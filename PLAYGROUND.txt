@@ -1,2 +1,3 @@
 Feel free to modify and commit this file to test your commit rights.
 - tommaso can play in the playground
+- works for wkasper
