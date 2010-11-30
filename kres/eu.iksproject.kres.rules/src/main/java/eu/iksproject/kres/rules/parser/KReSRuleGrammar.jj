@@ -1,0 +1,369 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.17+ wizard for JavaCC 1.5.0+
+ */
+options
+{
+  JDK_VERSION = "1.6";
+  static = false;
+}
+
+PARSER_BEGIN(KReSRuleParser)
+package eu.iksproject.kres.rules.parser;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
+
+
+import eu.iksproject.kres.api.rules.KReSRule;
+import eu.iksproject.kres.api.rules.KReSRuleAtom;
+import eu.iksproject.kres.api.rules.URIResource;
+import eu.iksproject.kres.api.rules.util.AtomList;
+import eu.iksproject.kres.api.rules.util.KReSRuleList;
+import eu.iksproject.kres.rules.KReSKB;
+import eu.iksproject.kres.rules.KReSRuleImpl;
+import eu.iksproject.kres.rules.atoms.ClassAtom;
+import eu.iksproject.kres.rules.atoms.DatavaluedPropertyAtom;
+import eu.iksproject.kres.rules.atoms.IndividualPropertyAtom;
+import eu.iksproject.kres.rules.atoms.KReSResource;
+import eu.iksproject.kres.rules.atoms.KReSVariable;
+
+public class KReSRuleParser
+{
+
+  static KReSKB kReSKB;
+  
+  static KReSKB parse( String inString ) {
+  {
+  	kReSKB = new KReSKB();
+  	Reader reader = new StringReader( inString ) ;
+    KReSRuleParser parser = new KReSRuleParser(reader);
+    StringBuffer buffer = new StringBuffer() ;
+	try {
+		parser.start( ) ; 
+	} catch( TokenMgrError e ) { 
+		throw new IllegalStateException(e) ; 
+	} catch( ParseException e ) { 
+		throw new IllegalStateException(e) ; 
+	} 
+	return kReSKB ; }
+  }
+
+
+	private static URI getSWRLArgument(String argument){
+                Resource rdfNode = null;
+                String[] argumentComposition = argument.split(":");
+                if(argumentComposition.length == 2){
+                        String prefix = argumentComposition[0];
+                        String resourceName = argumentComposition[1];
+
+                        String namespaceURI = kReSKB.getPrefixURI(prefix);
+                        rdfNode = ModelFactory.createDefaultModel().createResource(namespaceURI+resourceName);
+                        try {
+							return new URI(rdfNode.getURI());
+						} catch (URISyntaxException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+
+                }
+                
+                return null;
+        }
+
+        private static URI getSWRLVariable(String argument){
+                Resource variableResource = null;
+                String variableString = argument.substring(1);
+
+
+                variableResource = ModelFactory.createDefaultModel().createResource(kReSKB.getPrefixURI("var")+variableString);
+
+
+
+                try {
+					return new URI(variableResource.getURI());
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					return null;
+				}
+        }
+}
+
+PARSER_END(KReSRuleParser)
+
+SKIP : {" "}
+SKIP : {"\r" | "\t" | "\n"}
+
+TOKEN : /* OPERATORS */
+{
+  < LARROW : "->" >
+| < COLON : ":" >
+| < EQUAL : "=" >
+| < AND : "." >
+| < COMMA : "," >
+| < SAME : "same" >
+| < DIFFERENT : "different" >
+| < IS : "is" >
+| < HAS : "has" >
+| < RANGE : "range" >
+| < VALUES : "values" >
+}
+
+TOKEN : /* BLOCKS */
+{
+
+  < LPAR : "(" >
+| < RPAR : ")" >
+| < DQUOT : "\"" >
+| < LQUAD : "[" >
+| < RQUAD : "]" >
+}
+
+TOKEN :
+{
+  < NUM : ([ "0"-"9"])+ > 
+| < VAR : ([ "0"-"9","a"-"z","A"-"Z","-", "_"])+ >
+| < VARIABLE : "?" ([ "0"-"9","a"-"z","A"-"Z","-", "_"])+ >
+| < URI : "<" ([ "0"-"9","a"-"z","A"-"Z","-", "_", ".", "#", ":", "/" ])+ ">" >
+}
+
+
+void start () :
+{}
+{
+	expression() expressionCont()
+}
+
+void expressionCont() :
+{}
+{
+	( < AND > expression() ) | {}
+}
+
+void expression() :
+{KReSRule kReSRule;}
+{
+	prefix() expressionCont()  
+}
+
+void prefix() :
+{String nsPrefix; Object obj;}
+{
+  nsPrefix=getVariable() (obj=equality() { String prefixURI = (String)obj;
+  										   prefixURI = prefixURI.substring(1, prefixURI.length()-1);
+  										   kReSKB.addPrefix(nsPrefix, prefixURI);  										    
+  										 } 
+  							|   obj=rule() { AtomList[] atoms = (AtomList[]) obj;
+  											 String varPrefix = kReSKB.getPrefixURI("var");
+  											 varPrefix = varPrefix.substring(0, varPrefix.length());
+  											 KReSRule kReSRule = new KReSRuleImpl(varPrefix+nsPrefix, atoms[0], atoms[1]);
+  											 kReSKB.addRule(kReSRule); }
+  						)
+}
+
+
+String equality() :
+{String nsURI;}
+{
+	< EQUAL > ( nsURI=getURI() )
+	{ return nsURI;}
+}
+
+
+
+AtomList[] rule() :
+{AtomList[] ruleAtoms;}
+{
+   < LQUAD >  ruleAtoms=ruleDefinition()  < RQUAD >
+   { return ruleAtoms; }
+  
+}
+
+AtomList[] ruleDefinition():
+{AtomList body; AtomList head;}
+{
+	body=atomList() <LARROW> head=atomList()
+	{ return new AtomList[]{body, head};}
+}
+
+AtomList atomList() :
+{AtomList atomList = new AtomList(); KReSRuleAtom kReSAtom;}
+{
+	kReSAtom=atom() atomList=atomListRest() 
+	{ atomList.add(kReSAtom); return atomList;}
+	
+	| 
+	{}
+	{return atomList;} 
+}
+
+
+AtomList atomListRest() :
+{AtomList atomList = new AtomList(); KReSRuleAtom kReSAtom;}
+{
+	< AND > atomList=atomList() 
+	{ return atomList;}
+	| 
+	{}
+	{return atomList;} 
+}
+
+KReSRuleAtom atom() :
+{KReSRuleAtom kReSRuleAtom;}
+{
+   kReSRuleAtom=classAtom() {return kReSRuleAtom;}
+|  dataRangeAtom()
+|  kReSRuleAtom=individualPropertyAtom() {return kReSRuleAtom;}
+|  kReSRuleAtom=datavaluedPropertyAtom() {return kReSRuleAtom;}
+|  sameAsAtom()
+|  differentFromAtom()
+
+}
+
+
+
+ClassAtom classAtom() :
+{URIResource uri1; URIResource uri2;}
+{
+	< IS > < LPAR > uri1=iObject()  < COMMA > uri2=iObject() < RPAR >
+	{ return new ClassAtom(uri1, uri2);}
+}
+
+
+void dataRangeAtom() :
+{}
+{
+	 < RANGE > < LPAR > iObject() < COMMA > dObject()  < RPAR >
+}
+
+
+IndividualPropertyAtom individualPropertyAtom() :
+{URIResource uri1; URIResource uri2; URIResource uri3;}
+{
+	 < HAS > < LPAR > uri1=iObject() < COMMA > uri2=iObject() <COMMA> uri3=iObject() < RPAR >
+	 {return new IndividualPropertyAtom(uri1, uri2, uri3);}
+}
+
+
+DatavaluedPropertyAtom datavaluedPropertyAtom() :
+{URIResource uri1; URIResource uri2; Object obj;}
+{
+	 < VALUES > < LPAR > uri1=iObject() < COMMA > uri2=iObject() <COMMA> obj=dObject() < RPAR >
+	 { return new DatavaluedPropertyAtom(uri1, uri2, obj); }
+}
+
+
+void sameAsAtom() :
+{}
+{
+	< SAME > < LPAR > iObject() < COMMA > iObject() < RPAR > 
+}
+
+void differentFromAtom() :
+{}
+{
+	< DIFFERENT > < LPAR > iObject() < COMMA > iObject() < RPAR > 
+}
+
+URIResource reference() :
+{ String uri1;
+  Token colon;
+  String uri3; }
+{
+	 uri1=getURI() { uri1 = uri1.substring(1, uri1.length()-1);
+	 					try {
+						  return new KReSResource(new URI(uri1));
+							} catch (URISyntaxException e) {
+								e.printStackTrace();
+							} } | 
+	 uri1= getVariable() colon=< COLON > uri3=getVariable() { return new KReSResource(getSWRLArgument(uri1+colon.image+uri3)); }
+}
+
+
+
+URIResource varReference() :
+{ String uri1;
+  Token colon;
+  String uri3; }
+{
+	 uri1=getURI() { try {
+															return new KReSResource(new URI(uri1));
+														} catch (URISyntaxException e) {
+															e.printStackTrace();
+														} } | 
+	 uri1= getVariable() colon=< COLON > uri3=getVariable() { return new KReSResource(getSWRLArgument(uri1+colon.image+uri3)); }
+}
+
+
+String getURI() :
+{
+	Token t;
+}
+{
+	t = < URI > { return t.image; }
+}
+
+String getVariable() :
+{
+	Token t;
+}
+{
+	t = < VAR > { return t.image; }
+}
+
+
+String getString() :
+{
+	String t;
+}
+{
+	< DQUOT > t = getVariable() < DQUOT >{ return t; }
+}
+
+Integer getInt() :
+{
+	Token t;
+}
+{
+	t=< NUM > { return Integer.valueOf(t.image); }
+}
+
+
+URIResource iObject() :
+{ URIResource uri; }
+{
+	uri = variable() {return uri;} | uri = reference() {return uri;}
+}
+
+Object dObject() :
+{ Object variable; }
+{
+	
+	(variable=getString() | variable=getInt()) {return variable;}	
+}
+
+
+URIResource variable() :
+{ Token t; }
+{
+	t = < VARIABLE >
+	{ String var=t.image; var=kReSKB.getPrefixURI("var") + var.substring(1);
+														try{ 
+															return new KReSVariable(new URI(var));
+														} catch (URISyntaxException e) {
+															e.printStackTrace();
+															return null;
+														} }
+}
+
+

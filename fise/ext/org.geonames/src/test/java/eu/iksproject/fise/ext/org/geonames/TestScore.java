@@ -1,0 +1,56 @@
+package eu.iksproject.fise.ext.org.geonames;
+
+import org.geonames.Style;
+import org.geonames.Toponym;
+import org.geonames.ToponymSearchCriteria;
+import org.geonames.ToponymSearchResult;
+import org.geonames.WebService;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * This test only correct values for score (set/getScore).
+ * An extension to the web service client for geonames.org implemented to
+ * be able to write fise:confidence values for fise:EntityAnnotations.
+ * @author Rupert Westenthaler
+ *
+ */
+public class TestScore extends Assert{
+	
+	private static final Logger log = LoggerFactory.getLogger(TestScore.class);
+	
+	@Test
+	public void testSearch() throws Exception {
+		ToponymSearchCriteria searchCriteria = new ToponymSearchCriteria();
+		searchCriteria.setName("Zealand");
+		searchCriteria.setStyle(Style.FULL);
+		searchCriteria.setMaxRows(5);
+		ToponymSearchResult searchResult = WebService.search(searchCriteria);
+		int i = 0;
+		for (Toponym toponym : searchResult.getToponyms()) {
+			i++;
+			log.info("Result "+i+" "+ toponym.getGeoNameId()+" score= "+toponym.getScore());
+			assertTrue(toponym.getScore() != null);
+			assertTrue(toponym.getScore()>= Double.valueOf(0));
+			assertTrue(toponym.getScore()<= Double.valueOf(100));
+		}
+	}
+	
+	@Test
+	public void testHierarchy() throws Exception {
+		ToponymSearchCriteria searchCriteria = new ToponymSearchCriteria();
+		searchCriteria.setName("New York");
+		searchCriteria.setStyle(Style.FULL);
+		searchCriteria.setMaxRows(1);
+		ToponymSearchResult searchResult = WebService.search(searchCriteria);
+		int testGeonamesId = searchResult.getToponyms().iterator().next().getGeoNameId();
+	    for(Toponym hierarchy : WebService.hierarchy(testGeonamesId, null, Style.FULL)){
+	    	//this service does not provide an score, so test if 1.0 is returned
+			assertTrue(hierarchy.getScore() != null);
+			assertTrue(hierarchy.getScore().equals(Double.valueOf(1.0)));
+	    }
+	}
+
+}

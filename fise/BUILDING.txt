@@ -1,0 +1,54 @@
+Building FISE
+=============
+
+You need Java 6 and maven (version as defined in the pom)
+You probably need
+  export MAVEN_OPTS="-Xmx512M -XX:MaxPermSize=128M"
+or similar.
+
+
+Build the FISE framework and engine wrappers
+--------------------------------------------
+
+Checkout the source::
+
+  % svn co https://iks-project.googlecode.com/svn/sandbox/fise/trunk/ fise
+
+Build and run the tests::
+
+  % cd fise
+  % mvn -DskipTests install
+
+Launch the FISE server::
+
+  % cd launchers/lite/target
+  % rm -rf sling                # erase previous sling install if any (optional)
+  % java -jar eu.iksproject.fise.launchers.lite-*-SNAPSHOT.jar
+
+And connect your browser to http://localhost:8080 for basic usage instructions.
+
+
+Import the FISE project in the Eclipse IDE
+------------------------------------------
+
+At the toplevel FISE directory, run::
+
+  % mvn eclipse:eclipse
+
+Then in the eclipse interface choose::
+
+  "Import..." > "Existing projects into Workspace"
+
+And select the FISE root folder.
+
+
+Hot (re-)deployment of a single bundle
+--------------------------------------
+
+If you are working on specific subproject (e.g. a new engine) can you test it on
+a running fise instance without redeploying the complete server from scracth.
+Just got to the folder of your project and run::
+
+  % mvn install -o -DskipTests -PinstallBundle -Dsling.url=http://localhost:8080/system/console
+
+

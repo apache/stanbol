@@ -1,0 +1,180 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY classification "http://www.ontologydesignpatterns.org/cp/owl/classification.owl#" >
+    <!ENTITY typesofentities "http://www.ontologydesignpatterns.org/cp/owl/typesofentities.owl#" >
+    <!ENTITY cpannotationschema "http://www.ontologydesignpatterns.org/schemas/cpannotationschema.owl#" >
+    <!ENTITY timeindexedsituation "http://www.ontologydesignpatterns.org/cp/owl/timeindexedsituation.owl#" >
+    <!ENTITY timed_and_typed_event "http://ontologydesignpatterns.org/cpont/iks/ami/timed_and_typed_event.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://ontologydesignpatterns.org/cpont/iks/ami/timed_and_typed_event.owl#"
+     xml:base="http://ontologydesignpatterns.org/cpont/iks/ami/timed_and_typed_event.owl"
+     xmlns:timed_and_typed_event="http://ontologydesignpatterns.org/cpont/iks/ami/timed_and_typed_event.owl#"
+     xmlns:timeindexedsituation="http://www.ontologydesignpatterns.org/cp/owl/timeindexedsituation.owl#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:cpannotationschema="http://www.ontologydesignpatterns.org/schemas/cpannotationschema.owl#"
+     xmlns:typesofentities="http://www.ontologydesignpatterns.org/cp/owl/typesofentities.owl#"
+     xmlns:classification="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://ontologydesignpatterns.org/cpont/iks/ami/timed_and_typed_event.owl">
+        <rdfs:label xml:lang="en">Timed and Typed Events</rdfs:label>
+        <cpannotationschema:hasUnitTest rdf:datatype="&xsd;string">SELECT ?s ?d WHERE { ?s timeindexed:atTime ?t. ?t timeinterval:hasIntervalStartDate ?d . } </cpannotationschema:hasUnitTest>
+        <cpannotationschema:isSpecializationOf rdf:datatype="&xsd;anyURI">http://www.ontologydesignpatterns.org/cp/owl/timeindexedsituation.owl</cpannotationschema:isSpecializationOf>
+        <cpannotationschema:coversRequirements xml:lang="en">At what time does a specific event take place?</cpannotationschema:coversRequirements>
+        <rdfs:comment xml:lang="en">Ontology describes the occurence of actual events at a specific time and their relationship to event types.</rdfs:comment>
+        <cpannotationschema:scenarios xml:lang="en">The movie &quot;Avatar&quot; is shown from 8 till 10 p.m. in Saarbr&#252;cken CineStar. This sentence represents a cinema event. </cpannotationschema:scenarios>
+        <owl:imports rdf:resource="http://ontologydesignpatterns.org/cpont/iks/ami/types_of_events.owl"/>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl"/>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/timeindexedsituation.owl"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;scenarios"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;hasUnitTest"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;coversRequirements"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;isSpecializationOf"/>
+    <owl:AnnotationProperty rdf:about="&rdfs;label"/>
+    <owl:AnnotationProperty rdf:about="&rdfs;comment"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://ontologydesignpatterns.org/cpont/iks/ami/timed_and_typed_event.owl#hasEventType -->
+
+    <owl:ObjectProperty rdf:about="&timed_and_typed_event;hasEventType">
+        <rdfs:label xml:lang="de">hat Ereignistyp</rdfs:label>
+        <rdfs:label xml:lang="en">has Event Type</rdfs:label>
+        <rdfs:comment xml:lang="en">Actual event has a specific event type.</rdfs:comment>
+        <rdfs:domain rdf:resource="&timed_and_typed_event;ActualEvent"/>
+        <owl:inverseOf rdf:resource="&timed_and_typed_event;isEventTypeOf"/>
+        <rdfs:subPropertyOf rdf:resource="&classification;isClassifiedBy"/>
+        <rdfs:subPropertyOf rdf:resource="&timeindexedsituation;forEntity"/>
+        <rdfs:range rdf:resource="&typesofentities;Event"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://ontologydesignpatterns.org/cpont/iks/ami/timed_and_typed_event.owl#isEventTypeOf -->
+
+    <owl:ObjectProperty rdf:about="&timed_and_typed_event;isEventTypeOf">
+        <rdfs:label xml:lang="de">ist Ereignistyp eines</rdfs:label>
+        <rdfs:label xml:lang="en">is Event Type Of</rdfs:label>
+        <rdfs:comment xml:lang="en">The event final soccer play of the world cup is of type soccer game.</rdfs:comment>
+        <rdfs:range rdf:resource="&timed_and_typed_event;ActualEvent"/>
+        <rdfs:subPropertyOf rdf:resource="&classification;classifies"/>
+        <rdfs:subPropertyOf rdf:resource="&timeindexedsituation;hasTimeIndexedSetting"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/classification.owl#classifies -->
+
+    <owl:ObjectProperty rdf:about="&classification;classifies"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/classification.owl#isClassifiedBy -->
+
+    <owl:ObjectProperty rdf:about="&classification;isClassifiedBy"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/timeindexedsituation.owl#atTime -->
+
+    <owl:ObjectProperty rdf:about="&timeindexedsituation;atTime">
+        <owl:propertyDisjointWith rdf:resource="&timeindexedsituation;forEntity"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/timeindexedsituation.owl#forEntity -->
+
+    <owl:ObjectProperty rdf:about="&timeindexedsituation;forEntity"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/timeindexedsituation.owl#hasTimeIndexedSetting -->
+
+    <owl:ObjectProperty rdf:about="&timeindexedsituation;hasTimeIndexedSetting">
+        <owl:propertyDisjointWith rdf:resource="&timeindexedsituation;isTimeIndexFor"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/timeindexedsituation.owl#isTimeIndexFor -->
+
+    <owl:ObjectProperty rdf:about="&timeindexedsituation;isTimeIndexFor"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://ontologydesignpatterns.org/cpont/iks/ami/timed_and_typed_event.owl#ActualEvent -->
+
+    <owl:Class rdf:about="&timed_and_typed_event;ActualEvent">
+        <rdfs:label xml:lang="de">Tats&#228;chliches Ereignis</rdfs:label>
+        <rdfs:label xml:lang="en">Actual Event</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&timeindexedsituation;TimeIndexedSituation"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&timed_and_typed_event;hasEventType"/>
+                <owl:allValuesFrom rdf:resource="&typesofentities;Event"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment xml:lang="en">Actual event of a specific event type, occuring at a specific time.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/timeindexedsituation.owl#TimeIndexedSituation -->
+
+    <owl:Class rdf:about="&timeindexedsituation;TimeIndexedSituation"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/typesofentities.owl#Event -->
+
+    <owl:Class rdf:about="&typesofentities;Event"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.0.0.1451) http://owlapi.sourceforge.net -->
+

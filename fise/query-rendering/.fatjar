@@ -1,0 +1,14 @@
+#Fat Jar Configuration File
+#Wed Mar 31 14:41:34 CEST 2010
+onejar.license.required=true
+manifest.classpath=
+manifest.removesigners=true
+onejar.checkbox=false
+jarname=QueryRendering-SNAPSHOT_20100331.jar
+manifest.mergeall=true
+manifest.mainclass=eu.iksproject.fise.interaction.Start
+manifest.file=<createnew>
+jarname.isextern=false
+onejar.expand=
+excludes=
+includes=

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    IKS KReS sotftware
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>eu.iksproject</groupId>
+  <artifactId>eu.iksproject.kres.reactor</artifactId>
+  <packaging>pom</packaging>
+  <version>0.6-SNAPSHOT</version>
+
+  <name>IKS KReS reactor</name>
+  <description>
+    Pseudo project to build the complete KReS project
+  </description>
+
+  <inceptionYear>2010</inceptionYear>
+
+  <modules>
+  	<!-- KReS parent -->
+    <module>eu.iksproject.kres.parent</module>
+    
+    <!-- OWL API bundle -->
+	<!-- Dependency bundle -->
+	<module>eu.iksproject.kres.shared/dependency/owlapi3</module>
+	<module>eu.iksproject.kres.shared/dependency/hermit124</module>
+    <module>eu.iksproject.kres.shared/dependency/owllink102</module>
+    <module>eu.iksproject.kres.shared/dependency/xerces</module>
+    <module>eu.iksproject.kres.shared/dependency/mysql</module>
+
+	<!-- KReS Reasoner -->
+	<module>eu.iksproject.kres.reasoners</module>
+	
+	<!-- Transformation utils -->
+<!--	<module>eu.iksproject.kres.shared/dependency/silk</module> -->
+	<module>eu.iksproject.kres.shared/transformation</module>
+	
+	<!-- KReS ontologies -->
+	<module>eu.iksproject.kres.ontologies</module>
+    
+	
+	<!-- KReS APIs -->
+    <module>eu.iksproject.kres.api</module>
+	
+	<module>eu.iksproject.kres.storage.provider</module>
+	
+	<!-- KReS manager -->
+	<module>eu.iksproject.kres.manager</module>
+	
+	<!-- KReS rules -->
+    <module>eu.iksproject.kres.rules</module>
+	
+	<!-- Semion -->
+	<module>eu.iksproject.kres.semion.manager</module>
+	<module>eu.iksproject.kres.semion.reengineer.db</module>
+	<module>eu.iksproject.kres.semion.reengineer.xml</module>
+    <module>eu.iksproject.kres.semion.refactorer</module>
+    
+    <!-- Storage -->
+    <module>eu.iksproject.kres.storage</module>
+    
+    <!-- Jersey -->
+    <module>eu.iksproject.kres.jersey</module>
+    <!-- <module>eu.iksproject.kres.manager.jersey</module> -->
+
+ </modules>
+</project>

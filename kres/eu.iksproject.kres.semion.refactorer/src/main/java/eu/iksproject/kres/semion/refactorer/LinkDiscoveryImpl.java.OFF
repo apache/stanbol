@@ -1,0 +1,39 @@
+package eu.iksproject.kres.semion.refactorer;
+
+import java.io.File;
+import java.io.InputStream;
+
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
+
+
+import de.fuberlin.wiwiss.silk.Silk;
+import de.fuberlin.wiwiss.silk.config.ConfigLoader;
+import de.fuberlin.wiwiss.silk.config.Configuration;
+import eu.iksproject.kres.api.semion.LinkDiscovery;
+
+@Component(immediate = true, metatype = true)
+@Service(LinkDiscovery.class)
+public class LinkDiscoveryImpl implements LinkDiscovery {
+
+	
+	public void discoveryLinks(Configuration configuration){
+		Silk.executeConfig(configuration, (String) null, 1, false);
+	}
+	
+	public void discoveryLinks(InputStream configurationStream){
+		Configuration configuration = ConfigLoader.load(configurationStream);
+		Silk.executeConfig(configuration, (String) null, 1, false);
+	}
+	
+	public void discoveryLinks(File configurationFile){
+		
+		Silk.executeFile(configurationFile, (String) null, 1, false);
+	}
+	
+	public static void main(String[] args){
+		File file = new File("linkedmdb_directors.xml");
+		LinkDiscoveryImpl linkDiscoveryImpl = new LinkDiscoveryImpl();
+		linkDiscoveryImpl.discoveryLinks(file);
+	}
+}

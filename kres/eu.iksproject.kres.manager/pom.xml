@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>eu.iksproject</groupId>
+		<artifactId>eu.iksproject.kres.parent</artifactId>
+		<version>0.6-SNAPSHOT</version>
+		<relativePath>../parent/pom.xml</relativePath>
+	</parent>
+
+	<groupId>eu.iksproject</groupId>
+	<artifactId>eu.iksproject.kres.manager</artifactId>
+	<packaging>bundle</packaging>
+	<version>0.6-SNAPSHOT</version>
+
+	<name>IKS KReS Ontology Network Manager</name>
+	<description>IKS KReS Ontology Network Manager</description>
+
+	<inceptionYear>2010</inceptionYear>
+
+	<properties>
+		<kres-version>0.6-SNAPSHOT</kres-version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+
+						<Bundle-Activator>
+							eu.iksproject.kres.manager.Activator
+						</Bundle-Activator>
+
+						<Export-Package>
+							eu.iksproject.kres.manager,
+							eu.iksproject.kres.manager.*,
+							conf/
+						</Export-Package>
+
+						<Import-Package>
+							eu.iksproject.kres.api.manager.*,
+							eu.iksproject.kres.api.storage.*,
+							eu.iksproject.kres.storage,
+							org.coode.owlapi.*,
+							org.osgi.*,
+							org.semanticweb.owlapi.*,
+							org.slf4j.*;version=${pom.version},
+							org.stlab.xd.registry.io,
+							org.stlab.xd.registry.models
+						</Import-Package>
+
+						<Private-Package>
+							org.stlab.xd.lang,
+							org.stlab.xd.utils,
+							org.stlab.xd.vocabulary
+						</Private-Package>
+
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-scr-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+
+		<!-- KReS deps -->
+		<dependency>
+			<groupId>eu.iksproject</groupId>
+			<artifactId>eu.iksproject.kres.api</artifactId>
+			<version>${kres-version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>eu.iksproject</groupId>
+			<artifactId>eu.iksproject.kres.shared.dependency.owlapi</artifactId>
+			<version>${kres-version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>eu.iksproject</groupId>
+			<artifactId>eu.iksproject.kres.storage</artifactId>
+			<version>${kres-version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- OSGi deps -->
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<version>4.1.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+			<version>4.1.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.scr.annotations</artifactId>
+			<version>1.2.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Testing deps -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.4</version>
+			<scope>test</scope>
+                        <exclusions>
+                            <exclusion>
+                            <groupId>org.slf4j</groupId>
+                            <artifactId>slf4j-api</artifactId>
+                            </exclusion>
+                        </exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>			
+            <version>1.5.6</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.13</version>
+			<scope>provided</scope>
+		</dependency>
+
+	</dependencies>
+
+	<repositories />
+
+</project>

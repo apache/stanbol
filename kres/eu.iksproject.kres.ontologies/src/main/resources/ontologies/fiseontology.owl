@@ -1,0 +1,228 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY ontology "http://fise.iks-project.eu/ontology/" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY enhancementtypes "http://fise.iks-project.eu/enhancementtypes.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://fise.iks-project.eu/ontology#"
+     xml:base="http://fise.iks-project.eu/ontology"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:enhancementtypes="http://fise.iks-project.eu/enhancementtypes.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:ontology="http://fise.iks-project.eu/ontology/">
+    <owl:Ontology rdf:about="http://fise.iks-project.eu/ontology">
+        <owl:imports rdf:resource="http://fise.iks-project.eu/enhancementtypes.owl"/>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/schemas/cpannotationschema.owl"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:AnnotationProperty rdf:about="&ontology;entity-label">
+        <rdfs:domain rdf:resource="&ontology;EntityAnnotation"/>
+    </owl:AnnotationProperty>
+    <owl:AnnotationProperty rdf:about="&rdfs;label"/>
+    <owl:AnnotationProperty rdf:about="&rdfs;comment"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://fise.iks-project.eu/enhancementtypes.owl#hasEnhancementType -->
+
+    <owl:ObjectProperty rdf:about="&enhancementtypes;hasEnhancementType">
+        <rdfs:range rdf:resource="&enhancementtypes;Enhancement"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://fise.iks-project.eu/ontology/entity -->
+
+    <owl:ObjectProperty rdf:about="&ontology;entity">
+        <owl:equivalentProperty rdf:resource="&ontology;entity-reference"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://fise.iks-project.eu/ontology/entity-reference -->
+
+    <owl:ObjectProperty rdf:about="&ontology;entity-reference">
+        <rdfs:domain rdf:resource="&ontology;EntityAnnotation"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://fise.iks-project.eu/ontology/entity-type -->
+
+    <owl:ObjectProperty rdf:about="&ontology;entity-type">
+        <rdfs:comment xml:lang="en">This one looks like some kind of specialized rdf:type, looks like it has owl:Class as a range ?!?!?</rdfs:comment>
+        <rdfs:domain rdf:resource="&ontology;EntityAnnotation"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://fise.iks-project.eu/ontology/extracted-from -->
+
+    <owl:ObjectProperty rdf:about="&ontology;extracted-from">
+        <rdfs:comment xml:lang="en">Range is undetermined</rdfs:comment>
+        <rdfs:domain rdf:resource="&ontology;TextAnnotation"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#topObjectProperty -->
+
+    <owl:ObjectProperty rdf:about="&owl;topObjectProperty"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://fise.iks-project.eu/ontology/confidence -->
+
+    <owl:DatatypeProperty rdf:about="&ontology;confidence">
+        <rdfs:label xml:lang="en">confidence</rdfs:label>
+        <rdfs:comment xml:lang="en">A real number that indicates the accuracy of some measurement.</rdfs:comment>
+        <rdfs:range rdf:resource="&xsd;double"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://fise.iks-project.eu/ontology/end -->
+
+    <owl:DatatypeProperty rdf:about="&ontology;end">
+        <rdfs:label xml:lang="en">end</rdfs:label>
+        <rdfs:domain rdf:resource="&ontology;TextAnnotation"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://fise.iks-project.eu/ontology/selected-text -->
+
+    <owl:DatatypeProperty rdf:about="&ontology;selected-text">
+        <rdfs:label xml:lang="en">selected text</rdfs:label>
+        <rdfs:domain rdf:resource="&ontology;TextAnnotation"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://fise.iks-project.eu/ontology/selection-context -->
+
+    <owl:DatatypeProperty rdf:about="&ontology;selection-context">
+        <rdfs:label xml:lang="en">selection context</rdfs:label>
+        <rdfs:domain rdf:resource="&ontology;TextAnnotation"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://fise.iks-project.eu/ontology/start -->
+
+    <owl:DatatypeProperty rdf:about="&ontology;start">
+        <rdfs:label xml:lang="en">start</rdfs:label>
+        <rdfs:domain rdf:resource="&ontology;TextAnnotation"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#topDataProperty -->
+
+    <owl:DatatypeProperty rdf:about="&owl;topDataProperty"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://fise.iks-project.eu/enhancementtypes.owl#Enhancement -->
+
+    <owl:Class rdf:about="&enhancementtypes;Enhancement"/>
+    
+
+
+    <!-- http://fise.iks-project.eu/ontology/Annotation -->
+
+    <owl:Class rdf:about="&ontology;Annotation">
+        <rdfs:subClassOf rdf:resource="&enhancementtypes;Enhancement"/>
+    </owl:Class>
+    
+
+
+    <!-- http://fise.iks-project.eu/ontology/EntityAnnotation -->
+
+    <owl:Class rdf:about="&ontology;EntityAnnotation">
+        <rdfs:label xml:lang="en">entity annotation</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&ontology;Annotation"/>
+        <!-- 
+        <owl:disjointWith rdf:resource="&ontology;TextAnnotation"/>
+        -->
+    </owl:Class>
+    
+
+
+    <!-- http://fise.iks-project.eu/ontology/TextAnnotation -->
+
+    <owl:Class rdf:about="&ontology;TextAnnotation">
+        <rdfs:label xml:lang="en">text annotation</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&ontology;Annotation"/>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.0.0.1451) http://owlapi.sourceforge.net -->
+

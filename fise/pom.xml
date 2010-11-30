@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    IKS FISE software is licensed under the Apache License, Version 2.0,
+    see http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+    applicable law or agreed to in writing, software distributed under the
+    License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+    CONDITIONS OF ANY KIND, either express or implied. See the License for
+    the specific language governing permissions and limitations under the
+    License.
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>eu.iksproject</groupId>
+    <artifactId>eu.iksproject.fise.parent</artifactId>
+    <version>0.9-SNAPSHOT</version>
+    <relativePath>./parent</relativePath>
+  </parent>
+
+  <groupId>eu.iksproject</groupId>
+  <artifactId>eu.iksproject.fise.reactor</artifactId>
+  <packaging>pom</packaging>
+  <version>0.9-SNAPSHOT</version>
+
+  <name>IKS FISE reactor</name>
+  <description>
+    Pseudo project to build the complete FISE project
+  </description>
+
+  <inceptionYear>2010</inceptionYear>
+
+  <scm>
+    <connection>
+      scm:svn:http://iks-project.googlecode.com/svn/sandbox/fise/trunk
+    </connection>
+    <developerConnection>
+      scm:svn:https://iks-project.googlecode.com/svn/sandbox/fise/trunk
+    </developerConnection>
+    <url>http://wiki.iks-project.eu/index.php/FISEcodeAndDocs</url>
+  </scm>
+
+  <modules>
+    <module>parent</module>
+
+    <module>iks-autotagging</module>
+    <module>ext/org.geonames</module>
+
+    <module>generic/servicesapi</module>
+    <module>generic/jobmanager</module>
+    <module>generic/standalone</module>
+    <module>generic/jsonld</module>
+
+    <module>engines/autotagging</module>
+    <module>engines/opennlp-ner</module>
+    <module>engines/langid</module>
+    <module>engines/metaxa</module>
+    <module>engines/geonames</module>
+
+    <module>jersey</module>
+
+    <!-- disabling integration broken tests while jersey refactoring
+         is underway
+    <module>integration-tests</module>
+    -->
+
+    <module>clerezza/eu.iksproject.fise.clerezza</module>
+    <module>clerezza/clerezza-sparql</module>
+
+    <module>launchers/full</module>
+    <module>launchers/lite</module>
+
+    <module>SemiAutomaticContentEnhancer</module>
+  </modules>
+</project>
