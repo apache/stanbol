@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<htmlextractors>
+  <extractor id="HtmlMetadata">
+    <source type="xslt">xslt/htmlmetadata.xsl</source>
+  </extractor>
+  <extractor id="MF">
+  	<source type="xslt">xslt/Microformats2RDF.xsl</source>
+  </extractor>
+  <extractor id="RDFa">
+    <source type="xslt">xslt/rdfa.xslt</source>
+  </extractor>
+<!-- 
+  <extractor id="hCard">
+    <source type="xslt">xslt/hcard2rdf.xsl</source>
+  </extractor>
+  <extractor id="rel-tag">
+    <source type="xslt">xslt/rel-tag2rdf.xsl</source>
+  </extractor>
+-->
+</htmlextractors>

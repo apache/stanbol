@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>eu.iksproject</groupId>
+    <artifactId>eu.iksproject.fise.parent</artifactId>
+    <version>0.9-SNAPSHOT</version>
+    <relativePath>../parent/pom.xml</relativePath>
+  </parent>
+
+  <groupId>eu.iksproject</groupId>
+  <artifactId>eu.iksproject.fise.integration-tests</artifactId>
+  <version>0.9-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>IKS FISE Integration Tests</name>
+
+  <properties>
+    <pax-exam-version>1.2.0</pax-exam-version>
+  </properties>
+
+  <dependencies>
+    <!-- things to test -->
+    <dependency>
+      <groupId>eu.iksproject</groupId>
+      <artifactId>eu.iksproject.fise.jersey</artifactId>
+      <version>0.9-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <version>4.2.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- for tests -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.7</version>
+      <scope>test</scope>
+    </dependency>
+
+     <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam</artifactId>
+      <version>${pax-exam-version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-junit</artifactId>
+      <version>${pax-exam-version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-container-default</artifactId>
+      <version>${pax-exam-version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.ops4j.pax.exam</groupId>
+        <artifactId>maven-paxexam-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-config</id>
+            <goals>
+              <goal>generate-config</goal>
+            </goals>
+          </execution>
+        </executions>
+
+        <configuration>
+          <options>
+            <profiles>log</profiles>
+          </options>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

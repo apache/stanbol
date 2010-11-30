@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	<!--
+		IKS FISE software is licensed under the Apache License, Version 2.0,
+		see http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+		applicable law or agreed to in writing, software distributed under the
+		License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+		CONDITIONS OF ANY KIND, either express or implied. See the License for
+		the specific language governing permissions and limitations under the
+		License.
+	-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>eu.iksproject</groupId>
+		<artifactId>eu.iksproject.fise.parent</artifactId>
+		<version>0.9-SNAPSHOT</version>
+		<relativePath>../../parent</relativePath>
+	</parent>
+
+	<groupId>eu.iksproject</groupId>
+	<artifactId>eu.iksproject.fise.engines.opennlp.ner</artifactId>
+	<packaging>bundle</packaging>
+	<version>${fise-version}</version>
+
+	<name>IKS FISE Enhancement Engine : Semantic NER</name>
+	<description></description>
+
+	<inceptionYear>2010</inceptionYear>
+
+	<dependencies>
+		<!-- obviously we need opennlp -->
+		<dependency>
+			<groupId>org.clojars.pjt</groupId>
+			<artifactId>opennlp-tools</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>eu.iksproject</groupId>
+			<artifactId>eu.iksproject.fise.servicesapi</artifactId>
+		</dependency>
+		<!--
+			TODO: remove dependency after the openNLP Models are no longer loaded
+			via the AutotaggingProvider
+		-->
+		<dependency>
+			<groupId>eu.iksproject</groupId>
+			<artifactId>eu.iksproject.fise.engines.autotagging</artifactId>
+		</dependency>		
+
+		<dependency>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.scr.annotations</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+		</dependency>
+
+		<!-- generic tax -->
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<!-- for tests -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Private-Package>
+							eu.iksproject.fise.engines.opennlp.impl.*
+            			</Private-Package>
+						<Embed-Dependency>opennlp-tools,opennlp-maxent,trove</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
+						<Import-Package>
+							!net.didion.*,
+							!gnu.getopt,
+							!org.apache.log.*,
+							!junit.framework.*,
+							!org.apache.avalon.framework.*,
+							*
+           				</Import-Package>						
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-scr-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

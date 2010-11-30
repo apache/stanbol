@@ -1,0 +1,14 @@
+README
+
+About the content of tools/wikidumps
+
+Scripts are bash and have been tested on Linux OpenSUSE
+
+Usage on unix console:
+
+To parse an XML wiki dump and create a set of .txt/.uri files
+> ./parseWikiDump wikidump.xml /outputdir
+
+To get the RDF enhancements from FISE and store it locally
+> ./getRDF /inputdir /outputdir 
+
