@@ -13,7 +13,9 @@ public class JsonComparator implements Comparator<Object> {
 	@Override
 	public int compare(Object arg0, Object arg1) {
 		int value = 0;
-		if (arg0.equals("#"))
+		if (arg0.equals(arg1))
+			value = 0;
+		else if (arg0.equals("#"))
 			value = -1;
 		else if (arg1.equals("#"))
 			value = 1;
