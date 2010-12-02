@@ -36,8 +36,11 @@ public class JsonLdTest {
 		
 		String actual = jsonLd.toString();
 		String expected = "{\"#\":{\"myvocab\":\"http:\\/\\/example.org\\/myvocab#\"},\"a\":\"foaf:Person\",\"foaf:homepage\":\"<http:\\/\\/manu.sporny.org\\/>\",\"foaf:name\":\"Manu Sporny\",\"myvocab:credits\":500,\"sioc:avatar\":\"<http:\\/\\/twitter.com\\/account\\/profile_image\\/manusporny>\"}";
-
 		assertEquals(expected, actual);
+		
+		String actualIndent = jsonLd.toString(4);
+		String expectedIndent = "{\n    \"#\": {\n        \"myvocab\": \"http:\\/\\/example.org\\/myvocab#\"\n    },\n    \"a\": \"foaf:Person\",\n    \"foaf:homepage\": \"<http:\\/\\/manu.sporny.org\\/>\",\n    \"foaf:name\": \"Manu Sporny\",\n    \"myvocab:credits\": 500,    \"sioc:avatar\": \"<http:\\/\\/twitter.com\\/account\\/profile_image\\/manusporny>\"\n}";
+		assertEquals(expectedIndent, actualIndent);
 	}
 	
 	@Test
@@ -69,8 +72,11 @@ public class JsonLdTest {
 		
 		String actual = jsonLd.toString();
 		String expected = "{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\"},\"@\":[{\"@\":\"_:bnode1\",\"a\":\"foaf:Person\",\"foaf:homepage\":\"<http:\\/\\/example.com\\/bob>\",\"foaf:name\":\"Bob\"},{\"@\":\"_:bnode2\",\"a\":\"foaf:Person\",\"foaf:homepage\":\"<http:\\/\\/example.com\\/eve>\",\"foaf:name\":\"Eve\"},{\"@\":\"_:bnode3\",\"a\":\"foaf:Person\",\"foaf:homepage\":\"<http:\\/\\/example.com\\/bert>\",\"foaf:name\":\"Bert\"}]}";
-
 		assertEquals(expected, actual);
+		
+		String actualIndent = jsonLd.toString(4);
+		String expectedIndent = "{\n    \"#\": {\n        \"foaf\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\"\n    },\n    \"@\": [\n        {\n            \"@\": \"_:bnode1\",\n            \"a\": \"foaf:Person\",\n            \"foaf:homepage\": \"<http:\\/\\/example.com\\/bob>\",\n            \"foaf:name\": \"Bob\"\n        },\n        {\n            \"@\": \"_:bnode2\",\n            \"a\": \"foaf:Person\",\n            \"foaf:homepage\": \"<http:\\/\\/example.com\\/eve>\",\n            \"foaf:name\": \"Eve\"\n        },\n        {\n            \"@\": \"_:bnode3\",\n            \"a\": \"foaf:Person\",\n            \"foaf:homepage\": \"<http:\\/\\/example.com\\/bert>\",\n            \"foaf:name\": \"Bert\"\n        }\n    ]\n}";
+		assertEquals(expectedIndent, actualIndent);		
 	}
 
 	@Test
@@ -103,8 +109,12 @@ public class JsonLdTest {
 		
 		String actual = jsonLd.toString();
 		String expected = "[{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\"},\"@\":\"_:bnode1\",\"a\":\"foaf:Person\",\"foaf:homepage\":\"<http:\\/\\/example.com\\/bob>\",\"foaf:name\":\"Bob\"},{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\"},\"@\":\"_:bnode2\",\"a\":\"foaf:Person\",\"foaf:homepage\":\"<http:\\/\\/example.com\\/eve>\",\"foaf:name\":\"Eve\"},{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\"},\"@\":\"_:bnode3\",\"a\":\"foaf:Person\",\"foaf:homepage\":\"<http:\\/\\/example.com\\/eve>\",\"foaf:name\":\"Eve\"}]";
-
 		assertEquals(expected, actual);
+		
+		String actualIndent = jsonLd.toString(4);
+		String expectedIndent = "[\n    {\n        \"#\": {\n            \"foaf\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\"\n        },\n        \"@\": \"_:bnode1\",\n        \"a\": \"foaf:Person\",\n        \"foaf:homepage\": \"<http:\\/\\/example.com\\/bob>\",\n        \"foaf:name\": \"Bob\"\n    },\n    {\n        \"#\": {\n            \"foaf\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\"\n        },\n        \"@\": \"_:bnode2\",\n        \"a\": \"foaf:Person\",\n        \"foaf:homepage\": \"<http:\\/\\/example.com\\/eve>\",\n        \"foaf:name\": \"Eve\"\n    },\n    {\n        \"#\": {\n            \"foaf\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\"\n        },\n        \"@\": \"_:bnode3\",\n        \"a\": \"foaf:Person\",\n        \"foaf:homepage\": \"<http:\\/\\/example.com\\/eve>\",\n        \"foaf:name\": \"Eve\"\n    }\n]";
+		assertEquals(expectedIndent, actualIndent);
+		
 	}
 	
 	@Test
@@ -124,8 +134,11 @@ public class JsonLdTest {
 		
 		String actual = jsonLd.toString();
 		String expected = "{\"#\":{\"fn\":\"http:\\/\\/microformats.org\\/profile\\/hcard#fn\",\"url\":\"http:\\/\\/microformats.org\\/profile\\/hcard#url\",\"vcard\":\"http:\\/\\/microformats.org\\/profile\\/hcard#vcard\"},\"@\":\"_:bnode1\",\"a\":\"vcard\",\"fn\":\"Tantek Celik\",\"url\":\"<http:\\/\\/tantek.com\\/>\"}";
-
 		assertEquals(expected, actual);
+		
+		String actualIndent = jsonLd.toString(4);
+		String expectedIndent = "{\n    \"#\": {\n        \"fn\": \"http:\\/\\/microformats.org\\/profile\\/hcard#fn\",\n        \"url\": \"http:\\/\\/microformats.org\\/profile\\/hcard#url\",\n        \"vcard\": \"http:\\/\\/microformats.org\\/profile\\/hcard#vcard\"\n    },\n    \"@\": \"_:bnode1\",\n    \"a\": \"vcard\",\n    \"fn\": \"Tantek Celik\",\n    \"url\": \"<http:\\/\\/tantek.com\\/>\"\n}";
+		assertEquals(expectedIndent, actualIndent);
 	}
 	
 	@Test
@@ -149,8 +162,11 @@ public class JsonLdTest {
 		
 		String actual = jsonLd.toString();
 		String expected = "{\"#\":{\"#base\":\"http:\\/\\/example.org\\/baseurl\\/\",\"#vocab\":\"http:\\/\\/example.org\\/default-vocab#\",\"cal\":\"http:\\/\\/www.w3.org\\/2002\\/12\\/cal\\/ical#\",\"cc\":\"http:\\/\\/creativecommons.org\\/ns#\",\"dc\":\"http:\\/\\/purl.org\\/dc\\/terms\\/\",\"doap\":\"http:\\/\\/usefulinc.com\\/ns\\/doap#\",\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\"geo\":\"http:\\/\\/www.w3.org\\/2003\\/01\\/geo\\/wgs84_pos#\",\"homepage\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/homepage\",\"name\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/name\",\"Person\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/Person\",\"sioc\":\"http:\\/\\/rdfs.org\\/sioc\\/ns#\",\"vcard\":\"http:\\/\\/www.w3.org\\/2006\\/vcard\\/ns#\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"}}";
-
 		assertEquals(expected, actual);
+		
+		String actualIndent = jsonLd.toString(4);
+		String expectedIndent = "{\n    \"#\": {\n        \"#base\": \"http:\\/\\/example.org\\/baseurl\\/\",\n        \"#vocab\": \"http:\\/\\/example.org\\/default-vocab#\",\n        \"cal\": \"http:\\/\\/www.w3.org\\/2002\\/12\\/cal\\/ical#\",\n        \"cc\": \"http:\\/\\/creativecommons.org\\/ns#\",\n        \"dc\": \"http:\\/\\/purl.org\\/dc\\/terms\\/\",\n        \"doap\": \"http:\\/\\/usefulinc.com\\/ns\\/doap#\",\n        \"foaf\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\n        \"geo\": \"http:\\/\\/www.w3.org\\/2003\\/01\\/geo\\/wgs84_pos#\",\n        \"homepage\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/homepage\",\n        \"name\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/name\",\n        \"Person\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/Person\",\n        \"sioc\": \"http:\\/\\/rdfs.org\\/sioc\\/ns#\",\n        \"vcard\": \"http:\\/\\/www.w3.org\\/2006\\/vcard\\/ns#\",\n        \"xsd\": \"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"\n    }\n}";
+		assertEquals(expectedIndent, actualIndent);
 	}
 	
 	@Test
@@ -181,8 +197,11 @@ public class JsonLdTest {
 		
 		String actual = jsonLd.toString();
 		String expected = "[{\"@\":\"<http:\\/\\/purl.oreilly.com\\/products\\/9780596007683.BOOK>\",\"a\":\"<http:\\/\\/purl.org\\/vocab\\/frbr\\/core#Expression>\",\"http:\\/\\/purl.org\\/dc\\/terms\\/type\":\"<http:\\/\\/purl.oreilly.com\\/product-types\\/BOOK>\"},{\"@\":\"<http:\\/\\/purl.oreilly.com\\/products\\/9780596802189.EBOOK>\",\"a\":\"http:\\/\\/purl.org\\/vocab\\/frbr\\/core#Expression\",\"http:\\/\\/purl.org\\/dc\\/terms\\/type\":\"<http:\\/\\/purl.oreilly.com\\/product-types\\/BOOK>\"},{\"@\":\"<http:\\/\\/purl.oreilly.com\\/works\\/45U8QJGZSQKDH8N>\",\"a\":\"http:\\/\\/purl.org\\/vocab\\/frbr\\/core#Work\",\"http:\\/\\/purl.org\\/dc\\/terms\\/creator\":\"Whil Wheaton\",\"http:\\/\\/purl.org\\/dc\\/terms\\/title\":\"Just a Geek\",\"http:\\/\\/purl.org\\/vocab\\/frbr\\/core#realization\":[\"<http:\\/\\/purl.oreilly.com\\/products\\/9780596007683.BOOK>\",\"<http:\\/\\/purl.oreilly.com\\/products\\/9780596802189.EBOOK>\"]}]";
-
 		assertEquals(expected, actual);
+		
+		String actualIndent = jsonLd.toString(4);
+		String expectedIndent = "[\n    {\n        \"@\": \"<http:\\/\\/purl.oreilly.com\\/products\\/9780596007683.BOOK>\",\n        \"a\": \"<http:\\/\\/purl.org\\/vocab\\/frbr\\/core#Expression>\",\n        \"http:\\/\\/purl.org\\/dc\\/terms\\/type\": \"<http:\\/\\/purl.oreilly.com\\/product-types\\/BOOK>\"\n    },\n    {\n        \"@\": \"<http:\\/\\/purl.oreilly.com\\/products\\/9780596802189.EBOOK>\",\n        \"a\": \"http:\\/\\/purl.org\\/vocab\\/frbr\\/core#Expression\",\n        \"http:\\/\\/purl.org\\/dc\\/terms\\/type\": \"<http:\\/\\/purl.oreilly.com\\/product-types\\/BOOK>\"\n    },\n    {\n        \"@\": \"<http:\\/\\/purl.oreilly.com\\/works\\/45U8QJGZSQKDH8N>\",\n        \"a\": \"http:\\/\\/purl.org\\/vocab\\/frbr\\/core#Work\",\n        \"http:\\/\\/purl.org\\/dc\\/terms\\/creator\": \"Whil Wheaton\",\n        \"http:\\/\\/purl.org\\/dc\\/terms\\/title\": \"Just a Geek\",\n        \"http:\\/\\/purl.org\\/vocab\\/frbr\\/core#realization\": [\n            \"<http:\\/\\/purl.oreilly.com\\/products\\/9780596007683.BOOK>\",\n            \"<http:\\/\\/purl.oreilly.com\\/products\\/9780596802189.EBOOK>\"\n        ]\n    }\n]";
+		assertEquals(expectedIndent, actualIndent);
 	}
 	
 	@Test
@@ -198,8 +217,11 @@ public class JsonLdTest {
 		
 		String actual = jsonLd.toString();
 		String expected = "{\"#\":{\"dc\":\"http:\\/\\/purl.org\\/dc\\/terms\\/\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"},\"dc:modified\":\"2010-05-29T14:17:39+02:00^^xsd:dateTime\"}";
-
 		assertEquals(expected, actual);
+		
+		String actualIndent = jsonLd.toString(4);
+		String expectedIndent = "{\n    \"#\": {\n        \"dc\": \"http:\\/\\/purl.org\\/dc\\/terms\\/\",\n        \"xsd\": \"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"\n    },\n    \"dc:modified\": \"2010-05-29T14:17:39+02:00^^xsd:dateTime\"\n}";
+		assertEquals(expectedIndent, actualIndent);		
 	}
 	
 	@Test
@@ -217,8 +239,11 @@ public class JsonLdTest {
 		
 		String actual = jsonLd.toString();
 		String expected = "{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"},\"@\":\"<http:\\/\\/example.org\\/people#joebob>\",\"foaf:nick\":[\"\\\"stu\\\"^^xsd:string\",\"\\\"groknar\\\"^^xsd:string\",\"\\\"radface\\\"^^xsd:string\"]}";
-
 		assertEquals(expected, actual);
+		
+		String actualIndent = jsonLd.toString(4);
+		String expectedIndent = "{\n    \"#\": {\n        \"foaf\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\n        \"xsd\": \"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"\n    },\n    \"@\": \"<http:\\/\\/example.org\\/people#joebob>\",\n    \"foaf:nick\": [\n        \"\\\"stu\\\"^^xsd:string\",\n        \"\\\"groknar\\\"^^xsd:string\",\n        \"\\\"radface\\\"^^xsd:string\"\n    ]\n}";
+		assertEquals(expectedIndent, actualIndent);		
 	}
 	
 	@Test
@@ -237,8 +262,11 @@ public class JsonLdTest {
 		
 		String actual = jsonLd.toString();
 		String expected = "{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"},\"@\":\"<http:\\/\\/example.org\\/people#joebob>\",\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/nick\":[\"\\\"stu\\\"^^http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string\",\"\\\"groknar\\\"^^http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string\",\"\\\"radface\\\"^^http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string\"]}";
-
 		assertEquals(expected, actual);
+
+		String actualIndent = jsonLd.toString(4);
+		String expectedIndent = "{\n    \"#\": {\n        \"foaf\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\n        \"xsd\": \"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"\n    },\n    \"@\": \"<http:\\/\\/example.org\\/people#joebob>\",\n    \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/nick\": [\n        \"\\\"stu\\\"^^http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string\",\n        \"\\\"groknar\\\"^^http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string\",\n        \"\\\"radface\\\"^^http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string\"\n    ]\n}";
+		assertEquals(expectedIndent, actualIndent);		
 	}
 
 	@Test
@@ -257,8 +285,11 @@ public class JsonLdTest {
 		
 		String actual = jsonLd.toString();
 		String expected = "{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"},\"@\":\"<http:\\/\\/example.org\\/people#joebob>\",\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/nick\":[\"\\\"stu\\\"^^xsd:string\",\"\\\"groknar\\\"^^xsd:string\",\"\\\"radface\\\"^^xsd:string\"]}";
-		
 		assertEquals(expected, actual);
+
+		String actualIndent = jsonLd.toString(4);
+		String expectedIndent = "{\n    \"#\": {\n        \"foaf\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\n        \"xsd\": \"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"\n    },\n    \"@\": \"<http:\\/\\/example.org\\/people#joebob>\",\n    \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/nick\": [\n        \"\\\"stu\\\"^^xsd:string\",\n        \"\\\"groknar\\\"^^xsd:string\",\n        \"\\\"radface\\\"^^xsd:string\"\n    ]\n}";
+		assertEquals(expectedIndent, actualIndent);		
 	}
 
 	
@@ -268,6 +299,7 @@ public class JsonLdTest {
 		String s = actual;
 		s = s.replaceAll("\\\\", "\\\\\\\\");
 		s = s.replace("\"", "\\\"");
+		s = s.replace("\n", "\\n");
 		System.out.println(s);
 	}
 }

@@ -8,9 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-
 /**
  * @author Fabian Christ
  * 
@@ -57,17 +54,30 @@ public class JsonLd {
 		if (useJointGraphs) {
 			Map<String, Object> json = createJointGraph();
 			
-			return JSONObject.toJSONString(json);
+			return JsonSerializer.toString(json);
 		}
 		else {
-			JSONArray json = createDisjointGraph();
+			List<Object> json = createDisjointGraph();
 			
-			return JSONArray.toJSONString(json);
+			return JsonSerializer.toString(json);
 		}
 	}
 	
-	private JSONArray createDisjointGraph() {
-		JSONArray json = new JSONArray();
+	public String toString(int indent) {
+		if (useJointGraphs) {
+			Map<String, Object> json = createJointGraph();
+			
+			return JsonSerializer.toString(json, indent);
+		}
+		else {
+			List<Object> json = createDisjointGraph();
+			
+			return JsonSerializer.toString(json, indent);
+		}
+	}
+	
+	private List<Object> createDisjointGraph() {
+		List<Object> json = new ArrayList<Object>();
 		if (this.resourceMap.size() > 0) {
 
 			for (String subject : this.resourceMap.keySet()) {
@@ -104,10 +114,11 @@ public class JsonLd {
 		return json;
 	}
 
+	@SuppressWarnings("unchecked")
 	private Map<String, Object> createJointGraph() {
 		Map<String, Object> json = new TreeMap<String, Object>(new JsonComparator());
 		if (this.resourceMap.size() > 0) {
-			JSONArray subjects = new JSONArray();
+			List<Object> subjects = new ArrayList<Object>();
 
 			for (String subject : this.resourceMap.keySet()) {
 				// put subject
@@ -133,7 +144,7 @@ public class JsonLd {
 			// put subjects
 			if (subjects.size() > 0) {
 				if (subjects.size() == 1) {
-					json = (Map) subjects.get(0);
+					json = (Map<String, Object>) subjects.get(0);
 				} else {
 					json.put("@", subjects);
 				}
@@ -148,14 +159,13 @@ public class JsonLd {
 			}
 			json.put("#", nsObject);
 		}
-		
+
 		return json;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void putTypes(Map<String, Object> subjectObject, JsonLdResource resource) {
 		if (resource.getTypes().size() > 0) {
-			JSONArray types = new JSONArray();
+			List<String> types = new ArrayList<String>();
 			for (String type : resource.getTypes()) {
 				types.add(this.applyNamespace(type));
 			}
@@ -189,13 +199,12 @@ public class JsonLd {
 				for (int i=0; i<stringArray.length; i++) {
 					valueList.add(this.applyNamespace(stringArray[i]));
 				}
-				JSONArray jsonArray = new JSONArray();
-				jsonArray.addAll(valueList);
+				List<Object> jsonArray = new ArrayList<Object>(valueList);
 				jsonObject.put(this.applyNamespace(property), jsonArray);
 			}
 			else if (value instanceof Object[]) {
 				Object[] objectArray = (Object[]) value;
-				JSONArray jsonArray = new JSONArray();
+				List<Object> jsonArray = new ArrayList<Object>();
 				for (Object object : objectArray) {
 					jsonArray.add(object);
 				}

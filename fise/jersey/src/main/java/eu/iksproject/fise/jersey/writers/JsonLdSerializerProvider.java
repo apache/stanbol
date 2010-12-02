@@ -47,6 +47,8 @@ public class JsonLdSerializerProvider implements SerializingProvider {
 	
 	// Map from Namespace -> to Prefix
 	private Map<String, String> namespacePrefixMap = new HashMap<String, String>();
+	
+	private int indentation = 2;
 
 	@Override
 	public void serialize(OutputStream serializedGraph, TripleCollection tc, String formatIdentifier) {
@@ -87,7 +89,7 @@ public class JsonLdSerializerProvider implements SerializingProvider {
 		
 		try {
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(serializedGraph));
-	        writer.write(jsonLd.toString());
+	        writer.write(jsonLd.toString(this.indentation));
 	        writer.flush();
 		} catch (IOException ioe) {
 			logger.error(ioe.getMessage());
@@ -130,4 +132,23 @@ public class JsonLdSerializerProvider implements SerializingProvider {
 		this.namespacePrefixMap = knownNamespaces;
 	}
 
+	/**
+	 * Returns the current number of space characters which are used
+	 * to indent the serialized output.
+	 * 
+	 * @return Number of space characters used for indentation.
+	 */
+	public int getIndentation() {
+		return indentation;
+	}
+
+	/**
+	 * Sets the number of characters used per indentation level for the serialized output.<br />
+	 * Set this value to zero (0) if you don't want indentation. Default value is 2.
+	 * 
+	 * @param indentation Number of space characters used for indentation.
+	 */
+	public void setIndentation(int indentation) {
+		this.indentation = indentation;
+	}
 }
