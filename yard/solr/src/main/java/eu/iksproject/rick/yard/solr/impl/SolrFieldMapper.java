@@ -509,7 +509,7 @@ public class SolrFieldMapper implements FieldMapper {
 	 * {@link #NAMESPACE_PREFIX_SEPERATOR_CHAR} this method returns the parsed
 	 * String.<p>
 	 * The local name may contain the {@link #NAMESPACE_PREFIX_SEPERATOR_CHAR} 
-	 * Ô{@link #NAMESPACE_PREFIX_SEPERATOR_CHAR}'. The prefix MUST NOT contain
+	 * Ã”{@link #NAMESPACE_PREFIX_SEPERATOR_CHAR}'. The prefix MUST NOT contain
 	 * this char, because {@link String#indexOf(int)} is used to split prefix
 	 * and local name.
 	 * @param shortFieldName the short name
