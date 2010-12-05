@@ -19,6 +19,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.Language;
+import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.PlainLiteral;
@@ -223,8 +224,7 @@ public class ContentItemResource extends NavigationMixin {
             }
             UriRef entityUri = (UriRef) mapping.get("entity");
             if (entityUri != null) {
-                String label = lf.createObject(String.class,
-                        (TypedLiteral) mapping.get("entity_label"));
+                String label = ((Literal) mapping.get("entity_label")).getLexicalForm();
                 Double confidence = lf.createObject(Double.class,
                         (TypedLiteral) mapping.get("confidence"));
                 Graph properties = new GraphNode(entityUri, remoteEntityCache).getNodeContext();

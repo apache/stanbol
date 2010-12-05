@@ -58,6 +58,7 @@
     <module>engines/langid</module>
     <module>engines/metaxa</module>
     <module>engines/geonames</module>
+    <module>engines/entitytagging</module><!-- RICK based enhancement engine(s) -->
 
     <module>jersey</module>
 

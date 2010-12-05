@@ -31,19 +31,18 @@
 			<artifactId>org.apache.felix.metatype</artifactId>
 			<version>1.0.4</version>
 		</bundle>
-		<bundle>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-			<version>4.1.0</version>
-		</bundle>
 	</startLevel>
-
 	<!-- HTTP service -->
 	<startLevel level="5">
 		<bundle>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.http.whiteboard</artifactId>
 			<version>2.0.4</version>
+		</bundle>
+		<bundle>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+			<version>4.1.0</version>
 		</bundle>
 	</startLevel>
 
@@ -52,13 +51,13 @@
 		<bundle>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.webconsole</artifactId>
-			<version>3.0.0</version>
+			<version>3.1.2</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.webconsole.plugins.memoryusage
 			</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.2</version>
 		</bundle>
 	</startLevel>
 
@@ -94,18 +93,56 @@
 			<artifactId>httpcore-osgi</artifactId>
 			<version>4.0.1</version>
 		</bundle>
-		<!--  <bundle>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-math</artifactId>
-			<version>2.1</version>
-		</bundle>
-		<bundle>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.12</version>
-		</bundle>-->
+	<bundle>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.4</version>
+    </bundle>
+    <bundle>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+      <version>1.2.1</version>    
+    </bundle>
+    <bundle>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>1.6.2</version>
+    </bundle>
 	</startLevel>
 
+	<!-- JAX-RS -->
+	<startLevel level="5">
+		<!--
+			WARNING: jersey-core bug, must start before jersey-server to avoid
+			jersey spi class not found errors. Restart jersey-server manually if
+			getting those.
+		-->
+		<bundle>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-core</artifactId>
+			<version>1.2</version>
+		</bundle>
+	</startLevel>
+    
+    <!-- Jersey -->
+	<startLevel level="15">
+		<bundle>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>jsr311-api</artifactId>
+			<version>1.1.1</version>
+		</bundle>
+		<bundle>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-server</artifactId>
+			<version>1.2</version>
+		</bundle>
+		<bundle>
+			<groupId>org.codehaus.jettison</groupId>
+			<artifactId>jettison</artifactId>
+			<version>1.2</version>
+		</bundle>
+	</startLevel>
+    
 	<!-- FISE infrastructure and required libraries-->
 	<startLevel level="15">
 		<bundle>
@@ -244,37 +281,6 @@
         </bundle>
 	</startLevel>
 
-	<!-- JAX-RS -->
-	<startLevel level="5">
-		<!--
-			WARNING: jersey-core bug, must start before jersey-server to avoid
-			jersey spi class not found errors. Restart jersey-server manually if
-			getting those.
-		-->
-		<bundle>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-core</artifactId>
-			<version>1.2</version>
-		</bundle>
-	</startLevel>
-	<startLevel level="15">
-		<bundle>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>jsr311-api</artifactId>
-			<version>1.1.1</version>
-		</bundle>
-		<bundle>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-server</artifactId>
-			<version>1.2</version>
-		</bundle>
-		<bundle>
-			<groupId>org.codehaus.jettison</groupId>
-			<artifactId>jettison</artifactId>
-			<version>1.2</version>
-		</bundle>
-	</startLevel>
-
 	<!-- FISE plug-ins -->
 	<startLevel level="20">
         <bundle> <groupId>eu.iksproject</groupId>
@@ -287,6 +293,8 @@
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
+
+	<!-- FISE Enhancement Engines -->
 	<startLevel level="30">
 		<bundle>
 			<groupId>eu.iksproject</groupId>
@@ -323,7 +331,90 @@
 			<artifactId>eu.iksproject.fise.engines.geonames</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
+        <!-- Entity Tagging Engine based on RICK -->
+		<bundle>
+			<groupId>eu.iksproject</groupId>
+			<artifactId>eu.iksproject.fise.engine.entitytagging</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
 	</startLevel>
+    
+  <!-- RICK infrastructure and required libraries-->
+  <startLevel level="15">
+    <bundle>
+      <groupId>eu.iksproject</groupId>
+      <artifactId>eu.iksproject.rick.servicesapi</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>eu.iksproject</groupId>
+      <artifactId>eu.iksproject.rick.model.clerezza</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>eu.iksproject</groupId>
+      <artifactId>eu.iksproject.rick.query.clerezza</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>eu.iksproject</groupId>
+      <artifactId>eu.iksproject.rick.site.linkedData</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>eu.iksproject</groupId>
+      <artifactId>eu.iksproject.rick.yard.clerezza</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>eu.iksproject</groupId>
+      <artifactId>eu.iksproject.rick.yard.solr</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </bundle>
+  </startLevel>
+  <startLevel level="16">
+    <bundle>
+      <groupId>eu.iksproject</groupId>
+      <artifactId>eu.iksproject.rick.core</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+	  <groupId>eu.iksproject</groupId>
+	  <artifactId>eu.iksproject.rick.jersey</artifactId>
+	  <version>0.1-SNAPSHOT</version>
+    </bundle>
+  </startLevel>
+
+  <!-- Solr Client (needed for eu.iksproject.rick.yard.solr) -->
+  <startLevel level="14">
+<!-- not a Bundle - currently included in the eu.iksproject.rick.yard.solr bundle
+     <bundle>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-solrj</artifactId>
+        <version>1.4.1</version>
+    </bundle>
+    -->
+<!-- The Solr Client only works with 3.1, but there is no Bundle for that
+     version. Currently the jar version in included in the
+     eu.iksproject.rick.yard.solr bundle!
+    <bundle>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient-osgi</artifactId>
+        <version>4.0.3</version>
+    </bundle>
+    -->
+    <bundle>
+      <groupId>org.codehaus.woodstox</groupId>
+      <artifactId>wstx-asl</artifactId>
+      <version>3.2.9</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-stax-api_1.0_spec</artifactId>
+      <version>1.0.1</version>
+    </bundle>
+  </startLevel>
+    
 	<!-- Persistence Store Bundles-->
 	<!--  <startLevel level="25">
 		<bundle>
