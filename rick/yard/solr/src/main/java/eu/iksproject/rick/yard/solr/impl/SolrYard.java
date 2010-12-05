@@ -8,7 +8,9 @@ import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -31,12 +33,15 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.org.apache.bcel.internal.classfile.Code;
+
 import eu.iksproject.rick.core.model.InMemoryValueFactory;
 import eu.iksproject.rick.core.query.DefaultQueryFactory;
 import eu.iksproject.rick.core.query.QueryResultListImpl;
 import eu.iksproject.rick.core.utils.AdaptingIterator;
 import eu.iksproject.rick.core.yard.AbstractYard;
 import eu.iksproject.rick.servicesapi.model.Representation;
+import eu.iksproject.rick.servicesapi.model.rdf.RdfResourceEnum;
 import eu.iksproject.rick.servicesapi.query.Constraint;
 import eu.iksproject.rick.servicesapi.query.FieldQuery;
 import eu.iksproject.rick.servicesapi.query.QueryResultList;
@@ -128,6 +133,20 @@ public class SolrYard extends AbstractYard implements Yard {
 	 */
 	public static final String MAX_BOOLEAN_CLAUSES = "eu.iksproject.rick.yard.solr.maxBooleanClauses";
 	/**
+	 * This property allows to define a field that is used to parse the boost
+	 * for the parsed representation. Typically this will be the pageRank of
+	 * that entity within the referenced site (e.g. {@link Math#log1p(double)}
+	 * of the number of incoming links
+	 */
+	public static final String DOCUMENT_BOOST_FIELD = "eu.iksproject.rick.yard.solr.documentBoost";
+	/**
+	 * Key used to configure {@link Entry Entry&lt;String,Float&gt;} for fields
+	 * with the boost. If no Map is configured or a field is not present in the
+	 * Map, than 1.0f is used as Boost. If a Document boost is present than the
+	 * boost of a Field is documentBoost*fieldBoost.
+	 */
+	public static final String FIELD_BOOST_MAPPINGS = "eu.iksproject.rick.yard.solr.fieldBoosts";
+	/**
 	 * The default value for the maxBooleanClauses of SolrQueries. Set to
 	 * {@value #defaultMaxBooleanClauses} the default of Slor 1.4
 	 */
@@ -169,7 +188,22 @@ public class SolrYard extends AbstractYard implements Yard {
 	 * 
 	 */
 	private SolrQueryFactory solrQueryFactoy;
-
+	/**
+	 * Used to store the name of the field used to get the 
+	 * {@link SolrInputDocument#setDocumentBoost(float)} for a Representation.
+	 * This name is available via {@link SolrYardConfig#getDocumentBoostFieldName()}
+	 * however it is stored here to prevent lookups for field of every
+	 * stored {@link Representation}.
+	 */
+	private String documentBoostFieldName;
+	/**
+	 * Map used to store boost values for fields. The default Boost for fields
+	 * is 1.0f. This is used if this map is <code>null</code>, a field is not
+	 * a key in this map, the value of a field in that map is <code>null</code> or
+	 * lower equals zero. Also NOTE that the boost for fields is multiplied with
+	 * the boost for the Document if present.
+	 */
+	private Map<String,Float> fieldBoostMap;
 	/**
 	 * Default constructor as used by the OSGI environment.<p> DO NOT USE to
 	 * manually create instances! The SolrYard instances do need to be configured.
@@ -230,6 +264,8 @@ public class SolrYard extends AbstractYard implements Yard {
 		}
 		solrQueryFactoy.setDefaultQueryResults(this.config.getDefaultQueryResultNumber());
 		solrQueryFactoy.setMaxQueryResults(this.config.getMaxQueryResultNumber());
+		this.documentBoostFieldName = config.getDocumentBoostFieldName();
+		this.fieldBoostMap = config.getFieldBoosts();
 	}
 	@Deactivate
 	protected void deactivate(ComponentContext context) {
@@ -245,6 +281,8 @@ public class SolrYard extends AbstractYard implements Yard {
 		this.fieldMapper = null;
 		this.indexValueFactory = null;
 		this.solrQueryFactoy = null;
+		this.documentBoostFieldName  = null;
+		this.fieldBoostMap = null;
 		super.deactivate(); //deactivate the super implementation
 	}
 	
@@ -256,12 +294,14 @@ public class SolrYard extends AbstractYard implements Yard {
 	private QueryResultList<Representation> find(final FieldQuery parsedQuery,SELECT select) throws YardException {
 		log.debug(String.format("find %s",parsedQuery));
 		long start = System.currentTimeMillis();
-		SolrQuery query = solrQueryFactoy.parseFieldQuery(parsedQuery,SELECT.QUERY);
+		SolrQuery query = solrQueryFactoy.parseFieldQuery(parsedQuery,select);
 		long queryGeneration = System.currentTimeMillis();
 		final Set<String> selected;
 		if(select == SELECT.QUERY){
 			//if query set the fields to add to the result Representations
 			selected = parsedQuery.getSelectedFields();
+			//add the score to query results!
+			selected.add(RdfResourceEnum.resultScore.getUri());
 		} else {
 			//otherwise add all fields
 			selected = null;
@@ -509,6 +549,7 @@ public class SolrYard extends AbstractYard implements Yard {
 		return representations;	
 		}
 	/**
+	 * boost if present!
 	 * @param representation
 	 * @return
 	 */
@@ -520,8 +561,14 @@ public class SolrYard extends AbstractYard implements Yard {
 			inputDocument.addField(fieldMapper.getDocumentDomainField(), config.getId());
 		} // else we need to do nothing
 		inputDocument.addField(fieldMapper.getDocumentIdField(), representation.getId());
+		//first process the document boost
+		float documentBoost = documentBoostFieldName == null ? 1.0f : getDocumentBoost(representation);
 		for(Iterator<String> fields = representation.getFieldNames();fields.hasNext();){
+			//TODO: maybe add some functionality to prevent indexing of the
+			//      field configured as documentBoostFieldName!
 			String field = fields.next();
+			Float fieldBoost = fieldBoostMap == null ? null : fieldBoostMap.get(field);
+			float boost = fieldBoost == null ? documentBoost : fieldBoost >= 0 ? fieldBoost * documentBoost: documentBoost;
 //			log.debug(String.format(" > Process Representation Field %s",field));
 			for(Iterator<Object> values = representation.get(field);values.hasNext();){
 				//now we need to get the indexField for the value
@@ -529,9 +576,9 @@ public class SolrYard extends AbstractYard implements Yard {
 				IndexValue value;
 				try {
 					value = indexValueFactory.createIndexValue(next);
-					for(String fieldName :fieldMapper.getFieldNames(Arrays.asList(field), value)){
+					for(String fieldName : fieldMapper.getFieldNames(Arrays.asList(field), value)){
 //						log.debug(String.format("  - add: %s=%s",fieldName,value));
-						inputDocument.addField(fieldName, value.getValue());
+						inputDocument.addField(fieldName, value.getValue(),boost);
 					}
 				}catch(Exception e){
 					log.warn(String.format("Unable to process value %s (type:%s) for field %s!",next,next.getClass(),field),e);
@@ -539,6 +586,30 @@ public class SolrYard extends AbstractYard implements Yard {
 			}
 		}
 		return inputDocument;
+	}
+	/**
+	 * Extracts the document boost from a {@link Representation}. 
+	 * @param representation the representation
+	 * @return the Boost or <code>null</code> if not found or lower equals zero
+	 */
+	private float getDocumentBoost(Representation representation) {
+		if(documentBoostFieldName == null){
+			return 1.0f;
+		}
+		Float documentBoost = null;
+		for(Iterator<Object> values =representation.get(documentBoostFieldName);values.hasNext() && documentBoost == null;){
+			Object value = values.next();
+			if(value instanceof Float){
+				documentBoost = (Float) value;
+			} else {
+				try {
+					documentBoost = Float.parseFloat(value.toString());
+				} catch (NumberFormatException e) {
+					log.warn(String.format("Unable to parse the Document Boost from field %s=%s[type=%s] -> The Document Boost MUST BE a Float value!",documentBoostFieldName,value,value.getClass()));
+				}
+			}
+		}
+		return documentBoost == null? 1.0f : documentBoost >= 0 ? documentBoost : 1.0f;
 	}
 
 	@Override

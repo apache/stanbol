@@ -129,7 +129,7 @@ public class FieldMappingUtils {
 		
 		String[] parts = mapping.split(" "); //TODO: maybe we should not use the spaces here
 		List<String> mappedTo = Collections.emptyList();
-		String fieldPattern = getFullUri(parts[0]);
+		String fieldPattern = NamespaceEnum.getFullName(parts[0]);
 		Constraint filter = null;
 		for(int i=1;i<parts.length;i++){
 			if("|".equals(parts[i]) && parts.length > i+1){
@@ -145,21 +145,22 @@ public class FieldMappingUtils {
 		}
 		return new FieldMapping(fieldPattern, filter, mappedTo.toArray(new String[mappedTo.size()]));
 	}
-	private static String getFullUri(String value){
-		int index = value.indexOf(':');
-		if(index>0){
-			NamespaceEnum namespace = NamespaceEnum.forPrefix(value.substring(0, index));
-			if(namespace!= null){
-				value = namespace.getNamespace()+value.substring(index+1);
-			}
-		}
-		return value;
-	}
+//moved to NamespaceEnum
+//	private static String getFullUri(String value){
+//		int index = value.indexOf(':');
+//		if(index>0){
+//			NamespaceEnum namespace = NamespaceEnum.forPrefix(value.substring(0, index));
+//			if(namespace!= null){
+//				value = namespace.getNamespace()+value.substring(index+1);
+//			}
+//		}
+//		return value;
+//	}
 	
 	private static List<String> parseMappings(String[] parts, int start) {
 		ArrayList<String> mappings = new ArrayList<String>(parts.length-start);
 		for(int i=start;i<parts.length;i++){
-			String act = getFullUri(parts[i]);
+			String act = NamespaceEnum.getFullName(parts[i]);
 			if(!act.isEmpty()){ //needed to remove two spaces in a row
 				mappings.add(act);
 			}

@@ -8,6 +8,7 @@ import eu.iksproject.rick.servicesapi.model.Representation;
 import eu.iksproject.rick.servicesapi.model.Sign;
 import eu.iksproject.rick.servicesapi.query.Constraint;
 import eu.iksproject.rick.servicesapi.query.FieldQuery;
+import eu.iksproject.rick.servicesapi.query.FieldQueryFactory;
 import eu.iksproject.rick.servicesapi.query.QueryResultList;
 import eu.iksproject.rick.servicesapi.yard.Cache;
 
@@ -84,5 +85,16 @@ public interface ReferencedSite extends ConfiguredSite {
 	 * @return The {@link FieldMapping} present for this Site.
 	 */
 	FieldMapper getFieldMapper();
+	/**
+	 * Getter for the QueryFactory implementation preferable used with this Site.
+	 * Note that Site MUST support query instances regardless of there specific
+	 * implementation. However specific implementations might have performance
+	 * advantages for query processing and may be even execution. Therefore
+	 * if one creates queries that are specifically executed on this specific
+	 * site, that it is best practice to use the instance provided by this
+	 * method.
+	 * @return The query factory of this site.
+	 */
+	FieldQueryFactory getQueryFactory();
 	
 }

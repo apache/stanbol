@@ -176,6 +176,8 @@ public class SolrQueryFactory {
 					String.format("Unknown SELECT status %s! Adapt this implementation to the new value of the Enumeration",
 							select));
 		}
+		//add the select for the score
+		query.addField("score");
 	}
 	private IndexConstraint createIndexConstraint(Entry<String, Constraint> fieldConstraint){
 		IndexConstraint indexConstraint = new IndexConstraint(Arrays.asList(fieldConstraint.getKey()));

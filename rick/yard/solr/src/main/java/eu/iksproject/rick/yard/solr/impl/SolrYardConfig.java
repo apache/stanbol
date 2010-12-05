@@ -3,6 +3,7 @@ package eu.iksproject.rick.yard.solr.impl;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Dictionary;
+import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrServer;
 import org.osgi.service.cm.ConfigurationException;
@@ -148,6 +149,35 @@ public final class SolrYardConfig extends YardConfig {
 			config.remove(SolrYard.MAX_BOOLEAN_CLAUSES);
 		} else {
 			config.put(SolrYard.MAX_BOOLEAN_CLAUSES, integer);
+		}
+	}
+	public void setDocumentBoostFieldName(String fieldName){
+		if(fieldName == null || fieldName.isEmpty()){
+			config.remove(SolrYard.DOCUMENT_BOOST_FIELD);
+		} else {
+			config.put(SolrYard.DOCUMENT_BOOST_FIELD, fieldName);
+		}
+	}
+	public String getDocumentBoostFieldName(){
+		Object name = config.get(SolrYard.DOCUMENT_BOOST_FIELD);
+		return name == null?null:name.toString();
+	}
+	public void setFieldBoosts(Map<String,Float> fieldBoosts){
+		if(fieldBoosts != null){
+			config.put(SolrYard.FIELD_BOOST_MAPPINGS, fieldBoosts);
+		} else {
+			config.remove(SolrYard.FIELD_BOOST_MAPPINGS);
+		}
+	}
+	public Map<String,Float> getFieldBoosts(){
+		Object fieldBoosts = config.get(SolrYard.FIELD_BOOST_MAPPINGS);
+		if(fieldBoosts == null){
+			return null;
+		} else if(fieldBoosts instanceof Map<?, ?>){
+			return (Map<String,Float>)fieldBoosts;
+		} else {
+			//TODO: add support for parsing from String[] and Collection<String>
+			return null;
 		}
 	}
 	/**

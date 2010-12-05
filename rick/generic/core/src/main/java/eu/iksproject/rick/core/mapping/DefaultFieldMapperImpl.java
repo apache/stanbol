@@ -186,7 +186,7 @@ public class DefaultFieldMapperImpl implements FieldMapper {
 	/* (non-Javadoc)
 	 * @see eu.iksproject.rick.servicesapi.mapping.FieldMapper#applyMappings(eu.iksproject.rick.servicesapi.model.Representation, eu.iksproject.rick.servicesapi.model.Representation)
 	 */
-	public void applyMappings(Representation source, Representation target) {
+	public Representation applyMappings(Representation source, Representation target) {
 		Collection<String> fields = new HashSet<String>();
 		for(Iterator<String> fieldIt = source.getFieldNames();fieldIt.hasNext();){
 			fields.add(fieldIt.next());
@@ -267,6 +267,7 @@ public class DefaultFieldMapperImpl implements FieldMapper {
 		 * All mapping activities should be documented and stored with the
 		 * MappedEntity as MappingActivity!
 		 */
+		return target;
 	}
 	/**
 	 * 
@@ -303,7 +304,6 @@ public class DefaultFieldMapperImpl implements FieldMapper {
 						mapping.getFilter().getType(),mapping.getFilter()));
 				break;
 			}
-			log.warn("TODO: Filters are currently not supported by this Implementation");
 			/*
 			 * TODO: add general purpose functionality to apply Constraints.
 			 * Currently this is done by the specific Query Implementations :(

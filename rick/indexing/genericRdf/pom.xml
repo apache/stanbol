@@ -21,7 +21,7 @@
   </parent>
 
   <groupId>eu.iksproject</groupId>
-  <artifactId>eu.iksproject.indexing.genericRdf</artifactId>
+  <artifactId>eu.iksproject.rick.indexing.genericRdf</artifactId>
   <packaging>jar</packaging>
   <version>0.1-SNAPSHOT</version>
   <name>IKS RICK Indexing for rdf Resource</name>

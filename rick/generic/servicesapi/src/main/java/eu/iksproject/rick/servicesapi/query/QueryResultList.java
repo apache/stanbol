@@ -38,5 +38,4 @@ public interface QueryResultList<T> extends Iterable<T> {
 	 * @return the type
 	 */
 	Class<T> getType();
-
 }
