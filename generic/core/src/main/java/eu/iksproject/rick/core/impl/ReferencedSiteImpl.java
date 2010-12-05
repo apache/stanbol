@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import eu.iksproject.rick.core.mapping.DefaultFieldMapperImpl;
 import eu.iksproject.rick.core.mapping.FieldMappingUtils;
 import eu.iksproject.rick.core.mapping.ValueConverterFactory;
+import eu.iksproject.rick.core.query.DefaultQueryFactory;
 import eu.iksproject.rick.core.query.QueryResultListImpl;
 import eu.iksproject.rick.core.site.AbstractEntityDereferencer;
 import eu.iksproject.rick.core.utils.ModelUtils;
@@ -45,6 +46,7 @@ import eu.iksproject.rick.servicesapi.model.Representation;
 import eu.iksproject.rick.servicesapi.model.Sign;
 import eu.iksproject.rick.servicesapi.model.Symbol;
 import eu.iksproject.rick.servicesapi.query.FieldQuery;
+import eu.iksproject.rick.servicesapi.query.FieldQueryFactory;
 import eu.iksproject.rick.servicesapi.query.QueryResultList;
 import eu.iksproject.rick.servicesapi.site.ConfiguredSite;
 import eu.iksproject.rick.servicesapi.site.EntityDereferencer;
@@ -221,7 +223,8 @@ public class ReferencedSiteImpl implements ReferencedSite {
 	protected Dictionary<String,?> properties;
 	protected FieldMapper fieldMappings;
 
-	private boolean dereferencerEqualsEntitySearcherComponent;
+	private final Object searcherAndDereferencerLock = new Object();
+	private Boolean dereferencerEqualsEntitySearcherComponent;
 	private ComponentFactoryListener dereferencerComponentFactoryListener;
 	private ComponentFactoryListener searcherComponentFactoryListener;
 
@@ -368,6 +371,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
 					for(Representation result : representations){
 						results.add(ModelUtils.createSign(result, getId()));
 					}
+					return new QueryResultListImpl<Sign>(query, results, Sign.class);
 				} catch (YardException e) {
 					if(entitySearcherComponentName==null){
 						throw new ReferencedSiteException("Unable to execute query on Cache "+cacheId,e);
@@ -382,7 +386,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
 					log.warn(String.format("Cache %s currently not active will query remote Site %s as fallback",cacheId,queryUri));
 				}
 			}
-		}		
+		}	
 		QueryResultList<String> entityIds;
 		try {
 			entityIds = entitySearcher.findEntities(query);
@@ -580,6 +584,25 @@ public class ReferencedSiteImpl implements ReferencedSite {
 	}
 
 	/**
+	 * In case {@link CacheStrategy#all} this Method returns the
+	 * query factory of the Cache.
+	 * Otherwise it returns {@link DefaultQueryFactory#getInstance()}.
+	 */
+	@Override
+	public FieldQueryFactory getQueryFactory() {
+		FieldQueryFactory factory = null;
+		if(cacheStrategy == CacheStrategy.all){
+			Cache cache = getCache();
+			if(cache != null){
+				factory = cache.getQueryFactory();
+			}
+		}
+		if(factory == null){
+			factory = DefaultQueryFactory.getInstance();
+		}
+		return factory;
+	}
+	/**
 	 * Internally used to get the Cache for this site. If 
 	 * {@link CacheStrategy#none}, this methods always returns <code>null</code>,
 	 * otherwise it returns the Cache for the configured Yard or <code>null</code>
@@ -739,9 +762,9 @@ public class ReferencedSiteImpl implements ReferencedSite {
 	 */
 	@SuppressWarnings("unchecked")
 	protected void createEntitySearcherComponent(ComponentFactory factory){
-		//both create*** methods sync on the cacheId to avoid
+		//both create*** methods sync on the searcherAndDereferencerLock to avoid
 		//multiple component instances because of concurrent calls
-		synchronized (this.cacheId) {
+		synchronized (this.searcherAndDereferencerLock ) {
 			if(entitySearcherComponentInstace == null){
 				this.entitySearcherComponentInstace = factory.newInstance(OsgiUtils.copyConfig(context.getProperties()));
 				this.entitySearcher = (EntitySearcher)entitySearcherComponentInstace.getInstance();
@@ -759,9 +782,9 @@ public class ReferencedSiteImpl implements ReferencedSite {
 	 */
 	@SuppressWarnings("unchecked")
 	protected void createDereferencerComponent(ComponentFactory factory){
-		//both create*** methods sync on cacheId to avoid
+		//both create*** methods sync on searcherAndDereferencerLock to avoid
 		//multiple component instances because of concurrent calls
-		synchronized (this.cacheId) {
+		synchronized (this.searcherAndDereferencerLock) {
 			if(dereferencerComponentInstance == null){
 				dereferencerComponentInstance=factory.newInstance(OsgiUtils.copyConfig(context.getProperties()));
 				this.dereferencer = (EntityDereferencer)dereferencerComponentInstance.getInstance();

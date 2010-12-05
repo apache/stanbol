@@ -30,11 +30,12 @@ public interface FieldMapper extends Cloneable{
 	 * are NOT used as source fields for further mappings.
 	 * @param source the source for the mapping process
 	 * @param target the target for the processed mappings (can be the same as source)
+	 * @return the {@link Representation} parsed as target.
 	 * TODO: This Method should return a MappingReport, that can be stored with
 	 * the {@link EntityMapping}. However the MappingActivity functionality is
 	 * not yet designed/implemented!
 	 */
-	void applyMappings(Representation source, Representation target);
+	Representation applyMappings(Representation source, Representation target);
 	/**
 	 * Getter for the unmodifiable collection of all mappings
 	 * @return the configured mappings

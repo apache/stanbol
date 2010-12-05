@@ -39,17 +39,17 @@ public class JerseyEndpoint {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Property(value = "/")
-    public static final String ALIAS_PROPERTY = "eu.iksproject.fise.jersey.alias";
+    @Property(value = "/rick")
+    public static final String ALIAS_PROPERTY = "eu.iksproject.rick.jersey.alias";
 
-    @Property(value = "/static")
-    public static final String STATIC_RESOURCES_URL_ROOT_PROPERTY = "eu.iksproject.fise.jersey.static.url";
+    @Property(value = "/rick/static")
+    public static final String STATIC_RESOURCES_URL_ROOT_PROPERTY = "eu.iksproject.rick.jersey.static.url";
 
-    @Property(value = "/META-INF/static")
-    public static final String STATIC_RESOURCES_CLASSPATH_PROPERTY = "eu.iksproject.fise.jersey.static.classpath";
+    @Property(value = "/rick/META-INF/static")
+    public static final String STATIC_RESOURCES_CLASSPATH_PROPERTY = "eu.iksproject.rick.jersey.static.classpath";
 
     //@Property(value = "/META-INF/templates")
-    //public static final String FREEMARKER_TEMPLATE_CLASSPATH_PROPERTY = "eu.iksproject.fise.jersey.templates.classpath";
+    //public static final String FREEMARKER_TEMPLATE_CLASSPATH_PROPERTY = "eu.iksproject.rick.jersey.templates.classpath";
 
     @Reference
     TcManager tcManager;

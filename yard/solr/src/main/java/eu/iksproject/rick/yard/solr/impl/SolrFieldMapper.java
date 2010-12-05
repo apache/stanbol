@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.iksproject.rick.core.utils.ModelUtils;
 import eu.iksproject.rick.servicesapi.defaults.NamespaceEnum;
+import eu.iksproject.rick.servicesapi.model.rdf.RdfResourceEnum;
 import eu.iksproject.rick.yard.solr.defaults.IndexDataTypeEnum;
 import eu.iksproject.rick.yard.solr.defaults.SolrConst;
 import eu.iksproject.rick.yard.solr.model.FieldMapper;
@@ -61,6 +62,13 @@ public class SolrFieldMapper implements FieldMapper {
 	 * property.
 	 */
     private static final int LRU_MAPPINGS_CACHE_SIZE = 1024;
+    /**
+     * The IndexField for the Solr score. This field is mapped to the field 
+     * {@link RdfResourceEnum#resultScore} and uses {@link IndexDataTypeEnum#FLOAT}
+     */
+    private static final IndexField scoreField = new IndexField(
+    		Collections.singletonList(RdfResourceEnum.resultScore.getUri()), 
+    		IndexDataTypeEnum.FLOAT.getIndexType());
     /**
      * Internally used as LRU Cache with {@link SolrFieldMapper#LRU_MAPPINGS_CACHE_SIZE}
      * elements. This subclass of {@link LinkedHashMap} overrides the
@@ -121,7 +129,9 @@ public class SolrFieldMapper implements FieldMapper {
 				//   meaning, that this index document field does not represent
 				//   an logical IndexField and should be ignored
 				return null;
-			} 
+			} else if (SolrConst.SCORE_FIELD.equals(fieldName)){
+				return scoreField;
+			}
 			//parse the prefix and suffix
 			String[] tokens = fieldName.split(Character.toString(SolrConst.PATH_SEPERATOR));
 			int numTokens = tokens.length;
@@ -509,7 +519,7 @@ public class SolrFieldMapper implements FieldMapper {
 	 * {@link #NAMESPACE_PREFIX_SEPERATOR_CHAR} this method returns the parsed
 	 * String.<p>
 	 * The local name may contain the {@link #NAMESPACE_PREFIX_SEPERATOR_CHAR} 
-	 * Ô{@link #NAMESPACE_PREFIX_SEPERATOR_CHAR}'. The prefix MUST NOT contain
+	 * {@link #NAMESPACE_PREFIX_SEPERATOR_CHAR}'. The prefix MUST NOT contain
 	 * this char, because {@link String#indexOf(int)} is used to split prefix
 	 * and local name.
 	 * @param shortFieldName the short name

@@ -119,9 +119,24 @@ public enum NamespaceEnum {
 	public static NamespaceEnum forPrefix(String prefix){
 		return prefix2Namespace.get(prefix);
 	}
-//	public static void main(String[] args) {
-//		for(NamespaceEnum entry : NamespaceEnum.values()){
-//			System.out.println(String.format("forNamespace(%s)=%s == %s",entry.getNamespace(),forNamespace(entry.getNamespace()).getPrefix(),entry.getPrefix()));
-//		}
-//	}
+	/**
+	 * Lookup if the parsed URI uses one of the registered prefixes of this
+	 * Enumeration. If this is the case, the prefix is replaced by the namespace
+	 * and the full URI is returned. If no prefix is returned, the
+	 * parsed URI is returned
+	 * @param shortUri the short URI
+	 * @return the full URI if the parsed shortUri uses a prefix defined by this
+	 * Enumeration. Otherwise the parsed value.
+	 */
+	public static String getFullName(String shortUri){
+		if(shortUri == null) return null;
+		int index = shortUri.indexOf(':');
+		if(index>0){
+			NamespaceEnum namespace = NamespaceEnum.forPrefix(shortUri.substring(0, index));
+			if(namespace!= null){
+				shortUri = namespace.getNamespace()+shortUri.substring(index+1);
+			}
+		}
+		return shortUri;
+	}
 }

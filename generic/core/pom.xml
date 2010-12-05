@@ -89,6 +89,7 @@
         <groupId>joda-time</groupId>
         <artifactId>joda-time</artifactId>
         <version>1.6.2</version>
+        <scope>compile</scope>
     </dependency>
     <dependency>
         <groupId>commons-collections</groupId>

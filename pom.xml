@@ -59,7 +59,6 @@
     <!-- Utils for createing local caches (indexing utils) -->
     <module>indexing/geonames</module>
     <module>indexing/genericRdf</module>
-
     <!-- disabling missing stuff
     <module>jersey</module>
     -->

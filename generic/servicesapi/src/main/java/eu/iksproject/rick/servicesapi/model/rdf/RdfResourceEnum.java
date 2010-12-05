@@ -20,6 +20,14 @@ public enum RdfResourceEnum {
 	 */
 	signSite,
 	/**
+	 * The ranking of the entity by this site in the value range of [0..1]
+	 * A sign with the rank 1 would be (one of) the most important entities
+	 * managed by this Site. A sign with rank 0 has no relevance. Even that this
+	 * is still within the value range one could wonder why this site does
+	 * even manage a representation about that entity.
+	 */
+	signRank,
+	/**
 	 * The representation of the Sign (domain=Sign, range=Representation).
 	 */
 	signRepresentation,
@@ -121,10 +129,9 @@ public enum RdfResourceEnum {
 	 */
 	queryResult(NamespaceEnum.rickQuery),
 	/**
-	 * The ranking of the result, optimally the page rank or if not available the
-	 * number of incoming relations
+	 * The score of the result in respect to the parsed query.
 	 */
-	resultRank(NamespaceEnum.rickQuery),
+	resultScore(NamespaceEnum.rickQuery,"score"),
 	/**
 	 * The id of the site the result was found
 	 */

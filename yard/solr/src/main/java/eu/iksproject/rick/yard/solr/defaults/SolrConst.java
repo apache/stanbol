@@ -79,5 +79,9 @@ public class SolrConst {
 	 * Documents with the same ID (equal values for {@link #DOCUMENT_ID_FIELD})
 	 */
 	public static final String DOMAIN_FIELD = SPECIAL_FIELD_PREFIX+"domain";
+	/**
+	 * The field name used by Solr for the score of query results
+	 */
+	public static final String SCORE_FIELD = "score";
 	
 }
