@@ -25,7 +25,7 @@
 	<packaging>bundle</packaging>
 	<version>${fise-version}</version>
 
-	<name>FISE Enhancement Engine for RICK ReferencedSites</name>
+	<name>IKS FISE Enhancement Engine : for RICK ReferencedSites</name>
 	<description>
 		Implementation of an annotation engine that links named entities
         extracted from a text (TextAnnotations) to semantic entities
