@@ -25,7 +25,7 @@
 	<version>${fise-version}</version>
 	<packaging>bundle</packaging>
 
-	<name>IKS FISE Metaxa Metadata and Text Extractor</name>
+	<name>IKS FISE Enhancement Engine : Metaxa Metadata and Text Extractor</name>
 	<description>Extracts metadata and text from a number of document formats like pdf, Word doc, etc.</description>
 
 	<inceptionYear>2010</inceptionYear>

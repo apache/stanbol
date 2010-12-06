@@ -25,7 +25,7 @@
   <packaging>bundle</packaging>
   <version>0.9-SNAPSHOT</version>
 
-  <name>IKS FISE Zemanta Tagging Enhancement Engine</name>
+  <name>IKS FISE Enhancement Engine : Zemanta Tagging</name>
   <description></description>
 
   <inceptionYear>2010</inceptionYear>
