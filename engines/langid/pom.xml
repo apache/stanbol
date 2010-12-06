@@ -25,7 +25,7 @@
 	<version>${fise-version}</version>
 	<packaging>bundle</packaging>
 
-	<name>IKS FISE Language Identifier</name>
+	<name>IKS FISE Enhancement Engine : Language Identifier</name>
 	<description>identifies a text as: German(de), English(en), French(fr), Spanish(es), Italian(it), Swedish(sv), Polish(pl), Dutch(nl), Norwegian(no), Finnish(fi), Albanian(sq), Slovakian(sk), Slovenian(sl), Danish(da), Hungarian(hu)</description>
 
 	<inceptionYear>2010</inceptionYear>
