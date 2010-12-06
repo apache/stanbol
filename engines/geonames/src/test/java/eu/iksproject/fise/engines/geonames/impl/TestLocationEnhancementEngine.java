@@ -7,6 +7,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -20,9 +22,11 @@ import org.apache.commons.io.IOUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import eu.iksproject.fise.engines.geonames.impl.MockComponentContext;
 import eu.iksproject.fise.servicesapi.ContentItem;
+import eu.iksproject.fise.servicesapi.EngineException;
 import eu.iksproject.fise.servicesapi.TextAnnotation;
 import eu.iksproject.fise.servicesapi.helper.RdfEntityFactory;
 import eu.iksproject.fise.servicesapi.rdf.OntologicalClasses;
@@ -31,6 +35,7 @@ import eu.iksproject.fise.servicesapi.rdf.TechnicalClasses;
 
 public class TestLocationEnhancementEngine {
 
+	private Logger log = LoggerFactory.getLogger(TestLocationEnhancementEngine.class);
 	/**
 	 * The context for the tests (same as in TestOpenNLPEnhancementEngine)
 	 */
@@ -110,7 +115,7 @@ public class TestLocationEnhancementEngine {
     	testAnnotation.setEnd(start+name.length());
     }
     @Test
-    public void testLocationEnhancementEngine() throws Exception{
+    public void testLocationEnhancementEngine() {//throws Exception{
     	//create a content item
     	ContentItem ci = getContentItem("urn:iks-project:fise:text:content-item:person", CONTEXT);
     	//add three text annotations to be consumed by this test
@@ -118,7 +123,17 @@ public class TestLocationEnhancementEngine {
     	getTextAnnotation(ci, ORGANISATION, CONTEXT, OntologicalClasses.DBPEDIA_ORGANISATION);
     	getTextAnnotation(ci, PLACE, CONTEXT, OntologicalClasses.DBPEDIA_PLACE);
     	//perform the computation of the enhancements
-    	locationEnhancementEngine.computeEnhancements(ci);
+    	try {
+			locationEnhancementEngine.computeEnhancements(ci);
+		} catch (EngineException e) {
+			if(e.getCause() instanceof UnknownHostException) {
+				log.warn("Unable to test LocationEnhancemetEngine when offline! -> skipping this test",e.getCause());
+				return;
+			} else if(e.getCause() instanceof SocketTimeoutException){
+				log.warn("Seams like the geonames.org webservice is currently unavailable -> skipping this test",e.getCause());
+				return;
+			}
+		}
     	// ... and test the results
     	/*
     	 * TODO: rw 20100617 

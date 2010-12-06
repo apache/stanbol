@@ -1,5 +1,9 @@
 package eu.iksproject.fise.ext.org.geonames;
 
+import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
+
 import org.geonames.Style;
 import org.geonames.Toponym;
 import org.geonames.ToponymSearchCriteria;
@@ -27,14 +31,24 @@ public class TestScore extends Assert{
 		searchCriteria.setName("Zealand");
 		searchCriteria.setStyle(Style.FULL);
 		searchCriteria.setMaxRows(5);
-		ToponymSearchResult searchResult = WebService.search(searchCriteria);
-		int i = 0;
-		for (Toponym toponym : searchResult.getToponyms()) {
-			i++;
-			log.info("Result "+i+" "+ toponym.getGeoNameId()+" score= "+toponym.getScore());
-			assertTrue(toponym.getScore() != null);
-			assertTrue(toponym.getScore()>= Double.valueOf(0));
-			assertTrue(toponym.getScore()<= Double.valueOf(100));
+		try {
+			ToponymSearchResult searchResult = WebService.search(searchCriteria);
+			int i = 0;
+			for (Toponym toponym : searchResult.getToponyms()) {
+				i++;
+				log.info("Result "+i+" "+ toponym.getGeoNameId()+" score= "+toponym.getScore());
+				assertTrue(toponym.getScore() != null);
+				assertTrue(toponym.getScore()>= Double.valueOf(0));
+				assertTrue(toponym.getScore()<= Double.valueOf(100));
+			}
+		} catch(IOException e){
+			if(e instanceof UnknownHostException) {
+				log.warn("Unable to test LocationEnhancemetEngine when offline! -> skipping this test",e.getCause());
+			} else if(e instanceof SocketTimeoutException){
+				log.warn("Seams like the geonames.org webservice is currently unavailable -> skipping this test",e.getCause());
+			} else {
+				throw e;
+			}
 		}
 	}
 	
@@ -44,13 +58,23 @@ public class TestScore extends Assert{
 		searchCriteria.setName("New York");
 		searchCriteria.setStyle(Style.FULL);
 		searchCriteria.setMaxRows(1);
-		ToponymSearchResult searchResult = WebService.search(searchCriteria);
-		int testGeonamesId = searchResult.getToponyms().iterator().next().getGeoNameId();
-	    for(Toponym hierarchy : WebService.hierarchy(testGeonamesId, null, Style.FULL)){
-	    	//this service does not provide an score, so test if 1.0 is returned
-			assertTrue(hierarchy.getScore() != null);
-			assertTrue(hierarchy.getScore().equals(Double.valueOf(1.0)));
-	    }
+		try {
+			ToponymSearchResult searchResult = WebService.search(searchCriteria);
+			int testGeonamesId = searchResult.getToponyms().iterator().next().getGeoNameId();
+		    for(Toponym hierarchy : WebService.hierarchy(testGeonamesId, null, Style.FULL)){
+		    	//this service does not provide an score, so test if 1.0 is returned
+				assertTrue(hierarchy.getScore() != null);
+				assertTrue(hierarchy.getScore().equals(Double.valueOf(1.0)));
+		    }
+		} catch(IOException e){
+			if(e instanceof UnknownHostException) {
+				log.warn("Unable to test LocationEnhancemetEngine when offline! -> skipping this test",e.getCause());
+			} else if(e instanceof SocketTimeoutException){
+				log.warn("Seams like the geonames.org webservice is currently unavailable -> skipping this test",e.getCause());
+			} else {
+				throw e;
+			}
+		}
 	}
 
 }
