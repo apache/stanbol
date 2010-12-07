@@ -2,7 +2,7 @@
 <html>
   <head>
 
-    <title>FISE - ${title?html}</title>
+    <title>Apache Stanbol - ${title?html}</title>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 
     <link rel="stylesheet" href="/static/style/fise.css" />
@@ -17,7 +17,7 @@
 
   </head>
   <body>
-    <div class="home"><a href="/"><img src="/static/images/fise_logo_cropped.png" alt="FISE Home" /></a></div>
+    <div class="home"><a href="/"><img src="/static/images/apache_stanbol_logo_cropped.png" alt="Stanbol Home" /></a></div>
     <div class="header">
       <h1>The RESTful Semantic Engine</h1>
 
