@@ -5,7 +5,7 @@
     <title>Apache Stanbol - ${title?html}</title>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 
-    <link rel="stylesheet" href="/static/style/fise.css" />
+    <link rel="stylesheet" href="/static/style/stanbol.css" />
     <link rel="stylesheet" href="/static/openlayers-2.9/theme/default/style.css" type="text/css" />
     <link rel="stylesheet" href="/static/scripts/prettify/prettify.css" />
     <link rel="icon" type="image/png" href="/static/images/favicon.png" />
