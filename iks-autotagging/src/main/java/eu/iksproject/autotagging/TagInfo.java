@@ -34,7 +34,7 @@ public class TagInfo {
     private final String[] type;
 
     public TagInfo(String id, String label, String[] type, double confidence) {
-    	if(id == null){
+    	if (id == null){
     		throw new IllegalArgumentException("Parameter id MUST NOT be NULL");
     	}
         this.id = id;
@@ -54,6 +54,7 @@ public class TagInfo {
     public boolean equals(Object obj) {
     	return obj != null && obj instanceof TagInfo && ((TagInfo)obj).id.equals(id) && ((TagInfo)obj).confidence.equals(confidence);
     }
+
     public final String getId() {
 		return id;
 	}
@@ -75,7 +76,7 @@ public class TagInfo {
      */
     @Override
     public int hashCode() {
-    	return id.hashCode()+confidence.hashCode();
+    	return id.hashCode() + confidence.hashCode();
     }
 
 }

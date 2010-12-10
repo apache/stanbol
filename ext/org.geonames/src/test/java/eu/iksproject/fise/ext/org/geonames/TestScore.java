@@ -14,14 +14,18 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 /**
  * This test only correct values for score (set/getScore).
  * An extension to the web service client for geonames.org implemented to
  * be able to write fise:confidence values for fise:EntityAnnotations.
- * @author Rupert Westenthaler
  *
+ * @author Rupert Westenthaler
  */
-public class TestScore extends Assert{
+public class TestScore {
 	
 	private static final Logger log = LoggerFactory.getLogger(TestScore.class);
 	
@@ -37,14 +41,14 @@ public class TestScore extends Assert{
 			for (Toponym toponym : searchResult.getToponyms()) {
 				i++;
 				log.info("Result "+i+" "+ toponym.getGeoNameId()+" score= "+toponym.getScore());
-				assertTrue(toponym.getScore() != null);
-				assertTrue(toponym.getScore()>= Double.valueOf(0));
+                assertNotNull(toponym.getScore());
+				assertTrue(toponym.getScore() >= Double.valueOf(0));
 				assertTrue(toponym.getScore()<= Double.valueOf(100));
 			}
 		} catch(IOException e){
-			if(e instanceof UnknownHostException) {
+			if (e instanceof UnknownHostException) {
 				log.warn("Unable to test LocationEnhancemetEngine when offline! -> skipping this test",e.getCause());
-			} else if(e instanceof SocketTimeoutException){
+			} else if (e instanceof SocketTimeoutException){
 				log.warn("Seams like the geonames.org webservice is currently unavailable -> skipping this test",e.getCause());
 			} else {
 				throw e;
@@ -61,15 +65,15 @@ public class TestScore extends Assert{
 		try {
 			ToponymSearchResult searchResult = WebService.search(searchCriteria);
 			int testGeonamesId = searchResult.getToponyms().iterator().next().getGeoNameId();
-		    for(Toponym hierarchy : WebService.hierarchy(testGeonamesId, null, Style.FULL)){
+		    for (Toponym hierarchy : WebService.hierarchy(testGeonamesId, null, Style.FULL)){
 		    	//this service does not provide an score, so test if 1.0 is returned
-				assertTrue(hierarchy.getScore() != null);
-				assertTrue(hierarchy.getScore().equals(Double.valueOf(1.0)));
+                assertNotNull(hierarchy.getScore());
+                assertEquals(hierarchy.getScore(), Double.valueOf(1.0));
 		    }
 		} catch(IOException e){
-			if(e instanceof UnknownHostException) {
+			if (e instanceof UnknownHostException) {
 				log.warn("Unable to test LocationEnhancemetEngine when offline! -> skipping this test",e.getCause());
-			} else if(e instanceof SocketTimeoutException){
+			} else if (e instanceof SocketTimeoutException){
 				log.warn("Seams like the geonames.org webservice is currently unavailable -> skipping this test",e.getCause());
 			} else {
 				throw e;

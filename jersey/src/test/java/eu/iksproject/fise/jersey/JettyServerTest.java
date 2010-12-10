@@ -18,13 +18,11 @@ package eu.iksproject.fise.jersey;
  *
  * $Id$
  */
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.clerezza.rdf.core.MGraph;
@@ -52,11 +50,15 @@ import eu.iksproject.fise.servicesapi.EnhancementJobManager;
 import eu.iksproject.fise.servicesapi.Store;
 import eu.iksproject.fise.servicesapi.helper.EnhancementEngineHelper;
 
+import static javax.ws.rs.core.MediaType.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 /**
  * Starts a server, then run a few HTTP requests against it using the Jersey
  * client.
  */
-public class JettyServerTest extends Assert {
+public class JettyServerTest {
 
     protected static final String TEXT_CONTENT = "Let the autotagger guess who was a Jamaican"
             + " musician, a lead singer and guitarist"
@@ -189,7 +191,7 @@ public class JettyServerTest extends Assert {
     public void testWebView() throws Exception {
         // the job manager is registered along with an engine (see the
         // #startServer method)
-        String r = enginesResource.accept(MediaType.TEXT_HTML).get(String.class);
+        String r = enginesResource.accept(TEXT_HTML).get(String.class);
         assertTrue(r, r.contains("<strong>1</strong> active engines"));
         assertTrue(r, r.contains(engine.getClass().getName()));
 
@@ -208,20 +210,19 @@ public class JettyServerTest extends Assert {
     public void testGetEnginesAsJSON() throws Exception {
         // the job manager is registered along with an engine (see the
         // #startServer method)
-        String r = enginesResource.accept(MediaType.APPLICATION_JSON).get(
+        String r = enginesResource.accept(APPLICATION_JSON).get(
                 String.class);
-        assertEquals(r,
-                "[\"http:\\/\\/localhost:9999\\/engines\\/relatedtopic\"]\n");
+        assertEquals("[\"http:\\/\\/localhost:9999\\/engines\\/relatedtopic\"]\n", r);
 
         // unbind the engine from the job manager
         jobManager.unbindEnhancementEngine(engine);
-        r = enginesResource.accept(MediaType.APPLICATION_JSON).get(String.class);
-        assertEquals(r, "[]\n");
+        r = enginesResource.accept(APPLICATION_JSON).get(String.class);
+        assertEquals("[]\n", r);
 
         // remove the job manager
         server.removeAttribute(EnhancementJobManager.class.getName());
-        r = enginesResource.accept(MediaType.APPLICATION_JSON).get(String.class);
-        assertEquals(r, "[]\n");
+        r = enginesResource.accept(APPLICATION_JSON).get(String.class);
+        assertEquals("[]\n", r);
     }
 
     @Test
@@ -229,7 +230,7 @@ public class JettyServerTest extends Assert {
         MultivaluedMap<String, String> formData = new MultivaluedMapImpl();
         formData.add("content", TEXT_CONTENT);
 
-        String r = enginesResource.type(MediaType.APPLICATION_FORM_URLENCODED).accept(
+        String r = enginesResource.type(APPLICATION_FORM_URLENCODED).accept(
                 "text/rdf+nt").post(String.class, formData);
         assertTrue(r.contains("<urn:enhancement-ba419d35-0dfe-8af7-aee7-bbe10c45c028> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://fise.iks-project.eu/ontology/EntityAnnotation> ."));
         assertTrue(r.contains("<urn:enhancement-ba419d35-0dfe-8af7-aee7-bbe10c45c028> <http://fise.iks-project.eu/ontology/extracted-from> <urn:content-item-sha1-9a674f3a975dbb1fc50c50d5686bbdb00595ba94> ."));
@@ -247,7 +248,7 @@ public class JettyServerTest extends Assert {
 
         // TODO: find a way to pass a namespace prefix configuration to the
         // serializers
-        String r = enginesResource.type(MediaType.APPLICATION_FORM_URLENCODED).accept(
+        String r = enginesResource.type(APPLICATION_FORM_URLENCODED).accept(
                 "text/turtle").post(String.class, formData);
 
         assertTrue(r.contains(""
@@ -263,8 +264,8 @@ public class JettyServerTest extends Assert {
         formData.add("content", TEXT_CONTENT);
 
         EnhancementEngineHelper.setSeed(42);
-        String r = enginesResource.type(MediaType.APPLICATION_FORM_URLENCODED).accept(
-                MediaType.APPLICATION_JSON).post(String.class, formData);
+        String r = enginesResource.type(APPLICATION_FORM_URLENCODED).accept(
+                APPLICATION_JSON).post(String.class, formData);
         assertTrue(r.contains("{\"value\":\"http:\\/\\/dbpedia.org\\/resource\\/Bob_Marley\""));
     }
 
@@ -275,14 +276,14 @@ public class JettyServerTest extends Assert {
 
         // test force mimetype from HTML form parameters
         formData.putSingle("format", "application/rdf+xml");
-        String r = enginesResource.type(MediaType.APPLICATION_FORM_URLENCODED).accept(
-                MediaType.TEXT_HTML).post(String.class, formData);
+        String r = enginesResource.type(APPLICATION_FORM_URLENCODED).accept(
+                TEXT_HTML).post(String.class, formData);
         assertTrue(r.contains("<rdf:Description rdf:about=\"urn:enhancement-ba419d35-0dfe-8af7-aee7-bbe10c45c028\">"));
     }
 
     @Test
     public void testEnginesRawPostNt() throws Exception {
-        String r = enginesResource.type(MediaType.TEXT_PLAIN).accept(
+        String r = enginesResource.type(TEXT_PLAIN).accept(
                 "text/rdf+nt").post(String.class, TEXT_CONTENT);
         assertTrue(r.contains("<urn:enhancement-ba419d35-0dfe-8af7-aee7-bbe10c45c028> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://fise.iks-project.eu/ontology/EntityAnnotation> ."));
         assertTrue(r.contains("<urn:enhancement-ba419d35-0dfe-8af7-aee7-bbe10c45c028> <http://fise.iks-project.eu/ontology/extracted-from> <urn:content-item-sha1-9a674f3a975dbb1fc50c50d5686bbdb00595ba94> ."));
@@ -292,7 +293,7 @@ public class JettyServerTest extends Assert {
 
     // @Test
     public void testEnginesRawPosTurtle() throws Exception {
-        String r = enginesResource.type(MediaType.TEXT_PLAIN).accept(
+        String r = enginesResource.type(TEXT_PLAIN).accept(
                 "text/turtle").post(String.class, TEXT_CONTENT);
         assertTrue(r.contains(""
                 + "<urn:enhancement-ba419d35-0dfe-8af7-aee7-bbe10c45c028>\n"
@@ -303,27 +304,16 @@ public class JettyServerTest extends Assert {
 
     @Test
     public void testEnginesRawPosXml() throws Exception {
-        String r = enginesResource.type(MediaType.TEXT_PLAIN).accept(
+        String r = enginesResource.type(TEXT_PLAIN).accept(
                 "application/rdf+xml").post(String.class, TEXT_CONTENT);
         assertTrue(r.contains("<rdf:Description rdf:about=\"urn:enhancement-ba419d35-0dfe-8af7-aee7-bbe10c45c028\">"));
     }
 
     @Test
     public void testEnginesRawPosJson() throws Exception {
-        String r = enginesResource.type(MediaType.TEXT_PLAIN).accept(
-                MediaType.APPLICATION_JSON).post(String.class, TEXT_CONTENT);
+        String r = enginesResource.type(TEXT_PLAIN).accept(
+                APPLICATION_JSON).post(String.class, TEXT_CONTENT);
         assertTrue(r.contains("{\"value\":\"http:\\/\\/dbpedia.org\\/resource\\/Bob_Marley\""));
     }
 
-    protected void assertResult(String result, String expected) {
-    	assertResults(result, new String[] { expected });
-    }
-
-    protected void assertResults(String result, String [] expected) {
-        for(String exp : expected) {
-        	if(!result.contains(exp)) {
-        		fail("Expected result to contain [" + exp + "], result is [" + result + "]");
-        	}
-        }
-    }
 }

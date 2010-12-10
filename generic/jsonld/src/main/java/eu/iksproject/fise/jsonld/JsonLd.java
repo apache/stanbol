@@ -78,21 +78,21 @@ public class JsonLd {
 	
 	private List<Object> createDisjointGraph() {
 		List<Object> json = new ArrayList<Object>();
-		if (!this.resourceMap.isEmpty()) {
+		if (!resourceMap.isEmpty()) {
 
-			for (String subject : this.resourceMap.keySet()) {
+			for (String subject : resourceMap.keySet()) {
 				Map<String, Object> subjectObject = new TreeMap<String, Object>(new JsonComparator());
 
 				// put the namespaces
-				if (this.namespacePrefixMap.size() > 0) {
+				if (!namespacePrefixMap.isEmpty()) {
 					Map<String, Object> nsObject = new TreeMap<String, Object>(new JsonComparator());
-					for (String ns : this.namespacePrefixMap.keySet()) {
-						nsObject.put(this.namespacePrefixMap.get(ns), ns);
+					for (String ns : namespacePrefixMap.keySet()) {
+						nsObject.put(namespacePrefixMap.get(ns), ns);
 					}
 					subjectObject.put("#", nsObject);
 				}
 
-				JsonLdResource resource = this.resourceMap.get(subject);
+				JsonLdResource resource = resourceMap.get(subject);
 
 				// put subject
 				if (resource.getSubject() != null) {
@@ -117,14 +117,14 @@ public class JsonLd {
 	@SuppressWarnings("unchecked")
 	private Map<String, Object> createJointGraph() {
 		Map<String, Object> json = new TreeMap<String, Object>(new JsonComparator());
-		if (!this.resourceMap.isEmpty()) {
+		if (!resourceMap.isEmpty()) {
 			List<Object> subjects = new ArrayList<Object>();
 
-			for (String subject : this.resourceMap.keySet()) {
+			for (String subject : resourceMap.keySet()) {
 				// put subject
 				Map<String, Object> subjectObject = new TreeMap<String, Object>(new JsonComparator());
 
-				JsonLdResource resource = this.resourceMap.get(subject);
+				JsonLdResource resource = resourceMap.get(subject);
 
 				// put subject
 				if (resource.getSubject() != null) {
@@ -152,10 +152,10 @@ public class JsonLd {
 		}
 
 		// put the namespaces
-		if (!this.namespacePrefixMap.isEmpty()) {
+		if (!namespacePrefixMap.isEmpty()) {
 			Map<String, Object> nsObject = new TreeMap<String, Object>(new JsonComparator());
-			for (String ns : this.namespacePrefixMap.keySet()) {
-				nsObject.put(this.namespacePrefixMap.get(ns), ns);
+			for (String ns : namespacePrefixMap.keySet()) {
+				nsObject.put(namespacePrefixMap.get(ns), ns);
 			}
 			json.put("#", nsObject);
 		}
@@ -167,7 +167,7 @@ public class JsonLd {
 		if (!resource.getTypes().isEmpty()) {
 			List<String> types = new ArrayList<String>();
 			for (String type : resource.getTypes()) {
-				types.add(this.applyNamespace(type));
+				types.add(applyNamespace(type));
 			}
 			if (types.size() == 1) {
 				subjectObject.put("a", types.get(0));
@@ -190,17 +190,17 @@ public class JsonLd {
 		for (String property : resource.getPropertyMap().keySet()) {
 			Object value = resource.getPropertyMap().get(property);
 			if (value instanceof String) {
-				value = this.applyNamespace((String) value);
-				jsonObject.put(this.applyNamespace(property), value);
+				value = applyNamespace((String) value);
+				jsonObject.put(applyNamespace(property), value);
 			}
 			else if (value instanceof String[]) {
 				String[] stringArray = (String[]) value;
 				List<String> valueList = new ArrayList<String>();
-				for (int i=0; i<stringArray.length; i++) {
-					valueList.add(this.applyNamespace(stringArray[i]));
-				}
+                for (String uri : stringArray) {
+                    valueList.add(applyNamespace(uri));
+                }
 				List<Object> jsonArray = new ArrayList<Object>(valueList);
-				jsonObject.put(this.applyNamespace(property), jsonArray);
+				jsonObject.put(applyNamespace(property), jsonArray);
 			}
 			else if (value instanceof Object[]) {
 				Object[] objectArray = (Object[]) value;
@@ -208,18 +208,18 @@ public class JsonLd {
 				for (Object object : objectArray) {
 					jsonArray.add(object);
 				}
-				jsonObject.put(this.applyNamespace(property), jsonArray);
+				jsonObject.put(applyNamespace(property), jsonArray);
 			}
 			else {
-				jsonObject.put(this.applyNamespace(property), value);
+				jsonObject.put(applyNamespace(property), value);
 			}
 		}
 	}
 
 	private String applyNamespace(String uri) {
-		if (this.applyNamespaces) {
-			for (String namespace : this.namespacePrefixMap.keySet()) {
-				String prefix = this.namespacePrefixMap.get(namespace) + ":";
+		if (applyNamespaces) {
+			for (String namespace : namespacePrefixMap.keySet()) {
+				String prefix = namespacePrefixMap.get(namespace) + ":";
 				uri = uri.replaceAll(namespace, prefix);
 			}
 		}
@@ -228,18 +228,15 @@ public class JsonLd {
 
 	/**
 	 * Return the JSON-LD Resource for the given subject.
-	 * 
-	 * @param subject
-	 * @return
 	 */
 	public JsonLdResource getResource(String subject) {
-		return this.resourceMap.get(subject);
+		return resourceMap.get(subject);
 	}
 
 	/**
 	 * Get the known namespace to prefix mapping.
 	 * 
-	 * @return A {@link java.util.Map} from namespace String to prefix String.
+	 * @return A {@link Map} from namespace String to prefix String.
 	 */
 	public Map<String, String> getNamespacePrefixMap() {
 		return namespacePrefixMap;
@@ -249,7 +246,7 @@ public class JsonLd {
 	 * Sets the known namespaces for the serializer.
 	 * 
 	 * @param namespacePrefixMap
-	 *            A {@link java.util.Map} from namespace String to prefix
+	 *            A {@link Map} from namespace String to prefix
 	 *            String.
 	 */
 	public void setNamespacePrefixMap(Map<String, String> namespacePrefixMap) {
@@ -264,7 +261,7 @@ public class JsonLd {
 	 * @param prefix A prefix to use and identify this namespace in serialized JSON-LD.
 	 */
 	public void addNamespacePrefix(String namespace, String prefix) {
-		this.namespacePrefixMap.put(namespace, prefix);
+        namespacePrefixMap.put(namespace, prefix);
 	}
 
 	/**
@@ -288,8 +285,8 @@ public class JsonLd {
 	/**
 	 * Flag to control whether the namespace prefix map should be used
 	 * to shorten IRIs to prefix notation during serialization. Default
-	 * value is <code>true</code>.<br />
-	 * <br />
+	 * value is <code>true</code>.
+     * <p>
 	 * If you already put values into this JSON-LD instance with prefix
 	 * notation, you should set this to <code>false</code> before starting
 	 * the serialization.
@@ -302,8 +299,8 @@ public class JsonLd {
 
 	/**
 	 * Control whether namespaces from the namespace prefix map are
-	 * applied to URLs during serialization.<br />
-	 * <br />
+	 * applied to URLs during serialization.
+     * <p>
 	 * Set this to <code>false</code> if you already have shortened IRIs
 	 * with prefixes.
 	 * 

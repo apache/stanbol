@@ -13,12 +13,13 @@ public class SimpleRdfEntityFactory extends RdfEntityFactory {
 	
 	private final MGraph graph;
 	private final LiteralFactory literalFactory;
+
 	public SimpleRdfEntityFactory(MGraph graph) {
-		if(graph == null){
+		if (graph == null){
 			throw new IllegalArgumentException("The MGraph parsed as parameter MUST NOT be NULL!");
 		}
 		this.graph = graph;
-		this.literalFactory = LiteralFactory.getInstance();
+        literalFactory = LiteralFactory.getInstance();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -27,7 +28,10 @@ public class SimpleRdfEntityFactory extends RdfEntityFactory {
 		interfaces[0] = type;
 		System.arraycopy(additionalInterfaces, 0, interfaces, 1, additionalInterfaces.length);
 		//Class<?> proxy = Proxy.getProxyClass(WrapperFactory.class.getClassLoader(), interfaces);
-		Object instance = Proxy.newProxyInstance(SimpleRdfEntityFactory.class.getClassLoader(), interfaces, new RdfProxyInvocationHandler(this, rdfNode, interfaces, literalFactory));
+		Object instance = Proxy.newProxyInstance(
+                SimpleRdfEntityFactory.class.getClassLoader(),
+                interfaces,
+                new RdfProxyInvocationHandler(this, rdfNode, interfaces, literalFactory));
 		return (T)instance;
 	}
 

@@ -61,6 +61,8 @@ import eu.iksproject.fise.servicesapi.Store;
 import eu.iksproject.fise.servicesapi.helper.ContentItemHelper;
 import eu.iksproject.fise.servicesapi.rdf.Properties;
 
+import static javax.ws.rs.core.MediaType.*;
+
 /**
  * Resource to provide a CRU[D] REST API for content items and there related
  * enhancements.
@@ -79,7 +81,7 @@ import eu.iksproject.fise.servicesapi.rdf.Properties;
 @Path("/store")
 public class StoreRootResource extends NavigationMixin {
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    private static final Logger log = LoggerFactory.getLogger(StoreRootResource.class);
 
     public static final Set<String> RDF_MEDIA_TYPES = new TreeSet<String>(
             Arrays.asList(SupportedFormat.N3, SupportedFormat.N_TRIPLE,
@@ -231,7 +233,7 @@ public class StoreRootResource extends NavigationMixin {
     }
 
     @GET
-    @Produces(MediaType.TEXT_HTML + ";qs=2")
+    @Produces(TEXT_HTML + ";qs=2")
     public Viewable getView() {
         return new Viewable("index", this);
     }
@@ -257,7 +259,7 @@ public class StoreRootResource extends NavigationMixin {
 
         // handle smart redirection to browser view
         for (MediaType mt : headers.getAcceptableMediaTypes()) {
-            if (mt.toString().startsWith(MediaType.TEXT_HTML)) {
+            if (mt.toString().startsWith(TEXT_HTML)) {
                 return Response.temporaryRedirect(
                         UriBuilder.fromPath("/store/page/" + localId).build()).build();
             }
@@ -287,7 +289,7 @@ public class StoreRootResource extends NavigationMixin {
     }
 
     @Path("/page/{localId}")
-    @Produces(MediaType.TEXT_HTML)
+    @Produces(TEXT_HTML)
     public ContentItemResource getContentItemView(
             @PathParam(value = "localId") String localId) throws IOException {
         UriRef uri = makeContentItemUri(localId);
@@ -314,7 +316,7 @@ public class StoreRootResource extends NavigationMixin {
     }
 
     @POST
-    @Consumes(MediaType.WILDCARD + ";qs=0.5")
+    @Consumes(WILDCARD + ";qs=0.5")
     public Response createContentItem(byte[] data, @Context HttpHeaders headers)
             throws URISyntaxException, EngineException {
         String uri = makeContentItemUri(data).getUnicodeString();
@@ -322,8 +324,8 @@ public class StoreRootResource extends NavigationMixin {
     }
 
     @POST
-    @Consumes( { MediaType.APPLICATION_FORM_URLENCODED + ";qs=1.0",
-            MediaType.MULTIPART_FORM_DATA + ";qs=0.9" })
+    @Consumes( { APPLICATION_FORM_URLENCODED + ";qs=1.0",
+            MULTIPART_FORM_DATA + ";qs=0.9" })
     public Response createContentItemFromForm(
             @FormParam("content") String content, @FormParam("url") String url,
             @FormParam("file") File file,
@@ -335,7 +337,7 @@ public class StoreRootResource extends NavigationMixin {
         MediaType mt = null;
         if (content != null && !content.trim().isEmpty()) {
             data = content.getBytes();
-            mt = MediaType.TEXT_PLAIN_TYPE;
+            mt = TEXT_PLAIN_TYPE;
         } else if (url != null && !url.trim().isEmpty()) {
             try {
                 URLConnection uc = (new URL(url)).openConnection();
@@ -352,7 +354,7 @@ public class StoreRootResource extends NavigationMixin {
             if (lowerFilename.matches(".*\\.jpe?g")) {
                 mt = MediaType.valueOf("image/jpeg");
             } else {
-                mt = MediaType.APPLICATION_OCTET_STREAM_TYPE;
+                mt = APPLICATION_OCTET_STREAM_TYPE;
             }
         }
         if (data != null && mt != null) {
@@ -366,7 +368,7 @@ public class StoreRootResource extends NavigationMixin {
 
     @PUT
     @Path("/content/{localId}")
-    @Consumes(MediaType.WILDCARD)
+    @Consumes(WILDCARD)
     public Response createContentItemWithId(
             @PathParam(value = "localId") String localId, byte[] data,
             @Context HttpHeaders headers) throws URISyntaxException,

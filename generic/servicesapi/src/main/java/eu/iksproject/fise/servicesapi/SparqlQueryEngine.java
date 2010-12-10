@@ -10,7 +10,7 @@ import org.apache.clerezza.rdf.core.sparql.ResultSet;
  */
 public interface SparqlQueryEngine {
 	
-	public static class SparqlQueryEngineException extends Exception {
+	class SparqlQueryEngineException extends Exception {
 		private static final long serialVersionUID = 1L;
 		
 		public SparqlQueryEngineException(String reason, Throwable cause) {
@@ -23,4 +23,5 @@ public interface SparqlQueryEngine {
 	}
 	
 	ResultSet executeQuery(String sparqlQuery) throws SparqlQueryEngineException;
+
 }

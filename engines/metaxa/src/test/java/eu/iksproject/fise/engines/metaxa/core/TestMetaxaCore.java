@@ -46,9 +46,6 @@ public class TestMetaxaCore {
 
     /**
      * This initializes the Aperture extractor.
-     * 
-     * @throws IOException
-     *             if an error occurs
      */
     @BeforeClass
     public static void oneTimeSetUp()
@@ -56,7 +53,6 @@ public class TestMetaxaCore {
 
         extractor = new MetaxaCore("extractionregistry.xml");
     }
-
 
     /**
      * This tests the pdf extraction.
@@ -67,8 +63,7 @@ public class TestMetaxaCore {
      *             if there is an error when reading the document
      */
     @Test
-    public void testPdfExtraction()
-            throws ExtractorException, IOException {
+    public void testPdfExtraction() throws Exception {
 
         String testFile = "test.pdf";
         String testResultFile = "pdf-res.txt";
@@ -95,7 +90,6 @@ public class TestMetaxaCore {
         Assert.assertEquals(11, tripleCounter);
     }
 
-    
     /**
      * This tests the html extraction.
      * 
@@ -105,8 +99,7 @@ public class TestMetaxaCore {
      *             if there is an error when reading the document
      */
     @Test
-    public void testHtmlExtraction()
-            throws ExtractorException, IOException {
+    public void testHtmlExtraction() throws Exception {
 
         String testFile = "test.html";
         String testResultFile = "html-res.txt";
@@ -132,7 +125,6 @@ public class TestMetaxaCore {
         int tripleCounter = this.printTriples(m);
         Assert.assertEquals(28, tripleCounter);
     }
-
     
     /**
      * This tests the html extraction.
@@ -143,8 +135,7 @@ public class TestMetaxaCore {
      *             if there is an error when reading the document
      */
     @Test
-    public void testRdfaExtraction()
-            throws ExtractorException, IOException {
+    public void testRdfaExtraction() throws Exception {
 
         String testFile = "test-rdfa.html";
         String testResultFile = "rdfa-res.txt";
@@ -189,20 +180,11 @@ public class TestMetaxaCore {
         ClosableIterator<Statement> it = m.iterator();
         while (it.hasNext()) {
             Statement oneStmt = it.next();
-            NonLiteral fiseSubject = null;
-            UriRef fisePredicate = null;
-            Resource fiseObject = null;
-            
-            fiseSubject = 
-                (NonLiteral)MetaxaEngine.asFiseResource(
-                    oneStmt.getSubject(), blankNodeMap);
-            fisePredicate =
-                (UriRef)MetaxaEngine.asFiseResource(
-                    oneStmt.getPredicate(), blankNodeMap);
-            fiseObject =
-                MetaxaEngine.asFiseResource(
-                    oneStmt.getObject(), blankNodeMap);
-            
+
+            NonLiteral fiseSubject = (NonLiteral) MetaxaEngine.asFiseResource(oneStmt.getSubject(), blankNodeMap);
+            UriRef fisePredicate = (UriRef) MetaxaEngine.asFiseResource(oneStmt.getPredicate(), blankNodeMap);
+            Resource fiseObject = MetaxaEngine.asFiseResource(oneStmt.getObject(), blankNodeMap);
+
             if (null != fiseSubject 
                     && null != fisePredicate 
                     && null != fiseObject) {
@@ -219,8 +201,7 @@ public class TestMetaxaCore {
         
         return tripleCounter;
     }
-    
-    
+
     /**
      * Cleanup strings for comparison, by removing non-printable chars.
      * 

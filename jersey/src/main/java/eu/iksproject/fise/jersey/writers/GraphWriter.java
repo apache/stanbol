@@ -18,11 +18,14 @@ import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+
 @Provider
-@Produces( { MediaType.TEXT_PLAIN, SupportedFormat.N3,
+@Produces( { TEXT_PLAIN, SupportedFormat.N3,
         SupportedFormat.N_TRIPLE, SupportedFormat.RDF_XML,
         SupportedFormat.TURTLE, SupportedFormat.X_TURTLE,
-        SupportedFormat.RDF_JSON, MediaType.APPLICATION_JSON })
+        SupportedFormat.RDF_JSON, APPLICATION_JSON })
 public class GraphWriter implements MessageBodyWriter<TripleCollection> {
 
     @Context
@@ -48,8 +51,8 @@ public class GraphWriter implements MessageBodyWriter<TripleCollection> {
             OutputStream entityStream) throws IOException,
             WebApplicationException {
 
-        if (mediaType == null || mediaType.isWildcardType() || MediaType.TEXT_PLAIN.equals(mediaType.toString())) {
-           getSerializer().serialize(entityStream, t, MediaType.APPLICATION_JSON);
+        if (mediaType == null || mediaType.isWildcardType() || TEXT_PLAIN.equals(mediaType.toString())) {
+           getSerializer().serialize(entityStream, t, APPLICATION_JSON);
         } else {
             getSerializer().serialize(entityStream, t, mediaType.toString());
         }

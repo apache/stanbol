@@ -15,7 +15,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
@@ -23,7 +22,6 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.codehaus.jettison.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,16 +36,19 @@ import eu.iksproject.fise.servicesapi.EnhancementEngine;
 import eu.iksproject.fise.servicesapi.EnhancementJobManager;
 import eu.iksproject.fise.servicesapi.helper.InMemoryContentItem;
 
+import static javax.ws.rs.core.MediaType.*;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JSON;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
+
 /**
  * RESTful interface to browse the list of available engines and allow to call
  * them in a stateless, synchronous way.
- *
+ * <p>
  * If you need the content of the extractions to be stored on the server, use
  * the StoreRootResource API instead.
- *
  */
 @Path("/engines")
-@ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
+@ImplicitProduces(TEXT_HTML + ";qs=2")
 public class EnginesRootResource extends NavigationMixin {
 
     @SuppressWarnings("unused")
@@ -81,7 +82,7 @@ public class EnginesRootResource extends NavigationMixin {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(APPLICATION_JSON)
     public JSONArray getEnginesAsJsonArray() {
         JSONArray uriArray = new JSONArray();
         if (jobManager != null) {
@@ -114,17 +115,17 @@ public class EnginesRootResource extends NavigationMixin {
      *
      * Note: the format parameter is not part of the official API
      *
-     * @throws EngineException
+     * @throws EngineException if the content is somehow corrupted
      * @throws IOException
      */
     @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(APPLICATION_FORM_URLENCODED)
     public Response enhanceFromForm(@FormParam("content") String content,
             @FormParam("format") String format,
             @FormParam("ajax") boolean buildAjaxview,
             @Context HttpHeaders headers) throws EngineException, IOException {
         ContentItem ci = new InMemoryContentItem(content.getBytes(),
-                MediaType.TEXT_PLAIN);
+                TEXT_PLAIN);
         return enhanceAndBuildResponse(format, headers, ci, buildAjaxview);
     }
 
@@ -138,11 +139,11 @@ public class EnginesRootResource extends NavigationMixin {
      * @throws IOException
      */
     @POST
-    @Consumes(MediaType.WILDCARD)
+    @Consumes(WILDCARD)
     public Response enhanceFromData(byte[] data,
             @QueryParam(value = "uri") String uri, @Context HttpHeaders headers)
             throws EngineException, IOException {
-        String format = MediaType.TEXT_PLAIN;
+        String format = TEXT_PLAIN;
         if (headers.getMediaType() != null) {
             format = headers.getMediaType().toString();
         }
@@ -168,20 +169,20 @@ public class EnginesRootResource extends NavigationMixin {
             contentItemResource.setRdfSerializationFormat(format);
             Viewable ajaxView = new Viewable("/ajax/contentitem",
                     contentItemResource);
-            return Response.ok(ajaxView).type(MediaType.TEXT_HTML).build();
+            return Response.ok(ajaxView).type(TEXT_HTML).build();
         }
         if (format != null) {
             // force mimetype from form params
             return Response.ok(graph, format).build();
         }
         if (headers.getAcceptableMediaTypes().contains(
-                MediaType.APPLICATION_JSON_TYPE)) {
+                APPLICATION_JSON_TYPE)) {
             // force RDF JSON media type (TODO: move this logic
-            return Response.ok(graph, SupportedFormat.RDF_JSON).build();
-        } else if (headers.getAcceptableMediaTypes().size() == 0) {
+            return Response.ok(graph, RDF_JSON).build();
+        } else if (headers.getAcceptableMediaTypes().isEmpty()) {
             // use RDF/XML as default format to keep compat with OpenCalais
             // clients
-            return Response.ok(graph, SupportedFormat.RDF_XML).build();
+            return Response.ok(graph, RDF_XML).build();
         }
 
         // traditional response lookup

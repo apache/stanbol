@@ -24,8 +24,9 @@ import eu.iksproject.fise.servicesapi.rdf.TechnicalClasses;
 
 public class EnhancementEngineHelper {
 
-    private static final Logger log = LoggerFactory.getLogger(EnhancementEngineHelper.class);
     protected static Random rng = new Random();
+
+    private static final Logger log = LoggerFactory.getLogger(EnhancementEngineHelper.class);
 
     public static void setSeed(long seed) {
         rng.setSeed(seed);
@@ -203,7 +204,8 @@ public class EnhancementEngineHelper {
      * @param literalFactory the literalFactory
      * @return the value
      */
-    public static <T> T get(TripleCollection graph, NonLiteral resource, UriRef property, Class<T> type, LiteralFactory literalFactory){
+    public static <T> T get(TripleCollection graph, NonLiteral resource, UriRef property, Class<T> type,
+            LiteralFactory literalFactory){
     	Iterator<Triple> results = graph.filter(resource, property, null);
     	if(results.hasNext()){
 			Triple result = results.next();
@@ -229,7 +231,8 @@ public class EnhancementEngineHelper {
      * @param literalFactory the literalFactory
      * @return the value
      */
-    public static <T> Iterator<T> getValues(TripleCollection graph, NonLiteral resource, UriRef property, final Class<T> type,final  LiteralFactory literalFactory){
+    public static <T> Iterator<T> getValues(TripleCollection graph, NonLiteral resource,
+            UriRef property, final Class<T> type, final  LiteralFactory literalFactory){
     	final Iterator<Triple> results = graph.filter(resource, property, null);
     	return new Iterator<T>() {
     		//TODO: dose not check if the object of the triple is of type UriRef
@@ -309,7 +312,8 @@ public class EnhancementEngineHelper {
     	}
     }
     /**
-     * Getter for the values of the data type property for a resource
+     * Getter for the values of the data type property for a resource.
+     *
      * @param graph the graph used to query for the property value
      * @param resource the resource
      * @param property the property
@@ -327,4 +331,5 @@ public class EnhancementEngineHelper {
 			public void remove() { results.remove(); }
 		};
     }
+
 }

@@ -9,9 +9,7 @@ import javax.servlet.ServletException;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.*;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;
@@ -29,11 +27,10 @@ import eu.iksproject.fise.servicesapi.Store;
 
 /**
  * Jersey-based RESTful endpoint for the FISE engines and store.
- *
+ * <p>
  * This OSGi component serves as a bridge between the OSGi context and the
  * Servlet context available to JAX-RS resources.
  */
-
 @Component(immediate = true, metatype = true)
 public class JerseyEndpoint {
 
@@ -89,6 +86,7 @@ public class JerseyEndpoint {
         return initParams;
     }
 
+    @Activate
     protected void activate(ComponentContext ctx) throws IOException,
             ServletException, NamespaceException {
 
@@ -138,6 +136,7 @@ public class JerseyEndpoint {
         log.info("Jersey servlet registered at {}", alias);
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext ctx) {
         log.info("Deactivating jersey bundle");
         String alias = (String) ctx.getProperties().get(ALIAS_PROPERTY);

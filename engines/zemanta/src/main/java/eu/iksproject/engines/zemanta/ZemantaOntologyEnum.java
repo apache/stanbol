@@ -10,6 +10,8 @@ import org.apache.clerezza.rdf.core.UriRef;
  * @author Rupert Westenthaler
  */
 public enum ZemantaOntologyEnum {
+
+    // TODO: use capitals for constant names
     Recognition,
     anchor,
     confidence,
@@ -59,14 +61,14 @@ public enum ZemantaOntologyEnum {
 
     /**
      * Creates a new entry of this Enum by using the default Zemanta namespace
-     * and the name() of this element as lecal name
+     * and the name() of this element as lecal name.
      */
     private ZemantaOntologyEnum() {
         this(null, null);
     }
 
     /**
-     * The unicode name of the URI
+     * The unicode name of the URI.
      *
      * @return the unicode name of the URI
      */
@@ -76,7 +78,7 @@ public enum ZemantaOntologyEnum {
     }
 
     /**
-     * The URI of the element of this Enum
+     * The URI of the element of this Enum.
      *
      * @return the URI of the element as Clerezza UriRef
      */

@@ -2,10 +2,10 @@ package eu.iksproject.fise.interaction.event;
 
 public class ClerezzaServerInfoChangedEvent extends Event {
 
-	private String serverHost;
-	private int serverPort;
-	private String username;
-	private String password;
+	private final String serverHost;
+	private final int serverPort;
+	private final String username;
+	private final String password;
 
 	public ClerezzaServerInfoChangedEvent (String serverHost, int serverPort, String username, String password) {
 		this.serverHost = serverHost;
@@ -13,7 +13,6 @@ public class ClerezzaServerInfoChangedEvent extends Event {
 		this.username = username;
 		this.password = password;
 	}
-
 
 	public String getServerHost() {
 		return serverHost;

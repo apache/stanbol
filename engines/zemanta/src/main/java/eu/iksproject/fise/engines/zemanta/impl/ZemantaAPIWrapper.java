@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
  * 
  * @author michaelmarth
  * @author westei (Rupert Westenthaler)
- *
  */
 public class ZemantaAPIWrapper {
 
@@ -33,6 +32,7 @@ public class ZemantaAPIWrapper {
 	private static String apiKey;
 
 	private static final String URL = "http://api.zemanta.com/services/rest/0.0/";
+
 	public ZemantaAPIWrapper(String key) {
 		apiKey = key;
 	}
@@ -84,21 +84,21 @@ public class ZemantaAPIWrapper {
 		}
 
 		return null;
-
 	}
+
 	private StringBuilder getRequestData(Map<ZemantaPropertyEnum,String> requestProperties){
 		StringBuilder data = new StringBuilder();
 		boolean first = true;
-		for(ZemantaPropertyEnum property : ZemantaPropertyEnum.values()){
+		for (ZemantaPropertyEnum property : ZemantaPropertyEnum.values()){
 			String value = requestProperties.get(property);
-			if(value == null && property.hasDefault()){
+			if (value == null && property.hasDefault()) {
 				value = property.defaultValue();
 			}
 			//NOTE: value == null may still be OK
-			if(property.allowedValue(value)){
+			if (property.allowedValue(value)) {
 				//NOTE: also this may still say that NULL is OK
-				if(value != null){
-					if(!first){
+				if (value != null) {
+					if (!first) {
 						data.append('&');
 					} else {
 						first = false;
@@ -122,4 +122,5 @@ public class ZemantaAPIWrapper {
 		log.debug("graph: " + g.toString());
 		return g;
 	}
+
 }

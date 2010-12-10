@@ -45,7 +45,7 @@ public class Autotagger {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    public String typeFieldName = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+    public final String typeFieldName = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 
     private final String lookupFieldName = "http://www.w3.org/2000/01/rdf-schema#label";
 

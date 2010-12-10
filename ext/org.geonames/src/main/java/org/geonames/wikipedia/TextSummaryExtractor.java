@@ -270,26 +270,23 @@ public class TextSummaryExtractor {
 	}
 
 	/**
-	 * removes sequences of whitespace and keeps only one whitespace character
-	 * 
-	 * @param pString
-	 * @return
+	 * Removes sequences of whitespace and keeps only one whitespace character.
 	 */
 	public static String removeWhiteSpace(String pString) {
-		StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
 		char[] chars = pString.toCharArray();
 		int counter = 0;
-		for (int i = 0; i < chars.length; i++) {
-			if (chars[i] == ' ') {
-				if (counter == 0) {
-					buf.append(chars[i]);
-				}
-				counter++;
-			} else {
-				buf.append(chars[i]);
-				counter = 0;
-			}
-		}
+        for (char c : chars) {
+            if (c == ' ') {
+                if (counter == 0) {
+                    buf.append(' ');
+                }
+                counter++;
+            } else {
+                buf.append(c);
+                counter = 0;
+            }
+        }
 		return buf.toString();
 	}
 

@@ -36,21 +36,22 @@ import org.apache.clerezza.rdf.core.MGraph;
 
 import eu.iksproject.fise.servicesapi.helper.ContentItemHelper;
 
-/** Store and retrieve ContentItem instances.
+/**
+ * Store and retrieve ContentItem instances.
  *
- *  Incomplete CRUD for now, we don't need it for our
- *  initial use cases.
+ * Incomplete CRUD for now, we don't need it for our
+ * initial use cases.
  */
 public interface Store {
 
 	/**
 	 * Creates a {@link ContentItem} item based on supplied data,
 	 * using an implementation that suits this store.
-	 *
-	 * The call to this method creates an empty data transfer object in
+	 * <p>
+	 * Calling this method creates an empty data transfer object in
 	 * memory suitable for later saving using the {@link Store#put(ContentItem)} method.
 	 * The Store state is unchanged by the call to the
-	 * {@link #create(String, byte[], String)} methode.
+	 * {@link #create(String, byte[], String)} method.
 	 *
 	 * @param id The value to use {@link ContentItem#getId}. If <code>null</code>
 	 * is parsed as id, an id need to be computed based on the parsed content (

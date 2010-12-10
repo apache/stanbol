@@ -2,8 +2,8 @@ package eu.iksproject.fise.interaction.event;
 
 public class UploadFileEvent extends Event {
 	
-	private String filename;
-	private String uri;
+	private final String filename;
+	private final String uri;
 	
 	public UploadFileEvent (String filename, String uri) {
 		this.filename = filename;

@@ -44,10 +44,11 @@ import eu.iksproject.fise.servicesapi.rdf.TechnicalClasses;
  * This enhancement engine uses the the Zemanta API for enhancing content.
  * See http://developer.zemanta.com
  * To run this engine you need a Zemanta API key configured (see README)
- * <p/>
+ * <p>
  * For detailed information on the mappings of Zemanta annotations to FISE
  * enhancements see <a>http://wiki.iks-project.eu/index.php/ZemantaEnhancementEngine</a>
- * <p>This implementation currently only provides FISE enhancements for
+ * <p>
+ * This implementation currently only provides FISE enhancements for
  * Zemanta Recognitions.
  *
  * @author michaelmarth
@@ -265,6 +266,7 @@ public class ZemantaEnhancementEngine implements EnhancementEngine {
      *
      * @param tc       the graph used to query for confidence value
      * @param resource the resource holding the confidence property
+     *
      * @return the confidence of <code>null</code> if no confidence property is
      *         present for the parsed resource of the value can not be converted to a
      *         double value.
@@ -299,6 +301,7 @@ public class ZemantaEnhancementEngine implements EnhancementEngine {
      * @param ciId         the ID of the content item
      * @param anchor       the anchor text
      * @param confidence   the confidence to be used for newly created text annotations
+     *
      * @return a collection of all existing/created text annotations for the parsed anchor
      */
     private Collection<NonLiteral> processTextAnnotation(MGraph enhancements, String text, UriRef ciId, String anchor, Double confidence) {
@@ -340,6 +343,7 @@ public class ZemantaEnhancementEngine implements EnhancementEngine {
      *
      * @param enhancements  the graph containing the enhancements to be searched
      * @param anchorLiteral the Literal representing the selected text
+     *
      * @return Map that uses the start position as an key and a list of
      *         text annotations as an value.
      */

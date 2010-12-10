@@ -33,7 +33,6 @@ import org.w3c.dom.Document;
  * @author <a href="mailto:kasper@dfki.de">Walter Kasper</a>
  * 
  */
-
 public class XsltExtractor implements HtmlExtractionComponent {
 
     /**
@@ -67,83 +66,45 @@ public class XsltExtractor implements HtmlExtractionComponent {
         initialize(factory);
     }
 
-    /**
-     * @return the uriParameter
-     */
     public String getUriParameter() {
         return uriParameter;
     }
 
-    /**
-     * @param uriParameter
-     *            the uriParameter to set
-     */
     public void setUriParameter(String uriParameter) {
         this.uriParameter = uriParameter;
     }
 
-    /**
-     * @return the syntax
-     */
     public Syntax getSyntax() {
         return syntax;
     }
 
-    /**
-     * @param syntax
-     *            the syntax to set
-     */
     public void setSyntax(Syntax syntax) {
         this.syntax = syntax;
     }
 
-    /**
-     * @return the transformer
-     */
     public Transformer getTransformer() {
         return transformer;
     }
 
-    /**
-     * @param transformer
-     *            the transformer to set
-     */
     public void setTransformer(Transformer transformer) {
         this.transformer = transformer;
     }
 
-    /**
-     * @return the id
-     */
     public String getId() {
         return id;
     }
 
-    /**
-     * @param id
-     *            the id to set
-     */
     public void setId(String id) {
         this.id = id;
     }
 
-
-    /**
-     * @return the source
-     */
     public URI getSource() {
         return source;
     }
 
-
-    /**
-     * @param source
-     *            the source to set
-     */
     public void setSource(URI source) {
         this.source = source;
     }
-
 
     public synchronized void extract(String id, Document doc, Map<String, Object> params,
             RDFContainer result)
@@ -172,9 +133,7 @@ public class XsltExtractor implements HtmlExtractionComponent {
         } catch (IOException e) {
             throw new ExtractorException(e.getMessage(), e);
         }
-
     }
-
 
     public void initialize(TransformerFactory factory)
             throws InitializationException {
@@ -189,19 +148,18 @@ public class XsltExtractor implements HtmlExtractionComponent {
         StreamSource xsltSource = new StreamSource(source.toString());
         xsltSource.setSystemId(source.toString());
         try {
-            this.transformer = factory.newTransformer(xsltSource);
+            transformer = factory.newTransformer(xsltSource);
         } catch (TransformerConfigurationException e) {
             throw new InitializationException(e.getMessage(), e);
         }
     }
 
-
     public void initTransformerParameters(Map<String, Object> params) {
-        this.transformer.clearParameters();
+        transformer.clearParameters();
         if (params != null) {
             Set<String> parms = params.keySet();
             for (String piter : parms) {
-                this.transformer.setParameter(piter, params.get(piter));
+                transformer.setParameter(piter, params.get(piter));
             }
         }
     }

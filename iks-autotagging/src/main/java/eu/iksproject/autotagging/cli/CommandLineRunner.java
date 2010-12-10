@@ -233,7 +233,7 @@ public class CommandLineRunner {
         } else if (command.equals("suggest")) {
             handleSuggest(commandArgs);
         } else {
-            System.err.append("unknow command: " + args[0]);
+            System.err.append("Unknown command: " + args[0]);
             System.exit(5);
         }
     }

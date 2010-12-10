@@ -43,9 +43,9 @@ public class FiseHandler {
 
 	@Reference
 	Store store;
+
 	@Reference
 	TcManager tcManager;
-
 
 	@GET
 	public MGraph getFiseMetadata(@QueryParam("uri") UriRef uri) {
@@ -57,16 +57,16 @@ public class FiseHandler {
 		SelectQuery query = (SelectQuery)QueryParser.getInstance().parse(sqarqlQuery);
 		Set<UriRef> graphUris = tcManager.listTripleCollections();
 		ArrayList<TripleCollection> tripleCollections = new ArrayList<TripleCollection>();
-		for (Iterator<UriRef> it = graphUris.iterator(); it.hasNext();) {
-			UriRef uriRef = it.next();
-			try {
-				 tripleCollections.add(tcManager.getTriples(uriRef));
-			} catch (NoSuchEntityException ex) {
-				continue;
-			}			
-		}
+        for (UriRef uriRef : graphUris) {
+            try {
+                tripleCollections.add(tcManager.getTriples(uriRef));
+            } catch (NoSuchEntityException ex) {
+                continue;
+            }
+        }
 		MGraph unionGraph = new UnionMGraph(tripleCollections.toArray(new TripleCollection[0]));
 		ResultSet resultSet = tcManager.executeSparqlQuery(query, unionGraph);
 		return resultSet;
-	}	
+	}
+
 }

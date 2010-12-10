@@ -8,9 +8,9 @@ public class ResourceInfo {
 
     public final Double score;
 
-
     public ResourceInfo(Resource resource, Double score) {
         this.resource = resource;
         this.score = score;
     }
+
 }

@@ -18,9 +18,9 @@ import org.apache.clerezza.rdf.utils.GraphNode;
  */
 public class ClerezzaContentItem implements ContentItem {
 
-    private GraphNode idNode;
-    private DiscobitsHandler handler;
-    private MGraph metadataGraph;
+    private final GraphNode idNode;
+    private final DiscobitsHandler handler;
+    private final MGraph metadataGraph;
 
     public ClerezzaContentItem(GraphNode idNode, MGraph metadataGraph, DiscobitsHandler handler) {
         this.idNode = idNode;
@@ -37,7 +37,7 @@ public class ClerezzaContentItem implements ContentItem {
     }
 
     public String getMimeType() {
-        return (handler.getMediaType((UriRef) idNode.getNode())).toString();
+        return handler.getMediaType((UriRef) idNode.getNode()).toString();
     }
 
     public MGraph getMetadata() {

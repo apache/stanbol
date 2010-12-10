@@ -11,7 +11,8 @@ import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import eu.iksproject.autotagging.TagInfo;
 import eu.iksproject.fise.servicesapi.EnhancementEngine;
 import eu.iksproject.fise.servicesapi.helper.EnhancementEngineHelper;
-import eu.iksproject.fise.servicesapi.rdf.Properties;
+
+import static eu.iksproject.fise.servicesapi.rdf.Properties.*;
 
 public class EnhancementRDFUtils {
 
@@ -25,27 +26,28 @@ public class EnhancementRDFUtils {
 	 * @param relatedEnhancements enhancements this textAnnotation is related to
 	 * @param tag the related entity
 	 */
-	public static UriRef writeEntityAnnotation(EnhancementEngine engine, LiteralFactory literalFactory, MGraph graph, UriRef contentItemId, Collection<NonLiteral> relatedEnhancements, TagInfo tag) {
+	public static UriRef writeEntityAnnotation(EnhancementEngine engine, LiteralFactory literalFactory,
+            MGraph graph, UriRef contentItemId, Collection<NonLiteral> relatedEnhancements, TagInfo tag) {
 		UriRef entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(
 		        graph, engine, contentItemId);
 		// first relate this entity annotation to the text annotation(s)
-		for(NonLiteral enhancement: relatedEnhancements){
+		for (NonLiteral enhancement: relatedEnhancements){
 			graph.add(new TripleImpl(entityAnnotation,
-			            Properties.DC_RELATION, enhancement));
+			            DC_RELATION, enhancement));
 		}
 		UriRef entityUri = new UriRef(tag.getId());
 		// add the link to the referred entity
 		graph.add(new TripleImpl(entityAnnotation,
-		        Properties.FISE_ENTITY_REFERENCE, entityUri));
+		        FISE_ENTITY_REFERENCE, entityUri));
 		graph.add(new TripleImpl(entityAnnotation,
-		        Properties.FISE_ENTITY_LABEL,
+		        FISE_ENTITY_LABEL,
 		        literalFactory.createTypedLiteral(tag.getLabel())));
 		graph.add(new TripleImpl(entityAnnotation,
-		        Properties.FISE_CONFIDENCE,
+		        FISE_CONFIDENCE,
 		        literalFactory.createTypedLiteral(tag.getConfidence())));
 		for (String entityType : tag.getType()) {
 		    graph.add(new TripleImpl(entityAnnotation,
-		            Properties.FISE_ENTITY_TYPE, new UriRef(entityType)));
+		            FISE_ENTITY_TYPE, new UriRef(entityType)));
 		}
 		return entityAnnotation;
 	}

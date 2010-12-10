@@ -9,7 +9,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
@@ -23,6 +22,10 @@ import com.sun.jersey.api.view.Viewable;
 
 import eu.iksproject.fise.servicesapi.Store;
 import eu.iksproject.fise.servicesapi.SparqlQueryEngine.SparqlQueryEngineException;
+
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static javax.ws.rs.core.MediaType.APPLICATION_XML;
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
 
 /**
  * Implementation of a SPARQL endpoint as defined by the W3C:
@@ -48,10 +51,10 @@ public class SparqlQueryResource extends NavigationMixin {
     }
 
     @GET
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces( { MediaType.TEXT_HTML + ";qs=2",
+    @Consumes(APPLICATION_FORM_URLENCODED)
+    @Produces( { TEXT_HTML + ";qs=2",
             "application/sparql-results+xml", "application/rdf+xml",
-            MediaType.APPLICATION_XML })
+            APPLICATION_XML })
     public Object sparql(@QueryParam(value = "query") String sparqlQuery,
             @Deprecated @QueryParam(value = "q") String q)
             throws SparqlQueryEngineException, ParseException {
@@ -61,7 +64,7 @@ public class SparqlQueryResource extends NavigationMixin {
             sparqlQuery = q;
         }
         if (sparqlQuery == null) {
-            return Response.ok(new Viewable("index", this), MediaType.TEXT_HTML).build();
+            return Response.ok(new Viewable("index", this), TEXT_HTML).build();
         }
         Query query = QueryParser.getInstance().parse(sparqlQuery);
         String mediaType = "application/sparql-results+xml";
@@ -74,9 +77,9 @@ public class SparqlQueryResource extends NavigationMixin {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(APPLICATION_FORM_URLENCODED)
     @Produces( { "application/sparql-results+xml", "application/rdf+xml",
-            MediaType.APPLICATION_XML })
+            APPLICATION_XML })
     public Object postSparql(@FormParam("query") String sparqlQuery)
             throws SparqlQueryEngineException, ParseException {
         return sparql(sparqlQuery, null);

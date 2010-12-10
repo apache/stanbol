@@ -52,10 +52,11 @@ public class JsonSerializer {
 		for (String key : jsonMap.keySet()) {
 			appendIndentation(sb, indent, level);
 			appendQuoted(key, sb);
-			if (indent == 0)
-				sb.append(':');
-			else
-				sb.append(": ");
+			if (indent == 0) {
+                sb.append(':');
+            } else {
+                sb.append(": ");
+            }
 			appendValueOf(jsonMap.get(key), sb, indent, level);
 		}
 		removeOddChars(sb, indent);
