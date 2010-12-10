@@ -14,10 +14,8 @@ public class InitializationException extends Exception {
      * null as its detail message. The cause is not initialized.
      */
     public InitializationException() {
-
         super();
     }
-
 
     /**
      * This creates a new instance of <code>InitializationException</code> with
@@ -27,10 +25,8 @@ public class InitializationException extends Exception {
      *            a <code>String</code> with the detail message
      */
     public InitializationException(String message) {
-
         super(message);
     }
-
 
     /**
      * This creates a new instance of <code>InitializationException</code> with
@@ -49,7 +45,6 @@ public class InitializationException extends Exception {
         super(cause);
     }
 
-
     /**
      * This creates a new instance of <code>InitializationException</code> with
      * the given detail message and the given cause.
@@ -66,4 +61,5 @@ public class InitializationException extends Exception {
 
         super(message, cause);
     }
+
 }

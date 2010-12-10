@@ -26,12 +26,14 @@ import eu.iksproject.fise.servicesapi.EnhancementEngine;
 import eu.iksproject.fise.servicesapi.InvalidContentException;
 import eu.iksproject.fise.servicesapi.ServiceProperties;
 import eu.iksproject.fise.servicesapi.helper.EnhancementEngineHelper;
-import eu.iksproject.fise.servicesapi.rdf.Properties;
+
+import static eu.iksproject.fise.servicesapi.rdf.Properties.DC_LANGUAGE;
+import static eu.iksproject.fise.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
 
 /**
  * {@link LangIdEnhancementEngine} provides functionality to enhance document
  * with their language.
- * 
+ *
  * @author Joerg Steffen, DFKI
  * @version $Id$
  */
@@ -39,11 +41,11 @@ import eu.iksproject.fise.servicesapi.rdf.Properties;
 @Service
 public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProperties {
 
-  /**
-   * The default value for the Execution of this Engine. Currently set to
-   * {@link ServiceProperties#ORDERING_PRE_PROCESSING}
-   */
-  public static final Integer defaultOrder = ServiceProperties.ORDERING_PRE_PROCESSING - 2;
+    /**
+     * The default value for the Execution of this Engine. Currently set to
+     * {@link ServiceProperties#ORDERING_PRE_PROCESSING}
+     */
+    public static final Integer defaultOrder = ORDERING_PRE_PROCESSING - 2;
 
     /**
      * This contains the only supported MIME type of this enhancement engine.
@@ -53,8 +55,7 @@ public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProper
     /**
      * This contains the logger.
      */
-    private static Logger log =
-        LoggerFactory.getLogger(LangIdEnhancementEngine.class);
+    private static final Logger log = LoggerFactory.getLogger(LangIdEnhancementEngine.class);
 
     /**
      * This contains the language identifier.
@@ -62,7 +63,7 @@ public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProper
     private TextCategorizer languageIdentifier;
 
     private static final int PROBE_LENGTH_DEFAULT = 400;
-    
+
     @Property
     public static final String PROBE_LENGTH_PROP = "eu.iksproject.fise.engines.langid.probe-length";
 
@@ -70,123 +71,88 @@ public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProper
      * How much text should be used for testing: If the value is 0 or smaller, the complete text will be used. Otherwise a text probe of the given length is taken from the middle of the text. The default length is 400 characters.
      */
     private int probeLength = PROBE_LENGTH_DEFAULT;
-    
+
     /**
      * The activate method.
-     * 
-     * @param ce
-     *            the {@link ComponentContext}
+     *
+     * @param ce the {@link ComponentContext}
      */
     protected void activate(@SuppressWarnings("unused") ComponentContext ce) {
-      if (ce != null) {
-        Dictionary<String,String> properties = ce.getProperties();
-        String lengthVal = properties.get(PROBE_LENGTH_PROP);
-        setProbeLength(lengthVal==null?PROBE_LENGTH_DEFAULT:Integer.parseInt(lengthVal));
-      }
-      this.languageIdentifier = new TextCategorizer();
+        if (ce != null) {
+            Dictionary<String, String> properties = ce.getProperties();
+            String lengthVal = properties.get(PROBE_LENGTH_PROP);
+            probeLength = lengthVal == null ? PROBE_LENGTH_DEFAULT : Integer.parseInt(lengthVal);
+        }
+        languageIdentifier = new TextCategorizer();
     }
-
 
     /**
      * The deactivate method.
-     * 
-     * @param ce
-     *            the {@link ComponentContext}
+     *
+     * @param ce the {@link ComponentContext}
      */
     protected void deactivate(@SuppressWarnings("unused") ComponentContext ce) {
-
-        this.languageIdentifier = null;
+        languageIdentifier = null;
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
-    public int canEnhance(ContentItem ci)
-            throws EngineException {
-       	String mimeType = ci.getMimeType().split(";",2)[0];
+    public int canEnhance(ContentItem ci) throws EngineException {
+        String mimeType = ci.getMimeType().split(";", 2)[0];
         if (TEXT_PLAIN_MIMETYPE.equalsIgnoreCase(mimeType)) {
             return ENHANCE_SYNCHRONOUS;
         }
-        else {
-          // TODO: check whether there is the graph contains the text
-          UriRef subj = new UriRef(ci.getId());
-          Iterator<Triple> it = ci.getMetadata().filter(subj, Properties.NIE_PLAINTEXTCONTENT, null);
-          if (it.hasNext()) {
+
+        // TODO: check whether there is the graph contains the text
+        UriRef subj = new UriRef(ci.getId());
+        Iterator<Triple> it = ci.getMetadata().filter(subj, NIE_PLAINTEXTCONTENT, null);
+        if (it.hasNext()) {
             return ENHANCE_SYNCHRONOUS;
-          }
         }
         return CANNOT_ENHANCE;
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
-    public void computeEnhancements(ContentItem ci)
-            throws EngineException {
-
+    public void computeEnhancements(ContentItem ci) throws EngineException {
         String text = "";
         if (TEXT_PLAIN_MIMETYPE.equals(ci.getMimeType())) {
-          try {
-            text = IOUtils.toString(ci.getStream());
-          } catch (IOException e) {
-            throw new InvalidContentException(this, ci, e);
-          }
-        }
-        else {
-          for (Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getId()), Properties.NIE_PLAINTEXTCONTENT, null); it.hasNext();) {
-            text += it.next().getObject();
-          }
+            try {
+                text = IOUtils.toString(ci.getStream());
+            } catch (IOException e) {
+                throw new InvalidContentException(this, ci, e);
+            }
+        } else {
+            Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getId()), NIE_PLAINTEXTCONTENT, null);
+            while (it.hasNext()) {
+                text += it.next().getObject();
+            }
         }
         if (text.trim().length() == 0) {
             log.warn("no text found");
             return;
         }
 
-        // truncate text to some piece from the middle if probeLenght > 0
-        int checkLength = getProbeLength();
+        // truncate text to some piece from the middle if probeLength > 0
+        int checkLength = probeLength;
         if (checkLength > 0 && text.length() > checkLength) {
-            text =
-                text.substring(text.length() / 2 - checkLength / 2, text
-                .length()
-                / 2
-                + checkLength / 2);
+            text = text.substring(text.length() / 2 - checkLength / 2, text.length() / 2 + checkLength / 2);
         }
-        String language = this.languageIdentifier.categorize(text);
+        String language = languageIdentifier.categorize(text);
         log.info("language identified as " + language);
-         
+
         // add language to metadata
         MGraph g = ci.getMetadata();
-        UriRef textEnhancement =
-            EnhancementEngineHelper.createTextEnhancement(ci, this);
-        g.add(
-            new TripleImpl(
-            textEnhancement, Properties.DC_LANGUAGE, new PlainLiteralImpl(
-            language)));
-
+        UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
+        g.add(new TripleImpl(textEnhancement, DC_LANGUAGE, new PlainLiteralImpl(language)));
     }
 
-    /**
-     * @return the probeLength
-     */
     public int getProbeLength() {
-      return probeLength;
+        return probeLength;
     }
 
-    /**
-     * @param probeLength the probeLength to set
-     */
     public void setProbeLength(int probeLength) {
-      this.probeLength = probeLength;
+        this.probeLength = probeLength;
     }
-
 
     public Map<String, Object> getServiceProperties() {
-      return Collections.unmodifiableMap(Collections.singletonMap(
-          ServiceProperties.ENHANCEMENT_ENGINE_ORDERING,
-          (Object) defaultOrder));
+        return Collections.unmodifiableMap(Collections.singletonMap(ENHANCEMENT_ENGINE_ORDERING, (Object) defaultOrder));
     }
-    
-    
+
 }

@@ -175,6 +175,7 @@ public class Autotagger {
      *
      * @param text the textual content used for similarity search
      * @param fieldFilters
+     *
      * @return entities info that best match the text
      * @throws CorruptIndexException
      * @throws IOException
@@ -275,8 +276,7 @@ public class Autotagger {
      * textually similar to the text (if long). Further restrict the results to
      * match the type given either as full URI or DBpedia class name.
      *
-     * @param name
-     * @param context
+     * @param text
      * @param type
      * @return ranked entities info that best match
      * @throws CorruptIndexException

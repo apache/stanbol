@@ -9,6 +9,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.knallgrau.utils.textcat.TextCategorizer;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 /**
  * {@link TextCatTest} is a test class for {@link TextCategorizer}.
  * 
@@ -22,16 +25,13 @@ public class TextCatTest {
      */
     private static TextCategorizer tc;
 
-
     /**
      * This initializes the text categorizer.
      */
     @BeforeClass
     public static void oneTimeSetUp() {
-
         tc = new TextCategorizer();
     }
-    
 
     /**
      * This test the language identification.
@@ -41,14 +41,14 @@ public class TextCatTest {
      */
     @Test
     public void testTextCat() throws IOException {
-
         String testFileName = "en.txt";
         
         InputStream in =
             this.getClass().getClassLoader().getResourceAsStream(
                 testFileName);
-        Assert.assertNotNull("failed to load resource " + testFileName, in);
+        assertNotNull("failed to load resource " + testFileName, in);
         String text = IOUtils.toString(in);
-        Assert.assertEquals("en", tc.categorize(text));
+        assertEquals("en", tc.categorize(text));
     }
+
 }

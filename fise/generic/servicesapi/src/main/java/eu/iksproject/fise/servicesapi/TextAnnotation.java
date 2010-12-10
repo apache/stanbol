@@ -21,7 +21,7 @@ public interface TextAnnotation extends Enhancement {
 	void setSelectedText(String selectedText);
 	
 	@Rdf(id="http://fise.iks-project.eu/ontology/selection-context")
-	String getSeletionContext();
+	String getSelectionContext();
 	@Rdf(id="http://fise.iks-project.eu/ontology/selection-context")
 	void setSelectionContext(String selectionContext);
 }

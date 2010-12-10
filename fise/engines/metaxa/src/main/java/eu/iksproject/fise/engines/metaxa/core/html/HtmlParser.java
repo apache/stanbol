@@ -18,7 +18,6 @@ import org.w3c.dom.Document;
  * @author <a href="mailto:kasper@dfki.de">Walter Kasper</a>
  * 
  */
-
 public class HtmlParser {
 
     /**
@@ -32,7 +31,6 @@ public class HtmlParser {
 
 
     public HtmlParser() {
-
         this.htmlToXmlParser = new HtmlCleaner();
         this.parserProps = this.htmlToXmlParser.getProperties();
         this.parserProps.setRecognizeUnicodeChars(true);
@@ -47,7 +45,6 @@ public class HtmlParser {
 
 
     public Document getDOM(String html) {
-
         Document doc = null;
         try {
             doc = domCreator.createDOM(this.htmlToXmlParser.clean(html));
@@ -61,7 +58,6 @@ public class HtmlParser {
 
 
     public Document getDOM(InputStream html, String charset) {
-
         Document doc = null;
         try {
             doc =

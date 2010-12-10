@@ -18,7 +18,7 @@ public interface ServiceProperties {
 
 	//TODO review the definition of constants
 	/**
-	 * Property Key used to define the order in which EhancementEngines are
+	 * Property Key used to define the order in which {@link EnhancementEngine}s are
 	 * called by the {@link EnhancementJobManager}. This property expects a
 	 * single {@link Integer} as value
 	 */
@@ -48,9 +48,9 @@ public interface ServiceProperties {
 
 	/**
 	 * The default ordering uses {@link ServiceProperties#ORDERING_EXTRACTION_ENHANCEMENT}
-	 *  -1 . So by default EnhancementEngines are called after all engines that
-	 *  use an value within the ordering range defined by 
-	 *  {@link ServiceProperties#ORDERING_EXTRACTION_ENHANCEMENT}
+	 * -1 . So by default EnhancementEngines are called after all engines that
+	 * use an value within the ordering range defined by
+	 * {@link ServiceProperties#ORDERING_EXTRACTION_ENHANCEMENT}
 	 */
 	Integer ORDERING_DEFAULT = 0;
 
