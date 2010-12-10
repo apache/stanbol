@@ -40,12 +40,14 @@ import eu.iksproject.fise.servicesapi.EnhancementEngine;
 import eu.iksproject.fise.servicesapi.ServiceProperties;
 import eu.iksproject.fise.servicesapi.helper.EnhancementEngineHelper;
 import eu.iksproject.fise.servicesapi.rdf.NamespaceEnum;
-import eu.iksproject.fise.servicesapi.rdf.OntologicalClasses;
-import eu.iksproject.fise.servicesapi.rdf.Properties;
-import eu.iksproject.fise.servicesapi.rdf.TechnicalClasses;
+
+import static eu.iksproject.fise.servicesapi.rdf.NamespaceEnum.dbpedia_ont;
+import static eu.iksproject.fise.servicesapi.rdf.OntologicalClasses.DBPEDIA_PLACE;
+import static eu.iksproject.fise.servicesapi.rdf.Properties.*;
+import static eu.iksproject.fise.servicesapi.rdf.TechnicalClasses.FISE_TEXTANNOTATION;
 
 @Component(immediate = true, metatype = true)
-@Service()
+@Service
 //@Property(name="service.ranking",intValue=5)
 public class LocationEnhancementEngine implements EnhancementEngine, ServiceProperties {
 
@@ -55,14 +57,14 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
      */
     public static final Integer defaultOrder = ORDERING_EXTRACTION_ENHANCEMENT;
 
-    private static final Logger log = LoggerFactory.getLogger(EnhancementEngineHelper.class);
-
     /**
      * This maps geonames.org feature classes to dbPedia.org ontology classes
      */
     public static final Map<FeatureClass, Collection<UriRef>> FEATURE_CLASS_CONCEPT_MAPPINGS;
 
     public static final Map<String, Collection<UriRef>> FEATURE_TYPE_CONCEPT_MAPPINGS;
+
+    private static final Logger log = LoggerFactory.getLogger(EnhancementEngineHelper.class);
 
     /**
      * Default value for minimum scores of search results are added to the
@@ -99,23 +101,23 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
         for (FeatureClass fc : FeatureClass.values()) {
             List<UriRef> conceptMappings = new ArrayList<UriRef>();
             conceptMappings.add(CONCEPT_GEONAMES_FEATURE); //all things are features
-            conceptMappings.add(OntologicalClasses.DBPEDIA_PLACE); //all things are dbPedia places
+            conceptMappings.add(DBPEDIA_PLACE); //all things are dbPedia places
             mappings.put(fc, conceptMappings);
         }
         //now add additional mappings to the dbPedia Ontology
-        UriRef populatedPlace = new UriRef(NamespaceEnum.dbpedia_ont + "PopulatedPlace");
-        mappings.get(FeatureClass.P).addAll(Arrays.asList(populatedPlace, new UriRef(NamespaceEnum.dbpedia_ont + "Settlement")));
-        mappings.get(FeatureClass.A).addAll(Arrays.asList(populatedPlace, new UriRef(NamespaceEnum.dbpedia_ont + "AdministrativeRegion")));
-        mappings.get(FeatureClass.H).add(new UriRef(NamespaceEnum.dbpedia_ont + "BodyOfWater"));
-        mappings.get(FeatureClass.R).add(new UriRef(NamespaceEnum.dbpedia_ont + "Infrastructure"));
-        mappings.get(FeatureClass.S).add(new UriRef(NamespaceEnum.dbpedia_ont + "Building"));
-        mappings.get(FeatureClass.T).add(new UriRef(NamespaceEnum.dbpedia_ont + "Mountain"));
+        UriRef populatedPlace = new UriRef(dbpedia_ont + "PopulatedPlace");
+        mappings.get(FeatureClass.P).addAll(Arrays.asList(populatedPlace, new UriRef(dbpedia_ont + "Settlement")));
+        mappings.get(FeatureClass.A).addAll(Arrays.asList(populatedPlace, new UriRef(dbpedia_ont + "AdministrativeRegion")));
+        mappings.get(FeatureClass.H).add(new UriRef(dbpedia_ont + "BodyOfWater"));
+        mappings.get(FeatureClass.R).add(new UriRef(dbpedia_ont + "Infrastructure"));
+        mappings.get(FeatureClass.S).add(new UriRef(dbpedia_ont + "Building"));
+        mappings.get(FeatureClass.T).add(new UriRef(dbpedia_ont + "Mountain"));
         //now write the unmodifiable static final constant
         FEATURE_CLASS_CONCEPT_MAPPINGS = Collections.unmodifiableMap(mappings);
 
         //Mappings for known FeatureTypes
         Map<String, Collection<UriRef>> typeMappings = new HashMap<String, Collection<UriRef>>();
-        Collection<UriRef> lakeTypes = Arrays.asList(new UriRef(NamespaceEnum.dbpedia_ont + "Lake"));
+        Collection<UriRef> lakeTypes = Arrays.asList(new UriRef(dbpedia_ont + "Lake"));
         typeMappings.put("H.LK", lakeTypes);
         typeMappings.put("H.LKS", lakeTypes);
         typeMappings.put("H.LKI", lakeTypes);
@@ -133,8 +135,8 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
         typeMappings.put("H.LKSNI", lakeTypes);
         typeMappings.put("H.RSV", lakeTypes);
 
-        UriRef stream = new UriRef(NamespaceEnum.dbpedia_ont + " Stream");
-        Collection<UriRef> canalTypes = Arrays.asList(stream, new UriRef(NamespaceEnum.dbpedia_ont + "Canal"));
+        UriRef stream = new UriRef(dbpedia_ont + " Stream");
+        Collection<UriRef> canalTypes = Arrays.asList(stream, new UriRef(dbpedia_ont + "Canal"));
         typeMappings.put("H.CNL", canalTypes);
         typeMappings.put("H.CNLA", canalTypes);
         typeMappings.put("H.CNLB", canalTypes);
@@ -145,7 +147,7 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
         typeMappings.put("H.CNLQ", canalTypes);
         typeMappings.put("H.CNLX", canalTypes);
 
-        Collection<UriRef> riverTypes = Arrays.asList(stream, new UriRef(NamespaceEnum.dbpedia_ont + "River"));
+        Collection<UriRef> riverTypes = Arrays.asList(stream, new UriRef(dbpedia_ont + "River"));
         typeMappings.put("H.STM", riverTypes);
         typeMappings.put("H.STMI", riverTypes);
         typeMappings.put("H.STMB", riverTypes);
@@ -163,18 +165,18 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
         typeMappings.put("H.STM", riverTypes);
         typeMappings.put("H.STM", riverTypes);
 
-        Collection<UriRef> caveTypes = Arrays.asList(new UriRef(NamespaceEnum.dbpedia_ont + "Cave"));
+        Collection<UriRef> caveTypes = Arrays.asList(new UriRef(dbpedia_ont + "Cave"));
         typeMappings.put("H.LKSB", caveTypes);
         typeMappings.put("R.TNLN", caveTypes);
         typeMappings.put("S.CAVE", caveTypes);
         typeMappings.put("S.BUR", caveTypes);
 
-        Collection<UriRef> countryTypes = Arrays.asList(new UriRef(NamespaceEnum.dbpedia_ont + "Country"));
+        Collection<UriRef> countryTypes = Arrays.asList(new UriRef(dbpedia_ont + "Country"));
         typeMappings.put("A.PCLI", countryTypes);
 
-        UriRef settlement = new UriRef(NamespaceEnum.dbpedia_ont + "Settlement");
-        Collection<UriRef> cityTypes = Arrays.asList(settlement, new UriRef(NamespaceEnum.dbpedia_ont + "City"));
-        Collection<UriRef> villageTypes = Arrays.asList(settlement, new UriRef(NamespaceEnum.dbpedia_ont + "Village"));
+        UriRef settlement = new UriRef(dbpedia_ont + "Settlement");
+        Collection<UriRef> cityTypes = Arrays.asList(settlement, new UriRef(dbpedia_ont + "City"));
+        Collection<UriRef> villageTypes = Arrays.asList(settlement, new UriRef(dbpedia_ont + "Village"));
         typeMappings.put("P.PPLG", cityTypes);
         typeMappings.put("P.PPLC", cityTypes);
         typeMappings.put("P.PPLF", villageTypes);
@@ -191,13 +193,13 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
     @SuppressWarnings("unchecked")
     protected void activate(ComponentContext ce) throws IOException {
         Dictionary<String, String> properties = ce.getProperties();
-        String value;
         log.debug("activating ...");
+        String value;
         try {
             value = properties.get(MIN_SCORE);
             log.debug(" -> " + MIN_SCORE + "=" + value);
             setMinScore(value == null ? null : Double.valueOf(value));
-            log.debug(" <- " + MIN_SCORE + "=" + getMinScore());
+            log.debug(" <- " + MIN_SCORE + "=" + minScore);
         } catch (NumberFormatException e) {
             log.warn("Unable to parse MIN_SCORE", e);
             setMinScore(null);
@@ -206,7 +208,7 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
             value = properties.get(MAX_LOCATION_ENHANCEMENTS);
             log.debug(" -> " + MAX_LOCATION_ENHANCEMENTS + "=" + value);
             setMaxLocationEnhancements(value == null ? null : Integer.valueOf(value));
-            log.debug(" <- " + MAX_LOCATION_ENHANCEMENTS + "=" + getMaxLocationEnhancements());
+            log.debug(" <- " + MAX_LOCATION_ENHANCEMENTS + "=" + maxLocationEnhancements);
         } catch (NumberFormatException e) {
             log.warn("Unable to parse MAX_LOCATION_ENHANCEMENTS", e);
             setMaxLocationEnhancements(null);
@@ -215,7 +217,7 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
             value = properties.get(MIN_HIERARCHY_SCORE);
             log.debug(" -> " + MIN_HIERARCHY_SCORE + "=" + value);
             setMinHierarchyScore(value == null ? null : Double.valueOf(value));
-            log.debug(" <- " + MIN_HIERARCHY_SCORE + "=" + getMinHierarchyScore());
+            log.debug(" <- " + MIN_HIERARCHY_SCORE + "=" + minHierarchyScore);
         } catch (NumberFormatException e) {
             log.warn("Unable to parse MIN_HIERARCHY_SCORE", e);
             setMinHierarchyScore(null);
@@ -230,7 +232,7 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
 
     @Override
     public int canEnhance(ContentItem ci) throws EngineException {
-        return EnhancementEngine.ENHANCE_SYNCHRONOUS;
+        return ENHANCE_SYNCHRONOUS;
     }
 
     @Override
@@ -246,16 +248,18 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
          * selecting the same name.
          */
         Map<String, Collection<NonLiteral>> name2placeEnhancementMap = new HashMap<String, Collection<NonLiteral>>();
-        for (Iterator<Triple> it = graph.filter(null, Properties.DC_TYPE, OntologicalClasses.DBPEDIA_PLACE); it.hasNext();) {
-            NonLiteral placeEnhancement = it.next().getSubject(); //the enhancement annotating an place
+        Iterator<Triple> iterator = graph.filter(null, DC_TYPE, DBPEDIA_PLACE);
+        while (iterator.hasNext()) {
+            NonLiteral placeEnhancement = iterator.next().getSubject(); //the enhancement annotating an place
             //this can still be an TextAnnotation of an EntityAnnotation
             //so we need to filter TextAnnotation
-            Triple isTextAnnotation = new TripleImpl(placeEnhancement, Properties.RDF_TYPE, TechnicalClasses.FISE_TEXTANNOTATION);
+            Triple isTextAnnotation = new TripleImpl(placeEnhancement, RDF_TYPE, FISE_TEXTANNOTATION);
             if (graph.contains(isTextAnnotation)) {
                 //now get the name
-                String name = EnhancementEngineHelper.getString(graph, placeEnhancement, Properties.FISE_SELECTED_TEXT);
+                String name = EnhancementEngineHelper.getString(graph, placeEnhancement, FISE_SELECTED_TEXT);
                 if (name == null) {
-                    log.warn("Unable to process TextAnnotation " + placeEnhancement + " because property" + Properties.FISE_SELECTED_TEXT + " is not present");
+                    log.warn("Unable to process TextAnnotation " + placeEnhancement
+                            + " because property" + FISE_SELECTED_TEXT + " is not present");
                 } else {
                     Collection<NonLiteral> placeEnhancements = name2placeEnhancementMap.get(name);
                     if (placeEnhancements == null) {
@@ -292,21 +296,22 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
                     try {
                         score = getToponymScore(result);
                     } catch (InsufficientStyleException e) {
-                        throw new IllegalStateException("Change style of this implementation to get the score values", e);
+                        throw new IllegalStateException(
+                                "Change style of this implementation to get the score values", e);
                     }
                     log.info("  > score " + score);
                     if (score != null) {
-                        if (score.doubleValue() < minScore) {
+                        if (score < minScore) {
                             //if score is lower than the under bound, than stop
                             break;
                         }
                     } else {
                         log.warn("NULL returned as Score for " + result.getGeoNameId() + " " + result.getName());
                         /*
-                               * NOTE: If score is not present all suggestions are
-                               * added as enhancements to the metadata of the content
-                               * item.
-                               */
+                         * NOTE: If score is not present all suggestions are
+                         * added as enhancements to the metadata of the content
+                         * item.
+                         */
                     }
                     //write the enhancement!
                     NonLiteral locationEnhancement = writeEntityEnhancement(contentItemId, graph, literalFactory, result, entry.getValue(), null);
@@ -330,12 +335,13 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
                                     //      configuration here!
                                     log.info("    - write hierarchy " + hierarchyEntry.getGeoNameId() + " " + hierarchyEntry.getName());
                                     /*
-                                              * The hierarchy service dose not provide a score, because it would be 1.0
-                                              * so we need to set the score to this value.
-                                              * Currently is is set to the value of the suggested entry
-                                              */
+                                     * The hierarchy service dose not provide a score, because it would be 1.0
+                                     * so we need to set the score to this value.
+                                     * Currently is is set to the value of the suggested entry
+                                     */
                                     hierarchyEntry.setScore(score);
-                                    writeEntityEnhancement(contentItemId, graph, literalFactory, hierarchyEntry, null, Collections.singletonList(locationEnhancement));
+                                    writeEntityEnhancement(contentItemId, graph, literalFactory, hierarchyEntry,
+                                            null, Collections.singletonList(locationEnhancement));
                                 }
                             }
                         } catch (Exception e) {
@@ -388,7 +394,9 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
      * @param requiresEnhancements required enhancements
      * @return The UriRef of the created entity enhancement
      */
-    private UriRef writeEntityEnhancement(UriRef contentItemId, MGraph graph, LiteralFactory literalFactory, Toponym toponym, Collection<NonLiteral> relatedEnhancements, Collection<NonLiteral> requiresEnhancements) {
+    private UriRef writeEntityEnhancement(UriRef contentItemId, MGraph graph,
+            LiteralFactory literalFactory, Toponym toponym,
+            Collection<NonLiteral> relatedEnhancements, Collection<NonLiteral> requiresEnhancements) {
         UriRef entityRef = new UriRef("http://sws.geonames.org/" + toponym.getGeoNameId() + '/');
         FeatureClass featureClass = toponym.getFeatureClass();
         log.debug("  > featureClass " + featureClass);
@@ -396,22 +404,22 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
         // first relate this entity annotation to the text annotation(s)
         if (relatedEnhancements != null) {
             for (NonLiteral related : relatedEnhancements) {
-                graph.add(new TripleImpl(entityAnnotation, Properties.DC_RELATION, related));
+                graph.add(new TripleImpl(entityAnnotation, DC_RELATION, related));
             }
         }
         if (requiresEnhancements != null) {
             for (NonLiteral requires : requiresEnhancements) {
-                graph.add(new TripleImpl(entityAnnotation, Properties.DC_REQUIRES, requires));
+                graph.add(new TripleImpl(entityAnnotation, DC_REQUIRES, requires));
             }
         }
-        graph.add(new TripleImpl(entityAnnotation, Properties.FISE_ENTITY_REFERENCE, entityRef));
+        graph.add(new TripleImpl(entityAnnotation, FISE_ENTITY_REFERENCE, entityRef));
         log.debug("  > name " + toponym.getName());
-        graph.add(new TripleImpl(entityAnnotation, Properties.FISE_ENTITY_LABEL, literalFactory.createTypedLiteral(toponym.getName())));
+        graph.add(new TripleImpl(entityAnnotation, FISE_ENTITY_LABEL, literalFactory.createTypedLiteral(toponym.getName())));
         Double score;
         try {
             score = getToponymScore(toponym);
             if (score != null) {
-                graph.add(new TripleImpl(entityAnnotation, Properties.FISE_CONFIDENCE, literalFactory.createTypedLiteral(score)));
+                graph.add(new TripleImpl(entityAnnotation, FISE_CONFIDENCE, literalFactory.createTypedLiteral(score)));
             }
         } catch (InsufficientStyleException e) {
             //ignore -> don not write the score
@@ -433,7 +441,7 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
         entityTypes.add(new UriRef(NamespaceEnum.geonames + featureClass.name() + '.' + featureCode));
         //finally add the type triples to the enhancement
         for (UriRef entityType : entityTypes) {
-            graph.add(new TripleImpl(entityAnnotation, Properties.FISE_ENTITY_TYPE, entityType));
+            graph.add(new TripleImpl(entityAnnotation, FISE_ENTITY_TYPE, entityType));
         }
         return entityAnnotation;
     }
@@ -446,7 +454,6 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
         criteria.setMaxRows(5);
         // criteria.setLanguage("language") TODO: search for the language of the document!
         return WebService.search(criteria);
-
     }
 
     /**
@@ -480,7 +487,8 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
 
     @Override
     public Map<String, Object> getServiceProperties() {
-        return Collections.unmodifiableMap(Collections.singletonMap(ENHANCEMENT_ENGINE_ORDERING, (Object) defaultOrder));
+        return Collections.unmodifiableMap(Collections.singletonMap(
+                ENHANCEMENT_ENGINE_ORDERING, (Object) defaultOrder));
     }
 
     /**

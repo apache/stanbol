@@ -26,15 +26,16 @@ import org.junit.Test;
 import eu.iksproject.fise.engines.autotagging.impl.ConfiguredAutotaggerProvider;
 import eu.iksproject.fise.servicesapi.ContentItem;
 import eu.iksproject.fise.servicesapi.EngineException;
-import eu.iksproject.fise.servicesapi.rdf.Properties;
-import eu.iksproject.fise.servicesapi.rdf.TechnicalClasses;
+
+import static eu.iksproject.fise.servicesapi.rdf.Properties.*;
+import static eu.iksproject.fise.servicesapi.rdf.TechnicalClasses.FISE_TEXTANNOTATION;
 
 public class TestNamedEntityExtractionEnhancementEngine extends Assert {
 
     public static final String SINGLE_SENTENCE = "Dr. Patrick Marshall (1869 - November 1950) was a"
             + " geologist who lived in New Zealand and worked at the University of Otago.";
 
-    public static final String MULTI_SENCTENCES = "The life of Patrick Marshall\n\n"
+    public static final String MULTI_SENTENCES = "The life of Patrick Marshall\n\n"
             + "Dr Patrick Marshall (1869 - November 1950) was a"
             + " geologist who lived in New Zealand and worked at the"
             + " University of Otago. This is another unrelated sentence"
@@ -88,21 +89,21 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
     }
 
     @Test
-    public void testPersonNameOccurencesExtraction() {
-        Map<String, List<NameOccurrence>> nameOccurrences = nerEngine.extractPersonNameOccurrences(MULTI_SENCTENCES);
+    public void testPersonNameOccurrencesExtraction() {
+        Map<String, List<NameOccurrence>> nameOccurrences = nerEngine.extractPersonNameOccurrences(MULTI_SENTENCES);
         assertEquals(1, nameOccurrences.size());
 
-        List<NameOccurrence> pmOccurences = nameOccurrences.get("Patrick Marshall");
-        assertNotNull(pmOccurences);
-        assertEquals(2, pmOccurences.size());
+        List<NameOccurrence> pmOccurrences = nameOccurrences.get("Patrick Marshall");
+        assertNotNull(pmOccurrences);
+        assertEquals(2, pmOccurrences.size());
 
-        NameOccurrence firstOccurence = pmOccurences.get(0);
-        assertEquals("Patrick Marshall", firstOccurence.name);
-        assertEquals(12, firstOccurence.start.intValue());
-        assertEquals(28, firstOccurence.end.intValue());
-        assertEquals(0.98, firstOccurence.confidence, 0.005);
+        NameOccurrence firstOccurrence = pmOccurrences.get(0);
+        assertEquals("Patrick Marshall", firstOccurrence.name);
+        assertEquals(12, firstOccurrence.start.intValue());
+        assertEquals(28, firstOccurrence.end.intValue());
+        assertEquals(0.98, firstOccurrence.confidence, 0.005);
 
-        NameOccurrence secondOccurrence = pmOccurences.get(1);
+        NameOccurrence secondOccurrence = pmOccurrences.get(1);
         assertEquals("Patrick Marshall", secondOccurrence.name);
         assertEquals(33, secondOccurrence.start.intValue());
         assertEquals(49, secondOccurrence.end.intValue());
@@ -136,13 +137,9 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
      * -----------------------------------------------------------------------
      */
  
-    /**
-     * @param g
-     * @return
-     */
     private int checkAllTextAnnotations(MGraph g, String content) {
         Iterator<Triple> textAnnotationIterator = g.filter(null,
-                Properties.RDF_TYPE, TechnicalClasses.FISE_TEXTANNOTATION);
+                RDF_TYPE, FISE_TEXTANNOTATION);
         // test if a textAnnotation is present
         assertTrue(textAnnotationIterator.hasNext());
         int textAnnotationCount = 0;
@@ -157,13 +154,10 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
 
     /**
      * Checks if a text annotation is valid
-     *
-     * @param g
-     * @param textAnnotation
      */
     private void checkTextAnnotation(MGraph g, UriRef textAnnotation, String content) {
         Iterator<Triple> selectedTextIterator = g.filter(textAnnotation,
-                Properties.FISE_SELECTED_TEXT, null);
+                FISE_SELECTED_TEXT, null);
         // check if the selected text is added
         assertTrue(selectedTextIterator.hasNext());
         // test if the selected text is part of the TEXT_TO_TEST
@@ -171,21 +165,21 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
         assertTrue(object instanceof Literal);
         Literal selectedText = (Literal)object;
         object = null;
-        assertTrue(SINGLE_SENTENCE.indexOf(selectedText.getLexicalForm()) >= 0);
+        assertTrue(SINGLE_SENTENCE.contains(selectedText.getLexicalForm()));
         // test if context is added
         Iterator<Triple> selectionContextIterator = g.filter(textAnnotation,
-                Properties.FISE_SELECTION_CONTEXT, null);
+                FISE_SELECTION_CONTEXT, null);
         assertTrue(selectionContextIterator.hasNext());
         // test if the selected text is part of the TEXT_TO_TEST
         object = selectionContextIterator.next().getObject();
         assertTrue(object instanceof Literal);
-        assertTrue(SINGLE_SENTENCE.indexOf(((Literal)object).getLexicalForm()) >= 0);
+        assertTrue(SINGLE_SENTENCE.contains(((Literal) object).getLexicalForm()));
         object = null;
         //test start/end if present
         Iterator<Triple> startPosIterator = g.filter(textAnnotation,
-                Properties.FISE_START, null);
+                FISE_START, null);
         Iterator<Triple> endPosIterator = g.filter(textAnnotation,
-                Properties.FISE_END, null);
+                FISE_END, null);
         //start end is optional, but if start is present, that also end needs to be set
         if(startPosIterator.hasNext()){
         	Resource resource = startPosIterator.next().getObject();
@@ -209,12 +203,11 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
         	endPosLiteral = null;
         	//check for equality of the selected text and the text on the selected position in the content
         	//System.out.println("TA ["+start+"|"+end+"]"+selectedText.getLexicalForm()+"<->"+content.substring(start,end));
-        	assertTrue(content.substring(start, end).equals(selectedText.getLexicalForm()));
+            assertEquals(content.substring(start, end), selectedText.getLexicalForm());
         } else {
         	//if no start position is present, there must also be no end position defined
         	assertTrue(!endPosIterator.hasNext());
         }
     }
-
 
 }

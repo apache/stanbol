@@ -46,7 +46,8 @@ import eu.iksproject.fise.servicesapi.InvalidContentException;
 import eu.iksproject.fise.servicesapi.ServiceProperties;
 import eu.iksproject.fise.servicesapi.helper.EnhancementEngineHelper;
 import eu.iksproject.fise.servicesapi.rdf.OntologicalClasses;
-import eu.iksproject.fise.servicesapi.rdf.Properties;
+
+import static eu.iksproject.fise.servicesapi.rdf.Properties.*;
 
 /**
  * FISE Named Entity Recognition enhancement engine based on opennlp's Maximum
@@ -219,21 +220,21 @@ public class NamedEntityExtractionEnhancementEngine implements
                 UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(
                         ci, this);
                 g.add(new TripleImpl(textAnnotation,
-                        Properties.FISE_SELECTED_TEXT,
+                        FISE_SELECTED_TEXT,
                         literalFactory.createTypedLiteral(name)));
                 g.add(new TripleImpl(textAnnotation,
-                        Properties.FISE_SELECTION_CONTEXT,
+                        FISE_SELECTION_CONTEXT,
                         literalFactory.createTypedLiteral(occurrence.context)));
-                g.add(new TripleImpl(textAnnotation, Properties.DC_TYPE,
+                g.add(new TripleImpl(textAnnotation, DC_TYPE,
                         typeUri));
                 g.add(new TripleImpl(
                         textAnnotation,
-                        Properties.FISE_CONFIDENCE,
+                        FISE_CONFIDENCE,
                         literalFactory.createTypedLiteral(occurrence.confidence)));
                 if (occurrence.start != null && occurrence.end != null) {
-                    g.add(new TripleImpl(textAnnotation, Properties.FISE_START,
+                    g.add(new TripleImpl(textAnnotation, FISE_START,
                             literalFactory.createTypedLiteral(occurrence.start)));
-                    g.add(new TripleImpl(textAnnotation, Properties.FISE_END,
+                    g.add(new TripleImpl(textAnnotation, FISE_END,
                             literalFactory.createTypedLiteral(occurrence.end)));
                 }
 
@@ -248,7 +249,7 @@ public class NamedEntityExtractionEnhancementEngine implements
                             // occurrence, use it as subsumption target
                             firstOccurrenceAnnotation = entry.getValue();
                             g.add(new TripleImpl(textAnnotation,
-                                    Properties.DC_RELATION,
+                                    DC_RELATION,
                                     firstOccurrenceAnnotation));
                             break;
                         }
@@ -263,7 +264,7 @@ public class NamedEntityExtractionEnhancementEngine implements
                     // I am referring to a most specific first occurrence of the
                     // same name
                     g.add(new TripleImpl(textAnnotation,
-                            Properties.DC_RELATION, firstOccurrenceAnnotation));
+                            DC_RELATION, firstOccurrenceAnnotation));
                 }
             }
         }

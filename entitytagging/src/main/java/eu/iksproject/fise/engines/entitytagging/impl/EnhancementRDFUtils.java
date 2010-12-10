@@ -21,14 +21,19 @@ import eu.iksproject.rick.servicesapi.model.Reference;
 import eu.iksproject.rick.servicesapi.model.Sign;
 import eu.iksproject.rick.servicesapi.model.Text;
 import eu.iksproject.rick.servicesapi.model.rdf.RdfResourceEnum;
+
+import static eu.iksproject.fise.servicesapi.rdf.Properties.*;
+import static eu.iksproject.fise.servicesapi.rdf.Properties.RDFS_LABEL;
+
 /**
  * Utility taken form the engine.autotagging bundle and adapted from
  * using TagInfo to {@link Sign}.
+ *
  * @author Rupert Westenthaler
  * @author ogrisel (original utility)
- *
  */
 public class EnhancementRDFUtils {
+
 	/**
 	 * @param literalFactory the LiteralFactory to use 
 	 * @param graph the MGraph to use
@@ -40,7 +45,7 @@ public class EnhancementRDFUtils {
 		//1. check if the returned Entity does has a label -> if not return null
 		//add labels (set only a single label. Use "en" if available!
 		Text label = null;
-		for(Iterator<Text> labels = entity.getRepresentation().getText(Properties.RDFS_LABEL.getUnicodeString());labels.hasNext();){
+		for (Iterator<Text> labels = entity.getRepresentation().getText(RDFS_LABEL.getUnicodeString());labels.hasNext();){
 			Text actLabel  = labels.next();
 			if(label == null){
 				label = actLabel;
@@ -50,11 +55,11 @@ public class EnhancementRDFUtils {
 				}
 			}
 		}
-		Literal literal;
-		if(label == null){
+        if (label == null){
 			return null;
 		}
-		if(label.getLanguage() == null){
+        Literal literal;
+        if (label.getLanguage() == null){
 			literal = new PlainLiteralImpl(label.getText());
 		} else {
 			literal = new PlainLiteralImpl(label.getText(), new Language(label.getLanguage()));
@@ -63,24 +68,23 @@ public class EnhancementRDFUtils {
 		UriRef entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(
 		        graph, engine, contentItemId);
 		// first relate this entity annotation to the text annotation(s)
-		for(NonLiteral enhancement: relatedEnhancements){
-			graph.add(new TripleImpl(entityAnnotation,
-			            Properties.DC_RELATION, enhancement));
+		for (NonLiteral enhancement: relatedEnhancements){
+			graph.add(new TripleImpl(entityAnnotation, DC_RELATION, enhancement));
 		}
 		UriRef entityUri = new UriRef(entity.getId());
 		// add the link to the referred entity
 		graph.add(new TripleImpl(entityAnnotation,
-		        Properties.FISE_ENTITY_REFERENCE, entityUri));
+		        FISE_ENTITY_REFERENCE, entityUri));
 		//add the label parsed above
 		graph.add(new TripleImpl(entityAnnotation,
-		        Properties.FISE_ENTITY_LABEL,
+		        FISE_ENTITY_LABEL,
 		        literal));
 		//TODO: add real confidence values!
 		// -> in case of SolrYards this will be a Lucene score and not within the range [0..1]
 		// -> in case of SPARQL there will be no score information at all. 
 		Object score = entity.getRepresentation().getFirst(RdfResourceEnum.resultScore.getUri());
 		Double scoreValue = new Double(-1); //use -1 if no score is available!
-		if(score != null){
+		if (score != null){
 			try {
 				scoreValue = Double.valueOf(score.toString());
 			} catch (NumberFormatException e) {
@@ -88,12 +92,12 @@ public class EnhancementRDFUtils {
 			}
 		}
 		graph.add(new TripleImpl(entityAnnotation,
-		        Properties.FISE_CONFIDENCE,
+		        FISE_CONFIDENCE,
 		        literalFactory.createTypedLiteral(scoreValue)));
 
-		for (Iterator<Reference> types = entity.getRepresentation().getReferences(Properties.RDF_TYPE.getUnicodeString());types.hasNext();){
+		for (Iterator<Reference> types = entity.getRepresentation().getReferences(RDF_TYPE.getUnicodeString());types.hasNext();){
 		    graph.add(new TripleImpl(entityAnnotation,
-		            Properties.FISE_ENTITY_TYPE, new UriRef(types.next().getReference())));
+		            FISE_ENTITY_TYPE, new UriRef(types.next().getReference())));
 		}
 		//TODO: for now add the information about this entity to the graph
 		// -> this might be replaced by some additional engine at the end

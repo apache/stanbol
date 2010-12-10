@@ -32,9 +32,6 @@ import static org.junit.Assert.assertFalse;
 import eu.iksproject.fise.servicesapi.ContentItem;
 import eu.iksproject.fise.servicesapi.TextAnnotation;
 import eu.iksproject.fise.servicesapi.helper.RdfEntityFactory;
-import eu.iksproject.fise.servicesapi.rdf.OntologicalClasses;
-import eu.iksproject.fise.servicesapi.rdf.Properties;
-import eu.iksproject.fise.servicesapi.rdf.TechnicalClasses;
 
 public class TestEntityMentionEnhancementEngine {
 

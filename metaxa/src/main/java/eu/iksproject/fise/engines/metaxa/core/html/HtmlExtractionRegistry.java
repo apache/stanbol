@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -28,7 +29,6 @@ import org.xml.sax.SAXException;
  * HtmlExtractionRegistry.java
  * 
  * @author <a href="mailto:kasper@dfki.de">Walter Kasper</a>
- * 
  */
 public class HtmlExtractionRegistry {
 
@@ -43,8 +43,8 @@ public class HtmlExtractionRegistry {
 
 
     public HtmlExtractionRegistry() {
-        this.registry = new HashMap<String, HtmlExtractionComponent>();
-        this.activeExtractors = new HashSet<String>();
+        registry = new HashMap<String, HtmlExtractionComponent>();
+        activeExtractors = new HashSet<String>();
     }
 
     public HtmlExtractionRegistry(String configFileName)
@@ -162,43 +162,26 @@ public class HtmlExtractionRegistry {
         }
     }
 
-    /**
-     * @return the registry
-     */
     public HashMap<String, HtmlExtractionComponent> getRegistry() {
         return registry;
     }
 
-    /**
-     * @param registry
-     *            the registry to set
-     */
     public void setRegistry(HashMap<String, HtmlExtractionComponent> registry) {
         this.registry = registry;
     }
 
-    /**
-     * @return the activeExtractors
-     */
-    public HashSet<String> getActiveExtractors() {
+    public Set<String> getActiveExtractors() {
         return activeExtractors;
     }
 
-    /**
-     * @param activeExtractors
-     *            the activeExtractors to set
-     */
     public void setActiveExtractors(HashSet<String> activeExtractors) {
         this.activeExtractors = activeExtractors;
     }
 
-    public static void main(String[] args)
-            throws Exception {
-
+    public static void main(String[] args) throws Exception {
         int argv = 0;
         HtmlExtractionRegistry inst = new HtmlExtractionRegistry(args[0]);
-        System.err
-            .println("Active Components: " + inst.activeExtractors.size());
+        System.err.println("Active Components: " + inst.activeExtractors.size());
         for (String s : inst.activeExtractors) {
             System.err.println(s);
         }
@@ -206,19 +189,15 @@ public class HtmlExtractionRegistry {
 
     public void add(String id, String resourceName, String type)
             throws InitializationException {
-
     }
 
     public void remove(String id) {
-
     }
 
     public void activate(String id) {
-
     }
 
     public void deactivate(String id) {
-
     }
 
 }
