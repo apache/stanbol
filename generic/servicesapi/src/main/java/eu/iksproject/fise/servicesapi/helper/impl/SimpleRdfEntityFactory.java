@@ -21,9 +21,6 @@ public class SimpleRdfEntityFactory extends RdfEntityFactory {
 		this.literalFactory = LiteralFactory.getInstance();
 	}
 
-	/* (non-Javadoc)
-	 * @see eu.iksproject.fise.servicesapi.helper.RdfEntityFactory#getWrapper(org.apache.clerezza.rdf.core.NonLiteral, java.lang.Class, java.lang.Class)
-	 */
 	@SuppressWarnings("unchecked")
 	public <T extends RdfEntity> T getProxy(NonLiteral rdfNode, Class<T> type,Class<?>...additionalInterfaces) {
 		Class<?>[] interfaces = new Class<?>[additionalInterfaces.length+1];
@@ -33,8 +30,7 @@ public class SimpleRdfEntityFactory extends RdfEntityFactory {
 		Object instance = Proxy.newProxyInstance(SimpleRdfEntityFactory.class.getClassLoader(), interfaces, new RdfProxyInvocationHandler(this, rdfNode, interfaces, literalFactory));
 		return (T)instance;
 	}
-	
-	
+
 	protected MGraph getGraph() {
 		return graph;
 	}

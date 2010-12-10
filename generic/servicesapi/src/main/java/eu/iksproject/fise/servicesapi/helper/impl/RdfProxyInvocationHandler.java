@@ -12,7 +12,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.AbstractCollection;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -49,6 +48,7 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 	 * The hashCode Method of {@link Object}
 	 */
 	protected final static Method hashCode;
+
 	static {
 		try {
 			getIDMethod = RdfEntity.class.getMethod("getId", new Class<?>[]{});
@@ -61,6 +61,7 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 			throw new IllegalStateException("Unable to find getId Method in the "+RdfEntity.class+" Interface",e);
 		}
 	}
+
 	/**
 	 * The logger TODO: Question: How to get the dependencies for logging working with maven :(
 	 */
@@ -114,7 +115,8 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		//RdfEntity rdfEntity;
 		if(!(proxy instanceof RdfEntity)){
-			throw new IllegalArgumentException("Parsed proxy instance is not of type "+RdfEntity.class+". This RdfWrapperInvocationHandler implementations only work for proxis implementing this interface!");
+			throw new IllegalArgumentException("Parsed proxy instance is not of type "+RdfEntity.class
+                    +". This RdfWrapperInvocationHandler implementations only work for proxies implementing this interface!");
 		}
 		//First check for Methods defined in RDFEntity and java.lang.Object
 		//implementation of the RffEntity Interface method!
@@ -149,15 +151,18 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 			//check the parameter types to improve error messages!
 			//Only methods with a single parameter are supported
 			if(parameterTypes.length!=1){
-				throw new IllegalStateException("Unsupported parameters for Method "+method.toString()+"! Only setter methodes with a singe parameter are supported.");
+				throw new IllegalStateException("Unsupported parameters for Method "+method.toString()
+                        +"! Only setter methodes with a singe parameter are supported.");
 			}
 			final Type parameterType = parameterTypes[0];
 			//now check if args != null and has an element
 			if(args == null){
-				throw new IllegalArgumentException("NULL parsed as \"Object[] args\". An array with a single value is expected when calling "+method.toString()+"!");
+				throw new IllegalArgumentException(
+                        "NULL parsed as \"Object[] args\". An array with a single value is expected when calling "+method.toString()+"!");
 			}
 			if(args.length<1){
-				throw new IllegalArgumentException("An empty array was parsed as \"Object[] args\". An array with a single value is expected when calling method "+method.toString()+"!");
+				throw new IllegalArgumentException(
+                        "An empty array was parsed as \"Object[] args\". An array with a single value is expected when calling method "+method.toString()+"!");
 			}
 			final Object value = args[0];
 			//Handle Arrays
@@ -178,7 +183,9 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 							genericType = typeArgument;
 						} else {
 							//TODO: replace with a warning but for testing start with an exception
-							throw new IllegalStateException("Multiple generic type definition for method "+method.toString()+" (generic types: "+((ParameterizedType)parameterTypes[0]).getActualTypeArguments()+")");
+							throw new IllegalStateException(
+                                    "Multiple generic type definition for method "+method.toString()
+                                    +" (generic types: "+((ParameterizedType)parameterTypes[0]).getActualTypeArguments()+")");
 						}
 					}
 				}
@@ -200,12 +207,16 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 							genericType = typeArgument;
 						} else {
 							//TODO: replace with a warning but for testing start with an exception
-							throw new IllegalStateException("Multiple generic type definition for method "+method.toString()+" (generic types: "+type.getActualTypeArguments()+")");
+							throw new IllegalStateException(
+                                    "Multiple generic type definition for method "+method.toString()
+                                    +" (generic types: "+type.getActualTypeArguments()+")");
 						}
 					}
 				}
 				if(genericType == null){
-					throw new IllegalStateException("Generic Type not defined for Collection in Method "+method.toString()+" (generic type is needed to correctly map rdf values for property "+property);
+					throw new IllegalStateException(
+                            "Generic Type not defined for Collection in Method "+method.toString()
+                            +" (generic type is needed to correctly map rdf values for property "+property);
 				}
 				return getValues(property, (Class<?>)genericType);
 			} else {
@@ -230,19 +241,27 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 							try {
 								return (T)new URI(((UriRef)result).getUnicodeString());
 							} catch (URISyntaxException e) {
-								throw new IllegalStateException("Unable to parse "+URI.class+" for "+UriRef.class+" value="+((UriRef)result).getUnicodeString());
+								throw new IllegalStateException("Unable to parse "+URI.class
+                                        +" for "+UriRef.class+" value="+((UriRef)result).getUnicodeString());
 							}
 						} else if(URL.class.isAssignableFrom(type)){
 							try {
 								return (T)new URL(((UriRef)result).getUnicodeString());
 							} catch (MalformedURLException e) {
-								throw new IllegalStateException("Unable to parse "+URL.class+" for "+UriRef.class+" value="+((UriRef)result).getUnicodeString());
+								throw new IllegalStateException("Unable to parse "+URL.class
+                                        +" for "+UriRef.class+" value="+((UriRef)result).getUnicodeString());
 							}
 						} else {
-							throw new IllegalArgumentException("Parsed Type "+type+" is not compatible for result type "+result.getClass()+" (value "+result+") of node "+rdfNode+" and property "+property+"! (Subclass of RdfEntity, UriRef, URI or URL is expected for NonLiteral Values)");
+							throw new IllegalArgumentException("Parsed Type "+type
+                                    +" is not compatible for result type "+result.getClass()
+                                    +" (value "+result+") of node "+rdfNode+" and property "+property
+                                    +"! (Subclass of RdfEntity, UriRef, URI or URL is expected for NonLiteral Values)");
 						}
 					} else {
-						throw new IllegalArgumentException("Parsed Type "+type+" is not compatible for result type "+result.getClass()+" (value "+result+") of node "+rdfNode+" and property "+property+"! (Subclass of RdfEntity expected as type for NonLiteral values that are no instanceof UriRef)");
+						throw new IllegalArgumentException("Parsed Type "+type
+                                +" is not compatible for result type "+result.getClass()
+                                +" (value "+result+") of node "+rdfNode+" and property "+property
+                                +"! (Subclass of RdfEntity expected as type for NonLiteral values that are no instanceof UriRef)");
 					}
 				}
 			} else {
@@ -286,7 +305,8 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 			rdfValue = getRdfResource(value);
 			return factory.getGraph().add(new TripleImpl(rdfNode, property, rdfValue));
 		} catch (NoConvertorException e){
-			throw new IllegalArgumentException("Unable to transform "+value.getClass()+" to an RDF Node. Only "+RdfEntity.class+" and RDF Literal Types are supported");
+			throw new IllegalArgumentException("Unable to transform "+value.getClass()
+                    +" to an RDF Node. Only "+RdfEntity.class+" and RDF Literal Types are supported");
 		}
 	}
 	private boolean removeValue(UriRef property, Object value){	
@@ -295,7 +315,8 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 			rdfValue = getRdfResource(value);
 			return factory.getGraph().remove(new TripleImpl(rdfNode, property, rdfValue));
 		} catch (NoConvertorException e){
-			throw new IllegalArgumentException("Unable to transform "+value.getClass()+" to an RDF Node. Only "+RdfEntity.class+" and RDF Literal Types are supported");
+			throw new IllegalArgumentException("Unable to transform "+value.getClass()
+                    +" to an RDF Node. Only "+RdfEntity.class+" and RDF Literal Types are supported");
 		}
 	}
 	private void removeValues(UriRef proptery){
@@ -316,7 +337,7 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 	 *
 	 * @param <T>
 	 */
-	private class RdfProxyPropertyCollection<T> extends java.util.AbstractCollection<T> implements Collection<T>{
+	private class RdfProxyPropertyCollection<T> extends AbstractCollection<T> implements Collection<T>{
 
 		//private final NonLiteral resource;
 		private final UriRef property;

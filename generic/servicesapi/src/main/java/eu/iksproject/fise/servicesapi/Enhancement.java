@@ -1,19 +1,16 @@
 package eu.iksproject.fise.servicesapi;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.Date;
 
-import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 
 import eu.iksproject.fise.servicesapi.helper.Rdf;
 import eu.iksproject.fise.servicesapi.helper.RdfEntity;
-import eu.iksproject.fise.servicesapi.helper.RdfEntityFactory;
 
 /**
  * This Interface represents a Fise enhancement.
+ *
  * To create an instance of this interface use the following code
  * <code><pre>
  *  ContentItem ci;
@@ -26,8 +23,8 @@ import eu.iksproject.fise.servicesapi.helper.RdfEntityFactory;
  *  enhancement.setCreated(new Date());
  *  ...
  * </pre></code>
- * @author Rupert Westenthaler
  *
+ * @author Rupert Westenthaler
  */
 @Rdf(id="http://fise.iks-project.eu/ontology/Enhancement")
 public interface Enhancement extends RdfEntity{

@@ -120,7 +120,7 @@ public class ContentItemHelper {
         // calculate an ID based on the digest of the content
         String hexDigest = "";
         if (!baseUri.startsWith("urn:") && !baseUri.endsWith("/")) {
-            baseUri = baseUri + "/";
+            baseUri += "/";
         }
         try {
             hexDigest = ContentItemHelper.streamDigest(
