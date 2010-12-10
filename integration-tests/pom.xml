@@ -1,90 +1,110 @@
 <?xml version="1.0"?>
 <project>
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
+    <parent>
+        <groupId>eu.iksproject</groupId>
+        <artifactId>eu.iksproject.fise.parent</artifactId>
+        <version>0.9-SNAPSHOT</version>
+        <relativePath>../parent/pom.xml</relativePath>
+    </parent>
+
     <groupId>eu.iksproject</groupId>
-    <artifactId>eu.iksproject.fise.parent</artifactId>
+    <artifactId>eu.iksproject.fise.integration-tests</artifactId>
     <version>0.9-SNAPSHOT</version>
-    <relativePath>../parent/pom.xml</relativePath>
-  </parent>
+    <packaging>jar</packaging>
 
-  <groupId>eu.iksproject</groupId>
-  <artifactId>eu.iksproject.fise.integration-tests</artifactId>
-  <version>0.9-SNAPSHOT</version>
-  <packaging>jar</packaging>
+    <name>IKS FISE Integration Tests</name>
 
-  <name>IKS FISE Integration Tests</name>
+    <properties>
+        <test.hostname>localhost</test.hostname>
+    </properties>
+    
+    <dependencies>
+        <dependency>
+            <groupId>eu.iksproject</groupId>
+            <artifactId>eu.iksproject.fise.launchers.full</artifactId>
+            <version>0.9-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-exec</artifactId>
+            <version>1.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.7</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
-  <properties>
-    <pax-exam-version>1.2.0</pax-exam-version>
-  </properties>
-
-  <dependencies>
-    <!-- things to test -->
-    <dependency>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.fise.jersey</artifactId>
-      <version>0.9-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
-      <version>4.2.0</version>
-      <scope>test</scope>
-    </dependency>
-
-    <!-- for tests -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.7</version>
-      <scope>test</scope>
-    </dependency>
-
-     <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam</artifactId>
-      <version>${pax-exam-version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-junit</artifactId>
-      <version>${pax-exam-version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-container-default</artifactId>
-      <version>${pax-exam-version}</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.ops4j.pax.exam</groupId>
-        <artifactId>maven-paxexam-plugin</artifactId>
-        <version>1.2.2</version>
-        <executions>
-          <execution>
-            <id>generate-config</id>
-            <goals>
-              <goal>generate-config</goal>
-            </goals>
-          </execution>
-        </executions>
-
-        <configuration>
-          <options>
-            <profiles>log</profiles>
-          </options>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
+    <build>
+        <plugins>
+           <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${basedir}</directory>
+                            <includes>
+                                <!-- sling folder is the workdir of the executable jar that we test -->
+                                <include>sling</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-runnable-jar</id>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                            <phase>process-resources</phase>
+                        <configuration>
+                            <includeArtifactIds>eu.iksproject.fise.launchers.full</includeArtifactIds>
+                            <excludeTransitive>true</excludeTransitive>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- Find free ports to run our server -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>reserve-server-port</id>
+                        <goals>
+                            <goal>reserve-network-port</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <portNames>
+                                <portName>server.port</portName>
+                            </portNames>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <jar.executor.server.port>${server.port}</jar.executor.server.port>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+         </plugins>
+    </build>
 </project>
