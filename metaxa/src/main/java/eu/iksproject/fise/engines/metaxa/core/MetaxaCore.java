@@ -36,7 +36,6 @@ public class MetaxaCore {
      */
     private ExtractorRegistry extractorRegistry;
 
-
     /**
      * This creates a new instance of {@code ApertureExtractor} using the given
      * configuration.
@@ -54,7 +53,6 @@ public class MetaxaCore {
         this.extractorRegistry = new DefaultExtractorRegistry(in);
     }
 
-
     /**
      * This return {@code true} if the given MIME type is supported by the
      * extractor.
@@ -64,14 +62,9 @@ public class MetaxaCore {
      * @return a {@code boolean}
      */
     public boolean isSupported(String mimeType) {
-
         @SuppressWarnings("rawtypes")
-        Set factories =
-            this.extractorRegistry.getExtractorFactories(mimeType);
-        if (factories != null && !factories.isEmpty()) {
-            return true;
-        }
-        return false;
+        Set factories = this.extractorRegistry.getExtractorFactories(mimeType);
+        return factories != null && !factories.isEmpty();
     }
 
 
@@ -97,8 +90,7 @@ public class MetaxaCore {
             throws ExtractorException, IOException {
 
         @SuppressWarnings("rawtypes")
-        Set factories =
-            this.extractorRegistry.getExtractorFactories(mimeType);
+        Set factories = this.extractorRegistry.getExtractorFactories(mimeType);
         Model result = null;
         if (factories != null && !factories.isEmpty()) {
             // get extractor from the first available factory
@@ -120,7 +112,6 @@ public class MetaxaCore {
         return result;
     }
 
-
     /**
      * This returns a documents plain text if contained in the given extracted
      * metadata.
@@ -131,7 +122,6 @@ public class MetaxaCore {
      *         no plain text was contained in the extracted metadata
      */
     public static String getText(Model model) {
-
         String result = null;
         ClosableIterator<Statement> statements = null;
         try {
@@ -155,7 +145,7 @@ public class MetaxaCore {
                 statements.close();
             }
         }
-
         return result;
     }
+
 }

@@ -14,7 +14,11 @@ import eu.iksproject.fise.servicesapi.helper.EnhancementEngineHelper;
 import eu.iksproject.fise.servicesapi.rdf.Properties;
 
 public class EnhancementRDFUtils {
-	/**
+
+    private EnhancementRDFUtils() {
+    }
+
+    /**
 	 * @param literalFactory the LiteralFactory to use 
 	 * @param graph the MGraph to use
 	 * @param contentItemId the contentItemId the enhancement is extracted from

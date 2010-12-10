@@ -27,7 +27,6 @@ import org.w3c.dom.Document;
  * @author <a href="mailto:kasper@dfki.de">Walter Kasper</a>
  * 
  */
-
 public class IksHtmlExtractor implements Extractor {
 
     /**
@@ -50,19 +49,14 @@ public class IksHtmlExtractor implements Extractor {
         }
     }
 
-
     public IksHtmlExtractor() {
-
     }
-
 
     public IksHtmlExtractor(String configFileName)
             throws InitializationException {
-
         this();
         this.registry = new HtmlExtractionRegistry(configFileName);
     }
-
 
     public void extract(URI id,
             InputStream input, Charset charset, String mimeType,
@@ -120,7 +114,6 @@ public class IksHtmlExtractor implements Extractor {
         }
     }
 
-
     public static void main(String[] args)
             throws Exception {
 
@@ -141,4 +134,5 @@ public class IksHtmlExtractor implements Extractor {
             container.dispose();
         }
     }
+
 }

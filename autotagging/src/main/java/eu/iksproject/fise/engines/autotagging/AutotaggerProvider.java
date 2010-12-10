@@ -12,8 +12,8 @@ public interface AutotaggerProvider {
     /**
      * @return the autotagger instance or null if none is configured
      */
-    public Autotagger getAutotagger();
+    Autotagger getAutotagger();
 
-    public BundleContext getBundleContext();
+    BundleContext getBundleContext();
 
 }

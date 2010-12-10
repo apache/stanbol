@@ -36,19 +36,23 @@ import eu.iksproject.fise.servicesapi.rdf.TechnicalClasses;
 public class TestLocationEnhancementEngine {
 
 	private Logger log = LoggerFactory.getLogger(TestLocationEnhancementEngine.class);
+
 	/**
 	 * The context for the tests (same as in TestOpenNLPEnhancementEngine)
 	 */
 	public static final String CONTEXT = "Dr. Patrick Marshall (1869 - November 1950) was a"
         + " geologist who lived in New Zealand and worked at the University of Otago.";
+
 	/**
 	 * The person for the tests (same as in TestOpenNLPEnhancementEngine)
 	 */
 	public static final String PERSON = "Patrick Marshall";
+
 	/**
 	 * The organisation for the tests (same as in TestOpenNLPEnhancementEngine)
 	 */
 	public static final String ORGANISATION ="University of Otago";
+
 	/**
 	 * The place for the tests (same as in TestOpenNLPEnhancementEngine)
 	 */
@@ -56,12 +60,14 @@ public class TestLocationEnhancementEngine {
 	
 	
 	static LocationEnhancementEngine locationEnhancementEngine = new LocationEnhancementEngine();
+
     @BeforeClass
     public static void setUpServices() throws IOException {
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
         MockComponentContext context = new MockComponentContext(properties);
         locationEnhancementEngine.activate(context);
     }
+
     @AfterClass
     public static void shutdownServices() {
     	locationEnhancementEngine.deactivate(null);
@@ -114,6 +120,7 @@ public class TestLocationEnhancementEngine {
     	testAnnotation.setStart(start);
     	testAnnotation.setEnd(start+name.length());
     }
+
     @Test
     public void testLocationEnhancementEngine() {//throws Exception{
     	//create a content item
@@ -169,6 +176,7 @@ public class TestLocationEnhancementEngine {
         }
         return entityAnnotationCount;
     }
+
     /**
      * Checks if an entity annotation is valid
      *

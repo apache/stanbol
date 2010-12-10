@@ -51,9 +51,7 @@ public class XsltExtractor implements HtmlExtractionComponent {
 
 
     public XsltExtractor() {
-
     }
-
 
     public XsltExtractor(String id, String fileName, TransformerFactory factory)
             throws InitializationException {
@@ -69,79 +67,63 @@ public class XsltExtractor implements HtmlExtractionComponent {
         initialize(factory);
     }
 
-
     /**
      * @return the uriParameter
      */
     public String getUriParameter() {
-
         return uriParameter;
     }
-
 
     /**
      * @param uriParameter
      *            the uriParameter to set
      */
     public void setUriParameter(String uriParameter) {
-
         this.uriParameter = uriParameter;
     }
-
 
     /**
      * @return the syntax
      */
     public Syntax getSyntax() {
-
         return syntax;
     }
-
 
     /**
      * @param syntax
      *            the syntax to set
      */
     public void setSyntax(Syntax syntax) {
-
         this.syntax = syntax;
     }
-
 
     /**
      * @return the transformer
      */
     public Transformer getTransformer() {
-
         return transformer;
     }
-
 
     /**
      * @param transformer
      *            the transformer to set
      */
     public void setTransformer(Transformer transformer) {
-
         this.transformer = transformer;
     }
-
 
     /**
      * @return the id
      */
     public String getId() {
-
         return id;
     }
-
 
     /**
      * @param id
      *            the id to set
      */
     public void setId(String id) {
-
         this.id = id;
     }
 
@@ -150,7 +132,6 @@ public class XsltExtractor implements HtmlExtractionComponent {
      * @return the source
      */
     public URI getSource() {
-
         return source;
     }
 
@@ -160,7 +141,6 @@ public class XsltExtractor implements HtmlExtractionComponent {
      *            the source to set
      */
     public void setSource(URI source) {
-
         this.source = source;
     }
 
@@ -217,7 +197,6 @@ public class XsltExtractor implements HtmlExtractionComponent {
 
 
     public void initTransformerParameters(Map<String, Object> params) {
-
         this.transformer.clearParameters();
         if (params != null) {
             Set<String> parms = params.keySet();
@@ -226,4 +205,5 @@ public class XsltExtractor implements HtmlExtractionComponent {
             }
         }
     }
+
 }

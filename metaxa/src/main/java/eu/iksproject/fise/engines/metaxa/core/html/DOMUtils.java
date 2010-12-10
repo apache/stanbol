@@ -79,7 +79,6 @@ public final class DOMUtils {
 
     }
 
-
     /**
      * This prints the specified node and all of its children to System.out.
      * 
@@ -280,7 +279,6 @@ public final class DOMUtils {
         return null;
     }
 
-
     /**
      * This method writes a DOM document to the given output stream.
      * 
@@ -385,7 +383,6 @@ public final class DOMUtils {
         return document;
     }
 
-
     /**
      * This parses the given XML file and creates a DOM Document.
      * 
@@ -450,7 +447,6 @@ public final class DOMUtils {
         return null;
     }
 
-
     /**
      * This counts the elements in the given document by tag name.
      * 
@@ -466,7 +462,6 @@ public final class DOMUtils {
         NodeList list = doc.getElementsByTagName(tag);
         return list.getLength();
     }
-
 
     /**
      * This realizes the <code>indexOf</code> method of the
@@ -489,7 +484,6 @@ public final class DOMUtils {
         }
         return -1;
     }
-
 
     /**
      * This concatenates the string values of all text nodes which are direct
@@ -523,7 +517,6 @@ public final class DOMUtils {
         return null;
     }
 
-
     /**
      * This selects all direct children of the given element with the given
      * name. If the name is <code>null</code>, all children are returned.
@@ -549,7 +542,6 @@ public final class DOMUtils {
         return eles;
     }
 
-
     /**
      * This selects all direct children of type 'Element' of the given element.
      * 
@@ -559,7 +551,6 @@ public final class DOMUtils {
      *         children
      */
     public static List<Element> getChildrenElements(Element ele) {
-
         NodeList dtrs = ele.getChildNodes();
         List<Element> eles = new ArrayList<Element>();
         for (int i = 0, j = dtrs.getLength(); i < j; ++i) {
@@ -571,7 +562,6 @@ public final class DOMUtils {
 
         return eles;
     }
-
 
     /**
      * This returns the first child element with the given name found at the
@@ -585,7 +575,6 @@ public final class DOMUtils {
      *         such child was found
      */
     public static Element getFirstChild(Element ele, String name) {
-
         NodeList dtrs = ele.getChildNodes();
         for (int i = 0, iMax = dtrs.getLength(); i < iMax; ++i) {
             org.w3c.dom.Node item = dtrs.item(i);
@@ -595,7 +584,6 @@ public final class DOMUtils {
         }
         return null;
     }
-
 
     /**
      * This adds a new child with the given name to the given element.
@@ -612,4 +600,5 @@ public final class DOMUtils {
         ele.appendChild(child);
         return child;
     }
+
 }
