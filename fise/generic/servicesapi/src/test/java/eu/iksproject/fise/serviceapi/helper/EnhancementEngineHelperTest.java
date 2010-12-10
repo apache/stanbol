@@ -1,5 +1,8 @@
 package eu.iksproject.fise.serviceapi.helper;
 
+import static eu.iksproject.fise.servicesapi.rdf.Properties.FISE_RELATED_CONTENT_ITEM;
+import static eu.iksproject.fise.servicesapi.rdf.Properties.RDF_TYPE;
+import static eu.iksproject.fise.servicesapi.rdf.TechnicalClasses.FISE_EXTRACTION;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -15,8 +18,6 @@ import eu.iksproject.fise.servicesapi.ContentItem;
 import eu.iksproject.fise.servicesapi.EngineException;
 import eu.iksproject.fise.servicesapi.EnhancementEngine;
 import eu.iksproject.fise.servicesapi.helper.EnhancementEngineHelper;
-import eu.iksproject.fise.servicesapi.rdf.Properties;
-import eu.iksproject.fise.servicesapi.rdf.TechnicalClasses;
 
 public class EnhancementEngineHelperTest {
 
@@ -56,9 +57,9 @@ public class EnhancementEngineHelperTest {
         MGraph metadata = ci.getMetadata();
 
         assertTrue(metadata.contains(new TripleImpl(extraction,
-                Properties.FISE_RELATED_CONTENT_ITEM, new UriRef(ci.getId()))));
+                FISE_RELATED_CONTENT_ITEM, new UriRef(ci.getId()))));
         assertTrue(metadata.contains(new TripleImpl(extraction,
-                Properties.RDF_TYPE, TechnicalClasses.FISE_EXTRACTION)));
+                RDF_TYPE, FISE_EXTRACTION)));
         // and so on
     }
 }

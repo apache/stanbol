@@ -62,7 +62,7 @@ public class ModelResampler {
     }
 
     public ModelResampler withPrecomputedScoresFile(File tsvRanksFile) {
-        this.tsvScoreFile = tsvRanksFile;
+        tsvScoreFile = tsvRanksFile;
         return this;
     }
 

@@ -17,7 +17,6 @@ import eu.iksproject.fise.servicesapi.ContentItem;
  * Helper class to factorize common code for ContentItem handling.
  *
  * @author ogrisel
- *
  */
 public class ContentItemHelper {
 
@@ -32,12 +31,10 @@ public class ContentItemHelper {
     // TODO: instead of using a static helper, build an OSGi component with a
     // configurable site-wide URI namespace for ids that are local to the
     // server.
+
     /**
      * Check that ContentItem#getId returns a valid URI or make an urn out of
      * it.
-     *
-     * @param ci
-     * @return
      */
     public static UriRef ensureUri(ContentItem ci) {
         String uri = ci.getId();
@@ -118,13 +115,12 @@ public class ContentItemHelper {
 
     public static UriRef makeDefaultUri(String baseUri, byte[] content) {
         // calculate an ID based on the digest of the content
-        String hexDigest = "";
         if (!baseUri.startsWith("urn:") && !baseUri.endsWith("/")) {
             baseUri += "/";
         }
+        String hexDigest = "";
         try {
-            hexDigest = ContentItemHelper.streamDigest(
-                    new ByteArrayInputStream(content), null, SHA1);
+            hexDigest = streamDigest(new ByteArrayInputStream(content), null, SHA1);
         } catch (IOException e) {
             // this is not going to happen since output stream is null and the
             // input data is already loaded in memory

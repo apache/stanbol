@@ -53,6 +53,7 @@ public enum ZemantaPropertyEnum {
      * The text to analyse use UTF-8 encoding (required)
      */
     text(true),;
+
     private boolean required;
     private String defaultValue;
     private Set<String> valueList;

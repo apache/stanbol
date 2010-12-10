@@ -36,10 +36,9 @@ import com.hp.hpl.jena.tdb.TDBFactory;
 import eu.iksproject.autotagging.Autotagger;
 
 /**
- * Build a Lucene index out of a Jena model
+ * Build a Lucene index out of a Jena model.
  *
  * @author ogrisel
- *
  */
 public class ModelIndexer implements Closeable {
 
@@ -249,7 +248,7 @@ public class ModelIndexer implements Closeable {
 
     public static File buildDefaultIndex() throws CorruptIndexException,
             LockObtainFailedException, IOException {
-        return ModelIndexer.buildDefaultIndex(null, false);
+        return buildDefaultIndex(null, false);
     }
 
     public static File buildDefaultIndex(File folder, boolean deleteExisting)
@@ -275,7 +274,7 @@ public class ModelIndexer implements Closeable {
             }
             Model model = ModelFactory.createDefaultModel();
             model.read(stream, null, "N-TRIPLE");
-            ModelIndexer.index(model, fsDirectory);
+            index(model, fsDirectory);
         }
         return fsDirectory;
     }

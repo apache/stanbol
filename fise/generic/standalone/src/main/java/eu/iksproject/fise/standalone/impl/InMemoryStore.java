@@ -53,7 +53,7 @@ public class InMemoryStore implements Store {
     }
 
     public ContentItem get(String id) {
-        ContentItem result = null;
+        ContentItem result;
         synchronized (data) {
             result = data.get(id);
         }

@@ -117,7 +117,7 @@ public class JsonLdSerializerProvider implements SerializingProvider {
 	/**
 	 * Get the known namespace to prefix mapping.
 	 * 
-	 * @return A {@link java.util.Map} from namespace String to prefix String.
+	 * @return A {@link Map} from namespace String to prefix String.
 	 */
 	public Map<String, String> getNamespacePrefixMap() {
 		return namespacePrefixMap;
@@ -126,7 +126,7 @@ public class JsonLdSerializerProvider implements SerializingProvider {
 	/**
 	 * Sets the known namespaces for the serializer.
 	 * 
-	 * @param knownNamespaces A {@link java.util.Map} from namespace String to prefix String.
+	 * @param knownNamespaces A {@link Map} from namespace String to prefix String.
 	 */
 	public void setNamespacePrefixMap(Map<String, String> knownNamespaces) {
 		this.namespacePrefixMap = knownNamespaces;

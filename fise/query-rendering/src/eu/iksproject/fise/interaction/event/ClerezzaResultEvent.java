@@ -28,7 +28,7 @@ package eu.iksproject.fise.interaction.event;
 
 public class ClerezzaResultEvent extends Event {
 
-	private String result;
+	private final String result;
 	
 	public ClerezzaResultEvent (String result) {
 		this.result = result;

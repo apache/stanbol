@@ -1,9 +1,9 @@
 package eu.iksproject.fise.servicesapi;
 
 /**
- * Base exception raised by EnhancementEngine implementations when they fail to
+ * Base exception thrown by EnhancementEngine implementations when they fail to
  * process the provided content item.
- *
+ * <p>
  * If the failure is imputable to a malformed input in the
  * {@link ContentItem#getStream()} or {@link ContentItem#getMetadata()} one
  * should throw the subclass {@link InvalidContentException} instead.

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
@@ -46,10 +45,16 @@ import org.slf4j.LoggerFactory;
 import com.sun.jersey.api.view.ImplicitProduces;
 
 import eu.iksproject.fise.servicesapi.ContentItem;
-import eu.iksproject.fise.servicesapi.rdf.OntologicalClasses;
 import eu.iksproject.fise.servicesapi.rdf.Properties;
 
-@ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
+import static eu.iksproject.fise.servicesapi.rdf.OntologicalClasses.DBPEDIA_ORGANISATION;
+import static eu.iksproject.fise.servicesapi.rdf.OntologicalClasses.DBPEDIA_PERSON;
+import static eu.iksproject.fise.servicesapi.rdf.OntologicalClasses.DBPEDIA_PLACE;
+import static eu.iksproject.fise.servicesapi.rdf.Properties.GEO_LAT;
+import static eu.iksproject.fise.servicesapi.rdf.Properties.GEO_LONG;
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
+
+@ImplicitProduces(TEXT_HTML + ";qs=2")
 public class ContentItemResource extends NavigationMixin {
 
     @SuppressWarnings("unused")
@@ -65,12 +70,9 @@ public class ContentItemResource extends NavigationMixin {
 
     public static final Map<UriRef, String> DEFAULT_THUMBNAILS = new HashMap<UriRef, String>();
     static {
-        DEFAULT_THUMBNAILS.put(OntologicalClasses.DBPEDIA_PERSON,
-                "/static/images/user_48.png");
-        DEFAULT_THUMBNAILS.put(OntologicalClasses.DBPEDIA_ORGANISATION,
-                "/static/images/organization_48.png");
-        DEFAULT_THUMBNAILS.put(OntologicalClasses.DBPEDIA_PLACE,
-                "/static/images/compass_48.png");
+        DEFAULT_THUMBNAILS.put(DBPEDIA_PERSON, "/static/images/user_48.png");
+        DEFAULT_THUMBNAILS.put(DBPEDIA_ORGANISATION, "/static/images/organization_48.png");
+        DEFAULT_THUMBNAILS.put(DBPEDIA_PLACE, "/static/images/compass_48.png");
     }
 
     protected ContentItem contentItem;
@@ -160,7 +162,7 @@ public class ContentItemResource extends NavigationMixin {
     public Collection<EntityExtractionSummary> getPersonOccurrences()
             throws ParseException {
         if (people == null) {
-            people = getOccurrences(OntologicalClasses.DBPEDIA_PERSON);
+            people = getOccurrences(DBPEDIA_PERSON);
         }
         return people;
     }
@@ -168,7 +170,7 @@ public class ContentItemResource extends NavigationMixin {
     public Collection<EntityExtractionSummary> getOrganizationOccurrences()
             throws ParseException {
         if (organizations == null) {
-            organizations = getOccurrences(OntologicalClasses.DBPEDIA_ORGANISATION);
+            organizations = getOccurrences(DBPEDIA_ORGANISATION);
         }
         return organizations;
     }
@@ -176,7 +178,7 @@ public class ContentItemResource extends NavigationMixin {
     public Collection<EntityExtractionSummary> getPlaceOccurrences()
             throws ParseException {
         if (places == null) {
-            places = getOccurrences(OntologicalClasses.DBPEDIA_PLACE);
+            places = getOccurrences(DBPEDIA_PLACE);
         }
         return places;
     }
@@ -201,7 +203,7 @@ public class ContentItemResource extends NavigationMixin {
 
         SelectQuery query = (SelectQuery) QueryParser.getInstance().parse(q);
         ResultSet result = tcManager.executeSparqlQuery(query, graph);
-        Map<String, EntityExtractionSummary> occurenceMap = new TreeMap<String, EntityExtractionSummary>();
+        Map<String, EntityExtractionSummary> occurrenceMap = new TreeMap<String, EntityExtractionSummary>();
         LiteralFactory lf = LiteralFactory.getInstance();
         while (result.hasNext()) {
             SolutionMapping mapping = result.next();
@@ -217,10 +219,10 @@ public class ContentItemResource extends NavigationMixin {
             TypedLiteral textLiteral = (TypedLiteral) mapping.get("text");
             String text = lf.createObject(String.class, textLiteral);
 
-            EntityExtractionSummary entity = occurenceMap.get(text);
+            EntityExtractionSummary entity = occurrenceMap.get(text);
             if (entity == null) {
                 entity = new EntityExtractionSummary(text, type);
-                occurenceMap.put(text, entity);
+                occurrenceMap.put(text, entity);
             }
             UriRef entityUri = (UriRef) mapping.get("entity");
             if (entityUri != null) {
@@ -231,7 +233,7 @@ public class ContentItemResource extends NavigationMixin {
                 entity.addSuggestion(entityUri, label, confidence, properties);
             }
         }
-        return occurenceMap.values();
+        return occurrenceMap.values();
     }
 
     public static class EntityExtractionSummary implements
@@ -313,6 +315,25 @@ public class ContentItemResource extends NavigationMixin {
         @Override
         public int compareTo(EntityExtractionSummary o) {
             return getName().compareTo(o.getName());
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            EntityExtractionSummary that = (EntityExtractionSummary) o;
+
+            return !(name != null ? !name.equals(that.name) : that.name != null);
+        }
+
+        @Override
+        public int hashCode() {
+            return name != null ? name.hashCode() : 0;
         }
     }
 
@@ -417,7 +438,7 @@ public class ContentItemResource extends NavigationMixin {
     }
 
     public void setRdfSerializationFormat(String format) {
-        this.serializationFormat = format;
+        serializationFormat = format;
     }
 
     /**
@@ -435,12 +456,12 @@ public class ContentItemResource extends NavigationMixin {
                 }
                 UriRef uri = new UriRef(bestGuess.getUri());
                 Iterator<Triple> latitudes = remoteEntityCache.filter(uri,
-                        Properties.GEO_LAT, null);
+                        GEO_LAT, null);
                 if (latitudes.hasNext()) {
                     g.add(latitudes.next());
                 }
                 Iterator<Triple> longitutes = remoteEntityCache.filter(uri,
-                        Properties.GEO_LONG, null);
+                        GEO_LONG, null);
                 if (longitutes.hasNext()) {
                     g.add(longitutes.next());
                     g.add(new TripleImpl(uri, Properties.RDFS_LABEL,
@@ -452,4 +473,5 @@ public class ContentItemResource extends NavigationMixin {
         serializer.serialize(out, g, SupportedFormat.RDF_JSON);
         return out.toString("utf-8");
     }
+
 }

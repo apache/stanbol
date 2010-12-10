@@ -1,11 +1,13 @@
 package eu.iksproject.fise.serviceapi.helper;
 
+import static eu.iksproject.fise.servicesapi.rdf.Properties.*;
+import static eu.iksproject.fise.servicesapi.rdf.TechnicalClasses.FISE_TEXTANNOTATION;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
@@ -23,19 +25,19 @@ import eu.iksproject.fise.servicesapi.EntityAnnotation;
 import eu.iksproject.fise.servicesapi.TextAnnotation;
 import eu.iksproject.fise.servicesapi.helper.EnhancementEngineHelper;
 import eu.iksproject.fise.servicesapi.helper.RdfEntityFactory;
-import eu.iksproject.fise.servicesapi.rdf.Properties;
 import eu.iksproject.fise.servicesapi.rdf.TechnicalClasses;
 
 /**
- * Tests if the enhancement interfaces can be used to write valid enhancement
- * @author westei
+ * Tests if the enhancement interfaces can be used to write valid enhancement.
  *
+ * @author westei
  */
 public class TestEnhancementInterfaces {
 
 	public static final String SINGLE_SENTENCE = "Dr. Patrick Marshall (1869 - November 1950) was a"
         + " geologist who lived in New Zealand and worked at the University of Otago.";
-	public static final UriRef TEST_ENHANCEMENT_ENGINE_URI = new UriRef("urn:test:dummyEnhancemenEngine");
+	public static final UriRef TEST_ENHANCEMENT_ENGINE_URI = new UriRef("urn:test:dummyEnhancementEngine");
+
 	public static ContentItem wrapAsContentItem(final String id, final String text) {
         return new ContentItem() {
             SimpleMGraph metadata = new SimpleMGraph();
@@ -45,6 +47,7 @@ public class TestEnhancementInterfaces {
 	        public String getId() { return id; }
 	    };
 	}
+
 	@Test
 	public void testEnhancementInterfaces() throws Exception {
 		ContentItem ci = wrapAsContentItem("urn:contentItem-"
@@ -143,34 +146,30 @@ public class TestEnhancementInterfaces {
 				new UriRef("http://rdf.freebase.com/ns/freebase.apps.hosts.com.appspot.acre.juggle.juggle"),
 				new UriRef("http://rdf.freebase.com/ns/business.company")));
 		System.out.println("creation time "+(System.currentTimeMillis()-start)+"ms");
+
 		//now test the enhancement
 		int numberOfTextAnnotations = checkAllTextAnnotations(ci.getMetadata());
-		assertTrue(numberOfTextAnnotations == 3);
+        assertEquals(3, numberOfTextAnnotations);
+
 		int numberOfEntityAnnotations = checkAllEntityAnnotations(ci.getMetadata());
-		assertTrue(numberOfEntityAnnotations == 3);
+        assertEquals(3, numberOfEntityAnnotations);
 	}
-	/**
-	 * @return
-	 */
-	private UriRef createEnhancementURI() {
+
+	private static UriRef createEnhancementURI() {
 		//TODO: add some Utility to create Instances to the RdfEntityFactory
 		//      this should create a new URI by some default Algorithm 
-		UriRef enhancementNode = new UriRef("urn:enhancement-"
-                + EnhancementEngineHelper.randomUUID());
-		return enhancementNode;
+        return new UriRef("urn:enhancement-" + EnhancementEngineHelper.randomUUID());
 	}
-	   /*
+
+	/*
      * -----------------------------------------------------------------------
      * Helper Methods to check Text and EntityAnnotations
      * -----------------------------------------------------------------------
      */
-    /**
-     * @param g
-     * @return
-     */
+
     private int checkAllEntityAnnotations(MGraph g) {
         Iterator<Triple> entityAnnotationIterator = g.filter(null,
-                Properties.RDF_TYPE, TechnicalClasses.FISE_ENTITYANNOTATION);
+                RDF_TYPE, TechnicalClasses.FISE_ENTITYANNOTATION);
         int entityAnnotationCount = 0;
         while (entityAnnotationIterator.hasNext()) {
             UriRef entityAnnotation = (UriRef) entityAnnotationIterator.next().getSubject();
@@ -181,13 +180,9 @@ public class TestEnhancementInterfaces {
         return entityAnnotationCount;
     }
 
-    /**
-     * @param g
-     * @return
-     */
     private int checkAllTextAnnotations(MGraph g) {
         Iterator<Triple> textAnnotationIterator = g.filter(null,
-                Properties.RDF_TYPE, TechnicalClasses.FISE_TEXTANNOTATION);
+                RDF_TYPE, FISE_TEXTANNOTATION);
         // test if a textAnnotation is present
         assertTrue("Expecting non-empty textAnnotationIterator", textAnnotationIterator.hasNext());
         int textAnnotationCount = 0;
@@ -201,51 +196,45 @@ public class TestEnhancementInterfaces {
     }
 
     /**
-     * Checks if a text annotation is valid
-     *
-     * @param g
-     * @param textAnnotation
+     * Checks if a text annotation is valid.
      */
     private void checkTextAnnotation(MGraph g, UriRef textAnnotation) {
         Iterator<Triple> selectedTextIterator = g.filter(textAnnotation,
-                Properties.FISE_SELECTED_TEXT, null);
+                FISE_SELECTED_TEXT, null);
         // check if the selected text is added
         assertTrue(selectedTextIterator.hasNext());
         // test if the selected text is part of the TEXT_TO_TEST
         Resource object = selectedTextIterator.next().getObject();
         assertTrue(object instanceof Literal);
-        assertTrue(SINGLE_SENTENCE.indexOf(((Literal) object).getLexicalForm()) >= 0);
+        assertTrue(SINGLE_SENTENCE.contains(((Literal) object).getLexicalForm()));
         // test if context is added
         Iterator<Triple> selectionContextIterator = g.filter(textAnnotation,
-                Properties.FISE_SELECTION_CONTEXT, null);
+                FISE_SELECTION_CONTEXT, null);
         assertTrue(selectionContextIterator.hasNext());
         // test if the selected text is part of the TEXT_TO_TEST
         object = selectionContextIterator.next().getObject();
         assertTrue(object instanceof Literal);
-        assertTrue(SINGLE_SENTENCE.indexOf(((Literal) object).getLexicalForm()) >= 0);
+        assertTrue(SINGLE_SENTENCE.contains(((Literal) object).getLexicalForm()));
     }
 
     /**
-     * Checks if an entity annotation is valid
-     *
-     * @param g
-     * @param textAnnotation
+     * Checks if an entity annotation is valid.
      */
     private void checkEntityAnnotation(MGraph g, UriRef entityAnnotation) {
         Iterator<Triple> relationToTextAnnotationIterator = g.filter(
-                entityAnnotation, Properties.DC_RELATION, null);
+                entityAnnotation, DC_RELATION, null);
         // check if the relation to the text annotation is set
         assertTrue(relationToTextAnnotationIterator.hasNext());
         while (relationToTextAnnotationIterator.hasNext()) {
             // test if the referred annotations are text annotations
             UriRef referredTextAnnotation = (UriRef) relationToTextAnnotationIterator.next().getObject();
-            assertTrue(g.filter(referredTextAnnotation, Properties.RDF_TYPE,
-                    TechnicalClasses.FISE_TEXTANNOTATION).hasNext());
+            assertTrue(g.filter(referredTextAnnotation, RDF_TYPE,
+                    FISE_TEXTANNOTATION).hasNext());
         }
 
         // test if an entity is referred
         Iterator<Triple> entityReferenceIterator = g.filter(entityAnnotation,
-                Properties.FISE_ENTITY_REFERENCE, null);
+                FISE_ENTITY_REFERENCE, null);
         assertTrue(entityReferenceIterator.hasNext());
         // test if the reference is an URI
         assertTrue(entityReferenceIterator.next().getObject() instanceof UriRef);
@@ -254,7 +243,8 @@ public class TestEnhancementInterfaces {
 
         // finally test if the entity label is set
         Iterator<Triple> entityLabelIterator = g.filter(entityAnnotation,
-                Properties.FISE_ENTITY_LABEL, null);
+                FISE_ENTITY_LABEL, null);
         assertTrue(entityLabelIterator.hasNext());
     }
+
 }

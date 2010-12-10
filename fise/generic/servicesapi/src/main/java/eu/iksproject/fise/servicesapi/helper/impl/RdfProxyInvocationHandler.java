@@ -32,22 +32,26 @@ import eu.iksproject.fise.servicesapi.helper.RdfEntity;
 import eu.iksproject.fise.servicesapi.rdf.Properties;
 
 public class RdfProxyInvocationHandler implements InvocationHandler {
+
 	/**
 	 * The getID method of the RdfEntity Interface
 	 */
-	protected final static Method getIDMethod;
+    protected static final Method getIDMethod;
+
 	/**
 	 * The toString Method of {@link Object}
 	 */
-	protected final static Method toString;
+    protected static final Method toString;
+
 	/**
 	 * The equals Method of {@link Object}
 	 */
-	protected final static Method equals;
+    protected static final Method equals;
+
 	/**
 	 * The hashCode Method of {@link Object}
 	 */
-	protected final static Method hashCode;
+    protected static final Method hashCode;
 
 	static {
 		try {
@@ -78,7 +82,7 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 		//TODO If slow implement this by directly using the MGraph Interface!
 		Collection<UriRef> nodeTypes = getValues(Properties.RDF_TYPE, UriRef.class);
 		Set<Class<?>> interfaceSet = new HashSet<Class<?>>();
-		for(Class<?> clazz : parsedInterfaces){
+		for (Class<?> clazz : parsedInterfaces){
 			if(!clazz.isInterface()){
 				throw new IllegalStateException("Parsed Class "+clazz+" is not an interface!");
 			}
@@ -86,7 +90,7 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 			getSuperInterfaces(clazz, interfaceSet);
 		}
 		this.interfaces = Collections.unmodifiableSet(interfaceSet); //nobody should be able to change this! 
-		for(Class<?> clazz : this.interfaces){
+		for (Class<?> clazz : this.interfaces){
 			Rdf classAnnotation = clazz.getAnnotation(Rdf.class);
 			if(classAnnotation == null){
 			} else { //check of the type statement is present
@@ -103,14 +107,16 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 			}
 		}
 	}
+
 	private static void getSuperInterfaces(Class<?> interfaze, Collection<Class<?>> interfaces){
-		for(Class<?> superInterface : interfaze.getInterfaces()){
+		for (Class<?> superInterface : interfaze.getInterfaces()){
 			if(superInterface != null){
 				interfaces.add(superInterface);
 				getSuperInterfaces(superInterface, interfaces); //recursive
 			}
 		}
 	}
+
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		//RdfEntity rdfEntity;
@@ -170,22 +176,22 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 				throw new IllegalStateException("No support for Arrays right now. Use "+Collection.class+" instead");
 			}
 			//if null is parsed as value we need to delete all values
-			if(value == null){
+			if (value == null){
 				removeValues(property);
 				return null; //setter methods are void -> return null
 			}
 			//if a collection is parsed we need to check the generic type
-			if(Collection.class.isAssignableFrom(value.getClass())){
+			if (Collection.class.isAssignableFrom(value.getClass())){
 				Type genericType = null;
-				if(parameterTypes[0] instanceof ParameterizedType){
+				if (parameterTypes[0] instanceof ParameterizedType){
 					for(Type typeArgument : ((ParameterizedType)parameterTypes[0]).getActualTypeArguments()){
-						if(genericType == null){
+						if (genericType == null){
 							genericType = typeArgument;
 						} else {
 							//TODO: replace with a warning but for testing start with an exception
 							throw new IllegalStateException(
                                     "Multiple generic type definition for method "+method.toString()
-                                    +" (generic types: "+((ParameterizedType)parameterTypes[0]).getActualTypeArguments()+")");
+                                    +" (generic types: "+((ParameterizedType) parameterTypes[0]).getActualTypeArguments()+")");
 						}
 					}
 				}
@@ -197,13 +203,13 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 			}
 		} else { //assume an read (getter) method
 			Class<?> returnType = method.getReturnType();
-			if(Collection.class.isAssignableFrom(returnType)){
+			if (Collection.class.isAssignableFrom(returnType)){
 				Type genericType = null;
 				Type genericReturnType = method.getGenericReturnType();
-				if(genericReturnType instanceof ParameterizedType){
+				if (genericReturnType instanceof ParameterizedType){
 				    ParameterizedType type = (ParameterizedType) genericReturnType;
-					for(Type typeArgument : type.getActualTypeArguments()){
-						if(genericType == null){
+					for (Type typeArgument : type.getActualTypeArguments()){
+						if (genericType == null){
 							genericType = typeArgument;
 						} else {
 							//TODO: replace with a warning but for testing start with an exception
@@ -213,7 +219,7 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 						}
 					}
 				}
-				if(genericType == null){
+				if (genericType == null){
 					throw new IllegalStateException(
                             "Generic Type not defined for Collection in Method "+method.toString()
                             +" (generic type is needed to correctly map rdf values for property "+property);
@@ -228,23 +234,23 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 	@SuppressWarnings("unchecked")
 	private <T> T getValue(UriRef property, Class<T> type){
 		Iterator<Triple> results = factory.getGraph().filter(rdfNode, property, null);
-		if(results.hasNext()){
+		if (results.hasNext()){
 			Resource result = results.next().getObject();
-			if(result instanceof NonLiteral){
-				if(RdfEntity.class.isAssignableFrom(type)){
+			if (result instanceof NonLiteral){
+				if (RdfEntity.class.isAssignableFrom(type)){
 					return (T)factory.getProxy((NonLiteral)result, (Class<? extends RdfEntity>)type);
 				} else { //check result for UriRef and types UriRef, URI or URL
 					if(result instanceof UriRef){
-						if(UriRef.class.isAssignableFrom(type)){
+						if (UriRef.class.isAssignableFrom(type)){
 							return (T)result;
-						} else if(URI.class.isAssignableFrom(type)){
+						} else if (URI.class.isAssignableFrom(type)){
 							try {
 								return (T)new URI(((UriRef)result).getUnicodeString());
 							} catch (URISyntaxException e) {
 								throw new IllegalStateException("Unable to parse "+URI.class
                                         +" for "+UriRef.class+" value="+((UriRef)result).getUnicodeString());
 							}
-						} else if(URL.class.isAssignableFrom(type)){
+						} else if (URL.class.isAssignableFrom(type)){
 							try {
 								return (T)new URL(((UriRef)result).getUnicodeString());
 							} catch (MalformedURLException e) {
@@ -337,7 +343,7 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 	 *
 	 * @param <T>
 	 */
-	private class RdfProxyPropertyCollection<T> extends AbstractCollection<T> implements Collection<T>{
+	private class RdfProxyPropertyCollection<T> extends AbstractCollection<T> {
 
 		//private final NonLiteral resource;
 		private final UriRef property;
@@ -369,7 +375,7 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 				@Override
 				public T next() {
 					Resource value = results.next().getObject();
-					if(entity){
+					if (entity){
 						//type checks are done within the constructor 
 						return (T) factory.getProxy((NonLiteral)value, (Class<? extends RdfEntity>)genericType);
 					} else if(uri){
@@ -402,14 +408,14 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 		public int size() {
 			Iterator<Triple> results = factory.getGraph().filter(rdfNode, property, null);
 			int size = 0;
-			for(;results.hasNext();size++){
+			for (;results.hasNext();size++){
 				results.next();
 			}
 			return size;
 		}
 		public boolean add(T value) {
 			return addValue(property, value);
-		};
+		}
 		@Override
 		public boolean remove(Object value) {
 			return removeValue(property,value);

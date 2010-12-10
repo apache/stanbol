@@ -32,8 +32,8 @@ public class BundleURIResolver implements URIResolver {
         }
         String resource;
         try {
-            LOG.debug("base: " + base + "\nhref: " + href);
-            URL newUrl = null;
+            LOG.debug("base: " + base + "\n" + "href: " + href);
+            URL newUrl;
             if (base.startsWith("bundle:")) {
                 URI baseURI = new URI(base);
                 String path = baseURI.getPath();

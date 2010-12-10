@@ -18,6 +18,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 class ResultSetToXml {
+
 	private final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 	
 	Document toDocument(ResultSet rs) throws ParserConfigurationException {
@@ -68,7 +69,7 @@ class ResultSetToXml {
 	}
 	
 	private Element createValueElement(Resource resource, Document doc) {
-		Element value = null;
+		Element value;
 		if (resource instanceof UriRef) {
 			value = doc.createElement("uri");
 			value.appendChild(doc.createTextNode(((UriRef) resource)

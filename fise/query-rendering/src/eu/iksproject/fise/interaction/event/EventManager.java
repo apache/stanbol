@@ -31,7 +31,7 @@ import java.util.Set;
 
 public class EventManager {
 
-	private static Set<EventListener> listeners = new HashSet<EventListener>();
+	private static final Set<EventListener> listeners = new HashSet<EventListener>();
 
 	public static void eventOccurred (Event e) {
 		synchronized (listeners) {

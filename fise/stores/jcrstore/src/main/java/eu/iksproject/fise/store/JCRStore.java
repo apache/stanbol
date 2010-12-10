@@ -38,12 +38,11 @@ import eu.iksproject.fise.store.jcr.JCRContentItem;
  * 
  * @scr.property name="service.ranking" type=Integer value=10000
  */
-
 @Component(immediate = false)
 @Service
 public class JCRStore implements Store {
 
-	private final static Logger log = LoggerFactory.getLogger("eu.iksproject.fise.store.JCRStore");
+	private static final Logger log = LoggerFactory.getLogger("eu.iksproject.fise.store.JCRStore");
 
 	private static final String FISE_ROOT_NODE = "fise";
 

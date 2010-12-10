@@ -19,7 +19,6 @@ import com.ibm.icu.text.CharsetMatch;
  * @author <a href="mailto:kasper@dfki.de">Walter Kasper</a>
  * 
  */
-
 public class CharsetRecognizer {
 
     /**
@@ -94,8 +93,9 @@ public class CharsetRecognizer {
         String result = null;
         if (format != null) {
             result = checkFormat(format, in);
-            if (result != null)
+            if (result != null) {
                 return result;
+            }
         }
         // in case of HTML or XML check whether there is a charset
         // specification; might be too fragile
@@ -110,10 +110,6 @@ public class CharsetRecognizer {
         return result;
     }
 
-
-    /**
-     * @param args
-     */
     public static void main(String[] args) {
 
         String format = null;

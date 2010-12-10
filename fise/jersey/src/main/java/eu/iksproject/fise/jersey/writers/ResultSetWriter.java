@@ -22,9 +22,10 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.clerezza.rdf.core.sparql.ResultSet;
 import org.w3c.dom.Document;
 
-/** MessageBodyWriter for a ResultSet.
- * 	Clerezza does provide such a writer, but it seems to require
- * 	quite a lot of Clerezza dependencies that we don't really need.
+/**
+ * MessageBodyWriter for a ResultSet.
+ * Clerezza does provide such a writer, but it seems to require
+ * quite a lot of Clerezza dependencies that we don't really need.
  */
 @Provider
 @Produces({"application/sparql-results+xml", "application/xml", "text/xml"})
@@ -48,11 +49,10 @@ public class ResultSetWriter implements MessageBodyWriter<ResultSet> {
 			Annotation[] annotations, MediaType mediaType,
 			MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
 			throws IOException, WebApplicationException {
-		Document doc = null;
 
-		try {
-			doc = new ResultSetToXml().toDocument(resultSet);
-			DOMSource domSource = new DOMSource(doc);
+        try {
+            Document doc = new ResultSetToXml().toDocument(resultSet);
+            DOMSource domSource = new DOMSource(doc);
 			StreamResult streamResult = new StreamResult(entityStream);
 			TransformerFactory tf = TransformerFactory.newInstance();
 			Transformer serializer = tf.newTransformer();

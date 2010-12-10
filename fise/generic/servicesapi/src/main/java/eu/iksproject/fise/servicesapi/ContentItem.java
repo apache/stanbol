@@ -36,11 +36,12 @@ import java.io.InputStream;
 
 import org.apache.clerezza.rdf.core.MGraph;
 
-/** A unit of content that FISE can enhance.
- *  
- *  Gives access to the binary content that
- *  was registered, and the Graph that represents its metadata
- *  (provided by client and/or generated).   
+/**
+ * A unit of content that FISE can enhance.
+ * <p>
+ * Gives access to the binary content that
+ * was registered, and the Graph that represents its metadata
+ * (provided by client and/or generated).
  */
 public interface ContentItem {
 

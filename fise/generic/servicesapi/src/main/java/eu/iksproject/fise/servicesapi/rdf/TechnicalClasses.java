@@ -8,13 +8,14 @@ import org.apache.clerezza.rdf.core.UriRef;
  *
  * @author ogrisel
  */
-public interface TechnicalClasses {
+public class TechnicalClasses {
 
     /**
      * Type used for all enhancement created by Fise
      */
     public static final UriRef FISE_ENHANCEMENT = new UriRef(
     		NamespaceEnum.fise+"Enhancement");
+
     /**
      * Type used for annotations on Text created by FISE. This type is intended
      * to be used in combination with FISE_ENHANCEMENT
@@ -28,6 +29,7 @@ public interface TechnicalClasses {
      */
     public static final UriRef FISE_ENTITYANNOTATION = new UriRef(
     		NamespaceEnum.fise+"EntityAnnotation");
+
     /**
      * To be used as a type pour any semantic knowledge extraction
      */
@@ -58,4 +60,8 @@ public interface TechnicalClasses {
      */
     public static final UriRef FISE_CATEGORY = new UriRef(
     		NamespaceEnum.fise + "Category");
+
+    private TechnicalClasses() {
+    }
+
 }

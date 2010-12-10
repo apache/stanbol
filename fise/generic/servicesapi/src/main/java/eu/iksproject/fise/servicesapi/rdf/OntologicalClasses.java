@@ -12,7 +12,7 @@ import org.apache.clerezza.rdf.core.UriRef;
  *
  * @author ogrisel@nuxeo.com
  */
-public interface OntologicalClasses {
+public class OntologicalClasses {
 
     public static final UriRef DBPEDIA_PERSON = new UriRef(
             NamespaceEnum.dbpedia_ont+"Person");
@@ -22,4 +22,8 @@ public interface OntologicalClasses {
 
     public static final UriRef DBPEDIA_ORGANISATION = new UriRef(
     		NamespaceEnum.dbpedia_ont+"Organisation");
+
+    private OntologicalClasses() {
+    }
+
 }

@@ -24,7 +24,7 @@ public class JsonLdResource {
 	}
 	
 	public void addType(String type) {
-		this.types.add(type);
+        types.add(type);
 	}
 
 	public void addAllTypes(List<String> types) {
@@ -40,11 +40,11 @@ public class JsonLdResource {
 	}
 	
 	public void putProperty(String property, Object value) {
-		this.propertyMap.put(property, value);
+        propertyMap.put(property, value);
 	}
 
 	public Map<String, Object> getPropertyMap() {
-		return this.propertyMap;
+		return propertyMap;
 	}
 	
 }

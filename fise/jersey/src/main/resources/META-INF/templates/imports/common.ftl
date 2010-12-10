@@ -16,6 +16,7 @@
     <script type="text/javascript" src="/static/scripts/jit.js"></script>
 
   </head>
+
   <body>
     <div class="home"><a href="/"><img src="/static/images/apache_stanbol_logo_cropped.png" alt="Stanbol Home" /></a></div>
     <div class="header">

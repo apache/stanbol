@@ -46,7 +46,7 @@ public interface EnhancementJobManager {
 
     /**
      * Create relevant asynchronous requests or enhance content immediately. The
-     * result is not persisted right now. The caller is responsible to call the
+     * result is not persisted right now. The caller is responsible for calling the
      * {@link Store#put(ContentItem)} afterwards in case persistence is
      * required.
      * <p>
@@ -62,4 +62,5 @@ public interface EnhancementJobManager {
      * can be used by the manager.
      */
     List<EnhancementEngine> getActiveEngines();
+
 }

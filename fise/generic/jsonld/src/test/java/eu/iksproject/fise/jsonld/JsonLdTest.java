@@ -114,7 +114,6 @@ public class JsonLdTest {
 		String actualIndent = jsonLd.toString(4);
 		String expectedIndent = "[\n    {\n        \"#\": {\n            \"foaf\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\"\n        },\n        \"@\": \"_:bnode1\",\n        \"a\": \"foaf:Person\",\n        \"foaf:homepage\": \"<http:\\/\\/example.com\\/bob>\",\n        \"foaf:name\": \"Bob\"\n    },\n    {\n        \"#\": {\n            \"foaf\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\"\n        },\n        \"@\": \"_:bnode2\",\n        \"a\": \"foaf:Person\",\n        \"foaf:homepage\": \"<http:\\/\\/example.com\\/eve>\",\n        \"foaf:name\": \"Eve\"\n    },\n    {\n        \"#\": {\n            \"foaf\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\"\n        },\n        \"@\": \"_:bnode3\",\n        \"a\": \"foaf:Person\",\n        \"foaf:homepage\": \"<http:\\/\\/example.com\\/eve>\",\n        \"foaf:name\": \"Eve\"\n    }\n]";
 		assertEquals(expectedIndent, actualIndent);
-		
 	}
 	
 	@Test

@@ -45,7 +45,7 @@ public class IksHtmlExtractor implements Extractor {
         try {
             registry.initialize(DEFAULT_CONFIGURATION);
         } catch (InitializationException e) {
-            LOG.error("Registration Initalization Error: " + e.getMessage());
+            LOG.error("Registration Initialization Error: " + e.getMessage());
         }
     }
 
@@ -114,9 +114,7 @@ public class IksHtmlExtractor implements Extractor {
         }
     }
 
-    public static void main(String[] args)
-            throws Exception {
-
+    public static void main(String[] args) throws Exception {
         int argv = 0;
         IksHtmlExtractor inst = new IksHtmlExtractor();
         RDFContainerFactory rdfFactory = new RDFContainerFactoryImpl();

@@ -74,7 +74,7 @@ public class AutotaggingServlet extends HttpServlet {
         Writer writer = resp.getWriter();
         JSONObject suggestionList = new JSONObject();
         List<Map<String, Object>> suggestionObjects = new ArrayList<Map<String,Object>>(suggestions.size());
-    	for(TagInfo suggestion : suggestions){
+    	for (TagInfo suggestion : suggestions){
     		Map<String,Object> map = new HashMap<String, Object>();
     		map.put("uri", suggestion.getId());
     		map.put("label",suggestion.getLabel());

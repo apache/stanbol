@@ -29,8 +29,9 @@ import eu.iksproject.fise.servicesapi.EnhancementEngine;
 import eu.iksproject.fise.servicesapi.EnhancementJobManager;
 import eu.iksproject.fise.servicesapi.ServiceProperties;
 import eu.iksproject.fise.servicesapi.helper.EnhancementEngineHelper;
-import eu.iksproject.fise.servicesapi.rdf.Properties;
-import eu.iksproject.fise.servicesapi.rdf.TechnicalClasses;
+
+import static eu.iksproject.fise.servicesapi.rdf.Properties.*;
+import static eu.iksproject.fise.servicesapi.rdf.TechnicalClasses.FISE_TEXTANNOTATION;
 
 /**
  * Engine that uses an AutotaggerProvider to process existing TextAnnotations of
@@ -39,7 +40,7 @@ import eu.iksproject.fise.servicesapi.rdf.TechnicalClasses;
  * @author ogrisel, rwesten
  */
 @Component(immediate = true, metatype = true)
-@Service()
+@Service
 public class EntityMentionEnhancementEngine implements EnhancementEngine,
         ServiceProperties {
 
@@ -69,17 +70,17 @@ public class EntityMentionEnhancementEngine implements EnhancementEngine,
 
         // Retrieve the existing text annotations
         Map<UriRef, List<UriRef>> textAnnotations = new HashMap<UriRef, List<UriRef>>();
-        for (Iterator<Triple> it = graph.filter(null, Properties.RDF_TYPE,
-                TechnicalClasses.FISE_TEXTANNOTATION); it.hasNext();) {
+        for (Iterator<Triple> it = graph.filter(null, RDF_TYPE,
+                FISE_TEXTANNOTATION); it.hasNext();) {
             UriRef uri = (UriRef) it.next().getSubject();
-            if (graph.filter(uri, Properties.DC_RELATION, null).hasNext()) {
+            if (graph.filter(uri, DC_RELATION, null).hasNext()) {
                 // this is not the most specific occurrence of this name: skip
                 continue;
             }
             // This is a first occurrence, collect any subsumed annotations
             List<UriRef> subsumed = new ArrayList<UriRef>();
             for (Iterator<Triple> it2 = graph.filter(null,
-                    Properties.DC_RELATION, uri); it2.hasNext();) {
+                    DC_RELATION, uri); it2.hasNext();) {
                 subsumed.add((UriRef) it2.next().getSubject());
             }
             textAnnotations.put(uri, subsumed);
@@ -87,51 +88,47 @@ public class EntityMentionEnhancementEngine implements EnhancementEngine,
 
         for (Map.Entry<UriRef, List<UriRef>> entry : textAnnotations.entrySet()) {
             try {
-                computeEntityRecommentations(autotagger, literalFactory, graph,
-                        contentItemId, entry.getKey(), entry.getValue());
+                computeEntityRecommendations(autotagger, literalFactory, graph, contentItemId, entry.getKey(), entry.getValue());
             } catch (IOException e) {
                 throw new EngineException(this, ci, e);
             }
         }
     }
 
-    protected final Collection<TagInfo> computeEntityRecommentations(
-            Autotagger autotagger, LiteralFactory literalFactory, MGraph graph,
-            UriRef contentItemId, UriRef textAnnotation,
-            List<UriRef> subsumedAnnotations) throws IOException {
+    protected final Collection<TagInfo> computeEntityRecommendations(Autotagger autotagger, LiteralFactory literalFactory, MGraph graph, UriRef contentItemId, UriRef textAnnotation, List<UriRef> subsumedAnnotations) throws IOException {
         // First get the required properties for the parsed textAnnotation
         // ... and check the values
         String name = EnhancementEngineHelper.getString(graph, textAnnotation,
-                Properties.FISE_SELECTED_TEXT);
+                FISE_SELECTED_TEXT);
         if (name == null) {
             log.warn("Unable to process TextAnnotation " + textAnnotation
-                    + " because property" + Properties.FISE_SELECTED_TEXT
+                    + " because property" + FISE_SELECTED_TEXT
                     + " is not present");
             return Collections.emptyList();
         }
         String context = EnhancementEngineHelper.getString(graph,
-                textAnnotation, Properties.FISE_SELECTION_CONTEXT);
+                textAnnotation, FISE_SELECTION_CONTEXT);
         if (context == null) {
             log.warn("Unable to process TextAnnotation " + textAnnotation
-                    + " because property" + Properties.FISE_SELECTION_CONTEXT
+                    + " because property" + FISE_SELECTION_CONTEXT
                     + " is not present");
             return Collections.emptyList();
         }
 
         // aggregate context from subsumed entries:
-        for (NonLiteral subsumendAnnotation : subsumedAnnotations) {
+        for (NonLiteral subsumedAnnotation : subsumedAnnotations) {
             String otherContext = EnhancementEngineHelper.getString(graph,
-                    subsumendAnnotation, Properties.FISE_SELECTION_CONTEXT);
+                    subsumedAnnotation, FISE_SELECTION_CONTEXT);
             if (otherContext != null) {
                 context += " " + otherContext;
             }
         }
 
         UriRef type = EnhancementEngineHelper.getReference(graph,
-                textAnnotation, Properties.DC_TYPE);
+                textAnnotation, DC_TYPE);
         if (type == null) {
             log.warn("Unable to process TextAnnotation " + textAnnotation
-                    + " because property" + Properties.DC_TYPE
+                    + " because property" + DC_TYPE
                     + " is not present");
             return Collections.emptyList();
         }

@@ -1,7 +1,8 @@
 Building FISE
 =============
 
-You need Java 6 and maven (version as defined in the pom)
+You need Java 6 and maven (version as defined in the pom).
+
 You probably need
   export MAVEN_OPTS="-Xmx512M -XX:MaxPermSize=128M"
 or similar.
@@ -46,9 +47,8 @@ Hot (re-)deployment of a single bundle
 --------------------------------------
 
 If you are working on specific subproject (e.g. a new engine) can you test it on
-a running fise instance without redeploying the complete server from scracth.
-Just got to the folder of your project and run::
+a running FISE instance without redeploying the complete server from scracth.
+
+Just go to the uour project folder and run::
 
   % mvn install -o -DskipTests -PinstallBundle -Dsling.url=http://localhost:8080/system/console
-
-

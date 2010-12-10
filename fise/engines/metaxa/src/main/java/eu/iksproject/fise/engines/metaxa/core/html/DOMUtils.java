@@ -31,6 +31,7 @@ package eu.iksproject.fise.engines.metaxa.core.html;
  * in the design, construction, operation or maintenance of any nuclear
  * facility.
  */
+// TODO: this license doesn't look open source to me
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

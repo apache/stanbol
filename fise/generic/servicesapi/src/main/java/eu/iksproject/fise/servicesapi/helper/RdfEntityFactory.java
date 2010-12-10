@@ -16,6 +16,7 @@ public abstract class RdfEntityFactory {
 	
 	/**
 	 * Creates a new factory for the parsed {@link MGraph} instance.
+     *
 	 * @param graph the graph used by the proxies created by this factory to
 	 * read/write there data
 	 * @return the created factory
@@ -29,7 +30,8 @@ public abstract class RdfEntityFactory {
 	 * Interfaces. The interface parsed as type must extend {@link RdfEntity}.
 	 * Additional interfaces must not extend this interface.
      * <p>
-	 * Interfaces parsed as parameter:<ul>
+	 * Interfaces parsed as parameter:
+     * <ul>
 	 * <li> SHOULD have an {@link Rdf} annotation. If that is the case, than the
 	 * according rdf:type statements are checks/added when the proxy is created
 	 * <li> all methods of the parsed interfaces MUST HAVE {@link Rdf} 
@@ -40,7 +42,9 @@ public abstract class RdfEntityFactory {
 	 * getSomething). Methods with a parameter do set the parsed data. Methods
 	 * with a return type do read the data.
 	 * </ul>
-	 * Proxies returned by this Factory:<ul>
+	 *
+     * Proxies returned by this Factory:
+     * <ul>
 	 * <li> MUST NOT have an internal state. They need to represent a view over
 	 * the current data within the {@link MGraph} instance. Direct changes to 
 	 * the graph need to be reflected in calls to proxies.
@@ -65,6 +69,7 @@ public abstract class RdfEntityFactory {
 	 * @throws NullPointerException if the parameter type, additionalInterfaces
 	 * or any entry of additionalInterfaces is <code>null</code>. 
 	 */
-	public abstract <T extends RdfEntity> T getProxy(NonLiteral rdfNode, Class<T> type, Class<?>... additionalInterfaces) throws IllegalArgumentException;
+	public abstract <T extends RdfEntity> T getProxy(NonLiteral rdfNode,
+            Class<T> type, Class<?>... additionalInterfaces) throws IllegalArgumentException;
 
 }

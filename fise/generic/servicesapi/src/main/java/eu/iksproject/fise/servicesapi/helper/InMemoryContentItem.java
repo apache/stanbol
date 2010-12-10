@@ -11,7 +11,7 @@ import eu.iksproject.fise.servicesapi.ContentItem;
 /**
  * Base content item implementation that holds a complete copy of the data in
  * memory.
- *
+ * <p>
  * This implementation can be used independently of any store implementation and
  * is suitable for stateless processing.
  */

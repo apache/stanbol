@@ -18,6 +18,7 @@
         <bundle>mvn:eu.iksproject/eu.iksproject.fise.servicesapi/0.9-SNAPSHOT</bundle>
         <bundle>mvn:eu.iksproject/eu.iksproject.fise.standalone/0.9-SNAPSHOT</bundle>
         <bundle>mvn:eu.iksproject/eu.iksproject.fise.jobmanager/0.9-SNAPSHOT</bundle>
+
         <!-- additional engines -->
         <!-- autotagging -->
         <bundle>mvn:eu.iksproject/eu.iksproject.fise.engines.autotagging/0.9-SNAPSHOT</bundle>

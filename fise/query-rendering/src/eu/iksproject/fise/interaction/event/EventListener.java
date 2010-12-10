@@ -28,6 +28,6 @@ package eu.iksproject.fise.interaction.event;
 
 public interface EventListener {
 	
-	public void eventOccurred (Event e);
+	void eventOccurred (Event e);
 
 }

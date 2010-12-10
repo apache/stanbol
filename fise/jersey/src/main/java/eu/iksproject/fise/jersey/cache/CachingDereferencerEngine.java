@@ -25,7 +25,6 @@ import org.apache.clerezza.rdf.core.access.NoSuchEntityException;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
-import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -41,18 +40,20 @@ import eu.iksproject.fise.servicesapi.ServiceProperties;
 import eu.iksproject.fise.servicesapi.Store;
 import eu.iksproject.fise.servicesapi.rdf.Properties;
 
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
+
 /**
  * Simple engine that does not enhance content items but fetches resources
  * metadata from remote sites to cache them locally for the sole purpose of
  * displaying up to date data in the user interface.
- *
+ * <p>
  * This engine might be replaced by a proper dereferencer engine in a future
  * version of fise.
  *
  * @author Olivier Grisel
  */
 @Component(immediate = true, metatype = true)
-@Service()
+@Service
 public class CachingDereferencerEngine implements EnhancementEngine,
         ServiceProperties, EntityCacheProvider {
 
@@ -64,7 +65,7 @@ public class CachingDereferencerEngine implements EnhancementEngine,
      * The default value for the Execution of this Engine. Currently set to
      * {@link EnhancementJobManager#DEFAULT_ORDER}
      */
-    public static final Integer defaultOrder = ServiceProperties.ORDERING_POST_PROCESSING;
+    public static final Integer defaultOrder = ORDERING_POST_PROCESSING;
 
     @Reference
     protected Parser parser;
@@ -107,7 +108,7 @@ public class CachingDereferencerEngine implements EnhancementEngine,
         serializer.start();
     }
 
-    protected void disactivate(ComponentContext ce) throws IOException {
+    protected void deactivate(ComponentContext ce) throws IOException {
         executor.shutdownNow();
         executor = null;
         fetchTaskQueue = null;
@@ -166,8 +167,8 @@ public class CachingDereferencerEngine implements EnhancementEngine,
     public Graph dereferenceHTTP(UriRef reference) throws IOException {
         final URL url = new URL(reference.getUnicodeString());
         final URLConnection con = url.openConnection();
-        con.addRequestProperty("Accept", SupportedFormat.RDF_XML);
-        return parser.parse(con.getInputStream(), SupportedFormat.RDF_XML);
+        con.addRequestProperty("Accept", RDF_XML);
+        return parser.parse(con.getInputStream(), RDF_XML);
     }
 
     public Graph dereferenceSPARQL(String endpointURL, UriRef reference)
@@ -180,7 +181,7 @@ public class CachingDereferencerEngine implements EnhancementEngine,
         query.append(reference);
         query.append(" ?p ?o }");
 
-        String format = SupportedFormat.RDF_XML;
+        String format = RDF_XML;
         final URI uri = UriBuilder.fromUri(endpointURL).queryParam("query",
                 "{query}").queryParam("format", "{format}").build(
                 query.toString(), format);
@@ -210,7 +211,7 @@ public class CachingDereferencerEngine implements EnhancementEngine,
     @Override
     public Map<String, Object> getServiceProperties() {
         return Collections.unmodifiableMap(Collections.singletonMap(
-                ServiceProperties.ENHANCEMENT_ENGINE_ORDERING,
+                ENHANCEMENT_ENGINE_ORDERING,
                 (Object) defaultOrder));
     }
 

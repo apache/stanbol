@@ -9,8 +9,8 @@ import eu.iksproject.fise.servicesapi.helper.Rdf;
 import eu.iksproject.fise.servicesapi.helper.RdfEntity;
 
 /**
- * This Interface represents a Fise enhancement.
- *
+ * This Interface represents a FISE enhancement.
+ * <p>
  * To create an instance of this interface use the following code
  * <code><pre>
  *  ContentItem ci;

@@ -17,9 +17,10 @@ public class NavigationMixin {
     }
 
     public List<MenuItem> getMainMenuItems() {
-        return Arrays.asList(new MenuItem("/engines", "/engines", uriInfo),
-                new MenuItem("/store", "/store", uriInfo), new MenuItem(
-                        "/sparql", "/sparql", uriInfo));
+        return Arrays.asList(
+                new MenuItem("/engines", "/engines", uriInfo),
+                new MenuItem("/store", "/store", uriInfo),
+                new MenuItem("/sparql", "/sparql", uriInfo));
     }
 
     public static class MenuItem {
