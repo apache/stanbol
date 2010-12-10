@@ -50,165 +50,128 @@ import eu.iksproject.fise.servicesapi.rdf.Properties;
 @Service
 public class MetaxaEngine implements EnhancementEngine, ServiceProperties {
 
-  /**
-   * This contains the logger.
-   */
-  private static Logger log =
-    LoggerFactory.getLogger(MetaxaEngine.class);
+    /**
+     * This contains the logger.
+     */
+    private static final Logger log = LoggerFactory.getLogger(MetaxaEngine.class);
 
-  /**
-   * The default value for the Execution of this Engine. Currently set to
-   * {@link ServiceProperties#ORDERING_PRE_PROCESSING}
-   */
-  public static final Integer defaultOrder = ServiceProperties.ORDERING_PRE_PROCESSING;
+    /**
+     * The default value for the Execution of this Engine. Currently set to
+     * {@link ServiceProperties#ORDERING_PRE_PROCESSING}
+     */
+    public static final Integer defaultOrder = ORDERING_PRE_PROCESSING;
 
+    /**
+     * This contains the Aperture extractor.
+     */
+    private MetaxaCore extractor;
 
-  /**
-   * This contains the Aperture extractor.
-   */
-  private MetaxaCore extractor;
+    /**
+     * The activate method.
+     *
+     * @param ce the {@link ComponentContext}
+     * @throws IOException if initializing fails
+     */
+    protected void activate(ComponentContext ce) throws IOException {
 
-
-  /**
-   * The activate method.
-   *
-   * @param ce
-   *          the {@link ComponentContext}
-   * @throws IOException
-   *           if initializing fails
-   */
-  protected void activate(ComponentContext ce)
-      throws IOException {
-
-    try {
-      this.extractor= new MetaxaCore("extractionregistry.xml");
-      BundleURIResolver.BUNDLE = ce.getBundleContext().getBundle();
-    } catch (IOException e) {
-      log.error(e.getLocalizedMessage(), e);
-      throw e;
+        try {
+            this.extractor = new MetaxaCore("extractionregistry.xml");
+            BundleURIResolver.BUNDLE = ce.getBundleContext().getBundle();
+        } catch (IOException e) {
+            log.error(e.getLocalizedMessage(), e);
+            throw e;
+        }
     }
-  }
 
-
-  /**
-   * The deactivate method.
-   *
-   * @param ce
-   *          the {@link ComponentContext}
-   */
-  protected void deactivate(@SuppressWarnings("unused") ComponentContext ce) {
-
-    this.extractor = null;
-  }
-
-
-  /**
-   * {@inheritDoc}
-   */
-  public int canEnhance(ContentItem ci)
-      throws EngineException {
- 	String mimeType = ci.getMimeType().split(";",2)[0];
-    if (this.extractor.isSupported(mimeType)) {
-      return ENHANCE_SYNCHRONOUS;
+    /**
+     * The deactivate method.
+     *
+     * @param ce the {@link ComponentContext}
+     */
+    protected void deactivate(@SuppressWarnings("unused") ComponentContext ce) {
+        this.extractor = null;
     }
-    return CANNOT_ENHANCE;
-  }
 
+    public int canEnhance(ContentItem ci) throws EngineException {
+        String mimeType = ci.getMimeType().split(";", 2)[0];
+        if (this.extractor.isSupported(mimeType)) {
+            return ENHANCE_SYNCHRONOUS;
+        }
+        return CANNOT_ENHANCE;
+    }
 
-  /**
-   * {@inheritDoc}
-   */
-  public void computeEnhancements(ContentItem ci)
-      throws EngineException {
+    public void computeEnhancements(ContentItem ci) throws EngineException {
 
-    try {
-        // get the model where to add the statements
-        MGraph g = ci.getMetadata();     
-        // create enhancement
-        UriRef textEnhancement =
-            EnhancementEngineHelper.createTextEnhancement(ci, this);
-        // set confidence value to 1.0
-        LiteralFactory literalFactory = LiteralFactory.getInstance(); 
-        g.add(new TripleImpl(
-            textEnhancement,
-            Properties.FISE_CONFIDENCE,
-            literalFactory.createTypedLiteral(1.0))); 
-        // get model from the extraction
-        Model m = this.extractor.extract(
-            ci.getStream(), ci.getId(), ci.getMimeType());
-        // add the statements from this model to the Metadata model
-        if (null != m) {
-            /*
-            String text = MetaxaCore.getText(m);
-            log.info(text);
-             */
-            RDF2GoUtils.urifyBlankNodes(m);
-            HashMap<BlankNode,BNode> blankNodeMap = new HashMap<BlankNode,BNode>();
-            ClosableIterator<Statement> it = m.iterator();
-            while (it.hasNext()) {
-                Statement oneStmt = it.next();
-                NonLiteral fiseSubject = null;
-                UriRef fisePredicate = null;
-                Resource fiseObject = null;
+        try {
+            // get the model where to add the statements
+            MGraph g = ci.getMetadata();
+            // create enhancement
+            UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
+            // set confidence value to 1.0
+            LiteralFactory literalFactory = LiteralFactory.getInstance();
+            g.add(new TripleImpl(textEnhancement, Properties.FISE_CONFIDENCE, literalFactory.createTypedLiteral(1.0)));
+            // get model from the extraction
+            Model m = this.extractor.extract(ci.getStream(), ci.getId(), ci.getMimeType());
+            // add the statements from this model to the Metadata model
+            if (null != m) {
+                /*
+               String text = MetaxaCore.getText(m);
+               log.info(text);
+                */
+                RDF2GoUtils.urifyBlankNodes(m);
+                HashMap<BlankNode, BNode> blankNodeMap = new HashMap<BlankNode, BNode>();
+                ClosableIterator<Statement> it = m.iterator();
+                while (it.hasNext()) {
+                    Statement oneStmt = it.next();
 
-                fiseSubject = (NonLiteral)asFiseResource(oneStmt.getSubject(),blankNodeMap);
-                fisePredicate = (UriRef)asFiseResource(oneStmt.getPredicate(),blankNodeMap);
-                fiseObject = asFiseResource(oneStmt.getObject(),blankNodeMap);
+                    NonLiteral fiseSubject = (NonLiteral) asFiseResource(oneStmt.getSubject(), blankNodeMap);
+                    UriRef fisePredicate = (UriRef) asFiseResource(oneStmt.getPredicate(), blankNodeMap);
+                    Resource fiseObject = asFiseResource(oneStmt.getObject(), blankNodeMap);
 
-                if (null != fiseSubject 
-                        && null != fisePredicate 
-                        && null != fiseObject) {
-                    Triple t = 
-                        new TripleImpl(fiseSubject, fisePredicate, fiseObject); 
-                    g.add(t);
-                    log.info("added " + t.toString());
+                    if (null != fiseSubject && null != fisePredicate && null != fiseObject) {
+                        Triple t = new TripleImpl(fiseSubject, fisePredicate, fiseObject);
+                        g.add(t);
+                        log.info("added " + t.toString());
+                    }
                 }
+                it.close();
             }
-            it.close();
+        } catch (ExtractorException e) {
+            throw new EngineException(e.getLocalizedMessage(), e);
+        } catch (IOException e) {
+            throw new EngineException(e.getLocalizedMessage(), e);
         }
-    } catch (ExtractorException e) {
-        throw new EngineException(e.getLocalizedMessage(), e);
-    } catch (IOException e) {
-        throw new EngineException(e.getLocalizedMessage(), e);
     }
-  }
-  
-  
-  /**
-   * This converts the given RDF2Go node into a corresponding FISE object. 
-   *
-   * @param node a {@link Node}
-   * @return a {@link Resource}
-   */
-  public static Resource asFiseResource(Node node,HashMap<BlankNode,BNode> blankNodeMap) {
 
-      if (node instanceof URI) {
-          return new UriRef(node.asURI().toString());
-      }
-      else if (node instanceof BlankNode) {
-        BNode bNode = blankNodeMap.get(node);
-        if (bNode == null) {
-          bNode = new BNode();
-          blankNodeMap.put(node.asBlankNode(), bNode);
+    /**
+     * This converts the given RDF2Go node into a corresponding FISE object.
+     *
+     * @param node a {@link Node}
+     * @return a {@link Resource}
+     */
+    public static Resource asFiseResource(Node node, HashMap<BlankNode, BNode> blankNodeMap) {
+
+        if (node instanceof URI) {
+            return new UriRef(node.asURI().toString());
+        } else if (node instanceof BlankNode) {
+            BNode bNode = blankNodeMap.get(node);
+            if (bNode == null) {
+                bNode = new BNode();
+                blankNodeMap.put(node.asBlankNode(), bNode);
+            }
+            return bNode;
+        } else if (node instanceof DatatypeLiteral) {
+            DatatypeLiteral dtl = node.asDatatypeLiteral();
+            return new TypedLiteralImpl(dtl.getValue(), new UriRef(dtl.getDatatype().asURI().toString()));
+        } else if (node instanceof PlainLiteral) {
+            return new PlainLiteralImpl(node.asLiteral().getValue());
         }
-          return bNode;
-      }
-      else if (node instanceof DatatypeLiteral) {
-          DatatypeLiteral dtl = node.asDatatypeLiteral();
-          return new TypedLiteralImpl(
-              dtl.getValue(), 
-              new UriRef(dtl.getDatatype().asURI().toString())); 
-      }
-      else if (node instanceof PlainLiteral) {
-          return new PlainLiteralImpl(node.asLiteral().getValue());
-      }
 
-      return null;
-  }
+        return null;
+    }
 
-  public Map<String, Object> getServiceProperties() {
-    return Collections.unmodifiableMap(Collections.singletonMap(
-        ServiceProperties.ENHANCEMENT_ENGINE_ORDERING,
-        (Object) defaultOrder));
-  }
+    public Map<String, Object> getServiceProperties() {
+        return Collections.unmodifiableMap(Collections.singletonMap(ENHANCEMENT_ENGINE_ORDERING, (Object) defaultOrder));
+    }
+
 }

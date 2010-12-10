@@ -81,4 +81,5 @@ public interface EnhancementEngine {
      *             expected
      */
     void computeEnhancements(ContentItem ci) throws EngineException;
+
 }

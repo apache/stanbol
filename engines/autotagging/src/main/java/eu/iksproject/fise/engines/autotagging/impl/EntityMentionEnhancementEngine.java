@@ -52,7 +52,7 @@ public class EntityMentionEnhancementEngine implements EnhancementEngine,
      * The default value for the Execution of this Engine. Currently set to
      * {@link EnhancementJobManager#DEFAULT_ORDER}
      */
-    public static final Integer defaultOrder = ServiceProperties.ORDERING_EXTRACTION_ENHANCEMENT;
+    public static final Integer defaultOrder = ORDERING_EXTRACTION_ENHANCEMENT;
 
     public void computeEnhancements(ContentItem ci) throws EngineException {
         Autotagger autotagger = autotaggerProvider.getAutotagger();
@@ -173,7 +173,7 @@ public class EntityMentionEnhancementEngine implements EnhancementEngine,
     @Override
     public Map<String, Object> getServiceProperties() {
         return Collections.unmodifiableMap(Collections.singletonMap(
-                ServiceProperties.ENHANCEMENT_ENGINE_ORDERING,
+                ENHANCEMENT_ENGINE_ORDERING,
                 (Object) defaultOrder));
     }
 }

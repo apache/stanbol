@@ -30,7 +30,6 @@ import org.xml.sax.SAXException;
  * @author <a href="mailto:kasper@dfki.de">Walter Kasper</a>
  * 
  */
-
 public class HtmlExtractionRegistry {
 
     /**
@@ -44,19 +43,15 @@ public class HtmlExtractionRegistry {
 
 
     public HtmlExtractionRegistry() {
-
         this.registry = new HashMap<String, HtmlExtractionComponent>();
         this.activeExtractors = new HashSet<String>();
     }
 
-
     public HtmlExtractionRegistry(String configFileName)
             throws InitializationException {
-
         this();
         initialize(configFileName);
     }
-
 
     public void initialize(String configFileName)
             throws InitializationException {
@@ -66,15 +61,9 @@ public class HtmlExtractionRegistry {
             XPath xPath = factory.newXPath();
             DocumentBuilder parser =
                 DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document document =
-                parser.parse(new InputSource(
-                getClass().getClassLoader().getResourceAsStream(
-                configFileName)));
+            Document document = parser.parse(new InputSource(getClass().getClassLoader().getResourceAsStream(configFileName)));
             Node node;
-            NodeList nodes =
-                (NodeList)xPath
-                .evaluate("/htmlextractors/extractor", document,
-                XPathConstants.NODESET);
+            NodeList nodes = (NodeList) xPath.evaluate("/htmlextractors/extractor", document, XPathConstants.NODESET);
             if (nodes != null) {
                 TransformerFactory transFac = TransformerFactory.newInstance();
                 transFac.setURIResolver(new BundleURIResolver());
@@ -85,9 +74,7 @@ public class HtmlExtractionRegistry {
                     Node srcNode =
                         (Node)xPath.evaluate("source", nd, XPathConstants.NODE);
                     if (srcNode != null) {
-                        node =
-                            (Node)xPath.evaluate("@type", srcNode,
-                            XPathConstants.NODE);
+                        node = (Node) xPath.evaluate("@type", srcNode, XPathConstants.NODE);
                         String srcType = node.getNodeValue();
                         if (srcType.equals("xslt")) {
                             String rdfFormat = "rdfxml";
@@ -175,44 +162,35 @@ public class HtmlExtractionRegistry {
         }
     }
 
-
     /**
      * @return the registry
      */
     public HashMap<String, HtmlExtractionComponent> getRegistry() {
-
         return registry;
     }
-
 
     /**
      * @param registry
      *            the registry to set
      */
     public void setRegistry(HashMap<String, HtmlExtractionComponent> registry) {
-
         this.registry = registry;
     }
-
 
     /**
      * @return the activeExtractors
      */
     public HashSet<String> getActiveExtractors() {
-
         return activeExtractors;
     }
-
 
     /**
      * @param activeExtractors
      *            the activeExtractors to set
      */
     public void setActiveExtractors(HashSet<String> activeExtractors) {
-
         this.activeExtractors = activeExtractors;
     }
-
 
     public static void main(String[] args)
             throws Exception {
@@ -226,24 +204,21 @@ public class HtmlExtractionRegistry {
         }
     }
 
-
     public void add(String id, String resourceName, String type)
             throws InitializationException {
 
     }
 
-
     public void remove(String id) {
 
     }
-
 
     public void activate(String id) {
 
     }
 
-
     public void deactivate(String id) {
 
     }
+
 }
