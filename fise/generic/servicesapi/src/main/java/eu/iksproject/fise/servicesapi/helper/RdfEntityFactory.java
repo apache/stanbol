@@ -8,9 +8,9 @@ import org.apache.clerezza.rdf.core.NonLiteral;
 import eu.iksproject.fise.servicesapi.helper.impl.SimpleRdfEntityFactory;
 
 /**
- * A Factory that creates proxies over rdf nodes. 
- * @author Rupert Westenthaler
+ * A Factory that creates proxies over rdf nodes.
  *
+ * @author Rupert Westenthaler
  */
 public abstract class RdfEntityFactory {
 	
@@ -23,10 +23,12 @@ public abstract class RdfEntityFactory {
 	public static RdfEntityFactory createInstance(MGraph graph){
 		return new SimpleRdfEntityFactory(graph);
 	}
+
 	/**
 	 * Getter for a proxy for the parsed rdf node that implements all the parsed
 	 * Interfaces. The interface parsed as type must extend {@link RdfEntity}.
-	 * Additional interfaces must not extend this interface.<p>
+	 * Additional interfaces must not extend this interface.
+     * <p>
 	 * Interfaces parsed as parameter:<ul>
 	 * <li> SHOULD have an {@link Rdf} annotation. If that is the case, than the
 	 * according rdf:type statements are checks/added when the proxy is created
@@ -48,12 +50,14 @@ public abstract class RdfEntityFactory {
 	 * {@link ConcurrentModificationException} if the graph changes while using
 	 * the iterator.
 	 * </ul>
+     *
 	 * @param <T> The interface implemented by the returned proxy
 	 * @param rdfNode the rdfNode represented by the proxy (created if not 
 	 * present in the Graph)
 	 * @param type The interface for the proxy. Needs to extend {@link RdfEntity}
 	 * @param additionalInterfaces Additional interfaces the proxy needs to
 	 * implement.
+     *
 	 * @return A proxy representing the parsed rdf node and implementing all the
 	 * parsed interfaces
 	 * @throws IllegalArgumentException if the node is <code>null</code> or the

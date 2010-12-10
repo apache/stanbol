@@ -41,6 +41,4 @@ public class JsonComparator implements Comparator<Object> {
 		return value;
 	}
 
-
-
 }

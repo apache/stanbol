@@ -78,7 +78,7 @@ public class JsonLd {
 	
 	private List<Object> createDisjointGraph() {
 		List<Object> json = new ArrayList<Object>();
-		if (this.resourceMap.size() > 0) {
+		if (!this.resourceMap.isEmpty()) {
 
 			for (String subject : this.resourceMap.keySet()) {
 				Map<String, Object> subjectObject = new TreeMap<String, Object>(new JsonComparator());
@@ -117,7 +117,7 @@ public class JsonLd {
 	@SuppressWarnings("unchecked")
 	private Map<String, Object> createJointGraph() {
 		Map<String, Object> json = new TreeMap<String, Object>(new JsonComparator());
-		if (this.resourceMap.size() > 0) {
+		if (!this.resourceMap.isEmpty()) {
 			List<Object> subjects = new ArrayList<Object>();
 
 			for (String subject : this.resourceMap.keySet()) {
@@ -142,7 +142,7 @@ public class JsonLd {
 			}
 
 			// put subjects
-			if (subjects.size() > 0) {
+			if (!subjects.isEmpty()) {
 				if (subjects.size() == 1) {
 					json = (Map<String, Object>) subjects.get(0);
 				} else {
@@ -152,7 +152,7 @@ public class JsonLd {
 		}
 
 		// put the namespaces
-		if (this.namespacePrefixMap.size() > 0) {
+		if (!this.namespacePrefixMap.isEmpty()) {
 			Map<String, Object> nsObject = new TreeMap<String, Object>(new JsonComparator());
 			for (String ns : this.namespacePrefixMap.keySet()) {
 				nsObject.put(this.namespacePrefixMap.get(ns), ns);
@@ -164,7 +164,7 @@ public class JsonLd {
 	}
 
 	private void putTypes(Map<String, Object> subjectObject, JsonLdResource resource) {
-		if (resource.getTypes().size() > 0) {
+		if (!resource.getTypes().isEmpty()) {
 			List<String> types = new ArrayList<String>();
 			for (String type : resource.getTypes()) {
 				types.add(this.applyNamespace(type));

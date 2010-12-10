@@ -8,8 +8,10 @@ one, so for now SPARQL queries are not supported.
 How to deploy
 =============
 
-You need to have the following bundles deployed in your OSGi runtim.
+You need to have the following bundles deployed in your OSGi runtime.
+
 In the future they will be put in the pom.xml, but ATM this is not working, yet:
+
 These bundles are also available at http://dl.dropbox.com/u/2022914/fise_jcrstore_bundles.zip
 (for your convenience)
 

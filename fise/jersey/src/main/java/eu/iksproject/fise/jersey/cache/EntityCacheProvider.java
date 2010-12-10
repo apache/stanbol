@@ -4,5 +4,6 @@ import org.apache.clerezza.rdf.core.MGraph;
 
 public interface EntityCacheProvider {
 
-    public MGraph getEntityCache();
+    MGraph getEntityCache();
+
 }

@@ -1,4 +1,4 @@
-/**
+/*
 Copyright (c) 2010, IKS Project
 All rights reserved.
 
