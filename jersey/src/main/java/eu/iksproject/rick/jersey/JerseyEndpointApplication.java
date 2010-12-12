@@ -29,15 +29,15 @@ import eu.iksproject.rick.jersey.writers.SignWriter;
  * providers.
  */
 public class JerseyEndpointApplication extends Application {
-	
-	Logger log = LoggerFactory.getLogger(getClass());
-	public JerseyEndpointApplication() {
-		log.info("JerseyEndpointApplication instanceiated");
-	}
+
+    Logger log = LoggerFactory.getLogger(getClass());
+    public JerseyEndpointApplication() {
+        log.info("JerseyEndpointApplication instanceiated");
+    }
 
     @Override
     public Set<Class<?>> getClasses() {
-		log.info("JerseyEndpointApplication getClasses called ...");
+        log.info("JerseyEndpointApplication getClasses called ...");
         Set<Class<?>> classes = new HashSet<Class<?>>();
         // resources
         classes.add(RickRootResource.class);
@@ -49,8 +49,8 @@ public class JerseyEndpointApplication extends Application {
         classes.add(QueryResultListWriter.class);
         classes.add(SignWriter.class);
         //TODO: somehow writing of Json has not worked because of
-        //      A message body writer for Java class org.codehaus.jettison.json.JSONArray, 
-        //     and Java type class org.codehaus.jettison.json.JSONArray, and MIME media 
+        //      A message body writer for Java class org.codehaus.jettison.json.JSONArray,
+        //     and Java type class org.codehaus.jettison.json.JSONArray, and MIME media
         //     type application/json was not found
         //     As a workaround I have implemented this small workaround!
         classes.add(JettisonWriter.class);

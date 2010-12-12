@@ -17,62 +17,67 @@ import eu.iksproject.rick.servicesapi.model.Symbol;
 import eu.iksproject.rick.servicesapi.model.rdf.RdfResourceEnum;
 
 final class SignToRDF {
-	private SignToRDF() { /* do not create instances of utility classes */}
+    private SignToRDF() { /* do not create instances of utility classes */}
 
-	static UriRef signRepresentation = new UriRef(RdfResourceEnum.signRepresentation.getUri());
-	static UriRef signSite = new UriRef(RdfResourceEnum.signSite.getUri());
-	static UriRef sign = new UriRef(RdfResourceEnum.Sign.getUri());
-	static UriRef entityMapping = new UriRef(RdfResourceEnum.EntityMapping.getUri());
-	static UriRef symbol = new UriRef(RdfResourceEnum.Symbol.getUri());
-	static RdfValueFactory valueFactory = RdfValueFactory.getInstance();
-	static LiteralFactory literalFactory = LiteralFactory.getInstance();
+    static UriRef signRepresentation = new UriRef(RdfResourceEnum.signRepresentation.getUri());
+    static UriRef signSite = new UriRef(RdfResourceEnum.signSite.getUri());
+    static UriRef sign = new UriRef(RdfResourceEnum.Sign.getUri());
+    static UriRef entityMapping = new UriRef(RdfResourceEnum.EntityMapping.getUri());
+    static UriRef symbol = new UriRef(RdfResourceEnum.Symbol.getUri());
+    static RdfValueFactory valueFactory = RdfValueFactory.getInstance();
+    static LiteralFactory literalFactory = LiteralFactory.getInstance();
 
-	static MGraph toRDF(Representation representation){
-		MGraph graph = new SimpleMGraph();
-		addRDFTo(graph, representation);
-		return graph;
-	}
-	static void addRDFTo(MGraph graph,Representation representation){
-		graph.addAll(valueFactory.toRdfRepresentation(representation).getRdfGraph());
-	}
-	
-	static TripleCollection toRDF(Sign sign){
-		MGraph graph = new SimpleMGraph();
-		addRDFTo(graph, sign);
-		return graph;
-	}
-	static void addRDFTo(MGraph graph, Sign sign){
-		addRDFTo(graph,sign.getRepresentation());
-		//now add some triples that represent the Sign
-		addSignTriplesToGraph(graph, sign);
-	}
-	/**
-	 * Adds the Triples that represent the Sign to the parsed graph. Note that
-	 * this method does not add triples for the representation. However it adds 
-	 * the triple (sign,singRepresentation,representation)
-	 * @param graph the graph to add the triples
-	 * @param sign the sign
-	 */
-	static void addSignTriplesToGraph(MGraph graph, Sign sign) {
-		UriRef id = new UriRef(sign.getId());
-		UriRef repId = new UriRef(sign.getRepresentation().getId());
-		/*
-		 * TODO: change to URI as soon as the paths are defined
-		 *  e.g:
-		 *   - Sign: <URLofRICK>/site/<sing.getSignSite>
-		 *   - Symbol: <URLofRICK>/symbol/<sing.getSignSite>
-		 *   - EntityMapping: <URLofRICK>/mapping/<sing.getSignSite>
-		 * For now write a Literal with the ID of the Site
-		 */
-		TypedLiteral siteName = literalFactory.createTypedLiteral(sign.getSignSite());
-		graph.add(new TripleImpl(id, SignToRDF.signSite, siteName));
-		graph.add(new TripleImpl(id, SignToRDF.signRepresentation, repId));
-		if(sign instanceof Symbol){
-			graph.add(new TripleImpl(id, RDF.type, SignToRDF.symbol));
-		} else if(sign instanceof EntityMapping){
-			graph.add(new TripleImpl(id, RDF.type, SignToRDF.entityMapping));
-		} else {
-			graph.add(new TripleImpl(id, RDF.type, SignToRDF.sign));
-		}
-	}
+    static MGraph toRDF(Representation representation) {
+        MGraph graph = new SimpleMGraph();
+        addRDFTo(graph, representation);
+        return graph;
+    }
+
+    static void addRDFTo(MGraph graph, Representation representation) {
+        graph.addAll(valueFactory.toRdfRepresentation(representation).getRdfGraph());
+    }
+
+    static TripleCollection toRDF(Sign sign) {
+        MGraph graph = new SimpleMGraph();
+        addRDFTo(graph, sign);
+        return graph;
+    }
+
+    static void addRDFTo(MGraph graph, Sign sign) {
+        addRDFTo(graph, sign.getRepresentation());
+        //now add some triples that represent the Sign
+        addSignTriplesToGraph(graph, sign);
+    }
+
+    /**
+     * Adds the Triples that represent the Sign to the parsed graph. Note that
+     * this method does not add triples for the representation. However it adds
+     * the triple (sign,singRepresentation,representation)
+     *
+     * @param graph the graph to add the triples
+     * @param sign the sign
+     */
+    static void addSignTriplesToGraph(MGraph graph, Sign sign) {
+        UriRef id = new UriRef(sign.getId());
+        UriRef repId = new UriRef(sign.getRepresentation().getId());
+        /*
+         * TODO: change to URI as soon as the paths are defined
+         *  e.g:
+         *   - Sign: <URLofRICK>/site/<sing.getSignSite>
+         *   - Symbol: <URLofRICK>/symbol/<sing.getSignSite>
+         *   - EntityMapping: <URLofRICK>/mapping/<sing.getSignSite>
+         * For now write a Literal with the ID of the Site
+         */
+        TypedLiteral siteName = literalFactory.createTypedLiteral(sign.getSignSite());
+        graph.add(new TripleImpl(id, SignToRDF.signSite, siteName));
+        graph.add(new TripleImpl(id, SignToRDF.signRepresentation, repId));
+        if (sign instanceof Symbol) {
+            graph.add(new TripleImpl(id, RDF.type, SignToRDF.symbol));
+        } else if (sign instanceof EntityMapping) {
+            graph.add(new TripleImpl(id, RDF.type, SignToRDF.entityMapping));
+        } else {
+            graph.add(new TripleImpl(id, RDF.type, SignToRDF.sign));
+        }
+    }
+
 }

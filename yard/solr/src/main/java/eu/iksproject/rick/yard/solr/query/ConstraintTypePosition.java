@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package eu.iksproject.rick.yard.solr.query;
 
@@ -17,52 +17,52 @@ package eu.iksproject.rick.yard.solr.query;
  *
  */
 public class ConstraintTypePosition implements Comparable<ConstraintTypePosition>{
-	/**
-	 * The possible positions of constraints within a Index Constraint.<p>
-	 * The ordinal number of the elements is used to sort the constraints in the
-	 * {@link EncodedConstraintParts}. So ensure, that the ordering in this
-	 * enumeration corresponds with the ordering in a constraint within the
-	 * index
-	 * @author Rupert Westenthaler
-	 *
-	 */
-	public static enum PositionType {
-		prefix,
-		field,
-		suffux,
-		assignment,
-		value;
-	}
-	private PositionType type;
-	private int pos;
-	
-	public ConstraintTypePosition(PositionType type) {
-		this(type,0);
-	}
+    /**
+     * The possible positions of constraints within a Index Constraint.<p>
+     * The ordinal number of the elements is used to sort the constraints in the
+     * {@link EncodedConstraintParts}. So ensure, that the ordering in this
+     * enumeration corresponds with the ordering in a constraint within the
+     * index
+     * @author Rupert Westenthaler
+     *
+     */
+    public static enum PositionType {
+        prefix,
+        field,
+        suffux,
+        assignment,
+        value;
+    }
+    private PositionType type;
+    private int pos;
 
-	public ConstraintTypePosition(PositionType type,int pos) {
-		if(type == null){
-			throw new IllegalArgumentException("The ConstraintPosition MUST NOT be NULL!");
-		}
-		this.type = type;
-		this.pos = pos;
-	}
+    public ConstraintTypePosition(PositionType type) {
+        this(type,0);
+    }
 
-	@Override
-	public int compareTo(ConstraintTypePosition other) {
-		return type == other.type?pos-other.pos:type.ordinal()-other.type.ordinal();
-	}
-	@Override
-	public int hashCode() {
-		return type.hashCode()+pos;
-	}
-	@Override
-	public boolean equals(Object obj) {
-		return obj != null && obj instanceof ConstraintTypePosition 
-			&& ((ConstraintTypePosition)obj).type == type && ((ConstraintTypePosition)obj).pos == pos;
-	}
-	@Override
-	public String toString() {
-		return String.format("constraintPosition %s,%d", type,pos);
-	}
+    public ConstraintTypePosition(PositionType type,int pos) {
+        if(type == null){
+            throw new IllegalArgumentException("The ConstraintPosition MUST NOT be NULL!");
+        }
+        this.type = type;
+        this.pos = pos;
+    }
+
+    @Override
+    public int compareTo(ConstraintTypePosition other) {
+        return type == other.type?pos-other.pos:type.ordinal()-other.type.ordinal();
+    }
+    @Override
+    public int hashCode() {
+        return type.hashCode()+pos;
+    }
+    @Override
+    public boolean equals(Object obj) {
+        return obj != null && obj instanceof ConstraintTypePosition
+            && ((ConstraintTypePosition)obj).type == type && ((ConstraintTypePosition)obj).pos == pos;
+    }
+    @Override
+    public String toString() {
+        return String.format("constraintPosition %s,%d", type,pos);
+    }
 }

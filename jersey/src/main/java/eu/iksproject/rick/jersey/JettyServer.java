@@ -28,7 +28,7 @@ public class JettyServer {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    public static String DEFAUL_BASE_URI = "http://localhost:9998/";
+    public static String DEFAULT_BASE_URI = "http://localhost:9998/";
 
     protected Server server = new Server();
 
@@ -85,7 +85,7 @@ public class JettyServer {
      */
     public static void main(String[] args) throws Exception {
         JettyServer server = new JettyServer();
-        server.start(DEFAUL_BASE_URI);
+        server.start(DEFAULT_BASE_URI);
         System.out.println("Hit enter to stop it...");
         System.in.read();
         server.stop();

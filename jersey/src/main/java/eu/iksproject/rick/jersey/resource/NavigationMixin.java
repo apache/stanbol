@@ -9,19 +9,22 @@ import javax.ws.rs.core.UriInfo;
 
 public class NavigationMixin {
 
-	protected NavigationMixin(){
-	}
-	/**
-	 * Some subclasses set the uriInfo property. If that is necessary, than it's
-	 * best to do it when calling the super constructor (rw, 20101015)
-	 * @param uriInfo
-	 */
-	protected NavigationMixin(UriInfo uriInfo){
-		if(uriInfo == null){
-			throw new IllegalArgumentException("Parameter uriInfo MUST NOT be NULL");
-		}
-		this.uriInfo = uriInfo;
-	}
+    protected NavigationMixin() {
+    }
+
+    /**
+     * Some subclasses set the uriInfo property. If that is necessary, than it's
+     * best to do it when calling the super constructor (rw, 20101015)
+     *
+     * @param uriInfo
+     */
+    protected NavigationMixin(UriInfo uriInfo) {
+        if (uriInfo == null) {
+            throw new IllegalArgumentException("Parameter uriInfo MUST NOT be NULL");
+        }
+        this.uriInfo = uriInfo;
+    }
+
     @Context
     protected UriInfo uriInfo;
 
@@ -30,10 +33,8 @@ public class NavigationMixin {
     }
 
     public List<MenuItem> getMainMenuItems() {
-        return Arrays.asList(
-                new MenuItem("RICK", "/rick", uriInfo),
-        		new MenuItem("Referenced Site Manager", "/site", uriInfo)
-        		);
+        return Arrays.asList(new MenuItem("RICK", "/rick", uriInfo),
+                new MenuItem("Referenced Site Manager", "/site", uriInfo));
     }
 
     public static class MenuItem {
@@ -46,9 +47,9 @@ public class NavigationMixin {
 
         protected final String label;
 
-        protected final  String link;
+        protected final String link;
 
-        protected final  String cssClass;
+        protected final String cssClass;
 
         public String getLabel() {
             return label;
