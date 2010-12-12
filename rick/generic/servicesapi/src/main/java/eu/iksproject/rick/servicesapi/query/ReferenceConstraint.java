@@ -8,20 +8,20 @@ import eu.iksproject.rick.servicesapi.defaults.DataTypeEnum;
 public class ReferenceConstraint extends ValueConstraint {
 
 
-	public ReferenceConstraint(String reference) {
-		super(reference,Arrays.asList(DataTypeEnum.Reference.getUri()));
-		if(reference == null){
-			throw new IllegalArgumentException("Parsed Reference MUST NOT be NULL");
-		}
-	}
+    public ReferenceConstraint(String reference) {
+        super(reference,Arrays.asList(DataTypeEnum.Reference.getUri()));
+        if(reference == null){
+            throw new IllegalArgumentException("Parsed Reference MUST NOT be NULL");
+        }
+    }
 
-	/**
-	 * Getter for the Reference
-	 * @return the reference
-	 */
-	public String getReference() {
-		return (String)getValue();
-	}
+    /**
+     * Getter for the Reference
+     * @return the reference
+     */
+    public String getReference() {
+        return (String)getValue();
+    }
 
 
 }
