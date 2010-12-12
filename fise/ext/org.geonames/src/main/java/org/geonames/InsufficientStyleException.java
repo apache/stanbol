@@ -19,12 +19,12 @@ package org.geonames;
 /**
  * Is thrown when trying to access a field that has not been set as the style
  * for the request was not sufficiently verbose to return this information.
- * 
+ *
  * @author marc
- * 
+ *
  */
 public class InsufficientStyleException extends Exception {
-	public InsufficientStyleException(String msg) {
-		super(msg);
-	}
+    public InsufficientStyleException(String msg) {
+        super(msg);
+    }
 }

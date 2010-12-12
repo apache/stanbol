@@ -152,11 +152,11 @@ public class Properties {
     public static final UriRef DC_LANGUAGE = new UriRef(NamespaceEnum.dc
             + "language");
 
-	/**
-	 * Plain text content of a content item.
-	  */
-	public static final UriRef NIE_PLAINTEXTCONTENT = new UriRef(NamespaceEnum.nie + "plainTextContent");
-	
+    /**
+     * Plain text content of a content item.
+      */
+    public static final UriRef NIE_PLAINTEXTCONTENT = new UriRef(NamespaceEnum.nie + "plainTextContent");
+
     /**
      * The topic of the resource. Used to relate a content item to a
      * skos:Concept modelling one of the overall topic of the content.

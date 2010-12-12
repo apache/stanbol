@@ -44,8 +44,8 @@ public class EnhancementEngineHelper {
      * @return the URI of the new enhancement instance
      */
     public static UriRef createTextEnhancement(ContentItem ci,
-    		EnhancementEngine engine){
-    	return createTextEnhancement(ci.getMetadata(), engine, new UriRef(ci.getId()));
+            EnhancementEngine engine){
+        return createTextEnhancement(ci.getMetadata(), engine, new UriRef(ci.getId()));
     }
     /**
      * Create a new instance with the types fise:Enhancement and
@@ -60,8 +60,8 @@ public class EnhancementEngineHelper {
      * @return the URI of the new enhancement instance
      */
     public static UriRef createTextEnhancement(MGraph metadata,
-        		EnhancementEngine engine, UriRef contentItemId){
-    	UriRef enhancement = createEnhancement(metadata, engine,contentItemId);
+                EnhancementEngine engine, UriRef contentItemId){
+        UriRef enhancement = createEnhancement(metadata, engine,contentItemId);
         //add the Text Annotation Type
         metadata.add(new TripleImpl(enhancement, Properties.RDF_TYPE,
                 TechnicalClasses.FISE_TEXTANNOTATION));
@@ -78,8 +78,8 @@ public class EnhancementEngineHelper {
      * @return the URI of the new enhancement instance
      */
     public static UriRef createEntityEnhancement(ContentItem ci,
-    		EnhancementEngine engine){
-    	return createEntityEnhancement(ci.getMetadata(), engine, new UriRef(ci.getId()));
+            EnhancementEngine engine){
+        return createEntityEnhancement(ci.getMetadata(), engine, new UriRef(ci.getId()));
     }
     /**
      * Create a new instance with the types fise:Enhancement and
@@ -94,8 +94,8 @@ public class EnhancementEngineHelper {
      * @return the URI of the new enhancement instance
      */
     public static UriRef createEntityEnhancement(MGraph metadata,
-        		EnhancementEngine engine, UriRef contentItemId){
-    	UriRef enhancement = createEnhancement(metadata, engine, contentItemId);
+                EnhancementEngine engine, UriRef contentItemId){
+        UriRef enhancement = createEnhancement(metadata, engine, contentItemId);
         metadata.add(new TripleImpl(enhancement, Properties.RDF_TYPE,
                 TechnicalClasses.FISE_ENTITYANNOTATION));
         return enhancement;
@@ -111,7 +111,7 @@ public class EnhancementEngineHelper {
      * @return the URI of the new enhancement instance
      */
     protected static UriRef createEnhancement(MGraph metadata,
-    		EnhancementEngine engine, UriRef contentItemId){
+            EnhancementEngine engine, UriRef contentItemId){
         LiteralFactory literalFactory = LiteralFactory.getInstance();
 
         UriRef enhancement = new UriRef("urn:enhancement-"
@@ -206,19 +206,19 @@ public class EnhancementEngineHelper {
      */
     public static <T> T get(TripleCollection graph, NonLiteral resource, UriRef property, Class<T> type,
             LiteralFactory literalFactory){
-    	Iterator<Triple> results = graph.filter(resource, property, null);
-    	if(results.hasNext()){
-			Triple result = results.next();
-			if(result.getObject() instanceof TypedLiteral){
-	    		return literalFactory.createObject(type, (TypedLiteral)result.getObject());
-			} else {
-				log.warn("Triple "+result+" does not have a TypedLiteral as object! -> return null");
-				return null;
-			}
-    	} else {
-			log.info("No Triple found for "+resource+" and property "+property+"! -> return null");
-    		return null;
-    	}
+        Iterator<Triple> results = graph.filter(resource, property, null);
+        if(results.hasNext()){
+            Triple result = results.next();
+            if(result.getObject() instanceof TypedLiteral){
+                return literalFactory.createObject(type, (TypedLiteral)result.getObject());
+            } else {
+                log.warn("Triple "+result+" does not have a TypedLiteral as object! -> return null");
+                return null;
+            }
+        } else {
+            log.info("No Triple found for "+resource+" and property "+property+"! -> return null");
+            return null;
+        }
     }
     /**
      * Getter for the typed literal values of the property for a resource
@@ -233,18 +233,18 @@ public class EnhancementEngineHelper {
      */
     public static <T> Iterator<T> getValues(TripleCollection graph, NonLiteral resource,
             UriRef property, final Class<T> type, final  LiteralFactory literalFactory){
-    	final Iterator<Triple> results = graph.filter(resource, property, null);
-    	return new Iterator<T>() {
-    		//TODO: dose not check if the object of the triple is of type UriRef
-			@Override
-			public boolean hasNext() {	return results.hasNext(); }
-			@Override
-			public T next() {
-				return literalFactory.createObject(type, (TypedLiteral)results.next().getObject());
-			}
-			@Override
-			public void remove() { results.remove(); }
-		};
+        final Iterator<Triple> results = graph.filter(resource, property, null);
+        return new Iterator<T>() {
+            //TODO: dose not check if the object of the triple is of type UriRef
+            @Override
+            public boolean hasNext() {    return results.hasNext(); }
+            @Override
+            public T next() {
+                return literalFactory.createObject(type, (TypedLiteral)results.next().getObject());
+            }
+            @Override
+            public void remove() { results.remove(); }
+        };
     }
     /**
      * Getter for the first String literal value the property for a resource
@@ -254,19 +254,19 @@ public class EnhancementEngineHelper {
      * @return the value
      */
     public static String getString(TripleCollection graph, NonLiteral resource, UriRef property){
-    	Iterator<Triple> results = graph.filter(resource, property, null);
-    	if(results.hasNext()){
-    		Triple result = results.next();
-    		if(result.getObject() instanceof Literal){
-    			return ((Literal)result.getObject()).getLexicalForm();
-    		} else {
-    			log.warn("Triple "+result+" does not have a literal as object! -> return null");
-    			return null;
-    		}
-    	} else {
-			log.info("No Triple found for "+resource+" and property "+property+"! -> return null");
-    		return null;
-    	}
+        Iterator<Triple> results = graph.filter(resource, property, null);
+        if(results.hasNext()){
+            Triple result = results.next();
+            if(result.getObject() instanceof Literal){
+                return ((Literal)result.getObject()).getLexicalForm();
+            } else {
+                log.warn("Triple "+result+" does not have a literal as object! -> return null");
+                return null;
+            }
+        } else {
+            log.info("No Triple found for "+resource+" and property "+property+"! -> return null");
+            return null;
+        }
     }
     /**
      * Getter for the string literal values the property for a resource
@@ -276,18 +276,18 @@ public class EnhancementEngineHelper {
      * @return the value
      */
     public static Iterator<String> getStrings(TripleCollection graph, NonLiteral resource, UriRef property){
-    	final Iterator<Triple> results = graph.filter(resource, property, null);
-    	return new Iterator<String>() {
-    		//TODO: dose not check if the object of the triple is of type UriRef
-			@Override
-			public boolean hasNext() { return results.hasNext(); }
-			@Override
-			public String next() {
-				return ((Literal)results.next().getObject()).getLexicalForm();
-			}
-			@Override
-			public void remove() { results.remove(); }
-		};
+        final Iterator<Triple> results = graph.filter(resource, property, null);
+        return new Iterator<String>() {
+            //TODO: dose not check if the object of the triple is of type UriRef
+            @Override
+            public boolean hasNext() { return results.hasNext(); }
+            @Override
+            public String next() {
+                return ((Literal)results.next().getObject()).getLexicalForm();
+            }
+            @Override
+            public void remove() { results.remove(); }
+        };
     }
     /**
      * Getter for the first value of the data type property for a resource
@@ -297,19 +297,19 @@ public class EnhancementEngineHelper {
      * @return the value
      */
     public static UriRef getReference(MGraph graph, NonLiteral resource, UriRef property){
-    	Iterator<Triple> results = graph.filter(resource, property, null);
-    	if(results.hasNext()){
-			Triple result = results.next();
-			if(result.getObject() instanceof UriRef){
-				return (UriRef)result.getObject();
-			} else {
-    			log.warn("Triple "+result+" does not have a UriRef as object! -> return null");
-    			return null;
-			}
-    	} else {
-			log.info("No Triple found for "+resource+" and property "+property+"! -> return null");
-    		return null;
-    	}
+        Iterator<Triple> results = graph.filter(resource, property, null);
+        if(results.hasNext()){
+            Triple result = results.next();
+            if(result.getObject() instanceof UriRef){
+                return (UriRef)result.getObject();
+            } else {
+                log.warn("Triple "+result+" does not have a UriRef as object! -> return null");
+                return null;
+            }
+        } else {
+            log.info("No Triple found for "+resource+" and property "+property+"! -> return null");
+            return null;
+        }
     }
     /**
      * Getter for the values of the data type property for a resource.
@@ -320,16 +320,16 @@ public class EnhancementEngineHelper {
      * @return The iterator over all the values (
      */
     public static Iterator<UriRef> getReferences(MGraph graph, NonLiteral resource, UriRef property){
-    	final Iterator<Triple> results = graph.filter(resource, property, null);
-    	return new Iterator<UriRef>() {
-    		//TODO: dose not check if the object of the triple is of type UriRef
-			@Override
-			public boolean hasNext() { return results.hasNext(); }
-			@Override
-			public UriRef next() { return (UriRef)results.next().getObject(); }
-			@Override
-			public void remove() { results.remove(); }
-		};
+        final Iterator<Triple> results = graph.filter(resource, property, null);
+        return new Iterator<UriRef>() {
+            //TODO: dose not check if the object of the triple is of type UriRef
+            @Override
+            public boolean hasNext() { return results.hasNext(); }
+            @Override
+            public UriRef next() { return (UriRef)results.next().getObject(); }
+            @Override
+            public void remove() { results.remove(); }
+        };
     }
 
 }

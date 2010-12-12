@@ -32,32 +32,32 @@ import eu.iksproject.fise.servicesapi.rdf.Properties;
 import eu.iksproject.fise.servicesapi.rdf.TechnicalClasses;
 
 public class ZemantaEnhancementEngineTest {
-	private static final Logger log = LoggerFactory.getLogger(ZemantaEnhancementEngineTest.class);
-	
-	/**
-	 * This key was generated to support testing only. Please do only use it
-	 * for testing. For real usages of the engine you need to create your own
-	 * key!
-	 */
-	private static final String ZEMANTA_FISE_TEST_APPLICATION_KEY = "2qsvcvkut8rhnqbhm35znn76";
-	
-	/**
-	 * found on this Blog {@linkplain http://bcbio.wordpress.com/2009/01/04/extracting-keywords-from-biological-text-using-zemanta/}
-	 */
-	public static final String BIO_DOMAIN_TEXT = "glh-2 encodes a putative DEAD-box RNA " +
-	"helicase that contains six CCHC zinc fingers and is homologous to Drosophila VASA, " +
-	"a germ-line-specific, ATP-dependent, RNA helicase; GLH-2 activity may also be required " +
-	"for the wild-type morphology of P granules and for localization of several protein " +
-	"components, but not accumulation of P granule mRNA components; GLH-2 interacts in " +
-	"vitro with itself and with KGB-1, a JNK-like MAP kinase; GLH-2 is a constitutive P " +
-	"granule component and thus, with the exception of mature sperm, is expressed in germ " +
-	"cells at all stages of development; GLH-2 is cytoplasmic in oocytes and the early " +
-	"embryo, while perinuclear in all later developmental stages as well as in the distal " +
-	"and medial regions of the hermaphrodite gonad; GLH-2 is expressed at barely detectable " +
-	"levels in males";
+    private static final Logger log = LoggerFactory.getLogger(ZemantaEnhancementEngineTest.class);
 
-	
-	static ZemantaEnhancementEngine zemantaEngine = new ZemantaEnhancementEngine();
+    /**
+     * This key was generated to support testing only. Please do only use it
+     * for testing. For real usages of the engine you need to create your own
+     * key!
+     */
+    private static final String ZEMANTA_FISE_TEST_APPLICATION_KEY = "2qsvcvkut8rhnqbhm35znn76";
+
+    /**
+     * found on this Blog {@linkplain http://bcbio.wordpress.com/2009/01/04/extracting-keywords-from-biological-text-using-zemanta/}
+     */
+    public static final String BIO_DOMAIN_TEXT = "glh-2 encodes a putative DEAD-box RNA " +
+    "helicase that contains six CCHC zinc fingers and is homologous to Drosophila VASA, " +
+    "a germ-line-specific, ATP-dependent, RNA helicase; GLH-2 activity may also be required " +
+    "for the wild-type morphology of P granules and for localization of several protein " +
+    "components, but not accumulation of P granule mRNA components; GLH-2 interacts in " +
+    "vitro with itself and with KGB-1, a JNK-like MAP kinase; GLH-2 is a constitutive P " +
+    "granule component and thus, with the exception of mature sperm, is expressed in germ " +
+    "cells at all stages of development; GLH-2 is cytoplasmic in oocytes and the early " +
+    "embryo, while perinuclear in all later developmental stages as well as in the distal " +
+    "and medial regions of the hermaphrodite gonad; GLH-2 is expressed at barely detectable " +
+    "levels in males";
+
+
+    static ZemantaEnhancementEngine zemantaEngine = new ZemantaEnhancementEngine();
     @BeforeClass
     public static void setUpServices() throws IOException {
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
@@ -68,7 +68,7 @@ public class ZemantaEnhancementEngineTest {
 
     @AfterClass
     public static void shutdownServices() {
-    	zemantaEngine.deactivate(null);
+        zemantaEngine.deactivate(null);
     }
     public static ContentItem wrapAsContentItem(final String text) {
         return new ContentItem() {
@@ -92,24 +92,24 @@ public class ZemantaEnhancementEngineTest {
                 return id;
             }
         };
-    }    
+    }
     @Test
     public void tesetBioText() throws Exception{
-    	ContentItem ci = wrapAsContentItem(BIO_DOMAIN_TEXT);
-    	zemantaEngine.computeEnhancements(ci);
-		JenaSerializerProvider serializer = new JenaSerializerProvider();
-		serializer.serialize(System.out, ci.getMetadata(), SupportedFormat.TURTLE);
-    	int textAnnoNum = checkAllTextAnnotations(ci.getMetadata(), BIO_DOMAIN_TEXT);
-    	log.info(textAnnoNum + " TextAnnotations found ...");
-    	int entityAnnoNum = checkAllEntityAnnotations(ci.getMetadata());
-    	log.info(textAnnoNum + " EntityAnnotations found ...");
+        ContentItem ci = wrapAsContentItem(BIO_DOMAIN_TEXT);
+        zemantaEngine.computeEnhancements(ci);
+        JenaSerializerProvider serializer = new JenaSerializerProvider();
+        serializer.serialize(System.out, ci.getMetadata(), SupportedFormat.TURTLE);
+        int textAnnoNum = checkAllTextAnnotations(ci.getMetadata(), BIO_DOMAIN_TEXT);
+        log.info(textAnnoNum + " TextAnnotations found ...");
+        int entityAnnoNum = checkAllEntityAnnotations(ci.getMetadata());
+        log.info(textAnnoNum + " EntityAnnotations found ...");
     }
     /*
      * -----------------------------------------------------------------------
      * Helper Methods to check Text and EntityAnnotations
      * -----------------------------------------------------------------------
      */
-    
+
     /**
      * @param g
      * @return
@@ -138,7 +138,7 @@ public class ZemantaEnhancementEngineTest {
         Iterator<Triple> requiresIterator = g.filter(
                 entityAnnotation, Properties.DC_REQUIRES, null);
         Iterator<Triple> dcTypeCategory = g.filter(
-        		entityAnnotation, Properties.DC_TYPE, TechnicalClasses.FISE_CATEGORY);
+                entityAnnotation, Properties.DC_TYPE, TechnicalClasses.FISE_CATEGORY);
         // check if the relation or an requires annotation set
         // also include the DC_TYPE FISE_CATEGORY, because such entityEnhancements
         // do not need to have any values for DC_RELATION nor DC_REQUIRES
@@ -219,38 +219,38 @@ public class ZemantaEnhancementEngineTest {
                 Properties.FISE_END, null);
         //start end is optional, but if start is present, that also end needs to be set
         if(startPosIterator.hasNext()){
-        	Resource resource = startPosIterator.next().getObject();
-        	//only a single start position is supported
-        	assertTrue(!startPosIterator.hasNext());
-        	assertTrue(resource instanceof TypedLiteral);
-        	TypedLiteral startPosLiteral = (TypedLiteral) resource;
-        	resource = null;
-        	int start = LiteralFactory.getInstance().createObject(Integer.class, startPosLiteral);
-        	startPosLiteral = null;
-        	//now get the end
+            Resource resource = startPosIterator.next().getObject();
+            //only a single start position is supported
+            assertTrue(!startPosIterator.hasNext());
+            assertTrue(resource instanceof TypedLiteral);
+            TypedLiteral startPosLiteral = (TypedLiteral) resource;
+            resource = null;
+            int start = LiteralFactory.getInstance().createObject(Integer.class, startPosLiteral);
+            startPosLiteral = null;
+            //now get the end
             //end must be defined if start is present
             assertTrue(endPosIterator.hasNext());
             resource = endPosIterator.next().getObject();
-        	//only a single end position is supported
-        	assertTrue(!endPosIterator.hasNext());
-        	assertTrue(resource instanceof TypedLiteral);
-        	TypedLiteral endPosLiteral = (TypedLiteral) resource;
-        	resource = null;
-        	int end = LiteralFactory.getInstance().createObject(Integer.class, endPosLiteral);
-        	endPosLiteral = null;
-        	//check for equality of the selected text and the text on the selected position in the content
-        	//System.out.println("TA ["+start+"|"+end+"]"+selectedText.getLexicalForm()+"<->"+content.substring(start,end));
-        	assertTrue(content.substring(start, end).equals(selectedText.getLexicalForm()));
+            //only a single end position is supported
+            assertTrue(!endPosIterator.hasNext());
+            assertTrue(resource instanceof TypedLiteral);
+            TypedLiteral endPosLiteral = (TypedLiteral) resource;
+            resource = null;
+            int end = LiteralFactory.getInstance().createObject(Integer.class, endPosLiteral);
+            endPosLiteral = null;
+            //check for equality of the selected text and the text on the selected position in the content
+            //System.out.println("TA ["+start+"|"+end+"]"+selectedText.getLexicalForm()+"<->"+content.substring(start,end));
+            assertTrue(content.substring(start, end).equals(selectedText.getLexicalForm()));
         } else {
-        	//if no start position is present, there must also be no end position defined
-        	assertTrue(!endPosIterator.hasNext());
+            //if no start position is present, there must also be no end position defined
+            assertTrue(!endPosIterator.hasNext());
         }
     }
-   
+
     public static void main(String[] args) throws Exception{
-		ZemantaEnhancementEngineTest test = new ZemantaEnhancementEngineTest();
-		test.setUpServices();
-		test.tesetBioText();
-		test.shutdownServices();
-	}
+        ZemantaEnhancementEngineTest test = new ZemantaEnhancementEngineTest();
+        test.setUpServices();
+        test.tesetBioText();
+        test.shutdownServices();
+    }
 }

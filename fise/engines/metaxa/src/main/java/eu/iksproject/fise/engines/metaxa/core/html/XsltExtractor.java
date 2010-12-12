@@ -1,6 +1,5 @@
 package eu.iksproject.fise.engines.metaxa.core.html;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -29,9 +28,8 @@ import org.w3c.dom.Document;
 
 /**
  * XsltExtractor.java
- * 
+ *
  * @author <a href="mailto:kasper@dfki.de">Walter Kasper</a>
- * 
  */
 public class XsltExtractor implements HtmlExtractionComponent {
 
@@ -59,7 +57,7 @@ public class XsltExtractor implements HtmlExtractionComponent {
         try {
             URI location =
                 getClass().getClassLoader().getResource(fileName).toURI();
-            this.source = location;
+            source = location;
         } catch (URISyntaxException e) {
             throw new InitializationException(e.getMessage(), e);
         }

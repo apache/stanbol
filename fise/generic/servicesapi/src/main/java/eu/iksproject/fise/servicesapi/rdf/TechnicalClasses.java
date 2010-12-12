@@ -14,26 +14,26 @@ public class TechnicalClasses {
      * Type used for all enhancement created by Fise
      */
     public static final UriRef FISE_ENHANCEMENT = new UriRef(
-    		NamespaceEnum.fise+"Enhancement");
+            NamespaceEnum.fise+"Enhancement");
 
     /**
      * Type used for annotations on Text created by FISE. This type is intended
      * to be used in combination with FISE_ENHANCEMENT
      */
     public static final UriRef FISE_TEXTANNOTATION = new UriRef(
-    		NamespaceEnum.fise+"TextAnnotation");
+            NamespaceEnum.fise+"TextAnnotation");
 
     /**
      * Type used for annotations of named entities. This type is intended
      * to be used in combination with FISE_ENHANCEMENT
      */
     public static final UriRef FISE_ENTITYANNOTATION = new UriRef(
-    		NamespaceEnum.fise+"EntityAnnotation");
+            NamespaceEnum.fise+"EntityAnnotation");
 
     /**
      * To be used as a type pour any semantic knowledge extraction
      */
-	@Deprecated
+    @Deprecated
     public static final UriRef FISE_EXTRACTION = new UriRef(
             "http://iks-project.eu/ns/fise/extraction/Extraction");
 
@@ -43,7 +43,7 @@ public class TechnicalClasses {
      * TODO: rwesten: Check how this standard can be used for FISE enhancements
      * @deprecated
      */
-	@Deprecated
+    @Deprecated
     public static final UriRef ANNOTEA_ANNOTATION = new UriRef(
             "http://www.w3.org/2000/10/annotation-ns#Annotation");
 
@@ -59,7 +59,7 @@ public class TechnicalClasses {
      * Mapping of Categories</a> for more Information)
      */
     public static final UriRef FISE_CATEGORY = new UriRef(
-    		NamespaceEnum.fise + "Category");
+            NamespaceEnum.fise + "Category");
 
     private TechnicalClasses() {
     }

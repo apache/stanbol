@@ -21,60 +21,60 @@ import java.util.List;
 
 /**
  * a toponym search result as returned by the geonames webservice.
- * 
+ *
  * @author marc@geonames
- * 
+ *
  */
 public class ToponymSearchResult {
 
-	List<Toponym> toponyms = new ArrayList<Toponym>();
+    List<Toponym> toponyms = new ArrayList<Toponym>();
 
-	int totalResultsCount;
-	
-	Style style;
+    int totalResultsCount;
 
-	/**
-	 * @return Returns the toponyms.
-	 */
-	public List<Toponym> getToponyms() {
-		return toponyms;
-	}
+    Style style;
 
-	/**
-	 * @param toponyms
-	 *            The toponyms to set.
-	 */
-	public void setToponyms(List<Toponym> toponyms) {
-		this.toponyms = toponyms;
-	}
+    /**
+     * @return Returns the toponyms.
+     */
+    public List<Toponym> getToponyms() {
+        return toponyms;
+    }
 
-	/**
-	 * @return Returns the totalResultsCount.
-	 */
-	public int getTotalResultsCount() {
-		return totalResultsCount;
-	}
+    /**
+     * @param toponyms
+     *            The toponyms to set.
+     */
+    public void setToponyms(List<Toponym> toponyms) {
+        this.toponyms = toponyms;
+    }
 
-	/**
-	 * @param totalResultsCount
-	 *            The totalResultsCount to set.
-	 */
-	public void setTotalResultsCount(int totalResultsCount) {
-		this.totalResultsCount = totalResultsCount;
-	}
+    /**
+     * @return Returns the totalResultsCount.
+     */
+    public int getTotalResultsCount() {
+        return totalResultsCount;
+    }
 
-	/**
-	 * @return the style
-	 */
-	public Style getStyle() {
-		return style;
-	}
+    /**
+     * @param totalResultsCount
+     *            The totalResultsCount to set.
+     */
+    public void setTotalResultsCount(int totalResultsCount) {
+        this.totalResultsCount = totalResultsCount;
+    }
 
-	/**
-	 * @param style the style to set
-	 */
-	public void setStyle(Style style) {
-		this.style = style;
-	}
+    /**
+     * @return the style
+     */
+    public Style getStyle() {
+        return style;
+    }
+
+    /**
+     * @param style the style to set
+     */
+    public void setStyle(Style style) {
+        this.style = style;
+    }
 
 }

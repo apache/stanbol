@@ -30,7 +30,7 @@ import org.apache.commons.exec.ShutdownHookProcessDestroyer;
 
 /** Start a runnable jar by forking a JVM process,
  *  and terminate the process when this VM exits.
- *  
+ *
  *  TODO: move to a commons/testing library?
  */
 public class JarExecutor {
@@ -38,11 +38,11 @@ public class JarExecutor {
     private final File jarToExecute;
     private final String javaExecutable;
     private final int serverPort;
-    
+
     public static final int DEFAULT_PORT = 8765;
     public static final String PROP_PREFIX = "jar.executor.";
     public static final String PROP_SERVER_PORT = PROP_PREFIX + "server.port";
-    
+
     @SuppressWarnings("serial")
     public static class ExecutorException extends Exception {
         ExecutorException(String reason) {
@@ -52,7 +52,7 @@ public class JarExecutor {
             super(reason, cause);
         }
     }
-    
+
     public static JarExecutor getInstance(Properties config) throws ExecutorException {
         if(instance == null) {
             synchronized (JarExecutor.class) {
@@ -63,19 +63,19 @@ public class JarExecutor {
         }
         return instance;
     }
-    
+
     /** Build a JarExecutor, locate the jar to run, etc */
     private JarExecutor(Properties config) throws ExecutorException {
         final boolean isWindows = System.getProperty("os.name").toLowerCase().contains("windows");
-        
+
         String str = config.getProperty(PROP_SERVER_PORT);
         serverPort = str == null ? DEFAULT_PORT : Integer.valueOf(str);
-        
+
         // TODO make those configurable
         javaExecutable = isWindows ? "java.exe" : "java";
         final File jarFolder = new File("./target/dependency");
         final Pattern jarPattern = Pattern.compile("eu.iksproject.*full.*jar$");
-        
+
         // Find executable jar
         final String [] candidates = jarFolder.list();
         File f = null;
@@ -87,15 +87,15 @@ public class JarExecutor {
                 }
             }
         }
-        
+
         if(f == null) {
-            throw new ExecutorException("Executable jar matching " + jarPattern 
+            throw new ExecutorException("Executable jar matching " + jarPattern
                     + " not found in " + jarFolder.getAbsolutePath()
                     + ", candidates are " + Arrays.asList(candidates));
         }
         jarToExecute = f;
     }
-    
+
     /** Start the jar if not done yet, and setup runtime hook
      *  to stop it.
      */
@@ -105,13 +105,13 @@ public class JarExecutor {
             public void onProcessFailed(ExecuteException ex) {
                 info("Process execution failed:" + ex);
             }
-            
+
             @Override
             public void onProcessComplete(int result) {
                 info("Process execution complete, exit code=" + result);
             }
         };
-        
+
         // TODO add optional memory settings
         final Executor e = new DefaultExecutor();
         final CommandLine cl = new CommandLine(javaExecutable);
@@ -123,7 +123,7 @@ public class JarExecutor {
         e.setProcessDestroyer(new ShutdownHookProcessDestroyer());
         e.execute(cl, h);
     }
-    
+
     protected void info(String msg) {
         System.out.println(getClass().getName() + ": " + msg);
     }

@@ -18,179 +18,179 @@ package org.geonames;
 
 /**
  * a wikipedia article
- * 
+ *
  * @author marc@geonames
- * 
+ *
  */
 public class WikipediaArticle {
 
-	private String language;
+    private String language;
 
-	private String title;
+    private String title;
 
-	private String summary;
+    private String summary;
 
-	private String wikipediaUrl;
+    private String wikipediaUrl;
 
-	private String feature;
+    private String feature;
 
-	private int population;
+    private int population;
 
-	private int elevation;
+    private int elevation;
 
-	private double latitude;
+    private double latitude;
 
-	private double longitude;
-	
-	private String thumbnailImg;
+    private double longitude;
 
-	/**
-	 * @return Returns the elevation.
-	 */
-	public int getElevation() {
-		return elevation;
-	}
+    private String thumbnailImg;
 
-	/**
-	 * @param elevation
-	 *            The elevation to set.
-	 */
-	public void setElevation(int elevation) {
-		this.elevation = elevation;
-	}
+    /**
+     * @return Returns the elevation.
+     */
+    public int getElevation() {
+        return elevation;
+    }
 
-	/**
-	 * @return Returns the feature.
-	 */
-	public String getFeature() {
-		return feature;
-	}
+    /**
+     * @param elevation
+     *            The elevation to set.
+     */
+    public void setElevation(int elevation) {
+        this.elevation = elevation;
+    }
 
-	/**
-	 * @param feature
-	 *            The feature to set.
-	 */
-	public void setFeature(String feature) {
-		this.feature = feature;
-	}
+    /**
+     * @return Returns the feature.
+     */
+    public String getFeature() {
+        return feature;
+    }
 
-	/**
-	 * @return Returns the language.
-	 */
-	public String getLanguage() {
-		return language;
-	}
+    /**
+     * @param feature
+     *            The feature to set.
+     */
+    public void setFeature(String feature) {
+        this.feature = feature;
+    }
 
-	/**
-	 * @param language
-	 *            The language to set.
-	 */
-	public void setLanguage(String language) {
-		this.language = language;
-	}
+    /**
+     * @return Returns the language.
+     */
+    public String getLanguage() {
+        return language;
+    }
 
-	/**
-	 * @return Returns the latitude.
-	 */
-	public double getLatitude() {
-		return latitude;
-	}
+    /**
+     * @param language
+     *            The language to set.
+     */
+    public void setLanguage(String language) {
+        this.language = language;
+    }
 
-	/**
-	 * @param latitude
-	 *            The latitude to set.
-	 */
-	public void setLatitude(double latitude) {
-		this.latitude = latitude;
-	}
+    /**
+     * @return Returns the latitude.
+     */
+    public double getLatitude() {
+        return latitude;
+    }
 
-	/**
-	 * @return Returns the longitude.
-	 */
-	public double getLongitude() {
-		return longitude;
-	}
+    /**
+     * @param latitude
+     *            The latitude to set.
+     */
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
 
-	/**
-	 * @param longitude
-	 *            The longitude to set.
-	 */
-	public void setLongitude(double longitude) {
-		this.longitude = longitude;
-	}
+    /**
+     * @return Returns the longitude.
+     */
+    public double getLongitude() {
+        return longitude;
+    }
 
-	/**
-	 * @return Returns the population.
-	 */
-	public int getPopulation() {
-		return population;
-	}
+    /**
+     * @param longitude
+     *            The longitude to set.
+     */
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
 
-	/**
-	 * @param population
-	 *            The population to set.
-	 */
-	public void setPopulation(int population) {
-		this.population = population;
-	}
+    /**
+     * @return Returns the population.
+     */
+    public int getPopulation() {
+        return population;
+    }
 
-	/**
-	 * @return Returns the summary.
-	 */
-	public String getSummary() {
-		return summary;
-	}
+    /**
+     * @param population
+     *            The population to set.
+     */
+    public void setPopulation(int population) {
+        this.population = population;
+    }
 
-	/**
-	 * @param summary
-	 *            The summary to set.
-	 */
-	public void setSummary(String summary) {
-		this.summary = summary;
-	}
+    /**
+     * @return Returns the summary.
+     */
+    public String getSummary() {
+        return summary;
+    }
 
-	/**
-	 * @return Returns the title.
-	 */
-	public String getTitle() {
-		return title;
-	}
+    /**
+     * @param summary
+     *            The summary to set.
+     */
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
 
-	/**
-	 * @param title
-	 *            The title to set.
-	 */
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    /**
+     * @return Returns the title.
+     */
+    public String getTitle() {
+        return title;
+    }
 
-	/**
-	 * @return Returns the wikipediaUrl.
-	 */
-	public String getWikipediaUrl() {
-		return wikipediaUrl;
-	}
+    /**
+     * @param title
+     *            The title to set.
+     */
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-	/**
-	 * @param wikipediaUrl
-	 *            The wikipediaUrl to set.
-	 */
-	public void setWikipediaUrl(String wikipediaURL) {
-		this.wikipediaUrl = wikipediaURL;
-	}
+    /**
+     * @return Returns the wikipediaUrl.
+     */
+    public String getWikipediaUrl() {
+        return wikipediaUrl;
+    }
 
-	/**
-	 * @return the thumbnailImg
-	 */
-	public String getThumbnailImg() {
-		return thumbnailImg;
-	}
+    /**
+     * @param wikipediaUrl
+     *            The wikipediaUrl to set.
+     */
+    public void setWikipediaUrl(String wikipediaURL) {
+        this.wikipediaUrl = wikipediaURL;
+    }
 
-	/**
-	 * @param thumbnailImg the thumbnailImg to set
-	 */
-	public void setThumbnailImg(String thumbnailImg) {
-		this.thumbnailImg = thumbnailImg;
-	}
+    /**
+     * @return the thumbnailImg
+     */
+    public String getThumbnailImg() {
+        return thumbnailImg;
+    }
+
+    /**
+     * @param thumbnailImg the thumbnailImg to set
+     */
+    public void setThumbnailImg(String thumbnailImg) {
+        this.thumbnailImg = thumbnailImg;
+    }
 
 }

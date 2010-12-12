@@ -81,9 +81,9 @@ public class RelatedTopicEnhancementEngine implements EnhancementEngine {
             List<TagInfo> suggestions = autotagger.suggestForType(text, type);
             Collection<NonLiteral> noRelatedEnhancements = Collections.emptyList();
             for (TagInfo tag : suggestions) {
-                EnhancementRDFUtils.writeEntityAnnotation(this, literalFactory, 
-    	        		graph, contentItemId, 
-    	        		noRelatedEnhancements, tag);
+                EnhancementRDFUtils.writeEntityAnnotation(this, literalFactory,
+                        graph, contentItemId,
+                        noRelatedEnhancements, tag);
             }
         } catch (IOException e) {
             throw new EngineException(this, ci, e);
@@ -91,7 +91,7 @@ public class RelatedTopicEnhancementEngine implements EnhancementEngine {
     }
 
     public int canEnhance(ContentItem ci) {
-       	String mimeType = ci.getMimeType().split(";",2)[0];
+           String mimeType = ci.getMimeType().split(";",2)[0];
         if (TEXT_PLAIN_MIMETYPE.equalsIgnoreCase(mimeType)) {
             return ENHANCE_SYNCHRONOUS;
         }

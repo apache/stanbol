@@ -27,7 +27,7 @@ import org.xml.sax.SAXException;
 
 /**
  * HtmlExtractionRegistry.java
- * 
+ *
  * @author <a href="mailto:kasper@dfki.de">Walter Kasper</a>
  */
 public class HtmlExtractionRegistry {

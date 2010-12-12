@@ -76,14 +76,14 @@ public class ClientHttpRequest {
     connection.setRequestProperty("Content-Type",
                                   "multipart/form-data; boundary=" + boundary);
   }
-  
+
   public ClientHttpRequest(URLConnection connection, String name, String pw) throws IOException {
-	  this.connection = connection;
-	  connection.setDoOutput(true);
-	    connection.setRequestProperty("Content-Type",
+      this.connection = connection;
+      connection.setDoOutput(true);
+        connection.setRequestProperty("Content-Type",
                 "multipart/form-data; boundary=" + boundary);
-	    connection.setRequestProperty("Authorization ", 
-	    		"Basic " + Base64.encodeBytes((name + ":" + pw).getBytes()));
+        connection.setRequestProperty("Authorization ",
+                "Basic " + Base64.encodeBytes((name + ":" + pw).getBytes()));
   }
 
   /**
@@ -500,4 +500,3 @@ public class ClientHttpRequest {
     return new ClientHttpRequest(url).post(name1, value1, name2, value2, name3, value3, name4, value4);
   }
 }
-

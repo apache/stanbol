@@ -19,14 +19,14 @@ package org.geonames;
 /**
  * is thrown when the search criteria is initialized with obviously invalid parameters,
  * such as an invalid country code.
- * 
+ *
  * @author marc
- * 
+ *
  */
 public class InvalidParameterException extends Exception {
 
-	public InvalidParameterException(String msg) {
-		super(msg);
-	}
+    public InvalidParameterException(String msg) {
+        super(msg);
+    }
 
 }
