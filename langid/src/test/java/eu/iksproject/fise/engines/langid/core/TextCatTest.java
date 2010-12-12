@@ -13,7 +13,7 @@ import static org.junit.Assert.assertNotNull;
 
 /**
  * {@link TextCatTest} is a test class for {@link TextCategorizer}.
- * 
+ *
  * @author Joerg Steffen, DFKI
  * @version $Id$
  */
@@ -34,14 +34,14 @@ public class TextCatTest {
 
     /**
      * This test the language identification.
-     * 
+     *
      * @throws IOException
      *             if there is an error when reading the text
      */
     @Test
     public void testTextCat() throws IOException {
         String testFileName = "en.txt";
-        
+
         InputStream in =
             this.getClass().getClassLoader().getResourceAsStream(
                 testFileName);

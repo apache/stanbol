@@ -25,7 +25,7 @@ import org.semanticdesktop.aperture.vocabulary.NIE;
 /**
  * {@link MetaxaCore} provides the functionality to extract metadata and text
  * for a number of different document formats (pdf, html, etc.).
- * 
+ *
  * @author Joerg Steffen, DFKI
  * @version $Id$
  */
@@ -39,7 +39,7 @@ public class MetaxaCore {
     /**
      * This creates a new instance of {@code ApertureExtractor} using the given
      * configuration.
-     * 
+     *
      * @param configFileName
      *            a {@link String} with the config file name.
      * @throws IOException
@@ -56,7 +56,7 @@ public class MetaxaCore {
     /**
      * This return {@code true} if the given MIME type is supported by the
      * extractor.
-     * 
+     *
      * @param mimeType
      *            a {@link String} with the MIME type
      * @return a {@code boolean}
@@ -71,7 +71,7 @@ public class MetaxaCore {
     /**
      * This returns a model containing all the metadata that could be extracted
      * by reading the given input stream using the given MIME type.
-     * 
+     *
      * @param in
      *            an {@link InputStream} where to read the document from
      * @param docId
@@ -115,7 +115,7 @@ public class MetaxaCore {
     /**
      * This returns a documents plain text if contained in the given extracted
      * metadata.
-     * 
+     *
      * @param model
      *            a {@link Model} with the extracted metadata
      * @return a {@link String} with the plain text content or {@code null} if

@@ -23,17 +23,12 @@ import org.w3c.dom.Document;
 
 /**
  * IksHtmlExtractor.java
- * 
+ *
  * @author <a href="mailto:kasper@dfki.de">Walter Kasper</a>
- * 
  */
 public class IksHtmlExtractor implements Extractor {
 
-    /**
-     * This contains the logger.
-     */
-    private static final Logger LOG =
-        LoggerFactory.getLogger(IksHtmlExtractor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IksHtmlExtractor.class);
 
     public static String DEFAULT_CONFIGURATION = "htmlextractors.xml";
 
@@ -55,7 +50,7 @@ public class IksHtmlExtractor implements Extractor {
     public IksHtmlExtractor(String configFileName)
             throws InitializationException {
         this();
-        this.registry = new HtmlExtractionRegistry(configFileName);
+        registry = new HtmlExtractionRegistry(configFileName);
     }
 
     public void extract(URI id,

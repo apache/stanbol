@@ -2,7 +2,7 @@ package eu.iksproject.fise.engines.metaxa.core.html;
 
 /*
  * Copyright 2002 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: -
  * Redistributions of source code must retain the above copyright notice, this
@@ -10,11 +10,11 @@ package eu.iksproject.fise.engines.metaxa.core.html;
  * form must reproduce the above copyright notice, this list of conditions and
  * the following disclaimer in the documentation and/or other materials provided
  * with the distribution.
- * 
+ *
  * Neither the name of Sun Microsystems, Inc. or the names of contributors may
  * be used to endorse or promote products derived from this software without
  * specific prior written permission.
- * 
+ *
  * This software is provided "AS IS," without a warranty of any kind. ALL
  * EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES, INCLUDING ANY
  * IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR
@@ -26,7 +26,7 @@ package eu.iksproject.fise.engines.metaxa.core.html;
  * CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY, ARISING OUT OF THE USE OF
  * OR INABILITY TO USE SOFTWARE, EVEN IF SUN HAS BEEN ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGES.
- * 
+ *
  * You acknowledge that Software is not designed, licensed or intended for use
  * in the design, construction, operation or maintenance of any nuclear
  * facility.
@@ -66,7 +66,7 @@ import org.xml.sax.SAXParseException;
 /**
  * <code>DOMUtils</code> provides convenience methods for working with DOM
  * documents.
- * 
+ *
  * @author Walter Kasper, DFKI
  * @author Joerg Steffen, DFKI
  * @version $Id$
@@ -82,7 +82,7 @@ public final class DOMUtils {
 
     /**
      * This prints the specified node and all of its children to System.out.
-     * 
+     *
      * @param node
      *            a DOM <code>Node</code>
      */
@@ -164,7 +164,7 @@ public final class DOMUtils {
     /**
      * This prints the given DOM document to System.out with indentation and
      * iso-8859 encoding.
-     * 
+     *
      * @param doc
      *            a DOM <code>Document</code>
      */
@@ -216,7 +216,7 @@ public final class DOMUtils {
 
     /**
      * This returns a string representation of the given document.
-     * 
+     *
      * @param doc
      *            an XML <code>Document</code>
      * @param encoding
@@ -282,7 +282,7 @@ public final class DOMUtils {
 
     /**
      * This method writes a DOM document to the given output stream.
-     * 
+     *
      * @param doc
      *            a DOM <code>Document</code>
      * @param encoding
@@ -345,7 +345,7 @@ public final class DOMUtils {
 
     /**
      * This parses the given XML string and creates a DOM Document.
-     * 
+     *
      * @param fileName
      *            a <code>String</code> with the source file name
      * @param encoding
@@ -386,7 +386,7 @@ public final class DOMUtils {
 
     /**
      * This parses the given XML file and creates a DOM Document.
-     * 
+     *
      * @param fileName
      *            a <code>String</code> with the source file name
      * @param validation
@@ -450,7 +450,7 @@ public final class DOMUtils {
 
     /**
      * This counts the elements in the given document by tag name.
-     * 
+     *
      * @param tag
      *            a <code>String</code> with a tag name
      * @param doc
@@ -467,7 +467,7 @@ public final class DOMUtils {
     /**
      * This realizes the <code>indexOf</code> method of the
      * <code>java.util.List</code> interface for <code>NodeList</code>.
-     * 
+     *
      * @param list
      *            a <code>NodeList</code> value
      * @param node
@@ -491,7 +491,7 @@ public final class DOMUtils {
      * children of the given node. If <code>node</code> is a text or attribute
      * node, its value is returned. Otherwise <code>null</code> is returned
      * (improvement potential!).
-     * 
+     *
      * @param node
      *            a <code>Node</code> value
      * @return a <code>String</code> with the concatenated text
@@ -521,7 +521,7 @@ public final class DOMUtils {
     /**
      * This selects all direct children of the given element with the given
      * name. If the name is <code>null</code>, all children are returned.
-     * 
+     *
      * @param ele
      *            an <code>Element</code> value
      * @param name
@@ -545,7 +545,7 @@ public final class DOMUtils {
 
     /**
      * This selects all direct children of type 'Element' of the given element.
-     * 
+     *
      * @param ele
      *            an <code>Element</code> value
      * @return a <code>List</code> of <code>Elmenet</code>s with the element
@@ -567,7 +567,7 @@ public final class DOMUtils {
     /**
      * This returns the first child element with the given name found at the
      * given element.
-     * 
+     *
      * @param ele
      *            an <code>Element</code> value
      * @param name
@@ -588,7 +588,7 @@ public final class DOMUtils {
 
     /**
      * This adds a new child with the given name to the given element.
-     * 
+     *
      * @param ele
      *            an <code>Element</code>
      * @param name

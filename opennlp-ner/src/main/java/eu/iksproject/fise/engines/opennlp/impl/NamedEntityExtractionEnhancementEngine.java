@@ -400,8 +400,8 @@ public class NamedEntityExtractionEnhancementEngine implements
     }
 
     public int canEnhance(ContentItem ci) {
-    	//in case text/pain;charSet=UTF8 is parsed
-    	String mimeType = ci.getMimeType().split(";",2)[0];
+        //in case text/pain;charSet=UTF8 is parsed
+        String mimeType = ci.getMimeType().split(";",2)[0];
         if (TEXT_PLAIN_MIMETYPE.equalsIgnoreCase(mimeType)) {
             return ENHANCE_SYNCHRONOUS;
         }
