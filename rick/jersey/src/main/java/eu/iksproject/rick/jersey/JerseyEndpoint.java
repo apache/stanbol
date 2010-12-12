@@ -29,9 +29,9 @@ import eu.iksproject.rick.servicesapi.site.ReferencedSiteManager;
  *
  * This OSGi component serves as a bridge between the OSGi context and the
  * Servlet context available to JAX-RS resources.
- * 
- * NOTE: Original Code taken from the FISE 
- * @author Rupert Westenthaler 
+ *
+ * NOTE: Original Code taken from the FISE
+ * @author Rupert Westenthaler
  */
 
 @Component(immediate = true, metatype = true)

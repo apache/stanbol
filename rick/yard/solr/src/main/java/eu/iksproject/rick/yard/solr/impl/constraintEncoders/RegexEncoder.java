@@ -18,36 +18,36 @@ import eu.iksproject.rick.yard.solr.query.ConstraintTypePosition.PositionType;
  */
 public class RegexEncoder implements IndexConstraintTypeEncoder<String>{
 
-	private static final ConstraintTypePosition POS = new ConstraintTypePosition(PositionType.value);
-	
-	@Override
-	public void encode(EncodedConstraintParts constraint, String value) {
-		if(value == null){
-			throw new IllegalArgumentException("This encoder does not support the NULL IndexValue!");
-		} else {
-			//TODO: Implement some REGEX to WILDCard conversion for Solr
-			constraint.addEncoded(POS, value.toLowerCase());
-		}
-	}
+    private static final ConstraintTypePosition POS = new ConstraintTypePosition(PositionType.value);
 
-	@Override
-	public Collection<IndexConstraintTypeEnum> dependsOn() {
-		return Arrays.asList(IndexConstraintTypeEnum.EQ);
-	}
+    @Override
+    public void encode(EncodedConstraintParts constraint, String value) {
+        if(value == null){
+            throw new IllegalArgumentException("This encoder does not support the NULL IndexValue!");
+        } else {
+            //TODO: Implement some REGEX to WILDCard conversion for Solr
+            constraint.addEncoded(POS, value.toLowerCase());
+        }
+    }
 
-	@Override
-	public IndexConstraintTypeEnum encodes() {
-		return IndexConstraintTypeEnum.REGEX;
-	}
+    @Override
+    public Collection<IndexConstraintTypeEnum> dependsOn() {
+        return Arrays.asList(IndexConstraintTypeEnum.EQ);
+    }
 
-	@Override
-	public boolean supportsDefault() {
-		return false;
-	}
+    @Override
+    public IndexConstraintTypeEnum encodes() {
+        return IndexConstraintTypeEnum.REGEX;
+    }
 
-	@Override
-	public Class<String> acceptsValueType() {
-		return String.class;
-	}
+    @Override
+    public boolean supportsDefault() {
+        return false;
+    }
+
+    @Override
+    public Class<String> acceptsValueType() {
+        return String.class;
+    }
 
 }

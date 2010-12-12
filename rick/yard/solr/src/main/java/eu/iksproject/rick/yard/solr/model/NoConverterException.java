@@ -11,18 +11,18 @@ import java.lang.reflect.Type;
  */
 public class NoConverterException extends RuntimeException {
 
-	/**
-	 * default serialVersionUID
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     * default serialVersionUID
+     */
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Create an instance of <code>NoAdapterException</code>
-	 * indicating that no adapter is available for the type.
-	 *
-	 * @param type the type for which no adapter is available
-	 */
-	public NoConverterException(Type type) {
-		super("No adapter available for type "+type);
-	}
+    /**
+     * Create an instance of <code>NoAdapterException</code>
+     * indicating that no adapter is available for the type.
+     *
+     * @param type the type for which no adapter is available
+     */
+    public NoConverterException(Type type) {
+        super("No adapter available for type "+type);
+    }
 }
