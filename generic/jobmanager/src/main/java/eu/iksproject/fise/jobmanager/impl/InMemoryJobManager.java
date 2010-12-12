@@ -50,10 +50,10 @@ public class InMemoryJobManager implements EnhancementJobManager {
         //however the remove Method will not have any affect if the list was
         //changed.
         synchronized (sortedEngineList) {
-        	engines = sortedEngineList.iterator();
-		}
+            engines = sortedEngineList.iterator();
+        }
         while (engines.hasNext()) {
-        	EnhancementEngine engine = engines.next();
+            EnhancementEngine engine = engines.next();
             if (engine.canEnhance(ci) == EnhancementEngine.CANNOT_ENHANCE) {
                 log.debug("[{}] cannot be enhanced by engine [{}], skipping",
                         ci.getId(), engine);
@@ -91,25 +91,25 @@ public class InMemoryJobManager implements EnhancementJobManager {
 
     private static class ExecutionOrderComparator implements Comparator<EnhancementEngine> {
 
-		@Override
-		public int compare(EnhancementEngine engine1, EnhancementEngine engine2) {
-			Integer order1 = getOrder(engine1);
-			Integer order2 = getOrder(engine2);
-			//start with the highest number finish with the lowest ...
-			return order1 == order2?0:order1<order2?1:-1;
-		}
+        @Override
+        public int compare(EnhancementEngine engine1, EnhancementEngine engine2) {
+            Integer order1 = getOrder(engine1);
+            Integer order2 = getOrder(engine2);
+            //start with the highest number finish with the lowest ...
+            return order1 == order2?0:order1<order2?1:-1;
+        }
 
-		public Integer getOrder(EnhancementEngine engine){
-			log.info("getOrder "+engine);
-			if (engine instanceof ServiceProperties){
-				log.info(" ... implements ServiceProperties");
-				Object value = ((ServiceProperties)engine).getServiceProperties().get(ServiceProperties.ENHANCEMENT_ENGINE_ORDERING);
-				log.info("   > value = "+value +" "+value.getClass());
-				if (value !=null && value instanceof Integer){
-					return (Integer)value;
-				}
-			}
-			return ServiceProperties.ORDERING_DEFAULT;
-		}
+        public Integer getOrder(EnhancementEngine engine){
+            log.info("getOrder "+engine);
+            if (engine instanceof ServiceProperties){
+                log.info(" ... implements ServiceProperties");
+                Object value = ((ServiceProperties)engine).getServiceProperties().get(ServiceProperties.ENHANCEMENT_ENGINE_ORDERING);
+                log.info("   > value = "+value +" "+value.getClass());
+                if (value !=null && value instanceof Integer){
+                    return (Integer)value;
+                }
+            }
+            return ServiceProperties.ORDERING_DEFAULT;
+        }
     }
 }

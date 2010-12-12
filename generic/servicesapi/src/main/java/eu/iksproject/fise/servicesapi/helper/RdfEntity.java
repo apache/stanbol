@@ -12,12 +12,12 @@ import org.apache.clerezza.rdf.core.UriRef;
  */
 public interface RdfEntity {
 
-	/**
-	 * Getter for the RDF node represented by the proxy.
+    /**
+     * Getter for the RDF node represented by the proxy.
      *
-	 * @return the node representing the proxy. Typically an {@link UriRef} but
-	 * could be also a {@link BNode}
-	 */
-	NonLiteral getId();
+     * @return the node representing the proxy. Typically an {@link UriRef} but
+     * could be also a {@link BNode}
+     */
+    NonLiteral getId();
 
 }

@@ -136,7 +136,7 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
      * Helper Methods to check Text and EntityAnnotations
      * -----------------------------------------------------------------------
      */
- 
+
     private int checkAllTextAnnotations(MGraph g, String content) {
         Iterator<Triple> textAnnotationIterator = g.filter(null,
                 RDF_TYPE, FISE_TEXTANNOTATION);
@@ -182,31 +182,31 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
                 FISE_END, null);
         //start end is optional, but if start is present, that also end needs to be set
         if(startPosIterator.hasNext()){
-        	Resource resource = startPosIterator.next().getObject();
-        	//only a single start position is supported
-        	assertTrue(!startPosIterator.hasNext());
-        	assertTrue(resource instanceof TypedLiteral);
-        	TypedLiteral startPosLiteral = (TypedLiteral) resource;
-        	resource = null;
-        	int start = LiteralFactory.getInstance().createObject(Integer.class, startPosLiteral);
-        	startPosLiteral = null;
-        	//now get the end
+            Resource resource = startPosIterator.next().getObject();
+            //only a single start position is supported
+            assertTrue(!startPosIterator.hasNext());
+            assertTrue(resource instanceof TypedLiteral);
+            TypedLiteral startPosLiteral = (TypedLiteral) resource;
+            resource = null;
+            int start = LiteralFactory.getInstance().createObject(Integer.class, startPosLiteral);
+            startPosLiteral = null;
+            //now get the end
             //end must be defined if start is present
             assertTrue(endPosIterator.hasNext());
             resource = endPosIterator.next().getObject();
-        	//only a single end position is supported
-        	assertTrue(!endPosIterator.hasNext());
-        	assertTrue(resource instanceof TypedLiteral);
-        	TypedLiteral endPosLiteral = (TypedLiteral) resource;
-        	resource = null;
-        	int end = LiteralFactory.getInstance().createObject(Integer.class, endPosLiteral);
-        	endPosLiteral = null;
-        	//check for equality of the selected text and the text on the selected position in the content
-        	//System.out.println("TA ["+start+"|"+end+"]"+selectedText.getLexicalForm()+"<->"+content.substring(start,end));
+            //only a single end position is supported
+            assertTrue(!endPosIterator.hasNext());
+            assertTrue(resource instanceof TypedLiteral);
+            TypedLiteral endPosLiteral = (TypedLiteral) resource;
+            resource = null;
+            int end = LiteralFactory.getInstance().createObject(Integer.class, endPosLiteral);
+            endPosLiteral = null;
+            //check for equality of the selected text and the text on the selected position in the content
+            //System.out.println("TA ["+start+"|"+end+"]"+selectedText.getLexicalForm()+"<->"+content.substring(start,end));
             assertEquals(content.substring(start, end), selectedText.getLexicalForm());
         } else {
-        	//if no start position is present, there must also be no end position defined
-        	assertTrue(!endPosIterator.hasNext());
+            //if no start position is present, there must also be no end position defined
+            assertTrue(!endPosIterator.hasNext());
         }
     }
 

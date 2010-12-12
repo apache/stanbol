@@ -1,7 +1,6 @@
 package eu.iksproject.fise.clerezza.sparql;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.MGraph;

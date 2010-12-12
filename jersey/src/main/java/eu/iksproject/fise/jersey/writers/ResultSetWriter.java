@@ -31,40 +31,40 @@ import org.w3c.dom.Document;
 @Produces({"application/sparql-results+xml", "application/xml", "text/xml"})
 public class ResultSetWriter implements MessageBodyWriter<ResultSet> {
 
-	public static final String ENCODING = "UTF-8";
+    public static final String ENCODING = "UTF-8";
 
-	@Override
+    @Override
     public long getSize(ResultSet resultSet, Class<?> type, Type genericType,
             Annotation[] annotations, MediaType mediaType) {
         return -1;
     }
 
-	@Override
+    @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
         return ResultSet.class.isAssignableFrom(type);
     }
 
-	@Override
-	public void writeTo(ResultSet resultSet, Class<?> type, Type genericType,
-			Annotation[] annotations, MediaType mediaType,
-			MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
-			throws IOException, WebApplicationException {
+    @Override
+    public void writeTo(ResultSet resultSet, Class<?> type, Type genericType,
+            Annotation[] annotations, MediaType mediaType,
+            MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
+            throws IOException, WebApplicationException {
 
         try {
             Document doc = new ResultSetToXml().toDocument(resultSet);
             DOMSource domSource = new DOMSource(doc);
-			StreamResult streamResult = new StreamResult(entityStream);
-			TransformerFactory tf = TransformerFactory.newInstance();
-			Transformer serializer = tf.newTransformer();
-			serializer.setOutputProperty(OutputKeys.ENCODING,ENCODING);
-			serializer.setOutputProperty(OutputKeys.INDENT,"yes");
-			serializer.transform(domSource, streamResult);
-		} catch(TransformerException te) {
-			throw new IOException("TransformerException in writeTo()", te);
-		} catch(ParserConfigurationException pce) {
-			throw new IOException("Exception in ResultSetToXml.toDocument()", pce);
-		}
+            StreamResult streamResult = new StreamResult(entityStream);
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer serializer = tf.newTransformer();
+            serializer.setOutputProperty(OutputKeys.ENCODING,ENCODING);
+            serializer.setOutputProperty(OutputKeys.INDENT,"yes");
+            serializer.transform(domSource, streamResult);
+        } catch(TransformerException te) {
+            throw new IOException("TransformerException in writeTo()", te);
+        } catch(ParserConfigurationException pce) {
+            throw new IOException("Exception in ResultSetToXml.toDocument()", pce);
+        }
 
-		entityStream.flush();
-	}
+        entityStream.flush();
+    }
 }

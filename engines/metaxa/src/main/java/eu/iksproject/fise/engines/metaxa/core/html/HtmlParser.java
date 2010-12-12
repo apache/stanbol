@@ -14,9 +14,9 @@ import org.w3c.dom.Document;
 
 /**
  * HtmlParser.java
- * 
+ *
  * @author <a href="mailto:kasper@dfki.de">Walter Kasper</a>
- * 
+ *
  */
 public class HtmlParser {
 

@@ -65,7 +65,7 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
         ServiceProperties {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-    
+
     @Property(value="dbPedia")
     public static final String REFERENCED_SITE_ID = "eu.iksprojet.fise.engines.entitytagging.referencedSiteId";
     @Property(boolValue=true)
@@ -82,7 +82,7 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
     public static final String PLACE_TYPE = "eu.iksprojet.fise.engines.entitytagging.placeType";
     @Property(value="rdfs:label")
     public static final String NAME_FIELD = "eu.iksprojet.fise.engines.entitytagging.nameField";
-    
+
     /**
      * Service of the RICK that manages all the active referenced Site.
      * This Service is used to lookup the configured Referenced Site when we
@@ -107,13 +107,13 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
      * are enhanced by this engine
      */
     protected boolean personState;
-    
+
     /**
      * State if text annotations of type {@link OntologicalClasses#DBPEDIA_ORGANISATION}
      * are enhanced by this engine
      */
     protected boolean orgState;
-    
+
     /**
      * State if text annotations of type {@link OntologicalClasses#DBPEDIA_PLACE}
      * are enhanced by this engine
@@ -124,13 +124,13 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
      * if no type constraint should be used
      */
     protected String personType;
-    
+
     /**
      * The rdf:type constraint used to search for organisations or <code>null</code>
      * if no type constraint should be used
      */
     protected String orgType;
-    
+
     /**
      * The rdf:type constraint used to search for places or <code>null</code>
      * if no type constraint should be used
@@ -139,62 +139,64 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
     /**
      * The field used to search for the selected text of the TextAnnotation.
      */
-	private String nameField;
-	/**
-	 * The number of Suggestions to be added
-	 */
-	public Integer numSuggestions = 3;
-	
+    private String nameField;
+    /**
+     * The number of Suggestions to be added
+     */
+    public Integer numSuggestions = 3;
+
     @SuppressWarnings("unchecked")
-	@Activate
-	protected void activate(ComponentContext context) throws ConfigurationException {
-    	Dictionary<String, Object> config = context.getProperties();
-		Object referencedSiteID = config.get(REFERENCED_SITE_ID);
+    @Activate
+    protected void activate(ComponentContext context) throws ConfigurationException {
+        Dictionary<String, Object> config = context.getProperties();
+        Object referencedSiteID = config.get(REFERENCED_SITE_ID);
         if (referencedSiteID == null) {
-            throw new ConfigurationException(REFERENCED_SITE_ID, "The ID of the Referenced Site is a required Parameter and MUST NOT be NULL!");
+            throw new ConfigurationException(REFERENCED_SITE_ID,
+                    "The ID of the Referenced Site is a required Parameter and MUST NOT be NULL!");
         }
 
         this.referencedSiteID = referencedSiteID.toString();
-        if(this.referencedSiteID.isEmpty()){
-            throw new ConfigurationException(REFERENCED_SITE_ID, "The ID of the Referenced Site is a required Parameter and MUST NOT be an empty String!");
+        if (this.referencedSiteID.isEmpty()){
+            throw new ConfigurationException(REFERENCED_SITE_ID,
+                    "The ID of the Referenced Site is a required Parameter and MUST NOT be an empty String!");
         }
         Object state = config.get(PERSON_STATE);
         personState = state == null ? true : Boolean.parseBoolean(state.toString());
-		state = config.get(ORG_STATE);
+        state = config.get(ORG_STATE);
         orgState = state == null ? true : Boolean.parseBoolean(state.toString());
-		state = config.get(PLACE_STATE);
+        state = config.get(PLACE_STATE);
         placeState = state == null ? true : Boolean.parseBoolean(state.toString());
-		Object type = config.get(PERSON_TYPE);
+        Object type = config.get(PERSON_TYPE);
         personType = type == null || type.toString().isEmpty() ? null : NamespaceEnum.getFullName(type.toString());
-		type = config.get(ORG_TYPE);
+        type = config.get(ORG_TYPE);
         orgType = type == null || type.toString().isEmpty() ? null : NamespaceEnum.getFullName(type.toString());
-		type = config.get(PLACE_TYPE);
+        type = config.get(PLACE_TYPE);
         placeType = type == null || type.toString().isEmpty() ? null : NamespaceEnum.getFullName(type.toString());
-		Object nameField = config.get(NAME_FIELD);
-		this.nameField = nameField == null || nameField.toString().isEmpty() ? NamespaceEnum.rdfs+"label" : NamespaceEnum.getFullName(nameField.toString());
-	}
+        Object nameField = config.get(NAME_FIELD);
+        this.nameField = nameField == null || nameField.toString().isEmpty() ? NamespaceEnum.rdfs+"label" : NamespaceEnum.getFullName(nameField.toString());
+    }
 
-	@Deactivate
-	protected void deactivate(ComponentContext context) {
+    @Deactivate
+    protected void deactivate(ComponentContext context) {
         referencedSiteID = null;
         personType = null;
         orgType = null;
         placeType = null;
         nameField = null;
-	}
+    }
 
     public void computeEnhancements(ContentItem ci) throws EngineException {
-    	ReferencedSite site = siteManager.getReferencedSite(referencedSiteID);
-    	if(site == null){
-    		String msg = String.format("Unable to enhance %s because Referenced Site %s is currently not active!",
-    				ci.getId(), referencedSiteID);
-    		log.warn(msg);
-    		//TODO: throwing Exceptions is currently deactivated. We need a more clear
-    		//policy what do to in such situations
-    		//throw new EngineException(msg);
-    		return;
-    	}
-    	UriRef contentItemId = new UriRef(ci.getId());
+        ReferencedSite site = siteManager.getReferencedSite(referencedSiteID);
+        if(site == null){
+            String msg = String.format("Unable to enhance %s because Referenced Site %s is currently not active!",
+                    ci.getId(), referencedSiteID);
+            log.warn(msg);
+            //TODO: throwing Exceptions is currently deactivated. We need a more clear
+            //policy what do to in such situations
+            //throw new EngineException(msg);
+            return;
+        }
+        UriRef contentItemId = new UriRef(ci.getId());
 
         MGraph graph = ci.getMetadata();
         LiteralFactory literalFactory = LiteralFactory.getInstance();
@@ -255,29 +257,29 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
         //replace spaces with plus to create an AND search for all words in the name!
         query.setConstraint(nameField, new TextConstraint(name.replace(' ', '+')));
         if (OntologicalClasses.DBPEDIA_PERSON.equals(type)){
-        	if (personState){
-        		if (personType!=null){
-        	        query.setConstraint(RDF_TYPE.getUnicodeString(), new ReferenceConstraint(personType));
-        		} // else no type constraint
-        	} else { //ignore people
-        		return Collections.emptyList();
-        	}
+            if (personState){
+                if (personType!=null){
+                    query.setConstraint(RDF_TYPE.getUnicodeString(), new ReferenceConstraint(personType));
+                } // else no type constraint
+            } else { //ignore people
+                return Collections.emptyList();
+            }
         } else if (DBPEDIA_ORGANISATION.equals(type)){
-        	if (orgState){
-        		if (orgType!=null){
-        	        query.setConstraint(RDF_TYPE.getUnicodeString(), new ReferenceConstraint(orgType));
-        		} // else no type constraint
-        	} else { //ignore people
-        		return Collections.emptyList();
-        	}
+            if (orgState){
+                if (orgType!=null){
+                    query.setConstraint(RDF_TYPE.getUnicodeString(), new ReferenceConstraint(orgType));
+                } // else no type constraint
+            } else { //ignore people
+                return Collections.emptyList();
+            }
         } else if(OntologicalClasses.DBPEDIA_PLACE.equals(type)){
-        	if (this.placeState){
-        		if (this.placeType!=null){
-        	        query.setConstraint(RDF_TYPE.getUnicodeString(), new ReferenceConstraint(placeType));
-        		} // else no type constraint
-        	} else { //ignore people
-        		return Collections.emptyList();
-        	}
+            if (this.placeState){
+                if (this.placeType!=null){
+                    query.setConstraint(RDF_TYPE.getUnicodeString(), new ReferenceConstraint(placeType));
+                } // else no type constraint
+            } else { //ignore people
+                return Collections.emptyList();
+            }
         }
         query.setLimit(this.numSuggestions);
         QueryResultList<Sign> results = site.findSigns(query);

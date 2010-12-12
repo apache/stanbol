@@ -15,9 +15,9 @@ import com.ibm.icu.text.CharsetMatch;
 
 /**
  * EncodingDetector.java
- * 
+ *
  * @author <a href="mailto:kasper@dfki.de">Walter Kasper</a>
- * 
+ *
  */
 public class CharsetRecognizer {
 

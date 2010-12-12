@@ -18,228 +18,228 @@ package org.geonames;
 
 /**
  * search criteria for web services returning postal codes
- * 
+ *
  * @author marc@geonames
- * 
+ *
  */
 public class PostalCodeSearchCriteria {
 
-	private String postalCode;
+    private String postalCode;
 
-	private String placeName;
+    private String placeName;
 
-	private String adminCode1;
+    private String adminCode1;
 
-	private String countryCode;
+    private String countryCode;
 
-	private String countryBias;
+    private String countryBias;
 
-	private Double latitude;
+    private Double latitude;
 
-	private Double longitude;
+    private Double longitude;
 
-	private double radius;
+    private double radius;
 
-	private Style style;
+    private Style style;
 
-	private int maxRows;
+    private int maxRows;
 
-	private int startRow;
+    private int startRow;
 
-	private boolean isOROperator = false;
+    private boolean isOROperator = false;
 
-	/**
-	 * @return Returns the style.
-	 */
-	public Style getStyle() {
-		return style;
-	}
+    /**
+     * @return Returns the style.
+     */
+    public Style getStyle() {
+        return style;
+    }
 
-	/**
-	 * @param style
-	 *            The style to set.
-	 */
-	public void setStyle(Style style) {
-		this.style = style;
-	}
+    /**
+     * @param style
+     *            The style to set.
+     */
+    public void setStyle(Style style) {
+        this.style = style;
+    }
 
-	/**
-	 * @return Returns the ISO 3166-1-alpha-2 countryCode.
-	 */
-	public String getCountryCode() {
-		return countryCode;
-	}
+    /**
+     * @return Returns the ISO 3166-1-alpha-2 countryCode.
+     */
+    public String getCountryCode() {
+        return countryCode;
+    }
 
-	/**
-	 * @param countryCode
-	 *            The ISO 3166-1-alpha-2 countryCode to set.
-	 */
-	public void setCountryCode(String countryCode)
-			throws InvalidParameterException {
-		if (countryCode != null && countryCode.length() != 2) {
-			throw new InvalidParameterException("invalid country code "
-					+ countryCode);
-		}
-		this.countryCode = countryCode;
-	}
+    /**
+     * @param countryCode
+     *            The ISO 3166-1-alpha-2 countryCode to set.
+     */
+    public void setCountryCode(String countryCode)
+            throws InvalidParameterException {
+        if (countryCode != null && countryCode.length() != 2) {
+            throw new InvalidParameterException("invalid country code "
+                    + countryCode);
+        }
+        this.countryCode = countryCode;
+    }
 
-	/**
-	 * @return Returns the latitude.
-	 */
-	public Double getLatitude() {
-		return latitude;
-	}
+    /**
+     * @return Returns the latitude.
+     */
+    public Double getLatitude() {
+        return latitude;
+    }
 
-	/**
-	 * @param latitude
-	 *            The latitude to set.
-	 */
-	public void setLatitude(double latitude) throws InvalidParameterException {
-		if (latitude > 90.0 || latitude < -90.0) {
-			throw new InvalidParameterException("invalid latitude " + latitude);
-		}
-		this.latitude = new Double(latitude);
-	}
+    /**
+     * @param latitude
+     *            The latitude to set.
+     */
+    public void setLatitude(double latitude) throws InvalidParameterException {
+        if (latitude > 90.0 || latitude < -90.0) {
+            throw new InvalidParameterException("invalid latitude " + latitude);
+        }
+        this.latitude = new Double(latitude);
+    }
 
-	/**
-	 * @return Returns the longitude.
-	 */
-	public Double getLongitude() {
-		return longitude;
-	}
+    /**
+     * @return Returns the longitude.
+     */
+    public Double getLongitude() {
+        return longitude;
+    }
 
-	/**
-	 * @param longitude
-	 *            The longitude to set.
-	 */
-	public void setLongitude(double longitude) throws InvalidParameterException {
-		if (longitude > 180.0 || longitude < -180.0) {
-			throw new InvalidParameterException("invalid longitude "
-					+ longitude);
-		}
-		this.longitude = new Double(longitude);
-	}
+    /**
+     * @param longitude
+     *            The longitude to set.
+     */
+    public void setLongitude(double longitude) throws InvalidParameterException {
+        if (longitude > 180.0 || longitude < -180.0) {
+            throw new InvalidParameterException("invalid longitude "
+                    + longitude);
+        }
+        this.longitude = new Double(longitude);
+    }
 
-	/**
-	 * @return Returns the placeName.
-	 */
-	public String getPlaceName() {
-		return placeName;
-	}
+    /**
+     * @return Returns the placeName.
+     */
+    public String getPlaceName() {
+        return placeName;
+    }
 
-	/**
-	 * @param placeName
-	 *            The placeName to set.
-	 */
-	public void setPlaceName(String placeName) {
-		this.placeName = placeName;
-	}
+    /**
+     * @param placeName
+     *            The placeName to set.
+     */
+    public void setPlaceName(String placeName) {
+        this.placeName = placeName;
+    }
 
-	/**
-	 * @return Returns the postalCode.
-	 */
-	public String getPostalCode() {
-		return postalCode;
-	}
+    /**
+     * @return Returns the postalCode.
+     */
+    public String getPostalCode() {
+        return postalCode;
+    }
 
-	/**
-	 * @param postalCode
-	 *            The postalCode to set.
-	 */
-	public void setPostalCode(String postalCode) {
-		this.postalCode = postalCode;
-	}
+    /**
+     * @param postalCode
+     *            The postalCode to set.
+     */
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
 
-	/**
-	 * @return the maxRows
-	 */
-	public int getMaxRows() {
-		return maxRows;
-	}
+    /**
+     * @return the maxRows
+     */
+    public int getMaxRows() {
+        return maxRows;
+    }
 
-	/**
-	 * @param maxRows
-	 *            the maxRows to set
-	 */
-	public void setMaxRows(int maxRows) {
-		this.maxRows = maxRows;
-	}
+    /**
+     * @param maxRows
+     *            the maxRows to set
+     */
+    public void setMaxRows(int maxRows) {
+        this.maxRows = maxRows;
+    }
 
-	/**
-	 * @param isOROperator
-	 *            the isOROperator to set
-	 */
-	public void setOROperator(boolean isOROperator) {
-		this.isOROperator = isOROperator;
-	}
+    /**
+     * @param isOROperator
+     *            the isOROperator to set
+     */
+    public void setOROperator(boolean isOROperator) {
+        this.isOROperator = isOROperator;
+    }
 
-	/**
-	 * @return the isOROperator
-	 */
-	public boolean isOROperator() {
-		return isOROperator;
-	}
+    /**
+     * @return the isOROperator
+     */
+    public boolean isOROperator() {
+        return isOROperator;
+    }
 
-	/**
-	 * @return the adminCode1
-	 */
-	public String getAdminCode1() {
-		return adminCode1;
-	}
+    /**
+     * @return the adminCode1
+     */
+    public String getAdminCode1() {
+        return adminCode1;
+    }
 
-	/**
-	 * @param adminCode1
-	 *            the adminCode1 to set
-	 */
-	public void setAdminCode1(String adminCode1) {
-		this.adminCode1 = adminCode1;
-	}
+    /**
+     * @param adminCode1
+     *            the adminCode1 to set
+     */
+    public void setAdminCode1(String adminCode1) {
+        this.adminCode1 = adminCode1;
+    }
 
-	/**
-	 * the radius in km to be used for reverse geocoding.
-	 * 
-	 * @param radius
-	 *            the radius to set
-	 */
-	public void setRadius(double radius) {
-		this.radius = radius;
-	}
+    /**
+     * the radius in km to be used for reverse geocoding.
+     *
+     * @param radius
+     *            the radius to set
+     */
+    public void setRadius(double radius) {
+        this.radius = radius;
+    }
 
-	/**
-	 * @return the radius
-	 */
-	public double getRadius() {
-		return radius;
-	}
+    /**
+     * @return the radius
+     */
+    public double getRadius() {
+        return radius;
+    }
 
-	/**
-	 * @return the countryBias
-	 */
-	public String getCountryBias() {
-		return countryBias;
-	}
+    /**
+     * @return the countryBias
+     */
+    public String getCountryBias() {
+        return countryBias;
+    }
 
-	/**
-	 * @param countryBias
-	 *            the countryBias to set
-	 */
-	public void setCountryBias(String countryBias) {
-		this.countryBias = countryBias;
-	}
+    /**
+     * @param countryBias
+     *            the countryBias to set
+     */
+    public void setCountryBias(String countryBias) {
+        this.countryBias = countryBias;
+    }
 
-	/**
-	 * @return the startRow
-	 */
-	public int getStartRow() {
-		return startRow;
-	}
+    /**
+     * @return the startRow
+     */
+    public int getStartRow() {
+        return startRow;
+    }
 
-	/**
-	 * @param startRow
-	 *            the startRow to set
-	 */
-	public void setStartRow(int startRow) {
-		this.startRow = startRow;
-	}
+    /**
+     * @param startRow
+     *            the startRow to set
+     */
+    public void setStartRow(int startRow) {
+        this.startRow = startRow;
+    }
 
 }

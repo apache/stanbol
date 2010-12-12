@@ -20,10 +20,10 @@ package org.geonames;
 /**
  * Enumeration for style parameter specifying the verbosity of geonames web
  * services
- * 
+ *
  * @author marc@geonames
- * 
+ *
  */
 public enum Style {
-	SHORT, MEDIUM, LONG, FULL
+    SHORT, MEDIUM, LONG, FULL
 }

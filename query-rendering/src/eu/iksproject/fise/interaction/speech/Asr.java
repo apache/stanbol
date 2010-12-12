@@ -5,21 +5,21 @@ package eu.iksproject.fise.interaction.speech;
  * German Research Center for Artificial Intelligence (DFKI)
  * Department of Intelligent User Interfaces
  * Germany
- * 
+ *
  *     http://www.dfki.de/web/forschung/iui
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * Authors:
  *     Sebastian Germesin
  *     Massimo Romanelli
@@ -41,46 +41,46 @@ import edu.cmu.sphinx.util.props.PropertyException;
 
 public class Asr {
 
-	private Recognizer recognizer;
-	private JSGFGrammar jsgfGrammarManager;
-	private StreamDataSource inputStreamDataSource;
+    private Recognizer recognizer;
+    private JSGFGrammar jsgfGrammarManager;
+    private StreamDataSource inputStreamDataSource;
 
-	public Asr (String configFilename) throws IOException, PropertyException, InstantiationException {
+    public Asr (String configFilename) throws IOException, PropertyException, InstantiationException {
 
-		URL url = new File(configFilename).toURI().toURL();
-		ConfigurationManager cm = new ConfigurationManager(url);
+        URL url = new File(configFilename).toURI().toURL();
+        ConfigurationManager cm = new ConfigurationManager(url);
 
-		// retrive the recognizer, jsgfGrammar and the microphone from
-		// the configuration file.
+        // retrive the recognizer, jsgfGrammar and the microphone from
+        // the configuration file.
 
-		recognizer = (Recognizer) cm.lookup("recognizer");
-		jsgfGrammarManager = (JSGFGrammar) cm.lookup("jsgfGrammar");
-		inputStreamDataSource = (StreamDataSource) cm.lookup("inputStreamDataSource");
+        recognizer = (Recognizer) cm.lookup("recognizer");
+        jsgfGrammarManager = (JSGFGrammar) cm.lookup("jsgfGrammar");
+        inputStreamDataSource = (StreamDataSource) cm.lookup("inputStreamDataSource");
 
-		System.out.print(" Loading recognizer ...");
-		recognizer.allocate();
+        System.out.print(" Loading recognizer ...");
+        recognizer.allocate();
 
-		dumpSampleSentences();
-	}
+        dumpSampleSentences();
+    }
 
-	protected String recognizeSpeech (byte[] audioData) {
-		InputStream input = new ByteArrayInputStream(audioData);
-		inputStreamDataSource.setInputStream(input, ByteArrayInputStream.class.getName());
+    protected String recognizeSpeech (byte[] audioData) {
+        InputStream input = new ByteArrayInputStream(audioData);
+        inputStreamDataSource.setInputStream(input, ByteArrayInputStream.class.getName());
 
-		Result result = recognizer.recognize();
-		if (result == null)
-			return null;
-		else
-			return result.getBestFinalResultNoFiller();
-	}
+        Result result = recognizer.recognize();
+        if (result == null)
+            return null;
+        else
+            return result.getBestFinalResultNoFiller();
+    }
 
-	protected void dumpSampleSentences() {
-		System.out.println("Speak one of: \n");
-		jsgfGrammarManager.dumpRandomSentences(200);
-	}
+    protected void dumpSampleSentences() {
+        System.out.println("Speak one of: \n");
+        jsgfGrammarManager.dumpRandomSentences(200);
+    }
 
-	protected void deallocate () {
-		recognizer.deallocate();
-	}
+    protected void deallocate () {
+        recognizer.deallocate();
+    }
 
 }

@@ -35,31 +35,31 @@ import eu.iksproject.fise.servicesapi.rdf.TechnicalClasses;
 
 public class TestLocationEnhancementEngine {
 
-	private Logger log = LoggerFactory.getLogger(TestLocationEnhancementEngine.class);
+    private Logger log = LoggerFactory.getLogger(TestLocationEnhancementEngine.class);
 
-	/**
-	 * The context for the tests (same as in TestOpenNLPEnhancementEngine)
-	 */
-	public static final String CONTEXT = "Dr. Patrick Marshall (1869 - November 1950) was a"
+    /**
+     * The context for the tests (same as in TestOpenNLPEnhancementEngine)
+     */
+    public static final String CONTEXT = "Dr. Patrick Marshall (1869 - November 1950) was a"
         + " geologist who lived in New Zealand and worked at the University of Otago.";
 
-	/**
-	 * The person for the tests (same as in TestOpenNLPEnhancementEngine)
-	 */
-	public static final String PERSON = "Patrick Marshall";
+    /**
+     * The person for the tests (same as in TestOpenNLPEnhancementEngine)
+     */
+    public static final String PERSON = "Patrick Marshall";
 
-	/**
-	 * The organisation for the tests (same as in TestOpenNLPEnhancementEngine)
-	 */
-	public static final String ORGANISATION ="University of Otago";
+    /**
+     * The organisation for the tests (same as in TestOpenNLPEnhancementEngine)
+     */
+    public static final String ORGANISATION ="University of Otago";
 
-	/**
-	 * The place for the tests (same as in TestOpenNLPEnhancementEngine)
-	 */
-	public static final String PLACE = "New Zealand";
-	
-	
-	static LocationEnhancementEngine locationEnhancementEngine = new LocationEnhancementEngine();
+    /**
+     * The place for the tests (same as in TestOpenNLPEnhancementEngine)
+     */
+    public static final String PLACE = "New Zealand";
+
+
+    static LocationEnhancementEngine locationEnhancementEngine = new LocationEnhancementEngine();
 
     @BeforeClass
     public static void setUpServices() throws IOException {
@@ -70,7 +70,7 @@ public class TestLocationEnhancementEngine {
 
     @AfterClass
     public static void shutdownServices() {
-    	locationEnhancementEngine.deactivate(null);
+        locationEnhancementEngine.deactivate(null);
     }
 
     public static ContentItem getContentItem(final String id,
@@ -96,70 +96,70 @@ public class TestLocationEnhancementEngine {
             }
         };
     }
-    
+
     public static void getTextAnnotation(ContentItem ci, String name,String context,UriRef type){
-    	String content;
-		try {
-			content = IOUtils.toString(ci.getStream());
-		} catch (IOException e) {
-			//should never happen anyway!
-			content = "";
-		}
-    	RdfEntityFactory factory = RdfEntityFactory.createInstance(ci.getMetadata());
-    	TextAnnotation testAnnotation = factory.getProxy(new UriRef("urn:iks-project:fise:test:text-annotation:person"), TextAnnotation.class);
-    	testAnnotation.setCreator(new UriRef("urn:iks-project:fise:test:dummyEngine"));
-    	testAnnotation.setCreated(new Date());
-    	testAnnotation.setSelectedText(name);
-    	testAnnotation.setSelectionContext(context);
-    	testAnnotation.getDcType().add(type);
-    	Integer start = content.indexOf(name);
-    	if(start < 0){ //if not found in the content
-	    	//set some random numbers for start/end
-    		start = (int)Math.random()*100;
-    	}
-    	testAnnotation.setStart(start);
-    	testAnnotation.setEnd(start+name.length());
+        String content;
+        try {
+            content = IOUtils.toString(ci.getStream());
+        } catch (IOException e) {
+            //should never happen anyway!
+            content = "";
+        }
+        RdfEntityFactory factory = RdfEntityFactory.createInstance(ci.getMetadata());
+        TextAnnotation testAnnotation = factory.getProxy(new UriRef("urn:iks-project:fise:test:text-annotation:person"), TextAnnotation.class);
+        testAnnotation.setCreator(new UriRef("urn:iks-project:fise:test:dummyEngine"));
+        testAnnotation.setCreated(new Date());
+        testAnnotation.setSelectedText(name);
+        testAnnotation.setSelectionContext(context);
+        testAnnotation.getDcType().add(type);
+        Integer start = content.indexOf(name);
+        if(start < 0){ //if not found in the content
+            //set some random numbers for start/end
+            start = (int)Math.random()*100;
+        }
+        testAnnotation.setStart(start);
+        testAnnotation.setEnd(start+name.length());
     }
 
     @Test
     public void testLocationEnhancementEngine() {//throws Exception{
-    	//create a content item
-    	ContentItem ci = getContentItem("urn:iks-project:fise:text:content-item:person", CONTEXT);
-    	//add three text annotations to be consumed by this test
-    	getTextAnnotation(ci, PERSON, CONTEXT, OntologicalClasses.DBPEDIA_PERSON);
-    	getTextAnnotation(ci, ORGANISATION, CONTEXT, OntologicalClasses.DBPEDIA_ORGANISATION);
-    	getTextAnnotation(ci, PLACE, CONTEXT, OntologicalClasses.DBPEDIA_PLACE);
-    	//perform the computation of the enhancements
-    	try {
-			locationEnhancementEngine.computeEnhancements(ci);
-		} catch (EngineException e) {
-			if(e.getCause() instanceof UnknownHostException) {
-				log.warn("Unable to test LocationEnhancemetEngine when offline! -> skipping this test",e.getCause());
-				return;
-			} else if(e.getCause() instanceof SocketTimeoutException){
-				log.warn("Seams like the geonames.org webservice is currently unavailable -> skipping this test",e.getCause());
-				return;
-			}
-		}
-    	// ... and test the results
-    	/*
-    	 * TODO: rw 20100617 
-    	 *  - Expected results depend on the used Index.
-    	 *  - Use an example where the Organisation, Person and Place is part
-    	 *    of the index
-    	 */
-    	int entityAnnotationCount = checkAllEntityAnnotations(ci.getMetadata());
-    	//two suggestions for New Zealand and one hierarchy entry for the first
-    	//suggestion
-    	assertEquals(3, entityAnnotationCount);
+        //create a content item
+        ContentItem ci = getContentItem("urn:iks-project:fise:text:content-item:person", CONTEXT);
+        //add three text annotations to be consumed by this test
+        getTextAnnotation(ci, PERSON, CONTEXT, OntologicalClasses.DBPEDIA_PERSON);
+        getTextAnnotation(ci, ORGANISATION, CONTEXT, OntologicalClasses.DBPEDIA_ORGANISATION);
+        getTextAnnotation(ci, PLACE, CONTEXT, OntologicalClasses.DBPEDIA_PLACE);
+        //perform the computation of the enhancements
+        try {
+            locationEnhancementEngine.computeEnhancements(ci);
+        } catch (EngineException e) {
+            if(e.getCause() instanceof UnknownHostException) {
+                log.warn("Unable to test LocationEnhancemetEngine when offline! -> skipping this test",e.getCause());
+                return;
+            } else if(e.getCause() instanceof SocketTimeoutException){
+                log.warn("Seams like the geonames.org webservice is currently unavailable -> skipping this test",e.getCause());
+                return;
+            }
+        }
+        // ... and test the results
+        /*
+         * TODO: rw 20100617
+         *  - Expected results depend on the used Index.
+         *  - Use an example where the Organisation, Person and Place is part
+         *    of the index
+         */
+        int entityAnnotationCount = checkAllEntityAnnotations(ci.getMetadata());
+        //two suggestions for New Zealand and one hierarchy entry for the first
+        //suggestion
+        assertEquals(3, entityAnnotationCount);
     }
- 
+
     /*
      * -----------------------------------------------------------------------
      * Helper Methods to check Text and EntityAnnotations
      * -----------------------------------------------------------------------
      */
-    
+
     /**
      * @param g
      * @return

@@ -25,18 +25,18 @@ import org.junit.Test;
  *  integration tests that talk to the server via http.
  */
 public class DummyTest {
-    
+
     @BeforeClass
     public static void startRunnableJar() throws Exception {
         JarExecutor.getInstance(System.getProperties()).start();
     }
-    
+
     @Test
     public void testNothing() throws Exception {
         // TODO check that server is started and test it...
         final long delay = 10000;
-        System.out.println(getClass().getName() 
-                + " - this test does nothing for now, just waits " 
+        System.out.println(getClass().getName()
+                + " - this test does nothing for now, just waits "
                 + delay + " msec to let you check that the server is starting ...");
         Thread.sleep(delay);
         System.out.println(getClass().getName() + " - done waiting");

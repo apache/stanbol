@@ -34,9 +34,9 @@ public class TagInfo {
     private final String[] type;
 
     public TagInfo(String id, String label, String[] type, double confidence) {
-    	if (id == null){
-    		throw new IllegalArgumentException("Parameter id MUST NOT be NULL");
-    	}
+        if (id == null){
+            throw new IllegalArgumentException("Parameter id MUST NOT be NULL");
+        }
         this.id = id;
         this.label = label;
         this.type = type;
@@ -52,31 +52,31 @@ public class TagInfo {
      */
     @Override
     public boolean equals(Object obj) {
-    	return obj != null && obj instanceof TagInfo && ((TagInfo)obj).id.equals(id) && ((TagInfo)obj).confidence.equals(confidence);
+        return obj != null && obj instanceof TagInfo && ((TagInfo)obj).id.equals(id) && ((TagInfo)obj).confidence.equals(confidence);
     }
 
     public final String getId() {
-		return id;
-	}
+        return id;
+    }
 
-	public final String getLabel() {
-		return label;
-	}
+    public final String getLabel() {
+        return label;
+    }
 
-	public final Double getConfidence() {
-		return confidence;
-	}
+    public final Double getConfidence() {
+        return confidence;
+    }
 
-	public final String[] getType() {
-		return type;
-	}
+    public final String[] getType() {
+        return type;
+    }
 
-	/**
+    /**
      * Implementation based on the id and confidence property
      */
     @Override
     public int hashCode() {
-    	return id.hashCode() + confidence.hashCode();
+        return id.hashCode() + confidence.hashCode();
     }
 
 }

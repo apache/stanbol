@@ -36,21 +36,21 @@ public class EnhancementEngineHelperTest {
     @Test
     public void testEnhancementEngineHelper() throws Exception {
         ContentItem ci = new ContentItem() {
-			MGraph mgraph = new SimpleMGraph();
-			@Override
-			public InputStream getStream() {
-				return new ByteArrayInputStream("There is content".getBytes());
-			}
-			
-			@Override
-			public String getMimeType() { return "text/plain"; }
-			
-			@Override
-			public MGraph getMetadata() { return mgraph; }
-			
-			@Override
-			public String getId() { return "urn:test:contentItem"; }
-		};
+            MGraph mgraph = new SimpleMGraph();
+            @Override
+            public InputStream getStream() {
+                return new ByteArrayInputStream("There is content".getBytes());
+            }
+
+            @Override
+            public String getMimeType() { return "text/plain"; }
+
+            @Override
+            public MGraph getMetadata() { return mgraph; }
+
+            @Override
+            public String getId() { return "urn:test:contentItem"; }
+        };
         EnhancementEngine engine = new MyEngine();
 
         UriRef extraction = EnhancementEngineHelper.createNewExtraction(ci, engine);

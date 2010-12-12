@@ -18,10 +18,10 @@ public class OntologicalClasses {
             NamespaceEnum.dbpedia_ont+"Person");
 
     public static final UriRef DBPEDIA_PLACE = new UriRef(
-    		NamespaceEnum.dbpedia_ont+"Place");
+            NamespaceEnum.dbpedia_ont+"Place");
 
     public static final UriRef DBPEDIA_ORGANISATION = new UriRef(
-    		NamespaceEnum.dbpedia_ont+"Organisation");
+            NamespaceEnum.dbpedia_ont+"Organisation");
 
     private OntologicalClasses() {
     }

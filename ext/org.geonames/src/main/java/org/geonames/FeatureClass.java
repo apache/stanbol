@@ -18,52 +18,52 @@ package org.geonames;
 
 /**
  * Enumeration for the GeoNames feature classes A,H,L,P,R,S,T,U,V
- * 
+ *
  * @author marc
- * 
+ *
  */
 public enum FeatureClass {
-	/**
-	 * Administrative Boundary Features
-	 */
-	A,
-	/**
-	 * Hydrographic Features
-	 */
-	H,
-	/**
-	 * Area Features
-	 */
-	L,
-	/**
-	 * Populated Place Features
-	 */
-	P,
-	/**
-	 * Road / Railroad Features
-	 */
-	R,
-	/**
-	 * Spot Features
-	 */
-	S,
-	/**
-	 * Hypsographic Features
-	 */
-	T,
-	/**
-	 * Undersea Features
-	 */
-	U,
-	/**
-	 * Vegetation Features
-	 */
-	V;
+    /**
+     * Administrative Boundary Features
+     */
+    A,
+    /**
+     * Hydrographic Features
+     */
+    H,
+    /**
+     * Area Features
+     */
+    L,
+    /**
+     * Populated Place Features
+     */
+    P,
+    /**
+     * Road / Railroad Features
+     */
+    R,
+    /**
+     * Spot Features
+     */
+    S,
+    /**
+     * Hypsographic Features
+     */
+    T,
+    /**
+     * Undersea Features
+     */
+    U,
+    /**
+     * Vegetation Features
+     */
+    V;
 
-	public static FeatureClass fromValue(String value) {
-		if (value == null || "".equals(value)) {
-			return null;
-		}
-		return valueOf(value);
-	}
+    public static FeatureClass fromValue(String value) {
+        if (value == null || "".equals(value)) {
+            return null;
+        }
+        return valueOf(value);
+    }
 }

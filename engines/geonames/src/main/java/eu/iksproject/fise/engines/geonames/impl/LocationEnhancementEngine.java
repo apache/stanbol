@@ -241,8 +241,8 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
         MGraph graph = ci.getMetadata();
         LiteralFactory literalFactory = LiteralFactory.getInstance();
         //get all the textAnnotations
-        /* 
-         * this Map holds the name as key and all the text annotations of 
+        /*
+         * this Map holds the name as key and all the text annotations of
          * dc:type dbPedia:Place that select this name as value
          * this map is used to avoid multiple lookups for text annotations
          * selecting the same name.

@@ -45,12 +45,12 @@ public class ClerezzaStore implements Store {
         // {@link put} method.
 
         UriRef uriRef = new UriRef(id);
-		MGraph metadataGraph;
-		try {
+        MGraph metadataGraph;
+        try {
         metadataGraph = tcManager.createMGraph(uriRef);
-		} catch (EntityAlreadyExistsException ex) {
-			return null;
-		}
+        } catch (EntityAlreadyExistsException ex) {
+            return null;
+        }
         handler.put(new UriRef(id), MediaType.valueOf(contentType), content);
         ContentItem contentItem = new ClerezzaContentItem(new GraphNode(uriRef,
                 cgProvider.getContentGraph()), new SimpleMGraph(metadataGraph), handler);
@@ -66,12 +66,12 @@ public class ClerezzaStore implements Store {
 
     public ContentItem get(String id) {
         UriRef uriRef = new UriRef(id);
-		MGraph metadataGraph;
-		try {
-		metadataGraph = tcManager.getMGraph(uriRef);
-		} catch(NoSuchEntityException ex) {
-			throw new IllegalArgumentException("Is not a content item");
-		}
+        MGraph metadataGraph;
+        try {
+        metadataGraph = tcManager.getMGraph(uriRef);
+        } catch(NoSuchEntityException ex) {
+            throw new IllegalArgumentException("Is not a content item");
+        }
         ContentItem contentItem = new ClerezzaContentItem(new GraphNode(uriRef,
                 cgProvider.getContentGraph()), metadataGraph, handler);
         return contentItem;

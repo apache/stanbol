@@ -18,44 +18,44 @@ package org.geonames;
 
 /**
  * a street address
- * 
+ *
  * @author Mark Thomas
- * 
+ *
  */
 public class Address extends PostalCode {
 
-	private String street;
+    private String street;
 
-	private String streetNumber;
+    private String streetNumber;
 
-	/**
-	 * @return the street
-	 */
-	public String getStreet() {
-		return street;
-	}
+    /**
+     * @return the street
+     */
+    public String getStreet() {
+        return street;
+    }
 
-	/**
-	 * @param street
-	 *            the street to set
-	 */
-	public void setStreet(String street) {
-		this.street = street;
-	}
+    /**
+     * @param street
+     *            the street to set
+     */
+    public void setStreet(String street) {
+        this.street = street;
+    }
 
-	/**
-	 * @return the streetNumber
-	 */
-	public String getStreetNumber() {
-		return streetNumber;
-	}
+    /**
+     * @return the streetNumber
+     */
+    public String getStreetNumber() {
+        return streetNumber;
+    }
 
-	/**
-	 * @param streetNumber
-	 *            the streetNumber to set
-	 */
-	public void setStreetNumber(String streetNumber) {
-		this.streetNumber = streetNumber;
-	}
+    /**
+     * @param streetNumber
+     *            the streetNumber to set
+     */
+    public void setStreetNumber(String streetNumber) {
+        this.streetNumber = streetNumber;
+    }
 
 }
