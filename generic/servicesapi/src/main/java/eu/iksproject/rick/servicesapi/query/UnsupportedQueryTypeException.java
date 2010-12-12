@@ -10,18 +10,18 @@ import java.util.Collection;
  */
 public class UnsupportedQueryTypeException extends IllegalArgumentException {
 
-	/**
-	 * Default serial version id
-	 */
-	private static final long serialVersionUID = 1L;
-	public UnsupportedQueryTypeException(String unsupportedQueryType, Collection<String> supportedTypes) {
-		this(unsupportedQueryType,supportedTypes,null);
-	}
-	public UnsupportedQueryTypeException(String unsupportedQueryType, 
-			Collection<String> supportedTypes,String serviceName) {
-		super(String.format("Queries of type {} are not supported by {} (supportedTypes: {}",
-				unsupportedQueryType,
-				(serviceName!=null?serviceName:"this query service"),
-				supportedTypes));
-	}
+    /**
+     * Default serial version id
+     */
+    private static final long serialVersionUID = 1L;
+    public UnsupportedQueryTypeException(String unsupportedQueryType, Collection<String> supportedTypes) {
+        this(unsupportedQueryType,supportedTypes,null);
+    }
+    public UnsupportedQueryTypeException(String unsupportedQueryType,
+            Collection<String> supportedTypes,String serviceName) {
+        super(String.format("Queries of type {} are not supported by {} (supportedTypes: {}",
+                unsupportedQueryType,
+                (serviceName!=null?serviceName:"this query service"),
+                supportedTypes));
+    }
 }

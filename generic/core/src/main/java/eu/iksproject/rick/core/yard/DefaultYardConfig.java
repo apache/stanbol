@@ -17,36 +17,36 @@ import eu.iksproject.rick.servicesapi.yard.Yard;
  */
 public final class DefaultYardConfig extends YardConfig {
 
-	/**
-	 * Creates a new configuration with the minimal set of required properties
-	 * @param id the ID of the Yard
-	 * @throws IllegalArgumentException if the parsed valued do not fulfil the
-	 * requirements.
-	 */
-	public DefaultYardConfig(String id) throws IllegalArgumentException {
-		super(id);
-		try {
-			isValid();
-		} catch (ConfigurationException e) {
-			throw new IllegalArgumentException(e.getMessage(),e);
-		}
-	}
-	/**
-	 * Initialise the Yard configuration based on a parsed configuration. Usually
-	 * used on the context of an OSGI environment in the activate method.
-	 * @param config the configuration usually parsed within an OSGI activate
-	 * method
-	 * @throws ConfigurationException if the configuration is incomplete of
-	 * some values are not valid
-	 * @throws IllegalArgumentException if <code>null</code> is parsed as
-	 * configuration
-	 */
-	public DefaultYardConfig(Dictionary<String, Object> config) throws ConfigurationException, IllegalArgumentException {
-		super(config);
-	}
+    /**
+     * Creates a new configuration with the minimal set of required properties
+     * @param id the ID of the Yard
+     * @throws IllegalArgumentException if the parsed valued do not fulfil the
+     * requirements.
+     */
+    public DefaultYardConfig(String id) throws IllegalArgumentException {
+        super(id);
+        try {
+            isValid();
+        } catch (ConfigurationException e) {
+            throw new IllegalArgumentException(e.getMessage(),e);
+        }
+    }
+    /**
+     * Initialise the Yard configuration based on a parsed configuration. Usually
+     * used on the context of an OSGI environment in the activate method.
+     * @param config the configuration usually parsed within an OSGI activate
+     * method
+     * @throws ConfigurationException if the configuration is incomplete of
+     * some values are not valid
+     * @throws IllegalArgumentException if <code>null</code> is parsed as
+     * configuration
+     */
+    public DefaultYardConfig(Dictionary<String, Object> config) throws ConfigurationException, IllegalArgumentException {
+        super(config);
+    }
 
-	@Override
-	protected void validateConfig() throws ConfigurationException {
-	}
+    @Override
+    protected void validateConfig() throws ConfigurationException {
+    }
 
 }

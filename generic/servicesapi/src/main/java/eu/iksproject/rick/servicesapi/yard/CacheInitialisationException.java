@@ -7,23 +7,23 @@ package eu.iksproject.rick.servicesapi.yard;
  * required configuration meta data needed to correctly configure the cache.<p>
  * For errors while performing CRUD operations on the Cache {@link YardException}s
  * are used.
- * 
+ *
  * @author Rupert Westenthaler
  *
  */
 public class CacheInitialisationException extends RuntimeException {
 
-	public CacheInitialisationException(String reason) {
-		super(reason);
-	}
+    public CacheInitialisationException(String reason) {
+        super(reason);
+    }
 
-	public CacheInitialisationException(String reason, Throwable cause) {
-		super(reason, cause);
-	}
+    public CacheInitialisationException(String reason, Throwable cause) {
+        super(reason, cause);
+    }
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
 }

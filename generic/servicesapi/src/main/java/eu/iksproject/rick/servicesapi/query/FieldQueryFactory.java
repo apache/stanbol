@@ -6,11 +6,11 @@ package eu.iksproject.rick.servicesapi.query;
  *
  */
 public interface FieldQueryFactory {
-	/**
-	 * Creates a new field query instance without any constraints or selected
-	 * fields
-	 * @return a new and empty field query instance
-	 */
-	FieldQuery createFieldQuery();
+    /**
+     * Creates a new field query instance without any constraints or selected
+     * fields
+     * @return a new and empty field query instance
+     */
+    FieldQuery createFieldQuery();
 
 }
