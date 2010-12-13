@@ -1,37 +1,5 @@
 package eu.iksproject.fise.engines.metaxa.core.html;
 
-/*
- * Copyright 2002 Sun Microsystems, Inc. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: -
- * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer. - Redistribution in binary
- * form must reproduce the above copyright notice, this list of conditions and
- * the following disclaimer in the documentation and/or other materials provided
- * with the distribution.
- *
- * Neither the name of Sun Microsystems, Inc. or the names of contributors may
- * be used to endorse or promote products derived from this software without
- * specific prior written permission.
- *
- * This software is provided "AS IS," without a warranty of any kind. ALL
- * EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES, INCLUDING ANY
- * IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR
- * NON-INFRINGEMENT, ARE HEREBY EXCLUDED. SUN AND ITS LICENSORS SHALL NOT BE
- * LIABLE FOR ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING
- * OR DISTRIBUTING THE SOFTWARE OR ITS DERIVATIVES. IN NO EVENT WILL SUN OR ITS
- * LICENSORS BE LIABLE FOR ANY LOST REVENUE, PROFIT OR DATA, OR FOR DIRECT,
- * INDIRECT, SPECIAL, CONSEQUENTIAL, INCIDENTAL OR PUNITIVE DAMAGES, HOWEVER
- * CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY, ARISING OUT OF THE USE OF
- * OR INABILITY TO USE SOFTWARE, EVEN IF SUN HAS BEEN ADVISED OF THE POSSIBILITY
- * OF SUCH DAMAGES.
- *
- * You acknowledge that Software is not designed, licensed or intended for use
- * in the design, construction, operation or maintenance of any nuclear
- * facility.
- */
-// TODO: this license doesn't look open source to me
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -74,96 +42,8 @@ import org.xml.sax.SAXParseException;
 public final class DOMUtils {
 
     /**
-     * This creates a new instance of <code>DOMUtils</code>. Not to be used.
-     */
-    private DOMUtils() {
-
-    }
-
-    /**
-     * This prints the specified node and all of its children to System.out.
-     *
-     * @param node
-     *            a DOM <code>Node</code>
-     */
-    public static void printDOM(Node node) {
-
-        int type = node.getNodeType();
-        switch (type) {
-            // print the document element
-            case Node.DOCUMENT_NODE:
-                System.out.println("<?xml version=\"1.0\" ?>");
-                printDOM(((Document)node).getDocumentElement());
-                break;
-
-            // print element with attributes
-            case Node.ELEMENT_NODE:
-                System.out.print("<");
-                System.out.print(node.getNodeName());
-                NamedNodeMap attrs = node.getAttributes();
-                for (int i = 0; i < attrs.getLength(); i++) {
-                    Node attr = attrs.item(i);
-                    System.out.print(" " + attr.getNodeName().trim() + "=\""
-                        + attr.getNodeValue().trim() + "\"");
-                }
-                System.out.println(">");
-
-                NodeList children = node.getChildNodes();
-                if (children != null) {
-                    int len = children.getLength();
-                    for (int i = 0; i < len; i++) {
-                        printDOM(children.item(i));
-                    }
-                }
-
-                break;
-
-            // handle entity reference nodes
-            case Node.ENTITY_REFERENCE_NODE:
-                System.out.print("&");
-                System.out.print(node.getNodeName().trim());
-                System.out.print(";");
-                break;
-
-            // print cdata sections
-            case Node.CDATA_SECTION_NODE:
-                System.out.print("<![CDATA[");
-                System.out.print(node.getNodeValue().trim());
-                System.out.print("]]>");
-                break;
-
-            // print text
-            case Node.TEXT_NODE:
-                System.out.print(node.getNodeValue().trim());
-                break;
-
-            // print processing instruction
-            case Node.PROCESSING_INSTRUCTION_NODE:
-                System.out.print("<?");
-                System.out.print(node.getNodeName().trim());
-                String data = node.getNodeValue().trim();
-                System.out.print(" ");
-                System.out.print(data);
-                System.out.print("?>");
-                break;
-
-            default:
-                System.err.println("unknown type " + type);
-                break;
-        }
-
-        if (type == Node.ELEMENT_NODE) {
-            System.out.println();
-            System.out.print("</");
-            System.out.print(node.getNodeName().trim());
-            System.out.print('>');
-        }
-    }
-
-
-    /**
      * This prints the given DOM document to System.out with indentation and
-     * iso-8859 encoding.
+     * utf-8 encoding.
      *
      * @param doc
      *            a DOM <code>Document</code>
@@ -184,7 +64,7 @@ public final class DOMUtils {
             xformer.setOutputProperty(
                 OutputKeys.INDENT, "yes");
             xformer.setOutputProperty(
-                OutputKeys.ENCODING, "iso-8859-1");
+                OutputKeys.ENCODING, "UTF-8");
             xformer.setOutputProperty(
                 "{http://xml.apache.org/xslt}indent-amount", "2");
             xformer.setOutputProperty(OutputKeys.METHOD, "xml");
