@@ -14,9 +14,9 @@ public class KReSFormat extends MediaType {
 	
 	public static final MediaType OWL_XML_TYPE = new MediaType("application", "owl+xml");
 	
-	public static final String MANCHERSTER_OWL = "application/manchester+owl";
+	public static final String MANCHESTER_OWL = "application/manchester+owl";
 	
-	public static final MediaType MANCHERSTER_OWL_TYPE = new MediaType("application", "manchester+xml");
+	public static final MediaType MANCHESTER_OWL_TYPE = new MediaType("application", "manchester+xml");
 	
 	public static final String FUNCTIONAL_OWL = "application/functional+owl";
 	

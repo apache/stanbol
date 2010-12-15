@@ -66,46 +66,67 @@ public class OntologyUtils {
 		return appendOntology(parentSrc, childSrc, ontologyManager, null);
 	}
 
+	public static OWLOntology appendOntology(OntologyInputSource parentSrc,
+			OntologyInputSource childSrc) {
+		return appendOntology(parentSrc, childSrc, null, null);
+	}
+
+	public static OWLOntology appendOntology(OntologyInputSource parentSrc,
+			OntologyInputSource childSrc, IRI rewritePrefix) {
+		return appendOntology(parentSrc, childSrc, null, rewritePrefix);
+	}
+
 	/**
 	 * This method appends one ontology (the child) to another (the parent) by
 	 * proceeding as follows. If a physical URI can be obtained from the child
 	 * source, an import statement using that physical URI will be added to the
 	 * parent ontology, otherwise all the axioms from the child ontology will be
 	 * copied to the parent. <br>
-	 * Note: the ontology manager does not load ontologies.
+	 * Note: the ontology manager will not load additional ontologies.
 	 * 
 	 * @param parentSrc
 	 *            must exist!
 	 * @param childSrc
 	 * @param ontologyManager
+	 *            can be null (e.g. when one does not want changes to be
+	 *            immediately reflected in their ontology manager), in which
+	 *            case a temporary ontology manager will be used.
+	 * @param rewritePrefix
+	 *            . if not null, import statements will be generated in the form
+	 *            <tt>rewritePrefix/child_ontology_logical_IRI</tt>. It can be
+	 *            used for relocating the ontology document file elsewhere.
 	 * @return the parent with the appended child
 	 */
 	public static OWLOntology appendOntology(OntologyInputSource parentSrc,
 			OntologyInputSource childSrc, OWLOntologyManager ontologyManager,
 			IRI rewritePrefix) {
+
+		if (ontologyManager == null)
+			ontologyManager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = ontologyManager.getOWLDataFactory();
 		OWLOntology oParent = parentSrc.getRootOntology();
 		OWLOntology oChild = childSrc.getRootOntology();
-		// If we can obtain a physical IRI from source, add the import.
 
-		// Named
+		// Named ontology with a provided absolute prefix. Use name and prefix
+		// for creating an new import statement.
 		OWLOntology child = childSrc.getRootOntology();
-		if (!child.isAnonymous() && rewritePrefix != null) {
+		if (!child.isAnonymous() && rewritePrefix != null
+		/* && rewritePrefix.isAbsolute() */) {
 			IRI impIri = IRI.create(rewritePrefix + "/"
 					+ child.getOntologyID().getOntologyIRI());
 			OWLImportsDeclaration imp = factory
 					.getOWLImportsDeclaration(impIri);
 			ontologyManager.applyChange(new AddImport(oParent, imp));
 		}
-		// Anonymous, with physicalIRI
+		// Anonymous, with physicalIRI. A plain import statement is added.
 		else if (childSrc.hasPhysicalIRI()) {
 			OWLImportsDeclaration imp = factory
 					.getOWLImportsDeclaration(childSrc.getPhysicalIRI());
 			ontologyManager.applyChange(new AddImport(oParent, imp));
 		}
-		// Otherwise just copy all its axioms and imports.
 
-		// Anonymous and no physical IRI
+		// Anonymous and no physical IRI (e.g. in memory). Copy all axioms and
+		// import statements.
 		else {
 			ontologyManager.addAxioms(oParent, oChild.getAxioms());
 			for (OWLImportsDeclaration imp : oChild.getImportsDeclarations())

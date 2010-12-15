@@ -25,7 +25,7 @@
      xmlns:onm="http://kres.iks-project.eu/ontology/meta/onm.owl#">
     <owl:Ontology rdf:about="http://kres.iks-project.eu/ontology/meta/onm.owl">
         <rdfs:comment xml:lang="en">The IKS KReS Ontology Network Manager metalevel vocabulary.</rdfs:comment>
-        <owl:imports rdf:resource="http://omv.ontoware.org/2005/05/ontology"/>
+        <owl:imports rdf:resource="http://ontologydesignpatterns.org/ont/iks/kres/omv.owl"/>
         <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/schemas/meta.owl"/>
     </owl:Ontology>
     
@@ -68,6 +68,7 @@
     <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#isCoreOntologyUsedBy -->
 
     <owl:ObjectProperty rdf:about="&onm;isCoreOntologyUsedBy">
+        <rdfs:label xml:lang="en">is core ontology used by</rdfs:label>
         <rdfs:subPropertyOf rdf:resource="&onm;isOntologyUsedBy"/>
         <owl:inverseOf rdf:resource="&onm;usesCoreOntology"/>
     </owl:ObjectProperty>
@@ -87,6 +88,7 @@
     <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#isCustomOntologyUsedBy -->
 
     <owl:ObjectProperty rdf:about="&onm;isCustomOntologyUsedBy">
+        <rdfs:label xml:lang="en">is custom ontology used by</rdfs:label>
         <rdfs:subPropertyOf rdf:resource="&onm;isOntologyUsedBy"/>
         <owl:inverseOf rdf:resource="&onm;usesCustomOntology"/>
     </owl:ObjectProperty>
@@ -116,6 +118,7 @@
     <!-- http://kres.iks-project.eu/ontology/meta/onm.owl#isOntologyUsedBy -->
 
     <owl:ObjectProperty rdf:about="&onm;isOntologyUsedBy">
+        <rdfs:label xml:lang="en">is ontology used by</rdfs:label>
         <rdfs:subPropertyOf rdf:resource="&onm;isOntologyResourceUsedBy"/>
         <owl:inverseOf rdf:resource="&onm;usesOntology"/>
     </owl:ObjectProperty>

@@ -1,9 +1,6 @@
 package eu.iksproject.kres.jersey.resource;
 
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.CONFLICT;
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static javax.ws.rs.core.Response.Status.*;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -24,13 +21,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.coode.owlapi.turtle.TurtleOntologyFormat;
-import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
+import eu.iksproject.kres.api.format.KReSFormat;
 import eu.iksproject.kres.api.manager.DuplicateIDException;
 import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
@@ -39,7 +34,6 @@ import eu.iksproject.kres.api.manager.ontology.OntologyScopeFactory;
 import eu.iksproject.kres.api.manager.ontology.OntologySpace;
 import eu.iksproject.kres.api.manager.ontology.ScopeRegistry;
 import eu.iksproject.kres.api.manager.ontology.UnmodifiableOntologySpaceException;
-import eu.iksproject.kres.jersey.util.OntologyRenderUtils;
 import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.manager.io.OntologyRegistryIRISource;
 import eu.iksproject.kres.manager.io.RootOntologyIRISource;
@@ -64,7 +58,7 @@ public class ONMScopeResource extends NavigationMixin {
 					.println("[KReS] :: No KReS Ontology Network Manager provided by Servlet Context. Instantiating now...");
 			onm = new ONManager();
 		}
-		
+
 	}
 
 	@DELETE
@@ -82,7 +76,9 @@ public class ONMScopeResource extends NavigationMixin {
 	}
 
 	@GET
-	@Produces("application/rdf+xml")
+	@Produces(value = { KReSFormat.RDF_XML, KReSFormat.OWL_XML,
+			KReSFormat.TURTLE, KReSFormat.FUNCTIONAL_OWL,
+			KReSFormat.MANCHESTER_OWL, KReSFormat.RDF_JSON })
 	public Response getTopOntology(@Context UriInfo uriInfo,
 			@Context HttpHeaders headers, @Context ServletContext servletContext) {
 
@@ -100,64 +96,7 @@ public class ONMScopeResource extends NavigationMixin {
 		if (ont == null)
 			ont = scope.getCoreSpace().getTopOntology();
 
-		String s = null;
-		try {
-			s = OntologyRenderUtils.renderOntology(ont,
-					new RDFXMLOntologyFormat(), uriInfo.getAbsolutePath()
-							.toString(), onm);
-		} catch (OWLOntologyStorageException e1) {
-			throw new WebApplicationException(e1, INTERNAL_SERVER_ERROR);
-		}
-
-		// OWLOntologyManager tmpmgr = OWLManager.createOWLOntologyManager();
-		// StringDocumentTarget tgt = new StringDocumentTarget();
-		// try {
-		// tmpmgr.saveOntology(ont, new RDFXMLOntologyFormat(), tgt);
-		// } catch (OWLOntologyStorageException e) {
-		// e.printStackTrace();
-		// return Response.status(INTERNAL_SERVER_ERROR).build();
-		// }
-		return Response.ok(s).build();
-
-	}
-
-	@GET
-	@Produces("text/turtle")
-	public Response getTopOntologyT(@Context UriInfo uriInfo,
-			@Context HttpHeaders headers, @Context ServletContext servletContext) {
-
-		ScopeRegistry reg = onm.getScopeRegistry();
-
-		OntologyScope scope = reg.getScope(IRI
-				.create(uriInfo.getAbsolutePath()));
-		if (scope == null)
-			return Response.status(NO_CONTENT).build();
-
-		OntologySpace cs = scope.getCustomSpace();
-		OWLOntology ont = null;
-		if (cs != null)
-			ont = scope.getCustomSpace().getTopOntology();
-		if (ont == null)
-			ont = scope.getCoreSpace().getTopOntology();
-
-		String s = null;
-		try {
-			s = OntologyRenderUtils.renderOntology(ont,
-					new TurtleOntologyFormat(), uriInfo.getAbsolutePath()
-							.toString(), onm);
-		} catch (OWLOntologyStorageException e1) {
-			throw new WebApplicationException(e1, INTERNAL_SERVER_ERROR);
-		}
-
-		// OWLOntologyManager tmpmgr = OWLManager.createOWLOntologyManager();
-		// StringDocumentTarget tgt = new StringDocumentTarget();
-		// try {
-		// tmpmgr.saveOntology(ont, new TurtleOntologyFormat(), tgt);
-		// } catch (OWLOntologyStorageException e) {
-		// e.printStackTrace();
-		// return Response.status(INTERNAL_SERVER_ERROR).build();
-		// }
-		return Response.ok(s).build();
+		return Response.ok(ont).build();
 
 	}
 

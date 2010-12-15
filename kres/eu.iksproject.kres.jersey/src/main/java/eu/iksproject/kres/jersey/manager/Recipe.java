@@ -90,7 +90,7 @@ public class Recipe extends NavigationMixin{
     				 KReSFormat.TURTLE,
     				 KReSFormat.OWL_XML, 
     				 KReSFormat.FUNCTIONAL_OWL, 
-    				 KReSFormat.MANCHERSTER_OWL,
+    				 KReSFormat.MANCHESTER_OWL,
     				 KReSFormat.RDF_JSON})
     public Response getRecipe(@PathParam("uri") String uri){
       try{
@@ -217,7 +217,7 @@ public class Recipe extends NavigationMixin{
     				 KReSFormat.TURTLE,
     				 KReSFormat.OWL_XML,
     				 KReSFormat.FUNCTIONAL_OWL,
-    				 KReSFormat.MANCHERSTER_OWL,
+    				 KReSFormat.MANCHESTER_OWL,
     				 KReSFormat.RDF_JSON})
     public Response addRecipe(@FormParam(value="recipe") String recipe,@FormParam(value="description") String description){
 

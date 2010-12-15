@@ -1,7 +1,5 @@
 package eu.iksproject.kres.jersey.resource;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -9,6 +7,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -49,12 +48,33 @@ public class ONMRootResource extends NavigationMixin {
 		this.servletContext = servletContext;
 		onm = (KReSONManager) this.servletContext
 				.getAttribute(KReSONManager.class.getName());
-		
+
 		if (onm == null) {
 			System.err
 					.println("[KReS] :: No KReS Ontology Network Manager provided by Servlet Context. Instantiating now...");
 			onm = new ONManager();
 		}
+	}
+
+	/**
+	 * RESTful DELETE method that clears the entire scope registry and managed
+	 * ontology store.
+	 */
+	@DELETE
+	public void clearOntologies() {
+		// First clear the registry...
+		ScopeRegistry reg = onm.getScopeRegistry();
+		for (OntologyScope scope : reg.getRegisteredScopes())
+			reg.deregisterScope(scope);
+		// ...then clear the store.
+		// TODO : the other way around?
+		onm.getOntologyStore().clear();
+	}
+
+	@GET
+	@Path("/{param:.+}")
+	public Response echo(@PathParam("param") String s) {
+		return Response.ok(s).build();
 	}
 
 	/**
@@ -73,39 +93,77 @@ public class ONMRootResource extends NavigationMixin {
 	 *         acceptable by the client.
 	 */
 	@GET
-	@Produces( { KReSFormat.FUNCTIONAL_OWL, 
-				 KReSFormat.MANCHERSTER_OWL, 
-				 KReSFormat.OWL_XML,
-				 KReSFormat.RDF_XML, 
-				 KReSFormat.TURTLE,
-				 KReSFormat.RDF_JSON})
+	@Produces(value = { KReSFormat.RDF_XML, KReSFormat.OWL_XML,
+			KReSFormat.TURTLE, KReSFormat.FUNCTIONAL_OWL,
+			KReSFormat.MANCHESTER_OWL, KReSFormat.RDF_JSON })
 	public Response getScopes(
 			@DefaultValue("false") @QueryParam("with-inactive") boolean inactive,
 			@Context HttpHeaders headers, @Context ServletContext servletContext) {
 
 		ScopeRegistry reg = onm.getScopeRegistry();
-		
+
 		Set<OntologyScope> scopes = inactive ? reg.getRegisteredScopes() : reg
 				.getActiveScopes();
-		
+
 		OWLOntology ontology = ScopeSetRenderer.getScopes(scopes);
 
 		return Response.ok(ontology).build();
 	}
-	
-	/**
-	 * RESTful DELETE method that clears the entire scope registry and managed
-	 * ontology store.
-	 */
-	@DELETE
-	public void clearOntologies() {
-		// First clear the registry...
-		ScopeRegistry reg = onm.getScopeRegistry();
-		for (OntologyScope scope : reg.getRegisteredScopes())
-			reg.deregisterScope(scope);
-		// ...then clear the store.
-		// TODO : the other way around?
-		onm.getOntologyStore().clear();
-	}
+
+	// @Path("upload")
+	// @Consumes(MediaType.MULTIPART_FORM_DATA)
+	// @POST
+	// public void uploadDumb(@FormParam("file") InputStream is) {
+	// Writer writer = new StringWriter();
+	//
+	// char[] buffer = new char[1024];
+	//
+	// try {
+	//
+	// Reader reader = new BufferedReader(
+	//
+	// new InputStreamReader(is, "UTF-8"));
+	//
+	// int n;
+	//
+	// while ((n = reader.read(buffer)) != -1) {
+	//
+	// writer.write(buffer, 0, n);
+	//
+	// }
+	// } catch (IOException ex) {
+	// throw new WebApplicationException(ex);
+	// } finally {
+	//
+	// try {
+	// is.close();
+	// } catch (IOException e) {
+	// throw new WebApplicationException(e);
+	// }
+	//
+	// }
+	// System.out.println(writer.toString());
+	// }
+	//
+	// @Path("formdata")
+	// @Consumes(MediaType.MULTIPART_FORM_DATA)
+	// @POST
+	// public void uploadUrlFormData(
+	// @FormDataParam("file") List<FormDataBodyPart> parts,
+	// @FormDataParam("submit") FormDataBodyPart submit)
+	// throws IOException, ParseException {
+	//
+	// System.out.println("XXXX: " + submit.getMediaType());
+	// System.out.println("XXXX: "
+	// + submit.getHeaders().getFirst("Content-Type"));
+	//
+	// for (FormDataBodyPart bp : parts) {
+	// System.out.println(bp.getMediaType());
+	// System.out.println(bp.getHeaders().get("Content-Disposition"));
+	// System.out.println(bp.getParameterizedHeaders().getFirst(
+	// "Content-Disposition").getParameters().get("name"));
+	// bp.cleanup();
+	// }
+	// }
 
 }

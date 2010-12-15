@@ -44,6 +44,7 @@ import eu.iksproject.kres.manager.util.StringUtils;
  * NOTE: By default, an ontology space is NOT write-locked. Developers need to
  * set the <code>locked</code> variable to true to make the space read-only.
  * 
+ * 
  * @author alessandro
  * 
  */
@@ -102,11 +103,11 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 		this.parentID = parentID;
 
 		// FIXME: ensure that this is not null
-		OntologyScope ps = ONManager.get().getScopeRegistry()
+		OntologyScope parentScope = ONManager.get().getScopeRegistry()
 				.getScope(parentID);
 
-		if (ps != null && ps instanceof OntologySpaceListener)
-			this.addOntologySpaceListener((OntologySpaceListener) ps);
+		if (parentScope != null && parentScope instanceof OntologySpaceListener)
+			this.addOntologySpaceListener((OntologySpaceListener) parentScope);
 
 		this._id = spaceID;
 		if (ontologyManager != null)
@@ -206,49 +207,34 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 		if (ontology != null) {
 
 			OWLOntologyID id = ontology.getOntologyID();
+
+			// if (ontologySource != null && parentID != null)
+			// // rewrite the source
+			// ontologySource = new ScopeOntologySource(parentID,
+			// ontologySource.getRootOntology(), ontologySource
+			// .getPhysicalIRI());
+
+			// Should not modify the child ontology in any way.
+			// TODO implement transaction control.
+			OntologyUtils
+					.appendOntology(new RootOntologySource(getTopOntology(),
+							null), ontologySource, ontologyManager/* ,parentID */);
+
+			StringDocumentTarget tgt = new StringDocumentTarget();
 			try {
-
-				// if (ontologySource != null && parentID != null)
-				// // rewrite the source
-				// ontologySource = new ScopeOntologySource(parentID,
-				// ontologySource.getRootOntology(), ontologySource
-				// .getPhysicalIRI());
-
-				OntologyUtils.appendOntology(new RootOntologySource(
-						getTopOntology(), null), ontologySource,
-						ontologyManager/* ,parentID */);
-
-				StringDocumentTarget tgt = new StringDocumentTarget();
 				ontologyManager.saveOntology(ontology,
 						new RDFXMLOntologyFormat(), tgt);
+			} catch (OWLOntologyStorageException e) {
+				log.error("KReS : [FATAL] Failed to store ontology " + id
+						+ " in memory.", e);
+				return;
+			}
+
+			try {
+				ontologyManager.removeOntology(ontology);
 				ontologyManager
 						.loadOntologyFromOntologyDocument(new StringDocumentSource(
 								tgt.toString()));
-
-				try {
-					// Store the top ontology
-					if (!(this instanceof SessionOntologySpace)) {
-						OntologyStorage storage = ONManager.get()
-								.getOntologyStore();
-						if (storage == null)
-							log
-									.error("KReS :: [NONFATAL] no ontology storage found. Ontology "
-											+ ontology.getOntologyID()
-											+ " will be stored in-memory only.");
-						else
-							storage.store(ontology);
-					}
-					// ONManager.get().getOntologyStore().load(rootOntology.getOntologyID().getOntologyIRI());
-				} catch (Exception ex) {
-					log
-							.error(
-									"KReS :: [NONFATAL] An error occurred while storing ontology "
-											+ ontology
-											+ " . Ontology management will be volatile!",
-									ex);
-				}
-
-				fireOntologyAdded(id.getOntologyIRI());
 			} catch (OWLOntologyAlreadyExistsException e) {
 				// Could happen if we supplied an ontology manager that already
 				// knows this ontology. Nothing to do then.
@@ -257,9 +243,34 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 			} catch (OWLOntologyCreationException e) {
 				log.error("Unexpected exception caught while copying ontology "
 						+ id + " across managers", e);
-			} catch (OWLOntologyStorageException e) {
-				log.error("KReS : [FATAL] Failed to store ontology " + id, e);
+				return;
 			}
+
+			try {
+				// Store the top ontology
+				if (!(this instanceof SessionOntologySpace)) {
+					OntologyStorage storage = ONManager.get()
+							.getOntologyStore();
+					if (storage == null)
+						log
+								.error("KReS :: [NONFATAL] no ontology storage found. Ontology "
+										+ ontology.getOntologyID()
+										+ " will be stored in-memory only.");
+					else {
+						storage.store(ontology);
+					}
+				}
+				// ONManager.get().getOntologyStore().load(rootOntology.getOntologyID().getOntologyIRI());
+			} catch (Exception ex) {
+				log.error(
+						"KReS :: [NONFATAL] An error occurred while storing ontology "
+								+ ontology
+								+ " . Ontology management will be volatile!",
+						ex);
+			}
+
+			fireOntologyAdded(id.getOntologyIRI());
+
 		}
 
 	}
@@ -485,8 +496,9 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 							.error("KReS :: [NONFATAL] no ontology storage found. Ontology "
 									+ rootOntology.getOntologyID()
 									+ " will be stored in-memory only.");
-				else
+				else {
 					storage.store(rootOntology);
+				}
 			}
 		} catch (Exception ex) {
 			log.error(

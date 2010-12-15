@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -25,13 +26,27 @@ public class TestOntologyScope {
 
 	public static IRI baseIri = IRI.create(Constants.base),
 			baseIri2 = IRI.create(Constants.base2),
+			scopeIriBlank = IRI
+					.create("http://kres.iks-project.eu/scope/WackyRaces"),
 			scopeIri1 = IRI.create("http://kres.iks-project.eu/scope/Peanuts"),
 			scopeIri2 = IRI
 					.create("http://kres.iks-project.eu/scope/CalvinAndHobbes");
 
+	/**
+	 * An ontology scope that initially contains no ontologies, and is rebuilt
+	 * from scratch before each test method.
+	 */
+	private static OntologyScope blankScope;
+
 	private static OntologyScopeFactory factory = null;
 
 	private static OntologyInputSource src1 = null, src2 = null;
+
+	@Before
+	public void cleaup() throws DuplicateIDException {
+		if (factory != null)
+			blankScope = factory.createOntologyScope(scopeIriBlank, null);
+	}
 
 	@BeforeClass
 	public static void setup() {

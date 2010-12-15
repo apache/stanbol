@@ -1,6 +1,8 @@
 package eu.iksproject.kres.manager.ontology;
 
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLImportsDeclaration;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 
@@ -36,15 +38,18 @@ public class CustomOntologySpaceImpl extends AbstractOntologySpaceImpl
 	public void attachCoreSpace(CoreOntologySpace coreSpace, boolean skipRoot)
 			throws UnmodifiableOntologySpaceException {
 
+		OWLOntology o = coreSpace.getTopOntology();
 		// This does the append thingy
-		log.debug("Attaching " + coreSpace.getTopOntology() + " TO "
-				+ getTopOntology() + " ...");
+		log.debug("Attaching " + o + " TO " + getTopOntology() + " ...");
 		try {
-			addOntology(new RootOntologySource(coreSpace.getTopOntology(), null));
-			log.debug("ok");
+			// It is in fact the addition of the core space top ontology to the
+			// custom space, with import statements and all.
+			addOntology(new RootOntologySource(o, null));
+			// log.debug("ok");
 		} catch (Exception ex) {
 			log.error("FAILED", ex);
 		}
+
 	}
 
 	/**

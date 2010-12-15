@@ -74,7 +74,7 @@ public class GraphsResource extends NavigationMixin {
 	@GET
 	@Path("/resume")
 	@Produces( {KReSFormat.FUNCTIONAL_OWL, 
-				KReSFormat.MANCHERSTER_OWL, 
+				KReSFormat.MANCHESTER_OWL, 
 				KReSFormat.OWL_XML, 
 				KReSFormat.RDF_XML,
 				KReSFormat.TURTLE,

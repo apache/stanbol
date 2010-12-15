@@ -2,7 +2,10 @@ package eu.iksproject.kres.jersey;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -10,7 +13,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.ClientResponse.Status;
 import com.sun.jersey.api.representation.Form;
 
 import eu.iksproject.kres.api.format.KReSFormat;
@@ -85,6 +90,47 @@ public class JettyServerTest {
 
 	}
 
+	@Test
+	public void testEcho() throws Exception {
+
+		boolean eq = true;
+
+		Client client = Client.create();
+		WebResource resUpload = client.resource(__TEST_URI + "prova");
+
+		resUpload.get(String.class);
+		ClientResponse head = resUpload.head();
+		int status = head.getStatus();
+		head.close();
+		eq &= status == Status.OK.getStatusCode();
+
+		resUpload = client.resource(__TEST_URI + "prova/saluto");
+
+		resUpload.get(String.class);
+		head = resUpload.head();
+		status = head.getStatus();
+		head.close();
+		eq &= status == Status.OK.getStatusCode();
+
+		client.destroy();
+
+		assertTrue(eq);
+
+	}
+
+	public void testOntologyUpload() throws Exception {
+		WebResource resUpload = client.resource(_ROOT_URI + "/upload");
+
+		Form f = new Form();
+		f
+				.add("file", new File(
+						"./src/main/resources/TestFile/ProvaParent.owl"));
+
+		//resUpload.type(MediaType.MULTIPART_FORM_DATA).post();
+
+		assertTrue(true);
+	}
+
 	/**
 	 * Tests that the creation of active and inactive scopes is reflected in the
 	 * RDF version of the scope set, whether it is set to display all scopes or
@@ -92,11 +138,12 @@ public class JettyServerTest {
 	 * 
 	 * @throws Exception
 	 */
-//	@Test
+	// @Test
 	public void testActiveVsAll() throws Exception {
 		// The needed Web resources to GET from.
 		WebResource resActive = client.resource(_ROOT_URI);
-		WebResource resAllScopes = client.resource(_ROOT_URI + "?with-inactive=true");
+		WebResource resAllScopes = client.resource(_ROOT_URI
+				+ "?with-inactive=true");
 		// Put a simple, inactive scope.
 		client.resource(SCOPE_USER_URI + "?coreont=" + ONT_FOAF_URI).put(
 				String.class);
@@ -119,8 +166,8 @@ public class JettyServerTest {
 
 	@Test
 	public void testGetScopes() throws Exception {
-		String r = ontologyResource.accept(KReSFormat.RDF_XML).get(
-				String.class);
+		String r = ontologyResource.accept(KReSFormat.RDF_XML)
+				.get(String.class);
 		assertTrue(r
 				.contains("<imports rdf:resource=\"http://www.ontologydesignpatterns.org/schemas/meta.owl\"/>"));
 		r = ontologyResource.accept(KReSFormat.TURTLE).get(String.class);
@@ -143,7 +190,7 @@ public class JettyServerTest {
 		assertTrue(true);
 	}
 
-//	@Test
+	// @Test
 	public void testLocking() throws Exception {
 		// Create a scope with a core ontology and a custom registry.
 		String r;
@@ -160,8 +207,7 @@ public class JettyServerTest {
 			f.add("location", ONT_PIZZA_URI);
 			f.add("registry", "false");
 			scopeResourceTest2.post(String.class, f);
-			r = scopeResourceTest2.accept(KReSFormat.RDF_XML).get(
-					String.class);
+			r = scopeResourceTest2.accept(KReSFormat.RDF_XML).get(String.class);
 			// fail("Addition succeded on existing scope with supposedly locked core space!");
 		} catch (WebApplicationException ex) {
 			assertTrue(r != null);
@@ -173,15 +219,15 @@ public class JettyServerTest {
 
 	}
 
-//	@Test
+	// @Test
 	public void testSessionCreation() {
 		WebResource resource = client.resource(__TEST_URI + "session");
 		String r = resource.accept(KReSFormat.RDF_XML).post(String.class);
-		//System.err.println(r);
+		// System.err.println(r);
 		assertTrue(true);
 	}
 
-//	@Test
+	// @Test
 	public void testScopeManagement() throws Exception {
 		String rootIdToken = "rdf:about=\"http://localhost:9999/ontology/Pippo%20Baudo/custom/root.owl\"";
 		String importORToken = "<owl:imports rdf:resource=\"http://www.ontologydesignpatterns.org/cp/owl/objectrole.owl\"/>";
@@ -199,7 +245,7 @@ public class JettyServerTest {
 						.contains("rdf:type rdf:resource=\"http://kres.iks-project.eu/ontology/onm/meta.owl#Scope\""));
 		// Check that the top ontology has the correct ID and imports objectrole
 		r = scopeResourceTest1.accept(KReSFormat.RDF_XML).get(String.class);
-		//System.err.println(r);
+		// System.err.println(r);
 		assertTrue(r.contains(rootIdToken));
 		assertTrue(r.contains("http://xmlns.com/foaf/spec/index.rdf"));
 		// Now add an ontology

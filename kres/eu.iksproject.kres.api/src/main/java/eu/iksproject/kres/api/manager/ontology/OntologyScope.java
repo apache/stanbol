@@ -101,6 +101,21 @@ public interface OntologyScope extends ScopeOntologyListenable {
 	public void setUp();
 
 	/**
+	 * Performs whatever operations are required for making sure the custom
+	 * space of this scope is aware of changes occurring in its core space, that
+	 * all session spaces are aware of changes in the custom space, and so on.
+	 * Typically, this includes updating all import statements in the top
+	 * ontologies for each space.<br>
+	 * <br>
+	 * This method is not intended for usage by ontology managers. Since its
+	 * invocation is supposed to be automatic, it should be invoked by whatever
+	 * classes are responsible for listening to changes in an ontology
+	 * scope/space. In the default implementation, it is the scope itself, yet
+	 * the method is left public in order to allow for external controllers.
+	 */
+	public void synchronizeSpaces();
+
+	/**
 	 * Performs the operations required for deactivating the ontology scope. In
 	 * general, this is not equivalent to finalizing the object for garbage
 	 * collection. It should be possible to activate the same ontology scope

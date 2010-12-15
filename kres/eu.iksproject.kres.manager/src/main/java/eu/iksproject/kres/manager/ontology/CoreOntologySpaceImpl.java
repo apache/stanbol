@@ -5,7 +5,6 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import eu.iksproject.kres.api.manager.ontology.CoreOntologySpace;
 import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
-import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.manager.util.StringUtils;
 
 public class CoreOntologySpaceImpl extends AbstractOntologySpaceImpl implements

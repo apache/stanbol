@@ -1,5 +1,7 @@
 package eu.iksproject.kres.jersey.resource;
 
+import static javax.ws.rs.core.Response.Status.*;
+
 import java.net.URI;
 import java.util.Set;
 
@@ -9,14 +11,12 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.model.IRI;
@@ -33,8 +33,8 @@ import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.api.manager.ontology.OntologySpace;
 import eu.iksproject.kres.api.manager.ontology.OntologySpaceModificationException;
 import eu.iksproject.kres.api.manager.ontology.ScopeRegistry;
-import eu.iksproject.kres.manager.io.RootOntologySource;
 import eu.iksproject.kres.jersey.util.OntologyRenderUtils;
+import eu.iksproject.kres.manager.io.RootOntologySource;
 
 /**
  * This resource represents ontologies loaded within a scope.
@@ -70,7 +70,9 @@ public class ONMScopeOntologyResource extends NavigationMixin {
 	 *          ontology is not loaded within that scope.
 	 */
 	@GET
-	@Produces(value={KReSFormat.RDF_XML, KReSFormat.RDF_JSON, KReSFormat.FUNCTIONAL_OWL, KReSFormat.MANCHERSTER_OWL, KReSFormat.TURTLE})
+	@Produces(value = { KReSFormat.RDF_XML, KReSFormat.OWL_XML,
+			KReSFormat.TURTLE, KReSFormat.FUNCTIONAL_OWL,
+			KReSFormat.MANCHESTER_OWL, KReSFormat.RDF_JSON })
 	public Response getScopeOntology(@PathParam("scopeid") String scopeid,
 			@PathParam("uri") String ontologyid, @Context UriInfo uriInfo) {
 
@@ -80,75 +82,78 @@ public class ONMScopeOntologyResource extends NavigationMixin {
 
 		IRI sciri = IRI.create(uri);
 		IRI ontiri = IRI.create(ontologyid);
-//		System.err.println("Looking for ontology with id " + ontiri
-//				+ " in scope " + sciri + " ...");
+		
+		// TODO: hack (ma anche no)
+		if (!ontiri.isAbsolute())
+			ontiri = IRI.create(absur);
+			
 		ScopeRegistry reg = onm.getScopeRegistry();
 		OntologyScope scope = reg.getScope(sciri);
 		if (scope == null)
-			return Response.status(404).build();
+			return Response.status(NOT_FOUND).build();
 
-		OntologySpace cs = scope.getCustomSpace();
-//		System.err.println("check custom");
-//		for (OWLOntology o : cs.getOntologies()) {
-//			System.err.println("\thas "+o);
-//		}
-//		System.err.println("check core");
-//		for (OWLOntology o : scope.getCoreSpace().getOntologies()) {
-//			System.err.println("\thas "+o);
-//		}
+		/* BEGIN debug code, uncomment only for local testing */
+		// OWLOntology test = null, top = null;
+		// test = scope.getCustomSpace().getOntology(ontiri);
+		// System.out.println("Ontology " + ontiri);
+		// for (OWLImportsDeclaration imp : test.getImportsDeclarations())
+		// System.out.println("\timports " + imp.getIRI());
+		// top = scope.getCoreSpace().getTopOntology();
+		// System.out.println("Core root for scope " + scopeid);
+		// for (OWLImportsDeclaration imp : top.getImportsDeclarations())
+		// System.out.println("\timports " + imp.getIRI());
+		/* END debug code */
+
 		OWLOntology ont = null;
-		if (cs != null) {
-			ont = scope.getCustomSpace().getOntology(ontiri);
-		}
+		// By default, always try retrieving the ontology from the custom space
+		// first.
+		OntologySpace space = scope.getCustomSpace();
+		if (space == null)
+			space = scope.getCoreSpace();
+		if (space != null)
+			ont = space.getOntology(ontiri);
+
 		if (ont == null) {
-			ont = scope.getCoreSpace().getOntology(ontiri);
-		}
-		if (ont == null){
 			OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-			final Set<OWLOntology> ontologies = scope.getSessionSpace(ontiri).getOntologies();
-			
+			final Set<OWLOntology> ontologies = scope.getSessionSpace(ontiri)
+					.getOntologies();
+
 			OWLOntologySetProvider provider = new OWLOntologySetProvider() {
-				
+
 				@Override
 				public Set<OWLOntology> getOntologies() {
-					System.out.println("ID SPACE : "+ontologies);
+					// System.out.println("ID SPACE : " + ontologies);
 					return ontologies;
 				}
 			};
 			OWLOntologyMerger merger = new OWLOntologyMerger(provider);
-			
-			
-			/*Set<OntologySpace> spaces = scope.getSessionSpaces();
-			for(OntologySpace space : spaces){
-				System.out.println("ID SPACE : "+space.getID());
-			}*/
-			
-			
+
+			/*
+			 * Set<OntologySpace> spaces = scope.getSessionSpaces();
+			 * for(OntologySpace space : spaces){
+			 * System.out.println("ID SPACE : "+space.getID()); }
+			 */
+
 			try {
 				ont = merger.createMergedOntology(man, ontiri);
 			} catch (OWLOntologyCreationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
 			}
-			
-			
+
 		}
 		if (ont == null) {
-			return Response.status(404).build();
+			return Response.status(NOT_FOUND).build();
 		}
 		String res = null;
 		try {
 			res = OntologyRenderUtils.renderOntology(ont,
-					new RDFXMLOntologyFormat(),sciri.toString(),onm);
+					new RDFXMLOntologyFormat(), sciri.toString(), onm);
 		} catch (OWLOntologyStorageException e) {
-			e.printStackTrace();
-			return Response.status(500).build();
+			throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
 		}
 		return Response.ok(res).build();
 
 	}
-
-	
 
 	/**
 	 * Unloads an ontology from an ontology scope.
@@ -163,7 +168,7 @@ public class ONMScopeOntologyResource extends NavigationMixin {
 			@PathParam("uri") String ontologyid, @Context UriInfo uriInfo,
 			@Context HttpHeaders headers) {
 
-		if (ontologyid != null || !ontologyid.equals("")) {
+		if (ontologyid != null && !ontologyid.equals("")) {
 			String scopeURI = uriInfo.getAbsolutePath().toString().replace(
 					ontologyid, "");
 			System.out.println("Received DELETE request for ontology "
@@ -183,7 +188,7 @@ public class ONMScopeOntologyResource extends NavigationMixin {
 					reg.setScopeActive(scopeIri, true);
 				} catch (OntologySpaceModificationException e) {
 					reg.setScopeActive(scopeIri, true);
-					throw new WebApplicationException(e, 500);
+					throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
 				}
 			}
 		}

@@ -120,7 +120,7 @@ public class SemionRefactorerResource extends NavigationMixin {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(value = {KReSFormat.TURTLE, 
 				KReSFormat.FUNCTIONAL_OWL, 
-				KReSFormat.MANCHERSTER_OWL, 
+				KReSFormat.MANCHESTER_OWL, 
 				KReSFormat.RDF_XML,
 				KReSFormat.OWL_XML,
 				KReSFormat.RDF_JSON})
@@ -192,7 +192,7 @@ public class SemionRefactorerResource extends NavigationMixin {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces({KReSFormat.TURTLE, 
 				KReSFormat.FUNCTIONAL_OWL, 
-				KReSFormat.MANCHERSTER_OWL, 
+				KReSFormat.MANCHESTER_OWL, 
 				KReSFormat.RDF_XML,
 				KReSFormat.OWL_XML,
 				KReSFormat.RDF_JSON})

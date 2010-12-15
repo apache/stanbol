@@ -59,12 +59,9 @@ public class KReSSessionResource extends NavigationMixin {
 
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	@Produces( { KReSFormat.FUNCTIONAL_OWL, 
-				 KReSFormat.MANCHERSTER_OWL, 
-				 KReSFormat.OWL_XML,
-				 KReSFormat.RDF_XML, 
-				 KReSFormat.TURTLE,
-				 KReSFormat.RDF_JSON})
+	@Produces(value = { KReSFormat.RDF_XML, KReSFormat.OWL_XML,
+			KReSFormat.TURTLE, KReSFormat.FUNCTIONAL_OWL,
+			KReSFormat.MANCHESTER_OWL, KReSFormat.RDF_JSON })
 	public Response createSession(@FormParam("scope") String scope,
 			@Context UriInfo uriInfo,
 			@Context HttpHeaders headers) {

@@ -219,7 +219,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
 	 */
 	@Override
 	public void onOntologyAdded(IRI spaceId, IRI addedOntology) {
-		// Propagate events
+		// Propagate events to scope listeners
 		fireOntologyAdded(addedOntology);
 	}
 
@@ -232,7 +232,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
 	 */
 	@Override
 	public void onOntologyRemoved(IRI spaceId, IRI removedOntology) {
-		// Propagate events
+		// Propagate events to scope listeners
 		fireOntologyRemoved(removedOntology);
 	}
 
@@ -267,7 +267,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see eu.iksproject.kres.api.manager.ontology.OntologyScope#bringUp()
+	 * @see eu.iksproject.kres.api.manager.ontology.OntologyScope#setUp()
 	 */
 	@Override
 	public synchronized void setUp() {
@@ -306,6 +306,12 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
 	@Override
 	public String toString() {
 		return getID().toString();
+	}
+
+	@Override
+	public void synchronizeSpaces() {
+		// TODO Auto-generated method stub
+
 	}
 
 }

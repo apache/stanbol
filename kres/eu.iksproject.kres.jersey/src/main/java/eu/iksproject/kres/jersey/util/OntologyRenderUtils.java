@@ -148,7 +148,7 @@ public class OntologyRenderUtils {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		} else if (format.equals(KReSFormat.MANCHERSTER_OWL)) {
+		} else if (format.equals(KReSFormat.MANCHESTER_OWL)) {
 			try {
 				tmpmgr.saveOntology(o2,
 						new ManchesterOWLSyntaxOntologyFormat(), tgt);

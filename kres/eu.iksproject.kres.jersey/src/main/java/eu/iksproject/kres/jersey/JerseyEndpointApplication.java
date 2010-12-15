@@ -18,6 +18,7 @@ import eu.iksproject.kres.jersey.resource.KReSSessionIDResource;
 import eu.iksproject.kres.jersey.resource.KReSSessionResource;
 import eu.iksproject.kres.jersey.resource.ONMOntResource;
 //import eu.iksproject.kres.jersey.resource.LinkDiscoveryResource;
+import eu.iksproject.kres.jersey.resource.ProvaResource;
 import eu.iksproject.kres.jersey.resource.RESTfulResource;
 import eu.iksproject.kres.jersey.resource.ONMRootResource;
 import eu.iksproject.kres.jersey.resource.ONMScopeOntologyResource;
@@ -75,6 +76,10 @@ public class JerseyEndpointApplication extends Application {
         classes.add(KReSSessionIDResource.class);
         classes.add(GraphsResource.class);
         classes.add(DocumentationResource.class);
+        
+        
+        classes.add(ProvaResource.class);
+        
         
 /* REST services */
 	classes.add(RESTfulResource.class);
