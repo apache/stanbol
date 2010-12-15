@@ -8,5 +8,6 @@
 	<classpathentry kind="lib" path="resource/am/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="resource"/>
+	<classpathentry kind="lib" path="lib/commons-codec-1.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

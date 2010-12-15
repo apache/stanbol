@@ -1,23 +1,25 @@
 package eu.iksproject.fise.interaction.util;
 
-import java.net.URLConnection;
-import java.net.URL;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.io.File;
-import java.io.InputStream;
-import java.util.Random;
-import java.io.OutputStream;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Random;
+
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * <p>Title: Client HTTP Request class</p>
  * <p>Description: this class helps to send POST HTTP requests with various form data,
  * including files. Cookies can be added to be included in the request.</p>
  *
- * @author Vlad Patryshev
+ * @author Vlad Patryshev, Fabian Christ
  * @version 1.0
  */
 
@@ -83,7 +85,7 @@ public class ClientHttpRequest {
         connection.setRequestProperty("Content-Type",
                 "multipart/form-data; boundary=" + boundary);
         connection.setRequestProperty("Authorization ",
-                "Basic " + Base64.encodeBytes((name + ":" + pw).getBytes()));
+                "Basic " + Base64.encodeBase64((name + ":" + pw).getBytes()));
   }
 
   /**

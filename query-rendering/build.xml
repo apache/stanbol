@@ -12,6 +12,7 @@
         <pathelement location="lib/sphinx4.jar"/>
         <pathelement location="resource/am/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar"/>
         <pathelement location="lib/log4j-1.2.15.jar"/>
+    	<pathelement location="lib/commons-codec-1.4.jar"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>
