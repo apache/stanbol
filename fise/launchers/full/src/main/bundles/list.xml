@@ -303,6 +303,11 @@
 		</bundle>
 		<bundle>
 			<groupId>eu.iksproject</groupId>
+			<artifactId>eu.iksproject.fise.engines.opencalais</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.fise.engines.autotagging</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
