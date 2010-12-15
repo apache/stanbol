@@ -43,7 +43,7 @@ public class TestOpenCalaisEngine {
   public static void oneTimeSetup() {
     calaisExtractor = new OpenCalaisEngine();
     calaisExtractor.tcManager = TcManager.getInstance();
-    if (TEST_LICENSE_KEY.matches("\\w+")) {
+    if (TEST_LICENSE_KEY != null && TEST_LICENSE_KEY.matches("\\w+")) {
       calaisExtractor.setLicenseKey(TEST_LICENSE_KEY);
     }
   }
@@ -88,7 +88,7 @@ public class TestOpenCalaisEngine {
 
   @Test
   public void testCalaisConnection() {
-  	Assume.assumeNotNull(TEST_LICENSE_KEY);
+  	Assume.assumeNotNull(calaisExtractor.getLicenseKey());
   	try {
   	  ContentItem ci = wrapAsContentItem(TEST_TEXT);
   	  ci.getMetadata().add(new TripleImpl(new UriRef(ci.getId()), Properties.DC_LANGUAGE, LiteralFactory.getInstance().createTypedLiteral("en")));
