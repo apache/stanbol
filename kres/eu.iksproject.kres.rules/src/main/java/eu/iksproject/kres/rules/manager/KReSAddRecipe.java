@@ -419,12 +419,7 @@ public class KReSAddRecipe {
             }
 
             //Add single rule
-            
-            /* 
-             * BUGFIX - previously the check was done on rules.size()-1.
-             * 
-             */
-            for(int r=0; r<rules.size(); r++){
+            for(int r=0; r<rules.size()-1; r++){
                 ind = factory.getOWLNamedIndividual(rules.get(r));
                 if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))){
                 //Add the rule to the recipes
@@ -432,6 +427,7 @@ public class KReSAddRecipe {
                 owlmanager.addAxiom(owlmodel, objectPropAssertion);
                 ok = true;
                 //Add precedes
+                int size = rules.size();
                 OWLNamedIndividual indf = factory.getOWLNamedIndividual(rules.get(r+1));
                 if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, indf))){
                     objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(precedes,ind,indf);
