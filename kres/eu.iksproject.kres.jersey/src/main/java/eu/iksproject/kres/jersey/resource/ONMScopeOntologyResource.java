@@ -1,8 +1,10 @@
 package eu.iksproject.kres.jersey.resource;
 
-import static javax.ws.rs.core.Response.Status.*;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.net.URI;
+import java.util.Hashtable;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -20,12 +22,15 @@ import javax.ws.rs.core.UriInfo;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologySetProvider;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.util.OWLOntologyMerger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.iksproject.kres.api.format.KReSFormat;
 import eu.iksproject.kres.api.manager.KReSONManager;
@@ -33,8 +38,11 @@ import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.api.manager.ontology.OntologySpace;
 import eu.iksproject.kres.api.manager.ontology.OntologySpaceModificationException;
 import eu.iksproject.kres.api.manager.ontology.ScopeRegistry;
+import eu.iksproject.kres.api.storage.OntologyStoreProvider;
 import eu.iksproject.kres.jersey.util.OntologyRenderUtils;
+import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.manager.io.RootOntologySource;
+import eu.iksproject.kres.storage.provider.OntologyStorageProviderImpl;
 
 /**
  * This resource represents ontologies loaded within a scope.
@@ -45,17 +53,38 @@ import eu.iksproject.kres.manager.io.RootOntologySource;
 @Path("/ontology/{scopeid}/{uri:.+}")
 public class ONMScopeOntologyResource extends NavigationMixin {
 
+	private Logger log = LoggerFactory.getLogger(getClass());
+
 	/*
 	 * Placeholder for the KReSONManager to be fetched from the servlet context.
 	 */
 	protected KReSONManager onm;
+	protected OntologyStoreProvider storeProvider;
 
 	protected ServletContext servletContext;
 
 	public ONMScopeOntologyResource(@Context ServletContext servletContext) {
 		this.servletContext = servletContext;
-		onm = (KReSONManager) this.servletContext
+		this.onm = (KReSONManager) servletContext
 				.getAttribute(KReSONManager.class.getName());
+this.storeProvider = (OntologyStoreProvider) servletContext
+		.getAttribute(OntologyStoreProvider.class.getName());
+// Contingency code for missing components follows.
+/*
+ * FIXME! The following code is required only for the tests. This should
+ * be removed and the test should work without this code.
+ */
+if (storeProvider == null) {
+	log
+			.warn("No OntologyStoreProvider in servlet context. Instantiating manually...");
+	storeProvider = new OntologyStorageProviderImpl();
+}
+if (onm == null) {
+	log
+			.warn("No KReSONManager in servlet context. Instantiating manually...");
+	onm = new ONManager(storeProvider.getActiveOntologyStorage(),
+			new Hashtable<String, Object>());
+}
 	}
 
 	/**
@@ -93,15 +122,15 @@ public class ONMScopeOntologyResource extends NavigationMixin {
 			return Response.status(NOT_FOUND).build();
 
 		/* BEGIN debug code, uncomment only for local testing */
-		// OWLOntology test = null, top = null;
-		// test = scope.getCustomSpace().getOntology(ontiri);
-		// System.out.println("Ontology " + ontiri);
-		// for (OWLImportsDeclaration imp : test.getImportsDeclarations())
-		// System.out.println("\timports " + imp.getIRI());
-		// top = scope.getCoreSpace().getTopOntology();
-		// System.out.println("Core root for scope " + scopeid);
-		// for (OWLImportsDeclaration imp : top.getImportsDeclarations())
-		// System.out.println("\timports " + imp.getIRI());
+		 OWLOntology test = null, top = null;
+		 test = scope.getCustomSpace().getOntology(ontiri);
+		 System.out.println("Ontology " + ontiri);
+		 for (OWLImportsDeclaration imp : test.getImportsDeclarations())
+		 System.out.println("\timports " + imp.getIRI());
+		 top = scope.getCoreSpace().getTopOntology();
+		 System.out.println("Core root for scope " + scopeid);
+		 for (OWLImportsDeclaration imp : top.getImportsDeclarations())
+		 System.out.println("\timports " + imp.getIRI());
 		/* END debug code */
 
 		OWLOntology ont = null;
@@ -151,7 +180,7 @@ public class ONMScopeOntologyResource extends NavigationMixin {
 		} catch (OWLOntologyStorageException e) {
 			throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
 		}
-		return Response.ok(res).build();
+		return Response.ok(/*ont*/res).build();
 
 	}
 

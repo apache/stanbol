@@ -17,14 +17,14 @@
   <parent>
     <groupId>eu.iksproject</groupId>
     <artifactId>eu.iksproject.kres.parent</artifactId>
-    <version>0.6-SNAPSHOT</version>
+		<version>0.7</version>
     <relativePath>../../parent/pom.xml</relativePath>
   </parent>
 
   <groupId>eu.iksproject</groupId>
   <artifactId>eu.iksproject.kres.semion.refactorer</artifactId>
   <packaging>bundle</packaging>
-  <version>0.6-SNAPSHOT</version>
+	<version>${kres-version}</version>
 
   <name>IKS KReS Semion Refactorer</name>
   <description>IKS KReS - Semion Refactorer OSGi bundle</description>
@@ -32,7 +32,7 @@
   <inceptionYear>2010</inceptionYear>
   
   <properties>
-    <kres-version>0.6-SNAPSHOT</kres-version>
+		<kres-version>0.7</kres-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -52,7 +52,7 @@
               !junit.*,
               !org.junit.*,
               !eu.iksproject.kres.semion.api.*,
-              org.slf4j.*;version=${pom.version},
+							org.slf4j.*;version=1.5.2,
               *
             </Import-Package>
 			<!-- TODO those should be bundles! -->
@@ -89,7 +89,7 @@
     <dependency>
 		<groupId>org.slf4j</groupId>
 		<artifactId>slf4j-api</artifactId>	
-        <version>1.5.6</version>
+			<version>1.5.2</version>
 		<scope>provided</scope>
 	</dependency>
 	<dependency>
@@ -201,7 +201,26 @@
 	  <artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
       <version>0.9-incubating-SNAPSHOT</version>
     </dependency>
+
     <!-- Testing deps -->
+		<dependency>
+			<groupId>eu.iksproject</groupId>
+			<artifactId>eu.iksproject.kres.manager</artifactId>
+			<version>${kres-version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>eu.iksproject</groupId>
+			<artifactId>eu.iksproject.kres.reasoners</artifactId>
+			<version>${kres-version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>eu.iksproject</groupId>
+			<artifactId>eu.iksproject.kres.semion.manager</artifactId>
+			<version>${kres-version}</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

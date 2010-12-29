@@ -9,18 +9,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.iksproject.kres.api.manager.ontology.SessionOntologySpace;
+import eu.iksproject.kres.api.manager.ontology.SpaceType;
 import eu.iksproject.kres.api.manager.ontology.UnmodifiableOntologySpaceException;
+import eu.iksproject.kres.api.storage.OntologyStorage;
 import eu.iksproject.kres.manager.io.RootOntologySource;
 import eu.iksproject.kres.manager.util.StringUtils;
 
 public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl
 		implements SessionOntologySpace {
 
-	public SessionOntologySpaceImpl(IRI scopeID) {
+	
+	public static final String SUFFIX = SpaceType.SESSION.getIRISuffix();
+//	static {
+//		SUFFIX = SpaceType.SESSION.getIRISuffix();
+//	}
+	
+	public SessionOntologySpaceImpl(IRI scopeID, OntologyStorage storage) {
 		// FIXME : sync session id with session space ID
-		super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/session-"
-				+ new Random().nextLong()), scopeID);
-		Logger log = LoggerFactory.getLogger(getClass());
+		super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/"
+				+ SpaceType.SESSION.getIRISuffix() + "-"
+				+ new Random().nextLong()), SpaceType.SESSION,storage/*, scopeID*/);
+
 		IRI iri = IRI.create(StringUtils.stripIRITerminator(getID())
 				+ "/root.owl");
 		try {
@@ -40,11 +49,12 @@ public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl
 		}
 	}
 
-	public SessionOntologySpaceImpl(IRI scopeID,
+	public SessionOntologySpaceImpl(IRI scopeID, OntologyStorage storage,
 			OWLOntologyManager ontologyManager) {
 		// FIXME : sync session id with session space ID
-		super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/session-"
-				+ new Random().nextLong()), scopeID, ontologyManager);
+		super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/"
+				+ SpaceType.SESSION.getIRISuffix() + "-"
+				+ new Random().nextLong()), SpaceType.SESSION,storage, /*scopeID,*/ ontologyManager);
 		Logger log = LoggerFactory.getLogger(getClass());
 		IRI iri = IRI.create(StringUtils.stripIRITerminator(getID())
 				+ "/root.owl");

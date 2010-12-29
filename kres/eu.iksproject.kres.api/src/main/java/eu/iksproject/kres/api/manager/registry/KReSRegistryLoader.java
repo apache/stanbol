@@ -26,7 +26,7 @@ public interface KReSRegistryLoader {
 
 	public boolean hasLibrary(Registry reg, IRI libraryID);
 
-	public boolean isPrintingLoadedOntologies();
+//	public boolean isPrintingLoadedOntologies();
 
 	public void loadLocations() throws RegistryContentException;
 	
@@ -40,5 +40,5 @@ public interface KReSRegistryLoader {
 	 */
 	public Set<Registry> loadRegistriesEager(IRI physicalIRI);
 
-	public void setPrintLoadedOntologies(boolean doPrint);
+//	public void setPrintLoadedOntologies(boolean doPrint);
 }

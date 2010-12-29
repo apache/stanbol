@@ -5,24 +5,34 @@
 
 package eu.iksproject.kres.rules.manager;
 
-import eu.iksproject.kres.api.rules.RuleStore;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import static org.junit.Assert.*;
+
 import java.io.File;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import eu.iksproject.kres.api.rules.RuleStore;
+import eu.iksproject.kres.manager.ONManager;
 
 /**
  *
  * @author elvio
  */
 public class KReSRuleStoreTest {
+
+	private Logger log = LoggerFactory.getLogger(getClass());
 
     public KReSRuleStoreTest() {
     }
@@ -37,47 +47,53 @@ public class KReSRuleStoreTest {
 
     @Before
     public void setUp() {
+		Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+		store = new KReSRuleStore(new ONManager(null, configuration),
+				configuration,
+				"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+		blankStore = new KReSRuleStore(new ONManager(null, configuration),
+				configuration, "");
     }
 
     @After
     public void tearDown() {
+		store = null;
+		blankStore = null;
     }
+
+	public RuleStore store = null, blankStore = null;
 
     @Test
     public void testKReSRuleStore(){
-        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         OWLOntology owlmodel = store.getOntology();
-        System.out.println(store.getFilePath());
-        if(owlmodel!=null){
+		log.debug("Path for default store config is "
+				+ blankStore.getFilePath());
+		assertNotNull(owlmodel);
             OWLOntologyManager owlmanager = OWLManager.createOWLOntologyManager();
+		String src = "";
             try{
-                try{
-                    assertEquals(owlmodel, owlmanager.loadOntologyFromOntologyDocument(new File("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl")));
+			src = "./src/main/resources/RuleOntology/TestKReSOntologyRules.owl";
+			assertEquals(owlmodel, owlmanager
+					.loadOntologyFromOntologyDocument(new File(src)));
                 }catch (Exception e){
-                    assertEquals(owlmodel, owlmanager.loadOntologyFromOntologyDocument(new File("./src/main/resources/RuleOntology/OffLineKReSOntologyRules.owl")));
+			try {
+				src = "./src/main/resources/RuleOntology/OffLineKReSOntologyRules.owl";
+				assertEquals(owlmodel, owlmanager
+						.loadOntologyFromOntologyDocument(new File(src)));
+			} catch (OWLOntologyCreationException ex) {
+				fail("OWLOntologyCreationException caught when loading from "
+						+ src);
                 }
-            }catch(OWLOntologyCreationException e){
-                e.printStackTrace();
-                fail("OWLOntologyCreationException catched");
-            }
-        }else{
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test fail for KReSRuleStore");
         }
     }
 
     @Test
     public void testKReSRuleStore_2(){
-        RuleStore store  = new KReSRuleStore("");
-        OWLOntology owlmodel = store.getOntology();
-        System.out.println("ECCOMI "+store.getFilePath());
-        if(!owlmodel.isEmpty()){
+		OWLOntology owlmodel = blankStore.getOntology();
+		log.debug("Path for default store config is "
+				+ blankStore.getFilePath());
+		assertNotNull(owlmodel);
             assertTrue(!owlmodel.isEmpty());
-        }else{
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test fail for KReSRuleStore");
         }
-    }
-    
 
 }

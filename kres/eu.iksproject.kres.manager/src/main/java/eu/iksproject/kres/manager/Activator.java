@@ -16,6 +16,7 @@ public class Activator implements BundleActivator {
 
 	@Override
 	public void start(BundleContext context) throws Exception {
+
 		// context.addBundleListener(new BundleListener() {
 		//			
 		// @Override
@@ -45,10 +46,10 @@ public class Activator implements BundleActivator {
 
 		Logger log = LoggerFactory.getLogger(this.getClass());
 		log.debug("KReS :: Instantiating ONM static context...");
-		if (ONManager.get() != null) {
-			log.debug("KReS :: ONM static context instantiated.");
+//		if (ONManager.get() != null) {
+//			log.debug("KReS :: ONM static context instantiated.");
 			log.info("KReS :: Ontology Network Manager set up.");
-		}
+//		}
 	}
 
 	@Override

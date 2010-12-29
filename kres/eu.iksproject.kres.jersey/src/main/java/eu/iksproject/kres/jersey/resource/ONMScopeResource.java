@@ -2,6 +2,8 @@ package eu.iksproject.kres.jersey.resource;
 
 import static javax.ws.rs.core.Response.Status.*;
 
+import java.util.Hashtable;
+
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -24,6 +26,8 @@ import javax.ws.rs.core.UriInfo;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.iksproject.kres.api.format.KReSFormat;
 import eu.iksproject.kres.api.manager.DuplicateIDException;
@@ -34,31 +38,47 @@ import eu.iksproject.kres.api.manager.ontology.OntologyScopeFactory;
 import eu.iksproject.kres.api.manager.ontology.OntologySpace;
 import eu.iksproject.kres.api.manager.ontology.ScopeRegistry;
 import eu.iksproject.kres.api.manager.ontology.UnmodifiableOntologySpaceException;
+import eu.iksproject.kres.api.storage.OntologyStoreProvider;
 import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.manager.io.OntologyRegistryIRISource;
 import eu.iksproject.kres.manager.io.RootOntologyIRISource;
+import eu.iksproject.kres.storage.provider.OntologyStorageProviderImpl;
 
 @Path("/ontology/{scopeid}")
 public class ONMScopeResource extends NavigationMixin {
+
+	private Logger log = LoggerFactory.getLogger(getClass());
 
 	/*
 	 * Placeholder for the KReSONManager to be fetched from the servlet context.
 	 */
 	protected KReSONManager onm;
+	protected OntologyStoreProvider storeProvider;
 
 	protected ServletContext servletContext;
 
 	public ONMScopeResource(@Context ServletContext servletContext) {
 		this.servletContext = servletContext;
-		onm = (KReSONManager) this.servletContext
+		this.onm = (KReSONManager) servletContext
 				.getAttribute(KReSONManager.class.getName());
-
+this.storeProvider = (OntologyStoreProvider) servletContext
+		.getAttribute(OntologyStoreProvider.class.getName());
+// Contingency code for missing components follows.
+/*
+ * FIXME! The following code is required only for the tests. This should
+ * be removed and the test should work without this code.
+ */
+if (storeProvider == null) {
+	log
+			.warn("No OntologyStoreProvider in servlet context. Instantiating manually...");
+	storeProvider = new OntologyStorageProviderImpl();
+}
 		if (onm == null) {
-			System.err
-					.println("[KReS] :: No KReS Ontology Network Manager provided by Servlet Context. Instantiating now...");
-			onm = new ONManager();
+	log
+			.warn("No KReSONManager in servlet context. Instantiating manually...");
+	onm = new ONManager(storeProvider.getActiveOntologyStorage(),
+			new Hashtable<String, Object>());
 		}
-
 	}
 
 	@DELETE
@@ -185,7 +205,8 @@ public class ONMScopeResource extends NavigationMixin {
 
 		// First thing, check the core source.
 		try {
-			coreSrc = new OntologyRegistryIRISource(IRI.create(coreRegistry));
+			coreSrc = new OntologyRegistryIRISource(IRI.create(coreRegistry),
+					onm.getOwlCacheManager(), onm.getRegistryLoader());
 		} catch (Exception e1) {
 			// Bad or not supplied core registry, try the ontology.
 			try {
@@ -203,7 +224,8 @@ public class ONMScopeResource extends NavigationMixin {
 			// ...but if it was, be prepared to throw exceptions.
 			try {
 				custSrc = new OntologyRegistryIRISource(IRI
-						.create(customRegistry));
+						.create(customRegistry), onm.getOwlCacheManager(), onm
+						.getRegistryLoader());
 			} catch (Exception e1) {
 				// Bad or not supplied custom registry, try the ontology.
 				try {

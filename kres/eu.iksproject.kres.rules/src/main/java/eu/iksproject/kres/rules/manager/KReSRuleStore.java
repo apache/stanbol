@@ -8,12 +8,17 @@ package eu.iksproject.kres.rules.manager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -34,6 +39,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.semanticweb.owlapi.util.OWLEntityRemover;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,8 +52,6 @@ import eu.iksproject.kres.api.rules.util.KReSRuleList;
 import eu.iksproject.kres.api.semion.util.RecipeList;
 import eu.iksproject.kres.rules.KReSKB;
 import eu.iksproject.kres.rules.parser.KReSRuleParser;
-import java.util.Collections;
-import org.semanticweb.owlapi.util.OWLEntityRemover;
 
 /**
  * This class creates an OWLOntology object where to store rules and recipes.
@@ -70,7 +74,7 @@ public class KReSRuleStore implements RuleStore {
 	@Property(value = "http://kres.iks-project.eu/ontology/meta/rmi.owl#")
 	public static final String RULE_ONTOLOGY_NAMESPACE = "rule.ontology.namespace";
 
-	private static Logger log = LoggerFactory.getLogger(KReSRuleStore.class);
+	private final Logger log = LoggerFactory.getLogger(getClass());
 	private OWLOntology owlmodel;
 	private String file;
 	private String alias;
@@ -84,6 +88,14 @@ public class KReSRuleStore implements RuleStore {
 	 * This construct returns KReSRuleStore object with inside an ontology where
 	 * to store the rules.
 	 * 
+	 * This default constructor is <b>only</b> intended to be used by the OSGI
+	 * environment with Service Component Runtime support.
+	 * <p>
+	 * DO NOT USE to manually create instances - the KReSRuleStore instances do
+	 * need to be configured! YOU NEED TO USE
+	 * {@link #KReSRuleStore(KReSONManager, Dictionary)} or its overloads, to
+	 * parse the configuration and then initialise the rule store if running
+	 * outside a OSGI environment.
 	 */
 	public KReSRuleStore() {
 
@@ -91,7 +103,13 @@ public class KReSRuleStore implements RuleStore {
 		 * The constructor should be empty as some issue derives from a filled
 		 * one. The old version can be invoked with KReSRuleStore(null)
 		 */
+	}
 
+	public KReSRuleStore(KReSONManager onm,
+			Dictionary<String, Object> configuration) {
+		this();
+		this.onManager = onm;
+		activate(configuration);
 	}
 
 	/**
@@ -100,7 +118,15 @@ public class KReSRuleStore implements RuleStore {
 	 * @param filepath
 	 *            {Ontology file path previously stored.}
 	 */
-	public KReSRuleStore(String filepath) {
+	public KReSRuleStore(KReSONManager onm,
+			Dictionary<String, Object> configuration, String filepath) {
+		/*
+		 * FIXME : This won't work if the activate() method is called at the end
+		 * of the constructor, like it is for other components. Constructors
+		 * should not override activate().
+		 */
+		// This recursive constructor call will also invoke activate()
+		this(onm, configuration);
 
 		if (filepath.isEmpty()) {
 			try {
@@ -138,7 +164,9 @@ public class KReSRuleStore implements RuleStore {
 				log.error(oce.getLocalizedMessage(), oce);
 				this.owlmodel = null;
 			}
+
 		}
+		// activate(configuration);
 
 	}
 
@@ -148,7 +176,15 @@ public class KReSRuleStore implements RuleStore {
 	 * @param owl
 	 *            {OWLOntology object contains rules and recipe}
 	 */
-	public KReSRuleStore(OWLOntology owl) {
+	public KReSRuleStore(KReSONManager onm,
+			Dictionary<String, Object> configuration, OWLOntology owl) {
+		/*
+		 * FIXME : This won't work if the activate() method is called at the end
+		 * of the constructor, like it is for other components. Constructors
+		 * should not override activate().
+		 */
+		// This recursive constructor call will also invoke activate()
+		this(onm, configuration);
 
 		try {
 			this.owlmodel = owl;
@@ -156,6 +192,7 @@ public class KReSRuleStore implements RuleStore {
 			log.error(e.getLocalizedMessage(), e);
 			this.owlmodel = null;
 		}
+		// activate(configuration);
 	}
 
 	/**
@@ -180,12 +217,28 @@ public class KReSRuleStore implements RuleStore {
 		this.owlmodel = owl;
 	}
 
-	protected void activate(ComponentContext context) {
-		log.info("Activated KReS Rule Store");
+	/**
+	 * Used to configure an instance within an OSGi container.
+	 * 
+	 * @throws IOException
+	 */
+	@SuppressWarnings("unchecked")
+	@Activate
+	protected void activate(ComponentContext context) throws IOException {
+		log.info("in " + KReSRuleStore.class + " activate with context "
+				+ context);
+		if (context == null) {
+			throw new IllegalStateException("No valid" + ComponentContext.class
+					+ " parsed in activate!");
+		}
+		activate((Dictionary<String, Object>) context.getProperties());
+	}
 
-		this.file = (String) context.getProperties().get(RULE_ONTOLOGY);
-		this.ruleOntologyNS = (String) context.getProperties().get(
-				RULE_ONTOLOGY_NAMESPACE);
+	protected void activate(Dictionary<String, Object> configuration) {
+
+		this.file = (String) configuration.get(RULE_ONTOLOGY);
+		this.ruleOntologyNS = (String) configuration
+				.get(RULE_ONTOLOGY_NAMESPACE);
 
 		if (file == null || file.equals("")) {
 			// InputStream ontologyStream =
@@ -239,8 +292,10 @@ public class KReSRuleStore implements RuleStore {
 
 	}
 
+	@Deactivate
 	protected void deactivate(ComponentContext context) {
-		log.info("Deactivated KReS Rule Store");
+		log.info("in " + KReSRuleStore.class + " deactivate with context "
+				+ context);
 	}
 
 	@Override
@@ -445,7 +500,9 @@ public class KReSRuleStore implements RuleStore {
 	@Override
 	public boolean addRecipe(IRI recipeIRI, String recipeDescription) {
 		boolean ok = false;
-		log.debug("Adding recipe "+recipeIRI+" ["+recipeDescription+"]",this);
+		log.debug(
+				"Adding recipe " + recipeIRI + " [" + recipeDescription + "]",
+				this);
 		OWLOntologyManager owlmanager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = OWLManager.getOWLDataFactory();
 
@@ -483,7 +540,8 @@ public class KReSRuleStore implements RuleStore {
 			}
 
 		} else {
-			log.error("The recipe with name and the set of rules cannot be empity or null.");
+			log
+					.error("The recipe with name and the set of rules cannot be empity or null.");
 			ok = false;
 			return (ok);
 		}
@@ -592,7 +650,8 @@ public class KReSRuleStore implements RuleStore {
 
 	@Override
 	public void createRecipe(String recipeID, String rulesInKReSSyntax) {
-		log.debug("Create recipe " + recipeID + " with rules in kres sytnax "+rulesInKReSSyntax,this);
+		log.debug("Create recipe " + recipeID + " with rules in kres sytnax "
+				+ rulesInKReSSyntax, this);
 		KReSKB kb = KReSRuleParser.parse(rulesInKReSSyntax);
 		KReSRuleList rules = kb.getkReSRuleList();
 
@@ -617,13 +676,10 @@ public class KReSRuleStore implements RuleStore {
 		
 	}
 
-
 	private KReSRuleList generateKnowledgeBase(String kReSRulesInKReSSyntax) {
 		KReSKB kb = KReSRuleParser.parse(kReSRulesInKReSSyntax);
 		return kb.getkReSRuleList();
 	}
-
-
 
         @Override
         public boolean removeRecipe(Recipe recipe) {
@@ -632,10 +688,12 @@ public class KReSRuleStore implements RuleStore {
             OWLDataFactory factory = mng.getOWLDataFactory();
 
             //Create the remover to be used to delete the recipe from the ontology.
-            OWLEntityRemover remover = new OWLEntityRemover(mng, Collections.singleton(owlmodel));
+		OWLEntityRemover remover = new OWLEntityRemover(mng, Collections
+				.singleton(owlmodel));
 
             //Create the recipe axiom
-            OWLNamedIndividual ontoind = factory.getOWLNamedIndividual(recipe.getRecipeID());
+		OWLNamedIndividual ontoind = factory.getOWLNamedIndividual(recipe
+				.getRecipeID());
 
             //Remove the recipe
             ontoind.accept(remover);
@@ -670,10 +728,12 @@ public class KReSRuleStore implements RuleStore {
             String ruleNS = "http://kres.iks-project.eu/ontology/meta/rmi.owl#";
 
             //Create the remover to be used to delete the rule from the ontology.
-            OWLEntityRemover remover = new OWLEntityRemover(mng, Collections.singleton(owlmodel));
+		OWLEntityRemover remover = new OWLEntityRemover(mng, Collections
+				.singleton(owlmodel));
 
             //Create the rule axiom
-            OWLNamedIndividual ontoind = factory.getOWLNamedIndividual(IRI.create((ruleNS+rule.getRuleName())));
+		OWLNamedIndividual ontoind = factory.getOWLNamedIndividual(IRI
+				.create((ruleNS + rule.getRuleName())));
 
             //Remove the rule
             ontoind.accept(remover);
@@ -681,12 +741,12 @@ public class KReSRuleStore implements RuleStore {
             remover.reset();
 
             //Check if the recipe ahs been removed
-            if(owlmodel.containsIndividualInSignature(IRI.create((ruleNS+rule.getRuleName()))))
+		if (owlmodel.containsIndividualInSignature(IRI.create((ruleNS + rule
+				.getRuleName()))))
                 return false;
             else
                 return true;
 
     }
 
-        
 }

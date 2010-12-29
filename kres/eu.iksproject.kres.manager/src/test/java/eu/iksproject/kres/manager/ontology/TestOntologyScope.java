@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Hashtable;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -14,6 +16,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import eu.iksproject.kres.api.manager.DuplicateIDException;
+import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.api.manager.ontology.OntologyScopeFactory;
@@ -38,6 +41,8 @@ public class TestOntologyScope {
 	 */
 	private static OntologyScope blankScope;
 
+	private static KReSONManager onm;
+	
 	private static OntologyScopeFactory factory = null;
 
 	private static OntologyInputSource src1 = null, src2 = null;
@@ -50,7 +55,9 @@ public class TestOntologyScope {
 
 	@BeforeClass
 	public static void setup() {
-		factory = ONManager.get().getOntologyScopeFactory();
+		// An ONManager with no store and default settings
+		onm = new ONManager(null, new Hashtable<String, Object>());
+		factory = onm.getOntologyScopeFactory();
 		if (factory == null)
 			fail("Could not instantiate ontology space factory");
 		OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
@@ -139,9 +146,9 @@ public class TestOntologyScope {
 
 	@Test
 	public void testScopesRendering() {
-		OntologyScopeFactoryImpl scf = new OntologyScopeFactoryImpl();
+		ScopeRegistry reg = onm.getScopeRegistry();
+		OntologyScopeFactoryImpl scf = new OntologyScopeFactoryImpl(reg,onm.getOntologySpaceFactory());
 		OntologyScope scope = null, scope2 = null;
-		ScopeRegistry reg = ONManager.get().getScopeRegistry();
 		try {
 			scope = scf.createOntologyScope(scopeIri1, src1, src2);
 			scope2 = scf.createOntologyScope(scopeIri2, src2);

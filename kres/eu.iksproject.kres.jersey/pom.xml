@@ -7,13 +7,13 @@
 	<parent>
 		<groupId>eu.iksproject</groupId>
 		<artifactId>eu.iksproject.kres.parent</artifactId>
-		<version>0.6-SNAPSHOT</version>
+		<version>0.7</version>
 		<relativePath>../parent/pom.xml</relativePath>
 	</parent>
 
 	<groupId>eu.iksproject</groupId>
 	<artifactId>eu.iksproject.kres.jersey</artifactId>
-	<version>0.6-SNAPSHOT</version>
+	<version>${kres-version}</version>
 	<packaging>bundle</packaging>
 
 	<name>IKS KReS Jersey JAX-RS API and front-end</name>
@@ -22,7 +22,8 @@
 	<properties>
 		<jersey-version>1.1.5.1</jersey-version>
 		<pax-exam-version>1.2.0</pax-exam-version>
-		<kres-version>0.6-SNAPSHOT</kres-version>
+		<kres-version>0.7</kres-version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<dependencies>
@@ -251,6 +252,12 @@
             <version>${kres-version}</version>
             <scope>provided</scope>
 	    </dependency>
+		<dependency>
+			<groupId>eu.iksproject</groupId>
+			<artifactId>eu.iksproject.kres.storage.provider</artifactId>
+			<version>${kres-version}</version>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>com.hp.hpl.jena</groupId>
 			<artifactId>jena</artifactId>

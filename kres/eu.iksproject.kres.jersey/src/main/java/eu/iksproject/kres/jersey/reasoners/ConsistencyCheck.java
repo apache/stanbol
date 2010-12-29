@@ -2,6 +2,7 @@ package eu.iksproject.kres.jersey.reasoners;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +15,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -44,6 +44,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 
+import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.manager.OWLDuplicateSafeLoader;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.api.manager.ontology.OntologySpace;
@@ -53,6 +54,7 @@ import eu.iksproject.kres.api.rules.KReSRule;
 import eu.iksproject.kres.api.rules.NoSuchRecipeException;
 import eu.iksproject.kres.api.rules.RuleStore;
 import eu.iksproject.kres.api.rules.util.KReSRuleList;
+import eu.iksproject.kres.api.storage.OntologyStoreProvider;
 import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.reasoners.KReSCreateReasoner;
 import eu.iksproject.kres.reasoners.KReSRunReasoner;
@@ -60,6 +62,7 @@ import eu.iksproject.kres.reasoners.KReSRunRules;
 import eu.iksproject.kres.rules.KReSKB;
 import eu.iksproject.kres.rules.manager.KReSRuleStore;
 import eu.iksproject.kres.rules.parser.KReSRuleParser;
+import eu.iksproject.kres.storage.provider.OntologyStorageProviderImpl;
 
 /**
  * This class implements the REST interface for the /check-consistency service
@@ -75,7 +78,10 @@ public class ConsistencyCheck {
 	private OWLOntology scopeowl;
 
 	private final OWLDuplicateSafeLoader loader = new OWLDuplicateSafeLoader();
-	private final Logger log = LoggerFactory.getLogger(getClass());
+	protected KReSONManager onm;
+	protected OntologyStoreProvider storeProvider;
+
+	private Logger log = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * The constructor.
@@ -85,24 +91,40 @@ public class ConsistencyCheck {
 	 */
 	public ConsistencyCheck(@Context ServletContext servletContext) {
 
-		/**
-		 * Retrieve the rule store
-		 */
+		// Retrieve the rule store
 		this.kresRuleStore = (RuleStore) servletContext
 				.getAttribute(RuleStore.class.getName());
-		/**
+		// Retrieve the ontology network manager
+		this.onm = (KReSONManager) servletContext
+				.getAttribute(KReSONManager.class.getName());
+		this.storeProvider = (OntologyStoreProvider) servletContext
+				.getAttribute(OntologyStoreProvider.class.getName());
+		// Contingency code for missing components follows.
+		/*
 		 * FIXME! The following code is required only for the tests. This should
 		 * be removed and the test should work without this code.
 		 */
+		if (storeProvider == null) {
+			log
+					.warn("No OntologyStoreProvider in servlet context. Instantiating manually...");
+			storeProvider = new OntologyStorageProviderImpl();
+		}
+		if (onm == null) {
+			log
+					.warn("No KReSONManager in servlet context. Instantiating manually...");
+			onm = new ONManager(storeProvider.getActiveOntologyStorage(),
+					new Hashtable<String, Object>());
+		}
 		if (kresRuleStore == null) {
 			log
-					.warn(
-							"KReSRuleStore with stored rules and recipes is missing in ServletContext. A new instance has been created.",
-							this);
-			this.kresRuleStore = new KReSRuleStore("");
-			log.info("Configuration file loaded from: "
+					.warn("No KReSRuleStore with stored rules and recipes found in servlet context. Instantiating manually with default values...");
+			this.kresRuleStore = new KReSRuleStore(onm,
+					new Hashtable<String, Object>(), "");
+			log
+					.debug("PATH TO OWL FILE LOADED: "
 					+ kresRuleStore.getFilePath());
 		}
+
 	}
 
 	/**
@@ -115,7 +137,9 @@ public class ConsistencyCheck {
 	private Model fromRecipeToModel(OWLOntology owl)
 			throws NoSuchRecipeException, OWLOntologyCreationException {
 
-		RuleStore store = new KReSRuleStore(owl);
+		// FIXME: why the heck is this method re-instantiating a rule store?!?
+		RuleStore store = new KReSRuleStore(onm,
+				new Hashtable<String, Object>(), owl);
 		Model jenamodel = ModelFactory.createDefaultModel();
 
 		OWLDataFactory factory = owl.getOWLOntologyManager()
@@ -199,7 +223,10 @@ public class ConsistencyCheck {
 				log.debug("Some ontology import failed. Cannot continue.", uu);
 				return Response.status(Status.PRECONDITION_FAILED).build();
 			} catch (Exception ee) {
-				log.error("Cannot fetch the ontology. Some error occurred. Cannot continue.", ee);
+				log
+						.error(
+								"Cannot fetch the ontology. Some error occurred. Cannot continue.",
+								ee);
 				return Response.status(Status.NOT_FOUND).build();
 			}
 			KReSCreateReasoner newreasoner = new KReSCreateReasoner(owl);
@@ -312,7 +339,7 @@ public class ConsistencyCheck {
 			if ((scope != null) && (session == null))
 				try {
 					IRI iri = IRI.create(scope);
-					ScopeRegistry reg = ONManager.get().getScopeRegistry();
+					ScopeRegistry reg = onm.getScopeRegistry();
 					OntologyScope ontoscope = reg.getScope(iri);
 					Iterator<OWLOntology> importscope = ontoscope
 							.getCustomSpace().getOntologies().iterator();
@@ -365,7 +392,7 @@ public class ConsistencyCheck {
 			if ((session != null) && (scope != null))
 				try {
 					IRI iri = IRI.create(scope);
-					ScopeRegistry reg = ONManager.get().getScopeRegistry();
+					ScopeRegistry reg = onm.getScopeRegistry();
 					OntologyScope ontoscope = reg.getScope(iri);
 					SessionOntologySpace sos = ontoscope.getSessionSpace(IRI
 							.create(session));

@@ -7,14 +7,14 @@
 	<parent>
 		<groupId>eu.iksproject</groupId>
 		<artifactId>eu.iksproject.kres.parent</artifactId>
-		<version>0.6-SNAPSHOT</version>
+		<version>0.7</version>
 		<relativePath>../parent/pom.xml</relativePath>
 	</parent>
 
 	<groupId>eu.iksproject</groupId>
 	<artifactId>eu.iksproject.kres.storage.provider</artifactId>
 	<packaging>bundle</packaging>
-	<version>0.6-SNAPSHOT</version>
+	<version>${kres-version}</version>
 
 	<name>IKS KReS Storage Provider</name>
 	<description>IKS KReS Storage Provider</description>
@@ -23,7 +23,7 @@
 
 	<properties>
 		<jersey-version>1.1.5.1</jersey-version>
-		<kres-version>0.6-SNAPSHOT</kres-version>
+		<kres-version>0.7</kres-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 

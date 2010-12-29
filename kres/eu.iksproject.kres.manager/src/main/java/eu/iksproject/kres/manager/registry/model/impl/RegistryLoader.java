@@ -45,6 +45,7 @@ import org.stlab.xd.registry.models.RegistryOntology;
 import org.stlab.xd.utils.RDFSLabelGetter;
 import org.stlab.xd.vocabulary.CODOVocabulary;
 
+import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.manager.registry.KReSRegistryLoader;
 import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.manager.registry.cache.ODPRegistryCacheException;
@@ -56,22 +57,21 @@ public class RegistryLoader implements KReSRegistryLoader {
 
 	private final OWLClass cRegistryLibrary;
 
-	private Logger logger = LoggerFactory.getLogger(getClass());
+	private KReSONManager onm;
 
-	private boolean doPrint = false;
+	private Logger log = LoggerFactory.getLogger(getClass());
 
 	private final OWLObjectProperty isPartOf, isOntologyOf;
 
 	private final IRI mergedOntologyIRI = IRI
 			.create(CODOVocabulary.REPOSITORY_MERGED_ONTOLOGY);
 
-	private OWLOntologyLoaderListener printer = new OntologyLoaderPrinter();
-
 	private Map<URI, OWLOntology> registryOntologiesCache = new HashMap<URI, OWLOntology>();
 
 	/**
 	 */
-	public RegistryLoader() {
+	public RegistryLoader(KReSONManager onm) {
+		this.onm = onm;
 		OWLDataFactory factory = OWLManager.getOWLDataFactory();
 		cRegistryLibrary = factory.getOWLClass(IRI
 				.create(CODOVocabulary.CODD_OntologyLibrary));
@@ -93,7 +93,7 @@ public class RegistryLoader implements KReSRegistryLoader {
 					result.addAll(gatherOntologies(item, manager,
 							recurseRegistries));
 				} catch (OWLOntologyCreationException e) {
-					logger
+					log
 							.warn(
 									"KReS :: [NONFATAL] Could not gather ontologies for registry "
 											+ registryItem.getName()
@@ -110,7 +110,7 @@ public class RegistryLoader implements KReSRegistryLoader {
 			} catch (OWLOntologyCreationIOException ex) {
 				// Che ce potemo fa'?
 			} catch (URISyntaxException e) {
-				logger.warn("KReS :: [NONFATAL] Malformed URI for ontology "
+				log.warn("KReS :: [NONFATAL] Malformed URI for ontology "
 						+ registryItem.getName() + ". Skipping.", e);
 			}
 		else if (registryItem.isLibrary())
@@ -142,7 +142,7 @@ public class RegistryLoader implements KReSRegistryLoader {
 		try {
 			return getMergedOntology(registryLocation.toURI().toURL());
 		} catch (MalformedURLException e) {
-			logger.warn(
+			log.warn(
 					"KReS :: [NONFATAL] Malformed URI for merged ontology from registry "
 							+ registryLocation, e);
 			return null;
@@ -254,9 +254,8 @@ public class RegistryLoader implements KReSRegistryLoader {
 			return OWLManager.createOWLOntologyManager()
 					.loadOntologyFromOntologyDocument(IRI.create(location));
 		} catch (OWLOntologyCreationException e) {
-			LoggerFactory.getLogger(getClass()).error(
-					"KReS :: Registry loader failed to load ontology at "+location
-							, e);
+			log.error("KReS :: Registry loader failed to load ontology at "
+					+ location, e);
 			return null;
 		}
 	}
@@ -337,16 +336,14 @@ public class RegistryLoader implements KReSRegistryLoader {
 			} catch (Exception e) {
 				if (registry1 != null) {
 					registry1.setError(e.getLocalizedMessage());
-					LoggerFactory.getLogger(getClass()).error(
-							"KReS :: Error on ODP registry: "
+					log.error("KReS :: Error on ODP registry: "
 									+ registry1.getName(), e);
 				}
 			}
 			if (registry1 != null)
 				registries.add(registry1);
 			else
-				LoggerFactory.getLogger(getClass()).error(
-						"KReS :: Cannot load ODP registry: " + regs[i]);
+				log.error("KReS :: Cannot load ODP registry: " + regs[i]);
 		}
 		return registries;
 	}
@@ -387,7 +384,7 @@ public class RegistryLoader implements KReSRegistryLoader {
 				}
 			}
 		} catch (MalformedURLException e) {
-			LoggerFactory.getLogger(getClass()).error(
+			log.error(
 					"KReS :: MalformedURLException caught while getting tree for "
 							+ i.getIRI(), e);
 
@@ -427,43 +424,16 @@ public class RegistryLoader implements KReSRegistryLoader {
 		return (ontologyClass.getIndividuals(ontology).contains(indy));
 	}
 
-	public boolean isPrintingLoadedOntologies() {
-		return doPrint;
-	}
-
 	public void loadLocations() throws RegistryContentException {
-		// String jobDescription = "ODP Registry updating...";
 
-		// Job initViewJob = new Job(jobDescription) {
-		// private void checkCanceled(IProgressMonitor monitor)
-		// throws InterruptedException {
-		// if (monitor.isCanceled())
-		// throw new InterruptedException(
-		// "Registry updating has been interrupted by the user.");
-		// }
-		//
-		// @Override
-		// protected IStatus run(IProgressMonitor monitor) {
 		try {
-			// checkCanceled(monitor);
-
-			// initialize();
-			// checkCanceled(monitor);
-
-			Logger log = LoggerFactory.getLogger(getClass());
 
 			registryOntologiesCache.clear();
 			List<Registry> registries = getRegistries();
-			// checkCanceled(monitor);
 
 			int regsize = registries.size();
-			// int tasks = (regsize * 2) + 5;
-			// monitor.beginTask("Loading registries", tasks);
-			// int worked = 0;
-			// monitor.worked(worked);
 			int c = 0;
 			for (Registry current : registries) {
-				// checkCanceled(monitor);
 				c++;
 				log.debug("Loading " + current.toString() + " [" + c + "/"
 						+ regsize + "]");
@@ -471,74 +441,34 @@ public class RegistryLoader implements KReSRegistryLoader {
 						.toURI())) {
 					try {
 						log.debug("Fetching: " + current.getURL().toURI());
-						// ODPRegistryCacheManager.getManager()
-						// .addOntologyLoaderListener(
-						// new OWLOntologyLoaderListener() {
-						//
-						// @Override
-						// public void finishedLoadingOntology(
-						// LoadingFinishedEvent event) {
-						// System.out
-						// .println("Finished loading: "
-						// + event
-						// .getDocumentIRI()
-						// + " Error? "
-						// + event
-						// .getException());
-						// }
-						//
-						// @Override
-						// public void startedLoadingOntology(
-						// LoadingStartedEvent event) {
-						// System.out
-						// .println("Start loading: "
-						// + event
-						// .getDocumentIRI()
-						// + " ");
-						// }
-						//
-						// });
 						registryOntologiesCache.put(current.getURL().toURI(),
 								ODPRegistryCacheManager.getOntology(current
 										.getURL().toURI()));
 					} catch (URIUnresolvableException e) {
-						LoggerFactory.getLogger(getClass()).error(
-								"KReS :: could not resolve URI "
+						log.error("KReS :: could not resolve URI "
 										+ current.getURL().toURI(), e);
 						registryOntologiesCache.put(current.getURL().toURI(),
 								null);
 					} catch (ODPRegistryCacheException e) {
-						LoggerFactory.getLogger(getClass()).error(
-								"KReS :: failed to cache ontology "
+						log.error("KReS :: failed to cache ontology "
 										+ current.getURL().toURI(), e);
 						registryOntologiesCache.put(current.getURL().toURI(),
 								null);
 					}
 				}
-				// worked++;
-				// monitor.worked(worked);
-				// checkCanceled(monitor);
 			}
 			c = 0;
 			for (Registry registry : registries) {
-				// checkCanceled(monitor);
 				c++;
-				// monitor.setTaskName("Setup: " + registry.getName()
-				// + " [" + c + "/" + regsize + "]");
 				try {
 					registry = setupRegistry(registry);
 				} catch (RegistryContentException e) {
 					registry.setError(" [Unable to load from location "
 							+ registry.getURL().toString() + "]");
 				}
-				// invisibleRoot.addChild(registry);
-				// worked++;
-				// monitor.worked(worked);
-				// checkCanceled(monitor);
 			}
 		} catch (Throwable th) {
-			LoggerFactory
-					.getLogger(getClass())
+			log
 					.error(
 							"KreS :: Exception occurred while trying to get registry locations.",
 							th);
@@ -555,7 +485,7 @@ public class RegistryLoader implements KReSRegistryLoader {
 	public Set<Registry> loadRegistriesEager(IRI physicalIRI) {
 
 		Set<Registry> results = new HashSet<Registry>();
-		OWLOntologyManager mgr = ONManager.get().getOwlCacheManager();// getManager();
+		OWLOntologyManager mgr = onm.getOwlCacheManager();// getManager();
 
 		try {
 			OWLOntology ontology = mgr.loadOntology(physicalIRI);
@@ -570,10 +500,8 @@ public class RegistryLoader implements KReSRegistryLoader {
 					} catch (MalformedURLException e) {
 						// Why should a well-formed IRI be a malformed URL
 						// anyway ?
-						LoggerFactory.getLogger(getClass()).warn(
-								"KReS :: ontology document IRI " + physicalIRI
-										+ " matches a malformed URI pattern.",
-								e);
+						log.warn("KReS :: ontology document IRI " + physicalIRI
+								+ " matches a malformed URI pattern.", e);
 					}
 					// Find the ontologies in this registry
 					// If this is individual is not "ontology of" or "part of",
@@ -588,25 +516,15 @@ public class RegistryLoader implements KReSRegistryLoader {
 					results.add(registry);
 				}
 		} catch (OWLOntologyAlreadyExistsException e) {
-			LoggerFactory.getLogger(getClass()).warn(
-					"KReS :: ontology " + e.getOntologyID()
+			log.warn("KReS :: ontology " + e.getOntologyID()
 							+ " exists and will not be reloaded.", e);
 			// Do nothing. Existing ontologies are fine.
 		} catch (OWLOntologyCreationException e) {
-			LoggerFactory.getLogger(getClass()).error(
-					"KReS :: Could not load ontology " + physicalIRI + " .", e);
+			log.error("KReS :: Could not load ontology " + physicalIRI + " .",
+					e);
 		} finally {
 		}
 		return results;
-	}
-
-	public void setPrintLoadedOntologies(boolean doPrint) {
-		OWLOntologyManager manager = ONManager.get().getOwlCacheManager();
-		if (doPrint)
-			manager.addOntologyLoaderListener(printer);
-		else
-			manager.removeOntologyLoaderListener(printer);
-		this.doPrint = doPrint;
 	}
 
 	/**

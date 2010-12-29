@@ -2,6 +2,7 @@ package eu.iksproject.kres.manager.session;
 
 import org.semanticweb.owlapi.model.IRI;
 
+import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.api.manager.ontology.OntologySpaceFactory;
 import eu.iksproject.kres.api.manager.session.KReSSession;
@@ -11,23 +12,18 @@ import eu.iksproject.kres.manager.ONManager;
 
 public class ScopeSessionSynchronizer implements SessionListener {
 
-	private static ScopeSessionSynchronizer me = null;
+	private KReSONManager manager;
 
-	public static ScopeSessionSynchronizer get() {
-		if (me == null)
-			me = new ScopeSessionSynchronizer();
-		return me;
-	}
-
-	private ScopeSessionSynchronizer() {
+	public ScopeSessionSynchronizer(KReSONManager manager) {
 		// WARN do not use ONManager here, as it will most probably be
 		// instantiated by it.
+		this.manager = manager;
 	}
 
 	private void addSessionSpaces(IRI sessionId) {
-		OntologySpaceFactory factory = ONManager.get()
+		OntologySpaceFactory factory = manager
 				.getOntologySpaceFactory();
-		for (OntologyScope scope : ONManager.get().getScopeRegistry()
+		for (OntologyScope scope : manager.getScopeRegistry()
 				.getActiveScopes()) {
 			scope.addSessionSpace(factory.createSessionOntologySpace(scope
 					.getID()), sessionId);

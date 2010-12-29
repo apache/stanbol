@@ -1,35 +1,40 @@
 package eu.iksproject.kres.semion.reengineer.xml;
 
-import static org.junit.Assert.fail;
-
 import java.io.InputStream;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
+import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.semion.DataSource;
-import eu.iksproject.kres.api.semion.ReengineeringException;
+import eu.iksproject.kres.api.semion.SemionReengineer;
 import eu.iksproject.kres.api.semion.util.ReengineerType;
-
+import eu.iksproject.kres.manager.ONManager;
+import eu.iksproject.kres.semion.manager.SemionManagerImpl;
 
 public class XMLReengineerTest {
 	
+	static DataSource dataSource;
 	static String graphNS;
 	static IRI outputIRI;
-	static DataSource dataSource;
+	static SemionReengineer xmlExtractor;
 	
 	@BeforeClass
-	public static void setup(){
+	public static void setupClass() {
 		graphNS = "http://kres.iks-project.eu/reengineering/test";
 		outputIRI = IRI.create(graphNS);
 		dataSource = new DataSource() {
 			
 			@Override
-			public String getID() {
-				// TODO Auto-generated method stub
-				return null;
+			public Object getDataSource() {
+				InputStream xmlStream = this.getClass().getResourceAsStream(
+						"/META-INF/test/weather.xml");
+				return xmlStream;
 			}
 			
 			@Override
@@ -38,39 +43,42 @@ public class XMLReengineerTest {
 			}
 			
 			@Override
-			public Object getDataSource() {
-				InputStream xmlStream = this.getClass().getResourceAsStream("/META-INF/test/weather.xml");
-				return xmlStream;
+			public String getID() {
+				// TODO Auto-generated method stub
+				return null;
 			}
 		};
 	}
 	
 	@Test
-	public void scemaReengineeringTest(){
-		XMLExtractor xmlExtractor = new XMLExtractor();
+	public void dataReengineeringTest() throws Exception {
+		OWLOntology schemaOntology = xmlExtractor.schemaReengineering(graphNS,
+				outputIRI, dataSource);
+		xmlExtractor.dataReengineering(graphNS, outputIRI, dataSource,
+				schemaOntology);
+	}
+	
+	@Test
+	public void reengineeringTest() throws Exception {
+		xmlExtractor.reengineering(graphNS, outputIRI, dataSource);
+	}
+	
+	@Test
+	public void schemaReengineeringTest() throws Exception {
 		xmlExtractor.schemaReengineering(graphNS, outputIRI, dataSource);
-	}
-	
-	@Test
-	public void dataReengineeringTest(){
-		XMLExtractor xmlExtractor = new XMLExtractor();
-		OWLOntology schemaOntology = xmlExtractor.schemaReengineering(graphNS, outputIRI, dataSource);
-		
-		try {
-			xmlExtractor.dataReengineering(graphNS, outputIRI, dataSource, schemaOntology);
-		} catch (ReengineeringException e) {
-			fail("Some errors occur with dataReengineeringTest of XMLExtractor.");
 		}
+
+	@Before
+	public void setup() {
+		Dictionary<String, Object> emptyConf = new Hashtable<String, Object>();
+		KReSONManager onManager = new ONManager(null, emptyConf);
+		xmlExtractor = new XMLExtractor(new SemionManagerImpl(onManager),
+				onManager, emptyConf);
 	}
-	
-	@Test
-	public void reengineeringTest(){
-		XMLExtractor xmlExtractor = new XMLExtractor();
-		try {
-			xmlExtractor.reengineering(graphNS, outputIRI, dataSource);
-		} catch (ReengineeringException e) {
-			fail("Some errors occur with reengineeringTest of XMLExtractor.");
-		}
+
+	@Before
+	public void tearDown() {
+		xmlExtractor = null;
 	}
 
 }

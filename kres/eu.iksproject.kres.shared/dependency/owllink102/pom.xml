@@ -6,16 +6,21 @@
     <parent>
     	<groupId>eu.iksproject</groupId>
     	<artifactId>eu.iksproject.kres.parent</artifactId>
-    	<version>0.6-SNAPSHOT</version>
+		<version>0.7</version>
     	<relativePath>../parent</relativePath>
   	</parent>
 
-    
     <groupId>eu.iksproject</groupId>
     <artifactId>eu.iksproject.kres.shared.dependency.owllink</artifactId>
-    <version>0.6-SNAPSHOT</version>
+	<version>${kres-version}</version>
     <packaging>bundle</packaging>
     <name>IKS KReS owl-link OSGi Bundle</name>
+
+	<properties>
+		<kres-version>0.7</kres-version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -137,7 +142,8 @@
                                 <configuration>
                                     <tasks>
                                         <property name="plugins" refid="maven.runtime.classpath"/>
-                                        <pathconvert pathsep=" " dirsep="/" property="project.build.url">
+										<pathconvert pathsep=" " dirsep="/"
+											property="project.build.url">
                                             <path path="${project.build.directory}"/>
                                         </pathconvert>
                                         <pathconvert property="plugins.jars" pathsep=":">
@@ -152,23 +158,28 @@
                                             <mapper>
                                                 <chainedmapper>
                                                     <flattenmapper/>
-                                                    <globmapper from="*" to="file:modules/*" casesensitive="no"/>
+													<globmapper from="*" to="file:modules/*"
+														casesensitive="no" />
                                                 </chainedmapper>
                                             </mapper>
                                         </pathconvert>
-                                        <makeurl property="main.bundle.url" file="${project.build.directory}/${project.artifactId}-${project.version}.jar"/>
+										<makeurl property="main.bundle.url"
+											file="${project.build.directory}/${project.artifactId}-${project.version}.jar" />
                                         <echo file="${project.build.directory}/run.properties">
                                             felix.auto.install=${urls}
                                             felix.auto.start=${main.bundle.url}
                                             org.osgi.framework.storage=${project.build.url}/felix-cache
                                             org.osgi.framework.bootdelegation=*
                                         </echo>
-                                        <replace file="${project.build.directory}/run.properties" token="\" value="\\"/>
+										<replace file="${project.build.directory}/run.properties"
+											token="\" value="\\" />
                                         <echo file="${project.build.directory}/config.properties">
                                             felix.auto.install="${bundles}"
                                             felix.auto.start=file:modules/${project.artifactId}-${project.version}.jar
                                         </echo>
-                                        <copy file="${maven.dependency.org.apache.felix.org.apache.felix.main.jar.path}" tofile="${project.build.directory}/felix.jar"/>
+										<copy
+											file="${maven.dependency.org.apache.felix.org.apache.felix.main.jar.path}"
+											tofile="${project.build.directory}/felix.jar" />
                                     </tasks>
                                 </configuration>
                             </execution>
@@ -198,7 +209,5 @@
             </build>
         </profile>
     </profiles>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+
 </project>

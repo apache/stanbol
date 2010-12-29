@@ -7,14 +7,14 @@
 	<parent>
 		<groupId>eu.iksproject</groupId>
 		<artifactId>eu.iksproject.kres.parent</artifactId>
-		<version>0.6-SNAPSHOT</version>
+		<version>0.7</version>
 		<relativePath>../parent/pom.xml</relativePath>
 	</parent>
 
 	<groupId>eu.iksproject</groupId>
 	<artifactId>eu.iksproject.kres.api</artifactId>
 	<packaging>bundle</packaging>
-	<version>0.6-SNAPSHOT</version>
+	<version>${kres-version}</version>
 
 	<name>IKS KReS API</name>
 	<description>KReS API</description>
@@ -23,7 +23,7 @@
 
 	<properties>
 		<jersey-version>1.1.5.1</jersey-version>
-		<kres-version>0.6-SNAPSHOT</kres-version>
+		<kres-version>0.7</kres-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -36,7 +36,7 @@
 				<configuration>
 					<instructions>
 						<Export-Package>
-							eu.iksproject.kres.api.*;version=${pom.version},
+							eu.iksproject.kres.api.*;version=${kres-version},
 							com.hp.hpl.jena.*,
 							com.ibm.icu.*,
 							com.sun.jersey.*,

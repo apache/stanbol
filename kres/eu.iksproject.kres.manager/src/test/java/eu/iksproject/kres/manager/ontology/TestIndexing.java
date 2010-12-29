@@ -2,6 +2,8 @@ package eu.iksproject.kres.manager.ontology;
 
 import static org.junit.Assert.*;
 
+import java.util.Hashtable;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -11,6 +13,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import eu.iksproject.kres.api.manager.DuplicateIDException;
+import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.manager.ontology.OntologyIndex;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.api.manager.ontology.OntologySpaceModificationException;
@@ -23,7 +26,7 @@ import eu.iksproject.kres.manager.util.OntologyUtils;
 
 public class TestIndexing {
 
-	private static ONManager context;
+	private static KReSONManager onm;
 
 	private static OWLOntologyManager mgr = OWLManager
 			.createOWLOntologyManager();
@@ -44,9 +47,8 @@ public class TestIndexing {
 
 	@BeforeClass
 	public static void setup() {
-		context = ONManager.get();
-		// Uncomment next line for verbose output.
-		// context.getRegistryLoader().setPrintLoadedOntologies(true);
+		// An ONManager with no store and default settings
+		onm = new ONManager(null, new Hashtable<String, Object>());
 
 		// Since it is registered, this scope must be unique, or subsequent
 		// tests will fail on duplicate ID exceptions!
@@ -62,12 +64,12 @@ public class TestIndexing {
 		// The factory call also invokes loadRegistriesEager() and
 		// gatherOntologies() so no need to test them individually.
 		try {
-			scope = context.getOntologyScopeFactory().createOntologyScope(
+			scope = onm.getOntologyScopeFactory().createOntologyScope(
 					scopeIri,
-					new OntologyRegistryIRISource(testRegistryIri, null
+					new OntologyRegistryIRISource(testRegistryIri,onm.getOwlCacheManager(),onm.getRegistryLoader(), null
 					// new RootOntologySource(oParent)
 					));
-			context.getScopeRegistry().registerScope(scope);
+			onm.getScopeRegistry().registerScope(scope);
 		} catch (DuplicateIDException e) {
 			// Uncomment if annotated with @BeforeClass instead of @Before ,
 			// comment otherwise.
@@ -77,7 +79,7 @@ public class TestIndexing {
 
 	@Test
 	public void testAddOntology() {
-		OntologyIndex index = ONManager.get().getOntologyIndex();
+		OntologyIndex index = onm.getOntologyIndex();
 		try {
 			scope.getCustomSpace().addOntology(
 					new RootOntologyIRISource(communitiesCpIri));
@@ -105,7 +107,7 @@ public class TestIndexing {
 		} catch (OWLOntologyCreationException e) {
 			fail("Could not instantiate other ObjectRole ontology for comparison");
 		}
-		OntologyIndex index = context.getOntologyIndex();
+		OntologyIndex index = onm.getOntologyIndex();
 		assertNotNull(index.getOntology(objrole));
 		// assertSame() would fail.
 		assertEquals(index.getOntology(objrole), oObjRole);
@@ -113,7 +115,7 @@ public class TestIndexing {
 
 	@Test
 	public void testIsOntologyLoaded() {
-		OntologyIndex index = context.getOntologyIndex();
+		OntologyIndex index = onm.getOntologyIndex();
 		IRI coreroot = IRI.create(scopeIri + "/core/root.owl");
 		IRI dne = IRI
 				.create("http://www.ontologydesignpatterns.org/cp/owl/doesnotexist.owl");

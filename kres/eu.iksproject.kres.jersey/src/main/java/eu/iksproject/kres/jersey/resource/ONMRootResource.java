@@ -1,5 +1,6 @@
 package eu.iksproject.kres.jersey.resource;
 
+import java.util.Hashtable;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -15,13 +16,17 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.iksproject.kres.api.format.KReSFormat;
 import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.api.manager.ontology.ScopeRegistry;
+import eu.iksproject.kres.api.storage.OntologyStoreProvider;
 import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.manager.renderers.ScopeSetRenderer;
+import eu.iksproject.kres.storage.provider.OntologyStorageProviderImpl;
 
 /**
  * The main Web resource of the KReS ontology manager. All the scopes, sessions
@@ -37,22 +42,37 @@ import eu.iksproject.kres.manager.renderers.ScopeSetRenderer;
 @Path("/ontology")
 public class ONMRootResource extends NavigationMixin {
 
+	private Logger log = LoggerFactory.getLogger(getClass());
+
 	/*
 	 * Placeholder for the KReSONManager to be fetched from the servlet context.
 	 */
 	protected KReSONManager onm;
+	protected OntologyStoreProvider storeProvider;
 
 	protected ServletContext servletContext;
 
 	public ONMRootResource(@Context ServletContext servletContext) {
 		this.servletContext = servletContext;
-		onm = (KReSONManager) this.servletContext
+		this.onm = (KReSONManager) servletContext
 				.getAttribute(KReSONManager.class.getName());
-
+		this.storeProvider = (OntologyStoreProvider) servletContext
+				.getAttribute(OntologyStoreProvider.class.getName());
+		// Contingency code for missing components follows.
+		/*
+		 * FIXME! The following code is required only for the tests. This should
+		 * be removed and the test should work without this code.
+		 */
+		if (storeProvider == null) {
+			log
+					.warn("No OntologyStoreProvider in servlet context. Instantiating manually...");
+			storeProvider = new OntologyStorageProviderImpl();
+		}
 		if (onm == null) {
-			System.err
-					.println("[KReS] :: No KReS Ontology Network Manager provided by Servlet Context. Instantiating now...");
-			onm = new ONManager();
+			log
+					.warn("No KReSONManager in servlet context. Instantiating manually...");
+			onm = new ONManager(storeProvider.getActiveOntologyStorage(),
+					new Hashtable<String, Object>());
 		}
 	}
 

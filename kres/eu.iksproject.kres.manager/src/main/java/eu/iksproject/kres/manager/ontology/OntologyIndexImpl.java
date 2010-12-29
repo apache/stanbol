@@ -10,6 +10,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.manager.ontology.NoSuchScopeException;
 import eu.iksproject.kres.api.manager.ontology.OntologyIndex;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
@@ -27,12 +28,17 @@ public class OntologyIndexImpl implements OntologyIndex {
 
 	private ScopeRegistry scopeRegistry;
 
-	public OntologyIndexImpl(ScopeRegistry scopeRegistry) {
+	private KReSONManager onm;
+
+	public OntologyIndexImpl(KReSONManager onm) {
+
 		ontScopeMap = new HashMap<IRI, Set<IRI>>();
-		if (scopeRegistry == null)
+		if (onm == null)
 			this.scopeRegistry = new ScopeRegistryImpl();
-		else
-			this.scopeRegistry = scopeRegistry;
+		else {
+			this.onm=onm;
+			this.scopeRegistry = onm.getScopeRegistry();
+		}
 		this.scopeRegistry.addScopeRegistrationListener(this);
 	}
 
@@ -211,7 +217,7 @@ public class OntologyIndexImpl implements OntologyIndex {
 				+ " registered. Now you can check for its activation status.");
 
 		Set<OntologyScope> scopez = scopeRegistry.getRegisteredScopes();
-		for (String token : ONManager.get().getUrisToActivate()) {
+		for (String token : onm.getUrisToActivate()) {
 			try {
 				IRI scopeId = IRI.create(token.trim());
 				scopeRegistry.setScopeActive(scopeId, true);

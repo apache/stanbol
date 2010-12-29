@@ -6,16 +6,22 @@
     <parent>
     	<groupId>eu.iksproject</groupId>
     	<artifactId>eu.iksproject.kres.parent</artifactId>
-    	<version>0.6-SNAPSHOT</version>
+    	<version>0.7</version>
     	<relativePath>../parent</relativePath>
     </parent>
 
     
     <groupId>eu.iksproject</groupId>
     <artifactId>eu.iksproject.kres.shared.dependency.mysql</artifactId>
-    <version>0.6-SNAPSHOT</version>
+    <version>${kres-version}</version>
     <packaging>bundle</packaging>
     <name>IKS KReS MySQL dependency</name>
+    
+    <properties>
+		<kres-version>0.7</kres-version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+    
     <dependencies>
         <dependency>
 	    	<groupId>mysql</groupId>

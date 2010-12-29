@@ -21,9 +21,9 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.model.UnknownOWLOntologyException;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
-import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.manager.io.RootOntologySource;
 
 /**
@@ -33,6 +33,8 @@ import eu.iksproject.kres.manager.io.RootOntologySource;
  * 
  */
 public class OntologyUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger(OntologyUtils.class);
 
 	// /**
 	// * Creates an ontology with the specified IRI and only the import
@@ -109,11 +111,10 @@ public class OntologyUtils {
 
 		// Named ontology with a provided absolute prefix. Use name and prefix
 		// for creating an new import statement.
-		OWLOntology child = childSrc.getRootOntology();
-		if (!child.isAnonymous() && rewritePrefix != null
+		if (!oChild.isAnonymous() && rewritePrefix != null
 		/* && rewritePrefix.isAbsolute() */) {
 			IRI impIri = IRI.create(rewritePrefix + "/"
-					+ child.getOntologyID().getOntologyIRI());
+					+ oChild.getOntologyID().getOntologyIRI());
 			OWLImportsDeclaration imp = factory
 					.getOWLImportsDeclaration(impIri);
 			ontologyManager.applyChange(new AddImport(oParent, imp));
@@ -215,7 +216,7 @@ public class OntologyUtils {
 			mgr = OWLManager.createOWLOntologyManager();
 		OWLDataFactory owlFactory = mgr.getOWLDataFactory();
 		List<OWLOntologyChange> changes = new LinkedList<OWLOntologyChange>();
-		Logger logger = ONManager.get().log;
+
 
 		for (OWLOntology o : subtrees) {
 

@@ -6,16 +6,21 @@
     <parent>
     	<groupId>eu.iksproject</groupId>
     	<artifactId>eu.iksproject.kres.parent</artifactId>
-    	<version>0.6-SNAPSHOT</version>
+		<version>0.7</version>
     	<relativePath>../parent</relativePath>
     </parent>
 
-    
     <groupId>eu.iksproject</groupId>
     <artifactId>eu.iksproject.kres.shared.dependency.xerces</artifactId>
-    <version>0.6-SNAPSHOT</version>
+	<version>${kres-version}</version>
     <packaging>bundle</packaging>
     <name>IKS KReS Xerces dependency</name>
+
+	<properties>
+		<kres-version>0.7</kres-version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
     <dependencies>
         <dependency>
   	    <groupId>xerces</groupId>
@@ -43,21 +48,38 @@
         <configuration>
           <instructions>
           	<Export-Package>
-              org.apache.xerces.*, org.exolab.castor.*, org.xml.sax.*
+							org.apache.xerces.*,
+							org.apache.xml.serialize,
+							org.castor.core.*,
+							org.castor.mapping,
+							org.exolab.castor.*,
+							org.exolab.javasource
             </Export-Package>
+						<Private-Package>
+							org.castor.xml
+            			</Private-Package>
             <Import-Package>
-		!javax.xml.*,
-		!org.apache.xml.*,
-		org.w3c.dom.*,
-		org.apache.xerces.*,
-		!org.w3c.dom.traversal.*,
-		!org.exolab.castor.types.*,
-		!org.castor.*,
-		!org.exolab.javasource.*,
-		!netscape.ldap.*,
-		!org.apache.regexp.*,
+							javax.naming,
+							javax.naming.directory,
+							javax.servlet,
+							javax.xml.datatype,
+							javax.xml.namespace,
+							javax.xml.parsers,
+							javax.xml.transform.*,
+							javax.xml.validation,
+							!netscape.ldap,
+							!org.apache.avalon.framework.logger,
+							!org.apache.log,
+							org.apache.log4j,
+							!org.apache.oro.text.regex,
+							!org.apache.regexp,
 		!org.apache.velocity.*,
-		!org.apache.oro.*,
+							!org.apache.xml.resolver,
+							!org.apache.xml.resolver.readers,
+							org.castor.mapping,
+							org.w3c.dom.*,
+							org.xml.sax.*,
+							!sun.io,
 		*
             </Import-Package>
             

@@ -19,6 +19,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.model.RemoveImport;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.iksproject.kres.api.manager.ontology.IrremovableOntologyException;
 import eu.iksproject.kres.api.manager.ontology.MissingOntologyException;
@@ -28,6 +29,7 @@ import eu.iksproject.kres.api.manager.ontology.OntologySpace;
 import eu.iksproject.kres.api.manager.ontology.OntologySpaceListener;
 import eu.iksproject.kres.api.manager.ontology.OntologySpaceModificationException;
 import eu.iksproject.kres.api.manager.ontology.SessionOntologySpace;
+import eu.iksproject.kres.api.manager.ontology.SpaceType;
 import eu.iksproject.kres.api.manager.ontology.UnmodifiableOntologySpaceException;
 import eu.iksproject.kres.api.storage.OntologyStorage;
 import eu.iksproject.kres.manager.ONManager;
@@ -60,6 +62,8 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 	 */
 	protected boolean locked = false;
 
+	protected Logger log = LoggerFactory.getLogger(getClass());
+
 	/**
 	 * Each ontology space comes with its OWL ontology manager. By default, it
 	 * is not available to the outside world, unless subclasses implement
@@ -67,26 +71,30 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 	 */
 	protected OWLOntologyManager ontologyManager;
 
+	protected OntologyStorage storage;
+
 	protected IRI parentID = null;
 
+//	public static String SUFFIX = "";
+	
 	protected OWLOntology rootOntology = null;
 
 	protected boolean silent = false;
 
-	protected AbstractOntologySpaceImpl(IRI spaceID, IRI parentID) {
-		this(spaceID, parentID, OWLManager.createOWLOntologyManager());
+	protected AbstractOntologySpaceImpl(IRI spaceID, SpaceType type/*, IRI parentID*/, OntologyStorage storage) {
+		this(spaceID, type, /*parentID,*/ storage,OWLManager.createOWLOntologyManager());
 	}
 
-	/**
-	 * TODO: manage IDs properly
-	 * 
-	 * @param rootOntology
-	 */
-	public AbstractOntologySpaceImpl(IRI spaceID, IRI parentID,
-			OntologyInputSource rootOntology) {
-		this(spaceID, parentID, OWLManager.createOWLOntologyManager(),
-				rootOntology);
-	}
+//	/**
+//	 * TODO: manage IDs properly
+//	 * 
+//	 * @param rootOntology
+//	 */
+//	public AbstractOntologySpaceImpl(IRI spaceID, SpaceType type, IRI parentID,
+//			OntologyInputSource rootOntology) {
+//		this(spaceID, type, parentID, OWLManager.createOWLOntologyManager(),
+//				rootOntology);
+//	}
 
 	/**
 	 * Creates a new ontology space with the supplied ontology manager as the
@@ -94,21 +102,24 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 	 * 
 	 * @param spaceID
 	 *            the IRI that will uniquely identify this space.
+	 	 * @param parentID
+	 *             IRI of the parent scope (TODO: get rid of it).
 	 * @param ontologyManager
 	 *            the default ontology manager for this space.
 	 */
-	protected AbstractOntologySpaceImpl(IRI spaceID, IRI parentID,
+	protected AbstractOntologySpaceImpl(IRI spaceID, SpaceType type, OntologyStorage storage, /*IRI parentID,*/
 			OWLOntologyManager ontologyManager) {
 
-		this.parentID = parentID;
+//		this.parentID = parentID;
+//		SUFFIX = type.getIRISuffix();
 
-		// FIXME: ensure that this is not null
-		OntologyScope parentScope = ONManager.get().getScopeRegistry()
-				.getScope(parentID);
-
-		if (parentScope != null && parentScope instanceof OntologySpaceListener)
-			this.addOntologySpaceListener((OntologySpaceListener) parentScope);
-
+//		// FIXME: ensure that this is not null
+//		OntologyScope parentScope = ONManager.get().getScopeRegistry()
+//				.getScope(parentID);
+//
+//		if (parentScope != null && parentScope instanceof OntologySpaceListener)
+//			this.addOntologySpaceListener((OntologySpaceListener) parentScope);
+this.storage = storage;
 		this._id = spaceID;
 		if (ontologyManager != null)
 			this.ontologyManager = ontologyManager;
@@ -136,29 +147,29 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 				});
 	}
 
-	/**
-	 * Creates a new ontology space with the supplied ontology set as its top
-	 * ontology and the supplied ontology manager as the default manager for
-	 * this space.
-	 * 
-	 * @param spaceID
-	 *            the IRI that will uniquely identify this space.
-	 * @param ontologyManager
-	 *            the default ontology manager for this space.
-	 * @param rootSource
-	 *            the root ontology for this space.
-	 */
-	public AbstractOntologySpaceImpl(IRI spaceID, IRI parentID,
-			OWLOntologyManager ontologyManager, OntologyInputSource rootSource) {
-		this(spaceID, parentID, ontologyManager);
-		// Set the supplied ontology's parent as the root for this space.
-		try {
-			this.setTopOntology(rootSource, true);
-		} catch (UnmodifiableOntologySpaceException e) {
-			ONManager.get().log.error("KReS :: Ontology space " + spaceID
-					+ " found locked at creation time!", e);
-		}
-	}
+//	/**
+//	 * Creates a new ontology space with the supplied ontology set as its top
+//	 * ontology and the supplied ontology manager as the default manager for
+//	 * this space.
+//	 * 
+//	 * @param spaceID
+//	 *            the IRI that will uniquely identify this space.
+//	 * @param ontologyManager
+//	 *            the default ontology manager for this space.
+//	 * @param rootSource
+//	 *            the root ontology for this space.
+//	 */
+//	public AbstractOntologySpaceImpl(IRI spaceID,SpaceType type, IRI parentID,
+//			OWLOntologyManager ontologyManager, OntologyInputSource rootSource) {
+//		this(spaceID, type,parentID, ontologyManager);
+//		// Set the supplied ontology's parent as the root for this space.
+//		try {
+//			this.setTopOntology(rootSource, true);
+//		} catch (UnmodifiableOntologySpaceException e) {
+//			log.error("KReS :: Ontology space " + spaceID
+//					+ " found locked at creation time!", e);
+//		}
+//	}
 
 	/**
 	 * TODO: manage import statements
@@ -171,17 +182,6 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 
 		if (locked)
 			throw new UnmodifiableOntologySpaceException(this);
-
-		Logger log = ONManager.get().log;
-
-		// if (ontologySource != null && parentID != null)
-		// // rewrite the source
-		// ontologySource = new ScopeOntologySource(parentID,
-		// ontologySource.getRootOntology(), ontologySource
-		// .getPhysicalIRI());
-
-		OWLOntology ontology = ontologySource != null ? ontologySource
-				.getRootOntology() : null;
 
 		if (getTopOntology() == null) {
 			// If no top ontology has been set, we must create one first.
@@ -204,73 +204,9 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 		}
 
 		// Now add the new ontology.
-		if (ontology != null) {
-
-			OWLOntologyID id = ontology.getOntologyID();
-
-			// if (ontologySource != null && parentID != null)
-			// // rewrite the source
-			// ontologySource = new ScopeOntologySource(parentID,
-			// ontologySource.getRootOntology(), ontologySource
-			// .getPhysicalIRI());
-
-			// Should not modify the child ontology in any way.
-			// TODO implement transaction control.
-			OntologyUtils
-					.appendOntology(new RootOntologySource(getTopOntology(),
-							null), ontologySource, ontologyManager/* ,parentID */);
-
-			StringDocumentTarget tgt = new StringDocumentTarget();
-			try {
-				ontologyManager.saveOntology(ontology,
-						new RDFXMLOntologyFormat(), tgt);
-			} catch (OWLOntologyStorageException e) {
-				log.error("KReS : [FATAL] Failed to store ontology " + id
-						+ " in memory.", e);
-				return;
-			}
-
-			try {
-				ontologyManager.removeOntology(ontology);
-				ontologyManager
-						.loadOntologyFromOntologyDocument(new StringDocumentSource(
-								tgt.toString()));
-			} catch (OWLOntologyAlreadyExistsException e) {
-				// Could happen if we supplied an ontology manager that already
-				// knows this ontology. Nothing to do then.
-				log.warn("KReS : [NONFATAL] Tried to copy ontology " + id
-						+ " to existing one.");
-			} catch (OWLOntologyCreationException e) {
-				log.error("Unexpected exception caught while copying ontology "
-						+ id + " across managers", e);
-				return;
-			}
-
-			try {
-				// Store the top ontology
-				if (!(this instanceof SessionOntologySpace)) {
-					OntologyStorage storage = ONManager.get()
-							.getOntologyStore();
-					if (storage == null)
-						log
-								.error("KReS :: [NONFATAL] no ontology storage found. Ontology "
-										+ ontology.getOntologyID()
-										+ " will be stored in-memory only.");
-					else {
-						storage.store(ontology);
-					}
-				}
-				// ONManager.get().getOntologyStore().load(rootOntology.getOntologyID().getOntologyIRI());
-			} catch (Exception ex) {
-				log.error(
-						"KReS :: [NONFATAL] An error occurred while storing ontology "
-								+ ontology
-								+ " . Ontology management will be volatile!",
-						ex);
-			}
-
-			fireOntologyAdded(id.getOntologyIRI());
-
+		if (ontologySource != null && ontologySource.hasRootOntology()) {
+			// Remember that this method also fores the event
+			performAdd(ontologySource);
 		}
 
 	}
@@ -338,6 +274,64 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 	@Override
 	public boolean isSilentMissingOntologyHandling() {
 		return silent;
+	}
+
+	private void performAdd(OntologyInputSource ontSrc) {
+		OWLOntology ontology = ontSrc.getRootOntology();
+		OWLOntologyID id = ontology.getOntologyID();
+
+		// Should not modify the child ontology in any way.
+		// TODO implement transaction control.
+		OntologyUtils.appendOntology(new RootOntologySource(getTopOntology(),
+				null), ontSrc, ontologyManager/* ,parentID */);
+
+		StringDocumentTarget tgt = new StringDocumentTarget();
+		try {
+			ontologyManager.saveOntology(ontology, new RDFXMLOntologyFormat(),
+					tgt);
+		} catch (OWLOntologyStorageException e) {
+			log.error("KReS : [FATAL] Failed to store ontology " + id
+					+ " in memory.", e);
+			return;
+		}
+
+		try {
+			ontologyManager.removeOntology(ontology);
+			ontologyManager
+					.loadOntologyFromOntologyDocument(new StringDocumentSource(
+							tgt.toString()));
+		} catch (OWLOntologyAlreadyExistsException e) {
+			// Could happen if we supplied an ontology manager that already
+			// knows this ontology. Nothing to do then.
+			log.warn("KReS : [NONFATAL] Tried to copy ontology " + id
+					+ " to existing one.");
+		} catch (OWLOntologyCreationException e) {
+			log.error("Unexpected exception caught while copying ontology "
+					+ id + " across managers", e);
+			return;
+		}
+
+		try {
+			// Store the top ontology
+			if (!(this instanceof SessionOntologySpace)) {
+				if (storage == null)
+					log
+							.error("KReS :: [NONFATAL] no ontology storage found. Ontology "
+									+ ontology.getOntologyID()
+									+ " will be stored in-memory only.");
+				else {
+					storage.store(ontology);
+				}
+			}
+			// ONManager.get().getOntologyStore().load(rootOntology.getOntologyID().getOntologyIRI());
+		} catch (Exception ex) {
+			log.error(
+					"KReS :: [NONFATAL] An error occurred while storing ontology "
+							+ ontology
+							+ " . Ontology management will be volatile!", ex);
+		}
+
+		fireOntologyAdded(id.getOntologyIRI());
 	}
 
 	/**
@@ -408,8 +402,6 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 	public synchronized void setTopOntology(OntologyInputSource ontologySource,
 			boolean createParent) throws UnmodifiableOntologySpaceException {
 
-		Logger log = ONManager.get().log;
-
 		// TODO : implement or avoid passing of OWLOntology objects across
 		// managers
 
@@ -450,12 +442,6 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 		if (ontologySource != null)
 			try {
 
-				// if (ontologySource != null && parentID != null)
-				// // rewrite the source
-				// ontologySource = new ScopeOntologySource(parentID,
-				// ontologySource.getRootOntology(), ontologySource
-				// .getPhysicalIRI());
-
 				// Append the supplied ontology to the parent.
 				oParent = OntologyUtils.appendOntology(new RootOntologySource(
 						oParent, null), ontologySource, ontologyManager/*
@@ -490,7 +476,6 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 
 			// Store the top ontology
 			if (!(this instanceof SessionOntologySpace)) {
-				OntologyStorage storage = ONManager.get().getOntologyStore();
 				if (storage == null)
 					log
 							.error("KReS :: [NONFATAL] no ontology storage found. Ontology "

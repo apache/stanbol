@@ -3,8 +3,11 @@ package eu.iksproject.kres.manager;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Dictionary;
 
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -60,24 +63,33 @@ import eu.iksproject.kres.manager.session.ScopeSessionSynchronizer;
 // @Property(name="service.ranking",intValue=5)
 public class ONManager implements KReSONManager {
 
-	// @Property(value = "/ontology")
-	public static final String ALIAS_PROPERTY = "eu.iksproject.kres.manager.ontologyNetworkManager.alias";
+	public static final String _ALIAS_DEFAULT = "/ontology";
+	public static final String _CONFIG_FILE_PATH_DEFAULT = "";
+	public static final String _KRES_NAMESPACE_DEFAULT = "http://kres.iksproject.eu/";
 
-	@Property(value = "")
+	// @Property(value = _ALIAS_DEFAULT)
+	public static final String ALIAS = "eu.iksproject.kres.manager.ontologyNetworkManager.alias";
+
+	@Property(value = _CONFIG_FILE_PATH_DEFAULT)
 	public static String CONFIG_FILE_PATH = "eu.iksproject.kres.manager.ontologyNetworkManager.config_ont";
 
-	@Property(value = "http://kres.iksproject.eu/")
+	@Property(value = _KRES_NAMESPACE_DEFAULT)
 	public static String KRES_NAMESPACE = "kres.namespace";
 
-	private static ONManager me = new ONManager();
+	@SuppressWarnings("unused")
+	private String alias = _ALIAS_DEFAULT;
+	private String configPath = _CONFIG_FILE_PATH_DEFAULT;
+	private String kresNs = _KRES_NAMESPACE_DEFAULT;
 
-	public static ONManager get() {
-		return me;
-	}
+	// private static ONManager me = new ONManager();
+	//
+	// public static ONManager get() {
+	// return me;
+	// }
 
-	private ComponentContext ce;
+	// private ComponentContext ce;
 
-	public final Logger log = LoggerFactory.getLogger(getClass());
+	private final Logger log = LoggerFactory.getLogger(getClass());
 
 	private OntologyIndex oIndex;
 
@@ -104,50 +116,88 @@ public class ONManager implements KReSONManager {
 	 */
 	private String[] toActivate = new String[] {};
 
-	/**
-	 * Instantiates all the default providers.
-	 * 
-	 * TODO : Felix component constraints prevent this constructor from being
-	 * private, find a way around...
-	 */
 	public ONManager() {
+		super();
 		owlFactory = OWLManager.getOWLDataFactory();
 		owlCacheManager = OWLManager.createOWLOntologyManager();
 
-		// These may require the OWL cache manager
-		ontologyScopeFactory = new OntologyScopeFactoryImpl();
-		ontologySpaceFactory = new OntologySpaceFactoryImpl();
-
 		// These depend on one another
 		scopeRegistry = new ScopeRegistryImpl();
-		oIndex = new OntologyIndexImpl(scopeRegistry);
+		oIndex = new OntologyIndexImpl(this);
+
+		// These may require the OWL cache manager
+		ontologySpaceFactory = new OntologySpaceFactoryImpl(scopeRegistry,
+				storage);
+		ontologyScopeFactory = new OntologyScopeFactoryImpl(scopeRegistry,
+				ontologySpaceFactory);
 		ontologyScopeFactory.addScopeEventListener(oIndex);
 
 		// This requires the OWL cache manager
-		registryLoader = new RegistryLoader();
+		registryLoader = new RegistryLoader(this);
 
 		// TODO : assign dynamically in case the FISE persistence store is not
 		// available.
 		// storage = new FISEPersistenceStorage();
 
 		sessionManager = new KReSSessionManagerImpl(IRI
-				.create("http://kres.iks-project.eu/"));
-		sessionManager.addSessionListener(ScopeSessionSynchronizer.get());
+				.create("http://kres.iks-project.eu/"), getScopeRegistry(),
+				getOntologyStore());
+		sessionManager.addSessionListener(new ScopeSessionSynchronizer(this));
 	}
 
-	protected void activate(ComponentContext ce) throws IOException {
+	/**
+	 * Instantiates all the default providers.
+	 * 
+	 * TODO : Felix component constraints prevent this constructor from being
+	 * private, find a way around...
+	 */
+	public ONManager(OntologyStorage ontologyStorage,
+			Dictionary<String, Object> configuration) {
+		this();
+		try {
+			activate(configuration);
+		} catch (IOException e) {
+			log.error("Unable to access servlet context.", e);
+		}
+	}
 
-		log.debug("KReS :: activating main component...");
+	/**
+	 * Used to configure an instance within an OSGi container.
+	 * 
+	 * @throws IOException
+	 */
+	@SuppressWarnings("unchecked")
+	@Activate
+	protected void activate(ComponentContext context) throws IOException {
+		log.info("in " + ONManager.class + " activate with context " + context);
+		if (context == null) {
+			throw new IllegalStateException("No valid" + ComponentContext.class
+					+ " parsed in activate!");
+		}
+		activate((Dictionary<String, Object>) context.getProperties());
+	}
 
-		me = this;
-		this.ce = ce;
+	protected void activate(Dictionary<String, Object> configuration)
+			throws IOException {
 
-		String path = (String) ce.getProperties().get(CONFIG_FILE_PATH);
+		// log.debug("KReS :: activating main component...");
+		//
+		// me = this;
+		// this.ce = ce;
+
+		String tfile = (String) configuration.get(CONFIG_FILE_PATH);
+		if (tfile != null)
+			this.configPath = tfile;
+		String tns = (String) configuration.get(KRES_NAMESPACE);
+		if (tns != null)
+			this.kresNs = tns;
+
+		// configPath = (String) configuration.get(CONFIG_FILE_PATH);
 
 		/*
 		 * If there is no configuration file, just start with an empty scope set
 		 */
-		if (path != null && !path.trim().isEmpty()) {
+		if (configPath != null && !configPath.trim().isEmpty()) {
 			OWLOntology oConf = null;
 			OWLOntologyManager tempMgr = OWLManager.createOWLOntologyManager();
 			OWLOntologyDocumentSource oConfSrc = null;
@@ -155,7 +205,8 @@ public class ONManager implements KReSONManager {
 			try {
 				log
 						.debug("Try to load the configuration ontology from a local bundle relative path");
-				InputStream is = this.getClass().getResourceAsStream(path);
+				InputStream is = this.getClass()
+						.getResourceAsStream(configPath);
 				oConfSrc = new StreamDocumentSource(is);
 			} catch (Exception e1) {
 				try {
@@ -163,7 +214,7 @@ public class ONManager implements KReSONManager {
 							e1);
 					log
 							.debug("Try to load the configuration ontology resolving the given IRI");
-					IRI iri = IRI.create(path);
+					IRI iri = IRI.create(configPath);
 					if (!iri.isAbsolute())
 						throw new Exception(
 								"IRI seems to be not absolute! value was: "
@@ -177,11 +228,11 @@ public class ONManager implements KReSONManager {
 						log.debug("Cannot load from the web", e1);
 						log
 								.debug("Try to load the configuration ontology as full local file path");
-						oConfSrc = new FileDocumentSource(new File(path));
+						oConfSrc = new FileDocumentSource(new File(configPath));
 					} catch (Exception e2) {
 						log.error(
 								"Cannot load the configuration ontology from parameter value: "
-										+ path, e2);
+										+ configPath, e2);
 					}
 				}
 			}
@@ -189,7 +240,8 @@ public class ONManager implements KReSONManager {
 			if (oConfSrc == null) {
 				log
 						.warn("KReS :: [NONFATAL] No ONM configuration file found at path "
-								+ path + ". Starting with blank scope set.");
+								+ configPath
+								+ ". Starting with blank scope set.");
 			} else {
 				try {
 					oConf = tempMgr.loadOntologyFromOntologyDocument(oConfSrc);
@@ -225,7 +277,7 @@ public class ONManager implements KReSONManager {
 				String[] customs = ConfigurationManagement.getCustomOntologies(
 						configOntology, scopeIRI);
 
-				// "Be a man. Use printf()"
+				// "Be a man. Use printf"
 				log.debug("KReS :: Scope " + scopeIRI);
 				for (String s : cores) {
 					log.debug("\tKReS :: Core ontology " + s);
@@ -295,14 +347,18 @@ public class ONManager implements KReSONManager {
 
 	}
 
-	protected void deactivate(ComponentContext ce) throws IOException {
-		log.debug("KReS :: Deactivating ONManager");
+	/**
+	 * Deactivation of the ONManager resets all its resources.
+	 */
+	@Deactivate
+	protected void deactivate(ComponentContext context) {
+		log.info("in " + ONManager.class + " deactivate with context "
+				+ context);
 	}
 
 	@Override
 	public String getKReSNamespace() {
-		String ns = (String) ce.getProperties().get(KRES_NAMESPACE);
-		return ns;
+		return kresNs;
 	}
 
 	public OntologyIndex getOntologyIndex() {

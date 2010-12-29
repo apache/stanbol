@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog id="file:/Users/alessandro/workspaces/IKS/main/kres/eu.iksproject.kres.manager/src/main/resources/META-INF/conf/" prefer="public" xml:base="file:/Users/alessandro/workspaces/IKS/main/kres/eu.iksproject.kres.manager/src/main/resources/META-INF/conf/" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <uri name="http://kres.iks-project.eu/ontology/meta/onm.owl" uri="onm.owl"/>
+</catalog>

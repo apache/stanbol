@@ -11,7 +11,7 @@
   <parent>
     <groupId>eu.iksproject</groupId>
     <artifactId>eu.iksproject.kres.parent</artifactId>
-    <version>0.6-SNAPSHOT</version>
+    <version>0.7</version>
     <relativePath>../../../parent/pom.xml</relativePath>
   </parent>
 
@@ -19,7 +19,7 @@
   <groupId>eu.iksproject</groupId>
   <artifactId>eu.iksproject.kres.semion.reengineer.xml</artifactId>
   <packaging>bundle</packaging>
-  <version>0.6-SNAPSHOT</version>
+  <version>${kres-version}</version>
 
   <name>IKS KReS Semion Reengineer for XML</name>
   <description>IKS KReS - Semion Reengineer OSGi bundle for XML</description>
@@ -27,7 +27,7 @@
   <inceptionYear>2010</inceptionYear>
 
   <properties>
-    <kres-version>0.6-SNAPSHOT</kres-version>
+    <kres-version>0.7</kres-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -47,7 +47,8 @@
             <Import-Package>
             	!org.apache.xml.resolver.*,
             	!sun.io.*,
-            	org.slf4j.*;version=${pom.version},
+				org.slf4j.*;version=1.5.2,
+            	org.xml.sax.*,
             	*
            	</Import-Package>
           </instructions>
@@ -105,7 +106,7 @@
     <dependency>
 		<groupId>org.slf4j</groupId>
 		<artifactId>slf4j-api</artifactId>	
-        <version>1.5.6</version>
+        <version>1.5.2</version>
 		<scope>provided</scope>
 	</dependency>
 	<dependency>
@@ -211,8 +212,21 @@
 	  <artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
       <version>0.9-incubating-SNAPSHOT</version>
     </dependency>
+
     <!-- Testing deps -->
 		<dependency>
+      <groupId>eu.iksproject</groupId>
+      <artifactId>eu.iksproject.kres.manager</artifactId>
+	  <version>${kres-version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>eu.iksproject</groupId>
+      <artifactId>eu.iksproject.kres.semion.manager</artifactId>
+	  <version>${kres-version}</version>
+      <scope>test</scope>
+    </dependency>
+	<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.4</version>
@@ -224,6 +238,7 @@
                             </exclusion>
                        </exclusions>
 		</dependency>
+
   </dependencies>
   
   <repositories>

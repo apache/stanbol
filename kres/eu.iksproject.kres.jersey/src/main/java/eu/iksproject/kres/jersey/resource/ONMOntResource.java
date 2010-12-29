@@ -1,5 +1,7 @@
 package eu.iksproject.kres.jersey.resource;
 
+import java.util.Hashtable;
+
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -18,26 +20,52 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.manager.ontology.OntologyIndex;
+import eu.iksproject.kres.api.storage.OntologyStoreProvider;
+import eu.iksproject.kres.manager.ONManager;
+import eu.iksproject.kres.storage.provider.OntologyStorageProviderImpl;
 
 @Path("/ontology/get")
 public class ONMOntResource extends NavigationMixin {
+
+	private Logger log = LoggerFactory.getLogger(getClass());
 
 	/*
 	 * Placeholder for the KReSONManager to be fetched from the servlet context.
 	 */
 	protected KReSONManager onm;
-	
-	protected Serializer serializer;
+	protected OntologyStoreProvider storeProvider;
 
 	protected ServletContext servletContext;
 
+	protected Serializer serializer;
+
 	public ONMOntResource(@Context ServletContext servletContext) {
 		this.servletContext = servletContext;
-		onm = (KReSONManager) this.servletContext
+		this.onm = (KReSONManager) servletContext
 				.getAttribute(KReSONManager.class.getName());
+this.storeProvider = (OntologyStoreProvider) servletContext
+		.getAttribute(OntologyStoreProvider.class.getName());
+// Contingency code for missing components follows.
+/*
+ * FIXME! The following code is required only for the tests. This should
+ * be removed and the test should work without this code.
+ */
+if (storeProvider == null) {
+	log
+			.warn("No OntologyStoreProvider in servlet context. Instantiating manually...");
+	storeProvider = new OntologyStorageProviderImpl();
+}
+if (onm == null) {
+	log
+			.warn("No KReSONManager in servlet context. Instantiating manually...");
+	onm = new ONManager(storeProvider.getActiveOntologyStorage(),
+			new Hashtable<String, Object>());
+}
 		serializer = (Serializer) this.servletContext
 				.getAttribute(Serializer.class.getName());
 	}

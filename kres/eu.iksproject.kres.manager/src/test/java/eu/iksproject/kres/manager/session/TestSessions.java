@@ -3,6 +3,7 @@ package eu.iksproject.kres.manager.session;
 import static junit.framework.Assert.*;
 
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Set;
 
 import org.junit.BeforeClass;
@@ -13,6 +14,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import eu.iksproject.kres.api.manager.DuplicateIDException;
+import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.api.manager.ontology.OntologyScopeFactory;
@@ -37,6 +39,8 @@ public class TestSessions {
 
 	private static OntologyScopeFactory scopeFactory = null;
 
+	private static ScopeRegistry scopeRegistry = null;
+	
 	private static KReSSessionManager sesmgr = null;
 
 	private static OntologySpaceFactory spaceFactory = null;
@@ -45,11 +49,16 @@ public class TestSessions {
 
 	@BeforeClass
 	public static void setup() {
-		sesmgr = ONManager.get().getSessionManager();
-		scopeFactory = ONManager.get().getOntologyScopeFactory();
-		spaceFactory = ONManager.get().getOntologySpaceFactory();
-		if (scopeFactory == null)
+		// An ONManager with no store and default settings
+		KReSONManager onm = new ONManager(null, new Hashtable<String, Object>());
+		sesmgr = onm.getSessionManager();
+		scopeFactory = onm.getOntologyScopeFactory();
+		spaceFactory = onm.getOntologySpaceFactory();
+		scopeRegistry = onm.getScopeRegistry();
+		if (spaceFactory == null)
 			fail("Could not instantiate ontology space factory");
+		if (scopeFactory == null)
+			fail("Could not instantiate ontology scope factory");
 		OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
 		try {
 			src1 = new RootOntologySource(mgr.createOntology(baseIri), null);
@@ -80,21 +89,19 @@ public class TestSessions {
 
 	@Test
 	public void testCreateSessionSpaceAutomatic() {
-		ScopeRegistry reg = ONManager.get().getScopeRegistry();
 		OntologyScope scope1 = null, scope2 = null, scope3 = null;
 		try {
-
 			scope1 = scopeFactory.createOntologyScope(scopeIri1, src1, src2);
-			reg.registerScope(scope1);
+			scopeRegistry.registerScope(scope1);
 			scope2 = scopeFactory.createOntologyScope(scopeIri2, src2, src1);
-			reg.registerScope(scope2);
+			scopeRegistry.registerScope(scope2);
 			scope3 = scopeFactory.createOntologyScope(scopeIri3, src2, src2);
-			reg.registerScope(scope3);
+			scopeRegistry.registerScope(scope3);
 			// We do all activations after registering, otherwise the component
 			// property value will override these activations.
-			reg.setScopeActive(scopeIri1, true);
-			reg.setScopeActive(scopeIri2, false);
-			reg.setScopeActive(scopeIri3, true);
+			scopeRegistry.setScopeActive(scopeIri1, true);
+			scopeRegistry.setScopeActive(scopeIri2, false);
+			scopeRegistry.setScopeActive(scopeIri3, true);
 		} catch (DuplicateIDException e) {
 			fail("Unexpected DuplicateIDException was caught while testing scope "
 					+ e.getDulicateID());

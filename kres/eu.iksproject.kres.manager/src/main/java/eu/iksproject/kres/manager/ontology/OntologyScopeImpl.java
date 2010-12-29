@@ -19,7 +19,6 @@ import eu.iksproject.kres.api.manager.ontology.OntologySpaceListener;
 import eu.iksproject.kres.api.manager.ontology.ScopeOntologyListener;
 import eu.iksproject.kres.api.manager.ontology.SessionOntologySpace;
 import eu.iksproject.kres.api.manager.ontology.UnmodifiableOntologySpaceException;
-import eu.iksproject.kres.manager.ONManager;
 
 /**
  * The default implementation of an ontology scope.
@@ -59,18 +58,16 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
 	 */
 	protected Map<IRI, SessionOntologySpace> sessionSpaces;
 
-	public OntologyScopeImpl(IRI id, OntologyInputSource coreRoot) {
-		this(id, coreRoot, null);
+	public OntologyScopeImpl(IRI id, OntologySpaceFactory factory,OntologyInputSource coreRoot) {
+		this(id, factory, coreRoot,null);
 	}
 
-	public OntologyScopeImpl(IRI id, OntologyInputSource coreRoot,
+	public OntologyScopeImpl(IRI id,OntologySpaceFactory factory, OntologyInputSource coreRoot, 
 			OntologyInputSource customRoot) {
 		if (id == null)
 			throw new NullPointerException(
 					"Ontology scope must be identified by a non-null IRI.");
 
-		OntologySpaceFactory factory = ONManager.get()
-				.getOntologySpaceFactory();
 		this.id = id;
 		this.coreSpace = factory.createCoreOntologySpace(id, coreRoot);
 		this.coreSpace.addOntologySpaceListener(this);

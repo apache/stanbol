@@ -5,7 +5,12 @@
 
 package eu.iksproject.kres.rules.manager;
 
+import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.rules.RuleStore;
+import eu.iksproject.kres.manager.ONManager;
+
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Iterator;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -37,18 +42,26 @@ public class KReSRemoveRecipeTest {
 
     @Before
     public void setUp() {
+    	Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+    	onm = new ONManager(null, new Hashtable<String, Object>());
+    	store = new KReSRuleStore(onm, configuration,"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
     }
 
     @After
     public void tearDown() {
+    	store = null;
+    	onm = null;
     }
+
+    public RuleStore store = null;
+    public KReSONManager onm = null;
 
     /**
      * Test of removeRule method, of class KReSRemoveRecipe.
      */
     @Test
     public void testRemoveRule_String() throws OWLOntologyCreationException {
-        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         String owlID = store.getOntology().getOntologyID().toString().replace("<", "").replace(">", "") + "#";
         //Load the example file
         KReSLoadRuleFile load = new KReSLoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
@@ -71,7 +84,7 @@ public class KReSRemoveRecipeTest {
      */
     @Test
     public void testRemoveRuleName_String() throws OWLOntologyCreationException {
-        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         //Load the example file
         KReSLoadRuleFile load = new KReSLoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
         OWLOntology owlstart = load.getStore().getOntology();

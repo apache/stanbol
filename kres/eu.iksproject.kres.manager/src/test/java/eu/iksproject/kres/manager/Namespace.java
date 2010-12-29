@@ -1,27 +1,27 @@
 package eu.iksproject.kres.manager;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
+
+import java.util.Hashtable;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 
+import eu.iksproject.kres.api.manager.KReSONManager;
 
 public class Namespace {
 	
-	
-	static ONManager onManager;
+	private static KReSONManager onm;
 	
 	@BeforeClass
 	public static void setUp() {
-		
-		onManager = ONManager.get();
-		
+		// An ONManager with no store and default settings
+		onm = new ONManager(null, new Hashtable<String, Object>());
 	}
 	
 	@Test
-	public static void getNamespace() {
-		
+	public void getNamespace() {
+		assertNotNull(onm.getKReSNamespace());
 	}
 
 }

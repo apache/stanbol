@@ -5,7 +5,12 @@
 
 package eu.iksproject.kres.rules.manager;
 
+import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.rules.RuleStore;
+import eu.iksproject.kres.manager.ONManager;
+
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
 import org.semanticweb.owlapi.model.IRI;
@@ -37,18 +42,26 @@ public class KReSGetRuleTest {
 
     @Before
     public void setUp() {
+    	Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+    	onm = new ONManager(null, new Hashtable<String, Object>());
+    	store = new KReSRuleStore(onm, configuration,"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
     }
 
     @After
     public void tearDown() {
+    	store = null;
+    	onm = null;
     }
+
+    public RuleStore store = null;
+    public KReSONManager onm = null;
 
     /**
      * Test of getRule method, of class KReSGetRule.
      */
     @Test
     public void testGetRule() {
-        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         OWLOntology owl = store.getOntology();
         String ID = owl.getOntologyID().toString().replace("<", "").replace(">", "")+"#";
         //Load the example file
@@ -72,7 +85,7 @@ public class KReSGetRuleTest {
      */
     @Test
     public void testGetAllRule() {
-        KReSRuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        KReSRuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         OWLOntology owl = store.getOntology();
         String ID = owl.getOntologyID().toString().replace("<", "").replace(">", "")+"#";
         //Load the example file
@@ -119,7 +132,7 @@ public class KReSGetRuleTest {
      */
     @Test
     public void testGetRuleUsage() {
-        KReSRuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        KReSRuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         OWLOntology owl = store.getOntology();
         String ID = owl.getOntologyID().toString().replace("<", "").replace(">", "")+"#";
         //Load the example file
@@ -139,7 +152,7 @@ public class KReSGetRuleTest {
     
     @Test
     public void testGetRulesOfRecipe() {
-        KReSRuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        KReSRuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         OWLOntology owl = store.getOntology();
         String ID = owl.getOntologyID().toString().replace("<", "").replace(">", "")+"#";
         //Load the example file

@@ -7,9 +7,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationValue;
+import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLStringLiteral;
 import org.semanticweb.owlapi.model.OWLTypedLiteral;
@@ -28,6 +30,7 @@ public class RDFSLabelGetter {
 	private Map<String, String> allLabels;
 	private IRI subject;
 	private boolean strict;
+	private OWLDataFactory owlFactory = OWLManager.getOWLDataFactory();
 
 	public RDFSLabelGetter(OWLOntology ontology, IRI subject, boolean strict) {
 		this.subject = subject;
@@ -37,7 +40,7 @@ public class RDFSLabelGetter {
 		allLabels = new HashMap<String, String>();
 		for (OWLAnnotationAssertionAxiom annotation : individualAnnotations) {
 			if (annotation.getProperty().equals(
-					ONManager.get().getOwlFactory()
+					owlFactory
 							.getOWLAnnotationProperty(
 									OWLRDFVocabulary.RDFS_LABEL.getIRI()))) {
 				OWLAnnotationValue value = annotation.getValue();

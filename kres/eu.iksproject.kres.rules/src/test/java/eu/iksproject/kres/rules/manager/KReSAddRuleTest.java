@@ -5,8 +5,13 @@
 
 package eu.iksproject.kres.rules.manager;
 
+import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.rules.RuleStore;
+import eu.iksproject.kres.manager.ONManager;
+
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -37,18 +42,26 @@ public class KReSAddRuleTest {
 
     @Before
     public void setUp() {
+    	Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+    	onm = new ONManager(null, new Hashtable<String, Object>());
+    	store = new KReSRuleStore(onm, configuration,"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
     }
 
     @After
     public void tearDown() {
+    	store = null;
+    	onm = null;
     }
+
+    public RuleStore store = null;
+    public KReSONManager onm = null;
 
     /**
      * Test of addRule method, of class KReSAddRule.
      */
     @Test
     public void testAddRule_3args_1() {
-        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
 
         String ruleName = "MyRuleA";
         String ruleBodyHead = "MyRuleABody -> MyRuleAHead";
@@ -74,7 +87,7 @@ public class KReSAddRuleTest {
      */
     @Test
     public void testAddRule_3args_2() {
-        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         OWLOntology owl = store.getOntology();
         String ID = owl.getOntologyID().toString().replace("<","").replace(">","")+"#";
         IRI ruleName = IRI.create(ID+"MyRuleA");
@@ -100,7 +113,7 @@ public class KReSAddRuleTest {
      */
     @Test
     public void testAddRuleMap() {
-        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         OWLOntology owl = store.getOntology();
         String ID = owl.getOntologyID().toString().replace("<","").replace(">","")+"#";
         HashMap<String, String> ruleBodyHeadMap = new HashMap();
@@ -135,7 +148,7 @@ public class KReSAddRuleTest {
      */
     @Test
     public void testAddRuleMapIRI() {
-        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         OWLOntology owl = store.getOntology();
         String ID = owl.getOntologyID().toString().replace("<","").replace(">","")+"#";
         HashMap<IRI, String> ruleBodyHeadMap = new HashMap();

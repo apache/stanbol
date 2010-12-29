@@ -2,7 +2,6 @@
 <rdf:RDF xmlns="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#"
      xml:base="http://kres.iks-project.eu/ontology/meta/rmi_config.owl"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-     xmlns:rmi_config="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#"
      xmlns:sequence="http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"

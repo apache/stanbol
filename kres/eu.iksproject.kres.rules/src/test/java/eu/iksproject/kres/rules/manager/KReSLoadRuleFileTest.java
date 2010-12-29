@@ -5,7 +5,12 @@
 
 package eu.iksproject.kres.rules.manager;
 
+import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.rules.RuleStore;
+import eu.iksproject.kres.manager.ONManager;
+
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 import org.junit.After;
@@ -59,8 +64,13 @@ public class KReSLoadRuleFileTest {
      */
     @Test
     public void testKReSLoadRuleFile() throws OWLOntologyStorageException {
-        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
-        RuleStore newstore = new KReSRuleStore(store.getOntology());
+    	Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+    	KReSONManager onm = new ONManager(null,configuration);
+    	Dictionary<String, Object> configuration2 = new Hashtable<String, Object>();
+//    	configuration2.put(KReSRuleStore.RULE_ONTOLOGY, "");
+    	configuration2.put(KReSRuleStore.RULE_ONTOLOGY_NAMESPACE, "http://kres.iks-project.eu/ontology/meta/rmi.owl#");
+        RuleStore store  = new KReSRuleStore(onm,configuration2,"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+        RuleStore newstore = new KReSRuleStore(new ONManager(null,configuration),configuration2,store.getOntology());
         //Load the example file
         KReSLoadRuleFile load = new KReSLoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
         OWLOntology result = load.getStore().getOntology();

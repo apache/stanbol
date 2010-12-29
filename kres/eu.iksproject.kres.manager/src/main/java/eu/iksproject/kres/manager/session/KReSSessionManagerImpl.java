@@ -9,9 +9,11 @@ import java.util.Set;
 
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
+import eu.iksproject.kres.api.manager.ontology.ScopeRegistry;
 import eu.iksproject.kres.api.manager.ontology.SessionOntologySpace;
 import eu.iksproject.kres.api.manager.session.DuplicateSessionIDException;
 import eu.iksproject.kres.api.manager.session.KReSSession;
@@ -41,12 +43,19 @@ public class KReSSessionManagerImpl implements KReSSessionManager {
 
 	protected Set<SessionListener> listeners;
 
+	protected Logger log = LoggerFactory.getLogger(getClass());
+
 	protected KReSSessionIDGenerator idgen;
 
-	public KReSSessionManagerImpl(IRI baseIri) {
+	protected ScopeRegistry scopeRegistry;
+	protected OntologyStorage store;
+
+	public KReSSessionManagerImpl(IRI baseIri, ScopeRegistry scopeRegistry, OntologyStorage store) {
 		idgen = new TimestampedSessionIDGenerator(baseIri);
 		listeners = new HashSet<SessionListener>();
 		sessionsByID = new HashMap<IRI, KReSSession>();
+this.scopeRegistry = scopeRegistry;
+		this.store = store;
 	}
 
 	/*
@@ -129,7 +138,7 @@ public class KReSSessionManagerImpl implements KReSSessionManager {
 			removeSession(ses);
 			fireSessionDestroyed(ses);
 		} catch (NonReferenceableSessionException e) {
-			ONManager.get().log.warn(
+			log.warn(
 					"KReS :: tried to kick a dead horse on session "
 							+ sessionID
 							+ " which was already in a zombie state.", e);
@@ -224,7 +233,7 @@ public class KReSSessionManagerImpl implements KReSSessionManager {
 			throws NonReferenceableSessionException {
 		Set<SessionOntologySpace> result = new HashSet<SessionOntologySpace>();
 		// Brute force search
-		for (OntologyScope scope : ONManager.get().getScopeRegistry()
+		for (OntologyScope scope : scopeRegistry
 				.getRegisteredScopes()) {
 			SessionOntologySpace space = scope.getSessionSpace(sessionID);
 			if (space != null)
@@ -257,7 +266,6 @@ public class KReSSessionManagerImpl implements KReSSessionManager {
 	@Override
 	public void storeSession(IRI sessionID, OutputStream out)
 			throws NonReferenceableSessionException {
-		OntologyStorage store = ONManager.get().getOntologyStore();
 		for (SessionOntologySpace so : getSessionSpaces(sessionID))
 			for (OWLOntology o : so.getOntologies())
 				store.store(o);

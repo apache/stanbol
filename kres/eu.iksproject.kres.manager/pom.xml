@@ -7,14 +7,14 @@
 	<parent>
 		<groupId>eu.iksproject</groupId>
 		<artifactId>eu.iksproject.kres.parent</artifactId>
-		<version>0.6-SNAPSHOT</version>
+		<version>0.7</version>
 		<relativePath>../parent/pom.xml</relativePath>
 	</parent>
 
 	<groupId>eu.iksproject</groupId>
 	<artifactId>eu.iksproject.kres.manager</artifactId>
 	<packaging>bundle</packaging>
-	<version>0.6-SNAPSHOT</version>
+	<version>${kres-version}</version>
 
 	<name>IKS KReS Ontology Network Manager</name>
 	<description>IKS KReS Ontology Network Manager</description>
@@ -22,7 +22,7 @@
 	<inceptionYear>2010</inceptionYear>
 
 	<properties>
-		<kres-version>0.6-SNAPSHOT</kres-version>
+		<kres-version>0.7</kres-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -52,9 +52,10 @@
 							org.coode.owlapi.*,
 							org.osgi.*,
 							org.semanticweb.owlapi.*,
-							org.slf4j.*;version=${pom.version},
+							org.slf4j.*;version=1.5.2,
 							org.stlab.xd.registry.io,
-							org.stlab.xd.registry.models
+							org.stlab.xd.registry.models,
+							org.xml.sax.*
 						</Import-Package>
 
 						<Private-Package>
@@ -123,6 +124,20 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- Diagnostics deps -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>			
+            <version>1.5.2</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.13</version>
+			<scope>provided</scope>
+		</dependency>
+
 		<!-- Testing deps -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -135,18 +150,6 @@
                             <artifactId>slf4j-api</artifactId>
                             </exclusion>
                         </exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>			
-            <version>1.5.6</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.13</version>
-			<scope>provided</scope>
 		</dependency>
 
 	</dependencies>

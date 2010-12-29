@@ -2,6 +2,8 @@ package eu.iksproject.kres.manager.ontology;
 
 import static org.junit.Assert.*;
 
+import java.util.Hashtable;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -15,6 +17,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
+import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.manager.ontology.CoreOntologySpace;
 import eu.iksproject.kres.api.manager.ontology.CustomOntologySpace;
 import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
@@ -41,15 +44,19 @@ public class TestOntologySpaces {
 
 	private static OWLOntology ont = null, ont2 = null;
 
+	private static KReSONManager onm;
+	
 	private static OntologyInputSource ontSrc, ont2Src, pizzaSrc, wineSrc;
 
-	private static OntologySpaceFactory spaceFactory = ONManager.get()
-			.getOntologySpaceFactory();
+	private static OntologySpaceFactory spaceFactory;
 
 	private static OWLAxiom linusIsHuman = null;
 
 	@BeforeClass
 	public static void setup() {
+		// An ONManager with no store and default settings
+		onm = new ONManager(null, new Hashtable<String, Object>());
+		spaceFactory = onm.getOntologySpaceFactory();
 		if (spaceFactory == null)
 			fail("Could not instantiate ontology space factory");
 

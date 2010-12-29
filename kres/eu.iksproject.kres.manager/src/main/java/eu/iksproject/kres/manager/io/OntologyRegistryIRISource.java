@@ -14,8 +14,7 @@ import org.stlab.xd.registry.models.Registry;
 import org.stlab.xd.registry.models.RegistryItem;
 
 import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
-import eu.iksproject.kres.manager.ONManager;
-import eu.iksproject.kres.manager.registry.model.impl.RegistryLoader;
+import eu.iksproject.kres.api.manager.registry.KReSRegistryLoader;
 import eu.iksproject.kres.manager.util.OntologyUtils;
 
 /**
@@ -30,8 +29,9 @@ public class OntologyRegistryIRISource extends AbstractOntologyInputSource {
 
 	protected IRI registryIRI = null;
 
-	public OntologyRegistryIRISource(IRI registryIRI) {
-		this(registryIRI, null);
+	public OntologyRegistryIRISource(IRI registryIRI,
+			OWLOntologyManager ontologyManager, KReSRegistryLoader loader) {
+		this(registryIRI, ontologyManager, loader, null);
 	}
 
 	/**
@@ -42,22 +42,20 @@ public class OntologyRegistryIRISource extends AbstractOntologyInputSource {
 	 * @param registryIRI
 	 */
 	public OntologyRegistryIRISource(IRI registryIRI,
+			OWLOntologyManager ontologyManager, KReSRegistryLoader loader,
 			OntologyInputSource parentSrc) {
 
 		this.registryIRI = registryIRI;
 
 		Logger log = LoggerFactory.getLogger(getClass());
 
-		// TODO : support the use of other ontology managers.
-		OWLOntologyManager mgr = ONManager.get().getOwlCacheManager();
-		RegistryLoader loader = ONManager.get().getRegistryLoader();
 		Set<OWLOntology> subtrees = new HashSet<OWLOntology>();
 		for (Registry reg : loader.loadRegistriesEager(registryIRI)) {
 			for (RegistryItem ri : reg.getChildren()) {
 				if (ri.isLibrary())
 					try {
 						Set<OWLOntology> adds = loader.gatherOntologies(ri,
-								mgr, true);
+								ontologyManager, true);
 						subtrees.addAll(adds);
 					} catch (OWLOntologyAlreadyExistsException e) {
 						// Chettefreca
@@ -81,9 +79,10 @@ public class OntologyRegistryIRISource extends AbstractOntologyInputSource {
 		try {
 			if (parentSrc != null)
 				rootOntology = OntologyUtils.buildImportTree(parentSrc,
-						subtrees, mgr);
+						subtrees, ontologyManager);
 			else
-				rootOntology = OntologyUtils.buildImportTree(subtrees, mgr);
+				rootOntology = OntologyUtils.buildImportTree(subtrees,
+						ontologyManager);
 		} catch (OWLOntologyCreationException e) {
 			log.error(
 					"KReS :: Failed to build import tree for registry source "
