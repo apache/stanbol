@@ -88,9 +88,13 @@ public class Dulcifier implements EnhancementEngine, ServiceProperties {
 	public static final String DULCIFIER_RECIPE = "dulcifier.recipe";
 
     @Property(value={"peopleTypeRule[is(dbpedia:Person%2C?x) -> is(google:Person%2C?x)]",
-"peopleFISEStartRule [ has(fise:entity-reference%2C ?y%2C ?x) . values(fise:entity-label%2C ?y%2C ?z) . values(fise:selected-text%2C ?t%2C ?z) . values(fise:start%2C ?t%2C ?start) -> values(fise:start-position%2C ?x%2C ?start) ]",
-"peopleFISEEndRule [ has(fise:entity-reference%2C ?y%2C ?x) . values(fise:entity-label%2C ?y%2C ?z) . values(fise:selected-text%2C ?t%2C ?z) . values(fise:end%2C ?t%2C ?end) -> values(fise:end-position%2C ?x%2C ?end) ]",
-"peopleFISEContextRule [ has(fise:entity-reference%2C ?y%2C ?x) . values(fise:entity-label%2C ?y%2C ?z) . values(fise:selected-text%2C ?t%2C ?z) . values(fise:selection-context%2C ?t%2C ?context) -> values(fise:context%2C ?x%2C ?context) ]",
+//"myRule[has(fise:entity-reference%2C ?y%2C ?x) . has(<http://purl.org/dc/terms/relation>%2C ?y%2C ?r) ->  has(<http://purl.org/dc/terms/relation>%2C ?x%2C ?r)]",
+"fiseStartRul1[has(fise:entity-reference%2C ?y%2C ?x) . has(<http://purl.org/dc/terms/relation>%2C ?y%2C ?r) . values(fise:selected-text%2C ?r%2C ?t) . values(fise:start%2C ?r%2C ?start) -> is(fise:enhancementContext%2C ?t) . values(fise:start-position%2C ?r%2C ?start) . has(fise:hasEnhancementContext%2C ?x%2C ?r)]",
+"fiseEndRule1[has(fise:entity-reference%2C ?y%2C ?x) . has(<http://purl.org/dc/terms/relation>%2C ?y%2C ?r) . values(fise:selected-text%2C ?r%2C ?t) . values(fise:end%2C ?r%2C ?end) -> is(fise:enhancementContext%2C ?t) . values(fise:end-position%2C ?r%2C ?end) . has(fise:hasEnhancementContext%2C ?x%2C ?r) ]",
+"fiseContextRule1[has(fise:entity-reference%2C ?y%2C ?x) . has(<http://purl.org/dc/terms/relation>%2C ?y%2C ?r) . values(fise:selected-text%2C ?r%2C ?t) . values(fise:selection-context%2C ?r%2C ?context) -> is(fise:enhancementContext%2C ?t) . values(fise:context%2C ?r%2C ?context) . has(fise:hasEnhancementContext%2C ?x%2C ?r)]",
+//"fiseStartRul[has(fise:entity-reference%2C ?y%2C ?x) . values(fise:entity-label%2C ?y%2C ?z) . values(fise:selected-text%2C ?t%2C ?z) . values(fise:start%2C ?t%2C ?start) -> is(fise:enhancementContext%2C ?t) . values(fise:start-position%2C ?t%2C ?start) . has(fise:hasEnhancementContext%2C ?x%2C ?t)]",
+//"fiseEndRule[has(fise:entity-reference%2C ?y%2C ?x) . values(fise:entity-label%2C ?y%2C ?z) . values(fise:selected-text%2C ?t%2C ?z) . values(fise:end%2C ?t%2C ?end) -> is(fise:enhancementContext%2C ?t) . values(fise:end-position%2C ?t%2C ?end) . has(fise:hasEnhancementContext%2C ?x%2C ?t) ]",
+//"fiseContextRule[has(fise:entity-reference%2C ?y%2C ?x) . values(fise:entity-label%2C ?y%2C ?z) . values(fise:selected-text%2C ?t%2C ?z) . values(fise:selection-context%2C ?t%2C ?context) -> is(fise:enhancementContext%2C ?t) . values(fise:context%2C ?t%2C ?context) . has(fise:hasEnhancementContext%2C ?x%2C ?t)]",
 "peopleNameRule[is(dbpedia:Person%2C?x) . values(foaf:name%2C?x%2C?y) -> values(google:name%2C?x%2C?y)]",
 "peopleNickRule[is(dbpedia:Person%2C?x) . values(foaf:nick%2C?x%2C?y) -> values(google:nickname%2C?x%2C?y)]",
 "peoplePhotoRule[is(dbpedia:Person%2C?x) . has(dbpedia:thumbnail%2C?x%2C?y) -> has(google:photo%2C?x%2C?y)]",
@@ -101,6 +105,8 @@ public class Dulcifier implements EnhancementEngine, ServiceProperties {
 "peopleAffiliationRule[is(dbpedia:Person%2C?x) . has(dbpedia:employer%2C?x%2C?y) -> has(google:affiliation%2C?x%2C?y)]",
 "peopleKnowsRule[is(dbpedia:Person%2C?x) . has(foaf:knows%2C?x%2C?y) -> has(google:friend%2C?x%2C?y)]",
 "peopleAddressRule[is(dbpedia:Person%2C?x) . values(dbpedia:address%2C?x%2C?y) -> values(google:address%2C?x%2C?y)]",
+"peopleOccupationRule2[is(dbpedia:Person%2C?x) . has(dc:description%2C?x%2C?y) -> has(google:title%2C?x%2C?y)]",
+"peopleOccupationRule3[is(dbpedia:Person%2C?x) . has(skos:subject%2C?x%2C?y) -> has(google:affiliation%2C?x%2C?y)]",
 "productTypeRule[is(dbpedia:Organisation%2C?x) . has(dbpedia:product%2C?x%2C?y) -> is(google:Product%2C?y)]",
 "productNameRule1[is(dbpedia:Organisation%2C?x) . has(dbpedia:product%2C?x%2C?y) . values(foaf:name%2C?y%2C?z) -> values(google:name%2C?y%2C?z)]",
 "productNameRule2[is(dbpedia:Organisation%2C?x) . has(dbpedia:product%2C?x%2C?y) . values(dbprop:name%2C?y%2C?z) -> values(google:name%2C?y%2C?z)]",
@@ -116,10 +122,10 @@ public class Dulcifier implements EnhancementEngine, ServiceProperties {
 "organizationHomepageRule[is(dbpedia:Organisation%2C?x) . values(foaf:homepage%2C?x%2C?y) -> values(google:url%2C?x%2C?y)]",
 "organizationRegionRule[is(dbpedia:Organisation%2C?x) . has(dbpedia:region%2C?x%2C?y) -> has(google:region%2C?x%2C?y)]",
 "organizationCountryRule[is(dbpedia:Organisation%2C?x) . has(dbpedia:locationCountry%2C?x%2C?y) -> has(google:country-name%2C?x%2C?y)]",
-"organizationAddressRule[is(dbpedia:Organisation%2C?x) . values(dbpprop:address%2C?x%2C?y) -> values(google:address%2C?x%2C?y)]",
-"organizationStreetAddressRule[is(dbpedia:Organisation%2C?x) . values(dbpprop:streetaddress%2C?x%2C?y) -> values(google:street-address%2C?x%2C?y)]",
+"organizationAddressRule[is(dbpedia:Organisation%2C?x) . values(dbprop:address%2C?x%2C?y) -> values(google:address%2C?x%2C?y)]",
+"organizationStreetAddressRule[is(dbpedia:Organisation%2C?x) . values(dbprop:streetaddress%2C?x%2C?y) -> values(google:street-address%2C?x%2C?y)]",
 "organizationLocationRule[is(dbpedia:Organisation%2C?x) . has(dbpedia:location%2C?x%2C?y) -> has(google:locality%2C?x%2C?y)]",
-"organizationTelephoneRule[is(dbpedia:Organisation%2C?x) . values(dbpprop:telephon%2C?x%2C?y) -> values(google:tel%2C?x%2C?y)]",
+"organizationTelephoneRule[is(dbpedia:Organisation%2C?x) . values(dbprop:telephon%2C?x%2C?y) -> values(google:tel%2C?x%2C?y)]",
 "organizationPostalCodeRule[is(dbpedia:Organisation%2C?x) . values(dbpedia:postalCode%2C?x%2C?y) -> has(google:postal-code%2C?x%2C?y)]",
 "organizationGeoLatRule[is(dbpedia:Organisation%2C?x) . values(gn:lat%2C?x%2C?y) -> values(google:latitude%2C?x%2C?y)]",
 "organizationGeoLongRule[is(dbpedia:Organisation%2C?x) . values(gn:long%2C?x%2C?y) -> values(google:longitude%2C?x%2C?y)]",
@@ -127,33 +133,35 @@ public class Dulcifier implements EnhancementEngine, ServiceProperties {
 "eventTypeRule[is(dbpedia:Event%2C?x) -> is(google:Event%2C?x)]",
 "eventURLRule[is(dbpedia:Event%2C?x) . has(foaf:page%2C?x%2C?y) -> has(google:url%2C?x%2C?y)]",
 "eventLocationRule1[is(dbpedia:Event%2C?x) . has(dbpedia:place%2C?x%2C?y) -> has(google:location%2C?x%2C?y)]",
-"eventLocationRule2[is(dbpedia:Event%2C?x) . has(dbpedia:place%2C?x%2C?y) . has(owl:sameAs%2C?y%2C?z) . is(gn:Feature%2C?z) . values(wgs84_pos:lat%2C?z%2C?lat) . values(wgs84_pos:long%2C?z%2C?long) -> is(google:geo%2C?z) . has(goole:location%2C?x%2C?y) . has(google:geo%2C?y%2C?z) . values(goole:latitude%2C?z%2C?lat) . values(google:longitude%2C?z%2C?long)]",
+"eventLocationRule2[is(dbpedia:Event%2C?x) . has(dbpedia:place%2C?x%2C?y) . has(owl:sameAs%2C?y%2C?z) . is(gn:Feature%2C?z) . values(wgs84_pos:lat%2C?z%2C?lat) . values(wgs84_pos:long%2C?z%2C?long) -> is(google:geo%2C?z) . has(google:location%2C?x%2C?y) . has(google:geo%2C?y%2C?z) . values(google:latitude%2C?z%2C?lat) . values(google:longitude%2C?z%2C?long)]",
 "eventDateRule1[is(dbpedia:Event%2C?x) . values(dbpedia:date%2C?x%2C?y) -> values(google:startDate%2C?x%2C?y)]",
 "eventCategoryRule[is(dbpedia:Event%2C?x) . has(skos:subject%2C?x%2C?y) -> has(google:eventType%2C?x%2C?y)]",
 "eventPhotoRule[is(dbpedia:Event%2C?x) . has(dbpedia:thumbnail%2C?x%2C?y) -> has(google:photo%2C?x%2C?y)]",
 "recipeClassAssertionRule[has(skos:subject%2C?x%2C<http://dbpedia.org/page/Category:World_cuisine>) -> is(google:Recipe%2C?x)]",
 "recipeTypeRule[has(skos:subject%2C?x%2C<http://dbpedia.org/page/Category:World_cuisine>) . has(skos:subject%2C?x%2C?y) -> has(google:recipeType%2C?x%2C?y)]",
-"recipePhotoRule[has(skos:subject%2C?x%2C<http://dbpedia.org/page/Category:World_cuisine>) . has(dbpedia:thumbnail%2C?x%2C?y) -> has(google:photo%2C?x%2C?y)]",
-"recipePhotoRule[has(skos:subject%2C?x%2C<http://dbpedia.org/page/Category:World_cuisine>) . values(dbpedia:abstract%2C?x%2C?y) -> values(google:summary%2C?x%2C?y)]"},
+"recipePhotoRule1[has(skos:subject%2C?x%2C<http://dbpedia.org/page/Category:World_cuisine>) . has(dbpedia:thumbnail%2C?x%2C?y) -> has(google:photo%2C?x%2C?y)]",
+"recipePhotoRule2[has(skos:subject%2C?x%2C<http://dbpedia.org/page/Category:World_cuisine>) . values(dbpedia:abstract%2C?x%2C?y) -> values(google:summary%2C?x%2C?y)]"},
                 cardinality=1000, description="Rule/s specified in kReS syntax. This/these rule/s belong to the specified recipe")
     public static final String DULCIFIER_RECIPE_RULE ="dulcifier.recipe.rule";
     
     @Property(value={"dbpedia = <http://dbpedia.org/ontology/>",
-    "dbpprop = <http://dbpedia.org/property/>",
+    "dbprop = <http://dbpedia.org/property/>",
     "google = <http://rdf.data-vocabulary.org/#>",
     "foaf = <http://xmlns.com/foaf/0.1/>",
     "rdf = <http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
     "wgs84_pos = <http://www.w3.org/2003/01/geo/wgs84_pos#>",
     "skos = <http://www.w3.org/2004/02/skos/core#>",
     "gn = <http://www.geonames.org/ontology#>",
-    "fise = <http://fise.iks-project.eu/ontology/>"},
+    "fise = <http://fise.iks-project.eu/ontology/>",
+    "owl = <http://www.w3.org/2002/07/owl#>",
+    "dc = <http://purl.org/dc/elements/1.1/>"},
             cardinality=1000, description="Base prefix to be used for the rules.")
     public static final String DULCIFIER_RECIPE_RULE_PREFIX ="dulcifier.recipe.rule.prefix";
 
     @Property(value={"http://ontologydesignpatterns.org/ont/iks/kres/dbpedia_demo.owl",""}, cardinality=1000, description="To fix a set of resolvable ontology URIs for the scope's ontologies.")
     public static final String DULCIFIER_SCOPE_CORE_ONTOLOGY ="dulcifier.scope.core.ontology";
 
-    @Property(value="false",description="If true: the previously generated RDF is deleted and substituted with the new one. If false: the new one is appended to the old RDF. Possible value: true or false.")
+    @Property(value="true",description="If true: the previously generated RDF is deleted and substituted with the new one. If false: the new one is appended to the old RDF. Possible value: true or false.")
     public static final String DULCIFIER_APPEND = "dulcifier.append";
 
 	@Reference
@@ -332,13 +340,6 @@ public class Dulcifier implements EnhancementEngine, ServiceProperties {
 			 * the Semion Manager.
 			 */
 
-			try {
-				man.saveOntology(ontology, new RDFXMLOntologyFormat(), System.out);
-			} catch (OWLOntologyStorageException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			
 			SemionRefactorer refactorer = semion.getRegisteredRefactorer();
 
 			log.debug("Refactoring recipe IRI is : " + recipeIRI);
@@ -355,6 +356,7 @@ public class Dulcifier implements EnhancementEngine, ServiceProperties {
 				log.debug("Rules in the recipe are : "+ recipe.getkReSRuleList().size(), this);
 
 				log.debug("The ontology to be refactor is : " + ontology, this);
+				
 				ontology = refactorer.ontologyRefactoring(ontology, recipeIRI);
                                 
 			} catch (SemionRefactoringException e) {
@@ -618,12 +620,17 @@ public class Dulcifier implements EnhancementEngine, ServiceProperties {
             ruleBasePrefix  =aux;
         }
         
-        String auxruleprefix="";
-        for(int p = 0; p<ruleBasePrefix.length; p++){
-            auxruleprefix = auxruleprefix+ruleBasePrefix[p]+" . ";
+        
+        String kReSRuleSyntax = "";
+        
+        /**
+         * We add the prefixes in the rules head.
+         * The syntax used for expressing the rules is the KReSRule syntax.
+         */
+        for(String auxruleprefix : ruleBasePrefix){
+        	kReSRuleSyntax += auxruleprefix+" . ";
         }
 
-        String kReSRulePrefixDef =auxruleprefix;
 
         /**
          * step 2.2
@@ -638,18 +645,19 @@ public class Dulcifier implements EnhancementEngine, ServiceProperties {
             ruleSyntax  =aux;
         }
 
-        String auxrule="";
-        for(int p = 0; p<ruleSyntax.length; p++){
-            auxrule = auxrule+ruleSyntax[p].replaceAll("%2C",",")+" . ";
+        
+        for(String auxrule : ruleSyntax){
+        	kReSRuleSyntax += auxrule.replaceAll("%2C",",")+" . ";
         }
 
-        if(auxrule.endsWith(" . "))
-            auxrule=auxrule.substring(0,auxrule.lastIndexOf(" . ")+1);
 
-        String kReSRuleBodyAndHead = kReSRulePrefixDef+auxrule;
-        kReSRuleBodyAndHead = kReSRuleBodyAndHead.trim();
+        if(kReSRuleSyntax.endsWith(" . "))
+            kReSRuleSyntax = kReSRuleSyntax.substring(0,kReSRuleSyntax.lastIndexOf(" . ")+1);
+
         
-        log.debug("The complete rule to be added is: "+kReSRuleBodyAndHead);
+        kReSRuleSyntax = kReSRuleSyntax.trim();
+        
+        log.debug("The complete rule to be added is: "+kReSRuleSyntax);
 
         //String kReSRulePerson = "dbpedia = <http://dbpedia.org/ontology/> . google = <http://rdf.data-vocabulary.org#> . foaf = <http://xmlns.com/foaf/0.1/homepage> . typeRule [is(dbpedia:Person, ?x) -> is(google:Person, ?x)] . nameRule [ values(foaf:name, ?x, ?y) -> values(google:name, ?x, ?y) ] . nickRule [ values(foaf:nick, ?x, ?y) -> values(google:nickname, ?x, ?y) ] . photoRule [ has(dbpedia:thumbnail, ?x, ?y) -> has(google:photo, ?x, ?y) ] . professionRule [has(dbpedia:profession, ?x, ?y) -> has(google:title, ?x, ?y)] . occupationRule [has(dbpedia:occupation, ?x, ?y) -> has(google:title, ?x, ?y)] . roleRule [values(dbpedia:role, ?x, ?y) -> values(google:role, ?x, ?y)] . homepageRule [has(foaf:homepage, ?x, ?y) -> has(google:url, ?x, ?y)] . affiliationRule [has(dbpedia:employer, ?x, ?y) -> has(google:affiliation, ?x, ?y)] . knowsRule [has(foaf:knows, ?x, ?y) -> has(google:friend, ?x, ?y)] . addressRule [values(dbpedia:address, ?x, ?y) -> values(google:address, ?x, ?y)]";
 
@@ -657,7 +665,7 @@ public class Dulcifier implements EnhancementEngine, ServiceProperties {
          * step 3
          */
         try {
-        	ruleStore.addRuleToRecipe(recipeIRI.toString(), kReSRuleBodyAndHead);
+        	ruleStore.addRuleToRecipe(recipeIRI.toString(), kReSRuleSyntax);
         	log.debug("Added rules to recipe " + recipeIRI.toString());
 		} catch (NoSuchRecipeException e) {
 			log.error("The recipe does not exists: ", e);

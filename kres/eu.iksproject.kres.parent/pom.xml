@@ -6,27 +6,27 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-
 	<groupId>eu.iksproject</groupId>
 	<artifactId>eu.iksproject.kres.parent</artifactId>
 	<packaging>pom</packaging>
-	<version>0.7</version>
+  <version>0.7</version>
 
 	<name>IKS KReS parent POM</name>
-	<description>Parent POM for the KReS project</description>
-
-	<inceptionYear>2010</inceptionYear>
+  <description>
+    Parent POM for the KReS project
+  </description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
+  <inceptionYear>2010</inceptionYear>
+
 	<build>
 		<plugins>
 
-			<!--
-				requires Java 6 because Clerezza artefacts are compiled using Java 6
-			-->
+      <!-- requires Java 6 because Clerezza artefacts are compiled
+       using Java 6 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
@@ -38,9 +38,8 @@
 						</goals>
 						<configuration>
 							<rules>
-								<!--
-									Constraint disabled since even fixing the version for the maven
-									eclipse plugin does not seem to make this rule pass
+                <!-- Constraint disabled since even fixing the version for
+                the maven eclipse plugin does not seem to make this rule pass
 									<requirePluginVersions/>
 								-->
 								<requireJavaVersion>
@@ -125,8 +124,9 @@
 					<artifactId>maven-scr-plugin</artifactId>
 					<version>1.4.2</version>
 					<!--
-						slf4j impl is needed when QDox inspects/loads classes that use a
-						static field for the logger, so that those classes can be loaded.
+             slf4j impl is needed when QDox inspects/loads classes
+              that use a static field for the logger, so that those
+              classes can be loaded.
 					-->
 					<dependencies>
 						<dependency>

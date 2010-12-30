@@ -7,10 +7,15 @@
 
   <modelVersion>4.0.0</modelVersion>
 
+  <properties>
+    <kres-version>0.7</kres-version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <groupId>eu.iksproject</groupId>
   <artifactId>eu.iksproject.kres.reactor</artifactId>
   <packaging>pom</packaging>
-  <version>0.6-SNAPSHOT</version>
+  <version>${kres-version}</version>
 
   <name>IKS KReS reactor</name>
   <description>
@@ -65,6 +70,8 @@
     <!-- Jersey -->
     <module>eu.iksproject.kres.jersey</module>
     <!-- <module>eu.iksproject.kres.manager.jersey</module> -->
+
+    <!-- Launcher -->
 
  </modules>
 </project>
