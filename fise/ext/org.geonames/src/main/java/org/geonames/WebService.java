@@ -1080,7 +1080,7 @@ public class WebService {
     private static void checkException(Element root) throws Exception {
         Element message = root.getChild("status");
         if (message != null) {
-            throw new Exception(message.getAttributeValue("message"));
+            throw new IOException(message.getAttributeValue("message"));
         }
     }
 

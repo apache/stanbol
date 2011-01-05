@@ -139,6 +139,11 @@ public class TestLocationEnhancementEngine {
             } else if(e.getCause() instanceof SocketTimeoutException){
                 log.warn("Seams like the geonames.org webservice is currently unavailable -> skipping this test",e.getCause());
                 return;
+            } else if (e.getMessage().contains("overloaded with requests")) {
+                log.warn(
+                        "Seams like the geonames.org webservice is currently unavailable -> skipping this test",
+                        e.getCause());
+                return;
             }
         }
         // ... and test the results

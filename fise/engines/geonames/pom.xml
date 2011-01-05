@@ -43,29 +43,38 @@
 		<url>http://wiki.iks-project.eu/index.php/FISEcodeAndDocs</url>
 	</scm>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<Export-Package>
-							eu.iksproject.fise.engines.geonames;version=${pom.version},
-            			</Export-Package>
-						<Private-Package>
-							eu.iksproject.fise.engines.geonames.impl.*,
-            			</Private-Package>
-					</instructions>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-scr-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <extensions>true</extensions>
+          <configuration>
+            <instructions>
+              <Export-Package>
+                eu.iksproject.fise.engines.geonames;version=${pom.version},
+              </Export-Package>
+              <Private-Package>
+                eu.iksproject.fise.engines.geonames.impl.*,
+              </Private-Package>
+            </instructions>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-scr-plugin</artifactId>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <excludes>
+              <exclude>**/TestLocationEnhancementEngine*.java</exclude>
+            </excludes>
+          </configuration>
+        </plugin>
+      </plugins>
+    </build>
 
 	<dependencies>
 		<dependency>
