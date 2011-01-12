@@ -733,9 +733,9 @@
 			<dependency>
 				<groupId>com.ibm.icu</groupId>
 				<artifactId>icu4j</artifactId>
-				<version>3.4.5</version>
+				<version>3.4.4</version>
 				<scope>provided</scope>
-			</dependency>			
+			</dependency>
 					
 			<!-- Sling -->
 			<dependency>
