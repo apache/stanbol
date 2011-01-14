@@ -30,14 +30,25 @@ public class InMemoryRepresentation implements Representation,Cloneable {
     protected final Map<String,Object> representation;
     protected final Map<String,Object> unmodRepresentation;
     private final String id;
-
-    public InMemoryRepresentation(String id){
+    /**
+     * creates a new InMemoryRepresentation for the parsed ID
+     * @param id the id of the representation
+     */
+    protected InMemoryRepresentation(String id){
         this(id,null);
     }
     /**
-     * Initialise a new InMemoryRepresenation that contains already some data.
-     * @param id
-     * @param representation
+     * Initialise a new InMemoryRepresenation with the parsed map. Note that the
+     * parsed map is directly used to store the data. That means that callers
+     * MUST keep in minds that changes to that map will influence the internal
+     * state of this instance.<br>
+     * The intension of this constructor is to allow also to define the actual
+     * map implementation used to store the data.
+     * If one also wants to directly parse data already contained within an
+     * other representation one MUST first create deep copy of the according
+     * map!
+     * @param id the id for the Representation
+     * @param representation the map used by this representation to store it's data
      */
     protected InMemoryRepresentation(String id, Map<String,Object> representation){
         if(id == null){
@@ -54,11 +65,14 @@ public class InMemoryRepresentation implements Representation,Cloneable {
     @SuppressWarnings("unchecked")
     @Override
     public void add(String field, Object parsedValue) {
-        //TODO:add processing of values
-        // URI, URL -> Reference
-        // String[] -> Text
-        // check Collections!
-        // The rest should be added as Objects
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
+        }
+        if(parsedValue == null){
+            throw new IllegalArgumentException("NULL values are not supported by Representations");
+        }
         Collection<Object> newValues = new ArrayList<Object>();
         ModelUtils.checkValues(valueFactory, parsedValue, newValues);
         Object values = representation.get(field);
@@ -81,12 +95,12 @@ public class InMemoryRepresentation implements Representation,Cloneable {
             representation.put(field, newValues.size() == 1?newValues.iterator().next():newValues);
         }
     }
-    protected void addValues(String field,Collection<Object> values){
-
-    }
 
     @Override
     public void addNaturalText(String field, String text, String... languages) {
+        if(text == null){
+            throw new IllegalArgumentException("NULL was parsed for the text! NULL values are not supported by Representations");
+        }
         if(languages == null || languages.length<1){ //if no language is parse add the default lanugage!
             add(field,valueFactory.createText(text, null));
         } else {
@@ -98,6 +112,9 @@ public class InMemoryRepresentation implements Representation,Cloneable {
 
     @Override
     public void addReference(String field, String reference) {
+        if(reference == null){
+            throw new IllegalArgumentException("NULL values are not supported by Representations");
+        }
         add(field, valueFactory.createReference(reference));
     }
     /**
@@ -108,6 +125,11 @@ public class InMemoryRepresentation implements Representation,Cloneable {
      */
     @SuppressWarnings("unchecked")
     private Collection<Object> getValuesAsCollection(String field){
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
+        }
         Object value = representation.get(field);
         if(value == null){
             return Collections.emptySet();
@@ -125,6 +147,11 @@ public class InMemoryRepresentation implements Representation,Cloneable {
 
     @Override
     public Iterator<Object> get(String field) {
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
+        }
         return getValuesAsCollection(field).iterator();
     }
     @Override
@@ -169,29 +196,53 @@ public class InMemoryRepresentation implements Representation,Cloneable {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void remove(String field, Object value) {
+    public void remove(String field, Object parsedValue) {
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
+        }
+        Collection<Object> removeValues = new ArrayList<Object>();
+        ModelUtils.checkValues(valueFactory, parsedValue, removeValues);
         Object values = representation.get(field);
-        if(values == null) return;
-        if(value.equals(value)){
+        if(values == null) {
+            return;
+        } else if(removeValues.contains(values)){
+            //in case this field has a single value and this values is part of
+            //the values to remove -> remove the whole field
             representation.remove(field);
         } else if(values instanceof Collection<?>){
-            if(((Collection<Object>)values).remove(value) && //remove the Element
+            if(((Collection<Object>)values).removeAll(removeValues) && //remove all Elements
                     ((Collection<Object>)values).size()<2){ //if removed check for size
-                //it only one element remaining -> replace the collection with a Object
-                representation.put(field, ((Collection<Object>)values).iterator().next());
+                if(((Collection<Object>)values).size()==1){
+                    //only one element remaining -> replace the collection with a Object
+                    representation.put(field, ((Collection<Object>)values).iterator().next());
+                } else {
+                    //if no element remains, remove the field
+                    representation.remove(field);
+                }
             }
-
-        } //else ignore
+        } //else ignore (single value for field && value not to be removed)
     }
 
     @Override
     public void removeAll(String field) {
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
+        }
         representation.remove(field);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void removeAllNaturalText(String field, String... languages) {
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
+        }
         Object values = representation.get(field);
         if(values == null) return;
         if(values instanceof Collection<?>){
@@ -220,6 +271,11 @@ public class InMemoryRepresentation implements Representation,Cloneable {
     @SuppressWarnings("unchecked")
     @Override
     public void removeNaturalText(String field, String text, String... languages) {
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
+        }
         Object values = representation.get(field);
         if(values == null) return;
         if(values instanceof Collection<?>){
@@ -259,8 +315,15 @@ public class InMemoryRepresentation implements Representation,Cloneable {
 
     @Override
     public void set(String field, Object value) {
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
+        }
         representation.remove(field);
-        add(field,value);
+        if(value != null){
+            add(field,value);
+        }
 
     }
 
@@ -307,7 +370,7 @@ public class InMemoryRepresentation implements Representation,Cloneable {
         Collection<Object> values = getValuesAsCollection(field);
         return new TypeSaveIterator<Reference>(values.iterator(), Reference.class);
     }
-    private static String getNaturalLanguageValue(Object check,Set<String> langSet,boolean isNullLanguage){
+    protected static String getNaturalLanguageValue(Object check,Set<String> langSet,boolean isNullLanguage){
         if(check instanceof Text){
             Text text = (Text)check;
             if(langSet == null || langSet.contains(text.getLanguage())){
@@ -318,7 +381,7 @@ public class InMemoryRepresentation implements Representation,Cloneable {
         } //type does not fit -> ignore
         return null; //no label found
     }
-    public static String getNaturalLanguageValue(Object check,String...languages){
+    protected static String getNaturalLanguageValue(Object check,String...languages){
         Set<String> langSet;
         boolean isNullLanguage;
         if(languages != null && languages.length>1){
@@ -335,7 +398,7 @@ public class InMemoryRepresentation implements Representation,Cloneable {
      * @param languages
      * @return
      */
-    public static boolean isNaturalLanguageValue(Object check,String...languages){
+    protected static boolean isNaturalLanguageValue(Object check,String...languages){
         return getNaturalLanguageValue(check,languages) != null;
     }
     @Override

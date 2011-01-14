@@ -20,22 +20,39 @@ import javax.xml.namespace.QName;
 import eu.iksproject.rick.servicesapi.model.Reference;
 import eu.iksproject.rick.servicesapi.model.Text;
 /**
- * Holds data types used by Rick. Uses the xsd data types where possible.
- *
+ * Defines the data types that need to be supported by the model 
+ * implementation.<p>
+ * Each data type defines:<ul>
+ * <li><b>short name:</b> An short and human readable ID that is unique within 
+ * the list of data types. Currently <code>prefix:localName</code> is used as 
+ * short name and prefixes are used as defined by the {@link NamespaceEnum}.
+ * <li><b>uri:</b> Ths is the global unique UD of the namespace. If possible the
+ * URI defined by XSD is used (e.g. http://www.w3.org/2001/XMLSchema#string for
+ * strings). 
+ * <li><b>java class:</b> Each data type is mapped to exactly one preferred 
+ * and 0..n optional java representations. Note that
+ * different data types may use the same preferred as well as optional java class 
+ * meaning. This means that the java class can not be used to uniquely identify 
+ * a data type.
+ * </ul>
+ * The {@link #name()} is not used, but typically the local name with an capital
+ * first letter is used. The URI of the data type is used by the implementation
+ * of {@link #toString()}.<p>
+ * In addition the the definition of all the data types this class also provides
+ * several utilities for getting the data type by short name, URI as well as
+ * preferred or all defined java class mappings.
+ * 
  * @author Rupert Westenthaler
  *
  */
 public enum DataTypeEnum {
     //Rick specific
-    //Reference
     Reference(NamespaceEnum.rickModel,"ref",Reference.class),
-    //Natural language Text
     Text(NamespaceEnum.rickModel,"text",Text.class),
     //xsd types
     /**
      * currently URIs are preferable mapped to {@link Reference}, because there
-     * may be RDF URIs that are not valid {@link URI}s nor {@link URL}s. However
-     * existing URI and URL instances are also accepted.
+     * may be RDF URIs that are not valid {@link URI}s nor {@link URL}s.
      */
     AnyUri("anyURI",Reference.class,URI.class,URL.class),
     Boolean("boolean",Boolean.class),
@@ -58,10 +75,10 @@ public enum DataTypeEnum {
     final String shortName;
     final String uri;
     final Set<Class<?>> additional;
-    DataTypeEnum(Class<?> javaType,Class<?>...additional){
+    private DataTypeEnum(Class<?> javaType,Class<?>...additional){
         this(null,null,javaType,additional);
     }
-    DataTypeEnum(String localName,Class<?> javaType,Class<?>...additional){
+    private DataTypeEnum(String localName,Class<?> javaType,Class<?>...additional){
         this(null,localName,javaType,additional);
     }
     private DataTypeEnum(NamespaceEnum namespace,Class<?> javaType,Class<?>...additional) {

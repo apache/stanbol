@@ -3,7 +3,12 @@ package eu.iksproject.rick.servicesapi.defaults;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * Defines commonly used name spaces to prevent multiple definitions in several
+ * classes
+ * @author Rupert Westenthaler
+ *
+ */
 public enum NamespaceEnum {
     //Namespaces defined by RICK
     rickModel("rick","http://www.iks-project.eu/ontology/rick/model/"),
@@ -11,9 +16,9 @@ public enum NamespaceEnum {
 
 
     //First the XML Namespaces
-    xsd("http://www.w3.org/2001/XMLSchema/"),
-    xsi("http://www.w3.org/2001/XMLSchema-instance/"),
-    xml("http://www.w3.org/XML/1998/namespace/"),
+    xsd("http://www.w3.org/2001/XMLSchema#"),
+    xsi("http://www.w3.org/2001/XMLSchema-instance#"),
+    xml("http://www.w3.org/XML/1998/namespace#"),
     //Start with the semantic Web Namespaces
     rdf("http://www.w3.org/1999/02/22-rdf-syntax-ns#"),
     rdfs("http://www.w3.org/2000/01/rdf-schema#"),

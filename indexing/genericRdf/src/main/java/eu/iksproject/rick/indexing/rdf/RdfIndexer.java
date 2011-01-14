@@ -130,7 +130,7 @@ public class RdfIndexer {
      * @author Rupert Westenthaler
      *
      */
-    public static enum IndexingMode{ REPLACE, APPEND }
+    public static enum IndexingMode{ NORMAL, RANKING_MAP_BASED }
 
     public static final String RDF_XML = "application/rdf+xml";
     public static final String TURTLE = "text/turtle";
@@ -192,299 +192,282 @@ public class RdfIndexer {
      * The {@link Object#toString()} method is used on elements to get the actual type!
      */
     public static final String KEY_RDF_TYPES = "eu.iksproject.rick.indexing.rdf.indexedTypes";
-    /**
-     * Key used to parse the indexing mode. Values should be of instance {@link IndexingMode}
-     * or the {@link Object#toString()} value should be a member of this enum!
-     */
-    public static final String KEY_INDEXING_MODE = "eu.iksproject.rick.indexing.rdf.indexingMode";
-    /**
-     * If <code>true</code> than no RDF data are loaded. Instead it is assumed, that
-     * the Graph of the parsed {@link #KEY_MODEL_NAME} already contains all the needed
-     * data!<p>
-     * This can be useful if one first wants to index rdf:type A and than rdf:type B
-     * based on the same set of data
-     */
-    public static final String KEY_SKIP_READ = "eu.iksproject.rick.indexing.rdf.skipRead";
-    /**
-     * The number of {@link Representation}s stored at once in the SolrYard!
-     */
-    public static final String KEY_CHUNK_SIZE = "eu.iksproject.rick.indexing.rdf.chunkSize";
-    /**
-     * Can be used to parse a map with {@link String} entity id, {@link Float} rank
-     * for entities.<p>
-     * Such values are added to Representations for the {@link RdfResourceEnum#signRank}
-     * field.
-     */
-    public static final String KEY_ENTITY_RANKINGS = "eu.iksproject.rick.indexing.rdf.entityRankings";
-    /**
-     * Can be used to activate ignoring of Entities without a page rank
-     */
-    public static final String KEY_IGNORE_ENTITIES_WITHOUT_ENTITY_RANKING = "eu.iksproject.rick.indexing.rdf.ignoreEntitiesWithoutRankings";
-    /**
-     * If set to a value >= 0 this is used to exclude Entities with a lower or
-     * missing entity rank
-     */
-    public static final String KEY_REQUIRED_ENTITY_RANKING = "eu.iksproject.rick.indexing.rdf.requiredRanking";
-    /**
-     * The rank for entities with a missing rank. This takes only effect if
-     * {@link #KEY_IGNORE_ENTITIES_WITHOUT_ENTITY_RANKING} is set to <code>false</code>
-     * (the default)
-     */
-    public static final String KEY_DEFAULT_ENTITY_RANKING = "eu.iksproject.rick.indexing.rdf.defaultRanking";
-    /**
-     * Expert only: This allows to enable indexing based on the keys in the map parsed with the
-     * entity rankings. This will only index entities that are keys in that map.
-     * If no Map is parsed by {@link #KEY_ENTITY_RANKINGS}, than activating this mode
-     * will not be successful and a warning will be written.<p>
-     * This mode is about 50% slower than the usual indexing mode. Therefore this
-     * mode makes only sense id less than 50% of the entities are indexed.
-     */
-    public static final String KEY_ENTITY_RANKING_BASED_INDEXING_MODE = "eu.iksproject.rick.indexing.rdf.rankingBasedIndexingMode";
-    /**
-     * The resume Mode first checks if a Resource is already present in the parsed
-     * Yard. If this is the case, than the representation is not indexes again.<p>
-     * This mode is intended to resume indexing after stopping a previous call before
-     * finished. The default value = false.
-     */
-    public static final String KEY_RESUME_MODE = "eu.iksproject.rick.indexing.rdf.resumeMode";
+	/**
+	 * Expert only: This allows to set the indexing based on the keys in the map parsed with the
+	 * entity rankings. This will only index entities that are keys in that map.
+	 * If no Map is parsed by {@link #KEY_ENTITY_RANKINGS}, than activating this mode
+	 * will not be successful and a warning will be written.<p>
+	 * This mode is about 50% slower than the usual indexing mode. Therefore this
+	 * mode makes only sense id less than 50% of the entities are indexed.
+	 */
+	public static final String KEY_INDEXING_MODE = "eu.iksproject.rick.indexing.rdf.indexingMode";
+	/**
+	 * If <code>true</code> than no RDF data are loaded. Instead it is assumed, that
+	 * the Graph of the parsed {@link #KEY_MODEL_NAME} already contains all the needed
+	 * data!<p>
+	 * This can be useful if one first wants to index rdf:type A and than rdf:type B
+	 * based on the same set of data
+	 */
+	public static final String KEY_SKIP_READ = "eu.iksproject.rick.indexing.rdf.skipRead";
+	/**
+	 * The number of {@link Representation}s stored at once in the SolrYard!
+	 */
+	public static final String KEY_CHUNK_SIZE = "eu.iksproject.rick.indexing.rdf.chunkSize";
+	/**
+	 * Can be used to parse a map with {@link String} entity id, {@link Float} rank
+	 * for entities.<p>
+	 * Such values are added to Representations for the {@link RdfResourceEnum#signRank}
+	 * field.
+	 */
+	public static final String KEY_ENTITY_RANKINGS = "eu.iksproject.rick.indexing.rdf.entityRankings";
+	/**
+	 * Can be used to activate ignoring of Entities without a page rank
+	 */
+	public static final String KEY_IGNORE_ENTITIES_WITHOUT_ENTITY_RANKING = "eu.iksproject.rick.indexing.rdf.ignoreEntitiesWithoutRankings";
+	/**
+	 * If set to a value >= 0 this is used to exclude Entities with a lower or 
+	 * missing entity rank
+	 */
+	public static final String KEY_REQUIRED_ENTITY_RANKING = "eu.iksproject.rick.indexing.rdf.requiredRanking";
+	/**
+	 * The rank for entities with a missing rank. This takes only effect if
+	 * {@link #KEY_IGNORE_ENTITIES_WITHOUT_ENTITY_RANKING} is set to <code>false</code>
+	 * (the default)
+	 */
+	public static final String KEY_DEFAULT_ENTITY_RANKING = "eu.iksproject.rick.indexing.rdf.defaultRanking";
+	/**
+	 * The resume Mode first checks if a Resource is already present in the parsed
+	 * Yard. If this is the case, than the representation is not indexes again.<p>
+	 * This mode is intended to resume indexing after stopping a previous call before
+	 * finished. The default value = false.
+	 */
+	public static final String KEY_RESUME_MODE = "eu.iksproject.rick.indexing.rdf.resumeMode";
+	
+	private final IndexingMode indexingMode;
+	private final Yard yard;
+	private final ValueFactory vf;
+	private final List<File> rdfFiles;
+	private final File indexingDir;
+	private final String modelName;
+//	private final ParsingProvider parser = new JenaParserProvider();
+	//private final WeightedTcProvider provider;
+	private final FieldMapper mapper;
+	private final Set<String> types;
+	//private MGraph indexingGraph;
+	private final DatasetGraphTDB indexingDataset;
+	private final boolean skipRead;
+	private Location modelLocation;
+	private int indexingChunkSize = 1000;
+	
+	//vars for entity rankings
+	private Map<String,Float> entityRankings = null;
+	private boolean ignoreEntitiesWithoutRank = false;
+	private float defaultEntityRanking = -1;
+	private String entityRankingField = RdfResourceEnum.signRank.getUri();
+	private float minimumRequiredEntityRanking = -1;
+	private boolean resumeMode;
+	
+	
+	public RdfIndexer(Dictionary<String, Object> config){
+		this.yard = (Yard)config.get(KEY_YARD);
+		if(yard == null){
+			throw new IllegalArgumentException("Parsed config MUST CONTAIN a Yard. Use the key "+KEY_YARD+" to parse the YardInstance used to store the geonames.org index!");
+		} else {
+			log.info(String.format("Using Yard %s (id=%s) to index parsed RDF data",
+					yard.getName(),yard.getId()));
+		}
+		this.vf = yard.getValueFactory();
+		Object rdfFiles = config.get(KEY_RDF_FILES);
+		if(rdfFiles instanceof Iterable<?>){
+			this.rdfFiles = new ArrayList<File>();
+			for(Object value : (Iterable<?>)rdfFiles){
+				this.rdfFiles.add(checkFile(value.toString()));
+			}
+		} else {
+			this.rdfFiles = Collections.singletonList(checkFile(rdfFiles.toString()));
+		}
+		Object indexingDir = config.get(KEY_RDF_STORE_DIR);
+		if(indexingDir == null){
+			indexingDir = "indexingData";
+			config.put(KEY_RDF_STORE_DIR, indexingDir);
+		}
+		this.indexingDir = checkFile(indexingDir.toString(), false, true);
+		Object modelName = config.get(KEY_MODEL_NAME);
+		if(modelName == null){
+			modelName = "indexingModel-"+ModelUtils.randomUUID().toString();
+			config.put(KEY_MODEL_NAME, modelName);
+		}
+		this.modelName = modelName.toString();
+		//init the types!
+		Iterable<?> types = (Iterable<?>)config.get(KEY_RDF_TYPES);
+		if(types != null){
+			Set<String> typeSet = new HashSet<String>();
+			for(Object type : types){
+				if(type != null){
+					typeSet.add(type.toString());
+					log.info("  - adding Resoures with rdf:type "+type);
+				}
+			}
+			if(typeSet.isEmpty()){
+				log.info("  - adding all Types (no rdf:type based restriction for RDF Reseource present)");
+				this.types = null;
+			} else {
+				this.types = typeSet;
+			}
+		} else{
+			log.info("  - adding all Types (no rdf:type based restriction for RDF Reseource present)");
+			this.types = null; //null or an iterable with one or more elements!
+		}
+		//init the indexing mode
+		Object indexingMode = config.get(KEY_INDEXING_MODE);
+		if(indexingMode == null){
+			this.indexingMode = IndexingMode.NORMAL; //default to replace
+		} else if(indexingMode instanceof IndexingMode){
+			this.indexingMode = (IndexingMode)indexingMode;
+		} else {
+			try {
+				this.indexingMode = IndexingMode.valueOf(indexingMode.toString());
+			}catch (IllegalArgumentException e) {
+				//catch and re-throw with a better message!
+				throw new IllegalArgumentException(
+						String.format("Values of KEY \"%s\" MUST BE of Type %s or the toString() value MUST BE a member of this Enumeration. If the Key is missing %s is used!",
+								KEY_INDEXING_MODE,IndexingMode.class,IndexingMode.NORMAL),e);
+			}
+		}
+		//init the fieldMapper
+		Iterable<?> mappings = (Iterable<?>)config.get(KEY_FIELD_MAPPINGS);
+		List<FieldMapping> fieldMappings;
+		if(mappings != null){
+			fieldMappings = new ArrayList<FieldMapping>();
+			for(Object mappingString : mappings){
+				if(mappingString != null){
+					FieldMapping fieldMapping = FieldMappingUtils.parseFieldMapping(mappingString.toString());
+					if(fieldMapping != null){
+						fieldMappings.add(fieldMapping);
+					}
+				}
+			}
+			if(!fieldMappings.isEmpty()){
+				this.mapper = new DefaultFieldMapperImpl(ValueConverterFactory.getInstance(vf));
+				for(FieldMapping mapping : fieldMappings){
+					mapper.addMapping(mapping);
+				}
+				//we need to add a mapping for the field rankings (if a mapper is present)
+				mapper.addMapping(new FieldMapping(this.entityRankingField));
+			} else {
+				this.mapper = null;
+			}
+		} else {
+			this.mapper = null;
+		}
+		File modelDir = new File(this.indexingDir,this.modelName);
+		if(!modelDir.exists()){
+			modelDir.mkdir();
+		} else if(!modelDir.isDirectory()){
+			throw new IllegalStateException(String.format("A directory for %s already exists but is not a directory!",modelDir.getAbsoluteFile()));
+		} //else exists and is a dir -> nothing to do
+		Object skipRead = config.get(KEY_SKIP_READ);
+		if(skipRead != null){
+			if(skipRead instanceof Boolean){
+				this.skipRead = ((Boolean)skipRead).booleanValue();
+			} else {
+				this.skipRead = Boolean.parseBoolean(skipRead.toString());
+			}
+		} else {
+			this.skipRead = false;
+		}
+		Integer chunkSize = (Integer)config.get(KEY_CHUNK_SIZE);
+		if(chunkSize != null && chunkSize>0){
+			this.indexingChunkSize = chunkSize;
+		} //else use default value of 1000
 
-    private final IndexingMode indexingMode;
-    private final Yard yard;
-    private final ValueFactory vf;
-    private final List<File> rdfFiles;
-    private final File indexingDir;
-    private final String modelName;
-//    private final ParsingProvider parser = new JenaParserProvider();
-    //private final WeightedTcProvider provider;
-    private final FieldMapper mapper;
-    private final Set<String> types;
-    //private MGraph indexingGraph;
-    private final DatasetGraphTDB indexingDataset;
-    private final boolean skipRead;
-    private Location modelLocation;
-    private int indexingChunkSize = 1000;
+		this.modelLocation = new Location(modelDir.getAbsolutePath());
+		this.indexingDataset =  TDBFactory.createDatasetGraph(modelLocation) ;
+		//this.provider = new IndexingModelProvider(this.indexingDir);
+		
+		//init entity Ranking
+		try{
+			this.entityRankings = (Map<String,Float>)config.get(KEY_ENTITY_RANKINGS);
+		}catch (RuntimeException e) {
+			log.error("Parsed Entity Rankings MUST use the form Map<String,Float>");
+			System.exit(0);
+		}
+		Object ignore = config.get(KEY_IGNORE_ENTITIES_WITHOUT_ENTITY_RANKING);
+		if(ignore != null){
+			if(ignore instanceof Boolean){
+				this.ignoreEntitiesWithoutRank = (Boolean)ignore;
+			} else {
+				this.ignoreEntitiesWithoutRank = Boolean.parseBoolean(ignore.toString());
+			}
+		}
+		Object defaultRankingObject = config.get(KEY_DEFAULT_ENTITY_RANKING);
+		if(defaultRankingObject != null){
+			float defaultranking = -1;
+			if(defaultRankingObject instanceof Float){
+				defaultranking = (Float)defaultRankingObject;
+			} else {
+				try {
+					defaultranking = Float.parseFloat(defaultRankingObject.toString());
+				} catch (Exception e) {
+					log.error("Unable to parse Float value for the Default Entity Ranking from the value parsed for the KEY_DEFAULT_ENTITY_RANKING key (value: "+defaultRankingObject+")");
+					System.exit(0);
+				}
+			}
+			this.defaultEntityRanking = defaultranking;
+		}
+		Object minimumRequiredRankingObject = config.get(KEY_REQUIRED_ENTITY_RANKING);
+		if(minimumRequiredRankingObject != null){
+			float minRanking = -1;
+			if(minimumRequiredRankingObject instanceof Float){
+				minRanking = (Float)minimumRequiredRankingObject;
+			} else {
+				try {
+					minRanking = Float.parseFloat(minimumRequiredRankingObject.toString());
+				} catch (Exception e) {
+					log.error("Unable to parse Float value for the Minimum Required Entity Ranking from the value parsed for the KEY_DEFAULT_ENTITY_RANKING key (value: "+minimumRequiredRankingObject+")");
+					System.exit(0);
+				}
+			}
+			if(minRanking>=0){ //setting a valid required ranking automatically
+				//means that entities without a rank should be ignored!
+				this.ignoreEntitiesWithoutRank = true;
+			}
+			this.minimumRequiredEntityRanking = minRanking;
+		}
 
-    //vars for entity rankings
-    private Map<String,Float> entityRankings = null;
-    private boolean ignoreEntitiesWithoutRank = false;
-    private float defaultEntityRanking = -1;
-    private String entityRankingField = RdfResourceEnum.signRank.getUri();
-    private float minimumRequiredEntityRanking = -1;
-    private boolean rankingMode;
-    private boolean resumeMode;
-
-
-    public RdfIndexer(Dictionary<String, Object> config){
-        this.yard = (Yard)config.get(KEY_YARD);
-        if(yard == null){
-            throw new IllegalArgumentException("Parsed config MUST CONTAIN a Yard. Use the key "+KEY_YARD+" to parse the YardInstance used to store the geonames.org index!");
-        } else {
-            log.info(String.format("Using Yard %s (id=%s) to index parsed RDF data",
-                    yard.getName(),yard.getId()));
-        }
-        this.vf = yard.getValueFactory();
-        Object rdfFiles = config.get(KEY_RDF_FILES);
-        if(rdfFiles instanceof Iterable<?>){
-            this.rdfFiles = new ArrayList<File>();
-            for(Object value : (Iterable<?>)rdfFiles){
-                this.rdfFiles.add(checkFile(value.toString()));
-            }
-        } else {
-            this.rdfFiles = Collections.singletonList(checkFile(rdfFiles.toString()));
-        }
-        Object indexingDir = config.get(KEY_RDF_STORE_DIR);
-        if(indexingDir == null){
-            indexingDir = "indexingData";
-            config.put(KEY_RDF_STORE_DIR, indexingDir);
-        }
-        this.indexingDir = checkFile(indexingDir.toString(), false, true);
-        Object modelName = config.get(KEY_MODEL_NAME);
-        if(modelName == null){
-            modelName = "indexingModel-"+ModelUtils.randomUUID().toString();
-            config.put(KEY_MODEL_NAME, modelName);
-        }
-        this.modelName = modelName.toString();
-        //init the types!
-        Iterable<?> types = (Iterable<?>)config.get(KEY_RDF_TYPES);
-        if(types != null){
-            Set<String> typeSet = new HashSet<String>();
-            for(Object type : types){
-                if(type != null){
-                    typeSet.add(type.toString());
-                    log.info("  - adding Resoures with rdf:type "+type);
-                }
-            }
-            if(typeSet.isEmpty()){
-                log.info("  - adding all Types (no rdf:type based restriction for RDF Reseource present)");
-                this.types = null;
-            } else {
-                this.types = typeSet;
-            }
-        } else{
-            log.info("  - adding all Types (no rdf:type based restriction for RDF Reseource present)");
-            this.types = null; //null or an iterable with one or more elements!
-        }
-        //init the indexing mode
-        Object indexingMode = config.get(KEY_INDEXING_MODE);
-        if(indexingMode == null){
-            this.indexingMode = IndexingMode.REPLACE; //default to replace
-        } else if(indexingMode instanceof IndexingMode){
-            this.indexingMode = (IndexingMode)indexingMode;
-        } else {
-            try {
-                this.indexingMode = IndexingMode.valueOf(indexingMode.toString());
-            }catch (IllegalArgumentException e) {
-                //catch and re-throw with a better message!
-                throw new IllegalArgumentException(
-                        String.format("Values of KEY \"%s\" MUST BE of Type %s or the toString() value MUST BE a member of this Enumeration. If the Key is missing %s is used!",
-                                KEY_INDEXING_MODE,IndexingMode.class,IndexingMode.REPLACE),e);
-            }
-        }
-        //init the fieldMapper
-        Iterable<?> mappings = (Iterable<?>)config.get(KEY_FIELD_MAPPINGS);
-        List<FieldMapping> fieldMappings;
-        if(mappings != null){
-            fieldMappings = new ArrayList<FieldMapping>();
-            for(Object mappingString : mappings){
-                if(mappingString != null){
-                    FieldMapping fieldMapping = FieldMappingUtils.parseFieldMapping(mappingString.toString());
-                    if(fieldMapping != null){
-                        fieldMappings.add(fieldMapping);
-                    }
-                }
-            }
-            if(!fieldMappings.isEmpty()){
-                this.mapper = new DefaultFieldMapperImpl(ValueConverterFactory.getInstance(vf));
-                for(FieldMapping mapping : fieldMappings){
-                    mapper.addMapping(mapping);
-                }
-                //we need to add a mapping for the field rankings (if a mapper is present)
-                mapper.addMapping(new FieldMapping(this.entityRankingField));
-            } else {
-                this.mapper = null;
-            }
-        } else {
-            this.mapper = null;
-        }
-        File modelDir = new File(this.indexingDir,this.modelName);
-        if(!modelDir.exists()){
-            modelDir.mkdir();
-        } else if(!modelDir.isDirectory()){
-            throw new IllegalStateException(String.format("A directory for %s already exists but is not a directory!",modelDir.getAbsoluteFile()));
-        } //else exists and is a dir -> nothing to do
-        Object skipRead = config.get(KEY_SKIP_READ);
-        if(skipRead != null){
-            if(skipRead instanceof Boolean){
-                this.skipRead = ((Boolean)skipRead).booleanValue();
-            } else {
-                this.skipRead = Boolean.parseBoolean(skipRead.toString());
-            }
-        } else {
-            this.skipRead = false;
-        }
-        Integer chunkSize = (Integer)config.get(KEY_CHUNK_SIZE);
-        if(chunkSize != null && chunkSize>0){
-            this.indexingChunkSize = chunkSize;
-        } //else use default value of 1000
-
-        this.modelLocation = new Location(modelDir.getAbsolutePath());
-        this.indexingDataset =  TDBFactory.createDatasetGraph(modelLocation) ;
-        //this.provider = new IndexingModelProvider(this.indexingDir);
-
-        //init entity Ranking
-        try{
-            this.entityRankings = (Map<String,Float>)config.get(KEY_ENTITY_RANKINGS);
-        }catch (RuntimeException e) {
-            log.error("Parsed Entity Rankings MUST use the form Map<String,Float>");
-            System.exit(0);
-        }
-        Object ignore = config.get(KEY_IGNORE_ENTITIES_WITHOUT_ENTITY_RANKING);
-        if(ignore != null){
-            if(ignore instanceof Boolean){
-                this.ignoreEntitiesWithoutRank = (Boolean)ignore;
-            } else {
-                this.ignoreEntitiesWithoutRank = Boolean.parseBoolean(ignore.toString());
-            }
-        }
-        Object defaultRankingObject = config.get(KEY_DEFAULT_ENTITY_RANKING);
-        if(defaultRankingObject != null){
-            float defaultranking = -1;
-            if(defaultRankingObject instanceof Float){
-                defaultranking = (Float)defaultRankingObject;
-            } else {
-                try {
-                    defaultranking = Float.parseFloat(defaultRankingObject.toString());
-                } catch (Exception e) {
-                    log.error("Unable to parse Float value for the Default Entity Ranking from the value parsed for the KEY_DEFAULT_ENTITY_RANKING key (value: "+defaultRankingObject+")");
-                    System.exit(0);
-                }
-            }
-            this.defaultEntityRanking = defaultranking;
-        }
-        Object minimumRequiredRankingObject = config.get(KEY_REQUIRED_ENTITY_RANKING);
-        if(minimumRequiredRankingObject != null){
-            float minRanking = -1;
-            if(minimumRequiredRankingObject instanceof Float){
-                minRanking = (Float)minimumRequiredRankingObject;
-            } else {
-                try {
-                    minRanking = Float.parseFloat(minimumRequiredRankingObject.toString());
-                } catch (Exception e) {
-                    log.error("Unable to parse Float value for the Minimum Required Entity Ranking from the value parsed for the KEY_DEFAULT_ENTITY_RANKING key (value: "+minimumRequiredRankingObject+")");
-                    System.exit(0);
-                }
-            }
-            if(minRanking>=0){ //setting a valid required ranking automatically
-                //means that entities without a rank should be ignored!
-                this.ignoreEntitiesWithoutRank = true;
-            }
-            this.minimumRequiredEntityRanking = minRanking;
-        }
-        Object rankingMode = config.get(KEY_ENTITY_RANKING_BASED_INDEXING_MODE);
-        if(rankingMode != null){
-            if(rankingMode instanceof Boolean){
-                this.rankingMode = (Boolean)rankingMode;
-            } else {
-                this.rankingMode = Boolean.parseBoolean(rankingMode.toString());
-            }
-        }
-        if(this.rankingMode && this.entityRankings == null){
-            log.warn("The Entity Ranking based Indexing Mode can not be activated if no EntityRankings are parsed! -> deactivate Ranking Mode (intertes over all Resources in the RDF Data)");
-            this.rankingMode = false;
-        }
-        Object resumeMode = config.get(KEY_RESUME_MODE);
-        if(resumeMode != null) {
-            if(resumeMode instanceof Boolean){
-                this.resumeMode = (Boolean)resumeMode;
-            } else {
-                this.resumeMode = Boolean.parseBoolean(resumeMode.toString());
-            }
-        } else {
-            this.resumeMode = false;
-        }
-    }
-    public void index() throws YardException{
-        log.info("initialize ...");
-        if(!skipRead){
-            loadRdfFiles();
-        } else {
-            log.info(" ... skiping loading of RDF data");
-        }
-        if(rankingMode){
-            indexRanked();
-        } else {
-            indexResources();
-        }
-        writeCacheBaseConfiguration();
-    }
-    /**
-     * This Method is used to process the RDF Data if all Resource can be indexed,
-     * because it provides the best performance. Mainly because it reads everything
-     * from a single stream and therefore gives the OS the best opportunities to
-     * optimise file access.
-     * @throws YardException
-     */
-    private void indexResources() throws YardException{
+		Object resumeMode = config.get(KEY_RESUME_MODE);
+		if(resumeMode != null) {
+			if(resumeMode instanceof Boolean){
+				this.resumeMode = (Boolean)resumeMode;
+			} else {
+				this.resumeMode = Boolean.parseBoolean(resumeMode.toString());
+			}
+		} else {
+			this.resumeMode = false;
+		}
+	}
+	public void index() throws YardException{
+		log.info("initialize ...");
+		if(!skipRead){
+			loadRdfFiles();
+		} else {
+			log.info(" ... skiping loading of RDF data");
+		}
+		if(indexingMode == IndexingMode.RANKING_MAP_BASED){
+			indexRanked();
+		} else {
+			indexResources();
+		}
+		writeCacheBaseConfiguration();
+	}
+	/**
+	 * This Method is used to process the RDF Data if all Resource can be indexed,
+	 * because it provides the best performance. Mainly because it reads everything
+	 * from a single stream and therefore gives the OS the best opportunities to
+	 * optimise file access.
+	 * @throws YardException
+	 */
+	private void indexResources() throws YardException{
         StringBuilder qb = new StringBuilder();
         /*
          * NOTES:

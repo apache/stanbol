@@ -10,10 +10,22 @@ import eu.iksproject.rick.servicesapi.model.Reference;
 public class RdfReference implements Reference,Cloneable {
     private final UriRef uri;
     protected RdfReference(String reference){
-        this.uri = new UriRef(reference);
+        if(reference == null){
+            throw new NullPointerException("The parsed Reference MUST NOT be NULL!");
+        } else if(reference.isEmpty()){
+            throw new IllegalArgumentException("The parsed Reference MUST NOT be Empty!");
+        } else {
+            this.uri = new UriRef(reference);
+        }
     }
     protected RdfReference(UriRef uri){
-        this.uri = uri;
+        if(uri == null){
+            throw new NullPointerException("The parsed Reference MUST NOT be NULL!");
+        } else if(uri.getUnicodeString().isEmpty()){
+            throw new IllegalArgumentException("The parsed Reference MUST NOT be represent an empty string!");
+        } else {
+            this.uri = uri;
+        }
     }
     @Override
     public String getReference() {

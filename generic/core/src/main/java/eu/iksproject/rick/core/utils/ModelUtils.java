@@ -3,6 +3,7 @@ package eu.iksproject.rick.core.utils;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -95,6 +96,7 @@ public final class ModelUtils {
      * Processes a value parsed as object to the representation.
      * This processing includes:
      * <ul>
+     * <li> Removal of <code>null</code> values
      * <li> Converting URIs and URLs to {@link Reference}
      * <li> Converting String[] with at least a single entry where the first
      * entry is not null to {@link Text} (the second entry is used as language.
@@ -103,11 +105,16 @@ public final class ModelUtils {
      *      {@link Collection}), {@link Iterator} or {@link Enumeration} is parsed.
      * <li> All other Objects are added to the result list
      * </ul>
+     * TODO: Maybe we need to enable an option to throw {@link IllegalArgumentException}
+     * in case any of the parsed values is invalid. Currently invalid values are
+     * just ignored.
      * @param value the value to parse
      * @param results the collections the results of the parsing are added to.
      */
     public static void checkValues(ValueFactory valueFactory, Object value,Collection<Object> results){
-        if(value instanceof Iterable<?>){
+        if(value == null){
+            return;
+        } else if(value instanceof Iterable<?>){
             for(Object current : (Iterable<?>)value){
                 checkValues(valueFactory,current,results);
             }
@@ -126,7 +133,7 @@ public final class ModelUtils {
                 results.add(valueFactory.createText(((String[])value)[0],
                         ((String[])value).length>1?((String[])value)[1]:null));
             } else {
-                log.warn("String[] "+value+" is not a valied natural language array! -> ignore value");
+                log.warn("String[] "+Arrays.toString((String[])value)+" is not a valied natural language array! -> ignore value");
             }
         } else {
             results.add(value);

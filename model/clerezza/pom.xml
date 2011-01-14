@@ -123,6 +123,12 @@
     </dependency> -->
     <!-- for tests -->
     <dependency>
+      <groupId>eu.iksproject</groupId>
+      <artifactId>eu.iksproject.rick.test</artifactId>
+      <version>0.1-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.7</version>

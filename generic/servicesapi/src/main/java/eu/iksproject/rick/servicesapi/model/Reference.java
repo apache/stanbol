@@ -1,7 +1,8 @@
 package eu.iksproject.rick.servicesapi.model;
 
 /**
- * Defines a reference to an other entity
+ * Defines a reference to an other entity <p>
+ * Implementations of that interface MUST BE immutable
  * @author Rupert Westenthaler
  *
  */

@@ -40,9 +40,16 @@ public class LiteralAdapter<T extends Literal,A> implements Adapter<T, A> {
     @SuppressWarnings("unchecked")
     @Override
     public A adapt(T value, Class<A> type) {
-        if(type.equals(String.class)){
-            return (A) value.getLexicalForm();
-        } else if(Text.class.isAssignableFrom(type)){
+// NOTE: (Rupert Westenthaler 12.01.2011)
+//      Converting everything to String is not an intended functionality. When
+//      someone parsed String.class he rather assumes that he gets only string
+//      values and not also string representations for Dates, Integer ...
+//      If someone needs this kind of functionality he can anyway use the 
+//      the Resource2StringAdapter.
+//        if(type.equals(String.class)){
+//            return (A) value.getLexicalForm();
+//        } else 
+        if(Text.class.isAssignableFrom(type)){
             if(value instanceof PlainLiteral ||
                     (value instanceof TypedLiteral &&
                     RdfResourceUtils.STRING_DATATYPES.contains(((TypedLiteral)value).getDataType()))){

@@ -236,7 +236,7 @@ public class CommandLineRunner {
         //50% of the entities are indexed!
         if(line.hasOption("r")){
             //resume makes only really sense with the RANKING BASED MODE
-            indexingConfig.put(KEY_ENTITY_RANKING_BASED_INDEXING_MODE, Boolean.TRUE);
+            indexingConfig.put(KEY_INDEXING_MODE, IndexingMode.RANKING_MAP_BASED);
             //set the RESUME MODE
             indexingConfig.put(KEY_RESUME_MODE, Boolean.TRUE);
         }
