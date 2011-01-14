@@ -16,13 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.iksproject.rick.core.utils.AdaptingIterator;
+import eu.iksproject.rick.core.utils.FilteringIterator;
 import eu.iksproject.rick.core.utils.ModelUtils;
 import eu.iksproject.rick.core.utils.TypeSaveIterator;
 import eu.iksproject.rick.model.clerezza.impl.Literal2TextAdapter;
 import eu.iksproject.rick.model.clerezza.impl.LiteralAdapter;
-import eu.iksproject.rick.model.clerezza.impl.NaturalLanguageLiteralIterator;
-import eu.iksproject.rick.model.clerezza.impl.ReferenceIterator;
+import eu.iksproject.rick.model.clerezza.impl.NaturalTextFilter;
 import eu.iksproject.rick.model.clerezza.impl.Resource2ValueAdapter;
+import eu.iksproject.rick.model.clerezza.impl.UriRef2ReferenceAdapter;
 import eu.iksproject.rick.model.clerezza.impl.UriRefAdapter;
 import eu.iksproject.rick.model.clerezza.utils.Resource2StringAdapter;
 import eu.iksproject.rick.servicesapi.model.Reference;
@@ -64,13 +65,13 @@ public class RdfRepresentation implements Representation{
     }
     @Override
     public void add(String field, Object value) {
-        if(field == null) {
-            throw new IllegalArgumentException("Parameter \"String field\" MUST NOT be NULL!");
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
         if(value == null){
-            log.warn("NULL parsed as value in add method for symbol "+getId()
-                    +" and field "+field+" -> call ignored");
-            return;
+            throw new IllegalArgumentException("NULL values are not supported by Representations");
         }
         UriRef fieldUriRef = new UriRef(field);
         Collection<Object> values = new ArrayList<Object>();
@@ -86,7 +87,6 @@ public class RdfRepresentation implements Representation{
                 graphNode.addProperty(fieldUriRef, ((RdfReference) current).getUriRef());
             } else if (current instanceof Reference){
                 graphNode.addProperty(fieldUriRef, new UriRef(((Reference) current).getReference()));
-                addReference(field,((Reference)current).getReference());
             } else if (current instanceof RdfText){
                 //treat RDF Implementations special to avoid creating new instances
                 graphNode.addProperty(fieldUriRef,((RdfText) current).getLiteral());
@@ -111,30 +111,32 @@ public class RdfRepresentation implements Representation{
     }
     @Override
     public void addReference(String field, String reference) {
-        if(field == null) {
-            throw new IllegalArgumentException("Parameter \"String field\" MUST NOT be NULL!");
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
         if(reference == null){
-            log.warn("NULL parsed as value in add method for symbol "+getId()
-                    +" and field "+field+" -> call ignored");
+            throw new IllegalArgumentException("NULL values are not supported by Representations");
+        } else if (reference.isEmpty()) {
+            throw new IllegalArgumentException("References MUST NOT be empty!");
         }
         graphNode.addProperty(new UriRef(field), new UriRef(reference));
     }
     @Override
     public void addNaturalText(String field, String text, String...languages) {
-        if(field == null) {
-            throw new IllegalArgumentException("Parameter \"String field\" MUST NOT be NULL!");
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
         if(text == null){
-            log.warn("NULL parsed as value in add method for symbol "+getId()
-                    +" and field "+field+" -> call ignored");
+            throw new IllegalArgumentException("NULL values are not supported by Representations");
         }
         this.addNaturalText(new UriRef(field), text, languages);
     }
     private void addNaturalText(UriRef field, String text, String...languages) {
-        if(languages == null){
-            log.debug("NULL parsed as languages -> replacing with \"new String []{null}\"" +
-                    " -> assuming a missing explicit cast to (Stirng) in the var arg");
+        if(languages == null || languages.length == 0){
             languages = new String []{null};
         }
         for(String language : languages){
@@ -145,22 +147,33 @@ public class RdfRepresentation implements Representation{
     @SuppressWarnings("unchecked")
     @Override
     public <T> Iterator<T> get(String field, final Class<T> type) throws UnsupportedTypeException {
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
+        }
         UriRef fieldUriRef = new UriRef(field);
         if(Resource.class.isAssignableFrom(type)){ //native support for Clerezza types
             return new TypeSaveIterator<T>(graphNode.getObjects(fieldUriRef), type);
-        } else if(type.equals(String.class)){ //support to convert anything to String
-            return (Iterator<T>) new AdaptingIterator<Resource,String>(
-                    graphNode.getObjects(fieldUriRef),
-                    new Resource2StringAdapter<Resource>(),
-                    String.class);
+// NOTE: (Rupert Westenthaler 12.01.2011)
+//     Converting everything to String is not an intended functionality. When
+//     someone parsed String.class he rather assumes that he gets only string
+//     values and not also string representations for Dates, Integer ...
+//       
+//        } else if(type.equals(String.class)){ //support to convert anything to String
+//            return (Iterator<T>) new AdaptingIterator<Resource,String>(
+//                    graphNode.getObjects(fieldUriRef),
+//                    new Resource2StringAdapter<Resource>(),
+//                    String.class);
         } else if(type.equals(URI.class) || type.equals(URL.class)){ //support for References
             return new AdaptingIterator<UriRef, T>(
                     graphNode.getUriRefObjects(fieldUriRef),
                     new UriRefAdapter<T>(),
                     type);
         } else if(Reference.class.isAssignableFrom(type)){
-            return (Iterator<T>) new ReferenceIterator(
-                    graphNode.getUriRefObjects(fieldUriRef));
+            return (Iterator<T>) new AdaptingIterator<UriRef,Reference>(
+                    graphNode.getUriRefObjects(fieldUriRef),
+                    new UriRef2ReferenceAdapter(),Reference.class);
         } else if(Text.class.isAssignableFrom(type)){
             return (Iterator<T>)new AdaptingIterator<Literal, Text>(
                     graphNode.getLiterals(fieldUriRef),
@@ -176,12 +189,23 @@ public class RdfRepresentation implements Representation{
 
     @Override
     public Iterator<Reference> getReferences(String field) {
-        Iterator<UriRef> it = graphNode.getUriRefObjects(new UriRef(field));
-        return new ReferenceIterator(it);
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
+        }
+        return new AdaptingIterator<UriRef,Reference>(
+                graphNode.getUriRefObjects(new UriRef(field)),
+                new UriRef2ReferenceAdapter(),Reference.class);
     }
 
     @Override
     public Iterator<Text> getText(String field) {
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
+        }
         return new AdaptingIterator<Literal, Text>(
                 graphNode.getLiterals(new UriRef(field)),
                 new Literal2TextAdapter<Literal>(),
@@ -190,16 +214,21 @@ public class RdfRepresentation implements Representation{
 
     @Override
     public Iterator<Object> get(String field) {
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
+        }
         return new AdaptingIterator<Resource, Object>(graphNode.getObjects(new UriRef(field)),
                 new Resource2ValueAdapter<Resource>(),Object.class);
     }
 
     @Override
     public Iterator<Text> get(String field, String...languages) {
-        if(languages == null){
-            log.debug("NULL parsed as languages -> replacing with \"new String []{null}\"" +
-                    " -> assuming a missing explicit cast to (String) in the var arg");
-            languages = new String []{null};
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
         return new AdaptingIterator<Literal, Text>(
                 graphNode.getLiterals(new UriRef(field)),
@@ -215,6 +244,11 @@ public class RdfRepresentation implements Representation{
 
     @Override
     public <T> T getFirst(String field, Class<T> type) throws UnsupportedTypeException {
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
+        }
         Iterator<T> it = get(field,type);
         if(it.hasNext()){
             return it.next();
@@ -225,6 +259,11 @@ public class RdfRepresentation implements Representation{
 
     @Override
     public Object getFirst(String field) {
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
+        }
         Iterator<Object> it = get(field);
         if(it.hasNext()){
             return it.next();
@@ -234,11 +273,21 @@ public class RdfRepresentation implements Representation{
     }
     @Override
     public Reference getFirstReference(String field) {
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
+        }
         Iterator<Reference> it = getReferences(field);
         return it.hasNext()?it.next():null;
     }
     @Override
     public Text getFirst(String field, String...languages) {
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
+        }
         if(languages == null){
             log.debug("NULL parsed as languages -> replacing with \"new String []{null}\"" +
                     " -> assuming a missing explicit cast to (String) in the var arg");
@@ -257,37 +306,47 @@ public class RdfRepresentation implements Representation{
     }
 
     @Override
-    public void remove(String field, Object value) {
-        if(field == null) {
-            throw new IllegalArgumentException("Parameter \"String field\" MUST NOT be NULL!");
+    public void remove(String field, Object parsedValue) {
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
-        if(value == null){
+        if(parsedValue == null){
             log.warn("NULL parsed as value in remove method for symbol "+getId()
                     +" and field "+field+" -> call ignored");
+            return;
         }
         UriRef fieldUriRef = new UriRef(field);
-        if(value instanceof Resource){ //native support for Clerezza types!
-            graphNode.deleteProperty(fieldUriRef, (Resource)value);
-        } else if(value instanceof URI || value instanceof URL){
-            removeReference(field, value.toString());
-        } else if (value instanceof String[]){
-            if(((String[])value).length>0){
-                if(((String[])value).length>1){
-                    removeNaturalText(field, ((String[])value)[0],((String[])value)[1]);
-                } else {
-                    removeNaturalText(field, ((String[])value)[0],(String)null);
-                }
+        Collection<Object> removeValues = new ArrayList<Object>();
+        
+        ModelUtils.checkValues(valueFactory, parsedValue, removeValues);
+        //We still need to implement support for specific types supported by this implementation
+        for (Object current : removeValues){
+            if (current instanceof Resource){ //native support for Clerezza types!
+                graphNode.deleteProperty(fieldUriRef, (Resource)current);
+            } else if (current instanceof RdfReference){
+                //treat RDF Implementations special to avoid creating new instances
+                graphNode.deleteProperty(fieldUriRef, ((RdfReference) current).getUriRef());
+            } else if (current instanceof Reference){
+                graphNode.deleteProperty(fieldUriRef, new UriRef(((Reference) current).getReference()));
+            } else if (current instanceof RdfText){
+                //treat RDF Implementations special to avoid creating new instances
+                graphNode.deleteProperty(fieldUriRef,((RdfText) current).getLiteral());
+            } else if (current instanceof Text){
+                removeNaturalText(field,((Text)current).getText(),((Text)current).getLanguage());
+            } else { //else add an typed Literal!
+                removeTypedLiteral(fieldUriRef, current);
             }
-        } else {
-            removeTypedLiteral(fieldUriRef, value);
         }
-
     }
 
     @Override
     public void removeReference(String field, String reference) {
-        if(field == null) {
-            throw new IllegalArgumentException("Parameter \"String field\" MUST NOT be NULL!");
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
         if(reference == null){
             log.warn("NULL parsed as value in remove method for symbol "+getId()+" and field "+field+" -> call ignored");
@@ -307,48 +366,59 @@ public class RdfRepresentation implements Representation{
     }
     @Override
     public void removeNaturalText(String field, String value, String... languages) {
-        if(field == null) {
-            throw new IllegalArgumentException("Parameter \"String field\" MUST NOT be NULL!");
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
         if(value == null){
             log.warn("NULL parsed as value in remove method for symbol "+getId()+" and field "+field+" -> call ignored");
         }
-        if(languages == null){
-            log.debug("NULL parsed as languages -> replacing with \"new String []{null}\"" +
-                    " -> assuming a missing explicit cast to (Stirng) in the var arg");
+        if(languages == null || languages.length == 0){ //null or no language
+            //need to be interpreted as default language
             languages = new String []{null};
         }
         UriRef fieldUriRef = new UriRef(field);
         for(String language : languages){
             graphNode.deleteProperty(fieldUriRef,RdfResourceUtils.createLiteral(value, language));
+            if(language == null){ //if the language is null
+                //we need also try to remove a typed Literal with the data type
+                //xsd:string and the parsed value!
+                graphNode.deleteProperty(fieldUriRef,RdfResourceUtils.createLiteral(value));
+            }
         }
     }
     @Override
     public void removeAll(String field) {
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
+        }
         graphNode.deleteProperties(new UriRef(field));
     }
     @Override
     public void removeAllNaturalText(String field, String... languages) {
-        if(field == null) {
-            throw new IllegalArgumentException("Parameter \"String field\" MUST NOT be NULL!");
+        if(field == null){
+            throw new NullPointerException("The parsed field MUST NOT be NULL");
+        } else if(field.isEmpty()){
+            throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
-        if(languages == null){
-            log.debug("NULL parsed as languages -> replacing with \"new String []{null}\"" +
-                    " -> assuming a missing explicit cast to (Stirng) in the var arg");
-            languages = new String []{null};
-        }
+//        if(languages == null || languages.length == 0){
+//            languages = new String []{null};
+//        }
         UriRef fieldUriRef = new UriRef(field);
-        Collection<Literal> literals = new ArrayList<Literal>();
         //get all the affected Literals
-        for (Iterator<Literal> it =  new NaturalLanguageLiteralIterator(graphNode.getLiterals(fieldUriRef), languages);
-            it.hasNext();
-            literals.add(it.next())
-        );
-        //delete the found literals
-        for(Literal literal:literals){
-            graphNode.deleteProperty(fieldUriRef, literal);
+        Collection<Literal> toRemove = new ArrayList<Literal>();
+        Iterator<Literal> it =  new FilteringIterator<Literal>(
+                graphNode.getLiterals(fieldUriRef),
+                new NaturalTextFilter(languages),Literal.class);
+        while(it.hasNext()){
+            toRemove.add(it.next());
         }
-
+        for(Literal l : toRemove){
+            graphNode.deleteProperty(fieldUriRef, l);
+        }
     }
 
     @Override
@@ -361,7 +431,7 @@ public class RdfRepresentation implements Representation{
 
     @Override
     public void setReference(String field, String reference) {
-        removeAll(reference);
+        removeAll(field);
         if(reference != null){
             addReference(field, reference);
         }
@@ -373,6 +443,19 @@ public class RdfRepresentation implements Representation{
         if(text != null){
             addNaturalText(field, text, languages);
         }
+    }
+    
+    @Override
+    public String toString() {
+        return RdfRepresentation.class.getSimpleName()+getId();
+    }
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
+    @Override
+    public boolean equals(Object obj) {
+        return obj != null && obj instanceof Representation && ((Representation)obj).getId().equals(getId());
     }
 
 }

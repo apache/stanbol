@@ -24,7 +24,7 @@ public class InMemoryValueFactory implements ValueFactory {
     @Override
     public Reference createReference(Object value) {
         if(value == null){
-            throw new IllegalArgumentException("The parsed value MUST NOT be NULL");
+            throw new NullPointerException("The parsed value MUST NOT be NULL");
         }
         return new ReferenceImpl(value.toString());
     }
@@ -32,7 +32,7 @@ public class InMemoryValueFactory implements ValueFactory {
     @Override
     public Text createText(Object value) {
         if(value == null){
-            throw new IllegalArgumentException("The parsed value MUST NOT be NULL");
+            throw new NullPointerException("The parsed value MUST NOT be NULL");
         }
         return createText(value.toString(),null);
     }
@@ -91,13 +91,13 @@ public class InMemoryValueFactory implements ValueFactory {
 
         private final String value;
         private final String language;
-        protected TextImpl(String value) {
+        protected TextImpl(String value) throws NullPointerException {
             this(value,null);
         }
-        protected TextImpl(String value, String language) {
+        protected TextImpl(String value, String language) throws NullPointerException {
             super();
             if(value == null){
-                throw new IllegalArgumentException("The value of the Text MUST NOT be NULL!");
+                throw new NullPointerException("The value of the Text MUST NOT be NULL!");
             }
             this.value = value;
             this.language = language;
@@ -135,10 +135,12 @@ public class InMemoryValueFactory implements ValueFactory {
     }
     @Override
     public Representation createRepresentation(String id) {
-        if(id != null){
-            return new InMemoryRepresentation(id);
-        } else {
-            throw new IllegalArgumentException("The parsed id MUST NOT be NULL");
+        if (id == null){
+            throw new NullPointerException("The parsed id MUST NOT be NULL!");
+         } else if(id.isEmpty()){
+             throw new IllegalArgumentException("The parsed id MUST NOT be empty!");
+         } else {
+             return new InMemoryRepresentation(id);
         }
     }
 //    @Override

@@ -9,18 +9,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentFactory;
-import org.osgi.service.component.ComponentInstance;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import eu.iksproject.rick.servicesapi.site.ConfiguredSite;
-import eu.iksproject.rick.servicesapi.site.EntityDereferencer;
-import eu.iksproject.rick.servicesapi.site.ReferencedSite;
 
 /**
  * This class contains some utilities for osgi
@@ -30,7 +19,7 @@ import eu.iksproject.rick.servicesapi.site.ReferencedSite;
  */
 public final class OsgiUtils {
 
-    private static final Logger log = LoggerFactory.getLogger(OsgiUtils.class);
+    //private static final Logger log = LoggerFactory.getLogger(OsgiUtils.class);
 
     private OsgiUtils() {/* do not create instances of utility classes*/}
 
@@ -113,67 +102,67 @@ public final class OsgiUtils {
             throw new ConfigurationException(propertyName,String.format("Property value %s is not a member of Enumeration %s!",value,enumeration.getName()), e);
         }
     }
-    /**
-     * search for a {@link ComponentFactory} that has the component.name property
-     * as configured by {@link ConfiguredSite#DEREFERENCER_TYPE}. Than creates
-     * an new instance of an {@link EntityDereferencer} and configures it with
-     * all the properties present for this instance of {@link ReferencedSite} (
-     * only component.* and service.* properties are ignored).<br>
-     * The {@link ComponentInstance} and the {@link EntityDereferencer} are
-     * stored in the according memeber variables.
-     * @return the ComponentInstance of <code>null</code> if no ComponentFactory
-     *    was found for the parsed componentService
-     * @throws ConfigurationException if the {@link ConfiguredSite#DEREFERENCER_TYPE}
-     * is not present or it's value does not allow to create a {@link EntityDereferencer}
-     * instance.
-     */
-    public static ComponentInstance createComonentInstance(ComponentContext context, String property,Object componentName,Class<?> componentService) throws ConfigurationException {
-        //Object value = checkProperty(DEREFERENCER_TYPE);
-        final ServiceReference[] refs;
-        try {
-            refs = context.getBundleContext().getServiceReferences(
-                    ComponentFactory.class.getName(),
-                    "(component.name="+componentName+")");
-
-        } catch (InvalidSyntaxException e) {
-            throw new ConfigurationException(property, "Unable to get ComponentFactory for parsed value "+componentName.toString(),e);
-        }
-        if(refs != null && refs.length>0){
-            if(refs.length>1){ //log some warning if more than one Service Reference was found by the query!
-                log.warn("Multiple ComponentFactories found for the property "+property+"="+componentName+"! -> First one was used to instantiate the "+componentService+" Service");
-            }
-            Object dereferencerFactorySerivceObject = context.getBundleContext().getService(refs[0]);
-            if(dereferencerFactorySerivceObject != null){
-                try {
-                    // I trust the OSGI framework, that the returned service implements the requested Interface
-                    ComponentFactory dereferencerFactory = (ComponentFactory)dereferencerFactorySerivceObject;
-                    //log.debug("build configuration for "+EntityDereferencer.class.getSimpleName()+" "+componentName.toString());
-                    Dictionary<String, Object> config = copyConfig(context.getProperties());
-                    ComponentInstance dereferencerComponentInstance = dereferencerFactory.newInstance(config);
-                    dereferencerFactory = null;
-                    //now
-                    if(dereferencerComponentInstance == null){
-                        throw new IllegalStateException("Unable to create ComponentInstance for Property value "+componentName+"!");
-                    }
-                    if(componentService.isAssignableFrom(dereferencerComponentInstance.getInstance().getClass())){
-                        return dereferencerComponentInstance;
-                    } else {
-                        dereferencerComponentInstance.dispose(); //we can not use it -> so dispose it!
-                        dereferencerComponentInstance = null;
-                        throw new IllegalStateException("ComponentInstance created for Property value "+componentName+" does not provide the "+componentService+" Service!");
-                    }
-                } finally {
-                    //we need to unget the ComponentFactory!
-                    context.getBundleContext().ungetService(refs[0]);
-                    dereferencerFactorySerivceObject=null;
-                }
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
-    }
+//    /**
+//     * search for a {@link ComponentFactory} that has the component.name property
+//     * as configured by {@link ConfiguredSite#DEREFERENCER_TYPE}. Than creates
+//     * an new instance of an {@link EntityDereferencer} and configures it with
+//     * all the properties present for this instance of {@link ReferencedSite} (
+//     * only component.* and service.* properties are ignored).<br>
+//     * The {@link ComponentInstance} and the {@link EntityDereferencer} are
+//     * stored in the according memeber variables.
+//     * @return the ComponentInstance of <code>null</code> if no ComponentFactory
+//     *    was found for the parsed componentService
+//     * @throws ConfigurationException if the {@link ConfiguredSite#DEREFERENCER_TYPE}
+//     * is not present or it's value does not allow to create a {@link EntityDereferencer}
+//     * instance.
+//     */
+//    public static ComponentInstance createComonentInstance(ComponentContext context, String property,Object componentName,Class<?> componentService) throws ConfigurationException {
+//        //Object value = checkProperty(DEREFERENCER_TYPE);
+//        final ServiceReference[] refs;
+//        try {
+//            refs = context.getBundleContext().getServiceReferences(
+//                    ComponentFactory.class.getName(),
+//                    "(component.name="+componentName+")");
+//
+//        } catch (InvalidSyntaxException e) {
+//            throw new ConfigurationException(property, "Unable to get ComponentFactory for parsed value "+componentName.toString(),e);
+//        }
+//        if(refs != null && refs.length>0){
+//            if(refs.length>1){ //log some warning if more than one Service Reference was found by the query!
+//                log.warn("Multiple ComponentFactories found for the property "+property+"="+componentName+"! -> First one was used to instantiate the "+componentService+" Service");
+//            }
+//            Object dereferencerFactorySerivceObject = context.getBundleContext().getService(refs[0]);
+//            if(dereferencerFactorySerivceObject != null){
+//                try {
+//                    // I trust the OSGI framework, that the returned service implements the requested Interface
+//                    ComponentFactory dereferencerFactory = (ComponentFactory)dereferencerFactorySerivceObject;
+//                    //log.debug("build configuration for "+EntityDereferencer.class.getSimpleName()+" "+componentName.toString());
+//                    Dictionary<String, Object> config = copyConfig(context.getProperties());
+//                    ComponentInstance dereferencerComponentInstance = dereferencerFactory.newInstance(config);
+//                    dereferencerFactory = null;
+//                    //now
+//                    if(dereferencerComponentInstance == null){
+//                        throw new IllegalStateException("Unable to create ComponentInstance for Property value "+componentName+"!");
+//                    }
+//                    if(componentService.isAssignableFrom(dereferencerComponentInstance.getInstance().getClass())){
+//                        return dereferencerComponentInstance;
+//                    } else {
+//                        dereferencerComponentInstance.dispose(); //we can not use it -> so dispose it!
+//                        dereferencerComponentInstance = null;
+//                        throw new IllegalStateException("ComponentInstance created for Property value "+componentName+" does not provide the "+componentService+" Service!");
+//                    }
+//                } finally {
+//                    //we need to unget the ComponentFactory!
+//                    context.getBundleContext().ungetService(refs[0]);
+//                    dereferencerFactorySerivceObject=null;
+//                }
+//            } else {
+//                return null;
+//            }
+//        } else {
+//            return null;
+//        }
+//    }
 
     /**
      * Copy all properties excluding "{@value Constants#OBJECTCLASS}",

@@ -26,7 +26,8 @@
   <version>0.1-SNAPSHOT</version>
   <name>IKS RICK Indexing for rdf Resource</name>
   <description>This indexes all kind of RDF sources by using a prased
-  configuration (FieldMapper to define index fields and field values and a set of indexed rdf:types) configuration for processing Resources in the Graph.
+  configuration (FieldMapper to define index fields and field values and a set 
+  of indexed rdf:types) configuration for processing Resources in the Graph.
   </description>
   <dependencies>
     <dependency>
@@ -44,50 +45,21 @@
         <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-        <groupId>eu.iksproject</groupId>
-        <artifactId>eu.iksproject.rick.core</artifactId>
-        <version>0.1-SNAPSHOT</version>
+      <groupId>com.hp.hpl.jena</groupId>
+      <artifactId>jena</artifactId>
+      <version>2.6.4</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>slf4j-log4j12</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.utils</artifactId>
-      <version>0.13-incubating-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.core</artifactId>
-      <version>0.12-incubating-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.jaxrs.rdf.providers</artifactId>
-      <version>0.13-incubating-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.tdb.storage</artifactId>
-      <version>0.5-incubating-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
-      <version>0.9-incubating-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-     <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.parser</artifactId>
-      <version>0.10-incubating-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.rdfjson</artifactId>
-      <version>0.3-incubating-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
+	<dependency>
+      <groupId>com.hp.hpl.jena</groupId>
+	  <artifactId>tdb</artifactId>
+	  <version>0.8.8</version>
+    </dependency>  
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>

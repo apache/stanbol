@@ -298,10 +298,10 @@ public class SolrYard extends AbstractYard implements Yard {
         long queryGeneration = System.currentTimeMillis();
         final Set<String> selected;
         if(select == SELECT.QUERY){
-            //if query set the fields to add to the result Representations
-            selected = parsedQuery.getSelectedFields();
-            //add the score to query results!
-            selected.add(RdfResourceEnum.resultScore.getUri());
+			//if query set the fields to add to the result Representations
+			selected = new HashSet<String>(parsedQuery.getSelectedFields());
+			//add the score to query results!
+			selected.add(RdfResourceEnum.resultScore.getUri());
         } else {
             //otherwise add all fields
             selected = null;

@@ -15,6 +15,14 @@ public class RdfText implements Text, Cloneable {
     private final boolean isPlain;
 
     protected RdfText(String text, String lang) {
+        if(text == null){
+            throw new NullPointerException("The parsed text MUST NOT be NULL");
+        } else if(text.isEmpty()){
+            throw new IllegalArgumentException("Tha parsed Text MUST NOT be empty!");
+        }
+        if(lang != null && lang.isEmpty()){ //we need to avoid empty languages, because Clerezza don't like them!
+            lang = null;
+        }
         this.literal = new PlainLiteralImpl(text, lang != null ? new Language(lang) : null);
         this.isPlain = true;
     }
@@ -26,7 +34,9 @@ public class RdfText implements Text, Cloneable {
 
     @Override
     public String getLanguage() {
-        return isPlain && ((PlainLiteral) literal).getLanguage() != null ? ((PlainLiteral) literal).getLanguage().toString() : null;
+        return isPlain && 
+            ((PlainLiteral) literal).getLanguage() != null ? 
+                ((PlainLiteral) literal).getLanguage().toString() : null;
     }
 
     @Override
