@@ -23,13 +23,6 @@ import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
-import org.geonames.FeatureClass;
-import org.geonames.InsufficientStyleException;
-import org.geonames.Style;
-import org.geonames.Toponym;
-import org.geonames.ToponymSearchCriteria;
-import org.geonames.ToponymSearchResult;
-import org.geonames.WebService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +44,7 @@ import static eu.iksproject.fise.servicesapi.rdf.TechnicalClasses.FISE_TEXTANNOT
 //@Property(name="service.ranking",intValue=5)
 public class LocationEnhancementEngine implements EnhancementEngine, ServiceProperties {
 
+    
     /**
      * The default value for the Execution of this Engine. Currently set to
      * {@link ServiceProperties#ORDERING_EXTRACTION_ENHANCEMENT}
@@ -70,30 +64,41 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
      * Default value for minimum scores of search results are added to the
      * metadata of the parsed ContentItem
      */
-    private static final Double DEFAULT_MIN_SCORE = 0.33;
+    private static final double DEFAULT_MIN_SCORE = 0.33;
 
-    @Property
+    @Property(doubleValue=DEFAULT_MIN_SCORE)
     public static final String MIN_SCORE = "eu.iksproject.fise.engines.geonames.locationEnhancementEngine.min-score";
 
     /**
      * Default values for the number of results returned by search requests
      * to the geonames.org web service
      */
-    private static final Integer DEFAULT_MAX_LOCATION_ENHANCEMENTS = 5;
+    private static final int DEFAULT_MAX_LOCATION_ENHANCEMENTS = 5;
 
-    @Property
+    @Property(intValue=DEFAULT_MAX_LOCATION_ENHANCEMENTS)
     public static final String MAX_LOCATION_ENHANCEMENTS = "eu.iksproject.fise.engines.geonames.locationEnhancementEngine.max-location-enhancements";
 
     /**
      * Default value for the minimum score of search results used to also add
      * the hierarchy
      */
-    private static final Double DEFAULT_MIN_HIERARCHY_SCORE = 0.70;
+    private static final double DEFAULT_MIN_HIERARCHY_SCORE = 0.70;
 
-    @Property
+    @Property(doubleValue=DEFAULT_MIN_HIERARCHY_SCORE)
     public static final String MIN_HIERARCHY_SCORE = "eu.iksproject.fise.engines.geonames.locationEnhancementEngine.min-hierarchy-score";
 
     public static final UriRef CONCEPT_GEONAMES_FEATURE = new UriRef(NamespaceEnum.geonames.toString() + "Feature");
+    @Property(value=GeonamesAPIWrapper.GEONAMES_ORG_WEBSERVICE_URL)
+    public static final String GEONAMES_SERVER_URL = "eu.iksproject.fise.engines.geonames.locationEnhancementEngine.serverURL";
+    @Property
+    public static final String GEONAMES_USERNAME = "eu.iksproject.fise.engines.geonames.locationEnhancementEngine.username";
+    @Property
+    public static final String GEONAMES_TOKEN = "eu.iksproject.fise.engines.geonames.locationEnhancementEngine.token";
+    
+    /**
+     * The geonames.org API wrapper used to make service requests
+     */
+    protected GeonamesAPIWrapper geonamesService;
 
     static {
         Map<FeatureClass, Collection<UriRef>> mappings = new EnumMap<FeatureClass, Collection<UriRef>>(FeatureClass.class);
@@ -192,42 +197,27 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
 
     @SuppressWarnings("unchecked")
     protected void activate(ComponentContext ce) throws IOException {
-        Dictionary<String, String> properties = ce.getProperties();
+        Dictionary<String, Object> properties = ce.getProperties();
         log.debug("activating ...");
-        String value;
-        try {
-            value = properties.get(MIN_SCORE);
-            log.debug(" -> " + MIN_SCORE + "=" + value);
-            setMinScore(value == null ? null : Double.valueOf(value));
-            log.debug(" <- " + MIN_SCORE + "=" + minScore);
-        } catch (NumberFormatException e) {
-            log.warn("Unable to parse MIN_SCORE", e);
-            setMinScore(null);
+        //NOTE: The type of the values is ensured by the default values in the
+        //      @Property annotations e.g. doubleValue -> Double
+        setMinScore((Double)properties.get(MIN_SCORE));
+        setMaxLocationEnhancements((Integer)properties.get(MAX_LOCATION_ENHANCEMENTS));
+        setMinHierarchyScore((Double)properties.get(MIN_HIERARCHY_SCORE));
+        String serverUrl = (String)properties.get(GEONAMES_SERVER_URL);
+        if(serverUrl != null && serverUrl.isEmpty()){
+            serverUrl = null; //prevent empty serverURLs (e.g. if the user deletes an value)
         }
-        try {
-            value = properties.get(MAX_LOCATION_ENHANCEMENTS);
-            log.debug(" -> " + MAX_LOCATION_ENHANCEMENTS + "=" + value);
-            setMaxLocationEnhancements(value == null ? null : Integer.valueOf(value));
-            log.debug(" <- " + MAX_LOCATION_ENHANCEMENTS + "=" + maxLocationEnhancements);
-        } catch (NumberFormatException e) {
-            log.warn("Unable to parse MAX_LOCATION_ENHANCEMENTS", e);
-            setMaxLocationEnhancements(null);
-        }
-        try {
-            value = properties.get(MIN_HIERARCHY_SCORE);
-            log.debug(" -> " + MIN_HIERARCHY_SCORE + "=" + value);
-            setMinHierarchyScore(value == null ? null : Double.valueOf(value));
-            log.debug(" <- " + MIN_HIERARCHY_SCORE + "=" + minHierarchyScore);
-        } catch (NumberFormatException e) {
-            log.warn("Unable to parse MIN_HIERARCHY_SCORE", e);
-            setMinHierarchyScore(null);
-        }
+        String userName = (String)properties.get(GEONAMES_USERNAME);
+        String token = (String)properties.get(GEONAMES_TOKEN);
+        geonamesService = new GeonamesAPIWrapper(serverUrl, userName, token);
     }
 
     protected void deactivate(ComponentContext ce) {
         setMinScore(null);
         setMaxLocationEnhancements(null);
         setMinHierarchyScore(null);
+        geonamesService = null;
     }
 
     @Override
@@ -275,9 +265,9 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
         }
         //Now we do have all the names we need to lookup
         for (Map.Entry<String, Collection<NonLiteral>> entry : name2placeEnhancementMap.entrySet()) {
-            ToponymSearchResult results;
+            List<Toponym> results;
             try {
-                results = lookupLocation(entry.getKey());
+                results = geonamesService.searchToponyms(entry.getKey());
             } catch (Exception e) {
                 /*
                      * TODO: Review if it makes sense to catch here for each name, or
@@ -290,15 +280,9 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
                 throw new EngineException(this, ci, e);
             }
             if (results != null) {
-                for (Toponym result : results.getToponyms()) {
+                for (Toponym result : results) {
                     log.info("process result " + result.getGeoNameId() + " " + result.getName());
-                    Double score;
-                    try {
-                        score = getToponymScore(result);
-                    } catch (InsufficientStyleException e) {
-                        throw new IllegalStateException(
-                                "Change style of this implementation to get the score values", e);
-                    }
+                    Double score = getToponymScore(result);
                     log.info("  > score " + score);
                     if (score != null) {
                         if (score < minScore) {
@@ -314,7 +298,8 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
                          */
                     }
                     //write the enhancement!
-                    NonLiteral locationEnhancement = writeEntityEnhancement(contentItemId, graph, literalFactory, result, entry.getValue(), null);
+                    NonLiteral locationEnhancement = writeEntityEnhancement(
+                        contentItemId, graph, literalFactory, result, entry.getValue(), null,null);
                     log.info("  > " + score + " >= " + minHierarchyScore);
                     if (score != null && score >= minHierarchyScore) {
                         log.info("  > getHierarchy for " + result.getGeoNameId() + " " + result.getName());
@@ -339,9 +324,8 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
                                      * so we need to set the score to this value.
                                      * Currently is is set to the value of the suggested entry
                                      */
-                                    hierarchyEntry.setScore(score);
                                     writeEntityEnhancement(contentItemId, graph, literalFactory, hierarchyEntry,
-                                            null, Collections.singletonList(locationEnhancement));
+                                            null, Collections.singletonList(locationEnhancement),score);
                                 }
                             }
                         } catch (Exception e) {
@@ -365,8 +349,8 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
      * @return the score in a range [0..1]
      * @throws InsufficientStyleException
      */
-    private Double getToponymScore(Toponym toponym) throws InsufficientStyleException {
-        return toponym.getScore() / 100;
+    private Double getToponymScore(Toponym toponym){
+        return toponym.getScore() == null ? null : toponym.getScore() / 100;
     }
 
     /**
@@ -379,7 +363,7 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
      * @throws Exception on any error while accessing the webservice
      */
     protected Collection<Toponym> getHierarchy(Toponym toponym) throws Exception {
-        return WebService.hierarchy(toponym.getGeoNameId(), null, Style.FULL);
+        return geonamesService.getHierarchy(toponym.getGeoNameId());
     }
 
     /**
@@ -392,11 +376,15 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
      * @param toponym the toponym
      * @param relatedEnhancements related enhancements
      * @param requiresEnhancements required enhancements
+     * @param defaultScore the score used as default id not present. This is
+     * used to parse the score of the Toponym if this method is used to add a
+     * parent Toponym.
      * @return The UriRef of the created entity enhancement
      */
     private UriRef writeEntityEnhancement(UriRef contentItemId, MGraph graph,
             LiteralFactory literalFactory, Toponym toponym,
-            Collection<NonLiteral> relatedEnhancements, Collection<NonLiteral> requiresEnhancements) {
+            Collection<NonLiteral> relatedEnhancements, Collection<NonLiteral> requiresEnhancements,
+            Double defaultScore) {
         UriRef entityRef = new UriRef("http://sws.geonames.org/" + toponym.getGeoNameId() + '/');
         FeatureClass featureClass = toponym.getFeatureClass();
         log.debug("  > featureClass " + featureClass);
@@ -415,14 +403,12 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
         graph.add(new TripleImpl(entityAnnotation, FISE_ENTITY_REFERENCE, entityRef));
         log.debug("  > name " + toponym.getName());
         graph.add(new TripleImpl(entityAnnotation, FISE_ENTITY_LABEL, literalFactory.createTypedLiteral(toponym.getName())));
-        Double score;
-        try {
-            score = getToponymScore(toponym);
-            if (score != null) {
-                graph.add(new TripleImpl(entityAnnotation, FISE_CONFIDENCE, literalFactory.createTypedLiteral(score)));
-            }
-        } catch (InsufficientStyleException e) {
-            //ignore -> don not write the score
+        Double score = getToponymScore(toponym);
+        if(score == null){ //use the default score as fallback
+            score = defaultScore;
+        }
+        if (score != null) {
+            graph.add(new TripleImpl(entityAnnotation, FISE_CONFIDENCE, literalFactory.createTypedLiteral(score)));
         }
         //now get all the entity types for the results
         Set<UriRef> entityTypes = new HashSet<UriRef>();
@@ -444,16 +430,6 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
             graph.add(new TripleImpl(entityAnnotation, FISE_ENTITY_TYPE, entityType));
         }
         return entityAnnotation;
-    }
-
-    protected ToponymSearchResult lookupLocation(String name) throws Exception {
-        ToponymSearchCriteria criteria = new ToponymSearchCriteria();
-        criteria.setName(name);
-        criteria.setMaxRows(maxLocationEnhancements);
-        criteria.setStyle(Style.FULL);
-        criteria.setMaxRows(5);
-        // criteria.setLanguage("language") TODO: search for the language of the document!
-        return WebService.search(criteria);
     }
 
     /**
@@ -555,4 +531,6 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
     public Double getMinHierarchyScore() {
         return minHierarchyScore;
     }
+    
+    
 }
