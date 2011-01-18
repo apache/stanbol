@@ -46,7 +46,6 @@
     <module>parent</module>
 
     <module>iks-autotagging</module>
-    <module>ext/org.geonames</module>
 
     <module>generic/servicesapi</module>
     <module>generic/jobmanager</module>

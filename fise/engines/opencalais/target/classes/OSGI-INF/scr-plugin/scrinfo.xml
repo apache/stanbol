@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+    <scr:component enabled="true" immediate="true" name="eu.iksproject.fise.engines.opencalais.impl.OpenCalaisEngine">
+        <implementation class="eu.iksproject.fise.engines.opencalais.impl.OpenCalaisEngine"/>
+        <service servicefactory="false">
+            <provide interface="eu.iksproject.fise.servicesapi.EnhancementEngine"/>
+            <provide interface="eu.iksproject.fise.servicesapi.ServiceProperties"/>
+        </service>
+        <property name="eu.iksproject.fise.engines.opencalais.license" private="false"/>
+        <property name="eu.iksproject.fise.engines.opencalais.url" type="String" value="http://api.opencalais.com/enlighten/rest/" private="false"/>
+        <property name="service.vendor" type="String" value="IKS project" private="true"/>
+        <property name="service.pid" value="eu.iksproject.fise.engines.opencalais.impl.OpenCalaisEngine" private="false"/>
+        <reference name="tcManager" interface="org.apache.clerezza.rdf.core.access.TcManager" cardinality="1..1" policy="static" bind="bindTcManager" unbind="unbindTcManager" checked="true"/>
+    </scr:component>
+</components>

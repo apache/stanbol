@@ -69,8 +69,11 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
             <excludes>
+            <!-- Deactivated because the free geonames.org services are 
+                 most of the time overloaded and may case the unit tests to
+                 fail. --> 
               <exclude>**/TestLocationEnhancementEngine*.java</exclude>
-            </excludes>
+            </excludes> 
           </configuration>
         </plugin>
       </plugins>
@@ -81,14 +84,14 @@
 			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.fise.servicesapi</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.ext.org.geonames</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jdom</groupId>
-			<artifactId>com.springsource.org.jdom</artifactId>
-		</dependency>
+        <dependency> <!-- used to parse json responses of geonames.org -->
+            <groupId>org.codehaus.jettison</groupId>
+            <artifactId>jettison</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.scr.annotations</artifactId>
@@ -106,11 +109,6 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
