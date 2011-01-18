@@ -27,6 +27,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.iksproject.fise.engines.geonames.impl.GeonamesAPIWrapper.SearchRequestPropertyEnum;
 import eu.iksproject.fise.servicesapi.ContentItem;
 import eu.iksproject.fise.servicesapi.EngineException;
 import eu.iksproject.fise.servicesapi.EnhancementEngine;
@@ -264,10 +265,15 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
             }
         }
         //Now we do have all the names we need to lookup
+        Map<SearchRequestPropertyEnum,Collection<String>> requestParams = new EnumMap<SearchRequestPropertyEnum,Collection<String>>(SearchRequestPropertyEnum.class);
+        if(getMaxLocationEnhancements() != null){   
+            requestParams.put(SearchRequestPropertyEnum.maxRows, Collections.singleton(getMaxLocationEnhancements().toString()));
+        }
         for (Map.Entry<String, Collection<NonLiteral>> entry : name2placeEnhancementMap.entrySet()) {
             List<Toponym> results;
             try {
-                results = geonamesService.searchToponyms(entry.getKey());
+                requestParams.put(SearchRequestPropertyEnum.name, Collections.singleton(entry.getKey()));
+                results = geonamesService.searchToponyms(requestParams);
             } catch (Exception e) {
                 /*
                      * TODO: Review if it makes sense to catch here for each name, or

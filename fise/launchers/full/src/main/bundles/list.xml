@@ -318,19 +318,9 @@
 		</bundle>
 		<!--
 			The geonames.org LocationEnhancement Engines needs two additional
-			bundles 1) com.springsource.org.jdom 2)
-			eu.iksproject.fise.ext.org.geonames (Rupert Westenthaler 20100619)
+			bundles 1) jettyjson 2) commons-io. Both of them are already
+			present in the bundle list.
 		-->
-		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.ext.org.geonames</artifactId>
-			<version>0.9-SNAPSHOT</version>
-		</bundle>
-		<bundle>
-			<groupId>org.jdom</groupId>
-			<artifactId>com.springsource.org.jdom</artifactId>
-			<version>1.1.0</version>
-		</bundle>
 		<bundle>
 			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.fise.engines.geonames</artifactId>
