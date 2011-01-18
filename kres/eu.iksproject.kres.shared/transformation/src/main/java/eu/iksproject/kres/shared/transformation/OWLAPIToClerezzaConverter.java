@@ -123,11 +123,8 @@ public class OWLAPIToClerezzaConverter {
 			ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 			
 			ParsingProvider parser = new JenaParserProvider();
-			org.apache.clerezza.rdf.core.Graph deserializedGraph = parser.parse(in, SupportedFormat.RDF_XML, null);
-			
-			
 			mGraph = new SimpleMGraph();
-			mGraph.addAll(deserializedGraph);
+			parser.parse(mGraph, in, SupportedFormat.RDF_XML, null);
 		} catch (OWLOntologyStorageException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
