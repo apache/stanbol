@@ -82,7 +82,7 @@ public class GeonamesAPIWrapper {
         /**
          * the maximum number of results (must be < 1000). Default is set to 5
          */
-        maxRow("5"),
+        maxRows("5"),
         /**
          * the index of the first result returned
          */
