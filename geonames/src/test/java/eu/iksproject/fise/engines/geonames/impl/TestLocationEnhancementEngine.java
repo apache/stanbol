@@ -146,12 +146,11 @@ public class TestLocationEnhancementEngine {
                 return;
             }
         }
-        // ... and test the results
         /*
-         * TODO: rw 20100617
-         *  - Expected results depend on the used Index.
-         *  - Use an example where the Organisation, Person and Place is part
-         *    of the index
+         * Note:
+         *  - Expected results depend on the geonames.org data. So if the test
+         *    fails it may also mean that the data provided by geonames.org have
+         *    changed
          */
         int entityAnnotationCount = checkAllEntityAnnotations(ci.getMetadata());
         //two suggestions for New Zealand and one hierarchy entry for the first
