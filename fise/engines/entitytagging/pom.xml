@@ -25,12 +25,12 @@
 	<packaging>bundle</packaging>
 	<version>${fise-version}</version>
 
-	<name>IKS FISE Enhancement Engine : for RICK ReferencedSites</name>
+	<name>IKS FISE Enhancement Engine : for Entityhub ReferencedSites</name>
 	<description>
 		Implementation of an annotation engine that links named entities
         extracted from a text (TextAnnotations) to semantic entities
-        managed by the RICK.
-        This engine depends on the RICK.
+        managed by the Entityhub.
+        This engine depends on the Apache Stanbol Entityhub.
 	</description>
 
 	<inceptionYear>2010</inceptionYear>
@@ -78,14 +78,14 @@
 			<artifactId>eu.iksproject.fise.servicesapi</artifactId>
 		</dependency>
         <dependency>
-            <groupId>eu.iksproject</groupId>
-            <artifactId>eu.iksproject.rick.servicesapi</artifactId>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
             <version>0.1-SNAPSHOT</version>
 			<scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>eu.iksproject</groupId>
-            <artifactId>eu.iksproject.rick.model.clerezza</artifactId>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
             <version>0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

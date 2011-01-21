@@ -337,52 +337,52 @@
   <!-- RICK infrastructure and required libraries-->
   <startLevel level="15">
     <bundle>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.servicesapi</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
       <version>0.1-SNAPSHOT</version>
     </bundle>
     <bundle>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.model.clerezza</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
       <version>0.1-SNAPSHOT</version>
     </bundle>
     <bundle>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.query.clerezza</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.query.clerezza</artifactId>
       <version>0.1-SNAPSHOT</version>
     </bundle>
     <bundle>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.site.linkedData</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.site.linkedData</artifactId>
       <version>0.1-SNAPSHOT</version>
     </bundle>
     <bundle>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.yard.clerezza</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.yard.clerezza</artifactId>
       <version>0.1-SNAPSHOT</version>
     </bundle>
     <bundle>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.yard.solr</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
       <version>0.1-SNAPSHOT</version>
     </bundle>
   </startLevel>
   <startLevel level="16">
     <bundle>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.core</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
       <version>0.1-SNAPSHOT</version>
     </bundle>
     <bundle>
-	  <groupId>eu.iksproject</groupId>
-	  <artifactId>eu.iksproject.rick.jersey</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+	  <artifactId>org.apache.stanbol.entityhub.jersey</artifactId>
 	  <version>0.1-SNAPSHOT</version>
     </bundle>
   </startLevel>
 
-  <!-- Solr Client (needed for eu.iksproject.rick.yard.solr) -->
+  <!-- Solr Client (needed for org.apache.stanbol.entityhub.yard.solr) -->
   <startLevel level="14">
-<!-- not a Bundle - currently included in the eu.iksproject.rick.yard.solr bundle
+<!-- not a Bundle - currently included in the org.apache.stanbol.entityhub.yard.solr bundle
      <bundle>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-solrj</artifactId>
