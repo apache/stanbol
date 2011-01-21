@@ -11,13 +11,13 @@ import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.stanbol.entityhub.servicesapi.model.Reference;
+import org.apache.stanbol.entityhub.servicesapi.model.Sign;
+import org.apache.stanbol.entityhub.servicesapi.model.Text;
+import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 
 import eu.iksproject.fise.servicesapi.EnhancementEngine;
 import eu.iksproject.fise.servicesapi.helper.EnhancementEngineHelper;
-import eu.iksproject.rick.servicesapi.model.Reference;
-import eu.iksproject.rick.servicesapi.model.Sign;
-import eu.iksproject.rick.servicesapi.model.Text;
-import eu.iksproject.rick.servicesapi.model.rdf.RdfResourceEnum;
 
 import static eu.iksproject.fise.servicesapi.rdf.Properties.*;
 
