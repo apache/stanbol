@@ -2,17 +2,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>eu.iksproject</groupId>
-    <artifactId>eu.iksproject.rick.parent</artifactId>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
     <version>0.1-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
-  <groupId>eu.iksproject</groupId>
-  <artifactId>eu.iksproject.rick.launchers.sling</artifactId>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.entityhub.launchers.sling</artifactId>
   <packaging>jar</packaging>
   <version>0.1-SNAPSHOT</version>
-  <name>IKS RICK Sling-based standalone launcher</name>
-  <description>Runnable jar that runs the standard IKS RICK configuration</description>
+  <name>Apache Stanbol Entityhub Sling-based standalone launcher</name>
+  <description>Runnable jar that runs the standard IKS Entityhub configuration</description>
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/launchers/sling
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/launchers/sling
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol</url>
+  </scm>
   <build>
     <plugins>
       <plugin>

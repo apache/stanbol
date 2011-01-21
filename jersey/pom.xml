@@ -3,19 +3,28 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>eu.iksproject</groupId>
-    <artifactId>eu.iksproject.rick.parent</artifactId>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
     <version>0.1-SNAPSHOT</version>
     <relativePath>../parent/pom.xml</relativePath>
   </parent>
 
-  <groupId>eu.iksproject</groupId>
-  <artifactId>eu.iksproject.rick.jersey</artifactId>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.entityhub.jersey</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>IKS RICK Jersey JAX-RS API and front-end</name>
+  <name>Apache Stanbol Entityhub Jersey JAX-RS API and front-end</name>
   <description></description>
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/jersey
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/jersey
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol</url>
+  </scm>
 
   <properties>
     <jersey-version>1.1.5.1</jersey-version>
@@ -24,28 +33,28 @@
 
   <dependencies>
 
-    <!-- dependencies on other RICK modules -->
+    <!-- dependencies on other Entityhub modules -->
     <dependency>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.servicesapi</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
       <version>0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.core</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
       <version>0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.model.clerezza</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
       <version>0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.query.clerezza</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.query.clerezza</artifactId>
       <version>0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
@@ -249,7 +258,7 @@
         <configuration>
           <instructions>
             <Export-Package>
-              eu.iksproject.rick.jersey.*
+              org.apache.stanbol.entityhub.jersey.*
             </Export-Package>
             <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>

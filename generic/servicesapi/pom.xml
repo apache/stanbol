@@ -14,30 +14,30 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>eu.iksproject</groupId>
-    <artifactId>eu.iksproject.rick.parent</artifactId>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
     <version>0.1-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
-  <groupId>eu.iksproject</groupId>
-  <artifactId>eu.iksproject.rick.servicesapi</artifactId>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
   <packaging>bundle</packaging>
   <version>0.1-SNAPSHOT</version>
 
-  <name>IKS RICK Services API</name>
-  <description>The Services API of the Reference Infrastructure for Content and Knowledge (RICK)</description>
+  <name>Apache Stanbol Entityhub Services API</name>
+  <description>The Services API of the Entityhub</description>
 
   <inceptionYear>2010</inceptionYear>
 
   <scm>
     <connection>
-      scm:svn:http://iks-project.googlecode.com/svn/sandbox/rick/trunk/generic/servicesapi
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/generic/servicesapi
     </connection>
     <developerConnection>
-      scm:svn:https://iks-project.googlecode.com/svn/sandbox/rick/trunk/generic/servicesapi
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/generic/servicesapi
     </developerConnection>
-    <url>http://wiki.iks-project.eu/index.php/Content-knowledge-reference-infrastructure</url>
+    <url>http://incubator.apache.org/stanbol</url>
   </scm>
 
   <build>
@@ -49,15 +49,15 @@
         <configuration>
           <instructions>
             <Export-Package>
-              eu.iksproject.rick.servicesapi;version=${pom.version},
-              eu.iksproject.rick.servicesapi.defaults;version=${pom.version},
-              eu.iksproject.rick.servicesapi.model;version=${pom.version},
-              eu.iksproject.rick.servicesapi.model.rdf;version=${pom.version},
-              eu.iksproject.rick.servicesapi.mapping;version=${pom.version},
-              eu.iksproject.rick.servicesapi.query;version=${pom.version},
-              eu.iksproject.rick.servicesapi.site;version=${pom.version},
-              eu.iksproject.rick.servicesapi.util;version=${pom.version},
-              eu.iksproject.rick.servicesapi.yard;version=${pom.version}
+              org.apache.stanbol.entityhub.servicesapi;version=${pom.version},
+              org.apache.stanbol.entityhub.servicesapi.defaults;version=${pom.version},
+              org.apache.stanbol.entityhub.servicesapi.model;version=${pom.version},
+              org.apache.stanbol.entityhub.servicesapi.model.rdf;version=${pom.version},
+              org.apache.stanbol.entityhub.servicesapi.mapping;version=${pom.version},
+              org.apache.stanbol.entityhub.servicesapi.query;version=${pom.version},
+              org.apache.stanbol.entityhub.servicesapi.site;version=${pom.version},
+              org.apache.stanbol.entityhub.servicesapi.util;version=${pom.version},
+              org.apache.stanbol.entityhub.servicesapi.yard;version=${pom.version}
             </Export-Package>
            <Private-Package>
             </Private-Package>

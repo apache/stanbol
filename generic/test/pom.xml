@@ -14,18 +14,29 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>eu.iksproject</groupId>
-    <artifactId>eu.iksproject.rick.parent</artifactId>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
     <version>0.1-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
-  <groupId>eu.iksproject</groupId>
-  <artifactId>eu.iksproject.rick.test</artifactId>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.entityhub.test</artifactId>
   <packaging>jar</packaging>
   <version>0.1-SNAPSHOT</version>
-  <name>IKS RICK - Testutils</name>
-  <description>Utilities to test implementations of the RICK servicesapi</description>
+  <name>Apache Stanbol Entityhub - Test Framework</name>
+  <description>Unit test framework for the Interfaces defined within the
+  services APO of the Entityhub</description>
+  <inceptionYear>2010</inceptionYear>
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/generic/test
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/generic/test
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol</url>
+  </scm>
   <dependencies>
 	  <dependency>
 	      <groupId>junit</groupId>
@@ -33,8 +44,8 @@
 	      <scope>provided</scope>
 	  </dependency>
       <dependency>
-          <groupId>eu.iksproject</groupId>
-          <artifactId>eu.iksproject.rick.servicesapi</artifactId>
+          <groupId>org.apache.stanbol</groupId>
+          <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
           <version>0.1-SNAPSHOT</version>
       </dependency>
    </dependencies>

@@ -14,30 +14,33 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>eu.iksproject</groupId>
-    <artifactId>eu.iksproject.rick.parent</artifactId>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
     <version>0.1-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
-  <groupId>eu.iksproject</groupId>
-  <artifactId>eu.iksproject.rick.core</artifactId>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.entityhub.core</artifactId>
   <packaging>bundle</packaging>
   <version>0.1-SNAPSHOT</version>
 
-  <name>IKS RICK Core </name>
-  <description>The Core Components of the Reference Infrastructure for Content and Knowledge (RICK)</description>
+  <name>Apache Stanbol Entityhub Core </name>
+  <description>The Core Components of the Entityhub. This includes the default
+  implementations for the services defined by the services API as well as an
+  in-memory implementation of the model.
+  </description>
 
   <inceptionYear>2010</inceptionYear>
 
   <scm>
     <connection>
-      scm:svn:http://iks-project.googlecode.com/svn/sandbox/rick/trunk/generic/servicesapi
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/generic/core
     </connection>
     <developerConnection>
-      scm:svn:https://iks-project.googlecode.com/svn/sandbox/rick/trunk/generic/servicesapi
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/generic/core
     </developerConnection>
-    <url>http://wiki.iks-project.eu/index.php/Content-knowledge-reference-infrastructure</url>
+    <url>http://incubator.apache.org/stanbol</url>
   </scm>
 
   <build>
@@ -49,16 +52,16 @@
         <configuration>
           <instructions>
             <Export-Package>
-              eu.iksproject.rick.core;version=${pom.version},
-              eu.iksproject.rick.core.mapping;version=${pom.version},
-              eu.iksproject.rick.core.model;version=${pom.version},
-              eu.iksproject.rick.core.query;version=${pom.version},
-              eu.iksproject.rick.core.site;version=${pom.version},
-              eu.iksproject.rick.core.yard;version=${pom.version},
-              eu.iksproject.rick.core.utils;version=${pom.version}
+              org.apache.stanbol.entityhub.core;version=${pom.version},
+              org.apache.stanbol.entityhub.core.mapping;version=${pom.version},
+              org.apache.stanbol.entityhub.core.model;version=${pom.version},
+              org.apache.stanbol.entityhub.core.query;version=${pom.version},
+              org.apache.stanbol.entityhub.core.site;version=${pom.version},
+              org.apache.stanbol.entityhub.core.yard;version=${pom.version},
+              org.apache.stanbol.entityhub.core.utils;version=${pom.version}
             </Export-Package>
            <Private-Package>
-              eu.iksproject.rick.core.impl;version=${pom.version},
+              org.apache.stanbol.entityhub.core.impl;version=${pom.version},
             </Private-Package>
            </instructions>
         </configuration>
@@ -74,8 +77,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.servicesapi</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
       <version>0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
@@ -135,8 +138,8 @@
     </dependency>
     <!-- for tests -->
     <dependency>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.test</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.test</artifactId>
       <version>0.1-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>

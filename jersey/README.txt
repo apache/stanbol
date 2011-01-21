@@ -28,7 +28,7 @@ Deployment
 
 Go to `launchers/sling/target` and run::
 
-  rm -rf sling && java -jar eu.iksproject.fise.launchers.sling-*-SNAPSHOT.jar
+  rm -rf sling && java -jar org.apache.stanbol.fise.launchers.sling-*-SNAPSHOT.jar
 
 Once deployed (check the logs) you can either use the HTML interface:
 
