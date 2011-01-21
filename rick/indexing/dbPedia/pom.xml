@@ -14,18 +14,27 @@
 	<modelVersion>4.0.0</modelVersion>
 <!-- 
 	<parent>
-		<groupId>eu.iksproject</groupId>
-		<artifactId>eu.iksproject.rick.parent</artifactId>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>org.apache.stanbol.entityhub.parent</artifactId>
 		<version>0.1-SNAPSHOT</version>
 		<relativePath>../../parent</relativePath>
 	</parent>
 -->
-	<groupId>eu.iksproject</groupId>
-	<artifactId>eu.iksproject.rick.indexing.dbPedia</artifactId>
+	<groupId>org.apache.stanbol</groupId>
+	<artifactId>org.apache.stanbol.entityhub.indexing.dbPedia</artifactId>
 	<packaging>jar</packaging>
 	<version>0.1-SNAPSHOT</version>
-	<name>IKS RICK Indexing for geonames.org</name>
+	<name>Apache Stanbol Entityhub Indexing for geonames.org</name>
 	<description>This uses the RDF dump of dbPedia.org to create a Full Yard for dbPedia.org  </description>
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/dbPedia
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/dbPedia
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol</url>
+  </scm>
 	<dependencies>
         <!-- for logging -->
         <dependency>
@@ -41,28 +50,28 @@
         </dependency>
         <!-- RICK dependencies -->
 		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.rick.servicesapi</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.rick.core</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.core</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.rick.yard.solr</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.rick.core</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.core</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
         <dependency>
-            <groupId>eu.iksproject</groupId>
-            <artifactId>eu.iksproject.rick.indexing.genericRdf</artifactId>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.entityhub.indexing.genericRdf</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
        <!-- for the main -->
@@ -108,7 +117,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>eu.iksproject.rick.indexing.dbPedia.cli.CommandLineRunner</mainClass>
+							<mainClass>org.apache.stanbol.entityhub.indexing.dbPedia.cli.CommandLineRunner</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

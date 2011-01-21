@@ -14,31 +14,31 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>eu.iksproject</groupId>
-    <artifactId>eu.iksproject.rick.parent</artifactId>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
     <version>0.1-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
-  <groupId>eu.iksproject</groupId>
-  <artifactId>eu.iksproject.rick.query.clerezza</artifactId>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.entityhub.query.clerezza</artifactId>
   <packaging>bundle</packaging>
   <version>0.1-SNAPSHOT</version>
 
-  <name>IKS RICK Query implementation hased on SPARQL </name>
-  <description>This bundle provides implementation of the RICK Query interface(s) 
+  <name>Apache Stanbol Entityhub Query implementation hased on SPARQL </name>
+  <description>This bundle provides implementation of the Entityhub Query interface(s) 
   based on SPARQL by using the Clerezza framework.</description>
 
   <inceptionYear>2010</inceptionYear>
 
   <scm>
     <connection>
-      scm:svn:http://iks-project.googlecode.com/svn/sandbox/rick/trunk/query/clerezza
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/query/clerezza
     </connection>
     <developerConnection>
-      scm:svn:https://iks-project.googlecode.com/svn/sandbox/rick/trunk/query/clerezza
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/query/clerezza
     </developerConnection>
-    <url>http://wiki.iks-project.eu/index.php/Content-knowledge-reference-infrastructure</url>
+    <url>http://incubator.apache.org/stanbol</url>
   </scm>
 
   <build>
@@ -50,10 +50,10 @@
         <configuration>
           <instructions>
             <Export-Package>
-              eu.iksproject.rick.query.clerezza;version=${pom.version},
+              org.apache.stanbol.entityhub.query.clerezza;version=${pom.version},
             </Export-Package>
            <Private-Package>
-              eu.iksproject.rick.query.clerezza.impl;version=${pom.version},
+              org.apache.stanbol.entityhub.query.clerezza.impl;version=${pom.version},
             </Private-Package>
            </instructions>
         </configuration>
@@ -69,18 +69,18 @@
 
   <dependencies>
     <dependency>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.servicesapi</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.core</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.model.clerezza</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     

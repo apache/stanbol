@@ -14,32 +14,32 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>eu.iksproject</groupId>
-    <artifactId>eu.iksproject.rick.parent</artifactId>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
     <version>0.1-SNAPSHOT</version>
     <relativePath>./parent</relativePath>
   </parent>
 
-  <groupId>eu.iksproject</groupId>
-  <artifactId>eu.iksproject.rick.reactor</artifactId>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.entityhub.reactor</artifactId>
   <packaging>pom</packaging>
   <version>0.1-SNAPSHOT</version>
 
-  <name>IKS RICK reactor</name>
+  <name>Apache Stanbol Entityhub reactor</name>
   <description>
-    Pseudo project to build the complete RICK project
+    Pseudo project to build the complete Apache Stanbol Entityhub component
   </description>
 
   <inceptionYear>2010</inceptionYear>
 
   <scm>
     <connection>
-      scm:svn:http://iks-project.googlecode.com/svn/sandbox/rick/trunk
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub
     </connection>
     <developerConnection>
-      scm:svn:https://iks-project.googlecode.com/svn/sandbox/rick/trunk
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub
     </developerConnection>
-    <url>http://wiki.iks-project.eu/index.php/Content-knowledge-reference-infrastructure</url>
+    <url>http://incubator.apache.org/stanbol</url>
   </scm>
 
   <modules>

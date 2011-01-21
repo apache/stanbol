@@ -14,31 +14,31 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>eu.iksproject</groupId>
-    <artifactId>eu.iksproject.rick.parent</artifactId>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
     <version>0.1-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
-  <groupId>eu.iksproject</groupId>
-  <artifactId>eu.iksproject.rick.yard.solr</artifactId>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
   <packaging>bundle</packaging>
   <version>0.1-SNAPSHOT</version>
 
-  <name>IKS RICK Yard implementation hased on Solr </name>
-  <description>This bundle provides implementation of the RICK Yard interface(s) 
+  <name>Apache Stanbol Entityhub Yard implementation hased on Solr </name>
+  <description>This bundle provides implementation of the Entityhub Yard interface(s) 
   based on a Solr Search Server</description>
 
   <inceptionYear>2010</inceptionYear>
 
   <scm>
     <connection>
-      scm:svn:http://iks-project.googlecode.com/svn/sandbox/rick/trunk/yard/solr
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/yard/solr
     </connection>
     <developerConnection>
-      scm:svn:https://iks-project.googlecode.com/svn/sandbox/rick/trunk/yard/solr
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/yard/solr
     </developerConnection>
-    <url>http://wiki.iks-project.eu/index.php/Content-knowledge-reference-infrastructure</url>
+    <url>http://incubator.apache.org/stanbol</url>
   </scm>
 
   <build>
@@ -61,11 +61,11 @@
         <configuration>
           <instructions>
             <Export-Package>
-              eu.iksproject.rick.yard.solr;version=${pom.version},
-              eu.iksproject.rick.yard.solr.model;version=${pom.version},
-              eu.iksproject.rick.yard.solr.query;version=${pom.version},
-              eu.iksproject.rick.yard.solr.utils;version=${pom.version},
-              eu.iksproject.rick.yard.solr.defaults;version=${pom.version}
+              org.apache.stanbol.entityhub.yard.solr;version=${pom.version},
+              org.apache.stanbol.entityhub.yard.solr.model;version=${pom.version},
+              org.apache.stanbol.entityhub.yard.solr.query;version=${pom.version},
+              org.apache.stanbol.entityhub.yard.solr.utils;version=${pom.version},
+              org.apache.stanbol.entityhub.yard.solr.defaults;version=${pom.version}
             </Export-Package>
             <Import-Package>
               !org.apache.lucene.*,
@@ -74,8 +74,8 @@
               *
             </Import-Package>
            <Private-Package>
-              eu.iksproject.rick.yard.solr.impl;version=${pom.version},
-              eu.iksproject.rick.yard.solr.impl.constraintEncoders;version=${pom.version}
+              org.apache.stanbol.entityhub.yard.solr.impl;version=${pom.version},
+              org.apache.stanbol.entityhub.yard.solr.impl.constraintEncoders;version=${pom.version}
             </Private-Package>
             <Embed-Dependency>
               solr-solrj,commons-httpclient
@@ -93,13 +93,13 @@
 
   <dependencies>
     <dependency>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.servicesapi</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.core</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
 

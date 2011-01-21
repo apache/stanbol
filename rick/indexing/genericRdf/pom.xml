@@ -14,34 +14,43 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>eu.iksproject</groupId>
-    <artifactId>eu.iksproject.rick.parent</artifactId>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
     <version>0.1-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
-  <groupId>eu.iksproject</groupId>
-  <artifactId>eu.iksproject.rick.indexing.genericRdf</artifactId>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.entityhub.indexing.genericRdf</artifactId>
   <packaging>jar</packaging>
   <version>0.1-SNAPSHOT</version>
-  <name>IKS RICK Indexing for rdf Resource</name>
+  <name>Apache Stanbol Entityhub Indexing for rdf Resource</name>
   <description>This indexes all kind of RDF sources by using a prased
   configuration (FieldMapper to define index fields and field values and a set 
   of indexed rdf:types) configuration for processing Resources in the Graph.
   </description>
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/genericRdf
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/genericRdf
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol</url>
+  </scm>
   <dependencies>
     <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
     </dependency>
     <dependency>
-        <groupId>eu.iksproject</groupId>
-        <artifactId>eu.iksproject.rick.servicesapi</artifactId>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
         <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-        <groupId>eu.iksproject</groupId>
-        <artifactId>eu.iksproject.rick.core</artifactId>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.entityhub.core</artifactId>
         <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>

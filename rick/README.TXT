@@ -25,7 +25,7 @@ Launch the FISE server::
 
   % cd launchers/sling/target
   % rm -rf sling                # erase previous sling install if any (optional)
-  % java -Xmx512M -jar eu.iksproject.rick.launchers.sling-*-SNAPSHOT.jar
+  % java -Xmx512M -jar org.apache.stanbol.entityhub.launchers.sling-*-SNAPSHOT.jar
 
 
 
@@ -93,29 +93,29 @@ OSGI Components of the RICK
 The Components of the RICK are all listed in the component tab of the 
 Apache Felix Web Console (http://localhost:8080/system/console/components).
 The RICK uses the following components:
- - eu.iksproject.rick.core.impl.RickConfigurationImpl 
+ - org.apache.stanbol.entityhub.core.impl.EntityhubConfigurationImpl 
      (Singelton holding the configuration of the Rick)
- - eu.iksproject.rick.core.impl.RickImpl
+ - org.apache.stanbol.entityhub.core.impl.EntityhubImpl
      (Singelton implementing the Rick Interface - Java API)
- - eu.iksproject.rick.core.impl.YardManagerImpl
+ - org.apache.stanbol.entityhub.core.impl.YardManagerImpl
      (Singelton that keeps track of all the running Yard instances)
- - eu.iksproject.rick.jersey.JerseyEndpoint
+ - org.apache.stanbol.entityhub.jersey.JerseyEndpoint
      (Singelton that starts the RESTful Service Implementation - RESTful API)
- - eu.iksproject.rick.site.referencedSite
+ - org.apache.stanbol.entityhub.site.referencedSite
      (Multiple instances - one for each Site referenced by the Rick)
- - eu.iksproject.rick.yard.clerezza.impl.ClerezzaYard
+ - org.apache.stanbol.entityhub.yard.clerezza.impl.ClerezzaYard
      (Multiple instances - Best suited for small and medium sized caches of
       semantic web data)
- - eu.iksproject.rick.yard.solr.impl.SolrYard
+ - org.apache.stanbol.entityhub.yard.solr.impl.SolrYard
      (Multiple instances - Best suited for full text queries. Better performance
      for Representations with a limited number of different fields)
- - eu.iksproject.rick.site.CoolUriDereferencer
+ - org.apache.stanbol.entityhub.site.CoolUriDereferencer
      (used and instantiated by ReferencedSite based on there configuration)
- - eu.iksproject.rick.site.SparqlDereferencer
+ - org.apache.stanbol.entityhub.site.SparqlDereferencer
      (used and instantiated by ReferencedSite based on there configuration)
- - eu.iksproject.rick.site.SparqlSearcher
+ - org.apache.stanbol.entityhub.site.SparqlSearcher
      (used and instantiated by ReferencedSite based on there configuration)
- - eu.iksproject.rick.site.VirtuosoSearcher
+ - org.apache.stanbol.entityhub.site.VirtuosoSearcher
      (used and instantiated by ReferencedSite based on there configuration)
 
 

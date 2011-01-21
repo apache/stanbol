@@ -14,31 +14,31 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>eu.iksproject</groupId>
-    <artifactId>eu.iksproject.rick.parent</artifactId>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
     <version>0.1-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
-  <groupId>eu.iksproject</groupId>
-  <artifactId>eu.iksproject.rick.yard.clerezza</artifactId>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.entityhub.yard.clerezza</artifactId>
   <packaging>bundle</packaging>
   <version>0.1-SNAPSHOT</version>
 
-  <name>IKS RICK Yard implementation hased on Clerezza </name>
-  <description>This bundle provides implementation of the RICK Yard interface(s) 
+  <name>Apache Stanbol Entityhub Yard implementation hased on Clerezza </name>
+  <description>This bundle provides implementation of the Entityhub Yard interface(s) 
   based on a RDF Triple store by using the Clerezza framework.</description>
 
   <inceptionYear>2010</inceptionYear>
 
   <scm>
     <connection>
-      scm:svn:http://iks-project.googlecode.com/svn/sandbox/rick/trunk/generic/servicesapi
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/yard/clerezza
     </connection>
     <developerConnection>
-      scm:svn:https://iks-project.googlecode.com/svn/sandbox/rick/trunk/generic/servicesapi
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/yard/clerezza
     </developerConnection>
-    <url>http://wiki.iks-project.eu/index.php/Content-knowledge-reference-infrastructure</url>
+    <url>http://incubator.apache.org/stanbol</url>
   </scm>
 
   <build>
@@ -50,11 +50,11 @@
         <configuration>
           <instructions>
             <Export-Package>
-              eu.iksproject.rick.yard.clerezza;version=${pom.version},
+              org.apache.stanbol.entityhub.yard.clerezza;version=${pom.version},
             </Export-Package>
            <Private-Package>
-              eu.iksproject.rick.yard.clerezza.impl;version=${pom.version},
-              eu.iksproject.rick.yard.clerezza.impl.adapter;version=${pom.version}
+              org.apache.stanbol.entityhub.yard.clerezza.impl;version=${pom.version},
+              org.apache.stanbol.entityhub.yard.clerezza.impl.adapter;version=${pom.version}
             </Private-Package>
            </instructions>
         </configuration>
@@ -70,23 +70,23 @@
 
   <dependencies>
     <dependency>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.servicesapi</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.core</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.model.clerezza</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.rick.query.clerezza</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.query.clerezza</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     

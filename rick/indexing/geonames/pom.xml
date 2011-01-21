@@ -14,20 +14,29 @@
 	<modelVersion>4.0.0</modelVersion>
 <!-- 
 	<parent>
-		<groupId>eu.iksproject</groupId>
-		<artifactId>eu.iksproject.rick.parent</artifactId>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>org.apache.stanbol.entityhub.parent</artifactId>
 		<version>0.1-SNAPSHOT</version>
 		<relativePath>../../parent</relativePath>
 	</parent>
 -->
-	<groupId>eu.iksproject</groupId>
-	<artifactId>eu.iksproject.rick.indexing.geonames</artifactId>
-	<packaging>jar</packaging>
-	<version>0.1-SNAPSHOT</version>
-	<name>IKS RICK Indexing for geonames.org</name>
-	<description>This uses the DB dump of geonames.org to create a Full Yard containing all points of
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.entityhub.indexing.geonames</artifactId>
+  <packaging>jar</packaging>
+  <version>0.1-SNAPSHOT</version>
+  <name>Apache Stanbol Entityhub Indexing for geonames.org</name>
+  <description>This uses the DB dump of geonames.org to create a Full Yard containing all points of
     interest of geonames.org
   </description>
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/geonames
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/geonames
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol</url>
+  </scm>
 	<dependencies>
         <!-- for logging -->
         <dependency>
@@ -41,25 +50,25 @@
             <version>1.5.8</version>
             <scope>runtime</scope>
         </dependency>
-        <!-- RICK dependencies -->
+        <!-- Entityhub dependencies -->
 		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.rick.servicesapi</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.rick.core</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.core</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.rick.yard.solr</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.rick.core</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.core</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
        <!-- for the main -->
@@ -95,7 +104,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>eu.iksproject.rick.indexing.geonames.cli.CommandLineRunner</mainClass>
+							<mainClass>org.apache.stanbol.entityhub.indexing.geonames.cli.CommandLineRunner</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
