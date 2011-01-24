@@ -59,6 +59,7 @@
     <module>engines/geonames</module>
     <module>engines/entitytagging</module><!-- RICK based enhancement engine(s) -->
 	<module>engines/opencalais</module>
+    <module>engines/zemanta</module>
 
     <module>jersey</module>
 
