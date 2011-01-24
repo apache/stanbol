@@ -12,6 +12,8 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.slf4j.Logger;
@@ -118,9 +120,10 @@ public class ZemantaAPIWrapper {
     private Graph parseResponse(InputStream is) {
         JenaParserProvider jenaParserProvider = new JenaParserProvider();
         //NOTE(rw): the new third parameter is the base URI used to resolve relative paths
-        Graph g = jenaParserProvider.parse(is, SupportedFormat.RDF_XML,null);
+        MGraph g = new SimpleMGraph();
+        jenaParserProvider.parse(g,is, SupportedFormat.RDF_XML,null);
         log.debug("graph: " + g.toString());
-        return g;
+        return g.getGraph();
     }
 
 }

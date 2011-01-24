@@ -35,30 +35,25 @@
     <dependency>
       <groupId>eu.iksproject</groupId>
       <artifactId>eu.iksproject.fise.servicesapi</artifactId>
-      <version>0.9-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>org.apache.clerezza.rdf.core</artifactId>
-      <version>0.12-incubating-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>org.apache.clerezza.rdf.jena.parser</artifactId>
-      <version>0.10-incubating-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>    
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
-      <version>1.2.0</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>1.4</version>
     </dependency>
 
 
@@ -75,18 +70,15 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.7</version>
-      <scope>test</scope>
     </dependency>
     <dependency><!--  for debugging enhancements -->
       <groupId>org.apache.clerezza</groupId>
       <artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
-      <version>0.9-incubating-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.5.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
