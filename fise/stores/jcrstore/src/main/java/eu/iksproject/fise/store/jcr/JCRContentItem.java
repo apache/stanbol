@@ -128,6 +128,18 @@ public class JCRContentItem implements ContentItem, GraphListener {
         }
 
         Node tripleNode = jcrNode.addNode(name);
+        /*
+         * TODO: Rupert Westenthaler 25.01.2011
+         * Using the toString method of the subject, predicate and object is
+         * not sufficient here. One needs to treat UriRefs, PlainLiterals,
+         * TypedLiterals and especially BNodes (blank nodes) differently.
+         * For Plain literals it is important to also store the language. For
+         * Typed Literals it is important to store the xsd:dataType (or even
+         * map the xsd:dataType to the according jcr:type.
+         * For BNodes one needs to keep a bidirectional mapping between the
+         * BNode instance and the JCR:Property (e.g. by using an random ID as
+         * value and map this value to an BNode instance.
+         */
         tripleNode.setProperty(SUBJECT, triple.getSubject().toString());
         tripleNode.setProperty(PREDICATE, triple.getPredicate().toString());
         tripleNode.setProperty(OBJECT, triple.getObject().toString());
@@ -182,6 +194,18 @@ public class JCRContentItem implements ContentItem, GraphListener {
                 if (childNode.hasProperty(SUBJECT)
                         && childNode.hasProperty(PREDICATE)
                         && childNode.hasProperty(OBJECT)) {
+                    /*
+                     * TODO: Rupert Westenthaler 25.01.2011
+                     * Triples may use
+                     *  - any kind of NonLiteral as Subject (BNode or UriRef)
+                     *  - only an UriRef as property (Predicate)
+                     *  - any Resource (PlainLiteral, TypedLiteral, NBode or UriRef)
+                     *    as Object.
+                     *  The Node representing the triple need to store the required 
+                     *  information and this mapping implementation need to be
+                     *  adapted accordingly.
+                     *  See also TODO for createNode(..)
+                     */
                     graph.add(new TripleImpl(new UriRef(childNode.getProperty(
                             SUBJECT).getValue().getString()), new UriRef(
                             childNode.getProperty(PREDICATE).getValue()

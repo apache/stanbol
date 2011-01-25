@@ -176,4 +176,38 @@ public class JCRStore implements Store {
         }
         return null;
     }
+
+    @Override
+    public MGraph getEnhancementGraph() {
+        // TODO Implement!
+        /* Rupert Westenthaler (24.01.2011)
+         * This Method was was part of the Store API when the JCR Store was
+         * implemented.
+         * 
+         * Here we need to get an MGraph for all content items and add them to
+         * a single MGraph.
+         * One possibility would be to use something like an "semantic index" -
+         * an Graph that contains all the the metadata of all the content items
+         * within the JCR Store. Every time a new version of an content item is
+         * stored in the JCR Store, the old version of the content item would
+         * needed to be deleted and the new version would needed to be added to
+         * this store. In addition one would need to provide an bootstrapping
+         * functionality to build up or restore the semantic index if necessary.
+         * 
+         * An other possibility would be to implement the Clerezza Graph
+         * interface. This could be done by extending the AbstractMGraph
+         * interface and usually requires to implement the
+         *  - add(Triple)
+         *  - remove(Triple) and the
+         *  - Iterator<Triple> filter(NonLiteral subject, UriRef predicate,
+         * Resource object) method that supports parsing null as wildcard for
+         * each of the three arguments.
+         * By doing that one really nice side effect would be, that this would
+         * also allow to execute SPARQL queries directly on the JCR Store
+         * (because Clerezza provides SPARQL functionality on top of any graph
+         * implementation).
+         */
+//        return null;
+        throw new UnsupportedOperationException("This Method is not implementad by this Store.");
+    }
 }
