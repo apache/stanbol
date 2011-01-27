@@ -74,7 +74,7 @@ public class JarExecutor {
         // TODO make those configurable
         javaExecutable = isWindows ? "java.exe" : "java";
         final File jarFolder = new File("./target/dependency");
-        final Pattern jarPattern = Pattern.compile("eu.iksproject.*full.*jar$");
+        final Pattern jarPattern = Pattern.compile("org.apache.stanbol.*full.*jar$");
 
         // Find executable jar
         final String [] candidates = jarFolder.list();

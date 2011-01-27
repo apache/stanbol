@@ -1,4 +1,4 @@
-This module builds a runnable FISE jar using the Sling Launchpad Maven plugin,
+This module builds a runnable Stanbol Enhancer jar using the Sling Launchpad Maven plugin,
 including the bundles defined at src/main/bundles/list.xml
 
 That Sling plugin is not released as I write this, so you need to build it
@@ -6,9 +6,9 @@ That Sling plugin is not released as I write this, so you need to build it
 
 To start this after building use:
 
-  java -Xmx512M -jar target/eu.iksproject.fise.launchers.lite-0.9-SNAPSHOT.jar
+  java -Xmx512M -jar target/org.apache.stanbol.enhancer.launchers.lite-0.9-SNAPSHOT.jar
 
-The FISE HTTP endpoint should then be available at 
+The Stanbol Enhancer HTTP endpoint should then be available at 
 
   http://localhost:8080
 

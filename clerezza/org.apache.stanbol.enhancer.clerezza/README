@@ -1,0 +1,58 @@
+1. Run Apache Stanbol Enhancer on the Apache Clerezza Platform
+
+   1. Compile the latest Clerezza Platform SNAPSHOT (see http://wiki.iks-project.eu/index.php/GettingStartedWithClerezza) or download it from https://repository.apache.org/content/repositories/snapshots/org/apache/clerezza/org.apache.clerezza.platform.launcher.sesame/ (with Sesame backend) or https://repository.apache.org/content/repositories/snapshots/org/apache/clerezza/org.apache.clerezza.platform.launcher.tdb/ (with Jena TDB backend)
+
+   2. start the platform
+
+   3. Build (mvn install) the following bundles and install it on the Clerezza Platform. On the Clerezza Platform you can install bundles over the maven uri. E.g. Execute the following command in the OSGi console: "start mvn:org.apache.stanbol/org.apache.stanbol.enhancer.servicesapi". Or you can use file or http uris. E.g. "start http://repo1.maven.org/maven2/commons-io/commons-io/1.4/commons-io-1.4.jar". 
+
+        start mvn:commons-io/commons-io/1.4
+        start mvn:commons-cli/commons-cli/1.2
+        start mvn:commons-lang/commons-lang/2.4
+        start mvn:org.apache.commons/commons-compress/1.0
+                
+        start mvn:org.apache.stanbol/org.apache.stanbol.enhancer.servicesapi/0.9-SNAPSHOT
+        start mvn:org.apache.stanbol/org.apache.stanbol.enhancer.jobmanager/0.9-SNAPSHOT
+        start mvn:org.apache.stanbol/org.apache.stanbol.enhancer.clerezza/0.1-SNAPSHOT
+        
+        # additional engines
+        # autotagging
+        start mvn:org.apache.stanbol/iks-autotagging/0.1.0-SNAPSHOT
+        start mvn:org.apache.stanbol/org.apache.stanbol.enhancer.engines.autotagging/0.9-SNAPSHOT
+        
+        # open NLP based Named Entity Reco.
+        start mvn:org.apache.stanbol/org.apache.stanbol.enhancer.engines.opennlp.ner/0.9-SNAPSHOT
+
+You find the org.apache.stanbol maven projects on google code in the iks-project. Commons-io is available in the central maven repo
+
+   4.a Download the lucene index from http://dl.dropbox.com/u/5743203/IKS/autotagging/iks-dbpedia-lucene-idx-20100331-0.tar.bz2 and extract it.
+   4.b Download the openNLP Moduls vor the version 1.4 from http://opennlp.sourceforge.net/models/
+       (You need only the english language and within that sentdedect and namefind for the current version)
+   
+    
+   5. Access the Apache Felix Web Management Console under link http://localhost:8080/system/console/configMgr/ (login and password is "admin")
+
+   6. Configure the org.apache.stanbol.enhancer.engines.autotagging.impl.AutotaggingEnhancementEngine. 
+      Set the property  "org.apache.stanbol.enhancer.engines.autotagging.indexPath" to the extracted 
+      lucene-index folder. E.g. "/home/mir/iks-dbpedia-lucene-idx
+
+   7. Configure the org.apache.stanbol.enhancer.engines.opennlp.impl.NEREnhancementEngine. Set the property
+      "org.apache.stanbol.enhancer.engines.opennlp.models.path.name" to the directory containing the
+      root folder of the module as downloaded form http://opennlp.sourceforge.net/models/.
+      E.g. "/home/mir/openNLP/"
+      The following pathes should be present under that folder 
+         /english/sentdetect and
+         /english/namefind
+         
+   7. Make sure you restarted the AutotaggingEnhacementEngine and the NEREnhancementEngine.
+
+   8. You're done 
+
+
+2. How to use Stanbol Enhancer with Clerezza
+
+Now you can put a text on the platform and metadata will automatically be generated. To put a text file you can use the "curl" command like this: curl -uadmin:admin -T myText.txt -H "Content-type: text/plain" http://localhost:8080/myText
+
+After putting it you should be able to see it in the browser when you open "http://localhost:8080/myText" in the browser. Under http://localhost:8080/enhancer?uri=http://localhost:8080/myText you'll receive the genertated metadata in rdf (To see it in the "application/rdf+xml" format you probably have to modify the ACCEPT header of the request. E.g You install the "modiy headers" addon in firefox).
+
+You can also make sparql queries over the metadata through a POST http://localhost:8080/enhancer. You have to set a form parameter "query" with the sparql query as value. 

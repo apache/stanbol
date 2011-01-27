@@ -1,4 +1,4 @@
-package eu.iksproject.fise.interaction.gui;
+package org.apache.stanbol.enhancer.interaction.gui;
 
 /*
  * Copyright 2010
@@ -60,20 +60,20 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 
-import eu.iksproject.fise.interaction.event.ClerezzaResultEvent;
-import eu.iksproject.fise.interaction.event.Event;
-import eu.iksproject.fise.interaction.event.EventListener;
-import eu.iksproject.fise.interaction.event.EventManager;
-import eu.iksproject.fise.interaction.event.NotUnderstoodEvent;
-import eu.iksproject.fise.interaction.event.PlaybackAudioEvent;
-import eu.iksproject.fise.interaction.event.QueryEvent;
-import eu.iksproject.fise.interaction.event.RecognizedSpeechEvent;
-import eu.iksproject.fise.interaction.event.RecordedAudioEvent;
-import eu.iksproject.fise.interaction.event.SparqlEvent;
-import eu.iksproject.fise.interaction.speech.Playback;
-import eu.iksproject.fise.interaction.speech.PlaybackInProgressException;
-import eu.iksproject.fise.interaction.speech.Recording;
-import eu.iksproject.fise.interaction.speech.RecordingInProgressException;
+import org.apache.stanbol.enhancer.interaction.event.ClerezzaResultEvent;
+import org.apache.stanbol.enhancer.interaction.event.Event;
+import org.apache.stanbol.enhancer.interaction.event.EventListener;
+import org.apache.stanbol.enhancer.interaction.event.EventManager;
+import org.apache.stanbol.enhancer.interaction.event.NotUnderstoodEvent;
+import org.apache.stanbol.enhancer.interaction.event.PlaybackAudioEvent;
+import org.apache.stanbol.enhancer.interaction.event.QueryEvent;
+import org.apache.stanbol.enhancer.interaction.event.RecognizedSpeechEvent;
+import org.apache.stanbol.enhancer.interaction.event.RecordedAudioEvent;
+import org.apache.stanbol.enhancer.interaction.event.SparqlEvent;
+import org.apache.stanbol.enhancer.interaction.speech.Playback;
+import org.apache.stanbol.enhancer.interaction.speech.PlaybackInProgressException;
+import org.apache.stanbol.enhancer.interaction.speech.Recording;
+import org.apache.stanbol.enhancer.interaction.speech.RecordingInProgressException;
 
 public class Gui extends JFrame implements EventListener {
 

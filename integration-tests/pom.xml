@@ -3,18 +3,27 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>eu.iksproject</groupId>
-        <artifactId>eu.iksproject.fise.parent</artifactId>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
         <version>0.9-SNAPSHOT</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
-    <groupId>eu.iksproject</groupId>
-    <artifactId>eu.iksproject.fise.integration-tests</artifactId>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.enhancer.integration-tests</artifactId>
     <version>0.9-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>IKS FISE Integration Tests</name>
+    <name>Apache Stanbol Enhancer Integration Tests</name>
+    <scm>
+        <connection>
+            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/integration-tests/
+        </connection>
+        <developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/integration-tests/
+        </developerConnection>
+        <url>http://incubator.apache.org/stanbol/</url>
+    </scm>
 
     <properties>
         <test.hostname>localhost</test.hostname>
@@ -22,8 +31,8 @@
     
     <dependencies>
         <dependency>
-            <groupId>eu.iksproject</groupId>
-            <artifactId>eu.iksproject.fise.launchers.full</artifactId>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.enhancer.launchers.full</artifactId>
             <version>0.9-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
@@ -69,7 +78,7 @@
                         </goals>
                             <phase>process-resources</phase>
                         <configuration>
-                            <includeArtifactIds>eu.iksproject.fise.launchers.full</includeArtifactIds>
+                            <includeArtifactIds>org.apache.stanbol.enhancer.launchers.full</includeArtifactIds>
                             <excludeTransitive>true</excludeTransitive>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>false</overWriteSnapshots>

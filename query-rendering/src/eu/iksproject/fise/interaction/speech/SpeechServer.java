@@ -1,4 +1,4 @@
-package eu.iksproject.fise.interaction.speech;
+package org.apache.stanbol.enhancer.interaction.speech;
 
 /*
  * Copyright 2010
@@ -32,14 +32,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import eu.iksproject.fise.interaction.Start;
-import eu.iksproject.fise.interaction.event.Event;
-import eu.iksproject.fise.interaction.event.EventListener;
-import eu.iksproject.fise.interaction.event.EventManager;
-import eu.iksproject.fise.interaction.event.PlaybackAudioEvent;
-import eu.iksproject.fise.interaction.event.RecognizedSpeechEvent;
-import eu.iksproject.fise.interaction.event.RecordedAudioEvent;
-import eu.iksproject.fise.interaction.event.TtsEvent;
+import org.apache.stanbol.enhancer.interaction.Start;
+import org.apache.stanbol.enhancer.interaction.event.Event;
+import org.apache.stanbol.enhancer.interaction.event.EventListener;
+import org.apache.stanbol.enhancer.interaction.event.EventManager;
+import org.apache.stanbol.enhancer.interaction.event.PlaybackAudioEvent;
+import org.apache.stanbol.enhancer.interaction.event.RecognizedSpeechEvent;
+import org.apache.stanbol.enhancer.interaction.event.RecordedAudioEvent;
+import org.apache.stanbol.enhancer.interaction.event.TtsEvent;
 
 public class SpeechServer implements EventListener {
 

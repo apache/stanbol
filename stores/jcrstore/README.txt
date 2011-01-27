@@ -2,7 +2,7 @@ JCR Storage Engine
 ==================
 
 This bundle implements a storage engine for FISE that stores triples (i.e. content enhancements in
-a JCR store). It implements the eu.iksproject.fise.servicesapi.Store interface, not the Clerezza
+a JCR store). It implements the org.apache.stanbol.enhancer.servicesapi.Store interface, not the Clerezza
 one, so for now SPARQL queries are not supported.
 
 How to deploy

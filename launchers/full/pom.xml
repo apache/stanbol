@@ -3,19 +3,28 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>eu.iksproject</groupId>
-		<artifactId>eu.iksproject.fise.parent</artifactId>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>org.apache.stanbol.enhancer.parent</artifactId>
 		<version>0.9-SNAPSHOT</version>
 		<relativePath>../../parent</relativePath>
 	</parent>
 
-	<groupId>eu.iksproject</groupId>
-	<artifactId>eu.iksproject.fise.launchers.full</artifactId>
+	<groupId>org.apache.stanbol</groupId>
+	<artifactId>org.apache.stanbol.enhancer.launchers.full</artifactId>
 	<packaging>jar</packaging>
-	<version>${fise-version}</version>
+	<version>${enhancer-version}</version>
 
-	<name>IKS FISE Sling-based standalone launcher</name>
-	<description>Runnable jar that runs the full IKS FISE configuration</description>
+	<name>Apache Stanbol Enhancer Sling-based standalone launcher</name>
+	<description>Runnable jar that runs the full Enhancer configuration</description>
+    <scm>
+        <connection>
+            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/launchers/full/
+        </connection>
+        <developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/launchers/full/
+        </developerConnection>
+        <url>http://incubator.apache.org/stanbol/</url>
+    </scm>
 
 	<build>
 		<plugins>

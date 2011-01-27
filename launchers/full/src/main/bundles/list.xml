@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 	<!--
-		List of initial bundles for the FISE Sling-based standalone launcher.
+		List of initial bundles for the Stanbol Enhancer Sling-based standalone launcher.
 	-->
 <bundles>
 
@@ -143,21 +143,21 @@
 		</bundle>
 	</startLevel>
     
-	<!-- FISE infrastructure and required libraries-->
+	<!-- Stanbol Enhancer infrastructure and required libraries-->
 	<startLevel level="15">
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.servicesapi</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.standalone</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.standalone</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.jobmanager</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.jobmanager</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
@@ -259,8 +259,8 @@
 	<!-- Clerezza SPARQL query engine -->
 	<startLevel level="17">
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.clerezza.sparql</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.clerezza.sparql</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
@@ -273,47 +273,47 @@
 			<artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
 			<version>0.9-incubating-SNAPSHOT</version>
 		</bundle>
-        <!-- FISE JSON-LD implementation -->
+        <!-- Stanbol JSON-LD implementation -->
         <bundle>
-            <groupId>eu.iksproject</groupId>
-            <artifactId>eu.iksproject.fise.jsonld</artifactId>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.jsonld</artifactId>
             <version>0.9-SNAPSHOT</version>
         </bundle>
 	</startLevel>
 
-	<!-- FISE plug-ins -->
+	<!-- Stanbol Enhancer plug-ins -->
 	<startLevel level="20">
-        <bundle> <groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.jersey</artifactId>
+        <bundle> <groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
 			<version>0.9-SNAPSHOT</version> 
         </bundle>
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.engines.metaxa</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.engines.metaxa</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
 
-	<!-- FISE Enhancement Engines -->
+	<!-- Stanbol Enhancer Enhancement Engines -->
 	<startLevel level="30">
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.engines.langid</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.engines.langid</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.engines.opencalais</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.engines.opencalais</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.engines.autotagging</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.engines.autotagging</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.engines.opennlp.ner</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<!--
@@ -322,14 +322,14 @@
 			present in the bundle list.
 		-->
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.engines.geonames</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
         <!-- Entity Tagging Engine based on RICK -->
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.engine.entitytagging</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.engine.entitytagging</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
@@ -391,7 +391,7 @@
     -->
 <!-- The Solr Client only works with 3.1, but there is no Bundle for that
      version. Currently the jar version in included in the
-     eu.iksproject.rick.yard.solr bundle!
+     org.apache.stanbol.rick.yard.solr bundle!
     <bundle>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpclient-osgi</artifactId>
@@ -413,36 +413,36 @@
 	<!-- Persistence Store Bundles-->
 	<!--  <startLevel level="25">
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.stores.persistencestore
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.stores.persistencestore
 			</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.stores.persistencestore.jena
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.stores.persistencestore.jena
 			</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.stores.persistencestore.jena.tdb
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.stores.persistencestore.jena.tdb
 			</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.stores.persistencestore.adapter
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.stores.persistencestore.adapter
 			</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>
-			<groupId>eu.iksproject</groupId>
+			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.semanticweb.owlapi.owllink</artifactId>
 			<version>1.0.2-SNAPSHOT</version>
 		</bundle>
 		<bundle>
-			<groupId>eu.iksproject</groupId>
+			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.semanticweb.owlapi</artifactId>
 			<version>3.0.0-SNAPSHOT</version>
 		</bundle>

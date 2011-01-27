@@ -1,4 +1,4 @@
-package eu.iksproject.fise.interaction.speech;
+package org.apache.stanbol.enhancer.interaction.speech;
 
 /*
  * Copyright 2010

@@ -51,7 +51,7 @@ that our dummy enhancement engine has added some metadata:
 
   $ curl http://localhost:8181/fise/testId
 
-ContentItemImpl id=[/testId], mimeType[=null], data=[108781] bytes, metadata=[eu.iksproject.fise.standalone.impl.DummyEnhancementEngine#<enhanced>#/testId, Romeo#<loves>#Julieta]
+ContentItemImpl id=[/testId], mimeType[=null], data=[108781] bytes, metadata=[org.apache.stanbol.enhancer.standalone.impl.DummyEnhancementEngine#<enhanced>#/testId, Romeo#<loves>#Julieta]
 
 Enhancement engines might be restricted to process only some media types, hence
 it might be important for the client to mention the media type of the payload in

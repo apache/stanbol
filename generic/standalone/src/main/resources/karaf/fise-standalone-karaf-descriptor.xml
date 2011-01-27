@@ -1,8 +1,8 @@
 <!--
-    Karaf descriptor for fise-standalone
+    Karaf descriptor for Stanbol Enhancer Standalone Server
  -->
 <features>
-    <feature name="fise-standalone" version="0.9">
+    <feature name="stanbol-enhancer-standalone" version="0.9">
         <feature>http</feature>
 
         <bundle>mvn:commons-io/commons-io/1.4</bundle>
@@ -15,15 +15,15 @@
         <bundle>mvn:org.apache.clerezza/org.apache.clerezza.rdf.core/0.12-incubating-SNAPSHOT</bundle>
         <bundle>mvn:org.apache.clerezza/org.apache.clerezza.rdf.simple.storage/0.7-incubating-SNAPSHOT</bundle>
 
-        <bundle>mvn:eu.iksproject/eu.iksproject.fise.servicesapi/0.9-SNAPSHOT</bundle>
-        <bundle>mvn:eu.iksproject/eu.iksproject.fise.standalone/0.9-SNAPSHOT</bundle>
-        <bundle>mvn:eu.iksproject/eu.iksproject.fise.jobmanager/0.9-SNAPSHOT</bundle>
+        <bundle>mvn:org.apache.stanbol/org.apache.stanbol.enhancer.servicesapi/0.9-SNAPSHOT</bundle>
+        <bundle>mvn:org.apache.stanbol/org.apache.stanbol.enhancer.standalone/0.9-SNAPSHOT</bundle>
+        <bundle>mvn:org.apache.stanbol/org.apache.stanbol.enhancer.jobmanager/0.9-SNAPSHOT</bundle>
 
         <!-- additional engines -->
         <!-- autotagging -->
-        <bundle>mvn:eu.iksproject/eu.iksproject.fise.engines.autotagging/0.9-SNAPSHOT</bundle>
+        <bundle>mvn:org.apache.stanbol/org.apache.stanbol.enhancer.engines.autotagging/0.9-SNAPSHOT</bundle>
         <!-- open NLP based Named Entity Reco. -->
-        <bundle>mvn:eu.iksproject/eu.iksproject.fise.engines.opennlp.ner/0.9-SNAPSHOT</bundle>
+        <bundle>mvn:org.apache.stanbol/org.apache.stanbol.enhancer.engines.opennlp.ner/0.9-SNAPSHOT</bundle>
 
     </feature>
 </features>

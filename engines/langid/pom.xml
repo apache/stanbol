@@ -1,36 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-  <!--
-    IKS FISE software is licensed under the Apache License, Version 2.0,
-    see http://www.apache.org/licenses/LICENSE-2.0 Unless required by
-    applicable law or agreed to in writing, software distributed under the
-    License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-    CONDITIONS OF ANY KIND, either express or implied. See the License for
-    the specific language governing permissions and limitations under the
-    License.
-  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>eu.iksproject.fise.parent</artifactId>
-    <groupId>eu.iksproject</groupId>
+    <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
+    <groupId>org.apache.stanbol</groupId>
     <version>0.9-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
-  <groupId>eu.iksproject</groupId>
-  <artifactId>eu.iksproject.fise.engines.langid</artifactId>
-  <version>${fise-version}</version>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.enhancer.engines.langid</artifactId>
+  <version>${enhancer-version}</version>
   <packaging>bundle</packaging>
 
-  <name>IKS FISE Enhancement Engine : Language Identifier</name>
+  <name>Apache Stanbol Enhancer Enhancement Engine : Language Identifier</name>
   <description>identifies a text as: German(de), English(en), French(fr), Spanish(es), Italian(it),
     Swedish(sv), Polish(pl), Dutch(nl), Norwegian(no), Finnish(fi), Albanian(sq), Slovakian(sk),
     Slovenian(sl), Danish(da), Hungarian(hu)</description>
 
   <inceptionYear>2010</inceptionYear>
+    <scm>
+        <connection>
+            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/langid/
+        </connection>
+        <developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/langid/
+        </developerConnection>
+        <url>http://incubator.apache.org/stanbol/</url>
+    </scm>
 
   <build>
     <plugins>
@@ -41,7 +41,7 @@
         <configuration>
           <instructions>
             <Export-Package>
-              eu.iksproject.fise.engines.langid;version=${project.version}
+              org.apache.stanbol.enhancer.engines.langid;version=${project.version}
             </Export-Package>
             <Embed-Dependency>
               textcat
@@ -62,8 +62,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.fise.servicesapi</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
       <version>0.9-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>

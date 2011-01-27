@@ -1,4 +1,4 @@
-package eu.iksproject.fise.interaction.gui;
+package org.apache.stanbol.enhancer.interaction.gui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,8 +13,8 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import eu.iksproject.fise.interaction.event.ClerezzaServerInfoChangedEvent;
-import eu.iksproject.fise.interaction.event.EventManager;
+import org.apache.stanbol.enhancer.interaction.event.ClerezzaServerInfoChangedEvent;
+import org.apache.stanbol.enhancer.interaction.event.EventManager;
 
 public class ConfigurationPanel extends JPanel {
 
