@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 	<!--
-		List of initial bundles for the FISE Sling-based standalone launcher.
+		List of initial bundles for the Stanbol Enhancer Sling-based standalone launcher.
 	-->
 <bundles>
 
@@ -136,21 +136,21 @@
 		</bundle>
 	</startLevel>
 
-	<!-- FISE infrastructure and required libraries-->
+	<!-- Stanbol Enhancer infrastructure and required libraries-->
 	<startLevel level="15">
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.servicesapi</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.standalone</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.standalone</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.jobmanager</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.jobmanager</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
@@ -254,8 +254,8 @@
 	<startLevel level="17">
 		<!-- Clerezza SPARQL query engine -->
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.clerezza.sparql</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.clerezza.sparql</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		
@@ -266,33 +266,33 @@
 			<version>0.9-incubating-SNAPSHOT</version>
 		</bundle>
 
-		<!-- FISE JSON-LD implementation -->
+		<!-- Stanbol JSON-LD implementation -->
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.jsonld</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.jsonld</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
 
-	<!-- FISE -->
+	<!-- Stanbol Enhancer  -->
 	<startLevel level="20">
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.jersey</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
 	
-	<!-- FISE Enhancement Engines -->
+	<!-- Stanbol Enhancer Enhancement Engines -->
 	<startLevel level="30">
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.engines.autotagging</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.engines.autotagging</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.engines.opennlp.ner</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<!--
@@ -300,8 +300,8 @@
 			commons-io as additional bundels. Both are already in this list.
 		-->
 		<bundle>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.engines.geonames</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 	</startLevel>

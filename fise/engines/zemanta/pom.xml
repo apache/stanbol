@@ -1,40 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-    IKS FISE software is licensed under the Apache License, Version 2.0,
-    see http://www.apache.org/licenses/LICENSE-2.0 Unless required by
-    applicable law or agreed to in writing, software distributed under the
-    License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-    CONDITIONS OF ANY KIND, either express or implied. See the License for
-    the specific language governing permissions and limitations under the
-    License.
-  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>eu.iksproject</groupId>
-    <artifactId>eu.iksproject.fise.parent</artifactId>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
     <version>0.9-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
-  <groupId>eu.iksproject</groupId>
-  <artifactId>eu.iksproject.fise.engines.zemanta</artifactId>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.enhancer.engines.zemanta</artifactId>
   <packaging>bundle</packaging>
   <version>0.9-SNAPSHOT</version>
 
-  <name>IKS FISE Enhancement Engine : Zemanta Tagging</name>
+  <name>Apache Stanbol Enhancer Enhancement Engine : Zemanta Tagging</name>
   <description></description>
 
   <inceptionYear>2010</inceptionYear>
+    <scm>
+        <connection>
+            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/zemanta/
+        </connection>
+        <developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/zemanta/
+        </developerConnection>
+        <url>http://incubator.apache.org/stanbol/</url>
+    </scm>
 
   <dependencies>
 
     <dependency>
-      <groupId>eu.iksproject</groupId>
-      <artifactId>eu.iksproject.fise.servicesapi</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -101,7 +101,7 @@
         <configuration>
           <instructions>
             <Private-Package>
-              eu.iksproject.fise.engines.zemanta.impl.*
+              org.apache.stanbol.enhancer.engines.zemanta.impl.*
             </Private-Package>
             <Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>

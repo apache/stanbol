@@ -1,4 +1,4 @@
-package eu.iksproject.fise.interaction.speech;
+package org.apache.stanbol.enhancer.interaction.speech;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package eu.iksproject.fise.interaction.util;
+package org.apache.stanbol.enhancer.interaction.util;
 
 import java.io.File;
 import java.io.FileInputStream;

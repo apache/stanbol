@@ -1,4 +1,4 @@
-package eu.iksproject.fise.interaction;
+package org.apache.stanbol.enhancer.interaction;
 
 /*
  * Copyright 2010
@@ -37,14 +37,14 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 
-import eu.iksproject.fise.interaction.event.ClerezzaResultEvent;
-import eu.iksproject.fise.interaction.event.ClerezzaServerInfoChangedEvent;
-import eu.iksproject.fise.interaction.event.Event;
-import eu.iksproject.fise.interaction.event.EventListener;
-import eu.iksproject.fise.interaction.event.EventManager;
-import eu.iksproject.fise.interaction.event.QueryEvent;
-import eu.iksproject.fise.interaction.event.UploadFileEvent;
-import eu.iksproject.fise.interaction.util.ClientHttpRequest;
+import org.apache.stanbol.enhancer.interaction.event.ClerezzaResultEvent;
+import org.apache.stanbol.enhancer.interaction.event.ClerezzaServerInfoChangedEvent;
+import org.apache.stanbol.enhancer.interaction.event.Event;
+import org.apache.stanbol.enhancer.interaction.event.EventListener;
+import org.apache.stanbol.enhancer.interaction.event.EventManager;
+import org.apache.stanbol.enhancer.interaction.event.QueryEvent;
+import org.apache.stanbol.enhancer.interaction.event.UploadFileEvent;
+import org.apache.stanbol.enhancer.interaction.util.ClientHttpRequest;
 
 public class QueryManager implements EventListener {
 

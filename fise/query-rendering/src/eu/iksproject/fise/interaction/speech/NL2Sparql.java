@@ -1,4 +1,4 @@
-package eu.iksproject.fise.interaction.speech;
+package org.apache.stanbol.enhancer.interaction.speech;
 
 /*
  * Copyright 2010
@@ -26,13 +26,13 @@ package eu.iksproject.fise.interaction.speech;
  *     Tilman Becker
  */
 
-import eu.iksproject.fise.interaction.event.Event;
-import eu.iksproject.fise.interaction.event.EventListener;
-import eu.iksproject.fise.interaction.event.EventManager;
-import eu.iksproject.fise.interaction.event.NotUnderstoodEvent;
-import eu.iksproject.fise.interaction.event.QueryEvent;
-import eu.iksproject.fise.interaction.event.RecognizedSpeechEvent;
-import eu.iksproject.fise.interaction.event.SparqlEvent;
+import org.apache.stanbol.enhancer.interaction.event.Event;
+import org.apache.stanbol.enhancer.interaction.event.EventListener;
+import org.apache.stanbol.enhancer.interaction.event.EventManager;
+import org.apache.stanbol.enhancer.interaction.event.NotUnderstoodEvent;
+import org.apache.stanbol.enhancer.interaction.event.QueryEvent;
+import org.apache.stanbol.enhancer.interaction.event.RecognizedSpeechEvent;
+import org.apache.stanbol.enhancer.interaction.event.SparqlEvent;
 
 public class NL2Sparql implements EventListener {
 

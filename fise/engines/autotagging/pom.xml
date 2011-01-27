@@ -1,31 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-	<!--
-		IKS FISE software is licensed under the Apache License, Version 2.0,
-		see http://www.apache.org/licenses/LICENSE-2.0 Unless required by
-		applicable law or agreed to in writing, software distributed under the
-		License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-		CONDITIONS OF ANY KIND, either express or implied. See the License for
-		the specific language governing permissions and limitations under the
-		License.
-	-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>eu.iksproject</groupId>
-		<artifactId>eu.iksproject.fise.parent</artifactId>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>org.apache.stanbol.enhancer.parent</artifactId>
 		<version>0.9-SNAPSHOT</version>
 		<relativePath>../../parent</relativePath>
 	</parent>
 
-	<groupId>eu.iksproject</groupId>
-	<artifactId>eu.iksproject.fise.engines.autotagging</artifactId>
+	<groupId>org.apache.stanbol</groupId>
+	<artifactId>org.apache.stanbol.enhancer.engines.autotagging</artifactId>
 	<packaging>bundle</packaging>
-	<version>${fise-version}</version>
+	<version>${enhancer-version}</version>
 
-	<name>IKS FISE Enhancement Engine : Semantic (Auto)Tagging</name>
+	<name>Apache Stanbol Enhancer Enhancement Engine : Semantic (Auto)Tagging</name>
 	<description>
 		Simple implementation of an annotation engine that tags text
 	    content globally using a pre-created lucene index of DBpedia
@@ -33,15 +24,15 @@
 
 	<inceptionYear>2010</inceptionYear>
 
-	<scm>
-		<connection>
-			scm:svn:http://iks-project.googlecode.com/svn/sandbox/fise/trunk/engines/autotagging
-    	</connection>
-		<developerConnection>
-			scm:svn:https://iks-project.googlecode.com/svn/sandbox/fise/trunk/engines/autotagging
-    	</developerConnection>
-		<url>http://wiki.iks-project.eu/index.php/FISEcodeAndDocs</url>
-	</scm>
+    <scm>
+        <connection>
+            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/autotagging/
+        </connection>
+        <developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/autotagging/
+        </developerConnection>
+        <url>http://incubator.apache.org/stanbol/</url>
+    </scm>
 
 	<build>
 		<plugins>
@@ -52,19 +43,23 @@
 				<configuration>
 					<instructions>
 						<Export-Package>
-							eu.iksproject.fise.engines.autotagging;version=${pom.version},
-							eu.iksproject.autotagging;version="${pom.version}",
+							org.apache.stanbol.enhancer.engines.autotagging;version=${pom.version},
+							org.apache.stanbol.autotagging;version="${pom.version}",
 							org.apache.lucene.*,
 							opennlp.english.namefind,
 							opennlp.english.sentdetect,
 							dbpedia
             			</Export-Package>
 						<Private-Package>
-							eu.iksproject.fise.engines.autotagging.impl.*
+							org.apache.stanbol.enhancer.engines.autotagging.impl.*
         			    </Private-Package>
 						<!-- TODO those should be bundles! -->
 						<Embed-Dependency>
-							iks-autotagging,lucene-core,lucene-queries,lucene-analyzers,json
+							org.apache.stanbol.autotagging,
+							lucene-core,
+							lucene-queries,
+							lucene-analyzers,
+							json
             			</Embed-Dependency>
 					</instructions>
 				</configuration>
@@ -89,12 +84,12 @@
 		</dependency>
 		
 		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.servicesapi</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>iks-autotagging</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.autotagging</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		

@@ -1,4 +1,4 @@
-package eu.iksproject.fise.interaction.gui;
+package org.apache.stanbol.enhancer.interaction.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -16,8 +16,8 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import eu.iksproject.fise.interaction.event.EventManager;
-import eu.iksproject.fise.interaction.event.UploadFileEvent;
+import org.apache.stanbol.enhancer.interaction.event.EventManager;
+import org.apache.stanbol.enhancer.interaction.event.UploadFileEvent;
 
 
 public class UploadPanel extends JPanel {

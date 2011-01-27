@@ -1,4 +1,4 @@
-package eu.iksproject.fise.interaction.gui;
+package org.apache.stanbol.enhancer.interaction.gui;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;

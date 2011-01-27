@@ -24,7 +24,7 @@ Launch the FISE server::
 
   % cd launchers/lite/target
   % rm -rf sling                # erase previous sling install if any (optional)
-  % java -jar eu.iksproject.fise.launchers.lite-*-SNAPSHOT.jar
+  % java -jar org.apache.stanbol.enhancer.launchers.lite-*-SNAPSHOT.jar
 
 And connect your browser to http://localhost:8080 for basic usage instructions.
 

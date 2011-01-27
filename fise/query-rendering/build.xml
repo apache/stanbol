@@ -51,7 +51,7 @@
         <antcall target="build"/>
     </target>
     <target name="Start">
-        <java classname="eu.iksproject.fise.interaction.Start" failonerror="true" fork="yes">
+        <java classname="org.apache.stanbol.enhancer.interaction.Start" failonerror="true" fork="yes">
             <jvmarg line="-Xmx1g"/>
             <classpath refid="query-rendering.classpath"/>
         </java>

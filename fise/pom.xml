@@ -14,38 +14,37 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>eu.iksproject</groupId>
-    <artifactId>eu.iksproject.fise.parent</artifactId>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
     <version>0.9-SNAPSHOT</version>
     <relativePath>./parent</relativePath>
   </parent>
 
-  <groupId>eu.iksproject</groupId>
-  <artifactId>eu.iksproject.fise.reactor</artifactId>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.enhancer.reactor</artifactId>
   <packaging>pom</packaging>
   <version>0.9-SNAPSHOT</version>
 
-  <name>IKS FISE reactor</name>
+  <name>Apache Stanbol Enhancer reactor</name>
   <description>
-    Pseudo project to build the complete FISE project
+    Pseudo project to build the complete Stanbol Enhancer component
   </description>
 
   <inceptionYear>2010</inceptionYear>
-
-  <scm>
-    <connection>
-      scm:svn:http://iks-project.googlecode.com/svn/sandbox/fise/trunk
-    </connection>
-    <developerConnection>
-      scm:svn:https://iks-project.googlecode.com/svn/sandbox/fise/trunk
-    </developerConnection>
-    <url>http://wiki.iks-project.eu/index.php/FISEcodeAndDocs</url>
-  </scm>
+    <scm>
+        <connection>
+            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/
+        </connection>
+        <developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/
+        </developerConnection>
+        <url>http://incubator.apache.org/stanbol/</url>
+    </scm>
 
   <modules>
     <module>parent</module>
 
-    <module>iks-autotagging</module>
+    <module>autotagging</module>
 
     <module>generic/servicesapi</module>
     <module>generic/jobmanager</module>
@@ -68,7 +67,7 @@
     <module>integration-tests</module>
     -->
 
-    <module>clerezza/eu.iksproject.fise.clerezza</module>
+    <module>clerezza/org.apache.stanbol.enhancer.clerezza</module>
     <module>clerezza/clerezza-sparql</module>
 
     <module>launchers/full</module>

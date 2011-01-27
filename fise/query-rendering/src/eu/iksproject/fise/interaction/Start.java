@@ -1,4 +1,4 @@
-package eu.iksproject.fise.interaction;
+package org.apache.stanbol.enhancer.interaction;
 
 /*
  * Copyright 2010
@@ -26,10 +26,10 @@ package eu.iksproject.fise.interaction;
  *     Tilman Becker
  */
 
-import eu.iksproject.fise.interaction.event.EventManager;
-import eu.iksproject.fise.interaction.gui.Gui;
-import eu.iksproject.fise.interaction.speech.NL2Sparql;
-import eu.iksproject.fise.interaction.speech.SpeechServer;
+import org.apache.stanbol.enhancer.interaction.event.EventManager;
+import org.apache.stanbol.enhancer.interaction.gui.Gui;
+import org.apache.stanbol.enhancer.interaction.speech.NL2Sparql;
+import org.apache.stanbol.enhancer.interaction.speech.SpeechServer;
 
 public class Start {
 

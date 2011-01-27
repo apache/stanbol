@@ -9,7 +9,7 @@ Running
 
 - import the jar into the OSGi runtime
 
-- In the OSGi web console, set the property "eu.iksproject.fise.engines.zemanta.key" with your API key
+- In the OSGi web console, set the property "org.apache.stanbol.enhancer.engines.zemanta.key" with your API key
   (restart the bundle in the OSGi console)
 
 - Watch the console when you add text using commands such as:

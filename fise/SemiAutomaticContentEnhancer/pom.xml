@@ -1,36 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-    IKS FISE software is licensed under the Apache License, Version 2.0,
-    see http://www.apache.org/licenses/LICENSE-2.0 Unless required by
-    applicable law or agreed to in writing, software distributed under the
-    License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-    CONDITIONS OF ANY KIND, either express or implied. See the License for
-    the specific language governing permissions and limitations under the
-    License.
-  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>eu.iksproject</groupId>
-    <artifactId>eu.iksproject.fise.parent</artifactId>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
     <version>0.9-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
 
-  <groupId>eu.iksproject</groupId>
-  <artifactId>eu.iksproject.clients.sace</artifactId>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.clients.sace</artifactId>
   <packaging>jar</packaging>
   <version>0.1-SNAPSHOT</version>
 
-  <name>IKS FISE SACE client</name>
+  <name>Apache Stanbol Enhancer SACE client</name>
   <description>
     Experimental content creation client
   </description>
 
   <inceptionYear>2010</inceptionYear>
+    <scm>
+        <connection>
+            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/SemiAutomaticContentEnhancer/
+        </connection>
+        <developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/SemiAutomaticContentEnhancer/
+        </developerConnection>
+        <url>http://incubator.apache.org/stanbol/</url>
+    </scm>
 
   <repositories>
     <repository>
@@ -58,7 +58,7 @@
                   </descriptorRefs>
                   <archive>
                       <manifest>
-                          <mainClass>eu.iksproject.fise.sace.Sace</mainClass>
+                          <mainClass>org.apache.stanbol.enhancer.sace.Sace</mainClass>
                       </manifest>
                   </archive>
                 </configuration>

@@ -1,31 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-	<!--
-		IKS FISE software is licensed under the Apache License, Version 2.0,
-		see http://www.apache.org/licenses/LICENSE-2.0 Unless required by
-		applicable law or agreed to in writing, software distributed under the
-		License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-		CONDITIONS OF ANY KIND, either express or implied. See the License for
-		the specific language governing permissions and limitations under the
-		License.
-	-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>eu.iksproject</groupId>
-		<artifactId>eu.iksproject.fise.parent</artifactId>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>org.apache.stanbol.enhancer.parent</artifactId>
 		<version>0.9-SNAPSHOT</version>
 		<relativePath>../../parent</relativePath>
 	</parent>
 
-	<groupId>eu.iksproject</groupId>
-	<artifactId>eu.iksproject.fise.engine.entitytagging</artifactId>
+	<groupId>org.apache.stanbol</groupId>
+	<artifactId>org.apache.stanbol.enhancer.engine.entitytagging</artifactId>
 	<packaging>bundle</packaging>
-	<version>${fise-version}</version>
+	<version>${enhancer-version}</version>
 
-	<name>IKS FISE Enhancement Engine : for Entityhub ReferencedSites</name>
+	<name>Apache Stanbol Enhancer Enhancement Engine : for Entityhub ReferencedSites</name>
 	<description>
 		Implementation of an annotation engine that links named entities
         extracted from a text (TextAnnotations) to semantic entities
@@ -35,15 +26,15 @@
 
 	<inceptionYear>2010</inceptionYear>
 
-	<scm>
-		<connection>
-			scm:svn:http://iks-project.googlecode.com/svn/sandbox/fise/trunk/engines
-    	</connection>
-		<developerConnection>
-			scm:svn:https://iks-project.googlecode.com/svn/sandbox/fise/trunk/engines
-    	</developerConnection>
-		<url>http://wiki.iks-project.eu/index.php/FISEcodeAndDocs</url>
-	</scm>
+    <scm>
+        <connection>
+            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/entitytagging/
+        </connection>
+        <developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/entitytagging/
+        </developerConnection>
+        <url>http://incubator.apache.org/stanbol/</url>
+    </scm>
 
 	<build>
 		<plugins>
@@ -54,10 +45,10 @@
 				<configuration>
 					<instructions>
 						<Export-Package>
-							eu.iksproject.fise.engines.entitytagging;version=${pom.version}
+							org.apache.stanbol.enhancer.engines.entitytagging;version=${pom.version}
                         </Export-Package>
 						<Private-Package>
-							eu.iksproject.fise.engines.entitytagging.impl.*
+							org.apache.stanbol.enhancer.engines.entitytagging.impl.*
         			    </Private-Package>
 						<!-- TODO those should be bundles! -->
 						<Embed-Dependency>
@@ -74,8 +65,8 @@
 
 	<dependencies>		
 		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.fise.servicesapi</artifactId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
 		</dependency>
         <dependency>
             <groupId>org.apache.stanbol</groupId>

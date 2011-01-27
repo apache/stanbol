@@ -3,7 +3,7 @@ Jersey front-end to the FISE engine
 
 Goals for this sub-project:
 
-- RESTful web services API to FISE for machines.
+- RESTful web services API to Stanbol Enhancer for machines.
 
 - Human-friendly HTML interface to quickly test the service and document the API.
 
@@ -11,24 +11,29 @@ Goals for this sub-project:
 Building from source
 --------------------
 
-Checkount and build both iks-autotagging and FISE:
+Checkount and build Stanbol Enhancer and Stanbol Entityhub:
 
-  $ svn checkout http://iks-project.googlecode.com/svn/sandbox/iks-autotagging/trunk iks-autotagging
-  $ cd iks-autotagging
-  $ mvn clean install -DskipTests
+  $ svn checkout http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub stanbol-entityhub
+  $ cd stanbol-entityhub
+  $ mvn clean install
   $ cd ..
 
-  $ svn checkout http://iks-project.googlecode.com/svn/sandbox/fise/trunk fise
-  $ cd fise
-  $ mvn clean install -DskipTests
+  $ svn checkout http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer stanbol-enhancer
+  $ cd stanbol-enhancer
+  $ mvn clean install
+
 
 
 Deployment
 ----------
 
-Go to `launchers/sling/target` and run::
+Go to 
+  - 'launchers/lite/target' to run the default configuration that comes with
+      a set of engines that is considered as stable
+  - 'launchers/full/target' to run the configuration that contains all availanle
+      engines.Stanbol
 
-  rm -rf sling && java -jar eu.iksproject.fise.launchers.sling-*-SNAPSHOT.jar
+  rm -rf sling && java -jar org.apache.stanbol.enhancer.launchers.sling-*-SNAPSHOT.jar
 
 Once deployed (check the logs) you can either use the HTML interface:
 
@@ -41,16 +46,16 @@ To submit data to engines using a simple form:
 If that page gives errors such as class not found, no web provider, stop and restart the jersey-server bundle.
 There's a bug in Jersey 1.2 that causes those if the core bundle starts before the server bundle.
 
-You can setup an apache virtualhost to blend a fise instance on you domain name
-using a ``NameVirtualHost *:80`` instruction in you global apache configuration
-and the following virtualhost parameters::
+You can setup an apache virtualhost to blend a Stanbol ehnacer instance on you 
+domain name using a ``NameVirtualHost *:80`` instruction in you global apache 
+configuration and the following virtualhost parameters::
 
   <VirtualHost *:80>
 
-  ServerName fise.example.com
+  ServerName stanbol-enhancer.example.com
 
-  CustomLog logs/fise.example.com.access.log combined
-  ErrorLog logs/fise.example.com.error.log
+  CustomLog logs/stanbol-enhancer.example.com.access.log combined
+  ErrorLog logs/stanbol-enhancer.example.com.error.log
 
   ProxyPass/  http://localhost:8080/
   ProxyPassReverse/ http://localhost:8080/
