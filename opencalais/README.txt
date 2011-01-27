@@ -6,7 +6,7 @@ Such a key can be obtained from
 
 In the OSGi configuration console the key can be set as value of the property
 
-	eu.iksproject.fise.engines.opencalais.license
+	org.apache.stanbol.enhancer.engines.opencalais.license
 
 
 

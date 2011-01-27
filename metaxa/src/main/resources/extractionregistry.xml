@@ -5,7 +5,7 @@
 		<name>org.semanticdesktop.aperture.extractor.excel.ExcelExtractorFactory</name>
 	</extractorFactory>
 	<extractorFactory>
-		<name>eu.iksproject.fise.engines.metaxa.core.html.HtmlExtractorFactory</name>
+		<name>org.apache.stanbol.enhancer.engines.metaxa.core.html.HtmlExtractorFactory</name>
 	</extractorFactory>
 	<extractorFactory>
 		<name>org.semanticdesktop.aperture.extractor.jpg.JpgExtractorFactory</name>
