@@ -49,6 +49,9 @@ public class InMemoryContentItem implements ContentItem {
         }
         if (mimeType == null) {
             mimeType = "application/octet-stream";
+        } else {
+            // Keep only first part of content-types like text/plain ; charset=UTF-8
+            mimeType = mimeType.split(";")[0].trim();
         }
         if (content == null) {
             content = new byte[0];
