@@ -2,6 +2,7 @@ package org.apache.stanbol.enhancer.engines.langid.core;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.BeforeClass;
@@ -23,13 +24,16 @@ public class TextCatTest {
      * This contains the text categorizer to test.
      */
     private static TextCategorizer tc;
+    private static Properties langMap = new Properties();
 
     /**
      * This initializes the text categorizer.
      */
     @BeforeClass
-    public static void oneTimeSetUp() {
+    public static void oneTimeSetUp() throws IOException {
         tc = new TextCategorizer();
+        InputStream in = tc.getClass().getClassLoader().getResourceAsStream("languageLabelsMap.txt");
+        langMap.load(in);
     }
 
     /**
@@ -47,7 +51,8 @@ public class TextCatTest {
                 testFileName);
         assertNotNull("failed to load resource " + testFileName, in);
         String text = IOUtils.toString(in);
-        assertEquals("en", tc.categorize(text));
+        String language = tc.categorize(text);
+        assertEquals("en", langMap.getProperty(language, language));
     }
 
 }
