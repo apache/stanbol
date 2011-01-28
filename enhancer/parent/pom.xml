@@ -674,7 +674,7 @@
 			<dependency>
 				<groupId>net.sourceforge</groupId>
 				<artifactId>textcat</artifactId>
-				<version>1.0.1-IKS</version>
+				<version>1.0.1</version>
 				<scope>provided</scope>
 			</dependency>
 
