@@ -39,4 +39,51 @@ public class StatelessEngineTest extends StanbolTestBase {
                 "http://fise.iks-project.eu/ontology/entity-label.*Bob Marley"
                 );
     }
+    
+    @Test
+    public void testOutputFormats() throws Exception {
+        final String [] formats = {
+            // Each group of 3 elements is: Accept header, Expected content-type, Expected regexp     
+            "application/json",
+            "application/rdf+json", 
+            "\\{.*http.*ontology.*confidence.*:",
+            
+            "application/rdf+xml",
+            "application/rdf+xml",
+            "xmlns:rdf=.http://www.w3.org/1999/02/22-rdf-syntax-ns",
+
+            "application/rdf+json", 
+            "application/rdf+json", 
+            "\\{.*value.*ontology.*TextAnnotation.*type.*uri.*}",
+
+            "text/turtle", 
+            "text/turtle", 
+            "a.*ontology/TextAnnotation.*ontology/Enhancement.*;",
+
+            "text/rdf+nt", 
+            "text/rdf+nt", 
+            "<urn:enhancement.*www.w3.org/1999/02/22-rdf-syntax-ns#type.*ontology/TextAnnotation>",
+        };
+        
+        for(int i=0 ; i < formats.length; i+=3) {
+            executor.execute(
+                    builder.buildPostRequest("/engines")
+                    .withHeader("Accept", formats[i])
+                    .withContent("Nothing")
+            )
+            .assertStatus(200)
+            .assertContentType(formats[i+1])
+            .assertContentRegexp(formats[i+2]);
+        }
+    }
+    
+    @Test
+    public void testInvalidFormat() throws Exception {
+        executor.execute(
+            builder.buildPostRequest("/engines")
+            .withHeader("Accept", "INVALID_FORMAT")
+            .withContent("Nothing")
+        )
+        .assertStatus(500);
+    }
 }
