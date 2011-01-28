@@ -52,6 +52,10 @@ public class JarExecutor {
             super(reason, cause);
         }
     }
+    
+    public int getServerPort() {
+        return serverPort;
+    }
 
     public static JarExecutor getInstance(Properties config) throws ExecutorException {
         if(instance == null) {
@@ -112,9 +116,12 @@ public class JarExecutor {
             }
         };
 
-        // TODO add optional memory settings
+        final String vmOptions = System.getProperty("jar.executor.vm.options"); 
         final Executor e = new DefaultExecutor();
         final CommandLine cl = new CommandLine(javaExecutable);
+        if(vmOptions != null && vmOptions.length() > 0) {
+            cl.addArgument(vmOptions);
+        }
         cl.addArgument("-jar");
         cl.addArgument(jarToExecute.getAbsolutePath());
         cl.addArgument("-p");

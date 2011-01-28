@@ -61,11 +61,7 @@
     <module>engines/zemanta</module>
 
     <module>jersey</module>
-
-    <!-- disabling integration broken tests while jersey refactoring
-         is underway
     <module>integration-tests</module>
-    -->
 
     <module>clerezza/org.apache.stanbol.enhancer.clerezza</module>
     <module>clerezza/clerezza-sparql</module>
