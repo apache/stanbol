@@ -18,15 +18,22 @@ package org.apache.stanbol.enhancer.it;
 
 import org.junit.Test;
 
-/** Simple test of the enhancer homepage, mostly
- *  to show how simple a test can be */
+/** Test the enhancer homepage and demonstrate the test classes */
 public class HomepageTest extends StanbolTestBase {
+    
     @Test
-    public void testHomepageHasCss() throws Exception {
-        executor.execute(builder.buildRequest("/"))
+    public void testHomepageExamples() throws Exception {
+        executor.execute(
+                builder.buildRequest("/")
+                .withHeader("Accept", "text/html")
+        )
         .assertStatus(200)
+        .assertContentType("text/html")
         .assertContentContains(
             "/static/style/stanbol.css", 
-            "The RESTful Semantic Engine");
+            "The RESTful Semantic Engine")
+        .assertContentRegexp(
+            "stylesheet.*stanbol.css",
+            "<title.*[Ss]tanbol");
     }
 }
