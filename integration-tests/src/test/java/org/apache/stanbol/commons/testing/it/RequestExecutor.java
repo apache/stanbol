@@ -64,6 +64,16 @@ public class RequestExecutor {
         assertEquals("Expecting status " + expected, expected, response.getStatusLine().getStatusCode());
         return this;
     }
+    
+    /** Verify that response matches supplied content type */
+    public RequestExecutor assertContentType(String expected) {
+        assertNotNull(response);
+        if(entity == null) {
+            fail("No entity in response, cannot check content type");
+        }
+        assertEquals("Expecting content type " + expected, expected, entity.getContentType().getValue());
+        return this;
+    }
 
     /** For each supplied regexp, fail unless content contains at 
      *  least one line that matches.
