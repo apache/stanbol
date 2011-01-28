@@ -1,0 +1,15 @@
+german=de
+english=en
+french=fr
+spanish=es
+italian=it
+swedish=sv
+polish=pl
+dutch=nl
+norwegian=no
+finnish=fi
+albanian=sq
+slovakian=sk
+slovenian=sl
+danish=da
+hungarian=hu

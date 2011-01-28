@@ -1,10 +1,15 @@
 package org.apache.stanbol.enhancer.engines.langid;
 
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
@@ -26,10 +31,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
-
 /**
  * {@link LangIdEnhancementEngine} provides functionality to enhance document
  * with their language.
@@ -48,7 +49,7 @@ public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProper
     public static final Integer defaultOrder = ORDERING_PRE_PROCESSING - 2;
 
     /**
-     * This contains the only supported MIME type of this enhancement engine.
+     * This contains the only MIME type directly supported by this enhancement engine.
      */
     private static final String TEXT_PLAIN_MIMETYPE = "text/plain";
 
@@ -56,6 +57,10 @@ public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProper
      * This contains the logger.
      */
     private static final Logger log = LoggerFactory.getLogger(LangIdEnhancementEngine.class);
+    
+    private static final String LANGUAGE_MAP_DEFAULT = "languageLabelsMap.txt";
+    
+    private Properties languageLabelsMap = new Properties();
 
     /**
      * This contains the language identifier.
@@ -64,9 +69,17 @@ public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProper
 
     private static final int PROBE_LENGTH_DEFAULT = 400;
 
+    /**
+     * a configurable value of the text segment length to check
+     */
     @Property
     public static final String PROBE_LENGTH_PROP = "org.apache.stanbol.enhancer.engines.langid.probe-length";
 
+    /**
+     * this allows to specify the path to a configuration file that specifies the language models and how they map to language labels
+     */
+    @Property
+    public static final String MODEL_CONFIGURATION_FILE_PROP = "org.apache.stanbol.enhancer.engines.langid.model-configuration-file";
     /**
      * How much text should be used for testing: If the value is 0 or smaller, the complete text will be used. Otherwise a text probe of the given length is taken from the middle of the text. The default length is 400 characters.
      */
@@ -77,13 +90,28 @@ public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProper
      *
      * @param ce the {@link ComponentContext}
      */
-    protected void activate(@SuppressWarnings("unused") ComponentContext ce) {
+    protected void activate(@SuppressWarnings("unused") ComponentContext ce) throws IOException {
+        String confFile = null;
         if (ce != null) {
             Dictionary<String, String> properties = ce.getProperties();
             String lengthVal = properties.get(PROBE_LENGTH_PROP);
             probeLength = lengthVal == null ? PROBE_LENGTH_DEFAULT : Integer.parseInt(lengthVal);
+            confFile = properties.get(MODEL_CONFIGURATION_FILE_PROP);
         }
-        languageIdentifier = new TextCategorizer();
+        if (confFile != null) {
+            languageIdentifier = new TextCategorizer(confFile);
+            if (languageIdentifier == null) {
+              throw new IOException("Could not initialize from configuration file: "+confFile);
+            }
+        }
+        else {
+            languageIdentifier = new TextCategorizer();
+            InputStream in = getClass().getClassLoader().getResourceAsStream(LANGUAGE_MAP_DEFAULT);
+            if (in != null) {
+                languageLabelsMap.load(in);
+                in.close();
+            }
+        }
     }
 
     /**
@@ -135,6 +163,7 @@ public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProper
             text = text.substring(text.length() / 2 - checkLength / 2, text.length() / 2 + checkLength / 2);
         }
         String language = languageIdentifier.categorize(text);
+        language = languageLabelsMap.getProperty(language,language);
         log.info("language identified as " + language);
 
         // add language to metadata
