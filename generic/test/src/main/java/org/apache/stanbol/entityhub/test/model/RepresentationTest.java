@@ -6,6 +6,8 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
+import static org.apache.stanbol.entityhub.test.Utils.asCollection;
+
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -1017,19 +1019,6 @@ public abstract class RepresentationTest {
         }
         return getValueFactory().createRepresentation(id);
     }
-    /**
-     * Converts an Iterator to a Collection by iterating over all elements and
-     * adding them to a List.
-     * @param <T>
-     * @param it the iterator
-     * @return the collection containing all elements of the iterator
-     */
-    protected static <T> Collection<T> asCollection(Iterator<T> it){
-        Collection<T> c = new ArrayList<T>();
-        while(it.hasNext()){
-            c.add(it.next());
-        }
-        return c;
-    };
+
 
 }

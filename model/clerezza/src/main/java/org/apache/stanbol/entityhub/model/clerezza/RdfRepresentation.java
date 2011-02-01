@@ -302,7 +302,14 @@ public class RdfRepresentation implements Representation{
     }
     @Override
     public String getId() {
-        return ((UriRef)graphNode.getNode()).getUnicodeString();
+        return getNode().getUnicodeString();
+    }
+    /**
+     * Getter for the UriRef representing the ID of this Representation.
+     * @return The UriRef representing the ID of this Representation.
+     */
+    public UriRef getNode(){
+        return (UriRef)graphNode.getNode();
     }
 
     @Override

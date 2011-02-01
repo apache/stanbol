@@ -12,6 +12,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
+import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.osgi.service.cm.ConfigurationException;
 
 @Component(componentAbstract=true)
@@ -52,6 +53,12 @@ public abstract class AbstractYard implements Yard {
      * Holds the configuration of the Yard.
      */
     protected YardConfig config;
+    
+    /**
+     * The default prefix used for created URIs.
+     * @see #getUriPrefix()
+     */
+    private String defaultPrefix;
 
     /**
      * Default constructor to create an uninitialised Yard. Typically used
@@ -81,17 +88,20 @@ public abstract class AbstractYard implements Yard {
      */
     protected final void activate(ValueFactory valueFactory,FieldQueryFactory queryFactory, YardConfig config) {
         if(valueFactory == null){
-            throw new IllegalArgumentException("Unable to activate: The ValueFactory MUST NOT be NULL!");
+            throw new NullPointerException("Unable to activate: The ValueFactory MUST NOT be NULL!");
         }
         if(queryFactory == null){
-            throw new IllegalArgumentException("Unable to activate: The QueryFactory MUST NOT be NULL!");
+            throw new NullPointerException("Unable to activate: The QueryFactory MUST NOT be NULL!");
         }
         if(config == null){
-            throw new IllegalArgumentException("Unable to activate: The YardConfig MUST NOT be NULL!");
+            throw new NullPointerException("Unable to activate: The YardConfig MUST NOT be NULL!");
         }
         this.queryFactory = queryFactory;
         this.valueFactory = valueFactory;
         this.config = config;
+        this.defaultPrefix = String.format("urn:org.apache.stanbol:entityhub.yard.%s:%s.",
+            getClass().getSimpleName(),
+            config.getId());
     }
     /**
      * Deactivates this yard instance. Typically called within an OSGI environment
@@ -102,6 +112,7 @@ public abstract class AbstractYard implements Yard {
         this.queryFactory = null;
         this.valueFactory = null;
         this.config = null;
+        this.defaultPrefix = null;
     }
 
     /**
@@ -112,27 +123,33 @@ public abstract class AbstractYard implements Yard {
      * @see Yard#create()
      */
     @Override
-    public final Representation create() {
+    public final Representation create() throws IllegalArgumentException, YardException{
         return create(null);
     }
     /**
      * Creates a representation with the parsed ID. If <code>null</code> is
-     * parsed a random UUID is generated as describe in {@link #create()}.
-     * @param id The id or <code>null</code> to create a random uuid
+     * parsed a random UUID is generated as describe in {@link #create()}.<p>
+     * Note that {@link #store(Representation)} is called for the newly created
+     * representation and the Representation returned by this Method is returned.
+     * @param id The id or <code>null</code> to create a random uuid.
+     * @return The newly created, empty and stored representation
      * @see Yard#create(String)
+     * @see Yard#store(Representation)
      */
     @Override
-    public final Representation create(String id) throws IllegalArgumentException {
+    public final Representation create(String id) throws IllegalArgumentException,YardException {
         if(config == null){
             throw new IllegalStateException("This Yard is not activated");
         }
-        if(id == null){
-            id = String.format("urn:org.apache.stanbol:entityhub.yard.%s:%s.%s",
-                    getClass().getSimpleName(),
-                    config.getId(),
-                    ModelUtils.randomUUID().toString());
+        if(id == null){ //create a new ID
+            do {
+                id = createRandomEntityUri();
+            } while(isRepresentation(id));
+        } else if(isRepresentation(id)){
+            throw new IllegalArgumentException(
+                String.format("An representation with the parsed ID %s is already present in this Yard",id));
         }
-        return valueFactory.createRepresentation(id);
+        return store(valueFactory.createRepresentation(id));
     }
 
 
@@ -173,6 +190,35 @@ public abstract class AbstractYard implements Yard {
             throw new IllegalStateException("This Yard is not activated");
         }
         return valueFactory;
+    }
+    /**
+     * This provides the prefix for URIs created by this Yard. This is used for
+     * creating new unique URIs for Representation if {@link #create()} is
+     * called. <p>
+     * By default this implementation uses:<br>
+     * <code>"urn:org.apache.stanbol:entityhub.yard."+this.getClass.getSimpleName()+":"+getId()+"."</code>
+     * <p>
+     * Subclasses can override this Method to use a different namespace for entities.
+     * @return The UriPrefix used by this Yard instance for creating URIs
+     */
+    protected String getUriPrefix(){
+        return defaultPrefix;
+    }
+    /**
+     * Creates an unique ID by using the {@link #getUriPrefix()} the parsed
+     * separator (non if <code>null</code>) and an uuid created by using 
+     * {@link ModelUtils#randomUUID()}.
+     * <p>
+     * This Method is used for the {@link #create()} and the {@link #create(String)}
+     * - if <code>null</code> is parsed - to generate an unique URI for the
+     * created Representation.
+     * <p>
+     * Subclasses can override this Method to use other algorithms for generating
+     * URIs for entities.
+     * @return the created URI as string.
+     */
+    protected final String createRandomEntityUri(){
+        return getUriPrefix()+ModelUtils.randomUUID().toString();
     }
 
     /** ------------------------------------------------------------------------

@@ -258,7 +258,7 @@ public class CacheImpl implements Cache {
      * --------------------------------------------------------------------------
      */
     @Override
-    public Representation create() throws IllegalArgumentException {
+    public Representation create() throws YardException {
         Yard yard = getCacheYard();
         if (yard == null) {
             return createRepresentation(null);
@@ -268,7 +268,7 @@ public class CacheImpl implements Cache {
     }
 
     @Override
-    public Representation create(String id) throws IllegalArgumentException {
+    public Representation create(String id) throws IllegalArgumentException, YardException {
         Yard yard = getCacheYard();
         if (yard == null) {
             return createRepresentation(id);
