@@ -15,7 +15,7 @@ import org.osgi.service.cm.ConfigurationException;
  * @author Rupert Westenthaler
  *
  */
-public final class DefaultYardConfig extends YardConfig {
+public final class SimpleYardConfig extends YardConfig {
 
     /**
      * Creates a new configuration with the minimal set of required properties
@@ -23,7 +23,7 @@ public final class DefaultYardConfig extends YardConfig {
      * @throws IllegalArgumentException if the parsed valued do not fulfil the
      * requirements.
      */
-    public DefaultYardConfig(String id) throws IllegalArgumentException {
+    public SimpleYardConfig(String id) throws IllegalArgumentException {
         super(id);
         try {
             isValid();
@@ -41,7 +41,7 @@ public final class DefaultYardConfig extends YardConfig {
      * @throws IllegalArgumentException if <code>null</code> is parsed as
      * configuration
      */
-    public DefaultYardConfig(Dictionary<String, Object> config) throws ConfigurationException, IllegalArgumentException {
+    public SimpleYardConfig(Dictionary<String, Object> config) throws ConfigurationException, IllegalArgumentException {
         super(config);
     }
 

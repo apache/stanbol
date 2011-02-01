@@ -417,7 +417,7 @@ public class GeoNamesIndexer {
         String id = t.nextElement();
         Integer geoNamesId = Integer.parseInt(id);
         //create a new Doc based on the first Element (geonamesID)
-        Representation doc = this.yard.create(String.format("%s%s/", geonamesFeatureBase,id));
+        Representation doc = this.yard.getValueFactory().createRepresentation(String.format("%s%s/", geonamesFeatureBase,id));
         //add the geonames:Feature type
         doc.add(Properties.rdf_type.toString(), getDocRef(Properties.gn_Feature.toString()));
         //add the UTF-8name

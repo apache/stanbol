@@ -1,26 +1,32 @@
 package org.apache.stanbol.entityhub.yard.clerezza.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
+import org.apache.clerezza.rdf.core.BNode;
 import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Resource;
+import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.LockableMGraph;
 import org.apache.clerezza.rdf.core.access.NoSuchEntityException;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
 import org.apache.clerezza.rdf.core.sparql.QueryParser;
 import org.apache.clerezza.rdf.core.sparql.ResultSet;
 import org.apache.clerezza.rdf.core.sparql.SolutionMapping;
 import org.apache.clerezza.rdf.core.sparql.query.Query;
 import org.apache.clerezza.rdf.core.sparql.query.SelectQuery;
-import org.apache.clerezza.rdf.ontologies.RDF;
-import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -31,7 +37,7 @@ import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.core.query.QueryUtils;
 import org.apache.stanbol.entityhub.core.utils.AdaptingIterator;
 import org.apache.stanbol.entityhub.core.yard.AbstractYard;
-import org.apache.stanbol.entityhub.core.yard.DefaultYardConfig;
+import org.apache.stanbol.entityhub.core.yard.SimpleYardConfig;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.model.clerezza.utils.Resource2StringAdapter;
@@ -78,18 +84,26 @@ import org.slf4j.LoggerFactory;
 //})
 public class ClerezzaYard extends AbstractYard implements Yard {
     Logger log = LoggerFactory.getLogger(ClerezzaYard.class);
-    public static final String YARD_URI_PREFIX = "urn:org.apache.stanbol:entityhub.yard:rdf.clerezza:";
-    public static final UriRef REPRESENTATION = new UriRef(RdfResourceEnum.Representation.getUri());
     /**
-     * This property is used to check if a URI in the graph represents a representation by
-     * calling {@link TripleCollection#filter(org.apache.clerezza.rdf.core.NonLiteral, UriRef, Resource)}
-     * with the reuqested ID as subject, this {@link UriRef} as property and
-     * <code>null</code> as value.<p>
-     * This is the easiest way to do that, because each representation MUST HAVE
-     * a entityhub:label. If this is requirements is changed in future, than the code
-     * using this property MUST BE changed accordingly!
+     * Property used to mark empty Representations managed by this Graph. This is
+     * needed to workaround the fact, that the Entityhub supports the storage of
+     * empty Representations but this Yard uses the search for any outgoing
+     * relation (triple with the id of the representation as Subject) for the 
+     * implementation of {@link #isRepresentation(String)}. Therefore for an
+     * empty Representation {@link #isRepresentation(String)} would return false
+     * even if the representation was {@link #store(Representation)} previously.
+     * <p>
+     * Adding the Triple<br>
+     * <code> ?representationId <{@value #MANAGED_REPRESENTATION}> true^^xsd:boolean </code>
+     * <br> for any empty Representation avoids this unwanted behaviour.
      */
-    private static UriRef ENTITYHUB_LABEL_URIREF = new UriRef(RdfResourceEnum.label.getUri());
+    public static UriRef MANAGED_REPRESENTATION = new UriRef("urn:org.apache.stanbol:entityhub.yard:rdf.clerezza:managesRepresentation");
+    /**
+     * The TRUE value used as object for the property {@link #MANAGED_REPRESENTATION}.
+     */
+    private static Literal TRUE_LITERAL = LiteralFactory.getInstance().createTypedLiteral(Boolean.FALSE);
+    //public static final String YARD_URI_PREFIX = "urn:org.apache.stanbol:entityhub.yard:rdf.clerezza:";
+//    public static final UriRef REPRESENTATION = new UriRef(RdfResourceEnum.Representation.getUri());
 //    protected ComponentContext context;
 //    protected Dictionary<String,?> properties;
     @Reference
@@ -100,8 +114,9 @@ public class ClerezzaYard extends AbstractYard implements Yard {
     public ClerezzaYard() {
         super();
     }
-    public ClerezzaYard(String yardId) {
+    public ClerezzaYard(YardConfig config) {
         super();
+        activate(config);
     }
     @SuppressWarnings("unchecked")
     @Activate
@@ -110,11 +125,26 @@ public class ClerezzaYard extends AbstractYard implements Yard {
         if(context == null || context.getProperties() == null){
             throw new IllegalStateException("No valid"+ComponentContext.class+" parsed in activate!");
         }
-        activate(new DefaultYardConfig(context.getProperties()));
+        activate(new SimpleYardConfig(context.getProperties()));
     }
-    protected final void activate(YardConfig config) throws ConfigurationException,IllegalArgumentException {
+    /**
+     * Internally used to activate the Yard. In case the Yard runs within a
+     * OSGI container it is called by the {@link #activate(ComponentContext)}
+     * Method. In case the Yard runs outside of an OSGI Container it is called
+     * by the Constructor taking the {@link YardConfig} as parameter
+     * @param config The configuration for the new Yard instance
+     * @throws NullPointerException In case <code>null</code> is parsed as configuration
+     * @throws IllegalArgumentException In case the configuration is invalid
+     */
+    private final void activate(YardConfig config) throws IllegalArgumentException, NullPointerException {
         super.activate(RdfValueFactory.getInstance(), SparqlFieldQueryFactory.getInstance(), config);
-        this.yardGraphUri = new UriRef(YARD_URI_PREFIX+config.getId());
+        if(tcManager == null){ //this will be the case if we are not in an OSGI environment
+          //use the getInstance() method!
+            tcManager = TcManager.getInstance(); 
+        }
+        String yardUri = getUriPrefix();
+        //remove the "." at the last position of the prefix
+        this.yardGraphUri = new UriRef(yardUri.substring(0, yardUri.length()-2));
         try {
             this.graph = tcManager.getMGraph(yardGraphUri);
             log.info("  ... (re)use existing Graph "+yardGraphUri+" for Yard "+config.getName());
@@ -144,7 +174,10 @@ public class ClerezzaYard extends AbstractYard implements Yard {
     @Override
     public Representation getRepresentation(String id) {
         if(id == null){
-            return null;
+            throw new NullPointerException("The parsed representation id MUST NOT be NULL!");
+        }
+        if(id.isEmpty()){
+            throw new IllegalArgumentException("The parsed representation id MUST NOT be EMTPY!");
         }
         return getRepresentation(new UriRef(id),true);
     }
@@ -156,45 +189,94 @@ public class ClerezzaYard extends AbstractYard implements Yard {
      * @return the Representation
      */
     protected Representation getRepresentation(UriRef uri, boolean check) {
-        if(!check || graph.filter(uri, ENTITYHUB_LABEL_URIREF, null).hasNext()){
-            /*
-             * We need to use an own graph for the Representation, because
-             * changes to the Representation should not be reflected in the
-             * Yard until a store() or update().
-             * Currently the GraphNode.getNodeContext() functionality is used
-             * to calculate the graph included for the Representation.
-             */
-            GraphNode node = new GraphNode(uri, graph);
-            //create a changeable graph for the representation, because
-            //node.getNodeContext returns an immutable Graph!
-            MGraph nodeGraph = new SimpleMGraph(node.getNodeContext());
-            return ((RdfValueFactory)valueFactory).createRdfRepresentation(uri, nodeGraph);
-        } else {
-            return null; //not found
+        Lock readLock = graph.getLock().readLock();
+        readLock.lock();
+        try {
+            if(!check || isRepresentation(uri)){
+                MGraph nodeGraph = createRepresentationGraph(uri, graph);
+                //Remove the triple internally used to represent an empty Representation
+                // ... this will only remove the triple if the Representation is empty
+                //     but a check would take longer than the this call
+                nodeGraph.remove(new TripleImpl(uri,MANAGED_REPRESENTATION,TRUE_LITERAL));
+                return ((RdfValueFactory)valueFactory).createRdfRepresentation(uri, nodeGraph);
+            } else {
+                return null; //not found
+            }
+        } finally {
+            readLock.unlock();
         }
+    }
+    /**
+     * Extracts the triples that belong to the {@link Representation} with the
+     * parsed id from the parsed graph. The graph is not modified and changes
+     * in the returned graph will not affect the parsed graph.
+     * @param id the {@link UriRef} node representing the id of the Representation.
+     * @param graph the Graph to extract the representation from
+     * @return the extracted graph.
+     */
+    protected MGraph createRepresentationGraph(UriRef id, TripleCollection graph){
+        return extractRepresentation(graph, new SimpleMGraph(), id, new HashSet<BNode>());
+    }
+    /**
+     * Recursive Method internally doing all the work for 
+     * {@link #createRepresentationGraph(UriRef, TripleCollection)}
+     * @param source The graph to extract the Representation (source)
+     * @param target The graph to store the extracted triples (target)
+     * @param node the current node. Changes in recursive calls as it follows
+     * @param visited holding all the visited BNodes to avoid cycles. Other nodes 
+     * need not be added because this implementation would not follow it anyway
+     * outgoing relations if the object is a {@link BNode} instance.
+     * @return the target graph (for convenience)
+     */
+    private MGraph extractRepresentation(TripleCollection source,MGraph target, NonLiteral node, Set<BNode> visited){
+        //we need all the outgoing relations and also want to follow bNodes until
+        //the next UriRef. However we are not interested in incoming relations!
+        Iterator<Triple> outgoing = source.filter((NonLiteral) node, null, null);
+        while (outgoing.hasNext()) {
+            Triple triple = outgoing.next();
+            target.add(triple);
+            Resource object = triple.getObject();
+            if(object instanceof BNode){
+                //add first and than follow because there might be a triple such as
+                // bnode1 <urn:someProperty> bnode1
+                visited.add((BNode)object);
+                extractRepresentation(source, target, (NonLiteral)object, visited);
+            }
+        }
+        return target;
     }
 
     @Override
     public boolean isRepresentation(String id) {
-        return id!=null?graph.filter(new UriRef(id), ENTITYHUB_LABEL_URIREF , null).hasNext():null;
+        if(id == null) {
+            throw new NullPointerException("The parsed id MUST NOT be NULL!");
+        }
+        if(id.isEmpty()){
+            throw new IllegalArgumentException("The parsed id MUST NOT be EMPTY!");
+        }
+        //search for any outgoing triple
+        return isRepresentation(new UriRef(id));
+    }
+    /**
+     * Internally used to check if a URI resource represents an representation
+     * @param resource the resource to check
+     * @return the state
+     */
+    protected boolean isRepresentation(UriRef resource){
+        return graph.filter(resource, null, null).hasNext();
     }
 
     @Override
     public void remove(String id) throws IllegalArgumentException {
-        if(id == null) return;
+        if(id == null) {
+            throw new NullPointerException("The parsed Representation id MUST NOT be NULL!");
+        }
         UriRef resource = new UriRef(id);
         Lock writeLock = graph.getLock().writeLock();
         writeLock.lock();
         try {
-            if(graph.filter(resource, RDF.type, REPRESENTATION).hasNext()){
-                GraphNode node = new GraphNode(resource, graph);
-                /*
-                 * Currently the "context" of the Clerezza GraphNode implementation
-                 * is used for CRUD operations on Representations.
-                 * This includes incoming and outgoing relations the resource and
-                 * recursively bNodes.
-                 */
-                node.deleteNodeContext();
+            if(isRepresentation(resource)){
+                graph.removeAll(createRepresentationGraph(resource, graph));
             } //else not found  -> nothing to do
         }finally {
             writeLock.unlock();
@@ -203,10 +285,12 @@ public class ClerezzaYard extends AbstractYard implements Yard {
     @Override
     public void remove(Iterable<String> ids) throws IllegalArgumentException, YardException {
         if(ids == null){
-            throw new IllegalArgumentException("The parsed Iterable over the IDs to remove MUST NOT be NULL!");
+            throw new NullPointerException("The parsed Iterable over the IDs to remove MUST NOT be NULL!");
         }
         for(String id : ids){
-            remove(id);
+            if(id != null){
+                remove(id);
+            } //else ignore null values within the parsed Iterable
         }
     }
     @Override
@@ -216,7 +300,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
     @Override
     public Iterable<Representation> store(Iterable<Representation> representations) throws IllegalArgumentException, YardException {
         if(representations == null){
-            throw new IllegalArgumentException("The parsed Iterable over the Representations to store MUST NOT be NULL!");
+            throw new NullPointerException("The parsed Iterable over the Representations to store MUST NOT be NULL!");
         }
         return store(representations, true);
     }
@@ -227,14 +311,23 @@ public class ClerezzaYard extends AbstractYard implements Yard {
     @Override
     public Iterable<Representation> update(Iterable<Representation> representations) throws YardException, IllegalArgumentException {
         if(representations == null){
-            throw new IllegalArgumentException("The parsed Iterable over the Representations to update MUST NOT be NULL!");
+            throw new NullPointerException("The parsed Iterable over the Representations to update MUST NOT be NULL!");
         }
         return store(representations,false);
     }
     protected final Iterable<Representation> store(Iterable<Representation> representations,boolean allowCreate) throws IllegalArgumentException, YardException{
         ArrayList<Representation> added = new ArrayList<Representation>();
         for(Representation representation : representations){
-            added.add(store(representation,allowCreate,false));
+            if(representation != null){
+                Representation stored = store(representation,allowCreate,false); //reassign
+                //to check if the store was successful
+                if(stored != null){
+                    added.add(stored);
+                } else { //can only be the case if allowCreate==false (update was called)
+                    log.warn(String.format("Unable to update Representation %s in Yard %s because it is not present!",
+                        representation.getId(),getId()));
+                }
+            } //ignore null values in the parsed Iterable!
         }
         return added;
     }
@@ -248,7 +341,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
 //            log.info("  > entityhub size: "+graph.size());
         } else if(!allowCreate){
             if(canNotCreateIsError) {
-                throw new YardException("Parsed Representation "+representation.getId()+" in not managed by this Yard "+getName()+"(id="+getId()+")");
+                throw new IllegalArgumentException("Parsed Representation "+representation.getId()+" in not managed by this Yard "+getName()+"(id="+getId()+")");
             } else {
                 return null;
             }
@@ -260,6 +353,12 @@ public class ClerezzaYard extends AbstractYard implements Yard {
         writeLock.lock();
         try {
             graph.addAll(toAdd.getRdfGraph());
+            //also add the representation type within the Representation
+            //TODO: Note somewhere that this Triple is reserved and MUST NOT
+            //      be used by externally.
+            if(!toAdd.getRdfGraph().filter(toAdd.getNode(), null, null).hasNext()){
+                graph.add(new TripleImpl(toAdd.getNode(), MANAGED_REPRESENTATION, TRUE_LITERAL));
+            }
         } finally {
             writeLock.unlock();
         }
