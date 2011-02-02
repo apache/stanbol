@@ -15,8 +15,6 @@ import org.apache.stanbol.entityhub.test.yard.YardTest;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sun.source.tree.AssertTree;
-
 public class ClerezzaYardTest extends YardTest {
     
     private Yard yard;
