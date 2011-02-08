@@ -28,7 +28,7 @@ public class RequestBuilder {
         this.baseUrl = baseUrl;
     }
     
-    public Request buildRequest(String path) {
+    public Request buildGetRequest(String path) {
         return new Request(new HttpGet(baseUrl + path));
     }
     

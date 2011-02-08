@@ -25,7 +25,7 @@ public class HomepageTest extends StanbolTestBase {
     @Test
     public void testHomepageExamples() throws Exception {
         executor.execute(
-                builder.buildRequest("/")
+                builder.buildGetRequest("/")
                 .withHeader("Accept", "text/html")
         )
         .assertStatus(200)
