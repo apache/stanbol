@@ -30,6 +30,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.util.EntityUtils;
 
 /** Executes a Request and provides convenience methods
@@ -37,6 +38,7 @@ import org.apache.http.util.EntityUtils;
  */
 public class RequestExecutor {
     private final HttpClient httpClient;
+    private HttpUriRequest request; 
     private HttpResponse response;
     private HttpEntity entity;
     private String content;
@@ -46,7 +48,8 @@ public class RequestExecutor {
     }
     
     public RequestExecutor execute(Request r) throws ClientProtocolException, IOException {
-        response = httpClient.execute(r.getRequest());
+        request = r.getRequest();
+        response = httpClient.execute(request);
         entity = response.getEntity();
         if(entity != null) {
             // We fully read the content every time, not super efficient but
@@ -106,5 +109,25 @@ public class RequestExecutor {
             }
         }
         return this;
+    }
+    
+    public void generateDocumentation(RequestDocumentor documentor, String...metadata) throws IOException {
+        documentor.generateDocumentation(this, metadata);
+    }
+
+    HttpUriRequest getRequest() {
+        return request;
+    }
+
+    HttpResponse getResponse() {
+        return response;
+    }
+
+    HttpEntity getEntity() {
+        return entity;
+    }
+
+    String getContent() {
+        return content;
     }
 }
