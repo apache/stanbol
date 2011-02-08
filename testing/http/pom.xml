@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<project>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.commons.testing.http</artifactId>
+    <version>0.9-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    
+    <name>Apache Stanbol Jar Http Testing Library</name>
+    <description>
+        Utilities for HTTP-based testing. 
+        Not Stanbol-specific, should be reusable in other contexts.
+    </description>
+    <scm>
+        <connection>
+            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/testing/http
+        </connection>
+        <developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/testing/http
+        </developerConnection>
+        <url>http://incubator.apache.org/stanbol/</url>
+    </scm>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.1-beta1</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.1</version>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
