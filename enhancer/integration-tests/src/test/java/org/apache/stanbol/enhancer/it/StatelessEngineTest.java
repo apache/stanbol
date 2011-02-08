@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.enhancer.it;
 
+import org.apache.stanbol.commons.testing.stanbol.StanbolTestBase;
 import org.junit.Test;
 
 /** Test the stateless text enhancement engines */

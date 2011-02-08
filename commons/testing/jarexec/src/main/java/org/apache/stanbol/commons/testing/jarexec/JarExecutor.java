@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.stanbol.commons.testing.it;
+package org.apache.stanbol.commons.testing.jarexec;
 
 import java.io.File;
 import java.util.Arrays;
@@ -30,8 +30,6 @@ import org.apache.commons.exec.ShutdownHookProcessDestroyer;
 
 /** Start a runnable jar by forking a JVM process,
  *  and terminate the process when this VM exits.
- *
- *  TODO: move to a commons/testing library?
  */
 public class JarExecutor {
     private static JarExecutor instance;

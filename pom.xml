@@ -47,5 +47,6 @@
     <module>entityhub</module>
     <module>enhancer</module>
     <module>kres</module>
+    <module>commons</module>
   </modules>
 </project>

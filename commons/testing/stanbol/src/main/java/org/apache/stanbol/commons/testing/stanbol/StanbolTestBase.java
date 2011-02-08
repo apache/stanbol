@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.stanbol.enhancer.it;
+package org.apache.stanbol.commons.testing.stanbol;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,12 +27,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.apache.stanbol.commons.testing.it.JarExecutor;
-import org.apache.stanbol.commons.testing.it.RequestBuilder;
-import org.apache.stanbol.commons.testing.it.RequestExecutor;
+import org.apache.stanbol.commons.testing.http.RequestBuilder;
+import org.apache.stanbol.commons.testing.http.RequestExecutor;
+import org.apache.stanbol.commons.testing.jarexec.JarExecutor;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
 
 /** Base class for Stanbol integration tests - starts the runnable jar
  *  to test if needed, and waits until server is ready before executing
