@@ -16,11 +16,14 @@
  */
 package org.apache.stanbol.enhancer.it;
 
+import org.apache.stanbol.commons.testing.http.RequestDocumentor;
 import org.apache.stanbol.commons.testing.stanbol.StanbolTestBase;
 import org.junit.Test;
 
 /** Test the stateless text enhancement engines */
 public class StatelessEngineTest extends StanbolTestBase {
+    
+    private final RequestDocumentor documentor = new RequestDocumentor(getClass().getName());
     
     @Test
     public void testSimpleEnhancement() throws Exception {
@@ -38,7 +41,15 @@ public class StatelessEngineTest extends StanbolTestBase {
                 "http://fise.iks-project.eu/ontology/entity-label.*Paris",
                 "http://purl.org/dc/terms/creator.*NamedEntityExtractionEnhancementEngine",
                 "http://fise.iks-project.eu/ontology/entity-label.*Bob Marley"
-                );
+                )
+        .generateDocumentation(
+                documentor,
+                "title", 
+                "Stateless text analysis",
+                "description", 
+                "A POST request to ${request.path} (TODO should be replaced by actual path) returns triples representing enhancements "
+                + " of the POSTed text. Output format is defined by the Accept header."
+        );
     }
     
     @Test
@@ -74,7 +85,11 @@ public class StatelessEngineTest extends StanbolTestBase {
             )
             .assertStatus(200)
             .assertContentType(formats[i+1])
-            .assertContentRegexp(formats[i+2]);
+            .assertContentRegexp(formats[i+2])
+            .generateDocumentation(documentor,
+                    "title", "Output format: " + formats[i],
+                    "description", "Demonstrate " + formats[i] + " output"
+                    );
         }
     }
     
