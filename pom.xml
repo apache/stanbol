@@ -61,13 +61,14 @@
     <module>engines/zemanta</module>
 
     <module>jersey</module>
-    <module>integration-tests</module>
 
     <module>clerezza/org.apache.stanbol.enhancer.clerezza</module>
     <module>clerezza/clerezza-sparql</module>
 
     <module>launchers/full</module>
     <module>launchers/lite</module>
+
+    <module>integration-tests</module>
 
     <module>SemiAutomaticContentEnhancer</module>
   </modules>
