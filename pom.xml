@@ -44,8 +44,7 @@
 
   <modules>
     <module>parent</module>
-    
-    
+
     <module>generic/servicesapi</module>
     <module>generic/test</module>
     <module>generic/core</module>
@@ -59,8 +58,8 @@
     <!-- Utils for createing local caches (indexing utils) -->
     <module>indexing/geonames</module>
     <module>indexing/genericRdf</module>
-    <!-- disabling missing stuff
-    <module>jersey</module>
-    -->
+    <!-- Modules for SolrServer providers (used by the SolrYard) -->
+    <module>yard/solrProvider</module>
+    <module>yard/embeddedSolrProvider</module>
   </modules>
 </project>

@@ -21,64 +21,74 @@
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
+  <artifactId>org.apache.stanbol.entityhub.yard.solr.provider</artifactId>
   <packaging>bundle</packaging>
   <version>0.1-SNAPSHOT</version>
 
-  <name>Apache Stanbol Entityhub Yard implementation hased on Solr </name>
-  <description>This bundle provides implementation of the Entityhub Yard interface(s) 
-  based on a Solr Search Server</description>
+  <name>Apache Stanbol Entityhub SolrProvider</name>
+  <description>This bundle defines the SolrProvider interface used by the SolrYard
+  implementation to instantiate the used SolrServer. It also provides support for
+  all the SolrServer implementations directly supported by SolrJ. Support for the
+  use of an embedded SolrServer is not provided by this Bundle, because this would
+  require to add all the Solr libs.</description>
 
-  <inceptionYear>2010</inceptionYear>
+  <inceptionYear>2011</inceptionYear>
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/yard/solr
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/yard/solrProvider
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/yard/solr
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/yard/solrProvider
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
 
   <build>
     <plugins>
- <!--  TODO: use this to deactivate unit tests that do require external resources 
-    <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>**/TestForARemoteService.java</exclude>
-            <exclude>**/TestForAnotherRemoteService.java</exclude>
-          </excludes>
-        </configuration>
-      </plugin> -->
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <!-- Export also SolrJ and dependencies  -->
             <Export-Package>
-              org.apache.stanbol.entityhub.yard.solr;version=${pom.version},
-              org.apache.stanbol.entityhub.yard.solr.model;version=${pom.version},
-              org.apache.stanbol.entityhub.yard.solr.query;version=${pom.version},
-              org.apache.stanbol.entityhub.yard.solr.utils;version=${pom.version},
-              org.apache.stanbol.entityhub.yard.solr.defaults;version=${pom.version}
-            </Export-Package>
+              org.apache.stanbol.entityhub.yard.solr.provider;version=${pom.version},
+              org.apache.commons.httpclient;version=3.1,
+              org.apache.commons.httpclient.auth;version=3.1,
+			  org.apache.commons.httpclient.cookie;version=3.1,
+			  org.apache.commons.httpclient.methods;version=3.1,
+			  org.apache.commons.httpclient.methods.multipart;version=3.1,
+			  org.apache.commons.httpclient.params;version=3.1,
+			  org.apache.commons.httpclient.protocol;version=3.1,
+			  org.apache.commons.httpclient.util;version=3.1,
+			  org.apache.solr.client.solrj;version=1.4.1,
+			  org.apache.solr.client.solrj.beans;version=1.4.1,
+			  org.apache.solr.client.solrj.impl;version=1.4.1,
+			  org.apache.solr.client.solrj.request;version=1.4.1,
+			  org.apache.solr.client.solrj.response;version=1.4.1,
+			  org.apache.solr.client.solrj.util;version=1.4.1,
+			  org.apache.solr.common;version=1.4.1,
+			  org.apache.solr.common.luke;version=1.4.1,
+			  org.apache.solr.common.params;version=1.4.1,
+			  org.apache.solr.common.util;version=1.4.1
+			</Export-Package>
+			<!-- The exclusion of javax.xml.stream assumes that only serialised 
+			     java objects are used as serialisation to and from the SolrServer 
+			     and therefore no XML API is needed -->
             <Import-Package>
               !org.apache.lucene.*,
-              !junit.*,
-              !org.junit.*,
+              !com.sun.msv.*,
+              !org.relaxng.datatype,
+              !javax.xml.stream,
               *
             </Import-Package>
            <Private-Package>
               org.apache.stanbol.entityhub.yard.solr.impl;version=${pom.version},
-              org.apache.stanbol.entityhub.yard.solr.impl.constraintEncoders;version=${pom.version}
             </Private-Package>
             <Embed-Dependency>
-              
+              solr-solrj,commons-httpclient
             </Embed-Dependency>
            </instructions>
         </configuration>
@@ -92,51 +102,29 @@
   </build>
 
   <dependencies>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-	  <groupId>org.apache.stanbol</groupId>
-	  <artifactId>org.apache.stanbol.entityhub.yard.solr.provider</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
 
-    <!-- exported by org.apache.stanbol.entityhub.yard.solr.provider
 	<dependency>
 	    <groupId>org.apache.solr</groupId>
 	    <artifactId>solr-solrj</artifactId>
 	    <version>1.4.1</version>
-	</dependency> -->
+	</dependency>       
 	<dependency>
-	    <groupId>joda-time</groupId>
-	    <artifactId>joda-time</artifactId>
-	    <version>1.6.2</version>
-	</dependency>
-<!--    <dependency> 
 	    <groupId>commons-httpclient</groupId>
 	    <artifactId>commons-httpclient</artifactId>
 	    <version>3.1</version>
-	    <scope>runtime</scope>
-	</dependency> -->
+	</dependency>	
     <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.scr.annotations</artifactId>
         <version>1.3.0</version>
     </dependency>
-<!--    <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.configadmin</artifactId>
-        <version>1.2.4</version>
-        <scope>provided</scope>
-    </dependency>
     <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.configadmin</artifactId>
+      <version>1.2.4</version>
+      <scope>provided</scope>
+    </dependency>
+<!--    <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.metatype</artifactId>
       <version>1.0.4</version>
@@ -152,24 +140,7 @@
       <artifactId>org.osgi.core</artifactId>
       <version>1.4.0</version>
     </dependency> -->
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <scope>provided</scope>
-    </dependency>
     <!-- for tests -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.test</artifactId>
-      <version>0.1-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-	  <groupId>org.apache.stanbol</groupId>
-	  <artifactId>org.apache.stanbol.entityhub.yard.solr.embedded</artifactId>
-      <version>0.1-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

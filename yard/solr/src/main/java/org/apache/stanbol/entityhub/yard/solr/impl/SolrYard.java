@@ -19,11 +19,11 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.common.SolrDocument;
@@ -35,6 +35,7 @@ import org.apache.stanbol.entityhub.core.utils.AdaptingIterator;
 import org.apache.stanbol.entityhub.core.yard.AbstractYard;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
+import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
@@ -45,6 +46,8 @@ import org.apache.stanbol.entityhub.yard.solr.model.FieldMapper;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexField;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
+import org.apache.stanbol.entityhub.yard.solr.provider.SolrServerProviderManager;
+import org.apache.stanbol.entityhub.yard.solr.provider.SolrServerProvider.Type;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.utils.SolrUtil;
 import org.osgi.service.cm.ConfigurationException;
@@ -94,7 +97,7 @@ import org.slf4j.LoggerFactory;
 @Component(
         metatype=true,
         configurationFactory=true,
-        policy=ConfigurationPolicy.REQUIRE, //the ID and SOLR_SERVER_URI are required!
+        policy=ConfigurationPolicy.REQUIRE, //the ID and SOLR_SERVER_LOCATION are required!
         specVersion="1.1")
 @Service
 @Properties(value={
@@ -105,7 +108,7 @@ import org.slf4j.LoggerFactory;
         @Property(name=AbstractYard.DEFAULT_QUERY_RESULT_NUMBER,intValue=-1),
         @Property(name=AbstractYard.MAX_QUERY_RESULT_NUMBER,intValue=-1),
         //BEGIN SolrYard specific Properties
-        @Property(name=SolrYard.SOLR_SERVER_URI,value="http://localhost:8181/solr/entityhub"),
+        @Property(name=SolrYard.SOLR_SERVER_LOCATION,value="http://localhost:8181/solr/entityhub"),
         @Property(name=SolrYard.MULTI_YARD_INDEX_LAYOUT,options={
             @PropertyOption(name="true",value="true"),
             @PropertyOption(name="false",value="false")},value="false"),
@@ -115,7 +118,7 @@ public class SolrYard extends AbstractYard implements Yard {
     /**
      * The key used to configure the URL for the SolrServer
      */
-    public static final String SOLR_SERVER_URI = "org.apache.stanbol.entityhub.yard.solr.solrUri";
+    public static final String SOLR_SERVER_LOCATION = "org.apache.stanbol.entityhub.yard.solr.solrUri";
     /**
      * The key used to configure if data of multiple Yards are stored within the
      * same index (<code>default=false</code>)
@@ -143,6 +146,14 @@ public class SolrYard extends AbstractYard implements Yard {
      * boost of a Field is documentBoost*fieldBoost.
      */
     public static final String FIELD_BOOST_MAPPINGS = "org.apache.stanbol.entityhub.yard.solr.fieldBoosts";
+    /**
+     * Key used to configure the implementation of the {@link SolrServer} to
+     * be used by this SolrYard implementation. The default value is determined
+     * by the type of the value configured by the {@link #SOLR_SERVER_LOCATION}.
+     * In case a path of a File URI is used, the type is set to
+     * {@link Type#EMBEDDED} otherwise {@link Type#HTTP} is used as default.
+     */
+    public static final String SOLR_SERVER_TYPE = "org.apache.stanbol.entityhub.yard.solr.solrServerType";
     /**
      * The default value for the maxBooleanClauses of SolrQueries. Set to
      * {@value #defaultMaxBooleanClauses} the default of Slor 1.4
@@ -201,6 +212,12 @@ public class SolrYard extends AbstractYard implements Yard {
      * the boost for the Document if present.
      */
     private Map<String,Float> fieldBoostMap;
+    
+    /**
+     * Manager used to create the {@link SolrServer} instance used by this yard.
+     */
+    @Reference
+    private SolrServerProviderManager solrServerProviderManager;
     /**
      * Default constructor as used by the OSGI environment.<p> DO NOT USE to
      * manually create instances! The SolrYard instances do need to be configured.
@@ -221,9 +238,9 @@ public class SolrYard extends AbstractYard implements Yard {
         try {
             activate(config);
         } catch (IOException e) {
-            new YardException("Unable to access SolrServer" +config.getSolrServerUrl());
+            new YardException("Unable to access SolrServer" +config.getSolrServerLocation());
         } catch (SolrServerException e) {
-            new YardException("Unable to initialize SolrServer" +config.getSolrServerUrl());
+            new YardException("Unable to initialize SolrServer" +config.getSolrServerLocation());
         } catch (ConfigurationException e) {
             new IllegalArgumentException("Unable to initialise SolrYard with the provided configuration",e);
         }
@@ -248,10 +265,15 @@ public class SolrYard extends AbstractYard implements Yard {
     private void activate(SolrYardConfig config) throws ConfigurationException,IOException,SolrServerException {
         //init with the default implementations of the ValueFactory and the QueryFactory
         super.activate(InMemoryValueFactory.getInstance(), DefaultQueryFactory.getInstance(), config);
-        server = new CommonsHttpSolrServer(((SolrYardConfig)this.config).getSolrServerUrl());
+        if(solrServerProviderManager == null){ //not within an OSGI environment
+            solrServerProviderManager = SolrServerProviderManager.getInstance();
+        }
+        server = solrServerProviderManager.getSolrServer(
+            ((SolrYardConfig)this.config).getSolrServerType(), 
+            ((SolrYardConfig)this.config).getSolrServerLocation().toString());
         //test the server
         SolrPingResponse pingResponse = server.ping();
-        log.info(String.format("Successful ping for SolrServer %s ( %d ms) Details: %s",config.getSolrServerUrl(),pingResponse.getElapsedTime(),pingResponse));
+        log.info(String.format("Successful ping for SolrServer %s ( %d ms) Details: %s",config.getSolrServerLocation(),pingResponse.getElapsedTime(),pingResponse));
         //the fieldMapper need the Server to store it's namespace prefix configuration
         this.fieldMapper = new SolrFieldMapper(server);
         this.indexValueFactory = IndexValueFactory.getInstance();
@@ -270,9 +292,9 @@ public class SolrYard extends AbstractYard implements Yard {
         try {
             this.server.commit();
         } catch (SolrServerException e) {
-            log.error(String.format("Unable to commit unsaved changes to SolrServer %s during deactivate!",((SolrYardConfig)this.config).getSolrServerUrl()),e);
+            log.error(String.format("Unable to commit unsaved changes to SolrServer %s during deactivate!",((SolrYardConfig)this.config).getSolrServerLocation()),e);
         } catch (IOException e) {
-            log.error(String.format("Unable to commit unsaved changes to SolrServer %s during deactivate!",((SolrYardConfig)this.config).getSolrServerUrl()),e);
+            log.error(String.format("Unable to commit unsaved changes to SolrServer %s during deactivate!",((SolrYardConfig)this.config).getSolrServerLocation()),e);
         }
         this.server = null;
         this.fieldMapper = null;
@@ -358,6 +380,12 @@ public class SolrYard extends AbstractYard implements Yard {
 
     @Override
     public Representation getRepresentation(String id) throws YardException {
+        if(id == null){
+            throw new NullPointerException("The parsed Representation id MUST NOT be NULL!");
+        }
+        if(id.isEmpty()){
+            throw new IllegalArgumentException("The parsed Representation id MUST NOT be empty!");
+        }
         SolrDocument doc;
         long start = System.currentTimeMillis();
         try {
@@ -436,6 +464,12 @@ public class SolrYard extends AbstractYard implements Yard {
 
     @Override
     public boolean isRepresentation(String id) throws YardException {
+        if(id == null){
+            throw new NullPointerException("The parsed Representation id MUST NOT be NULL!");
+        }
+        if(id.isEmpty()){
+            throw new IllegalArgumentException("The parsed Representation id MUST NOT be empty!");
+        }
         try {
             return getSolrDocument(id,Arrays.asList(fieldMapper.getDocumentIdField()))!=null;
         } catch (SolrServerException e) {
@@ -466,6 +500,12 @@ public class SolrYard extends AbstractYard implements Yard {
 
     @Override
     public void remove(String id) throws YardException, IllegalArgumentException {
+        if(id == null){
+            throw new NullPointerException("The parsed Representation id MUST NOT be NULL!");
+        }
+        if(id.isEmpty()){
+            throw new IllegalArgumentException("The parsed Representation id MUST NOT be empty!");
+        }
         try {
             server.deleteById(id);
             server.commit();
@@ -474,34 +514,40 @@ public class SolrYard extends AbstractYard implements Yard {
         } catch (IOException e) {
             throw new YardException("Unable to access SolrServer",e);
         }
-        //TODO: maybe we need also to update all Documents that refer this ID
+        //NOTE: We do not need to update all Documents that refer this ID, because
+        //      only the representation of the Entity is deleted and not the
+        //      Entity itself. So even that we do no longer have an representation
+        //      the entity still exists and might be referenced by others!
     }
     @Override
     public void remove(Iterable<String> ids) throws IllegalArgumentException, YardException {
         if(ids == null){
-            throw new IllegalArgumentException("The parsed IDs MUST NOT be NULL");
+            throw new NullPointerException("The parsed IDs MUST NOT be NULL");
         }
-        List<String> remove = new ArrayList<String>();
+        List<String> toRemove = new ArrayList<String>();
         for(String id :ids){
-            if(id != null){
-                remove.add(id);
+            if(id != null && !id.isEmpty()){
+                toRemove.add(id);
             }
         }
         try {
-            server.deleteById(remove);
+            server.deleteById(toRemove);
+            server.commit();
         } catch (SolrServerException e) {
             throw new YardException("Error while deleting documents from the Solr server",e);
         } catch (IOException e) {
             throw new YardException("Unable to access SolrServer",e);
         }
-        //TODO: maybe we need also to update all Documents that refer this ID
-
+        //NOTE: We do not need to update all Documents that refer this ID, because
+        //      only the representation of the Entity is deleted and not the
+        //      Entity itself. So even that we do no longer have an representation
+        //      the entity still exists and might be referenced by others!
     }
     @Override
     public Representation store(Representation representation) throws YardException,IllegalArgumentException {
         log.debug(String.format("Store %s",representation!= null?representation.getId():null));
         if(representation == null){
-            return null;
+            throw new NullPointerException("The parsed Representation MUST NOT be NULL!");
         }
         long start = System.currentTimeMillis();
         SolrInputDocument inputDocument = createSolrInputDocument(representation);
@@ -522,13 +568,15 @@ public class SolrYard extends AbstractYard implements Yard {
     @Override
     public Iterable<Representation> store(Iterable<Representation> representations) throws IllegalArgumentException, YardException {
         if(representations == null){
-            throw new IllegalArgumentException("The parsed Representations MUST NOT be NULL!");
+            throw new NullPointerException("The parsed Representations MUST NOT be NULL!");
         }
+        Collection<Representation> added = new HashSet<Representation>();
         long start = System.currentTimeMillis();
-        List<SolrInputDocument> inputDocs = new ArrayList<SolrInputDocument>();
+        Collection<SolrInputDocument> inputDocs = new HashSet<SolrInputDocument>();
         for(Representation representation : representations){
             if(representation != null){
                 inputDocs.add(createSolrInputDocument(representation));
+                added.add(representation);
             }
         }
         long created = System.currentTimeMillis();
@@ -543,8 +591,8 @@ public class SolrYard extends AbstractYard implements Yard {
         long ready = System.currentTimeMillis();
         log.debug(String.format("Processed store request for %d documents in %dms (created %dms| stored%dms)",
                 inputDocs.size(),ready-start,created-start,ready-created));
-        return representations;
-        }
+        return added;
+    }
     /**
      * boost if present!
      * @param representation
@@ -610,19 +658,22 @@ public class SolrYard extends AbstractYard implements Yard {
     }
 
     @Override
-    public Representation update(Representation representation) throws YardException {
+    public Representation update(Representation representation) throws IllegalArgumentException, NullPointerException, YardException {
         if(representation == null){
-            return null;
+            throw new NullPointerException("The parsed Representation MUST NOT be NULL!");
         }
         boolean found  = isRepresentation(representation.getId());
         if(found) {
             return store(representation); //there is no "update" for solr
         } else {
-            throw new YardException("Parsed Representation "+representation.getId()+" in not managed by this Yard "+getName()+"(id="+getId()+")");
+            throw new IllegalArgumentException("Parsed Representation "+representation.getId()+" in not managed by this Yard "+getName()+"(id="+getId()+")");
         }
     }
     @Override
-    public Iterable<Representation> update(Iterable<Representation> representations) throws YardException, IllegalArgumentException {
+    public Iterable<Representation> update(Iterable<Representation> representations) throws YardException, IllegalArgumentException, NullPointerException {
+        if(representations == null){
+            throw new NullPointerException("The parsed Iterable over Representations MUST NOT be NULL!");
+        }
         long start = System.currentTimeMillis();
         Set<String> ids = new HashSet<String>();
 
@@ -643,25 +694,25 @@ public class SolrYard extends AbstractYard implements Yard {
         List<SolrInputDocument> inputDocs = new ArrayList<SolrInputDocument>(ids.size());
         List<Representation> updated = new ArrayList<Representation>();
         for(Representation representation : representations){
-            if(representation == null || !ids.contains(representation.getId())){ //null parsed or not already present
-                updated.add(null); //we need to add null values to the output
-            } else { //present in the yard -> perform the update
+            if(representation != null && ids.contains(representation.getId())){ //null parsed or not already present
                 inputDocs.add(createSolrInputDocument(representation));
                 updated.add(representation);
             }
         }
         long created = System.currentTimeMillis();
-        try {
-            server.add(inputDocs);
-            server.commit();
-        } catch (SolrServerException e) {
-            throw new YardException("Error while adding updated Documents to the SolrServer",e);
-        } catch (IOException e) {
-            throw new YardException("Unable to access Solr server",e);
+        if(!inputDocs.isEmpty()) {
+            try {
+                server.add(inputDocs);
+                server.commit();
+            } catch (SolrServerException e) {
+                throw new YardException("Error while adding updated Documents to the SolrServer",e);
+            } catch (IOException e) {
+                throw new YardException("Unable to access Solr server",e);
+            }
         }
         long ready = System.currentTimeMillis();
-        log.debug(String.format("Processed updateRequest for %d documents (%d updated) in %dms (checked %dms|created %dms| stored%dms)",
-                numDocs,ids,ready-start,checked-start,created-checked,ready-created));
+        log.info(String.format("Processed updateRequest for %d documents (%d in index | %d updated) in %dms (checked %dms|created %dms| stored%dms)",
+                numDocs,ids.size(),updated.size(),ready-start,checked-start,created-checked,ready-created));
         return updated;
     }
     /**
@@ -723,11 +774,13 @@ public class SolrYard extends AbstractYard implements Yard {
                     num++;
                 }
             }
+            log.info("Get SolrDocuments for Query: "+queryBuilder.toString());
             //no more items or all boolean clauses used -> send a request
-            num = 0; //reset to 0
             solrQuery.setQuery(queryBuilder.toString());
             queryBuilder = new StringBuilder(); // and a new StringBuilder
-            solrQuery.setRows(num);
+            //set the number of results to the number of parsed IDs.
+            solrQuery.setRows(num); 
+            num = 0; //reset to 0
             QueryResponse queryResponse = server.query(solrQuery);
             if(resultDocs == null){
                 resultDocs = queryResponse.getResults();

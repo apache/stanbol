@@ -163,8 +163,7 @@ public class CommandLineRunner {
         }
         Dictionary<String, Object> indexingConfig = new Hashtable<String, Object>();
         //first the SolrServer used to store the index
-        URL solrServer = new URL(line.getArgs()[0]);
-        SolrYardConfig yardConfig = new SolrYardConfig(yardName, solrServer);
+        SolrYardConfig yardConfig = new SolrYardConfig(yardName, line.getArgs()[0]);
         //use the signRank as default for document Boosts
         yardConfig.setDocumentBoostFieldName(RdfResourceEnum.signRank.getUri());
         //increase the boost for fields that are usually used as labels

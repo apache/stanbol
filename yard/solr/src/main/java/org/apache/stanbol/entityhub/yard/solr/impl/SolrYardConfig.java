@@ -1,12 +1,11 @@
 package org.apache.stanbol.entityhub.yard.solr.impl;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Dictionary;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.stanbol.entityhub.core.yard.AbstractYard.YardConfig;
+import org.apache.stanbol.entityhub.yard.solr.provider.SolrServerProvider.Type;
 import org.osgi.service.cm.ConfigurationException;
 
 
@@ -29,9 +28,9 @@ public final class SolrYardConfig extends YardConfig {
      * @throws IllegalArgumentException if the parsed valued do not fulfil the
      * requirements.
      */
-    public SolrYardConfig(String id, URL solrServer) throws IllegalArgumentException{
+    public SolrYardConfig(String id, String solrServer) throws IllegalArgumentException{
         super(id);
-        setSolrServerUrl(solrServer);
+        setSolrServerLocation(solrServer);
         try {
             isValid();
         } catch (ConfigurationException e) {
@@ -52,38 +51,63 @@ public final class SolrYardConfig extends YardConfig {
         super(config);
     }
     /**
-     * Setter for the base URL of the SolrServer
-     * @param url the base URL of the SolrServer. Required, NOT NULL.
+     * Setter for the type of the SolrServer client to by used by the SolrYard.
+     * Setting the type to <code>null</code> will activate the default value.
+     * The default is determined based on the configured {@link #getSolrServerLocation()}
+     * @param type The type to use
      */
-    public void setSolrServerUrl(URL url){
-        if(url != null) {
-            config.put(SolrYard.SOLR_SERVER_URI, url);
+    public void setSolrServerType(Type type){
+        if(type == null){
+            config.remove(SolrYard.SOLR_SERVER_TYPE);
         } else {
-            config.remove(SolrYard.SOLR_SERVER_URI);
+            config.put(SolrYard.SOLR_SERVER_TYPE, type);
+        }
+    }
+    public Type getSolrServerType(){
+        Object serverType = config.get(SolrYard.SOLR_SERVER_TYPE);
+        if(serverType != null){
+            if(serverType instanceof Type){
+                return (Type)serverType;
+            } else {
+                try {
+                    return Type.valueOf(serverType.toString());
+                } catch (IllegalArgumentException e){
+                    //invalid value set!
+                    config.remove(SolrYard.SOLR_SERVER_TYPE);
+                }
+            }
+        }
+        //guess type based on Server Location
+        String serverLocation = getSolrServerLocation();
+        //TODO: maybe we need to improve this detection code.
+        if(serverLocation.startsWith("http")){
+            return Type.HTTP;
+        } else {
+            return Type.EMBEDDED;
         }
     }
     /**
-     * Getter for the base URL of the SolrServer
-     * @return the base URL of the configured SolrServer
-     * @throws IllegalStateException Internally a Object is used to store values
-     *   and if the configuration is provided by the OSGI environment the URL
-     *   is configured by using a {@link String}. When it fails to parse a
-     *   {@link URL} object based on the provided string, than the
-     *   {@link MalformedURLException} is wrapped by
-     *   an {@link IllegalStateException}.
+     * Setter for the location of the SolrServer. Might be a URL or a file.
+     * @param url the base URL of the SolrServer. Required, NOT NULL.
      */
-    public URL getSolrServerUrl() throws IllegalStateException {
-        Object value = config.get(SolrYard.SOLR_SERVER_URI);
+    public void setSolrServerLocation(String url){
+        if(url != null) {
+            config.put(SolrYard.SOLR_SERVER_LOCATION, url);
+        } else {
+            config.remove(SolrYard.SOLR_SERVER_LOCATION);
+        }
+    }
+    /**
+     * Getter for the Location of the SolrServer. In case of an remote server
+     * this will be the base URL of the RESTful interface. In case of an
+     * embedded Server it is the directory containing the solr.xml or the
+     * directory of the core in case of a multi-core setup.
+     * @return the URL or path to the SolrServer
+     */
+    public String getSolrServerLocation() throws IllegalStateException {
+        Object value = config.get(SolrYard.SOLR_SERVER_LOCATION);
         if(value != null){
-            if(value instanceof URL){
-                return (URL)value;
-            } else {
-                try {
-                    return new URL(value.toString());
-                } catch (MalformedURLException e) {
-                    throw new IllegalStateException("Unable to parse URL from value "+value,e);
-                }
-            }
+            return value.toString();
         } else {
             return null;
         }
@@ -169,6 +193,7 @@ public final class SolrYardConfig extends YardConfig {
             config.remove(SolrYard.FIELD_BOOST_MAPPINGS);
         }
     }
+    @SuppressWarnings("unchecked")
     public Map<String,Float> getFieldBoosts(){
         Object fieldBoosts = config.get(SolrYard.FIELD_BOOST_MAPPINGS);
         if(fieldBoosts == null){
@@ -181,17 +206,17 @@ public final class SolrYardConfig extends YardConfig {
         }
     }
     /**
-     * checks for the {@link SolrYard#SOLR_SERVER_URI}
+     * checks for the {@link SolrYard#SOLR_SERVER_LOCATION}
      */
     @Override
     protected void validateConfig() throws ConfigurationException{
         try {
-            URL solrServer = getSolrServerUrl();
+            String solrServer = getSolrServerLocation();
             if(solrServer == null){
-                throw new ConfigurationException(SolrYard.SOLR_SERVER_URI, "The URL of the Solr server MUST NOT be NULL!");
+                throw new ConfigurationException(SolrYard.SOLR_SERVER_LOCATION, "The URL of the Solr server MUST NOT be NULL!");
             }
         } catch (IllegalStateException e) {
-            throw new ConfigurationException(SolrYard.SOLR_SERVER_URI, e.getMessage(),e.getCause());
+            throw new ConfigurationException(SolrYard.SOLR_SERVER_LOCATION, e.getMessage(),e.getCause());
         }
 
     }

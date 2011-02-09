@@ -152,7 +152,7 @@
 							</goals>
 							<configuration>
 								<properties>
-									<service.vendor>IKS project</service.vendor>
+									<service.vendor>Apache Stanbol (incubating)</service.vendor>
 								</properties>
 							</configuration>
 						</execution>

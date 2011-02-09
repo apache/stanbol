@@ -144,9 +144,24 @@
       <artifactId>org.apache.stanbol.entityhub.yard.clerezza</artifactId>
       <version>0.1-SNAPSHOT</version>
     </bundle>
+    <!-- The SolrYard requires also the solr.provider bundle. In addition
+         the solr.embedded bundle can be added to support the use of
+         embedded SolrServer -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.yard.solr.provider</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <!-- optional SolrProvider implementation that adds support for
+           EmbeddedSolrServer -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.yard.solr.embedded</artifactId>
       <version>0.1-SNAPSHOT</version>
     </bundle>
   </startLevel>
@@ -160,36 +175,6 @@
 	  <groupId>org.apache.stanbol</groupId>
 	  <artifactId>org.apache.stanbol.entityhub.jersey</artifactId>
 	  <version>0.1-SNAPSHOT</version>
-    </bundle>
-  </startLevel>
-
-  <!-- Solr Client (needed for org.apache.stanbol.entityhub.yard.solr) -->
-  <startLevel level="14">
-<!-- not a Bundle - currently included in the org.apache.stanbol.entityhub.yard.solr bundle
-     <bundle>
-        <groupId>org.apache.solr</groupId>
-        <artifactId>solr-solrj</artifactId>
-        <version>1.4.1</version>
-    </bundle>
-    -->
-<!-- The Solr Client only works with 3.1, but there is no Bundle for that
-     version. Currently the jar version in included in the
-     org.apache.stanbol.entityhub.yard.solr bundle!
-    <bundle>
-        <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpclient-osgi</artifactId>
-        <version>4.0.3</version>
-    </bundle>
-    -->
-    <bundle>
-      <groupId>org.codehaus.woodstox</groupId>
-      <artifactId>wstx-asl</artifactId>
-      <version>3.2.9</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.geronimo.specs</groupId>
-      <artifactId>geronimo-stax-api_1.0_spec</artifactId>
-      <version>1.0.1</version>
     </bundle>
   </startLevel>
   
