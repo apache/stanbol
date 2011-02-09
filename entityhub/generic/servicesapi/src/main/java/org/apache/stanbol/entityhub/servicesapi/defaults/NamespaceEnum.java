@@ -11,8 +11,8 @@ import java.util.Map;
  */
 public enum NamespaceEnum {
     //Namespaces defined by the entityhub
-    entityhubModel("entityhub","http://www.iks-project.eu/ontology/entityhub/model/"),
-    entityhubQuery("entityhub-query","http://www.iks-project.eu/ontology/entityhub/query/"),
+    entityhubModel("entityhub","http://www.iks-project.eu/ontology/rick/model/"),
+    entityhubQuery("entityhub-query","http://www.iks-project.eu/ontology/rick/query/"),
 
 
     //First the XML Namespaces
