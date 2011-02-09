@@ -88,8 +88,7 @@ public class CommandLineRunner {
         if(yardName == null){
             yardName = "geonames";
         }
-        URL solrServer = new URL(line.getArgs()[0]);
-        SolrYardConfig yardConfig = new SolrYardConfig(yardName, solrServer);
+        SolrYardConfig yardConfig = new SolrYardConfig(yardName, line.getArgs()[0]);
         Dictionary<String, Object> indexingConfig = new Hashtable<String, Object>();
         SolrYard yard = new SolrYard(yardConfig);
         indexingConfig.put(KEY_YARD, yard);

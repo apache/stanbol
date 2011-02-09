@@ -12,6 +12,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 
@@ -28,7 +29,7 @@ public abstract class YardTest {
      * This collection is used to clean up the store after all the unit tests 
      * are executed.
      */
-    protected Collection<String> representationIds = new HashSet<String>();
+    protected static Collection<String> representationIds = new HashSet<String>();
     
     protected Representation create() throws YardException{
         Representation r = getYard().create();
@@ -515,16 +516,5 @@ public abstract class YardTest {
         assertTrue(values.remove(testValue2)); //test that it contains the 2nd value
         assertTrue(values.isEmpty()); //and that there are only these two values
         values = null;
-    }
-    
-    /**
-     * This Method removes all Representations create via {@link #create()} or
-     * {@link #create(String, boolean)} from the tested {@link Yard}.
-     * It also removes all Representations there ID was manually added to the
-     * {@link #representationIds} list.
-     */
-    @After
-    public final void clearUpRepresentations() throws YardException {
-        getYard().remove(representationIds);
     }
 }

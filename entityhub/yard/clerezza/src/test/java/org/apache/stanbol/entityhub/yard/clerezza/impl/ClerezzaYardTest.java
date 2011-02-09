@@ -12,15 +12,17 @@ import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.apache.stanbol.entityhub.test.yard.YardTest;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class ClerezzaYardTest extends YardTest {
     
-    private Yard yard;
+    private static Yard yard;
     
-    @Before
-    public final void initYard(){
+    @BeforeClass
+    public final static void initYard(){
         YardConfig config = new SimpleYardConfig("urn:yard.clerezza:testYardId");
         config.setName("Clerezza Yard Test");
         config.setDescription("The Clerezza Yard instance used to execute the Unit Tests defined for the Yard Interface");
@@ -55,6 +57,16 @@ public class ClerezzaYardTest extends YardTest {
          * URI of the Representation as 
          */
         test.add(RDF.type.getUnicodeString(), representationType);
+    }
+    /**
+     * This Method removes all Representations create via {@link #create()} or
+     * {@link #create(String, boolean)} from the tested {@link Yard}.
+     * It also removes all Representations there ID was manually added to the
+     * {@link #representationIds} list.
+     */
+    @AfterClass
+    public final static void clearUpRepresentations() throws YardException {
+        yard.remove(representationIds);
     }
     
 }
