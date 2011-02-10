@@ -19,6 +19,8 @@ In a different console, you can now run individual tests:
 
   $ mvn -o test -Dtest.server.url=http://localhost:54530 -Dtest=StatelessEngineTest
   
+And add -Dmaven.surefire.debug to enable debugging of the tests.
+
 Or do the same from your IDE, see the POM for system properties that the tests
 expect.
 
