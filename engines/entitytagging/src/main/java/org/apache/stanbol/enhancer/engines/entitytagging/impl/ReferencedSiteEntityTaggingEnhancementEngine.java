@@ -271,7 +271,7 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
         log.debug("Process TextAnnotation " + name + " type=" + type);
         FieldQuery query = site.getQueryFactory().createFieldQuery();
         //replace spaces with plus to create an AND search for all words in the name!
-        query.setConstraint(nameField, new TextConstraint(name.replace(' ', '+')));
+        query.setConstraint(nameField, new TextConstraint(name));//name.replace(' ', '+')));
         if (OntologicalClasses.DBPEDIA_PERSON.equals(type)){
             if (personState){
                 if (personType!=null){
