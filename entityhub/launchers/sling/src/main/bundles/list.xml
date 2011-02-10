@@ -144,24 +144,9 @@
       <artifactId>org.apache.stanbol.entityhub.yard.clerezza</artifactId>
       <version>0.1-SNAPSHOT</version>
     </bundle>
-    <!-- The SolrYard requires also the solr.provider bundle. In addition
-         the solr.embedded bundle can be added to support the use of
-         embedded SolrServer -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.yard.solr.provider</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <!-- optional SolrProvider implementation that adds support for
-           EmbeddedSolrServer -->
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.yard.solr.embedded</artifactId>
       <version>0.1-SNAPSHOT</version>
     </bundle>
   </startLevel>

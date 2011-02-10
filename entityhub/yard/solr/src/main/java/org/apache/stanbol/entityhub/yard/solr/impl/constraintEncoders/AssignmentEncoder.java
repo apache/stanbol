@@ -42,7 +42,10 @@ public class AssignmentEncoder implements IndexConstraintTypeEncoder<Object>{
         }
         String eqConstraint = EQ;
         if(value != null){
-            eqConstraint = EQ+(SolrUtil.escapeSolrSpecialChars(indexValue.getValue()));
+            String escapedValue = SolrUtil.escapeSolrSpecialChars(indexValue.getValue());
+            //now we need to replace spaces with '+' because only than the query
+            //is treated as EQUALS by solr
+            eqConstraint = EQ+escapedValue.replace(' ', '+');
         }
         constraint.addEncoded(POS, eqConstraint);
     }
