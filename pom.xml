@@ -46,7 +46,19 @@
     <module>parent</module>
     <module>entityhub</module>
     <module>enhancer</module>
-    <module>kres</module>
     <module>commons</module>
   </modules>
+  
+  <profiles>
+    <profile>
+       <id>kres</id>
+       <activation>
+         <activeByDefault>false</activeByDefault>
+       </activation>
+       <modules>
+         <module>kres</module>
+       </modules>
+     </profile>
+   </profiles>
+  
 </project>
