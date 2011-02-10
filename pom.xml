@@ -58,8 +58,5 @@
     <!-- Utils for createing local caches (indexing utils) -->
     <module>indexing/geonames</module>
     <module>indexing/genericRdf</module>
-    <!-- Modules for SolrServer providers (used by the SolrYard) -->
-    <module>yard/solrProvider</module>
-    <module>yard/embeddedSolrProvider</module>
   </modules>
 </project>

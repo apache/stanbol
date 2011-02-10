@@ -62,23 +62,36 @@
           <instructions>
             <Export-Package>
               org.apache.stanbol.entityhub.yard.solr;version=${pom.version},
+              org.apache.stanbol.entityhub.yard.solr.defaults;version=${pom.version},
               org.apache.stanbol.entityhub.yard.solr.model;version=${pom.version},
               org.apache.stanbol.entityhub.yard.solr.query;version=${pom.version},
-              org.apache.stanbol.entityhub.yard.solr.utils;version=${pom.version},
-              org.apache.stanbol.entityhub.yard.solr.defaults;version=${pom.version}
+              org.apache.stanbol.entityhub.yard.solr.provider;version=${pom.version},
+              org.apache.stanbol.entityhub.yard.solr.utils;version=${pom.version}
             </Export-Package>
+            <!-- NOTE: The exclusion of javax.xml.stream assumes that only serialised 
+                 java objects are used as serialisation to and from the SolrServer 
+                 and therefore no XML API is needed -->
             <Import-Package>
-              !org.apache.lucene.*,
               !junit.*,
               !org.junit.*,
+              !org.mortbay.jetty.*,
+              !org.mortbay.log,
+              !com.sun.msv.*,
+              !org.relaxng.datatype,
+              !javax.xml.stream,
               *
             </Import-Package>
            <Private-Package>
               org.apache.stanbol.entityhub.yard.solr.impl;version=${pom.version},
+              org.apache.stanbol.entityhub.yard.solr.embedded;version=${pom.version},
               org.apache.stanbol.entityhub.yard.solr.impl.constraintEncoders;version=${pom.version}
             </Private-Package>
             <Embed-Dependency>
-              
+              solr-solrj,commons-httpclient,
+              solr-core, solr-commons-csv,
+              lucene-core, lucene-analyzers, lucene-highlighter, lucene-memory,
+              lucene-spellchecker, lucene-misc, lucene-queries, lucene-snowball,
+              stax-api,wstx-asl
             </Embed-Dependency>
            </instructions>
         </configuration>
@@ -92,6 +105,7 @@
   </build>
 
   <dependencies>
+  <!-- Stanbol Entityhub internal dependencies -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
@@ -102,16 +116,118 @@
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
+    <!-- SolrJ dependencies (needed for using remote Solr servers) -->
     <dependency>
-	  <groupId>org.apache.stanbol</groupId>
-	  <artifactId>org.apache.stanbol.entityhub.yard.solr.provider</artifactId>
-      <version>0.1-SNAPSHOT</version>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-solrj</artifactId>
+        <version>1.4.1</version>
+    </dependency>       
+    <dependency>
+        <groupId>commons-httpclient</groupId>
+        <artifactId>commons-httpclient</artifactId>
+        <version>3.1</version>
     </dependency>
+    
+    <!-- Solr/Lucene dependencies (needed for using embedded Solr servers) -->
+    <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-core</artifactId>
+        <version>1.4.1</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-core</artifactId>
+        <version>2.9.4</version>
+    </dependency>
+    <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>1.3</version>
+    </dependency>
+    <dependency>
+        <groupId>commons-fileupload</groupId>
+        <artifactId>commons-fileupload</artifactId>
+        <version>1.2.1</version>
+        <scope>runtime</scope>
+    </dependency>
+    <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>1.4</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-analyzers</artifactId>
+        <version>2.9.4</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-highlighter</artifactId>
+        <version>2.9.4</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-memory</artifactId>
+        <version>2.9.4</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-misc</artifactId>
+        <version>2.9.4</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-queries</artifactId>
+        <version>2.9.4</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-snowball</artifactId>
+        <version>2.9.4</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-memory</artifactId>
+        <version>2.9.4</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-spellchecker</artifactId>
+        <version>2.9.4</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-commons-csv</artifactId>
+        <version>1.4.1</version>
+    </dependency>
+    <dependency>
+        <groupId>commons-collections</groupId>
+        <artifactId>commons-collections</artifactId>
+        <version>3.2.1</version>
+    </dependency>
+    <dependency>
+        <groupId>stax</groupId>
+        <artifactId>stax-api</artifactId>
+        <version>1.0.1</version>
+        <scope>runtime</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.codehaus.woodstox</groupId>
+        <artifactId>wstx-asl</artifactId>
+        <version>3.2.7</version>
+        <scope>runtime</scope>
+    </dependency>    
 	<dependency>
 	    <groupId>joda-time</groupId>
 	    <artifactId>joda-time</artifactId>
 	    <version>1.6.2</version>
 	</dependency>
+<!--    <dependency> 
+	    <groupId>commons-httpclient</groupId>
+	    <artifactId>commons-httpclient</artifactId>
+	    <version>3.1</version>
+	    <scope>runtime</scope>
+	</dependency> -->
     <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.scr.annotations</artifactId>
@@ -129,6 +245,18 @@
 			</exclusion>
 		</exclusions>        
     </dependency>
+    <!-- 
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.metatype</artifactId>
+      <version>1.0.4</version>
+      <exclusions>
+      	<exclusion>
+      		<groupId>org.apache.felix</groupId>
+      		<artifactId>org.osgi.foundation</artifactId>
+      	</exclusion>
+      </exclusions>
+    </dependency>  -->
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.osgi.core</artifactId>
@@ -139,17 +267,10 @@
         <artifactId>slf4j-api</artifactId>
         <scope>provided</scope>
     </dependency>
-    
     <!-- for tests -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.test</artifactId>
-      <version>0.1-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-	  <groupId>org.apache.stanbol</groupId>
-	  <artifactId>org.apache.stanbol.entityhub.yard.solr.embedded</artifactId>
       <version>0.1-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
