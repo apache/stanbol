@@ -11,10 +11,14 @@ need
 
     $ export MAVEN_OPTS="-Xmx512M -XX:MaxPermSize=128M"
 
-Before you can build Stanbol you need to install a few artifacts to your local
-Maven repository. This step is needed at the moment because these artifacts are
-not available via any public Maven repository. Please go to the Stanbol source
-directory and type the following commands:
+The Kres build is currently disabled by default, as it uses a few artifacts
+that are not available in public Maven repositories.
+
+If you want to include Kres in your build, activate the kres Maven profile
+(add -P kres to the mvn command line) and install a few artifacts to your 
+local Maven repository. Please go to the Stanbol source directory and type 
+the following commands (again, this is only needed if you want to build
+kres):
 
     $ mvn install:install-file -Dfile=kres/lib/owlapi-3.0.0.jar \
          -DgroupId=owlapi -DartifactId=owlapi -Dversion=3.0.0 -Dpackaging=jar
