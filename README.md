@@ -1,10 +1,10 @@
-= Apache Stanbol
+# Apache Stanbol
 
 Apache Stanbol is a modular set of components and HTTP services for
 semantic content management.
 
 
-== Building Stanbol
+## Building Stanbol
 
 To build Stanbol you need a JDK 1.6 and Maven 2.2.1 installed. You probably
 need
@@ -32,7 +32,7 @@ Then again in the Stanbol source directory type
 If you want to skip the tests, add '-DskipTests' to the Maven command.
 
 
-== Creating Eclipse Projects
+## Creating Eclipse Projects
 
 Go to Stanbol source directory and type
 
@@ -42,7 +42,7 @@ If you want to recreate already existing Eclipse projects, you have to delete
 the old ones first by using 'eclipse:clean'.
 
 
-== Useful links
+## Useful links
 
   - Documentation will be published and mailing lists info at:
     http://incubator.apache.org/stanbol/
