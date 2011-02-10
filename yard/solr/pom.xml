@@ -107,24 +107,11 @@
 	  <artifactId>org.apache.stanbol.entityhub.yard.solr.provider</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
-
-    <!-- exported by org.apache.stanbol.entityhub.yard.solr.provider
-	<dependency>
-	    <groupId>org.apache.solr</groupId>
-	    <artifactId>solr-solrj</artifactId>
-	    <version>1.4.1</version>
-	</dependency> -->
 	<dependency>
 	    <groupId>joda-time</groupId>
 	    <artifactId>joda-time</artifactId>
 	    <version>1.6.2</version>
 	</dependency>
-<!--    <dependency> 
-	    <groupId>commons-httpclient</groupId>
-	    <artifactId>commons-httpclient</artifactId>
-	    <version>3.1</version>
-	    <scope>runtime</scope>
-	</dependency> -->
     <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.scr.annotations</artifactId>
@@ -142,18 +129,6 @@
 			</exclusion>
 		</exclusions>        
     </dependency>
-    <!-- 
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.metatype</artifactId>
-      <version>1.0.4</version>
-      <exclusions>
-      	<exclusion>
-      		<groupId>org.apache.felix</groupId>
-      		<artifactId>org.osgi.foundation</artifactId>
-      	</exclusion>
-      </exclusions>
-    </dependency>  -->
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.osgi.core</artifactId>
@@ -164,6 +139,7 @@
         <artifactId>slf4j-api</artifactId>
         <scope>provided</scope>
     </dependency>
+    
     <!-- for tests -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>

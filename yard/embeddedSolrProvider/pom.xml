@@ -91,18 +91,6 @@
       <artifactId>org.apache.stanbol.entityhub.yard.solr.provider</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
-
-<!-- exported by org.apache.stanbol.entityhub.yard.solr.provider
-	<dependency>
-	    <groupId>org.apache.solr</groupId>
-	    <artifactId>solr-solrj</artifactId>
-	    <version>1.4.1</version>
-	</dependency>       
-    <dependency>
-        <groupId>commons-httpclient</groupId>
-        <artifactId>commons-httpclient</artifactId>
-        <version>3.1</version>
-    </dependency>    -->
 	<dependency>
 	    <groupId>org.apache.solr</groupId>
 	    <artifactId>solr-core</artifactId>
