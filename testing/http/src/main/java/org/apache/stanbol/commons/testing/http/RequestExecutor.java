@@ -94,6 +94,13 @@ public class RequestExecutor {
         httpClient = client;
     }
     
+    public String toString() {
+        if(request == null) {
+            return "Request";
+        }
+        return request.getMethod() + " request to " + request.getURI();
+    }
+    
     public RequestExecutor execute(Request r) throws ClientProtocolException, IOException {
         clear();
         request = r.getRequest();
@@ -132,18 +139,18 @@ public class RequestExecutor {
 
     /** Verify that response matches supplied status */
     public RequestExecutor assertStatus(int expected) {
-        assertNotNull(response);
-        assertEquals("Expecting status " + expected, expected, response.getStatusLine().getStatusCode());
+        assertNotNull(this.toString(), response);
+        assertEquals(this + ": expecting status " + expected, expected, response.getStatusLine().getStatusCode());
         return this;
     }
     
     /** Verify that response matches supplied content type */
     public RequestExecutor assertContentType(String expected) {
-        assertNotNull(response);
+        assertNotNull(this.toString(), response);
         if(entity == null) {
-            fail("No entity in response, cannot check content type");
+            fail(this + ": no entity in response, cannot check content type");
         }
-        assertEquals("Expecting content type " + expected, expected, entity.getContentType().getValue());
+        assertEquals(this + ": expecting content type " + expected, expected, entity.getContentType().getValue());
         return this;
     }
 
@@ -153,7 +160,7 @@ public class RequestExecutor {
      *  to have match partial lines.
      */
     public RequestExecutor assertContentRegexp(String... regexp) {
-        assertNotNull(response);
+        assertNotNull(this.toString(), response);
         nextPattern:
         for(String expr : regexp) {
             final Pattern p = Pattern.compile(".*" + expr + ".*");
@@ -164,17 +171,17 @@ public class RequestExecutor {
                     continue nextPattern;
                 }
             }
-            fail("No match for regexp '" + expr + "', content=\n" + content);
+            fail(this + ": no match for regexp '" + expr + "', content=\n" + content);
         }
         return this;
     }
 
     /** For each supplied string, fail unless content contains it */
     public RequestExecutor assertContentContains(String... expected) throws ParseException, IOException {
-        assertNotNull(response);
+        assertNotNull(this.toString(), response);
         for(String exp : expected) {
             if(!content.contains(exp)) {
-                fail("Content does not contain '" + exp + "', content=\n" + content);
+                fail(this + ": content does not contain '" + exp + "', content=\n" + content);
             }
         }
         return this;
