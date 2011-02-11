@@ -124,6 +124,8 @@
                         <test.server.url>${test.server.url}</test.server.url>
                         <jar.executor.server.port>${server.port}</jar.executor.server.port>
                         <jar.executor.vm.options>${jar.executor.vm.options}</jar.executor.vm.options>
+                        <jar.executor.jar.folder>${project.basedir}/target/dependency</jar.executor.jar.folder>
+                        <jar.executor.jar.name.regexp>org.apache.stanbol.*full.*jar$</jar.executor.jar.name.regexp>
                         <keepJarRunning>${keepJarRunning}</keepJarRunning>
                         <server.ready.timeout.seconds>60</server.ready.timeout.seconds>
                         <server.ready.path.1>/:stanbol.css</server.ready.path.1>
