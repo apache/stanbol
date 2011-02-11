@@ -22,7 +22,6 @@ import java.util.TreeSet;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -46,7 +45,7 @@ public class StanbolTestBase {
     private static boolean serverReady; 
     protected static String serverBaseUrl;
     protected static RequestBuilder builder;
-    protected static HttpClient httpClient = new DefaultHttpClient();
+    protected static DefaultHttpClient httpClient = new DefaultHttpClient();
     protected static RequestExecutor executor = new RequestExecutor(httpClient);
     
     @BeforeClass
@@ -149,7 +148,7 @@ public class StanbolTestBase {
                     continue readyLoop;
                 } finally {
                     if(entity != null) {
-                        EntityUtils.consume(entity);
+                        entity.consumeContent();
                     }
                 }
             }
