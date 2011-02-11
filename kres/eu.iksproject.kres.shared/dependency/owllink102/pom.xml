@@ -3,12 +3,12 @@
 
     <modelVersion>4.0.0</modelVersion>
     
-    <parent>
-    	<groupId>eu.iksproject</groupId>
-    	<artifactId>eu.iksproject.kres.parent</artifactId>
+	<parent>
+		<groupId>eu.iksproject</groupId>
+		<artifactId>eu.iksproject.kres.parent</artifactId>
 		<version>0.7</version>
-    	<relativePath>../parent</relativePath>
-  	</parent>
+		<relativePath>../../../eu.iksproject.kres.parent</relativePath>
+	</parent>
 
     <groupId>eu.iksproject</groupId>
     <artifactId>eu.iksproject.kres.shared.dependency.owllink</artifactId>
@@ -20,7 +20,12 @@
 		<kres-version>0.7</kres-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-
+<repositories>
+ <repository>
+  <id>stlab-cnr-repo</id>
+  <url>http://stlab.istc.cnr.it/software/maven/repo</url>
+ </repository>
+</repositories>
     <dependencies>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -31,6 +36,7 @@
             <groupId>owl-link</groupId>
             <artifactId>owl-link</artifactId>
             <version>1.0.2</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

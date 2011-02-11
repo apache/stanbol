@@ -3,12 +3,13 @@
 
     <modelVersion>4.0.0</modelVersion>
     
-    <parent>
-    	<groupId>eu.iksproject</groupId>
-    	<artifactId>eu.iksproject.kres.parent</artifactId>
+	<parent>
+		<groupId>eu.iksproject</groupId>
+		<artifactId>eu.iksproject.kres.parent</artifactId>
 		<version>0.7</version>
-    	<relativePath>../parent</relativePath>
-  	</parent>
+		<relativePath>../../../eu.iksproject.kres.parent</relativePath>
+	</parent>
+
   	
     <groupId>eu.iksproject</groupId>
     <artifactId>eu.iksproject.kres.shared.dependency.owlapi</artifactId>
@@ -20,6 +21,13 @@
 		<kres-version>0.7</kres-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+
+<repositories>
+ <repository>
+  <id>stlab-cnr-repo</id>
+  <url>http://stlab.istc.cnr.it/software/maven/repo</url>
+ </repository>
+</repositories>
 
     <dependencies>
         <dependency>
@@ -39,6 +47,18 @@
             <version>4.4</version>
             <scope>test</scope>
         </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.5.2</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.5.2</version>
+      <scope>test</scope>
+    </dependency>
     </dependencies>
     <build>
         <plugins>
