@@ -14,11 +14,11 @@ Building the Apache Stanbol Entityhub Framework
 
 Checkout the source::
 
-  % svn co https://iks-project.googlecode.com/svn/sandbox/entityhub/trunk/ iks-entityhub
+  % svn co https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/ entityhub
 
 Build and run the tests::
 
-  % cd iks-entityhub
+  % cd entityhub
   % mvn clean install
 
 Launch the FISE server::
@@ -37,13 +37,13 @@ Connect your browser to the Apache Felix Admin Console
    user: admin
    pwd:  admin
 
-Open the Cofiguration Tab (http://localhost:8080/system/console/configMgr)
+Open the Configuration Tab (http://localhost:8080/system/console/configMgr)
 
 Configuring Referenced Sites
 --------------------------------------------
 
 First configure one or more Referenced Sites by clicking on
-   IKS Referenced Site Configuration
+   Apache Stanbol Entityhub Referenced Site Configuration
 
 The default values can be used to configure dbPedia.org. Other examples can be
 found in *-siteConfig.txt files (e.g. musicbrainz-siteConfig.txt)
@@ -77,10 +77,10 @@ a site with the ID "dbPedia" should be called "dbPediaYard".
 Configuring the Apache Stanbol Entityhub
 --------------------------------------------
 
-As last step one needs to set the configuration of the Rick. To do that click on
+As last step one needs to set the configuration of the Entityhub. To do that click on
    IKS Apache Stanbol Entityhub Configuration
 
-Just use the default values. But note that the value of the "Rick Yard" property
+Just use the default values. But note that the value of the "Entityhub Yard" property
 MUST BE set to an ID of an active Yard.
 
 After completing this three steps all required components of the Rick framework
@@ -215,10 +215,10 @@ Example
    curl -X GET -H "Accept: application/json" http://localhost:8080/entityhub/site/dbPedia/entity?id=http://dbpedia.org/resource/Paris
 
 
-    /site/{site}/find?nams={name}
+    /site/{site}/find?name={name}
 
 Request:
-    GET /site/{site}/find?nams={name}&lang={lang}&limit={limit}&offset={offset}
+    GET /site/{site}/find?name={name}&lang={lang}&limit={limit}&offset={offset}
     POST -d "name={query}&lang={lang}&limit={limit}&offset={offset}" /site/{site}/find
 Parameter:
     site: is the ID configured for the referenced site (e.g. "dbPedia")
@@ -338,7 +338,7 @@ Response:
 Request: GET /mapping/entity?id={uri}
 Parameter
     id: The uri of the entity
-Description: This service allows to retrieve the mapping for a entity. If now 
+Description: This service allows to retrieve the mapping for a entity. If no 
     mapping for the parsed uri is defined, the service returns a 404 "Not Found"
 Example:
     curl "http://localhost:8080/entityhub/mapping/entity/?id=http://dbpedia.org/resource/Hallein"
