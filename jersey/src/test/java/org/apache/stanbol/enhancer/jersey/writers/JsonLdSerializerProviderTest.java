@@ -158,7 +158,7 @@ public class JsonLdSerializerProviderTest {
         Calendar myCal = Calendar.getInstance();
         myCal.set(2010, 9, 27, 12, 0, 0);
         myCal.set(Calendar.MILLISECOND, 0);
-        myCal.setTimeZone(TimeZone.getTimeZone("Germany/Berlin"));
+        myCal.setTimeZone(TimeZone.getTimeZone("UTC"));
         testAnnotation.setCreated(myCal.getTime());
 
         testAnnotation.setSelectedText(namedEntity);
