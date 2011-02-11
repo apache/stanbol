@@ -1,7 +1,17 @@
 package org.apache.stanbol.enhancer.jersey.resource;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import static javax.ws.rs.core.MediaType.WILDCARD;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JSON;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
+
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,11 +44,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.ImplicitProduces;
 import com.sun.jersey.api.view.Viewable;
-
-
-import static javax.ws.rs.core.MediaType.*;
-import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JSON;
-import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 
 /**
  * RESTful interface to browse the list of available engines and allow to call
@@ -81,18 +86,34 @@ public class EnginesRootResource extends NavigationMixin {
         }
     }
 
+    private List<EnhancementEngine> getEngines() {
+        if (jobManager != null) {
+            return jobManager.getActiveEngines();
+        }
+        return new ArrayList<EnhancementEngine>();
+    }
+    
     @GET
     @Produces(APPLICATION_JSON)
     public JSONArray getEnginesAsJsonArray() {
         JSONArray uriArray = new JSONArray();
-        if (jobManager != null) {
-            for (EnhancementEngine engine : jobManager.getActiveEngines()) {
-                UriBuilder ub = uriInfo.getAbsolutePathBuilder();
-                URI userUri = ub.path(makeEngineId(engine)).build();
-                uriArray.put(userUri.toASCIIString());
-            }
+        for (EnhancementEngine engine : getEngines()) {
+            UriBuilder ub = uriInfo.getAbsolutePathBuilder();
+            URI userUri = ub.path(makeEngineId(engine)).build();
+            uriArray.put(userUri.toASCIIString());
         }
         return uriArray;
+    }
+
+    @GET
+    @Produces(TEXT_PLAIN)
+    public String getEnginesAsString() {
+        final StringBuilder sb = new StringBuilder();
+        for (EnhancementEngine engine : getEngines()) {
+            sb.append(engine.getClass().getName());
+            sb.append("\n");
+        }
+        return sb.toString();
     }
 
     public static String makeEngineId(EnhancementEngine engine) {
