@@ -40,7 +40,9 @@ public class JarExecutor {
     public static final int DEFAULT_PORT = 8765;
     public static final String PROP_PREFIX = "jar.executor.";
     public static final String PROP_SERVER_PORT = PROP_PREFIX + "server.port";
-
+    public static final String PROP_JAR_FOLDER = PROP_PREFIX + "jar.folder";
+    public static final String PROP_JAR_NAME_REGEXP = PROP_PREFIX + "jar.name.regexp";
+    
     @SuppressWarnings("serial")
     public static class ExecutorException extends Exception {
         ExecutorException(String reason) {
@@ -65,6 +67,14 @@ public class JarExecutor {
         }
         return instance;
     }
+    
+    private String requireSystemProperty(String name) throws ExecutorException {
+        final String result = System.getProperty(name);
+        if(result == null || result.trim().length() == 0) {
+            throw new ExecutorException("Missing system property: " + name);
+        }
+        return result.trim();
+    }
 
     /** Build a JarExecutor, locate the jar to run, etc */
     private JarExecutor(Properties config) throws ExecutorException {
@@ -73,13 +83,17 @@ public class JarExecutor {
         String str = config.getProperty(PROP_SERVER_PORT);
         serverPort = str == null ? DEFAULT_PORT : Integer.valueOf(str);
 
-        // TODO make those configurable
         javaExecutable = isWindows ? "java.exe" : "java";
-        final File jarFolder = new File("./target/dependency");
-        final Pattern jarPattern = Pattern.compile("org.apache.stanbol.*full.*jar$");
+        final File jarFolder = new File(requireSystemProperty(PROP_JAR_FOLDER));
+        final Pattern jarPattern = Pattern.compile(requireSystemProperty(PROP_JAR_NAME_REGEXP));
 
         // Find executable jar
         final String [] candidates = jarFolder.list();
+        if(candidates == null) {
+            throw new ExecutorException(
+                    "No files found in jar folder specified by " 
+                    + PROP_JAR_FOLDER + " property: " + jarFolder.getAbsolutePath());
+        }
         File f = null;
         if(candidates != null) {
             for(String filename : candidates) {
