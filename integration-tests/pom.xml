@@ -26,6 +26,9 @@
     </scm>
 
     <properties>
+        <!-- Set this to run the server on a specific port -->
+        <http.port></http.port>
+        
         <!-- Set this to run tests against an existing server instance -->
         <test.server.url></test.server.url>
         
@@ -110,7 +113,7 @@
                         <phase>process-resources</phase>
                         <configuration>
                             <portNames>
-                                <portName>server.port</portName>
+                                <portName>http.port</portName>
                             </portNames>
                         </configuration>
                     </execution>
@@ -122,7 +125,7 @@
                 <configuration>
                     <systemPropertyVariables>
                         <test.server.url>${test.server.url}</test.server.url>
-                        <jar.executor.server.port>${server.port}</jar.executor.server.port>
+                        <jar.executor.server.port>${http.port}</jar.executor.server.port>
                         <jar.executor.vm.options>${jar.executor.vm.options}</jar.executor.vm.options>
                         <jar.executor.jar.folder>${project.basedir}/target/dependency</jar.executor.jar.folder>
                         <jar.executor.jar.name.regexp>org.apache.stanbol.*full.*jar$</jar.executor.jar.name.regexp>
