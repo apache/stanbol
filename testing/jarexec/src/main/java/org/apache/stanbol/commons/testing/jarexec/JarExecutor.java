@@ -27,6 +27,7 @@ import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteResultHandler;
 import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.ShutdownHookProcessDestroyer;
+import org.apache.commons.exec.util.StringUtils;
 
 /** Start a runnable jar by forking a JVM process,
  *  and terminate the process when this VM exits.
@@ -128,11 +129,15 @@ public class JarExecutor {
             }
         };
 
-        final String vmOptions = System.getProperty("jar.executor.vm.options"); 
+        final String vmOptions = System.getProperty("jar.executor.vm.options");
         final Executor e = new DefaultExecutor();
         final CommandLine cl = new CommandLine(javaExecutable);
-        if(vmOptions != null && vmOptions.length() > 0) {
-            cl.addArgument(vmOptions);
+        if (vmOptions != null && vmOptions.length() > 0) {
+            // TODO: this will fail if one of the vm options as a quoted value with a space in it, but this is
+            // not the case for common usage patterns
+            for (String option : StringUtils.split(vmOptions, " ")) {
+                cl.addArgument(option);
+            }
         }
         cl.addArgument("-jar");
         cl.addArgument(jarToExecute.getAbsolutePath());
