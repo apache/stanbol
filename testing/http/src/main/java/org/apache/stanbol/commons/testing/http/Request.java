@@ -27,6 +27,8 @@ import org.apache.http.entity.StringEntity;
  */
 public class Request {
     private final HttpUriRequest request;
+    private String username;
+    private String password;
     
     Request(HttpUriRequest r) {
         request = r;
@@ -41,6 +43,12 @@ public class Request {
         return this;
     }
     
+    public Request withCredentials(String username, String password) {
+        this.username = username;
+        this.password = password;
+        return this;
+    }
+    
     public Request withContent(String content) throws UnsupportedEncodingException {
         if(request instanceof HttpEntityEnclosingRequestBase) {
             ((HttpEntityEnclosingRequestBase)request).setEntity(new StringEntity(content, "UTF-8"));
@@ -49,5 +57,13 @@ public class Request {
                     + request.getClass().getName());
         }
         return this;
-    }    
+    }
+    
+    public String getUsername() {
+        return username;
+    }
+    
+    public String getPassword() {
+        return password;
+    }
 }

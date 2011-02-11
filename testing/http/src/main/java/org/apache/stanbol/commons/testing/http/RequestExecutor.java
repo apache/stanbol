@@ -26,29 +26,91 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.LineIterator;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpException;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.AuthState;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.ExecutionContext;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
 /** Executes a Request and provides convenience methods
  *  to validate the results.
  */
 public class RequestExecutor {
-    private final HttpClient httpClient;
+    private final DefaultHttpClient httpClient;
     private HttpUriRequest request; 
     private HttpResponse response;
     private HttpEntity entity;
     private String content;
     
-    public RequestExecutor(HttpClient client) {
+    /**
+     * HttpRequestInterceptor for preemptive authentication, based on httpclient
+     * 4.0 example
+     */
+    private static class PreemptiveAuthInterceptor implements
+            HttpRequestInterceptor {
+
+        public void process(HttpRequest request, HttpContext context)
+                throws HttpException, IOException {
+
+            AuthState authState = 
+                (AuthState) context.getAttribute(ClientContext.TARGET_AUTH_STATE);
+            CredentialsProvider credsProvider = 
+                (CredentialsProvider) context.getAttribute(ClientContext.CREDS_PROVIDER);
+            HttpHost targetHost = 
+                (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
+
+            // If not auth scheme has been initialized yet
+            if (authState.getAuthScheme() == null) {
+                AuthScope authScope = 
+                    new AuthScope(targetHost.getHostName(), targetHost.getPort());
+
+                // Obtain credentials matching the target host
+                Credentials creds = credsProvider.getCredentials(authScope);
+
+                // If found, generate BasicScheme preemptively
+                if(creds != null) {
+                    authState.setAuthScheme(new BasicScheme());
+                    authState.setCredentials(creds);
+                }
+            }
+        }
+    }
+    
+    public RequestExecutor(DefaultHttpClient client) {
         httpClient = client;
     }
     
     public RequestExecutor execute(Request r) throws ClientProtocolException, IOException {
+        clear();
         request = r.getRequest();
+        
+        if(r.getUsername() != null) {
+            // Setup for basic authentication
+            httpClient.getCredentialsProvider().setCredentials(
+                    AuthScope.ANY,
+                    new UsernamePasswordCredentials(r.getUsername(), r.getPassword()));
+
+            // And add request interceptor to have preemptive authentication
+            httpClient.addRequestInterceptor(new PreemptiveAuthInterceptor(), 0);
+        } else {
+            httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, null);
+            httpClient.removeRequestInterceptorByClass(PreemptiveAuthInterceptor.class);
+        }
+        
         response = httpClient.execute(request);
         entity = response.getEntity();
         if(entity != null) {
@@ -56,9 +118,16 @@ public class RequestExecutor {
             // how can we read it on demand while avoiding a (boring) cleanup() 
             // method on this class?
             content = EntityUtils.toString(entity);
-            EntityUtils.consume(entity);
+            entity.consumeContent();
         }
         return this;
+    }
+    
+    protected void clear() {
+        request = null;
+        entity = null;
+        response = null;
+        content = null;
     }
 
     /** Verify that response matches supplied status */
