@@ -13,8 +13,8 @@ import java.util.TimeZone;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.rdf.core.impl.util.W3CDateFormat;
 import org.apache.commons.io.IOUtils;
-import org.apache.stanbol.enhancer.jersey.writers.JsonLdSerializerProvider;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.TextAnnotation;
 import org.apache.stanbol.enhancer.servicesapi.helper.RdfEntityFactory;
@@ -29,6 +29,8 @@ public class JsonLdSerializerProviderTest {
     private JsonLdSerializerProvider jsonldProvider;
     private String formatIdentifier = "application/json";
 
+    private String expectedW3CFormattedDate;
+    
     @Before
     public void setup() {
         jsonldProvider = new JsonLdSerializerProvider();
@@ -55,8 +57,8 @@ public class JsonLdSerializerProviderTest {
         OutputStream serializedGraph = new ByteArrayOutputStream();
         jsonldProvider.setIndentation(0);
         jsonldProvider.serialize(serializedGraph, ci.getMetadata(), formatIdentifier);
-
-        String expected = "{\"@\":\"<urn:iks-project:enhancer:test:text-annotation:Person>\",\"a\":[\"<http:\\/\\/fise.iks-project.eu\\/ontology\\/Enhancement>\",\"<http:\\/\\/fise.iks-project.eu\\/ontology\\/TextAnnotation>\"],\"http:\\/\\/fise.iks-project.eu\\/ontology\\/end\":\"\\\"20\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#int>\",\"http:\\/\\/fise.iks-project.eu\\/ontology\\/selected-text\":\"\\\"Patrick Marshall\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string>\",\"http:\\/\\/fise.iks-project.eu\\/ontology\\/selection-context\":\"\\\"Dr. Patrick Marshall (1869 - November 1950) was a geologist who lived in New Zealand and worked at the University of Otago.\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string>\",\"http:\\/\\/fise.iks-project.eu\\/ontology\\/start\":\"\\\"4\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#int>\",\"http:\\/\\/purl.org\\/dc\\/terms\\/created\":\"\\\"2010-10-27T14:00:00+02:00\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#dateTime>\",\"http:\\/\\/purl.org\\/dc\\/terms\\/creator\":\"<urn:iks-project:enhancer:test:dummyEngine>\",\"http:\\/\\/purl.org\\/dc\\/terms\\/type\":\"<http:\\/\\/dbpedia.org\\/ontology\\/Person>\"}";
+        
+        String expected = "{\"@\":\"<urn:iks-project:enhancer:test:text-annotation:Person>\",\"a\":[\"<http:\\/\\/fise.iks-project.eu\\/ontology\\/Enhancement>\",\"<http:\\/\\/fise.iks-project.eu\\/ontology\\/TextAnnotation>\"],\"http:\\/\\/fise.iks-project.eu\\/ontology\\/end\":\"\\\"20\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#int>\",\"http:\\/\\/fise.iks-project.eu\\/ontology\\/selected-text\":\"\\\"Patrick Marshall\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string>\",\"http:\\/\\/fise.iks-project.eu\\/ontology\\/selection-context\":\"\\\"Dr. Patrick Marshall (1869 - November 1950) was a geologist who lived in New Zealand and worked at the University of Otago.\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string>\",\"http:\\/\\/fise.iks-project.eu\\/ontology\\/start\":\"\\\"4\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#int>\",\"http:\\/\\/purl.org\\/dc\\/terms\\/created\":\"\\\"" + this.expectedW3CFormattedDate + "\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#dateTime>\",\"http:\\/\\/purl.org\\/dc\\/terms\\/creator\":\"<urn:iks-project:enhancer:test:dummyEngine>\",\"http:\\/\\/purl.org\\/dc\\/terms\\/type\":\"<http:\\/\\/dbpedia.org\\/ontology\\/Person>\"}";
         String result = serializedGraph.toString();
         Assert.assertEquals(expected, result);
     }
@@ -71,7 +73,7 @@ public class JsonLdSerializerProviderTest {
         OutputStream serializedGraph = new ByteArrayOutputStream();
         jsonldProvider.serialize(serializedGraph, ci.getMetadata(), formatIdentifier);
 
-        String expected = "{\n  \"@\": \"<urn:iks-project:enhancer:test:text-annotation:Person>\",\n  \"a\": [\n    \"<http:\\/\\/fise.iks-project.eu\\/ontology\\/Enhancement>\",\n    \"<http:\\/\\/fise.iks-project.eu\\/ontology\\/TextAnnotation>\"\n  ],\n  \"http:\\/\\/fise.iks-project.eu\\/ontology\\/end\": \"\\\"20\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#int>\",\n  \"http:\\/\\/fise.iks-project.eu\\/ontology\\/selected-text\": \"\\\"Patrick Marshall\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string>\",\n  \"http:\\/\\/fise.iks-project.eu\\/ontology\\/selection-context\": \"\\\"Dr. Patrick Marshall (1869 - November 1950) was a geologist who lived in New Zealand and worked at the University of Otago.\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string>\",\n  \"http:\\/\\/fise.iks-project.eu\\/ontology\\/start\": \"\\\"4\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#int>\",\n  \"http:\\/\\/purl.org\\/dc\\/terms\\/created\": \"\\\"2010-10-27T14:00:00+02:00\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#dateTime>\",\n  \"http:\\/\\/purl.org\\/dc\\/terms\\/creator\": \"<urn:iks-project:enhancer:test:dummyEngine>\",\n  \"http:\\/\\/purl.org\\/dc\\/terms\\/type\": \"<http:\\/\\/dbpedia.org\\/ontology\\/Person>\"\n}";
+        String expected = "{\n  \"@\": \"<urn:iks-project:enhancer:test:text-annotation:Person>\",\n  \"a\": [\n    \"<http:\\/\\/fise.iks-project.eu\\/ontology\\/Enhancement>\",\n    \"<http:\\/\\/fise.iks-project.eu\\/ontology\\/TextAnnotation>\"\n  ],\n  \"http:\\/\\/fise.iks-project.eu\\/ontology\\/end\": \"\\\"20\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#int>\",\n  \"http:\\/\\/fise.iks-project.eu\\/ontology\\/selected-text\": \"\\\"Patrick Marshall\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string>\",\n  \"http:\\/\\/fise.iks-project.eu\\/ontology\\/selection-context\": \"\\\"Dr. Patrick Marshall (1869 - November 1950) was a geologist who lived in New Zealand and worked at the University of Otago.\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string>\",\n  \"http:\\/\\/fise.iks-project.eu\\/ontology\\/start\": \"\\\"4\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#int>\",\n  \"http:\\/\\/purl.org\\/dc\\/terms\\/created\": \"\\\"" + this.expectedW3CFormattedDate + "\\\"^^<http:\\/\\/www.w3.org\\/2001\\/XMLSchema#dateTime>\",\n  \"http:\\/\\/purl.org\\/dc\\/terms\\/creator\": \"<urn:iks-project:enhancer:test:dummyEngine>\",\n  \"http:\\/\\/purl.org\\/dc\\/terms\\/type\": \"<http:\\/\\/dbpedia.org\\/ontology\\/Person>\"\n}";
         String result = serializedGraph.toString();
         Assert.assertEquals(expected, result);
     }
@@ -93,7 +95,7 @@ public class JsonLdSerializerProviderTest {
         jsonldProvider.setNamespacePrefixMap(nsMap);
         jsonldProvider.serialize(serializedGraph, ci.getMetadata(), formatIdentifier);
 
-        String expected = "{\"#\":{\"dbpedia\":\"http:\\/\\/dbpedia.org\\/ontology\\/\",\"dcterms\":\"http:\\/\\/purl.org\\/dc\\/terms\",\"enhancer\":\"http:\\/\\/fise.iks-project.eu\\/ontology\\/\",\"xmlns\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"},\"@\":\"<urn:iks-project:enhancer:test:text-annotation:Person>\",\"a\":[\"<enhancer:Enhancement>\",\"<enhancer:TextAnnotation>\"],\"dcterms:\\/created\":\"\\\"2010-10-27T14:00:00+02:00\\\"^^<xmlns:dateTime>\",\"dcterms:\\/creator\":\"<urn:iks-project:enhancer:test:dummyEngine>\",\"dcterms:\\/type\":\"<dbpedia:Person>\",\"enhancer:end\":\"\\\"20\\\"^^<xmlns:int>\",\"enhancer:selected-text\":\"\\\"Patrick Marshall\\\"^^<xmlns:string>\",\"enhancer:selection-context\":\"\\\"Dr. Patrick Marshall (1869 - November 1950) was a geologist who lived in New Zealand and worked at the University of Otago.\\\"^^<xmlns:string>\",\"enhancer:start\":\"\\\"4\\\"^^<xmlns:int>\"}";
+        String expected = "{\"#\":{\"dbpedia\":\"http:\\/\\/dbpedia.org\\/ontology\\/\",\"dcterms\":\"http:\\/\\/purl.org\\/dc\\/terms\",\"enhancer\":\"http:\\/\\/fise.iks-project.eu\\/ontology\\/\",\"xmlns\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"},\"@\":\"<urn:iks-project:enhancer:test:text-annotation:Person>\",\"a\":[\"<enhancer:Enhancement>\",\"<enhancer:TextAnnotation>\"],\"dcterms:\\/created\":\"\\\"" + this.expectedW3CFormattedDate + "\\\"^^<xmlns:dateTime>\",\"dcterms:\\/creator\":\"<urn:iks-project:enhancer:test:dummyEngine>\",\"dcterms:\\/type\":\"<dbpedia:Person>\",\"enhancer:end\":\"\\\"20\\\"^^<xmlns:int>\",\"enhancer:selected-text\":\"\\\"Patrick Marshall\\\"^^<xmlns:string>\",\"enhancer:selection-context\":\"\\\"Dr. Patrick Marshall (1869 - November 1950) was a geologist who lived in New Zealand and worked at the University of Otago.\\\"^^<xmlns:string>\",\"enhancer:start\":\"\\\"4\\\"^^<xmlns:int>\"}";
         String result = serializedGraph.toString();
         Assert.assertEquals(expected, result);
     }
@@ -115,7 +117,7 @@ public class JsonLdSerializerProviderTest {
         jsonldProvider.setNamespacePrefixMap(nsMap);
         jsonldProvider.serialize(serializedGraph, ci.getMetadata(), formatIdentifier);
 
-        String expected = "{\n    \"#\": {\n        \"dbpedia\": \"http:\\/\\/dbpedia.org\\/ontology\\/\",\n        \"dcterms\": \"http:\\/\\/purl.org\\/dc\\/terms\",\n        \"enhancer\": \"http:\\/\\/fise.iks-project.eu\\/ontology\\/\",\n        \"xmlns\": \"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"\n    },\n    \"@\": \"<urn:iks-project:enhancer:test:text-annotation:Person>\",\n    \"a\": [\n        \"<enhancer:Enhancement>\",\n        \"<enhancer:TextAnnotation>\"\n    ],\n    \"dcterms:\\/created\": \"\\\"2010-10-27T14:00:00+02:00\\\"^^<xmlns:dateTime>\",\n    \"dcterms:\\/creator\": \"<urn:iks-project:enhancer:test:dummyEngine>\",\n    \"dcterms:\\/type\": \"<dbpedia:Person>\",\n    \"enhancer:end\": \"\\\"20\\\"^^<xmlns:int>\",\n    \"enhancer:selected-text\": \"\\\"Patrick Marshall\\\"^^<xmlns:string>\",\n    \"enhancer:selection-context\": \"\\\"Dr. Patrick Marshall (1869 - November 1950) was a geologist who lived in New Zealand and worked at the University of Otago.\\\"^^<xmlns:string>\",\n    \"enhancer:start\": \"\\\"4\\\"^^<xmlns:int>\"\n}";
+        String expected = "{\n    \"#\": {\n        \"dbpedia\": \"http:\\/\\/dbpedia.org\\/ontology\\/\",\n        \"dcterms\": \"http:\\/\\/purl.org\\/dc\\/terms\",\n        \"enhancer\": \"http:\\/\\/fise.iks-project.eu\\/ontology\\/\",\n        \"xmlns\": \"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"\n    },\n    \"@\": \"<urn:iks-project:enhancer:test:text-annotation:Person>\",\n    \"a\": [\n        \"<enhancer:Enhancement>\",\n        \"<enhancer:TextAnnotation>\"\n    ],\n    \"dcterms:\\/created\": \"\\\"" + this.expectedW3CFormattedDate + "\\\"^^<xmlns:dateTime>\",\n    \"dcterms:\\/creator\": \"<urn:iks-project:enhancer:test:dummyEngine>\",\n    \"dcterms:\\/type\": \"<dbpedia:Person>\",\n    \"enhancer:end\": \"\\\"20\\\"^^<xmlns:int>\",\n    \"enhancer:selected-text\": \"\\\"Patrick Marshall\\\"^^<xmlns:string>\",\n    \"enhancer:selection-context\": \"\\\"Dr. Patrick Marshall (1869 - November 1950) was a geologist who lived in New Zealand and worked at the University of Otago.\\\"^^<xmlns:string>\",\n    \"enhancer:start\": \"\\\"4\\\"^^<xmlns:int>\"\n}";
         String result = serializedGraph.toString();
         Assert.assertEquals(expected, result);
     }
@@ -160,7 +162,9 @@ public class JsonLdSerializerProviderTest {
         myCal.set(Calendar.MILLISECOND, 0);
         myCal.setTimeZone(TimeZone.getTimeZone("UTC"));
         testAnnotation.setCreated(myCal.getTime());
-
+        
+        this.expectedW3CFormattedDate = new W3CDateFormat().format(myCal.getTime());
+        
         testAnnotation.setSelectedText(namedEntity);
         testAnnotation.setSelectionContext(context);
         testAnnotation.getDcType().add(type);
