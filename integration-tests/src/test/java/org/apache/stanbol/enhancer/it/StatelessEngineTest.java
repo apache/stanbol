@@ -17,11 +17,10 @@
 package org.apache.stanbol.enhancer.it;
 
 import org.apache.stanbol.commons.testing.http.RequestDocumentor;
-import org.apache.stanbol.commons.testing.stanbol.StanbolTestBase;
 import org.junit.Test;
 
 /** Test the stateless text enhancement engines */
-public class StatelessEngineTest extends StanbolTestBase {
+public class StatelessEngineTest extends EnhancerTestBase {
     
     private final RequestDocumentor documentor = new RequestDocumentor(getClass().getName());
     

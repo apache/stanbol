@@ -19,7 +19,10 @@ package org.apache.stanbol.enhancer.it;
 import org.apache.stanbol.commons.testing.stanbol.StanbolTestBase;
 import org.junit.Test;
 
-/** Test the enhancer homepage and demonstrate the test classes */
+/** Test the enhancer homepage and demonstrate the test classes.
+ *  Does not inherit from EnhancerTestBase as we don't care
+ *  at this stage if engines are ready or not.
+ */
 public class HomepageTest extends StanbolTestBase {
     
     @Test
