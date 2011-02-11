@@ -39,6 +39,8 @@ public class JarExecutor {
     private final int serverPort;
 
     public static final int DEFAULT_PORT = 8765;
+    public static final String DEFAULT_JAR_FOLDER = "target/dependency";
+    public static final String DEFAULT_JAR_NAME_REGEXP = "org.apache.stanbol.*full.*jar$";
     public static final String PROP_PREFIX = "jar.executor.";
     public static final String PROP_SERVER_PORT = PROP_PREFIX + "server.port";
     public static final String PROP_JAR_FOLDER = PROP_PREFIX + "jar.folder";
@@ -69,24 +71,22 @@ public class JarExecutor {
         return instance;
     }
     
-    private String requireSystemProperty(String name) throws ExecutorException {
-        final String result = System.getProperty(name);
-        if(result == null || result.trim().length() == 0) {
-            throw new ExecutorException("Missing system property: " + name);
-        }
-        return result.trim();
-    }
-
     /** Build a JarExecutor, locate the jar to run, etc */
     private JarExecutor(Properties config) throws ExecutorException {
         final boolean isWindows = System.getProperty("os.name").toLowerCase().contains("windows");
 
-        String str = config.getProperty(PROP_SERVER_PORT);
-        serverPort = str == null ? DEFAULT_PORT : Integer.valueOf(str);
+        String portStr = config.getProperty(PROP_SERVER_PORT);
+        serverPort = portStr == null ? DEFAULT_PORT : Integer.valueOf(portStr);
 
         javaExecutable = isWindows ? "java.exe" : "java";
-        final File jarFolder = new File(requireSystemProperty(PROP_JAR_FOLDER));
-        final Pattern jarPattern = Pattern.compile(requireSystemProperty(PROP_JAR_NAME_REGEXP));
+        
+        String jarFolderPath = config.getProperty(PROP_JAR_FOLDER);
+        jarFolderPath = jarFolderPath == null ? DEFAULT_JAR_FOLDER : jarFolderPath;
+        final File jarFolder = new File(jarFolderPath);
+        
+        String jarNameRegexp = config.getProperty(PROP_JAR_NAME_REGEXP);
+        jarNameRegexp = jarNameRegexp == null ? DEFAULT_JAR_NAME_REGEXP : jarNameRegexp;
+        final Pattern jarPattern = Pattern.compile(jarNameRegexp);
 
         // Find executable jar
         final String [] candidates = jarFolder.list();
@@ -106,8 +106,8 @@ public class JarExecutor {
         }
 
         if(f == null) {
-            throw new ExecutorException("Executable jar matching " + jarPattern
-                    + " not found in " + jarFolder.getAbsolutePath()
+            throw new ExecutorException("Executable jar matching '" + jarPattern
+                    + "' not found in " + jarFolder.getAbsolutePath()
                     + ", candidates are " + Arrays.asList(candidates));
         }
         jarToExecute = f;
