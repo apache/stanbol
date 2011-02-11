@@ -83,10 +83,7 @@ public class StanbolTestBase {
         
         // Timeout for readyness test
         final String sec = System.getProperty(SERVER_READY_TIMEOUT_PROP);
-        if(sec == null) {
-            throw new Exception("Missing property: " + SERVER_READY_TIMEOUT_PROP);
-        }
-        final int timeoutSec = Integer.valueOf(sec);
+        final int timeoutSec = sec == null ? 60 : Integer.valueOf(sec);
         System.out.println("Will wait up to " + timeoutSec + " seconds for server to become ready");
         final long endTime = System.currentTimeMillis() + timeoutSec * 1000L;
 
