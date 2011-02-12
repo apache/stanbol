@@ -30,6 +30,8 @@
   -->
   <cores adminPath="/admin/cores">
     <!-- Test Core: Do not use this Core for real data!-->
-    <core name="test" instanceDir="test" />
+    <core name="test" instanceDir="test">
+        <property name="solr.core.dataDir" value="target/data/test" />
+    </core>
   </cores>
 </solr>
