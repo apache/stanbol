@@ -1,7 +1,9 @@
 package org.apache.stanbol.entityhub.jersey.writers;
 
+import java.util.Collection;
 import java.util.Map.Entry;
 
+import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.RangeConstraint;
@@ -36,6 +38,12 @@ final class FieldQueryToJSON {
             jFieldConstraint.put("field", fieldConstraint.getKey()); //add the field
             constraints.put(jFieldConstraint); //add fieldConstraint
         }
+        if(query.getLimit() != null){
+            jQuery.put("limit", query.getLimit());
+        }
+        if(query.getOffset() != 0){
+            jQuery.put("offset", query.getOffset());
+        }
         return jQuery;
     }
 
@@ -53,10 +61,23 @@ final class FieldQueryToJSON {
             case value:
                 ValueConstraint valueConstraint = ((ValueConstraint) constraint);
                 if (valueConstraint.getValue() != null) {
-                    jConstraint.put("vakue", valueConstraint.getValue());
+                    jConstraint.put("value", valueConstraint.getValue());
                 }
-                if (valueConstraint.getDataTypes() != null && !valueConstraint.getDataTypes().isEmpty()) {
+                Collection<String> dataTypes = valueConstraint.getDataTypes();
+                if (dataTypes != null && !dataTypes.isEmpty()) {
+                    //in case of type = reference we do not need to add any dataTypes!
                     jConstraint.put("dataTypes", valueConstraint.getDataTypes());
+                    //Event that internally "reference" is not part of the
+                    //ConstraintType enum it is still present in the serialisation
+                    //ant the Java API (see ReferenceConstraint class)
+                    //Value constraints with the dataType Reference and AnyURI are
+                    //considered to represent reference constraints
+                    if(dataTypes.size() == 1 && 
+                            (dataTypes.contains(DataTypeEnum.Reference.getUri()) || 
+                                    dataTypes.contains(DataTypeEnum.AnyUri.getUri()))){
+                        jConstraint.remove("type");
+                        jConstraint.put("type", "reference");
+                    }
                 }
                 break;
             case text:
@@ -68,14 +89,17 @@ final class FieldQueryToJSON {
                 if (textConstraint.getText() != null && !textConstraint.getText().isEmpty()) {
                     jConstraint.put("text", textConstraint.getText());
                 }
+                if(textConstraint.isCaseSensitive()){
+                    jConstraint.put("caseSensitive", true);
+                } //else default is false
                 break;
             case range:
                 RangeConstraint rangeConstraint = (RangeConstraint) constraint;
                 if (rangeConstraint.getLowerBound() != null) {
-                    jConstraint.put("lowerBound", rangeConstraint.getLowerBound().toString());
+                    jConstraint.put("lowerBound", rangeConstraint.getLowerBound());
                 }
                 if (rangeConstraint.getUpperBound() != null) {
-                    jConstraint.put("upperBound", rangeConstraint.getUpperBound().toString());
+                    jConstraint.put("upperBound", rangeConstraint.getUpperBound());
                 }
                 jConstraint.put("inclusive", rangeConstraint.isInclusive());
             default:

@@ -1,5 +1,10 @@
 package org.apache.stanbol.entityhub.jersey.resource;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -7,6 +12,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -24,7 +30,9 @@ import javax.ws.rs.core.Response;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.ontologies.RDFS;
+import org.apache.commons.io.FileUtils;
 import org.apache.stanbol.entityhub.core.query.FieldQueryImpl;
+import org.apache.stanbol.entityhub.jersey.parsers.JSONToFieldQuery;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.servicesapi.model.Sign;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
@@ -34,6 +42,7 @@ import org.apache.stanbol.entityhub.servicesapi.site.ConfiguredSite;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteException;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.codehaus.jettison.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +61,9 @@ public class ReferencedSiteRootResource extends NavigationMixin {
 
     /**
      * The Field used for find requests if not specified
-     * TODO: Make configurable via the {@link ConfiguredSite} interface!
+     * TODO: This will be replaced by the EntitySearch. With this search the
+     *       Site is responsible to decide what properties to use for label
+     *       based searches.
      */
     private static final String DEFAULT_FIND_FIELD = RDFS.label.getUnicodeString();
     /**
@@ -140,17 +151,17 @@ public class ReferencedSiteRootResource extends NavigationMixin {
     @GET
     @Path("/find")
     public Response findEntitybyGet(@QueryParam(value = "name") String name,
-            //@QueryParam(value="field") String field,
+            @QueryParam(value="field") String field,
             @QueryParam(value = "lang") String language,
             //@QueryParam(value="select") String select,
             @QueryParam(value = "limit") @DefaultValue(value = "-1") int limit, @QueryParam(value = "offset") @DefaultValue(value = "0") int offset, @Context HttpHeaders headers) {
-        return findEntity(name, language, limit, offset, headers);
+        return findEntity(name, field,language, limit, offset, headers);
     }
 
     @POST
     @Path("/find")
     public Response findEntity(@FormParam(value = "name") String name,
-            //@FormParam(value="field") String field,
+            @FormParam(value="field") String field,
             @FormParam(value = "lang") String language,
             //@FormParam(value="select") String select,
             @FormParam(value = "limit") @DefaultValue(value = "-1") int limit, @FormParam(value = "offset") @DefaultValue(value = "0") int offset, @Context HttpHeaders headers) {
@@ -160,10 +171,19 @@ public class ReferencedSiteRootResource extends NavigationMixin {
         log.info("  > limit : " + limit);
         log.info("  > offset: " + offset);
         log.info("  > accept: " + headers.getAcceptableMediaTypes());
-        if (name == null || name.isEmpty()) {
+        if (name == null || name.trim().isEmpty()) {
             log.error("/find Request with invalied name={}!", name);
+        } else {
+            name = name.trim();
         }
-        String field = DEFAULT_FIND_FIELD;
+        if(field == null){
+            field = DEFAULT_FIND_FIELD;
+        } else {
+            field = field.trim();
+            if(field.isEmpty()){
+                field = DEFAULT_FIND_FIELD;
+            }
+        }
         FieldQuery query = new FieldQueryImpl();
         if (language == null) {
             query.setConstraint(field, new TextConstraint(name, PatternType.wildcard, false));
@@ -195,4 +215,64 @@ public class ReferencedSiteRootResource extends NavigationMixin {
             throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
+    /**
+     * Allows to parse any kind of {@link FieldQuery} in its JSON Representation.
+     * Note that the maximum number of results (limit) and the offset of the
+     * first result (offset) are parsed as seperate parameters and are not
+     * part of the field query as in the java API.<p>
+     * TODO: as soon as the entityhub supports multiple query types this need
+     *       to be refactored. The idea is that this dynamically detects query
+     *       types and than redirects them to the referenced site implementation.
+     * @param query The field query in JSON format
+     * @param limit the maximum number of results starting at offset
+     * @param offset the offset of the first result
+     * @param headers the header information of the request
+     * @return the results of the query
+     */
+    @POST
+    @Path("/query")
+    @Consumes( { APPLICATION_FORM_URLENCODED + ";qs=1.0",
+            MULTIPART_FORM_DATA + ";qs=0.9" })
+    public Response queryEntities(
+            @FormParam("query") String query,
+            @FormParam("query") File file,
+            @Context HttpHeaders headers) {
+        if(query == null && file == null) {
+            throw new WebApplicationException(new IllegalArgumentException("Query Requests MUST define the \"query\" parameter"), Response.Status.BAD_REQUEST);
+        }
+        FieldQuery fieldQuery = null;
+        JSONException exception = null;
+        if(query != null){
+            try {
+                fieldQuery = JSONToFieldQuery.fromJSON(query);
+            } catch (JSONException e) {
+                log.warn("unable to parse FieldQuery from \"application/x-www-form-urlencoded\" encoded query string "+query);
+                fieldQuery = null;
+                exception = e;
+            }
+        } //else no query via application/x-www-form-urlencoded parsed
+        if(fieldQuery == null && file != null){
+            try {
+                query = FileUtils.readFileToString(file);
+                fieldQuery = JSONToFieldQuery.fromJSON(query);
+            } catch (IOException e) {
+                throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+            } catch (JSONException e) {
+                log.warn("unable to parse FieldQuery from \"multipart/form-data\" encoded query string "+query);
+                exception = e;
+            }
+        }//fieldquery already initialised or no query via multipart/form-data parsed
+        if(fieldQuery == null){
+            throw new WebApplicationException(new IllegalArgumentException("Unable to parse FieldQuery for the parsed query\n"+query, exception),Response.Status.BAD_REQUEST);
+        }
+        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, MediaType.APPLICATION_JSON_TYPE);
+        try {
+            return Response.ok(site.find(fieldQuery), acceptedMediaType).build();
+        } catch (ReferencedSiteException e) {
+            log.error("ReferencedSiteException while accessing Site " + site.getName() + " (id=" + site.getId() + ")", e);
+            throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+        }
+        
+    }
+
 }

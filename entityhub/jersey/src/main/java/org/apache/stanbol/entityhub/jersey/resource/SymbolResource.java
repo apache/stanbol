@@ -1,7 +1,9 @@
 package org.apache.stanbol.entityhub.jersey.resource;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
+import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
@@ -12,11 +14,14 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XM
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
 import javax.servlet.ServletContext;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -33,7 +38,9 @@ import javax.ws.rs.core.Response;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
+import org.apache.commons.io.FileUtils;
 import org.apache.stanbol.entityhub.core.query.FieldQueryImpl;
+import org.apache.stanbol.entityhub.jersey.parsers.JSONToFieldQuery;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
@@ -42,6 +49,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint.PatternType;
+import org.codehaus.jettison.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +71,6 @@ public class SymbolResource extends NavigationMixin {
      * entityhub-maodel:description.
      */
     private static final Collection<? extends String> DEFAULT_FIND_SELECTED_FIELDS = Arrays.asList(RdfResourceEnum.label.getUri(), RdfResourceEnum.description.getUri());
-
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -139,8 +146,11 @@ public class SymbolResource extends NavigationMixin {
     @POST
     @Path("/find")
     @Produces({APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
-    public Response findEntity(@FormParam(value = "name") String name, @FormParam(value = "field") String field,
-            @FormParam(value = "lang") String language, @FormParam(value = "select") String select, @Context HttpHeaders headers) {
+    public Response findEntity(@FormParam(value = "name") String name, 
+            @FormParam(value = "field") String field,
+            @FormParam(value = "lang") String language, 
+            @FormParam(value = "select") String select, 
+            @Context HttpHeaders headers) {
         log.info("symbol/find Request");
         log.info("  > name  : " + name);
         log.info("  > field : " + field);
@@ -148,11 +158,15 @@ public class SymbolResource extends NavigationMixin {
         log.info("  > select: " + select);
         log.info("  > accept: " + headers.getAcceptableMediaTypes());
         //TODO: Implement by using EntityQuery as soon as implemented
-        if (name == null || name.isEmpty()) {
+        if (name == null || name.trim().isEmpty()) {
             log.error("/find Request with invalied name={}!", name);
+        } else {
+            name = name.trim();
         }
-        if (field == null || field.isEmpty()) {
+        if (field == null || field.trim().isEmpty()) {
             field = DEFAULT_FIND_FIELD;
+        } else {
+            field = field.trim();
         }
         FieldQuery query = new FieldQueryImpl();
         if (language == null) {
@@ -186,5 +200,65 @@ public class SymbolResource extends NavigationMixin {
     @Produces({APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
     public Response removeSymbol() {
         return null;
+    }
+    /**
+     * Allows to parse any kind of {@link FieldQuery} in its JSON Representation.
+     * Note that the maximum number of results (limit) and the offset of the
+     * first result (offset) are parsed as seperate parameters and are not
+     * part of the field query as in the java API.<p>
+     * TODO: as soon as the entityhub supports multiple query types this need
+     *       to be refactored. The idea is that this dynamically detects query
+     *       types and than redirects them to the referenced site implementation.
+     * @param query The field query in JSON format
+     * @param limit the maximum number of results starting at offset
+     * @param offset the offset of the first result
+     * @param headers the header information of the request
+     * @return the results of the query
+     */
+    @POST
+    @Path("/query")
+    @Consumes( { APPLICATION_FORM_URLENCODED + ";qs=1.0",
+            MULTIPART_FORM_DATA + ";qs=0.9" })
+    public Response queryEntities(
+            @FormParam("query") String query,
+            @FormParam("query") File file,
+            @Context HttpHeaders headers) {
+        if(query == null && file == null) {
+            throw new WebApplicationException(new IllegalArgumentException("Query Requests MUST define the \"query\" parameter"), Response.Status.BAD_REQUEST);
+        }
+        FieldQuery fieldQuery = null;
+        JSONException exception = null;
+        if(query != null){
+            try {
+                fieldQuery = JSONToFieldQuery.fromJSON(query);
+            } catch (JSONException e) {
+                log.warn("unable to parse FieldQuery from \"application/x-www-form-urlencoded\" encoded query string "+query);
+                fieldQuery = null;
+                exception = e;
+            }
+        } //else no query via application/x-www-form-urlencoded parsed
+        if(fieldQuery == null && file != null){
+            try {
+                query = FileUtils.readFileToString(file);
+                fieldQuery = JSONToFieldQuery.fromJSON(query);
+            } catch (IOException e) {
+                throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+            } catch (JSONException e) {
+                log.warn("unable to parse FieldQuery from \"multipart/form-data\" encoded query string "+query);
+                exception = e;
+            }
+        }//fieldquery already initialised or no query via multipart/form-data parsed
+        if(fieldQuery == null){
+            throw new WebApplicationException(new IllegalArgumentException("Unable to parse FieldQuery for the parsed query\n"+query, exception),Response.Status.BAD_REQUEST);
+        }
+        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, MediaType.APPLICATION_JSON_TYPE);
+        try {
+            return Response.ok(entityhub.find(fieldQuery), acceptedMediaType).build();
+        } catch (EntityhubException e) {
+            log.error("Exception while performing the parsed query on the EntityHub", e);
+            log.error("Query:\n"+query);
+            throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+        }
+        
     }
 }
