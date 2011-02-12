@@ -183,10 +183,12 @@ Example:
     /sites/find?name={query}
 
 Request: 
-    GET /sites/find?name={query}&lang={lang}&limit={limit}&offset={offset}
-    POST -d "name={query}&lang={lang}&limit={limit}&offset={offset}" /sites/find
+    GET /sites/find?name={query}&field={field}&lang={lang}&limit={limit}&offset={offset}
+    POST -d "name={query}&field={field}&lang={lang}&limit={limit}&offset={offset}" /sites/find
 Parameter:
     name: the name of the entity (supports wildcards e.g. "Frankf*")
+    field: the name of the field used for the query. One MUST parse the full
+           name. Namespace prefixes are not supported yet. (default is rdfs:label)
     lang: optionally the language of the parsed name can be defined
     limit: optionally the maximum number of results
     offset: optionally the offset of first result
@@ -194,6 +196,28 @@ Description: This service can be used to search all referenced sites for
     entities with the parsed name. Both a POST and a GET version are available
 Example:
    curl -X POST -d "name=Bischofsh*&lang=de&limit=10&offset=0" http://localhost:8080/entityhub/sites/find
+
+
+    /sites/query&query={query}
+
+Allows to parse JSON serialzed FieldQueries to the sites endpoint.
+
+Request:
+    POST -d "query={query}" /sites/query
+Parameter:
+    query: the JSON serialized FieldQuery (see section "FieldQuery JSON format" 
+           below)
+Example:
+   curl -X POST -F "query=@fieldQuery.json" http://localhost:8080/entityhub/site/dbPedia/query
+Note: that "@fieldQuery.json" links to a local file that contains the parsed
+    Fieldquery (see ection "FieldQuery JSON format" for examples)
+Note: This method suffers form very bad performance on SPARQL Endpoints that do 
+    not support extensions for full text searches. On Virtuoso Endpoints do 
+    performance well under normal conditions
+Note: Optional selects suffers form very bad performance on any SPRQL Endpoint.
+    It is recommended to select only fields that are used for constraints. If
+    more data are required it is recommended to dereference found entities after
+    recieving initial results of the query.
 
 
 SITE Service Endpoint "/site/{siteID}"
@@ -218,11 +242,13 @@ Example
     /site/{site}/find?name={name}
 
 Request:
-    GET /site/{site}/find?name={name}&lang={lang}&limit={limit}&offset={offset}
-    POST -d "name={query}&lang={lang}&limit={limit}&offset={offset}" /site/{site}/find
+    GET /site/{site}/find?name={name}&field={field}&lang={lang}&limit={limit}&offset={offset}
+    POST -d "name={query}&field={field}&lang={lang}&limit={limit}&offset={offset}" /site/{site}/find
 Parameter:
     site: is the ID configured for the referenced site (e.g. "dbPedia")
     name: the name of the entity (supports wildcards e.g. "Frankf*")
+    field: the name of the field used for the query. One MUST parse the full
+           name. Namespace prefixes are not supported yet. (default is rdfs:label)
     lang: optionally the language of the parsed name can be defined
     limit: optionally the maximum number of results
     offset: optionally the offset of first result
@@ -231,6 +257,29 @@ Note: This method suffers form very bad performance on SPARQL Endpoints that do
     performance well under normal conditions
 Example:
    curl -X POST -d "name=Frankf*&lang=de&limit=10&offset=0" http://localhost:8080/entityhub/site/dbPedia/find
+
+
+    /site/{site}/query&query={query}
+
+Allows to parse JSON serialzed FieldQueries to the site endpoint.
+
+Request:
+    POST -d "query={query}" /site/{site}/query
+Parameter:
+    site: is the ID configured for the referenced site (e.g. "dbPedia")
+    query: the JSON serialized FieldQuery (see section "FieldQuery JSON format" 
+           below)
+Example:
+   curl -X POST -F "query=@fieldQuery.json" http://localhost:8080/entityhub/site/dbPedia/query
+Note: that "@fieldQuery.json" links to a local file that contains the parsed
+    Fieldquery (see ection "FieldQuery JSON format" for examples)
+Note: This method suffers form very bad performance on SPARQL Endpoints that do 
+    not support extensions for full text searches. On Virtuoso Endpoints do 
+    performance well under normal conditions
+Note: Optional selects suffers form very bad performance on any SPRQL Endpoint.
+    It is recommended to select only fields that are used for constraints. If
+    more data are required it is recommended to dereference found entities after
+    recieving initial results of the query.
 
 
 Entityhub Endpoint ("/symbol" and "/mapping")
@@ -299,6 +348,40 @@ In this case a new Symbol and EntityMapping for the city "Paris" would be
 created if not already present in the Apache Stanbol Entityhub.
 
 
+    /symbol/find&name={name}
+
+Finds Symbols (Entities managed by the Entityhub) based on the parsed arguments
+
+Request:
+    GET /symbol/find?name={name}&field={field}&lang={lang}&limit={limit}&offset={offset}
+    POST -d "name={query}&field={field}&lang={lang}&limit={limit}&offset={offset}" /symbol/find
+Parameter:
+    name: the name of the entity (supports wildcards e.g. "Frankf*")
+    field: the name of the field used for the query. One MUST parse the full
+           name. Namespace prefixes are not supported yet. The default is the 
+           symbol name (http://www.iks-project.eu/ontology/rick/model/name)
+    lang: optionally the language of the parsed name can be defined
+    limit: optionally the maximum number of results
+    offset: optionally the offset of first result
+Example:
+   curl -X POST -d "name=Frankf*&lang=de&limit=10&offset=0" http://localhost:8080/entityhub/symbol/find
+
+
+    /symbol/query&query={query}
+
+Allows to parse JSON serialzed FieldQueries to the Symbol endpoint.
+
+Request:
+    POST -d "query={query}" /symbol/query
+Parameter:
+    query: the JSON serialized FieldQuery (see section "FieldQuery JSON format" 
+           below)
+Example:
+   curl -X POST -F "query=@fieldQuery.json" http://localhost:8080/entityhub/symbol/query
+Note that "@fieldQuery.json" links to a local file that contains the parsed
+Fieldquery (see ection "FieldQuery JSON format" for examples)
+    
+    
     /mapping?id={uri}
 
 Request: GET /mapping?id={uri}
@@ -407,3 +490,105 @@ Response:
 
 Note that the response contains a Json Object with the key "results" as root 
 that has a Json Array containing all EntityMappings for the parsed Symbol.
+
+
+FieldQuery JSON format
+----------------------
+
+The FieldQuery is part of the java API defined in the bundle 
+    org.apache.stanbol.entityhub.servicesapi
+see http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/generic/servicesapi/src/main/java/org/apache/stanbol/entityhub/servicesapi/query/FieldQuery.java
+
+To enable to parse FieldQueries also via the RESTful interface of the Entityhub
+a JSON serilisazion for queries defined by this this interface is used.
+This section describes this interface and provides some examples
+
+Note that the FieldQuery as used for the Query is included in the Response.
+
+Root Element Keys: 
+
+    "selected": json array with the name of the fields selected by this query 
+    "offset": the offset of the first result returned by this query 
+    "limit": the maximum number of results returned 
+    "constraints": json array holding all the constraints of the query 
+
+Example:
+{
+    "selected": [ 
+        "http:\/\/www.w3.org\/2000\/01\/rdf-schema#label", 
+        "http:\/\/www.w3.org\/1999\/02\/22-rdf-syntax-ns#type"], 
+    "offset": "0", 
+    "limit": "3", 
+    "constraints": [...]
+}
+
+Constraints:
+
+Constraints are always applied to a field. Currently the implementation is
+limited to a single constraint/field. This is an limitation of the implementation
+and not a theoretical one.
+There are 3+1 different constraint types.
+The three main types are
+ - ValueConstraint: Checks if the value of the field is equals to the parsed
+    value and data type
+ - TextConstraint: Checks if the value of the field is equals to the parsed
+    value, language. It supports also wildcard and regex searches.
+ - RangeConstraint: Checks if the value of the field is within the parsed range
+ - ReferenceConstraint: A special form of the ValueConstraint that defaults the
+    data type to references (links to other entities)
+      
+Keys required by all Constraint types:
+ - field: the field to apply the constraint 
+ - type: the type of the constraint. One of "reference", "value", "text" or "range" 
+
+Reference Constraint keys: 
+ - value: the value (usually an URI) (required) 
+Example:
+Search for instances of the type Place as defined in the dbPedia ontology
+    { 
+        "type": "reference", 
+        "field": "http:\/\/www.w3.org\/1999\/02\/22-rdf-syntax-ns#type", 
+        "value": "http:\/\/dbpedia.org\/ontology\/Place", 
+    } 
+
+Value Constraint keys 
+ - value: the value (required)
+ - dataTypes: json array with the data types of the value (by default the 
+     dataType is defined by the type of the parsed value) 
+Example:
+Search for entities with the rdfs:label "Paris". (Note: one could also use a
+TextConstraint for this
+    { 
+        "type": "value", 
+        "field": "http:\/\/www.w3.org\/2000\/01\/rdf-schema#label", 
+        "value": "Paris", 
+    } 
+
+Text Constraint: 
+ - text: the text to search (required)
+ - languages: json array with the languages to search (default is all languages) 
+ - patternType: one of "wildcard", "regex" or "none" (default is "none") 
+ - caseSensitive: boolean (default is "false") 
+Example:
+Searches for entities with an german rdfs:label starting with "Frankf"
+    { 
+       "type": "text", 
+       "languages": ["de"], 
+       "patternType": "wildcard", 
+       "text": "Frankf*", 
+       "field": "http:\/\/www.w3.org\/2000\/01\/rdf-schema#label" 
+    }, 
+
+Range Constraint: 
+ - lowerBound: The lower bound of the range (one of lower and upper bound MUST BE defined) 
+ - upperBound: The upper bound of the range (one of lower and upper bound MUST BE defined) 
+ - inclusive: used for both upper and lower bound (default is "false") 
+Example:
+Searches for entities with a population over 1 million. Note that the data type
+is automatically detected based on the parsed value (integer in that case)
+    { 
+        "type": "range", 
+        "field": "http:\/\/dbpedia.org\/ontology\/populationTotal", 
+        "lowerBound": 1000000, 
+        "inclusive": true, 
+    }

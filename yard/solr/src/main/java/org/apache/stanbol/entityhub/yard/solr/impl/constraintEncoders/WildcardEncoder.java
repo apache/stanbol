@@ -22,7 +22,14 @@ public class WildcardEncoder implements IndexConstraintTypeEncoder<String>{
             //TODO: Use toLoverCase here, because I had problems with Solr that
             //     Queries where not converted to lower case even that the
             //     LowerCaseFilterFactory was present in the query analyser :(
-            constraint.addEncoded(POS, value.toLowerCase());
+            value = value.toLowerCase();
+            /* NOTE:
+             *   When searching for multiple words we assume that we need to find
+             *   the exact pattern e.g. "best pract*" because of that we replace
+             *   spaces with '+'
+             */
+            value = value.replace(' ', '+');
+            constraint.addEncoded(POS, value);
         }
     }
 
