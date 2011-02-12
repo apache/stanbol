@@ -8,7 +8,7 @@
 		<groupId>eu.iksproject</groupId>
 		<artifactId>eu.iksproject.kres.parent</artifactId>
 		<version>0.7</version>
-		<relativePath>../parent/pom.xml</relativePath>
+		<relativePath>../eu.iksproject.kres.parent</relativePath>
 	</parent>
 
 	<groupId>eu.iksproject</groupId>
@@ -187,6 +187,7 @@
 			<artifactId>jersey-json</artifactId>
 			<version>${jersey-version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>org.apache.clerezza.rdf.core</artifactId>
@@ -197,11 +198,13 @@
 			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.shared.dependency.owlapi</artifactId>
 			<version>${kres-version}</version>
+			<type>bundle</type>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.ontologies</artifactId>
+			<type>bundle</type>
 			<version>${kres-version}</version>
 		</dependency>
 	</dependencies>

@@ -3,12 +3,13 @@
 
     <modelVersion>4.0.0</modelVersion>
     
-    <parent>
-    	<groupId>eu.iksproject</groupId>
-    	<artifactId>eu.iksproject.kres.parent</artifactId>
+	<parent>
+		<groupId>eu.iksproject</groupId>
+		<artifactId>eu.iksproject.kres.parent</artifactId>
 		<version>0.7</version>
-    	<relativePath>../parent</relativePath>
-    </parent>
+		<relativePath>../../../eu.iksproject.kres.parent</relativePath>
+	</parent>
+
 
     <groupId>eu.iksproject</groupId>
     <artifactId>eu.iksproject.kres.shared.dependency.xerces</artifactId>

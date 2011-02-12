@@ -92,6 +92,7 @@
 							uk.ac.manchester.cs.*,
 							com.clarkparsia.owlapi.*
 						</Export-Package>
+						<Private-Package/>
                     </instructions>
                 </configuration>
 

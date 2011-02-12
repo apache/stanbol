@@ -8,8 +8,9 @@
 		<groupId>eu.iksproject</groupId>
 		<artifactId>eu.iksproject.kres.parent</artifactId>
 		<version>0.7</version>
-		<relativePath>../parent/pom.xml</relativePath>
+		<relativePath>../eu.iksproject.kres.parent</relativePath>
 	</parent>
+
 
 	<groupId>eu.iksproject</groupId>
 	<artifactId>eu.iksproject.kres.storage.provider</artifactId>

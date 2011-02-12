@@ -12,6 +12,13 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
+  <parent>
+    	<groupId>eu.iksproject</groupId>
+    	<artifactId>eu.iksproject.kres.parent</artifactId>
+	<version>0.7</version>
+    	<relativePath>./eu.iksproject.kres.parent</relativePath>
+  </parent>
+
   <groupId>eu.iksproject</groupId>
   <artifactId>eu.iksproject.kres.reactor</artifactId>
   <packaging>pom</packaging>
@@ -30,25 +37,31 @@
     
     <!-- OWL API bundle -->
 	<!-- Dependency bundle -->
+	<!--module>eu.iksproject.kres.shared</module-->
 	<module>eu.iksproject.kres.shared/dependency/owlapi3</module>
+
+	<!-- KReS ontologies -->
+	<module>eu.iksproject.kres.ontologies</module>
+	
 	<module>eu.iksproject.kres.shared/dependency/hermit124</module>
     <module>eu.iksproject.kres.shared/dependency/owllink102</module>
     <module>eu.iksproject.kres.shared/dependency/xerces</module>
     <module>eu.iksproject.kres.shared/dependency/mysql</module>
 
-	<!-- KReS Reasoner -->
-	<module>eu.iksproject.kres.reasoners</module>
 	
 	<!-- Transformation utils -->
 <!--	<module>eu.iksproject.kres.shared/dependency/silk</module> -->
 	<module>eu.iksproject.kres.shared/transformation</module>
 	
-	<!-- KReS ontologies -->
-	<module>eu.iksproject.kres.ontologies</module>
     
 	
 	<!-- KReS APIs -->
-    <module>eu.iksproject.kres.api</module>
+	<module>eu.iksproject.kres.api</module>
+
+
+	<!-- KReS Reasoner -->
+	<module>eu.iksproject.kres.reasoners</module>
+
 	
 	<module>eu.iksproject.kres.storage.provider</module>
 	

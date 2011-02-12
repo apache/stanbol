@@ -13,12 +13,13 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>eu.iksproject</groupId>
-    <artifactId>eu.iksproject.kres.parent</artifactId>
-    <version>0.7</version>
-    <relativePath>../../parent/pom.xml</relativePath>
-  </parent>
+	<parent>
+		<groupId>eu.iksproject</groupId>
+		<artifactId>eu.iksproject.kres.parent</artifactId>
+		<version>0.7</version>
+		<relativePath>../eu.iksproject.kres.parent</relativePath>
+	</parent>
+
 
   <groupId>eu.iksproject</groupId>
   <artifactId>eu.iksproject.kres.semion.manager</artifactId>

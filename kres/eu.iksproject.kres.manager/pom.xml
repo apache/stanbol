@@ -3,13 +3,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-
 	<parent>
 		<groupId>eu.iksproject</groupId>
 		<artifactId>eu.iksproject.kres.parent</artifactId>
 		<version>0.7</version>
-		<relativePath>../parent/pom.xml</relativePath>
+		<relativePath>../eu.iksproject.kres.parent</relativePath>
 	</parent>
+
 
 	<groupId>eu.iksproject</groupId>
 	<artifactId>eu.iksproject.kres.manager</artifactId>
