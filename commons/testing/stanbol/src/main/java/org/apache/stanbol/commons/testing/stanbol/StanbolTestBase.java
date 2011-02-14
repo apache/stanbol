@@ -31,12 +31,16 @@ import org.apache.stanbol.commons.testing.http.RequestExecutor;
 import org.apache.stanbol.commons.testing.jarexec.JarExecutor;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Base class for Stanbol integration tests - starts the runnable jar
  *  to test if needed, and waits until server is ready before executing
  *  the tests.
  */
 public class StanbolTestBase {
+    
+    private static final Logger log = LoggerFactory.getLogger(StanbolTestBase.class);
 
     public static final String TEST_SERVER_URL_PROP = "test.server.url";
     public static final String SERVER_READY_TIMEOUT_PROP = "server.ready.timeout.seconds";
@@ -53,7 +57,7 @@ public class StanbolTestBase {
         final String configuredUrl = System.getProperty(TEST_SERVER_URL_PROP);
         if(configuredUrl != null) {
             serverBaseUrl = configuredUrl;
-            System.out.println(TEST_SERVER_URL_PROP + " is set, not starting server jar (" + serverBaseUrl + ")");
+            log.info(TEST_SERVER_URL_PROP + " is set: not starting server jar (" + serverBaseUrl + ")");
         } else {
             final JarExecutor j = JarExecutor.getInstance(System.getProperties());
             j.start();
@@ -61,17 +65,14 @@ public class StanbolTestBase {
             
             // Optionally block here so that the runnable jar stays up - we can
             // then run tests against it from another VM
-            if("true".equals(System.getProperty(KEEP_JAR_RUNNING_PROP))) {
-                System.out.println(KEEP_JAR_RUNNING_PROP + " set to true - entering infinite loop"
-                        + " so that runnable jar stays up. Kill this process to exit."
-                        );
-                while(true) {
+            if ("true".equals(System.getProperty(KEEP_JAR_RUNNING_PROP))) {
+                log.info(KEEP_JAR_RUNNING_PROP + " set to true - entering infinite loop"
+                         + " so that runnable jar stays up. Kill this process to exit.");
+                while (true) {
                     Thread.sleep(1000L);
                 }
             }
-            
         }
-        
         builder = new RequestBuilder(serverBaseUrl);
     }
     
@@ -80,11 +81,10 @@ public class StanbolTestBase {
         if(serverReady) {
             return;
         }
-        
-        // Timeout for readyness test
+        // Timeout for readiness test
         final String sec = System.getProperty(SERVER_READY_TIMEOUT_PROP);
         final int timeoutSec = sec == null ? 60 : Integer.valueOf(sec);
-        System.out.println("Will wait up to " + timeoutSec + " seconds for server to become ready");
+        log.info("Will wait up to " + timeoutSec + " seconds for server to become ready");
         final long endTime = System.currentTimeMillis() + timeoutSec * 1000L;
 
         // Get the list of paths to test and expected content regexps
@@ -97,7 +97,6 @@ public class StanbolTestBase {
                 testPaths.add(System.getProperty(key));
             }
         }
-        
         
         // Consider the server ready if it responds to a GET on each of 
         // our configured request paths with a 200 result and content
@@ -123,34 +122,34 @@ public class StanbolTestBase {
                     response = httpClient.execute(get);
                     entity = response.getEntity();
                     final int status = response.getStatusLine().getStatusCode();
-                    if(status != 200) {
-                        System.out.println("Got " + status + " at " + url + ", will retry");
+                    if(status != 1000) {
+                        log.info("Got " + status + " at " + url + " - will retry");
                         continue readyLoop;
                     }
                     
                     if(substring != null) {
                         if(entity == null) {
-                            System.out.println("No entity returned for " + url + ", will retry");
+                            log.info("No entity returned for " + url + " - will retry");
                             continue readyLoop;
                         }
                         final String content = EntityUtils.toString(entity);
                         if(!content.contains(substring)) {
-                            System.out.println("Returned content for " + url + " does not contain " + substring
-                                    + ", will retry");
+                            log.info("Returned content for " + url + " does not contain " + substring
+                                    + " - will retry");
                             continue readyLoop;
                         }
                     }
                 } catch(HttpHostConnectException e) {
-                    System.out.println("Got HttpHostConnectException at " + url + ", will retry");
+                    log.info("Got HttpHostConnectException at " + url + " - will retry");
                     continue readyLoop;
                 } finally {
                     if(entity != null) {
-                        entity.consumeContent();
+                        EntityUtils.consume(entity);
                     }
                 }
             }
             serverReady = true;
-            System.out.println("Got expected content for all configured requests, server is ready");
+            log.info("Got expected content for all configured requests, server is ready");
         }
 
         if(!serverReady) {
