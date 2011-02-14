@@ -36,7 +36,6 @@ public class StatelessEngineTest extends EnhancerTestBase {
                 "http://purl.org/dc/terms/creator.*MetaxaEngine",
                 "http://purl.org/dc/terms/creator.*LangIdEnhancementEngine",
                 "http://purl.org/dc/terms/language.*en",
-                "http://purl.org/dc/terms/creator.*LocationEnhancementEngine",
                 "http://fise.iks-project.eu/ontology/entity-label.*Paris",
                 "http://purl.org/dc/terms/creator.*NamedEntityExtractionEnhancementEngine",
                 "http://fise.iks-project.eu/ontology/entity-label.*Bob Marley"
