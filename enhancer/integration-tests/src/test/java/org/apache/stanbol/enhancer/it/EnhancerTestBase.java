@@ -68,7 +68,6 @@ public class EnhancerTestBase extends StanbolTestBase {
                     "org.apache.stanbol.*NamedEntityExtractionEnhancementEngine",
                     "org.apache.stanbol.*OpenCalaisEngine",
                     "org.apache.stanbol.*EntityMentionEnhancementEngine",
-                    "org.apache.stanbol.*LocationEnhancementEngine",
                     "org.apache.stanbol.*RelatedTopicEnhancementEngine",
                     "org.apache.stanbol.*CachingDereferencerEngine"
                 );

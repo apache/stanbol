@@ -16,6 +16,19 @@
  */
 package org.apache.stanbol.enhancer.engines.geonames.impl;
 
+import static org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum.dbpedia_ont;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PLACE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_REQUIRES;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_LABEL;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +51,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.enhancer.engines.geonames.impl.GeonamesAPIWrapper.SearchRequestPropertyEnum;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -46,15 +60,10 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
+import org.apache.stanbol.commons.stanboltools.offline.OnlineMode;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-
-import static org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum.dbpedia_ont;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PLACE;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.*;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
 
 @Component(immediate = true, metatype = true)
 @Service
@@ -111,6 +120,11 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
     public static final String GEONAMES_USERNAME = "org.apache.stanbol.enhancer.engines.geonames.locationEnhancementEngine.username";
     @Property
     public static final String GEONAMES_TOKEN = "org.apache.stanbol.enhancer.engines.geonames.locationEnhancementEngine.token";
+    
+    /** Only activate this engine in online mode */
+    @SuppressWarnings("unused")
+    @Reference
+    private OnlineMode onlineMode;
     
     /**
      * The geonames.org API wrapper used to make service requests
