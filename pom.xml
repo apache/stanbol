@@ -22,5 +22,6 @@
         <module>testing/jarexec</module>
         <module>testing/http</module>
         <module>testing/stanbol</module>
+        <module>stanboltools/offline</module>
     </modules>
 </project>
