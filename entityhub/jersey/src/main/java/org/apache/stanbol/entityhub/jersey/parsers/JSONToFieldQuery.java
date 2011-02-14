@@ -20,9 +20,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
+import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.RangeConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
@@ -43,12 +43,12 @@ import org.slf4j.LoggerFactory;
 public class JSONToFieldQuery {
     private static final Logger log = LoggerFactory.getLogger(JSONToFieldQuery.class);
     
-    public static FieldQuery fromJSON(String jsonQueryString) throws JSONException{
+    public static FieldQuery fromJSON(FieldQueryFactory queryFactory, String jsonQueryString) throws JSONException{
         if(jsonQueryString == null){
             throw new NullPointerException("The parsed JSON object MUST NOT be NULL!");
         }
         JSONObject jQuery = new JSONObject(jsonQueryString);
-        FieldQuery query = DefaultQueryFactory.getInstance().createFieldQuery();
+        FieldQuery query = queryFactory.createFieldQuery();
         if(!jQuery.has("constraints")){
             throw new IllegalArgumentException("The parsed JSON object MUST contain the required key \"constraints\"");
         }

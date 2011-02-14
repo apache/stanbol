@@ -31,7 +31,6 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -54,18 +53,12 @@ import javax.ws.rs.core.Response;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.commons.io.FileUtils;
-import org.apache.stanbol.entityhub.core.query.FieldQueryImpl;
-import org.apache.stanbol.entityhub.jersey.parsers.JSONToFieldQuery;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
 import org.apache.stanbol.entityhub.servicesapi.model.Symbol;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
-import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
-import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint.PatternType;
-import org.codehaus.jettison.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,6 +74,10 @@ public class SymbolResource extends NavigationMixin {
      * The default search field for /find queries is the entityhub-maodel:label
      */
     private static final String DEFAULT_FIND_FIELD = RdfResourceEnum.label.getUri();
+    /**
+     * The default number of maximal results of searched sites.
+     */
+    private static final int DEFAULT_FIND_RESULT_LIMIT = 5;
 
     /**
      * The default result fields for /find queries is the entityhub-maodel:label and the
@@ -165,50 +162,38 @@ public class SymbolResource extends NavigationMixin {
     public Response findEntity(@FormParam(value = "name") String name, 
             @FormParam(value = "field") String field,
             @FormParam(value = "lang") String language, 
+            @FormParam(value = "limit") Integer limit, 
+            @FormParam(value = "offset") Integer offset, 
+            //TODO: Jersey supports parsing multiple values in Collections. 
+            //      Use this feature here instead of using this hand crafted
+            //      solution!
             @FormParam(value = "select") String select, 
             @Context HttpHeaders headers) {
-        log.info("symbol/find Request");
-        log.info("  > name  : " + name);
-        log.info("  > field : " + field);
-        log.info("  > lang  : " + language);
-        log.info("  > select: " + select);
-        log.info("  > accept: " + headers.getAcceptableMediaTypes());
-        //TODO: Implement by using EntityQuery as soon as implemented
-        if (name == null || name.trim().isEmpty()) {
-            log.error("/find Request with invalied name={}!", name);
-        } else {
-            name = name.trim();
-        }
+        log.debug("symbol/find Request");
         if (field == null || field.trim().isEmpty()) {
             field = DEFAULT_FIND_FIELD;
         } else {
             field = field.trim();
         }
-        FieldQuery query = new FieldQueryImpl();
-        if (language == null) {
-            query.setConstraint(field, new TextConstraint(name, PatternType.wildcard, false));
-        } else {
-            query.setConstraint(field, new TextConstraint(name, PatternType.wildcard, false, language));
-        }
-        Collection<String> selectedFields = new ArrayList<String>();
-        selectedFields.add(field); //select also the field used to find entities
+        FieldQuery query = JerseyUtils.createFieldQueryForFindRequest(name, field, language,
+            limit == null || limit <1? DEFAULT_FIND_RESULT_LIMIT:limit, offset);
+
+        // For the Entityhub we support to select additional fields for results
+        // of find requests. For the Sites and {site} endpoint this is currently
+        // deactivated because of very bad performance with OPTIONAL graph patterns
+        // in SPARQL queries. 
+        Collection<String> additionalSelectedFields = new ArrayList<String>();
         if (select == null || select.isEmpty()) {
-            selectedFields.addAll(DEFAULT_FIND_SELECTED_FIELDS);
+            additionalSelectedFields.addAll(DEFAULT_FIND_SELECTED_FIELDS);
         } else {
             for (String selected : select.trim().split(" ")) {
                 if (selected != null && !selected.isEmpty()) {
-                    selectedFields.add(selected);
+                    additionalSelectedFields.add(selected);
                 }
             }
         }
-        query.addSelectedFields(selectedFields);
-        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
-        try {
-            return Response.ok(entityhub.find(query), acceptedMediaType).build();
-        } catch (Exception e) {
-            log.error("Error while accessing Yard of the Entityhub" + entityhub.getYard().getName() + " (id=" + entityhub.getYard().getId() + ")", e);
-            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
-        }
+        query.addSelectedFields(additionalSelectedFields);
+        return executeQuery(query, headers);
     }
 
     @DELETE
@@ -239,42 +224,24 @@ public class SymbolResource extends NavigationMixin {
             @FormParam("query") String query,
             @FormParam("query") File file,
             @Context HttpHeaders headers) {
-        if(query == null && file == null) {
-            throw new WebApplicationException(new IllegalArgumentException("Query Requests MUST define the \"query\" parameter"), Response.Status.BAD_REQUEST);
-        }
-        FieldQuery fieldQuery = null;
-        JSONException exception = null;
-        if(query != null){
-            try {
-                fieldQuery = JSONToFieldQuery.fromJSON(query);
-            } catch (JSONException e) {
-                log.warn("unable to parse FieldQuery from \"application/x-www-form-urlencoded\" encoded query string "+query);
-                fieldQuery = null;
-                exception = e;
-            }
-        } //else no query via application/x-www-form-urlencoded parsed
-        if(fieldQuery == null && file != null){
-            try {
-                query = FileUtils.readFileToString(file);
-                fieldQuery = JSONToFieldQuery.fromJSON(query);
-            } catch (IOException e) {
-                throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-            } catch (JSONException e) {
-                log.warn("unable to parse FieldQuery from \"multipart/form-data\" encoded query string "+query);
-                exception = e;
-            }
-        }//fieldquery already initialised or no query via multipart/form-data parsed
-        if(fieldQuery == null){
-            throw new WebApplicationException(new IllegalArgumentException("Unable to parse FieldQuery for the parsed query\n"+query, exception),Response.Status.BAD_REQUEST);
-        }
+        return executeQuery(JerseyUtils.parseFieldQuery(query, file), headers);
+    }
+
+    /**
+     * Executes the query parsed by {@link #queryEntities(String, File, HttpHeaders)}
+     * or created based {@link #findEntity(String, String, String, String, HttpHeaders)
+     * @param query The query to execute
+     * @param headers The headers used to determine the media types
+     * @return the response (results of error)
+     */
+    private Response executeQuery(FieldQuery query, HttpHeaders headers) throws WebApplicationException {
         final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, MediaType.APPLICATION_JSON_TYPE);
         try {
-            return Response.ok(entityhub.find(fieldQuery), acceptedMediaType).build();
+            return Response.ok(entityhub.find(query), acceptedMediaType).build();
         } catch (EntityhubException e) {
-            log.error("Exception while performing the parsed query on the EntityHub", e);
+            log.error("Exception while performing the FieldQuery on the EntityHub", e);
             log.error("Query:\n"+query);
             throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
         }
-        
     }
 }

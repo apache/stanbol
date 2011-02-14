@@ -30,10 +30,7 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -55,17 +52,11 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.ontologies.RDFS;
-import org.apache.commons.io.FileUtils;
-import org.apache.stanbol.entityhub.core.query.FieldQueryImpl;
-import org.apache.stanbol.entityhub.jersey.parsers.JSONToFieldQuery;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.servicesapi.model.Sign;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
-import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
-import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint.PatternType;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
 import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,20 +173,10 @@ public class SiteManagerRootResource extends NavigationMixin {
             @FormParam(value="field") String field,
             @FormParam(value = "lang") String language,
             //@FormParam(value="select") String select,
-            @FormParam(value = "limit") @DefaultValue(value = "-1") int limit,
-            @FormParam(value = "offset") @DefaultValue(value = "0") int offset,
+            @FormParam(value = "limit") Integer limit,
+            @FormParam(value = "offset") Integer offset,
             @Context HttpHeaders headers) {
-        log.info("sites/find Request");
-        log.info("  > name  : " + name);
-        log.info("  > lang  : " + language);
-        log.info("  > limit : " + limit);
-        log.info("  > offset: " + offset);
-        log.info("  > accept: " + headers.getAcceptableMediaTypes());
-        if (name == null || name.trim().isEmpty()) {
-            log.error("/find Request with invalied name={}!", name);
-        } else {
-            name = name.trim();
-        }
+        log.debug("sites/find Request");
         if(field == null){
             field = DEFAULT_FIND_FIELD;
         } else {
@@ -204,29 +185,8 @@ public class SiteManagerRootResource extends NavigationMixin {
                 field = DEFAULT_FIND_FIELD;
             }
         }
-        FieldQuery query = new FieldQueryImpl();
-        if (language == null) {
-            query.setConstraint(field, new TextConstraint(name, PatternType.wildcard, false));
-        } else {
-            query.setConstraint(field, new TextConstraint(name, PatternType.wildcard, false, language));
-        }
-        Collection<String> selectedFields = new ArrayList<String>();
-        selectedFields.add(field); //select also the field used to find entities
-//        if(select == null ||select.isEmpty()){
-//            selectedFields.addAll(DEFAULT_FIND_SELECTED_FIELDS);
-//        } else {
-//            for(String selected : select.trim().split(" ")){
-//                if(selected != null && !selected.isEmpty()){
-//                    selectedFields.add(selected);
-//                }
-//            }
-//        }
-        query.addSelectedFields(selectedFields);
-        if (limit < 1) {
-            limit = DEFAULT_FIND_RESULT_LIMIT;
-        }
-        query.setLimit(limit);
-        query.setOffset(offset);
+        FieldQuery query = JerseyUtils.createFieldQueryForFindRequest(name, field, language, 
+            limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, offset);
         final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
         return Response.ok(referencedSiteManager.find(query), acceptedMediaType).build();
     }
@@ -249,39 +209,12 @@ public class SiteManagerRootResource extends NavigationMixin {
     @Consumes( { APPLICATION_FORM_URLENCODED + ";qs=1.0",
             MULTIPART_FORM_DATA + ";qs=0.9" })
     public Response queryEntities(
-            @FormParam("query") String query,
+            @FormParam("query") String queryString,
             @FormParam("query") File file,
             @Context HttpHeaders headers) {
-        if(query == null && file == null) {
-            throw new WebApplicationException(new IllegalArgumentException("Query Requests MUST define the \"query\" parameter"), Response.Status.BAD_REQUEST);
-        }
-        FieldQuery fieldQuery = null;
-        JSONException exception = null;
-        if(query != null){
-            try {
-                fieldQuery = JSONToFieldQuery.fromJSON(query);
-            } catch (JSONException e) {
-                log.warn("unable to parse FieldQuery from \"application/x-www-form-urlencoded\" encoded query string "+query);
-                fieldQuery = null;
-                exception = e;
-            }
-        } //else no query via application/x-www-form-urlencoded parsed
-        if(fieldQuery == null && file != null){
-            try {
-                query = FileUtils.readFileToString(file);
-                fieldQuery = JSONToFieldQuery.fromJSON(query);
-            } catch (IOException e) {
-                throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-            } catch (JSONException e) {
-                log.warn("unable to parse FieldQuery from \"multipart/form-data\" encoded query string "+query);
-                exception = e;
-            }
-        }//fieldquery already initialised or no query via multipart/form-data parsed
-        if(fieldQuery == null){
-            throw new WebApplicationException(new IllegalArgumentException("Unable to parse FieldQuery for the parsed query\n"+query, exception),Response.Status.BAD_REQUEST);
-        }
+        FieldQuery query = JerseyUtils.parseFieldQuery(queryString, file);
         final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, MediaType.APPLICATION_JSON_TYPE);
-        return Response.ok(referencedSiteManager.find(fieldQuery), acceptedMediaType).build();
+        return Response.ok(referencedSiteManager.find(query), acceptedMediaType).build();
     }
     
 }
