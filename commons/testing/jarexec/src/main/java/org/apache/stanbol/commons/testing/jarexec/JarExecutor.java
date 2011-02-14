@@ -26,6 +26,7 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteResultHandler;
 import org.apache.commons.exec.Executor;
+import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.exec.ShutdownHookProcessDestroyer;
 import org.apache.commons.exec.util.StringUtils;
 
@@ -144,6 +145,7 @@ public class JarExecutor {
         cl.addArgument("-p");
         cl.addArgument(String.valueOf(serverPort));
         info("Executing " + cl);
+        e.setStreamHandler(new PumpStreamHandler());
         e.setProcessDestroyer(new ShutdownHookProcessDestroyer());
         e.execute(cl, h);
     }
