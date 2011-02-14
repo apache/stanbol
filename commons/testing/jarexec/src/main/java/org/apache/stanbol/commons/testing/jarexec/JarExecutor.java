@@ -29,6 +29,8 @@ import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.exec.ShutdownHookProcessDestroyer;
 import org.apache.commons.exec.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Start a runnable jar by forking a JVM process,
  *  and terminate the process when this VM exits.
@@ -38,6 +40,8 @@ public class JarExecutor {
     private final File jarToExecute;
     private final String javaExecutable;
     private final int serverPort;
+    
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     public static final int DEFAULT_PORT = 8765;
     public static final String DEFAULT_JAR_FOLDER = "target/dependency";
@@ -121,12 +125,12 @@ public class JarExecutor {
         final ExecuteResultHandler h = new ExecuteResultHandler() {
             @Override
             public void onProcessFailed(ExecuteException ex) {
-                info("Process execution failed:" + ex);
+                log.error("Process execution failed:" + ex, ex);
             }
 
             @Override
             public void onProcessComplete(int result) {
-                info("Process execution complete, exit code=" + result);
+                log.info("Process execution complete, exit code=" + result);
             }
         };
 
@@ -144,13 +148,10 @@ public class JarExecutor {
         cl.addArgument(jarToExecute.getAbsolutePath());
         cl.addArgument("-p");
         cl.addArgument(String.valueOf(serverPort));
-        info("Executing " + cl);
+        log.info("Executing " + cl);
         e.setStreamHandler(new PumpStreamHandler());
         e.setProcessDestroyer(new ShutdownHookProcessDestroyer());
         e.execute(cl, h);
     }
 
-    protected void info(String msg) {
-        System.out.println(getClass().getName() + ": " + msg);
-    }
 }
