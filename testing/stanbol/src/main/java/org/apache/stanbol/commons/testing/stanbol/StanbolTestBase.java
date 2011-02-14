@@ -122,7 +122,7 @@ public class StanbolTestBase {
                     response = httpClient.execute(get);
                     entity = response.getEntity();
                     final int status = response.getStatusLine().getStatusCode();
-                    if(status != 1000) {
+                    if(status != 200) {
                         log.info("Got " + status + " at " + url + " - will retry");
                         continue readyLoop;
                     }
@@ -144,7 +144,7 @@ public class StanbolTestBase {
                     continue readyLoop;
                 } finally {
                     if(entity != null) {
-                        EntityUtils.consume(entity);
+                        entity.consumeContent();
                     }
                 }
             }
