@@ -46,14 +46,19 @@ public class StanbolTestBase {
     public static final String SERVER_READY_TIMEOUT_PROP = "server.ready.timeout.seconds";
     public static final String SERVER_READY_PROP_PREFIX = "server.ready.path";
     public static final String KEEP_JAR_RUNNING_PROP = "keepJarRunning";
-    private static boolean serverReady; 
     protected static String serverBaseUrl;
-    protected static RequestBuilder builder;
-    protected static DefaultHttpClient httpClient = new DefaultHttpClient();
-    protected static RequestExecutor executor = new RequestExecutor(httpClient);
+
+    protected boolean serverReady = false; 
+    protected RequestBuilder builder;
+    protected DefaultHttpClient httpClient = new DefaultHttpClient();
+    protected RequestExecutor executor = new RequestExecutor(httpClient);
     
     @BeforeClass
-    public static void startRunnableJar() throws Exception {
+    public synchronized static void startRunnableJar() throws Exception {
+        if (serverBaseUrl != null) {
+            // concurrent initialization
+            return;
+        }
         final String configuredUrl = System.getProperty(TEST_SERVER_URL_PROP);
         if(configuredUrl != null) {
             serverBaseUrl = configuredUrl;
@@ -62,6 +67,7 @@ public class StanbolTestBase {
             final JarExecutor j = JarExecutor.getInstance(System.getProperties());
             j.start();
             serverBaseUrl = "http://localhost:" + j.getServerPort();
+            log.info("Forked subprocess server listening to: " + serverBaseUrl);
             
             // Optionally block here so that the runnable jar stays up - we can
             // then run tests against it from another VM
@@ -73,14 +79,19 @@ public class StanbolTestBase {
                 }
             }
         }
-        builder = new RequestBuilder(serverBaseUrl);
     }
     
     @Before
     public void waitForServerReady() throws Exception {
+        // initialize instance request builder and HTTP client
+        builder = new RequestBuilder(serverBaseUrl);
+        httpClient = new DefaultHttpClient();
+        executor = new RequestExecutor(httpClient);
+
         if(serverReady) {
             return;
         }
+
         // Timeout for readiness test
         final String sec = System.getProperty(SERVER_READY_TIMEOUT_PROP);
         final int timeoutSec = sec == null ? 60 : Integer.valueOf(sec);
@@ -92,7 +103,7 @@ public class StanbolTestBase {
         final TreeSet<Object> propertyNames = new TreeSet<Object>();
         propertyNames.addAll(System.getProperties().keySet());
         for(Object o : propertyNames) {
-            final String key = (String)o;
+            final String key = (String) o;
             if(key.startsWith(SERVER_READY_PROP_PREFIX)) {
                 testPaths.add(System.getProperty(key));
             }
@@ -101,12 +112,12 @@ public class StanbolTestBase {
         // Consider the server ready if it responds to a GET on each of 
         // our configured request paths with a 200 result and content
         // that matches the regexp supplied with the path
-        long sleepTime = 50;
+        long sleepTime = 100;
         readyLoop:
         while(!serverReady && System.currentTimeMillis()  < endTime) {
             // Wait a bit between checks, to let the server come up
             Thread.sleep(sleepTime);
-            sleepTime = Math.min(2000L, sleepTime * 2);
+            sleepTime = Math.min(5000L, sleepTime * 2);
             
             // A test path is in the form path:substring or just path, in which case
             // we don't check that the content contains the substring 
@@ -156,4 +167,5 @@ public class StanbolTestBase {
             throw new Exception("Server not ready after " + timeoutSec + " seconds");
         }
     }
+
 }
