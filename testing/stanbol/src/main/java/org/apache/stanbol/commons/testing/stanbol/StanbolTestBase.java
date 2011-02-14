@@ -56,7 +56,7 @@ public class StanbolTestBase {
     @BeforeClass
     public synchronized static void startRunnableJar() throws Exception {
         if (serverBaseUrl != null) {
-            // concurrent initialization
+            // concurrent initialization by loading subclasses
             return;
         }
         final String configuredUrl = System.getProperty(TEST_SERVER_URL_PROP);
