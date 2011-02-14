@@ -21,11 +21,15 @@ import static org.junit.Assert.fail;
 import org.apache.stanbol.commons.testing.stanbol.RetryLoop;
 import org.apache.stanbol.commons.testing.stanbol.StanbolTestBase;
 import org.junit.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Inherit from this to wait for all default enhancement 
  *  engines to be up before running tests.
  */
 public class EnhancerTestBase extends StanbolTestBase {
+    
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     // TODO configurable via system properties??
     public static final int ENGINES_TIMEOUT_SECONDS = 60;
@@ -71,8 +75,7 @@ public class EnhancerTestBase extends StanbolTestBase {
                     "org.apache.stanbol.*RelatedTopicEnhancementEngine",
                     "org.apache.stanbol.*CachingDereferencerEngine"
                 );
-                // TODO use a log
-                System.out.println("Enhancement engines checked, all present");
+                log.info("Enhancement engines checked, all present");
                 return true;
             }
             
@@ -85,8 +88,7 @@ public class EnhancerTestBase extends StanbolTestBase {
         new RetryLoop(c, ENGINES_TIMEOUT_SECONDS, WAIT_BETWEEN_TRIES_MSEC) {
             @Override
             protected void reportException(Throwable t) {
-                // TODO use a log??
-                System.out.println("Exception in RetryLoop, will retry for up to " 
+                log.info("Exception in RetryLoop, will retry for up to " 
                         + getRemainingTimeSeconds() + " seconds: " + t);
             }
             
