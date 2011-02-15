@@ -23,6 +23,18 @@ Then in the Stanbol source directory type
 If you want to skip the tests, add `-DskipTests` to the Maven command.
 
 
+## Launching the Stanbol server
+
+Currently the recommended lanchers are packaged under
+`enhancer/launchers`.  Please follow the README from those folders for
+further instructions.
+
+It is planned to build toplevel folders that combine all the services
+(enhancer, entityhub and kres) into toplevel launchers once the Web
+interface has been refactored to be able to deploy them all at once in
+a consistent way.
+
+
 ## Importing the source code as Eclipse projects
 
 Eclipse is the most popular IDE among Stanbol developers. Here are
