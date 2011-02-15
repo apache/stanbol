@@ -73,9 +73,9 @@ by pressing `Shift+Ctrl+F`.
 
 ## Useful links
 
-  - Documentation will be published and mailing lists info at:
-    http://incubator.apache.org/stanbol/
+  - Documentation will be published and mailing lists info on [the official
+    Stanbol page](http://incubator.apache.org/stanbol/)
 
-  - Please report bugs at:
-    https://issues.apache.org/jira/browse/STANBOL
+  - Please report bugs on the [Apache issue tracker](
+    https://issues.apache.org/jira/browse/STANBOL)
 
