@@ -20,17 +20,43 @@ Then in the Stanbol source directory type
 
     $ mvn install
 
-If you want to skip the tests, add '-DskipTests' to the Maven command.
+If you want to skip the tests, add `-DskipTests` to the Maven command.
 
 
-## Creating Eclipse Projects
+## Importing the source code as Eclipse projects
 
-Go to Stanbol source directory and type
+Eclipse is the most popular IDE among Stanbol developers. Here are
+instructions to get you started with this IDE. For other IDEs / editors,
+please refer to their documentation and maven integration plugins.
+
+To generate the Eclipse project definition files, go to Stanbol source
+directory and type:
 
     $ mvn eclipse:eclipse
 
 If you want to recreate already existing Eclipse projects, you have to delete
-the old ones first by using 'eclipse:clean'.
+the old ones first by using `eclipse:clean`.
+
+Then in Eclipse, right click on the `Project Explorer` panel and select
+your source folder from the following menu / import wizard:
+
+    > Import... > General > Import Existing Projects into Workspace
+
+You will also need to setup the build path variable `M2_REPO` pointing to
+`~/.m2/repository` (where `~` stands for the path to your home folder). To set
+up this variable go to:
+
+    > Window > Preferences > Java > Build Path > Classpath Variables > New...
+
+If you plan to contribute patches to the project, please ensure that your style
+follow the official sun java guidelines with 4 space indents (no tabs). To
+ensure that your files follow the guidelines you can import the formatter
+definitions avaiable in the `conventions/` folder:
+
+    > Window > Preferences > Java > Code Style > Formatter > Import...
+
+You can then apply the formatter to a selected area of a Java source code files
+by pressing `Shift+Ctrl+F`.
 
 
 ## Useful links
