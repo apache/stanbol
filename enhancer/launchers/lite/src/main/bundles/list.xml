@@ -153,6 +153,11 @@
 			<artifactId>org.apache.stanbol.enhancer.jobmanager</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
 	</startLevel>
 
 	<!-- Clerezza storage and sparql infrastructure -->
