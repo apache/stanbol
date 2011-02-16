@@ -10,15 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#-----------------------------------------------------------------------
-#some test synonym mappings unlikely to appear in real input text
-aaa => aaaa
-bbb => bbbb1 bbbb2
-ccc => cccc1,cccc2
-a\=>a => b\=>b
-a\,a => b\,b
-fooaaa,baraaa,bazaaa
-
 # Some synonym groups specific to this example
 GB,gib,gigabyte,gigabytes
 MB,mib,megabyte,megabytes

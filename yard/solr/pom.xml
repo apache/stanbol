@@ -91,7 +91,7 @@
            <Private-Package>
               org.apache.stanbol.entityhub.yard.solr.impl;version=${pom.version},
               org.apache.stanbol.entityhub.yard.solr.embedded;version=${pom.version},
-              org.apache.stanbol.entityhub.yard.solr.impl.constraintEncoders;version=${pom.version}
+              org.apache.stanbol.entityhub.yard.solr.impl.constraintencoders;version=${pom.version}
             </Private-Package>
             <Embed-Dependency>
               solr-solrj,commons-httpclient,

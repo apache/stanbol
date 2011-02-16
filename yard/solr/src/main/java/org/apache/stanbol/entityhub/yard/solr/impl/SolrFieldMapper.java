@@ -308,18 +308,24 @@ public class SolrFieldMapper implements FieldMapper {
         }
         Collection<String> fieldNames = indexFieldMappings.get(indexField);
         if(fieldNames == null){
+            IndexDataTypeEnum dataTypeConfig = IndexDataTypeEnum.forIndexType(indexField.getDataType());
+            if(dataTypeConfig == null){
+                throw new IllegalStateException(String.format("No Config found for the parsed IndexDataType %s",indexField.getDataType()));
+            }
             fieldNames = new HashSet<String>();
             //Three things need to be done
-            //1) Replace the path with the prefix:localName
-            StringBuilder pathName = new StringBuilder();
-            encodePathName(pathName, indexField.getPath());
-            //2) add the prefix and/or suffix for the IndexType
-            encodeDataType(pathName,indexField.getDataType());
-            //3) add the prefix for the languages
+            //1) Encode the Path
+            String pathName = encodePathName(indexField.getPath());
+            //2) Encode the DataType
+            fieldNames.addAll(encodeDataType(pathName,dataTypeConfig));
+            //3) Encode the Languages
             if(indexField.hasLanguage()){
-                fieldNames = encodeLanguages(pathName.toString(),indexField.getLanguages());
-            } else {
-                fieldNames = Collections.singleton(pathName.toString());
+                fieldNames.addAll(encodeLanguages(pathName,indexField.getLanguages()));
+            }
+            //4) add the language merger field (in case the dataType represent natural
+            //   language texts)
+            if(dataTypeConfig.isLanguageType()){
+                fieldNames.add(SolrConst.LANG_MERGER_FIELD+pathName);
             }
             //cache the mappings
             indexFieldMappings.put(indexField, fieldNames);
@@ -333,10 +339,11 @@ public class SolrFieldMapper implements FieldMapper {
      * it places the <code>PATH_SEPERATOR</code> char between the elements.<p>
      * NOTE: This Method assumes that both Parameters are not NULL and that
      * the Path is not empty and contains no NULL nor emtpy element!
-     * @param pathName the StringBuilder used to add the path
      * @param path the path to encode
+     * @return the path name
      */
-    private void encodePathName(StringBuilder pathName,List<String> path){
+    private String encodePathName(List<String> path){
+        StringBuilder pathName = new StringBuilder();
         //Now Iterate over the Path
         pathName.append(PATH_SEPERATOR); //add the leading PathSeperator
         Iterator<String> fields = path.iterator();
@@ -357,41 +364,34 @@ public class SolrFieldMapper implements FieldMapper {
             }
         }
         pathName.append(PATH_SEPERATOR); //add the tailing PathSeperator
+        return pathName.toString();
     }
     @Override
     public String encodePath(List<String> path) throws IllegalArgumentException {
         IndexField.validatePath(path);
-        StringBuilder sb = new StringBuilder();
-        encodePathName(sb, path);
-        return sb.toString();
+        return encodePathName(path);
     }
     /**
-     * Encodes the prefix and/or Suffix that indicates the data type.<p>
-     * NOTE: This Method assumes that both parameters are not NULL.<p>
-     * TODO: Currently such mappings are "hard coded" within the
-     * {@link IndexDataTypeEnum}. It would be also possible to store such
-     * mappings within the Solr index. However this is currently not implemented
-     * because the Solr Server needs also to recognise such prefixes and suffixes
-     * - meaning they need to be configured in the SchemaXML used by the Solr
-     * Server. If there is a possibility to modify this configuration
-     * programmatically than adding new dataTypes should be exposed via the
-     * configuration tab of the OSGI Web Console!
-     * @param pathName the StringBuilder to add the prefix and the suffix. This
-     * method assumes, that the encoded path is already contained in the parsed
-     * StringBuilder.
+     * Encodes the datatype by adding the prefix and the suffix to the parsed
+     * path name. If no prefix nor suffix is defined for the parsed data type,
+     * than this method returns an empty collection 
+     * (indicating that no encoding is necessary)
+     * @param pathName the path name to add the prefix and the suffix.
      * @param dataType the dataType to encode.
+     * @return The fields representing the encoded dataType for the parsed field.
      */
-    private void encodeDataType(StringBuilder pathName,IndexDataType dataType){
-        IndexDataTypeEnum dataTypeConfig = IndexDataTypeEnum.forIndexType(dataType);
-        if(dataTypeConfig == null){
-            throw new IllegalStateException(String.format("No Config found for the parsed IndexDataType %s",dataType));
-        }
+    private Collection<String> encodeDataType(String pathName,IndexDataTypeEnum dataType){
         String[] prefixSuffix = encodeDataType(dataType);
-        if(prefixSuffix[0] != null){
-            pathName.insert(0,prefixSuffix[0]);
-        }
-        if(prefixSuffix[1] != null){
-            pathName.append(prefixSuffix[1]);
+        if((prefixSuffix[0] == null || prefixSuffix[0].isEmpty()) &&
+                (prefixSuffix[1] == null || prefixSuffix[1].isEmpty())){
+            //no prefix nor suffix defined -> return empty collection
+            return Collections.emptyList(); 
+        } else { 
+            //return prefix+fieldName+suffix
+            return Collections.singleton(
+                (prefixSuffix[0] != null?prefixSuffix[0]:"")+
+                pathName +
+                (prefixSuffix[1] != null?prefixSuffix[1]:""));
         }
     }
     @Override
@@ -400,25 +400,33 @@ public class SolrFieldMapper implements FieldMapper {
         if(dataTypeConfig == null){
             throw new IllegalStateException(String.format("No Config found for the parsed IndexDataType %s",dataType));
         }
+        return encodeDataType(dataTypeConfig);
+    }
+    private String[] encodeDataType(IndexDataTypeEnum dataType){
         String[] prefixSuffix = new String[] {null,null};
-        if(dataTypeConfig.getPrefix() != null && !dataTypeConfig.getPrefix().isEmpty()){
-            prefixSuffix[0] = dataTypeConfig.getPrefix();
+        if(dataType.getPrefix() != null && !dataType.getPrefix().isEmpty()){
+            prefixSuffix[0] = dataType.getPrefix();
         }
-        if(dataTypeConfig.getSuffix() != null && !dataTypeConfig.getSuffix().isEmpty()){
-            prefixSuffix[1] = dataTypeConfig.getSuffix();
+        if(dataType.getSuffix() != null && !dataType.getSuffix().isEmpty()){
+            prefixSuffix[1] = dataType.getSuffix();
         }
         return prefixSuffix;
     }
     /**
      * Encodes the prefixes for the parsed languages and returns the according
      * field names for the languages.<p>
-     * Languages are encodes using the {@link SolrConst#LANG_INDICATOR} and the
+     * Languages are encoded using the {@link SolrConst#LANG_INDICATOR} and the
      * parsed language as field prefix.<p>
-     * Note the on the server there is typically a copy field configuration that
-     * adds all fields that start with the {@link SolrConst#LANG_INDICATOR} and
-     * fields of the {@link IndexDataTypeEnum#STR} to a field with the prefix
-     * {@link SolrConst#LANG_INDICATOR}{@link SolrConst#MERGER_INDICATOR}.
-     * This field can be used by queries to search for strings in any language!
+     * Note that this implementation adds dataTypes that are marked as natural
+     * language text values ( all dataTypes where 
+     * <code>{@link IndexDataTypeEnum#isLanguageType()} == true</code>) to the
+     * special {@link SolrConst#LANG_MERGER_FIELD}. This can be used to search
+     * for values of an field in any language.<p>
+     * In addition to that the default schema.xml also defines a copyField 
+     * command that puts natural language values of all fields into the default
+     * search field "_text".<p>
+     * The collection returned by this method does not include
+     * <code>"{@link SolrConst#LANG_MERGER_FIELD}"+feildName</code>!
      * @param fieldName the string representing the field without encoded languages
      * @param languages the languages.
      * @return
@@ -445,11 +453,11 @@ public class SolrFieldMapper implements FieldMapper {
         if(languages == null || languages.isEmpty()){ //no language
             return Collections.emptySet();//just return the field
         } else if (languages.size()==1){
-            return encodeLanguage(languages.iterator().next());
+            return Collections.singleton(encodeLanguage(languages.iterator().next()));
         } else {
             Set<String> langPrefixes = new HashSet<String>();
             for(String lang : languages){
-                langPrefixes.addAll(encodeLanguage(lang));
+                langPrefixes.add(encodeLanguage(lang));
             }
             return langPrefixes;
         }
@@ -463,13 +471,13 @@ public class SolrFieldMapper implements FieldMapper {
      * @param lang the language
      * @return the field with the encoded language
      */
-    private Collection<String> encodeLanguage(String lang){
+    private String encodeLanguage(String lang){
         StringBuilder langField = new StringBuilder();
         langField.append(SolrConst.LANG_INDICATOR);
         if(lang != null){
             langField.append(lang);
         }
-        return Arrays.asList(langField.toString(),LANG_MERGER_FIELD);
+        return langField.toString();
     }
 
     /*--------------------------------------------------------------------------
