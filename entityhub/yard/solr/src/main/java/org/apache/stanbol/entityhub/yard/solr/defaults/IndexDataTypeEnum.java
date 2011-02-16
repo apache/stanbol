@@ -11,7 +11,7 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * See the License for the specific languageType governing permissions and
  * limitations under the License.
  */
 package org.apache.stanbol.entityhub.yard.solr.defaults;
@@ -58,22 +58,31 @@ public enum IndexDataTypeEnum {
     //TODO: DATE & DUR to be removed. The plan is to add explicit support for ranged queries over time spans/points!
     DATE(NamespaceEnum.xsd+"dateTime","cal",Date.class),
     DUR(NamespaceEnum.xsd+"duration","dur",Duration.class),
-    TXT(RdfResourceEnum.TextDataType.getUri(),null,Text.class), //no type prefix, but typically language prefixes
-    STR(NamespaceEnum.xsd+"string","str",String.class), //string values (not used for language)
+    TXT(RdfResourceEnum.TextDataType.getUri(),null,Text.class,true), //no type prefix, but typically languageType prefixes
+    STR(NamespaceEnum.xsd+"string","str",String.class,true), //string values (not used for languageType)
     ID(NamespaceEnum.xsd+"id","id",UUID.class),
     ;
     private IndexDataType indexType;
     private Class<?> javaType;
     private String prefix;
     private String suffix;
+    /**
+     * if true, values of this dataType should be treated as natural languageType 
+     * texts and added to the {@link SolrConst#LANG_MERGER_FIELD} 
+     */
+    private boolean languageType;
     private IndexDataTypeEnum(String name,String prefix,Class<?> type) {
-        this(name,prefix,null,type);
+        this(name,prefix,null,type,false);
     }
-    private IndexDataTypeEnum(String name,String prefix,String suffix, Class<?> type) {
+    private IndexDataTypeEnum(String name,String prefix,Class<?> type,boolean language) {
+        this(name,prefix,null,type,language);
+    }
+    private IndexDataTypeEnum(String name,String prefix,String suffix, Class<?> type,boolean language) {
         this.indexType = new IndexDataType(name);
         this.prefix = prefix;
         this.suffix = suffix;
         this.javaType = type;
+        this.languageType = language;
     }
     /**
      * The prefix to be used for index fields of that type
@@ -102,6 +111,15 @@ public enum IndexDataTypeEnum {
      */
     public final Class<?> getJavaType() {
         return javaType;
+    }
+    /**
+     * Returns <code>true</code> if values of this dataType should be included
+     * in searches for natural language texts. This means that such values are
+     * added to the {@link SolrConst#LANG_MERGER_FIELD} 
+     * @return the languageType
+     */
+    public boolean isLanguageType() {
+        return languageType;
     }
 
     /*--------------------------------------------------------------------------
@@ -195,5 +213,4 @@ public enum IndexDataTypeEnum {
     public static IndexDataTypeEnum forUri(String uri){
         return uriMap.get(uri);
     }
-
 }

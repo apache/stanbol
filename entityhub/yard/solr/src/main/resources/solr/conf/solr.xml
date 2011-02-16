@@ -19,27 +19,25 @@
 <!--
  RICK SolrYard Configuration Notes:
 
- The default Solr Milti-Core configuration as used by the
+ The default Solr multi-core configuration as used by the
  RICK SolrYard.
- By default it defines thre cores:
-  - rick: this is the core used for the RickYard
+ By default it defines three cores:
+  - entityhub: this is the core used for the EntityhubYard
   - cache: this yard is intended for caches with CacheStrategy "used".
            Multiple SolrYards can used this cache if "Multiple Yard Layout"
            is set to true.
   - test: This core is intended to be used for testing reasons only.
   
   To add additional Cores 
-    - create a subdirectory with the value configured by instanceDir. 
+    - create a sub directory with the value configured by instanceDir. 
     - Copy the "conf" Directory of an other core.
-    - Do not change the schema.xml because the schema is fixed by the
-      SolrYard implementation.
-    - You can change/optimize the solrConf.
+    - You can change/optimise the configuration.
 -->
 <solr persistent="true">
   <cores adminPath="/admin/cores">
     <!-- RickYard Core: This core is reservated for the rickYard 
          Please do not use for Caches! -->
-    <core name="rick" instanceDir="rick" />
+    <core name="entityhub" instanceDir="entityhub" />
     <!-- Test Core: Do not use this Cor for real data!-->
     <core name="test" instanceDir="test" />
     <!-- Core that is used by multiple Yards typically used for
