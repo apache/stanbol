@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.stanbol.commons.testing.stanbol;
+package org.apache.stanbol.commons.testing.http;
 
 import static org.junit.Assert.fail;
 
