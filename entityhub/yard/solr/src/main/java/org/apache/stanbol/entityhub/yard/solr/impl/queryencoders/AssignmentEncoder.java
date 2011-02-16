@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.entityhub.yard.solr.impl.constraintencoders;
+package org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,16 +26,23 @@ import org.apache.stanbol.entityhub.yard.solr.query.EncodedConstraintParts;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition.PositionType;
+import org.apache.stanbol.entityhub.yard.solr.utils.SolrUtil;
 
 
-public class LtEncoder implements IndexConstraintTypeEncoder<Object>{
-    private static final ConstraintTypePosition POS = new ConstraintTypePosition(PositionType.value,2);
-    private static final String DEFAULT = "*";
+/**
+ * Encodes the Assignment of the field to an value. If a value is parsed, than
+ * it encodes that the field must be equals to this value.
+ * @author Rupert Westenthaler
+ *
+ */
+public class AssignmentEncoder implements IndexConstraintTypeEncoder<Object>{
 
-    private IndexValueFactory indexValueFactory;
-    public LtEncoder(IndexValueFactory indexValueFactory) {
+    private final static ConstraintTypePosition POS = new ConstraintTypePosition(PositionType.assignment);
+    private final static String EQ = ":";
+    private final IndexValueFactory indexValueFactory;
+    public AssignmentEncoder(IndexValueFactory indexValueFactory) {
         if(indexValueFactory == null){
-            throw new IllegalArgumentException("The parsed IndexValueFactory MUST NOT be NULL!");
+            throw new IllegalArgumentException("The indexValueFactory MUST NOT be NULL");
         }
         this.indexValueFactory = indexValueFactory;
     }
@@ -43,35 +50,39 @@ public class LtEncoder implements IndexConstraintTypeEncoder<Object>{
     public void encode(EncodedConstraintParts constraint, Object value) {
         IndexValue indexValue;
         if(value == null){
-            indexValue = null; //default value
+            indexValue = null;
         } else if(value instanceof IndexValue){
             indexValue = (IndexValue)value;
         } else {
             indexValue = indexValueFactory.createIndexValue(value);
         }
-        String geConstraint = String.format("TO %s}",
-                indexValue !=null && indexValue.getValue() != null && !indexValue.getValue().isEmpty() ?
-                        indexValue.getValue() : DEFAULT);
-        constraint.addEncoded(POS, geConstraint);
+        String eqConstraint = EQ;
+        if(value != null){
+            String escapedValue = SolrUtil.escapeSolrSpecialChars(indexValue.getValue());
+            //now we need to replace spaces with '+' because only than the query
+            //is treated as EQUALS by solr
+            eqConstraint = EQ+escapedValue.replace(' ', '+');
+        }
+        constraint.addEncoded(POS, eqConstraint);
     }
 
     @Override
     public boolean supportsDefault() {
         return true;
     }
-
     @Override
     public Collection<IndexConstraintTypeEnum> dependsOn() {
-        return Arrays.asList(IndexConstraintTypeEnum.GT);
+        return Arrays.asList(IndexConstraintTypeEnum.FIELD);
     }
-
     @Override
     public IndexConstraintTypeEnum encodes() {
-        return IndexConstraintTypeEnum.LT;
+        return IndexConstraintTypeEnum.EQ;
     }
+
     @Override
     public Class<Object> acceptsValueType() {
         return Object.class;
     }
+
 
 }

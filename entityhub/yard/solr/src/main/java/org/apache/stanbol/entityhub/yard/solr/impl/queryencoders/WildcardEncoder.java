@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.entityhub.yard.solr.impl.constraintencoders;
+package org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,14 +26,7 @@ import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition.PositionType;
 
 
-/**
- * TODO: This encoder is not functional! It would need to convert the REGEX
- * Pattern to the according WildCard search!
- * Need to look at http://lucene.apache.org/java/2_4_0/api/org/apache/lucene/search/regex/RegexQuery.html
- * @author Rupert Westenthaler
- *
- */
-public class RegexEncoder implements IndexConstraintTypeEncoder<String>{
+public class WildcardEncoder implements IndexConstraintTypeEncoder<String>{
 
     private static final ConstraintTypePosition POS = new ConstraintTypePosition(PositionType.value);
 
@@ -42,8 +35,17 @@ public class RegexEncoder implements IndexConstraintTypeEncoder<String>{
         if(value == null){
             throw new IllegalArgumentException("This encoder does not support the NULL IndexValue!");
         } else {
-            //TODO: Implement some REGEX to WILDCard conversion for Solr
-            constraint.addEncoded(POS, value.toLowerCase());
+            //TODO: Use toLoverCase here, because I had problems with Solr that
+            //     Queries where not converted to lower case even that the
+            //     LowerCaseFilterFactory was present in the query analyser :(
+            value = value.toLowerCase();
+            /* NOTE:
+             *   When searching for multiple words we assume that we need to find
+             *   the exact pattern e.g. "best pract*" because of that we replace
+             *   spaces with '+'
+             */
+            value = value.replace(' ', '+');
+            constraint.addEncoded(POS, value);
         }
     }
 
@@ -54,7 +56,7 @@ public class RegexEncoder implements IndexConstraintTypeEncoder<String>{
 
     @Override
     public IndexConstraintTypeEnum encodes() {
-        return IndexConstraintTypeEnum.REGEX;
+        return IndexConstraintTypeEnum.WILDCARD;
     }
 
     @Override

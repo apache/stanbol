@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.entityhub.yard.solr.impl.constraintencoders;
+package org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;
 
 import java.util.Arrays;
 import java.util.Collection;

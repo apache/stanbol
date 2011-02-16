@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.entityhub.yard.solr.impl.constraintencoders;
+package org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,12 +29,12 @@ import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition.Posit
 
 
 
-public class GtEncoder implements IndexConstraintTypeEncoder<Object>{
-    private static final ConstraintTypePosition POS = new ConstraintTypePosition(PositionType.value,1);
+public class LeEncoder implements IndexConstraintTypeEncoder<Object>{
+    private static final ConstraintTypePosition POS = new ConstraintTypePosition(PositionType.value,2);
     private static final String DEFAULT = "*";
 
     private IndexValueFactory indexValueFactory;
-    public GtEncoder(IndexValueFactory indexValueFactory) {
+    public LeEncoder(IndexValueFactory indexValueFactory) {
         if(indexValueFactory == null){
             throw new IllegalArgumentException("The parsed IndexValueFactory MUST NOT be NULL!");
         }
@@ -50,8 +50,8 @@ public class GtEncoder implements IndexConstraintTypeEncoder<Object>{
         } else {
             indexValue = indexValueFactory.createIndexValue(value);
         }
-        String geConstraint = String.format("{%s ",
-                indexValue !=null && indexValue.getValue() != null && !indexValue.getValue().toString().isEmpty() ?
+        String geConstraint = String.format("TO %s]",
+                indexValue !=null && indexValue.getValue() != null && !indexValue.getValue().isEmpty() ?
                         indexValue.getValue() : DEFAULT);
         constraint.addEncoded(POS, geConstraint);
     }
@@ -63,12 +63,12 @@ public class GtEncoder implements IndexConstraintTypeEncoder<Object>{
 
     @Override
     public Collection<IndexConstraintTypeEnum> dependsOn() {
-        return Arrays.asList(IndexConstraintTypeEnum.EQ,IndexConstraintTypeEnum.LT);
+        return Arrays.asList(IndexConstraintTypeEnum.GE);
     }
 
     @Override
     public IndexConstraintTypeEnum encodes() {
-        return IndexConstraintTypeEnum.GT;
+        return IndexConstraintTypeEnum.LE;
     }
     @Override
     public Class<Object> acceptsValueType() {
