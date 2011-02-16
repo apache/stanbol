@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.entityhub.yard.solr.impl.constraintEncoders;
+package org.apache.stanbol.entityhub.yard.solr.impl.constraintencoders;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,7 +34,9 @@ public class LangEncoder implements IndexConstraintTypeEncoder<Collection<String
 
     private static final ConstraintTypePosition PREFIX = new ConstraintTypePosition(PositionType.prefix);
     private static final ConstraintTypePosition SUFFIX = new ConstraintTypePosition(PositionType.suffux);
-    private static final IndexDataType STRING_DATATYPE =  new IndexDataType(NamespaceEnum.xsd+"string");
+    //deactivated, because xsd:string values are now also included in the language
+    //merger field (the name returned by fieldMapper.getLanguageMergerField(null)).
+    //private static final IndexDataType STRING_DATATYPE =  new IndexDataType(NamespaceEnum.xsd+"string");
     private FieldMapper fieldMapper;
     public LangEncoder(FieldMapper fieldMapper){
         this.fieldMapper = fieldMapper;
@@ -48,13 +50,13 @@ public class LangEncoder implements IndexConstraintTypeEncoder<Collection<String
         } else { //default
             //search in the language merger field of the default language
             constraint.addEncoded(PREFIX, SolrUtil.escapeSolrSpecialChars(fieldMapper.getLanguageMergerField(null)));
-            String[] prefixSuffix = fieldMapper.encodeDataType(STRING_DATATYPE);
-            if(prefixSuffix[0] != null && !prefixSuffix[0].isEmpty()){
-                constraint.addEncoded(PREFIX, prefixSuffix[0]);
-            }
-            if(prefixSuffix[1] != null && !prefixSuffix[1].isEmpty()){
-                constraint.addEncoded(SUFFIX, prefixSuffix[1]);
-            }
+//            String[] prefixSuffix = fieldMapper.encodeDataType(STRING_DATATYPE);
+//            if(prefixSuffix[0] != null && !prefixSuffix[0].isEmpty()){
+//                constraint.addEncoded(PREFIX, prefixSuffix[0]);
+//            }
+//            if(prefixSuffix[1] != null && !prefixSuffix[1].isEmpty()){
+//                constraint.addEncoded(SUFFIX, prefixSuffix[1]);
+//            }
         }
     }
 
