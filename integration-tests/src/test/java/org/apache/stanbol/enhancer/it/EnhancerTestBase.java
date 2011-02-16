@@ -18,11 +18,12 @@ package org.apache.stanbol.enhancer.it;
 
 import static org.junit.Assert.fail;
 
-import org.apache.stanbol.commons.testing.stanbol.RetryLoop;
-import org.apache.stanbol.commons.testing.stanbol.StanbolTestBase;
-import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.apache.stanbol.commons.testing.http.RetryLoop;
+import org.apache.stanbol.commons.testing.stanbol.StanbolTestBase;
+import org.junit.Before;
 
 /** Inherit from this to wait for all default enhancement 
  *  engines to be up before running tests.
