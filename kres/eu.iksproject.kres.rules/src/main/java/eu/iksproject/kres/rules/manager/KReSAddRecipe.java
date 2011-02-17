@@ -422,6 +422,7 @@ public class KReSAddRecipe {
             
             /* 
              * BUGFIX - previously the check was done on rules.size()-1.
+             * The right code is rules.size(). Moreover is need also a control "if(r+1>(rules.size()-1)) break;" because the last rule has not successive rules.
              * 
              */
             for(int r=0; r<rules.size(); r++){
@@ -432,6 +433,7 @@ public class KReSAddRecipe {
                 owlmanager.addAxiom(owlmodel, objectPropAssertion);
                 ok = true;
                 //Add precedes
+                if(r+1>(rules.size()-1)) break;
                 OWLNamedIndividual indf = factory.getOWLNamedIndividual(rules.get(r+1));
                 if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, indf))){
                     objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(precedes,ind,indf);
