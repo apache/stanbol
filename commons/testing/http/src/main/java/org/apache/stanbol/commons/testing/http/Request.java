@@ -18,6 +18,7 @@ package org.apache.stanbol.commons.testing.http;
 
 import java.io.UnsupportedEncodingException;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
@@ -29,6 +30,7 @@ public class Request {
     private final HttpUriRequest request;
     private String username;
     private String password;
+    private boolean redirects = true;
     
     Request(HttpUriRequest r) {
         request = r;
@@ -48,14 +50,28 @@ public class Request {
         this.password = password;
         return this;
     }
+
+    public Request withRedirects(boolean followRedirectsAutomatically) {
+        redirects = followRedirectsAutomatically;
+        return this;
+    }
     
-    public Request withContent(String content) throws UnsupportedEncodingException {
+    private HttpEntityEnclosingRequestBase getHttpEntityEnclosingRequestBase() {
         if(request instanceof HttpEntityEnclosingRequestBase) {
-            ((HttpEntityEnclosingRequestBase)request).setEntity(new StringEntity(content, "UTF-8"));
+            return (HttpEntityEnclosingRequestBase)request;
         } else {
-            throw new IllegalStateException("Cannot add content to request " 
-                    + request.getClass().getName());
+            throw new IllegalStateException(
+                    "Request is not an HttpEntityEnclosingRequestBase: "  
+                + request.getClass().getName());
         }
+    }
+
+    public Request withContent(String content) throws UnsupportedEncodingException {
+        return withEntity(new StringEntity(content, "UTF-8"));
+    }
+    
+    public Request withEntity(HttpEntity e) throws UnsupportedEncodingException {
+        getHttpEntityEnclosingRequestBase().setEntity(e);
         return this;
     }
     
@@ -65,5 +81,9 @@ public class Request {
     
     public String getPassword() {
         return password;
+    }
+    
+    public boolean getRedirects() {
+        return redirects;
     }
 }
