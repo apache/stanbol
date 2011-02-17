@@ -535,7 +535,8 @@ public class RdfIndexer {
                     }
                     if(source != null){
                         if(processRanking(source)){
-                            if(resumeMode && yard.isRepresentation(source.getId())){ //resume mode check
+                            //add if !resummode or the representation is not yet in the yard
+                            if(!resumeMode || !yard.isRepresentation(source.getId())){
                                 //log.info("S<source Resource:\n"+ModelUtils.getRepresentationInfo(source));
                                 indexed++;
                                 indexedStdCount=indexedStdCount+repStdCount;
@@ -725,7 +726,12 @@ public class RdfIndexer {
      * @param is
      * @param name
      */
-    private void importRdfData(InputStream is, String name) {
+    private void importRdfData(InputStream is, String parsedName) {
+        String name = parsedName;
+        if(name.startsWith(".")){
+            log.info(" > Ignore hidden file "+parsedName+"!");
+            return;
+        }
         if (name.endsWith(".gz")) {
             try {
                 is = new GZIPInputStream(is);
@@ -756,7 +762,9 @@ public class RdfIndexer {
 //            format = Lang.RDFXML;
 //        }
         //For N-Triple we can use the TDBLoader
-        if(format == Lang.NTRIPLES){
+        if(format == null){
+            log.warn(" > ignore File with unknown extension "+parsedName);
+        } else if(format == Lang.NTRIPLES){
             TDBLoader.load(indexingDataset, is,true);
         } else if(format != Lang.RDFXML){
             //use RIOT to parse the format but with a special configuration
@@ -842,7 +850,7 @@ public class RdfIndexer {
      * last possible opportunity :(
      */
     private void writeCacheBaseConfiguration() throws YardException {
-        log.info("Write BaseMappings for geonames.org Cache");
+        log.info("Write BaseMappings for Cache");
         if(mapper != null){
             CacheUtils.storeBaseMappingsConfiguration(yard, mapper);
         }
