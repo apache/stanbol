@@ -39,6 +39,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -105,8 +106,8 @@ public class RequestExecutor {
         clear();
         request = r.getRequest();
         
+        // Optionally setup for basic authentication
         if(r.getUsername() != null) {
-            // Setup for basic authentication
             httpClient.getCredentialsProvider().setCredentials(
                     AuthScope.ANY,
                     new UsernamePasswordCredentials(r.getUsername(), r.getPassword()));
@@ -118,6 +119,10 @@ public class RequestExecutor {
             httpClient.removeRequestInterceptorByClass(PreemptiveAuthInterceptor.class);
         }
         
+        // Setup redirects
+        httpClient.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, r.getRedirects());
+        
+        // Execute request
         response = httpClient.execute(request);
         entity = response.getEntity();
         if(entity != null) {
