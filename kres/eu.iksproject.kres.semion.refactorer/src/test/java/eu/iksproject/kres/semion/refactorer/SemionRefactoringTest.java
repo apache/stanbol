@@ -131,7 +131,7 @@ public class SemionRefactoringTest {
 											+ "hasRule"));
 							Set<OWLIndividual> rules = recipeIndividual
 									.getObjectPropertyValues(objectProperty,
-											ontology);
+											recipeModel);
 							
 							String kReSRulesInKReSSyntax = "";
 							
@@ -146,7 +146,7 @@ public class SemionRefactoringTest {
 								 
 								Set<OWLLiteral> kReSRuleLiterals = rule
 										.getDataPropertyValues(hasBodyAndHead,
-												ontology);
+												recipeModel);
 								
 								for(OWLLiteral kReSRuleLiteral : kReSRuleLiterals){
 									String ruleTmp = kReSRuleLiteral
