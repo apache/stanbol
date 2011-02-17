@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.defaultdata</artifactId>
+  <version>0.9-SNAPSHOT</version>
+
+  <name>Apache Stanbol Default Data</name>
+  <description>
+    Default statistical models and indexes to minimally initialize the base Stanbol
+    services.
+  </description>
+
+  <inceptionYear>2011</inceptionYear>
+
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/defaultdata/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/defaultdata/
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol/</url>
+  </scm>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.0.1</version>
+        <inherited>true</inherited>
+        <configuration>
+          <instructions>
+            <Bundle-Category>Stanbol Data</Bundle-Category>
+            <Bundle-DocURL>http://incubator.apache.org/stanbol</Bundle-DocURL>
+            <Bundle-Vendor>Apache Stanbol (incubation)</Bundle-Vendor>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <_versionpolicy>$${version;===;${@}}</_versionpolicy>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
