@@ -10,7 +10,7 @@ sites.
 
 ## Downloading the OpenNLP statistical model files
 
-TODO
+Use the `download_models.sh` script.
 
 ## Building Entity Hub indices
 
