@@ -62,6 +62,7 @@ public enum NamespaceEnum {
     bio("dc-bio","http://purl.org/vocab/bio/0.1/"),
     rss("http://purl.org/rss/1.0/"),
     goodRelations("gr","http://purl.org/goodrelations/v1#"),
+    swrc("http://swrc.ontoware.org/ontology#"), //The Semantic Web for Research Communities Ontology
     //Linked Data Ontologies
     dbpediaOnt("dbp-ont","http://dbpedia.org/ontology/"),
     dbpediaProp("dbp-prop","http://dbpedia.org/property/"),
