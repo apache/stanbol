@@ -128,7 +128,7 @@
     <owl:NamedIndividual rdf:about="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRecipeA">
         <rdf:type rdf:resource="&rmi;Recipe"/>
         <rmi:hasDescription rdf:datatype="&xsd;string">Some description here</rmi:hasDescription>
-        <rmi:hasSequence rdf:datatype="&xsd;string">http://eu.iksproject.kres/KReSOntologyRules.owl#MyRuleB,http://eu.iksproject.kres/KReSOntologyRules.owl#MyRuleA</rmi:hasSequence>
+        <rmi:hasSequence rdf:datatype="&xsd;string">http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleB,http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleA</rmi:hasSequence>
         <rmi:hasRule rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleA"/>
         <rmi:endWith rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleA"/>
         <rmi:hasRule rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleB"/>
