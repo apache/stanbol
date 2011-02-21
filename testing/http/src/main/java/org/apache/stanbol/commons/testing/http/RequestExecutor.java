@@ -155,7 +155,15 @@ public class RequestExecutor {
         if(entity == null) {
             fail(this + ": no entity in response, cannot check content type");
         }
-        assertEquals(this + ": expecting content type " + expected, expected, entity.getContentType().getValue());
+        
+        // Remove whatever follows semicolon in content-type
+        String contentType = entity.getContentType().getValue();
+        if(contentType != null) {
+            contentType = contentType.split(";")[0].trim();
+        }
+        
+        // And check for match
+        assertEquals(this + ": expecting content type " + expected, expected, contentType);
         return this;
     }
 
