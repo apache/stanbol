@@ -208,7 +208,7 @@ public class RequestExecutor {
         return entity;
     }
 
-    String getContent() {
+    public String getContent() {
         return content;
     }
 }
