@@ -333,13 +333,21 @@ public class NamedEntityExtractionEnhancementEngine implements
         sentencePositions[0] = 0;
         System.arraycopy(sentenceEndings, 0, sentencePositions, 1,
                 sentenceEndings.length);
-        String[] sentences = new String[sentenceEndings.length];
-        for (int i = 0; i < sentences.length; i++) {
-            log.debug(String.format("Sentence %d from char %d to %d", i,
-                    sentencePositions[i], sentencePositions[i + 1]));
-            sentences[i] = text.substring(sentencePositions[i],
-                    sentencePositions[i + 1]);
-            log.debug("Sentence: " + sentences[i]);
+        String[] sentences;
+        if(sentenceEndings.length<1){
+            //STANBOL-60: if no sentence is detected treat the whole text as 
+            //one sentence.
+            log.debug("No sentence detected -> use whole text as one element");
+            sentences = new String[] {text};
+        } else {
+            sentences = new String[sentenceEndings.length];
+            for (int i = 0; i < sentences.length; i++) {
+                log.debug(String.format("Sentence %d from char %d to %d", i,
+                        sentencePositions[i], sentencePositions[i + 1]));
+                sentences[i] = text.substring(sentencePositions[i],
+                        sentencePositions[i + 1]);
+                log.debug("Sentence: " + sentences[i]);
+            }
         }
 
         NameFinderME finder = new NameFinderME(nameFinderModel);
