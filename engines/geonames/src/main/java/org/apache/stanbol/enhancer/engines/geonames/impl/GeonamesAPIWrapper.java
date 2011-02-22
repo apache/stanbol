@@ -317,8 +317,8 @@ public class GeonamesAPIWrapper {
      * If no valid user name is parsed the token will be ignored.
      */
     public GeonamesAPIWrapper(String searchService,String hierarchyService,String userName, String token){
-        this.searchServiceUrl = GEONAMES_ORG_WEBSERVICE_URL+SEARCH_SERVICE_PATH;
-        this.hierarchyServiceUrl = GEONAMES_ORG_WEBSERVICE_URL+HIERARCHY_SERVICE_PATH;
+        this.searchServiceUrl = searchService != null?searchService:(GEONAMES_ORG_WEBSERVICE_URL+SEARCH_SERVICE_PATH);
+        this.hierarchyServiceUrl = hierarchyService != null ?hierarchyService:(GEONAMES_ORG_WEBSERVICE_URL+HIERARCHY_SERVICE_PATH);
         this.userName = userName == null || userName.isEmpty()?null:userName;
         this.token = this.userName == null ? null:token;
     }
@@ -352,10 +352,18 @@ public class GeonamesAPIWrapper {
         URL requestUrl;
         try {
             requestUrl = new URL(requestString.toString());
+            log.info(" > search request: "+requestUrl);
         } catch (MalformedURLException e) {
             throw new IllegalStateException("Unable to build valid request URL for " + requestString);
         }
+        long start = System.currentTimeMillis();
         String result = IOUtils.toString(requestUrl.openConnection().getInputStream());
+        long responseTime = System.currentTimeMillis()-start;
+        if(responseTime > 1000){
+            log.info("    - responseTime: "+responseTime+"ms");
+        } else {
+            log.debug("    - responseTime: "+responseTime+"ms");
+        }
         try {
             JSONObject root = new JSONObject(result);
             if (root.has("totalResultsCount")) {
@@ -398,36 +406,38 @@ public class GeonamesAPIWrapper {
     public List<Toponym> getHierarchy(int geonameId) throws IOException {
         StringBuilder requestString = new StringBuilder();
         requestString.append(hierarchyServiceUrl);
+        Map<HierarchyRequestPorpertyEnum,Collection<String>> requestProperties = 
+            new EnumMap<HierarchyRequestPorpertyEnum,Collection<String>>(HierarchyRequestPorpertyEnum.class);
+        requestProperties.put(HierarchyRequestPorpertyEnum.geonameId, Collections.singleton(Integer.toString(geonameId)));
+        if(userName != null){
+            requestProperties.put(HierarchyRequestPorpertyEnum.username, Collections.singleton(userName));
+            //add the token only if also the user name was added
+            // ... we would not like to use the token of an other user name
+            if(token != null){
+                requestProperties.put(HierarchyRequestPorpertyEnum.token, Collections.singleton(token));
+            }
+        }
         boolean first = true;
         for (HierarchyRequestPorpertyEnum entry : HierarchyRequestPorpertyEnum.values()) {
-            Collection<String> values;
-            switch (entry) { //add values for geonameId, username and token
-                case geonameId:
-                    values = Collections.singleton(Integer.toString(geonameId));
-                    break;
-                case username:
-                    if(userName != null){
-                        values = Collections.singleton(userName);
-                    }
-                case token:
-                    if(token != null){
-                        values = Collections.singleton(token);
-                    }
-                default:
-                    values = null;
-                    break;
-            }
-            if (entry.getProperty().encode(requestString, first, values) && first) {
+            if (entry.getProperty().encode(requestString, first, requestProperties.get(entry)) && first) {
                 first = false; // if the first parameter is added set first to false
             }
         }
         URL requestUrl;
         try {
             requestUrl = new URL(requestString.toString());
+            log.info(" > hierarchy request: "+requestUrl);
         } catch (MalformedURLException e) {
             throw new IllegalStateException("Unable to build valid request URL for " + requestString);
         }
+        long start = System.currentTimeMillis();
         String result = IOUtils.toString(requestUrl.openConnection().getInputStream());
+        long responseTime = System.currentTimeMillis()-start;
+        if(responseTime > 1000){
+            log.info("    - responseTime: "+responseTime+"ms");
+        } else {
+            log.debug("    - responseTime: "+responseTime+"ms");
+        }
         try {
             JSONObject root = new JSONObject(result);
             if (root.has("geonames")) {
