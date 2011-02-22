@@ -34,7 +34,6 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.stanbol.enhancer.engines.autotagging.impl.ConfiguredAutotaggerProvider;
 import org.apache.stanbol.enhancer.engines.opennlp.impl.NameOccurrence;
 import org.apache.stanbol.enhancer.engines.opennlp.impl.NamedEntityExtractionEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -50,7 +49,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHAN
 
 public class TestNamedEntityExtractionEnhancementEngine extends Assert {
 
-    public static final String SINGLE_SENTENCE = "Dr. Patrick Marshall (1869 - November 1950) was a"
+    public static final String SINGLE_SENTENCE = "Dr Patrick Marshall (1869 - November 1950) was a"
             + " geologist who lived in New Zealand and worked at the University of Otago.";
 
     public static final String MULTI_SENTENCES = "The life of Patrick Marshall\n\n"
@@ -65,7 +64,6 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
     @BeforeClass
     public static void setUpServices() throws IOException {
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        properties.put(ConfiguredAutotaggerProvider.LUCENE_INDEX_PATH, "");
         MockComponentContext context = new MockComponentContext(properties);
         nerEngine.activate(context);
     }
@@ -119,13 +117,13 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
         assertEquals("Patrick Marshall", firstOccurrence.name);
         assertEquals(12, firstOccurrence.start.intValue());
         assertEquals(28, firstOccurrence.end.intValue());
-        assertEquals(0.98, firstOccurrence.confidence, 0.005);
+        assertEquals(0.998, firstOccurrence.confidence, 0.005);
 
         NameOccurrence secondOccurrence = pmOccurrences.get(1);
         assertEquals("Patrick Marshall", secondOccurrence.name);
         assertEquals(33, secondOccurrence.start.intValue());
         assertEquals(49, secondOccurrence.end.intValue());
-        assertEquals(0.97, secondOccurrence.confidence, 0.005);
+        assertEquals(0.85, secondOccurrence.confidence, 0.005);
     }
 
     @Test
