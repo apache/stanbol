@@ -99,7 +99,7 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
      * Default values for the number of results returned by search requests
      * to the geonames.org web service
      */
-    private static final int DEFAULT_MAX_LOCATION_ENHANCEMENTS = 5;
+    private static final int DEFAULT_MAX_LOCATION_ENHANCEMENTS = 3;
 
     @Property(intValue=DEFAULT_MAX_LOCATION_ENHANCEMENTS)
     public static final String MAX_LOCATION_ENHANCEMENTS = "org.apache.stanbol.enhancer.engines.geonames.locationEnhancementEngine.max-location-enhancements";
@@ -241,6 +241,8 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
         }
         String userName = (String)properties.get(GEONAMES_USERNAME);
         String token = (String)properties.get(GEONAMES_TOKEN);
+        log.info(String.format("create Geonames Client for server: %s and user: %s (token not logged)",
+            serverUrl,userName));
         geonamesService = new GeonamesAPIWrapper(serverUrl, userName, token);
     }
 
