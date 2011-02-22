@@ -49,8 +49,13 @@
 	<dependencies>
 		<!-- obviously we need opennlp -->
 		<dependency>
-			<groupId>org.clojars.pjt</groupId>
+			<groupId>org.clojars.zaxtax</groupId>
 			<artifactId>opennlp-tools</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.clojars.zaxtax</groupId>
+			<artifactId>maxent</artifactId>
 			<scope>compile</scope>
 		</dependency>
 
@@ -58,14 +63,11 @@
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
 		</dependency>
-		<!--
-			TODO: remove dependency after the openNLP Models are no longer loaded
-			via the AutotaggingProvider
-		-->
+
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.engines.autotagging</artifactId>
-		</dependency>		
+			<artifactId>org.apache.stanbol.defaultdata</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
@@ -119,16 +121,13 @@
 						<Private-Package>
 							org.apache.stanbol.enhancer.engines.opennlp.impl.*
             			</Private-Package>
-						<Embed-Dependency>opennlp-tools,opennlp-maxent,trove</Embed-Dependency>
+						<Embed-Dependency>opennlp-tools,maxent</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<Import-Package>
+						    org.apache.stanbol.defaultdata.opennlp,
 							!net.didion.*,
-							!gnu.getopt,
-							!org.apache.log.*,
-							!junit.framework.*,
-							!org.apache.avalon.framework.*,
 							*
-           				</Import-Package>						
+           				</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>
