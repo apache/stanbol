@@ -12,7 +12,7 @@
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.enhancer.launchers.lite</artifactId>
 	<packaging>jar</packaging>
-	<version>${enhancer-version}</version>
+	<version>${stanbol-version}</version>
 
 	<name>Apache Stanbol Enhancer Sling-based standalone launcher - lite version</name>
 	<description>Runnable jar that runs the lite Enhancer configuration</description>

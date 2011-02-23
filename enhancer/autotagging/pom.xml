@@ -23,7 +23,7 @@
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.autotagging</artifactId>
 	<packaging>jar</packaging>
-	<version>${enhancer-version}</version>
+	<version>${stanbol-version}</version>
 	
 	<name>Apache Stanbol Autotagging Service</name>
 	

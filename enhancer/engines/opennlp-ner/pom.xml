@@ -30,7 +30,7 @@
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner</artifactId>
 	<packaging>bundle</packaging>
-	<version>${enhancer-version}</version>
+	<version>${stanbol-version}</version>
 
 	<name>Apache Stanbol Enhancer Enhancement Engine : Semantic NER</name>
 	<description></description>

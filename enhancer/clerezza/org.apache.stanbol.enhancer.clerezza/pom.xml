@@ -27,7 +27,7 @@
 	
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.enhancer.clerezza</artifactId>
-	<version>${enhancer-version}</version>	
+	<version>${stanbol-version}</version>	
 	<packaging>bundle</packaging>
 	
 	<name>Apache Stanbol Enhancer Clerezza</name>

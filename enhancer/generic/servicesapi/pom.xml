@@ -14,7 +14,7 @@
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
 	<packaging>bundle</packaging>
-	<version>${enhancer-version}</version>
+	<version>${stanbol-version}</version>
 
 	<name>Apache Stanbol Enhancer Services API</name>
 	<description>The Enhancer (formally FISE) Services API</description>
