@@ -68,9 +68,9 @@ import org.osgi.service.component.ComponentContext;
 
 /**
  * Apache Stanbol Enhancer Named Entity Recognition enhancement engine based on opennlp's Maximum Entropy
- * models and a DBpedia index for optionally matching them to well know DBpedia entities.
+ * models.
  */
-@Component(immediate = true, metatype = true)
+@Component(immediate = true, metatype = true, label = "%stanbol.NamedEntityExtractionEnhancementEngine.name", description = "%stanbol.NamedEntityExtractionEnhancementEngine.description")
 @Service
 public class NamedEntityExtractionEnhancementEngine implements EnhancementEngine, ServiceProperties {
 
@@ -83,7 +83,7 @@ public class NamedEntityExtractionEnhancementEngine implements EnhancementEngine
     protected static final String TEXT_PLAIN_MIMETYPE = "text/plain";
 
     @Property
-    public static final String MODELS_PATH = "org.apache.stanbol.enhancer.engines.opennlp.models.path";
+    public static final String MODELS_PATH = "stanbol.opennlp.models.path";
 
     public static final Log log = LogFactory.getLog(NamedEntityExtractionEnhancementEngine.class);
 
