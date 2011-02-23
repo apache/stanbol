@@ -28,7 +28,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<enhancer-version>0.9-SNAPSHOT</enhancer-version>
+		<stanbol-version>0.9-SNAPSHOT</stanbol-version>
 		<jersey-version>1.1.5.1</jersey-version>
 		<pax-exam-version>1.2.0</pax-exam-version>
 	</properties>
@@ -242,37 +242,37 @@
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-				<version>${enhancer-version}</version>
+				<version>${stanbol-version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.enhancer.standalone</artifactId>
-				<version>${enhancer-version}</version>
+				<version>${stanbol-version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.jsonld</artifactId>
-				<version>${enhancer-version}</version>
+				<version>${stanbol-version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.enhancer.jobmanager</artifactId>
-				<version>${enhancer-version}</version>
+				<version>${stanbol-version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.enhancer.engines.autotagging</artifactId>
-				<version>${enhancer-version}</version>
+				<version>${stanbol-version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.autotagging</artifactId>
-				<version>${enhancer-version}</version>
+				<version>${stanbol-version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency> <!-- TODO: Still the old name, because this is not yet hosted @apache -->
@@ -284,7 +284,7 @@
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.enhancer.ext.org.geonames</artifactId>
-				<version>${enhancer-version}</version>
+				<version>${stanbol-version}</version>
 				<scope>provided</scope>
 			</dependency>
 
@@ -292,31 +292,31 @@
 			<!--  <dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.enhancer.stores.persistencestore</artifactId>
-				<version>${enhancer-version}</version>
+				<version>${stanbol-version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.enhancer.stores.persistencestore.jena</artifactId>
-				<version>${enhancer-version}</version>
+				<version>${stanbol-version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.enhancer.stores.persistencestore.adapter</artifactId>
-				<version>${enhancer-version}</version>
+				<version>${stanbol-version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.enhancer.stores.persistencestore.jena</artifactId>
-				<version>${enhancer-version}</version>
+				<version>${stanbol-version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.enhancer.stores.persistencestore.jena.tdb</artifactId>
-				<version>${enhancer-version}</version>
+				<version>${stanbol-version}</version>
 				<type>bundle</type>
 				<scope>provided</scope>
 			</dependency>-->

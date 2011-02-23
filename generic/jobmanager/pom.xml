@@ -14,7 +14,7 @@
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.enhancer.jobmanager</artifactId>
 	<packaging>bundle</packaging>
-	<version>${enhancer-version}</version>
+	<version>${stanbol-version}</version>
 
 	<name>Apache Stanbol Enhancer Enhancement Job Manager</name>
 	<description>Basic EnhancementJobManager implementation</description>

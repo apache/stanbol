@@ -14,7 +14,7 @@
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.enhancer.standalone</artifactId>
 	<packaging>bundle</packaging>
-	<version>${enhancer-version}</version>
+	<version>${stanbol-version}</version>
 
 	<name>Apache Stanbol Enhancer  Standalone Server</name>
 	<description>Naive Stanbol Enhancer standalone implementation with in-memory storage and a simple front-end servlet</description>

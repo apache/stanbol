@@ -30,7 +30,7 @@
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.enhancer.engine.entitytagging</artifactId>
 	<packaging>bundle</packaging>
-	<version>${enhancer-version}</version>
+	<version>${stanbol-version}</version>
 
 	<name>Apache Stanbol Enhancer Enhancement Engine : for Entityhub ReferencedSites</name>
 	<description>

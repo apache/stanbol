@@ -30,7 +30,7 @@
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.enhancer.clerezza.sparql</artifactId>
 	<packaging>bundle</packaging>
-	<version>${enhancer-version}</version>
+	<version>${stanbol-version}</version>
 
 	<name>Apache Stanbol Enhancer SPARQL Query Engine</name>
 	<description>SPARQL query engine using Clerezza components</description>

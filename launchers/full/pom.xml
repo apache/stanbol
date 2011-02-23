@@ -12,7 +12,7 @@
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.enhancer.launchers.full</artifactId>
 	<packaging>jar</packaging>
-	<version>${enhancer-version}</version>
+	<version>${stanbol-version}</version>
 
 	<name>Apache Stanbol Enhancer Sling-based standalone launcher</name>
 	<description>Runnable jar that runs the full Enhancer configuration</description>
