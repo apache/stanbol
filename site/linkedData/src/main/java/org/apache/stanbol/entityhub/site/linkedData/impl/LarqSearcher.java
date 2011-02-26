@@ -41,8 +41,8 @@ import org.slf4j.LoggerFactory;
 
 
 @Component(
-        name="org.apache.stanbol.entityhub.site.LarqSearcher",
-        factory="org.apache.stanbol.entityhub.site.LarqSearcherFactory",
+        name="org.apache.stanbol.entityhub.searcher.LarqSearcher",
+        factory="org.apache.stanbol.entityhub.searcher.LarqSearcherFactory",
         policy=ConfigurationPolicy.REQUIRE, //the queryUri and the SPARQL Endpoint are required
         specVersion="1.1"
         )

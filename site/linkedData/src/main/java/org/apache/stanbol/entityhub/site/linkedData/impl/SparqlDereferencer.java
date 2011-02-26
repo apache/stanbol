@@ -27,9 +27,11 @@ import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.entityhub.core.site.AbstractEntityDereferencer;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
+import org.apache.stanbol.entityhub.servicesapi.site.EntityDereferencer;
 import org.slf4j.LoggerFactory;
 
 
@@ -39,22 +41,18 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Component(
-        name="org.apache.stanbol.entityhub.site.SparqlDereferencer",
-        factory="org.apache.stanbol.entityhub.site.SparqlDereferencerFactory",
+        name="org.apache.stanbol.entityhub.dereferencer.SparqlDereferencer",
+        factory="org.apache.stanbol.entityhub.dereferencer.SparqlDereferencerFactory",
         policy=ConfigurationPolicy.REQUIRE, //the baseUri and the SPARQL Endpoint are required
         specVersion="1.1"
         )
+@Service(value=EntityDereferencer.class)
 public class SparqlDereferencer extends AbstractEntityDereferencer {
     private final RdfValueFactory valueFactory = RdfValueFactory.getInstance();
 
     public SparqlDereferencer(){
         super(LoggerFactory.getLogger(SparqlDereferencer.class));
     }
-    /**
-     * The key used to define the baseUri for instances of this Service
-     * TODO: Maybe define this constants in the ReferenceManager Interface
-     */
-    public static final String SPARQL_ENDPOINT_URI = "org.apache.stanbol.entityhub.servicesapi.site.sparqlEndpointUri";
 
     @Reference
     protected Parser parser;

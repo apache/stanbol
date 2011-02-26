@@ -40,6 +40,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.common.SolrDocument;
@@ -343,7 +344,7 @@ public class SolrYard extends AbstractYard implements Yard {
         }
         QueryResponse respone;
         try {
-            respone = server.query(query);
+            respone = server.query(query,METHOD.POST);
         } catch (SolrServerException e) {
             throw new YardException("Error while performing Query on SolrServer!",e);
         }
@@ -371,7 +372,7 @@ public class SolrYard extends AbstractYard implements Yard {
         SolrQuery query = solrQueryFactoy.parseFieldQuery(parsedQuery,SELECT.ID);
         QueryResponse respone;
         try {
-            respone = server.query(query);
+            respone = server.query(query,METHOD.POST);
         } catch (SolrServerException e) {
             throw new YardException("Error while performing query on the SolrServer",e);
         }
@@ -797,7 +798,7 @@ public class SolrYard extends AbstractYard implements Yard {
             //set the number of results to the number of parsed IDs.
             solrQuery.setRows(num); 
             num = 0; //reset to 0
-            QueryResponse queryResponse = server.query(solrQuery);
+            QueryResponse queryResponse = server.query(solrQuery,METHOD.POST);
             if(resultDocs == null){
                 resultDocs = queryResponse.getResults();
             } else {
@@ -827,7 +828,7 @@ public class SolrYard extends AbstractYard implements Yard {
         String queryString = String.format("%s:%s",
                 fieldMapper.getDocumentIdField(),SolrUtil.escapeSolrSpecialChars(uri));
         solrQuery.setQuery(queryString);
-        QueryResponse queryResponse = server.query(solrQuery);
+        QueryResponse queryResponse = server.query(solrQuery,METHOD.POST);
         if(queryResponse.getResults().isEmpty()){
             return null;
         } else {
