@@ -153,11 +153,11 @@ import org.slf4j.LoggerFactory;
                         name=""),
                 @PropertyOption(
                     value='%'+ConfiguredSite.DEREFERENCER_TYPE+".option.sparql",
-                    name="org.apache.stanbol.entityhub.site.SparqlDereferencer"),
+                    name="org.apache.stanbol.entityhub.dereferencer.SparqlDereferencer"),
                 @PropertyOption(
                         value='%'+ConfiguredSite.DEREFERENCER_TYPE+".option.coolUri",
-                        name="org.apache.stanbol.entityhub.site.CoolUriDereferencer")
-            },value="org.apache.stanbol.entityhub.site.SparqlDereferencer"),
+                        name="org.apache.stanbol.entityhub.dereferencer.CoolUriDereferencer")
+            },value="org.apache.stanbol.entityhub.dereferencer.SparqlDereferencer"),
         @Property(name=ConfiguredSite.QUERY_URI, value="http://dbpedia.org/sparql"), //the deri server has better performance
         @Property(name=ConfiguredSite.SEARCHER_TYPE,
             options={
@@ -166,14 +166,14 @@ import org.slf4j.LoggerFactory;
                         name=""),
                 @PropertyOption(
                     value='%'+ConfiguredSite.SEARCHER_TYPE+".option.sparql",
-                    name="org.apache.stanbol.entityhub.site.SparqlSearcher"),
+                    name="org.apache.stanbol.entityhub.searcher.SparqlSearcher"),
                 @PropertyOption(
                         value='%'+ConfiguredSite.SEARCHER_TYPE+".option.sparql-virtuoso",
-                        name="org.apache.stanbol.entityhub.site.VirtuosoSearcher"),
+                        name="org.apache.stanbol.entityhub.searcher.VirtuosoSearcher"),
                 @PropertyOption(
                         value='%'+ConfiguredSite.SEARCHER_TYPE+".option.sparql-larq",
-                        name="org.apache.stanbol.entityhub.site.LarqSearcher")
-            },value="org.apache.stanbol.entityhub.site.VirtuosoSearcher"),
+                        name="org.apache.stanbol.entityhub.searcher.LarqSearcher")
+            },value="org.apache.stanbol.entityhub.searcher.VirtuosoSearcher"),
         @Property(name=ConfiguredSite.DEFAULT_SYMBOL_STATE,
             options={
                 @PropertyOption( //seems, that name and value are exchanged ...
@@ -184,13 +184,13 @@ import org.slf4j.LoggerFactory;
                         name="active")
                 //the other states make no sense for new symbols
             }, value="proposed"),
-        @Property(name=ConfiguredSite.DEFAULT_MAPEED_ENTITY_STATE,
+        @Property(name=ConfiguredSite.DEFAULT_MAPPING_STATE,
             options={
                 @PropertyOption(
-                        value='%'+ConfiguredSite.DEFAULT_MAPEED_ENTITY_STATE+".option.proposed",
+                        value='%'+ConfiguredSite.DEFAULT_MAPPING_STATE+".option.proposed",
                         name="proposed"),
                 @PropertyOption(
-                        value='%'+ConfiguredSite.DEFAULT_MAPEED_ENTITY_STATE+".option.confirmed",
+                        value='%'+ConfiguredSite.DEFAULT_MAPPING_STATE+".option.confirmed",
                         name="confirmed")
                 //the other states make no sense for new symbols
             }, value="proposed"),
@@ -300,14 +300,14 @@ public class ReferencedSiteImpl implements ReferencedSite {
 
     @Override
     public final EntityMapping.MappingState getDefaultMappedEntityState() {
-        Object stateObject = properties.get(DEFAULT_MAPEED_ENTITY_STATE);
+        Object stateObject = properties.get(DEFAULT_MAPPING_STATE);
         if(stateObject == null){
             return EntityMapping.DEFAULT_MAPPING_STATE;
         } else {
             try {
                 return EntityMapping.MappingState.valueOf(stateObject.toString());
             } catch (IllegalArgumentException e) {
-                log.warn("Configuration "+DEFAULT_MAPEED_ENTITY_STATE+"="+stateObject+" dose not match any entry in the "+
+                log.warn("Configuration "+DEFAULT_MAPPING_STATE+"="+stateObject+" dose not match any entry in the "+
                         EntityMapping.MappingState.class+" Enumeration ( one of "+
                         Arrays.toString(EntityMapping.MappingState.values())+") " +
                         "-> return the default state "+EntityMapping.DEFAULT_MAPPING_STATE,e);
@@ -840,7 +840,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
                     createEntitySearcherComponent(factory);
                 }
             } else {
-                log.info(String.format("Ignore ServceEvent for ComponentFactory %s and state %s",
+                log.info(String.format("Ignore ServiceEvent for ComponentFactory %s and state %s",
                         eventComponentName,
                         event.getType()==ServiceEvent.MODIFIED?"MODIFIED":event.getType()==ServiceEvent.UNREGISTERING?"UNREGISTERING":"MODIFIED_ENDMATCH"));
             }

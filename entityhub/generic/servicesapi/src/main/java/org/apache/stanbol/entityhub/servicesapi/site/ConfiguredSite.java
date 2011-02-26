@@ -130,7 +130,7 @@ public interface ConfiguredSite {
      * Key used for the configuration of the default {@link EntityMapping} state
      * ({@link EntityMapping.MappingState} for a site
      */
-    String DEFAULT_MAPEED_ENTITY_STATE = "org.apache.stanbol.entityhub.site.defaultMappedEntityState";
+    String DEFAULT_MAPPING_STATE = "org.apache.stanbol.entityhub.site.defaultMappedEntityState";
     /**
      * The initial state for mappings of entities managed by this site
      * @return the default state for mappings to entities of this site

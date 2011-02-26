@@ -140,6 +140,7 @@ public class CommandLineRunner {
         options.addOption("i","incomming",true,"the file with the incomming links for Entities (id tab num, highest num needs to be the first line!)");
         options.addOption("ri","requiredIncomming",true,"the minimum number of incomming lins for Entities to be indexed");
         options.addOption("r","resume",true,"resume a previous canceled indexing session (usually used with -s)");
+        options.addOption("my","multiYardLayout",false,"If present the multi yard layout is used by the SolrYard");
     }
     private static final String footer;
     static {
@@ -177,6 +178,9 @@ public class CommandLineRunner {
         SolrYardConfig yardConfig = new SolrYardConfig(yardName, line.getArgs()[0]);
         //use the signRank as default for document Boosts
         yardConfig.setDocumentBoostFieldName(RdfResourceEnum.signRank.getUri());
+        if(line.hasOption("my")){
+            yardConfig.setMultiYardIndexLayout(true);
+        }
         //increase the boost for fields that are usually used as labels
         yardConfig.setFieldBoosts(fieldBoosts);
         SolrYard yard = new SolrYard(yardConfig);

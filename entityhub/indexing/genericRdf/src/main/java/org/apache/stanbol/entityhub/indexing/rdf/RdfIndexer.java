@@ -71,6 +71,7 @@ import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.tdb.TDBFactory;
 import com.hp.hpl.jena.tdb.TDBLoader;
 import com.hp.hpl.jena.tdb.base.file.Location;
@@ -474,6 +475,10 @@ public class RdfIndexer {
 		} else {
 			indexResources();
 		}
+		if(!chunkCache.isEmpty()){
+		    yard.store(chunkCache);
+		    chunkCache.clear();
+		}
 		writeCacheBaseConfiguration();
 	}
 	/**
@@ -555,7 +560,10 @@ public class RdfIndexer {
                     String field = fieldNode.asResource().getURI();
                     RDFNode value = solution.get("value");
                     if(value.isURIResource()){
-                        source.addReference(field, value.asResource().getURI());
+                        Resource r = value.asResource();
+                        if(r.getURI() != null && !r.getURI().isEmpty()) {
+                            source.addReference(field, value.asResource().getURI());
+                        }
                     } else if(value.isLiteral()){
                         Literal literal = value.asLiteral();
                         if(literal.getDatatype() != null){
@@ -563,24 +571,45 @@ public class RdfIndexer {
                             try {
                                 literalValue = literal.getValue();
                             } catch (DatatypeFormatException e) {
-                                log.warn(" Unable to convert "+literal.getLexicalForm()+" to "+literal.getDatatype()+"-> use lecicalForm");
-                                literalValue = literal.getLexicalForm();
+                                String lexicalFrom = literal.getLexicalForm();
+                                if(lexicalFrom != null && !lexicalFrom.isEmpty()){
+                                    log.warn(" Unable to convert "+literal.getLexicalForm()+" to "+literal.getDatatype()+"-> use lecicalForm");
+                                    literalValue = literal.getLexicalForm();
+                                } else {
+                                    literalValue = null;
+                                }
                             }
-                            if(literalValue instanceof BaseDatatype.TypedValue){
-                                source.add(field, ((BaseDatatype.TypedValue)literalValue).lexicalValue);
-                            } else if(literalValue instanceof XSDDateTime) {
-                                source.add(field, ((XSDDateTime)literalValue).asCalendar().getTime()); //Entityhub uses the time
-                            } else if(literalValue instanceof XSDDuration) {
-                                source.add(field, literalValue.toString());
-                            } else {
-                                source.add(field, literalValue);
+                            if(literalValue != null){
+                                if(literalValue instanceof BaseDatatype.TypedValue){
+                                    String lexicalValue = ((BaseDatatype.TypedValue)literalValue).lexicalValue;
+                                    if(lexicalValue != null && !lexicalValue.isEmpty()){
+                                        source.add(field, ((BaseDatatype.TypedValue)literalValue).lexicalValue);
+                                    }
+                                } else if(literalValue instanceof XSDDateTime) {
+                                    source.add(field, ((XSDDateTime)literalValue).asCalendar().getTime()); //Entityhub uses the time
+                                } else if(literalValue instanceof XSDDuration) {
+                                    String durationString = literalValue.toString();
+                                    if(durationString != null && !durationString.isEmpty()){
+                                        source.add(field, literalValue.toString());
+                                    }
+                                } else {
+                                    if(literalValue instanceof String){
+                                        if(!((String)literalValue).isEmpty())
+                                        source.add(field, literalValue);
+                                    } else {
+                                        source.add(field, literalValue);
+                                    }
+                                }
                             }
                         } else {
                             String lang = literal.getLanguage();
                             if(lang != null && lang.isEmpty()){
                                 lang = null;
                             }
-                            source.addNaturalText(field, literal.getLexicalForm(),lang);
+                            String lexicalFrom = literal.getLexicalForm();
+                            if(lexicalFrom != null && !lexicalFrom.isEmpty()){
+                                source.addNaturalText(field, literal.getLexicalForm(),lang);
+                            }
                         }
                     }
                 }
