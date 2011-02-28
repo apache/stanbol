@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <relativePath>../parent</relativePath>
+    <version>0.9-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>org.apache.stanbol.frameworkfragment</artifactId>
+  <packaging>jar</packaging>
+  <name>Apache Stanbol Default Framework Fragment Bundle</name>
+  <version>0.9.0-SNAPSHOT</version>
+
+  <description>
+    Fragment bundle that causes additional packages from the JVM
+    environment to be exported.  After starting this bundle, the OSGi
+    console detail view of the system bundle (/system/console/bundles/0)
+    should list two com.example packages as being exported.
+  </description>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.groovy.maven</groupId>
+        <artifactId>gmaven-plugin</artifactId>
+        <version>1.0</version>
+        <executions>
+          <execution>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>execute</goal>
+            </goals>
+            <configuration>
+              <properties>
+                <rawVersion>${project.version}</rawVersion>
+              </properties>
+              <source>
+                // Convert POM version to valid OSGi version identifier
+                project.properties['osgi.version'] =
+                (project.properties['rawVersion'] =~ /-/).replaceAll('.')
+              </source>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <!-- The POM packaging is jar but with these settings
+              we create a valid bundle. -->
+         <groupId>org.apache.maven.plugins</groupId>
+         <artifactId>maven-jar-plugin</artifactId>
+         <configuration>
+           <archive>
+             <index>true</index>
+             <manifest>
+               <addClasspath>false</addClasspath>
+             </manifest>
+             <manifestEntries>
+               <Bundle-Version>${osgi.version}</Bundle-Version>
+               <Bundle-Description>${project.description}</Bundle-Description>
+               <Bundle-Name>${project.name}</Bundle-Name>
+               <Bundle-DocURL>http://incubator.apache.org/stanbol</Bundle-DocURL>
+               <Bundle-ManifestVersion>2</Bundle-ManifestVersion>
+               <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
+               <Fragment-Host>system.bundle; extension:=framework</Fragment-Host>
+               <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+
+               <!-- Packages listed here will be exported by the system
+                    bundle once this bundle is active.
+                    The OSGi framework does not check whether the packages
+                     are actually available.  -->
+               <Export-Package>
+                 com.sun.xml.ws,
+                 com.sun.xml.ws.addressing,
+                 com.sun.xml.ws.addressing.model,
+                 com.sun.xml.ws.addressing.v200408,
+                 com.sun.xml.ws.api,
+                 com.sun.xml.ws.api.addressing,
+                 com.sun.xml.ws.api.client,
+                 com.sun.xml.ws.api.fastinfoset,
+                 com.sun.xml.ws.api.handler,
+                 com.sun.xml.ws.api.message,
+                 com.sun.xml.ws.api.message.stream,
+                 com.sun.xml.ws.api.model,
+                 com.sun.xml.ws.api.model.soap,
+                 com.sun.xml.ws.api.model.wsdl,
+                 com.sun.xml.ws.api.pipe,
+                 com.sun.xml.ws.api.pipe.helper,
+                 com.sun.xml.ws.api.server,
+                 com.sun.xml.ws.api.streaming,
+                 com.sun.xml.ws.api.wsdl.parser,
+                 com.sun.xml.ws.api.wsdl.writer,
+                 com.sun.xml.ws.binding,
+                 com.sun.xml.ws.client,
+                 com.sun.xml.ws.client.dispatch,
+                 com.sun.xml.ws.client.sei,
+                 com.sun.xml.ws.developer,
+                 com.sun.xml.ws.developer.servlet,
+                 com.sun.xml.ws.encoding,
+                 com.sun.xml.ws.encoding.fastinfoset,
+                 com.sun.xml.ws.encoding.soap,
+                 com.sun.xml.ws.encoding.soap.streaming,
+                 com.sun.xml.ws.encoding.xml,
+                 com.sun.xml.ws.fault,
+                 com.sun.xml.ws.handler,
+                 com.sun.xml.ws.message,
+                 com.sun.xml.ws.message.jaxb,
+                 com.sun.xml.ws.message.saaj,
+                 com.sun.xml.ws.message.source,
+                 com.sun.xml.ws.message.stream,
+                 com.sun.xml.ws.model,
+                 com.sun.xml.ws.model.soap,
+                 com.sun.xml.ws.model.wsdl,
+                 com.sun.xml.ws.org.objectweb.asm,
+                 com.sun.xml.ws.protocol.soap,
+                 com.sun.xml.ws.protocol.xml,
+                 com.sun.xml.ws.resources,
+                 com.sun.xml.ws.server,
+                 com.sun.xml.ws.server.provider,
+                 com.sun.xml.ws.server.sei,
+                 com.sun.xml.ws.server.servlet,
+                 com.sun.xml.ws.spi,
+                 com.sun.xml.ws.streaming,
+                 com.sun.xml.ws.transport,
+                 com.sun.xml.ws.transport.http,
+                 com.sun.xml.ws.transport.http.client,
+                 com.sun.xml.ws.transport.http.server,
+                 com.sun.xml.ws.transport.http.servlet,
+                 com.sun.xml.ws.util,
+                 com.sun.xml.ws.util.exception,
+                 com.sun.xml.ws.util.localization,
+                 com.sun.xml.ws.util.pipe,
+                 com.sun.xml.ws.util.xml,
+                 com.sun.xml.ws.wsdl.parser,
+                 com.sun.xml.ws.wsdl.writer,
+                 com.sun.xml.ws.wsdl.writer.document,
+                 com.sun.xml.ws.wsdl.writer.document.http,
+                 com.sun.xml.ws.wsdl.writer.document.soap,
+                 com.sun.xml.ws.wsdl.writer.document.soap12,
+                 com.sun.xml.ws.wsdl.writer.document.xsd,
+                 com.sun.xml.internal.bind,
+                 com.sun.xml.internal.ws,
+                 com.sun.xml.internal.ws.addressing,
+                 com.sun.xml.internal.ws.addressing.model,
+                 com.sun.xml.internal.ws.addressing.v200408,
+                 com.sun.xml.internal.ws.api,
+                 com.sun.xml.internal.ws.api.addressing,
+                 com.sun.xml.internal.ws.api.client,
+                 com.sun.xml.internal.ws.api.fastinfoset,
+                 com.sun.xml.internal.ws.api.handler,
+                 com.sun.xml.internal.ws.api.message,
+                 com.sun.xml.internal.ws.api.message.stream,
+                 com.sun.xml.internal.ws.api.model,
+                 com.sun.xml.internal.ws.api.model.soap,
+                 com.sun.xml.internal.ws.api.model.wsdl,
+                 com.sun.xml.internal.ws.api.pipe,
+                 com.sun.xml.internal.ws.api.pipe.helper,
+                 com.sun.xml.internal.ws.api.server,
+                 com.sun.xml.internal.ws.api.streaming,
+                 com.sun.xml.internal.ws.api.wsdl.parser,
+                 com.sun.xml.internal.ws.api.wsdl.writer,
+                 com.sun.xml.internal.ws.binding,
+                 com.sun.xml.internal.ws.client,
+                 com.sun.xml.internal.ws.client.dispatch,
+                 com.sun.xml.internal.ws.client.sei,
+                 com.sun.xml.internal.ws.developer,
+                 com.sun.xml.internal.ws.encoding,
+                 com.sun.xml.internal.ws.encoding.fastinfoset,
+                 com.sun.xml.internal.ws.encoding.soap,
+                 com.sun.xml.internal.ws.encoding.soap.streaming,
+                 com.sun.xml.internal.ws.encoding.xml,
+                 com.sun.xml.internal.ws.fault,
+                 com.sun.xml.internal.ws.handler,
+                 com.sun.xml.internal.ws.message,
+                 com.sun.xml.internal.ws.message.jaxb,
+                 com.sun.xml.internal.ws.message.saaj,
+                 com.sun.xml.internal.ws.message.source,
+                 com.sun.xml.internal.ws.message.stream,
+                 com.sun.xml.internal.ws.model,
+                 com.sun.xml.internal.ws.model.soap,
+                 com.sun.xml.internal.ws.model.wsdl,
+                 com.sun.xml.internal.ws.org.objectweb.asm,
+                 com.sun.xml.internal.ws.protocol.soap,
+                 com.sun.xml.internal.ws.protocol.xml,
+                 com.sun.xml.internal.ws.resources,
+                 com.sun.xml.internal.ws.server,
+                 com.sun.xml.internal.ws.server.provider,
+                 com.sun.xml.internal.ws.server.sei,
+                 com.sun.xml.internal.ws.spi,
+                 com.sun.xml.internal.ws.streaming,
+                 com.sun.xml.internal.ws.transport,
+                 com.sun.xml.internal.ws.transport.http,
+                 com.sun.xml.internal.ws.transport.http.client,
+                 com.sun.xml.internal.ws.transport.http.server,
+                 com.sun.xml.internal.ws.util,
+                 com.sun.xml.internal.ws.util.exception,
+                 com.sun.xml.internal.ws.util.localization,
+                 com.sun.xml.internal.ws.util.pipe,
+                 com.sun.xml.internal.ws.util.xml,
+                 com.sun.xml.internal.ws.wsdl.parser,
+                 com.sun.xml.internal.ws.wsdl.writer,
+                 com.sun.xml.internal.ws.wsdl.writer.document,
+                 com.sun.xml.internal.ws.wsdl.writer.document.http,
+                 com.sun.xml.internal.ws.wsdl.writer.document,
+                 com.sun.xml.internal.ws.wsdl.writer.document.soap,
+                 com.sun.xml.internal.ws.wsdl.writer.document.soap12,
+                 com.sun.xml.internal.ws.wsdl.writer.document.xsd
+               </Export-Package>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+
