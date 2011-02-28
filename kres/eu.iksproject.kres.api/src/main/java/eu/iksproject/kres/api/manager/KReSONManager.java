@@ -1,9 +1,7 @@
 package eu.iksproject.kres.api.manager;
 
-import javax.ws.rs.core.Context;
-
-import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import eu.iksproject.kres.api.manager.ontology.OntologyIndex;

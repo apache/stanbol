@@ -33,11 +33,11 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.iksproject.kres.api.format.KReSFormat;
 import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.storage.NoSuchStoreException;
 import eu.iksproject.kres.api.storage.OntologyStorage;
 import eu.iksproject.kres.api.storage.OntologyStoreProvider;
+import eu.iksproject.kres.jersey.format.KReSFormat;
 import eu.iksproject.kres.shared.transformation.JenaToOwlConvert;
 
 import org.semanticweb.owlapi.model.OWLOntology;

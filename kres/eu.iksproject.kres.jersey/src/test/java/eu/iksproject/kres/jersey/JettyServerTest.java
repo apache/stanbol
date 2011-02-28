@@ -18,7 +18,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.ClientResponse.Status;
 import com.sun.jersey.api.representation.Form;
 
-import eu.iksproject.kres.api.format.KReSFormat;
+import eu.iksproject.kres.jersey.format.KReSFormat;
 
 public class JettyServerTest {
 

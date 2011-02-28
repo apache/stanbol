@@ -22,7 +22,6 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import eu.iksproject.kres.api.format.KReSFormat;
 import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
@@ -33,6 +32,7 @@ import eu.iksproject.kres.api.manager.ontology.SessionOntologySpace;
 import eu.iksproject.kres.api.manager.ontology.UnmodifiableOntologySpaceException;
 import eu.iksproject.kres.api.manager.session.KReSSession;
 import eu.iksproject.kres.api.manager.session.KReSSessionManager;
+import eu.iksproject.kres.jersey.format.KReSFormat;
 import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.manager.renderers.SessionRenderer;
 

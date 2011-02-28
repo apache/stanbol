@@ -30,7 +30,7 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.iksproject.kres.api.format.KReSFormat;
+import eu.iksproject.kres.jersey.format.KReSFormat;
 import eu.iksproject.kres.shared.transformation.OWLAPIToClerezzaConverter;
 
 @Provider

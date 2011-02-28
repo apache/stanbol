@@ -1,13 +1,7 @@
 package eu.iksproject.kres.rules;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.ws.rs.HEAD;
 
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -22,7 +16,6 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import eu.iksproject.kres.api.rules.KReSRule;
 import eu.iksproject.kres.api.rules.KReSRuleAtom;
 import eu.iksproject.kres.api.rules.util.AtomList;
-import eu.iksproject.kres.api.rules.Recipe;
 import eu.iksproject.kres.ontologies.SWRL;
 
 public class KReSRuleImpl implements KReSRule {

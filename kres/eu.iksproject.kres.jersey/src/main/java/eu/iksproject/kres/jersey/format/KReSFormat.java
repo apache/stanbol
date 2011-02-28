@@ -1,4 +1,4 @@
-package eu.iksproject.kres.api.format;
+package eu.iksproject.kres.jersey.format;
 
 import javax.ws.rs.core.MediaType;
 

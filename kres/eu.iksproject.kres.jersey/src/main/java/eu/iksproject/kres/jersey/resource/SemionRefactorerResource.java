@@ -44,7 +44,6 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import com.sun.jersey.api.view.ImplicitProduces;
 
 
-import eu.iksproject.kres.api.format.KReSFormat;
 import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.reasoners.InconcistencyException;
 import eu.iksproject.kres.api.rules.NoSuchRecipeException;
@@ -52,6 +51,7 @@ import eu.iksproject.kres.api.rules.Recipe;
 import eu.iksproject.kres.api.semion.SemionRefactorer;
 import eu.iksproject.kres.api.semion.SemionManager;
 import eu.iksproject.kres.api.semion.SemionRefactoringException;
+import eu.iksproject.kres.jersey.format.KReSFormat;
 import eu.iksproject.kres.semion.refactorer.SemionRefactorerImpl;
 
 /**

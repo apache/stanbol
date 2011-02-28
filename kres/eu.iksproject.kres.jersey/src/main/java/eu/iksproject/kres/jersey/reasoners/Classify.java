@@ -46,7 +46,6 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-import eu.iksproject.kres.api.format.KReSFormat;
 import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.api.manager.ontology.OntologySpace;
@@ -57,6 +56,7 @@ import eu.iksproject.kres.api.rules.NoSuchRecipeException;
 import eu.iksproject.kres.api.rules.RuleStore;
 import eu.iksproject.kres.api.rules.util.KReSRuleList;
 import eu.iksproject.kres.api.storage.OntologyStoreProvider;
+import eu.iksproject.kres.jersey.format.KReSFormat;
 import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.reasoners.KReSCreateReasoner;
 import eu.iksproject.kres.reasoners.KReSRunReasoner;

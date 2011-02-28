@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.ImplicitProduces;
 
-import eu.iksproject.kres.api.format.KReSFormat;
 import eu.iksproject.kres.api.semion.DataSource;
 import eu.iksproject.kres.api.semion.ReengineeringException;
 import eu.iksproject.kres.api.semion.SemionManager;
@@ -49,6 +48,7 @@ import eu.iksproject.kres.api.semion.util.ReengineerType;
 import eu.iksproject.kres.api.semion.util.URIGenerator;
 import eu.iksproject.kres.api.semion.util.UnsupportedReengineerException;
 import eu.iksproject.kres.api.storage.OntologyStoreProvider;
+import eu.iksproject.kres.jersey.format.KReSFormat;
 import eu.iksproject.kres.jersey.util.OntologyRenderUtils;
 import eu.iksproject.kres.semion.manager.datasources.DataSourceFactory;
 import eu.iksproject.kres.semion.manager.datasources.InvalidDataSourceForTypeSelectedException;

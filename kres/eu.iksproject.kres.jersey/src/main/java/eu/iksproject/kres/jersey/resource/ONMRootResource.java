@@ -19,11 +19,11 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.iksproject.kres.api.format.KReSFormat;
 import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.api.manager.ontology.ScopeRegistry;
 import eu.iksproject.kres.api.storage.OntologyStoreProvider;
+import eu.iksproject.kres.jersey.format.KReSFormat;
 import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.manager.renderers.ScopeSetRenderer;
 import eu.iksproject.kres.storage.provider.OntologyStorageProviderImpl;

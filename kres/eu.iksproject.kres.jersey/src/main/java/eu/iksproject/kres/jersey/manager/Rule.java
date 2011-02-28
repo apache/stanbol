@@ -43,10 +43,10 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.iksproject.kres.api.format.KReSFormat;
 import eu.iksproject.kres.api.manager.KReSONManager;
 import eu.iksproject.kres.api.rules.RuleStore;
 import eu.iksproject.kres.api.storage.OntologyStoreProvider;
+import eu.iksproject.kres.jersey.format.KReSFormat;
 import eu.iksproject.kres.jersey.resource.NavigationMixin;
 import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.rules.manager.KReSAddRecipe;

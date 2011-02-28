@@ -34,42 +34,16 @@
 				<artifactId>maven-bundle-plugin</artifactId>
 				<extensions>true</extensions>
 				<configuration>
-					<instructions>
+					<instructions>				
 						<Export-Package>
 							eu.iksproject.kres.api.*;version=${kres-version},
-							com.hp.hpl.jena.*,
-							com.ibm.icu.*,
-							com.sun.jersey.*,
-							javax.ws.*;version=1.1.1,
 							org.stlab.xd.registry.*
             			</Export-Package>
 						<Import-Package>
 							org.slf4j.*,
-							!org.apache.lucene.*,
-							!org.apache.xerces.*,
-							!org.apache.tools.*,
-							!org.codehaus.*,
-							!org.openjena.atlas.*,
-							!javax.ws.*,
-							!org.objectweb.*,
-							!tdb.*,
-							!arq.*,
-							!javax.xml.*,
-							!com.sun.*,
-							!javax.activation,
-							!javax.ejb,
-							!javax.enterprise.*,
-							!javax.interceptor.*,
-							!javax.mail.*,
-							!javax.persistence.*,
-							!javax.annotation.*,
-							!javax.servlet.annotation.*,
-							!javax.imageio.*,
-							!javax.servlet.*,
-							!org.w3c.*,
-							!org.xml.*,
 							*
             		</Import-Package>
+            		<_nouses>true</_nouses>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -159,33 +133,6 @@
 			<artifactId>owlapi</artifactId>
 			<version>3.0.0</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-queries</artifactId>
-			<version>3.0.1</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-analyzers</artifactId>
-			<version>3.0.1</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-server</artifactId>
-			<version>${jersey-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-core</artifactId>
-			<version>${jersey-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-json</artifactId>
-			<version>${jersey-version}</version>
 		</dependency>
 
 		<dependency>
