@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
-    
+	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<groupId>eu.iksproject</groupId>
 		<artifactId>eu.iksproject.kres.parent</artifactId>
@@ -10,56 +10,55 @@
 		<relativePath>../../../eu.iksproject.kres.parent</relativePath>
 	</parent>
 
-
-    <groupId>eu.iksproject</groupId>
-    <artifactId>eu.iksproject.kres.shared.dependency.xerces</artifactId>
+	<groupId>eu.iksproject</groupId>
+	<artifactId>eu.iksproject.kres.shared.dependency.xerces</artifactId>
 	<version>${kres-version}</version>
-    <packaging>bundle</packaging>
-    <name>IKS KReS Xerces dependency</name>
+	<packaging>bundle</packaging>
+	<name>IKS KReS Xerces dependency</name>
 
 	<properties>
 		<kres-version>0.7</kres-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
-    <dependencies>
-        <dependency>
-  	    <groupId>xerces</groupId>
-	    <artifactId>xercesImpl</artifactId>
-	    <version>2.7.1</version>
-        <scope>compile</scope>
-        </dependency>
-        <dependency>
-   			<groupId>org.codehaus.castor</groupId>
-   			<artifactId>castor-xml</artifactId>
-   			<version>1.3.1</version>
+	<dependencies>
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+			<version>2.7.1</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
-   			<groupId>org.codehaus.castor</groupId>
-   			<artifactId>castor-codegen</artifactId>
-   			<version>1.3.1</version>
+			<groupId>org.codehaus.castor</groupId>
+			<artifactId>castor-xml</artifactId>
+			<version>1.3.1</version>
 		</dependency>
-    </dependencies>
-    <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-          	<Export-Package>
+		<dependency>
+			<groupId>org.codehaus.castor</groupId>
+			<artifactId>castor-codegen</artifactId>
+			<version>1.3.1</version>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Export-Package>
 							org.apache.xerces.*,
 							org.apache.xml.serialize,
 							org.castor.core.*,
 							org.castor.mapping,
 							org.exolab.castor.*,
 							org.exolab.javasource
-            </Export-Package>
+            			</Export-Package>
 						<Private-Package>
 							org.castor.xml
             			</Private-Package>
-            <Import-Package>
+						<Import-Package>
 							javax.naming,
 							javax.naming.directory,
 							javax.servlet,
@@ -69,45 +68,43 @@
 							javax.xml.transform.*,
 							javax.xml.validation,
 							!netscape.ldap,
-							!org.apache.avalon.framework.logger,
-							!org.apache.log,
 							org.apache.log4j,
 							!org.apache.oro.text.regex,
 							!org.apache.regexp,
-		!org.apache.velocity.*,
+							!org.apache.velocity.*,
 							!org.apache.xml.resolver,
 							!org.apache.xml.resolver.readers,
 							org.castor.mapping,
 							org.w3c.dom.*,
 							org.xml.sax.*,
 							!sun.io,
-		*
-            </Import-Package>
-            
-			<!-- TODO those should be bundles! -->
-          </instructions>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
-  
-  <repositories>
-  	<repository>
-    	<id>codehaus</id>
-    	<name>Maven Codehaus repository</name>
-    	<url>http://repository.codehaus.org/</url>
-	</repository>
-  </repositories>
+							*
+						</Import-Package>
+						<_nouses>true</_nouses>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-scr-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>codehaus</id>
+			<name>Maven Codehaus repository</name>
+			<url>http://repository.codehaus.org/</url>
+		</repository>
+	</repositories>
+	
 </project>

@@ -53,23 +53,23 @@
 			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.shared.transformation</artifactId>
 			<version>${kres-version}</version>
-		 <exclusions>
-		  <exclusion>
-		   <artifactId>slf4j-log4j12</artifactId>
-		   <groupId>org.slf4j</groupId>
-		  </exclusion>
-		 </exclusions>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-log4j12</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>owl-link</groupId>
 			<artifactId>owl-link</artifactId>
 			<version>1.0.2</version>
 		</dependency>
-		
+
 		<!-- Diagnostics deps -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>			
+			<artifactId>slf4j-api</artifactId>
 			<version>1.5.2</version>
 			<scope>provided</scope>
 		</dependency>
@@ -86,19 +86,19 @@
 			<artifactId>junit</artifactId>
 			<version>4.4</version>
 			<scope>test</scope>
-                        <exclusions>
-                            <exclusion>
-                            <groupId>org.slf4j</groupId>
-                            <artifactId>slf4j-api</artifactId>
-                            </exclusion>
-                       </exclusions>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-	 <dependency>
-	  <groupId>org.slf4j</groupId>
-	  <artifactId>slf4j-simple</artifactId>
-	  <version>1.5.2</version>
-	  <scope>test</scope>
-	 </dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.5.2</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -112,122 +112,18 @@
 						<Private-Package>eu.iksproject.kres.reasoners.*</Private-Package>
 						<Export-Package>
 							eu.iksproject.kres.reasoners.*,
-							eu.iksproject.kres.shered.trasformation.*,
-							org.semanticweb.HermiT.*,
-							com.hp.hpl.jena.*,
-							org.semanticweb.owlapi.owllink.*,
-							org.semanticweb.owlapi.reasoner.*
 						</Export-Package>
 						<Import-Package>
 							com.hp.hpl.jena.*,
 							org.semanticweb.owlapi.owllink.*,
 							org.slf4j.*;version=1.5.2,
-							eu.iksproject.kres.shered.trasformation.*,
+							eu.iksproject.kres.shared.transformation.*,
 							org.semanticweb.HermiT.*,
-                                                        org.semanticweb.owlapi.reasoner.*,
-                                                        uk.ac.manchester.cs.owl.owlapi,
-                                                        org.semanticweb.owlapi.*,
-							!com.sun.org.apache.xml.internal.serialize,
-							!org.coode.owlapi.owlxml.renderer,
-							!org.coode.owlapi.owlxmlparser,
-							!org.coode.string,
-							!org.coode.xml,
-							!org.mortbay.http,
-							!org.mortbay.http.handler,
-							!org.mortbay.util,
-							!org.semanticweb.owl.apibinding,
-							!org.semanticweb.owl.inference,
-							!org.semanticweb.owl.model,
-							!org.semanticweb.owl.util,
-							!org.semanticweb.owl.vocab,
-							!org.semanticweb.reasonerfactory.pellet,
-							!uk.ac.manchester.cs.owl,
-							!org.slf4j.imp.*,
-							!com.ibm.icu.lang,
-							!com.ibm.icu.text,
-							!javax.xml.namespace,
-							!javax.xml.stream,
-							!org.apache.axiom.c14n.impl,
-							!org.apache.lucene.analysis,
-							!org.apache.lucene.analysis.standard,
-							!org.apache.lucene.document,
-							!org.apache.lucene.index,
-							!org.apache.lucene.queryParser,
-							!org.apache.lucene.search,
-							!org.apache.lucene.store,
-							!org.apache.xerces.impl.dv,
-							!org.apache.xerces.impl.dv.util,
-							!org.apache.xerces.impl.dv.xs,
-							!org.apache.xerces.impl.validation,
-							!org.apache.xerces.impl.xpath.regex,
-							!org.apache.xerces.parsers,
-							!org.apache.xerces.util,
-							!org.apache.xerces.xni,
-							!org.apache.xerces.xni.grammars,
-							!org.apache.xerces.xni.parser,
-							!org.apache.xerces.xs,
-							!org.coode.owlapi.turtle,
-							!org.w3c.dom,
-							!rationals,
-							!rationals.transformations,
-							!com.clarkparsia.owlapi.*,
-							!dk.brics.automaton,
-							!gnu.getopt,
-							!javax.swing,
-							!javax.swing.event,
-							!javax.swing.text,
-							!javax.swing.tree,
-							!org.semanticweb.owlapi.*,
-							!com.sun.jdmk.comm,
-							!com.sun.msv.grammar,
-							!com.sun.msv.grammar.trex,
-							!com.sun.msv.reader,
-							!com.sun.msv.reader.trex.ng,
-							!com.sun.msv.reader.util,
-							!com.sun.msv.util,
-							!com.sun.msv.verifier,
-							!com.sun.msv.verifier.regexp,
-							!javax.activation,
-							!javax.jms,
-							!javax.mail,
-							!javax.mail.internet,
-							!javax.mail.util,
-							!javax.management,
-							!javax.naming,
-							!javax.security.auth.x500,
-							!javax.swing.border,
-							!javax.swing.table,
-							!javax.xml.datatype,
-							!javax.xml.parsers,
-							!javax.xml.transform,
-							!javax.xml.transform.dom,
-							!javax.xml.transform.sax,
-							!javax.xml.transform.stream,
-							!javax.xml.validation,
-							!junit.framework,
-							!org.apache.avalon.framework.logger,
-							!org.apache.log,
-							!org.apache.xml.resolver,
-							!org.apache.xml.resolver.readers,
-							!org.jaxen,
-							!org.jaxen.saxpath,
-							!org.jaxen.util,
-							!org.protege.editor.owl.model,
-							!org.protege.editor.owl.model.inference,
-							!org.relaxng.datatype,
-							!org.w3c.dom.events,
-							!org.w3c.dom.ls,
-							!org.w3c.dom.ranges,
-							!org.w3c.dom.traversal,
-							!org.xml.sax,
-							!org.xml.sax.ext,
-							!org.xml.sax.helpers,
-							!sun.io,
-							!arq.cmd.*,
-							!org.openjena.*,
-							!tdb.cmdline.*,
+							uk.ac.manchester.cs.owl.owlapi,
+							org.semanticweb.owlapi.*,
 							*
-							</Import-Package>
+						</Import-Package>
+						<_nouses>true</_nouses>
 					</instructions>
 				</configuration>
 			</plugin>

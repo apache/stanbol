@@ -37,7 +37,7 @@
 					<instructions>
 						<Bundle-ClassPath>
 							.,
-							OSGI-INF/serviceComponents.xml
+							OSGI-INF
 						</Bundle-ClassPath>
 						<Export-Package>
 							eu.iksproject.kres.storage
@@ -46,20 +46,20 @@
 							com.hp.hpl.jena.ontology,
 							com.hp.hpl.jena.util,
 							com.hp.hpl.jena.rdf.model,
-							com.sun.jersey.api.*,
 							eu.iksproject.kres.api.storage,
 							eu.iksproject.kres.shared.transformation,
-							javax.xml.namespace, 
-							javax.xml.parsers, 
+							javax.xml.namespace,
+							javax.xml.parsers,
 							javax.xml.xpath,
 							org.apache.clerezza.rdf.core.*,
 							org.osgi.service.component,
 							org.semanticweb.owlapi.*,
-							org.slf4j, 
-							org.w3c.dom, 
+							org.slf4j,
+							org.w3c.dom,
 							org.xml.sax
 						</Import-Package>
 						<Private-Package />
+						<_nouses>true</_nouses>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -77,7 +77,6 @@
 			</plugin>
 		</plugins>
 	</build>
-
 
 	<dependencies>
 

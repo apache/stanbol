@@ -41,21 +41,18 @@
 
 						<Export-Package>
 							eu.iksproject.kres.manager,
-							eu.iksproject.kres.manager.*,
-							conf/
+							eu.iksproject.kres.manager.*
 						</Export-Package>
 
 						<Import-Package>
 							eu.iksproject.kres.api.manager.*,
 							eu.iksproject.kres.api.storage.*,
 							eu.iksproject.kres.storage,
-							org.coode.owlapi.*,
 							org.osgi.*,
 							org.semanticweb.owlapi.*,
 							org.slf4j.*;version=1.5.2,
 							org.stlab.xd.registry.io,
 							org.stlab.xd.registry.models,
-							org.xml.sax.*
 						</Import-Package>
 
 						<Private-Package>
@@ -64,6 +61,8 @@
 							org.stlab.xd.vocabulary
 						</Private-Package>
 
+						<_nouses>true</_nouses>
+						
 					</instructions>
 				</configuration>
 			</plugin>

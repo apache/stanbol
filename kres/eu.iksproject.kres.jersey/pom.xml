@@ -88,11 +88,9 @@
 			</exclusions>
 		</dependency>
 		<!--
-		<dependency>
-			<groupId>com.sun.jersey.contribs</groupId>
-			<artifactId>jersey-multipart</artifactId>
-			<version>1.4</version>
-		</dependency>
+			<dependency> <groupId>com.sun.jersey.contribs</groupId>
+			<artifactId>jersey-multipart</artifactId> <version>1.4</version>
+			</dependency>
 		-->
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -216,13 +214,13 @@
 			<version>${kres-version}</version>
 			<scope>provided</scope>
 		</dependency>
-                <dependency>
+		<dependency>
 			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.rules</artifactId>
 			<version>${kres-version}</version>
 			<scope>provided</scope>
 		</dependency>
-                <dependency>
+		<dependency>
 			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.ontologies</artifactId>
 			<version>${kres-version}</version>
@@ -246,12 +244,12 @@
 			<version>${kres-version}</version>
 			<scope>provided</scope>
 		</dependency>
-        <dependency>
-            <groupId>eu.iksproject</groupId>
-            <artifactId>eu.iksproject.kres.reasoners</artifactId>
-            <version>${kres-version}</version>
-            <scope>provided</scope>
-	    </dependency>
+		<dependency>
+			<groupId>eu.iksproject</groupId>
+			<artifactId>eu.iksproject.kres.reasoners</artifactId>
+			<version>${kres-version}</version>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.storage.provider</artifactId>
@@ -302,23 +300,11 @@
 					<instructions>
 						<Export-Package>
 							eu.iksproject.kres.jersey.*
-            </Export-Package>
+            			</Export-Package>
 						<Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<Import-Package>
 							org.semanticweb.owlapi.*,
-							!com.sun.grizzly.*,
-							!com.sun.net.*,
-							!com.sun.xml.bind.v2.*,
-							!javax.activation.*,
-							!javax.annotation.*,
-							!javax.ejb.*,
-							!javax.enterprise.*,
-							!javax.imageio.*,
-							!javax.interceptor.*,
-							!javax.mail.*,
-							!javax.persistence.*,
-							!javax.servlet.annotation.*,
 							!javax.servlet.jsp.*,
 							!org.apache.tools.*,
 							!org.mortbay.*,
@@ -331,8 +317,9 @@
 							!org.dom4j.*,
 							!org.apache.log.*,
 							*
-            </Import-Package>
+            			</Import-Package>
 						<Embed-Dependency>freemarker</Embed-Dependency>
+						<_nouses>true</_nouses>
 					</instructions>
 				</configuration>
 			</plugin>
