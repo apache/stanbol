@@ -1,6 +1,7 @@
 package eu.iksproject.kres.rules.atoms;
 
 import java.net.URI;
+import java.util.ArrayList;
 
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -19,24 +20,22 @@ import org.semanticweb.owlapi.model.SWRLLiteralArgument;
 import org.semanticweb.owlapi.model.SWRLVariable;
 
 
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.SWRLAtom;
-
-
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import eu.iksproject.kres.api.rules.KReSRuleAtom;
+import eu.iksproject.kres.rules.SPARQLNot;
+import eu.iksproject.kres.api.rules.SPARQLObject;
+import eu.iksproject.kres.rules.SPARQLTriple;
 import eu.iksproject.kres.api.rules.URIResource;
 import eu.iksproject.kres.ontologies.SWRL;
 
-public class DatavaluedPropertyAtom implements KReSRuleAtom {
+public class DatavaluedPropertyAtom extends KReSCoreAtom {
 
 	private URIResource datatypeProperty;
 	private URIResource argument1;
 	private Object argument2;
-	
 	
 	public DatavaluedPropertyAtom(URIResource datatypeProperty, URIResource argument1, Object argument2) {
 		this.datatypeProperty = datatypeProperty;
@@ -45,34 +44,89 @@ public class DatavaluedPropertyAtom implements KReSRuleAtom {
 	}
 	
 	@Override
-	public String toSPARQL() {
+	public SPARQLObject toSPARQL() {
 		String arg1 = argument1.toString();
 		String arg2 = argument2.toString();
 		String dtP = datatypeProperty.toString();
 		
+		
+		boolean negativeArg1 = false;
+		boolean negativeArg2 = false;
+		boolean negativeDtP = false;
+		
 		if(arg1.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
-			arg1 = "?"+arg1.replace("http://kres.iks-project.eu/ontology/meta/variables#", ""); 
-		}
-		else{
-			arg1 = "<"+arg1+">";
+			arg1 = "?"+arg1.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			KReSVariable variable = (KReSVariable) argument1;
+			negativeArg1 = variable.isNegative();
 		}
 		
 		if(dtP.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
-			dtP = "?"+dtP.replace("http://kres.iks-project.eu/ontology/meta/variables#", ""); 
-		}
-		else{
-			dtP = "<"+dtP+">";
+			dtP = "?"+dtP.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			KReSVariable variable = (KReSVariable) datatypeProperty;
+			negativeDtP = variable.isNegative();
 		}
 		
 		if(arg2.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			arg2 = "?"+arg2.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			KReSVariable variable = (KReSVariable) argument2;
+			negativeArg2 = variable.isNegative();
 			
-			return arg1+" "+dtP+" "+arg2;
 		}
 		else{
-			OWLLiteral literal = getOWLTypedLiteral(argument2);
 			
-			return arg1+" "+dtP+" "+literal.getLiteral();
+			if(argument2 instanceof String){
+				arg2 = argument2.toString();
+			}
+			else if(argument2 instanceof Integer){
+				arg2 = ((Integer) argument2).toString();
+			}
+			else if(argument2 instanceof KReSTypedLiteral){
+				
+				KReSTypedLiteral kReSTypeLiteral = (KReSTypedLiteral) argument2;
+				
+				Object value = kReSTypeLiteral.getValue();
+				String xsdType = kReSTypeLiteral.getXsdType().toString();
+				
+				System.out.println("TYPED LITERAL : ");
+				System.out.println("        value : "+value);
+				System.out.println("        xsd type : "+xsdType);
+				
+				if(value instanceof String){
+					arg2 = value + "^^" + xsdType;
+				}
+				else if(value instanceof Integer){
+					arg2 = ((Integer) value).toString()+"^^" + xsdType;
+				}
+				
+				System.out.println("ARG 2 : "+arg2);
+			}
+			else if(argument2 instanceof StringFunctionAtom){
+				arg2 = ((StringFunctionAtom) argument2).toSPARQL().getObject();
+			}
+			//return arg1+" "+dtP+" "+literal.getLiteral();
+		}
+		
+		if(negativeArg1 || negativeArg2 || negativeDtP){
+			String optional = arg1+" "+dtP+" "+arg2;
+			
+			ArrayList<String> filters = new ArrayList<String>();
+			if(negativeArg1){
+				filters.add("!bound(" + arg1 + ")");
+			}
+			if(negativeArg2){
+				filters.add("!bound(" + arg2 + ")");
+			}
+			if(negativeDtP){
+				filters.add("!bound(" + dtP + ")");
+			}
+			
+			String[] filterArray = new String[filters.size()];
+			filterArray = filters.toArray(filterArray);
+			
+			return new SPARQLNot(optional, filterArray);
+		}
+		else{
+			return new SPARQLTriple(arg1+" "+dtP+" "+arg2);
 		}
 		
 		
@@ -192,21 +246,35 @@ public class DatavaluedPropertyAtom implements KReSRuleAtom {
 		
 		if(argument1.toString().startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			arg1 = "?"+argument1.toString().replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			KReSVariable variable = (KReSVariable) argument1;
+			if(variable.isNegative()){
+				arg1 = "notex(" + arg1 + ")";
+			}
 		}
 		else{
-			arg1 = "<"+argument1.toString()+">";
+			arg1 = argument1.toString();
 		}
 		
 		
 		if(datatypeProperty.toString().startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			arg3 = "?"+datatypeProperty.toString().replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			KReSVariable variable = (KReSVariable) datatypeProperty;
+			if(variable.isNegative()){
+				arg3 = "notex(" + arg3 + ")";
+			}
 		}
 		else{
-			arg3 = "<"+datatypeProperty.toString()+">";
+			arg3 = datatypeProperty.toString();
 		}
 		
 		if(argument2.toString().startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			arg2 = "?"+argument2.toString().replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			
+			KReSVariable variable = (KReSVariable) argument2;
+			if(variable.isNegative()){
+				arg2 = "notex(" + arg2 + ")";
+			}
+			
 			return "values(" + arg3 + ", " + arg1 + ", " + arg2 +")";
 		}
 		else{
@@ -215,9 +283,17 @@ public class DatavaluedPropertyAtom implements KReSRuleAtom {
 			return "values(" + arg3 + ", " + arg1 + ", " + literal.getLiteral() +")";
 		}
 		
-		
-		
-		
 	}
 
+
+	@Override
+	public boolean isSPARQLConstruct() {
+		return false;
+	}
+	
+	@Override
+	public boolean isSPARQLDelete() {
+		return false;
+	}
+	
 }

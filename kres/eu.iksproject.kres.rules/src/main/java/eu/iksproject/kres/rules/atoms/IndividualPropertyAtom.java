@@ -2,10 +2,7 @@ package eu.iksproject.kres.rules.atoms;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TypedLiteralImpl;
+import java.util.ArrayList;
 
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -17,18 +14,18 @@ import org.semanticweb.owlapi.model.SWRLAtom;
 import org.semanticweb.owlapi.model.SWRLIArgument;
 import org.semanticweb.owlapi.model.SWRLVariable;
 
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.SWRLAtom;
-
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import eu.iksproject.kres.api.rules.KReSRuleAtom;
+import eu.iksproject.kres.rules.SPARQLNot;
+import eu.iksproject.kres.api.rules.SPARQLObject;
+import eu.iksproject.kres.rules.SPARQLTriple;
 import eu.iksproject.kres.api.rules.URIResource;
 import eu.iksproject.kres.ontologies.SWRL;
 
-public class IndividualPropertyAtom implements KReSRuleAtom {
+public class IndividualPropertyAtom extends KReSCoreAtom {
 
 	
 	private URIResource objectProperty;
@@ -42,34 +39,63 @@ public class IndividualPropertyAtom implements KReSRuleAtom {
 	}
 	
 	@Override
-	public String toSPARQL() {
+	public SPARQLObject toSPARQL() {
 		String arg1 = argument1.toString();
 		String arg2 = argument2.toString();
 		String objP = objectProperty.toString();
 		
+		boolean negativeArg1 = false;
+		boolean negativeArg2 = false;
+		boolean negativeObjP = false;
+		
 		if(arg1.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
-			arg1 = "?"+arg1.replace("http://kres.iks-project.eu/ontology/meta/variables#", ""); 
-		}
-		else{
-			arg1 = "<"+arg1+">";
+			arg1 = "?"+arg1.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			KReSVariable variable = (KReSVariable) argument1;
+			if(variable.isNegative()){
+				negativeArg1 = true;
+			}
 		}
 		
 		if(arg2.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
-			arg2 = "?"+arg2.replace("http://kres.iks-project.eu/ontology/meta/variables#", ""); 
-		}
-		else{
-			arg2 = "<"+arg2+">";
+			arg2 = "?"+arg2.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			KReSVariable variable = (KReSVariable) argument2;
+			if(variable.isNegative()){
+				negativeArg2 = true;
+			}
 		}
 		
 		if(objP.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
-			objP = "?"+objP.replace("http://kres.iks-project.eu/ontology/meta/variables#", ""); 
+			objP = "?"+objP.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			KReSVariable variable = (KReSVariable) objectProperty;
+			if(variable.isNegative()){
+				negativeObjP = true;
+			}
+		}
+		
+		
+		
+		if(negativeArg1 || negativeArg2 || negativeObjP){
+			String optional = arg1+" "+objP+" "+arg2;
+			
+			ArrayList<String> filters = new ArrayList<String>();
+			if(negativeArg1){
+				filters.add("!bound(" + arg1 + ")");
+			}
+			if(negativeArg2){
+				filters.add("!bound(" + arg2 + ")");
+			}
+			if(negativeObjP){
+				filters.add("!bound(" + objP + ")");
+			}
+			
+			String[] filterArray = new String[filters.size()];
+			filterArray = filters.toArray(filterArray);
+			
+			return new SPARQLNot(optional, filterArray);
 		}
 		else{
-			objP = "<"+objP+">";
+			return new SPARQLTriple(arg1+" "+objP+" "+arg2);
 		}
-		
-		
-		return arg1+" "+objP+" "+arg2+" ";
 		
 	}
 
@@ -143,29 +169,51 @@ public class IndividualPropertyAtom implements KReSRuleAtom {
 		
 		if(argument1.toString().startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			arg1 = "?"+argument1.toString().replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			KReSVariable variable = (KReSVariable) argument1;
+			if(variable.isNegative()){
+				arg1 = "notex(" + arg1 + ")";
+			}
 		}
 		else{
-			arg1 = "<"+argument1.toString()+">";
+			arg1 = argument1.toString();
 		}
 		
 		
 		if(objectProperty.toString().startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			arg3 = "?"+objectProperty.toString().replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			KReSVariable variable = (KReSVariable) objectProperty;
+			if(variable.isNegative()){
+				arg3 = "notex(" + arg3 + ")";
+			}
 		}
 		else{
-			arg3 = "<"+objectProperty.toString()+">";
+			arg3 = objectProperty.toString();
 		}
 		
 		if(argument2.toString().startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			arg2 = "?"+argument2.toString().replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			KReSVariable variable = (KReSVariable) argument2;
+			if(variable.isNegative()){
+				arg2 = "notex(" + arg2 + ")";
+			}
 		}
 		else{
-			arg2 = "<"+argument2.toString()+">";
+			arg2 = argument2.toString();
 		}
 		
 		
 		return "has(" + arg3 + ", "+ arg1 +", "+arg2 +")";
 		
+	}
+
+	@Override
+	public boolean isSPARQLConstruct() {
+		return false;
+	}
+	
+	@Override
+	public boolean isSPARQLDelete() {
+		return false;
 	}
 
 	

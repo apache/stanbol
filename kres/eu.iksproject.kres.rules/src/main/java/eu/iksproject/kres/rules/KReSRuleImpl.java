@@ -1,6 +1,8 @@
 package eu.iksproject.kres.rules;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.semanticweb.owlapi.model.IRI;
@@ -15,6 +17,8 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 import eu.iksproject.kres.api.rules.KReSRule;
 import eu.iksproject.kres.api.rules.KReSRuleAtom;
+import eu.iksproject.kres.api.rules.KReSRuleExpressiveness;
+import eu.iksproject.kres.api.rules.SPARQLObject;
 import eu.iksproject.kres.api.rules.util.AtomList;
 import eu.iksproject.kres.ontologies.SWRL;
 
@@ -28,11 +32,18 @@ public class KReSRuleImpl implements KReSRule {
 	private AtomList head;
 	private AtomList body;
 	
+	private boolean forwardChain;
+	private boolean reflexive;
+	private boolean sparqlC;
+	private boolean sparqlD;
 	
-	public KReSRuleImpl(String ruleURI, AtomList body, AtomList head) {
+	KReSRuleExpressiveness expressiveness;
+	
+	public KReSRuleImpl(String ruleURI, AtomList body, AtomList head, KReSRuleExpressiveness expressiveness) {
 		this.ruleName = ruleURI;
 		this.head = head;
 		this.body = body;
+		this.expressiveness = expressiveness;
 	}
 	
 	
@@ -55,31 +66,104 @@ public class KReSRuleImpl implements KReSRule {
 	
 	public String toSPARQL() {
 		
-		String sparql = "CONSTRUCT {";
+		String sparql = null;
+		
+		if(isSPARQLConstruct() || isSPARQLDelete()){
+			boolean found = false;
+			Iterator<KReSRuleAtom> it = body.iterator();
+			while(it.hasNext() && !found){
+				KReSRuleAtom kReSRuleAtom = it.next();
+				sparql = kReSRuleAtom.toSPARQL().getObject();
+				found = true;
+			}
+			
+		}
+		
+		else{
+		
+			sparql = "CONSTRUCT {";
+						
+			boolean firstIte = true;
+			
+			for(KReSRuleAtom kReSRuleAtom : head){
+				if(!firstIte){
+					sparql += " . ";
+				}
+				firstIte = false;
+				sparql += kReSRuleAtom.toSPARQL().getObject();
+			}
+			
+			sparql += "} ";
+			sparql += "WHERE {";
+			
+			firstIte = true;
+			ArrayList<SPARQLObject> sparqlObjects = new ArrayList<SPARQLObject>();
+			for(KReSRuleAtom kReSRuleAtom : body){
+				SPARQLObject sparqlObject = kReSRuleAtom.toSPARQL();
+				if(sparqlObject instanceof SPARQLNot){
+					sparqlObjects.add((SPARQLNot) sparqlObject);
+				}
+				else if(sparqlObject instanceof SPARQLComparison){
+					sparqlObjects.add((SPARQLComparison) sparqlObject);
+				}
+				else{
+					if(!firstIte){
+						sparql += " . ";
+					}
+					else{
+						firstIte = false;
+					}
+					sparql += kReSRuleAtom.toSPARQL().getObject();
+				}
+			}
+			
+			firstIte = true;
+			
+			
+			String optional = "";
+			String filter = "";
+			for(SPARQLObject sparqlObj : sparqlObjects){
+				if(sparqlObj instanceof SPARQLNot){
+					SPARQLNot sparqlNot = (SPARQLNot) sparqlObj;
+					if(!firstIte){
+						optional += " . ";
+					}	
+					else{
+						firstIte = false;
+					}
 					
-		boolean firstIte = true;
-		
-		for(KReSRuleAtom kReSRuleAtom : head){
-			if(!firstIte){
-				sparql += " . ";
+					optional += sparqlNot.getObject();
+					
+					String[] filters = sparqlNot.getFilters();
+					for(String theFilter : filters){
+						if(!filter.isEmpty()){
+							filter += " && ";
+						}
+						filter += theFilter;
+					}
+				}
+				else if(sparqlObj instanceof SPARQLComparison){
+					SPARQLComparison sparqlDifferent = (SPARQLComparison) sparqlObj;
+					
+					String theFilter = sparqlDifferent.getObject();
+					
+					if(!filter.isEmpty()){
+						filter += " && ";
+					}
+					
+					filter += theFilter;
+				}
 			}
-			firstIte = false;
-			sparql += kReSRuleAtom.toSPARQL();
-		}
-		
-		sparql += "} ";
-		sparql += "WHERE {";
-		
-		firstIte = true;
-		for(KReSRuleAtom kReSRuleAtom : body){
-			if(!firstIte){
-				sparql += " . ";
+			
+			if(!optional.isEmpty()){
+				sparql += " . OPTIONAL { " + optional + " } ";
 			}
-			sparql += kReSRuleAtom.toSPARQL();
-			firstIte = false;
+			if(!filter.isEmpty()){
+				sparql += " . FILTER ( " + filter + " ) ";
+			}
+			
+			sparql += "}";
 		}
-		
-		sparql += "}";
 		
 		return sparql;
 	}
@@ -188,28 +272,46 @@ public class KReSRuleImpl implements KReSRule {
 		
 		Resource rs = ModelFactory.createDefaultModel().createResource(ruleName);
 		String ruleInKReSSyntax = rs.getLocalName()+"[";
-		boolean firstLoop = true;
-		for(KReSRuleAtom atom : body){
-			if(!firstLoop){
-				ruleInKReSSyntax += " . ";
+		
+		
+		if(isSPARQLConstruct() || isSPARQLDelete()){
+			boolean found = false;
+			Iterator<KReSRuleAtom> it = body.iterator();
+			while(it.hasNext() && !found){
+				KReSRuleAtom kReSRuleAtom = it.next();
+				ruleInKReSSyntax = kReSRuleAtom.toSPARQL().getObject();
+				found = true;
 			}
-			else{
-				firstLoop = false;
-			}
-			ruleInKReSSyntax += atom.toKReSSyntax();
+			
 		}
+		else{
 		
-		ruleInKReSSyntax += " -> ";
-		
-		firstLoop = true;
-		for(KReSRuleAtom atom : head){
-			if(!firstLoop){
-				ruleInKReSSyntax += " . ";
+			boolean firstLoop = true;
+			for(KReSRuleAtom atom : body){
+				if(!firstLoop){
+					ruleInKReSSyntax += " . ";
+				}
+				else{
+					firstLoop = false;
+				}
+				ruleInKReSSyntax += atom.toKReSSyntax();
 			}
-			else{
-				firstLoop = false;
+			
+			if(head != null){
+			
+				ruleInKReSSyntax += " -> ";
+				
+				firstLoop = true;
+				for(KReSRuleAtom atom : head){
+					if(!firstLoop){
+						ruleInKReSSyntax += " . ";
+					}
+					else{
+						firstLoop = false;
+					}
+					ruleInKReSSyntax += atom.toKReSSyntax();
+				}
 			}
-			ruleInKReSSyntax += atom.toKReSSyntax();
 		}
 		
 		ruleInKReSSyntax += "]";
@@ -217,4 +319,65 @@ public class KReSRuleImpl implements KReSRule {
 		return ruleInKReSSyntax;
 	}
 	
+	@Override
+	public boolean isForwardChain() {
+		switch (expressiveness) {
+		case ForwardChaining:
+			return true;
+
+		default:
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isSPARQLConstruct() {
+		switch (expressiveness) {
+		case SPARQLConstruct:
+			return true;
+
+		default:
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isSPARQLDelete() {
+		switch (expressiveness) {
+		case SPARQLDelete:
+			return true;
+
+		default:
+			return false;
+		}
+	}
+	
+	@Override
+	public boolean isSPARQLDeleteData() {
+		switch (expressiveness) {
+		case SPARQLDeleteData:
+			return true;
+
+		default:
+			return false;
+		}
+	}
+	
+
+	@Override
+	public boolean isReflexive() {
+		switch (expressiveness) {
+		case Reflexive:
+			return true;
+
+		default:
+			return false;
+		}
+	}
+
+	
+	@Override
+	public KReSRuleExpressiveness getExpressiveness() {
+		return expressiveness;
+	}
 }

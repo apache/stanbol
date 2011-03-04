@@ -1,0 +1,55 @@
+package eu.iksproject.kres.rules.atoms;
+
+import eu.iksproject.kres.rules.SPARQLComparison;
+import eu.iksproject.kres.api.rules.SPARQLObject;
+
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.SWRLAtom;
+
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.Resource;
+
+public class StartsWithAtom extends ComparisonAtom {
+
+	
+	private StringFunctionAtom argument; 
+	private StringFunctionAtom term;
+	
+	public StartsWithAtom(StringFunctionAtom argument, StringFunctionAtom term) {
+		this.argument = argument;
+		this.term = term;
+	}
+	
+	@Override
+	public Resource toSWRL(Model model) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SPARQLObject toSPARQL() {
+		String argumentSparql = argument.toSPARQL().getObject();
+		
+		
+		
+		return new SPARQLComparison("<http://www.w3.org/2005/xpath-functions#starts-with> (" + argumentSparql + ", " + term.toSPARQL().getObject() + ")");
+	}
+
+	@Override
+	public SWRLAtom toSWRL(OWLDataFactory factory) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String toKReSSyntax() {
+		
+		
+		
+		return "startsWith(" + argument.toKReSSyntax() + ", " + term.toKReSSyntax() + ")";
+	}
+	
+	
+
+}
+

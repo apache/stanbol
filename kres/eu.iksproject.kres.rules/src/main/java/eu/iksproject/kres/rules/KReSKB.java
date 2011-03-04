@@ -1,5 +1,8 @@
 package eu.iksproject.kres.rules;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Hashtable;
 
 import org.slf4j.Logger;
@@ -8,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.hp.hpl.jena.ontology.OntModel;
 
 import eu.iksproject.kres.api.rules.KReSRule;
-import eu.iksproject.kres.api.rules.util.KReSRuleList;
+import eu.iksproject.kres.api.rules.util.KReSRuleList;;
 /**
  * 
  * FIXME
@@ -47,11 +50,63 @@ public class KReSKB {
 	}
 	
 	public void addRule(KReSRule kReSRule){
+		System.out.println("Adding rule to Head");
 		kReSRuleList.add(kReSRule);
 	}
 	
 	public KReSRuleList getkReSRuleList() {
 		return kReSRuleList;
+	}
+	
+	public String toSPARQL(){
+		String sparql = null;
+		if(kReSRuleList != null){
+			boolean firstIteration = true;
+			for(KReSRule kReSRule : kReSRuleList){
+				if(firstIteration){
+					firstIteration = false;
+				}
+				else{
+					sparql += " . ";
+				}
+				sparql += kReSRule.toSPARQL();
+			}
+		}
+		
+		return sparql;
+	}
+	
+	public void write(OutputStream outputStream) throws IOException{
+		boolean firstIt = true;
+		for(KReSRule kReSRule : kReSRuleList){
+			
+			String rule;
+			
+			if(firstIt){
+				rule = kReSRule.toKReSSyntax();
+				
+				firstIt = false;
+			}
+			else{
+				rule = " . " + System.getProperty("line.separator") + kReSRule.toKReSSyntax();
+			}
+			outputStream.write(rule.getBytes());
+		}
+		outputStream.close();
+	}
+	
+	public void write(FileWriter fileWriter) throws IOException{
+		boolean write = true;
+		for(KReSRule kReSRule : kReSRuleList){
+			if(write){
+				fileWriter.write(kReSRule.toKReSSyntax());
+				write = false;
+			}
+			else{
+				fileWriter.write(" . " + System.getProperty("line.separator") + kReSRule.toKReSSyntax());
+			}
+		}
+		fileWriter.close();
 	}
 	
 }

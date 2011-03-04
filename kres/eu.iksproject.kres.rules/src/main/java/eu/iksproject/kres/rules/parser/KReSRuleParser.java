@@ -5,39 +5,63 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Iterator;
 
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-
-import eu.iksproject.kres.api.rules.KReSRule;
 import eu.iksproject.kres.api.rules.KReSRuleAtom;
+import eu.iksproject.kres.api.rules.KReSRule;
+import eu.iksproject.kres.api.rules.KReSRuleExpressiveness;
 import eu.iksproject.kres.api.rules.URIResource;
 import eu.iksproject.kres.api.rules.util.AtomList;
-import eu.iksproject.kres.api.rules.util.KReSRuleList;
 import eu.iksproject.kres.rules.KReSKB;
 import eu.iksproject.kres.rules.KReSRuleImpl;
 import eu.iksproject.kres.rules.atoms.ClassAtom;
+import eu.iksproject.kres.rules.atoms.ComparisonAtom;
+import eu.iksproject.kres.rules.atoms.ConcatAtom;
+import eu.iksproject.kres.rules.atoms.CreateLabelAtom;
 import eu.iksproject.kres.rules.atoms.DatavaluedPropertyAtom;
+import eu.iksproject.kres.rules.atoms.DifferentAtom;
+import eu.iksproject.kres.rules.atoms.EndsWithAtom;
+import eu.iksproject.kres.rules.atoms.GreaterThanAtom;
 import eu.iksproject.kres.rules.atoms.IndividualPropertyAtom;
+import eu.iksproject.kres.rules.atoms.IsBlankAtom;
+import eu.iksproject.kres.rules.atoms.KReSBlankNode;
 import eu.iksproject.kres.rules.atoms.KReSResource;
+import eu.iksproject.kres.rules.atoms.KReSTypedLiteral;
 import eu.iksproject.kres.rules.atoms.KReSVariable;
+import eu.iksproject.kres.rules.atoms.LengthAtom;
+import eu.iksproject.kres.rules.atoms.LessThanAtom;
+import eu.iksproject.kres.rules.atoms.LetAtom;
+import eu.iksproject.kres.rules.atoms.LocalNameAtom;
+import eu.iksproject.kres.rules.atoms.LowerCaseAtom;
+import eu.iksproject.kres.rules.atoms.NamespaceAtom;
+import eu.iksproject.kres.rules.atoms.NewNodeAtom;
+import eu.iksproject.kres.rules.atoms.NotAtom;
+import eu.iksproject.kres.rules.atoms.NumberAtom;
+import eu.iksproject.kres.rules.atoms.NumericFunctionAtom;
+import eu.iksproject.kres.rules.atoms.PropStringAtom;
+import eu.iksproject.kres.rules.atoms.SPARQLcAtom;
+import eu.iksproject.kres.rules.atoms.SPARQLdAtom;
+import eu.iksproject.kres.rules.atoms.SPARQLddAtom;
+import eu.iksproject.kres.rules.atoms.SameAtom;
+import eu.iksproject.kres.rules.atoms.StartsWithAtom;
+import eu.iksproject.kres.rules.atoms.StrAtom;
+import eu.iksproject.kres.rules.atoms.StringAtom;
+import eu.iksproject.kres.rules.atoms.StringFunctionAtom;
+import eu.iksproject.kres.rules.atoms.SubstringAtom;
+import eu.iksproject.kres.rules.atoms.SubtractionAtom;
+import eu.iksproject.kres.rules.atoms.SumAtom;
+import eu.iksproject.kres.rules.atoms.UnionAtom;
+import eu.iksproject.kres.rules.atoms.UpperCaseAtom;
 
-/**
- * 
- * @author andrea.nuzzolese
- *
- */
+
 
 public class KReSRuleParser implements KReSRuleParserConstants {
 
   static KReSKB kReSKB;
 
-  /**
-   * Parses the {@link String} containing the rule(s) in KReSRule syntax.
-   * @param inString {@link String}
-   * @return the KReS Knowledge Base - {@link KReSKB}
-   */
   public static KReSKB parse( String inString ) {
   {
         kReSKB = new KReSKB();
@@ -119,24 +143,75 @@ public class KReSRuleParser implements KReSRuleParserConstants {
 
   final public void prefix() throws ParseException {
  String nsPrefix; Object obj;
-    nsPrefix = getVariable();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case EQUAL:
-      obj = equality();
+    case VAR:
+      nsPrefix = getVariable();
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case EQUAL:
+        obj = equality();
                                            String prefixURI = (String)obj;
                                                                                    prefixURI = prefixURI.substring(1, prefixURI.length()-1);
                                                                                    kReSKB.addPrefix(nsPrefix, prefixURI);
-      break;
-    case LQUAD:
-      obj = rule();
+        break;
+      case LQUAD:
+        obj = rule();
                                                                          AtomList[] atoms = (AtomList[]) obj;
                                                                                          String varPrefix = kReSKB.getPrefixURI("var");
-                                                                         				 varPrefix = varPrefix.substring(0, varPrefix.length());
-                                                                                         KReSRule kReSRule = new KReSRuleImpl(varPrefix+nsPrefix, atoms[0], atoms[1]);
+                                                                                         varPrefix = varPrefix.substring(0, varPrefix.length());
+
+                                                                                         if(atoms.length == 1){
+                                                            AtomList body = atoms[0];
+                                                            if(body.size() == 1){
+                                                                    Iterator<KReSRuleAtom> it = body.iterator();
+                                                                    KReSRuleAtom atom = it.next();
+                                                                    if(atom.isSPARQLConstruct()){
+                                                                            KReSRule kReSRule = new KReSRuleImpl(varPrefix+nsPrefix, atoms[0], null, KReSRuleExpressiveness.SPARQLConstruct);
+                                                                            kReSKB.addRule(kReSRule);
+                                                                    }
+                                                                    else if(atom.isSPARQLDelete()){
+                                                                            KReSRule kReSRule = new KReSRuleImpl(varPrefix+nsPrefix, atoms[0], null, KReSRuleExpressiveness.SPARQLDelete);
+                                                                            kReSKB.addRule(kReSRule);
+                                                                    }
+                                                                    else if(atom.isSPARQLDeleteData()){
+                                                                            KReSRule kReSRule = new KReSRuleImpl(varPrefix+nsPrefix, atoms[0], null, KReSRuleExpressiveness.SPARQLDeleteData);
+                                                                            kReSKB.addRule(kReSRule);
+                                                                    }
+                                                            }
+
+                                                     }
+                                                 else{
+                                                         KReSRule kReSRule = new KReSRuleImpl(varPrefix+nsPrefix, atoms[0], atoms[1], KReSRuleExpressiveness.KReSCore);
+                                                         kReSKB.addRule(kReSRule);
+                                                }
+        break;
+      default:
+        jj_la1[1] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+      break;
+    case FORWARD_CHAIN:
+      jj_consume_token(FORWARD_CHAIN);
+      nsPrefix = getVariable();
+      obj = rule();
+                                                              AtomList[] atoms = (AtomList[]) obj;
+                                                                                         String varPrefix = kReSKB.getPrefixURI("var");
+                                                                                         varPrefix = varPrefix.substring(0, varPrefix.length());
+                                                                                         KReSRule kReSRule = new KReSRuleImpl(varPrefix+nsPrefix, atoms[0], atoms[1], KReSRuleExpressiveness.ForwardChaining);
                                                                                          kReSKB.addRule(kReSRule);
       break;
+    case REFLEXIVE:
+      jj_consume_token(REFLEXIVE);
+      nsPrefix = getVariable();
+      obj = rule();
+                                                                AtomList[] kReSAtoms = (AtomList[]) obj;
+                                                                                                                 String pref = kReSKB.getPrefixURI("var");
+                                                         pref = pref.substring(0, pref.length());
+                                                         KReSRule rule = new KReSRuleImpl(pref+nsPrefix, kReSAtoms[0], kReSAtoms[1], KReSRuleExpressiveness.Reflexive);
+                                                         kReSKB.addRule(rule);
+      break;
     default:
-      jj_la1[1] = jj_gen;
+      jj_la1[2] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -160,11 +235,63 @@ public class KReSRuleParser implements KReSRuleParserConstants {
   }
 
   final public AtomList[] ruleDefinition() throws ParseException {
- AtomList body; AtomList head;
-    body = atomList();
-    jj_consume_token(LARROW);
-    head = atomList();
+ AtomList body; AtomList head; Token t;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case LARROW:
+    case SAME:
+    case DIFFERENT:
+    case LESSTHAN:
+    case GREATERTHAN:
+    case IS:
+    case NEW_NODE:
+    case STARTS_WITH:
+    case ENDS_WITH:
+    case LET:
+    case HAS:
+    case VALUES:
+    case NOT:
+    case UNION:
+    case IS_BLANK:
+      body = atomList();
+      jj_consume_token(LARROW);
+      head = atomList();
           {if (true) return new AtomList[]{body, head};}
+      break;
+    case SPARQL_C:
+      jj_consume_token(SPARQL_C);
+      jj_consume_token(LPAR);
+      t = jj_consume_token(SPARQL_STRING);
+      jj_consume_token(RPAR);
+                KReSRuleAtom sparqlAtom = new SPARQLcAtom(t.image);
+                AtomList atomList = new AtomList();
+                atomList.addToHead(sparqlAtom);
+                {if (true) return new AtomList[]{atomList};}
+      break;
+    case SPARQL_D:
+      jj_consume_token(SPARQL_D);
+      jj_consume_token(LPAR);
+      t = jj_consume_token(SPARQL_STRING);
+      jj_consume_token(RPAR);
+                KReSRuleAtom sparqlDAtom = new SPARQLdAtom(t.image);
+        AtomList atomDList = new AtomList();
+        atomDList.addToHead(sparqlDAtom);
+        {if (true) return new AtomList[]{atomDList};}
+      break;
+    case SPARQL_DD:
+      jj_consume_token(SPARQL_DD);
+      jj_consume_token(LPAR);
+      t = jj_consume_token(SPARQL_STRING);
+      jj_consume_token(RPAR);
+                KReSRuleAtom sparqlDDAtom = new SPARQLddAtom(t.image);
+        AtomList atomDDList = new AtomList();
+        atomDDList.addToHead(sparqlDDAtom);
+        {if (true) return new AtomList[]{atomDDList};}
+      break;
+    default:
+      jj_la1[3] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
     throw new Error("Missing return statement in function");
   }
 
@@ -173,16 +300,24 @@ public class KReSRuleParser implements KReSRuleParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case SAME:
     case DIFFERENT:
+    case LESSTHAN:
+    case GREATERTHAN:
     case IS:
+    case NEW_NODE:
+    case STARTS_WITH:
+    case ENDS_WITH:
+    case LET:
     case HAS:
-    case RANGE:
     case VALUES:
+    case NOT:
+    case UNION:
+    case IS_BLANK:
       kReSAtom = atom();
       atomList = atomListRest();
-          atomList.add(kReSAtom); {if (true) return atomList;}
+          atomList.addToHead(kReSAtom); {if (true) return atomList;}
       break;
     default:
-      jj_la1[2] = jj_gen;
+      jj_la1[4] = jj_gen;
 
          {if (true) return atomList;}
     }
@@ -198,7 +333,7 @@ public class KReSRuleParser implements KReSRuleParserConstants {
           {if (true) return atomList;}
       break;
     default:
-      jj_la1[3] = jj_gen;
+      jj_la1[5] = jj_gen;
 
          {if (true) return atomList;}
     }
@@ -212,9 +347,6 @@ public class KReSRuleParser implements KReSRuleParserConstants {
       kReSRuleAtom = classAtom();
                              {if (true) return kReSRuleAtom;}
       break;
-    case RANGE:
-      dataRangeAtom();
-      break;
     case HAS:
       kReSRuleAtom = individualPropertyAtom();
                                           {if (true) return kReSRuleAtom;}
@@ -223,17 +355,300 @@ public class KReSRuleParser implements KReSRuleParserConstants {
       kReSRuleAtom = datavaluedPropertyAtom();
                                           {if (true) return kReSRuleAtom;}
       break;
-    case SAME:
-      sameAsAtom();
+    case LET:
+      kReSRuleAtom = letAtom();
+                           {if (true) return kReSRuleAtom;}
       break;
+    case NEW_NODE:
+      kReSRuleAtom = newNodeAtom();
+                               {if (true) return kReSRuleAtom;}
+      break;
+    case SAME:
     case DIFFERENT:
-      differentFromAtom();
+    case LESSTHAN:
+    case GREATERTHAN:
+    case STARTS_WITH:
+    case ENDS_WITH:
+    case NOT:
+    case IS_BLANK:
+      kReSRuleAtom = comparisonAtom();
+                                  {if (true) return kReSRuleAtom;}
+      break;
+    case UNION:
+      kReSRuleAtom = unionAtom();
+                             {if (true) return kReSRuleAtom;}
       break;
     default:
-      jj_la1[4] = jj_gen;
+      jj_la1[6] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
+    throw new Error("Missing return statement in function");
+  }
+
+  final public KReSRuleAtom unionAtom() throws ParseException {
+ AtomList atomList1; AtomList atomList2;
+    jj_consume_token(UNION);
+    jj_consume_token(LPAR);
+    atomList1 = atomList();
+    jj_consume_token(COMMA);
+    atomList2 = atomList();
+    jj_consume_token(RPAR);
+          {if (true) return new UnionAtom(atomList1, atomList2);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public StringFunctionAtom createLabelAtom() throws ParseException {
+ StringFunctionAtom stringFunctionAtom;
+    jj_consume_token(CREATE_LABEL);
+    jj_consume_token(LPAR);
+    stringFunctionAtom = stringFunctionAtom();
+    jj_consume_token(RPAR);
+          {if (true) return new CreateLabelAtom(stringFunctionAtom);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public StringFunctionAtom propStringAtom() throws ParseException {
+ StringFunctionAtom stringFunctionAtom1; StringFunctionAtom stringFunctionAtom2;
+    jj_consume_token(PROP);
+    jj_consume_token(LPAR);
+    stringFunctionAtom1 = stringFunctionAtom();
+    jj_consume_token(COMMA);
+    stringFunctionAtom2 = stringFunctionAtom();
+    jj_consume_token(RPAR);
+          {if (true) return new PropStringAtom(stringFunctionAtom1, stringFunctionAtom2);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public ComparisonAtom endsWithAtom() throws ParseException {
+ KReSRuleAtom kReSRuleAtom; StringFunctionAtom arg; StringFunctionAtom stringFunctionAtom;
+    jj_consume_token(ENDS_WITH);
+    jj_consume_token(LPAR);
+    arg = stringFunctionAtom();
+    jj_consume_token(COMMA);
+    stringFunctionAtom = stringFunctionAtom();
+    jj_consume_token(RPAR);
+         {if (true) return new EndsWithAtom(arg, stringFunctionAtom);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public ComparisonAtom startsWithAtom() throws ParseException {
+ KReSRuleAtom kReSRuleAtom; StringFunctionAtom arg; StringFunctionAtom stringFunctionAtom;
+    jj_consume_token(STARTS_WITH);
+    jj_consume_token(LPAR);
+    arg = stringFunctionAtom();
+    jj_consume_token(COMMA);
+    stringFunctionAtom = stringFunctionAtom();
+    jj_consume_token(RPAR);
+         {if (true) return new StartsWithAtom(arg, stringFunctionAtom);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public StringFunctionAtom stringFunctionAtom() throws ParseException {
+ Object obj; StringFunctionAtom stringFunctionAtom;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case CONCAT:
+      stringFunctionAtom = concatAtom();
+      break;
+    case UPPERCASE:
+      stringFunctionAtom = upperCaseAtom();
+      break;
+    case LOWERCASE:
+      stringFunctionAtom = lowerCaseAtom();
+      break;
+    case SUBSTRING:
+      stringFunctionAtom = substringAtom();
+      break;
+    case NAMESPACE:
+      stringFunctionAtom = namespaceAtom();
+      break;
+    case LOCALNAME:
+      stringFunctionAtom = localnameAtom();
+      break;
+    case STR:
+      stringFunctionAtom = strAtom();
+      break;
+    case NOTEX:
+    case NUM:
+    case VAR:
+    case VARIABLE:
+    case URI:
+    case STRING:
+    case BNODE:
+      stringFunctionAtom = stringAtom();
+      break;
+    case PROP:
+      stringFunctionAtom = propStringAtom();
+      break;
+    case CREATE_LABEL:
+      stringFunctionAtom = createLabelAtom();
+      break;
+    default:
+      jj_la1[7] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+         {if (true) return stringFunctionAtom;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public StrAtom strAtom() throws ParseException {
+ URIResource uri;
+    jj_consume_token(STR);
+    jj_consume_token(LPAR);
+    uri = iObject();
+    jj_consume_token(RPAR);
+         {if (true) return new StrAtom(uri);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public NamespaceAtom namespaceAtom() throws ParseException {
+ URIResource uri;
+    jj_consume_token(NAMESPACE);
+    jj_consume_token(LPAR);
+    uri = iObject();
+    jj_consume_token(RPAR);
+         {if (true) return new NamespaceAtom(uri);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public LocalNameAtom localnameAtom() throws ParseException {
+ URIResource uri;
+    jj_consume_token(LOCALNAME);
+    jj_consume_token(LPAR);
+    uri = iObject();
+    jj_consume_token(RPAR);
+         {if (true) return new LocalNameAtom(uri);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public StringAtom stringAtom() throws ParseException {
+ Object obj; StringFunctionAtom stringFunctionAtom;
+    obj = uObject();
+                          {if (true) return new StringAtom(obj.toString());}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public ConcatAtom concatAtom() throws ParseException {
+ StringFunctionAtom arg1; StringFunctionAtom arg2;
+    jj_consume_token(CONCAT);
+    jj_consume_token(LPAR);
+    arg1 = stringFunctionAtom();
+    jj_consume_token(COMMA);
+    arg2 = stringFunctionAtom();
+    jj_consume_token(RPAR);
+          {if (true) return new ConcatAtom(arg1, arg2);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public UpperCaseAtom upperCaseAtom() throws ParseException {
+ StringFunctionAtom arg;
+    jj_consume_token(UPPERCASE);
+    jj_consume_token(LPAR);
+    arg = stringFunctionAtom();
+    jj_consume_token(RPAR);
+          {if (true) return new UpperCaseAtom(arg);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public LowerCaseAtom lowerCaseAtom() throws ParseException {
+ StringFunctionAtom arg;
+    jj_consume_token(LOWERCASE);
+    jj_consume_token(LPAR);
+    arg = stringFunctionAtom();
+    jj_consume_token(RPAR);
+          {if (true) return new LowerCaseAtom(arg);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public SubstringAtom substringAtom() throws ParseException {
+ StringFunctionAtom arg; NumericFunctionAtom start; NumericFunctionAtom length;
+    jj_consume_token(SUBSTRING);
+    jj_consume_token(LPAR);
+    arg = stringFunctionAtom();
+    jj_consume_token(COMMA);
+    start = numericFunctionAtom();
+    jj_consume_token(COMMA);
+    length = numericFunctionAtom();
+    jj_consume_token(RPAR);
+          {if (true) return new SubstringAtom(arg, start, length);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public NumericFunctionAtom numericFunctionAtom() throws ParseException {
+ NumericFunctionAtom numericFunctionAtom;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case PLUS:
+      numericFunctionAtom = sumAtom();
+      break;
+    case MINUS:
+      numericFunctionAtom = subtractionAtom();
+      break;
+    case LENGTH:
+      numericFunctionAtom = lengthAtom();
+      break;
+    case NUM:
+    case VARIABLE:
+      numericFunctionAtom = numberAtom();
+      break;
+    default:
+      jj_la1[8] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+         {if (true) return numericFunctionAtom;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public LengthAtom lengthAtom() throws ParseException {
+ StringFunctionAtom stringFunctionAtom;
+    jj_consume_token(LENGTH);
+    jj_consume_token(LPAR);
+    stringFunctionAtom = stringFunctionAtom();
+    jj_consume_token(RPAR);
+         {if (true) return new LengthAtom(stringFunctionAtom);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public SumAtom sumAtom() throws ParseException {
+ NumericFunctionAtom numericFunctionAtom1; NumericFunctionAtom numericFunctionAtom2;
+    jj_consume_token(PLUS);
+    jj_consume_token(LPAR);
+    numericFunctionAtom1 = numericFunctionAtom();
+    jj_consume_token(COMMA);
+    numericFunctionAtom2 = numericFunctionAtom();
+    jj_consume_token(RPAR);
+         {if (true) return new SumAtom(numericFunctionAtom1, numericFunctionAtom2);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public SubtractionAtom subtractionAtom() throws ParseException {
+ NumericFunctionAtom numericFunctionAtom1; NumericFunctionAtom numericFunctionAtom2;
+    jj_consume_token(MINUS);
+    jj_consume_token(LPAR);
+    numericFunctionAtom1 = numericFunctionAtom();
+    jj_consume_token(COMMA);
+    numericFunctionAtom2 = numericFunctionAtom();
+    jj_consume_token(RPAR);
+         {if (true) return new SubtractionAtom(numericFunctionAtom1, numericFunctionAtom2);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public NumericFunctionAtom numberAtom() throws ParseException {
+ Token t;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case NUM:
+      t = jj_consume_token(NUM);
+      break;
+    case VARIABLE:
+      t = jj_consume_token(VARIABLE);
+      break;
+    default:
+      jj_la1[9] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+          {if (true) return new NumberAtom(t.image);}
     throw new Error("Missing return statement in function");
   }
 
@@ -249,13 +664,28 @@ public class KReSRuleParser implements KReSRuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public void dataRangeAtom() throws ParseException {
-    jj_consume_token(RANGE);
+  final public NewNodeAtom newNodeAtom() throws ParseException {
+ URIResource arg1; Object arg2;
+    jj_consume_token(NEW_NODE);
     jj_consume_token(LPAR);
-    iObject();
+    arg1 = iObject();
     jj_consume_token(COMMA);
-    dObject();
+    arg2 = dObject();
     jj_consume_token(RPAR);
+          {if (true) return new NewNodeAtom(arg1, arg2);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public LetAtom letAtom() throws ParseException {
+ URIResource uri1; StringFunctionAtom fun;
+    jj_consume_token(LET);
+    jj_consume_token(LPAR);
+    uri1 = iObject();
+    jj_consume_token(COMMA);
+    fun = stringFunctionAtom();
+    jj_consume_token(RPAR);
+          {if (true) return new LetAtom(uri1, fun);}
+    throw new Error("Missing return statement in function");
   }
 
   final public IndividualPropertyAtom individualPropertyAtom() throws ParseException {
@@ -286,22 +716,52 @@ public class KReSRuleParser implements KReSRuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public void sameAsAtom() throws ParseException {
+  final public SameAtom sameAsAtom() throws ParseException {
+ StringFunctionAtom stringFunctionAtom1; StringFunctionAtom stringFunctionAtom2;
     jj_consume_token(SAME);
     jj_consume_token(LPAR);
-    iObject();
+    stringFunctionAtom1 = stringFunctionAtom();
     jj_consume_token(COMMA);
-    iObject();
+    stringFunctionAtom2 = stringFunctionAtom();
     jj_consume_token(RPAR);
+          {if (true) return new SameAtom(stringFunctionAtom1, stringFunctionAtom2);}
+    throw new Error("Missing return statement in function");
   }
 
-  final public void differentFromAtom() throws ParseException {
+  final public LessThanAtom lessThanAtom() throws ParseException {
+ Object obj1; Object obj2;
+    jj_consume_token(LESSTHAN);
+    jj_consume_token(LPAR);
+    obj1 = iObject();
+    jj_consume_token(COMMA);
+    obj2 = iObject();
+    jj_consume_token(RPAR);
+          {if (true) return new LessThanAtom(obj1, obj2);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public GreaterThanAtom greaterThanAtom() throws ParseException {
+ Object obj1; Object obj2;
+    jj_consume_token(GREATERTHAN);
+    jj_consume_token(LPAR);
+    obj1 = iObject();
+    jj_consume_token(COMMA);
+    obj2 = iObject();
+    jj_consume_token(RPAR);
+          {if (true) return new GreaterThanAtom(obj1, obj2);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public DifferentAtom differentFromAtom() throws ParseException {
+ StringFunctionAtom stringFunctionAtom1; StringFunctionAtom stringFunctionAtom2;
     jj_consume_token(DIFFERENT);
     jj_consume_token(LPAR);
-    iObject();
+    stringFunctionAtom1 = stringFunctionAtom();
     jj_consume_token(COMMA);
-    iObject();
+    stringFunctionAtom2 = stringFunctionAtom();
     jj_consume_token(RPAR);
+          {if (true) return new DifferentAtom(stringFunctionAtom1, stringFunctionAtom2);}
+    throw new Error("Missing return statement in function");
   }
 
   final public URIResource reference() throws ParseException {
@@ -325,7 +785,7 @@ public class KReSRuleParser implements KReSRuleParserConstants {
                                                                   {if (true) return new KReSResource(getSWRLArgument(uri1+colon.image+uri3));}
       break;
     default:
-      jj_la1[5] = jj_gen;
+      jj_la1[10] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -352,7 +812,7 @@ public class KReSRuleParser implements KReSRuleParserConstants {
                                                                   {if (true) return new KReSResource(getSWRLArgument(uri1+colon.image+uri3));}
       break;
     default:
-      jj_la1[6] = jj_gen;
+      jj_la1[11] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -374,11 +834,9 @@ public class KReSRuleParser implements KReSRuleParserConstants {
   }
 
   final public String getString() throws ParseException {
-        String t;
-    jj_consume_token(DQUOT);
-    t = getVariable();
-    jj_consume_token(DQUOT);
-                                               {if (true) return t;}
+        Token t;
+    t = jj_consume_token(STRING);
+                         {if (true) return t.image;}
     throw new Error("Missing return statement in function");
   }
 
@@ -389,10 +847,39 @@ public class KReSRuleParser implements KReSRuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
+  final public Object uObject() throws ParseException {
+  Object obj;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case NOTEX:
+    case VARIABLE:
+    case BNODE:
+      obj = variable();
+      break;
+    case VAR:
+    case URI:
+      obj = reference();
+      break;
+    case STRING:
+      obj = getString();
+      break;
+    case NUM:
+      obj = getInt();
+      break;
+    default:
+      jj_la1[12] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+         {if (true) return obj;}
+    throw new Error("Missing return statement in function");
+  }
+
   final public URIResource iObject() throws ParseException {
   URIResource uri;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case NOTEX:
     case VARIABLE:
+    case BNODE:
       uri = variable();
                           {if (true) return uri;}
       break;
@@ -402,7 +889,7 @@ public class KReSRuleParser implements KReSRuleParserConstants {
                                                             {if (true) return uri;}
       break;
     default:
-      jj_la1[7] = jj_gen;
+      jj_la1[13] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -412,17 +899,17 @@ public class KReSRuleParser implements KReSRuleParserConstants {
   final public Object dObject() throws ParseException {
   Object variable;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case DQUOT:
-      variable = getString();
-      break;
     case NUM:
-      variable = getInt();
+    case STRING:
+      variable = literal();
       break;
+    case NOTEX:
     case VARIABLE:
-    	variable = variable();
-                            {if (true) return variable;}
+    case BNODE:
+      variable = variable();
+      break;
     default:
-      jj_la1[8] = jj_gen;
+      jj_la1[14] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -430,16 +917,138 @@ public class KReSRuleParser implements KReSRuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
+  final public Object literal() throws ParseException {
+  Object literal; URIResource typedLiteral;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case STRING:
+      literal = getString();
+      typedLiteral = typedLiteral();
+      break;
+    case NUM:
+      literal = getInt();
+      typedLiteral = typedLiteral();
+      break;
+    default:
+      jj_la1[15] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+                if(typedLiteral != null){
+                        {if (true) return new KReSTypedLiteral(literal, typedLiteral);}
+                }
+                else{
+                        {if (true) return literal;}
+                }
+    throw new Error("Missing return statement in function");
+  }
+
+  final public URIResource typedLiteral() throws ParseException {
+  URIResource type = null;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case APOX:
+      jj_consume_token(APOX);
+      jj_consume_token(APOX);
+      type = reference();
+      break;
+    default:
+      jj_la1[16] = jj_gen;
+
+    }
+         {if (true) return type;}
+    throw new Error("Missing return statement in function");
+  }
+
   final public URIResource variable() throws ParseException {
-  Token t;
-    t = jj_consume_token(VARIABLE);
-          String var=t.image; var=kReSKB.getPrefixURI("var") + var.substring(1);
+  Token t; String var;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case NOTEX:
+      jj_consume_token(NOTEX);
+      jj_consume_token(LPAR);
+      t = jj_consume_token(VARIABLE);
+      jj_consume_token(RPAR);
+                                                      var=t.image; var=kReSKB.getPrefixURI("var") + var.substring(1);
                                                                                                                 try{
-                                                                                                                        {if (true) return new KReSVariable(new URI(var));}
+                                                                                                                        {if (true) return new KReSVariable(new URI(var), true);}
                                                                                                                 } catch (URISyntaxException e) {
                                                                                                                         e.printStackTrace();
                                                                                                                         {if (true) return null;}
                                                                                                                 }
+      break;
+    case VARIABLE:
+      t = jj_consume_token(VARIABLE);
+          var=t.image; var=kReSKB.getPrefixURI("var") + var.substring(1);
+                                                                                                                try{
+                                                                                                                        {if (true) return new KReSVariable(new URI(var), false);}
+                                                                                                                } catch (URISyntaxException e) {
+                                                                                                                        e.printStackTrace();
+                                                                                                                        {if (true) return null;}
+                                                                                                                }
+      break;
+    case BNODE:
+      t = jj_consume_token(BNODE);
+          var=t.image;  {if (true) return new KReSBlankNode(var);}
+      break;
+    default:
+      jj_la1[17] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    throw new Error("Missing return statement in function");
+  }
+
+  final public ComparisonAtom notAtom() throws ParseException {
+  ComparisonAtom comparisonAtom;
+    jj_consume_token(NOT);
+    jj_consume_token(LPAR);
+    comparisonAtom = comparisonAtom();
+    jj_consume_token(RPAR);
+         {if (true) return new NotAtom(comparisonAtom);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public ComparisonAtom isBlankAtom() throws ParseException {
+  URIResource uriRes;
+    jj_consume_token(IS_BLANK);
+    jj_consume_token(LPAR);
+    uriRes = iObject();
+    jj_consume_token(RPAR);
+         {if (true) return new IsBlankAtom(uriRes);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public ComparisonAtom comparisonAtom() throws ParseException {
+  ComparisonAtom comparisonAtom;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case SAME:
+      comparisonAtom = sameAsAtom();
+      break;
+    case LESSTHAN:
+      comparisonAtom = lessThanAtom();
+      break;
+    case GREATERTHAN:
+      comparisonAtom = greaterThanAtom();
+      break;
+    case DIFFERENT:
+      comparisonAtom = differentFromAtom();
+      break;
+    case NOT:
+      comparisonAtom = notAtom();
+      break;
+    case STARTS_WITH:
+      comparisonAtom = startsWithAtom();
+      break;
+    case ENDS_WITH:
+      comparisonAtom = endsWithAtom();
+      break;
+    case IS_BLANK:
+      comparisonAtom = isBlankAtom();
+      break;
+    default:
+      jj_la1[18] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+         {if (true) return comparisonAtom;}
     throw new Error("Missing return statement in function");
   }
 
@@ -452,13 +1061,18 @@ public class KReSRuleParser implements KReSRuleParserConstants {
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[9];
+  final private int[] jj_la1 = new int[19];
   static private int[] jj_la1_0;
+  static private int[] jj_la1_1;
   static {
       jj_la1_init_0();
+      jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x100,0x80080,0xfc00,0x100,0xfc00,0x1400000,0x1400000,0x1c00000,0x240000,};
+      jj_la1_0 = new int[] {0x100,0x80,0x400,0x46e1f820,0x46e1f800,0x100,0x46e1f800,0x891c0000,0x30020000,0x0,0x0,0x0,0x8000000,0x8000000,0x8000000,0x0,0x0,0x8000000,0x40607800,};
+   }
+   private static void jj_la1_init_1() {
+      jj_la1_1 = new int[] {0x0,0x4000,0x20400,0x2e8,0x208,0x0,0x208,0x5f0113,0x50000,0x50000,0xa0000,0xa0000,0x5f0000,0x4e0000,0x550000,0x110000,0x4,0x440000,0x200,};
    }
 
   /** Constructor with InputStream. */
@@ -472,7 +1086,7 @@ public class KReSRuleParser implements KReSRuleParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 9; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 19; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -486,7 +1100,7 @@ public class KReSRuleParser implements KReSRuleParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 9; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 19; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -496,7 +1110,7 @@ public class KReSRuleParser implements KReSRuleParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 9; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 19; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -506,7 +1120,7 @@ public class KReSRuleParser implements KReSRuleParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 9; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 19; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -515,7 +1129,7 @@ public class KReSRuleParser implements KReSRuleParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 9; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 19; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -524,7 +1138,7 @@ public class KReSRuleParser implements KReSRuleParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 9; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 19; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -575,21 +1189,24 @@ public class KReSRuleParser implements KReSRuleParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[25];
+    boolean[] la1tokens = new boolean[55];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < 19; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
             la1tokens[j] = true;
           }
+          if ((jj_la1_1[i] & (1<<j)) != 0) {
+            la1tokens[32+j] = true;
+          }
         }
       }
     }
-    for (int i = 0; i < 25; i++) {
+    for (int i = 0; i < 55; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
@@ -611,30 +1228,4 @@ public class KReSRuleParser implements KReSRuleParserConstants {
   final public void disable_tracing() {
   }
 
-  public static void main(String[] args){
-	  String rule = "values(<http://dbpedia.org/ontology/role>, ?x, ?y) -> values(<http://rdf.data-vocabulary.org/#role>, ?x, ?y) . " +
-	  		"values(<http://xmlns.com/foaf/0.1/homepagenick>, ?x, ?y) -> values(<http://rdf.data-vocabulary.org/#nickname>, ?x, ?y) . " +
-	  		"has(<http://xmlns.com/foaf/0.1/homepagehomepage>, ?x, ?y) -> has(<http://rdf.data-vocabulary.org/#url>, ?x, ?y) . " +
-	  		"values(<http://dbpedia.org/ontology/address>, ?x, ?y) -> values(<http://rdf.data-vocabulary.org/#address>, ?x, ?y). " +
-	  		"values(<http://xmlns.com/foaf/0.1/homepagename>, ?x, ?y) -> values(<http://rdf.data-vocabulary.org/#name>, ?x, ?y) . " +
-	  		"has(<http://dbpedia.org/ontology/thumbnail>, ?x, ?y) -> has(<http://rdf.data-vocabulary.org/#photo>, ?x, ?y) . " +
-	  		"is(<http://dbpedia.org/ontology/Person>, ?x) -> is(<http://rdf.data-vocabulary.org/#Person>, ?x) . " +
-	  		"has(<http://dbpedia.org/ontology/employer>, ?x, ?y) -> has(<http://rdf.data-vocabulary.org/#affiliation>, ?x, ?y) . " +
-	  		"has(<http://xmlns.com/foaf/0.1/homepageknows>, ?x, ?y) -> has(<http://rdf.data-vocabulary.org/#friend>, ?x, ?y) . " +
-	  		"has(<http://dbpedia.org/ontology/profession>, ?x, ?y) -> has(<http://rdf.data-vocabulary.org/#title>, ?x, ?y) . " +
-	  		"has(<http://dbpedia.org/ontology/occupation>, ?x, ?y) -> has(<http://rdf.data-vocabulary.org/#title>, ?x, ?y)";
-	  KReSKB kReSKB = KReSRuleParser.parse(rule);
-		if(kReSKB != null){
-			KReSRuleList kReSRuleList = kReSKB.getkReSRuleList();
-			if(kReSRuleList != null){
-				for(KReSRule kReSRule : kReSRuleList){
-					System.out.println("RULE : "+kReSRule.toString());
-				}
-			}
-			System.out.println("RULE LIST IS NULL");
-		}
-		else{
-			System.out.println("KB IS NULL");
-		}
-  }
 }

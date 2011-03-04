@@ -21,35 +21,95 @@ public interface KReSRuleParserConstants {
   /** RegularExpression Id. */
   int COMMA = 9;
   /** RegularExpression Id. */
-  int SAME = 10;
+  int REFLEXIVE = 10;
   /** RegularExpression Id. */
-  int DIFFERENT = 11;
+  int SAME = 11;
   /** RegularExpression Id. */
-  int IS = 12;
+  int DIFFERENT = 12;
   /** RegularExpression Id. */
-  int HAS = 13;
+  int LESSTHAN = 13;
   /** RegularExpression Id. */
-  int RANGE = 14;
+  int GREATERTHAN = 14;
   /** RegularExpression Id. */
-  int VALUES = 15;
+  int IS = 15;
   /** RegularExpression Id. */
-  int LPAR = 16;
+  int NEW_NODE = 16;
   /** RegularExpression Id. */
-  int RPAR = 17;
+  int LENGTH = 17;
   /** RegularExpression Id. */
-  int DQUOT = 18;
+  int SUBSTRING = 18;
   /** RegularExpression Id. */
-  int LQUAD = 19;
+  int UPPERCASE = 19;
   /** RegularExpression Id. */
-  int RQUAD = 20;
+  int LOWERCASE = 20;
   /** RegularExpression Id. */
-  int NUM = 21;
+  int STARTS_WITH = 21;
   /** RegularExpression Id. */
-  int VAR = 22;
+  int ENDS_WITH = 22;
   /** RegularExpression Id. */
-  int VARIABLE = 23;
+  int LET = 23;
   /** RegularExpression Id. */
-  int URI = 24;
+  int CONCAT = 24;
+  /** RegularExpression Id. */
+  int HAS = 25;
+  /** RegularExpression Id. */
+  int VALUES = 26;
+  /** RegularExpression Id. */
+  int NOTEX = 27;
+  /** RegularExpression Id. */
+  int PLUS = 28;
+  /** RegularExpression Id. */
+  int MINUS = 29;
+  /** RegularExpression Id. */
+  int NOT = 30;
+  /** RegularExpression Id. */
+  int NAMESPACE = 31;
+  /** RegularExpression Id. */
+  int LOCALNAME = 32;
+  /** RegularExpression Id. */
+  int STR = 33;
+  /** RegularExpression Id. */
+  int APOX = 34;
+  /** RegularExpression Id. */
+  int UNION = 35;
+  /** RegularExpression Id. */
+  int CREATE_LABEL = 36;
+  /** RegularExpression Id. */
+  int SPARQL_C = 37;
+  /** RegularExpression Id. */
+  int SPARQL_D = 38;
+  /** RegularExpression Id. */
+  int SPARQL_DD = 39;
+  /** RegularExpression Id. */
+  int PROP = 40;
+  /** RegularExpression Id. */
+  int IS_BLANK = 41;
+  /** RegularExpression Id. */
+  int FORWARD_CHAIN = 42;
+  /** RegularExpression Id. */
+  int LPAR = 43;
+  /** RegularExpression Id. */
+  int RPAR = 44;
+  /** RegularExpression Id. */
+  int DQUOT = 45;
+  /** RegularExpression Id. */
+  int LQUAD = 46;
+  /** RegularExpression Id. */
+  int RQUAD = 47;
+  /** RegularExpression Id. */
+  int NUM = 48;
+  /** RegularExpression Id. */
+  int VAR = 49;
+  /** RegularExpression Id. */
+  int VARIABLE = 50;
+  /** RegularExpression Id. */
+  int URI = 51;
+  /** RegularExpression Id. */
+  int STRING = 52;
+  /** RegularExpression Id. */
+  int SPARQL_STRING = 53;
+  /** RegularExpression Id. */
+  int BNODE = 54;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -66,12 +126,39 @@ public interface KReSRuleParserConstants {
     "\"=\"",
     "\".\"",
     "\",\"",
+    "\"+\"",
     "\"same\"",
     "\"different\"",
+    "\"lt\"",
+    "\"gt\"",
     "\"is\"",
+    "\"newNode\"",
+    "\"length\"",
+    "\"substring\"",
+    "\"upperCase\"",
+    "\"lowerCase\"",
+    "\"startsWith\"",
+    "\"endsWith\"",
+    "\"let\"",
+    "\"concat\"",
     "\"has\"",
-    "\"range\"",
     "\"values\"",
+    "\"notex\"",
+    "\"sum\"",
+    "\"sub\"",
+    "\"not\"",
+    "\"namespace\"",
+    "\"localname\"",
+    "\"str\"",
+    "\"^\"",
+    "\"union\"",
+    "\"createLabel\"",
+    "\"sparql-c\"",
+    "\"sparql-d\"",
+    "\"sparql-dd\"",
+    "\"prop\"",
+    "\"isBlank\"",
+    "\"!\"",
     "\"(\"",
     "\")\"",
     "\"\\\"\"",
@@ -81,6 +168,9 @@ public interface KReSRuleParserConstants {
     "<VAR>",
     "<VARIABLE>",
     "<URI>",
+    "<STRING>",
+    "<SPARQL_STRING>",
+    "<BNODE>",
   };
 
 }

@@ -3,7 +3,6 @@ package eu.iksproject.kres.rules.atoms;
 import java.net.URI;
 
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import eu.iksproject.kres.api.rules.URIResource;
@@ -11,10 +10,12 @@ import eu.iksproject.kres.ontologies.SWRL;
 
 public class KReSVariable implements URIResource {
 
-	URI uri;
+	private URI uri;
+	private boolean negative;
 	
-	public KReSVariable(URI uri) {
+	public KReSVariable(URI uri, boolean negative) {
 		this.uri = uri;
+		this.negative = negative;
 	}
 
 	@Override
@@ -30,7 +31,13 @@ public class KReSVariable implements URIResource {
 		
 	@Override
 	public String toString() {
+		
 		return uri.toString();
+		
+	}
+	
+	public boolean isNegative() {
+		return negative;
 	}
 	
 }
