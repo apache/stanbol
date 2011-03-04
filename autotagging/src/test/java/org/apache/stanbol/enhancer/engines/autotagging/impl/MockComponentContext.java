@@ -74,13 +74,13 @@ public class MockComponentContext implements ComponentContext {
 
             @Override
             public ServiceRegistration registerService(String clazz,
-                    Object service, Dictionary properties) {
+                    Object service, @SuppressWarnings("rawtypes") Dictionary properties) {
                 return null;
             }
 
             @Override
             public ServiceRegistration registerService(String[] clazzes,
-                    Object service, Dictionary properties) {
+                    Object service, @SuppressWarnings("rawtypes") Dictionary properties) {
                 return null;
             }
 
