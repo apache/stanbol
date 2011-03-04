@@ -1,5 +1,7 @@
 package eu.iksproject.kres.api.rules.util;
 
+import eu.iksproject.kres.api.rules.util.AtomIterator;
+
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -22,6 +24,20 @@ public class AtomList implements Collection<KReSRuleAtom> {
 			KReSRuleAtom[] semionRulesCopy = new KReSRuleAtom[kReSRuleAtoms.length+1];
 			System.arraycopy(kReSRuleAtoms, 0, semionRulesCopy, 0, kReSRuleAtoms.length);
 			semionRulesCopy[semionRulesCopy.length-1] = kReSRuleAtom;
+			kReSRuleAtoms = semionRulesCopy;
+		}
+		return true;
+	}
+	
+	public boolean addToHead(KReSRuleAtom kReSRuleAtom) {
+		if(kReSRuleAtoms == null){
+			kReSRuleAtoms = new KReSRuleAtom[1];
+			kReSRuleAtoms[0] = kReSRuleAtom;
+		}
+		else{
+			KReSRuleAtom[] semionRulesCopy = new KReSRuleAtom[kReSRuleAtoms.length+1];
+			System.arraycopy(kReSRuleAtoms, 0, semionRulesCopy, 1, kReSRuleAtoms.length);
+			semionRulesCopy[0] = kReSRuleAtom;
 			kReSRuleAtoms = semionRulesCopy;
 		}
 		return true;

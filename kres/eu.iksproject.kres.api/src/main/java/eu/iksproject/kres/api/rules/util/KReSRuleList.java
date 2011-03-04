@@ -1,5 +1,7 @@
 package eu.iksproject.kres.api.rules.util;
 
+import eu.iksproject.kres.api.rules.util.KReSRuleIterator;
+
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -11,13 +13,14 @@ import eu.iksproject.kres.api.rules.KReSRule;
 public class KReSRuleList implements Collection<KReSRule> {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
-
+	
 	private KReSRule[] kReSRules;
 
 	public KReSRuleList() {
 
 	}
 
+	
 	public boolean add(KReSRule semionRule) {
 		if (kReSRules == null) {
 			kReSRules = new KReSRule[1];
@@ -31,6 +34,24 @@ public class KReSRuleList implements Collection<KReSRule> {
 			kReSRules = semionRulesCopy;
 		}
 		log.debug("Added rule " + semionRule, this);
+		System.out.println("Added rule " + semionRule);
+		return true;
+	}
+	
+	public boolean addToHead(KReSRule semionRule) {
+		if (kReSRules == null) {
+			kReSRules = new KReSRule[1];
+			kReSRules[0] = semionRule;
+		} else {
+			KReSRule[] semionRulesCopy = new KReSRule[kReSRules.length + 1];
+			System
+					.arraycopy(kReSRules, 0, semionRulesCopy, 1,
+							kReSRules.length);
+			semionRulesCopy[0] = semionRule;
+			kReSRules = semionRulesCopy;
+		}
+		log.debug("Added to HEAD rule " + semionRule, this);
+		System.out.println("Added to HEAD rule " + semionRule);
 		return true;
 	}
 

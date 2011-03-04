@@ -8,6 +8,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 import eu.iksproject.kres.api.rules.util.AtomList;
 
+
 /**
  * A KReSRule is a Java object that represent a rule in KReS. It contains methods to transform a rule both in SWRL and in KReSRule
  * syntax. 
@@ -86,5 +87,21 @@ public interface KReSRule {
 	 * @return the string of the rule in KReSRule syntax.
 	 */
 	public String toKReSSyntax();
-
+	
+	/**
+	 * If the variable forwardChain is set true than the forward chain mechanism is ebled for that rule.
+	 * @return {@link boolean}.
+	 */
+	public boolean isForwardChain();
+	
+	public boolean isSPARQLConstruct();
+	
+	public boolean isSPARQLDelete();
+	
+	public boolean isSPARQLDeleteData();
+	
+	public boolean isReflexive();
+	
+	public KReSRuleExpressiveness getExpressiveness();
+	
 }
