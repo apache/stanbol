@@ -723,7 +723,9 @@ public class SemionRefactorerImpl implements SemionRefactorer {
 					constructedGraph = kReSCoreOperation(sparql, mGraph);
 					break;
 				case ForwardChaining:
-					constructedGraph = forwardChainingOperation(sparql, mGraph);
+					ForwardChainingRefactoringGraph forwardChainingRefactoringGraph = forwardChainingOperation(sparql, mGraph);
+					constructedGraph = forwardChainingRefactoringGraph.getOutputGraph();
+					mGraph = forwardChainingRefactoringGraph.getInputGraph();
 					break;
 				case Reflexive:
 					constructedGraph = kReSCoreOperation(sparql, unionMGraph);
@@ -800,13 +802,13 @@ public class SemionRefactorerImpl implements SemionRefactorer {
 	}
 	
 	
-	private Graph forwardChainingOperation(String query, MGraph mGraph){
+	private ForwardChainingRefactoringGraph forwardChainingOperation(String query, MGraph mGraph){
 		
 		Graph graph = kReSCoreOperation(query, mGraph);
 		
 		mGraph.addAll(graph);
 		
-		return graph;
+		return new ForwardChainingRefactoringGraph(mGraph, graph);
 	}
 	
 	private Graph sparqlUpdateOperation(String query, MGraph mGraph){
@@ -815,4 +817,27 @@ public class SemionRefactorerImpl implements SemionRefactorer {
 		return JenaToClerezzaConverter.jenaModelToClerezzaMGraph(model).getGraph();
 	}
 
+}
+
+class ForwardChainingRefactoringGraph {
+	
+	private MGraph inputGraph;
+	private Graph outputGraph;
+	
+	public ForwardChainingRefactoringGraph(MGraph inputGraph, Graph outputGraph) {
+		this.inputGraph = inputGraph;
+		this.outputGraph = outputGraph;
+	}
+	
+	
+	public MGraph getInputGraph() {
+		return inputGraph;
+	}
+	
+	public Graph getOutputGraph() {
+		return outputGraph;
+	}
+	
+	
+	
 }
