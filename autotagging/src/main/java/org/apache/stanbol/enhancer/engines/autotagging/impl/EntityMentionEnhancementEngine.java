@@ -125,10 +125,7 @@ public class EntityMentionEnhancementEngine implements EnhancementEngine,
         String context = EnhancementEngineHelper.getString(graph,
                 textAnnotation, ENHANCER_SELECTION_CONTEXT);
         if (context == null) {
-            log.warn("Unable to process TextAnnotation " + textAnnotation
-                    + " because property" + ENHANCER_SELECTION_CONTEXT
-                    + " is not present");
-            return Collections.emptyList();
+            context = "";
         }
 
         // aggregate context from subsumed entries:
@@ -152,8 +149,8 @@ public class EntityMentionEnhancementEngine implements EnhancementEngine,
         log.debug("Process TextAnnotation " + name + " type=" + type);
 
         // this is a name lookup + context for disambiguation.
-        List<TagInfo> matchingEntities = autotagger.suggestForType(name,
-                context, type.getUnicodeString());
+        List<TagInfo> matchingEntities = autotagger.suggestForType(name, context.trim(),
+            type.getUnicodeString());
 
         List<NonLiteral> annotationsToRelate = new ArrayList<NonLiteral>();
         annotationsToRelate.add(textAnnotation);
