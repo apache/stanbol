@@ -32,6 +32,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.*;
 
 public class EnhancementRDFUtils {
 
+    // Utility class.
     private EnhancementRDFUtils() {
     }
 

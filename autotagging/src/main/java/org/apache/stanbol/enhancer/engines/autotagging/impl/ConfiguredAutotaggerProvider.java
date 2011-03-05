@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 @Service
 public class ConfiguredAutotaggerProvider implements AutotaggerProvider {
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    private static final Logger log = LoggerFactory.getLogger(ConfiguredAutotaggerProvider.class);
 
     @Property(value = "")
     public static final String LUCENE_INDEX_PATH = "org.apache.stanbol.enhancer.engines.autotagging.indexPath";
