@@ -22,35 +22,36 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Activator for the offline mnode bundle */
+/**
+ * Activator for the offline mode bundle
+ */
 public class Activator implements BundleActivator {
+
     private final Logger log = LoggerFactory.getLogger(getClass());
     public static final String OFFLINE_MODE_PROPERTY = "org.apache.stanbol.offline.mode";
-    private ServiceRegistration serviceReg = null;
-    
+    private ServiceRegistration serviceReg;
+
     @Override
     public void start(BundleContext context) throws Exception {
         final String s = System.getProperty(OFFLINE_MODE_PROPERTY);
         Object svc = null;
         String svcName = null;
-        
-        if("true".equals(s)) {
+
+        if ("true".equals(s)) {
             svc = new OfflineMode() {};
             svcName = OfflineMode.class.getName();
-            log.info("OfflineMode activated by {}={}", 
-                    OFFLINE_MODE_PROPERTY, s);
+            log.info("OfflineMode activated by {}={}", OFFLINE_MODE_PROPERTY, s);
         } else {
             svc = new OnlineMode() {};
             svcName = OnlineMode.class.getName();
-            log.info("Offline mode is not set by {}, OnlineMode activated", 
-                    OFFLINE_MODE_PROPERTY); 
+            log.info("Offline mode is not set by {}, OnlineMode activated", OFFLINE_MODE_PROPERTY);
         }
         serviceReg = context.registerService(svcName, svc, null);
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        if(serviceReg != null) {
+        if (serviceReg != null) {
             serviceReg.unregister();
             serviceReg = null;
         }

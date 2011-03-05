@@ -28,27 +28,29 @@ import org.apache.http.Header;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 
 
-/** Generate RESTful API documentation based on actual requests
- *  executed during integration tests, enhanced with user-supplied
- *  bits of documentation. 
+/**
+ * Generate RESTful API documentation based on actual requests
+ * executed during integration tests, enhanced with user-supplied
+ * bits of documentation.
  */
 public class RequestDocumentor {
+
     public static final String OUTPUT_BASE = "./target/" + RequestDocumentor.class.getSimpleName();
     private final String name;
-    
+
     public RequestDocumentor(String name) {
         this.name = name;
     }
-    
+
     public String toString() {
         return getClass().getSimpleName() + " (" + name + ")";
     }
-    
-    void generateDocumentation(RequestExecutor executor, String [] metadata) throws IOException {
+
+    void generateDocumentation(RequestExecutor executor, String[] metadata) throws IOException {
         final File f = getOutputFile();
         final File dir = f.getParentFile();
         dir.mkdirs();
-        if(!dir.isDirectory()) {
+        if (!dir.isDirectory()) {
             throw new IOException("Failed to create output folder " + dir.getAbsolutePath());
         }
         final PrintWriter pw = new PrintWriter(new FileWriter(f, true));
@@ -60,21 +62,22 @@ public class RequestDocumentor {
             pw.close();
         }
     }
-    
+
     protected File getOutputFile() {
         return new File(OUTPUT_BASE + "/" + name + ".txt");
     }
-    
-    protected void documentRequest(PrintWriter pw, RequestExecutor executor, String [] metadataArray) throws IOException {
+
+    protected void documentRequest(PrintWriter pw, RequestExecutor executor, String[] metadataArray)
+            throws IOException {
         // Convert metadata to more convenient Map 
         final Map<String, String> m = new HashMap<String, String>();
-        if(metadataArray.length % 2 != 0) {
+        if (metadataArray.length % 2 != 0) {
             throw new IllegalArgumentException("Metadata array must be of even size, got " + metadataArray.length);
         }
-        for(int i=0 ; i < metadataArray.length; i += 2) {
-            m.put(metadataArray[i], metadataArray[i+1]);
+        for (int i = 0; i < metadataArray.length; i += 2) {
+            m.put(metadataArray[i], metadataArray[i + 1]);
         }
-        
+
         // TODO use velocity or other templates? Just a rough prototype for now
         // Also need to filter overly long input/output, binary etc.
         pw.println();
@@ -87,39 +90,39 @@ public class RequestDocumentor {
         pw.print("\n=== ");
         pw.print("REQUEST");
         pw.println(" ===");
-        
+
         pw.print("Method: ");
         pw.println(executor.getRequest().getMethod());
         pw.print("URI: ");
         pw.println(executor.getRequest().getURI());
-        
-        final Header [] allHeaders = executor.getRequest().getAllHeaders();
-        if(allHeaders != null && allHeaders.length > 0) {
+
+        final Header[] allHeaders = executor.getRequest().getAllHeaders();
+        if (allHeaders != null && allHeaders.length > 0) {
             pw.println("Headers:");
-            for(Header h : allHeaders) {
+            for (Header h : allHeaders) {
                 pw.print(h.getName());
                 pw.print(":");
                 pw.println(h.getValue());
             }
         }
-        
-        if(executor.getRequest() instanceof HttpEntityEnclosingRequestBase) {
-            final HttpEntityEnclosingRequestBase heb = (HttpEntityEnclosingRequestBase)executor.getRequest();
-            if(heb.getEntity() != null) {
+
+        if (executor.getRequest() instanceof HttpEntityEnclosingRequestBase) {
+            final HttpEntityEnclosingRequestBase heb = (HttpEntityEnclosingRequestBase) executor.getRequest();
+            if (heb.getEntity() != null) {
                 pw.print("Content-Type:");
                 pw.println(heb.getEntity().getContentType().getValue());
                 pw.println("Content:");
                 final InputStream is = heb.getEntity().getContent();
                 final byte[] buffer = new byte[16384];
                 int count = 0;
-                while( (count = is.read(buffer, 0, buffer.length)) > 0) {
+                while ((count = is.read(buffer, 0, buffer.length)) > 0) {
                     // TODO encoding??
                     pw.write(new String(buffer, 0, count));
                 }
                 pw.println();
             }
         }
-        
+
         pw.print("\n=== ");
         pw.print("RESPONSE");
         pw.println(" ===");
@@ -127,7 +130,7 @@ public class RequestDocumentor {
         pw.println(executor.getResponse().getEntity().getContentType().getValue());
         pw.println("Content:");
         pw.println(executor.getContent());
-        
+
         pw.println("====================================================================================");
     }
 }

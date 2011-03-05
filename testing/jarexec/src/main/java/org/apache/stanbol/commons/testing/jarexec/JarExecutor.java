@@ -32,15 +32,17 @@ import org.apache.commons.exec.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Start a runnable jar by forking a JVM process,
- *  and terminate the process when this VM exits.
+/**
+ * Start a runnable jar by forking a JVM process,
+ * and terminate the process when this VM exits.
  */
 public class JarExecutor {
+
     private static JarExecutor instance;
     private final File jarToExecute;
     private final String javaExecutable;
     private final int serverPort;
-    
+
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     public static final int DEFAULT_PORT = 8765;
@@ -50,33 +52,37 @@ public class JarExecutor {
     public static final String PROP_SERVER_PORT = PROP_PREFIX + "server.port";
     public static final String PROP_JAR_FOLDER = PROP_PREFIX + "jar.folder";
     public static final String PROP_JAR_NAME_REGEXP = PROP_PREFIX + "jar.name.regexp";
-    
+
     @SuppressWarnings("serial")
     public static class ExecutorException extends Exception {
+
         ExecutorException(String reason) {
             super(reason);
         }
+
         ExecutorException(String reason, Throwable cause) {
             super(reason, cause);
         }
     }
-    
+
     public int getServerPort() {
         return serverPort;
     }
 
     public static JarExecutor getInstance(Properties config) throws ExecutorException {
-        if(instance == null) {
+        if (instance == null) {
             synchronized (JarExecutor.class) {
-                if(instance == null) {
+                if (instance == null) {
                     instance = new JarExecutor(config);
                 }
             }
         }
         return instance;
     }
-    
-    /** Build a JarExecutor, locate the jar to run, etc */
+
+    /**
+     * Build a JarExecutor, locate the jar to run, etc
+     */
     private JarExecutor(Properties config) throws ExecutorException {
         final boolean isWindows = System.getProperty("os.name").toLowerCase().contains("windows");
 
@@ -84,33 +90,32 @@ public class JarExecutor {
         serverPort = portStr == null ? DEFAULT_PORT : Integer.valueOf(portStr);
 
         javaExecutable = isWindows ? "java.exe" : "java";
-        
+
         String jarFolderPath = config.getProperty(PROP_JAR_FOLDER);
         jarFolderPath = jarFolderPath == null ? DEFAULT_JAR_FOLDER : jarFolderPath;
         final File jarFolder = new File(jarFolderPath);
-        
+
         String jarNameRegexp = config.getProperty(PROP_JAR_NAME_REGEXP);
         jarNameRegexp = jarNameRegexp == null ? DEFAULT_JAR_NAME_REGEXP : jarNameRegexp;
         final Pattern jarPattern = Pattern.compile(jarNameRegexp);
 
         // Find executable jar
-        final String [] candidates = jarFolder.list();
-        if(candidates == null) {
-            throw new ExecutorException(
-                    "No files found in jar folder specified by " 
+        final String[] candidates = jarFolder.list();
+        if (candidates == null) {
+            throw new ExecutorException("No files found in jar folder specified by "
                     + PROP_JAR_FOLDER + " property: " + jarFolder.getAbsolutePath());
         }
         File f = null;
-        if(candidates != null) {
-            for(String filename : candidates) {
-                if(jarPattern.matcher(filename).matches()) {
+        if (candidates != null) {
+            for (String filename : candidates) {
+                if (jarPattern.matcher(filename).matches()) {
                     f = new File(jarFolder, filename);
                     break;
                 }
             }
         }
 
-        if(f == null) {
+        if (f == null) {
             throw new ExecutorException("Executable jar matching '" + jarPattern
                     + "' not found in " + jarFolder.getAbsolutePath()
                     + ", candidates are " + Arrays.asList(candidates));
@@ -118,8 +123,9 @@ public class JarExecutor {
         jarToExecute = f;
     }
 
-    /** Start the jar if not done yet, and setup runtime hook
-     *  to stop it.
+    /**
+     * Start the jar if not done yet, and setup runtime hook
+     * to stop it.
      */
     public void start() throws Exception {
         final ExecuteResultHandler h = new ExecuteResultHandler() {

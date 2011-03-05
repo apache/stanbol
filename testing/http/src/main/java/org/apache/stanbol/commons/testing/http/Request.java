@@ -23,28 +23,30 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 
-/** Request class with convenience with... methods to 
- *  add headers, parameters etc.
+/**
+ * Request class with convenience withXxx methods to
+ * add headers, parameters, etc.
  */
 public class Request {
+
     private final HttpUriRequest request;
     private String username;
     private String password;
     private boolean redirects = true;
-    
+
     Request(HttpUriRequest r) {
         request = r;
     }
-    
+
     public HttpUriRequest getRequest() {
         return request;
     }
-    
+
     public Request withHeader(String name, String value) {
         request.addHeader(name, value);
         return this;
     }
-    
+
     public Request withCredentials(String username, String password) {
         this.username = username;
         this.password = password;
@@ -55,34 +57,33 @@ public class Request {
         redirects = followRedirectsAutomatically;
         return this;
     }
-    
+
     private HttpEntityEnclosingRequestBase getHttpEntityEnclosingRequestBase() {
-        if(request instanceof HttpEntityEnclosingRequestBase) {
-            return (HttpEntityEnclosingRequestBase)request;
+        if (request instanceof HttpEntityEnclosingRequestBase) {
+            return (HttpEntityEnclosingRequestBase) request;
         } else {
-            throw new IllegalStateException(
-                    "Request is not an HttpEntityEnclosingRequestBase: "  
-                + request.getClass().getName());
+            throw new IllegalStateException("Request is not an HttpEntityEnclosingRequestBase: "
+                    + request.getClass().getName());
         }
     }
 
     public Request withContent(String content) throws UnsupportedEncodingException {
         return withEntity(new StringEntity(content, "UTF-8"));
     }
-    
-    public Request withEntity(HttpEntity e) throws UnsupportedEncodingException {
+
+    public Request withEntity(HttpEntity e) {
         getHttpEntityEnclosingRequestBase().setEntity(e);
         return this;
     }
-    
+
     public String getUsername() {
         return username;
     }
-    
+
     public String getPassword() {
         return password;
     }
-    
+
     public boolean getRedirects() {
         return redirects;
     }

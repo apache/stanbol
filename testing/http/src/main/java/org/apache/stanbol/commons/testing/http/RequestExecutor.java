@@ -47,69 +47,64 @@ import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
-/** Executes a Request and provides convenience methods
- *  to validate the results.
+/**
+ * Executes a Request and provides convenience methods
+ * to validate the results.
  */
 public class RequestExecutor {
+
     private final DefaultHttpClient httpClient;
-    private HttpUriRequest request; 
+    private HttpUriRequest request;
     private HttpResponse response;
     private HttpEntity entity;
     private String content;
-    
+
     /**
      * HttpRequestInterceptor for preemptive authentication, based on httpclient
      * 4.0 example
      */
-    private static class PreemptiveAuthInterceptor implements
-            HttpRequestInterceptor {
+    private static class PreemptiveAuthInterceptor implements HttpRequestInterceptor {
 
-        public void process(HttpRequest request, HttpContext context)
-                throws HttpException, IOException {
+        public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
 
-            AuthState authState = 
-                (AuthState) context.getAttribute(ClientContext.TARGET_AUTH_STATE);
-            CredentialsProvider credsProvider = 
-                (CredentialsProvider) context.getAttribute(ClientContext.CREDS_PROVIDER);
-            HttpHost targetHost = 
-                (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
+            AuthState authState = (AuthState) context.getAttribute(ClientContext.TARGET_AUTH_STATE);
+            CredentialsProvider credsProvider = (CredentialsProvider) context.getAttribute(ClientContext.CREDS_PROVIDER);
+            HttpHost targetHost = (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
 
             // If not auth scheme has been initialized yet
             if (authState.getAuthScheme() == null) {
-                AuthScope authScope = 
-                    new AuthScope(targetHost.getHostName(), targetHost.getPort());
+                AuthScope authScope = new AuthScope(targetHost.getHostName(), targetHost.getPort());
 
                 // Obtain credentials matching the target host
                 Credentials creds = credsProvider.getCredentials(authScope);
 
                 // If found, generate BasicScheme preemptively
-                if(creds != null) {
+                if (creds != null) {
                     authState.setAuthScheme(new BasicScheme());
                     authState.setCredentials(creds);
                 }
             }
         }
     }
-    
+
     public RequestExecutor(DefaultHttpClient client) {
         httpClient = client;
     }
-    
+
     public String toString() {
-        if(request == null) {
+        if (request == null) {
             return "Request";
         }
         return request.getMethod() + " request to " + request.getURI();
     }
-    
+
     public RequestExecutor execute(Request r) throws ClientProtocolException, IOException {
         clear();
         request = r.getRequest();
-        
+
         // Optionally setup for basic authentication
-        if(r.getUsername() != null) {
-            httpClient.getCredentialsProvider().setCredentials(
-                    AuthScope.ANY,
+        if (r.getUsername() != null) {
+            httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY,
                     new UsernamePasswordCredentials(r.getUsername(), r.getPassword()));
 
             // And add request interceptor to have preemptive authentication
@@ -118,14 +113,14 @@ public class RequestExecutor {
             httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, null);
             httpClient.removeRequestInterceptorByClass(PreemptiveAuthInterceptor.class);
         }
-        
+
         // Setup redirects
         httpClient.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, r.getRedirects());
-        
+
         // Execute request
         response = httpClient.execute(request);
         entity = response.getEntity();
-        if(entity != null) {
+        if (entity != null) {
             // We fully read the content every time, not super efficient but
             // how can we read it on demand while avoiding a (boring) cleanup() 
             // method on this class?
@@ -134,7 +129,7 @@ public class RequestExecutor {
         }
         return this;
     }
-    
+
     protected void clear() {
         request = null;
         entity = null;
@@ -142,45 +137,50 @@ public class RequestExecutor {
         content = null;
     }
 
-    /** Verify that response matches supplied status */
+    /**
+     * Verify that response matches supplied status
+     */
     public RequestExecutor assertStatus(int expected) {
         assertNotNull(this.toString(), response);
         assertEquals(this + ": expecting status " + expected, expected, response.getStatusLine().getStatusCode());
         return this;
     }
-    
-    /** Verify that response matches supplied content type */
+
+    /**
+     * Verify that response matches supplied content type
+     */
     public RequestExecutor assertContentType(String expected) {
         assertNotNull(this.toString(), response);
-        if(entity == null) {
+        if (entity == null) {
             fail(this + ": no entity in response, cannot check content type");
         }
-        
+
         // Remove whatever follows semicolon in content-type
         String contentType = entity.getContentType().getValue();
-        if(contentType != null) {
+        if (contentType != null) {
             contentType = contentType.split(";")[0].trim();
         }
-        
+
         // And check for match
         assertEquals(this + ": expecting content type " + expected, expected, contentType);
         return this;
     }
 
-    /** For each supplied regexp, fail unless content contains at 
-     *  least one line that matches.
-     *  Regexps are automatically prefixed/suffixed with .* so as
-     *  to have match partial lines.
+    /**
+     * For each supplied regexp, fail unless content contains at
+     * least one line that matches.
+     * Regexps are automatically prefixed/suffixed with .* so as
+     * to have match partial lines.
      */
     public RequestExecutor assertContentRegexp(String... regexp) {
         assertNotNull(this.toString(), response);
         nextPattern:
-        for(String expr : regexp) {
+        for (String expr : regexp) {
             final Pattern p = Pattern.compile(".*" + expr + ".*");
             final LineIterator it = new LineIterator(new StringReader(content));
-            while(it.hasNext()) {
-                final String line = it.nextLine(); 
-                if(p.matcher(line).matches()) {
+            while (it.hasNext()) {
+                final String line = it.nextLine();
+                if (p.matcher(line).matches()) {
                     continue nextPattern;
                 }
             }
@@ -189,18 +189,20 @@ public class RequestExecutor {
         return this;
     }
 
-    /** For each supplied string, fail unless content contains it */
-    public RequestExecutor assertContentContains(String... expected) throws ParseException, IOException {
+    /**
+     * For each supplied string, fail unless content contains it
+     */
+    public RequestExecutor assertContentContains(String... expected) throws ParseException {
         assertNotNull(this.toString(), response);
-        for(String exp : expected) {
-            if(!content.contains(exp)) {
+        for (String exp : expected) {
+            if (!content.contains(exp)) {
                 fail(this + ": content does not contain '" + exp + "', content=\n" + content);
             }
         }
         return this;
     }
-    
-    public void generateDocumentation(RequestDocumentor documentor, String...metadata) throws IOException {
+
+    public void generateDocumentation(RequestDocumentor documentor, String... metadata) throws IOException {
         documentor.generateDocumentation(this, metadata);
     }
 
