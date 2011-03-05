@@ -372,8 +372,9 @@ public class Gui extends JFrame implements EventListener {
                 break;
             }
             else {
-                if (!retVal.contains(uri))
+                if (!retVal.contains(uri)) {
                     retVal.add(uri);
+                }
                 result = result.replaceFirst("(.*?)<binding name=\"content\"><uri>(.*?)</uri></binding>(.*?)", "$1$3");
             }
         }

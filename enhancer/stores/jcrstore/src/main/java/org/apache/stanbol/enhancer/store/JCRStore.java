@@ -59,9 +59,8 @@ public class JCRStore implements Store {
     public ContentItem create(String id, byte[] content, String mimeType) {
         final MGraph g = tcProvider.createMGraph(new UriRef(id));
 
-        ContentItem node;
         try {
-            node = new JCRContentItem(id, content, mimeType, g, getParentNode());
+            ContentItem node = new JCRContentItem(id, content, mimeType, g, getParentNode());
             return node;
         } catch (ItemExistsException e) {
             // TODO Auto-generated catch block
@@ -98,11 +97,9 @@ public class JCRStore implements Store {
     }
 
     public String put(ContentItem ci) {
-        byte[] bytes = new byte[0];// ci.getStream();
-        ContentItem result;
         try {
-            result = new JCRContentItem(ci.getId(), bytes, ci.getMimeType(), ci
-                    .getMetadata(), getParentNode());
+            byte[] bytes = new byte[0];// ci.getStream();
+            ContentItem result = new JCRContentItem(ci.getId(), bytes, ci.getMimeType(), ci.getMetadata(), getParentNode());
             return result.getId();
         } catch (ItemExistsException e) {
             // TODO Auto-generated catch block

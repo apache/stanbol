@@ -68,10 +68,11 @@ public class Asr {
         inputStreamDataSource.setInputStream(input, ByteArrayInputStream.class.getName());
 
         Result result = recognizer.recognize();
-        if (result == null)
+        if (result == null) {
             return null;
-        else
+        } else {
             return result.getBestFinalResultNoFiller();
+        }
     }
 
     protected void dumpSampleSentences() {
