@@ -36,6 +36,7 @@ import org.apache.stanbol.enhancer.servicesapi.Store;
 
 /**
  * test
+ *
  * @author andreas
  */
 @Component
@@ -44,8 +45,10 @@ public class ClerezzaStore implements Store {
 
     @Reference
     DiscobitsHandler handler;
+
     @Reference
     ContentGraphProvider cgProvider;
+
     @Reference
     TcManager tcManager;
 
@@ -59,7 +62,7 @@ public class ClerezzaStore implements Store {
         UriRef uriRef = new UriRef(id);
         MGraph metadataGraph;
         try {
-        metadataGraph = tcManager.createMGraph(uriRef);
+            metadataGraph = tcManager.createMGraph(uriRef);
         } catch (EntityAlreadyExistsException ex) {
             return null;
         }
@@ -80,8 +83,8 @@ public class ClerezzaStore implements Store {
         UriRef uriRef = new UriRef(id);
         MGraph metadataGraph;
         try {
-        metadataGraph = tcManager.getMGraph(uriRef);
-        } catch(NoSuchEntityException ex) {
+            metadataGraph = tcManager.getMGraph(uriRef);
+        } catch (NoSuchEntityException ex) {
             throw new IllegalArgumentException("Is not a content item");
         }
         ContentItem contentItem = new ClerezzaContentItem(new GraphNode(uriRef,

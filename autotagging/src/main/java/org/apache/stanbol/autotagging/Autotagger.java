@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Autotagger {
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    private static final Logger log = LoggerFactory.getLogger(Autotagger.class);
 
     public final String typeFieldName = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 

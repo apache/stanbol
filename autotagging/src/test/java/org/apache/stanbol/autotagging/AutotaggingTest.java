@@ -37,6 +37,8 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 public class AutotaggingTest {
 
+    protected File defaultIndexDirectory;
+
     private Model model;
 
     private RAMDirectory ramDirectory;
@@ -44,8 +46,6 @@ public class AutotaggingTest {
     private StandardAnalyzer analyzer;
 
     private IndexWriter writer;
-
-    protected File defaultIndexDirectory;
 
     public static InputStream getResource(String name) {
         InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(
@@ -94,8 +94,10 @@ public class AutotaggingTest {
         Document hitDoc = isearcher.doc(hits[0].doc);
         assertEquals("http://dbpedia.org/resource/%21Action_Pact%21",
                 hitDoc.get(ModelIndexer.URI_FIELD));
+
         String[] types = hitDoc.getValues("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
         assertEquals(3, types.length);
+
         isearcher.close();
     }
 

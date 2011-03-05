@@ -69,7 +69,6 @@ public class ModelResamplerTest {
         srcModel.add(r[8], p, r[4]);
 
         srcModel.add(r[4], p, r[8]);
-
     }
 
     @Test
@@ -85,8 +84,10 @@ public class ModelResamplerTest {
         assertEquals(1.0, r1Score, 0.01);
 
         assertTrue(samplerIterator.hasNext());
+
         ri = samplerIterator.next();
         assertEquals(r[2], ri.resource);
+
         double r2Score = ri.score.doubleValue();
         assertEquals(0.86, r2Score, 0.01);
 
