@@ -26,65 +26,71 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 
-/** Convenience builder for Request objects */
+/**
+ * Convenience builder for Request objects.
+ */
 public class RequestBuilder {
+
     private final String baseUrl;
-    
+
     public RequestBuilder(String baseUrl) {
         this.baseUrl = baseUrl;
     }
-    
-    /** Build a GET request to specified path with optional query
-     *  parameters. See {@link #buildUrl(String, String...)} for
-     *  queryParameters semantics.
+
+    /**
+     * Build a GET request to specified path with optional query
+     * parameters. See {@link #buildUrl(String, String...)} for
+     * queryParameters semantics.
      */
-    public Request buildGetRequest(String path, String...queryParameters) {
+    public Request buildGetRequest(String path, String... queryParameters) {
         return new Request(new HttpGet(buildUrl(path, queryParameters)));
     }
-    
-    /** Build a POST request to specified path with optional query
-     *  parameters. See {@link #buildUrl(String, String...)} for
-     *  queryParameters semantics.
+
+    /**
+     * Build a POST request to specified path with optional query
+     * parameters. See {@link #buildUrl(String, String...)} for
+     * queryParameters semantics.
      */
     public Request buildPostRequest(String path) {
         return new Request(new HttpPost(buildUrl(path)));
     }
-    
-    /** Wrap supplied HTTP request */
+
+    /**
+     * Wrap supplied HTTP request
+     */
     public Request buildOtherRequest(HttpRequestBase r) {
         return new Request(r);
     }
-    
-    /** Build an URL from our base path, supplied path and optional
-     *  query parameters.
-     *  @param queryParameters an even number of Strings, each pair
-     *  of values represents the key and value of a query parameter.
-     *  Keys and values are encoded by this method.
+
+    /**
+     * Build an URL from our base path, supplied path and optional
+     * query parameters.
+     *
+     * @param queryParameters an even number of Strings, each pair
+     * of values represents the key and value of a query parameter.
+     * Keys and values are encoded by this method.
      */
-    public String buildUrl(String path, String...queryParameters) {
+    public String buildUrl(String path, String... queryParameters) {
         final StringBuilder sb = new StringBuilder();
-        
-        if(queryParameters == null || queryParameters.length == 0) {
+
+        if (queryParameters == null || queryParameters.length == 0) {
             sb.append(baseUrl);
             sb.append(path);
-            
-        } else if(queryParameters.length % 2 != 0) {
-            throw new IllegalArgumentException(
-                    "Invalid number of queryParameters arguments ("
-                    + queryParameters.length
-                    + "), must be even"
-                    );
+
+        } else if (queryParameters.length % 2 != 0) {
+            throw new IllegalArgumentException("Invalid number of queryParameters arguments ("
+                    + queryParameters.length + "), must be even");
         } else {
             final List<NameValuePair> p = new ArrayList<NameValuePair>();
-            for(int i=0 ; i < queryParameters.length; i+=2) {
-                p.add(new BasicNameValuePair(queryParameters[i], queryParameters[i+1]));
+            for (int i = 0; i < queryParameters.length; i += 2) {
+                p.add(new BasicNameValuePair(queryParameters[i], queryParameters[i + 1]));
             }
             sb.append(baseUrl);
             sb.append(path);
             sb.append("?");
             sb.append(URLEncodedUtils.format(p, "UTF-8"));
         }
-        
+
         return sb.toString();
     }
 }

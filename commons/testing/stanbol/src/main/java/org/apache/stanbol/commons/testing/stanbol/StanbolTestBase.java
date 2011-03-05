@@ -34,33 +34,35 @@ import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Base class for Stanbol integration tests - starts the runnable jar
- *  to test if needed, and waits until server is ready before executing
- *  the tests.
+/**
+ * Base class for Stanbol integration tests - starts the runnable jar
+ * to test if needed, and waits until server is ready before executing
+ * the tests.
  */
 public class StanbolTestBase {
-    
-    private static final Logger log = LoggerFactory.getLogger(StanbolTestBase.class);
 
     public static final String TEST_SERVER_URL_PROP = "test.server.url";
     public static final String SERVER_READY_TIMEOUT_PROP = "server.ready.timeout.seconds";
     public static final String SERVER_READY_PROP_PREFIX = "server.ready.path";
     public static final String KEEP_JAR_RUNNING_PROP = "keepJarRunning";
+
     protected static String serverBaseUrl;
 
-    protected boolean serverReady = false; 
+    private static final Logger log = LoggerFactory.getLogger(StanbolTestBase.class);
+
+    protected boolean serverReady = false;
     protected RequestBuilder builder;
     protected DefaultHttpClient httpClient = new DefaultHttpClient();
     protected RequestExecutor executor = new RequestExecutor(httpClient);
-    
+
     @BeforeClass
-    public synchronized static void startRunnableJar() throws Exception {
+    public static synchronized void startRunnableJar() throws Exception {
         if (serverBaseUrl != null) {
             // concurrent initialization by loading subclasses
             return;
         }
         final String configuredUrl = System.getProperty(TEST_SERVER_URL_PROP);
-        if(configuredUrl != null) {
+        if (configuredUrl != null) {
             serverBaseUrl = configuredUrl;
             log.info(TEST_SERVER_URL_PROP + " is set: not starting server jar (" + serverBaseUrl + ")");
         } else {
@@ -68,19 +70,19 @@ public class StanbolTestBase {
             j.start();
             serverBaseUrl = "http://localhost:" + j.getServerPort();
             log.info("Forked subprocess server listening to: " + serverBaseUrl);
-            
+
             // Optionally block here so that the runnable jar stays up - we can
             // then run tests against it from another VM
             if ("true".equals(System.getProperty(KEEP_JAR_RUNNING_PROP))) {
                 log.info(KEEP_JAR_RUNNING_PROP + " set to true - entering infinite loop"
-                         + " so that runnable jar stays up. Kill this process to exit.");
+                        + " so that runnable jar stays up. Kill this process to exit.");
                 while (true) {
                     Thread.sleep(1000L);
                 }
             }
         }
     }
-    
+
     @Before
     public void waitForServerReady() throws Exception {
         // initialize instance request builder and HTTP client
@@ -88,7 +90,7 @@ public class StanbolTestBase {
         httpClient = new DefaultHttpClient();
         executor = new RequestExecutor(httpClient);
 
-        if(serverReady) {
+        if (serverReady) {
             return;
         }
 
@@ -102,59 +104,58 @@ public class StanbolTestBase {
         final List<String> testPaths = new ArrayList<String>();
         final TreeSet<Object> propertyNames = new TreeSet<Object>();
         propertyNames.addAll(System.getProperties().keySet());
-        for(Object o : propertyNames) {
+        for (Object o : propertyNames) {
             final String key = (String) o;
-            if(key.startsWith(SERVER_READY_PROP_PREFIX)) {
+            if (key.startsWith(SERVER_READY_PROP_PREFIX)) {
                 testPaths.add(System.getProperty(key));
             }
         }
-        
+
         // Consider the server ready if it responds to a GET on each of 
         // our configured request paths with a 200 result and content
         // that matches the regexp supplied with the path
         long sleepTime = 100;
         readyLoop:
-        while(!serverReady && System.currentTimeMillis()  < endTime) {
+        while (!serverReady && System.currentTimeMillis() < endTime) {
             // Wait a bit between checks, to let the server come up
             Thread.sleep(sleepTime);
             sleepTime = Math.min(5000L, sleepTime * 2);
-            
+
             // A test path is in the form path:substring or just path, in which case
             // we don't check that the content contains the substring 
-            for(String p : testPaths) {
-                final String [] s = p.split(":");
+            for (String p : testPaths) {
+                final String[] s = p.split(":");
                 final String path = s[0];
                 final String substring = (s.length > 0 ? s[1] : null);
                 final String url = serverBaseUrl + path;
                 final HttpGet get = new HttpGet(url);
-                HttpResponse response = null;
                 HttpEntity entity = null;
                 try {
-                    response = httpClient.execute(get);
+                    HttpResponse response = httpClient.execute(get);
                     entity = response.getEntity();
                     final int status = response.getStatusLine().getStatusCode();
-                    if(status != 200) {
+                    if (status != 200) {
                         log.info("Got " + status + " at " + url + " - will retry");
                         continue readyLoop;
                     }
-                    
-                    if(substring != null) {
-                        if(entity == null) {
+
+                    if (substring != null) {
+                        if (entity == null) {
                             log.info("No entity returned for " + url + " - will retry");
                             continue readyLoop;
                         }
                         final String content = EntityUtils.toString(entity);
-                        if(!content.contains(substring)) {
-                            log.info("Returned content for " + url + " does not contain " + substring
-                                    + " - will retry");
+                        if (!content.contains(substring)) {
+                            log.info("Returned content for " + url
+                                    + " does not contain " + substring + " - will retry");
                             continue readyLoop;
                         }
                     }
-                } catch(HttpHostConnectException e) {
+                } catch (HttpHostConnectException e) {
                     log.info("Got HttpHostConnectException at " + url + " - will retry");
                     continue readyLoop;
                 } finally {
-                    if(entity != null) {
+                    if (entity != null) {
                         entity.consumeContent();
                     }
                 }
@@ -163,7 +164,7 @@ public class StanbolTestBase {
             log.info("Got expected content for all configured requests, server is ready");
         }
 
-        if(!serverReady) {
+        if (!serverReady) {
             throw new Exception("Server not ready after " + timeoutSec + " seconds");
         }
     }

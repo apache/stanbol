@@ -18,62 +18,73 @@ package org.apache.stanbol.commons.testing.http;
 
 import static org.junit.Assert.fail;
 
-/** Convenience class for retrying tests
- *  until timeout or success.
+/**
+ * Convenience class for retrying tests
+ * until timeout or success.
  */
 public class RetryLoop {
-    
+
     private final long timeout;
-    
-    /** Interface for conditions to check, isTrue will be called
-     *  repeatedly until success or timeout */
-    static public interface Condition {
-        /** Used in failure messages to describe what was expected */
+
+    /**
+     * Interface for conditions to check, isTrue will be called
+     * repeatedly until success or timeout
+     */
+    public static interface Condition {
+
+        /**
+         * Used in failure messages to describe what was expected
+         */
         String getDescription();
-        
-        /** If true we stop retrying. The RetryLoop retries on AssertionError, 
-         *  so if tests fail in this method they are not reported as 
-         *  failures but retried.
+
+        /**
+         * If true we stop retrying. The RetryLoop retries on AssertionError,
+         * so if tests fail in this method they are not reported as
+         * failures but retried.
          */
         boolean isTrue() throws Exception;
     }
-    
-    /** Retry Condition c until it returns true or timeout. See {@link Condition}
-     *  for isTrue semantics.
+
+    /**
+     * Retry Condition c until it returns true or timeout. See {@link Condition}
+     * for isTrue semantics.
      */
     public RetryLoop(Condition c, int timeoutSeconds, int intervalBetweenTriesMsec) {
         timeout = System.currentTimeMillis() + timeoutSeconds * 1000L;
-        while(System.currentTimeMillis() < timeout) {
+        while (System.currentTimeMillis() < timeout) {
             try {
-                if(c.isTrue()) {
+                if (c.isTrue()) {
                     return;
                 }
-            } catch(AssertionError ae) {
+            } catch (AssertionError ae) {
                 // Retry JUnit tests failing in the condition as well
                 reportException(ae);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 reportException(e);
             }
-            
+
             try {
                 Thread.sleep(intervalBetweenTriesMsec);
-            } catch(InterruptedException ignore) {
+            } catch (InterruptedException ignore) {
             }
         }
-    
+
         onTimeout();
-        fail("RetryLoop failed, condition is false after " + timeoutSeconds + " seconds: " 
-                + c.getDescription());
+        fail("RetryLoop failed, condition is false after " + timeoutSeconds + " seconds: " + c.getDescription());
     }
 
-    /** Can be overridden to report Exceptions that happen in the retry loop */
+    /**
+     * Can be overridden to report Exceptions that happen in the retry loop
+     */
     protected void reportException(Throwable t) {
     }
-    
-    /** Called if the loop times out without success, just before failing */
+
+    /**
+     * Called if the loop times out without success, just before failing
+     */
     protected void onTimeout() {
     }
-    
+
     protected long getRemainingTimeSeconds() {
         return Math.max(0L, (timeout - System.currentTimeMillis()) / 1000L);
     }
