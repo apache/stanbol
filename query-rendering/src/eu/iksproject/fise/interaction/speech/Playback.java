@@ -46,48 +46,50 @@ public class Playback {
     private Boolean stopPlayback = false;
     private Boolean playbackInProgress = false;
 
-    public Playback () {
+    public Playback() {
         this(16000, 16, 1, true, true);
     }
 
-    public Playback (AudioFormat af) {
+    public Playback(AudioFormat af) {
         this(af.getSampleRate(), af.getSampleSizeInBits(), af.getChannels(), !af.toString().toLowerCase().contains("unsigned"), af.isBigEndian());
     }
 
-    public Playback (float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian) {
+    public Playback(float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian) {
         audioFormat = new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
     }
 
-    public AudioFormat getAudioFormat () {
+    public AudioFormat getAudioFormat() {
         return audioFormat;
     }
 
-    public boolean isPlaybacking () {
+    public boolean isPlaybacking() {
         return playbackInProgress;
     }
 
-    public void setAudioFormat (AudioFormat af) throws PlaybackInProgressException {
+    public void setAudioFormat(AudioFormat af) throws PlaybackInProgressException {
         synchronized (playbackInProgress) {
             if (playbackInProgress) {
-                throw new PlaybackInProgressException ();
+                throw new PlaybackInProgressException();
             }
             audioFormat = af;
         }
     }
 
-    public void stopPlayback () {
+    public void stopPlayback() {
         synchronized (stopPlayback) {
             stopPlayback = true;
         }
     }
 
-    public void playAudio (final byte[] audioData, boolean asynchronous) throws PlaybackInProgressException {
+    public void playAudio(final byte[] audioData, boolean asynchronous) throws PlaybackInProgressException {
         synchronized (playbackInProgress) {
             if (playbackInProgress) {
-                throw new PlaybackInProgressException ();
+                throw new PlaybackInProgressException();
+            } else {
+                {
+                    playbackInProgress = true;
+                }
             }
-            else
-                playbackInProgress = true;
         }
         synchronized (stopPlayback) {
             stopPlayback = false;
@@ -95,15 +97,14 @@ public class Playback {
 
         Runnable runner = new Runnable() {
             int bufferSize = (int) audioFormat.getSampleRate() * audioFormat.getFrameSize();
-            byte buffer[] = new byte[bufferSize];
+            byte[] buffer = new byte[bufferSize];
 
             public void run() {
                 try {
                     InputStream input = new ByteArrayInputStream(audioData);
                     final AudioInputStream ais = new AudioInputStream(input, audioFormat, audioData.length / audioFormat.getFrameSize());
                     DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
-                    final SourceDataLine line = (SourceDataLine)
-                    AudioSystem.getLine(info);
+                    final SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
                     line.open(audioFormat);
                     line.start();
                     int count;
@@ -112,8 +113,11 @@ public class Playback {
                             line.write(buffer, 0, count);
                         }
                         synchronized (stopPlayback) {
-                            if (stopPlayback)
-                                break;
+                            if (stopPlayback) {
+                                {
+                                    break;
+                                }
+                            }
                         }
                     }
                     line.drain();
@@ -133,8 +137,7 @@ public class Playback {
         if (asynchronous) {
             ExecutorService es = Executors.newSingleThreadExecutor();
             es.execute(runner);
-        }
-        else {
+        } else {
             runner.run();
         }
     }

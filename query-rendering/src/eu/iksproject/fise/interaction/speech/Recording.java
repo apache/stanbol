@@ -85,8 +85,9 @@ public class Recording {
             if (recordingInProgress) {
                 throw new RecordingInProgressException ();
             }
-            else
+            else {
                 recordingInProgress = true;
+            }
         }
         synchronized (stopRecording) {
             stopRecording = false;
@@ -97,7 +98,7 @@ public class Recording {
             public byte[] call() {
                 try {
                     int bufferSize = (int)audioFormat.getSampleRate() * audioFormat.getFrameSize();
-                    byte buffer[] = new byte[bufferSize];
+                    byte[] buffer = new byte[bufferSize];
 
                     DataLine.Info info = new DataLine.Info(TargetDataLine.class, audioFormat);
                     TargetDataLine line = (TargetDataLine)AudioSystem.getLine(info);
@@ -111,8 +112,9 @@ public class Recording {
                             out.write(buffer, 0, count);
                         }
                         synchronized (stopRecording) {
-                            if (stopRecording)
+                            if (stopRecording) {
                                 break;
+                            }
                         }
                     } while (!stopRecording);
                     out.flush();

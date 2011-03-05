@@ -92,8 +92,9 @@ public class SpeechServer implements EventListener {
 
             if (asr != null) {
                 String recognizedSpeech = asr.recognizeSpeech(rae.getData());
-                if (recognizedSpeech == null || recognizedSpeech.equals(""))
+                if (recognizedSpeech == null || recognizedSpeech.equals("")) {
                     recognizedSpeech = null;
+                }
 
                 System.out.println("RECOGNIZED SPEECH: '" + recognizedSpeech + "'");
                 RecognizedSpeechEvent rse = new RecognizedSpeechEvent(recognizedSpeech);

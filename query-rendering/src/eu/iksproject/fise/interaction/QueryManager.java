@@ -112,7 +112,6 @@ public class QueryManager implements EventListener {
 
     private String postData (String query) {
         try {
-            String resultText = "";
             // Construct data
             String data = URLEncoder.encode("query", "UTF-8") + "=" + URLEncoder.encode(query, "UTF-8");
 
@@ -128,6 +127,7 @@ public class QueryManager implements EventListener {
             // Get the response
             BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             String line;
+            String resultText = "";
             while ((line = rd.readLine()) != null) {
                 // Process line...
                 resultText += line;
