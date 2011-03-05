@@ -53,7 +53,7 @@ public class RelatedTopicEnhancementEngine implements EnhancementEngine {
 
     protected static final String TEXT_PLAIN_MIMETYPE = "text/plain";
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    private static final Logger log = LoggerFactory.getLogger(RelatedTopicEnhancementEngine.class);
 
     // TODO: make me configurable through an OSGi property
     protected String type = "http://www.w3.org/2004/02/skos/core#Concept";

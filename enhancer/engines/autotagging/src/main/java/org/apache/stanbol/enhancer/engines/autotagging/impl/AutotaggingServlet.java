@@ -66,20 +66,17 @@ public class AutotaggingServlet extends HttpServlet {
 
     @Override
     /** Create a ContentItem and queue for enhancement */
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        doGet(req,resp);
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doGet(req, resp);
     }
 
-
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String labelParam = getEntityName(req);
         String typeParam = getEntityType(req);
         Autotagger autotagger = provider.getAutotagger();
         List<TagInfo> suggestions;
-        if(typeParam == null){
+        if (typeParam == null) {
             suggestions = autotagger.suggest(labelParam);
         } else {
             suggestions = autotagger.suggestForType(labelParam, typeParam);
@@ -89,19 +86,19 @@ public class AutotaggingServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
         Writer writer = resp.getWriter();
         JSONObject suggestionList = new JSONObject();
-        List<Map<String, Object>> suggestionObjects = new ArrayList<Map<String,Object>>(suggestions.size());
-        for (TagInfo suggestion : suggestions){
-            Map<String,Object> map = new HashMap<String, Object>();
+        List<Map<String, Object>> suggestionObjects = new ArrayList<Map<String, Object>>(suggestions.size());
+        for (TagInfo suggestion : suggestions) {
+            Map<String, Object> map = new HashMap<String, Object>();
             map.put("uri", suggestion.getId());
-            map.put("label",suggestion.getLabel());
-            map.put("type",suggestion.getType());
+            map.put("label", suggestion.getLabel());
+            map.put("type", suggestion.getType());
             map.put("confidence", suggestion.getConfidence());
             suggestionObjects.add(map);
         }
         try {
             suggestionList.put("suggestion", suggestionObjects);
         } catch (JSONException e) {
-            log.error("Unable to encode suggestions as JSON",e);
+            log.error("Unable to encode suggestions as JSON", e);
             resp.sendError(500, e.getMessage());
             return;
         }
@@ -111,21 +108,21 @@ public class AutotaggingServlet extends HttpServlet {
     private String getEntityName(HttpServletRequest r) {
         final String result = r.getParameter("name");
         if (result == null || result.length() == 0) {
-            throw new IllegalArgumentException(
-                    "Missing Parameter name, request should include parameter \"name\"");
+            throw new IllegalArgumentException("Missing Parameter name, request should include parameter \"name\"");
         }
         return result;
     }
 
     private String getEntityType(HttpServletRequest r) {
         final String result = r.getParameter("type");
-//        if(result == null){
-//            return null;
-//        } else {
-//            //convert the Type to the Ontology
-//        }
+        //        if(result == null){
+        //            return null;
+        //        } else {
+        //            //convert the Type to the Ontology
+        //        }
         return result;
     }
+
     @Activate
     protected void activate(ComponentContext ctx) throws Exception {
         httpService.registerServlet(ALIAS, this, null, null);

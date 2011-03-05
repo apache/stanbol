@@ -74,8 +74,8 @@ public class StatelessEngineTest extends EnhancerTestBase {
             "text/rdf+nt", 
             "<urn:enhancement.*www.w3.org/1999/02/22-rdf-syntax-ns#type.*ontology/TextAnnotation>",
         };
-        
-        for(int i=0 ; i < formats.length; i+=3) {
+
+        for (int i = 0; i < formats.length; i += 3) {
             executor.execute(
                     builder.buildPostRequest("/engines")
                     .withHeader("Accept", formats[i])

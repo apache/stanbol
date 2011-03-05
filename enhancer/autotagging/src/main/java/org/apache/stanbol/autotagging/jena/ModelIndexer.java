@@ -42,13 +42,11 @@ import com.hp.hpl.jena.tdb.TDBFactory;
  */
 public class ModelIndexer implements Closeable {
 
-    private static final Logger log = LoggerFactory.getLogger(ModelIndexer.class);
-
     public static final String URI_FIELD = "uri";
-
     public static final String DEFAULT_DBPEDIA_SAMPLE = "dbpedia/dbpedia-sample-10000.nt";
-
     public static final String POPULARITY_SCORE_PROPERTY = "http://www.iksproject.eu/ns/popularity-score";
+
+    private static final Logger log = LoggerFactory.getLogger(ModelIndexer.class);
 
     private final IndexWriter iwriter;
 

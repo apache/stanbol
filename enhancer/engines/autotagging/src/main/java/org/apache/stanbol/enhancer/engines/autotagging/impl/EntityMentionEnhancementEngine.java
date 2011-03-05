@@ -60,7 +60,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHAN
 public class EntityMentionEnhancementEngine implements EnhancementEngine,
         ServiceProperties {
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    private static final Logger log = LoggerFactory.getLogger(EntityMentionEnhancementEngine.class);
 
     @Reference
     AutotaggerProvider autotaggerProvider;
@@ -111,7 +111,9 @@ public class EntityMentionEnhancementEngine implements EnhancementEngine,
         }
     }
 
-    protected final Collection<TagInfo> computeEntityRecommendations(Autotagger autotagger, LiteralFactory literalFactory, MGraph graph, UriRef contentItemId, UriRef textAnnotation, List<UriRef> subsumedAnnotations) throws IOException {
+    protected final Collection<TagInfo> computeEntityRecommendations(Autotagger autotagger,
+            LiteralFactory literalFactory, MGraph graph, UriRef contentItemId, UriRef textAnnotation,
+            List<UriRef> subsumedAnnotations) throws IOException {
         // First get the required properties for the parsed textAnnotation
         // ... and check the values
         String name = EnhancementEngineHelper.getString(graph, textAnnotation,

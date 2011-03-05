@@ -39,14 +39,15 @@ import org.slf4j.LoggerFactory;
 
 public class JCRContentItem implements ContentItem, GraphListener {
 
+    public static final String ENHANCER_ID_PROP = "stanbolEnhancerId";
+
     private static final String OBJECT = "object";
     private static final String PREDICATE = "predicate";
     private static final String SUBJECT = "subject";
     private static final String JCR_DATA = "jcr:data";
     private static final String JCR_MIME_TYPE = "jcr:mimeType";
-    public static final String ENHANCER_ID_PROP = "stanbolEnhancerId";
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    private static final Logger log = LoggerFactory.getLogger(getClass());
 
     private Node jcrNode;
 
