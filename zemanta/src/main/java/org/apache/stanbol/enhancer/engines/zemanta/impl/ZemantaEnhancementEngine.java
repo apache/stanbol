@@ -54,6 +54,10 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.*;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_CATEGORY;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
+
 
 /**
  * Apache Stanbol Enhancer Zemanta enhancement engine.
@@ -75,21 +79,22 @@ import org.slf4j.LoggerFactory;
 @Service
 public class ZemantaEnhancementEngine implements EnhancementEngine {
 
-    protected static final String TEXT_PLAIN_MIMETYPE = "text/plain";
-    protected static final String TEXT_HTML_MIMETYPE = "text/html";
-
-    private static final Logger log = LoggerFactory.getLogger(ZemantaEnhancementEngine.class);
-
-    protected BundleContext bundleContext;
-
     @Property
     public static final String API_KEY_PROPERTY = "org.apache.stanbol.enhancer.engines.zemanta.key";
 
     public static final String DMOZ_BASE_URL = "http://www.dmoz.org/";
     public static final String ZEMANTA_DMOZ_PREFIX = "Top/";
+
+    protected static final String TEXT_PLAIN_MIMETYPE = "text/plain";
+    protected static final String TEXT_HTML_MIMETYPE = "text/html";
+
+    private static final Logger log = LoggerFactory.getLogger(ZemantaEnhancementEngine.class);
+
     private static String key;
 
     public LiteralFactory literalFactory;
+
+    protected BundleContext bundleContext;
 
     @Activate
     @SuppressWarnings("unchecked")
@@ -151,11 +156,10 @@ public class ZemantaEnhancementEngine implements EnhancementEngine {
         //annotation structure
         processRecognition(results, graph, text, ciId);
         processCategories(results, graph, ciId);
-
     }
 
     protected void processCategories(MGraph results, MGraph enhancements, UriRef ciId) {
-        Iterator<Triple> categories = results.filter(null, Properties.RDF_TYPE, ZemantaOntologyEnum.Category.getUri());
+        Iterator<Triple> categories = results.filter(null, RDF_TYPE, ZemantaOntologyEnum.Category.getUri());
         while (categories.hasNext()) {
             NonLiteral category = categories.next().getSubject();
             log.info("process category " + category);
@@ -172,21 +176,23 @@ public class ZemantaEnhancementEngine implements EnhancementEngine {
                         //now write the Stanbol Enhancer entity enhancement
                         UriRef categoryEnhancement = EnhancementEngineHelper.createEntityEnhancement(enhancements, this, ciId);
                         //write the title
-                        enhancements.add(new TripleImpl(categoryEnhancement, Properties.ENHANCER_ENTITY_LABEL, literalFactory.createTypedLiteral(categoryTitle)));
+                        enhancements.add(new TripleImpl(categoryEnhancement, ENHANCER_ENTITY_LABEL, literalFactory.createTypedLiteral(categoryTitle)));
                         //write the reference
                         if (categoryTitle.startsWith(ZEMANTA_DMOZ_PREFIX)) {
-                            enhancements.add(new TripleImpl(categoryEnhancement, Properties.ENHANCER_ENTITY_REFERENCE, new UriRef(DMOZ_BASE_URL + categoryTitle.substring(ZEMANTA_DMOZ_PREFIX.length()))));
+                            enhancements.add(
+                                    new TripleImpl(categoryEnhancement, ENHANCER_ENTITY_REFERENCE, new UriRef(DMOZ_BASE_URL + categoryTitle.substring(ZEMANTA_DMOZ_PREFIX.length()))));
                         }
                         //write the confidence
                         if (confidence != null) {
-                            enhancements.add(new TripleImpl(categoryEnhancement, Properties.ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(confidence)));
+                            enhancements.add(
+                                    new TripleImpl(categoryEnhancement, ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(confidence)));
                         }
                         //we need to write the entity type and the dc:type
                         // see http://wiki.iks-project.eu/index.php/ZemantaEnhancementEngine#Mapping_of_Categories
                         // for more Information
-                        enhancements.add(new TripleImpl(categoryEnhancement, Properties.DC_TYPE, TechnicalClasses.ENHANCER_CATEGORY));
+                        enhancements.add(new TripleImpl(categoryEnhancement, DC_TYPE, ENHANCER_CATEGORY));
                         //Use the Zemanta Category as type for the referred Entity
-                        enhancements.add(new TripleImpl(categoryEnhancement, Properties.ENHANCER_ENTITY_TYPE, ZemantaOntologyEnum.Category.getUri()));
+                        enhancements.add(new TripleImpl(categoryEnhancement, ENHANCER_ENTITY_TYPE, ZemantaOntologyEnum.Category.getUri()));
                     } else {
                         log.warn("Unable to process category " + category + " because no title is present");
                     }
@@ -209,7 +215,7 @@ public class ZemantaEnhancementEngine implements EnhancementEngine {
      * @param text         the content of the content item as string
      */
     protected void processRecognition(MGraph results, MGraph enhancements, String text, UriRef ciId) {
-        Iterator<Triple> recognitions = results.filter(null, Properties.RDF_TYPE, ZemantaOntologyEnum.Recognition.getUri());
+        Iterator<Triple> recognitions = results.filter(null, RDF_TYPE, ZemantaOntologyEnum.Recognition.getUri());
         while (recognitions.hasNext()) {
             NonLiteral recognition = recognitions.next().getSubject();
             log.info("process recognition " + recognition);
@@ -265,15 +271,19 @@ public class ZemantaEnhancementEngine implements EnhancementEngine {
             //create the entityEnhancement
             UriRef entityEnhancement = EnhancementEngineHelper.createEntityEnhancement(enhancements, this, ciId);
             if (confidence != null) {
-                enhancements.add(new TripleImpl(entityEnhancement, Properties.ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(confidence)));
+                enhancements.add(
+                        new TripleImpl(entityEnhancement, ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(confidence)));
             }
             for (NonLiteral relatedTextAnnotation : textAnnotations) {
-                enhancements.add(new TripleImpl(entityEnhancement, Properties.DC_RELATION, relatedTextAnnotation));
+                enhancements.add(
+                        new TripleImpl(entityEnhancement, DC_RELATION, relatedTextAnnotation));
             }
             for (UriRef entity : sameAsSet) {
-                enhancements.add(new TripleImpl(entityEnhancement, Properties.ENHANCER_ENTITY_REFERENCE, entity));
+                enhancements.add(
+                        new TripleImpl(entityEnhancement, ENHANCER_ENTITY_REFERENCE, entity));
             }
-            enhancements.add(new TripleImpl(entityEnhancement, Properties.ENHANCER_ENTITY_LABEL, literalFactory.createTypedLiteral(title)));
+            enhancements.add(
+                    new TripleImpl(entityEnhancement, ENHANCER_ENTITY_LABEL, literalFactory.createTypedLiteral(title)));
         }
     }
 
@@ -308,7 +318,8 @@ public class ZemantaEnhancementEngine implements EnhancementEngine {
 
     /**
      * This Methods searches/creates text annotations for anchor points of Zemanta
-     * extractions.<br>
+     * extractions.
+     * <p>
      * First this method searches for text annotations that do use the anchor as
      * selected text. Second it searches for occurrences of the anchor within the
      * content of the content and checks if there is an text annotation for that
@@ -339,13 +350,17 @@ public class ZemantaEnhancementEngine implements EnhancementEngine {
                 UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(enhancements, this, ciId);
                 textAnnotations.add(textAnnotation);
                 //write the selection
-                enhancements.add(new TripleImpl(textAnnotation, Properties.ENHANCER_START, literalFactory.createTypedLiteral(current)));
-                enhancements.add(new TripleImpl(textAnnotation, Properties.ENHANCER_END, literalFactory.createTypedLiteral(current + anchorLength)));
-                enhancements.add(new TripleImpl(textAnnotation, Properties.ENHANCER_SELECTED_TEXT, anchorLiteral));
+                enhancements.add(
+                        new TripleImpl(textAnnotation, ENHANCER_START, literalFactory.createTypedLiteral(current)));
+                enhancements.add(
+                        new TripleImpl(textAnnotation, ENHANCER_END, literalFactory.createTypedLiteral(current + anchorLength)));
+                enhancements.add(
+                        new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, anchorLiteral));
                 //TODO: Currently I use the confidence of the extraction, but I think this is more
                 //      related to the annotated Entity rather to the selected text.
                 if (confidence != null) {
-                    enhancements.add(new TripleImpl(textAnnotation, Properties.ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(confidence)));
+                    enhancements.add(
+                            new TripleImpl(textAnnotation, ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(confidence)));
                 }
                 //TODO: No idea about the type of the Annotation, because we do not have an type of the entity!
                 //      One would need to get the types from the referred Source
@@ -366,13 +381,13 @@ public class ZemantaEnhancementEngine implements EnhancementEngine {
      *         text annotations as an value.
      */
     private Map<Integer, Collection<NonLiteral>> searchExistingTextAnnotations(MGraph enhancements, Literal anchorLiteral) {
-        Iterator<Triple> textAnnotationsIterator = enhancements.filter(null, Properties.ENHANCER_SELECTED_TEXT, anchorLiteral);
+        Iterator<Triple> textAnnotationsIterator = enhancements.filter(null, ENHANCER_SELECTED_TEXT, anchorLiteral);
         Map<Integer, Collection<NonLiteral>> existingTextAnnotationsMap = new HashMap<Integer, Collection<NonLiteral>>();
         while (textAnnotationsIterator.hasNext()) {
             NonLiteral subject = textAnnotationsIterator.next().getSubject();
             //test rdfType
-            if (enhancements.contains(new TripleImpl(subject, Properties.RDF_TYPE, TechnicalClasses.ENHANCER_TEXTANNOTATION))) {
-                Integer start = EnhancementEngineHelper.get(enhancements, subject, Properties.ENHANCER_START, Integer.class, literalFactory);
+            if (enhancements.contains(new TripleImpl(subject, RDF_TYPE, ENHANCER_TEXTANNOTATION))) {
+                Integer start = EnhancementEngineHelper.get(enhancements, subject, ENHANCER_START, Integer.class, literalFactory);
                 if (start != null) {
                     Collection<NonLiteral> textAnnotationList = existingTextAnnotationsMap.get(start);
                     if (textAnnotationList == null) {

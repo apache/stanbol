@@ -16,6 +16,12 @@
  */
 package org.apache.stanbol.enhancer.engines.zemanta.impl;
 
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
+import static org.apache.stanbol.enhancer.engines.zemanta.impl.ZemantaEnhancementEngine.API_KEY_PROPERTY;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.*;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_CATEGORY;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_ENTITYANNOTATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -49,15 +55,6 @@ import org.slf4j.LoggerFactory;
 
 
 public class ZemantaEnhancementEngineTest {
-    private static final Logger log = LoggerFactory.getLogger(ZemantaEnhancementEngineTest.class);
-
-    /**
-     * This key was generated to support testing only. Please do only use it
-     * for testing. For real usages of the engine you need to create your own
-     * key!
-     */
-    private static final String ZEMANTA_TEST_APPLICATION_KEY = "2qsvcvkut8rhnqbhm35znn76";
-
     /**
      * found on this Blog {@linkplain http://bcbio.wordpress.com/2009/01/04/extracting-keywords-from-biological-text-using-zemanta/}
      */
@@ -75,10 +72,20 @@ public class ZemantaEnhancementEngineTest {
 
 
     static ZemantaEnhancementEngine zemantaEngine = new ZemantaEnhancementEngine();
+
+    private static final Logger log = LoggerFactory.getLogger(ZemantaEnhancementEngineTest.class);
+
+    /**
+     * This key was generated to support testing only. Please do only use it
+     * for testing. For real usages of the engine you need to create your own
+     * key!
+     */
+    private static final String ZEMANTA_TEST_APPLICATION_KEY = "2qsvcvkut8rhnqbhm35znn76";
+
     @BeforeClass
     public static void setUpServices() throws IOException {
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        properties.put(ZemantaEnhancementEngine.API_KEY_PROPERTY, ZEMANTA_TEST_APPLICATION_KEY);
+        properties.put(API_KEY_PROPERTY, ZEMANTA_TEST_APPLICATION_KEY);
         MockComponentContext context = new MockComponentContext(properties);
         zemantaEngine.activate(context);
     }
@@ -87,11 +94,13 @@ public class ZemantaEnhancementEngineTest {
     public static void shutdownServices() {
         zemantaEngine.deactivate(null);
     }
+
     public static ContentItem wrapAsContentItem(final String text) {
         return new ContentItem() {
 
             SimpleMGraph metadata = new SimpleMGraph();
-            String id = "urn:org.apache.stanbol.enhancer:test:engines.zemanta:content-item-"+EnhancementEngineHelper.randomUUID().toString();
+            String id = "urn:org.apache.stanbol.enhancer:test:engines.zemanta:content-item-"
+                    + EnhancementEngineHelper.randomUUID().toString();
 
             public InputStream getStream() {
                 return new ByteArrayInputStream(text.getBytes());
@@ -110,30 +119,28 @@ public class ZemantaEnhancementEngineTest {
             }
         };
     }
+
     @Test
-    public void tesetBioText() throws Exception{
+    public void tesetBioText() throws Exception {
         ContentItem ci = wrapAsContentItem(BIO_DOMAIN_TEXT);
         zemantaEngine.computeEnhancements(ci);
         JenaSerializerProvider serializer = new JenaSerializerProvider();
-        serializer.serialize(System.out, ci.getMetadata(), SupportedFormat.TURTLE);
+        serializer.serialize(System.out, ci.getMetadata(), TURTLE);
         int textAnnoNum = checkAllTextAnnotations(ci.getMetadata(), BIO_DOMAIN_TEXT);
         log.info(textAnnoNum + " TextAnnotations found ...");
         int entityAnnoNum = checkAllEntityAnnotations(ci.getMetadata());
         log.info(textAnnoNum + " EntityAnnotations found ...");
     }
+
     /*
      * -----------------------------------------------------------------------
      * Helper Methods to check Text and EntityAnnotations
      * -----------------------------------------------------------------------
      */
 
-    /**
-     * @param g
-     * @return
-     */
     private int checkAllEntityAnnotations(MGraph g) {
         Iterator<Triple> entityAnnotationIterator = g.filter(null,
-                Properties.RDF_TYPE, TechnicalClasses.ENHANCER_ENTITYANNOTATION);
+                RDF_TYPE, ENHANCER_ENTITYANNOTATION);
         int entityAnnotationCount = 0;
         while (entityAnnotationIterator.hasNext()) {
             UriRef entityAnnotation = (UriRef) entityAnnotationIterator.next().getSubject();
@@ -143,19 +150,17 @@ public class ZemantaEnhancementEngineTest {
         }
         return entityAnnotationCount;
     }
+
     /**
-     * Checks if an entity annotation is valid
-     *
-     * @param g
-     * @param textAnnotation
+     * Checks if an entity annotation is valid.
      */
     private void checkEntityAnnotation(MGraph g, UriRef entityAnnotation) {
         Iterator<Triple> relationIterator = g.filter(
-                entityAnnotation, Properties.DC_RELATION, null);
+                entityAnnotation, DC_RELATION, null);
         Iterator<Triple> requiresIterator = g.filter(
-                entityAnnotation, Properties.DC_REQUIRES, null);
+                entityAnnotation, DC_REQUIRES, null);
         Iterator<Triple> dcTypeCategory = g.filter(
-                entityAnnotation, Properties.DC_TYPE, TechnicalClasses.ENHANCER_CATEGORY);
+                entityAnnotation, DC_TYPE, ENHANCER_CATEGORY);
         // check if the relation or an requires annotation set
         // also include the DC_TYPE ENHANCER_CATEGORY, because such entityEnhancements
         // do not need to have any values for DC_RELATION nor DC_REQUIRES
@@ -163,13 +168,13 @@ public class ZemantaEnhancementEngineTest {
         while (relationIterator.hasNext()) {
             // test if the referred annotations are text annotations
             UriRef referredTextAnnotation = (UriRef) relationIterator.next().getObject();
-            assertTrue(g.filter(referredTextAnnotation, Properties.RDF_TYPE,
-                    TechnicalClasses.ENHANCER_TEXTANNOTATION).hasNext());
+            assertTrue(g.filter(referredTextAnnotation, RDF_TYPE,
+                    ENHANCER_TEXTANNOTATION).hasNext());
         }
 
         // test if an entity is referred
         Iterator<Triple> entityReferenceIterator = g.filter(entityAnnotation,
-                Properties.ENHANCER_ENTITY_REFERENCE, null);
+                ENHANCER_ENTITY_REFERENCE, null);
         assertTrue(entityReferenceIterator.hasNext());
         // test if the reference is an URI
         assertTrue(entityReferenceIterator.next().getObject() instanceof UriRef);
@@ -180,16 +185,13 @@ public class ZemantaEnhancementEngineTest {
 
         // finally test if the entity label is set
         Iterator<Triple> entityLabelIterator = g.filter(entityAnnotation,
-                Properties.ENHANCER_ENTITY_LABEL, null);
+                ENHANCER_ENTITY_LABEL, null);
         assertTrue(entityLabelIterator.hasNext());
     }
-    /**
-     * @param g
-     * @return
-     */
+
     private int checkAllTextAnnotations(MGraph g, String content) {
         Iterator<Triple> textAnnotationIterator = g.filter(null,
-                Properties.RDF_TYPE, TechnicalClasses.ENHANCER_TEXTANNOTATION);
+                RDF_TYPE, ENHANCER_TEXTANNOTATION);
         // test if a textAnnotation is present
         assertTrue(textAnnotationIterator.hasNext());
         int textAnnotationCount = 0;
@@ -203,10 +205,7 @@ public class ZemantaEnhancementEngineTest {
     }
 
     /**
-     * Checks if a text annotation is valid
-     *
-     * @param g
-     * @param textAnnotation
+     * Checks if a text annotation is valid.
      */
     private void checkTextAnnotation(MGraph g, UriRef textAnnotation, String content) {
         Iterator<Triple> selectedTextIterator = g.filter(textAnnotation,
@@ -231,9 +230,9 @@ public class ZemantaEnhancementEngineTest {
 //        object = null;
         //test start/end if present
         Iterator<Triple> startPosIterator = g.filter(textAnnotation,
-                Properties.ENHANCER_START, null);
+                ENHANCER_START, null);
         Iterator<Triple> endPosIterator = g.filter(textAnnotation,
-                Properties.ENHANCER_END, null);
+                ENHANCER_END, null);
         //start end is optional, but if start is present, that also end needs to be set
         if(startPosIterator.hasNext()){
             Resource resource = startPosIterator.next().getObject();

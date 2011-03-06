@@ -30,30 +30,30 @@ import java.util.Set;
  * <p>
  * This class is intended to allow to define meta data about a used web service (e.g. within an
  * Enumeration)
- * 
+ *
  * @author Rupert Westenthaler
- * 
  */
 public class RequestProperty {
+
     private final String name;
     private final boolean required;
     private final String defaultValue;
     private final Set<String> valueList;
     private final String toString;
-    
+
     /**
      * Constructs a Property definition for a (RESTful) web service.
-     * 
+     *
      * @param name the name of the property (MUST NOT be <code>null</code>)
      * @param required defines if the property is optional or required
-     * @param defaultValue the value used if this parameter is not parsed. 
+     * @param defaultValue the value used if this parameter is not parsed.
      * <code>null</code> indicates no default configuration.
-     * @param valueList the list of allowed values for this parameter. 
-     * <code>null</code> or an empty array indicate that there are no 
+     * @param valueList the list of allowed values for this parameter.
+     * <code>null</code> or an empty array indicate that there are no
      * restrictions on possible values.
      */
     protected RequestProperty(String name, boolean required, String defaultValue, String... valueList) {
-        if(name == null){
+        if (name == null) {
             throw new IllegalArgumentException("The name of an Porperty MUST NOT be NULL");
         }
         this.name = name;
@@ -83,23 +83,23 @@ public class RequestProperty {
         b.append(']');
         this.toString = b.toString();
     }
-    
+
     public String getName() {
         return name;
     }
-    
+
     public boolean hasDefault() {
         return defaultValue != null;
     }
-    
+
     public String defaultValue() {
         return defaultValue;
     }
-    
+
     public boolean hasValueList() {
         return valueList != null;
     }
-    
+
     public boolean allowedValue(String value) {
         // if no value list is defined
         if (valueList == null) {
@@ -107,33 +107,31 @@ public class RequestProperty {
             return !(value == null && isRequired());
         } else {
             // check if the value is in the value list or null and optional
-            return valueList.contains(value) || ( value == null && isOptional());
+            return valueList.contains(value) || (value == null && isOptional());
         }
     }
-    
+
     public Set<String> getValueList() {
         return valueList;
     }
-    
+
     public boolean isRequired() {
         return required;
     }
-    
+
     public boolean isOptional() {
         return !required;
     }
-    
+
     /**
      * Encodes the Property for the given parameters.
-     * 
-     * @param requestString
-     *            The string builder used to create the request
-     * @param first
-     *            if the property is the first property added to the request
-     * @param values
-     *            the value(s) for the property. If <code>null</code> or an empty list, than the
-     *            {@link #defaultValue()} is added if present. Also if the parsed collection contains the
-     *            <code>null</code> value the {@link #defaultValue()} is added instead.
+     *
+     * @param requestString The string builder used to create the request
+     * @param first if the property is the first property added to the request
+     * @param values the value(s) for the property. If <code>null</code> or an empty list, than the
+     * {@link #defaultValue()} is added if present. Also if the parsed collection contains the
+     * <code>null</code> value the {@link #defaultValue()} is added instead.
+     *
      * @return <code>true</code> if the parsed request string was modified as a result of this call -
      *         meaning that parameter was added to the request.
      */
@@ -173,7 +171,7 @@ public class RequestProperty {
         }
         return added;
     }
-    
+
     @Override
     public String toString() {
         return toString;

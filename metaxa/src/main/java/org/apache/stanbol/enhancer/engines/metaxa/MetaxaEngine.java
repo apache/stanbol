@@ -160,7 +160,7 @@ public class MetaxaEngine implements EnhancementEngine, ServiceProperties {
     }
 
     /**
-     * This converts the given RDF2Go node into a corresponding Clerezza object.
+     * Converts the given RDF2Go node into a corresponding Clerezza object.
      *
      * @param node a {@link Node}
      * @return a {@link Resource}
