@@ -129,7 +129,7 @@ public class EnginesRootResource extends NavigationMixin {
     }
 
     /**
-     * Form based OpenCalais-compatible interface
+     * Form-based OpenCalais-compatible interface
      *
      * TODO: should we parse the OpenCalais paramsXML and find the closest 
      * Stanbol Enhancer semantics too?

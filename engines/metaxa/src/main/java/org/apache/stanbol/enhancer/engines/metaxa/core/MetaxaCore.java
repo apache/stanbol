@@ -48,12 +48,12 @@ import org.semanticdesktop.aperture.vocabulary.NIE;
 public class MetaxaCore {
 
     /**
-     * This contains the configured extractors.
+     * Contains the configured extractors.
      */
     private ExtractorRegistry extractorRegistry;
 
     /**
-     * This creates a new instance of {@code ApertureExtractor} using the given
+     * Creates a new instance of {@code ApertureExtractor} using the given
      * configuration.
      *
      * @param configFileName
@@ -70,7 +70,7 @@ public class MetaxaCore {
     }
 
     /**
-     * This return {@code true} if the given MIME type is supported by the
+     * Returns {@code true} if the given MIME type is supported by the
      * extractor.
      *
      * @param mimeType
@@ -85,7 +85,7 @@ public class MetaxaCore {
 
 
     /**
-     * This returns a model containing all the metadata that could be extracted
+     * Returns a model containing all the metadata that could be extracted
      * by reading the given input stream using the given MIME type.
      *
      * @param in
@@ -129,7 +129,7 @@ public class MetaxaCore {
     }
 
     /**
-     * This returns a documents plain text if contained in the given extracted
+     * Returns a documents plain text if contained in the given extracted
      * metadata.
      *
      * @param model

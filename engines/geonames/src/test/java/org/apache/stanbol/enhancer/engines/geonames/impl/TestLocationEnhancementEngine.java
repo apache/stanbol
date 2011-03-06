@@ -16,6 +16,12 @@
  */
 package org.apache.stanbol.enhancer.engines.geonames.impl;
 
+import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_ORGANISATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PERSON;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PLACE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.*;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_ENTITYANNOTATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -52,13 +58,13 @@ import org.slf4j.LoggerFactory;
 
 public class TestLocationEnhancementEngine {
 
-    private Logger log = LoggerFactory.getLogger(TestLocationEnhancementEngine.class);
+    private static final Logger log = LoggerFactory.getLogger(TestLocationEnhancementEngine.class);
 
     /**
      * The context for the tests (same as in TestOpenNLPEnhancementEngine)
      */
     public static final String CONTEXT = "Dr. Patrick Marshall (1869 - November 1950) was a"
-        + " geologist who lived in New Zealand and worked at the University of Otago.";
+            + " geologist who lived in New Zealand and worked at the University of Otago.";
 
     /**
      * The person for the tests (same as in TestOpenNLPEnhancementEngine)
@@ -68,7 +74,7 @@ public class TestLocationEnhancementEngine {
     /**
      * The organisation for the tests (same as in TestOpenNLPEnhancementEngine)
      */
-    public static final String ORGANISATION ="University of Otago";
+    public static final String ORGANISATION = "University of Otago";
 
     /**
      * The place for the tests (same as in TestOpenNLPEnhancementEngine)
@@ -93,7 +99,6 @@ public class TestLocationEnhancementEngine {
     public static ContentItem getContentItem(final String id,
             final String text) {
         return new ContentItem() {
-
             SimpleMGraph metadata = new SimpleMGraph();
 
             public InputStream getStream() {
@@ -114,7 +119,7 @@ public class TestLocationEnhancementEngine {
         };
     }
 
-    public static void getTextAnnotation(ContentItem ci, String name,String context,UriRef type){
+    public static void getTextAnnotation(ContentItem ci, String name, String context, UriRef type) {
         String content;
         try {
             content = IOUtils.toString(ci.getStream());
@@ -130,12 +135,12 @@ public class TestLocationEnhancementEngine {
         testAnnotation.setSelectionContext(context);
         testAnnotation.getDcType().add(type);
         Integer start = content.indexOf(name);
-        if(start < 0){ //if not found in the content
+        if (start < 0) { //if not found in the content
             //set some random numbers for start/end
-            start = (int)Math.random()*100;
+            start = (int) Math.random() * 100;
         }
         testAnnotation.setStart(start);
-        testAnnotation.setEnd(start+name.length());
+        testAnnotation.setEnd(start + name.length());
     }
 
     @Test
@@ -143,18 +148,18 @@ public class TestLocationEnhancementEngine {
         //create a content item
         ContentItem ci = getContentItem("urn:org.apache:stanbol.enhancer:text:content-item:person", CONTEXT);
         //add three text annotations to be consumed by this test
-        getTextAnnotation(ci, PERSON, CONTEXT, OntologicalClasses.DBPEDIA_PERSON);
-        getTextAnnotation(ci, ORGANISATION, CONTEXT, OntologicalClasses.DBPEDIA_ORGANISATION);
-        getTextAnnotation(ci, PLACE, CONTEXT, OntologicalClasses.DBPEDIA_PLACE);
+        getTextAnnotation(ci, PERSON, CONTEXT, DBPEDIA_PERSON);
+        getTextAnnotation(ci, ORGANISATION, CONTEXT, DBPEDIA_ORGANISATION);
+        getTextAnnotation(ci, PLACE, CONTEXT, DBPEDIA_PLACE);
         //perform the computation of the enhancements
         try {
             locationEnhancementEngine.computeEnhancements(ci);
         } catch (EngineException e) {
-            if(e.getCause() instanceof UnknownHostException) {
-                log.warn("Unable to test LocationEnhancemetEngine when offline! -> skipping this test",e.getCause());
+            if (e.getCause() instanceof UnknownHostException) {
+                log.warn("Unable to test LocationEnhancemetEngine when offline! -> skipping this test", e.getCause());
                 return;
-            } else if(e.getCause() instanceof SocketTimeoutException){
-                log.warn("Seams like the geonames.org webservice is currently unavailable -> skipping this test",e.getCause());
+            } else if (e.getCause() instanceof SocketTimeoutException) {
+                log.warn("Seams like the geonames.org webservice is currently unavailable -> skipping this test", e.getCause());
                 return;
             } else if (e.getMessage().contains("overloaded with requests")) {
                 log.warn(
@@ -181,13 +186,9 @@ public class TestLocationEnhancementEngine {
      * -----------------------------------------------------------------------
      */
 
-    /**
-     * @param g
-     * @return
-     */
     private int checkAllEntityAnnotations(MGraph g) {
         Iterator<Triple> entityAnnotationIterator = g.filter(null,
-                Properties.RDF_TYPE, TechnicalClasses.ENHANCER_ENTITYANNOTATION);
+                RDF_TYPE, ENHANCER_ENTITYANNOTATION);
         int entityAnnotationCount = 0;
         while (entityAnnotationIterator.hasNext()) {
             UriRef entityAnnotation = (UriRef) entityAnnotationIterator.next().getSubject();
@@ -200,27 +201,24 @@ public class TestLocationEnhancementEngine {
 
     /**
      * Checks if an entity annotation is valid
-     *
-     * @param g
-     * @param textAnnotation
      */
     private void checkEntityAnnotation(MGraph g, UriRef entityAnnotation) {
         Iterator<Triple> relationIterator = g.filter(
-                entityAnnotation, Properties.DC_RELATION, null);
+                entityAnnotation, DC_RELATION, null);
         Iterator<Triple> requiresIterator = g.filter(
-                entityAnnotation, Properties.DC_REQUIRES, null);
+                entityAnnotation, DC_REQUIRES, null);
         // check if the relation or an requires annotation set
         assertTrue(relationIterator.hasNext() || requiresIterator.hasNext());
         while (relationIterator.hasNext()) {
             // test if the referred annotations are text annotations
             UriRef referredTextAnnotation = (UriRef) relationIterator.next().getObject();
-            assertTrue(g.filter(referredTextAnnotation, Properties.RDF_TYPE,
-                    TechnicalClasses.ENHANCER_TEXTANNOTATION).hasNext());
+            assertTrue(g.filter(referredTextAnnotation, RDF_TYPE,
+                    ENHANCER_TEXTANNOTATION).hasNext());
         }
 
         // test if an entity is referred
         Iterator<Triple> entityReferenceIterator = g.filter(entityAnnotation,
-                Properties.ENHANCER_ENTITY_REFERENCE, null);
+                ENHANCER_ENTITY_REFERENCE, null);
         assertTrue(entityReferenceIterator.hasNext());
         // test if the reference is an URI
         assertTrue(entityReferenceIterator.next().getObject() instanceof UriRef);
@@ -229,7 +227,7 @@ public class TestLocationEnhancementEngine {
 
         // finally test if the entity label is set
         Iterator<Triple> entityLabelIterator = g.filter(entityAnnotation,
-                Properties.ENHANCER_ENTITY_LABEL, null);
+                ENHANCER_ENTITY_LABEL, null);
         assertTrue(entityLabelIterator.hasNext());
     }
 

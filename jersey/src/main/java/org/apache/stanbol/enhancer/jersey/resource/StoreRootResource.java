@@ -62,31 +62,30 @@ import com.sun.jersey.core.header.FormDataContentDisposition;
 
 
 import static javax.ws.rs.core.MediaType.*;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.*;
 
 /**
  * Resource to provide a CRU[D] REST API for content items and there related
  * enhancements.
- *
+ * <p>
  * Creation is achieved using either POST requests on the root of the store or
  * as PUT requests on the expected content item URI.
- *
+ * <p>
  * Retrieval is achieved using simple GET requests on the content item or
  * enhancement public URIs.
- *
+ * <p>
  * Update is achieved by issue a PUT request on an existing content item public
  * URI.
- *
+ * <p>
  * The Delete operation is not implemented yet.
  */
 @Path("/store")
 public class StoreRootResource extends NavigationMixin {
 
-    private static final Logger log = LoggerFactory.getLogger(StoreRootResource.class);
-
     public static final Set<String> RDF_MEDIA_TYPES = new TreeSet<String>(
-            Arrays.asList(SupportedFormat.N3, SupportedFormat.N_TRIPLE,
-                    SupportedFormat.RDF_XML, SupportedFormat.TURTLE,
-                    SupportedFormat.X_TURTLE, SupportedFormat.RDF_JSON));
+            Arrays.asList(N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE, RDF_JSON));
+
+    private static final Logger log = LoggerFactory.getLogger(StoreRootResource.class);
 
     protected TcManager tcManager;
 
@@ -143,7 +142,7 @@ public class StoreRootResource extends NavigationMixin {
 
     public StoreRootResource(@Context ServletContext context,
             @Context UriInfo uriInfo, @QueryParam(value = "offset") int offset,
-            @DefaultValue("5") @QueryParam(value = "pageSize") int pageSize)
+            @QueryParam(value = "pageSize") @DefaultValue("5") int pageSize)
             throws ParseException {
         tcManager = (TcManager) context.getAttribute(TcManager.class.getName());
         store = (Store) context.getAttribute(Store.class.getName());

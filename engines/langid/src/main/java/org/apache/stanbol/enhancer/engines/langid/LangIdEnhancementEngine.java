@@ -59,6 +59,20 @@ import org.slf4j.LoggerFactory;
 public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProperties {
 
     /**
+     * a configurable value of the text segment length to check
+     */
+    @Property
+    public static final String PROBE_LENGTH_PROP = "org.apache.stanbol.enhancer.engines.langid.probe-length";
+
+    /**
+     * this allows to specify the path to a configuration file that specifies
+     * the language models and how they map to language labels.
+     */
+    @Property
+    public static final String MODEL_CONFIGURATION_FILE_PROP
+            = "org.apache.stanbol.enhancer.engines.langid.model-configuration-file";
+
+    /**
      * The default value for the Execution of this Engine. Currently set to
      * {@link ServiceProperties#ORDERING_PRE_PROCESSING}
      */
@@ -73,9 +87,9 @@ public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProper
      * This contains the logger.
      */
     private static final Logger log = LoggerFactory.getLogger(LangIdEnhancementEngine.class);
-    
+
     private static final String LANGUAGE_MAP_DEFAULT = "languageLabelsMap.txt";
-    
+
     private Properties languageLabelsMap = new Properties();
 
     /**
@@ -86,18 +100,9 @@ public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProper
     private static final int PROBE_LENGTH_DEFAULT = 400;
 
     /**
-     * a configurable value of the text segment length to check
-     */
-    @Property
-    public static final String PROBE_LENGTH_PROP = "org.apache.stanbol.enhancer.engines.langid.probe-length";
-
-    /**
-     * this allows to specify the path to a configuration file that specifies the language models and how they map to language labels
-     */
-    @Property
-    public static final String MODEL_CONFIGURATION_FILE_PROP = "org.apache.stanbol.enhancer.engines.langid.model-configuration-file";
-    /**
-     * How much text should be used for testing: If the value is 0 or smaller, the complete text will be used. Otherwise a text probe of the given length is taken from the middle of the text. The default length is 400 characters.
+     * How much text should be used for testing: If the value is 0 or smaller,
+     * the complete text will be used. Otherwise a text probe of the given length
+     * is taken from the middle of the text. The default length is 400 characters.
      */
     private int probeLength = PROBE_LENGTH_DEFAULT;
 
@@ -117,10 +122,9 @@ public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProper
         if (confFile != null) {
             languageIdentifier = new TextCategorizer(confFile);
             if (languageIdentifier == null) {
-              throw new IOException("Could not initialize from configuration file: "+confFile);
+                throw new IOException("Could not initialize from configuration file: " + confFile);
             }
-        }
-        else {
+        } else {
             languageIdentifier = new TextCategorizer();
             InputStream in = getClass().getClassLoader().getResourceAsStream(LANGUAGE_MAP_DEFAULT);
             if (in != null) {
@@ -179,7 +183,7 @@ public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProper
             text = text.substring(text.length() / 2 - checkLength / 2, text.length() / 2 + checkLength / 2);
         }
         String language = languageIdentifier.categorize(text);
-        language = languageLabelsMap.getProperty(language,language);
+        language = languageLabelsMap.getProperty(language, language);
         log.info("language identified as " + language);
 
         // add language to metadata

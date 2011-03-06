@@ -53,19 +53,18 @@ public class TextCatTest {
     }
 
     /**
-     * This test the language identification.
+     * Tests the language identification.
      *
-     * @throws IOException
-     *             if there is an error when reading the text
+     * @throws IOException if there is an error when reading the text
      */
     @Test
     public void testTextCat() throws IOException {
         String testFileName = "en.txt";
 
-        InputStream in =
-            this.getClass().getClassLoader().getResourceAsStream(
+        InputStream in = this.getClass().getClassLoader().getResourceAsStream(
                 testFileName);
         assertNotNull("failed to load resource " + testFileName, in);
+
         String text = IOUtils.toString(in);
         String language = tc.categorize(text);
         assertEquals("en", langMap.getProperty(language, language));
