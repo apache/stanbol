@@ -12,7 +12,7 @@ lifting of unstructured content:
   of entities such as DBpedia (see autotagging/README.txt for instructions
   to obtain such an index).
 
-- opennlp.ner:
+- opennlp-ner:
 
   Given a content item of type text/plain, identify names of persons, locations,
   organization, ... and there position in the text. If the autotagging service

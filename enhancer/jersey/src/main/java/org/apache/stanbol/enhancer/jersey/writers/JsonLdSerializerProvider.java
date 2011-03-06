@@ -22,6 +22,8 @@ import org.apache.stanbol.jsonld.JsonLdResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+
 
 /**
  * Implements a <a href="http://json-ld.org/">JSON-LD</a> serialization of a Clerezza
@@ -39,7 +41,7 @@ import org.slf4j.LoggerFactory;
 @SupportedFormat(JsonLdSerializerProvider.SUPPORTED_FORMAT)
 public class JsonLdSerializerProvider implements SerializingProvider {
 
-    public static final String SUPPORTED_FORMAT = MediaType.APPLICATION_JSON;
+    public static final String SUPPORTED_FORMAT = APPLICATION_JSON;
 
     private static final String RDF_NS_TYPE="http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 

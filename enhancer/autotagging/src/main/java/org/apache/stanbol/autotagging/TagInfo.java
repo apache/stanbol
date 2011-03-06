@@ -34,7 +34,7 @@ public class TagInfo {
     private final String[] type;
 
     public TagInfo(String id, String label, String[] type, double confidence) {
-        if (id == null){
+        if (id == null) {
             throw new IllegalArgumentException("Parameter id MUST NOT be NULL");
         }
         this.id = id;
@@ -47,12 +47,16 @@ public class TagInfo {
     public String toString() {
         return String.format("%s [%f]", label, confidence);
     }
+
     /**
      * Checks for != null, instanceof TagInfor and equals id
      */
     @Override
     public boolean equals(Object obj) {
-        return obj != null && obj instanceof TagInfo && ((TagInfo)obj).id.equals(id) && ((TagInfo)obj).confidence.equals(confidence);
+        return obj != null
+                && obj instanceof TagInfo
+                && ((TagInfo) obj).id.equals(id)
+                && ((TagInfo) obj).confidence.equals(confidence);
     }
 
     public final String getId() {

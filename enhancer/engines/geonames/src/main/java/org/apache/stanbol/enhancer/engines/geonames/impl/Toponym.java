@@ -23,10 +23,13 @@ import java.util.List;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+
 public class Toponym {
+
     /**
      * JSON property names  keys used for Toponyms by geonames.org
      * (may not be complete)
+     *
      * @author Rupert Westenthaler
      */
     enum ToponymProperty {
@@ -64,174 +67,177 @@ public class Toponym {
     }
 
     private JSONObject data;
-    
-    public Toponym(JSONObject jsonData){
-        if(jsonData == null){
+
+    public Toponym(JSONObject jsonData) {
+        if (jsonData == null) {
             throw new NullPointerException("The parsed JSON object MUST NOT be NULL");
         }
         this.data = jsonData;
     }
+
     /**
-     * @return Returns the ISO 3166-1-alpha-2 countryCode.
+     * @return the ISO 3166-1-alpha-2 countryCode.
      */
     public String getCountryCode() {
         try {
             return data.getString(ToponymProperty.countryCode.name());
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.countryCode,data));
+                    ToponymProperty.countryCode, data));
         }
     }
 
 
     /**
-     * @return Returns the elevation in meter.
+     * @return the elevation in meter.
      */
-    public Integer getElevation()  {
+    public Integer getElevation() {
         try {
-            if(data.has(ToponymProperty.elevation.name())){
+            if (data.has(ToponymProperty.elevation.name())) {
                 return data.getInt(ToponymProperty.elevation.name());
             } else {
                 return null;
             }
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.elevation,data));
+                    ToponymProperty.elevation, data));
         }
     }
 
     /**
      * the feature class {@link FeatureClass}
      *
+     * @return the featureClass.
+     *
      * @see <a href="http://www.geonames.org/export/codes.html">GeoNames Feature
      *      Codes</a>
-     * @return Returns the featureClass.
      */
     public FeatureClass getFeatureClass() {
         try {
             String fc = data.getString(ToponymProperty.fcl.name());
-            return fc == null?null:FeatureClass.valueOf(fc);
+            return fc == null ? null : FeatureClass.valueOf(fc);
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.fcl,data));
+                    ToponymProperty.fcl, data));
         }
     }
 
     /**
+     * @return the featureCode.
+     *
      * @see <a href="http://www.geonames.org/export/codes.html">GeoNames Feature
      *      Codes</a>
-     * @return Returns the featureCode.
      */
     public String getFeatureCode() {
         try {
             return data.getString(ToponymProperty.fcode.name());
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.fcode,data));
+                    ToponymProperty.fcode, data));
         }
     }
 
     /**
      * latitude in decimal degrees (wgs84)
      *
-     * @return Returns the latitude.
+     * @return the latitude.
      */
     public double getLatitude() {
         try {
             return data.getDouble(ToponymProperty.lat.name());
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.lat,data));
+                    ToponymProperty.lat, data));
         }
     }
 
     /**
      * longitude in decimal degrees (wgs84)
      *
-     * @return Returns the longitude.
+     * @return the longitude.
      */
     public double getLongitude() {
         try {
             return data.getDouble(ToponymProperty.lng.name());
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.lng,data));
+                    ToponymProperty.lng, data));
         }
     }
 
     /**
-     * @return Returns the name.
+     * @return the name.
      */
     public String getName() {
         try {
             return data.getString(ToponymProperty.name.name());
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.name,data));
+                    ToponymProperty.name, data));
         }
     }
 
     /**
-     * @return Returns the population.
+     * @return the population.
      */
-    public Long getPopulation()  {
+    public Long getPopulation() {
         try {
-            if(data.has(ToponymProperty.population.name())){
+            if (data.has(ToponymProperty.population.name())) {
                 return data.getLong(ToponymProperty.population.name());
             } else {
                 return null;
             }
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.population,data));
+                    ToponymProperty.population, data));
         }
     }
 
     /**
-     * @return Returns the geoNameId.
+     * @return the geoNameId.
      */
     public int getGeoNameId() {
         try {
             return data.getInt(ToponymProperty.geonameId.name());
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.geonameId,data));
+                    ToponymProperty.geonameId, data));
         }
     }
 
     /**
-     * @return Returns the featureClassName.
+     * @return the featureClassName.
      */
     public String getFeatureClassName() {
         try {
             return data.getString(ToponymProperty.fclName.name());
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.fclName,data));
+                    ToponymProperty.fclName, data));
         }
     }
 
     /**
-     * @return Returns the featureCodeName.
+     * @return the featureCodeName.
      */
     public String getFeatureCodeName() {
         try {
             return data.getString(ToponymProperty.fcodeNmae.name());
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.fcodeNmae,data));
+                    ToponymProperty.fcodeNmae, data));
         }
     }
 
     /**
-     * @return Returns the countryName.
+     * @return the countryName.
      */
     public String getCountryName() {
         try {
             return data.getString(ToponymProperty.countryName.name());
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.countryName,data));
+                    ToponymProperty.countryName, data));
         }
     }
 
@@ -241,18 +247,18 @@ public class Toponym {
      *
      * @return the alternateNames as comma separated list
      */
-    public List<String[]> getAlternateNames()  {
+    public List<String[]> getAlternateNames() {
         try {
-            if(data.has(ToponymProperty.alternateNames.name())){
+            if (data.has(ToponymProperty.alternateNames.name())) {
                 List<String[]> parsedNames = new ArrayList<String[]>();
                 JSONArray altNames = data.getJSONArray(ToponymProperty.alternateNames.name());
-                for(int i=0;i<altNames.length();i++){
+                for (int i = 0; i < altNames.length(); i++) {
                     JSONObject altName = altNames.getJSONObject(i);
-                    if(altName.has("name")){
-                    parsedNames.add(new String[]{
-                        altName.getString("name"),
-                        altName.has("lang")?altName.getString("lang"):null
-                    });
+                    if (altName.has("name")) {
+                        parsedNames.add(new String[]{
+                                altName.getString("name"),
+                                altName.has("lang") ? altName.getString("lang") : null
+                        });
                     } // else ignore alternate names without a name
                 }
                 return parsedNames;
@@ -261,9 +267,9 @@ public class Toponym {
             }
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.alternateNames,data));
+                    ToponymProperty.alternateNames, data));
         }
-        
+
     }
 
     public String toString() {
@@ -273,53 +279,53 @@ public class Toponym {
     /**
      * @return the adminCode1
      */
-    public String getAdminCode1()  {
+    public String getAdminCode1() {
         try {
             return data.getString(ToponymProperty.adminCode1.name());
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.adminCode1,data));
+                    ToponymProperty.adminCode1, data));
         }
     }
 
     /**
      * @return the adminCode2
      */
-    public String getAdminCode2()  {
+    public String getAdminCode2() {
         try {
             return data.getString(ToponymProperty.adminCode2.name());
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.adminCode2,data));
+                    ToponymProperty.adminCode2, data));
         }
     }
 
     /**
      * @return the adminCode3
      */
-    public String getAdminCode3()  {
+    public String getAdminCode3() {
         try {
             return data.getString(ToponymProperty.adminCode3.name());
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.adminCode3,data));
+                    ToponymProperty.adminCode3, data));
         }
     }
 
     /**
      * @return the adminCode4
      */
-    public String getAdminCode4()  {
+    public String getAdminCode4() {
         try {
             return data.getString(ToponymProperty.adminCode4.name());
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.adminCode4,data));
+                    ToponymProperty.adminCode4, data));
         }
     }
 
     /**
-     * The time zone is a complex Object encoded like 
+     * The time zone is a complex Object encoded like
      * <code><pre>
      * timezone: {
      *     dstOffset: -5
@@ -328,72 +334,76 @@ public class Toponym {
      * }
      * </pre></code>
      * This mehtod does not further parse this data.
+     *
      * @return the {@link JSONObject} with the time zone information
      */
-    public JSONObject getTimezone()  {
+    public JSONObject getTimezone() {
         try {
             return data.getJSONObject(ToponymProperty.timezone.name());
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.timezone,data));
+                    ToponymProperty.timezone, data));
         }
     }
 
     /**
      * @return the adminName1
      */
-    public String getAdminName1()  {
+    public String getAdminName1() {
         try {
             return data.getString(ToponymProperty.adminName1.name());
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.adminName1,data));
+                    ToponymProperty.adminName1, data));
         }
     }
 
     /**
      * @return the adminName2
      */
-    public String getAdminName2()  {
+    public String getAdminName2() {
         try {
             return data.getString(ToponymProperty.adminName2.name());
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.adminName2,data));
+                    ToponymProperty.adminName2, data));
         }
     }
+
     /**
      * @return the adminName3
      */
-    public String getAdminName3()  {
+    public String getAdminName3() {
         try {
             return data.getString(ToponymProperty.adminName3.name());
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.adminName3,data));
+                    ToponymProperty.adminName3, data));
         }
     }
+
     /**
      * @return the adminName4
      */
-    public String getAdminName4()  {
+    public String getAdminName4() {
         try {
             return data.getString(ToponymProperty.adminName4.name());
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.adminName4,data));
+                    ToponymProperty.adminName4, data));
         }
     }
-    public Double getScore(){
+
+    public Double getScore() {
         try {
-            if(data.has(ToponymProperty.score.name())){
+            if (data.has(ToponymProperty.score.name())) {
                 return data.getDouble(ToponymProperty.score.name());
             } else {
                 return null;
             }
         } catch (JSONException e) {
             throw new IllegalStateException(String.format("Unable to parse %s form %s",
-                ToponymProperty.score,data));
+                    ToponymProperty.score, data));
         }
     }
 

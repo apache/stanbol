@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GeonamesAPIWrapper {
+
     static final Logger log = LoggerFactory.getLogger(GeonamesAPIWrapper.class);
     /**
      * URI of the geonames.orf web services. This URI is used for the free as
@@ -49,20 +50,20 @@ public class GeonamesAPIWrapper {
      * Relative path to the hierarchy service
      */
     public static final String HIERARCHY_SERVICE_PATH = "hierarchy";
-    
+
     /**
-     * The access url for the search service. As default 
+     * The access url for the search service. As default
      * {@link #GEONAMES_ORG_WEBSERVICE_URL}+{@link #SEARCH_SERVICE_PATH}
-     * ({@value #GEONAMES_ORG_WEBSERVICE_URL}{@value #SEARCH_SERVICE_PATH}) 
-     * is used. Users with a premium account including an own sub domain 
+     * ({@value #GEONAMES_ORG_WEBSERVICE_URL}{@value #SEARCH_SERVICE_PATH})
+     * is used. Users with a premium account including an own sub domain
      * might need to change this.
      */
     protected String searchServiceUrl;
     /**
-     * The access url for the hierarchy service. As default 
+     * The access url for the hierarchy service. As default
      * {@link #GEONAMES_ORG_WEBSERVICE_URL}+{@link #HIERARCHY_SERVICE_PATH}
-     * ({@value #GEONAMES_ORG_WEBSERVICE_URL}{@value #HIERARCHY_SERVICE_PATH}) 
-     * is used. Users with a premium account including an own sub domain 
+     * ({@value #GEONAMES_ORG_WEBSERVICE_URL}{@value #HIERARCHY_SERVICE_PATH})
+     * is used. Users with a premium account including an own sub domain
      * might need to change this.
      */
     protected String hierarchyServiceUrl;
@@ -74,11 +75,11 @@ public class GeonamesAPIWrapper {
      * The token. Only set if used in combination with a premium account
      */
     private String token;
-    
+
     /**
      * Enumeration that contains the property definitions used by the LocationEnhancementEngine. This enum
      * does not define all properties defined by geonames.org
-     * 
+     *
      * @author Rupert Westenthaler
      */
     public static enum SearchRequestPropertyEnum {
@@ -86,15 +87,15 @@ public class GeonamesAPIWrapper {
          * search Toponyms by name
          */
         name(true),
-//this two properties are not used
-//        /**
-//         * search toponyms by full text search over all properties
-//         */
-//        q,
-//        /**
-//         * enable/disable URIs of Linking Open Data entities
-//         */
-//        name_equals,
+        //this two properties are not used
+        //        /**
+        //         * search toponyms by full text search over all properties
+        //         */
+        //        q,
+        //        /**
+        //         * enable/disable URIs of Linking Open Data entities
+        //         */
+        //        name_equals,
         /**
          * the maximum number of results (must be < 1000). Default is set to 5
          */
@@ -153,19 +154,19 @@ public class GeonamesAPIWrapper {
         /**
          * The token required for requests of premium accounts
          */
-        token
-        ;
+        token;
         private RequestProperty property;
-        
+
         /**
          * An optional property with no default configuration and no value list
          */
         SearchRequestPropertyEnum() {
             this(false);
         }
-        
+
         /**
          * a required or optional property
+         *
          * @param required <code>true</code> if the property is a required one
          * or <code>false</code> for an optional property (in this case one can
          * also use the default constructor)
@@ -173,31 +174,33 @@ public class GeonamesAPIWrapper {
         SearchRequestPropertyEnum(boolean required) {
             this(required, null);
         }
-        
+
         /**
-         * A optional property with a default configuration and a list of 
+         * A optional property with a default configuration and a list of
          * allowed values
+         *
          * @param defaultValue the value used if this parameter is not parsed or
-         *<code>null</code> if there is no default value.
+         * <code>null</code> if there is no default value.
          * @param valueListthe list of allowed values for this parameter.
          */
         SearchRequestPropertyEnum(String defaultValue, String... valueList) {
             this(false, defaultValue, valueList);
         }
-        
+
         SearchRequestPropertyEnum(boolean required, String defaultValue, String... valueList) {
             this.property = new RequestProperty(name(), required, defaultValue, valueList);
         }
-        
+
         public RequestProperty getProperty() {
             return property;
         }
-        
+
         @Override
         public String toString() {
             return property.toString();
         }
     }
+
     public static enum HierarchyRequestPorpertyEnum {
         /**
          * The ID of the Toponym the hierarchy is requested for
@@ -228,18 +231,19 @@ public class GeonamesAPIWrapper {
         /**
          * The token required for requests of premium accounts
          */
-        token
-        ;
+        token;
         private RequestProperty property;
+
         /**
          * An optional property with no default configuration and no value list
          */
         HierarchyRequestPorpertyEnum() {
             this(false);
         }
-        
+
         /**
          * A required or optional property
+         *
          * @param required <code>true</code> if the property is a required one
          * or <code>false</code> for an optional property (in this case one can
          * also use the default constructor)
@@ -247,44 +251,48 @@ public class GeonamesAPIWrapper {
         HierarchyRequestPorpertyEnum(boolean required) {
             this(required, null);
         }
-        
+
         /**
-         * A optional property with a default configuration and a list of 
+         * A optional property with a default configuration and a list of
          * allowed values
+         *
          * @param defaultValue the value used if this parameter is not parsed or
-         *<code>null</code> if there is no default value.
+         * <code>null</code> if there is no default value.
          * @param valueListthe list of allowed values for this parameter.
          */
         HierarchyRequestPorpertyEnum(String defaultValue, String... valueList) {
             this(false, defaultValue, valueList);
         }
-        
+
         HierarchyRequestPorpertyEnum(boolean required, String defaultValue, String... valueList) {
             this.property = new RequestProperty(name(), required, defaultValue, valueList);
         }
-        
+
         public RequestProperty getProperty() {
             return property;
         }
-        
+
         @Override
         public String toString() {
             return property.toString();
-        }        
+        }
     }
+
     /**
      * Initialises a the geonames API wrapper as used for the free service
      */
     public GeonamesAPIWrapper() {
-        this(GEONAMES_ORG_WEBSERVICE_URL+SEARCH_SERVICE_PATH,
-            GEONAMES_ORG_WEBSERVICE_URL+HIERARCHY_SERVICE_PATH,
-            null,null);
+        this(GEONAMES_ORG_WEBSERVICE_URL + SEARCH_SERVICE_PATH,
+                GEONAMES_ORG_WEBSERVICE_URL + HIERARCHY_SERVICE_PATH,
+                null, null);
     }
+
     /**
      * Initialise the geonames API wrapper for a given server, username and
      * token. Parsing <code>null</code> for any of the parameter will use the
      * default values. If an empty string is parsed as user name it will be
      * ignored. Token is only accepted if a valid user name is prased.
+     *
      * @param serverURL The url of the geonames server to use or <code>null</code>
      * to use the default
      * @param userName The user name to use or <code>null</code> to use the
@@ -292,52 +300,55 @@ public class GeonamesAPIWrapper {
      * @param token The token to use or <code>null</code> to use the default.
      * If no valid user name is parsed the token will be ignored.
      */
-    public GeonamesAPIWrapper(String serverURL,String userName, String token){
+    public GeonamesAPIWrapper(String serverURL, String userName, String token) {
         //if serverURL is null parse null to use the default
         //if one is parsed add the tailing "/" if missing
-        this(serverURL==null?null:(serverURL+(serverURL.endsWith("/")?"":"/")+SEARCH_SERVICE_PATH),
-            serverURL==null?null:(serverURL+(serverURL.endsWith("/")?"":"/")+HIERARCHY_SERVICE_PATH),
-            userName,token);
+        this(serverURL == null ? null : (serverURL + (serverURL.endsWith("/") ? "" : "/") + SEARCH_SERVICE_PATH),
+                serverURL == null ? null : (serverURL + (serverURL.endsWith("/") ? "" : "/") + HIERARCHY_SERVICE_PATH),
+                userName, token);
     }
+
     /**
      * Initialise the geonames API wrapper for a given search and hierarchy
-     * service, username and token. Parsing <code>null</code> for any of the 
-     * parameter will use the default values. If an empty string is parsed as 
+     * service, username and token. Parsing <code>null</code> for any of the
+     * parameter will use the default values. If an empty string is parsed as
      * user name it will be ignored. Token is only accepted if a valid user name
-     * is prased.<br>
+     * is prased.
+     * <p>
      * The parsed user name and token will be used for both the search and the
      * hierarchy service.
+     *
      * @param searchService The url of the search service to use or <code>null</code>
      * to use the default
-     * @param hierarchyService The url of the hierarchy service to use or 
+     * @param hierarchyService The url of the hierarchy service to use or
      * <code>null</code> to use the default
      * @param userName The user name to use or <code>null</code> to use the
      * default. The user name MUST NOT be empty.
      * @param token The token to use or <code>null</code> to use the default.
      * If no valid user name is parsed the token will be ignored.
      */
-    public GeonamesAPIWrapper(String searchService,String hierarchyService,String userName, String token){
-        this.searchServiceUrl = searchService != null?searchService:(GEONAMES_ORG_WEBSERVICE_URL+SEARCH_SERVICE_PATH);
-        this.hierarchyServiceUrl = hierarchyService != null ?hierarchyService:(GEONAMES_ORG_WEBSERVICE_URL+HIERARCHY_SERVICE_PATH);
-        this.userName = userName == null || userName.isEmpty()?null:userName;
-        this.token = this.userName == null ? null:token;
+    public GeonamesAPIWrapper(String searchService, String hierarchyService, String userName, String token) {
+        this.searchServiceUrl = searchService != null ? searchService : (GEONAMES_ORG_WEBSERVICE_URL + SEARCH_SERVICE_PATH);
+        this.hierarchyServiceUrl = hierarchyService != null ? hierarchyService : (GEONAMES_ORG_WEBSERVICE_URL + HIERARCHY_SERVICE_PATH);
+        this.userName = userName == null || userName.isEmpty() ? null : userName;
+        this.token = this.userName == null ? null : token;
     }
-    
+
     public List<Toponym> searchToponyms(String name) throws IOException {
         return searchToponyms(Collections.singletonMap(SearchRequestPropertyEnum.name,
-            (Collection<String>) Arrays.asList(name)));
+                (Collection<String>) Arrays.asList(name)));
     }
-    
-    public List<Toponym> searchToponyms(Map<SearchRequestPropertyEnum,Collection<String>> parsedParameter) throws IOException {
+
+    public List<Toponym> searchToponyms(Map<SearchRequestPropertyEnum, Collection<String>> parsedParameter) throws IOException {
         //create a new map because we should not change the parsed map!
-        Map<SearchRequestPropertyEnum,Collection<String>> requestProperties = 
-            new EnumMap<SearchRequestPropertyEnum,Collection<String>>(SearchRequestPropertyEnum.class);
+        Map<SearchRequestPropertyEnum, Collection<String>> requestProperties =
+                new EnumMap<SearchRequestPropertyEnum, Collection<String>>(SearchRequestPropertyEnum.class);
         requestProperties.putAll(parsedParameter);
-        if(userName != null && !requestProperties.containsKey(SearchRequestPropertyEnum.username)){
+        if (userName != null && !requestProperties.containsKey(SearchRequestPropertyEnum.username)) {
             requestProperties.put(SearchRequestPropertyEnum.username, Collections.singleton(userName));
             //add the token only if also the user name was added
             // ... we would not like to use the token of an other user name
-            if(token != null){
+            if (token != null) {
                 requestProperties.put(SearchRequestPropertyEnum.token, Collections.singleton(token));
             }
         }
@@ -352,17 +363,17 @@ public class GeonamesAPIWrapper {
         URL requestUrl;
         try {
             requestUrl = new URL(requestString.toString());
-            log.info(" > search request: "+requestUrl);
+            log.info(" > search request: " + requestUrl);
         } catch (MalformedURLException e) {
             throw new IllegalStateException("Unable to build valid request URL for " + requestString);
         }
         long start = System.currentTimeMillis();
         String result = IOUtils.toString(requestUrl.openConnection().getInputStream());
-        long responseTime = System.currentTimeMillis()-start;
-        if(responseTime > 1000){
-            log.info("    - responseTime: "+responseTime+"ms");
+        long responseTime = System.currentTimeMillis() - start;
+        if (responseTime > 1000) {
+            log.info("    - responseTime: " + responseTime + "ms");
         } else {
-            log.debug("    - responseTime: "+responseTime+"ms");
+            log.debug("    - responseTime: " + responseTime + "ms");
         }
         try {
             JSONObject root = new JSONObject(result);
@@ -380,7 +391,7 @@ public class GeonamesAPIWrapper {
                         return results;
                     } else {
                         throw new IOException(String.format("Result of Query for Toponyms with %s (resultCount=%s) does not contain any Toponym data",
-                            requestProperties, resultCount));
+                                requestProperties, resultCount));
                     }
                 }
             } else { // illegal Response throw exception
@@ -398,22 +409,23 @@ public class GeonamesAPIWrapper {
                 throw new IOException(msg);
             }
         } catch (JSONException e) {
-            log.error("Unable to parse Response for Request "+requestUrl);
-            log.error("ResponseData: \n"+result);
+            log.error("Unable to parse Response for Request " + requestUrl);
+            log.error("ResponseData: \n" + result);
             throw new IOException("Unable to parse JSON from Results for Request " + requestUrl, e);
         }
     }
+
     public List<Toponym> getHierarchy(int geonameId) throws IOException {
         StringBuilder requestString = new StringBuilder();
         requestString.append(hierarchyServiceUrl);
-        Map<HierarchyRequestPorpertyEnum,Collection<String>> requestProperties = 
-            new EnumMap<HierarchyRequestPorpertyEnum,Collection<String>>(HierarchyRequestPorpertyEnum.class);
+        Map<HierarchyRequestPorpertyEnum, Collection<String>> requestProperties =
+                new EnumMap<HierarchyRequestPorpertyEnum, Collection<String>>(HierarchyRequestPorpertyEnum.class);
         requestProperties.put(HierarchyRequestPorpertyEnum.geonameId, Collections.singleton(Integer.toString(geonameId)));
-        if(userName != null){
+        if (userName != null) {
             requestProperties.put(HierarchyRequestPorpertyEnum.username, Collections.singleton(userName));
             //add the token only if also the user name was added
             // ... we would not like to use the token of an other user name
-            if(token != null){
+            if (token != null) {
                 requestProperties.put(HierarchyRequestPorpertyEnum.token, Collections.singleton(token));
             }
         }
@@ -426,17 +438,17 @@ public class GeonamesAPIWrapper {
         URL requestUrl;
         try {
             requestUrl = new URL(requestString.toString());
-            log.info(" > hierarchy request: "+requestUrl);
+            log.info(" > hierarchy request: " + requestUrl);
         } catch (MalformedURLException e) {
             throw new IllegalStateException("Unable to build valid request URL for " + requestString);
         }
         long start = System.currentTimeMillis();
         String result = IOUtils.toString(requestUrl.openConnection().getInputStream());
-        long responseTime = System.currentTimeMillis()-start;
-        if(responseTime > 1000){
-            log.info("    - responseTime: "+responseTime+"ms");
+        long responseTime = System.currentTimeMillis() - start;
+        if (responseTime > 1000) {
+            log.info("    - responseTime: " + responseTime + "ms");
         } else {
-            log.debug("    - responseTime: "+responseTime+"ms");
+            log.debug("    - responseTime: " + responseTime + "ms");
         }
         try {
             JSONObject root = new JSONObject(result);
@@ -462,8 +474,8 @@ public class GeonamesAPIWrapper {
                 throw new IOException(msg);
             }
         } catch (JSONException e) {
-            log.error("Unable to parse Response for Request "+requestUrl);
-            log.error("ResponseData: \n"+result);
+            log.error("Unable to parse Response for Request " + requestUrl);
+            log.error("ResponseData: \n" + result);
             throw new IOException("Unable to parse JSON from Results for Request " + requestUrl, e);
         }
     }

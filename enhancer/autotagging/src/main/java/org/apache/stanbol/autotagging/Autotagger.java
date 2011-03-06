@@ -51,7 +51,7 @@ public class Autotagger {
 
     private String[] likeFieldNames = {
             "http://www.w3.org/2000/01/rdf-schema#label",
-            "http://dbpedia.org/property/abstract" };
+            "http://dbpedia.org/property/abstract"};
 
     private String idField = ModelIndexer.URI_FIELD;
 
@@ -126,12 +126,9 @@ public class Autotagger {
     }
 
     /**
-     * Suggest entities that are textually similar to the given text.
+     * Suggests entities that are textually similar to the given text.
      *
-     * @param text
      * @return entities info that best match the text
-     * @throws CorruptIndexException
-     * @throws IOException
      */
     public List<TagInfo> suggest(String text) throws CorruptIndexException,
             IOException {
@@ -139,15 +136,13 @@ public class Autotagger {
     }
 
     /**
-     * Suggest entities that are textually similar to the given text. If the
+     * Suggests entities that are textually similar to the given text. If the
      * text is short enough, a fuzzy name lookup is performed instead. Further
-     * restrict the results to match the field values given in the fieldFilter
+     * restrict the results to match the field values given in the fieldFilters.
      *
      * @param text the textual content used for similarity search
-     * @param fieldFilters
+     *
      * @return entities info that best match the text
-     * @throws CorruptIndexException
-     * @throws IOException
      */
     public List<TagInfo> suggest(String text,
             Map<String, List<String>> fieldFilters)
@@ -169,16 +164,11 @@ public class Autotagger {
     }
 
     /**
-     * Suggest entities that are fuzzy matching the given name and/or textually
+     * Suggests entities that are fuzzy matching the given name and/or textually
      * similar to the given context. Further restrict the results to match the
-     * field values given in the fieldFilter
-     *
-     * @param text the textual content used for similarity search
-     * @param fieldFilters
+     * field values given in the fieldFilter.
      *
      * @return entities info that best match the text
-     * @throws CorruptIndexException
-     * @throws IOException
      */
     public List<TagInfo> suggest(String name, String context,
             Map<String, List<String>> fieldFilters)
@@ -276,11 +266,7 @@ public class Autotagger {
      * textually similar to the text (if long). Further restrict the results to
      * match the type given either as full URI or DBpedia class name.
      *
-     * @param text
-     * @param type
      * @return ranked entities info that best match
-     * @throws CorruptIndexException
-     * @throws IOException
      */
     public List<TagInfo> suggestForType(String text, String type)
             throws CorruptIndexException, IOException {
@@ -297,12 +283,7 @@ public class Autotagger {
      * similar to the given context. Further restrict the results to match the
      * type given either as full URI or DBpedia class name.
      *
-     * @param name
-     * @param context
-     * @param type
      * @return ranked entities info that best match
-     * @throws CorruptIndexException
-     * @throws IOException
      */
     public List<TagInfo> suggestForType(String name, String context, String type)
             throws CorruptIndexException, IOException {
@@ -315,7 +296,6 @@ public class Autotagger {
         }
         return suggest(name, context, fieldFilters);
     }
-
 
     public String[] mostImportantTerms(String text) throws CorruptIndexException, IOException {
         IndexReader reader = IndexReader.open(directory, true);

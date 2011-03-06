@@ -69,6 +69,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.stanbol.enhancer.servicesapi.ServiceProperties.ENHANCEMENT_ENGINE_ORDERING;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.*;
 
 
@@ -146,7 +147,7 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
     public Map<String, Object> getServiceProperties() {
         // TODO Auto-generated method stub
         return Collections.unmodifiableMap(Collections.singletonMap(
-                ServiceProperties.ENHANCEMENT_ENGINE_ORDERING,
+                ENHANCEMENT_ENGINE_ORDERING,
                 (Object) defaultOrder));
     }
 
@@ -237,7 +238,7 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
     }
 
     /**
-     * This retrieves the annotations from OpenCalais as RDF/XML. From that an MGraph is created.
+     * Retrieves the annotations from OpenCalais as RDF/XML. From that an MGraph is created.
      *
      * @param text the text to send to OpenCalais
      *
@@ -288,7 +289,7 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
     }
 
     /**
-     * This parses an InputStream of RDF data and produces an MGraph from them
+     * Parses an InputStream of RDF data and produces an MGraph from them
      *
      * @param in The InputStream of RDF data
      * @param format the format of the RDF data
@@ -309,7 +310,7 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
     }
 
     /**
-     * This extracts the relevant entity information from the Calais RDF data.
+     * Extracts the relevant entity information from the Calais RDF data.
      * The entities and the relted information is extracted by a Sparql query.
      *
      * @param model the MGraph representing the Calais data
@@ -377,7 +378,7 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
 
 
     /**
-     * This sends a POST request to the given url.
+     * Sends a POST request to the given url.
      *
      * @param targetUrl a <code>String</code> with the target url
      * @param params a <code>Map<String,String></code> object containing the url parameters;

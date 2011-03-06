@@ -20,12 +20,12 @@ import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.*;
+
 
 @Provider
-@Produces( { TEXT_PLAIN, SupportedFormat.N3,
-        SupportedFormat.N_TRIPLE, SupportedFormat.RDF_XML,
-        SupportedFormat.TURTLE, SupportedFormat.X_TURTLE,
-        SupportedFormat.RDF_JSON, APPLICATION_JSON })
+@Produces( { TEXT_PLAIN, N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE,
+        RDF_JSON, APPLICATION_JSON })
 public class GraphWriter implements MessageBodyWriter<TripleCollection> {
 
     @Context
