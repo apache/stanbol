@@ -98,7 +98,7 @@ public class QueryResultListWriter implements MessageBodyWriter<QueryResultList<
         Class<?> genericClass = (Class<?>) genericType;
         if (APPLICATION_JSON.equals(mediaType.toString())) {
             try {
-                IOUtils.write(QueryResultsToJSON.toJSON(resultList).toString(4), entityStream);
+                IOUtils.write(QueryResultsToJSON.toJSON(resultList).toString(4), entityStream,"UTF-8");
             } catch (JSONException e) {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             }
