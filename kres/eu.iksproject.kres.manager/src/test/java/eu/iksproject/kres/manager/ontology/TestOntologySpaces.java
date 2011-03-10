@@ -18,17 +18,17 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import eu.iksproject.kres.api.manager.KReSONManager;
+import eu.iksproject.kres.api.manager.io.OntologyInputSource;
+import eu.iksproject.kres.api.manager.io.RootOntologyIRISource;
+import eu.iksproject.kres.api.manager.io.RootOntologySource;
 import eu.iksproject.kres.api.manager.ontology.CoreOntologySpace;
 import eu.iksproject.kres.api.manager.ontology.CustomOntologySpace;
-import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
 import eu.iksproject.kres.api.manager.ontology.OntologySpaceFactory;
 import eu.iksproject.kres.api.manager.ontology.OntologySpaceModificationException;
 import eu.iksproject.kres.api.manager.ontology.SessionOntologySpace;
 import eu.iksproject.kres.api.manager.ontology.UnmodifiableOntologySpaceException;
 import eu.iksproject.kres.manager.Constants;
 import eu.iksproject.kres.manager.ONManager;
-import eu.iksproject.kres.manager.io.RootOntologyIRISource;
-import eu.iksproject.kres.manager.io.RootOntologySource;
 import eu.iksproject.kres.manager.util.OntologyUtils;
 
 public class TestOntologySpaces {

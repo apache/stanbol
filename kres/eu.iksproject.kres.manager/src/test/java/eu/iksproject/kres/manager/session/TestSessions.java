@@ -15,7 +15,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import eu.iksproject.kres.api.manager.DuplicateIDException;
 import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
+import eu.iksproject.kres.api.manager.io.OntologyInputSource;
+import eu.iksproject.kres.api.manager.io.RootOntologySource;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.api.manager.ontology.OntologyScopeFactory;
 import eu.iksproject.kres.api.manager.ontology.OntologySpaceFactory;
@@ -26,7 +27,6 @@ import eu.iksproject.kres.api.manager.session.NonReferenceableSessionException;
 import eu.iksproject.kres.api.manager.session.KReSSession.State;
 import eu.iksproject.kres.manager.Constants;
 import eu.iksproject.kres.manager.ONManager;
-import eu.iksproject.kres.manager.io.RootOntologySource;
 
 public class TestSessions {
 

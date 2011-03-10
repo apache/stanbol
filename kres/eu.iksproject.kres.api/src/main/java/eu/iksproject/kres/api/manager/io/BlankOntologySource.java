@@ -1,4 +1,4 @@
-package eu.iksproject.kres.manager.io;
+package eu.iksproject.kres.api.manager.io;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;

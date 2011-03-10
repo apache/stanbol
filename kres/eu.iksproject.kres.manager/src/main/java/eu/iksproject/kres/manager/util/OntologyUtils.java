@@ -23,8 +23,8 @@ import org.semanticweb.owlapi.model.UnknownOWLOntologyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
-import eu.iksproject.kres.manager.io.RootOntologySource;
+import eu.iksproject.kres.api.manager.io.OntologyInputSource;
+import eu.iksproject.kres.api.manager.io.RootOntologySource;
 
 /**
  * A set of static utility methods for managing ontologies in KReS.

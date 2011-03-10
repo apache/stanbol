@@ -3,6 +3,7 @@ package eu.iksproject.kres.api.manager.ontology;
 import org.semanticweb.owlapi.model.IRI;
 
 import eu.iksproject.kres.api.manager.DuplicateIDException;
+import eu.iksproject.kres.api.manager.io.OntologyInputSource;
 
 /**
  * An ontology scope factory is responsible for the creation of new ontology

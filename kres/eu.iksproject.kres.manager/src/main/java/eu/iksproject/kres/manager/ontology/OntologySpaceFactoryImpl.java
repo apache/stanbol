@@ -4,9 +4,9 @@ import org.semanticweb.owlapi.model.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.iksproject.kres.api.manager.io.OntologyInputSource;
 import eu.iksproject.kres.api.manager.ontology.CoreOntologySpace;
 import eu.iksproject.kres.api.manager.ontology.CustomOntologySpace;
-import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.api.manager.ontology.OntologySpace;
 import eu.iksproject.kres.api.manager.ontology.OntologySpaceFactory;

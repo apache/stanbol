@@ -2,6 +2,8 @@ package eu.iksproject.kres.api.manager.ontology;
 
 import org.semanticweb.owlapi.model.IRI;
 
+import eu.iksproject.kres.api.manager.io.OntologyInputSource;
+
 /**
  * An ontology space factory is responsible for the creation of new, readily
  * specialized ontology spaces from supplied ontology input sources.

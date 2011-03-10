@@ -5,9 +5,10 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
+import eu.iksproject.kres.api.manager.io.OntologyInputSource;
 import eu.iksproject.kres.ontologies.XML_OWL;
 
+@Deprecated
 public class OntologyInputSourceOXML implements OntologyInputSource {
 
 	@Override

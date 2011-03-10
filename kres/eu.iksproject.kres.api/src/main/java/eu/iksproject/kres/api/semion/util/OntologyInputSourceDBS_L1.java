@@ -3,12 +3,12 @@ package eu.iksproject.kres.api.semion.util;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
+import eu.iksproject.kres.api.manager.io.OntologyInputSource;
 import eu.iksproject.kres.ontologies.DBS_L1;
 
+@Deprecated
 public class OntologyInputSourceDBS_L1 implements OntologyInputSource {
 
 	

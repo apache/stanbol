@@ -3,8 +3,8 @@ package eu.iksproject.kres.manager.ontology;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
+import eu.iksproject.kres.api.manager.io.OntologyInputSource;
 import eu.iksproject.kres.api.manager.ontology.CoreOntologySpace;
-import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
 import eu.iksproject.kres.api.manager.ontology.SpaceType;
 import eu.iksproject.kres.api.storage.OntologyStorage;
 import eu.iksproject.kres.manager.util.StringUtils;

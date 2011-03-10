@@ -50,6 +50,7 @@ import org.xml.sax.SAXException;
 
 import eu.iksproject.kres.api.manager.DuplicateIDException;
 import eu.iksproject.kres.api.manager.KReSONManager;
+import eu.iksproject.kres.api.manager.io.RootOntologyIRISource;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.api.manager.ontology.OntologyScopeFactory;
 import eu.iksproject.kres.api.manager.ontology.OntologySpaceFactory;
@@ -73,7 +74,7 @@ import eu.iksproject.kres.ontologies.XSD_OWL;
  * the {@link SemionReengineer} for XML data sources.
  * 
  * @author andrea.nuzzolese
- *
+ * 
  */
 
 @Component(immediate = true, metatype = true)
@@ -84,30 +85,30 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 	public static final String _HOST_NAME_AND_PORT_DEFAULT = "localhost:8080";
 	public static final String _REENGINEERING_SCOPE_DEFAULT = "xml_reengineering";
 	public static final String _XML_REENGINEERING_SESSION_SPACE_DEFAULT = "/xml-reengineering-session-space";
-	
+
 	@Property(value = _HOST_NAME_AND_PORT_DEFAULT)
-    public static final String HOST_NAME_AND_PORT = "host.name.port";
-	
+	public static final String HOST_NAME_AND_PORT = "host.name.port";
+
 	@Property(value = _REENGINEERING_SCOPE_DEFAULT)
 	public static final String REENGINEERING_SCOPE = "xml.reengineering.scope";
 
 	@Property(value = _XML_REENGINEERING_SESSION_SPACE_DEFAULT)
-    public static final String XML_REENGINEERING_SESSION_SPACE = "http://kres.iks-project.eu/space/reengineering/db";
-	
+	public static final String XML_REENGINEERING_SESSION_SPACE = "http://kres.iks-project.eu/space/reengineering/db";
+
 	private IRI kReSSessionID;
-	
+
 	public final Logger log = LoggerFactory.getLogger(getClass());
-	
+
 	@Reference
 	KReSONManager onManager;
-	
+
 	@Reference
 	SemionManager reengineeringManager;
-	
+
 	private OntologyScope scope;
 	private IRI scopeIRI;
 	private IRI spaceIRI;
-	
+
 	/**
 	 * This default constructor is <b>only</b> intended to be used by the OSGI
 	 * environment with Service Component Runtime support.
@@ -119,9 +120,9 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 	 * OSGI environment.
 	 */
 	public XMLExtractor() {
-		
+
 	}
-	
+
 	public XMLExtractor(SemionManager reengineeringManager,
 			KReSONManager onManager, Dictionary<String, Object> configuration) {
 		this();
@@ -129,7 +130,7 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 		this.onManager = onManager;
 		activate(configuration);
 	}
-		
+
 	/**
 	 * Used to configure an instance within an OSGi container.
 	 * 
@@ -155,26 +156,26 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 		if (hostPort == null)
 			hostPort = _HOST_NAME_AND_PORT_DEFAULT;
 		// TODO: Manage the other properties
-					
+
 		spaceIRI = IRI.create(XML_REENGINEERING_SESSION_SPACE);
 		scopeIRI = IRI.create("http://" + hostPort + "/kres/ontology/"
 				+ scopeID);
-					
+
 		reengineeringManager.bindReengineer(this);
-					
+
 		KReSSessionManager kReSSessionManager = onManager.getSessionManager();
 		KReSSession kReSSession = kReSSessionManager.createSession();
-					
+
 		kReSSessionID = kReSSession.getID();
-					
+
 		OntologyScopeFactory ontologyScopeFactory = onManager
 				.getOntologyScopeFactory();
-					
+
 		ScopeRegistry scopeRegistry = onManager.getScopeRegistry();
 
 		OntologySpaceFactory ontologySpaceFactory = onManager
 				.getOntologySpaceFactory();
-		
+
 		scope = null;
 		try {
 			log.info("Semion XMLEtractor : created scope with IRI "
@@ -183,13 +184,14 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 			OWLOntologyManager ontologyManager = OWLManager
 					.createOWLOntologyManager();
 			OWLOntology owlOntology = ontologyManager.createOntology(iri);
-		
+
 			System.out.println("Created ONTOLOGY OWL");
-		
+
 			scope = ontologyScopeFactory.createOntologyScope(scopeIRI,
-					new OntologyInputSourceOXML());
+					new RootOntologyIRISource(IRI.create(XML_OWL.URI))
+			/* new OntologyInputSourceOXML() */);
 			// scope.setUp();
-			
+
 			scopeRegistry.registerScope(scope);
 		} catch (DuplicateIDException e) {
 			log.info("Semion DBExtractor : already existing scope for IRI "
@@ -211,11 +213,11 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 
 			scopeRegistry.setScopeActive(scopeIRI, true);
 		}
-				
+
 		log.info("Activated KReS Semion RDB Reengineer");
-			}
-			
-			@Override
+	}
+
+	@Override
 	public boolean canPerformReengineering(DataSource dataSource) {
 		if (dataSource.getDataSourceType() == ReengineerType.XML)
 			return true;
@@ -229,20 +231,20 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 			return true;
 		} else {
 			return false;
-				}
-			}
-			
+		}
+	}
+
 	@Override
 	public boolean canPerformReengineering(OWLOntology schemaOntology) {
-			
+
 		OWLDataFactory factory = onManager.getOwlFactory();
-			
+
 		OWLClass dataSourceClass = factory.getOWLClass(Semion_OWL.DataSource);
 		Set<OWLIndividual> individuals = dataSourceClass
 				.getIndividuals(schemaOntology);
-			
+
 		int hasDataSourceType = -1;
-		
+
 		if (individuals != null && individuals.size() == 1) {
 			for (OWLIndividual individual : individuals) {
 				OWLDataProperty hasDataSourceTypeProperty = factory
@@ -251,36 +253,36 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 						hasDataSourceTypeProperty, schemaOntology);
 				if (values != null && values.size() == 1) {
 					for (OWLLiteral value : values) {
-		try {
+						try {
 							Integer valueInteger = Integer.valueOf(value
 									.getLiteral());
 							hasDataSourceType = valueInteger.intValue();
 						} catch (NumberFormatException e) {
 
 						}
+					}
+				}
 			}
 		}
-		}
-		}
-		
+
 		if (hasDataSourceType == getReengineerType()) {
 			return true;
 		} else {
 			return false;
 		}
-			}
-			
-			@Override
+	}
+
+	@Override
 	public boolean canPerformReengineering(String dataSourceType)
 			throws UnsupportedReengineerException {
 		return canPerformReengineering(ReengineerType.getType(dataSourceType));
-			}
-			
+	}
+
 	private IRI createElementResource(String ns, String schemaNS,
 			Element element, String parentName, Integer id,
 			OWLOntologyManager manager, OWLDataFactory factory,
 			OWLOntology dataOntology) {
-				
+
 		IRI elementResourceIRI;
 		OWLClassAssertionAxiom elementResource;
 		if (id == null) {
@@ -292,23 +294,23 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 					+ element.getLocalName() + "_" + id.toString());
 			elementResource = createOWLClassAssertionAxiom(factory,
 					XML_OWL.XMLElement, elementResourceIRI);
-			}
+		}
 		manager.applyChange(new AddAxiom(dataOntology, elementResource));
-		
+
 		String schemaElementName = element.getLocalName();
-			
+
 		IRI elementDeclarationIRI = IRI.create(schemaNS + schemaElementName);
-			
+
 		manager.applyChange(new AddAxiom(dataOntology,
 				createOWLObjectPropertyAssertionAxiom(factory,
 						XML_OWL.hasElementDeclaration, elementResourceIRI,
 						elementDeclarationIRI)));
-			
+
 		NamedNodeMap namedNodeMap = element.getAttributes();
 		if (namedNodeMap != null) {
 			for (int i = 0, j = namedNodeMap.getLength(); i < j; i++) {
 				Node node = namedNodeMap.item(i);
-				
+
 				String attributeName = node.getNodeName();
 				String attributeValue = node.getTextContent();
 
@@ -319,8 +321,8 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 					elementLocalName = elementNames[1];
 				} else {
 					elementLocalName = elementNames[0];
-			}
-		
+				}
+
 				IRI xmlAttributeIRI = IRI.create(ns + elementLocalName
 						+ attributeName);
 				System.out.println("Attribute: " + ns + elementLocalName
@@ -328,7 +330,7 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 				OWLClassAssertionAxiom xmlAttribute = createOWLClassAssertionAxiom(
 						factory, XML_OWL.XMLAttribute, xmlAttributeIRI);
 				manager.addAxiom(dataOntology, xmlAttribute);
-		
+
 				manager.addAxiom(dataOntology,
 						createOWLDataPropertyAssertionAxiom(factory,
 								XML_OWL.nodeName, xmlAttributeIRI,
@@ -349,31 +351,31 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 						createOWLObjectPropertyAssertionAxiom(factory,
 								XML_OWL.hasXMLAttribute, elementResourceIRI,
 								xmlAttributeIRI));
-		
+
+			}
 		}
-	}
-	
+
 		return elementResourceIRI;
 	}
-	
+
 	@Override
 	public OWLOntology dataReengineering(String graphNS, IRI outputIRI,
 			DataSource dataSource, final OWLOntology schemaOntology)
 			throws ReengineeringException {
-		
+
 		OWLOntology ontology = null;
-		
+
 		System.out.println("Starting XML Reengineering");
 		OWLOntologyManager ontologyManager = onManager.getOwlCacheManager();
 		OWLDataFactory factory = onManager.getOwlFactory();
-		
+
 		IRI schemaOntologyIRI = schemaOntology.getOntologyID().getOntologyIRI();
-		
+
 		OWLOntology localDataOntology = null;
-			
-		System.out.println("XML output IRI: "+outputIRI);
-		if(schemaOntology != null){
-			if(outputIRI != null){
+
+		System.out.println("XML output IRI: " + outputIRI);
+		if (schemaOntology != null) {
+			if (outputIRI != null) {
 				try {
 					localDataOntology = ontologyManager
 							.createOntology(outputIRI);
@@ -386,53 +388,53 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 					localDataOntology = ontologyManager.createOntology();
 				} catch (OWLOntologyCreationException e) {
 					throw new ReengineeringException();
-				}	
+				}
 			}
-			
+
 			final OWLOntology dataOntology = localDataOntology;
-			
+
 			OWLImportsDeclaration importsDeclaration = factory
 					.getOWLImportsDeclaration(IRI.create(XML_OWL.URI));
-			
+
 			ontologyManager.applyChange(new AddImport(dataOntology,
 					importsDeclaration));
-			
+
 			graphNS = graphNS.replace("#", "");
 			String schemaNS = graphNS + "/schema#";
 			;
 			String dataNS = graphNS + "#";
-			
+
 			OWLClass dataSourceOwlClass = factory
 					.getOWLClass(Semion_OWL.DataSource);
-			
+
 			Set<OWLIndividual> individuals = dataSourceOwlClass
 					.getIndividuals(schemaOntology);
-			
+
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			dbf.setNamespaceAware(true);
 			DocumentBuilder db;
 			try {
 				db = dbf.newDocumentBuilder();
-				
+
 				InputStream xmlStream = (InputStream) dataSource
 						.getDataSource();
-				
+
 				Document dom = db.parse(xmlStream);
-				
+
 				Element documentElement = dom.getDocumentElement();
-				
+
 				String nodeName = documentElement.getNodeName();
-				
+
 				IRI rootElementIRI = createElementResource(dataNS, schemaNS,
 						documentElement, null, null, ontologyManager, factory,
 						dataOntology);
-				
+
 				iterateChildren(dataNS, schemaNS, rootElementIRI,
 						documentElement, ontologyManager, factory, dataOntology);
-				
+
 			} catch (ParserConfigurationException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace(); 
+				e.printStackTrace();
 			} catch (SAXException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -440,11 +442,11 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 			OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-			
+
 			OWLOntologySetProvider provider = new OWLOntologySetProvider() {
-				
+
 				@Override
 				public Set<OWLOntology> getOntologies() {
 					Set<OWLOntology> ontologies = new HashSet<OWLOntology>();
@@ -454,30 +456,30 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 				}
 			};
 			OWLOntologyMerger merger = new OWLOntologyMerger(provider);
-			
+
 			try {
 				ontology = merger.createMergedOntology(man, outputIRI);
 			} catch (OWLOntologyCreationException e) {
 				e.printStackTrace();
 			}
 		}
-		
+
 		return ontology;
 	}
-	
+
 	private OWLOntology dataReengineering(String graphNS, IRI outputIRI,
 			Document dom, OWLOntology schemaOntology)
 			throws ReengineeringException {
-		
+
 		OWLOntologyManager ontologyManager = onManager.getOwlCacheManager();
 		OWLDataFactory factory = onManager.getOwlFactory();
-		
+
 		IRI schemaOntologyIRI = schemaOntology.getOntologyID().getOntologyIRI();
-		
+
 		OWLOntology dataOntology = null;
-		
-		if(schemaOntology != null){
-			if(outputIRI != null){
+
+		if (schemaOntology != null) {
+			if (outputIRI != null) {
 				try {
 					dataOntology = ontologyManager.createOntology(outputIRI);
 				} catch (OWLOntologyCreationException e) {
@@ -488,86 +490,86 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 					dataOntology = ontologyManager.createOntology();
 				} catch (OWLOntologyCreationException e) {
 					throw new ReengineeringException();
-				}	
+				}
 			}
-			
+
 			OWLImportsDeclaration importsDeclaration = factory
 					.getOWLImportsDeclaration(schemaOntologyIRI);
-			
+
 			ontologyManager.applyChange(new AddImport(dataOntology,
 					importsDeclaration));
-			
+
 			String schemaNS = graphNS + "/schema#";
 			;
 			String dataNS = graphNS + "#";
 			;
-			
+
 			OWLClass dataSourceOwlClass = factory
 					.getOWLClass(Semion_OWL.DataSource);
-			
+
 			Set<OWLIndividual> individuals = dataSourceOwlClass
 					.getIndividuals(schemaOntology);
-			
+
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			dbf.setNamespaceAware(true);
 			DocumentBuilder db;
 			try {
 				db = dbf.newDocumentBuilder();
-				
+
 				Element documentElement = dom.getDocumentElement();
-				
+
 				String nodeName = documentElement.getNodeName();
-				
+
 				IRI rootElementIRI = createElementResource(dataNS, schemaNS,
 						documentElement, null, null, ontologyManager, factory,
 						dataOntology);
-				
+
 				iterateChildren(dataNS, schemaNS, rootElementIRI,
 						documentElement, ontologyManager, factory, dataOntology);
-				
+
 			} catch (ParserConfigurationException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace(); 
-			} 
+				e.printStackTrace();
+			}
 		}
-		
+
 		return dataOntology;
 	}
-	
+
 	@Deactivate
 	protected void deactivate(ComponentContext context) {
 		log.info("in " + XMLExtractor.class + " deactivate with context "
 				+ context);
 		reengineeringManager.unbindReengineer(this);
 	}
-	
+
 	@Override
 	public int getReengineerType() {
 		return ReengineerType.XML;
-		}
-		
+	}
+
 	private OntologyScope getScope() {
 		OntologyScope ontologyScope = null;
-				
+
 		ScopeRegistry scopeRegistry = onManager.getScopeRegistry();
-				
+
 		if (scopeRegistry.isScopeActive(scopeIRI)) {
 			ontologyScope = scopeRegistry.getScope(scopeIRI);
-				}
-				
+		}
+
 		return ontologyScope;
 	}
-				
+
 	private void iterateChildren(String dataNS, String schemaNS,
 			IRI parentResource, Node parentElement, OWLOntologyManager manager,
 			OWLDataFactory factory, OWLOntology dataOntology) {
-				
+
 		NodeList children = parentElement.getChildNodes();
 		if (children != null) {
 			for (int i = 0, j = children.getLength(); i < j; i++) {
 				Node child = children.item(i);
 				if (child instanceof Element) {
-				
+
 					String[] parentNames = parentResource.toString().split("#");
 					String parentLocalName;
 					if (parentNames.length == 2) {
@@ -575,7 +577,7 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 					} else {
 						parentLocalName = parentNames[0];
 					}
-				
+
 					IRI childResource = createElementResource(dataNS, schemaNS,
 							(Element) child, parentLocalName, Integer
 									.valueOf(i), manager, factory, dataOntology);
@@ -595,7 +597,7 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 					String textContent = child.getNodeValue();
 					if (textContent != null) {
 						textContent = textContent.trim();
-				
+
 						if (!textContent.equals("")) {
 							log.info("VALUE : " + textContent);
 							manager.applyChange(new AddAxiom(dataOntology,
@@ -608,40 +610,40 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 			}
 		}
 	}
-	
+
 	@Override
 	public OWLOntology reengineering(String graphNS, IRI outputIRI,
 			DataSource dataSource) throws ReengineeringException {
 
 		InputStream dataSourceAsStream = (InputStream) dataSource
 				.getDataSource();
-	
+
 		InputStreamReader isr = new InputStreamReader(dataSourceAsStream);
 		BufferedReader reader = new BufferedReader(isr);
 		final StringBuilder stringBuilder1 = new StringBuilder();
 		final StringBuilder stringBuilder2 = new StringBuilder();
-	
+
 		OutputStream out = new OutputStream() {
-	
-	@Override
+
+			@Override
 			public void write(byte[] bytes) throws IOException {
 				for (byte b : bytes) {
 					stringBuilder1.append((char) b);
 					stringBuilder2.append((char) b);
-		}
-	}
-	
-	@Override
+				}
+			}
+
+			@Override
 			public void write(int arg0) throws IOException {
 				stringBuilder1.append((char) arg0);
 				stringBuilder2.append((char) arg0);
-		
+
 			}
-		
+
 		};
-		
+
 		String line = "";
-						try{
+		try {
 			while ((line = reader.readLine()) != null) {
 				out.write(line.getBytes());
 			}
@@ -650,15 +652,15 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+
 		final ByteArrayOutputStream buff1 = new ByteArrayOutputStream();
 		try {
 			buff1.write(stringBuilder1.toString().getBytes());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-	}
-	
+		}
+
 		final ByteArrayOutputStream buff2 = new ByteArrayOutputStream();
 		try {
 			buff2.write(stringBuilder2.toString().getBytes());
@@ -666,7 +668,7 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		DataSource ds1 = new DataSource() {
 
 			@Override
@@ -674,22 +676,22 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 				ByteArrayInputStream byteArr = new ByteArrayInputStream(buff1
 						.toByteArray());
 				return byteArr;
-			
+
 			}
-			
+
 			@Override
 			public int getDataSourceType() {
 				// TODO Auto-generated method stub
 				return ReengineerType.XML;
 			}
-			
+
 			@Override
 			public String getID() {
 				// TODO Auto-generated method stub
 				return null;
-		}
+			}
 		};
-		
+
 		DataSource ds2 = new DataSource() {
 
 			@Override
@@ -697,14 +699,14 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 				ByteArrayInputStream byteArr = new ByteArrayInputStream(buff2
 						.toByteArray());
 				return byteArr;
-		
-	}
-	
+
+			}
+
 			@Override
 			public int getDataSourceType() {
 				// TODO Auto-generated method stub
 				return ReengineerType.XML;
-	}
+			}
 
 			@Override
 			public String getID() {
@@ -712,9 +714,9 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 				return null;
 			}
 		};
-		
+
 		OWLOntology schemaOntology;
-		
+
 		System.out.println("XML outputIRI : " + outputIRI);
 		if (outputIRI != null && !outputIRI.equals("")) {
 			IRI schemaIRI = IRI.create(outputIRI.toString() + "/schema");
@@ -725,7 +727,7 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 		}
 		OWLOntology ontology = dataReengineering(graphNS, outputIRI, ds2,
 				schemaOntology);
-		
+
 		try {
 			onManager.getOwlCacheManager().saveOntology(ontology, System.out);
 		} catch (OWLOntologyStorageException e) {

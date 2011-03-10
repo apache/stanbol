@@ -8,11 +8,11 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.iksproject.kres.api.manager.io.RootOntologySource;
 import eu.iksproject.kres.api.manager.ontology.SessionOntologySpace;
 import eu.iksproject.kres.api.manager.ontology.SpaceType;
 import eu.iksproject.kres.api.manager.ontology.UnmodifiableOntologySpaceException;
 import eu.iksproject.kres.api.storage.OntologyStorage;
-import eu.iksproject.kres.manager.io.RootOntologySource;
 import eu.iksproject.kres.manager.util.StringUtils;
 
 public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl

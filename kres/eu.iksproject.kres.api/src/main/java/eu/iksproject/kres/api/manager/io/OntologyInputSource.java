@@ -1,4 +1,4 @@
-package eu.iksproject.kres.api.manager.ontology;
+package eu.iksproject.kres.api.manager.io;
 
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;

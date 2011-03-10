@@ -1,9 +1,8 @@
-package eu.iksproject.kres.manager.io;
+package eu.iksproject.kres.api.manager.io;
 
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
-import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
 
 /**
  * Abstract implementation of {@link OntologyInputSource} with the basic methods

@@ -31,7 +31,8 @@ import org.slf4j.LoggerFactory;
 
 import eu.iksproject.kres.api.manager.DuplicateIDException;
 import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
+import eu.iksproject.kres.api.manager.io.OntologyInputSource;
+import eu.iksproject.kres.api.manager.io.RootOntologyIRISource;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.api.manager.ontology.OntologyScopeFactory;
 import eu.iksproject.kres.api.manager.ontology.OntologySpace;
@@ -41,7 +42,6 @@ import eu.iksproject.kres.api.storage.OntologyStoreProvider;
 import eu.iksproject.kres.jersey.format.KReSFormat;
 import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.manager.io.OntologyRegistryIRISource;
-import eu.iksproject.kres.manager.io.RootOntologyIRISource;
 import eu.iksproject.kres.storage.provider.OntologyStorageProviderImpl;
 
 @Path("/ontology/{scopeid}")
@@ -61,23 +61,23 @@ public class ONMScopeResource extends NavigationMixin {
 		this.servletContext = servletContext;
 		this.onm = (KReSONManager) servletContext
 				.getAttribute(KReSONManager.class.getName());
-this.storeProvider = (OntologyStoreProvider) servletContext
-		.getAttribute(OntologyStoreProvider.class.getName());
-// Contingency code for missing components follows.
-/*
- * FIXME! The following code is required only for the tests. This should
- * be removed and the test should work without this code.
- */
-if (storeProvider == null) {
-	log
-			.warn("No OntologyStoreProvider in servlet context. Instantiating manually...");
-	storeProvider = new OntologyStorageProviderImpl();
-}
+		this.storeProvider = (OntologyStoreProvider) servletContext
+				.getAttribute(OntologyStoreProvider.class.getName());
+		// Contingency code for missing components follows.
+		/*
+		 * FIXME! The following code is required only for the tests. This should
+		 * be removed and the test should work without this code.
+		 */
+		if (storeProvider == null) {
+			log
+					.warn("No OntologyStoreProvider in servlet context. Instantiating manually...");
+			storeProvider = new OntologyStorageProviderImpl();
+		}
 		if (onm == null) {
-	log
-			.warn("No KReSONManager in servlet context. Instantiating manually...");
-	onm = new ONManager(storeProvider.getActiveOntologyStorage(),
-			new Hashtable<String, Object>());
+			log
+					.warn("No KReSONManager in servlet context. Instantiating manually...");
+			onm = new ONManager(storeProvider.getActiveOntologyStorage(),
+					new Hashtable<String, Object>());
 		}
 	}
 
@@ -213,7 +213,7 @@ if (storeProvider == null) {
 				coreSrc = new RootOntologyIRISource(IRI.create(coreOntology));
 			} catch (Exception e2) {
 				// If this fails too, throw a bad request.
-				System.out.println("1.1");
+				// System.out.println("1.1");
 				e2.printStackTrace();
 				throw new WebApplicationException(e2, BAD_REQUEST);
 			}
@@ -233,7 +233,7 @@ if (storeProvider == null) {
 							.create(customOntology));
 				} catch (Exception e2) {
 					// If this fails too, throw a bad request.
-					System.out.println("1.2");
+					// System.out.println("1.2");
 					e2.printStackTrace();
 					throw new WebApplicationException(e2, BAD_REQUEST);
 				}
@@ -241,7 +241,7 @@ if (storeProvider == null) {
 		}
 		// If we weren't able to build core source, throw bad request.
 		if (coreSrc == null) {
-			System.out.println("1.3");
+			// System.out.println("1.3");
 			throw new WebApplicationException(BAD_REQUEST);
 		}
 

@@ -15,8 +15,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
-import eu.iksproject.kres.ontologies.DBS_L1;
+import eu.iksproject.kres.api.manager.io.OntologyInputSource;
 
 public class RuleOntologyInputSource implements OntologyInputSource {
 

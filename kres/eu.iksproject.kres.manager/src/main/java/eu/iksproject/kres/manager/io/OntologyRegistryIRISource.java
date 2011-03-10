@@ -13,7 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.stlab.xd.registry.models.Registry;
 import org.stlab.xd.registry.models.RegistryItem;
 
-import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
+import eu.iksproject.kres.api.manager.io.AbstractOntologyInputSource;
+import eu.iksproject.kres.api.manager.io.OntologyInputSource;
 import eu.iksproject.kres.api.manager.registry.KReSRegistryLoader;
 import eu.iksproject.kres.manager.util.OntologyUtils;
 

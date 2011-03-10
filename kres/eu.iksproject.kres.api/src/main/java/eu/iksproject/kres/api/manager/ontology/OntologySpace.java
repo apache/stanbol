@@ -6,6 +6,8 @@ import java.util.Set;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
+import eu.iksproject.kres.api.manager.io.OntologyInputSource;
+
 /**
  * An ontology space identifies the set of OWL ontologies that should be
  * "active" in a given context, e.g. for a certain user session or a specific

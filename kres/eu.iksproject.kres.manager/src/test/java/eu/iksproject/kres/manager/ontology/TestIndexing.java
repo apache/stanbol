@@ -14,14 +14,14 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import eu.iksproject.kres.api.manager.DuplicateIDException;
 import eu.iksproject.kres.api.manager.KReSONManager;
+import eu.iksproject.kres.api.manager.io.RootOntologyIRISource;
+import eu.iksproject.kres.api.manager.io.RootOntologySource;
 import eu.iksproject.kres.api.manager.ontology.OntologyIndex;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.api.manager.ontology.OntologySpaceModificationException;
 import eu.iksproject.kres.api.manager.ontology.UnmodifiableOntologySpaceException;
 import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.manager.io.OntologyRegistryIRISource;
-import eu.iksproject.kres.manager.io.RootOntologyIRISource;
-import eu.iksproject.kres.manager.io.RootOntologySource;
 import eu.iksproject.kres.manager.util.OntologyUtils;
 
 public class TestIndexing {

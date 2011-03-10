@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.iksproject.kres.api.manager.DuplicateIDException;
 import eu.iksproject.kres.api.manager.KReSONManager;
+import eu.iksproject.kres.api.manager.io.RootOntologyIRISource;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.api.manager.ontology.OntologyScopeFactory;
 import eu.iksproject.kres.api.manager.ontology.OntologySpaceFactory;
@@ -39,19 +40,20 @@ import eu.iksproject.kres.api.semion.util.OntologyInputSourceDBS_L1;
 import eu.iksproject.kres.api.semion.util.ReengineerType;
 import eu.iksproject.kres.api.semion.util.UnsupportedReengineerException;
 import eu.iksproject.kres.ontologies.DBS_L1;
+import eu.iksproject.kres.ontologies.XML_OWL;
 
 /**
  * The {@code DBExtractor} is an implementation of the {@link SemionReengineer}
  * for relational databases.
  * 
  * @author andrea.nuzzolese
- *
+ * 
  */
 
 @Component(immediate = true, metatype = true)
 @Service(SemionReengineer.class)
 public class DBExtractor implements SemionReengineer {
-	
+
 	public static final String _DB_DATA_REENGINEERING_SESSION_DEFAULT = "/db-data-reengineering-session";
 	public static final String _DB_DATA_REENGINEERING_SESSION_SPACE_DEFAULT = "/db-data-reengineering-session-space";
 	public static final String _DB_REENGINEERING_SESSION_SPACE_DEFAULT = "/db-schema-reengineering-session-space";
@@ -59,55 +61,55 @@ public class DBExtractor implements SemionReengineer {
 	public static final String _DB_SCHEMA_REENGINEERING_SESSION_DEFAULT = "/db-schema-reengineering-session";
 	public static final String _HOST_NAME_AND_PORT_DEFAULT = "localhost:8080";
 	public static final String _REENGINEERING_SCOPE_DEFAULT = "db_reengineering";
-	
+
 	@Property(value = _DB_DATA_REENGINEERING_SESSION_DEFAULT)
 	public static final String DB_DATA_REENGINEERING_SESSION = "eu.iksproject.kres.semion.reengineer.db.data";
 
 	@Property(value = _DB_DATA_REENGINEERING_SESSION_SPACE_DEFAULT)
 	public static final String DB_DATA_REENGINEERING_SESSION_SPACE = "eu.iksproject.kres.semion.reengineer.space.db.data";
-	
+
 	@Property(value = _DB_REENGINEERING_SESSION_SPACE_DEFAULT)
-    public static final String DB_REENGINEERING_SESSION_SPACE = "http://kres.iks-project.eu/space/reengineering/db";
-	
+	public static final String DB_REENGINEERING_SESSION_SPACE = "http://kres.iks-project.eu/space/reengineering/db";
+
 	@Property(value = _DB_SCHEMA_REENGINEERING_ONTOLOGY_SPACE_DEFAULT)
-    public static final String DB_SCHEMA_REENGINEERING_ONTOLOGY_SPACE = "eu.iksproject.kres.semion.reengineer.ontology.space.db";
-	
+	public static final String DB_SCHEMA_REENGINEERING_ONTOLOGY_SPACE = "eu.iksproject.kres.semion.reengineer.ontology.space.db";
+
 	@Property(value = _DB_SCHEMA_REENGINEERING_SESSION_DEFAULT)
-    public static final String DB_SCHEMA_REENGINEERING_SESSION = "eu.iksproject.kres.semion.reengineer.db.schema";
-	
+	public static final String DB_SCHEMA_REENGINEERING_SESSION = "eu.iksproject.kres.semion.reengineer.db.schema";
+
 	@Property(value = _HOST_NAME_AND_PORT_DEFAULT)
 	public static final String HOST_NAME_AND_PORT = "host.name.port";
-	
+
 	@Property(value = _REENGINEERING_SCOPE_DEFAULT)
-    public static final String REENGINEERING_SCOPE = "db.reengineering.scope";
-	
+	public static final String REENGINEERING_SCOPE = "db.reengineering.scope";
+
 	ConnectionSettings connectionSettings;
-	
+
 	String databaseURI;
-	
+
 	private IRI kReSSessionID;
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
-	
+
 	@Reference
 	KReSONManager onManager;
-	
+
 	@Reference
 	SemionManager reengineeringManager;
 
 	private IRI reengineeringScopeIRI;
-	
+
 	private IRI reengineeringSpaceIRI;
-	
+
 	MGraph schemaGraph;
 	protected OntologyScope scope;
-	
+
 	@Reference
 	TcManager tcManager;
-	
+
 	@Reference
 	WeightedTcProvider weightedTcProvider;
-	
+
 	/**
 	 * This default constructor is <b>only</b> intended to be used by the OSGI
 	 * environment with Service Component Runtime support.
@@ -119,9 +121,9 @@ public class DBExtractor implements SemionReengineer {
 	 * OSGI environment.
 	 */
 	public DBExtractor() {
-	
+
 	}
-	
+
 	/**
 	 * 
 	 * Create a new {@link DBExtractor} that is formally a
@@ -139,7 +141,7 @@ public class DBExtractor implements SemionReengineer {
 		this.weightedTcProvider = weightedTcProvider;
 		activate(configuration);
 	}
-	
+
 	/**
 	 * Create a new {@link DBExtractor} that is formally a
 	 * {@link SemionReengineer}.
@@ -168,7 +170,7 @@ public class DBExtractor implements SemionReengineer {
 		this.connectionSettings = connectionSettings;
 		activate(configuration);
 	}
-	
+
 	/**
 	 * Used to configure an instance within an OSGi container.
 	 * 
@@ -196,28 +198,28 @@ public class DBExtractor implements SemionReengineer {
 		if (hostNameAndPort == null)
 			hostNameAndPort = _HOST_NAME_AND_PORT_DEFAULT;
 		// TODO: Manage the other properties
-		
+
 		hostNameAndPort = "http://" + hostNameAndPort;
-		
+
 		reengineeringScopeIRI = IRI.create(hostNameAndPort + "/kres/ontology/"
 				+ reengineeringScopeID);
 		reengineeringSpaceIRI = IRI.create(DB_REENGINEERING_SESSION_SPACE);
-		
+
 		reengineeringManager.bindReengineer(this);
-		
+
 		KReSSessionManager kReSSessionManager = onManager.getSessionManager();
 		KReSSession kReSSession = kReSSessionManager.createSession();
-		
+
 		kReSSessionID = kReSSession.getID();
-		
+
 		OntologyScopeFactory ontologyScopeFactory = onManager
 				.getOntologyScopeFactory();
-		
+
 		ScopeRegistry scopeRegistry = onManager.getScopeRegistry();
-		
+
 		OntologySpaceFactory ontologySpaceFactory = onManager
 				.getOntologySpaceFactory();
-		
+
 		scope = null;
 		try {
 			log.info("Semion DBExtractor : created scope with IRI "
@@ -226,16 +228,20 @@ public class DBExtractor implements SemionReengineer {
 			OWLOntologyManager ontologyManager = OWLManager
 					.createOWLOntologyManager();
 			OWLOntology owlOntology = ontologyManager.createOntology(iri);
-			
+
 			System.out.println("Created ONTOLOGY OWL");
-		
+
 			scope = ontologyScopeFactory.createOntologyScope(
-					reengineeringScopeIRI, new OntologyInputSourceDBS_L1());
-			
-			//scope.setUp();
-			
+					reengineeringScopeIRI, new RootOntologyIRISource(IRI
+							.create(DBS_L1.URI))/*
+												 * new
+												 * OntologyInputSourceDBS_L1()
+												 */);
+
+			// scope.setUp();
+
 			scopeRegistry.registerScope(scope);
-			
+
 		} catch (DuplicateIDException e) {
 			log.info("Semion DBExtractor : already existing scope for IRI "
 					+ REENGINEERING_SCOPE);
@@ -247,21 +253,21 @@ public class DBExtractor implements SemionReengineer {
 			log
 					.error("Semion DBExtractor : No OntologyInputSource for ONManager.");
 		}
-		
-		if(scope != null){
+
+		if (scope != null) {
 			scope.addSessionSpace(ontologySpaceFactory
 					.createSessionOntologySpace(reengineeringSpaceIRI),
 					kReSSession.getID());
-			
+
 			scopeRegistry.setScopeActive(reengineeringScopeIRI, true);
 		}
-		
+
 		log.info("Activated KReS Semion RDB Reengineer");
 	}
-	
+
 	@Override
 	public boolean canPerformReengineering(DataSource dataSource) {
-		if(dataSource.getDataSourceType() == getReengineerType()){
+		if (dataSource.getDataSourceType() == getReengineerType()) {
 			return true;
 		} else {
 			return false;
@@ -270,13 +276,13 @@ public class DBExtractor implements SemionReengineer {
 
 	@Override
 	public boolean canPerformReengineering(int dataSourceType) {
-		if(dataSourceType == getReengineerType()){
+		if (dataSourceType == getReengineerType()) {
 			return true;
 		} else {
 			return false;
 		}
 	}
-	
+
 	@Override
 	public boolean canPerformReengineering(OWLOntology schemaOntology) {
 		// TODO Auto-generated method stub
@@ -311,15 +317,15 @@ public class DBExtractor implements SemionReengineer {
 	public int getReengineerType() {
 		return ReengineerType.RDB;
 	}
-		
+
 	private OntologyScope getScope() {
 		OntologyScope ontologyScope = null;
-		
+
 		ScopeRegistry scopeRegistry = onManager.getScopeRegistry();
 
 		if (scopeRegistry.isScopeActive(reengineeringScopeIRI)) {
 			ontologyScope = scopeRegistry.getScope(reengineeringScopeIRI);
-	}
+		}
 
 		return ontologyScope;
 	}
@@ -328,14 +334,14 @@ public class DBExtractor implements SemionReengineer {
 	public OWLOntology reengineering(String graphNS, IRI outputIRI,
 			DataSource dataSource) throws ReengineeringException {
 		IRI schemaIRI;
-		if(outputIRI != null){
+		if (outputIRI != null) {
 			schemaIRI = IRI.create(outputIRI.toString() + "/schema");
 		} else {
 			schemaIRI = IRI.create("/schema");
 		}
 		OWLOntology schemaOntology = schemaReengineering(graphNS + "/schema",
 				schemaIRI, dataSource);
-		
+
 		return dataReengineering(graphNS, outputIRI, dataSource, schemaOntology);
 	}
 
@@ -343,8 +349,8 @@ public class DBExtractor implements SemionReengineer {
 	public OWLOntology schemaReengineering(String graphNS, IRI outputIRI,
 			DataSource dataSource) {
 		OWLOntology schemaOntology = null;
-		
-		if(outputIRI != null){
+
+		if (outputIRI != null) {
 			log
 					.info("Semion DBExtractor : starting to generate RDF graph with URI "
 							+ outputIRI.toString() + " of a db schema ");
@@ -352,27 +358,27 @@ public class DBExtractor implements SemionReengineer {
 			log
 					.info("Semion DBExtractor : starting to generate RDF graph of a db schema ");
 		}
-		
+
 		OntologyScope reengineeringScope = getScope();
-		if(reengineeringScope != null){
+		if (reengineeringScope != null) {
 			ConnectionSettings connectionSettings = (ConnectionSettings) dataSource
 					.getDataSource();
 			SemionDBSchemaGenerator schemaGenerator = new SemionDBSchemaGenerator(
 					outputIRI, connectionSettings);
-			
-			System.out.println("OWL MANAGER IN SEMION: "+onManager);
+
+			System.out.println("OWL MANAGER IN SEMION: " + onManager);
 			OWLOntologyManager ontologyManager = onManager.getOwlCacheManager();
 			OWLDataFactory dataFactory = onManager.getOwlFactory();
 			schemaOntology = schemaGenerator.getSchema(ontologyManager,
 					dataFactory);
-			
-			if(outputIRI != null){
+
+			if (outputIRI != null) {
 				log.info("Created graph with URI " + outputIRI.toString()
 						+ " of DB Schema.");
 			} else {
 				log.info("Created graph of DB Schema.");
 			}
-			
+
 		}
 		return schemaOntology;
 	}

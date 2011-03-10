@@ -21,9 +21,10 @@ import org.semanticweb.owlapi.model.RemoveImport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.iksproject.kres.api.manager.io.OntologyInputSource;
+import eu.iksproject.kres.api.manager.io.RootOntologySource;
 import eu.iksproject.kres.api.manager.ontology.IrremovableOntologyException;
 import eu.iksproject.kres.api.manager.ontology.MissingOntologyException;
-import eu.iksproject.kres.api.manager.ontology.OntologyInputSource;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.api.manager.ontology.OntologySpace;
 import eu.iksproject.kres.api.manager.ontology.OntologySpaceListener;
@@ -33,7 +34,6 @@ import eu.iksproject.kres.api.manager.ontology.SpaceType;
 import eu.iksproject.kres.api.manager.ontology.UnmodifiableOntologySpaceException;
 import eu.iksproject.kres.api.storage.OntologyStorage;
 import eu.iksproject.kres.manager.ONManager;
-import eu.iksproject.kres.manager.io.RootOntologySource;
 import eu.iksproject.kres.manager.util.OntologyUtils;
 import eu.iksproject.kres.manager.util.StringUtils;
 
