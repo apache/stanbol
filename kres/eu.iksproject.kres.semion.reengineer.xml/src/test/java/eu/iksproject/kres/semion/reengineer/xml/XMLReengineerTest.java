@@ -54,7 +54,7 @@ public class XMLReengineerTest {
 	public void dataReengineeringTest() throws Exception {
 		OWLOntology schemaOntology = xmlExtractor.schemaReengineering(graphNS,
 				outputIRI, dataSource);
-		xmlExtractor.dataReengineering(graphNS, outputIRI, dataSource,
+		xmlExtractor.dataReengineering(graphNS, IRI.create(outputIRI.toString()+"_new"), dataSource,
 				schemaOntology);
 	}
 	
@@ -62,7 +62,7 @@ public class XMLReengineerTest {
 	public void reengineeringTest() throws Exception {
 		xmlExtractor.reengineering(graphNS, outputIRI, dataSource);
 	}
-	
+
 	@Test
 	public void schemaReengineeringTest() throws Exception {
 		xmlExtractor.schemaReengineering(graphNS, outputIRI, dataSource);
