@@ -25,7 +25,6 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.manager.io.OntologyInputSource;
 import eu.iksproject.kres.api.manager.io.RootOntologyIRISource;
 import eu.iksproject.kres.api.manager.io.RootOntologySource;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
@@ -81,9 +80,7 @@ public class KReSSessionResource extends NavigationMixin {
             OntologyScope ontologyScope = scopeRegistry.getScope(scopeIRI);
             SessionOntologySpace sos = ontologyScope.getSessionSpace(sessionIRI);
             try {
-                sos.addOntology(new RootOntologySource(ontology)/*
-                                                                 * createOntologyInputSource( ontology)
-                                                                 */);
+                sos.addOntology(new RootOntologySource(ontology));
                 return Response.ok().build();
             } catch (UnmodifiableOntologySpaceException e) {
                 return Response.status(INTERNAL_SERVER_ERROR).build();
@@ -111,9 +108,7 @@ public class KReSSessionResource extends NavigationMixin {
         OntologyScope ontologyScope = scopeRegistry.getScope(scopeIRI);
         SessionOntologySpace sos = ontologyScope.getSessionSpace(sessionIRI);
         try {
-            sos.addOntology(new RootOntologyIRISource(ontologyIRI)/*
-                                                                   * createOntologyInputSource( ontologyIRI)
-                                                                   */);
+            sos.addOntology(new RootOntologyIRISource(ontologyIRI));
             return Response.ok().build();
         } catch (UnmodifiableOntologySpaceException e) {
             return Response.status(INTERNAL_SERVER_ERROR).build();
@@ -121,66 +116,6 @@ public class KReSSessionResource extends NavigationMixin {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
 
-    }
-
-    @Deprecated
-    private OntologyInputSource createOntologyInputSource(final IRI iri) throws OWLOntologyCreationException {
-
-        final OWLOntology ontology = onm.getOwlCacheManager().loadOntology(iri);
-        OntologyInputSource ontologyInputSource = new OntologyInputSource() {
-
-            @Override
-            public IRI getPhysicalIRI() {
-                return iri;
-            }
-
-            @Override
-            public OWLOntology getRootOntology() {
-                return ontology;
-            }
-
-            @Override
-            public boolean hasPhysicalIRI() {
-                return iri == null ? false : true;
-            }
-
-            @Override
-            public boolean hasRootOntology() {
-                return ontology == null ? false : true;
-            }
-        };
-
-        return ontologyInputSource;
-    }
-
-    @Deprecated
-    private OntologyInputSource createOntologyInputSource(final OWLOntology ontology) throws OWLOntologyCreationException {
-
-        final IRI iri = ontology.getOntologyID().getOntologyIRI();
-        OntologyInputSource ontologyInputSource = new OntologyInputSource() {
-
-            @Override
-            public IRI getPhysicalIRI() {
-                return iri;
-            }
-
-            @Override
-            public OWLOntology getRootOntology() {
-                return ontology;
-            }
-
-            @Override
-            public boolean hasPhysicalIRI() {
-                return iri == null ? false : true;
-            }
-
-            @Override
-            public boolean hasRootOntology() {
-                return ontology == null ? false : true;
-            }
-        };
-
-        return ontologyInputSource;
     }
 
     @POST
@@ -255,13 +190,8 @@ public class KReSSessionResource extends NavigationMixin {
                  * treating this as a physical IRI. See if it still works this way
                  */
                 OWLOntology o = sos.getOntology(ontologyIRI);
-                if (o != null) sos.removeOntology(new RootOntologySource(o)/*
-                                                                            * createOntologyInputSource(
-                                                                            * ontologyIRI)
-                                                                            */);
+                if (o != null) sos.removeOntology(new RootOntologySource(o));
                 return Response.ok().build();
-                // } catch (OWLOntologyCreationException e) {
-                // return Response.status(INTERNAL_SERVER_ERROR).build();
             } catch (OntologySpaceModificationException e) {
                 return Response.status(INTERNAL_SERVER_ERROR).build();
             }

@@ -61,7 +61,6 @@ import eu.iksproject.kres.api.semion.DataSource;
 import eu.iksproject.kres.api.semion.ReengineeringException;
 import eu.iksproject.kres.api.semion.SemionManager;
 import eu.iksproject.kres.api.semion.SemionReengineer;
-import eu.iksproject.kres.api.semion.util.OntologyInputSourceOXML;
 import eu.iksproject.kres.api.semion.util.ReengineerType;
 import eu.iksproject.kres.api.semion.util.SemionUriRefGenerator;
 import eu.iksproject.kres.api.semion.util.UnsupportedReengineerException;
