@@ -397,6 +397,9 @@ public class XSDExtractor extends SemionUriRefGenerator {
 
 		try {
 			//Whitepace
+                        /* This line, sometimes, generates an exception when try to get simple type definition for white space.
+                                However, even if there is the exception, the line returns the ZERO value, so in the catch block is perfomed the
+                                option with ZERO value that is WS_PRESERVE.*/
 			short whitespace = xsSimpleTypeDefinition.getWhitespace();
 			if(whitespace == XSSimpleTypeDecl.WS_COLLAPSE){
 				//Collapse
@@ -414,7 +417,9 @@ public class XSDExtractor extends SemionUriRefGenerator {
 			log.info("WHITESPACE : "+whitespace);
 		} catch (DatatypeException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+                        /*In case of exception is run the option that preserves the simple type.*/
+                        manager.applyChange(new AddAxiom(schemaOntology, createOWLObjectPropertyAssertionAxiom(factory, XSD_OWL.hasWhitespace, simpleType, XSD_OWL.PRESERVE)));
+			log.warn("PROBLEM TO GET WHITE SPACE FROM SIMPLE TYPE DEFINITION", e);
 		}
 		
 		
@@ -527,6 +532,7 @@ public class XSDExtractor extends SemionUriRefGenerator {
 		};
 		
 		PSVIDocumentImpl psviDocumentImpl = new PSVIDocumentImpl();
+        XSSimpleTypeDecl m;
 		if(dataSource != null){
 			
 			OWLOntologyManager ontologyManager = onManager.getOwlCacheManager();		
@@ -630,7 +636,8 @@ public class XSDExtractor extends SemionUriRefGenerator {
 								if(baseType == XSTypeDefinition.SIMPLE_TYPE){
 									log.info("SIMPLE TYPE");
 									typeResource = createOWLClassAssertionAxiom(factory, XSD_OWL.SimpleType, typeIRI);
-									addSimpleType(graphNS, ontologyManager, factory, dataSourceSchemaOntology, typeIRI, (XSSimpleTypeDecl) xsTypeDefinition);
+                                                                        addSimpleType(graphNS, ontologyManager, factory, dataSourceSchemaOntology, typeIRI, (XSSimpleTypeDecl) xsTypeDefinition);
+                                                                       
 								}
 								else {
 									System.out.println("COMPLEX TYPE");
