@@ -73,7 +73,6 @@ import eu.iksproject.kres.api.semion.SemionReengineer;
 import eu.iksproject.kres.api.semion.util.ReengineerType;
 import eu.iksproject.kres.api.semion.util.SemionUriRefGenerator;
 import eu.iksproject.kres.ontologies.XSD_OWL;
-import eu.iksproject.kres.semion.reengineer.parsers.KReSDocumentBuilderFactoryImpl;
 
 public class XSDExtractor extends SemionUriRefGenerator {
 
@@ -561,7 +560,7 @@ public class XSDExtractor extends SemionUriRefGenerator {
 			
 				
 				
-				DocumentBuilderFactory dbf = new KReSDocumentBuilderFactoryImpl();
+				DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 				
 				dbf.setNamespaceAware(true);
 		

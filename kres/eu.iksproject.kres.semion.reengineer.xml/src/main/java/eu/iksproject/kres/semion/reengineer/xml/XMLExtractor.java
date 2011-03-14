@@ -50,7 +50,7 @@ import org.xml.sax.SAXException;
 
 import eu.iksproject.kres.api.manager.DuplicateIDException;
 import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.manager.io.RootOntologyIRISource;
+import eu.iksproject.kres.manager.io.RootOntologyIRISource;
 import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 import eu.iksproject.kres.api.manager.ontology.OntologyScopeFactory;
 import eu.iksproject.kres.api.manager.ontology.OntologySpaceFactory;
