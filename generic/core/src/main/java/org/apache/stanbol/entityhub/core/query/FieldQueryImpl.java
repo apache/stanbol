@@ -152,6 +152,8 @@ public class FieldQueryImpl implements Cloneable, FieldQuery{
             copyTo.setConstraint(entry.getKey(), entry.getValue());
         }
         copyTo.addSelectedFields(selected);
+        copyTo.setLimit(limit);
+        copyTo.setOffset(offset);
         return copyTo;
     }
     @Override
