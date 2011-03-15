@@ -148,7 +148,7 @@ public class JsonLdSerializerProviderTest {
     private void getTextAnnotation(ContentItem ci, String annotationURNExtension, String namedEntity, String context, UriRef type) {
         String content;
         try {
-            content = IOUtils.toString(ci.getStream());
+            content = IOUtils.toString(ci.getStream(),"UTF-8");
         } catch (IOException e) {
             // should never happen anyway!
             content = "";

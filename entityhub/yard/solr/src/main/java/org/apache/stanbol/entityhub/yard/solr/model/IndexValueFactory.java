@@ -270,11 +270,14 @@ public class IndexValueFactory {
 
         @Override
         public Date createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException {
+            if(type == null){
+                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
+            }
+            if(!type.equals(INDEX_TYPE)) {
+                throw new UnsupportedIndexTypeException(this,type);
+            }
             if(value == null){
                 return null;
-            }
-            if(type == null || !type.equals(INDEX_TYPE)){
-                throw new UnsupportedIndexTypeException(this,type);
             }
             if(value instanceof Date){
                 return (Date) value;
@@ -329,11 +332,14 @@ public class IndexValueFactory {
 
         @Override
         public Boolean createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException {
+            if(type == null){
+                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
+            }
+            if(!type.equals(INDEX_TYPE)){
+                throw new UnsupportedIndexTypeException(this,type);
+            }
             if(value == null){
                 return null;
-            }
-            if(type == null || !type.equals(INDEX_TYPE)){
-                throw new UnsupportedIndexTypeException(this,type);
             }
             if(value instanceof Boolean){
                 return (Boolean)value;
@@ -386,7 +392,10 @@ public class IndexValueFactory {
             return INDEX_TYPE;
         }
         @Override
-        public String createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException {
+        public String createObject(IndexDataType type, Object value, String lang) throws NullPointerException {
+            if(type == null){
+                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
+            }
             return value!=null?value.toString():null;
         }
     }
@@ -431,14 +440,14 @@ public class IndexValueFactory {
             return INDEX_TYPE;
         }
         @Override
-        public Integer createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException {
+        public Integer createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException, NullPointerException {
             if(type == null){
-                throw new UnsupportedIndexTypeException(this,type);
-            }
-            if(value == null){
-                return null;
+                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
             }
             if(type.equals(INDEX_TYPE)){
+                if(value == null){ //move in here to ensure returning UnsupportedIndexTypeException on wrong types
+                    return null;
+                }
                 if(value instanceof Integer){
                     return (Integer)value;
                 } else {
@@ -449,6 +458,9 @@ public class IndexValueFactory {
                     }
                 }
             } else if(acceptLong && type.equals(IndexDataTypeEnum.LONG.getIndexType())){
+                if(value == null){ //move in here to ensure returning UnsupportedIndexTypeException on wrong types
+                    return null;
+                }
                 long longValue;
                 if(value instanceof Long){
                     longValue = ((Long)value).longValue();
@@ -460,7 +472,7 @@ public class IndexValueFactory {
                     }
                 }
                 if(Integer.MAX_VALUE >= longValue && Integer.MIN_VALUE <= longValue){
-                        return new Integer((int)longValue);
+                        return Integer.valueOf((int)longValue);
                 } else {
                     //parsed long value outside of the int range
                     throw new UnsupportedValueException(this, type, value,
@@ -502,14 +514,14 @@ public class IndexValueFactory {
         }
 
         @Override
-        public Long createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException {
+        public Long createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException,NullPointerException {
             if(type == null){
-                throw new UnsupportedIndexTypeException(this, type);
-            }
-            if(value == null){
-                return null;
+                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
             }
             if(type.equals(LONG_TYPE) || type.equals(INT_TYPE)){
+                if(value == null){
+                    return null;
+                }
                 if(value instanceof Long){
                     return (Long) value;
                 } else if(value instanceof Integer){
@@ -562,11 +574,14 @@ public class IndexValueFactory {
         }
 
         @Override
-        public Double createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException {
-            if(value == null){
-                return null;
+        public Double createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException, NullPointerException {
+            if(type == null){
+                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
             }
             if(SUPPORTED.contains(type)){
+                if(value == null){
+                    return null;
+                }
                 if(value instanceof Double){
                     return (Double) value;
                 } else if(value instanceof Float){
@@ -632,11 +647,14 @@ public class IndexValueFactory {
             return INDEX_TYPE;
         }
         @Override
-        public Float createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException {
-            if(value == null){
-                return null;
+        public Float createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException, NullPointerException {
+            if(type == null) {
+                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
             }
             if(supported.contains(type)){
+                if(value == null){
+                    return null;
+                }
                 if(value instanceof Float){
                     return (Float) value;
                 } else if(value instanceof Double){
@@ -683,14 +701,14 @@ public class IndexValueFactory {
         }
 
         @Override
-        public BigInteger createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException {
+        public BigInteger createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException, NullPointerException {
             if(type == null){
-                throw new UnsupportedIndexTypeException(this, type);
-            }
-            if(value == null){
-                return null;
+                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
             }
             if(type.equals(INDEX_TYPE) || type.equals(INT_TYPE)){
+                if(value == null){
+                    return null;
+                }
                 try {
                     return new BigInteger(value.toString());
                 }catch (NumberFormatException e) {
@@ -724,11 +742,14 @@ public class IndexValueFactory {
             return createObject(value.getType(),value.getValue(), value.getLanguage());
         }
         @Override
-        public BigDecimal createObject(IndexDataType type,Object value, String lang) {
-            if(value == null){
-                return null;
+        public BigDecimal createObject(IndexDataType type,Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException, NullPointerException {
+            if(type == null){
+                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
             }
             if(SUPPORTED.contains(type)){
+                if(value == null){
+                    return null;
+                }
                 try {
                     return new BigDecimal(value.toString());
                 } catch (NumberFormatException e) {
@@ -782,14 +803,14 @@ public class IndexValueFactory {
             return INDEX_TYPE;
         }
         @Override
-        public Text createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException {
+        public Text createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException, NullPointerException {
             if(type == null){
-                throw new UnsupportedIndexTypeException(this, type);
-            }
-            if(value == null){
-                return null;
+                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
             }
             if(type.equals(INDEX_TYPE) || type.equals(STRING_TYPE)){
+                if(value == null){
+                    return null;
+                }
                 return valueFactory.createText(value.toString(), lang);
             } else {
                 throw new UnsupportedIndexTypeException(this, type);
@@ -828,11 +849,14 @@ public class IndexValueFactory {
             return INDEX_TYPE;
         }
         @Override
-        public Reference createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException {
-            if(value == null){
-                return null;
+        public Reference createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException, NullPointerException {
+            if(type == null) {
+                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
             }
-            if(type != null && type.equals(INDEX_TYPE)){
+            if(type.equals(INDEX_TYPE)){
+                if(value == null){
+                    return null;
+                }
                 return valueFactory.createReference(value.toString());
             } else {
                 throw new UnsupportedIndexTypeException(this, type);

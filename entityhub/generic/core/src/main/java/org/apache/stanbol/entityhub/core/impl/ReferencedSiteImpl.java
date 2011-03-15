@@ -45,6 +45,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Sign;
 import org.apache.stanbol.entityhub.servicesapi.model.Symbol;
+import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
@@ -410,7 +411,8 @@ public class ReferencedSiteImpl implements ReferencedSite {
             throw new ReferencedSiteException(String.format("Unable to execute query on remote site %s with entitySearcher %s!",
                     queryUri,entitySearcherComponentName), e);
         }
-        List<Sign> entities = new ArrayList<Sign>(entityIds.size());
+        int numResults = entityIds.size();
+        List<Sign> entities = new ArrayList<Sign>(numResults);
         int errors = 0;
         ReferencedSiteException lastError = null;
         for(String id : entityIds){
@@ -421,12 +423,16 @@ public class ReferencedSiteImpl implements ReferencedSite {
                     log.warn("Unable to create Entity for ID that was selected by an FieldQuery (id="+id+")");
                 }
                 entities.add(entity);
+                //use the position in the list as resultSocre
+                entity.getRepresentation().set(RdfResourceEnum.resultScore.getUri(), Float.valueOf((float)numResults));
             } catch (ReferencedSiteException e) {
                 lastError = e;
                 errors++;
                 log.warn(String.format("Unable to get Representation for Entity %s. -> %d Error%s for %d Entities in QueryResult (Reason:%s)",
                         id,errors,errors>1?"s":"",entityIds.size(),e.getMessage()));
             }
+            //decrease numResults because it is used as resultScore for entities
+            numResults--;
         }
         if(lastError != null){
             if(entities.isEmpty()){

@@ -37,7 +37,11 @@ import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreDescriptor;
+import org.apache.solr.core.SolrCore;
 import org.apache.stanbol.entityhub.yard.solr.provider.SolrServerProvider;
+import org.apache.stanbol.entityhub.yard.solr.provider.SolrServerProvider.Type;
+import org.apache.stanbol.entityhub.yard.solr.utils.ConfigUtils;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +50,25 @@ import org.xml.sax.SAXException;
  * Support for the use of {@link EmbeddedSolrPorovider} in combination with the
  * SolrYard implementation. This implements the {@link SolrServerProvider}
  * interface for the {@link Type#EMBEDDED}.<p>
- * TODO: Describe the configuration of the embedded SolrServer
+ * This implementation also adds support for dynamic configuration of an
+ * {@link EmbeddedSolrServer} within the "/data" directory provided by the
+ * OSGI Environment for the SolrYard bundle. This Embedded SolrServer is 
+ * configured using an default configuration part of the SolrYard Bundle. The
+ * Indexes are located at an folder with the name {@link #DEFAULT_SOLR_DATA_DIR}
+ * (see {@link BundleContext#getDataFile(String)}).<p>
+ * If a relative path is parsed as second parameter to 
+ * {@link #getSolrServer(org.apache.stanbol.entityhub.yard.solr.provider.SolrServerProvider.Type, String, String...)}
+ * than the value is looked up by using the internally managed EmbeddedSolrServer.<p>
+ * This implementation also supports the dynamic initialisation, creation and
+ * registration of new Cores for the internally managed EmbeddedSolrServer.
+ * So if a parsed relative path does not correspond with an existing SolrCore,
+ * than the default Core configuration (part of the SolrYard bundle) is used
+ * to create the missing core.<p>
+ * Note that it is also a valid Scenario that an other components copies data
+ * (e.g. a prepared index) to the directory used by the internally managed
+ * EmbeddedSolrServer. Than this implementation just registers the new core
+ * with the EmbeddedSolrServer (creation and registration of the Core).
+ * 
  * @author Rupert Westenthaler
  *
  */
@@ -63,6 +85,14 @@ public class EmbeddedSolrPorovider implements SolrServerProvider {
     
     @Property
     public static final String SOLR_HOME = "solr.solr.home";
+
+    public static final String DEFAULT_SOLR_DATA_DIR = "indexes";
+    
+    /**
+     * The component context. Only available when running within an OSGI 
+     * Environment and the component is active.
+     */
+    private ComponentContext componentContext;
     
     public EmbeddedSolrPorovider() {
     }
@@ -80,11 +110,19 @@ public class EmbeddedSolrPorovider implements SolrServerProvider {
                 index = new File(fileUri);
             } catch (URISyntaxException e) {
                 //also not an URI -> ignore
+            } catch (IllegalArgumentException e){
+                //URI can not be converted to a file (e.g. not an absolute URI starting with "file:")
             }
             if(!index.exists()){
-                throw new IllegalArgumentException(String.format("The parsed Index Path %s does not exist",uriOrPath));
+                //try to init the core via the default EmbeddedSolrServer
+                // -> Initialised based on the default values in the bundle
+                index = initCoreDirectory(uriOrPath);
+                if(index == null){
+                    throw new IllegalArgumentException(String.format("The parsed Index Path %s does not exist",uriOrPath));
+                }
             }
         }
+        File coreDir = null;
         if(index.isDirectory()){
             File solr = getFile(index, "solr.xml");
             String coreName;
@@ -96,6 +134,7 @@ public class EmbeddedSolrPorovider implements SolrServerProvider {
                 if(solr != null){
                     //assume this is a multi core
                     coreName = index.getName();
+                    coreDir = index;
                     index = index.getParentFile(); //set the index dir to the parent
                 } else {
                     throw new IllegalArgumentException(String.format("The parsed Index Path %s is not an Solr " +
@@ -105,10 +144,87 @@ public class EmbeddedSolrPorovider implements SolrServerProvider {
             }
             //now init the EmbeddedSolrServer
             log.info(String.format("Create EmbeddedSolrServer for index %s and core %s",index.getAbsolutePath(),coreName));
-            return new EmbeddedSolrServer(getCoreContainer(index.getAbsolutePath(), solr), coreName);
+            CoreContainer coreContainer = getCoreContainer(index.getAbsolutePath(), solr);
+            //if we have a multi core environment and the core is not yet registered
+            if(!coreName.isEmpty() && !coreContainer.getCoreNames().contains(coreName)){
+                //register this core first
+                /*
+                 * NOTE: This assumes that the data for the core are already copied
+                 * to the required location, but the core itself is not yet registered
+                 * in the solr.xml.
+                 * This uses the java API to register the core. Changes are saved
+                 * within the solr.xml if persistent="true" is present within the
+                 * solr element.
+                 */
+                /*
+                 * NOTE:
+                 * We need to reset the ContextClassLoader to the one used for this
+                 * Bundle, because Solr uses this ClassLoader to load all the
+                 * plugins configured in the solr.xml and schema.xml.
+                 * The finally block resets the context class loader to the previous
+                 * value. (Rupert Westenthaler 20010209)
+                 */
+                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+                Thread.currentThread().setContextClassLoader(EmbeddedSolrPorovider.class.getClassLoader());
+                try {
+                    //SolrResourceLoader solrLoader = new SolrResourceLoader(coreDir.getAbsolutePath());
+                    CoreDescriptor coreDescriptor = new CoreDescriptor(coreContainer,coreName,coreDir.getAbsolutePath());
+                    SolrCore core;
+                    try {
+                        core = coreContainer.create(coreDescriptor);
+                    } catch (Exception e) {
+                        throw new IllegalStateException(
+                            String.format("Unable to load/register Solr Core %s " +
+                            		"to SolrServer %s!",coreName,index.getAbsoluteFile()),e);
+                    }
+                    coreContainer.register(coreName, core,false);
+                } finally {
+                    Thread.currentThread().setContextClassLoader(classLoader);
+                }
+            }
+            return new EmbeddedSolrServer(coreContainer, coreName);
         } else {
             throw new IllegalArgumentException(String.format("The parsed Index Path %s is no Directory",uriOrPath));
         }
+    }
+    /**
+     * Getter for the defaultCore
+     * @param coreName the name of the core or <code>null</code> to get/init the
+     * default directory of the default CoreContainer.<p>
+     * Works only within an OSGI Environment
+     * @return the directory (instanceDir) of the core or the solr server (if
+     * <code>null</code> is parsed as coreName). <code>null</code> is returned
+     * if the initialisation was not successful.
+     */
+    protected final File initCoreDirectory(final String coreName){
+        ComponentContext context = componentContext;
+        if(context == null){ //not within OSGI Environment and active! 
+            return null; //no default core container available
+        }
+        File defaultCoreDirectory = context.getBundleContext().getDataFile(DEFAULT_SOLR_DATA_DIR);
+        if(!defaultCoreDirectory.exists()){
+            try {
+                defaultCoreDirectory = ConfigUtils.copyDefaultConfig(context.getBundleContext().getBundle(),
+                    defaultCoreDirectory, false);
+            } catch (Exception e) {
+                log.warn("Unable to initialise the default EmbeddedSolrServer!",e);
+                return null;
+            }
+        }
+        if(coreName == null){
+            return defaultCoreDirectory;
+        }
+        File coreDir = new File(defaultCoreDirectory,coreName);
+        if(!coreDir.exists()){
+            try {
+                ConfigUtils.copyCore(context.getBundleContext().getBundle(),
+                    coreDir, null, false);
+            } catch (Exception e) {
+                log.warn("Unable to initialise the core "+coreName+" with the default Core configuration!",e);
+                return null;
+            }
+        }
+        return coreDir;
     }
     
     protected final CoreContainer getCoreContainer(String solrDir, File solrConf) throws IllegalArgumentException, IllegalStateException {
@@ -147,9 +263,11 @@ public class EmbeddedSolrPorovider implements SolrServerProvider {
     }
     @Activate
     protected void activate(ComponentContext context) {
+        this.componentContext = context;
     }
     @Deactivate
     protected void deactivate(ComponentContext context) {
+        this.componentContext = null;
         //should we remove the coreContainers -> currently I don't because
         // (1) activate deactivate do not have any affect
         // (2) it are soft references anyway.

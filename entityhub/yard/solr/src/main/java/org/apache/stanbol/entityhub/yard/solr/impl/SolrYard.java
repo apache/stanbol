@@ -121,11 +121,11 @@ import org.slf4j.LoggerFactory;
         //TODO: Added propertied from AbstractYard to fix ordering!
         @Property(name=Yard.ID,value="entityhubYard"),
         @Property(name=Yard.NAME,value="Entityhub Yard"),
-        @Property(name=Yard.DESCRIPTION,value="Default values for configuring the RickYard without editing"),
+        @Property(name=Yard.DESCRIPTION,value="The Yard used by the Entityhub to store the data"),
         @Property(name=AbstractYard.DEFAULT_QUERY_RESULT_NUMBER,intValue=-1),
         @Property(name=AbstractYard.MAX_QUERY_RESULT_NUMBER,intValue=-1),
         //BEGIN SolrYard specific Properties
-        @Property(name=SolrYard.SOLR_SERVER_LOCATION,value="http://localhost:8181/solr/entityhub"),
+        @Property(name=SolrYard.SOLR_SERVER_LOCATION,value="entityhub"),
         @Property(name=SolrYard.MULTI_YARD_INDEX_LAYOUT,options={
             @PropertyOption(name="true",value="true"),
             @PropertyOption(name="false",value="false")},value="false"),

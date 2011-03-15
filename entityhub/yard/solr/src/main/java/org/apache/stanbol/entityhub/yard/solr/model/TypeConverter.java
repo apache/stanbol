@@ -42,13 +42,16 @@ public interface TypeConverter<T> {
      * Creates an java instance representing the parsed value as returned by the
      * index.
      * @param type the index data type of the value. MUST NOT be <code>null</code>
-     * @param value the value within the index. If <code>null</code> this method returns <code>null</code>.
+     * @param value the value within the index. If <code>null</code> this method 
+     * returns <code>null</code>.
      * @param lang the language
      * @return the java instance representing the parsed index value
      * @throws UnsupportedValueException if the value can not be processed by the
      * Converter
+     * @throws NullPointerException of the parsed {@link IndexDataType} is 
+     * <code>null</code>
      */
-    T createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException,UnsupportedValueException;
+    T createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException,UnsupportedValueException, NullPointerException;
     /**
      * Getter for the java type
      * @return the java class of the instances created by this converter

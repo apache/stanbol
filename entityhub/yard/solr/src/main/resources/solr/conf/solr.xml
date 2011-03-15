@@ -26,20 +26,24 @@
   - cache: this yard is intended for caches with CacheStrategy "used".
            Multiple SolrYards can used this cache if "Multiple Yard Layout"
            is set to true.
-  - test: This core is intended to be used for testing reasons only.
   
   To add additional Cores 
     - create a sub directory with the value configured by instanceDir. 
     - Copy the "conf" Directory of an other core.
     - You can change/optimise the configuration.
+    
+  NOTE: This configuration is also used for the EmbeddedSolrServer managed by
+        the SolrYard.
+        The index data and configurations of this EmbeddedSolrServer can be found
+        in the "/data" directory of the SolrYard bundle.
+        Note also that the SolrYard dynamically creates and registers Cores based 
+        on SolrYard instances created via the OSGI ConfigAdmin service.
 -->
 <solr persistent="true">
   <cores adminPath="/admin/cores">
     <!-- RickYard Core: This core is reservated for the rickYard 
          Please do not use for Caches! -->
     <core name="entityhub" instanceDir="entityhub" />
-    <!-- Test Core: Do not use this Cor for real data!-->
-    <core name="test" instanceDir="test" />
     <!-- Core that is used by multiple Yards typically used for
          Referenced Sites with CacheStrategy "used" 
     -->
