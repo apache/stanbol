@@ -124,7 +124,7 @@ public class TestEntityMentionEnhancementEngine {
     public static void getTextAnnotation(ContentItem ci, String name, String context, UriRef type) {
         String content;
         try {
-            content = IOUtils.toString(ci.getStream());
+            content = IOUtils.toString(ci.getStream(),"UTF-8");
         } catch (IOException e) {
             //should never happen anyway!
             content = "";

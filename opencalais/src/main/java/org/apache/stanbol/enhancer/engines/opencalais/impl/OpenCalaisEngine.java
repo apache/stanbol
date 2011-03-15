@@ -181,7 +181,7 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
         String text = "";
         if (SUPPORTED_MIMETYPES.contains(ci.getMimeType().split(";", 2)[0].toLowerCase())) {
             try {
-                text = IOUtils.toString(ci.getStream());
+                text = IOUtils.toString(ci.getStream(),"UTF-8");
             } catch (IOException e) {
                 throw new InvalidContentException(this, ci, e);
             }
