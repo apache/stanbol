@@ -75,7 +75,7 @@ public class RelatedTopicEnhancementEngine implements EnhancementEngine {
         }
         String text;
         try {
-            text = IOUtils.toString(ci.getStream());
+            text = IOUtils.toString(ci.getStream(),"UTF-8");
         } catch (IOException e) {
             throw new InvalidContentException(this, ci, e);
         }

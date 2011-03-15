@@ -162,7 +162,7 @@ public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProper
         String text = "";
         if (TEXT_PLAIN_MIMETYPE.equals(ci.getMimeType())) {
             try {
-                text = IOUtils.toString(ci.getStream());
+                text = IOUtils.toString(ci.getStream(),"UTF-8");
             } catch (IOException e) {
                 throw new InvalidContentException(this, ci, e);
             }
