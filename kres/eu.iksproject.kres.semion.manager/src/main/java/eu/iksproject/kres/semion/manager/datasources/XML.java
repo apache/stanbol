@@ -2,8 +2,8 @@ package eu.iksproject.kres.semion.manager.datasources;
 
 import java.io.InputStream;
 
-import eu.iksproject.kres.api.semion.IdentifiedDataSource;
-import eu.iksproject.kres.api.semion.util.ReengineerType;
+import org.apache.stanbol.reengineer.base.IdentifiedDataSource;
+import org.apache.stanbol.reengineer.base.util.ReengineerType;
 
 public class XML extends IdentifiedDataSource {
 

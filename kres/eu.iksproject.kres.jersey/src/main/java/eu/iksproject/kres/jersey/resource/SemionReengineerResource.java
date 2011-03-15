@@ -1,6 +1,5 @@
 package eu.iksproject.kres.jersey.resource;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collection;
 
@@ -11,26 +10,28 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.impl.SimpleGraph;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.SystemUtils;
+import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
+import org.apache.stanbol.reengineer.base.DataSource;
+import org.apache.stanbol.reengineer.base.ReengineeringException;
+import org.apache.stanbol.reengineer.base.SemionManager;
+import org.apache.stanbol.reengineer.base.SemionReengineer;
+import org.apache.stanbol.reengineer.base.settings.ConnectionSettings;
+import org.apache.stanbol.reengineer.base.settings.DBConnectionSettings;
+import org.apache.stanbol.reengineer.base.util.ReengineerType;
+import org.apache.stanbol.reengineer.base.util.UnsupportedReengineerException;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
@@ -38,23 +39,10 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.ImplicitProduces;
 
-import eu.iksproject.kres.api.semion.DataSource;
-import eu.iksproject.kres.api.semion.ReengineeringException;
-import eu.iksproject.kres.api.semion.SemionManager;
-import eu.iksproject.kres.api.semion.SemionReengineer;
-import eu.iksproject.kres.api.semion.settings.ConnectionSettings;
-import eu.iksproject.kres.api.semion.settings.DBConnectionSettings;
-import eu.iksproject.kres.api.semion.util.ReengineerType;
-import eu.iksproject.kres.api.semion.util.URIGenerator;
-import eu.iksproject.kres.api.semion.util.UnsupportedReengineerException;
-import eu.iksproject.kres.api.storage.OntologyStoreProvider;
-import eu.iksproject.kres.jersey.format.KReSFormat;
-import eu.iksproject.kres.jersey.util.OntologyRenderUtils;
 import eu.iksproject.kres.semion.manager.datasources.DataSourceFactory;
 import eu.iksproject.kres.semion.manager.datasources.InvalidDataSourceForTypeSelectedException;
 import eu.iksproject.kres.semion.manager.datasources.NoSuchDataSourceExpection;
 import eu.iksproject.kres.semion.manager.datasources.RDB;
-import eu.iksproject.kres.semion.manager.datasources.XML;
 
 @Path("/reengineer")
 @ImplicitProduces("text/html")

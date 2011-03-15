@@ -5,7 +5,6 @@
 
 package eu.iksproject.kres.rules.manager;
 
-import eu.iksproject.kres.api.rules.RuleStore;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,6 +13,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Vector;
+
+import org.apache.stanbol.rules.base.api.RuleStore;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;

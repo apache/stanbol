@@ -1,13 +1,12 @@
 package eu.iksproject.kres.manager;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Hashtable;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import eu.iksproject.kres.api.manager.KReSONManager;
 
 public class Namespace {
 	

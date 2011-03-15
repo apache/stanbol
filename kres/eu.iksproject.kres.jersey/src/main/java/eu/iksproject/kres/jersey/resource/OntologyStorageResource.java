@@ -1,36 +1,14 @@
 package eu.iksproject.kres.jersey.resource;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Set;
-
 import javax.servlet.ServletContext;
-import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
-import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.commons.lang.SystemUtils;
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.stlab.xd.registry.io.IRIRegistrySource;
-
-import com.sun.jersey.api.view.ImplicitProduces;
-
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.semion.SemionManager;
-import eu.iksproject.kres.api.storage.NoSuchStoreException;
-import eu.iksproject.kres.api.storage.OntologyStorage;
-import eu.iksproject.kres.api.storage.OntologyStoreProvider;
-
-import org.semanticweb.owlapi.model.IRI;
 
 @Path("/graphs/{graphid:.+}")
 public class OntologyStorageResource extends NavigationMixin {

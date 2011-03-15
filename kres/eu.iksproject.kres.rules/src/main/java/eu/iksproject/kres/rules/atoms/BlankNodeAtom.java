@@ -1,17 +1,13 @@
 package eu.iksproject.kres.rules.atoms;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
+import org.apache.stanbol.rules.base.api.SPARQLObject;
+import org.apache.stanbol.rules.base.api.URIResource;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.SWRLAtom;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.vocabulary.OWL;
 
-import eu.iksproject.kres.api.rules.SPARQLObject;
-import eu.iksproject.kres.api.rules.URIResource;
 import eu.iksproject.kres.rules.SPARQLTriple;
 
 

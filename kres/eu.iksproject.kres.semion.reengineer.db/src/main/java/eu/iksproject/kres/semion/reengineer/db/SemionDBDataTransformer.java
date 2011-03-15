@@ -1,18 +1,14 @@
 package eu.iksproject.kres.semion.reengineer.db;
 
-import java.net.URI;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.reengineer.base.ReengineeringException;
+import org.apache.stanbol.reengineer.base.util.SemionUriRefGenerator;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -34,11 +30,7 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.vocabulary.RDF;
 
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.semion.ReengineeringException;
-import eu.iksproject.kres.api.semion.util.SemionUriRefGenerator;
 import eu.iksproject.kres.ontologies.DBS_L1;
 import eu.iksproject.kres.ontologies.DBS_L1_OWL;
 import eu.iksproject.kres.semion.reengineer.db.connection.DatabaseConnection;

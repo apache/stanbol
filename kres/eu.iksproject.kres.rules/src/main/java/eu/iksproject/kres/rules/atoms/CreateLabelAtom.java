@@ -1,14 +1,13 @@
 package eu.iksproject.kres.rules.atoms;
 
+import org.apache.stanbol.rules.base.api.SPARQLObject;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.SWRLAtom;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-import eu.iksproject.kres.api.rules.KReSRuleAtom;
 import eu.iksproject.kres.rules.SPARQLFunction;
-import eu.iksproject.kres.api.rules.SPARQLObject;
 
 public class CreateLabelAtom extends StringFunctionAtom {
 

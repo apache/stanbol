@@ -12,20 +12,19 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.store.api.NoSuchOntologyInStoreException;
+import org.apache.stanbol.ontologymanager.store.api.OntologyStorage;
+import org.apache.stanbol.reengineer.base.DataSource;
+import org.apache.stanbol.reengineer.base.ReengineeringException;
+import org.apache.stanbol.reengineer.base.SemionManager;
+import org.apache.stanbol.reengineer.base.SemionReengineer;
+import org.apache.stanbol.rules.refactor.api.SemionRefactorer;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.semion.DataSource;
-import eu.iksproject.kres.api.semion.ReengineeringException;
-import eu.iksproject.kres.api.semion.SemionManager;
-import eu.iksproject.kres.api.semion.SemionReengineer;
-import eu.iksproject.kres.api.semion.SemionRefactorer;
-import eu.iksproject.kres.api.storage.NoSuchOntologyInStoreException;
-import eu.iksproject.kres.api.storage.OntologyStorage;
 
 /**
  * Concrete implementation of the

@@ -5,29 +5,6 @@
 
 package eu.iksproject.kres.jersey.reasoners;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Resource;
-
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.manager.ontology.OntologyScope;
-import eu.iksproject.kres.api.manager.ontology.OntologySpace;
-import eu.iksproject.kres.api.manager.ontology.ScopeRegistry;
-import eu.iksproject.kres.api.manager.ontology.SessionOntologySpace;
-import eu.iksproject.kres.api.rules.KReSRule;
-import eu.iksproject.kres.api.rules.NoSuchRecipeException;
-import eu.iksproject.kres.api.rules.RuleStore;
-import eu.iksproject.kres.api.rules.util.KReSRuleList;
-import eu.iksproject.kres.api.storage.OntologyStoreProvider;
-import eu.iksproject.kres.manager.ONManager;
-import eu.iksproject.kres.reasoners.KReSCreateReasoner;
-import eu.iksproject.kres.reasoners.KReSRunReasoner;
-import eu.iksproject.kres.reasoners.KReSRunRules;
-import eu.iksproject.kres.rules.KReSKB;
-import eu.iksproject.kres.rules.manager.KReSRuleStore;
-import eu.iksproject.kres.rules.parser.KReSRuleParser;
-import eu.iksproject.kres.storage.provider.OntologyStorageProviderImpl;
-
 import java.io.File;
 import java.net.URL;
 import java.util.Hashtable;
@@ -35,6 +12,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -46,6 +24,18 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
+import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
+import org.apache.stanbol.ontologymanager.store.impl.OntologyStorageProviderImpl;
+import org.apache.stanbol.rules.base.api.KReSRule;
+import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
+import org.apache.stanbol.rules.base.api.RuleStore;
+import org.apache.stanbol.rules.base.api.util.KReSRuleList;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
@@ -62,6 +52,18 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Resource;
+
+import eu.iksproject.kres.manager.ONManager;
+import eu.iksproject.kres.reasoners.KReSCreateReasoner;
+import eu.iksproject.kres.reasoners.KReSRunReasoner;
+import eu.iksproject.kres.reasoners.KReSRunRules;
+import eu.iksproject.kres.rules.KReSKB;
+import eu.iksproject.kres.rules.manager.KReSRuleStore;
+import eu.iksproject.kres.rules.parser.KReSRuleParser;
 
 /**
  *

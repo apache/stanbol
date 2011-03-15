@@ -2,7 +2,6 @@ package eu.iksproject.kres.jersey.resource;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -21,6 +20,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.store.api.NoSuchStoreException;
+import org.apache.stanbol.ontologymanager.store.api.OntologyStorage;
+import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
@@ -28,24 +31,15 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.storage.NoSuchStoreException;
-import eu.iksproject.kres.api.storage.OntologyStorage;
-import eu.iksproject.kres.api.storage.OntologyStoreProvider;
-import eu.iksproject.kres.jersey.format.KReSFormat;
-import eu.iksproject.kres.shared.transformation.JenaToOwlConvert;
-
-import org.semanticweb.owlapi.model.OWLOntology;
-
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Bag;
 import com.sun.jersey.api.view.ImplicitProduces;
+
+import eu.iksproject.kres.jersey.format.KReSFormat;
 
 @Path("/graphs")
 @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")

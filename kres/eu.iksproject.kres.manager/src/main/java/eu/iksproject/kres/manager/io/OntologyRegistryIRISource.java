@@ -3,6 +3,11 @@ package eu.iksproject.kres.manager.io;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.io.AbstractOntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.KReSRegistryLoader;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
@@ -10,12 +15,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.stlab.xd.registry.models.Registry;
-import org.stlab.xd.registry.models.RegistryItem;
 
-import eu.iksproject.kres.api.manager.io.AbstractOntologyInputSource;
-import eu.iksproject.kres.api.manager.io.OntologyInputSource;
-import eu.iksproject.kres.api.manager.registry.KReSRegistryLoader;
 import eu.iksproject.kres.manager.util.OntologyUtils;
 
 /**

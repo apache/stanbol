@@ -2,10 +2,8 @@ package eu.iksproject.kres.semion.manager.datasources;
 
 import java.io.InputStream;
 
-import com.hp.hpl.jena.sparql.util.Symbol;
-
-import eu.iksproject.kres.api.semion.DataSource;
-import eu.iksproject.kres.api.semion.settings.ConnectionSettings;
+import org.apache.stanbol.reengineer.base.DataSource;
+import org.apache.stanbol.reengineer.base.settings.ConnectionSettings;
 
 public class DataSourceFactory {
 

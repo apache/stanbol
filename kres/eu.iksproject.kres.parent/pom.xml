@@ -17,7 +17,10 @@
   </description>
 
 	<properties>
+		<jersey-version>1.1.5.1</jersey-version>
+		<kres-version>0.7</kres-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<stanbol-version>0.9-SNAPSHOT</stanbol-version>
 	</properties>
 
   <inceptionYear>2010</inceptionYear>

@@ -14,6 +14,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.KReSRegistryLoader;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.io.XDRegistrySource;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.AbstractRegistryItem;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryContentException;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryLibrary;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryOntology;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLOntologyCreationIOException;
 import org.semanticweb.owlapi.model.IRI;
@@ -27,7 +36,6 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyChangeException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyLoaderListener;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologySetProvider;
 import org.semanticweb.owlapi.util.OWLAxiomFilter;
@@ -35,23 +43,12 @@ import org.semanticweb.owlapi.util.OWLOntologyMerger;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.stlab.xd.registry.io.XDRegistrySource;
-import org.stlab.xd.registry.models.AbstractRegistryItem;
-import org.stlab.xd.registry.models.Registry;
-import org.stlab.xd.registry.models.RegistryContentException;
-import org.stlab.xd.registry.models.RegistryItem;
-import org.stlab.xd.registry.models.RegistryLibrary;
-import org.stlab.xd.registry.models.RegistryOntology;
 import org.stlab.xd.utils.RDFSLabelGetter;
 import org.stlab.xd.vocabulary.CODOVocabulary;
 
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.manager.registry.KReSRegistryLoader;
-import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.manager.registry.cache.ODPRegistryCacheException;
 import eu.iksproject.kres.manager.registry.cache.ODPRegistryCacheManager;
 import eu.iksproject.kres.manager.registry.cache.URIUnresolvableException;
-import eu.iksproject.kres.manager.util.OntologyLoaderPrinter;
 
 public class RegistryLoader implements KReSRegistryLoader {
 

@@ -1,10 +1,10 @@
 package eu.iksproject.kres.rules.parser;
 
+import org.apache.stanbol.rules.base.api.KReSRule;
+import org.apache.stanbol.rules.base.api.util.KReSRuleList;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import eu.iksproject.kres.api.rules.KReSRule;
-import eu.iksproject.kres.api.rules.util.KReSRuleList;
 import eu.iksproject.kres.rules.KReSKB;
 
 /**

@@ -5,22 +5,23 @@
 
 package eu.iksproject.kres.rules.manager;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.semanticweb.owlapi.model.IRI;
-
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.rules.RuleStore;
-import eu.iksproject.kres.manager.ONManager;
-
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.rules.base.api.RuleStore;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+
+import eu.iksproject.kres.manager.ONManager;
 
 /**
  *

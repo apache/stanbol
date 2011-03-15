@@ -1,11 +1,28 @@
 package eu.iksproject.kres.manager.session;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession.State;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -13,18 +30,6 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import eu.iksproject.kres.api.manager.DuplicateIDException;
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.manager.io.OntologyInputSource;
-import eu.iksproject.kres.api.manager.io.RootOntologySource;
-import eu.iksproject.kres.api.manager.ontology.OntologyScope;
-import eu.iksproject.kres.api.manager.ontology.OntologyScopeFactory;
-import eu.iksproject.kres.api.manager.ontology.OntologySpaceFactory;
-import eu.iksproject.kres.api.manager.ontology.ScopeRegistry;
-import eu.iksproject.kres.api.manager.session.KReSSession;
-import eu.iksproject.kres.api.manager.session.KReSSessionManager;
-import eu.iksproject.kres.api.manager.session.NonReferenceableSessionException;
-import eu.iksproject.kres.api.manager.session.KReSSession.State;
 import eu.iksproject.kres.manager.Constants;
 import eu.iksproject.kres.manager.ONManager;
 

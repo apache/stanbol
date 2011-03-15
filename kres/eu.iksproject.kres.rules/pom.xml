@@ -76,12 +76,26 @@
 			<artifactId>org.apache.felix.scr.annotations</artifactId>
 			<version>1.2.0</version>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.api</artifactId>
 			<version>${kres-version}</version>
 			<scope>provided</scope>
 		</dependency>
+		-->
+
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
+			<version>${stanbol-version}</version>
+		</dependency>	
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.rules.base</artifactId>
+			<version>${stanbol-version}</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>com.hp.hpl.jena</groupId>
 			<artifactId>jena</artifactId>

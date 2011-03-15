@@ -22,6 +22,13 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.rules.base.api.KReSRule;
+import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
+import org.apache.stanbol.rules.base.api.Recipe;
+import org.apache.stanbol.rules.base.api.RuleStore;
+import org.apache.stanbol.rules.base.api.util.KReSRuleList;
+import org.apache.stanbol.rules.base.api.util.RecipeList;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -43,13 +50,6 @@ import org.semanticweb.owlapi.util.OWLEntityRemover;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.rules.KReSRule;
-import eu.iksproject.kres.api.rules.NoSuchRecipeException;
-import eu.iksproject.kres.api.rules.Recipe;
-import eu.iksproject.kres.api.rules.RuleStore;
-import eu.iksproject.kres.api.rules.util.KReSRuleList;
-import eu.iksproject.kres.api.semion.util.RecipeList;
 import eu.iksproject.kres.rules.KReSKB;
 import eu.iksproject.kres.rules.parser.KReSRuleParser;
 

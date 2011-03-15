@@ -1,14 +1,12 @@
 package eu.iksproject.kres.manager.session;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
 import org.semanticweb.owlapi.model.IRI;
-
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.manager.ontology.OntologyScope;
-import eu.iksproject.kres.api.manager.ontology.OntologySpaceFactory;
-import eu.iksproject.kres.api.manager.session.KReSSession;
-import eu.iksproject.kres.api.manager.session.SessionEvent;
-import eu.iksproject.kres.api.manager.session.SessionListener;
-import eu.iksproject.kres.manager.ONManager;
 
 public class ScopeSessionSynchronizer implements SessionListener {
 

@@ -31,6 +31,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
+import org.apache.stanbol.ontologymanager.store.impl.OntologyStorageProviderImpl;
+import org.apache.stanbol.rules.base.api.RuleStore;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
@@ -39,13 +43,9 @@ import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.rules.RuleStore;
-import eu.iksproject.kres.api.storage.OntologyStoreProvider;
 import eu.iksproject.kres.jersey.format.KReSFormat;
 import eu.iksproject.kres.jersey.resource.NavigationMixin;
 import eu.iksproject.kres.manager.ONManager;
@@ -56,7 +56,6 @@ import eu.iksproject.kres.rules.manager.KReSGetRule;
 import eu.iksproject.kres.rules.manager.KReSRemoveRecipe;
 import eu.iksproject.kres.rules.manager.KReSRemoveRule;
 import eu.iksproject.kres.rules.manager.KReSRuleStore;
-import eu.iksproject.kres.storage.provider.OntologyStorageProviderImpl;
 
 /**
  *
@@ -182,16 +181,16 @@ public class Rule extends NavigationMixin{
 								.addAxioms(newmodel, ax);
             }
 
-            try {
-						OWLManager.createOWLOntologyManager().saveOntology(
-								newmodel,
-								newmodel.getOWLOntologyManager()
-										.getOntologyFormat(newmodel),
-								System.out);
-    		} catch (OWLOntologyStorageException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		}
+//            try {
+//						OWLManager.createOWLOntologyManager().saveOntology(
+//								newmodel,
+//								newmodel.getOWLOntologyManager()
+//										.getOntologyFormat(newmodel),
+//								System.out);
+//    		} catch (OWLOntologyStorageException e) {
+//    			// TODO Auto-generated catch block
+//    			e.printStackTrace();
+//    		}
 
             return Response.ok(newmodel).build();
         }
@@ -234,16 +233,16 @@ public class Rule extends NavigationMixin{
 
             newmodel.getOWLOntologyManager().addAxioms(newmodel,ax);
 
-            try {
-						OWLManager.createOWLOntologyManager().saveOntology(
-								newmodel,
-								newmodel.getOWLOntologyManager()
-										.getOntologyFormat(newmodel),
-								System.out);
-    		} catch (OWLOntologyStorageException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		}
+//            try {
+//						OWLManager.createOWLOntologyManager().saveOntology(
+//								newmodel,
+//								newmodel.getOWLOntologyManager()
+//										.getOntologyFormat(newmodel),
+//								System.out);
+//    		} catch (OWLOntologyStorageException e) {
+//    			// TODO Auto-generated catch block
+//    			e.printStackTrace();
+//    		}
 
             return Response.ok(newmodel).build();
         }

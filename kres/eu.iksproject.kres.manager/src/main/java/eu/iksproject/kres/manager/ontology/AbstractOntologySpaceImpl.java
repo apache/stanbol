@@ -4,6 +4,17 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.IrremovableOntologyException;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.MissingOntologyException;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceListener;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceModificationException;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.store.api.OntologyStorage;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.io.StringDocumentSource;
@@ -21,19 +32,6 @@ import org.semanticweb.owlapi.model.RemoveImport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.iksproject.kres.api.manager.io.OntologyInputSource;
-import eu.iksproject.kres.api.manager.io.RootOntologySource;
-import eu.iksproject.kres.api.manager.ontology.IrremovableOntologyException;
-import eu.iksproject.kres.api.manager.ontology.MissingOntologyException;
-import eu.iksproject.kres.api.manager.ontology.OntologyScope;
-import eu.iksproject.kres.api.manager.ontology.OntologySpace;
-import eu.iksproject.kres.api.manager.ontology.OntologySpaceListener;
-import eu.iksproject.kres.api.manager.ontology.OntologySpaceModificationException;
-import eu.iksproject.kres.api.manager.ontology.SessionOntologySpace;
-import eu.iksproject.kres.api.manager.ontology.SpaceType;
-import eu.iksproject.kres.api.manager.ontology.UnmodifiableOntologySpaceException;
-import eu.iksproject.kres.api.storage.OntologyStorage;
-import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.manager.util.OntologyUtils;
 import eu.iksproject.kres.manager.util.StringUtils;
 

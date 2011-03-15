@@ -1,20 +1,19 @@
 package eu.iksproject.kres.manager.ontology;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CustomOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceListener;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.store.api.OntologyStorage;
 import org.semanticweb.owlapi.model.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import eu.iksproject.kres.api.manager.io.OntologyInputSource;
-import eu.iksproject.kres.api.manager.ontology.CoreOntologySpace;
-import eu.iksproject.kres.api.manager.ontology.CustomOntologySpace;
-import eu.iksproject.kres.api.manager.ontology.OntologyScope;
-import eu.iksproject.kres.api.manager.ontology.OntologySpace;
-import eu.iksproject.kres.api.manager.ontology.OntologySpaceFactory;
-import eu.iksproject.kres.api.manager.ontology.OntologySpaceListener;
-import eu.iksproject.kres.api.manager.ontology.ScopeRegistry;
-import eu.iksproject.kres.api.manager.ontology.SessionOntologySpace;
-import eu.iksproject.kres.api.manager.ontology.UnmodifiableOntologySpaceException;
-import eu.iksproject.kres.api.storage.OntologyStorage;
 
 /**
  * Utility class that generates default implementations of the three types of

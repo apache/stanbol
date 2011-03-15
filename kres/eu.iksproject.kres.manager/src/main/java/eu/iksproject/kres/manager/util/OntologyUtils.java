@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.io.StringDocumentTarget;
@@ -22,9 +24,6 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.model.UnknownOWLOntologyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import eu.iksproject.kres.api.manager.io.OntologyInputSource;
-import eu.iksproject.kres.api.manager.io.RootOntologySource;
 
 /**
  * A set of static utility methods for managing ontologies in KReS.

@@ -116,7 +116,7 @@
     <owl:NamedIndividual rdf:about="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRecipeA">
         <rdf:type rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi.owl#Recipe"/>
         <rmi:hasDescription rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Some description here</rmi:hasDescription>
-        <rmi:hasSequence rdf:datatype="http://www.w3.org/2001/XMLSchema#string">http://eu.iksproject.kres/KReSOntologyRules.owl#MyRuleB,http://eu.iksproject.kres/KReSOntologyRules.owl#MyRuleA</rmi:hasSequence>
+        <rmi:hasSequence rdf:datatype="http://www.w3.org/2001/XMLSchema#string">http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleB, http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleA</rmi:hasSequence>
         <rmi:hasRule rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleA"/>
         <rmi:endWith rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleA"/>
         <rmi:hasRule rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleB"/>
@@ -151,7 +151,7 @@
     <owl:NamedIndividual rdf:about="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#ProvaParentRecipe">
         <rdf:type rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi.owl#Recipe"/>
         <rmi:hasDescription rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A single rule recipe.</rmi:hasDescription>
-        <rmi:hasSequence rdf:datatype="http://www.w3.org/2001/XMLSchema#string">http://kres.iks-project.eu/ontology/meta/rmi.owl#ProvaParentRule</rmi:hasSequence>
+        <rmi:hasSequence rdf:datatype="http://www.w3.org/2001/XMLSchema#string">http://kres.iks-project.eu/ontology/meta/rmi_config.owl#ProvaParentRule</rmi:hasSequence>
         <rmi:endWith rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#ProvaParentRule"/>
         <rmi:hasRule rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#ProvaParentRule"/>
         <rmi:startWith rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#ProvaParentRule"/>

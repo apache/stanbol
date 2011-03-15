@@ -3,9 +3,9 @@ package eu.iksproject.kres.manager.session;
 import java.util.Date;
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionIDGenerator;
 import org.semanticweb.owlapi.model.IRI;
 
-import eu.iksproject.kres.api.manager.session.KReSSessionIDGenerator;
 import eu.iksproject.kres.manager.util.StringUtils;
 
 public class TimestampedSessionIDGenerator implements KReSSessionIDGenerator {

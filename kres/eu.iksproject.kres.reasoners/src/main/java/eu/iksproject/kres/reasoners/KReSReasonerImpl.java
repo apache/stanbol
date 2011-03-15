@@ -6,13 +6,12 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.reasoners.base.api.KReSReasoner;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import eu.iksproject.kres.api.reasoners.KReSReasoner;
 
 @Component(immediate = true, metatype = true)
 @Service(KReSReasoner.class)

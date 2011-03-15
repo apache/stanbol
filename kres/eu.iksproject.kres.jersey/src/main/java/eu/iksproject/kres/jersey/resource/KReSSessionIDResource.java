@@ -11,11 +11,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
 import org.semanticweb.owlapi.model.IRI;
 
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.manager.session.KReSSession;
-import eu.iksproject.kres.api.manager.session.KReSSessionManager;
 import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.manager.renderers.SessionRenderer;
 

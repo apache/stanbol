@@ -6,19 +6,18 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CustomOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceListener;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeOntologyListener;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.semanticweb.owlapi.model.IRI;
 import org.slf4j.LoggerFactory;
-
-import eu.iksproject.kres.api.manager.io.OntologyInputSource;
-import eu.iksproject.kres.api.manager.ontology.CoreOntologySpace;
-import eu.iksproject.kres.api.manager.ontology.CustomOntologySpace;
-import eu.iksproject.kres.api.manager.ontology.OntologyScope;
-import eu.iksproject.kres.api.manager.ontology.OntologySpace;
-import eu.iksproject.kres.api.manager.ontology.OntologySpaceFactory;
-import eu.iksproject.kres.api.manager.ontology.OntologySpaceListener;
-import eu.iksproject.kres.api.manager.ontology.ScopeOntologyListener;
-import eu.iksproject.kres.api.manager.ontology.SessionOntologySpace;
-import eu.iksproject.kres.api.manager.ontology.UnmodifiableOntologySpaceException;
 
 /**
  * The default implementation of an ontology scope.

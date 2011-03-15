@@ -5,7 +5,6 @@
 
 package eu.iksproject.kres.rules.manager;
 
-import eu.iksproject.kres.api.rules.RuleStore;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,6 +13,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
+
+import org.apache.stanbol.rules.base.api.RuleStore;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;

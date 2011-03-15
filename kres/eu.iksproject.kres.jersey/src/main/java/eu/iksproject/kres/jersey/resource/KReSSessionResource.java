@@ -1,6 +1,7 @@
 package eu.iksproject.kres.jersey.resource;
 
-import static javax.ws.rs.core.Response.Status.*;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.io.InputStream;
 
@@ -20,21 +21,21 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceModificationException;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.manager.io.RootOntologyIRISource;
-import eu.iksproject.kres.api.manager.io.RootOntologySource;
-import eu.iksproject.kres.api.manager.ontology.OntologyScope;
-import eu.iksproject.kres.api.manager.ontology.OntologySpaceFactory;
-import eu.iksproject.kres.api.manager.ontology.OntologySpaceModificationException;
-import eu.iksproject.kres.api.manager.ontology.ScopeRegistry;
-import eu.iksproject.kres.api.manager.ontology.SessionOntologySpace;
-import eu.iksproject.kres.api.manager.ontology.UnmodifiableOntologySpaceException;
-import eu.iksproject.kres.api.manager.session.KReSSession;
-import eu.iksproject.kres.api.manager.session.KReSSessionManager;
 import eu.iksproject.kres.jersey.format.KReSFormat;
 import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.manager.renderers.SessionRenderer;

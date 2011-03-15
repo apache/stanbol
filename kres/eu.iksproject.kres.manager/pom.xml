@@ -53,6 +53,7 @@
 							org.slf4j.*;version=1.5.2,
 							org.stlab.xd.registry.io,
 							org.stlab.xd.registry.models,
+							*
 						</Import-Package>
 
 						<Private-Package>
@@ -62,7 +63,7 @@
 						</Private-Package>
 
 						<_nouses>true</_nouses>
-						
+
 					</instructions>
 				</configuration>
 			</plugin>
@@ -84,29 +85,47 @@
 	<dependencies>
 
 		<!-- KReS deps -->
-		<dependency>
-			<groupId>eu.iksproject</groupId>
+		<!--
+			<dependency> <groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.api</artifactId>
-			<version>${kres-version}</version>
-			<scope>provided</scope>
-		</dependency>
+			<version>${kres-version}</version> <scope>provided</scope>
+			</dependency>
+		-->
 		<dependency>
 			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.shared.dependency.owlapi</artifactId>
 			<version>${kres-version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>eu.iksproject</groupId>
+		<!--
+			<dependency> <groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.storage</artifactId>
-			<version>${kres-version}</version>
-			<scope>provided</scope>
-		 <exclusions>
-		  <exclusion>
-		   <artifactId>slf4j-log4j12</artifactId>
-		   <groupId>org.slf4j</groupId>
-		  </exclusion>
-		 </exclusions>
+			<version>${kres-version}</version> <scope>provided</scope>
+			<exclusions> <exclusion> <artifactId>slf4j-log4j12</artifactId>
+			<groupId>org.slf4j</groupId> </exclusion> </exclusions> </dependency>
+		-->
+
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
+			<version>${stanbol-version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-log4j12</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.ontologymanager.store</artifactId>
+			<version>${stanbol-version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-log4j12</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- OSGi deps -->
@@ -132,8 +151,8 @@
 		<!-- Diagnostics deps -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>			
-            <version>1.5.2</version>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.5.2</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -149,19 +168,19 @@
 			<artifactId>junit</artifactId>
 			<version>4.4</version>
 			<scope>test</scope>
-                        <exclusions>
-                            <exclusion>
-                            <groupId>org.slf4j</groupId>
-                            <artifactId>slf4j-api</artifactId>
-                            </exclusion>
-                        </exclusions>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-	 <dependency>
-	  <groupId>org.slf4j</groupId>
-	  <artifactId>slf4j-simple</artifactId>
-	  <version>1.5.2</version>
-	  <scope>test</scope>
-	 </dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.5.2</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<repositories />

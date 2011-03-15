@@ -5,12 +5,16 @@
 
 package eu.iksproject.kres.rules.manager;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.apache.stanbol.rules.base.api.RuleStore;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -23,7 +27,6 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.iksproject.kres.api.rules.RuleStore;
 import eu.iksproject.kres.manager.ONManager;
 
 /**

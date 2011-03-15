@@ -7,25 +7,23 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionIDException;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionIDGenerator;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession.State;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent.OperationType;
+import org.apache.stanbol.ontologymanager.store.api.OntologyStorage;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import eu.iksproject.kres.api.manager.ontology.OntologyScope;
-import eu.iksproject.kres.api.manager.ontology.ScopeRegistry;
-import eu.iksproject.kres.api.manager.ontology.SessionOntologySpace;
-import eu.iksproject.kres.api.manager.session.DuplicateSessionIDException;
-import eu.iksproject.kres.api.manager.session.KReSSession;
-import eu.iksproject.kres.api.manager.session.KReSSessionIDGenerator;
-import eu.iksproject.kres.api.manager.session.KReSSessionManager;
-import eu.iksproject.kres.api.manager.session.NonReferenceableSessionException;
-import eu.iksproject.kres.api.manager.session.SessionEvent;
-import eu.iksproject.kres.api.manager.session.SessionListener;
-import eu.iksproject.kres.api.manager.session.KReSSession.State;
-import eu.iksproject.kres.api.manager.session.SessionEvent.OperationType;
-import eu.iksproject.kres.api.storage.OntologyStorage;
-import eu.iksproject.kres.manager.ONManager;
 
 /**
  * 

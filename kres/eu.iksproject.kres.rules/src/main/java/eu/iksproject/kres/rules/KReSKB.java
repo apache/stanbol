@@ -5,13 +5,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Hashtable;
 
+import org.apache.stanbol.rules.base.api.KReSRule;
+import org.apache.stanbol.rules.base.api.util.KReSRuleList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.ontology.OntModel;
-
-import eu.iksproject.kres.api.rules.KReSRule;
-import eu.iksproject.kres.api.rules.util.KReSRuleList;;
 /**
  * 
  * FIXME

@@ -1,6 +1,8 @@
 package eu.iksproject.kres.jersey.resource;
 
-import static javax.ws.rs.core.Response.Status.*;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.CONFLICT;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
 import java.util.Hashtable;
 
@@ -23,26 +25,26 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
+import org.apache.stanbol.ontologymanager.store.impl.OntologyStorageProviderImpl;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.iksproject.kres.api.manager.DuplicateIDException;
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.manager.io.OntologyInputSource;
-import eu.iksproject.kres.api.manager.io.RootOntologyIRISource;
-import eu.iksproject.kres.api.manager.ontology.OntologyScope;
-import eu.iksproject.kres.api.manager.ontology.OntologyScopeFactory;
-import eu.iksproject.kres.api.manager.ontology.OntologySpace;
-import eu.iksproject.kres.api.manager.ontology.ScopeRegistry;
-import eu.iksproject.kres.api.manager.ontology.UnmodifiableOntologySpaceException;
-import eu.iksproject.kres.api.storage.OntologyStoreProvider;
 import eu.iksproject.kres.jersey.format.KReSFormat;
 import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.manager.io.OntologyRegistryIRISource;
-import eu.iksproject.kres.storage.provider.OntologyStorageProviderImpl;
 
 @Path("/ontology/{scopeid}")
 public class ONMScopeResource extends NavigationMixin {

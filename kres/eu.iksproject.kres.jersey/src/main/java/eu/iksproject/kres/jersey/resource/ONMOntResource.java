@@ -12,6 +12,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
+import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
+import org.apache.stanbol.ontologymanager.store.impl.OntologyStorageProviderImpl;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
@@ -23,11 +27,7 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.manager.ontology.OntologyIndex;
-import eu.iksproject.kres.api.storage.OntologyStoreProvider;
 import eu.iksproject.kres.manager.ONManager;
-import eu.iksproject.kres.storage.provider.OntologyStorageProviderImpl;
 
 @Path("/ontology/get")
 public class ONMOntResource extends NavigationMixin {

@@ -1,46 +1,18 @@
 package eu.iksproject.kres.rules.manager;
 
-import java.io.File;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Observable;
-import java.util.Observer;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.apache.stanbol.rules.base.api.KReSRule;
+import org.apache.stanbol.rules.base.api.Recipe;
+import org.apache.stanbol.rules.base.api.util.KReSRuleList;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Resource;
-
-import com.hp.hpl.jena.util.FileManager;
-
-import eu.iksproject.kres.api.rules.KReSRule;
-import eu.iksproject.kres.api.rules.NoSuchRecipeException;
-import eu.iksproject.kres.api.rules.util.KReSRuleList;
-import eu.iksproject.kres.api.rules.Recipe;
-import eu.iksproject.kres.rules.KReSKB;
-import eu.iksproject.kres.rules.parser.KReSRuleParser;;
 
 
 /**

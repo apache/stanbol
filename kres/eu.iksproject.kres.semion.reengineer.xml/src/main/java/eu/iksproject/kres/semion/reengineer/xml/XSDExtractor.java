@@ -3,25 +3,16 @@ package eu.iksproject.kres.semion.reengineer.xml;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.xerces.dom.PSVIDocumentImpl;
-import org.w3c.dom.traversal.DocumentTraversal;
-import org.w3c.dom.traversal.NodeFilter;
-import org.w3c.dom.traversal.NodeIterator;
-import org.w3c.dom.traversal.TreeWalker;
-
-import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.felix.scr.annotations.Reference;
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.reengineer.base.DataSource;
+import org.apache.stanbol.reengineer.base.util.SemionUriRefGenerator;
+import org.apache.xerces.dom.PSVIDocumentImpl;
 import org.apache.xerces.impl.dv.DatatypeException;
 import org.apache.xerces.impl.dv.xs.XSSimpleTypeDecl;
 import org.apache.xerces.impl.xs.XSAnnotationImpl;
@@ -54,7 +45,6 @@ import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,16 +52,12 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
+import org.w3c.dom.traversal.DocumentTraversal;
+import org.w3c.dom.traversal.NodeFilter;
+import org.w3c.dom.traversal.NodeIterator;
+import org.w3c.dom.traversal.TreeWalker;
 import org.xml.sax.SAXException;
 
-
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.semion.DataSource;
-import eu.iksproject.kres.api.semion.SemionManager;
-import eu.iksproject.kres.api.semion.SemionReengineer;
-import eu.iksproject.kres.api.semion.util.ReengineerType;
-import eu.iksproject.kres.api.semion.util.SemionUriRefGenerator;
 import eu.iksproject.kres.ontologies.XSD_OWL;
 
 public class XSDExtractor extends SemionUriRefGenerator {

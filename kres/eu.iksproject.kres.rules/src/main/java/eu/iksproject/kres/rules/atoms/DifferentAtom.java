@@ -1,7 +1,6 @@
 package eu.iksproject.kres.rules.atoms;
 
-import java.util.ArrayList;
-
+import org.apache.stanbol.rules.base.api.SPARQLObject;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLLiteral;
@@ -10,12 +9,7 @@ import org.semanticweb.owlapi.model.SWRLAtom;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-import eu.iksproject.kres.api.rules.KReSRuleAtom;
 import eu.iksproject.kres.rules.SPARQLComparison;
-import eu.iksproject.kres.rules.SPARQLNot;
-import eu.iksproject.kres.api.rules.SPARQLObject;
-import eu.iksproject.kres.rules.SPARQLTriple;
-import eu.iksproject.kres.api.rules.URIResource;
 
 public class DifferentAtom extends ComparisonAtom {
 

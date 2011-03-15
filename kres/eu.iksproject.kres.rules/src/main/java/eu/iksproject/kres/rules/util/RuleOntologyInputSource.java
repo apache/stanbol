@@ -9,13 +9,12 @@ import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-
-import eu.iksproject.kres.api.manager.io.OntologyInputSource;
 
 public class RuleOntologyInputSource implements OntologyInputSource {
 

@@ -1,9 +1,9 @@
 package eu.iksproject.kres.semion.manager.datasources;
 
-import eu.iksproject.kres.api.semion.IdentifiedDataSource;
-import eu.iksproject.kres.api.semion.settings.ConnectionSettings;
-import eu.iksproject.kres.api.semion.util.ReengineerType;
-import eu.iksproject.kres.api.semion.util.URIGenerator;
+import org.apache.stanbol.reengineer.base.IdentifiedDataSource;
+import org.apache.stanbol.reengineer.base.settings.ConnectionSettings;
+import org.apache.stanbol.reengineer.base.util.ReengineerType;
+import org.apache.stanbol.rules.refactor.api.util.URIGenerator;
 
 
 /**

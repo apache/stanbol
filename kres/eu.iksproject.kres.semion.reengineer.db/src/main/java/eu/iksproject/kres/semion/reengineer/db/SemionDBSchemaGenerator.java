@@ -9,22 +9,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.stanbol.reengineer.base.settings.ConnectionSettings;
+import org.apache.stanbol.reengineer.base.util.SemionUriRefGenerator;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import eu.iksproject.kres.api.semion.settings.ConnectionSettings;
-import eu.iksproject.kres.api.semion.util.SemionUriRefGenerator;
-import eu.iksproject.kres.ontologies.DBS_L1;
 import eu.iksproject.kres.ontologies.DBS_L1_OWL;
 
 

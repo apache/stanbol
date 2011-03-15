@@ -5,6 +5,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.stanbol.rules.base.api.KReSRule;
+import org.apache.stanbol.rules.base.api.KReSRuleAtom;
+import org.apache.stanbol.rules.base.api.KReSRuleExpressiveness;
+import org.apache.stanbol.rules.base.api.SPARQLObject;
+import org.apache.stanbol.rules.base.api.util.AtomList;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.SWRLAtom;
@@ -15,11 +20,6 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-import eu.iksproject.kres.api.rules.KReSRule;
-import eu.iksproject.kres.api.rules.KReSRuleAtom;
-import eu.iksproject.kres.api.rules.KReSRuleExpressiveness;
-import eu.iksproject.kres.api.rules.SPARQLObject;
-import eu.iksproject.kres.api.rules.util.AtomList;
 import eu.iksproject.kres.ontologies.SWRL;
 
 public class KReSRuleImpl implements KReSRule {

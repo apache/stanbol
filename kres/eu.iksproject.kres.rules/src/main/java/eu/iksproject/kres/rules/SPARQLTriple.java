@@ -1,6 +1,6 @@
 package eu.iksproject.kres.rules;
 
-import eu.iksproject.kres.api.rules.SPARQLObject;
+import org.apache.stanbol.rules.base.api.SPARQLObject;
 
 public class SPARQLTriple implements SPARQLObject {
 

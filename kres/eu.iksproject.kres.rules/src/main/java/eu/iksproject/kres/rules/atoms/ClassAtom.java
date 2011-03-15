@@ -2,24 +2,21 @@ package eu.iksproject.kres.rules.atoms;
 
 import java.util.ArrayList;
 
+import org.apache.stanbol.rules.base.api.SPARQLObject;
+import org.apache.stanbol.rules.base.api.URIResource;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLRestriction;
 import org.semanticweb.owlapi.model.SWRLAtom;
 import org.semanticweb.owlapi.model.SWRLIArgument;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.vocabulary.OWL;
 
-import eu.iksproject.kres.api.rules.KReSRuleAtom;
-import eu.iksproject.kres.rules.SPARQLNot;
-import eu.iksproject.kres.api.rules.SPARQLObject;
-import eu.iksproject.kres.rules.SPARQLTriple;
-import eu.iksproject.kres.api.rules.URIResource;
 import eu.iksproject.kres.ontologies.SWRL;
+import eu.iksproject.kres.rules.SPARQLNot;
+import eu.iksproject.kres.rules.SPARQLTriple;
 
 public class ClassAtom extends KReSCoreAtom {
 

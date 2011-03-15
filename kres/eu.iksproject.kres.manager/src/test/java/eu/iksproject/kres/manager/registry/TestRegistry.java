@@ -1,19 +1,20 @@
 package eu.iksproject.kres.manager.registry;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Hashtable;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
 
-import eu.iksproject.kres.api.manager.DuplicateIDException;
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.manager.ontology.CoreOntologySpace;
-import eu.iksproject.kres.api.manager.ontology.OntologyScope;
-import eu.iksproject.kres.api.manager.ontology.SessionOntologySpace;
-import eu.iksproject.kres.api.manager.ontology.UnmodifiableOntologySpaceException;
 import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.manager.io.OntologyRegistryIRISource;
 

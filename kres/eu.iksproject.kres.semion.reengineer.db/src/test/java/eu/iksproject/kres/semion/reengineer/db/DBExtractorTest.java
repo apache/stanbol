@@ -1,19 +1,15 @@
 package eu.iksproject.kres.semion.reengineer.db;
 
-import static org.junit.Assert.*;
-
 import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntology;
 
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.semion.ReengineeringException;
 import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.semion.manager.SemionManagerImpl;
 

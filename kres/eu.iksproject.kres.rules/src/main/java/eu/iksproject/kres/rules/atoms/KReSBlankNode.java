@@ -2,10 +2,10 @@ package eu.iksproject.kres.rules.atoms;
 
 import java.net.URI;
 
+import org.apache.stanbol.rules.base.api.URIResource;
+
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
-
-import eu.iksproject.kres.api.rules.URIResource;
 
 public class KReSBlankNode implements URIResource {
 

@@ -1,30 +1,20 @@
 package eu.iksproject.kres.semion.refactorer;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.access.TcProviderMultiplexer;
-import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.impl.SimpleGraph;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
 import org.apache.clerezza.rdf.core.sparql.QueryParser;
 import org.apache.clerezza.rdf.core.sparql.query.Query;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
-import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.apache.stanbol.ontologymanager.store.api.NoSuchStoreException;
+import org.apache.stanbol.ontologymanager.store.api.OntologyStorage;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
@@ -32,13 +22,9 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.util.FileManager;
 
-import eu.iksproject.kres.api.storage.NoSuchStoreException;
-import eu.iksproject.kres.api.storage.OntologyStorage;
-import eu.iksproject.kres.api.storage.OntologyStoreProvider;
 import eu.iksproject.kres.ontologies.XML_OWL;
 import eu.iksproject.kres.shared.transformation.JenaToClerezzaConverter;
 import eu.iksproject.kres.shared.transformation.JenaToOwlConvert;
-import eu.iksproject.kres.shared.transformation.OWLAPIToClerezzaConverter;
 
 public class ClerezzaStorage implements OntologyStorage {
 

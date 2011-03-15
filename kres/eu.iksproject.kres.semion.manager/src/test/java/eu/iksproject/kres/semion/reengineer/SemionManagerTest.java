@@ -2,17 +2,17 @@ package eu.iksproject.kres.semion.reengineer;
 
 import static org.junit.Assert.fail;
 
+import org.apache.stanbol.reengineer.base.DataSource;
+import org.apache.stanbol.reengineer.base.ReengineeringException;
+import org.apache.stanbol.reengineer.base.SemionManager;
+import org.apache.stanbol.reengineer.base.SemionReengineer;
+import org.apache.stanbol.reengineer.base.util.ReengineerType;
+import org.apache.stanbol.reengineer.base.util.UnsupportedReengineerException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
-import eu.iksproject.kres.api.semion.DataSource;
-import eu.iksproject.kres.api.semion.ReengineeringException;
-import eu.iksproject.kres.api.semion.SemionManager;
-import eu.iksproject.kres.api.semion.SemionReengineer;
-import eu.iksproject.kres.api.semion.util.ReengineerType;
-import eu.iksproject.kres.api.semion.util.UnsupportedReengineerException;
 import eu.iksproject.kres.semion.manager.SemionManagerImpl;
 
 

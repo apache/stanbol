@@ -45,9 +45,9 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.kres.api</artifactId>
-			<version>${kres-version}</version>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.reasoners.base</artifactId>
+			<version>${stanbol-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.iksproject</groupId>

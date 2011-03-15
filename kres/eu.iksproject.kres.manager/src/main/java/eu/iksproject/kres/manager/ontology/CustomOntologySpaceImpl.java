@@ -1,16 +1,15 @@
 package eu.iksproject.kres.manager.ontology;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CustomOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.store.api.OntologyStorage;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import eu.iksproject.kres.api.manager.io.OntologyInputSource;
-import eu.iksproject.kres.api.manager.io.RootOntologySource;
-import eu.iksproject.kres.api.manager.ontology.CoreOntologySpace;
-import eu.iksproject.kres.api.manager.ontology.CustomOntologySpace;
-import eu.iksproject.kres.api.manager.ontology.SpaceType;
-import eu.iksproject.kres.api.manager.ontology.UnmodifiableOntologySpaceException;
-import eu.iksproject.kres.api.storage.OntologyStorage;
 import eu.iksproject.kres.manager.util.StringUtils;
 
 public class CustomOntologySpaceImpl extends AbstractOntologySpaceImpl

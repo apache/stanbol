@@ -1,29 +1,22 @@
 package eu.iksproject.kres.rules.atoms;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 
+import org.apache.stanbol.rules.base.api.SPARQLObject;
+import org.apache.stanbol.rules.base.api.URIResource;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.SWRLAtom;
 import org.semanticweb.owlapi.model.SWRLIArgument;
-import org.semanticweb.owlapi.model.SWRLVariable;
-
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-import eu.iksproject.kres.api.rules.KReSRuleAtom;
-import eu.iksproject.kres.rules.SPARQLNot;
-import eu.iksproject.kres.api.rules.SPARQLObject;
-import eu.iksproject.kres.rules.SPARQLTriple;
-import eu.iksproject.kres.api.rules.URIResource;
 import eu.iksproject.kres.ontologies.SWRL;
+import eu.iksproject.kres.rules.SPARQLNot;
+import eu.iksproject.kres.rules.SPARQLTriple;
 
 public class IndividualPropertyAtom extends KReSCoreAtom {
 

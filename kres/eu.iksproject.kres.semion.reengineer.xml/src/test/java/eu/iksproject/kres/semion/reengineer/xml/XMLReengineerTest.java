@@ -4,16 +4,16 @@ import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.reengineer.base.DataSource;
+import org.apache.stanbol.reengineer.base.SemionReengineer;
+import org.apache.stanbol.reengineer.base.util.ReengineerType;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.semion.DataSource;
-import eu.iksproject.kres.api.semion.SemionReengineer;
-import eu.iksproject.kres.api.semion.util.ReengineerType;
 import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.semion.manager.SemionManagerImpl;
 

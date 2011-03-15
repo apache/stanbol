@@ -1,11 +1,6 @@
 package eu.iksproject.kres.jersey.resource;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -19,22 +14,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
-import org.apache.clerezza.rdf.core.sparql.ParseException;
-import org.apache.clerezza.rdf.core.sparql.QueryParser;
-import org.apache.clerezza.rdf.core.sparql.ResultSet;
-import org.apache.clerezza.rdf.core.sparql.SolutionMapping;
-import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
-import org.apache.clerezza.rdf.core.sparql.query.DescribeQuery;
-import org.apache.clerezza.rdf.core.sparql.query.Query;
-import org.apache.clerezza.rdf.core.sparql.query.Variable;
+import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.reasoners.base.api.InconcistencyException;
+import org.apache.stanbol.reengineer.base.SemionManager;
+import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
+import org.apache.stanbol.rules.refactor.api.SemionRefactorer;
+import org.apache.stanbol.rules.refactor.api.SemionRefactoringException;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -43,16 +29,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import com.sun.jersey.api.view.ImplicitProduces;
 
-
-import eu.iksproject.kres.api.manager.KReSONManager;
-import eu.iksproject.kres.api.reasoners.InconcistencyException;
-import eu.iksproject.kres.api.rules.NoSuchRecipeException;
-import eu.iksproject.kres.api.rules.Recipe;
-import eu.iksproject.kres.api.semion.SemionRefactorer;
-import eu.iksproject.kres.api.semion.SemionManager;
-import eu.iksproject.kres.api.semion.SemionRefactoringException;
 import eu.iksproject.kres.jersey.format.KReSFormat;
-import eu.iksproject.kres.semion.refactorer.SemionRefactorerImpl;
 
 /**
  * 

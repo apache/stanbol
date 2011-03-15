@@ -3,6 +3,7 @@ package eu.iksproject.kres.manager.renderers;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.io.StringDocumentTarget;
@@ -20,8 +21,6 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.model.OWLTypedLiteral;
 import org.slf4j.LoggerFactory;
-
-import eu.iksproject.kres.api.manager.session.KReSSession;
 
 public class SessionRenderer {
 

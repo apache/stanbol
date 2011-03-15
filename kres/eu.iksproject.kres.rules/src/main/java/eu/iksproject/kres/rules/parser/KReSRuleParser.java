@@ -7,14 +7,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 
+import org.apache.stanbol.rules.base.api.KReSRule;
+import org.apache.stanbol.rules.base.api.KReSRuleAtom;
+import org.apache.stanbol.rules.base.api.KReSRuleExpressiveness;
+import org.apache.stanbol.rules.base.api.URIResource;
+import org.apache.stanbol.rules.base.api.util.AtomList;
+
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-import eu.iksproject.kres.api.rules.KReSRuleAtom;
-import eu.iksproject.kres.api.rules.KReSRule;
-import eu.iksproject.kres.api.rules.KReSRuleExpressiveness;
-import eu.iksproject.kres.api.rules.URIResource;
-import eu.iksproject.kres.api.rules.util.AtomList;
 import eu.iksproject.kres.rules.KReSKB;
 import eu.iksproject.kres.rules.KReSRuleImpl;
 import eu.iksproject.kres.rules.atoms.ClassAtom;

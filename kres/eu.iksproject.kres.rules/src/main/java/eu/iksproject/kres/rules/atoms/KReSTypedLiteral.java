@@ -1,6 +1,6 @@
 package eu.iksproject.kres.rules.atoms;
 
-import eu.iksproject.kres.api.rules.URIResource;
+import org.apache.stanbol.rules.base.api.URIResource;
 
 public class KReSTypedLiteral {
 

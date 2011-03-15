@@ -4,14 +4,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession.State;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent.OperationType;
 import org.semanticweb.owlapi.model.IRI;
 import org.slf4j.LoggerFactory;
-
-import eu.iksproject.kres.api.manager.session.KReSSession;
-import eu.iksproject.kres.api.manager.session.NonReferenceableSessionException;
-import eu.iksproject.kres.api.manager.session.SessionEvent;
-import eu.iksproject.kres.api.manager.session.SessionListener;
-import eu.iksproject.kres.api.manager.session.SessionEvent.OperationType;
 
 /**
  * Standard implementation of the {@link KReSSession} interface. A

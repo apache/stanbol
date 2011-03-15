@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.AddImport;
@@ -18,8 +19,6 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.LoggerFactory;
 import org.stlab.xd.vocabulary.Vocabulary;
-
-import eu.iksproject.kres.api.manager.ontology.OntologyScope;
 
 /**
  * Just an attempt. If we like it, make an API out of it.

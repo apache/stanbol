@@ -56,14 +56,17 @@
     
 	
 	<!-- KReS APIs -->
+	<!--
 	<module>eu.iksproject.kres.api</module>
+	-->
 
 
 	<!-- KReS Reasoner -->
 	<module>eu.iksproject.kres.reasoners</module>
 
-	
+	<!--
 	<module>eu.iksproject.kres.storage.provider</module>
+	-->
 	
 	<!-- KReS manager -->
 	<module>eu.iksproject.kres.manager</module>
@@ -78,13 +81,22 @@
     <module>eu.iksproject.kres.semion.refactorer</module>
     
     <!-- Storage -->
+    <!--
     <module>eu.iksproject.kres.storage</module>
+    -->
     
     <!-- Jersey -->
     <module>eu.iksproject.kres.jersey</module>
     <!-- <module>eu.iksproject.kres.manager.jersey</module> -->
 
     <!-- Launcher -->
+    
+    <module>ontologymanager/ontonet</module>
+    <module>ontologymanager/store</module>
+    <module>reasoners/base</module>
+    <module>reengineer/base</module>
+    <module>rules/base</module>
+    <module>rules/refactor</module>
 
  </modules>
 </project>
