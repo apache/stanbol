@@ -32,13 +32,13 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySp
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.renderers.SessionRenderer;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import eu.iksproject.kres.jersey.format.KReSFormat;
-import eu.iksproject.kres.manager.ONManager;
-import eu.iksproject.kres.manager.renderers.SessionRenderer;
 
 @Path("/session")
 public class KReSSessionResource extends NavigationMixin {

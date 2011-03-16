@@ -5,12 +5,12 @@ import java.util.Hashtable;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
 
-import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.semion.manager.SemionManagerImpl;
 
 public class DBExtractorTest {

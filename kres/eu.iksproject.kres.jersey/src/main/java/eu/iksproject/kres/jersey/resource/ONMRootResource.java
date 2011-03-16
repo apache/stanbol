@@ -18,6 +18,8 @@ import javax.ws.rs.core.Response;
 import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.renderers.ScopeSetRenderer;
 import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
 import org.apache.stanbol.ontologymanager.store.impl.OntologyStorageProviderImpl;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -25,8 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.iksproject.kres.jersey.format.KReSFormat;
-import eu.iksproject.kres.manager.ONManager;
-import eu.iksproject.kres.manager.renderers.ScopeSetRenderer;
 
 /**
  * The main Web resource of the KReS ontology manager. All the scopes, sessions

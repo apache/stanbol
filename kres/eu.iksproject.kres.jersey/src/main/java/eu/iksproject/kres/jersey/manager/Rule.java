@@ -32,9 +32,17 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
 import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
 import org.apache.stanbol.ontologymanager.store.impl.OntologyStorageProviderImpl;
 import org.apache.stanbol.rules.base.api.RuleStore;
+import org.apache.stanbol.rules.manager.changes.KReSAddRecipe;
+import org.apache.stanbol.rules.manager.changes.KReSAddRule;
+import org.apache.stanbol.rules.manager.changes.KReSGetRecipe;
+import org.apache.stanbol.rules.manager.changes.KReSGetRule;
+import org.apache.stanbol.rules.manager.changes.KReSRemoveRecipe;
+import org.apache.stanbol.rules.manager.changes.KReSRemoveRule;
+import org.apache.stanbol.rules.manager.changes.KReSRuleStore;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
@@ -48,14 +56,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.iksproject.kres.jersey.format.KReSFormat;
 import eu.iksproject.kres.jersey.resource.NavigationMixin;
-import eu.iksproject.kres.manager.ONManager;
-import eu.iksproject.kres.rules.manager.KReSAddRecipe;
-import eu.iksproject.kres.rules.manager.KReSAddRule;
-import eu.iksproject.kres.rules.manager.KReSGetRecipe;
-import eu.iksproject.kres.rules.manager.KReSGetRule;
-import eu.iksproject.kres.rules.manager.KReSRemoveRecipe;
-import eu.iksproject.kres.rules.manager.KReSRemoveRule;
-import eu.iksproject.kres.rules.manager.KReSRuleStore;
 
 /**
  *

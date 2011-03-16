@@ -25,6 +25,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceModificationException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
 import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
 import org.apache.stanbol.ontologymanager.store.impl.OntologyStorageProviderImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -42,7 +43,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.iksproject.kres.jersey.format.KReSFormat;
 import eu.iksproject.kres.jersey.util.OntologyRenderUtils;
-import eu.iksproject.kres.manager.ONManager;
 
 /**
  * This resource represents ontologies loaded within a scope.

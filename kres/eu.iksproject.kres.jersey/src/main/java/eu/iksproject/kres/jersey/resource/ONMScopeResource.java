@@ -34,6 +34,8 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.OntologyRegistryIRISource;
 import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
 import org.apache.stanbol.ontologymanager.store.impl.OntologyStorageProviderImpl;
 import org.semanticweb.owlapi.model.IRI;
@@ -43,8 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.iksproject.kres.jersey.format.KReSFormat;
-import eu.iksproject.kres.manager.ONManager;
-import eu.iksproject.kres.manager.io.OntologyRegistryIRISource;
 
 @Path("/ontology/{scopeid}")
 public class ONMScopeResource extends NavigationMixin {

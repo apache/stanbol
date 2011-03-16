@@ -167,12 +167,23 @@
 		
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
+			<version>${stanbol-version}</version>
+			<scope>provided</scope>
+		</dependency>		
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.reengineer.base</artifactId>
 			<version>${stanbol-version}</version>
 		</dependency>		
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.rules.base</artifactId>
+			<version>${stanbol-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.rules.manager</artifactId>
 			<version>${stanbol-version}</version>
 		</dependency>
 		<dependency>
@@ -206,6 +217,7 @@
 			<artifactId>eu.iksproject.kres.ontologies</artifactId>
 			<version>${kres-version}</version>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.rules</artifactId>
@@ -217,6 +229,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.shared.dependency.owlapi</artifactId>
@@ -234,12 +247,6 @@
 		</dependency>
 
 		<!-- Testing deps -->
-		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.kres.manager</artifactId>
-			<version>${kres-version}</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.reasoners</artifactId>

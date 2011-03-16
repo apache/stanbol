@@ -30,9 +30,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
 import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
 import org.apache.stanbol.ontologymanager.store.impl.OntologyStorageProviderImpl;
 import org.apache.stanbol.rules.base.api.RuleStore;
+import org.apache.stanbol.rules.manager.changes.KReSAddRecipe;
+import org.apache.stanbol.rules.manager.changes.KReSGetRecipe;
+import org.apache.stanbol.rules.manager.changes.KReSRemoveRecipe;
+import org.apache.stanbol.rules.manager.changes.KReSRuleStore;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
@@ -48,308 +53,279 @@ import org.slf4j.LoggerFactory;
 
 import eu.iksproject.kres.jersey.format.KReSFormat;
 import eu.iksproject.kres.jersey.resource.NavigationMixin;
-import eu.iksproject.kres.manager.ONManager;
-import eu.iksproject.kres.rules.manager.KReSAddRecipe;
-import eu.iksproject.kres.rules.manager.KReSGetRecipe;
-import eu.iksproject.kres.rules.manager.KReSRemoveRecipe;
-import eu.iksproject.kres.rules.manager.KReSRuleStore;
 
 /**
- *
+ * 
  * @author elvio
  */
 @Path("/recipe")
 // /{uri:.+}")
-//@ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
-public class Recipe extends NavigationMixin{
+// @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
+public class Recipe extends NavigationMixin {
 
-	protected KReSONManager onm;
+    protected KReSONManager onm;
 
-	private Logger log = LoggerFactory.getLogger(getClass());
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     private RuleStore kresRuleStore;
-	private OntologyStoreProvider storeProvider;
+    private OntologyStoreProvider storeProvider;
 
-   /**
+    /**
      * To get the KReSRuleStore where are stored the rules and the recipes
-     *
-	 * @param servletContext
-	 *            {To get the context where the REST service is running.}
+     * 
+     * @param servletContext
+     *            {To get the context where the REST service is running.}
      */
-    public Recipe(@Context ServletContext servletContext){
-		this.kresRuleStore = (RuleStore) servletContext
-				.getAttribute(RuleStore.class.getName());
-		this.onm = (KReSONManager) servletContext
-				.getAttribute(KReSONManager.class.getName());
-		this.storeProvider = (OntologyStoreProvider) servletContext
-				.getAttribute(OntologyStoreProvider.class.getName());
-		// Contingency code for missing components follows.
-		/*
-		 * FIXME! The following code is required only for the tests. This should
-		 * be removed and the test should work without this code.
-		 */
-		if (storeProvider == null) {
-			log
-					.warn("No OntologyStoreProvider in servlet context. Instantiating manually...");
-			storeProvider = new OntologyStorageProviderImpl();
-		}
-		if (onm == null) {
-			log
-					.warn("No KReSONManager in servlet context. Instantiating manually...");
-			onm = new ONManager(storeProvider.getActiveOntologyStorage(),
-					new Hashtable<String, Object>());
-		}
-       if (kresRuleStore == null) {
-			log
-					.warn("No KReSRuleStore with stored rules and recipes found in servlet context. Instantiating manually with default values...");
-			this.kresRuleStore = new KReSRuleStore(onm,
-					new Hashtable<String, Object>(), "");
-			log
-					.debug("PATH TO OWL FILE LOADED: "
-							+ kresRuleStore.getFilePath());
+    public Recipe(@Context ServletContext servletContext) {
+        this.kresRuleStore = (RuleStore) servletContext.getAttribute(RuleStore.class.getName());
+        this.onm = (KReSONManager) servletContext.getAttribute(KReSONManager.class.getName());
+        this.storeProvider = (OntologyStoreProvider) servletContext.getAttribute(OntologyStoreProvider.class
+                .getName());
+        // Contingency code for missing components follows.
+        /*
+         * FIXME! The following code is required only for the tests. This should be removed and the test
+         * should work without this code.
+         */
+        if (storeProvider == null) {
+            log.warn("No OntologyStoreProvider in servlet context. Instantiating manually...");
+            storeProvider = new OntologyStorageProviderImpl();
+        }
+        if (onm == null) {
+            log.warn("No KReSONManager in servlet context. Instantiating manually...");
+            onm = new ONManager(storeProvider.getActiveOntologyStorage(), new Hashtable<String,Object>());
+        }
+        if (kresRuleStore == null) {
+            log
+                    .warn("No KReSRuleStore with stored rules and recipes found in servlet context. Instantiating manually with default values...");
+//            String iri = "http://www.ontologydesignpatterns.org/ont/iks/kres/rmi_config.owl";
+//            OWLOntology o;
+//            try {
+//                o = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(IRI.create(iri));
+//                this.kresRuleStore = new KReSRuleStore(onm, new Hashtable<String,Object>(), "");
+//                log.debug("PATH TO OWL FILE LOADED: " + kresRuleStore.getFilePath());
+//            } catch (OWLOntologyCreationException e) {
+//
+//            }
+            
+            this.kresRuleStore = new KReSRuleStore(onm, new Hashtable<String,Object>(), "");
+
         }
     }
 
-   /**
-	 * Get a recipe with its rules from the rule base (that is the ontology that
-	 * contains the rules and the recipe).
-     *
-	 * @param uri
-	 *            {A string contains the IRI full name of the recipe.}
+    /**
+     * Get a recipe with its rules from the rule base (that is the ontology that contains the rules and the
+     * recipe).
+     * 
+     * @param uri
+     *            {A string contains the IRI full name of the recipe.}
      * @return Return: <br/>
-	 *         200 The recipe is retrieved (import declarations point to KReS
-	 *         Services) <br/>
-     *       404 The recipe does not exists in the manager <br/>
-     *       500 Some error occurred 
-     *
+     *         200 The recipe is retrieved (import declarations point to KReS Services) <br/>
+     *         404 The recipe does not exists in the manager <br/>
+     *         500 Some error occurred
+     * 
      */
     @GET
     @Path("/{uri:.+}")
-	@Produces(value = { KReSFormat.RDF_XML, KReSFormat.TURTLE,
-			KReSFormat.OWL_XML, KReSFormat.FUNCTIONAL_OWL,
-			KReSFormat.MANCHESTER_OWL, KReSFormat.RDF_JSON })
-    public Response getRecipe(@PathParam("uri") String uri){
-      try{
+    @Produces(value = {KReSFormat.RDF_XML, KReSFormat.TURTLE, KReSFormat.OWL_XML, KReSFormat.FUNCTIONAL_OWL,
+                       KReSFormat.MANCHESTER_OWL, KReSFormat.RDF_JSON})
+    public Response getRecipe(@PathParam("uri") String uri) {
+        try {
 
-       KReSGetRecipe rule = new KReSGetRecipe(kresRuleStore);
+            KReSGetRecipe rule = new KReSGetRecipe(kresRuleStore);
 
-			// String ID =
-			// kresRuleStore.getOntology().getOntologyID().toString().replace(">","").replace("<","")+"#";
-       
-       if(uri.equals("all")){
+            // String ID =
+            // kresRuleStore.getOntology().getOntologyID().toString().replace(">","").replace("<","")+"#";
 
-           Vector<IRI> recipe = rule.getGeneralRecipes();
-           
-        if(recipe==null){
-            //The recipe does not exists in the manager
-            return Response.status(Status.NOT_FOUND).build();
-        }else{
-            
-					// The recipe is retrieved (import declarations point to
-					// KReS Services)
-            OWLOntology onto = kresRuleStore.getOntology();
-					OWLOntology newmodel = OWLManager
-							.createOWLOntologyManager().createOntology(
-									onto.getOntologyID());
-					OWLDataFactory factory = onto.getOWLOntologyManager()
-							.getOWLDataFactory();
+            if (uri.equals("all")) {
 
-					Iterator<OWLOntology> importedonto = onto
-							.getDirectImports().iterator();
-            List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
-					OWLDataFactory auxfactory = onto.getOWLOntologyManager()
-							.getOWLDataFactory();
+                Vector<IRI> recipe = rule.getGeneralRecipes();
 
-            while(importedonto.hasNext()){
-                OWLOntology auxonto = importedonto.next();
-						additions.add(new AddImport(newmodel, auxfactory
-								.getOWLImportsDeclaration(auxonto
-										.getOWLOntologyManager()
-										.getOntologyDocumentIRI(auxonto))));
+                if (recipe == null) {
+                    // The recipe does not exists in the manager
+                    return Response.status(Status.NOT_FOUND).build();
+                } else {
+
+                    // The recipe is retrieved (import declarations point to
+                    // KReS Services)
+                    OWLOntology onto = kresRuleStore.getOntology();
+                    OWLOntology newmodel = OWLManager.createOWLOntologyManager().createOntology(
+                        onto.getOntologyID());
+                    OWLDataFactory factory = onto.getOWLOntologyManager().getOWLDataFactory();
+
+                    Iterator<OWLOntology> importedonto = onto.getDirectImports().iterator();
+                    List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
+                    OWLDataFactory auxfactory = onto.getOWLOntologyManager().getOWLDataFactory();
+
+                    while (importedonto.hasNext()) {
+                        OWLOntology auxonto = importedonto.next();
+                        additions.add(new AddImport(newmodel, auxfactory.getOWLImportsDeclaration(auxonto
+                                .getOWLOntologyManager().getOntologyDocumentIRI(auxonto))));
+                    }
+
+                    if (!additions.isEmpty()) newmodel.getOWLOntologyManager().applyChanges(additions);
+
+                    for (int i = 0; i < recipe.size(); i++) {
+                        OWLNamedIndividual ind = factory.getOWLNamedIndividual(recipe.get(i));
+                        Set<OWLIndividualAxiom> ax = onto.getAxioms(ind);
+                        newmodel.getOWLOntologyManager().addAxioms(newmodel, ax);
+
+                    }
+
+                    // try {
+                    // OWLManager.createOWLOntologyManager().saveOntology(
+                    // newmodel,
+                    // newmodel.getOWLOntologyManager()
+                    // .getOntologyFormat(newmodel),
+                    // System.out);
+                    // } catch (OWLOntologyStorageException e) {
+                    // // TODO Auto-generated catch block
+                    // e.printStackTrace();
+                    // }
+
+                    return Response.ok(newmodel).build();
+                }
+
+            } else {
+
+                HashMap<IRI,String> recipe = rule.getRecipe(IRI.create(uri));
+
+                if (recipe == null) {
+                    // The recipe deos not exists in the manager
+                    return Response.status(Status.NOT_FOUND).build();
+                } else {
+                    // The recipe is retrieved (import declarations point to
+                    // KReS Services)
+                    OWLOntology onto = kresRuleStore.getOntology();
+
+                    OWLDataFactory factory = onto.getOWLOntologyManager().getOWLDataFactory();
+                    OWLObjectProperty prop = factory.getOWLObjectProperty(IRI
+                            .create("http://kres.iks-project.eu/ontology/meta/rmi.owl#hasRule"));
+                    OWLNamedIndividual ind = factory.getOWLNamedIndividual(IRI.create(uri));
+                    Set<OWLIndividual> value = ind.getObjectPropertyValues(prop, onto);
+                    Set<OWLIndividualAxiom> ax = onto.getAxioms(ind);
+
+                    Iterator<OWLIndividual> iter = value.iterator();
+
+                    OWLOntology newmodel = OWLManager.createOWLOntologyManager().createOntology(
+                        onto.getOntologyID());
+
+                    Iterator<OWLOntology> importedonto = onto.getDirectImports().iterator();
+                    List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
+                    OWLDataFactory auxfactory = onto.getOWLOntologyManager().getOWLDataFactory();
+
+                    while (importedonto.hasNext()) {
+                        OWLOntology auxonto = importedonto.next();
+                        additions.add(new AddImport(newmodel, auxfactory.getOWLImportsDeclaration(auxonto
+                                .getOWLOntologyManager().getOntologyDocumentIRI(auxonto))));
+                    }
+
+                    if (!additions.isEmpty()) newmodel.getOWLOntologyManager().applyChanges(additions);
+
+                    newmodel.getOWLOntologyManager().addAxioms(newmodel, ax);
+
+                    while (iter.hasNext()) {
+
+                        ind = (OWLNamedIndividual) iter.next();
+                        ax = onto.getAxioms(ind);
+
+                        newmodel.getOWLOntologyManager().addAxioms(newmodel, ax);
+                    }
+
+                    // try {
+                    // OWLManager.createOWLOntologyManager().saveOntology(
+                    // newmodel,
+                    // newmodel.getOWLOntologyManager()
+                    // .getOntologyFormat(newmodel),
+                    // System.out);
+                    // } catch (OWLOntologyStorageException e) {
+                    // // TODO Auto-generated catch block
+                    // e.printStackTrace();
+                    // }
+
+                    return Response.ok(newmodel).build();
+                }
             }
-
-            if(!additions.isEmpty())
-						newmodel.getOWLOntologyManager()
-								.applyChanges(additions);
-
-            for(int i = 0; i<recipe.size(); i++){
-						OWLNamedIndividual ind = factory
-								.getOWLNamedIndividual(recipe.get(i));
-                Set<OWLIndividualAxiom> ax = onto.getAxioms(ind);
-						newmodel.getOWLOntologyManager()
-								.addAxioms(newmodel, ax);
-
-            }
-            
-//            try {
-//						OWLManager.createOWLOntologyManager().saveOntology(
-//								newmodel,
-//								newmodel.getOWLOntologyManager()
-//										.getOntologyFormat(newmodel),
-//								System.out);
-//    		} catch (OWLOntologyStorageException e) {
-//    			// TODO Auto-generated catch block
-//    			e.printStackTrace();
-//    		}
-            
-            return Response.ok(newmodel).build();
+        } catch (Exception e) {
+            // Some error occurred
+            throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
         }
-
-       }else{
-
-        HashMap<IRI, String> recipe = rule.getRecipe(IRI.create(uri));
-     
-        if(recipe==null){
-            //The recipe deos not exists in the manager
-            return Response.status(Status.NOT_FOUND).build();
-        }else{
-					// The recipe is retrieved (import declarations point to
-					// KReS Services)
-            OWLOntology onto = kresRuleStore.getOntology();
-
-					OWLDataFactory factory = onto.getOWLOntologyManager()
-							.getOWLDataFactory();
-					OWLObjectProperty prop = factory
-							.getOWLObjectProperty(IRI
-									.create("http://kres.iks-project.eu/ontology/meta/rmi.owl#hasRule"));
-					OWLNamedIndividual ind = factory.getOWLNamedIndividual(IRI
-							.create(uri));
-					Set<OWLIndividual> value = ind.getObjectPropertyValues(
-							prop, onto);
-            Set<OWLIndividualAxiom> ax = onto.getAxioms(ind);
-            
-            Iterator<OWLIndividual> iter = value.iterator();
-
-					OWLOntology newmodel = OWLManager
-							.createOWLOntologyManager().createOntology(
-									onto.getOntologyID());
-
-					Iterator<OWLOntology> importedonto = onto
-							.getDirectImports().iterator();
-            List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
-					OWLDataFactory auxfactory = onto.getOWLOntologyManager()
-							.getOWLDataFactory();
-
-            while(importedonto.hasNext()){
-                OWLOntology auxonto = importedonto.next();
-						additions.add(new AddImport(newmodel, auxfactory
-								.getOWLImportsDeclaration(auxonto
-										.getOWLOntologyManager()
-										.getOntologyDocumentIRI(auxonto))));
-            }
-
-            if(!additions.isEmpty())
-						newmodel.getOWLOntologyManager()
-								.applyChanges(additions);
-
-            newmodel.getOWLOntologyManager().addAxioms(newmodel,ax);
-
-            while(iter.hasNext()){
-        
-                ind = (OWLNamedIndividual) iter.next();
-                ax = onto.getAxioms(ind);
-              
-						newmodel.getOWLOntologyManager()
-								.addAxioms(newmodel, ax);
-            }
-
-//            try {
-//						OWLManager.createOWLOntologyManager().saveOntology(
-//								newmodel,
-//								newmodel.getOWLOntologyManager()
-//										.getOntologyFormat(newmodel),
-//								System.out);
-//    		} catch (OWLOntologyStorageException e) {
-//    			// TODO Auto-generated catch block
-//    			e.printStackTrace();
-//    		}
-
-            return Response.ok(newmodel).build();
-        }
-       }
-      }catch (Exception e){
-          //Some error occurred
-         throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
-      }
 
     }
 
-   /**
+    /**
      * To add a recipe without rules.
-	 * 
-	 * @param recipe
-	 *            {A string contains the IRI of the recipe to be added}
-	 * @param description
-	 *            {A string contains a description of the rule}
+     * 
+     * @param recipe
+     *            {A string contains the IRI of the recipe to be added}
+     * @param description
+     *            {A string contains a description of the rule}
      * @return Return: <br/>
-     *      200 The recipe has been added<br/>
-     *      409 The recipe has not been added<br/>
-     *      500 Some error occurred
+     *         200 The recipe has been added<br/>
+     *         409 The recipe has not been added<br/>
+     *         500 Some error occurred
      */
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-	@Produces(value = { KReSFormat.RDF_XML, KReSFormat.TURTLE,
-			KReSFormat.OWL_XML, KReSFormat.FUNCTIONAL_OWL,
-			KReSFormat.MANCHESTER_OWL, KReSFormat.RDF_JSON })
-	public Response addRecipe(@FormParam(value = "recipe") String recipe,
-			@FormParam(value = "description") String description) {
+    @Produces(value = {KReSFormat.RDF_XML, KReSFormat.TURTLE, KReSFormat.OWL_XML, KReSFormat.FUNCTIONAL_OWL,
+                       KReSFormat.MANCHESTER_OWL, KReSFormat.RDF_JSON})
+    public Response addRecipe(@FormParam(value = "recipe") String recipe,
+                              @FormParam(value = "description") String description) {
 
-        try{
+        try {
 
             KReSAddRecipe instance = new KReSAddRecipe(kresRuleStore);
 
-			// String ID =
-			// kresRuleStore.getOntology().getOntologyID().toString().replace(">","").replace("<","")+"#";
+            // String ID =
+            // kresRuleStore.getOntology().getOntologyID().toString().replace(">","").replace("<","")+"#";
 
-			boolean ok = instance.addSimpleRecipe(IRI.create(recipe),
-					description);
-                
-                if(!ok){
+            boolean ok = instance.addSimpleRecipe(IRI.create(recipe), description);
 
-                   return Response.status(Status.CONFLICT).build();
-                  
-                }else{
-                   kresRuleStore.saveOntology();
-                   return Response.status(Status.OK).build();
-                }
-   
-        }catch (Exception e){
+            if (!ok) {
+
+                return Response.status(Status.CONFLICT).build();
+
+            } else {
+                kresRuleStore.saveOntology();
+                return Response.status(Status.OK).build();
+            }
+
+        } catch (Exception e) {
             throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
         }
     }
 
-   /**
+    /**
      * To delete a recipe
-	 * 
-	 * @param recipe
-	 *            {A tring contains an IRI of the recipe}
-	 * @return 200 The recipe has been deleted<br/>
-     *      409 The recipe has not been deleted<br/>
-     *      500 Some error occurred
+     * 
+     * @param recipe
+     *            {A tring contains an IRI of the recipe}
+     * @return 200 The recipe has been deleted<br/>
+     *         409 The recipe has not been deleted<br/>
+     *         500 Some error occurred
      */
     @DELETE
-    //@Consumes(MediaType.TEXT_PLAIN)
+    // @Consumes(MediaType.TEXT_PLAIN)
     @Produces("text/plain")
-    public Response removeRecipe(@QueryParam(value="recipe") String recipe){
+    public Response removeRecipe(@QueryParam(value = "recipe") String recipe) {
 
-        try{
-            
+        try {
+
             KReSRemoveRecipe instance = new KReSRemoveRecipe(kresRuleStore);
 
-			// String ID =
-			// kresRuleStore.getOntology().getOntologyID().toString().replace(">","").replace("<","")+"#";
+            // String ID =
+            // kresRuleStore.getOntology().getOntologyID().toString().replace(">","").replace("<","")+"#";
 
             boolean ok = instance.removeRecipe(IRI.create(recipe));
-            
-                if(!ok){
-                   return Response.status(Status.CONFLICT).build();
-                }else{
-                   kresRuleStore.saveOntology();
-                   return Response.ok().build();
-                }
 
-        }catch(Exception e){
-           throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
+            if (!ok) {
+                return Response.status(Status.CONFLICT).build();
+            } else {
+                kresRuleStore.saveOntology();
+                return Response.ok().build();
+            }
+
+        } catch (Exception e) {
+            throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
         }
     }
 

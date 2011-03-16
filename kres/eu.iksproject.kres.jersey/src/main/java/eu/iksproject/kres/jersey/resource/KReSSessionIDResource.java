@@ -14,10 +14,9 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.renderers.SessionRenderer;
 import org.semanticweb.owlapi.model.IRI;
-
-import eu.iksproject.kres.manager.ONManager;
-import eu.iksproject.kres.manager.renderers.SessionRenderer;
 
 @Path("/session/{id:.+}")
 public class KReSSessionIDResource extends NavigationMixin {

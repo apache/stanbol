@@ -5,6 +5,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
 import org.apache.stanbol.reengineer.base.DataSource;
 import org.apache.stanbol.reengineer.base.SemionReengineer;
 import org.apache.stanbol.reengineer.base.util.ReengineerType;
@@ -14,7 +15,6 @@ import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
-import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.semion.manager.SemionManagerImpl;
 
 public class XMLReengineerTest {

@@ -67,10 +67,10 @@ public class RecipeTest {
     @Test
     public void testGetRecipe() {
         WebResource webresget = webres.path("http://kres.iks-project.eu/ontology/meta/rmi_config.owl#ProvaParentRecipe");
-        System.out.println(webresget);
+//        System.out.println(webresget);
         //OWLOntology owl = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(webres.get(String.class));
 
-        System.out.println(webresget.get(String.class));
+//        System.out.println(webresget.get(String.class));
         ClientResponse head = webresget.head();
 
         if(head.getStatus()==200)
@@ -85,9 +85,9 @@ public class RecipeTest {
     @Test
     public void testGetAllRecipes() {
 
-        System.out.println(webresall);
-
-        System.out.println(webresall.get(String.class));
+//        System.out.println(webresall);
+//
+//        System.out.println(webresall.get(String.class));
         ClientResponse head = webresall.head();
 
         if(head.getStatus()==200)
@@ -96,79 +96,79 @@ public class RecipeTest {
             fail("Some errors occurred");
     }
 
-   /**
-     * Test of getRecipe method, of class GetRecipe.
-     */
-    @Test
-    public void testAddRecipe() {
-
-        Form form = new Form();
-        form.add("recipe","http://demo/myrecipe");//"http://kres.iks-project.eu/ontology/meta/rmi_config.owl#ProvaAddRecipe");
-        form.add("description","Try to add a recipe");
-        ClientResponse response = webres.type(MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class,form);
-
-        System.out.println(webres);
-
-        if(response.getStatus()==200)
-            assertEquals(200,response.getStatus());
-        else
-            fail("Some errors occurred");
-    }
-
-/**
-     * Test of getRecipe method, of class GetRecipe.
-     */
-    @Test
-    public void testGetRecipe_2() {
-        WebResource webresget = webres.path("http://demo/myrecipe");
-        System.out.println(webresget);
-        //OWLOntology owl = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(webres.get(String.class));
-
-        System.out.println(webresget.get(String.class));
-        ClientResponse head = webresget.head();
-
-        if(head.getStatus()==200)
-            assertEquals(200,head.getStatus());
-        else
-            fail("Some errors occurred");
-    }
-
-    /**
-     * Test of getRecipe method, of class GetRecipe.
-     */
-    @Test
-    public void testGetAllRecipes_2() {
-
-        System.out.println(webresall);
-
-        System.out.println(webresall.get(String.class));
-        ClientResponse head = webresall.head();
-
-        if(head.getStatus()==200)
-            assertEquals(200,head.getStatus());
-        else
-            fail("Some errors occurred");
-    }
-
-    /**
-     * Test of getRecipe method, of class GetRecipe.
-     */
-    @Test
-    public void testDeleteRecipe() {
-
-        String recipe = "http://demo/myrecipe";//http://kres.iks-project.eu/ontology/meta/rmi_config.owl#ProvaAddRecipe";
-
-        WebResource webresdel = webres.queryParam("recipe", recipe);
-
-        webresdel.delete();
-     
-        ClientResponse response = webresdel.head();
-        int status = response.getStatus();
-        System.out.println(response);
-        if((status==200)||status == 405)
-            assertTrue(true);
-        else
-            fail("Some errors occurred");
-    }
+//   /**
+//     * Test of getRecipe method, of class GetRecipe.
+//     */
+//    @Test
+//    public void testAddRecipe() {
+//
+//        Form form = new Form();
+//        form.add("recipe","http://demo/myrecipe");//"http://kres.iks-project.eu/ontology/meta/rmi_config.owl#ProvaAddRecipe");
+//        form.add("description","Try to add a recipe");
+//        ClientResponse response = webres.type(MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class,form);
+//
+////        System.out.println(webres);
+//
+//        if(response.getStatus()==200)
+//            assertEquals(200,response.getStatus());
+//        else
+//            fail("Some errors occurred");
+//    }
+//
+///**
+//     * Test of getRecipe method, of class GetRecipe.
+//     */
+//    @Test
+//    public void testGetRecipe_2() {
+//        WebResource webresget = webres.path("http://demo/myrecipe");
+//        System.out.println(webresget);
+////        //OWLOntology owl = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(webres.get(String.class));
+////
+////        System.out.println(webresget.get(String.class));
+//        ClientResponse head = webresget.head();
+//
+//        if(head.getStatus()==200)
+//            assertEquals(200,head.getStatus());
+//        else
+//            fail("Some errors occurred");
+//    }
+//
+//    /**
+//     * Test of getRecipe method, of class GetRecipe.
+//     */
+//    @Test
+//    public void testGetAllRecipes_2() {
+//
+////        System.out.println(webresall);
+////
+////        System.out.println(webresall.get(String.class));
+//        ClientResponse head = webresall.head();
+//
+//        if(head.getStatus()==200)
+//            assertEquals(200,head.getStatus());
+//        else
+//            fail("Some errors occurred");
+//    }
+//
+//    /**
+//     * Test of getRecipe method, of class GetRecipe.
+//     */
+//    @Test
+//    public void testDeleteRecipe() {
+//
+//        String recipe = "http://demo/myrecipe";//http://kres.iks-project.eu/ontology/meta/rmi_config.owl#ProvaAddRecipe";
+//
+//        WebResource webresdel = webres.queryParam("recipe", recipe);
+//
+//        webresdel.delete();
+//     
+//        ClientResponse response = webresdel.head();
+//        int status = response.getStatus();
+////        System.out.println(response);
+//        if((status==200)||status == 405)
+//            assertTrue(true);
+//        else
+//            fail("Some errors occurred");
+//    }
 
 }

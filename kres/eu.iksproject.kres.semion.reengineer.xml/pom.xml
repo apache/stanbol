@@ -169,6 +169,11 @@
 		
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
+			<version>${stanbol-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.reengineer.base</artifactId>
 			<version>${stanbol-version}</version>
 		</dependency>	
@@ -227,12 +232,6 @@
 		</dependency>
 
 		<!-- Testing deps -->
-		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.kres.manager</artifactId>
-			<version>${kres-version}</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.semion.manager</artifactId>

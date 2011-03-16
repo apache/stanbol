@@ -30,12 +30,16 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
 import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
 import org.apache.stanbol.ontologymanager.store.impl.OntologyStorageProviderImpl;
 import org.apache.stanbol.rules.base.api.KReSRule;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.base.api.util.KReSRuleList;
+import org.apache.stanbol.rules.manager.KReSKB;
+import org.apache.stanbol.rules.manager.changes.KReSRuleStore;
+import org.apache.stanbol.rules.manager.parse.KReSRuleParser;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
@@ -58,13 +62,9 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import eu.iksproject.kres.jersey.format.KReSFormat;
-import eu.iksproject.kres.manager.ONManager;
 import eu.iksproject.kres.reasoners.KReSCreateReasoner;
 import eu.iksproject.kres.reasoners.KReSRunReasoner;
 import eu.iksproject.kres.reasoners.KReSRunRules;
-import eu.iksproject.kres.rules.KReSKB;
-import eu.iksproject.kres.rules.manager.KReSRuleStore;
-import eu.iksproject.kres.rules.parser.KReSRuleParser;
 
 /**
  *
