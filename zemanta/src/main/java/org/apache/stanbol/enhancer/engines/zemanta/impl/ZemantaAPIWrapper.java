@@ -55,13 +55,13 @@ public class ZemantaAPIWrapper {
         apiKey = key;
     }
 
-    public Graph enhance(String textToAnalyze) {
+    public Graph enhance(String textToAnalyze) throws IOException {
         InputStream is = sendRequest(textToAnalyze);
         Graph zemantaResponseGraph = parseResponse(is);
         return zemantaResponseGraph;
     }
 
-    private InputStream sendRequest(String textToAnalyze) {
+    private InputStream sendRequest(String textToAnalyze) throws IOException {
         try {
             URL url = new URL(URL);
             HttpURLConnection httpURLConnection = (HttpURLConnection) url
@@ -97,10 +97,7 @@ public class ZemantaAPIWrapper {
             log.error(e.getMessage(),e);
         } catch (MalformedURLException e) {
             log.error(e.getMessage(),e);
-        } catch (IOException e) {
-            log.error(e.getMessage(),e);
         }
-
         return null;
     }
 

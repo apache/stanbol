@@ -151,7 +151,11 @@ public class ZemantaEnhancementEngine implements EnhancementEngine {
         //we need to store the results of Zemanta in an temp graph
         MGraph results = new SimpleMGraph();
         ZemantaAPIWrapper zemanta = new ZemantaAPIWrapper(key);
-        results.addAll(zemanta.enhance(text));
+        try {
+            results.addAll(zemanta.enhance(text));
+        } catch (IOException e) {
+           throw new EngineException("Unable to get Enhancement from remote Zemanta Service",e);
+        }
         //now we need to process the results and convert them into the Enhancer
         //annotation structure
         processRecognition(results, graph, text, ciId);
