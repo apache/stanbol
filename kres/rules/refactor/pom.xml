@@ -21,10 +21,10 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>eu.iksproject</groupId>
-		<artifactId>eu.iksproject.kres.parent</artifactId>
-		<version>0.7</version>
-		<relativePath>../../eu.iksproject.kres.parent</relativePath>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>stanbol-parent</artifactId>
+		<version>0.9-SNAPSHOT</version>
+		<relativePath>../../../parent</relativePath>
 	</parent>
 
 	<groupId>org.apache.stanbol</groupId>
@@ -38,6 +38,10 @@
 	</description>
 
 	<inceptionYear>2010</inceptionYear>
+
+	<properties>
+		<kres-version>0.7</kres-version>
+	</properties>
 
 	<build>
 		<plugins>

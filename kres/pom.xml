@@ -32,6 +32,7 @@
   <inceptionYear>2010</inceptionYear>
 
   <modules>
+  
   	<!-- KReS parent -->
     <module>eu.iksproject.kres.parent</module>
     
@@ -51,31 +52,16 @@
 	
 	<!-- Transformation utils -->
 <!--	<module>eu.iksproject.kres.shared/dependency/silk</module> -->
-	<module>eu.iksproject.kres.shared/transformation</module>
+	<module>eu.iksproject.kres.shared/transformation</module>  
 	
-    
-	
-	<!-- KReS APIs -->
+	<!-- Obsolete KReS modules -->
 	<!--
 	<module>eu.iksproject.kres.api</module>
-	-->
-
-
-	<!-- KReS Reasoner -->
-	<module>eu.iksproject.kres.reasoners</module>
-
-	<!--
-	<module>eu.iksproject.kres.storage.provider</module>
-	-->
-	
-	<!-- KReS manager -->
-	<!--
 	<module>eu.iksproject.kres.manager</module>
-	-->
-	
-	<!-- KReS rules -->
-	<!--
-    <module>eu.iksproject.kres.rules</module>
+	<module>eu.iksproject.kres.reasoners</module>
+	<module>eu.iksproject.kres.rules</module>
+	<module>eu.iksproject.kres.storage</module>
+	<module>eu.iksproject.kres.storage.provider</module>
 	-->
 	
 	<!-- Semion -->
@@ -83,17 +69,9 @@
 	<module>eu.iksproject.kres.semion.reengineer.db</module>
 	<module>eu.iksproject.kres.semion.reengineer.xml</module>
     <module>eu.iksproject.kres.semion.refactorer</module>
-    
-    <!-- Storage -->
-    <!--
-    <module>eu.iksproject.kres.storage</module>
-    -->
-    
+
     <!-- Jersey -->
     <module>eu.iksproject.kres.jersey</module>
-    <!-- <module>eu.iksproject.kres.manager.jersey</module> -->
-
-    <!-- Launcher -->
     
     <module>ontologymanager/ontonet</module>
     <module>ontologymanager/store</module>
