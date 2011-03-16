@@ -74,7 +74,23 @@ public class EnhancerTestBase extends StanbolTestBase {
                     "org.apache.stanbol.*OpenCalaisEngine",
                     "org.apache.stanbol.*EntityMentionEnhancementEngine",
                     "org.apache.stanbol.*RelatedTopicEnhancementEngine",
-                    "org.apache.stanbol.*CachingDereferencerEngine"
+                    "org.apache.stanbol.*CachingDereferencerEngine",
+                    //added by rwesten
+                    "org.apache.stanbol.*ReferencedSiteEntityTaggingEnhancementEngine"
+                );
+                
+                /*  List of expected referencedSites could also be made 
+                 *  configurable via system properties, but we don't expect it 
+                 *  to change often. 
+                 */
+                executor.execute(
+                        builder.buildGetRequest("/entityhub/sites/referenced")
+                        .withHeader("Accept", "application/json")
+                )
+                .assertStatus(200)
+                .assertContentType("application/json")
+                .assertContentRegexp(
+                    "http:\\\\/\\\\/.*\\\\/entityhub\\\\/site\\\\/dbPedia\\\\/"
                 );
                 log.info("Enhancement engines checked, all present");
                 return true;

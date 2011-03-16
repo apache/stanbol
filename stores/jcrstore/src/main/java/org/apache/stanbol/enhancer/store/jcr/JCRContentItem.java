@@ -47,7 +47,7 @@ public class JCRContentItem implements ContentItem, GraphListener {
     private static final String JCR_DATA = "jcr:data";
     private static final String JCR_MIME_TYPE = "jcr:mimeType";
 
-    private static final Logger log = LoggerFactory.getLogger(getClass());
+    private static final Logger log = LoggerFactory.getLogger(JCRContentItem.class);
 
     private Node jcrNode;
 
