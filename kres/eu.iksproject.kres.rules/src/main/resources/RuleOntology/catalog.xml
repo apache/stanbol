@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<catalog id="file:/Users/elvio/Desktop/CNR/kresOSGIbundle/KReSAlpha/trunk/eu.iksproject.kres.rules/src/main/resources/RuleOntology/" prefer="public" xml:base="file:/Users/elvio/Desktop/CNR/kresOSGIbundle/KReSAlpha/trunk/eu.iksproject.kres.rules/src/main/resources/RuleOntology/" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
-    <uri name="http://eu.iksproject.kres/KReSOntologyRules.owl" uri="OffLineKReSOntologyRules.owl"/>
-    <uri name="http://kres.iks-project.eu/ontology/meta/rmi_config.owl" uri="rmi_config.owl"/>
-    <uri name="http://kres.iks-project.eu/ontology/meta/rmi.owl" uri="TestKReSOntologyRules.owl"/>
-</catalog>
