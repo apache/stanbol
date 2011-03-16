@@ -37,9 +37,9 @@ public class SparqlFieldQuery extends FieldQueryImpl implements FieldQuery ,Clon
     private static final String FIELD_VAR_PREFIX = "v_";
     private static final String ROOT_VAR_NAME = "id";
     private int varNum;
-    protected final Map<String,String> field2VarMappings;
+    private final Map<String,String> field2VarMappings;
     private final Map<String, String> unmodField2VarMappings;
-    protected EndpointTypeEnum endpointType;
+    private EndpointTypeEnum endpointType;
     protected SparqlFieldQuery() {
         this(null);
     }
@@ -135,7 +135,7 @@ public class SparqlFieldQuery extends FieldQueryImpl implements FieldQuery ,Clon
     }
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return super.hashCode()+field2VarMappings.hashCode()+varNum+endpointType.ordinal();
     }
 
     /**
@@ -152,7 +152,8 @@ public class SparqlFieldQuery extends FieldQueryImpl implements FieldQuery ,Clon
     public boolean equals(Object obj) {
         return super.equals(obj) && obj instanceof SparqlFieldQuery &&
             ((SparqlFieldQuery)obj).field2VarMappings.equals(field2VarMappings) &&
-            ((SparqlFieldQuery)obj).varNum == varNum;
+            ((SparqlFieldQuery)obj).varNum == varNum &&
+            ((SparqlFieldQuery)obj).endpointType == endpointType;
     }
     /**
      * Getter for the SPARQL SELECT representation of this FieldQuery

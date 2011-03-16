@@ -40,12 +40,14 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  *
  */
-public class JSONToFieldQuery {
+public final class JSONToFieldQuery {
+    private JSONToFieldQuery(){}
+    
     private static final Logger log = LoggerFactory.getLogger(JSONToFieldQuery.class);
     
     public static FieldQuery fromJSON(FieldQueryFactory queryFactory, String jsonQueryString) throws JSONException{
         if(jsonQueryString == null){
-            throw new NullPointerException("The parsed JSON object MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed JSON object MUST NOT be NULL!");
         }
         JSONObject jQuery = new JSONObject(jsonQueryString);
         FieldQuery query = queryFactory.createFieldQuery();

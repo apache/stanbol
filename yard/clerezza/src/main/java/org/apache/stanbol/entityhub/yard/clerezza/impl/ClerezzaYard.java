@@ -56,7 +56,7 @@ import org.apache.stanbol.entityhub.core.yard.AbstractYard;
 import org.apache.stanbol.entityhub.core.yard.SimpleYardConfig;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
-import org.apache.stanbol.entityhub.model.clerezza.utils.Resource2StringAdapter;
+import org.apache.stanbol.entityhub.model.clerezza.impl.Resource2StringAdapter;
 import org.apache.stanbol.entityhub.query.clerezza.RdfQueryResultList;
 import org.apache.stanbol.entityhub.query.clerezza.SparqlFieldQuery;
 import org.apache.stanbol.entityhub.query.clerezza.SparqlFieldQueryFactory;
@@ -99,7 +99,7 @@ import org.slf4j.LoggerFactory;
 //        @Property(name=Yard.DESCRIPTION,value="Default values for configuring the Entityhub Yard without editing")
 //})
 public class ClerezzaYard extends AbstractYard implements Yard {
-    Logger log = LoggerFactory.getLogger(ClerezzaYard.class);
+    private static Logger log = LoggerFactory.getLogger(ClerezzaYard.class);
     /**
      * Property used to mark empty Representations managed by this Graph. This is
      * needed to workaround the fact, that the Entityhub supports the storage of
@@ -113,11 +113,11 @@ public class ClerezzaYard extends AbstractYard implements Yard {
      * <code> ?representationId <{@value #MANAGED_REPRESENTATION}> true^^xsd:boolean </code>
      * <br> for any empty Representation avoids this unwanted behaviour.
      */
-    public static UriRef MANAGED_REPRESENTATION = new UriRef("urn:org.apache.stanbol:entityhub.yard:rdf.clerezza:managesRepresentation");
+    public static final UriRef MANAGED_REPRESENTATION = new UriRef("urn:org.apache.stanbol:entityhub.yard:rdf.clerezza:managesRepresentation");
     /**
      * The TRUE value used as object for the property {@link #MANAGED_REPRESENTATION}.
      */
-    private static Literal TRUE_LITERAL = LiteralFactory.getInstance().createTypedLiteral(Boolean.FALSE);
+    private static final Literal TRUE_LITERAL = LiteralFactory.getInstance().createTypedLiteral(Boolean.FALSE);
     //public static final String YARD_URI_PREFIX = "urn:org.apache.stanbol:entityhub.yard:rdf.clerezza:";
 //    public static final UriRef REPRESENTATION = new UriRef(RdfResourceEnum.Representation.getUri());
 //    protected ComponentContext context;
@@ -136,7 +136,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
     }
     @SuppressWarnings("unchecked")
     @Activate
-    protected void activate(ComponentContext context) throws ConfigurationException {
+    protected final void activate(ComponentContext context) throws ConfigurationException {
         log.info("in "+ClerezzaYard.class+" activate with context "+context);
         if(context == null || context.getProperties() == null){
             throw new IllegalStateException("No valid"+ComponentContext.class+" parsed in activate!");
@@ -149,10 +149,10 @@ public class ClerezzaYard extends AbstractYard implements Yard {
      * Method. In case the Yard runs outside of an OSGI Container it is called
      * by the Constructor taking the {@link YardConfig} as parameter
      * @param config The configuration for the new Yard instance
-     * @throws NullPointerException In case <code>null</code> is parsed as configuration
-     * @throws IllegalArgumentException In case the configuration is invalid
+     * @throws IllegalArgumentException In case <code>null</code> is parsed as 
+     * configuration or the configuration is invalid
      */
-    private final void activate(YardConfig config) throws IllegalArgumentException, NullPointerException {
+    private final void activate(YardConfig config) throws IllegalArgumentException {
         super.activate(RdfValueFactory.getInstance(), SparqlFieldQueryFactory.getInstance(), config);
         if(tcManager == null){ //this will be the case if we are not in an OSGI environment
           //use the getInstance() method!
@@ -171,7 +171,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
 
     }
     @Deactivate
-    protected void deactivate(ComponentContext context) {
+    protected final void deactivate(ComponentContext context) {
         log.info("in "+ClerezzaYard.class.getSimpleName()+" deactivate with context "+context);
         this.yardGraphUri = null;
         this.graph = null;
@@ -183,14 +183,14 @@ public class ClerezzaYard extends AbstractYard implements Yard {
      * @return the URI used for the RDF graph that stores all the data of this
      * yard.
      */
-    public String getYardGraphUri(){
+    public final String getYardGraphUri(){
         return yardGraphUri.getUnicodeString();
     }
 
     @Override
     public Representation getRepresentation(String id) {
         if(id == null){
-            throw new NullPointerException("The parsed representation id MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed representation id MUST NOT be NULL!");
         }
         if(id.isEmpty()){
             throw new IllegalArgumentException("The parsed representation id MUST NOT be EMTPY!");
@@ -204,7 +204,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
      *     refers to a Resource in the graph that is of type {@link #REPRESENTATION}
      * @return the Representation
      */
-    protected Representation getRepresentation(UriRef uri, boolean check) {
+    protected final Representation getRepresentation(UriRef uri, boolean check) {
         Lock readLock = graph.getLock().readLock();
         readLock.lock();
         try {
@@ -214,7 +214,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
                 // ... this will only remove the triple if the Representation is empty
                 //     but a check would take longer than the this call
                 nodeGraph.remove(new TripleImpl(uri,MANAGED_REPRESENTATION,TRUE_LITERAL));
-                return ((RdfValueFactory)valueFactory).createRdfRepresentation(uri, nodeGraph);
+                return ((RdfValueFactory)getValueFactory()).createRdfRepresentation(uri, nodeGraph);
             } else {
                 return null; //not found
             }
@@ -265,7 +265,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
     @Override
     public boolean isRepresentation(String id) {
         if(id == null) {
-            throw new NullPointerException("The parsed id MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed id MUST NOT be NULL!");
         }
         if(id.isEmpty()){
             throw new IllegalArgumentException("The parsed id MUST NOT be EMPTY!");
@@ -278,14 +278,14 @@ public class ClerezzaYard extends AbstractYard implements Yard {
      * @param resource the resource to check
      * @return the state
      */
-    protected boolean isRepresentation(UriRef resource){
+    protected final boolean isRepresentation(UriRef resource){
         return graph.filter(resource, null, null).hasNext();
     }
 
     @Override
     public void remove(String id) throws IllegalArgumentException {
         if(id == null) {
-            throw new NullPointerException("The parsed Representation id MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed Representation id MUST NOT be NULL!");
         }
         UriRef resource = new UriRef(id);
         Lock writeLock = graph.getLock().writeLock();
@@ -299,9 +299,9 @@ public class ClerezzaYard extends AbstractYard implements Yard {
         }
     }
     @Override
-    public void remove(Iterable<String> ids) throws IllegalArgumentException, YardException {
+    public final void remove(Iterable<String> ids) throws IllegalArgumentException, YardException {
         if(ids == null){
-            throw new NullPointerException("The parsed Iterable over the IDs to remove MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed Iterable over the IDs to remove MUST NOT be NULL!");
         }
         for(String id : ids){
             if(id != null){
@@ -310,24 +310,30 @@ public class ClerezzaYard extends AbstractYard implements Yard {
         }
     }
     @Override
-    public Representation store(Representation representation) throws IllegalArgumentException, YardException {
+    public final Representation store(Representation representation) throws IllegalArgumentException, YardException {
+        if(representation == null){
+            throw new IllegalArgumentException("The parsed Representation MUST NOT be NULL!");
+        }
         return store(representation,true,true);
     }
     @Override
-    public Iterable<Representation> store(Iterable<Representation> representations) throws IllegalArgumentException, YardException {
+    public final Iterable<Representation> store(Iterable<Representation> representations) throws IllegalArgumentException, YardException {
         if(representations == null){
-            throw new NullPointerException("The parsed Iterable over the Representations to store MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed Iterable over the Representations to store MUST NOT be NULL!");
         }
         return store(representations, true);
     }
     @Override
-    public Representation update(Representation representation) throws IllegalArgumentException, YardException {
+    public final Representation update(Representation representation) throws IllegalArgumentException, YardException {
+        if(representation == null){
+            throw new IllegalArgumentException("The parsed Representation MUST NOT be NULL!");
+        }
         return store(representation,false,true);
     }
     @Override
-    public Iterable<Representation> update(Iterable<Representation> representations) throws YardException, IllegalArgumentException {
+    public final Iterable<Representation> update(Iterable<Representation> representations) throws YardException, IllegalArgumentException {
         if(representations == null){
-            throw new NullPointerException("The parsed Iterable over the Representations to update MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed Iterable over the Representations to update MUST NOT be NULL!");
         }
         return store(representations,false);
     }
@@ -350,7 +356,9 @@ public class ClerezzaYard extends AbstractYard implements Yard {
     protected final Representation store(Representation representation,boolean allowCreate,boolean canNotCreateIsError) throws IllegalArgumentException, YardException{
         log.info("store Representation "+representation.getId());
 //        log.info("  > entityhub size: "+graph.size());
-        if(representation == null) return null;
+        if(representation == null) {
+            return null;
+        }
         if(isRepresentation(representation.getId())){
 //            log.info("  > remove previous version");
             remove(representation.getId());
@@ -363,7 +371,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
             }
         }
         //get the graph for the Representation and add it to the store
-        RdfRepresentation toAdd = ((RdfValueFactory)valueFactory).toRdfRepresentation(representation);
+        RdfRepresentation toAdd = ((RdfValueFactory)getValueFactory()).toRdfRepresentation(representation);
 //        log.info("  > add "+toAdd.size()+" triples to Yard "+getId());
         Lock writeLock = graph.getLock().writeLock();
         writeLock.lock();
@@ -388,23 +396,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
             throw new IllegalArgumentException("The parsed query MUST NOT be NULL!");
         }
         final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
-        int limit = QueryUtils.getLimit(query, config.getDefaultQueryResultNumber(), config.getMaxQueryResultNumber());
-        SelectQuery sparqlQuery;
-        String sparqlQueryString = SparqlQueryUtils.createSparqlSelectQuery(query, false,limit,EndpointTypeEnum.Standard);
-        try {
-            sparqlQuery = (SelectQuery)QueryParser.getInstance().parse(sparqlQueryString);
-        } catch (ParseException e) {
-            log.error("ParseException for SPARQL Query in findRepresentation");
-            log.error("FieldQuery: "+query);
-            log.error("SPARQL Query: "+sparqlQueryString);
-            throw new YardException("Unable to parse SPARQL query generated for the parse FieldQuery",e);
-        } catch (ClassCastException e){
-            log.error("ClassCastExeption because parsed SPARQL Query is not of Type "+SelectQuery.class);
-            log.error("FieldQuery: "+query);
-            log.error("SPARQL Query: "+sparqlQueryString);
-            throw new YardException("Unable to parse SPARQL SELECT query generated for the parse FieldQuery",e);
-        }
-        final ResultSet result = tcManager.executeSparqlQuery((SelectQuery)sparqlQuery, graph);
+        final ResultSet result = executeSparqlFieldQuery(query);
         //A little bit complex construct ...
         // first we use the adaptingIterator to convert reseource to string
         // to get the resources we have to retrieve the root-variable of the
@@ -419,13 +411,16 @@ public class ClerezzaYard extends AbstractYard implements Yard {
                 new Resource2StringAdapter<Resource>(), String.class);
         return new QueryResultListImpl<String>(query,representationIdIterator,String.class);
     }
-    @Override
-    public QueryResultList<Representation> findRepresentation(FieldQuery parsedQuery) throws YardException, IllegalArgumentException {
-        if(parsedQuery == null){
-            throw new IllegalArgumentException("The parsed query MUST NOT be NULL!");
-        }
-        final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
-        int limit = QueryUtils.getLimit(query, config.getDefaultQueryResultNumber(), config.getMaxQueryResultNumber());
+    /**
+     * Returns the SPARQL result set for a given {@link SparqlFieldQuery} that
+     * was executed on this yard
+     * @param query the SparqlFieldQuery instance
+     * @return the results of the SPARQL query in the yard
+     * @throws YardException in case the generated SPARQL query could not be parsed
+     * or the generated Query is not an SPARQL SELECT query.
+     */
+    private ResultSet executeSparqlFieldQuery(final SparqlFieldQuery query) throws YardException {
+        int limit = QueryUtils.getLimit(query, getConfig().getDefaultQueryResultNumber(), getConfig().getMaxQueryResultNumber());
         SelectQuery sparqlQuery;
         String sparqlQueryString = SparqlQueryUtils.createSparqlSelectQuery(query, false,limit,EndpointTypeEnum.Standard);
         try {
@@ -441,7 +436,15 @@ public class ClerezzaYard extends AbstractYard implements Yard {
             log.error("SPARQL Query: "+sparqlQueryString);
             throw new YardException("Unable to parse SPARQL SELECT query generated for the parse FieldQuery",e);
         }
-        final ResultSet result = tcManager.executeSparqlQuery((SelectQuery)sparqlQuery, graph);
+        return tcManager.executeSparqlQuery((SelectQuery)sparqlQuery, graph);
+    }
+    @Override
+    public QueryResultList<Representation> findRepresentation(FieldQuery parsedQuery) throws YardException, IllegalArgumentException {
+        if(parsedQuery == null){
+            throw new IllegalArgumentException("The parsed query MUST NOT be NULL!");
+        }
+        final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
+        final ResultSet result = executeSparqlFieldQuery(query);
         //Note: An other possibility would be to first iterate over all results and add it to
         //      a list and create this Iterator than based on the List. This would
         //      be the preferenced way if changes in the graph could affect the
@@ -459,7 +462,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
                     @Override
                     public Representation adapt(SolutionMapping solution, Class<Representation> type) {
                         Resource resource = solution.get(query.getRootVariableName());
-                        if(resource != null && resource instanceof UriRef){
+                        if(resource instanceof UriRef){
                             try {
                                 return getRepresentation((UriRef)resource,false);
                             } catch (IllegalArgumentException e) {
@@ -477,12 +480,12 @@ public class ClerezzaYard extends AbstractYard implements Yard {
         return new QueryResultListImpl<Representation>(query,representationIterator,Representation.class);
     }
     @Override
-    public QueryResultList<Representation> find(FieldQuery parsedQuery) throws YardException, IllegalArgumentException {
+    public final QueryResultList<Representation> find(FieldQuery parsedQuery) throws YardException, IllegalArgumentException {
         if(parsedQuery == null){
             throw new IllegalArgumentException("The parsed query MUST NOT be NULL!");
         }
         final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
-        int limit = QueryUtils.getLimit(query, config.getDefaultQueryResultNumber(), config.getMaxQueryResultNumber());
+        int limit = QueryUtils.getLimit(query, getConfig().getDefaultQueryResultNumber(), getConfig().getMaxQueryResultNumber());
         Query sparqlQuery;
         //NOTE(s):
         // - parse RdfResourceEnum.representationType as additional field, because

@@ -24,8 +24,8 @@ import org.apache.stanbol.entityhub.servicesapi.query.Query;
  * @author Rupert Westenthaler
  *
  */
-public class QueryUtils {
-
+public final class QueryUtils {
+    private QueryUtils(){}
     /**
      * Getter for the Limit calculated bye on the limit defined by the query
      * and the configuration of the default results (for queries that do not

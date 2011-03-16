@@ -23,7 +23,7 @@ public class RdfReference implements Reference,Cloneable {
     private final UriRef uri;
     protected RdfReference(String reference){
         if(reference == null){
-            throw new NullPointerException("The parsed Reference MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed Reference MUST NOT be NULL!");
         } else if(reference.isEmpty()){
             throw new IllegalArgumentException("The parsed Reference MUST NOT be Empty!");
         } else {
@@ -32,7 +32,7 @@ public class RdfReference implements Reference,Cloneable {
     }
     protected RdfReference(UriRef uri){
         if(uri == null){
-            throw new NullPointerException("The parsed Reference MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed Reference MUST NOT be NULL!");
         } else if(uri.getUnicodeString().isEmpty()){
             throw new IllegalArgumentException("The parsed Reference MUST NOT be represent an empty string!");
         } else {
@@ -56,7 +56,7 @@ public class RdfReference implements Reference,Cloneable {
     }
     @Override
     public boolean equals(Object obj) {
-        return obj != null &&obj instanceof Reference && uri.getUnicodeString().equals(((Reference)obj).getReference());
+        return obj instanceof Reference && uri.getUnicodeString().equals(((Reference)obj).getReference());
     }
     @Override
     public String toString() {

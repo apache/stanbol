@@ -25,7 +25,7 @@ public final class IndexValue {
     /**
      * Calculate the hash only once
      */
-    private final int _hash;
+    private final int hash;
 
     public IndexValue(String value,IndexDataType type){
         this(value,type,null,false);
@@ -49,7 +49,7 @@ public final class IndexValue {
         } else {
             this.language = null;
         }
-        this._hash= type.hashCode()+value.hashCode()+(language!=null?language.hashCode():0);
+        this.hash = type.hashCode()+value.hashCode()+(language!=null?language.hashCode():0);
     }
     public final String getValue(){
         return value;
@@ -65,12 +65,11 @@ public final class IndexValue {
     }
     @Override
     public int hashCode() {
-        return _hash;
+        return hash;
     }
     @Override
     public boolean equals(Object obj) {
-        return obj != null &&
-            obj instanceof IndexValue &&
+        return obj instanceof IndexValue &&
             ((IndexValue)obj).value.equals(value) &&
             ((IndexValue)obj).type.equals(type) &&
             ((IndexValue)obj).hasLanguage == hasLanguage && (

@@ -100,38 +100,38 @@ public class DefaultSymbolImpl extends DefaultSignImpl implements Symbol {
         this.defaultLanguage = defaultLanguage;
     }
     @Override
-    public void addDescription(String description) {
+    public final void addDescription(String description) {
         representation.addNaturalText(Symbol.DESCRIPTION, description,defaultLanguage);
     }
 
     @Override
-    public void addDescription(String description, String lanugage) {
+    public final void addDescription(String description, String lanugage) {
         representation.addNaturalText(Symbol.DESCRIPTION, description,lanugage);
     }
 
     @Override
-    public void addPredecessor(String predecessor) {
+    public final void addPredecessor(String predecessor) {
         representation.addReference(Symbol.PREDECESSOR, predecessor);
     }
 
     @Override
-    public void addSuccessor(String successor) {
+    public final void addSuccessor(String successor) {
         representation.addReference(Symbol.SUCCESSOR, successor);
 
     }
 
     @Override
-    public Iterator<Text> getDescriptions() {
+    public final Iterator<Text> getDescriptions() {
         return representation.getText(Symbol.DESCRIPTION);
     }
 
     @Override
-    public Iterator<Text> getDescriptions(String lang) {
+    public final Iterator<Text> getDescriptions(String lang) {
         return representation.get(Symbol.DESCRIPTION, lang);
     }
 
     @Override
-    public String getLabel() {
+    public final String getLabel() {
         String label = getLabel(defaultLanguage);
         if(label == null){ //no label for the default language
             //search labels in other languages
@@ -149,18 +149,18 @@ public class DefaultSymbolImpl extends DefaultSignImpl implements Symbol {
     }
 
     @Override
-    public String getLabel(String lang) {
+    public final String getLabel(String lang) {
         Text label = representation.getFirst(Symbol.LABEL, lang);
         return label!=null?label.getText():null;
     }
 
     @Override
-    public Iterator<String> getPredecessors() {
+    public final Iterator<String> getPredecessors() {
         return new ToStringIterator(representation.get(Symbol.PREDECESSOR));
     }
 
     @Override
-    public SymbolState getState() {
+    public final SymbolState getState() {
         Reference stateUri = representation.getFirstReference(Symbol.STATE);
         SymbolState state;
         if(stateUri != null){
@@ -177,52 +177,52 @@ public class DefaultSymbolImpl extends DefaultSignImpl implements Symbol {
     }
 
     @Override
-    public Iterator<String> getSuccessors() {
+    public final Iterator<String> getSuccessors() {
         return new ToStringIterator(representation.get(Symbol.SUCCESSOR));
     }
 
     @Override
-    public boolean isPredecessors() {
+    public final boolean isPredecessors() {
         return getPredecessors().hasNext();
     }
 
     @Override
-    public boolean isSuccessor() {
+    public final boolean isSuccessor() {
         return getSuccessors().hasNext();
     }
 
     @Override
-    public void removeDescription(String description) {
+    public final void removeDescription(String description) {
         representation.removeNaturalText(Symbol.DESCRIPTION,description,defaultLanguage);
     }
 
     @Override
-    public void removeDescription(String description, String language) {
+    public final void removeDescription(String description, String language) {
         representation.removeNaturalText(Symbol.DESCRIPTION,description,language);
     }
 
     @Override
-    public void removePredecessor(String predecessor) {
+    public final void removePredecessor(String predecessor) {
         representation.removeReference(Symbol.PREDECESSOR, predecessor);
     }
 
     @Override
-    public void removeSuccessor(String successor) {
+    public final void removeSuccessor(String successor) {
         representation.removeReference(Symbol.SUCCESSOR, successor);
     }
 
     @Override
-    public void setLabel(String label) {
+    public final void setLabel(String label) {
         representation.setNaturalText(Symbol.LABEL, label, defaultLanguage);
     }
 
     @Override
-    public void setLabel(String label, String language) {
+    public final void setLabel(String label, String language) {
         representation.setNaturalText(Symbol.LABEL, label, language);
     }
 
     @Override
-    public void setState(SymbolState state) throws IllegalArgumentException {
+    public final void setState(SymbolState state) throws IllegalArgumentException {
         representation.setReference(Symbol.STATE, state.getUri());
     }
 }

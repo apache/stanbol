@@ -35,13 +35,13 @@ import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 final class SignToRDF {
     private SignToRDF() { /* do not create instances of utility classes */}
 
-    static UriRef signRepresentation = new UriRef(RdfResourceEnum.signRepresentation.getUri());
-    static UriRef signSite = new UriRef(RdfResourceEnum.signSite.getUri());
-    static UriRef sign = new UriRef(RdfResourceEnum.Sign.getUri());
-    static UriRef entityMapping = new UriRef(RdfResourceEnum.EntityMapping.getUri());
-    static UriRef symbol = new UriRef(RdfResourceEnum.Symbol.getUri());
-    static RdfValueFactory valueFactory = RdfValueFactory.getInstance();
-    static LiteralFactory literalFactory = LiteralFactory.getInstance();
+    private static UriRef signRepresentation = new UriRef(RdfResourceEnum.signRepresentation.getUri());
+    private static UriRef signSite = new UriRef(RdfResourceEnum.signSite.getUri());
+    private static UriRef sign = new UriRef(RdfResourceEnum.Sign.getUri());
+    private static UriRef entityMapping = new UriRef(RdfResourceEnum.EntityMapping.getUri());
+    private static UriRef symbol = new UriRef(RdfResourceEnum.Symbol.getUri());
+    private static RdfValueFactory valueFactory = RdfValueFactory.getInstance();
+    private static LiteralFactory literalFactory = LiteralFactory.getInstance();
 
     static MGraph toRDF(Representation representation) {
         MGraph graph = new SimpleMGraph();

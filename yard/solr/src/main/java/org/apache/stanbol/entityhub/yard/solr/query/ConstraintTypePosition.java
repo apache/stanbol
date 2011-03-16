@@ -71,7 +71,7 @@ public class ConstraintTypePosition implements Comparable<ConstraintTypePosition
     }
     @Override
     public boolean equals(Object obj) {
-        return obj != null && obj instanceof ConstraintTypePosition
+        return obj instanceof ConstraintTypePosition
             && ((ConstraintTypePosition)obj).type == type && ((ConstraintTypePosition)obj).pos == pos;
     }
     @Override

@@ -39,15 +39,15 @@ import org.slf4j.LoggerFactory;
  */
 public class Resource2ValueAdapter<T extends Resource> implements Adapter<T, Object> {
 
-    Logger log = LoggerFactory.getLogger(Resource2ValueAdapter.class);
+    private static Logger log = LoggerFactory.getLogger(Resource2ValueAdapter.class);
 
 
-    protected final LiteralFactory literalFactory = LiteralFactory.getInstance();
+    private final LiteralFactory literalFactory = LiteralFactory.getInstance();
 
-    RdfValueFactory valueFactory = RdfValueFactory.getInstance();
+    private RdfValueFactory valueFactory = RdfValueFactory.getInstance();
 
     @Override
-    public Object adapt(T value, Class<Object> type) {
+    public final Object adapt(T value, Class<Object> type) {
         if(value instanceof UriRef){
             return valueFactory.createReference((UriRef)value);
         } else if(value instanceof PlainLiteral){

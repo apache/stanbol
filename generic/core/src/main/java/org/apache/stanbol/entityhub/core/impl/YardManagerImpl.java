@@ -30,14 +30,12 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.entityhub.servicesapi.yard.Cache;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Component(immediate = true)
 @Service
 public class YardManagerImpl implements YardManager {
 
-    Logger log = LoggerFactory.getLogger(YardManagerImpl.class);
+//    private static final Logger log = LoggerFactory.getLogger(YardManagerImpl.class);
     @Reference(
             cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE,
             referenceInterface=Yard.class,
@@ -113,8 +111,7 @@ public class YardManagerImpl implements YardManager {
     }
     @Override
     public Cache getCache(String id) {
-        Cache cache = caches.get(id);
-        return cache;
+        return caches.get(id);
     }
     @Override
     public Collection<String> getCacheIDs() {

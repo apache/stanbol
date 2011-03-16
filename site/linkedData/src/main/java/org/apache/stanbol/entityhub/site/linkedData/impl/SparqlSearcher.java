@@ -40,9 +40,9 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.site.EntitySearcher;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.LoggerFactory;
 
 
@@ -59,12 +59,12 @@ public class SparqlSearcher extends AbstractEntitySearcher implements EntitySear
     }
 
     @Reference
-    protected Parser parser;
+    private Parser parser;
 
     protected static final String DEFAULT_RDF_CONTENT_TYPE = SupportedFormat.N3;
     protected static final String DEFAULT_SPARQL_RESULT_CONTENT_TYPE = SparqlEndpointUtils.SPARQL_RESULT_JSON;
     @Override
-    public QueryResultList<String> findEntities(FieldQuery parsedQuery)  throws IOException {
+    public final QueryResultList<String> findEntities(FieldQuery parsedQuery)  throws IOException {
         final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
         String sparqlQuery = query.toSparqlSelect(false);
         InputStream in = SparqlEndpointUtils.sendSparqlRequest(getQueryUri(), sparqlQuery, DEFAULT_SPARQL_RESULT_CONTENT_TYPE);
@@ -116,7 +116,7 @@ public class SparqlSearcher extends AbstractEntitySearcher implements EntitySear
     }
 
     @Override
-    public QueryResultList<Representation> find(FieldQuery parsedQuery) throws IOException{
+    public final QueryResultList<Representation> find(FieldQuery parsedQuery) throws IOException{
         long start = System.currentTimeMillis();
         final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
         String sparqlQuery = query.toSparqlConstruct();

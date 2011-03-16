@@ -28,7 +28,7 @@ public class RdfText implements Text, Cloneable {
 
     protected RdfText(String text, String lang) {
         if(text == null){
-            throw new NullPointerException("The parsed text MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed text MUST NOT be NULL");
         } else if(text.isEmpty()){
             throw new IllegalArgumentException("Tha parsed Text MUST NOT be empty!");
         }
@@ -61,7 +61,7 @@ public class RdfText implements Text, Cloneable {
     }
 
     @Override
-    public Object clone() {
+    public RdfText clone() {
         Language language = isPlain ? ((PlainLiteral) literal).getLanguage() : null;
         return new RdfText(new PlainLiteralImpl(literal.getLexicalForm(), language));
     }
@@ -73,7 +73,7 @@ public class RdfText implements Text, Cloneable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj != null && obj instanceof Text && ((Text) obj).getText().equals(getText())) {
+        if (obj instanceof Text && ((Text) obj).getText().equals(getText())) {
             return (getLanguage() == null && ((Text) obj).getLanguage() == null)
                     || (getLanguage() != null && getLanguage().equals(((Text) obj).getLanguage()));
         } else {

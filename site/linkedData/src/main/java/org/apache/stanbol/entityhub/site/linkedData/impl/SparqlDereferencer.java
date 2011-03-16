@@ -55,7 +55,7 @@ public class SparqlDereferencer extends AbstractEntityDereferencer {
     }
 
     @Reference
-    protected Parser parser;
+    private Parser parser;
 
 
     /*
@@ -65,7 +65,7 @@ public class SparqlDereferencer extends AbstractEntityDereferencer {
      * However it is not clear if such a functionality is needed.
      */
     @Override
-    public InputStream dereference(String uri, String contentType) throws IOException {
+    public final InputStream dereference(String uri, String contentType) throws IOException {
         if(uri==null){
             return null;
         }
@@ -81,7 +81,7 @@ public class SparqlDereferencer extends AbstractEntityDereferencer {
         return SparqlEndpointUtils.sendSparqlRequest(getAccessUri(),query.toString(),contentType);
     }
 
-    public Representation dereference(String uri) throws IOException {
+    public final Representation dereference(String uri) throws IOException {
         long start = System.currentTimeMillis();
         String format = SupportedFormat.RDF_XML;
         InputStream in = dereference(uri, format);

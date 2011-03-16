@@ -25,7 +25,6 @@ import static org.apache.stanbol.entityhub.indexing.geonames.GeoNamesIndexer.KEY
 import static org.apache.stanbol.entityhub.indexing.geonames.GeoNamesIndexer.KEY_YARD;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -43,7 +42,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class CommandLineRunner {
+public final class CommandLineRunner {
+    private CommandLineRunner(){}
 
     protected static final Logger log = LoggerFactory.getLogger(CommandLineRunner.class);
 

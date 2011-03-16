@@ -87,6 +87,6 @@ public class EncodedConstraintParts implements Iterable<Entry<ConstraintTypePosi
     }
     @Override
     public boolean equals(Object obj) {
-        return obj != null && obj instanceof EncodedConstraintParts && ((EncodedConstraintParts)obj).constraintMap.equals(constraintMap);
+        return obj instanceof EncodedConstraintParts && ((EncodedConstraintParts)obj).constraintMap.equals(constraintMap);
     }
 }

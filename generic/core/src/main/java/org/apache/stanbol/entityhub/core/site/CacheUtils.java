@@ -32,7 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class CacheUtils {
+public final class CacheUtils {
+    private CacheUtils(){}
 
     private static Logger log = LoggerFactory.getLogger(CacheUtils.class);
 

@@ -32,8 +32,8 @@ import java.util.LinkedHashSet;
 public class ValueConstraint extends Constraint {
 
 
-    protected final Object value;
-    protected final Collection<String> dataTypeUris;
+    private final Object value;
+    private final Collection<String> dataTypeUris;
 
     public ValueConstraint(Object value) {
         this(value,null);

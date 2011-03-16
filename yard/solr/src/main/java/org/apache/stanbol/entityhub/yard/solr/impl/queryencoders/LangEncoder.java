@@ -19,9 +19,7 @@ package org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.yard.solr.model.FieldMapper;
-import org.apache.stanbol.entityhub.yard.solr.model.IndexDataType;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition;
 import org.apache.stanbol.entityhub.yard.solr.query.EncodedConstraintParts;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
@@ -33,7 +31,7 @@ import org.apache.stanbol.entityhub.yard.solr.utils.SolrUtil;
 public class LangEncoder implements IndexConstraintTypeEncoder<Collection<String>> {
 
     private static final ConstraintTypePosition PREFIX = new ConstraintTypePosition(PositionType.prefix);
-    private static final ConstraintTypePosition SUFFIX = new ConstraintTypePosition(PositionType.suffux);
+//    private static final ConstraintTypePosition SUFFIX = new ConstraintTypePosition(PositionType.suffux);
     //deactivated, because xsd:string values are now also included in the language
     //merger field (the name returned by fieldMapper.getLanguageMergerField(null)).
     //private static final IndexDataType STRING_DATATYPE =  new IndexDataType(NamespaceEnum.xsd+"string");

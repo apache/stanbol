@@ -50,13 +50,13 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class NaturalTextFilter implements Filter<Literal> {
-    Logger log = LoggerFactory.getLogger(NaturalTextFilter.class);
+    private Logger log = LoggerFactory.getLogger(NaturalTextFilter.class);
     /**
      * The xsd:string data type constant used for TypedLiterals to check if the
      * represent an string value!
      */
     private static UriRef xsdString = new UriRef(DataTypeEnum.String.getUri());
-    protected final Set<String> languages;
+    private final Set<String> languages;
     private final boolean containsNull;
 
     public NaturalTextFilter(String...languages){
@@ -77,7 +77,7 @@ public class NaturalTextFilter implements Filter<Literal> {
         }
     }
     @Override
-    public boolean isValid(Literal value) {
+    public final boolean isValid(Literal value) {
         if (value instanceof PlainLiteral){
            if(languages == null) { //no language restrictions
                 return true; //return any Plain Literal

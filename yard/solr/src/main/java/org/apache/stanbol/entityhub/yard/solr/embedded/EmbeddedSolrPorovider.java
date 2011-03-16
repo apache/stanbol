@@ -81,7 +81,7 @@ public class EmbeddedSolrPorovider implements SolrServerProvider {
      * requested paths.
      */
     @SuppressWarnings("unchecked")
-    protected Map<String, CoreContainer> coreContainers = new ReferenceMap(); 
+    private Map<String, CoreContainer> coreContainers = new ReferenceMap(); 
     
     @Property
     public static final String SOLR_HOME = "solr.solr.home";
@@ -101,7 +101,7 @@ public class EmbeddedSolrPorovider implements SolrServerProvider {
     public SolrServer getSolrServer(Type type, String uriOrPath, String... additional) throws NullPointerException, IllegalArgumentException {
         log.debug(String.format("getSolrServer Request for %s and path %s",type,uriOrPath));
         if(uriOrPath == null){
-            throw new NullPointerException("The Path to the Index MUST NOT be NULL!");
+            throw new IllegalArgumentException("The Path to the Index MUST NOT be NULL!");
         }
         File index = new File(uriOrPath);
         if(!index.exists()){

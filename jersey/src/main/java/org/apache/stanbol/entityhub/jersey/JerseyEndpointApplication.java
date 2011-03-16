@@ -21,11 +21,11 @@ import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
-import org.apache.stanbol.entityhub.jersey.resource.ReferencedSiteRootResource;
 import org.apache.stanbol.entityhub.jersey.resource.EntityMappingResource;
 import org.apache.stanbol.entityhub.jersey.resource.EntityhubRootResource;
-import org.apache.stanbol.entityhub.jersey.resource.SymbolResource;
+import org.apache.stanbol.entityhub.jersey.resource.ReferencedSiteRootResource;
 import org.apache.stanbol.entityhub.jersey.resource.SiteManagerRootResource;
+import org.apache.stanbol.entityhub.jersey.resource.SymbolResource;
 import org.apache.stanbol.entityhub.jersey.writers.JettisonWriter;
 import org.apache.stanbol.entityhub.jersey.writers.QueryResultListWriter;
 import org.apache.stanbol.entityhub.jersey.writers.SignWriter;
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JerseyEndpointApplication extends Application {
 
-    Logger log = LoggerFactory.getLogger(getClass());
+    private static Logger log = LoggerFactory.getLogger(JerseyEndpointApplication.class);
     public JerseyEndpointApplication() {
         log.info("JerseyEndpointApplication instanceiated");
     }

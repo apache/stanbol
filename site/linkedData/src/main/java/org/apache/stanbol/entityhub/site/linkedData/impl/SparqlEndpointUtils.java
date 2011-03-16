@@ -24,10 +24,10 @@ import java.net.URLConnection;
 
 import javax.ws.rs.core.UriBuilder;
 
-public class SparqlEndpointUtils {
+public final class SparqlEndpointUtils {
+    private SparqlEndpointUtils() {/* Do not create instances of utility classes*/}
 
     public static final String SPARQL_RESULT_JSON = "application/sparql-results+json";
-    public SparqlEndpointUtils() {/* Do not create instances of utility classes*/}
 
     /**
      * Sends an SPARQL Request to the accessUri. Please note that based on the
@@ -43,7 +43,7 @@ public class SparqlEndpointUtils {
         final URI dereferenceUri = UriBuilder.fromUri(accessUri)
             .queryParam("query", "{query}")
             .queryParam("format", "{format}")
-            .build(query.toString(), contentType);
+            .build(query, contentType);
         final URLConnection con = dereferenceUri.toURL().openConnection();
         con.addRequestProperty("Accept", contentType);
         return con.getInputStream();

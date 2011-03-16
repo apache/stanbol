@@ -107,7 +107,7 @@ public class RdfIndexerConfig {
      * @param sourceFiles
      *            the source files to add
      */
-    public void addSourceFile(File... sourceFiles) {
+    public final void addSourceFile(File... sourceFiles) {
         if (sourceFiles != null) {
             for (File sourceFile : sourceFiles) {
                 checkAndAddSrouceFile(sourceFile);
@@ -121,7 +121,7 @@ public class RdfIndexerConfig {
      * @param sourceFile
      *            the source files to remove
      */
-    public void removeSourceFile(File... sourceFile) {
+    public final void removeSourceFile(File... sourceFile) {
         if (sourceFile == null) {
             return;
         }
@@ -136,7 +136,7 @@ public class RdfIndexerConfig {
      * 
      * @return the unmodifiable list of files or <code>null</code>if no source files are present.
      */
-    public Collection<File> getSourceFiles() {
+    public final Collection<File> getSourceFiles() {
         Collection<File> sourceFiles = (Collection<File>) config.get(KEY_RDF_FILES);
         return sourceFiles == null ? null : Collections.unmodifiableCollection((Collection<File>) config
                 .get(KEY_RDF_FILES));
@@ -150,7 +150,7 @@ public class RdfIndexerConfig {
      * @return <code>true</code> if the parsed file can be used as indexing
      *     directory (exists and is a directory or !exists) 
      */
-    public boolean setIndexingDir(File file) throws IllegalArgumentException {
+    public final boolean setIndexingDir(File file) throws IllegalArgumentException {
         if (checkFile(file, false, null)) { // isDirectory or !exists
             config.put(KEY_RDF_STORE_DIR, file);
             return true;
@@ -162,7 +162,7 @@ public class RdfIndexerConfig {
      * Getter for the indexing directory
      * @return the directory used for indexing
      */
-    public File getIndexingDir() {
+    public final File getIndexingDir() {
         return (File) config.get(KEY_RDF_STORE_DIR);
     }
     /**
@@ -170,7 +170,7 @@ public class RdfIndexerConfig {
      * for indexing
      * @param modelName the RDF model name
      */
-    public void setModelName(String modelName) {
+    public final void setModelName(String modelName) {
         if (modelName != null && !modelName.isEmpty()) {
             config.put(KEY_MODEL_NAME, modelName);
         } else {
@@ -182,7 +182,7 @@ public class RdfIndexerConfig {
      * for indexing
      * @return the RDF model name
      */
-    public String getModelName() {
+    public final String getModelName() {
         return (String) config.get(KEY_MODEL_NAME);
     }
     /**
@@ -191,7 +191,7 @@ public class RdfIndexerConfig {
      * about ranking of entities)
      * @param entityRankings the entity ranking map
      */
-    public void setEntityRankings(Map<String,Float> entityRankings) {
+    public final void setEntityRankings(Map<String,Float> entityRankings) {
         if (entityRankings == null) {
             config.remove(KEY_ENTITY_RANKINGS);
         } else {
@@ -205,7 +205,7 @@ public class RdfIndexerConfig {
      * @return the entity rankings or <code>null</code> if no entity rankings
      * are present
      */
-    public Map<String,Float> getNetityRankings() {
+    public final Map<String,Float> getNetityRankings() {
         return (Map<String,Float>) config.get(KEY_ENTITY_RANKINGS);
     }
     /**
@@ -213,7 +213,7 @@ public class RdfIndexerConfig {
      * {@link RdfIndexer#KEY_INDEXING_MODE} before setting this property.
      * @param mode the indexing mode
      */
-    public void setIndexingMode(IndexingMode mode) {
+    public final void setIndexingMode(IndexingMode mode) {
         if (mode != null) {
             config.put(KEY_INDEXING_MODE, mode);
         } else {
@@ -225,7 +225,7 @@ public class RdfIndexerConfig {
      * @return the indexing mode or <code>null</code> if not set by this
      * configuration.
      */
-    public IndexingMode getIndexingMode() {
+    public final IndexingMode getIndexingMode() {
         return (IndexingMode) config.get(KEY_INDEXING_MODE);
     }
     /**
@@ -235,7 +235,7 @@ public class RdfIndexerConfig {
      * indexing session that has already completed with reading the RDF data.
      * @param state the state or <code>null</code> to remove any present config
      */
-    public void setSkipRead(Boolean state) {
+    public final void setSkipRead(Boolean state) {
         if (state == null) {
             config.remove(KEY_SKIP_READ);
         } else {
@@ -246,7 +246,7 @@ public class RdfIndexerConfig {
      * Getter for the skip reading state.
      * @return the state or <code>null</code> if not set
      */
-    public Boolean getSkipRead() {
+    public final Boolean getSkipRead() {
         return (Boolean) config.get(KEY_SKIP_READ);
     }
     /**
@@ -258,7 +258,7 @@ public class RdfIndexerConfig {
      * at once. Parse <code>null</code> or a value smaller equals zero to remove
      * this optional configuration.
      */
-    public void setChunkSize(Integer size) {
+    public final void setChunkSize(Integer size) {
         if (size == null || size < 1) {
             config.remove(KEY_CHUNK_SIZE);
         } else {
@@ -270,7 +270,7 @@ public class RdfIndexerConfig {
      * in the {@link Yard}.
      * @return the chunk size or <code>null</code> if not present
      */
-    public Integer getChunkSize() {
+    public final Integer getChunkSize() {
         return (Integer) config.get(KEY_CHUNK_SIZE);
     }
     /**
@@ -279,7 +279,7 @@ public class RdfIndexerConfig {
      * @param state the state or <code>null</code> to remove the configuration
      * and go with the default.
      */
-    public void setIgnoreEntitiesWithoutRanking(Boolean state) {
+    public final void setIgnoreEntitiesWithoutRanking(Boolean state) {
         if (state == null) {
             config.remove(KEY_IGNORE_ENTITIES_WITHOUT_ENTITY_RANKING);
         } else {
@@ -291,7 +291,7 @@ public class RdfIndexerConfig {
      * ignored.
      * @return the state or <code>null</code> if not present
      */
-    public Boolean getIgnoreEntitiesWithoutRanking() {
+    public final Boolean getIgnoreEntitiesWithoutRanking() {
         return (Boolean) config.get(KEY_IGNORE_ENTITIES_WITHOUT_ENTITY_RANKING);
     }
     /**
@@ -301,7 +301,7 @@ public class RdfIndexerConfig {
      * value smaller equals 0 to remove this configuration and go with the
      * default.
      */
-    public void setMinEntityRanking(Float minRanking) {
+    public final void setMinEntityRanking(Float minRanking) {
         if (minRanking == null || minRanking <= 0) {
             config.remove(KEY_REQUIRED_ENTITY_RANKING);
         } else {
@@ -313,7 +313,7 @@ public class RdfIndexerConfig {
      * @return the minimum required ranking or <code>null</code> if not defined
      * by this configuration
      */
-    public Float getMinEntityRanking() {
+    public final Float getMinEntityRanking() {
         return (Float) config.get(KEY_REQUIRED_ENTITY_RANKING);
     }
     /**
@@ -323,7 +323,7 @@ public class RdfIndexerConfig {
      * information. Parse <code>null</code> or a value smaller equals zero to
      * remove this configuration.
      */
-    public void setDefaultEntityRanking(Float defaultRanking) {
+    public final void setDefaultEntityRanking(Float defaultRanking) {
         if (defaultRanking == null || defaultRanking <= 0) {
             config.remove(defaultRanking);
         } else {
@@ -336,7 +336,7 @@ public class RdfIndexerConfig {
      * @return the default ranking or <code>null</code> if not present within
      * this configuration.
      */
-    public Float getDefaultEntityRanking() {
+    public final Float getDefaultEntityRanking() {
         return (Float) config.get(KEY_DEFAULT_ENTITY_RANKING);
     }
     
@@ -345,7 +345,7 @@ public class RdfIndexerConfig {
      * if OK add them to the configuration.
      * @param sourceFile the file to add
      */
-    private void checkAndAddSrouceFile(File sourceFile) {
+    private final void checkAndAddSrouceFile(File sourceFile) {
         if (checkFile(sourceFile, true, true)) {
             Set<File> files = (Set<File>) config.get(KEY_RDF_FILES);
             if (files == null) {
@@ -364,7 +364,7 @@ public class RdfIndexerConfig {
      * If <code>null</code> or an empty collection is parsed the configuration
      * is removed.
      */
-    public void setMappings(Collection<String> mappings){
+    public final void setMappings(Collection<String> mappings){
         if(mappings == null || mappings.isEmpty()){
             config.remove(KEY_FIELD_MAPPINGS);
         } else {
@@ -379,7 +379,7 @@ public class RdfIndexerConfig {
      * @param mapper the FieldMapper instance with the FieldMappings to be used
      * for the configuration of the indexer.
      */
-    public void setMappings(FieldMapper mapper){
+    public final void setMappings(FieldMapper mapper){
         if(mapper != null){
             String[] mappingStrings = FieldMappingUtils.serialiseFieldMapper(mapper);
             setMappings(mappingStrings != null ? Arrays.asList(mappingStrings):null);
@@ -392,7 +392,7 @@ public class RdfIndexerConfig {
      * @return the field mappings or <code>null</code> if no are defined for
      * this configuration.
      */
-    public Collection<String> getMappings(){
+    public final Collection<String> getMappings(){
         Collection<String> mappings = (Collection<String>)config.get(KEY_FIELD_MAPPINGS);
         return mappings == null ? null: Collections.unmodifiableCollection(mappings);
     }
@@ -408,7 +408,7 @@ public class RdfIndexerConfig {
      * @return <code>true</code> if the parsed {@link File} fulfils the stated
      * requirements.
      */
-    private boolean checkFile(File file, boolean isFile, Boolean exists) {
+    private final boolean checkFile(File file, boolean isFile, Boolean exists) {
         //exists null means that it will be created if not existence
         //therefore we need only to check the state if not null.
         if (exists != null) {

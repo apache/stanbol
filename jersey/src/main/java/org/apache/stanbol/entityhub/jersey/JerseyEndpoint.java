@@ -67,20 +67,20 @@ public class JerseyEndpoint {
     //public static final String FREEMARKER_TEMPLATE_CLASSPATH_PROPERTY = "org.apache.stanbol.entityhub.jersey.templates.classpath";
 
     @Reference
-    TcManager tcManager;
+    private TcManager tcManager;
 
     @Reference
-    Entityhub entityhub;
+    private Entityhub entityhub;
 
     @Reference
-    ReferencedSiteManager referencedSiteManager;
+    private ReferencedSiteManager referencedSiteManager;
 
 
     @Reference
-    HttpService httpService;
+    private HttpService httpService;
 
     @Reference
-    Serializer serializer;
+    private Serializer serializer;
 
 
     protected ServletContext servletContext;

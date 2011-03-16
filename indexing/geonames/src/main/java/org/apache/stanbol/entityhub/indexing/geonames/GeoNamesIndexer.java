@@ -33,6 +33,7 @@ import java.util.EnumMap;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -101,7 +102,7 @@ public class GeoNamesIndexer {
         mappings.add(Properties.rdf_type.toString());
         fieldMappings = mappings.toArray(new String[mappings.size()]);
     }
-    Logger log = LoggerFactory.getLogger(GeoNamesIndexer.class);
+    private static final Logger log = LoggerFactory.getLogger(GeoNamesIndexer.class);
 
     private Yard yard;
     private ValueFactory vf;
@@ -110,6 +111,7 @@ public class GeoNamesIndexer {
     private int indexingChunkSize = 1000;
 
     private File dataDir;
+    @SuppressWarnings("unused") //TODO implement indexing of Ontology
     private File geonamesOntFile;
     private File alternateNamesFile;
     private File hierarchyFile;
@@ -117,9 +119,9 @@ public class GeoNamesIndexer {
     private File countryInfoFile;
     private final int countryGeonamesIdPos = 17;
     private File geonamesArchiveFile;
-    private final String geonamesOntBase = "http://www.geonames.org/ontology/";
+    //private final String geonamesOntBase = "http://www.geonames.org/ontology/";
     private final String geonamesFeatureBase = "http://sws.geonames.org/";
-    private final String geonamesCountryBase = "http://www.geonames.org/countries/";
+    //private final String geonamesCountryBase = "http://www.geonames.org/countries/";
     //for date processing we use joda time!
     private final Map<Integer,List<FeatureName>> featureNames = new TreeMap<Integer,List<FeatureName>>();
     private final Map<String, Integer> adminCode2featureId = new TreeMap<String, Integer>();
@@ -233,7 +235,7 @@ public class GeoNamesIndexer {
         skos_narrower(NamespaceEnum.skos.getNamespace(),"narrower"),
         skos_related(NamespaceEnum.skos.getNamespace(),"related"),
         ;
-        String uri;
+        private String uri;
         Properties(String namespace,String name){
             uri = namespace+name;
         }
@@ -262,13 +264,13 @@ public class GeoNamesIndexer {
             this.indexingChunkSize = chunkSize;
         } //else use default value of 1000
         log.info(" ... start indexing at position "+startPosition);
-        Boolean indexOntology = (Boolean)config.get(KEY_INDEX_ONTOLOGY_STATE);
-        if(indexOntology != null){
-            this.indexOntology = indexOntology;
+        Boolean indexOntologyState = (Boolean)config.get(KEY_INDEX_ONTOLOGY_STATE);
+        if(indexOntologyState != null){
+            this.indexOntology = indexOntologyState;
         } else {
             this.indexOntology = false;
         }
-        log.info(" ... indexing geonames.org thesaurus="+indexOntology);
+        log.info(" ... indexing geonames.org thesaurus="+indexOntologyState);
         this.dataDir = checkFile(KEY_DATA_DIR, config, "/data");
         this.geonamesArchiveFile = checkFile(KEY_GEONAMES_ARCHIVE, dataDir, config,"allCountries.zip");
         this.countryInfoFile = checkFile(KEY_COUNTRY_INFOS, dataDir,config,"countryInfo.txt");
@@ -396,7 +398,7 @@ public class GeoNamesIndexer {
                         }
                     } else {
                         //remove alternate labels from the inMemoryMap for the ID to save memory
-                        Integer id = new Integer(line.substring(0, line.indexOf('\t')));
+                        Integer id = Integer.valueOf(line.substring(0, line.indexOf('\t')));
                         featureNames.remove(id);
                     }
                 }
@@ -430,23 +432,23 @@ public class GeoNamesIndexer {
     }
     private Representation importFeature(String line){
         Tokenizer t = new Tokenizer(line);
-        String id = t.nextElement();
+        String id = t.next();
         Integer geoNamesId = Integer.parseInt(id);
         //create a new Doc based on the first Element (geonamesID)
         Representation doc = this.yard.getValueFactory().createRepresentation(String.format("%s%s/", geonamesFeatureBase,id));
         //add the geonames:Feature type
         doc.add(Properties.rdf_type.toString(), getDocRef(Properties.gn_Feature.toString()));
         //add the UTF-8name
-        String utf8Label = t.nextElement();
+        String utf8Label = t.next();
         doc.addNaturalText(Properties.gn_name.toString(),utf8Label);
         //add the ASKII Name as rdfs:label
-        String askiiLabel = t.nextElement();
+        String askiiLabel = t.next();
         if(utf8Label == null){
             utf8Label = askiiLabel; //use ASKII label as fallback for the utf8 version
         }
         doc.addNaturalText(Properties.rdfs_label.toString(),utf8Label);
         //alternate Names (alternate names also include Airport codes, postal codes and Wikipedia links!
-        t.nextElement(); //consume this Element and use the alternateNames Map instead
+        t.next(); //consume this Element and use the alternateNames Map instead
         List<FeatureName> alternateNames = featureNames.remove(geoNamesId); //use remove, because we need not need it a 2nd time!
         if(alternateNames != null){
             List<Text> altList = new ArrayList<Text>(alternateNames.size());
@@ -495,20 +497,20 @@ public class GeoNamesIndexer {
             }
         }
         //lat
-        doc.add(Properties.geo_lat.toString(),new BigDecimal(t.nextElement()));
+        doc.add(Properties.geo_lat.toString(),new BigDecimal(t.next()));
         //lon
-        doc.add(Properties.geo_long.toString(),new BigDecimal(t.nextElement()));
+        doc.add(Properties.geo_long.toString(),new BigDecimal(t.next()));
         //featureClass
-        String featureClass = String.format("%s%s",NamespaceEnum.geonames,t.nextElement());
+        String featureClass = String.format("%s%s",NamespaceEnum.geonames,t.next());
         doc.add(Properties.gn_featureClass.toString(),getDocRef(featureClass));
         //featureCode (-> need to use <featureClass>.<featureCode>!!)
-        doc.add(Properties.gn_featureCode.toString(),getDocRef(String.format("%s.%s",featureClass,t.nextElement())));
+        doc.add(Properties.gn_featureCode.toString(),getDocRef(String.format("%s.%s",featureClass,t.next())));
         //countryCode
         //  -> geonames uses here the link to an HTML Page showing the Country
         //     We would like to use an Link to a SKOS:Concept representing the Country
         // ... But luckily here we need only to add the URI!
         Set<String> ccs = new HashSet<String>();
-        String countryCode = t.nextElement();
+        String countryCode = t.next();
         if(countryCode != null){
             countryCode = countryCode.trim(); //need to trim because some country codes use '  ' to indicate null!
             if(countryCode.length() == 2){ //Yes there are some features that are in no country!
@@ -516,7 +518,7 @@ public class GeoNamesIndexer {
             }
         }
         //alternate countryCodes
-        String altCc = t.nextElement();
+        String altCc = t.next();
         if(altCc != null){
             StringTokenizer altCcT = new StringTokenizer(altCc,",");
             while(altCcT.hasMoreElements()){
@@ -533,10 +535,10 @@ public class GeoNamesIndexer {
         //first read them -> we need to consume the tokens anyway
         String[] adminCodes = new String[] {
             countryCode, //country
-            t.nextElement(), //ADM1
-            t.nextElement(), //ADM2
-            t.nextElement(), //ADM3
-            t.nextElement()};//ADM4
+            t.next(), //ADM1
+            t.next(), //ADM2
+            t.next(), //ADM3
+            t.next()};//ADM4
         //Workaround for Admin1 -> add leading '0' for single Value
         if(adminCodes[1] != null && adminCodes[1].length() < 2){
             adminCodes[1] = '0'+adminCodes[1];
@@ -544,7 +546,7 @@ public class GeoNamesIndexer {
         addParents(doc,geoNamesId,adminCodes);
 
         //population
-        String populationString = t.nextElement();
+        String populationString = t.next();
         if(populationString != null){
             //NOTE: we need to used Long, because of Asia (3.800.000)
             Long population = new Long(populationString);
@@ -553,20 +555,20 @@ public class GeoNamesIndexer {
             }
         }
         //elevation
-        String latString = t.nextElement();
-        if(latString == null){
-            latString = t.nextElement(); //if no elevation than use the gtopo30
+        String altString = t.next();
+        if(altString == null){
+            altString = t.next(); //if no elevation than use the gtopo30
         } else {
-            t.nextElement(); //if there is already en elevation, than consume these entry
+            t.next(); //if there is already en elevation, than consume these entry
         }
-        Integer alt = new Integer(latString);
+        Integer alt = Integer.valueOf(altString);
         if(alt.intValue() > -9999){ //it looks like that -9999 is sometimes used as not known!
             doc.add(Properties.geo_alt.toString(),alt);
         }
         //time zone
-        t.nextElement(); //not used
+        t.next(); //not used
         //mod-date
-        String modDateString = t.nextElement();
+        String modDateString = t.next();
         if(modDateString != null){
             try {
                 doc.add(Properties.dc_date.toString(),TimeUtils.toDate(DataTypeEnum.DateTime, modDateString));
@@ -696,13 +698,13 @@ public class GeoNamesIndexer {
                 String code = null;
                 Integer geonamesId = null;
                 int i=1;
-                for(;t.hasMoreElements();i++){
-                    String actToken = t.nextElement();
+                for(;t.hasNext();i++){
+                    String actToken = t.next();
                     if(i==1){
                         code = actToken;
                     }
                     if(i==countryGeonamesIdPos){
-                        geonamesId = new Integer(actToken);
+                        geonamesId = Integer.valueOf(actToken);
                         break;
                     }
                 }
@@ -742,7 +744,7 @@ public class GeoNamesIndexer {
                     lineCount++;
                     //no tokenizer this time ... need only first and last column!
                     String code = line.substring(0, line.indexOf('\t'));
-                    Integer geonamesId = new Integer(line.substring(line.lastIndexOf('\t')+1));
+                    Integer geonamesId = Integer.valueOf(line.substring(line.lastIndexOf('\t')+1));
                     adminCode2featureId.put(code, geonamesId);
                 }
             }
@@ -875,11 +877,11 @@ public class GeoNamesIndexer {
         while((line = reader.readLine()) != null){
             lineCount++;
             Tokenizer t = new Tokenizer(line);
-            Integer parent = new Integer(t.nextElement());
-            Integer child = new Integer(t.nextElement());
+            Integer parent = Integer.valueOf(t.next());
+            Integer child = Integer.valueOf(t.next());
             String type;
-            if(t.hasMoreElements()){
-                type = t.nextElement();
+            if(t.hasNext()){
+                type = t.next();
             } else {
                 type = null;
             }
@@ -964,34 +966,34 @@ public class GeoNamesIndexer {
         private final static String TRUE = "1";
         protected FeatureName(String line){
             Tokenizer t = new Tokenizer(line);
-            labelID = Integer.parseInt(t.nextElement()); //first Elem the labelID
-            geonameID = Integer.parseInt(t.nextElement());
-            String lang = t.nextElement();
-            if(lang != null && (lang.length() == 2 || lang.length() == 3)){
-                this.lang = lang;
+            labelID = Integer.parseInt(t.next()); //first Elem the labelID
+            geonameID = Integer.parseInt(t.next());
+            String language = t.next();
+            if(language != null && (language.length() == 2 || language.length() == 3)){
+                this.lang = language;
             } else {
                 this.lang = null; //no valied lang Code
             }
-            if(lang == null || lang.length()<=3){
+            if(language == null || language.length()<=3){
                 type = NameType.naturalLanguage;
-            } else if("post".equals(lang)){
+            } else if("post".equals(language)){
                 type = NameType.postal;
-            } else if("link".equals(lang)) {
+            } else if("link".equals(language)) {
                 type = NameType.link;
-            } else if("abbr".equals(lang)) {
+            } else if("abbr".equals(language)) {
                 type = NameType.abbreviation;
-            } else if("iata".equals(lang) || "icao".equals(lang) || "faac".equals(lang)){
+            } else if("iata".equals(language) || "icao".equals(language) || "faac".equals(language)){
                 type = NameType.airportCode;
             } else {
                 type = NameType.unknown; // e.g. fr_1793 for French Revolution names
             }
-            name = t.nextElement();
+            name = t.next();
             if(name == null){
                 throw new IllegalStateException(" Unable to parse name from line:" + line);
             }
-            String act = t.nextElement();
+            String act = t.next();
             this.preferred = act != null && act.equals(TRUE);
-            act = t.nextElement();
+            act = t.next();
             this.shortName = act != null && act.equals(TRUE);
         }
         public final Integer getGeonameID() {
@@ -1017,9 +1019,7 @@ public class GeoNamesIndexer {
         }
         @Override
         public final boolean equals(Object obj) {
-            return obj != null &&
-                    obj instanceof FeatureName &&
-                    ((FeatureName)obj).labelID == labelID;
+            return obj instanceof FeatureName && ((FeatureName)obj).labelID == labelID;
         }
         @Override
         public final int hashCode() {
@@ -1029,20 +1029,20 @@ public class GeoNamesIndexer {
             return name+(lang!=null?('@'+lang):"");
         }
     }
-    public static class Tokenizer implements Enumeration<String>{
+    public static class Tokenizer implements Iterator<String>{
         private static final String DELIM ="\t";
         private final StringTokenizer t;
-        boolean prevElementWasNull = true;
+        private boolean prevElementWasNull = true;
         public Tokenizer(String data){
             t = new StringTokenizer(data, DELIM, true);
         }
         @Override
-        public boolean hasMoreElements() {
+       public boolean hasNext() {
             return t.hasMoreTokens();
         }
 
         @Override
-        public String nextElement() {
+        public String next() {
             if(!prevElementWasNull){
                 t.nextElement();//dump the delim
             }
@@ -1062,6 +1062,10 @@ public class GeoNamesIndexer {
                     return act;
                 }
             }
+        }
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
         }
     }
 }

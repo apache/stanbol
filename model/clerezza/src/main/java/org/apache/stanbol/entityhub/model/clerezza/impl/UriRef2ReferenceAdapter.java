@@ -33,7 +33,7 @@ public class UriRef2ReferenceAdapter implements Adapter<UriRef,Reference> {
     private final RdfValueFactory valueFactory = RdfValueFactory.getInstance();
 
     @Override
-    public Reference adapt(UriRef value, Class<Reference> type) {
+    public final Reference adapt(UriRef value, Class<Reference> type) {
         return valueFactory.createReference(value);
     }
 

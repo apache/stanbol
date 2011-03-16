@@ -44,12 +44,12 @@ import org.apache.stanbol.entityhub.servicesapi.util.PatternUtils;
  */
 public class FieldMapping {
 
-    protected final String pattern;
-    protected final Pattern regex;
-    protected final boolean usesWildcard;
-    protected Set<String> mappings;
-    protected Constraint filter;
-    protected final boolean inverse;
+    private final String pattern;
+    private final Pattern regex;
+    private final boolean usesWildcard;
+    private Set<String> mappings;
+    private Constraint filter;
+    private final boolean inverse;
     private final boolean global;
     /**
      * Returns <code>true</code> if fields that match the pattern are ignored.
@@ -237,8 +237,7 @@ public class FieldMapping {
     }
     @Override
     public boolean equals(Object obj) {
-        return obj != null && //not null
-            obj instanceof FieldMapping && // check type
+        return obj instanceof FieldMapping && // check type
             ((FieldMapping)obj).pattern.equals(pattern) && //check field pattern
             ((FieldMapping)obj).inverse == inverse && //check inverse
             ((FieldMapping)obj).mappings.equals(mappings) && //check mappings

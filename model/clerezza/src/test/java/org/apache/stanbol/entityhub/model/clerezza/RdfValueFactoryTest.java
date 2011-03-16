@@ -18,7 +18,6 @@ package org.apache.stanbol.entityhub.model.clerezza;
 
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.test.model.ValueFactoryTest;
 import org.junit.Before;
@@ -48,12 +47,12 @@ public class RdfValueFactoryTest extends ValueFactoryTest {
     protected ValueFactory getValueFactory() {
         return valueFactory;
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullNodeRepresentation() {
         SimpleMGraph graph = new SimpleMGraph();
         valueFactory.createRdfRepresentation(null, graph);
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullGraphRepresentation() {
         UriRef rootNode = new UriRef("urn:test.rootNode");
         valueFactory.createRdfRepresentation(rootNode, null);

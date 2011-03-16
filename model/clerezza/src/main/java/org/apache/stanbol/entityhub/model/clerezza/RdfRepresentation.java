@@ -35,10 +35,10 @@ import org.apache.stanbol.entityhub.core.utils.TypeSaveIterator;
 import org.apache.stanbol.entityhub.model.clerezza.impl.Literal2TextAdapter;
 import org.apache.stanbol.entityhub.model.clerezza.impl.LiteralAdapter;
 import org.apache.stanbol.entityhub.model.clerezza.impl.NaturalTextFilter;
+import org.apache.stanbol.entityhub.model.clerezza.impl.Resource2StringAdapter;
 import org.apache.stanbol.entityhub.model.clerezza.impl.Resource2ValueAdapter;
 import org.apache.stanbol.entityhub.model.clerezza.impl.UriRef2ReferenceAdapter;
 import org.apache.stanbol.entityhub.model.clerezza.impl.UriRefAdapter;
-import org.apache.stanbol.entityhub.model.clerezza.utils.Resource2StringAdapter;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
@@ -82,7 +82,7 @@ public class RdfRepresentation implements Representation{
     @Override
     public void add(String field, Object value) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -128,7 +128,7 @@ public class RdfRepresentation implements Representation{
     @Override
     public void addReference(String field, String reference) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -142,7 +142,7 @@ public class RdfRepresentation implements Representation{
     @Override
     public void addNaturalText(String field, String text, String...languages) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -164,7 +164,7 @@ public class RdfRepresentation implements Representation{
     @Override
     public <T> Iterator<T> get(String field, final Class<T> type) throws UnsupportedTypeException {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -206,7 +206,7 @@ public class RdfRepresentation implements Representation{
     @Override
     public Iterator<Reference> getReferences(String field) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -218,7 +218,7 @@ public class RdfRepresentation implements Representation{
     @Override
     public Iterator<Text> getText(String field) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -231,7 +231,7 @@ public class RdfRepresentation implements Representation{
     @Override
     public Iterator<Object> get(String field) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -242,7 +242,7 @@ public class RdfRepresentation implements Representation{
     @Override
     public Iterator<Text> get(String field, String...languages) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -261,7 +261,7 @@ public class RdfRepresentation implements Representation{
     @Override
     public <T> T getFirst(String field, Class<T> type) throws UnsupportedTypeException {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -276,7 +276,7 @@ public class RdfRepresentation implements Representation{
     @Override
     public Object getFirst(String field) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -290,7 +290,7 @@ public class RdfRepresentation implements Representation{
     @Override
     public Reference getFirstReference(String field) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -300,7 +300,7 @@ public class RdfRepresentation implements Representation{
     @Override
     public Text getFirst(String field, String...languages) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -331,7 +331,7 @@ public class RdfRepresentation implements Representation{
     @Override
     public void remove(String field, Object parsedValue) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -367,7 +367,7 @@ public class RdfRepresentation implements Representation{
     @Override
     public void removeReference(String field, String reference) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -390,7 +390,7 @@ public class RdfRepresentation implements Representation{
     @Override
     public void removeNaturalText(String field, String value, String... languages) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -414,7 +414,7 @@ public class RdfRepresentation implements Representation{
     @Override
     public void removeAll(String field) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -423,7 +423,7 @@ public class RdfRepresentation implements Representation{
     @Override
     public void removeAllNaturalText(String field, String... languages) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -478,7 +478,7 @@ public class RdfRepresentation implements Representation{
     }
     @Override
     public boolean equals(Object obj) {
-        return obj != null && obj instanceof Representation && ((Representation)obj).getId().equals(getId());
+        return obj instanceof Representation && ((Representation)obj).getId().equals(getId());
     }
 
 }

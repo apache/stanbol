@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class Utils {
+public final class Utils {
+    private Utils(){}
     /**
      * Converts an Iterator to a Collection by iterating over all elements and
      * adding them to a List.

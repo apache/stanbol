@@ -33,7 +33,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
  * @author Rupert Westenthaler
  *
  */
-public class RdfValueFactory implements ValueFactory {
+public final class RdfValueFactory implements ValueFactory {
 
     private static RdfValueFactory instance;
     /**
@@ -55,7 +55,7 @@ public class RdfValueFactory implements ValueFactory {
     @Override
     public RdfReference createReference(Object value) {
         if (value == null) {
-            throw new NullPointerException("The parsed value MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed value MUST NOT be NULL");
         } else if (value instanceof UriRef) {
             return new RdfReference((UriRef) value);
         } else {
@@ -66,7 +66,7 @@ public class RdfValueFactory implements ValueFactory {
     @Override
     public RdfText createText(Object value) {
         if (value == null) {
-            throw new NullPointerException("The parsed value MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed value MUST NOT be NULL");
         } else if (value instanceof Literal) {
             return new RdfText((Literal) value);
         } else {
@@ -82,7 +82,7 @@ public class RdfValueFactory implements ValueFactory {
     @Override
     public RdfRepresentation createRepresentation(String id) {
         if (id == null){
-           throw new NullPointerException("The parsed id MUST NOT be NULL!");
+           throw new IllegalArgumentException("The parsed id MUST NOT be NULL!");
         } else if(id.isEmpty()){
             throw new IllegalArgumentException("The parsed id MUST NOT be empty!");
         } else {
@@ -102,10 +102,10 @@ public class RdfValueFactory implements ValueFactory {
      */
     public RdfRepresentation createRdfRepresentation(UriRef node, TripleCollection graph) {
         if (node == null) {
-            throw new NullPointerException("The parsed id MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed id MUST NOT be NULL!");
         }
         if(graph == null){
-            throw new NullPointerException("The parsed graph MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed graph MUST NOT be NULL!");
         }
         return new RdfRepresentation(node, graph);
     }

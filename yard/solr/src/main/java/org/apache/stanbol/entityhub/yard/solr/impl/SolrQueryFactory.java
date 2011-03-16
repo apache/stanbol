@@ -96,15 +96,15 @@ public class SolrQueryFactory {
      * The default limit of results for queries
      */
     public static final Integer DEFAULT_QUERY_RESULTS = 10;
-    protected final Logger log = LoggerFactory.getLogger(SolrQueryFactory.class);
+    private final Logger log = LoggerFactory.getLogger(SolrQueryFactory.class);
     private final FieldMapper fieldMapper;
     private final IndexValueFactory indexValueFactory;
     private final ValueFactory valueFactory;
-    protected final Map<IndexConstraintTypeEnum, IndexConstraintTypeEncoder<?>> constraintEncoders;
+    private final Map<IndexConstraintTypeEnum, IndexConstraintTypeEncoder<?>> constraintEncoders;
 
-    protected String domain;
-    protected Integer maxQueryResults = MAX_QUERY_RESULTS;
-    protected Integer defaultQueryResults = DEFAULT_QUERY_RESULTS;
+    private String domain;
+    private Integer maxQueryResults = MAX_QUERY_RESULTS;
+    private Integer defaultQueryResults = DEFAULT_QUERY_RESULTS;
 
     public SolrQueryFactory(ValueFactory valueFactory, IndexValueFactory indexValueFactory, FieldMapper fieldMapper){
         if(fieldMapper == null){
@@ -230,7 +230,7 @@ public class SolrQueryFactory {
             if(dataType == null){
                 dataType = upperDataType;
             } else {
-                if(dataType != upperDataType){
+                if(!dataType.equals(upperDataType)){
                     indexConstraint.setInvalied(String.format("A Range Query MUST use the same data type for the upper and lover Bound! (lower:[value=%s|datatype=%s] | upper:[value=%s|datatype=%s])",
                             rangeConstraint.getLowerBound(),dataType,rangeConstraint.getUpperBound(),upperDataType));
                 }

@@ -92,7 +92,7 @@ public class ValueConverterFactory {
      * The {@link ValueFactory} used by converters to create instances for converted
      * values.
      */
-    protected final ValueFactory valueFactory;
+    private final ValueFactory valueFactory;
     private boolean readonly = false;
     /**
      * Creates a new factory instance that supports conversions for all
@@ -229,7 +229,9 @@ public class ValueConverterFactory {
 
         @Override
         public Boolean convert(Object value) {
-            if (value == null) return null;
+            if (value == null) {
+                return null;
+            }
             if(value instanceof Boolean){
                 return (Boolean)value;
             } else {
@@ -248,7 +250,9 @@ public class ValueConverterFactory {
     public class ByteConverter implements ValueConverter<Byte>{
         @Override
         public Byte convert(Object value) {
-            if (value == null) return null;
+            if (value == null) {
+                return null;
+            }
             if(value instanceof Byte){
                 return (Byte)value;
             } else {
@@ -264,7 +268,9 @@ public class ValueConverterFactory {
     public class ShortConverter implements ValueConverter<Short>{
         @Override
         public Short convert(Object value) {
-            if (value == null) return null;
+            if (value == null) {
+                return null;
+            }
             if(value instanceof Short){
                 return (Short)value;
             } else {
@@ -280,7 +286,9 @@ public class ValueConverterFactory {
     public class IntConverter implements ValueConverter<Integer>{
         @Override
         public Integer convert(Object value) {
-            if (value == null) return null;
+            if (value == null) {
+                return null;
+            }
             if(value instanceof Integer){
                 return (Integer)value;
             } else {
@@ -296,7 +304,9 @@ public class ValueConverterFactory {
     public class LongConverter implements ValueConverter<Long>{
         @Override
         public Long convert(Object value) {
-            if (value == null) return null;
+            if (value == null) {
+                return null;
+            }
             if(value instanceof Long){
                 return (Long)value;
             } else {
@@ -311,7 +321,9 @@ public class ValueConverterFactory {
     public class FloatConverter implements ValueConverter<Float>{
         @Override
         public Float convert(Object value) {
-            if (value == null) return null;
+            if (value == null) {
+                return null;
+            }
             if(value instanceof Float){
                 return (Float)value;
             } else {
@@ -326,7 +338,9 @@ public class ValueConverterFactory {
     public class DoubleConverter implements ValueConverter<Double>{
         @Override
         public Double convert(Object value) {
-            if (value == null) return null;
+            if (value == null) {
+                return null;
+            }
             if(value instanceof Double){
                 return (Double)value;
             } else {
@@ -341,7 +355,9 @@ public class ValueConverterFactory {
     public class IntegerConverter implements ValueConverter<BigInteger>{
         @Override
         public BigInteger convert(Object value) {
-            if (value == null) return null;
+            if (value == null) {
+                return null;
+            }
             if(value instanceof BigInteger){
                 return (BigInteger)value;
             } else {
@@ -356,7 +372,9 @@ public class ValueConverterFactory {
     public class DecimalConverter implements ValueConverter<BigDecimal>{
         @Override
         public BigDecimal convert(Object value) {
-            if (value == null) return null;
+            if (value == null) {
+                return null;
+            }
             if(value instanceof BigDecimal){
                 return (BigDecimal)value;
             } else {
@@ -371,7 +389,9 @@ public class ValueConverterFactory {
     public class AnyUriConverter implements ValueConverter<Reference>{
         @Override
         public Reference convert(Object value) {
-            if (value == null) return null;
+            if (value == null) {
+                return null;
+            }
             if(value instanceof Reference){
                 return (Reference)value;
             } else if(value instanceof URI || value instanceof URL){
@@ -404,7 +424,9 @@ public class ValueConverterFactory {
         }
         @Override
         public Date convert(Object value) {
-            if (value == null) return null;
+            if (value == null) {
+                return null;
+            }
             if(value instanceof Date){
                 return (Date)value;
             } else if(value instanceof XMLGregorianCalendar){
@@ -433,7 +455,9 @@ public class ValueConverterFactory {
     public class TextConverter implements ValueConverter<Text> {
         @Override
         public Text convert(Object value) {
-            if (value == null) return null;
+            if (value == null) {
+                return null;
+            }
             if(value instanceof Text){
                 return (Text)value;
             } else {

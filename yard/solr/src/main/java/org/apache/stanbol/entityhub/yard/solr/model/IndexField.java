@@ -44,7 +44,7 @@ public class IndexField {
     private final List<String> path;
     private final IndexDataType indexType;
     private final Set<String> languages;
-    private final int _hash;
+    private final int hash;
     /**
      * Constructs a new IndexField
      * @param path
@@ -76,7 +76,7 @@ public class IndexField {
             this.languages = Collections.unmodifiableSet(languageSet);
         }
         //calculate the hash of is immutable class only once
-        _hash = this.path.hashCode()+this.indexType.hashCode()+this.languages.hashCode();
+        hash = this.path.hashCode()+this.indexType.hashCode()+this.languages.hashCode();
     }
     /**
      * Checks if the path is not <code>null</code>, empty and does not contain
@@ -127,14 +127,14 @@ public class IndexField {
     }
     @Override
     public boolean equals(Object obj) {
-        return obj != null && obj instanceof IndexField &&
+        return obj instanceof IndexField &&
             ((IndexField)obj).path.equals(path) &&
             ((IndexField)obj).indexType.equals(indexType) &&
             ((IndexField)obj).languages.equals(languages);
     }
     @Override
     public int hashCode() {
-        return _hash;
+        return hash;
     }
     @Override
     public String toString() {

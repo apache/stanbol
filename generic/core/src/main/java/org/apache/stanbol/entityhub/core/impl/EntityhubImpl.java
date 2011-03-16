@@ -82,7 +82,7 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
      * The field mapper holding global mappings that are used for mapping
      * representations of entities for any referenced sites
      */
-    protected FieldMapper fieldMapper;
+    private FieldMapper fieldMapper;
 
     /**
      * The yard where this Entityhub instance stores its data
@@ -101,27 +101,27 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
      *      on an component that is in the "unsatisfied" state.
      * </ul>
      */
-    protected Yard entityhubYard; //reference initialised in the activate method
+    private Yard entityhubYard; //reference initialised in the activate method
     /*
      * TODO: The YardManager is currently not used.
      */
     @Reference // 1..1, static
-    protected YardManager yardManager;
+    private YardManager yardManager;
     /**
      * The Configuration of the Entityhub
      * TODO: Maybe refactor this implementation to implement this interface or
      * to extend the {@link EntityhubConfigurationImpl}.
      */
     @Reference // 1..1, static
-    protected EntityhubConfiguration config;
+    private EntityhubConfiguration config;
     /**
      * The site manager is used to search for entities within the Entityhub framework
      */
     @Reference // 1..1, static
-    protected ReferencedSiteManager siteManager;
+    private ReferencedSiteManager siteManager;
 
-    private String DEFAULT_SYMBOL_PREFIX = "symbol";
-    private String DEFAULT_MAPPING_PREFIX = "mapping";
+    private static final String DEFAULT_SYMBOL_PREFIX = "symbol";
+    private static final String DEFAULT_MAPPING_PREFIX = "mapping";
     /**
      * Activates the Entityhub (OSGI Lifecycle method)
      * @param context the OSGI component context (stored in {@link #context})

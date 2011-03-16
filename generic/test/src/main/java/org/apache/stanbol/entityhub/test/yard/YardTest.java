@@ -16,7 +16,12 @@
  */
 package org.apache.stanbol.entityhub.test.yard;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNotSame;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 import static org.apache.stanbol.entityhub.test.Utils.asCollection;
 
 import java.util.Arrays;
@@ -27,8 +32,6 @@ import java.util.Iterator;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Test;
 
 
@@ -123,7 +126,7 @@ public abstract class YardTest {
         yard.create(test.getId()); //throws an IllegalArgumentException
     }
 
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testIsRepresentationWithNull() throws YardException {
         getYard().isRepresentation(null);
     }
@@ -132,12 +135,12 @@ public abstract class YardTest {
     public void testIsRepresentationWithEmptyString() throws YardException{
         getYard().isRepresentation("");
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testStoreRepresentationWithNull() throws YardException {
         getYard().store((Representation)null);
     }
 
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testStoreRepresentationsWithNull() throws YardException {
         getYard().store((Iterable<Representation>)null);
     }
@@ -200,7 +203,7 @@ public abstract class YardTest {
         assertEquals(test, addedIt.next());
         assertFalse(addedIt.hasNext());
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testGetRepresentationWithNull() throws YardException {
         getYard().getRepresentation(null);
     }
@@ -288,7 +291,7 @@ public abstract class YardTest {
         yard.remove(test2.getId());
         assertFalse(yard.isRepresentation(test2.getId()));
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testUpdateRepresentationWithNull() throws YardException {
         getYard().update((Representation)null);
     }
@@ -298,7 +301,7 @@ public abstract class YardTest {
         Representation test = create(id,false);
         getYard().update(test); //throws an Exception because test is not part of the yard
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testUpdateRepresentationsWithNull() throws YardException {
         getYard().update((Iterable<Representation>)null);
     }
@@ -375,7 +378,7 @@ public abstract class YardTest {
         assertFalse(updatedIt.hasNext());
     }
     
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testRemoveRepresentationWithNull() throws YardException {
         getYard().remove((String)null);
     }
@@ -412,7 +415,7 @@ public abstract class YardTest {
         //it represents form the store (2)
         assertEquals(testValue, test.getFirst(field));
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testRemoveRepresentationsWithNull() throws YardException {
         getYard().remove((Iterable<String>)null);
     }

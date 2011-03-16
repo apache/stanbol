@@ -42,7 +42,7 @@ public class NavigationMixin {
     }
 
     @Context
-    protected UriInfo uriInfo;
+    private UriInfo uriInfo;
 
     public URI getPublicBaseUri() {
         return uriInfo.getBaseUri();
@@ -61,11 +61,11 @@ public class NavigationMixin {
             cssClass = uriInfo.getPath().startsWith(link.substring(1)) ? "selected" : "unselected";
         }
 
-        protected final String label;
+        private final String label;
 
-        protected final String link;
+        private final String link;
 
-        protected final String cssClass;
+        private final String cssClass;
 
         public String getLabel() {
             return label;

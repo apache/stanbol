@@ -40,9 +40,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
@@ -74,20 +71,12 @@ public class EntityMappingResource extends NavigationMixin {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    protected Entityhub entityhub;
-
-    protected TcManager tcManager;
-
-    protected Serializer serializer;
-
-    protected TripleCollection entityCache;
+    private Entityhub entityhub;
 
     // bind the job manager by looking it up from the servlet request context
     public EntityMappingResource(@Context ServletContext context) {
         super();
         entityhub = (Entityhub) context.getAttribute(Entityhub.class.getName());
-        tcManager = (TcManager) context.getAttribute(TcManager.class.getName());
-        serializer = (Serializer) context.getAttribute(Serializer.class.getName());
     }
 
     @GET

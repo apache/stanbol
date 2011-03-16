@@ -35,7 +35,7 @@ import java.util.List;
  * while indexing data.<p>
  * The three encode** methods are used to encode query constraints.<p>
  * Implementations are encouraged to cache mappings, because typically there will
- * be manny request with similar parameters.
+ * be many request with similar parameters.
  * @author Rupert Westenthaler.
  */
 public interface FieldMapper {

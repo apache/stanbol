@@ -69,7 +69,7 @@ public abstract class ValueFactoryTest {
      */
     protected abstract Object getUnsupportedTextType();
     
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullReference(){
         testRef(null);
     }
@@ -108,7 +108,7 @@ public abstract class ValueFactoryTest {
         Reference ref = testRef(refObject);
         assertEquals(ref.getReference(), refObject.toString());
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullText(){
         testText(null, "en");
     }
@@ -154,7 +154,7 @@ public abstract class ValueFactoryTest {
      * NOTE: automatic generation of IDs is supported by the {@link Yard#create()}
      * but not by the {@link Representation} itself.
      */
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullIdRepresentation(){
         testRepresentation(null);
     }

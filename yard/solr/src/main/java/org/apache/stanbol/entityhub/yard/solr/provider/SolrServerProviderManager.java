@@ -64,7 +64,7 @@ public final class SolrServerProviderManager {
         policy=ReferencePolicy.DYNAMIC,
         cardinality=ReferenceCardinality.MANDATORY_MULTIPLE,
         bind="addSolrProvider",unbind="removeSolrProvider")
-    protected Map<Type,List<SolrServerProvider>> solrServerProviders = Collections.synchronizedMap(new EnumMap<Type,List<SolrServerProvider>>(Type.class));
+    private Map<Type,List<SolrServerProvider>> solrServerProviders = Collections.synchronizedMap(new EnumMap<Type,List<SolrServerProvider>>(Type.class));
 
     public static SolrServerProviderManager getInstance(){
         if(solrServerProviderManager == null){

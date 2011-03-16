@@ -53,14 +53,14 @@ public abstract class AbstractEntitySearcher implements EntitySearcher {
         if(context != null && context.getProperties() != null){
             this.context = context;
             Dictionary<String,?> properties = context.getProperties();
-            Object queryUri = properties.get(EntitySearcher.QUERY_URI);
-            Object accessUri = properties.get(ConfiguredSite.ACCESS_URI); //use as an fallback
-            if(queryUri != null){
-                this.queryUri = queryUri.toString();
+            Object queryUriObject = properties.get(EntitySearcher.QUERY_URI);
+            Object accessUriObject = properties.get(ConfiguredSite.ACCESS_URI); //use as an fallback
+            if(queryUriObject != null){
+                this.queryUri = queryUriObject.toString();
                 //now set the new config
-            } else if(accessUri != null){
-                log.info("Using AccessUri as fallback for missing QueryUri Proerty (accessUri="+accessUri);
-                this.queryUri = accessUri.toString();
+            } else if(accessUriObject != null){
+                log.info("Using AccessUri as fallback for missing QueryUri Proerty (accessUri="+accessUriObject);
+                this.queryUri = accessUriObject.toString();
             } else {
                 throw new IllegalArgumentException("The property "+EntitySearcher.QUERY_URI+" must be defined");
             }

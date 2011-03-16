@@ -115,11 +115,11 @@ public class IndexValueFactory {
             //NOTE: To ensure thread save iterations over Entries of this Map
             //create new map instance, add to the new instance and replace reference
             // ... i know this is slow, but such calls are very uncommon
-            Map<Class<?>,TypeConverter<?>> javaInterfaceConverters =
+            Map<Class<?>,TypeConverter<?>> javaInterfaceConverterMap =
                 new HashMap<Class<?>,TypeConverter<?>>(this.javaInterfaceConverters);
-            javaInterfaceConverters.put(javaType,converter);
+            javaInterfaceConverterMap.put(javaType,converter);
             //TODO: add support for IndexTypeConverter
-            this.javaInterfaceConverters = javaInterfaceConverters;
+            this.javaInterfaceConverters = javaInterfaceConverterMap;
         } else {
             //there are no Iterations over this Map!
             javaClassConverters.put(javaType,converter);
@@ -139,10 +139,10 @@ public class IndexValueFactory {
             if(javaInterfaceConverters.containsKey(type)){
                 //create new map instance, remove to the converter and replace reference
                 // ... i know this is slow, but such calls are very uncommon
-                Map<Class<?>,TypeConverter<?>> javaInterfaceConverters =
+                Map<Class<?>,TypeConverter<?>> javaInterfaceConverterMap =
                     new HashMap<Class<?>,TypeConverter<?>>(this.javaInterfaceConverters);
-                converter = (TypeConverter<T>)javaInterfaceConverters.remove(type);
-                this.javaInterfaceConverters = javaInterfaceConverters;
+                converter = (TypeConverter<T>)javaInterfaceConverterMap.remove(type);
+                this.javaInterfaceConverters = javaInterfaceConverterMap;
             } else {
                 converter = null;
             }
@@ -271,7 +271,7 @@ public class IndexValueFactory {
         @Override
         public Date createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException {
             if(type == null){
-                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
+                throw new IllegalArgumentException("The parsed IndexDataType MUST NOT be null");
             }
             if(!type.equals(INDEX_TYPE)) {
                 throw new UnsupportedIndexTypeException(this,type);
@@ -333,7 +333,7 @@ public class IndexValueFactory {
         @Override
         public Boolean createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException {
             if(type == null){
-                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
+                throw new IllegalArgumentException("The parsed IndexDataType MUST NOT be null");
             }
             if(!type.equals(INDEX_TYPE)){
                 throw new UnsupportedIndexTypeException(this,type);
@@ -394,7 +394,7 @@ public class IndexValueFactory {
         @Override
         public String createObject(IndexDataType type, Object value, String lang) throws NullPointerException {
             if(type == null){
-                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
+                throw new IllegalArgumentException("The parsed IndexDataType MUST NOT be null");
             }
             return value!=null?value.toString():null;
         }
@@ -442,7 +442,7 @@ public class IndexValueFactory {
         @Override
         public Integer createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException, NullPointerException {
             if(type == null){
-                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
+                throw new IllegalArgumentException("The parsed IndexDataType MUST NOT be null");
             }
             if(type.equals(INDEX_TYPE)){
                 if(value == null){ //move in here to ensure returning UnsupportedIndexTypeException on wrong types
@@ -452,7 +452,7 @@ public class IndexValueFactory {
                     return (Integer)value;
                 } else {
                     try {
-                        return new Integer(value.toString());
+                        return Integer.valueOf(value.toString());
                     } catch (NumberFormatException e) {
                         throw new UnsupportedValueException(this, type, value, e);
                     }
@@ -516,7 +516,7 @@ public class IndexValueFactory {
         @Override
         public Long createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException,NullPointerException {
             if(type == null){
-                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
+                throw new IllegalArgumentException("The parsed IndexDataType MUST NOT be null");
             }
             if(type.equals(LONG_TYPE) || type.equals(INT_TYPE)){
                 if(value == null){
@@ -542,7 +542,7 @@ public class IndexValueFactory {
     public static class DoubleConverter implements TypeConverter<Double> {
 
         public static final IndexDataType INDEX_TYPE = IndexDataTypeEnum.DOUBLE.getIndexType();
-        private static Set<IndexDataType> SUPPORTED = new HashSet<IndexDataType>(
+        private static final Set<IndexDataType> SUPPORTED = new HashSet<IndexDataType>(
                 Arrays.asList(
                         IndexDataTypeEnum.FLOAT.getIndexType(),
                         IndexDataTypeEnum.INT.getIndexType(),
@@ -576,7 +576,7 @@ public class IndexValueFactory {
         @Override
         public Double createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException, NullPointerException {
             if(type == null){
-                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
+                throw new IllegalArgumentException("The parsed IndexDataType MUST NOT be null");
             }
             if(SUPPORTED.contains(type)){
                 if(value == null){
@@ -616,7 +616,7 @@ public class IndexValueFactory {
         public boolean isAcceptDoubleAndLongIndexTypes(){
             return supported.containsAll(DOUBLE_LONG_TYPES);
         }
-        public void setAcceptDoubleAndLongIndexTypes(boolean state){
+        public final void setAcceptDoubleAndLongIndexTypes(boolean state){
             if(state){
                 supported.addAll(DOUBLE_LONG_TYPES);
             } else {
@@ -649,7 +649,7 @@ public class IndexValueFactory {
         @Override
         public Float createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException, NullPointerException {
             if(type == null) {
-                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
+                throw new IllegalArgumentException("The parsed IndexDataType MUST NOT be null");
             }
             if(supported.contains(type)){
                 if(value == null){
@@ -703,7 +703,7 @@ public class IndexValueFactory {
         @Override
         public BigInteger createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException, NullPointerException {
             if(type == null){
-                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
+                throw new IllegalArgumentException("The parsed IndexDataType MUST NOT be null");
             }
             if(type.equals(INDEX_TYPE) || type.equals(INT_TYPE)){
                 if(value == null){
@@ -722,7 +722,7 @@ public class IndexValueFactory {
     public static class BigDecimalConverter implements TypeConverter<BigDecimal> {
 
         public static final IndexDataType INDEX_TYPE = IndexDataTypeEnum.DOUBLE.getIndexType();
-        private static Set<IndexDataType> SUPPORTED = new HashSet<IndexDataType>(
+        private static final Set<IndexDataType> SUPPORTED = new HashSet<IndexDataType>(
                 Arrays.asList(
                         IndexDataTypeEnum.FLOAT.getIndexType(),
                         IndexDataTypeEnum.INT.getIndexType(),
@@ -744,7 +744,7 @@ public class IndexValueFactory {
         @Override
         public BigDecimal createObject(IndexDataType type,Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException, NullPointerException {
             if(type == null){
-                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
+                throw new IllegalArgumentException("The parsed IndexDataType MUST NOT be null");
             }
             if(SUPPORTED.contains(type)){
                 if(value == null){
@@ -773,7 +773,7 @@ public class IndexValueFactory {
 
         public static final IndexDataType INDEX_TYPE = IndexDataTypeEnum.TXT.getIndexType();
         private static final IndexDataType STRING_TYPE = IndexDataTypeEnum.STR.getIndexType();
-        protected final ValueFactory valueFactory;
+        private final ValueFactory valueFactory;
         public TextConverter(ValueFactory valueFactory) {
             if(valueFactory == null){
                 throw new IllegalArgumentException("Parameter ValueFactory MUST NOT be NULL!");
@@ -805,7 +805,7 @@ public class IndexValueFactory {
         @Override
         public Text createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException, NullPointerException {
             if(type == null){
-                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
+                throw new IllegalArgumentException("The parsed IndexDataType MUST NOT be null");
             }
             if(type.equals(INDEX_TYPE) || type.equals(STRING_TYPE)){
                 if(value == null){
@@ -819,7 +819,7 @@ public class IndexValueFactory {
     }
     public static class ReferenceConverter implements TypeConverter<Reference> {
         public static final IndexDataType INDEX_TYPE = IndexDataTypeEnum.REF.getIndexType();
-        protected final ValueFactory valueFactory;
+        private final ValueFactory valueFactory;
         public ReferenceConverter(ValueFactory valueFactory) {
             if(valueFactory == null){
                 throw new IllegalArgumentException("Parameter ValueFactory MUST NOT be NULL!");
@@ -851,7 +851,7 @@ public class IndexValueFactory {
         @Override
         public Reference createObject(IndexDataType type, Object value, String lang) throws UnsupportedIndexTypeException, UnsupportedValueException, NullPointerException {
             if(type == null) {
-                throw new NullPointerException("The parsed IndexDataType MUST NOT be null");
+                throw new IllegalArgumentException("The parsed IndexDataType MUST NOT be null");
             }
             if(type.equals(INDEX_TYPE)){
                 if(value == null){

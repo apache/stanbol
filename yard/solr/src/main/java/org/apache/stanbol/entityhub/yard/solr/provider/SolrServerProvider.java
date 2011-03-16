@@ -77,10 +77,10 @@ public interface SolrServerProvider {
      * ignored if the requested type does not support the usage of multiple
      * servers.
      * @return the configured SolrServer client for the parsed parameter
-     * @throws NullPointerException if <code>null</code> is parsed as uriOrPath.
-     * @throws IllegalArgumentException if the parsed URI or path is not valid
-     * for the requested {@link Type} or the parsed type is not supported by
-     * this provider
+     * @throws NullPointerException 
+     * @throws IllegalArgumentException if <code>null</code> is parsed as uriOrPath
+     * or if the parsed URI or path is not valid for the requested {@link Type} 
+     * or the parsed type is not supported by this provider
      */
-    SolrServer getSolrServer(Type type,String uriOrPath,String...additional) throws NullPointerException,IllegalArgumentException;
+    SolrServer getSolrServer(Type type,String uriOrPath,String...additional) throws IllegalArgumentException;
 }

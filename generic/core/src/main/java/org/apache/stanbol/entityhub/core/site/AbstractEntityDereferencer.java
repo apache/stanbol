@@ -61,9 +61,9 @@ public abstract class AbstractEntityDereferencer implements EntityDereferencer {
         if (context != null && context.getProperties() != null) {
             this.context = context;
             Dictionary<String, ?> properties = context.getProperties();
-            Object baseUri = properties.get(EntityDereferencer.ACCESS_URI);
-            if (baseUri != null) {
-                this.baseUri = baseUri.toString();
+            Object baseUriObject = properties.get(EntityDereferencer.ACCESS_URI);
+            if (baseUriObject != null) {
+                this.baseUri = baseUriObject.toString();
                 //now set the new config
                 this.config = properties;
             } else {
@@ -72,18 +72,18 @@ public abstract class AbstractEntityDereferencer implements EntityDereferencer {
             //TODO: I am sure, there is some Utility, that supports getting multiple
             //      values from a OSGI Dictionary
             Object prefixObject = properties.get(ConfiguredSite.ENTITY_PREFIX);
-            ArrayList<String> prefixes = new ArrayList<String>();
+            ArrayList<String> prefixList = new ArrayList<String>();
             if (prefixObject == null) {
-                prefixes = null;
+                prefixList = null;
             } else if (prefixObject.getClass().isArray()) {
-                prefixes.addAll(Arrays.asList((String[]) prefixObject));
+                prefixList.addAll(Arrays.asList((String[]) prefixObject));
             } else if (prefixObject instanceof Collection<?>) {
-                prefixes.addAll((Collection<String>) prefixObject);
+                prefixList.addAll((Collection<String>) prefixObject);
             } else { //assuming a single value
-                prefixes.add(prefixObject.toString());
+                prefixList.add(prefixObject.toString());
             }
-            Collections.sort(prefixes); //sort the prefixes List
-            this.prefixes = Collections.unmodifiableList(prefixes); //use an unmodifiable wrapper for the member variable
+            Collections.sort(prefixList); //sort the prefixes List
+            this.prefixes = Collections.unmodifiableList(prefixList); //use an unmodifiable wrapper for the member variable
         } else {
             throw new IllegalArgumentException("The property " + EntityDereferencer.ACCESS_URI + " must be defined");
         }

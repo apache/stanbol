@@ -44,8 +44,8 @@ public class InMemoryRepresentation implements Representation,Cloneable {
     //private final Logger log = LoggerFactory.getLogger(InMemoryRepresentation.class);
     private static ValueFactory valueFactory = new InMemoryValueFactory();
 
-    protected final Map<String,Object> representation;
-    protected final Map<String,Object> unmodRepresentation;
+    private final Map<String,Object> representation;
+    private final Map<String,Object> unmodRepresentation;
     private final String id;
     /**
      * creates a new InMemoryRepresentation for the parsed ID
@@ -83,7 +83,7 @@ public class InMemoryRepresentation implements Representation,Cloneable {
     @Override
     public void add(String field, Object parsedValue) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -143,7 +143,7 @@ public class InMemoryRepresentation implements Representation,Cloneable {
     @SuppressWarnings("unchecked")
     private Collection<Object> getValuesAsCollection(String field){
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -165,7 +165,7 @@ public class InMemoryRepresentation implements Representation,Cloneable {
     @Override
     public Iterator<Object> get(String field) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -215,7 +215,7 @@ public class InMemoryRepresentation implements Representation,Cloneable {
     @Override
     public void remove(String field, Object parsedValue) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -245,7 +245,7 @@ public class InMemoryRepresentation implements Representation,Cloneable {
     @Override
     public void removeAll(String field) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -256,12 +256,14 @@ public class InMemoryRepresentation implements Representation,Cloneable {
     @Override
     public void removeAllNaturalText(String field, String... languages) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
         Object values = representation.get(field);
-        if(values == null) return;
+        if(values == null) {
+            return;
+        }
         if(values instanceof Collection<?>){
             int removed = 0;
             for(Iterator<Text> it = new TextIterator(valueFactory,
@@ -289,12 +291,14 @@ public class InMemoryRepresentation implements Representation,Cloneable {
     @Override
     public void removeNaturalText(String field, String text, String... languages) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
         Object values = representation.get(field);
-        if(values == null) return;
+        if(values == null) {
+            return;
+        }
         if(values instanceof Collection<?>){
             int removed = 0;
             for(Iterator<Text> it = new TextIterator(valueFactory,
@@ -333,7 +337,7 @@ public class InMemoryRepresentation implements Representation,Cloneable {
     @Override
     public void set(String field, Object value) {
         if(field == null){
-            throw new NullPointerException("The parsed field MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed field MUST NOT be NULL");
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
@@ -428,6 +432,6 @@ public class InMemoryRepresentation implements Representation,Cloneable {
     }
     @Override
     public boolean equals(Object obj) {
-        return obj != null && obj instanceof Representation && ((Representation)obj).getId().equals(getId());
+        return obj instanceof Representation && ((Representation)obj).getId().equals(getId());
     }
 }

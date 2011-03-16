@@ -235,10 +235,10 @@ import org.slf4j.LoggerFactory;
         })
 public class ReferencedSiteImpl implements ReferencedSite {
     static final int maxInt = Integer.MAX_VALUE;
-    protected final Logger log;
-    protected ComponentContext context;
-    protected Dictionary<String,?> properties;
-    protected FieldMapper fieldMappings;
+    private final Logger log;
+    private ComponentContext context;
+    private Dictionary<String,?> properties;
+    private FieldMapper fieldMappings;
 
     private final Object searcherAndDereferencerLock = new Object();
     private Boolean dereferencerEqualsEntitySearcherComponent;
@@ -247,7 +247,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
 
     private String dereferencerComponentName;
     private ComponentInstance dereferencerComponentInstance;
-    protected EntityDereferencer dereferencer;
+    private EntityDereferencer dereferencer;
 
     private String entitySearcherComponentName;
     private EntitySearcher entitySearcher;
@@ -594,7 +594,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
     }
     @Override
     public boolean equals(Object obj) {
-        return obj != null && obj instanceof ReferencedSite && ((ReferencedSite)obj).getId().equals(getId());
+        return obj instanceof ReferencedSite && ((ReferencedSite)obj).getId().equals(getId());
     }
     @Override
     public FieldMapper getFieldMapper() {
