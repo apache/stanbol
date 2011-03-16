@@ -33,6 +33,9 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySp
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
 import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
 import org.apache.stanbol.ontologymanager.store.impl.OntologyStorageProviderImpl;
+import org.apache.stanbol.reasoners.base.commands.KReSCreateReasoner;
+import org.apache.stanbol.reasoners.base.commands.KReSRunReasoner;
+import org.apache.stanbol.reasoners.base.commands.KReSRunRules;
 import org.apache.stanbol.rules.base.api.KReSRule;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.RuleStore;
@@ -62,9 +65,6 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import eu.iksproject.kres.jersey.format.KReSFormat;
-import eu.iksproject.kres.reasoners.KReSCreateReasoner;
-import eu.iksproject.kres.reasoners.KReSRunReasoner;
-import eu.iksproject.kres.reasoners.KReSRunRules;
 
 /**
  *

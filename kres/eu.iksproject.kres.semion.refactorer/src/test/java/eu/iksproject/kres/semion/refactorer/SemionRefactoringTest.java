@@ -15,6 +15,7 @@ import org.apache.clerezza.rdf.jena.sparql.JenaSparqlEngine;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.reasoners.base.impl.KReSReasonerImpl;
 import org.apache.stanbol.rules.base.api.KReSRule;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
@@ -38,7 +39,6 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
-import eu.iksproject.kres.reasoners.KReSReasonerImpl;
 import eu.iksproject.kres.semion.manager.SemionManagerImpl;
 
 public class SemionRefactoringTest {
