@@ -28,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.UnknownHostException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -44,6 +45,7 @@ import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 import org.apache.stanbol.enhancer.engines.zemanta.impl.ZemantaEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
@@ -123,13 +125,21 @@ public class ZemantaEnhancementEngineTest {
     @Test
     public void tesetBioText() throws Exception {
         ContentItem ci = wrapAsContentItem(BIO_DOMAIN_TEXT);
-        zemantaEngine.computeEnhancements(ci);
+        try {
+            zemantaEngine.computeEnhancements(ci);
+        } catch (EngineException e) {
+            if(e.getCause() != null && e.getCause() instanceof UnknownHostException){
+                log.warn("Zemanta Service not reachable -> offline? -> deactivate test");
+                return;
+            }
+            throw e;
+        }
         JenaSerializerProvider serializer = new JenaSerializerProvider();
         serializer.serialize(System.out, ci.getMetadata(), TURTLE);
         int textAnnoNum = checkAllTextAnnotations(ci.getMetadata(), BIO_DOMAIN_TEXT);
         log.info(textAnnoNum + " TextAnnotations found ...");
         int entityAnnoNum = checkAllEntityAnnotations(ci.getMetadata());
-        log.info(textAnnoNum + " EntityAnnotations found ...");
+        log.info(entityAnnoNum + " EntityAnnotations found ...");
     }
 
     /*
