@@ -18,7 +18,8 @@ package org.apache.stanbol.entityhub.servicesapi.util;
 
 import java.util.regex.Pattern;
 
-public class PatternUtils {
+public final class PatternUtils {
+    private PatternUtils(){}
     /**
      * Converts a Wildcard search string to REGEX. If strict is enabled, than
      * the REGEX pattern searches only full labels ("^Patt?er.*$") otherwise

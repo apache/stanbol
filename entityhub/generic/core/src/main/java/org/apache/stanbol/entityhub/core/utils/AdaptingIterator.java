@@ -65,9 +65,9 @@ public class AdaptingIterator<T,A> implements Iterator<A> {
         A adapt(T value, Class<A> type);
     }
     
-    protected final Adapter<T, A> adapter;
-    protected final Iterator<T> it;
-    protected final Class<A> type;
+    private final Adapter<T, A> adapter;
+    private final Iterator<T> it;
+    private final Class<A> type;
     private A next;
     private Boolean hasNext;
     /**

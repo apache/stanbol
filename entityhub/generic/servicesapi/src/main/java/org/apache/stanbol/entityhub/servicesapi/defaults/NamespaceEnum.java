@@ -68,8 +68,8 @@ public enum NamespaceEnum {
     dbpediaProp("dbp-prop","http://dbpedia.org/property/"),
     geonames("http://www.geonames.org/ontology#"),
     ;
-    String ns;
-    String prefix;
+    private String ns;
+    private String prefix;
     private NamespaceEnum(String ns) {
         if(ns == null){
             throw new IllegalArgumentException("The namespace MUST NOT be NULL");
@@ -151,7 +151,9 @@ public enum NamespaceEnum {
      * Enumeration. Otherwise the parsed value.
      */
     public static String getFullName(String shortUri){
-        if(shortUri == null) return null;
+        if(shortUri == null) {
+            return null;
+        }
         int index = shortUri.indexOf(':');
         if(index>0){
             NamespaceEnum namespace = NamespaceEnum.forPrefix(shortUri.substring(0, index));

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.entityhub.model.clerezza.utils;
+package org.apache.stanbol.entityhub.model.clerezza.impl;
 
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.Resource;
@@ -32,7 +32,7 @@ import org.apache.stanbol.entityhub.core.utils.AdaptingIterator.Adapter;
 public class Resource2StringAdapter<T extends Resource> implements Adapter<T, String> {
 
     @Override
-    public String adapt(T value, Class<String> type) {
+    public final String adapt(T value, Class<String> type) {
         if (value == null) {
             return null;
         } else if (value instanceof UriRef) {

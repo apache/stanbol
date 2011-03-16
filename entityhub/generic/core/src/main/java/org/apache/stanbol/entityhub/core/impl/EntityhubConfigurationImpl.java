@@ -51,15 +51,15 @@ public class EntityhubConfigurationImpl implements EntityhubConfiguration {
     private final Logger log = LoggerFactory.getLogger(EntityhubConfigurationImpl.class);
 
     @Property(name=EntityhubConfiguration.ID,value="entityhub")
-    protected String entityhubID;
+    private String entityhubID;
     @Property(name=EntityhubConfiguration.NAME,value="<organisations> Entityhub")
-    protected String entityhubName;
+    private String entityhubName;
     @Property(name=EntityhubConfiguration.DESCRIPTION,value="The entityhub holding all entities of <organisation>")
-    protected String entityhubDescription;
+    private String entityhubDescription;
     @Property(name=EntityhubConfiguration.PREFIX,value="urn:org.apache.stanbol:entityhub:")
-    protected String entityhubPrefix;
+    private String entityhubPrefix;
     @Property(name=EntityhubConfiguration.ENTITYHUB_YARD_ID,value=EntityhubConfiguration.DEFAULT_ENTITYHUB_YARD_ID)
-    protected String entityhubYardId;
+    private String entityhubYardId;
     @Property(
             name=EntityhubConfiguration.FIELD_MAPPINGS,
             value ={ //This is the default config for well known Ontologies
@@ -111,7 +111,7 @@ public class EntityhubConfigurationImpl implements EntityhubConfiguration {
                 "foaf:logo | d=xsd:anyURI",
                 "foaf:page | d=xsd:anyURI" //page about the entity
             })
-    protected String[] fieldMappingConfig;
+    private String[] fieldMappingConfig;
     //NOTE: there is no other way than hard coding the names there!
     @Property(name=EntityhubConfiguration.DEFAULT_MAPPING_STATE,options={
             @PropertyOption( //seems, that name and value are exchanged ...
@@ -121,7 +121,7 @@ public class EntityhubConfigurationImpl implements EntityhubConfiguration {
                     value='%'+EntityhubConfiguration.DEFAULT_MAPPING_STATE+".option.confirmed",
                     name="confirmed")
             },value="proposed")
-    protected String defaultMappingStateString;
+    private String defaultMappingStateString;
     @Property(name=EntityhubConfiguration.DEFAULT_SYMBOL_STATE,options={
             @PropertyOption( //seems, that name and value are exchanged ...
                     value='%'+EntityhubConfiguration.DEFAULT_SYMBOL_STATE+".option.proposed",
@@ -130,7 +130,7 @@ public class EntityhubConfigurationImpl implements EntityhubConfiguration {
                     value='%'+EntityhubConfiguration.DEFAULT_SYMBOL_STATE+".option.active",
                     name="active")
             },value="proposed")
-    protected String defaultSymblStateString;
+    private String defaultSymblStateString;
 
     @Activate
     protected void activate(ComponentContext context) throws ConfigurationException {
@@ -140,8 +140,8 @@ public class EntityhubConfigurationImpl implements EntityhubConfiguration {
         log.info("entityhubName:{}",entityhubName);
         this.entityhubID = OsgiUtils.checkProperty(properties, EntityhubConfiguration.ID).toString();
         this.entityhubName = OsgiUtils.checkProperty(properties, EntityhubConfiguration.NAME, this.entityhubID).toString();
-        Object entityhubDescription = properties.get(EntityhubConfiguration.DESCRIPTION);
-        this.entityhubDescription = entityhubDescription==null?null:entityhubDescription.toString();
+        Object entityhubDescriptionObject = properties.get(EntityhubConfiguration.DESCRIPTION);
+        this.entityhubDescription = entityhubDescriptionObject==null?null:entityhubDescriptionObject.toString();
         this.entityhubPrefix = OsgiUtils.checkProperty(properties, EntityhubConfiguration.PREFIX).toString();
         this.entityhubYardId = OsgiUtils.checkProperty(properties, EntityhubConfiguration.ENTITYHUB_YARD_ID).toString();
         Object defaultSymbolState = properties.get(EntityhubConfiguration.DEFAULT_SYMBOL_STATE);
@@ -156,9 +156,9 @@ public class EntityhubConfigurationImpl implements EntityhubConfiguration {
         } else {
             this.defaultMappingStateString = defaultMappingState.toString();
         }
-        Object fieldMappingConfig = OsgiUtils.checkProperty(properties, EntityhubConfiguration.FIELD_MAPPINGS);
-        if(fieldMappingConfig instanceof String[]){
-            this.fieldMappingConfig = (String[])fieldMappingConfig;
+        Object fieldMappingConfigObject = OsgiUtils.checkProperty(properties, EntityhubConfiguration.FIELD_MAPPINGS);
+        if(fieldMappingConfigObject instanceof String[]){
+            this.fieldMappingConfig = (String[])fieldMappingConfigObject;
         } else {
             throw new ConfigurationException(EntityhubConfiguration.FIELD_MAPPINGS, "Values for this property must be of type Stirng[]!");
         }
@@ -180,7 +180,7 @@ public class EntityhubConfigurationImpl implements EntityhubConfiguration {
 
     @Override
     public String getEntityhubPrefix() {
-        return entityhubID;
+        return entityhubPrefix;
     }
 
     @Override

@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.entityhub.core.model;
 
-import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.test.model.RepresentationTest;
 import org.junit.Before;

@@ -58,17 +58,17 @@ public abstract class AbstractYard implements Yard {
     /**
      * This Yard uses the default in-memory implementation of the Entityhub model.
      */
-    protected ValueFactory valueFactory;
+    private ValueFactory valueFactory;
     /**
      * The QueryFactory as required by {@link Yard#getQueryFactory()}. This
      * Yard uses the default implementation as provided by the
      * {@link DefaultQueryFactory}.
      */
-    protected FieldQueryFactory queryFactory;
+    private FieldQueryFactory queryFactory;
     /**
      * Holds the configuration of the Yard.
      */
-    protected YardConfig config;
+    private YardConfig config;
     
     /**
      * The default prefix used for created URIs.
@@ -104,13 +104,13 @@ public abstract class AbstractYard implements Yard {
      */
     protected final void activate(ValueFactory valueFactory,FieldQueryFactory queryFactory, YardConfig config) {
         if(valueFactory == null){
-            throw new NullPointerException("Unable to activate: The ValueFactory MUST NOT be NULL!");
+            throw new IllegalArgumentException("Unable to activate: The ValueFactory MUST NOT be NULL!");
         }
         if(queryFactory == null){
-            throw new NullPointerException("Unable to activate: The QueryFactory MUST NOT be NULL!");
+            throw new IllegalArgumentException("Unable to activate: The QueryFactory MUST NOT be NULL!");
         }
         if(config == null){
-            throw new NullPointerException("Unable to activate: The YardConfig MUST NOT be NULL!");
+            throw new IllegalArgumentException("Unable to activate: The YardConfig MUST NOT be NULL!");
         }
         this.queryFactory = queryFactory;
         this.valueFactory = valueFactory;
@@ -220,6 +220,14 @@ public abstract class AbstractYard implements Yard {
     protected String getUriPrefix(){
         return defaultPrefix;
     }
+    protected final YardConfig getConfig() {
+        return config;
+    }
+
+    protected final void setConfig(YardConfig config) {
+        this.config = config;
+    }
+
     /**
      * Creates an unique ID by using the {@link #getUriPrefix()} the parsed
      * separator (non if <code>null</code>) and an uuid created by using 
@@ -297,7 +305,7 @@ public abstract class AbstractYard implements Yard {
          * Representations of this Yard within the SolrIndex.
          * @param the id of the yard. Required, not null, not empty!
          */
-        public void setId(String id) {
+        public final void setId(String id) {
             if(id != null){
                 config.put(Yard.ID, id);
             } else {
@@ -309,7 +317,7 @@ public abstract class AbstractYard implements Yard {
          * Getter for the ID of the yard
          * @return the id of the yard
          */
-        public String getId() {
+        public final String getId() {
             Object value = config.get(Yard.ID);
             return value==null?null:value.toString();
         }
@@ -319,7 +327,7 @@ public abstract class AbstractYard implements Yard {
          * is used as default
          * @param name The name or <code>null</code> to use {@link #getId()}.
          */
-        public void setName(String name) {
+        public final void setName(String name) {
             if(name != null){
                 config.put(Yard.NAME, name);
             } else {
@@ -331,7 +339,7 @@ public abstract class AbstractYard implements Yard {
          * Getter for the human readable name of the Yard
          * @return the name
          */
-        public String getName() {
+        public final String getName() {
             Object value = config.get(Yard.NAME);
             return value==null?getId():value.toString();
         }
@@ -340,7 +348,7 @@ public abstract class AbstractYard implements Yard {
          * Setter for the description of this Yard
          * @param description the description. Optional parameter
          */
-        public void setDescription(String description) {
+        public final void setDescription(String description) {
             if(description != null){
                 config.put(Yard.DESCRIPTION, description);
             } else {
@@ -352,7 +360,7 @@ public abstract class AbstractYard implements Yard {
          * Getter for the description
          * @return description The description or <code>null</code> if not defined
          */
-        public String getDescription() {
+        public final String getDescription() {
             Object value = config.get(Yard.DESCRIPTION);
             return value==null?null:value.toString();
         }
@@ -364,7 +372,7 @@ public abstract class AbstractYard implements Yard {
          * <code>null</code> or a negative number to use the default value defined
          * by the Yard.
          */
-        public void setDefaultQueryResultNumber(Integer defaultQueryResults) {
+        public final void setDefaultQueryResultNumber(Integer defaultQueryResults) {
             if(defaultQueryResults != null){
                 config.put(DEFAULT_QUERY_RESULT_NUMBER, defaultQueryResults);
             } else {
@@ -382,7 +390,7 @@ public abstract class AbstractYard implements Yard {
          * if the value was set to a number lower or equals 0 and -1 if the
          * value is not configured at all.
          */
-        public int getDefaultQueryResultNumber() throws NumberFormatException {
+        public final int getDefaultQueryResultNumber() throws NumberFormatException {
             Object value = config.get(DEFAULT_QUERY_RESULT_NUMBER);
             Integer number;
             if(value != null){
@@ -390,7 +398,7 @@ public abstract class AbstractYard implements Yard {
                     number = (Integer) value;
                 } else {
                     try {
-                        number = new Integer(value.toString());
+                        number = Integer.valueOf(value.toString());
                     } catch (NumberFormatException e){
                         return -1;
                     }
@@ -417,7 +425,7 @@ public abstract class AbstractYard implements Yard {
          * <code>null</code> or a negative number to use the default as defined by
          * the Yard implementation.
          */
-        public void setMaxQueryResultNumber(Integer maxQueryResults) {
+        public final void setMaxQueryResultNumber(Integer maxQueryResults) {
             if(maxQueryResults != null){
                 config.put(MAX_QUERY_RESULT_NUMBER, maxQueryResults);
             } else {
@@ -433,7 +441,7 @@ public abstract class AbstractYard implements Yard {
          * if the value was set to a number lower or equals 0 and -1 if the
          * value is not configured at all.
          */
-        public int getMaxQueryResultNumber() {
+        public final int getMaxQueryResultNumber() {
             Object value = config.get(MAX_QUERY_RESULT_NUMBER);
             Integer number;
             if(value != null){
@@ -441,7 +449,7 @@ public abstract class AbstractYard implements Yard {
                     number = (Integer) value;
                 } else {
                     try {
-                        number = new Integer(value.toString());
+                        number = Integer.valueOf(value.toString());
                     }catch (NumberFormatException e) {
                         return -1;
                     }

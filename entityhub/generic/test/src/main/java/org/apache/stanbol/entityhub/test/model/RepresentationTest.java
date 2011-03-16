@@ -21,14 +21,12 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-
 import static org.apache.stanbol.entityhub.test.Utils.asCollection;
 
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -66,107 +64,107 @@ public abstract class RepresentationTest {
     protected abstract Object getUnsupportedValueInstance();
     
     /*--------------------------------------------------------------------------
-     * Set of Tests that check if all Methods correctly throw a NullPointerException
+     * Set of Tests that check if all Methods correctly throw an IllegalArgumentException
      * when parsing null as field!
      *  - important to prevent NULL fields within the Entityhub
      *--------------------------------------------------------------------------
      */
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldAdd(){
         Representation rep = createRepresentation(null);
         rep.add(null, "test");
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldAddNaturalText(){
         Representation rep = createRepresentation(null);
         rep.addNaturalText(null, "test");
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldAddReference(){
         Representation rep = createRepresentation(null);
         rep.addReference(null, "urn:test");
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldGet(){
         Representation rep = createRepresentation(null);
         rep.get(null);
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldGetDataType(){
         Representation rep = createRepresentation(null);
         rep.get(null, Integer.class);
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldGetNaturalLanguateText(){
         Representation rep = createRepresentation(null);
         rep.get(null,"en");
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldGetFirst(){
         Representation rep = createRepresentation(null);
         rep.getFirst(null);
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldGetFirstReference(){
         Representation rep = createRepresentation(null);
         rep.getFirstReference(null);
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldGetFirstDataType(){
         Representation rep = createRepresentation(null);
         rep.getFirst(null, Integer.class);
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldGetFirstNaturalLanguage(){
         Representation rep = createRepresentation(null);
         rep.getFirst(null, "en");
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldGetReferences(){
         Representation rep = createRepresentation(null);
         rep.getReferences(null);
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldGetText(){
         Representation rep = createRepresentation(null);
         rep.getText(null);
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldRemove(){
         Representation rep = createRepresentation(null);
         rep.remove(null, "test");
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldRemoveAll(){
         Representation rep = createRepresentation(null);
         rep.removeAll(null);
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldRemoveAllNaturalText(){
         Representation rep = createRepresentation(null);
         rep.removeAllNaturalText(null, "de");
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldRemoveNaturalText(){
         Representation rep = createRepresentation(null);
         rep.removeNaturalText(null, "test");
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldRemoveReference(){
         Representation rep = createRepresentation(null);
         rep.removeReference(null, "urn:test");
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldSet(){
         Representation rep = createRepresentation(null);
         rep.set(null, "test");
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldSetNaturalText(){
         Representation rep = createRepresentation(null);
         rep.setNaturalText(null, "test");
     }
-    @Test(expected=NullPointerException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testNullFieldSetReference(){
         Representation rep = createRepresentation(null);
         rep.setReference(null, "urn:test");
@@ -848,7 +846,6 @@ public abstract class RepresentationTest {
         for(Iterator<Text> texts = rep.getText(field);texts.hasNext();textSet.remove(texts.next().getText()));
         //and check that the value we expect to be removed is still in the set
         assertTrue(textSet.size() == 1);
-        System.out.println("TextSet: "+textSet);
         assertTrue(textSet.contains(NL_TEST_en2));
     }
     /**

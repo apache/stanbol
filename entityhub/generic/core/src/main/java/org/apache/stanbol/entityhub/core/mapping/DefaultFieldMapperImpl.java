@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  *
  */
-public class DefaultFieldMapperImpl implements FieldMapper {
+public class DefaultFieldMapperImpl implements FieldMapper, Cloneable {
     private final Logger log = LoggerFactory.getLogger(DefaultFieldMapperImpl.class);
     private final Set<FieldMapping> mappings;
 //    private final Map<String,Collection<FieldMapping>> ignoreFieldMap;
@@ -62,7 +62,7 @@ public class DefaultFieldMapperImpl implements FieldMapper {
     private final Map<String,Set<FieldMapping>> fieldMap;
     private final Map<Pattern,Set<FieldMapping>> wildcardMap;
     private Collection<FieldMapping> unmodMappings;
-    ValueConverterFactory valueConverter;
+    private ValueConverterFactory valueConverter;
     //private Map<String,FieldMapping> mappings = Collections.synchronizedMap(new HashMap<String, FieldMapping>());
     public DefaultFieldMapperImpl(ValueConverterFactory valueConverter) {
         super();
@@ -94,20 +94,20 @@ public class DefaultFieldMapperImpl implements FieldMapper {
      * @return all the active Mappings
      */
     protected List<FieldMapping> getMappings(String field){
-        final List<FieldMapping> mappings = new ArrayList<FieldMapping>();
+        final List<FieldMapping> fieldMappings = new ArrayList<FieldMapping>();
         //first search the fieldMappings
         Collection<FieldMapping> tmp = fieldMap.get(field);
         if(tmp != null){
-            mappings.addAll(tmp);
+            fieldMappings.addAll(tmp);
         }
         //now iterate over the Wildcard Mappings
         for(Entry<Pattern,Set<FieldMapping>> entry : wildcardMap.entrySet()){
             if(entry.getKey().matcher(field).find()){
-                mappings.addAll(entry.getValue());
+                fieldMappings.addAll(entry.getValue());
             }
         }
-        Collections.sort(mappings, FieldMappingUtils.FIELD_MAPPING_COMPARATOR);
-        return mappings;
+        Collections.sort(fieldMappings, FieldMappingUtils.FIELD_MAPPING_COMPARATOR);
+        return fieldMappings;
     }
     /* (non-Javadoc)
      * @see org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper#addMapping(org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping)
@@ -428,10 +428,11 @@ public class DefaultFieldMapperImpl implements FieldMapper {
         Set<Object> needConversion = new HashSet<Object>();
         for(Iterator<Object> it = values.iterator();it.hasNext();){
             Object value = it.next();
-            if(accepted.contains(value.getClass())){
+//            if(accepted.contains(value.getClass())){
 //                log.info(String.format("   + value %s(type:%s) accepted by value filter",value,value.getClass()));
                 //nothing to do
-            } else if(rejected.contains(value.getClass())){
+//            } else 
+            if(rejected.contains(value.getClass())){
                 it.remove(); //remove also the current value of that type
                 needConversion.add(value); //save as value that need to be converted
 //                log.info(String.format("   - value %s(type:%s) rejected by value filter",value,value.getClass()));
@@ -479,7 +480,7 @@ public class DefaultFieldMapperImpl implements FieldMapper {
     }
     @Override
     public boolean equals(Object o) {
-        return o != null && o instanceof DefaultFieldMapperImpl &&
+        return o instanceof DefaultFieldMapperImpl &&
             ((DefaultFieldMapperImpl)o).mappings.equals(mappings);
     }
 }

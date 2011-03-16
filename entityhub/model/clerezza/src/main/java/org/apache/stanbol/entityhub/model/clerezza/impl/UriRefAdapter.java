@@ -29,11 +29,11 @@ import org.slf4j.LoggerFactory;
 
 public class UriRefAdapter<A> implements Adapter<UriRef, A> {
 
-    static Logger log = LoggerFactory.getLogger(UriRefAdapter.class);
+    private static Logger log = LoggerFactory.getLogger(UriRefAdapter.class);
 
     @SuppressWarnings("unchecked")
     @Override
-    public A adapt(UriRef value, Class<A> type) {
+    public final A adapt(UriRef value, Class<A> type) {
         if(type.equals(URI.class)){
             try {
                 return (A) new URI(value.getUnicodeString());

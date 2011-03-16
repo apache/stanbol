@@ -52,10 +52,10 @@ public class LarqSearcher extends AbstractEntitySearcher implements EntitySearch
         super(LoggerFactory.getLogger(LarqSearcher.class));
     }
     @Reference
-    protected Parser parser;
+    private Parser parser;
 
     @Override
-    public QueryResultList<Representation> find(FieldQuery parsedQuery) throws IOException {
+    public final QueryResultList<Representation> find(FieldQuery parsedQuery) throws IOException {
         long start = System.currentTimeMillis();
         final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
         query.setEndpointType(EndpointTypeEnum.LARQ);
@@ -83,7 +83,7 @@ public class LarqSearcher extends AbstractEntitySearcher implements EntitySearch
     }
 
     @Override
-    public QueryResultList<String> findEntities(FieldQuery parsedQuery) throws IOException {
+    public final QueryResultList<String> findEntities(FieldQuery parsedQuery) throws IOException {
         final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
         query.setEndpointType(EndpointTypeEnum.LARQ);
         String sparqlQuery = query.toSparqlSelect(false);

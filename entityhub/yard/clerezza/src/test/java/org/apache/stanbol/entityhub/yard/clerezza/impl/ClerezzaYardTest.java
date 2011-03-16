@@ -29,7 +29,6 @@ import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.apache.stanbol.entityhub.test.yard.YardTest;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

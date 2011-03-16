@@ -48,14 +48,14 @@ import org.slf4j.LoggerFactory;
         )
 public class VirtuosoSearcher extends AbstractEntitySearcher implements EntitySearcher{
     @Reference
-    protected Parser parser;
+    private Parser parser;
 
     public VirtuosoSearcher() {
         super(LoggerFactory.getLogger(VirtuosoSearcher.class));
     }
 
     @Override
-    public QueryResultList<Representation> find(FieldQuery parsedQuery) throws IOException {
+    public final QueryResultList<Representation> find(FieldQuery parsedQuery) throws IOException {
         long start = System.currentTimeMillis();
         final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
         query.setEndpointType(EndpointTypeEnum.Virtuoso);
@@ -83,7 +83,7 @@ public class VirtuosoSearcher extends AbstractEntitySearcher implements EntitySe
     }
 
     @Override
-    public QueryResultList<String> findEntities(FieldQuery parsedQuery) throws IOException {
+    public final QueryResultList<String> findEntities(FieldQuery parsedQuery) throws IOException {
         final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
         query.setEndpointType(EndpointTypeEnum.Virtuoso);
         String sparqlQuery = query.toSparqlSelect(false);

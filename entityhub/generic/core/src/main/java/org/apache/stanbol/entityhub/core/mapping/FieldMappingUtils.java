@@ -39,7 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class FieldMappingUtils {
+public final class FieldMappingUtils {
     /**
      * Comparator that sorts field mappings in a way that optimises the
      * processing.

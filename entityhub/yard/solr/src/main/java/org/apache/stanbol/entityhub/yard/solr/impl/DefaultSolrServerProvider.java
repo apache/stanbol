@@ -50,7 +50,7 @@ public class DefaultSolrServerProvider implements SolrServerProvider {
     @Override
     public SolrServer getSolrServer(Type type, String uriOrPath, String... additional) throws NullPointerException, IllegalArgumentException {
         if(uriOrPath == null){
-            throw new NullPointerException("The parsed SolrServer URI MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed SolrServer URI MUST NOT be NULL!");
         }
         if(type == null){
             type = Type.HTTP;

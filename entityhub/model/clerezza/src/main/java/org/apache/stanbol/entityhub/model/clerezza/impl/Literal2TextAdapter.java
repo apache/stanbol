@@ -60,9 +60,9 @@ public class Literal2TextAdapter<T extends Literal> implements Adapter<T,Text> {
     /**
      * Unmodifiable set of the active languages
      */
-    protected final Set<String> languages;
+    private final Set<String> languages;
     private final boolean containsNull;
-    protected final RdfValueFactory valueFactory = RdfValueFactory.getInstance();
+    private final RdfValueFactory valueFactory = RdfValueFactory.getInstance();
 
     /**
      * Filters Literals in the parsed Iterator based on the parsed languages and
@@ -84,7 +84,7 @@ public class Literal2TextAdapter<T extends Literal> implements Adapter<T,Text> {
     }
 
     @Override
-    public Text adapt(T value, Class<Text> type) {
+    public final Text adapt(T value, Class<Text> type) {
         if(value instanceof PlainLiteral){
             String literalLang = ((PlainLiteral) value).getLanguage() == null ? 
                     null : ((PlainLiteral) value).getLanguage().toString();

@@ -101,18 +101,18 @@ public class DefaultEntityMappingImpl extends DefaultSignImpl implements EntityM
         }
     }
     @Override
-    public String getEntityId() {
+    public final String getEntityId() {
         Object id = representation.getFirst(EntityMapping.ENTITY_ID);
         return id != null?id.toString():null;
     }
 
     @Override
-    public Date getExpires() {
+    public final Date getExpires() {
         return representation.getFirst(EntityMapping.EXPIRES, Date.class);
     }
 
     @Override
-    public MappingState getState() {
+    public final MappingState getState() {
         Reference stateUri = representation.getFirstReference(EntityMapping.STATE);
         MappingState state;
         if(stateUri != null){
@@ -129,18 +129,18 @@ public class DefaultEntityMappingImpl extends DefaultSignImpl implements EntityM
     }
 
     @Override
-    public String getSymbolId() {
+    public final String getSymbolId() {
         Object id =  representation.getFirst(EntityMapping.SYMBOL_ID);
         return id != null?id.toString():null;
     }
 
     @Override
-    public void setExpires(Date date) {
+    public final void setExpires(Date date) {
         representation.set(EntityMapping.EXPIRES, date);
     }
 
     @Override
-    public void setState(MappingState state) throws IllegalArgumentException {
+    public final void setState(MappingState state) throws IllegalArgumentException {
         if(state != null){
             representation.setReference(EntityMapping.STATE, state.getUri());
         } else {

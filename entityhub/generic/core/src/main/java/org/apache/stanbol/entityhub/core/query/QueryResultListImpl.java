@@ -52,15 +52,15 @@ public class QueryResultListImpl<T> implements Iterable<T>, QueryResultList<T>{
         if(resultIterator == null || !resultIterator.hasNext()){
             this.results = Collections.emptyList();
         } else {
-            List<T> results = new ArrayList<T>();
+            List<T> resultList = new ArrayList<T>();
             while(resultIterator.hasNext()){
-                results.add(resultIterator.next());
+                resultList.add(resultIterator.next());
             }
-            this.results = Collections.unmodifiableList(results);
+            this.results = Collections.unmodifiableList(resultList);
         }
     }
     @Override
-    public Class<T> getType(){
+    public final Class<T> getType(){
         return type;
     }
     /**
@@ -88,32 +88,34 @@ public class QueryResultListImpl<T> implements Iterable<T>, QueryResultList<T>{
     /* (non-Javadoc)
      * @see org.apache.stanbol.entityhub.core.query.ResultList#getQuery()
      */
-    public FieldQuery getQuery(){
+    @Override
+    public final FieldQuery getQuery(){
         return query;
     }
     /* (non-Javadoc)
      * @see org.apache.stanbol.entityhub.core.query.ResultList#getSelectedFields()
      */
-    public Set<String> getSelectedFields(){
+    @Override
+    public final Set<String> getSelectedFields(){
         return query.getSelectedFields();
     }
     /* (non-Javadoc)
      * @see org.apache.stanbol.entityhub.core.query.ResultList#iterator()
      */
     @Override
-    public Iterator<T> iterator() {
+    public final Iterator<T> iterator() {
         return results.iterator();
     }
     /* (non-Javadoc)
      * @see org.apache.stanbol.entityhub.core.query.ResultList#isEmpty()
      */
-    public boolean isEmpty() {
+    public final boolean isEmpty() {
         return results.isEmpty();
     }
     /* (non-Javadoc)
      * @see org.apache.stanbol.entityhub.core.query.ResultList#size()
      */
-    public int size() {
+    public final int size() {
         return results.size(); //not supported :(
     }
 }

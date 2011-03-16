@@ -269,7 +269,9 @@ public class RdfIndexer {
 //	private final ParsingProvider parser = new JenaParserProvider();
 	//private final WeightedTcProvider provider;
 	private final FieldMapper mapper;
-	private final Set<String> types;
+	
+	@SuppressWarnings("unused") //TODO: Implement filtering based on rdf:type
+    private final Set<String> types;
 	//private MGraph indexingGraph;
 	private final DatasetGraphTDB indexingDataset;
 	private final boolean skipRead;
@@ -285,7 +287,7 @@ public class RdfIndexer {
 	private boolean resumeMode;
 	
 	
-	public RdfIndexer(Dictionary<String, Object> config){
+    public RdfIndexer(Dictionary<String, Object> config){
 		this.yard = (Yard)config.get(KEY_YARD);
 		if(yard == null){
 			throw new IllegalArgumentException("Parsed config MUST CONTAIN a Yard. Use the key "+KEY_YARD+" to parse the YardInstance used to store the geonames.org index!");
@@ -294,35 +296,35 @@ public class RdfIndexer {
 					yard.getName(),yard.getId()));
 		}
 		this.vf = yard.getValueFactory();
-		Object rdfFiles = config.get(KEY_RDF_FILES);
-		if(rdfFiles instanceof Iterable<?>){
+		Object rdfFilesObject = config.get(KEY_RDF_FILES);
+		if(rdfFilesObject instanceof Iterable<?>){
 			this.rdfFiles = new ArrayList<File>();
-			for(Object value : (Iterable<?>)rdfFiles){
+			for(Object value : (Iterable<?>)rdfFilesObject){
 				this.rdfFiles.add(checkFile(value.toString()));
 			}
 		} else {
-			this.rdfFiles = Collections.singletonList(checkFile(rdfFiles.toString()));
+			this.rdfFiles = Collections.singletonList(checkFile(rdfFilesObject.toString()));
 		}
-		Object indexingDir = config.get(KEY_RDF_STORE_DIR);
-		if(indexingDir == null){
-			indexingDir = "indexingData";
-			config.put(KEY_RDF_STORE_DIR, indexingDir);
+		Object indexingDirObject = config.get(KEY_RDF_STORE_DIR);
+		if(indexingDirObject == null){
+			indexingDirObject = "indexingData";
+			config.put(KEY_RDF_STORE_DIR, indexingDirObject);
 		}
-		this.indexingDir = checkFile(indexingDir.toString(), false, true);
-		Object modelName = config.get(KEY_MODEL_NAME);
-		if(modelName == null){
-			modelName = "indexingModel-"+ModelUtils.randomUUID().toString();
-			config.put(KEY_MODEL_NAME, modelName);
+		this.indexingDir = checkFile(indexingDirObject.toString(), false, true);
+		Object modelNameObject = config.get(KEY_MODEL_NAME);
+		if(modelNameObject == null){
+			modelNameObject = "indexingModel-"+ModelUtils.randomUUID().toString();
+			config.put(KEY_MODEL_NAME, modelNameObject);
 		}
-		this.modelName = modelName.toString();
+		this.modelName = modelNameObject.toString();
 		//init the types!
-		Iterable<?> types = (Iterable<?>)config.get(KEY_RDF_TYPES);
-		if(types != null){
+		Iterable<?> typeIterator = (Iterable<?>)config.get(KEY_RDF_TYPES);
+		if(typeIterator != null){
 			Set<String> typeSet = new HashSet<String>();
-			for(Object type : types){
-				if(type != null){
-					typeSet.add(type.toString());
-					log.info("  - adding Resoures with rdf:type "+type);
+			for(Object typeObject : typeIterator){
+				if(typeObject != null){
+					typeSet.add(typeObject.toString());
+					log.info("  - adding Resoures with rdf:type "+typeObject);
 				}
 			}
 			if(typeSet.isEmpty()){
@@ -336,14 +338,14 @@ public class RdfIndexer {
 			this.types = null; //null or an iterable with one or more elements!
 		}
 		//init the indexing mode
-		Object indexingMode = config.get(KEY_INDEXING_MODE);
-		if(indexingMode == null){
+		Object indexingModeObject = config.get(KEY_INDEXING_MODE);
+		if(indexingModeObject == null){
 			this.indexingMode = IndexingMode.NORMAL; //default to replace
-		} else if(indexingMode instanceof IndexingMode){
-			this.indexingMode = (IndexingMode)indexingMode;
+		} else if(indexingModeObject instanceof IndexingMode){
+			this.indexingMode = (IndexingMode)indexingModeObject;
 		} else {
 			try {
-				this.indexingMode = IndexingMode.valueOf(indexingMode.toString());
+				this.indexingMode = IndexingMode.valueOf(indexingModeObject.toString());
 			}catch (IllegalArgumentException e) {
 				//catch and re-throw with a better message!
 				throw new IllegalArgumentException(
@@ -352,11 +354,11 @@ public class RdfIndexer {
 			}
 		}
 		//init the fieldMapper
-		Iterable<?> mappings = (Iterable<?>)config.get(KEY_FIELD_MAPPINGS);
+		Iterable<?> mappingIterator = (Iterable<?>)config.get(KEY_FIELD_MAPPINGS);
 		List<FieldMapping> fieldMappings;
-		if(mappings != null){
+		if(mappingIterator != null){
 			fieldMappings = new ArrayList<FieldMapping>();
-			for(Object mappingString : mappings){
+			for(Object mappingString : mappingIterator){
 				if(mappingString != null){
 					FieldMapping fieldMapping = FieldMappingUtils.parseFieldMapping(mappingString.toString());
 					if(fieldMapping != null){
@@ -383,12 +385,12 @@ public class RdfIndexer {
 		} else if(!modelDir.isDirectory()){
 			throw new IllegalStateException(String.format("A directory for %s already exists but is not a directory!",modelDir.getAbsoluteFile()));
 		} //else exists and is a dir -> nothing to do
-		Object skipRead = config.get(KEY_SKIP_READ);
-		if(skipRead != null){
-			if(skipRead instanceof Boolean){
-				this.skipRead = ((Boolean)skipRead).booleanValue();
+		Object skipReadObject = config.get(KEY_SKIP_READ);
+		if(skipReadObject != null){
+			if(skipReadObject instanceof Boolean){
+				this.skipRead = ((Boolean)skipReadObject).booleanValue();
 			} else {
-				this.skipRead = Boolean.parseBoolean(skipRead.toString());
+				this.skipRead = Boolean.parseBoolean(skipReadObject.toString());
 			}
 		} else {
 			this.skipRead = false;
@@ -452,12 +454,12 @@ public class RdfIndexer {
 			this.minimumRequiredEntityRanking = minRanking;
 		}
 
-		Object resumeMode = config.get(KEY_RESUME_MODE);
-		if(resumeMode != null) {
-			if(resumeMode instanceof Boolean){
-				this.resumeMode = (Boolean)resumeMode;
+		Object resumeModeObject = config.get(KEY_RESUME_MODE);
+		if(resumeModeObject != null) {
+			if(resumeModeObject instanceof Boolean){
+				this.resumeMode = (Boolean)resumeModeObject;
 			} else {
-				this.resumeMode = Boolean.parseBoolean(resumeMode.toString());
+				this.resumeMode = Boolean.parseBoolean(resumeModeObject.toString());
 			}
 		} else {
 			this.resumeMode = false;
@@ -594,8 +596,9 @@ public class RdfIndexer {
                                     }
                                 } else {
                                     if(literalValue instanceof String){
-                                        if(!((String)literalValue).isEmpty())
-                                        source.add(field, literalValue);
+                                        if(!((String)literalValue).isEmpty()){
+                                            source.add(field, literalValue);
+                                        }
                                     } else {
                                         source.add(field, literalValue);
                                     }
@@ -674,7 +677,7 @@ public class RdfIndexer {
             //remove leading path separators!
             value = value.substring(File.pathSeparator.length());
         }
-        File testFile = new File(value.toString());
+        File testFile = new File(value);
 
         if(!testFile.exists()){
             if(create){ //create

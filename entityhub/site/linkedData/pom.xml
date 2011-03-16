@@ -63,9 +63,6 @@
            <Private-Package>
               org.apache.stanbol.entityhub.site.linkedData.impl;version=${pom.version},
             </Private-Package>
-             <Embed-Dependency> <!-- TODO: remove as soon as possible -->
-              json
-            </Embed-Dependency>
            </instructions>
         </configuration>
       </plugin>
@@ -121,11 +118,11 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
-      <version>20090211</version>
-    </dependency>    
-     <dependency>
+      <groupId>org.codehaus.jettison</groupId>
+      <artifactId>jettison</artifactId>
+      <version>1.2</version>
+    </dependency>
+    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>1.4</version>

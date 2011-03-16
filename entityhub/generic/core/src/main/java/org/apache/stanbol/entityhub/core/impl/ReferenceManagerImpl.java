@@ -58,9 +58,9 @@ import org.slf4j.LoggerFactory;
 })
 public class ReferenceManagerImpl implements ReferencedSiteManager {
 
-    protected final Logger log;
+    private final Logger log;
 
-    protected ComponentContext context;
+//    private ComponentContext context;
     public ReferenceManagerImpl(){
         super();
         log = LoggerFactory.getLogger(ReferenceManagerImpl.class);
@@ -98,13 +98,13 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
 
     @Activate
     protected void activate(ComponentContext context) {
-        this.context = context;
+//        this.context = context;
         log.info("Activate ReferenceManager with context" + context);
     }
     @Deactivate
     protected void deactivate(ComponentContext context) {
         log.info("Deactivate ReferenceManager with context" + context);
-        this.context = null;
+//        this.context = null;
         synchronized (prefixMap) {
             this.prefixList.clear();
             this.prefixMap.clear();

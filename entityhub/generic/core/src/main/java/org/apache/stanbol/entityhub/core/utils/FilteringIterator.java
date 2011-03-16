@@ -63,7 +63,7 @@ public class FilteringIterator<T> extends AdaptingIterator<T,T>{
         private Filter<A> filter;
         public FilterAdapter(Filter<A> filter) {
             if(filter == null){
-                throw new NullPointerException("The parsed Filter MUST NOT be NULL!");
+                throw new IllegalArgumentException("The parsed Filter MUST NOT be NULL!");
             }
             this.filter = filter;
         }

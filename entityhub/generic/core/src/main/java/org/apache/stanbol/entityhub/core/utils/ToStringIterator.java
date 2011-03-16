@@ -31,7 +31,7 @@ import java.util.Iterator;
  */
 public class ToStringIterator implements Iterator<String> {
 
-    protected final Iterator<?> it;
+    private final Iterator<?> it;
     /**
      * Creates an string iterator over parsed parent
      * @param it the parent iterator
@@ -40,7 +40,7 @@ public class ToStringIterator implements Iterator<String> {
      */
     public ToStringIterator(Iterator<?> it) throws NullPointerException{
         if(it == null){
-            throw new NullPointerException("Parsed iterator MUST NOT be NULL!");
+            throw new IllegalArgumentException("Parsed iterator MUST NOT be NULL!");
         }
         this.it = it;
     }

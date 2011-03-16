@@ -48,14 +48,14 @@ import org.slf4j.LoggerFactory;
  */
 public class LiteralAdapter<T extends Literal,A> implements Adapter<T, A> {
 
-    static Logger log = LoggerFactory.getLogger(LiteralAdapter.class);
+    private static Logger log = LoggerFactory.getLogger(LiteralAdapter.class);
 
-    LiteralFactory lf = LiteralFactory.getInstance();
-    RdfValueFactory valueFactory = RdfValueFactory.getInstance();
+    private LiteralFactory lf = LiteralFactory.getInstance();
+    private RdfValueFactory valueFactory = RdfValueFactory.getInstance();
 
     @SuppressWarnings("unchecked")
     @Override
-    public A adapt(T value, Class<A> type) {
+    public final A adapt(T value, Class<A> type) {
 // NOTE: (Rupert Westenthaler 12.01.2011)
 //      Converting everything to String is not an intended functionality. When
 //      someone parsed String.class he rather assumes that he gets only string

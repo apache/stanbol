@@ -52,7 +52,7 @@ public interface Symbol extends Sign{
          */
         active(RdfResourceEnum.symbolStateActive.getUri()),
         ;
-        String uri;
+        private String uri;
         SymbolState(String uri){
             this.uri = uri;
         }

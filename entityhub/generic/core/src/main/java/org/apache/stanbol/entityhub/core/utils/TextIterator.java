@@ -26,12 +26,6 @@ import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 
 public class TextIterator extends AdaptingIterator<Object,Text> implements Iterator<Text> {
-//    protected final Iterator<?> it;
-//    private Text next;
-//    private Boolean hasNext;
-//    protected final Set<String> languages;
-//    private final boolean isNullLanguage;
-//    protected final ValueFactory valueFactory;
     /**
      * Creates an instance that iterates over values and returns {@link Text}
      * instances that confirm to the active languages. If no languages are parsed
@@ -43,26 +37,11 @@ public class TextIterator extends AdaptingIterator<Object,Text> implements Itera
      */
     public TextIterator(ValueFactory valueFactory,Iterator<Object> it,String...languages){
         super(it,new TextAdapter(valueFactory, languages),Text.class);
-//        if(it == null){
-//            throw new IllegalArgumentException("Parsed iterator MUST NOT be NULL!");
-//        }
-//        this.it = it;
-//        if(valueFactory == null){
-//            throw new IllegalArgumentException("Parsed ValueFactory MUST NOT be NULL!");
-//        }
-//        this.valueFactory = valueFactory;
-//        if(languages != null && languages.length>0){
-//            this.languages = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(languages)));
-//            isNullLanguage = this.languages.contains(null);
-//        } else {
-//            this.languages = null;
-//            isNullLanguage = true;
-//        }
     }
     private static class TextAdapter implements Adapter<Object,Text>{
-        protected final Set<String> languages;
+        private final Set<String> languages;
         private final boolean isNullLanguage;
-        protected final ValueFactory valueFactory;
+        private final ValueFactory valueFactory;
         
         public TextAdapter(ValueFactory valueFactory,String...languages) {
             if(valueFactory == null){

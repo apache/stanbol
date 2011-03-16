@@ -44,8 +44,6 @@ import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.codehaus.jettison.json.JSONException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * TODO: Replace with Serializer infrastructure similar to {@link Serializer}
@@ -54,9 +52,9 @@ import org.slf4j.LoggerFactory;
 @Produces({APPLICATION_JSON, N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE, RDF_JSON})
 public class QueryResultListWriter implements MessageBodyWriter<QueryResultList<?>> {
 
-    private final Logger log = LoggerFactory.getLogger(QueryResultListWriter.class);
+//    private final Logger log = LoggerFactory.getLogger(QueryResultListWriter.class);
     @Context
-    protected ServletContext servletContext;
+    private ServletContext servletContext;
 
     protected Serializer getSerializer() {
         return (Serializer) servletContext.getAttribute(Serializer.class.getName());
@@ -69,33 +67,14 @@ public class QueryResultListWriter implements MessageBodyWriter<QueryResultList<
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        //TODO: The type is also parsed as genericType ... so we can only check
-        //for the type :(
         return QueryResultList.class.isAssignableFrom(type);
-//       if(QueryResultList.class.isAssignableFrom(type) &&
-//               genericType != null &&  //QueryResult is always a generic Type
-//               genericType instanceof Class<?>){ //and such types do not use generics
-//           //This writer supports String, Representation and all types of Signs
-//           Class<?> genericClass  = (Class<?>) genericType;
-//
-//           if(String.class.isAssignableFrom(genericClass) ||
-//                   Representation.class.isAssignableFrom(genericClass) ||
-//                   Sign.class.isAssignableFrom(genericClass)){
-//               //maybe we need further checks if we do not support all data types
-//               //for all generic types! But currently all different types of
-//               //QueryResultList support all the different MediaTypes!
-//               return true;
-//           }
-//       }
-//       log.info("Request for not writeable combination: type="+type+"|genericType="+genericType+"|mediaType="+mediaType);
-//       return false;
     }
 
     @Override
-    public void writeTo(QueryResultList<?> resultList, Class<?> __doNotUse, Type genericType,
+    public void writeTo(QueryResultList<?> resultList, Class<?> doNotUse, Type genericType,
             Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders,
             OutputStream entityStream) throws IOException, WebApplicationException {
-        Class<?> genericClass = (Class<?>) genericType;
+//        Class<?> genericClass = (Class<?>) genericType;
         if (APPLICATION_JSON.equals(mediaType.toString())) {
             try {
                 IOUtils.write(QueryResultsToJSON.toJSON(resultList).toString(4), entityStream,"UTF-8");

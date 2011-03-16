@@ -49,24 +49,24 @@ public class RdfQueryResultList implements QueryResultList<Representation> {
                         SparqlQueryUtils.parseQueryResultsFromMGraph(resultGraph)));
     }
     @Override
-    public FieldQuery getQuery() {
+    public final FieldQuery getQuery() {
         return query;
     }
 
     @Override
-    public Set<String> getSelectedFields() {
+    public final Set<String> getSelectedFields() {
         return query.getSelectedFields();
     }
 
     @Override
-    public boolean isEmpty() {
+    public final boolean isEmpty() {
         return results.isEmpty();
     }
 
     @Override
-    public Iterator<Representation> iterator() {
+    public final Iterator<Representation> iterator() {
         return new Iterator<Representation>() {
-            Iterator<RdfRepresentation> it = results.iterator();
+            private Iterator<RdfRepresentation> it = results.iterator();
             @Override
             public boolean hasNext() { return it.hasNext(); }
             @Override
@@ -77,18 +77,18 @@ public class RdfQueryResultList implements QueryResultList<Representation> {
     }
 
     @Override
-    public int size() {
+    public final int size() {
         return results.size();
     }
     /**
      * Getter for the RDF Graph holding the Results of the Query
      * @return the RDF Graph with the Results
      */
-    public MGraph getResultGraph() {
+    public final MGraph getResultGraph() {
         return resultGraph;
     }
     @Override
-    public Class<Representation> getType() {
+    public final Class<Representation> getType() {
         return Representation.class;
     }
 

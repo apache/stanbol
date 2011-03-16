@@ -43,10 +43,10 @@ public class FieldQueryImpl implements Cloneable, FieldQuery{
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(FieldQueryImpl.class);
 
-    protected final Map<String,Constraint> queryConstraint = new HashMap<String, Constraint>();
+    private final Map<String,Constraint> queryConstraint = new HashMap<String, Constraint>();
     private final Map<String,Constraint> unmodQueryElements = Collections.unmodifiableMap(queryConstraint);
 
-    protected final Set<String> selected = new HashSet<String>();
+    private final Set<String> selected = new HashSet<String>();
     private final Set<String> unmodSelected = Collections.unmodifiableSet(selected);
 
     private Integer limit;
@@ -189,5 +189,24 @@ public class FieldQueryImpl implements Cloneable, FieldQuery{
             offset = 0;
         }
         this.offset = offset;
+    }
+    @Override
+    public int hashCode() {
+        return queryConstraint.hashCode()+selected.hashCode()+offset+(limit!=null?limit:0);
+    }
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof FieldQuery && 
+            ((FieldQuery)obj).getConstraints().equals(getConstraints()) &&
+            ((FieldQuery)obj).getSelectedFields().equals(getSelectedFields()) &&
+            ((FieldQuery)obj).getOffset() == getOffset()){
+            if(limit != null){
+                return limit.equals(((FieldQuery)obj).getLimit());
+            } else {
+                return ((FieldQuery)obj).getLimit() == null;
+            }
+        } else {
+            return false;
+        }
     }
 }

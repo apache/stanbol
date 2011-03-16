@@ -19,7 +19,6 @@ package org.apache.stanbol.entityhub.yard.solr.impl;
 import static org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst.DEPENDENT_DOCUMENT_FIELD;
 import static org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst.DOCUMENT_ID_FIELD;
 import static org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst.DOMAIN_FIELD;
-import static org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst.LANG_MERGER_FIELD;
 import static org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst.PATH_SEPERATOR;
 import static org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst.REFERRED_DOCUMENT_FIELD;
 import static org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst.SPECIAL_CONFIG_FIELD;
@@ -65,7 +64,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SolrFieldMapper implements FieldMapper {
 
-    Logger log = LoggerFactory.getLogger(SolrFieldMapper.class);
+    private static Logger log = LoggerFactory.getLogger(SolrFieldMapper.class);
     /**
      * Char used to separate the prefix from the local name of uri's
      */
@@ -85,6 +84,10 @@ public class SolrFieldMapper implements FieldMapper {
     private static final IndexField scoreField = new IndexField(
             Collections.singletonList(RdfResourceEnum.resultScore.getUri()),
             IndexDataTypeEnum.FLOAT.getIndexType());
+    /**
+     * The Solr Server of this FieldMapper
+     */
+    protected final SolrServer server;
     /**
      * Internally used as LRU Cache with {@link SolrFieldMapper#LRU_MAPPINGS_CACHE_SIZE}
      * elements. This subclass of {@link LinkedHashMap} overrides the
@@ -115,17 +118,16 @@ public class SolrFieldMapper implements FieldMapper {
      * them again and again.
      * @see LinkedHashMap#
      */
-    private final LinkedHashMap<IndexField, Collection<String>> indexFieldMappings =
+    private final LRU<IndexField, Collection<String>> indexFieldMappings =
         new LRU<IndexField, Collection<String>>();
     /**
      * The assumption is, that only a handful of fields appear in index documents.
      * So it makes sense to keep some mappings within a cache rather than calculating
      * them again and again.
      */
-    private final LinkedHashMap<String, IndexField> fieldMappings =
+    private final LRU<String, IndexField> fieldMappings =
         new LRU<String, IndexField>();
 
-    protected final SolrServer server;
     public SolrFieldMapper(SolrServer server){
         if(server == null){
             throw new IllegalArgumentException("The parsed SolrServer MUST NOT be NULL");

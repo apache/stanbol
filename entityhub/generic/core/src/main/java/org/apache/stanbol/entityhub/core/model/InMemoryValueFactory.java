@@ -40,7 +40,7 @@ public class InMemoryValueFactory implements ValueFactory {
     @Override
     public Reference createReference(Object value) {
         if(value == null){
-            throw new NullPointerException("The parsed value MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed value MUST NOT be NULL");
         }
         return new ReferenceImpl(value.toString());
     }
@@ -48,7 +48,7 @@ public class InMemoryValueFactory implements ValueFactory {
     @Override
     public Text createText(Object value) {
         if(value == null){
-            throw new NullPointerException("The parsed value MUST NOT be NULL");
+            throw new IllegalArgumentException("The parsed value MUST NOT be NULL");
         }
         return createText(value.toString(),null);
     }
@@ -87,7 +87,7 @@ public class InMemoryValueFactory implements ValueFactory {
 
         @Override
         public boolean equals(Object obj) {
-            return obj != null && obj instanceof ReferenceImpl && ((ReferenceImpl)obj).value.equals(value);
+            return obj instanceof ReferenceImpl && ((ReferenceImpl)obj).value.equals(value);
         }
         @Override
         public String toString() {
@@ -107,13 +107,13 @@ public class InMemoryValueFactory implements ValueFactory {
 
         private final String value;
         private final String language;
-        protected TextImpl(String value) throws NullPointerException {
+        protected TextImpl(String value) throws IllegalArgumentException {
             this(value,null);
         }
-        protected TextImpl(String value, String language) throws NullPointerException {
+        protected TextImpl(String value, String language) throws IllegalArgumentException {
             super();
             if(value == null){
-                throw new NullPointerException("The value of the Text MUST NOT be NULL!");
+                throw new IllegalArgumentException("The value of the Text MUST NOT be NULL!");
             }
             this.value = value;
             this.language = language;
@@ -134,7 +134,7 @@ public class InMemoryValueFactory implements ValueFactory {
         }
         @Override
         public boolean equals(Object obj) {
-            if(obj != null && obj instanceof TextImpl && ((TextImpl)obj).value.equals(value)){
+            if(obj instanceof TextImpl && ((TextImpl)obj).value.equals(value)){
                 if(((TextImpl)obj).language == null){
                     return language == null;
                 } else {
@@ -152,7 +152,7 @@ public class InMemoryValueFactory implements ValueFactory {
     @Override
     public Representation createRepresentation(String id) {
         if (id == null){
-            throw new NullPointerException("The parsed id MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed id MUST NOT be NULL!");
          } else if(id.isEmpty()){
              throw new IllegalArgumentException("The parsed id MUST NOT be empty!");
          } else {

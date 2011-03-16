@@ -88,7 +88,7 @@ public final class ModelUtils {
      *
      * @return a new Random UUID
      */
-    protected static Random rng = new Random();
+    private static Random rng = new Random();
 
     /**
      * Do not allow instances of this class
@@ -203,18 +203,18 @@ public final class ModelUtils {
         String[] parts = new String[2];
         if(uri.startsWith("urn:")){
             if(uri.lastIndexOf(':')>3){
-                parts[1] = uri.substring(uri.lastIndexOf(":")+1);
-                parts[0] = uri.substring(0, uri.lastIndexOf(":")+1);
+                parts[1] = uri.substring(uri.lastIndexOf(':')+1);
+                parts[0] = uri.substring(0, uri.lastIndexOf(':')+1);
             } else {
                 parts[1] = uri;
                 parts[0] = null;
             }
-        } else if(uri.lastIndexOf("#")>=0){
-            parts[1] = uri.substring(uri.lastIndexOf("#")+1);
-            parts[0] = uri.substring(0, uri.lastIndexOf("#")+1);
-        } else if(uri.lastIndexOf("/")>=0){
-            parts[1] = uri.substring(uri.lastIndexOf("/")+1);
-            parts[0] = uri.substring(0, uri.lastIndexOf("/")+1);
+        } else if(uri.lastIndexOf('#')>=0){
+            parts[1] = uri.substring(uri.lastIndexOf('#')+1);
+            parts[0] = uri.substring(0, uri.lastIndexOf('#')+1);
+        } else if(uri.lastIndexOf('/')>=0){
+            parts[1] = uri.substring(uri.lastIndexOf('/')+1);
+            parts[0] = uri.substring(0, uri.lastIndexOf('/')+1);
         } else {
             parts[0] = null;
             parts[1] = uri;

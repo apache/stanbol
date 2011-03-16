@@ -21,7 +21,6 @@ import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -41,13 +40,11 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.servicesapi.model.Sign;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
-import org.apache.stanbol.entityhub.servicesapi.site.ConfiguredSite;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteException;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
@@ -77,21 +74,21 @@ public class ReferencedSiteRootResource extends NavigationMixin {
     /**
      * The Field used as default as selected fields for find requests
      * TODO: Make configurable via the {@link ConfiguredSite} interface!
+     * NOTE: This feature is deactivated, because OPTIONAL selects do have very
+     * weak performance when using SPARQL endpoints
      */
-    private static final Collection<String> DEFAULT_FIND_SELECTED_FIELDS = Arrays.asList(RDFS.comment.getUnicodeString());
+//    private static final Collection<String> DEFAULT_FIND_SELECTED_FIELDS = Arrays.asList(RDFS.comment.getUnicodeString());
     /**
      * The default number of maximal results.
      */
     private static final int DEFAULT_FIND_RESULT_LIMIT = 5;
-    protected Serializer serializer;
 
-    protected ReferencedSite site;
+    private ReferencedSite site;
 
     public ReferencedSiteRootResource(@Context ServletContext context, @PathParam(value = "site") String siteId) {
         super();
         log.info("... init ReferencedSiteRootResource for Site {}", siteId);
         ReferencedSiteManager referencedSiteManager = (ReferencedSiteManager) context.getAttribute(ReferencedSiteManager.class.getName());
-        serializer = (Serializer) context.getAttribute(Serializer.class.getName());
         if (referencedSiteManager == null) {
             log.error("Missing referencedSiteManager={}", referencedSiteManager);
             throw new WebApplicationException(Response.Status.NOT_FOUND);

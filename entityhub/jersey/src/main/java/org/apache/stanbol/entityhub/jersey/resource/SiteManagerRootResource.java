@@ -50,7 +50,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.servicesapi.model.Sign;
@@ -85,15 +84,12 @@ public class SiteManagerRootResource extends NavigationMixin {
      */
     private static final int DEFAULT_FIND_RESULT_LIMIT = 5;
 
-    protected Serializer serializer;
-
     private ReferencedSiteManager referencedSiteManager;
 
     public SiteManagerRootResource(@Context ServletContext context) {
         super();
         log.info("... init SiteManagerRootResource");
         referencedSiteManager = (ReferencedSiteManager) context.getAttribute(ReferencedSiteManager.class.getName());
-        serializer = (Serializer) context.getAttribute(Serializer.class.getName());
         if (referencedSiteManager == null) {
             log.error("Missing referencedSiteManager={}", referencedSiteManager);
             throw new WebApplicationException(NOT_FOUND);

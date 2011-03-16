@@ -18,17 +18,16 @@ package org.apache.stanbol.entityhub.core.model;
 
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Sign;
-import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DefaultSignImpl implements Sign{
 
     Logger log = LoggerFactory.getLogger(DefaultSignImpl.class);
-
+    
     protected final Representation representation;
-    protected final String TYPE = RdfResourceEnum.signType.getUri();
-    protected final String signSite;
+//    private final String TYPE = RdfResourceEnum.signType.getUri();
+    private final String signSite;
 
 //    public DefaultSignImpl(Representation representation) {
 //        if(representation == null){

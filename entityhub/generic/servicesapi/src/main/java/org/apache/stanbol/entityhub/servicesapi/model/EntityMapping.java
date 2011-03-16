@@ -61,7 +61,7 @@ public interface EntityMapping extends Sign {
          */
         confirmed(RdfResourceEnum.mappingStateConfirmed.getUri()),
         ;
-        String uri;
+        private String uri;
         MappingState(String uri){
             this.uri = uri;
         }
@@ -73,7 +73,7 @@ public interface EntityMapping extends Sign {
             return uri;
         }
         // ---- reverse Mapping based on URI ----
-        static Map<String,MappingState> uri2state;
+        private static Map<String,MappingState> uri2state;
         static {
             Map<String, MappingState> mappings = new HashMap<String, MappingState>();
             for(MappingState state : MappingState.values()){

@@ -44,7 +44,7 @@ public class JettisonWriter implements MessageBodyWriter<Object> {
     }
 
     @Override
-    public void writeTo(Object value, Class<?> __doNotUse, Type genericType,
+    public void writeTo(Object value, Class<?> doNotUse, Type genericType,
             Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
             throws IOException, WebApplicationException {

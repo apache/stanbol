@@ -24,7 +24,8 @@ package org.apache.stanbol.entityhub.yard.solr.defaults;
  * @author Rupert Westenthaler
  *
  */
-public class SolrConst {
+public final class SolrConst {
+    private SolrConst(){}
     /**
      * Char used to mark special fields. Special fields are internally used
      * fields that do not represent a value that was present in the original

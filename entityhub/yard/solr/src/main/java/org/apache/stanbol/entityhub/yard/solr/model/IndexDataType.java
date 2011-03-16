@@ -64,19 +64,21 @@ public final class IndexDataType {
     public IndexDataType(String id,String name) {
         this.id = id;
         if(name == null){
-            if(id.lastIndexOf("#")>=0){
-                name = id.substring(id.lastIndexOf("#")+1);
-            } else if(id.lastIndexOf("/")>=0){
-                name = id.substring(id.lastIndexOf("/")+1);
-            } else if(id.lastIndexOf(":")>=0){
-                name = id.substring(id.lastIndexOf(":")+1);
+            String defaultName;
+            if(id.lastIndexOf('#')>=0){
+                defaultName = id.substring(id.lastIndexOf('#')+1);
+            } else if(id.lastIndexOf('/')>=0){
+                defaultName = id.substring(id.lastIndexOf('/')+1);
+            } else if(id.lastIndexOf(':')>=0){
+                defaultName = id.substring(id.lastIndexOf(':')+1);
             } else {
-                name = id;
+                defaultName = id;
             }
             //convert first char to lower case
-            name = name.substring(0,1).toLowerCase()+name.substring(1);
+            this.name = defaultName.substring(0,1).toLowerCase()+defaultName.substring(1);
+        } else {
+            this.name = name;
         }
-        this.name = name;
     }
     /**
      * Getter for the prefix
@@ -99,7 +101,7 @@ public final class IndexDataType {
     }
     @Override
     public boolean equals(Object obj) {
-        return obj != null && obj instanceof IndexDataType && ((IndexDataType)obj).id.equals(id);
+        return obj instanceof IndexDataType && ((IndexDataType)obj).id.equals(id);
     }
     /**
      * Returns the id of the dataType. Use {@link #getName()} if you need a

@@ -45,7 +45,9 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  *
  */
-public class TimeUtils {
+public final class TimeUtils {
+    private TimeUtils(){}
+
     protected static final Logger log = LoggerFactory.getLogger(TimeUtils.class);
     /**
      * Holds all the data types that represent a date or a time!
@@ -154,23 +156,24 @@ public class TimeUtils {
     /**
      * Lazy initialisation to avoid Exceptions if {@link DatatypeConfigurationException}
      * is thrown during initialisation of the Utility class.<p>
+     * Do not access directly! Use {@link #getXmlDataTypeFactory()} instead.
      */
-    private static DatatypeFactory __xmlDatatypeFactory;
+    private static DatatypeFactory xmlDatatypeFactory;
     /**
-     * Inits the {@link #__xmlDatatypeFactory} if not already done.<p>
+     * Inits the {@link #xmlDatatypeFactory} if not already done.<p>
      * @return the XML datatype factory
      * @throws IllegalStateException if a {@link DatatypeConfigurationException}
      * is encountered during {@link DatatypeFactory#newInstance()}
      */
     private static DatatypeFactory getXmlDataTypeFactory() throws IllegalStateException {
-        if(__xmlDatatypeFactory == null){
+        if(xmlDatatypeFactory == null){
             try {
-                __xmlDatatypeFactory = DatatypeFactory.newInstance();
+                xmlDatatypeFactory = DatatypeFactory.newInstance();
             } catch (DatatypeConfigurationException e) {
                 throw new IllegalStateException("Unable to instantiate XML Datatype Factory!",e);
             }
         }
-        return __xmlDatatypeFactory;
+        return xmlDatatypeFactory;
     }
 
     public static String toString(String dataTypeUri,Date value){

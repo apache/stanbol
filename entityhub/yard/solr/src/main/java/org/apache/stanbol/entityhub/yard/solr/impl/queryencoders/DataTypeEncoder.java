@@ -40,8 +40,8 @@ public class DataTypeEncoder implements IndexConstraintTypeEncoder<Object> {
 
     private static final ConstraintTypePosition PREFIX = new ConstraintTypePosition(PositionType.prefix);
     private static final ConstraintTypePosition SUFFIX = new ConstraintTypePosition(PositionType.suffux);
-    protected final FieldMapper fieldMapper;
-    protected final IndexValueFactory indexValueFactory;
+    private final FieldMapper fieldMapper;
+    private final IndexValueFactory indexValueFactory;
     public DataTypeEncoder(IndexValueFactory indexValueFactory, FieldMapper fieldMapper) {
         if(fieldMapper == null){
             throw new IllegalArgumentException("The FieldMapper MUST NOT be NULL!");

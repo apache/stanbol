@@ -37,15 +37,13 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.SimpleLiteralFactory;
 import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Utilities to create {@link Resource} instances for Java Objects.
  * @author Rupert Westenthaler
  *
  */
-public class RdfResourceUtils {
+public final class RdfResourceUtils {
 
     private RdfResourceUtils(){/*do not create instances of Util Classes*/}
     /**
@@ -136,7 +134,7 @@ public class RdfResourceUtils {
         JAVA_OBJECT_XSD_DATATYPE_MAPPING = Collections.unmodifiableMap(objectMappings);
     }
 
-    private static final Logger log = LoggerFactory.getLogger(RdfResourceUtils.class);
+//    private static final Logger log = LoggerFactory.getLogger(RdfResourceUtils.class);
 
     private static final LiteralFactory literalFactory = LiteralFactory.getInstance();
 

@@ -70,13 +70,13 @@ public class SignWriter implements MessageBodyWriter<Sign>{
         supportedMediaTypes = Collections.unmodifiableSet(types);
     }
     @Context
-    protected ServletContext servletContext;
+    private ServletContext servletContext;
 
     protected Serializer getSerializer() {
         return (Serializer) servletContext.getAttribute(Serializer.class.getName());
     }
     @Override
-    public long getSize(Sign Sign, Class<?> type, Type genericType,
+    public long getSize(Sign sign, Class<?> type, Type genericType,
             Annotation[] annotations, MediaType mediaType) {
         return -1; //to hard to calculate
     }

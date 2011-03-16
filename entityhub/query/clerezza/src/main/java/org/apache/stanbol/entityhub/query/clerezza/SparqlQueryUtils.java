@@ -39,7 +39,6 @@ import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
 import org.apache.stanbol.entityhub.servicesapi.query.RangeConstraint;
-import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint.PatternType;
@@ -57,6 +56,9 @@ import org.slf4j.LoggerFactory;
  *
  */
 public final class SparqlQueryUtils {
+    
+    private static final Logger log = LoggerFactory.getLogger(SparqlQueryUtils.class);
+    
     public static enum EndpointTypeEnum {
         Standard,
         Virtuoso,
@@ -66,7 +68,6 @@ public final class SparqlQueryUtils {
 
     private static final String XSD_DATE_TIME = "http://www.w3.org/2001/XMLSchema#dateTime";
     private static final DateFormat DATE_FORMAT = new W3CDateFormat();
-    private static final Logger log = LoggerFactory.getLogger(SparqlQueryUtils.class);
     private static final RdfValueFactory valueFavtory = RdfValueFactory.getInstance();
     /**
      * {@link UriRef} constant for {@link RdfResourceEnum#queryResult}
@@ -650,7 +651,7 @@ public final class SparqlQueryUtils {
     }
 
 
-    public static void main(String[] args) {
+/*    public static void main(String[] args) {
         SparqlFieldQuery query = SparqlFieldQueryFactory.getInstance().createFieldQuery();
         query.setConstraint("urn:field1", new ReferenceConstraint("urn:testReference"));
         query.setConstraint("urn:field1a", new ValueConstraint(null, Arrays.asList(
@@ -686,7 +687,7 @@ public final class SparqlQueryUtils {
         System.out.println(createSparqlSelectQuery(query,true,0,EndpointTypeEnum.Standard));
         System.out.println();
         System.out.println(createSparqlConstructQuery(query,0,EndpointTypeEnum.Virtuoso));
-    }
+    }*/
 
     /**
      * @param query

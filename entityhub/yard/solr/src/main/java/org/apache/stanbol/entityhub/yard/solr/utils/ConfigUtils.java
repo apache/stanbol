@@ -19,14 +19,10 @@ package org.apache.stanbol.entityhub.yard.solr.utils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Enumeration;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.solr.client.solrj.SolrServer;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
-import org.apache.solr.client.solrj.request.CoreAdminRequest;
 import org.apache.stanbol.entityhub.yard.solr.embedded.EmbeddedSolrPorovider;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
@@ -42,7 +38,8 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  *
  */
-public class ConfigUtils {
+public final class ConfigUtils {
+    private ConfigUtils(){}
     /**
      * The logger
      */
@@ -75,10 +72,10 @@ public class ConfigUtils {
     @SuppressWarnings("unchecked") //Enumeration<URL> required by OSGI specification
     public static File copyDefaultConfig(Bundle bundle, File rootDir,boolean override) throws IOException, NullPointerException, IllegalStateException, IllegalArgumentException {
         if(bundle == null){
-            throw new NullPointerException("The parsed Bundle MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed Bundle MUST NOT be NULL!");
         }
         if(rootDir == null){
-            throw new NullPointerException("The parsed root directory MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed root directory MUST NOT be NULL!");
         }
         if(rootDir.exists() && !rootDir.isDirectory()){
             throw new IllegalStateException("The parsed root directory "+rootDir.getAbsolutePath()+" extists but is not a directory!");
@@ -156,10 +153,10 @@ public class ConfigUtils {
     @SuppressWarnings("unchecked") //Enumeration<URL> required by OSGI specification
     public static void copyCore(Bundle bundle, File coreDir, String coreName, boolean override) throws IOException,NullPointerException,IllegalStateException,IllegalArgumentException{
         if(bundle == null){
-            throw new NullPointerException("The parsed Bundle MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed Bundle MUST NOT be NULL!");
         }
         if(coreDir == null){
-            throw new NullPointerException("The parsed core directory MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed core directory MUST NOT be NULL!");
         }
         if(coreDir.exists() && !coreDir.isDirectory()){
             throw new IllegalStateException("The parsed core directory "+coreDir.getAbsolutePath()+" extists but is not a directory!");

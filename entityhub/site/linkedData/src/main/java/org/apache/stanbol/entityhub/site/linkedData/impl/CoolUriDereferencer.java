@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
         )
 public class CoolUriDereferencer extends AbstractEntityDereferencer implements EntityDereferencer{
     @Reference
-    protected Parser parser;
+    private Parser parser;
 
     private final RdfValueFactory valueFactory = RdfValueFactory.getInstance();
 
@@ -55,7 +55,7 @@ public class CoolUriDereferencer extends AbstractEntityDereferencer implements E
     }
 
     @Override
-    public InputStream dereference(String uri, String contentType) throws IOException{
+    public final InputStream dereference(String uri, String contentType) throws IOException{
         if(uri!=null){
             final URL url = new URL(uri);
             final URLConnection con = url.openConnection();
@@ -67,7 +67,7 @@ public class CoolUriDereferencer extends AbstractEntityDereferencer implements E
     }
 
     @Override
-    public Representation dereference(String uri) throws IOException{
+    public final Representation dereference(String uri) throws IOException{
         long start = System.currentTimeMillis();
         String format = SupportedFormat.RDF_XML;
         InputStream in = dereference(uri, format);

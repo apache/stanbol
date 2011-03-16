@@ -86,11 +86,11 @@ public enum DataTypeEnum {
     DateTime("dateTime",Date.class),
     Duration("duration",Duration.class),
     ;
-    final Class<?> javaType;
-    final QName qName;
-    final String shortName;
-    final String uri;
-    final Set<Class<?>> additional;
+    private final Class<?> javaType;
+    private final QName qName;
+    private final String shortName;
+    private final String uri;
+    private final Set<Class<?>> additional;
     private DataTypeEnum(Class<?> javaType,Class<?>...additional){
         this(null,null,javaType,additional);
     }

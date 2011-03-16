@@ -84,11 +84,11 @@ public class CacheImpl implements Cache {
     //private Yard yard;
 
     private String yardId;
-    boolean initWithYard = false;
+    private boolean initWithYard = false;
 
     private FieldMapper baseMapper;
     private FieldMapper additionalMapper;
-    protected ComponentContext context;
+    private ComponentContext context;
 
     @Activate
     protected void activate(ComponentContext context) throws ConfigurationException, YardException, IllegalStateException, InvalidSyntaxException {
@@ -116,7 +116,7 @@ public class CacheImpl implements Cache {
         //(2) Init the additional mappings based on the configuration
         Object mappings = context.getProperties().get(Cache.ADDITIONAL_MAPPINGS);
         FieldMapper configuredMappings = null;
-        if (mappings != null && mappings instanceof String[] && ((String[]) mappings).length > 0) {
+        if (mappings instanceof String[] && ((String[]) mappings).length > 0) {
             configuredMappings = new DefaultFieldMapperImpl(ValueConverterFactory.getInstance(yard.getValueFactory()));
             for (String mappingString : (String[]) mappings) {
                 FieldMapping fieldMapping = FieldMappingUtils.parseFieldMapping(mappingString);

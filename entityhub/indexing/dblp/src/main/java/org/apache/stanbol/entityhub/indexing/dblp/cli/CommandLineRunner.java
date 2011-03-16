@@ -31,7 +31,6 @@ import static org.apache.stanbol.entityhub.indexing.rdf.RdfIndexer.KEY_YARD;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -59,7 +58,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class CommandLineRunner {
+public final class CommandLineRunner {
+    private CommandLineRunner(){}
+
+    
     public static final String[] defaultFieldMappings = new String [] {
         // --- Define the Languages for all fields ---
         //NOTE: the leading space is required for the global filter!
