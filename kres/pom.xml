@@ -69,10 +69,14 @@
 	-->
 	
 	<!-- KReS manager -->
+	<!--
 	<module>eu.iksproject.kres.manager</module>
+	-->
 	
 	<!-- KReS rules -->
+	<!--
     <module>eu.iksproject.kres.rules</module>
+	-->
 	
 	<!-- Semion -->
 	<module>eu.iksproject.kres.semion.manager</module>
@@ -96,6 +100,7 @@
     <module>reasoners/base</module>
     <module>reengineer/base</module>
     <module>rules/base</module>
+    <module>rules/manager</module>
     <module>rules/refactor</module>
 
  </modules>
