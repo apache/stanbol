@@ -55,16 +55,17 @@
 	<!--
 	<module>eu.iksproject.kres.api</module>
 	<module>eu.iksproject.kres.manager</module>
+	<module>eu.iksproject.kres.ontologies</module>
 	<module>eu.iksproject.kres.reasoners</module>
 	<module>eu.iksproject.kres.rules</module>
 	<module>eu.iksproject.kres.storage</module>
 	<module>eu.iksproject.kres.storage.provider</module>
-	-->
-	
-	<!-- Semion -->
 	<module>eu.iksproject.kres.semion.manager</module>
 	<module>eu.iksproject.kres.semion.reengineer.db</module>
 	<module>eu.iksproject.kres.semion.reengineer.xml</module>
+	-->
+	
+	<!-- Semion -->
     <module>eu.iksproject.kres.semion.refactorer</module>
 
     <!-- Jersey -->
