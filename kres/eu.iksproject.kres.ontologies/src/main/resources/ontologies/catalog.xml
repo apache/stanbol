@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<catalog id="file:/Users/alessandro/workspaces/IKS/KReS/eu.iksproject.kres.ontologies/src/main/resources/ontologies/" prefer="public" xml:base="file:/Users/alessandro/workspaces/IKS/KReS/eu.iksproject.kres.ontologies/src/main/resources/ontologies/" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
-    <uri name="http://fise.iks-project.eu/enhancementtypes.owl" uri="enhancementtypes.owl"/>
-    <uri name="http://fise.iks-project.eu/ontology" uri="fiseontology.owl"/>
-    <uri name="http://ontologydesignpatterns.org/cpont/iks/ami/LocationContext.owl" uri="LocationContext.owl"/>
-    <uri name="http://kres.iks-project.eu/ontology/meta/onm.owl" uri="onm.owl"/>
-    <uri name="http://ontologydesignpatterns.org/cpont/iks/ami/timed_and_typed_event.owl" uri="timed_and_typed_event.owl"/>
-</catalog>
