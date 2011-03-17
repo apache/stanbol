@@ -64,9 +64,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import eu.iksproject.kres.ontologies.Semion_OWL;
-import eu.iksproject.kres.ontologies.XML_OWL;
-import eu.iksproject.kres.ontologies.XSD_OWL;
+import org.apache.stanbol.reengineer.base.Semion_OWL;
+import org.apache.stanbol.reengineer.xml.XML_OWL;
+import org.apache.stanbol.reengineer.xml.XSD_OWL;
 
 /**
  * The {@code XMLExtractor} extends of the {@link XSDExtractor} that implements

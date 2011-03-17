@@ -58,7 +58,7 @@ import org.w3c.dom.traversal.NodeIterator;
 import org.w3c.dom.traversal.TreeWalker;
 import org.xml.sax.SAXException;
 
-import eu.iksproject.kres.ontologies.XSD_OWL;
+import org.apache.stanbol.reengineer.xml.XSD_OWL;
 
 public class XSDExtractor extends SemionUriRefGenerator {
 
