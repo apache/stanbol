@@ -1,6 +1,6 @@
 package org.apache.stanbol.rules.manager.arqextention;
 
-import eu.iksproject.kres.ontologies.XML_OWL;
+import org.apache.stanbol.reengineer.xml.XML_OWL;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.Model;

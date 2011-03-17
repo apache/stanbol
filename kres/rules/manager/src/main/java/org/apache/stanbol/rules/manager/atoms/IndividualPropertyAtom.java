@@ -16,7 +16,7 @@ import org.semanticweb.owlapi.model.SWRLIArgument;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-import eu.iksproject.kres.ontologies.SWRL;
+import org.apache.stanbol.rules.base.SWRL;
 
 public class IndividualPropertyAtom extends KReSCoreAtom {
 

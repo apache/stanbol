@@ -20,7 +20,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-import eu.iksproject.kres.ontologies.SWRL;
+import org.apache.stanbol.rules.base.SWRL;
 
 public class KReSRuleImpl implements KReSRule {
 

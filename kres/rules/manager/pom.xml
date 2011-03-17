@@ -126,12 +126,6 @@
 		-->
 		<dependency>
 			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.kres.ontologies</artifactId>
-			<version>${kres-version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.shared.transformation</artifactId>
 			<version>${kres-version}</version>
 			<scope>provided</scope>
@@ -144,6 +138,11 @@
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.rules.base</artifactId>
+			<version>${stanbol-version}</version>
+		</dependency>
+                <dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.reengineer.xml</artifactId>
 			<version>${stanbol-version}</version>
 		</dependency>
 
@@ -185,6 +184,11 @@
 
 	</dependencies>
 
-	<repositories />
+	<repositories>
+                <repository>
+                    <id>stlab-cnr-repo</id>
+                    <url>http://stlab.istc.cnr.it/software/maven/repo</url>
+                </repository>
+        </repositories>
 
 </project>

@@ -24,7 +24,7 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.CollectionFactory;
 import com.hp.hpl.jena.vocabulary.RDF;
 
-import eu.iksproject.kres.ontologies.SWRL;
+import org.apache.stanbol.rules.base.SWRL;
 
 public class KReSRuleParser {
 
