@@ -148,6 +148,10 @@
 	</dependencies>
 
 	<repositories>
+                <repository>
+                   <id>stlab-cnr-repo</id>
+                   <url>http://stlab.istc.cnr.it/software/maven/repo</url>
+                </repository>
 		<repository>
 			<id>com.hp.hpl.jena</id>
 			<name>jena maven repository</name>
