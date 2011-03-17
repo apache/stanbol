@@ -31,8 +31,8 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-import eu.iksproject.kres.ontologies.DBS_L1;
-import eu.iksproject.kres.ontologies.DBS_L1_OWL;
+import org.apache.stanbol.reengineer.db.DBS_L1;
+import org.apache.stanbol.reengineer.db.DBS_L1_OWL;
 import eu.iksproject.kres.semion.reengineer.db.connection.DatabaseConnection;
 import eu.iksproject.kres.shared.transformation.JenaToOwlConvert;
 

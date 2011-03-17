@@ -20,7 +20,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import eu.iksproject.kres.ontologies.DBS_L1_OWL;
+import org.apache.stanbol.reengineer.db.DBS_L1_OWL;
 
 
 /**

@@ -38,7 +38,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.iksproject.kres.ontologies.DBS_L1;
+import org.apache.stanbol.reengineer.db.DBS_L1;
 
 /**
  * The {@code DBExtractor} is an implementation of the {@link SemionReengineer} for relational databases.
