@@ -40,9 +40,6 @@
 	<!-- Dependency bundle -->
 	<!--module>eu.iksproject.kres.shared</module-->
 	<module>eu.iksproject.kres.shared/dependency/owlapi3</module>
-
-	<!-- KReS ontologies -->
-	<module>eu.iksproject.kres.ontologies</module>
 	
 	<module>eu.iksproject.kres.shared/dependency/hermit124</module>
     <module>eu.iksproject.kres.shared/dependency/owllink102</module>
@@ -76,6 +73,8 @@
     <module>ontologymanager/ontonet</module>
     <module>ontologymanager/store</module>
     <module>reasoners/base</module>
+    <module>reengineer/db</module>
+    <module>reengineer/xml</module>
     <module>reengineer/base</module>
     <module>rules/base</module>
     <module>rules/manager</module>
