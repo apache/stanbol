@@ -83,11 +83,6 @@
 		<!-- KReS deps -->
 		<dependency>
 			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.kres.ontologies</artifactId>
-			<version>${kres-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.shared.transformation</artifactId>
 			<version>${kres-version}</version>
 		</dependency>
@@ -98,6 +93,11 @@
 		</dependency>
 		<!-- NEEDED FOR Semion refactorer -->
 		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.reengineer.db</artifactId>
+			<version>${stanbol-version}</version>
+		</dependency>
+                <dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.rules.refactor</artifactId>
 			<version>${stanbol-version}</version>
@@ -168,6 +168,11 @@
 
 	</dependencies>
 
-	<repositories />
+	<repositories>
+                <repository>
+                    <id>stlab-cnr-repo</id>
+                    <url>http://stlab.istc.cnr.it/software/maven/repo</url>
+                </repository>
+        </repositories>
 
 </project>

@@ -14,7 +14,7 @@ import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 
-import eu.iksproject.kres.ontologies.DBS_L1;
+import org.apache.stanbol.reengineer.db.DBS_L1;
 
 public class SemionUriRefGenerator {
 	
