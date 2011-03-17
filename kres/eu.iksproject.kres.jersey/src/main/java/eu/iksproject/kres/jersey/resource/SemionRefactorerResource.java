@@ -17,7 +17,7 @@ import javax.ws.rs.core.Response;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
 import org.apache.stanbol.reasoners.base.api.InconcistencyException;
-import org.apache.stanbol.reengineer.base.SemionManager;
+import org.apache.stanbol.reengineer.base.api.SemionManager;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.refactor.api.SemionRefactorer;
 import org.apache.stanbol.rules.refactor.api.SemionRefactoringException;

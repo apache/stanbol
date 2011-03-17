@@ -30,7 +30,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager
 import org.apache.stanbol.ontologymanager.store.api.OntologyStorage;
 import org.apache.stanbol.reasoners.base.api.InconcistencyException;
 import org.apache.stanbol.reasoners.base.api.KReSReasoner;
-import org.apache.stanbol.reengineer.base.SemionManager;
+import org.apache.stanbol.reengineer.base.api.SemionManager;
 import org.apache.stanbol.rules.base.api.KReSRule;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;

@@ -24,14 +24,18 @@ import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
-import org.apache.stanbol.reengineer.base.DataSource;
-import org.apache.stanbol.reengineer.base.ReengineeringException;
-import org.apache.stanbol.reengineer.base.SemionManager;
-import org.apache.stanbol.reengineer.base.SemionReengineer;
-import org.apache.stanbol.reengineer.base.settings.ConnectionSettings;
-import org.apache.stanbol.reengineer.base.settings.DBConnectionSettings;
-import org.apache.stanbol.reengineer.base.util.ReengineerType;
-import org.apache.stanbol.reengineer.base.util.UnsupportedReengineerException;
+import org.apache.stanbol.reengineer.base.api.DataSource;
+import org.apache.stanbol.reengineer.base.api.ReengineeringException;
+import org.apache.stanbol.reengineer.base.api.SemionManager;
+import org.apache.stanbol.reengineer.base.api.SemionReengineer;
+import org.apache.stanbol.reengineer.base.api.datasources.DataSourceFactory;
+import org.apache.stanbol.reengineer.base.api.datasources.InvalidDataSourceForTypeSelectedException;
+import org.apache.stanbol.reengineer.base.api.datasources.NoSuchDataSourceExpection;
+import org.apache.stanbol.reengineer.base.api.datasources.RDB;
+import org.apache.stanbol.reengineer.base.api.settings.ConnectionSettings;
+import org.apache.stanbol.reengineer.base.api.settings.DBConnectionSettings;
+import org.apache.stanbol.reengineer.base.api.util.ReengineerType;
+import org.apache.stanbol.reengineer.base.api.util.UnsupportedReengineerException;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
@@ -39,10 +43,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.ImplicitProduces;
 
-import eu.iksproject.kres.semion.manager.datasources.DataSourceFactory;
-import eu.iksproject.kres.semion.manager.datasources.InvalidDataSourceForTypeSelectedException;
-import eu.iksproject.kres.semion.manager.datasources.NoSuchDataSourceExpection;
-import eu.iksproject.kres.semion.manager.datasources.RDB;
 
 @Path("/reengineer")
 @ImplicitProduces("text/html")
