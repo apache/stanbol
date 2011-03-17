@@ -201,12 +201,6 @@
 			<artifactId>org.apache.stanbol.rules.refactor</artifactId>
 			<version>${stanbol-version}</version>
 		</dependency>
-		
-		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.kres.ontologies</artifactId>
-			<version>${kres-version}</version>
-		</dependency>
 		<dependency>
 			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.shared.transformation</artifactId>
