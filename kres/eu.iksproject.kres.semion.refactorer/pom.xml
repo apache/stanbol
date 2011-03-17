@@ -180,7 +180,12 @@
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.reengineer.base</artifactId>
 			<version>${stanbol-version}</version>
-		</dependency>		
+		</dependency>
+                <dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.reengineer.xml</artifactId>
+			<version>${stanbol-version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.rules.base</artifactId>
@@ -217,11 +222,6 @@
 			</exclusions>
 		</dependency>
 		-->
-		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.kres.ontologies</artifactId>
-			<version>${kres-version}</version>
-		</dependency>
 		<!--
 		<dependency>
 			<groupId>eu.iksproject</groupId>

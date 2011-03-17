@@ -22,7 +22,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.util.FileManager;
 
-import eu.iksproject.kres.ontologies.XML_OWL;
+import org.apache.stanbol.reengineer.xml.XML_OWL;
 import eu.iksproject.kres.shared.transformation.JenaToClerezzaConverter;
 import eu.iksproject.kres.shared.transformation.JenaToOwlConvert;
 
