@@ -200,12 +200,10 @@
 
 		<!-- KReS -->
 		<!--
-		<dependency>
-			<groupId>eu.iksproject</groupId>
+			<dependency> <groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.api</artifactId>
-			<version>${kres-version}</version>
-			<scope>provided</scope>
-		</dependency>
+			<version>${kres-version}</version> <scope>provided</scope>
+			</dependency>
 		-->
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
@@ -224,62 +222,49 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.rules.manager</artifactId>
-			<version>${stanbol-version}</version>
-		</dependency>
-                <dependency>
-			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.reengineer.base</artifactId>
 			<version>${stanbol-version}</version>
 		</dependency>
-		
-		<!--
 		<dependency>
-			<groupId>eu.iksproject</groupId>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.rules.manager</artifactId>
+			<version>${stanbol-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.rules.refactor</artifactId>
+			<version>${stanbol-version}</version>
+		</dependency>
+
+		<!--
+			<dependency> <groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.manager</artifactId>
-			<version>${kres-version}</version>
-			<scope>provided</scope>
-		</dependency>
-		-->
-		<!--
-		<dependency>
-			<groupId>eu.iksproject</groupId>
+			<version>${kres-version}</version> <scope>provided</scope>
+			</dependency> <dependency> <groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.rules</artifactId>
-			<version>${kres-version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>eu.iksproject</groupId>
+			<version>${kres-version}</version> <scope>provided</scope>
+			</dependency> <dependency> <groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.semion.manager</artifactId>
-			<version>${kres-version}</version>
-			<scope>provided</scope>
-		</dependency>
-		-->
-		<dependency>
-			<groupId>eu.iksproject</groupId>
+			<version>${kres-version}</version> <scope>provided</scope>
+			</dependency> <dependency> <groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.semion.refactorer</artifactId>
-			<version>${kres-version}</version>
-			<scope>provided</scope>
-		</dependency>
+			<version>${kres-version}</version> <scope>provided</scope>
+			</dependency>
+		-->
 		<dependency>
 			<groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.shared.dependency.owlapi</artifactId>
 			<version>${kres-version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<!--		
-		<dependency>
-			<groupId>eu.iksproject</groupId>
+		<!--
+			<dependency> <groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.reasoners</artifactId>
-			<version>${kres-version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>eu.iksproject</groupId>
+			<version>${kres-version}</version> <scope>provided</scope>
+			</dependency> <dependency> <groupId>eu.iksproject</groupId>
 			<artifactId>eu.iksproject.kres.storage.provider</artifactId>
-			<version>${kres-version}</version>
-			<scope>provided</scope>
-		</dependency>
+			<version>${kres-version}</version> <scope>provided</scope>
+			</dependency>
 		-->
 		<dependency>
 			<groupId>com.hp.hpl.jena</groupId>

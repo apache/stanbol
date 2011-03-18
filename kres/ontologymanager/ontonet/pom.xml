@@ -133,7 +133,7 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.5.2</version>
-			<scope>provided</scope>	
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Testing deps -->
@@ -148,10 +148,10 @@
 	</dependencies>
 
 	<repositories>
-                <repository>
-                   <id>stlab-cnr-repo</id>
-                   <url>http://stlab.istc.cnr.it/software/maven/repo</url>
-                </repository>
+		<repository>
+			<id>stlab-cnr-repo</id>
+			<url>http://stlab.istc.cnr.it/software/maven/repo</url>
+		</repository>
 		<repository>
 			<id>com.hp.hpl.jena</id>
 			<name>jena maven repository</name>

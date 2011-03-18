@@ -19,7 +19,6 @@ import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.ReengineeringException;
 import org.apache.stanbol.reengineer.base.api.SemionManager;
 import org.apache.stanbol.reengineer.base.api.SemionReengineer;
-import org.apache.stanbol.rules.refactor.api.SemionRefactorer;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -40,12 +39,13 @@ import org.slf4j.LoggerFactory;
 public class SemionManagerImpl implements SemionManager{
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
+	
 	@Reference
 	KReSONManager onManager;
 	
 	private ArrayList<SemionReengineer> reengineers;
-
-	private SemionRefactorer semionRefactorer;
+//
+//	private SemionRefactorer semionRefactorer;
 
 	/**
 	 * This default constructor is <b>only</b> intended to be used by the OSGI
@@ -136,10 +136,10 @@ public class SemionManagerImpl implements SemionManager{
 		reengineers = null;
 	}
 	
-	@Override
-	public SemionRefactorer getRegisteredRefactorer() {
-		return semionRefactorer;
-		}
+//	@Override
+//	public SemionRefactorer getRegisteredRefactorer() {
+//		return semionRefactorer;
+//		}
 		
 	@Override
 	public Collection<SemionReengineer> listReengineers() {
@@ -244,10 +244,10 @@ public class SemionManagerImpl implements SemionManager{
 		return reengineeredSchemaOntology;
 	}
 
-	@Override
-	public void registerRefactorer(SemionRefactorer semionRefactorer) {
-		this.semionRefactorer = semionRefactorer;
-	}
+//	@Override
+//	public void registerRefactorer(SemionRefactorer semionRefactorer) {
+//		this.semionRefactorer = semionRefactorer;
+//	}
 	
 	@Override
 	public boolean unbindReengineer(int reenginnerType) {
@@ -274,9 +274,9 @@ public class SemionManagerImpl implements SemionManager{
 		return found;
 	}
 
-	@Override
-	public void unregisterRefactorer() {
-		this.semionRefactorer = null;
-	}
+//	@Override
+//	public void unregisterRefactorer() {
+//		this.semionRefactorer = null;
+//	}
 	
 }

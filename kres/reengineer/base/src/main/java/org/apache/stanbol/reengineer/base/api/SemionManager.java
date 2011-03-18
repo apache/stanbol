@@ -3,7 +3,6 @@ package org.apache.stanbol.reengineer.base.api;
 import java.util.Collection;
 
 import org.apache.stanbol.ontologymanager.store.api.NoSuchOntologyInStoreException;
-import org.apache.stanbol.rules.refactor.api.SemionRefactorer;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -45,24 +44,24 @@ public interface SemionManager {
 	public boolean unbindReengineer(int reenginnerType);
 	
 	
-	/**
-	 * The {@link SemionManager} can register a single instance of {@link SemionRefactorer}.
-	 * 
-	 * @param semionRefactorer {@link SemionRefactorer}
-	 */
-	public void registerRefactorer(SemionRefactorer semionRefactorer);
-	
-	/**
-	 * Unregisters the instance of {@link SemionRefactorer}. After the call of this method Semion has no refactorer.
-	 */
-	public void unregisterRefactorer();
-	
-	/**
-	 * The instance of the refactored is returned back if it exists.
-	 * 
-	 * @return the active {@link SemionRefactorer}
-	 */
-	public SemionRefactorer getRegisteredRefactorer();
+//	/**
+//	 * The {@link SemionManager} can register a single instance of {@link SemionRefactorer}.
+//	 * 
+//	 * @param semionRefactorer {@link SemionRefactorer}
+//	 */
+//	public void registerRefactorer(SemionRefactorer semionRefactorer);
+//	
+//	/**
+//	 * Unregisters the instance of {@link SemionRefactorer}. After the call of this method Semion has no refactorer.
+//	 */
+//	public void unregisterRefactorer();
+//	
+//	/**
+//	 * The instance of the refactored is returned back if it exists.
+//	 * 
+//	 * @return the active {@link SemionRefactorer}
+//	 */
+//	public SemionRefactorer getRegisteredRefactorer();
 	
 	
 	

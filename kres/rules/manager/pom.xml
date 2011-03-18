@@ -140,11 +140,6 @@
 			<artifactId>org.apache.stanbol.rules.base</artifactId>
 			<version>${stanbol-version}</version>
 		</dependency>
-                <dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.reengineer.xml</artifactId>
-			<version>${stanbol-version}</version>
-		</dependency>
 
 		<!-- Diagnostics deps -->
 		<dependency>

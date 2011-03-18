@@ -1,15 +1,8 @@
 package org.apache.stanbol.reengineer.base.api;
 
-import java.util.Observer;
-
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.reengineer.base.api.util.UnsupportedReengineerException;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
-
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.vocabulary.OWL;
 
 
 /**
