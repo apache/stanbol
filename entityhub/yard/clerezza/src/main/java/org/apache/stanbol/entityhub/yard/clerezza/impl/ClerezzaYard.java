@@ -56,7 +56,7 @@ import org.apache.stanbol.entityhub.core.yard.AbstractYard;
 import org.apache.stanbol.entityhub.core.yard.SimpleYardConfig;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
-import org.apache.stanbol.entityhub.model.clerezza.impl.Resource2StringAdapter;
+import org.apache.stanbol.entityhub.model.clerezza.utils.Resource2StringAdapter;
 import org.apache.stanbol.entityhub.query.clerezza.RdfQueryResultList;
 import org.apache.stanbol.entityhub.query.clerezza.SparqlFieldQuery;
 import org.apache.stanbol.entityhub.query.clerezza.SparqlFieldQueryFactory;

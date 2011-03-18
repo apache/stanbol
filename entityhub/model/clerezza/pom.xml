@@ -58,6 +58,7 @@
           <instructions>
             <Export-Package>
               org.apache.stanbol.entityhub.model.clerezza;version=${pom.version},
+              org.apache.stanbol.entityhub.model.clerezza.utils;version=${pom.version},
             </Export-Package>
            <Private-Package>
               org.apache.stanbol.entityhub.model.clerezza.impl;version=${pom.version}
