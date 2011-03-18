@@ -16,14 +16,19 @@
  */
 package org.apache.stanbol.entityhub.yard.solr;
 
+import java.io.File;
+
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.apache.stanbol.entityhub.test.yard.YardTest;
+import org.apache.stanbol.entityhub.yard.solr.embedded.EmbeddedSolrPorovider;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYard;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This test uses the system property "basedir" to configure an embedded Solr
@@ -36,16 +41,21 @@ import org.junit.Test;
 public class SolrYardTest extends YardTest {
     
     private static Yard yard;
-    private static String solrServer;
-    public static final String testYardId = "testYard";
+    public static final String TEST_YARD_ID = "testYard";
+    public static final String TEST_SOLR_CORE_NAME = "test";
+    private static final String TEST_INDEX_REL_PATH = 
+        File.separatorChar + "target"+
+        File.separatorChar + EmbeddedSolrPorovider.DEFAULT_SOLR_DATA_DIR;
+    private static final Logger log = LoggerFactory.getLogger(SolrYardTest.class);
     
     @BeforeClass
     public final static void initYard() throws YardException {
         //get the working directory
-        String baseDir = System.getProperty("basedir");
-        solrServer = baseDir+"/src/test/resources/solr/test";
-        System.out.println("BaseDir: "+baseDir);
-        SolrYardConfig config = new SolrYardConfig(testYardId,solrServer);
+        //use property substitution to test this feature!
+        String solrServerDir = "${basedir}"+TEST_INDEX_REL_PATH;
+        log.info("Test Solr Server Directory: "+solrServerDir);
+        System.setProperty(EmbeddedSolrPorovider.SOLR_DATA_DIR_PROPERTY, solrServerDir);
+        SolrYardConfig config = new SolrYardConfig(TEST_YARD_ID,TEST_SOLR_CORE_NAME);
         config.setName("Solr Yard Test");
         config.setDescription("The Solr Yard instance used to execute the Unit Tests defined for the Yard Interface");
         yard = new SolrYard(config);
@@ -65,11 +75,11 @@ public class SolrYardTest extends YardTest {
     }
     @Test(expected=IllegalArgumentException.class)
     public void testSolrYardConfigInitWithNullUrl() {
-            new SolrYardConfig(testYardId, null);
+            new SolrYardConfig(TEST_YARD_ID, null);
     }
     @Test(expected=IllegalArgumentException.class)
     public void testSolrYardConfigInitWithNullID() {
-            new SolrYardConfig(null, solrServer);
+            new SolrYardConfig(null, TEST_SOLR_CORE_NAME);
     }
     
     /**
