@@ -28,9 +28,9 @@ public class JettyServer {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    public static String DEFAULT_BASE_URI = "http://localhost:9998/";
+    public static final String DEFAULT_BASE_URI = "http://localhost:9998/";
 
-    protected Server server = new Server();
+    private Server server = new Server();
 
     private Context context;
 
