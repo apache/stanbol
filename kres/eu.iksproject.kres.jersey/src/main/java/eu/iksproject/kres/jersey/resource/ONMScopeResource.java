@@ -25,6 +25,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
@@ -36,8 +37,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.OntologyRegistryIRISource;
-import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
-import org.apache.stanbol.ontologymanager.store.impl.OntologyStorageProviderImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -55,7 +55,7 @@ public class ONMScopeResource extends NavigationMixin {
 	 * Placeholder for the KReSONManager to be fetched from the servlet context.
 	 */
 	protected KReSONManager onm;
-	protected OntologyStoreProvider storeProvider;
+	protected OntologyStorage storage;
 
 	protected ServletContext servletContext;
 
@@ -63,24 +63,26 @@ public class ONMScopeResource extends NavigationMixin {
 		this.servletContext = servletContext;
 		this.onm = (KReSONManager) servletContext
 				.getAttribute(KReSONManager.class.getName());
-		this.storeProvider = (OntologyStoreProvider) servletContext
-				.getAttribute(OntologyStoreProvider.class.getName());
-		// Contingency code for missing components follows.
-		/*
-		 * FIXME! The following code is required only for the tests. This should
-		 * be removed and the test should work without this code.
-		 */
-		if (storeProvider == null) {
-			log
-					.warn("No OntologyStoreProvider in servlet context. Instantiating manually...");
-			storeProvider = new OntologyStorageProviderImpl();
-		}
-		if (onm == null) {
-			log
-					.warn("No KReSONManager in servlet context. Instantiating manually...");
-			onm = new ONManager(storeProvider.getActiveOntologyStorage(),
-					new Hashtable<String, Object>());
-		}
+		this.storage = (OntologyStorage) servletContext
+				.getAttribute(OntologyStorage.class.getName());
+//      this.storage = (OntologyStorage) servletContext
+//      .getAttribute(OntologyStorage.class.getName());
+// Contingency code for missing components follows.
+/*
+ * FIXME! The following code is required only for the tests. This should
+ * be removed and the test should work without this code.
+ */
+if (onm == null) {
+    log
+            .warn("No KReSONManager in servlet context. Instantiating manually...");
+    onm = new ONManager(new TcManager(), null,
+            new Hashtable<String, Object>());
+}
+this.storage = onm.getOntologyStore();
+if (storage == null) {
+    log.warn("No OntologyStorage in servlet context. Instantiating manually...");
+    storage = new OntologyStorage(new TcManager(),null);
+}
 	}
 
 	@DELETE

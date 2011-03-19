@@ -16,7 +16,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.StringUtils;
-import org.apache.stanbol.ontologymanager.store.api.OntologyStorage;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.io.StringDocumentSource;

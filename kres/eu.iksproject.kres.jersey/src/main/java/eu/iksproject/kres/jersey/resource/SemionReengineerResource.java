@@ -23,7 +23,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.ReengineeringException;
 import org.apache.stanbol.reengineer.base.api.SemionManager;
@@ -52,14 +52,14 @@ public class SemionReengineerResource extends NavigationMixin {
 
 	protected SemionManager reengineeringManager;
 	protected TcManager tcManager;
-	protected OntologyStoreProvider storeProvider;
+	protected OntologyStorage storage;
 	
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	
 	
 	public SemionReengineerResource(@Context ServletContext servletContext) {
 		tcManager = (TcManager) servletContext.getAttribute(TcManager.class.getName());
-		storeProvider = (OntologyStoreProvider) servletContext.getAttribute(OntologyStoreProvider.class.getName());
+		storage = (OntologyStorage) servletContext.getAttribute(OntologyStorage.class.getName());
 		reengineeringManager  = (SemionManager) (servletContext.getAttribute(SemionManager.class.getName()));
 		if (reengineeringManager == null) {
             throw new IllegalStateException(
@@ -90,7 +90,7 @@ public class SemionReengineerResource extends NavigationMixin {
 			
 			try {
 				OWLOntology ontology;
-				System.out.println("STORE PROVIDER : "+storeProvider);
+				System.out.println("STORE PROVIDER : "+storage);
 				System.out.println("OUTGRAPH: "+outputGraph);
 				String servletPath = httpServletRequest.getLocalAddr();
 				System.out.println("SERVER PATH : "+servletPath);
@@ -102,7 +102,7 @@ public class SemionReengineerResource extends NavigationMixin {
 				else{
 					ontology = reengineeringManager.performReengineering(servletPath, IRI.create(outputGraph), dataSource);
 					
-					storeProvider.getActiveOntologyStorage().store(ontology);
+					storage.store(ontology);
 					return Response.ok(ontology).build();
 				}
 			} catch (ReengineeringException e) {

@@ -19,6 +19,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
@@ -26,8 +27,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceModificationException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
-import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
-import org.apache.stanbol.ontologymanager.store.impl.OntologyStorageProviderImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.model.IRI;
@@ -53,174 +53,162 @@ import eu.iksproject.kres.jersey.util.OntologyRenderUtils;
 @Path("/ontology/{scopeid}/{uri:.+}")
 public class ONMScopeOntologyResource extends NavigationMixin {
 
-	private Logger log = LoggerFactory.getLogger(getClass());
+    private Logger log = LoggerFactory.getLogger(getClass());
 
-	/*
-	 * Placeholder for the KReSONManager to be fetched from the servlet context.
-	 */
-	protected KReSONManager onm;
-	protected OntologyStoreProvider storeProvider;
+    /*
+     * Placeholder for the KReSONManager to be fetched from the servlet context.
+     */
+    protected KReSONManager onm;
+    protected OntologyStorage storage;
 
-	protected ServletContext servletContext;
+    protected ServletContext servletContext;
 
-	public ONMScopeOntologyResource(@Context ServletContext servletContext) {
-		this.servletContext = servletContext;
-		this.onm = (KReSONManager) servletContext
-				.getAttribute(KReSONManager.class.getName());
-this.storeProvider = (OntologyStoreProvider) servletContext
-		.getAttribute(OntologyStoreProvider.class.getName());
+    public ONMScopeOntologyResource(@Context ServletContext servletContext) {
+        this.servletContext = servletContext;
+        this.onm = (KReSONManager) servletContext.getAttribute(KReSONManager.class.getName());
+//      this.storage = (OntologyStorage) servletContext
+//      .getAttribute(OntologyStorage.class.getName());
 // Contingency code for missing components follows.
 /*
  * FIXME! The following code is required only for the tests. This should
  * be removed and the test should work without this code.
  */
-if (storeProvider == null) {
-	log
-			.warn("No OntologyStoreProvider in servlet context. Instantiating manually...");
-	storeProvider = new OntologyStorageProviderImpl();
-}
 if (onm == null) {
-	log
-			.warn("No KReSONManager in servlet context. Instantiating manually...");
-	onm = new ONManager(storeProvider.getActiveOntologyStorage(),
-			new Hashtable<String, Object>());
+    log
+            .warn("No KReSONManager in servlet context. Instantiating manually...");
+    onm = new ONManager(new TcManager(), null,
+            new Hashtable<String, Object>());
 }
-	}
+this.storage = onm.getOntologyStore();
+if (storage == null) {
+    log.warn("No OntologyStorage in servlet context. Instantiating manually...");
+    storage = new OntologyStorage(new TcManager(),null);
+}
+    }
 
-	/**
-	 * Returns an RDF/XML representation of the ontology identified by logical
-	 * IRI <code>ontologyid</code>, if it is loaded within the scope
-	 * <code>[baseUri]/scopeid</code>.
-	 * 
-	 * @param scopeid
-	 * @param ontologyid
-	 * @param uriInfo
-	 * @return, or a status 404 if either the scope is not registered or the
-	 *          ontology is not loaded within that scope.
-	 */
-	@GET
-	@Produces(value = { KReSFormat.RDF_XML, KReSFormat.OWL_XML,
-			KReSFormat.TURTLE, KReSFormat.FUNCTIONAL_OWL,
-			KReSFormat.MANCHESTER_OWL, KReSFormat.RDF_JSON })
-	public Response getScopeOntology(@PathParam("scopeid") String scopeid,
-			@PathParam("uri") String ontologyid, @Context UriInfo uriInfo) {
+    /**
+     * Returns an RDF/XML representation of the ontology identified by logical IRI <code>ontologyid</code>, if
+     * it is loaded within the scope <code>[baseUri]/scopeid</code>.
+     * 
+     * @param scopeid
+     * @param ontologyid
+     * @param uriInfo
+     * @return, or a status 404 if either the scope is not registered or the ontology is not loaded within
+     *          that scope.
+     */
+    @GET
+    @Produces(value = {KReSFormat.RDF_XML, KReSFormat.OWL_XML, KReSFormat.TURTLE, KReSFormat.FUNCTIONAL_OWL,
+                       KReSFormat.MANCHESTER_OWL, KReSFormat.RDF_JSON})
+    public Response getScopeOntology(@PathParam("scopeid") String scopeid,
+                                     @PathParam("uri") String ontologyid,
+                                     @Context UriInfo uriInfo) {
 
-		String absur = uriInfo.getAbsolutePath().toString();
-		URI uri = URI.create(absur.substring(0,
-				absur.lastIndexOf(ontologyid) - 1));
+        String absur = uriInfo.getAbsolutePath().toString();
+        URI uri = URI.create(absur.substring(0, absur.lastIndexOf(ontologyid) - 1));
 
-		IRI sciri = IRI.create(uri);
-		IRI ontiri = IRI.create(ontologyid);
-		
-		// TODO: hack (ma anche no)
-		if (!ontiri.isAbsolute())
-			ontiri = IRI.create(absur);
-			
-		ScopeRegistry reg = onm.getScopeRegistry();
-		OntologyScope scope = reg.getScope(sciri);
-		if (scope == null)
-			return Response.status(NOT_FOUND).build();
+        IRI sciri = IRI.create(uri);
+        IRI ontiri = IRI.create(ontologyid);
 
-		/* BEGIN debug code, uncomment only for local testing */
-		 OWLOntology test = null, top = null;
-		 test = scope.getCustomSpace().getOntology(ontiri);
-		 System.out.println("Ontology " + ontiri);
-		 for (OWLImportsDeclaration imp : test.getImportsDeclarations())
-		 System.out.println("\timports " + imp.getIRI());
-		 top = scope.getCoreSpace().getTopOntology();
-		 System.out.println("Core root for scope " + scopeid);
-		 for (OWLImportsDeclaration imp : top.getImportsDeclarations())
-		 System.out.println("\timports " + imp.getIRI());
-		/* END debug code */
+        // TODO: hack (ma anche no)
+        if (!ontiri.isAbsolute()) ontiri = IRI.create(absur);
 
-		OWLOntology ont = null;
-		// By default, always try retrieving the ontology from the custom space
-		// first.
-		OntologySpace space = scope.getCustomSpace();
-		if (space == null)
-			space = scope.getCoreSpace();
-		if (space != null)
-			ont = space.getOntology(ontiri);
+        ScopeRegistry reg = onm.getScopeRegistry();
+        OntologyScope scope = reg.getScope(sciri);
+        if (scope == null) return Response.status(NOT_FOUND).build();
 
-		if (ont == null) {
-			OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-			final Set<OWLOntology> ontologies = scope.getSessionSpace(ontiri)
-					.getOntologies();
+        /* BEGIN debug code, uncomment only for local testing */
+        OWLOntology test = null, top = null;
+        test = scope.getCustomSpace().getOntology(ontiri);
+        System.out.println("Ontology " + ontiri);
+        for (OWLImportsDeclaration imp : test.getImportsDeclarations())
+            System.out.println("\timports " + imp.getIRI());
+        top = scope.getCoreSpace().getTopOntology();
+        System.out.println("Core root for scope " + scopeid);
+        for (OWLImportsDeclaration imp : top.getImportsDeclarations())
+            System.out.println("\timports " + imp.getIRI());
+        /* END debug code */
 
-			OWLOntologySetProvider provider = new OWLOntologySetProvider() {
+        OWLOntology ont = null;
+        // By default, always try retrieving the ontology from the custom space
+        // first.
+        OntologySpace space = scope.getCustomSpace();
+        if (space == null) space = scope.getCoreSpace();
+        if (space != null) ont = space.getOntology(ontiri);
 
-				@Override
-				public Set<OWLOntology> getOntologies() {
-					// System.out.println("ID SPACE : " + ontologies);
-					return ontologies;
-				}
-			};
-			OWLOntologyMerger merger = new OWLOntologyMerger(provider);
+        if (ont == null) {
+            OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+            final Set<OWLOntology> ontologies = scope.getSessionSpace(ontiri).getOntologies();
 
-			/*
-			 * Set<OntologySpace> spaces = scope.getSessionSpaces();
-			 * for(OntologySpace space : spaces){
-			 * System.out.println("ID SPACE : "+space.getID()); }
-			 */
+            OWLOntologySetProvider provider = new OWLOntologySetProvider() {
 
-			try {
-				ont = merger.createMergedOntology(man, ontiri);
-			} catch (OWLOntologyCreationException e) {
-				throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
-			}
+                @Override
+                public Set<OWLOntology> getOntologies() {
+                    // System.out.println("ID SPACE : " + ontologies);
+                    return ontologies;
+                }
+            };
+            OWLOntologyMerger merger = new OWLOntologyMerger(provider);
 
-		}
-		if (ont == null) {
-			return Response.status(NOT_FOUND).build();
-		}
-		String res = null;
-		try {
-			res = OntologyRenderUtils.renderOntology(ont,
-					new RDFXMLOntologyFormat(), sciri.toString(), onm);
-		} catch (OWLOntologyStorageException e) {
-			throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
-		}
-		return Response.ok(/*ont*/res).build();
+            /*
+             * Set<OntologySpace> spaces = scope.getSessionSpaces(); for(OntologySpace space : spaces){
+             * System.out.println("ID SPACE : "+space.getID()); }
+             */
 
-	}
+            try {
+                ont = merger.createMergedOntology(man, ontiri);
+            } catch (OWLOntologyCreationException e) {
+                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+            }
 
-	/**
-	 * Unloads an ontology from an ontology scope.
-	 * 
-	 * @param scopeId
-	 * @param ontologyid
-	 * @param uriInfo
-	 * @param headers
-	 */
-	@DELETE
-	public void unloadOntology(@PathParam("scopeid") String scopeId,
-			@PathParam("uri") String ontologyid, @Context UriInfo uriInfo,
-			@Context HttpHeaders headers) {
+        }
+        if (ont == null) {
+            return Response.status(NOT_FOUND).build();
+        }
+        String res = null;
+        try {
+            res = OntologyRenderUtils.renderOntology(ont, new RDFXMLOntologyFormat(), sciri.toString(), onm);
+        } catch (OWLOntologyStorageException e) {
+            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+        }
+        return Response.ok(/* ont */res).build();
 
-		if (ontologyid != null && !ontologyid.equals("")) {
-			String scopeURI = uriInfo.getAbsolutePath().toString().replace(
-					ontologyid, "");
-			System.out.println("Received DELETE request for ontology "
-					+ ontologyid + " in scope " + scopeURI);
-			IRI scopeIri = IRI.create(uriInfo.getBaseUri() + "ontology/"
-					+ scopeId);
-			System.out.println("SCOPE IRI : " + scopeIri);
-			IRI ontIri = IRI.create(ontologyid);
-			ScopeRegistry reg = onm.getScopeRegistry();
-			OntologyScope scope = reg.getScope(scopeIri);
-			OntologySpace cs = scope.getCustomSpace();
-			if (cs.hasOntology(ontIri)) {
-				try {
-					reg.setScopeActive(scopeIri, false);
-					cs.removeOntology(new RootOntologySource(cs
-							.getOntology(ontIri)));
-					reg.setScopeActive(scopeIri, true);
-				} catch (OntologySpaceModificationException e) {
-					reg.setScopeActive(scopeIri, true);
-					throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
-				}
-			}
-		}
-	}
+    }
+
+    /**
+     * Unloads an ontology from an ontology scope.
+     * 
+     * @param scopeId
+     * @param ontologyid
+     * @param uriInfo
+     * @param headers
+     */
+    @DELETE
+    public void unloadOntology(@PathParam("scopeid") String scopeId,
+                               @PathParam("uri") String ontologyid,
+                               @Context UriInfo uriInfo,
+                               @Context HttpHeaders headers) {
+
+        if (ontologyid != null && !ontologyid.equals("")) {
+            String scopeURI = uriInfo.getAbsolutePath().toString().replace(ontologyid, "");
+            System.out
+                    .println("Received DELETE request for ontology " + ontologyid + " in scope " + scopeURI);
+            IRI scopeIri = IRI.create(uriInfo.getBaseUri() + "ontology/" + scopeId);
+            System.out.println("SCOPE IRI : " + scopeIri);
+            IRI ontIri = IRI.create(ontologyid);
+            ScopeRegistry reg = onm.getScopeRegistry();
+            OntologyScope scope = reg.getScope(scopeIri);
+            OntologySpace cs = scope.getCustomSpace();
+            if (cs.hasOntology(ontIri)) {
+                try {
+                    reg.setScopeActive(scopeIri, false);
+                    cs.removeOntology(new RootOntologySource(cs.getOntology(ontIri)));
+                    reg.setScopeActive(scopeIri, true);
+                } catch (OntologySpaceModificationException e) {
+                    reg.setScopeActive(scopeIri, true);
+                    throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+                }
+            }
+        }
+    }
 
 }

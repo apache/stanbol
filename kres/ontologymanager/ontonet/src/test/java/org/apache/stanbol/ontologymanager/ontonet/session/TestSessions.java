@@ -55,7 +55,7 @@ public class TestSessions {
 	@BeforeClass
 	public static void setup() {
 		// An ONManager with no store and default settings
-		KReSONManager onm = new ONManager(null, new Hashtable<String, Object>());
+		KReSONManager onm = new ONManager(null,null, new Hashtable<String, Object>());
 		sesmgr = onm.getSessionManager();
 		scopeFactory = onm.getOntologyScopeFactory();
 		spaceFactory = onm.getOntologySpaceFactory();

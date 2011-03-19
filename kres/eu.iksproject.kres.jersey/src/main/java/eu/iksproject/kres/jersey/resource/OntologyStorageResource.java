@@ -6,7 +6,7 @@ import javax.ws.rs.core.Context;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
-import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,15 +14,15 @@ import org.slf4j.LoggerFactory;
 public class OntologyStorageResource extends NavigationMixin {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
-	private OntologyStoreProvider ontologyStoreProvider;
+	private OntologyStorage storage;
 	private KReSONManager onManager;
 	private TcManager tcManager;
 	
 	public OntologyStorageResource(@Context ServletContext servletContext) {
-		ontologyStoreProvider  = (OntologyStoreProvider) (servletContext.getAttribute(OntologyStoreProvider.class.getName()));
+		storage  = (OntologyStorage) (servletContext.getAttribute(OntologyStorage.class.getName()));
 		onManager = (KReSONManager) (servletContext.getAttribute(KReSONManager.class.getName()));
 		tcManager = (TcManager) (servletContext.getAttribute(TcManager.class.getName()));
-        if (ontologyStoreProvider == null) {
+        if (storage == null) {
             throw new IllegalStateException(
                     "OntologyStoreProvider missing in ServletContext");
         }

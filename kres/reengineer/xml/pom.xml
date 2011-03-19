@@ -175,6 +175,18 @@
 			<artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
 			<version>0.9-incubating-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.jena.sparql</artifactId>
+			<version>0.5-incubating-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.simple.storage</artifactId>
+			<version>0.7-incubating-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- XML deps -->
 		<dependency>

@@ -29,10 +29,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
-import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
-import org.apache.stanbol.ontologymanager.store.impl.OntologyStorageProviderImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.manager.changes.KReSAddRecipe;
 import org.apache.stanbol.rules.manager.changes.KReSGetRecipe;
@@ -68,7 +68,7 @@ public class Recipe extends NavigationMixin {
     private Logger log = LoggerFactory.getLogger(getClass());
 
     private RuleStore kresRuleStore;
-    private OntologyStoreProvider storeProvider;
+    private OntologyStorage storage;
 
     /**
      * To get the KReSRuleStore where are stored the rules and the recipes
@@ -79,21 +79,24 @@ public class Recipe extends NavigationMixin {
     public Recipe(@Context ServletContext servletContext) {
         this.kresRuleStore = (RuleStore) servletContext.getAttribute(RuleStore.class.getName());
         this.onm = (KReSONManager) servletContext.getAttribute(KReSONManager.class.getName());
-        this.storeProvider = (OntologyStoreProvider) servletContext.getAttribute(OntologyStoreProvider.class
-                .getName());
-        // Contingency code for missing components follows.
-        /*
-         * FIXME! The following code is required only for the tests. This should be removed and the test
-         * should work without this code.
-         */
-        if (storeProvider == null) {
-            log.warn("No OntologyStoreProvider in servlet context. Instantiating manually...");
-            storeProvider = new OntologyStorageProviderImpl();
-        }
-        if (onm == null) {
-            log.warn("No KReSONManager in servlet context. Instantiating manually...");
-            onm = new ONManager(storeProvider.getActiveOntologyStorage(), new Hashtable<String,Object>());
-        }
+//      this.storage = (OntologyStorage) servletContext
+//      .getAttribute(OntologyStorage.class.getName());
+// Contingency code for missing components follows.
+/*
+ * FIXME! The following code is required only for the tests. This should
+ * be removed and the test should work without this code.
+ */
+if (onm == null) {
+    log
+            .warn("No KReSONManager in servlet context. Instantiating manually...");
+    onm = new ONManager(new TcManager(), null,
+            new Hashtable<String, Object>());
+}
+this.storage = onm.getOntologyStore();
+if (storage == null) {
+    log.warn("No OntologyStorage in servlet context. Instantiating manually...");
+    storage = new OntologyStorage(new TcManager(),null);
+}
         if (kresRuleStore == null) {
             log
                     .warn("No KReSRuleStore with stored rules and recipes found in servlet context. Instantiating manually with default values...");

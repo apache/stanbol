@@ -247,7 +247,7 @@ public class SemionRefactoringTest {
 	@Test
 	public void refactoringTest() throws Exception {
 		Dictionary<String, Object> emptyConfig = new Hashtable<String, Object>();
-		KReSONManager onm = new ONManager(null, emptyConfig);
+
 
 		class SpecialTcManager extends TcManager {
 			public SpecialTcManager(QueryEngine qe, WeightedTcProvider wtcp) {
@@ -261,6 +261,7 @@ public class SemionRefactoringTest {
 		WeightedTcProvider wtcp = new SimpleTcProvider();
 		TcManager tcm = new SpecialTcManager(qe, wtcp);
 
+	      KReSONManager onm = new ONManager(tcm,wtcp, emptyConfig);
 		SemionRefactorer refactorer = new SemionRefactorerImpl(null,
 				new Serializer(), tcm, onm,
 				ruleStore, new KReSReasonerImpl(emptyConfig), emptyConfig);

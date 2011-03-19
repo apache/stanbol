@@ -1,4 +1,4 @@
-package org.apache.stanbol.reengineer.base.api.impl;
+package org.apache.stanbol.reengineer.base.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,14 +7,15 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
-import org.apache.stanbol.ontologymanager.store.api.NoSuchOntologyInStoreException;
-import org.apache.stanbol.ontologymanager.store.api.OntologyStorage;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.ReengineeringException;
 import org.apache.stanbol.reengineer.base.api.SemionManager;
@@ -40,8 +41,13 @@ public class SemionManagerImpl implements SemionManager{
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	
-	@Reference
-	KReSONManager onManager;
+    @Reference
+    private TcManager tcm;
+
+    @Reference
+    private WeightedTcProvider wtcp;
+    
+    private OntologyStorage storage;
 	
 	private ArrayList<SemionReengineer> reengineers;
 //
@@ -67,9 +73,9 @@ public class SemionManagerImpl implements SemionManager{
 	 * 
 	 * @param onm
 	 */
-	public SemionManagerImpl(KReSONManager onManager) {
+	public SemionManagerImpl(TcManager tcm, WeightedTcProvider wtcp) {
 		this();
-		this.onManager = onManager;
+        storage = new OntologyStorage(tcm, wtcp);
 		activate(new Hashtable<String, Object>());
 	}
 
@@ -91,6 +97,7 @@ public class SemionManagerImpl implements SemionManager{
 	}
 
 	protected void activate(Dictionary<String, Object> configuration) {
+        if (storage == null) storage = new OntologyStorage(this.tcm, this.wtcp);
 		reengineers = new ArrayList<SemionReengineer>();
 	}
 
@@ -153,9 +160,9 @@ public class SemionManagerImpl implements SemionManager{
 		
 		OWLOntology reengineeredDataOntology = null;
 		
-		OntologyStorage ontologyStorage = onManager.getOntologyStore();
+//		OntologyStorage ontologyStorage = onManager.getOntologyStore();
 		
-		OWLOntology schemaOntology = ontologyStorage.load(schemaOntologyIRI);
+		OWLOntology schemaOntology = storage.load(schemaOntologyIRI);
 		
 		if(schemaOntology == null){
 			throw new NoSuchOntologyInStoreException(schemaOntologyIRI);

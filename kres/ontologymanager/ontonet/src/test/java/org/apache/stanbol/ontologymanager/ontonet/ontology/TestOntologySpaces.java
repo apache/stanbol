@@ -57,7 +57,7 @@ public class TestOntologySpaces {
 	@BeforeClass
 	public static void setup() {
 		// An ONManager with no store and default settings
-		onm = new ONManager(null, new Hashtable<String, Object>());
+		onm = new ONManager(null,null, new Hashtable<String, Object>());
 		spaceFactory = onm.getOntologySpaceFactory();
 		if (spaceFactory == null)
 			fail("Could not instantiate ontology space factory");

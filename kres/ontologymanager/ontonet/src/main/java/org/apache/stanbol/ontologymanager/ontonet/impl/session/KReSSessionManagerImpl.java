@@ -19,7 +19,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession.State;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent.OperationType;
-import org.apache.stanbol.ontologymanager.store.api.OntologyStorage;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;

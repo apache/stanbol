@@ -13,7 +13,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
-import org.apache.stanbol.ontologymanager.store.api.OntologyStoreProvider;
 import org.apache.stanbol.reengineer.base.api.SemionManager;
 import org.apache.stanbol.reengineer.base.api.SemionReengineer;
 import org.apache.stanbol.rules.base.api.RuleStore;
@@ -76,8 +75,11 @@ public class JerseyEndpoint {
 //    @Reference
 //    LinkDiscovery linkDiscovery; 
     
-    @Reference
-    OntologyStoreProvider ontologyStoreProvider;
+//    @Reference
+//    OntologyStoreProvider ontologyStoreProvider;
+    
+//    @Reference
+//    OntologyStorage ontologyStorage;
 	
 	@Reference
     RuleStore ruleStore;
@@ -145,7 +147,8 @@ public class JerseyEndpoint {
         
 		servletContext.setAttribute(KReSONManager.class.getName(), onm);
 		
-		servletContext.setAttribute(OntologyStoreProvider.class.getName(), ontologyStoreProvider);
+//		servletContext.setAttribute(OntologyStoreProvider.class.getName(), ontologyStoreProvider);
+//		servletContext.setAttribute(OntologyStorage.class.getName(), ontologyStorage);
 
         servletContext.setAttribute(STATIC_RESOURCES_URL_ROOT_PROPERTY,
                 staticUrlRoot);

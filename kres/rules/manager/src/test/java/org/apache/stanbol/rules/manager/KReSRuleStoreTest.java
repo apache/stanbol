@@ -51,10 +51,10 @@ public class KReSRuleStoreTest {
     @Before
     public void setUp() {
 		Dictionary<String, Object> configuration = new Hashtable<String, Object>();
-		store = new KReSRuleStore(new ONManager(null, configuration),
+		store = new KReSRuleStore(new ONManager(null,null, configuration),
 				configuration,
 				"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
-		blankStore = new KReSRuleStore(new ONManager(null, configuration),
+		blankStore = new KReSRuleStore(new ONManager(null,null, configuration),
 				configuration, "");
     }
 

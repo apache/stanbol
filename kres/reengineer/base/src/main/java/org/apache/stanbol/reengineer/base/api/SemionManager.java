@@ -2,7 +2,7 @@ package org.apache.stanbol.reengineer.base.api;
 
 import java.util.Collection;
 
-import org.apache.stanbol.ontologymanager.store.api.NoSuchOntologyInStoreException;
+import org.apache.stanbol.reengineer.base.impl.NoSuchOntologyInStoreException;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 

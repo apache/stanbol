@@ -46,7 +46,7 @@ public class KReSGetRecipeTest {
     @Before
     public void setUp() {
     	Dictionary<String, Object> configuration = new Hashtable<String, Object>();
-    	onm = new ONManager(null, new Hashtable<String, Object>());
+    	onm = new ONManager(null,null, new Hashtable<String, Object>());
     	store = new KReSRuleStore(onm, configuration,"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
     }
 

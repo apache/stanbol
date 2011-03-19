@@ -6,7 +6,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.KReSRegistryLoader;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
-import org.apache.stanbol.ontologymanager.store.api.OntologyStorage;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;

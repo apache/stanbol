@@ -59,7 +59,7 @@ public class TestOntologyScope {
 	@BeforeClass
 	public static void setup() {
 		// An ONManager with no store and default settings
-		onm = new ONManager(null, new Hashtable<String, Object>());
+		onm = new ONManager(null,null, new Hashtable<String, Object>());
 		factory = onm.getOntologyScopeFactory();
 		if (factory == null)
 			fail("Could not instantiate ontology space factory");
