@@ -70,7 +70,9 @@
     <module>eu.iksproject.kres.jersey</module>
     
     <module>ontologymanager/ontonet</module>
+    <!--
     <module>ontologymanager/store</module>
+    -->
     <module>reasoners/base</module>
     <module>reengineer/db</module>
     <module>reengineer/xml</module>
