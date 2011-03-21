@@ -111,11 +111,6 @@
 
 		<!-- Stanbol deps -->
 		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.kres.shared.dependency.owlapi</artifactId>
-			<version>${kres-version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
 			<version>${stanbol-version}</version>
@@ -126,9 +121,9 @@
 			<version>${stanbol-version}</version>
 		</dependency>
 		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.kres.shared.transformation</artifactId>
-			<version>${kres-version}</version>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.owlapi</artifactId>
+			<version>${stanbol-version}</version>
 		</dependency>
 
 		<!-- Jena deps -->
