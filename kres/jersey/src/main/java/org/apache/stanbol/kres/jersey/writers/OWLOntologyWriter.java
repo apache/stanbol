@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.stanbol.kres.jersey.format.KReSFormat;
-import eu.iksproject.kres.shared.transformation.OWLAPIToClerezzaConverter;
+import org.apache.stanbol.owlapi.trasformation.OWLAPIToClerezzaConverter;
 
 @Provider
 @Produces( { KReSFormat.RDF_XML, KReSFormat.OWL_XML, KReSFormat.MANCHESTER_OWL,
