@@ -263,9 +263,9 @@
 			</dependency>
 		-->
 		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.kres.shared.dependency.owlapi</artifactId>
-			<version>${kres-version}</version>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.owlapi</artifactId>
+			<version>${stanbol-version}</version>
 			<scope>provided</scope>
 		</dependency>
                 
