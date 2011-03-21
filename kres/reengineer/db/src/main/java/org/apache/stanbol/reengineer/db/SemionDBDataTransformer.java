@@ -34,7 +34,7 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-import eu.iksproject.kres.shared.transformation.JenaToOwlConvert;
+import org.apache.stanbol.owlapi.trasformation.JenaToOwlConvert;
 
 public class SemionDBDataTransformer extends SemionUriRefGenerator {
 
