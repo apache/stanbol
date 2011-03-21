@@ -16,10 +16,22 @@
  */
 package org.apache.stanbol.enhancer.engines.zemanta.impl;
 
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_END;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_LABEL;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_CATEGORY;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -47,16 +59,10 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
-import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
-import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.*;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_CATEGORY;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
 
 
 /**
@@ -97,34 +103,30 @@ public class ZemantaEnhancementEngine implements EnhancementEngine {
     protected BundleContext bundleContext;
 
     @Activate
-    @SuppressWarnings("unchecked")
     protected void activate(ComponentContext ce) throws IOException {
         bundleContext = ce.getBundleContext();
-        if (ce != null) {
-            Dictionary<String, String> properties = ce.getProperties();
-            key = properties.get(API_KEY_PROPERTY);
-            if (key == null) {
-                warnKeyMissing();
-            } else {
-                log.info("found Zemanta API key: " + key);
-            }
-        } else {
-            warnKeyMissing();
-        }
+        key = (String)ce.getProperties().get(API_KEY_PROPERTY);
+        
         //init the LiteralFactory
         literalFactory = LiteralFactory.getInstance();
-    }
-
-    private void warnKeyMissing() {
-        log.warn("No Zemanata API key configured. Zemanta engine will not work properly!");
     }
 
     @Deactivate
     protected void deactivate(ComponentContext ce) {
         literalFactory = null;
     }
+    
+    private void checkConfig() {
+        if(key == null || key.trim().length() == 0) {
+            throw new IllegalStateException(getClass().getSimpleName() 
+                    + ": please configure a Zemanta key to use this engine, or "
+                    + "disable this service (" + getClass().getName() + ") to avoid this error"
+                    );
+        }
+    }
 
     public int canEnhance(ContentItem ci) {
+        checkConfig();
         String mimeType = ci.getMimeType().split(";", 2)[0];
         if (TEXT_PLAIN_MIMETYPE.equalsIgnoreCase(mimeType)) {
             return ENHANCE_SYNCHRONOUS;
@@ -136,6 +138,7 @@ public class ZemantaEnhancementEngine implements EnhancementEngine {
     }
 
     public void computeEnhancements(ContentItem ci) throws EngineException {
+        checkConfig();
         String text;
         try {
             text = IOUtils.toString(ci.getStream(),"UTF-8");
