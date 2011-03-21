@@ -26,8 +26,8 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.util.FileManager;
 
-import eu.iksproject.kres.shared.transformation.JenaToClerezzaConverter;
-import eu.iksproject.kres.shared.transformation.JenaToOwlConvert;
+import org.apache.stanbol.owlapi.trasformation.JenaToClerezzaConverter;
+import org.apache.stanbol.owlapi.trasformation.JenaToOwlConvert;
 
 public class OntologyStorage {
 
