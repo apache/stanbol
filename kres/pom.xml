@@ -12,19 +12,19 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
-  <parent>
-    	<groupId>eu.iksproject</groupId>
-    	<artifactId>eu.iksproject.kres.parent</artifactId>
-	<version>0.7</version>
-    	<relativePath>./eu.iksproject.kres.parent</relativePath>
-  </parent>
+        <parent>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>stanbol-parent</artifactId>
+		<version>0.9-SNAPSHOT</version>
+		<relativePath>../../parent</relativePath>
+	</parent>
 
-  <groupId>eu.iksproject</groupId>
-  <artifactId>eu.iksproject.kres.reactor</artifactId>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.kres.reactor</artifactId>
   <packaging>pom</packaging>
-  <version>${kres-version}</version>
+  <version>${stanbol-version}</version>
 
-  <name>IKS KReS reactor</name>
+  <name>Apache Stanbol KReS reactor</name>
   <description>
     Pseudo project to build the complete KReS project
   </description>
@@ -34,22 +34,22 @@
   <modules>
   
   	<!-- KReS parent -->
-    <module>eu.iksproject.kres.parent</module>
+    <!--<module>eu.iksproject.kres.parent</module>-->
     
     <!-- OWL API bundle -->
 	<!-- Dependency bundle -->
 	<!--module>eu.iksproject.kres.shared</module-->
-	<module>eu.iksproject.kres.shared/dependency/owlapi3</module>
+	<!--<module>eu.iksproject.kres.shared/dependency/owlapi3</module>
 	
 	<module>eu.iksproject.kres.shared/dependency/hermit124</module>
     <module>eu.iksproject.kres.shared/dependency/owllink102</module>
     <module>eu.iksproject.kres.shared/dependency/xerces</module>
-    <module>eu.iksproject.kres.shared/dependency/mysql</module>
+    <module>eu.iksproject.kres.shared/dependency/mysql</module>-->
 
 	
 	<!-- Transformation utils -->
 <!--	<module>eu.iksproject.kres.shared/dependency/silk</module> -->
-	<module>eu.iksproject.kres.shared/transformation</module>  
+	<!--<module>eu.iksproject.kres.shared/transformation</module> -->
 	
 	<!-- Obsolete KReS modules -->
 	<!--
@@ -67,6 +67,8 @@
 	-->
 
     <!-- Jersey -->
+    <module>owlapi</module>
+
     <module>jersey</module>
     
     <module>ontologymanager/ontonet</module>
@@ -74,10 +76,15 @@
     <!--
     <module>ontologymanager/store</module>
     -->
+    
+    <module>reasoners/hermit</module>
+    <module>reasoners/owllink</module>
     <module>reasoners/base</module>
     <module>reasoners/web</module>
 
     <module>reengineer/base</module>
+    <module>reengineer/mysql</module>
+    <module>reengineer/xerces</module>
     <module>reengineer/xml</module>
     <module>reengineer/db</module>
     <module>reengineer/web</module>
@@ -86,6 +93,6 @@
     <module>rules/manager</module>
     <module>rules/refactor</module>
     <module>rules/web</module>
-
- </modules>
+    
+  </modules>
 </project>
