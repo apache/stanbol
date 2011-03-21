@@ -125,9 +125,9 @@
 		</dependency>
 		-->
 		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.kres.shared.transformation</artifactId>
-			<version>${kres-version}</version>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.owlapi</artifactId>
+			<version>${stanbol-version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -176,7 +176,12 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
+	 <dependency>
+	  <groupId>org.apache.clerezza</groupId>
+	  <artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
+	  <version>0.9-incubating-SNAPSHOT</version>
+	  <type>bundle</type>
+	 </dependency>
 	</dependencies>
 
 	<repositories>
