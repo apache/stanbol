@@ -44,7 +44,7 @@ public class KReSReasonerImpl implements KReSReasoner {
 		// Always call activate(Dictionary) in the constructor as a golden rule.
 		activate(configuration);
 	}
-	
+	// org.osgi.service.component.ComponentContext;
 	@SuppressWarnings("unchecked")
 	@Activate
 	protected void activate(ComponentContext context) {

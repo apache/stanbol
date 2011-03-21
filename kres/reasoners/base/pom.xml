@@ -167,9 +167,9 @@
 
 		<!-- Stanbol deps -->
 		<dependency>
-			<groupId>eu.iksproject</groupId>
-			<artifactId>eu.iksproject.kres.shared.transformation</artifactId>
-			<version>${kres-version}</version>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.owlapi</artifactId>
+			<version>${stanbol-version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>slf4j-log4j12</artifactId>
@@ -217,7 +217,12 @@
 			<version>1.5.2</version>
 			<scope>test</scope>
 		</dependency>
-
+	 <dependency>
+	  <groupId>org.osgi</groupId>
+	  <artifactId>org.osgi.compendium</artifactId>
+	  <version>4.0.1</version>
+	  <type>jar</type>
+	 </dependency>
 	</dependencies>
 
 	<repositories>
