@@ -64,9 +64,9 @@ import com.hp.hpl.jena.sparql.function.FunctionRegistry;
 import com.hp.hpl.jena.sparql.pfunction.PropertyFunctionRegistry;
 import com.hp.hpl.jena.update.UpdateAction;
 
-import eu.iksproject.kres.shared.transformation.JenaToClerezzaConverter;
-import eu.iksproject.kres.shared.transformation.JenaToOwlConvert;
-import eu.iksproject.kres.shared.transformation.OWLAPIToClerezzaConverter;
+import org.apache.stanbol.owlapi.trasformation.JenaToClerezzaConverter;
+import org.apache.stanbol.owlapi.trasformation.JenaToOwlConvert;
+import org.apache.stanbol.owlapi.trasformation.OWLAPIToClerezzaConverter;
 
 /**
  * The SemionRefactorerImpl is the concrete implementation of the SemionRefactorer interface defined in the
