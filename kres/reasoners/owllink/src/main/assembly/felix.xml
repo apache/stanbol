@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+ <id>all</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <dependencySets>
+    <dependencySet>
+        <useProjectArtifact>false</useProjectArtifact>
+        <outputDirectory>modules</outputDirectory>
+        <excludes>
+          <exclude>org.apache.felix:org.apache.felix.main</exclude>
+        </excludes>
+    </dependencySet>
+    <dependencySet>
+        <useProjectArtifact>false</useProjectArtifact>
+        <outputDirectory></outputDirectory>
+        <includes>
+          <include>org.apache.felix:org.apache.felix.main</include>
+        </includes>
+    </dependencySet>
+  </dependencySets>
+  <files>
+    <file>
+      <source>${project.build.directory}/${project.artifactId}-${project.version}.jar</source>
+      <outputDirectory>modules</outputDirectory>
+    </file>
+    <file>
+      <source>${project.build.directory}/felix.jar</source>
+      <outputDirectory>bin</outputDirectory>
+    </file>
+    <file>
+      <source>${project.build.directory}/config.properties</source>
+      <outputDirectory>conf</outputDirectory>
+    </file>
+  </files>
+</assembly>
