@@ -130,7 +130,7 @@
                         <jar.executor.jar.folder>${project.basedir}/target/dependency</jar.executor.jar.folder>
                         <jar.executor.jar.name.regexp>org.apache.stanbol.*full.*jar$</jar.executor.jar.name.regexp>
                         <keepJarRunning>${keepJarRunning}</keepJarRunning>
-                        <server.ready.timeout.seconds>60</server.ready.timeout.seconds>
+                        <server.ready.timeout.seconds>180</server.ready.timeout.seconds>
                         <server.ready.path.1>/:stanbol.css</server.ready.path.1>
                         <server.ready.path.2>/engines:There are currently</server.ready.path.2>
                         <server.ready.path.3>/store:Recently uploaded Content Items</server.ready.path.3>
