@@ -1,4 +1,4 @@
-package org.apache.stanbol.enhancer.jersey.writers;
+package org.apache.stanbol.commons.web.writers;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -15,6 +15,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.util.W3CDateFormat;
 import org.apache.commons.io.IOUtils;
+import org.apache.stanbol.commons.web.writers.JsonLdSerializerProvider;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.TextAnnotation;
 import org.apache.stanbol.enhancer.servicesapi.helper.RdfEntityFactory;

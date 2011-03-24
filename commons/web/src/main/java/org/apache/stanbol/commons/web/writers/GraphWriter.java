@@ -1,4 +1,13 @@
-package org.apache.stanbol.enhancer.jersey.writers;
+package org.apache.stanbol.commons.web.writers;
+
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N3;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N_TRIPLE;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JSON;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,11 +25,6 @@ import javax.ws.rs.ext.Provider;
 
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
-
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
-import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.*;
 
 
 @Provider

@@ -1,4 +1,4 @@
-package org.apache.stanbol.enhancer.jersey.resource;
+package org.apache.stanbol.commons.web.resource;
 
 import java.net.URI;
 import java.util.Arrays;

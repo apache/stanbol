@@ -1,4 +1,4 @@
-package org.apache.stanbol.enhancer.jersey.processors;
+package org.apache.stanbol.commons.web.processor;
 
 import java.io.IOException;
 import java.io.InputStream;

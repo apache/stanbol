@@ -1,4 +1,4 @@
-package org.apache.stanbol.enhancer.jersey.writers;
+package org.apache.stanbol.commons.web.writers;
 
 import java.util.Set;
 

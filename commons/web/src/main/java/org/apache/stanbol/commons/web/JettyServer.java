@@ -1,4 +1,4 @@
-package org.apache.stanbol.enhancer.jersey;
+package org.apache.stanbol.commons.web;
 
 import java.net.URI;
 import java.util.Dictionary;
@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 
 /**
- * Standalone (OSGi independent) Jetty-based server with the Stanbol Enhancer Jersey
+ * Standalone (OSGi independent) Jetty-based server with the Stanbol Jersey
  * endpoint. The OSGi component need be injected manually to the ServletContext
  * to make them available to the resources.
  * <p>

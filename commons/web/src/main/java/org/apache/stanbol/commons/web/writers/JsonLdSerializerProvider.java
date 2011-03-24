@@ -1,4 +1,6 @@
-package org.apache.stanbol.enhancer.jersey.writers;
+package org.apache.stanbol.commons.web.writers;
+
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -7,8 +9,6 @@ import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import javax.ws.rs.core.MediaType;
 
 import org.apache.clerezza.rdf.core.BNode;
 import org.apache.clerezza.rdf.core.NonLiteral;
@@ -21,8 +21,6 @@ import org.apache.stanbol.jsonld.JsonLd;
 import org.apache.stanbol.jsonld.JsonLdResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 
 /**
