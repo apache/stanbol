@@ -19,6 +19,7 @@
     </scm>
 
     <modules>
+        <module>web</module>
         <module>testing/jarexec</module>
         <module>testing/http</module>
         <module>testing/stanbol</module>

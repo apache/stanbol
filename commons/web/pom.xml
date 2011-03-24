@@ -5,24 +5,24 @@
 
 	<parent>
 		<groupId>org.apache.stanbol</groupId>
-		<artifactId>org.apache.stanbol.enhancer.parent</artifactId>
+		<artifactId>stanbol-parent</artifactId>
 		<version>0.9-SNAPSHOT</version>
-		<relativePath>../parent/pom.xml</relativePath>
+		<relativePath>../../parent/pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.apache.stanbol</groupId>
-	<artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
+	<artifactId>org.apache.stanbol.commons.web</artifactId>
 	<version>${stanbol-version}</version>
 	<packaging>bundle</packaging>
 
-	<name>Apache Stanbol Enhancer Jersey JAX-RS API and front-end</name>
-	<description>To be refactored to org.apache.stanbol.web!</description>
+	<name>Apache Stanbol HTTP Jersey Endpoint</name>
+	<description>This is the Stanbol HTTP endpoint bundle.</description>
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/jersey/
+            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/web
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/jersey/
+            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/web
         </developerConnection>
         <url>http://incubator.apache.org/stanbol/</url>
     </scm>
