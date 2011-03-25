@@ -1,22 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    IKS KReS sotftware
-  -->
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
-  <properties>
-    <kres-version>0.7</kres-version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-
         <parent>
 		<groupId>org.apache.stanbol</groupId>
 		<artifactId>stanbol-parent</artifactId>
-		<version>0.9-SNAPSHOT</version>
-		<relativePath>../../parent</relativePath>
+		<version>${stanbol-version}</version>
+		<relativePath>../parent</relativePath>
 	</parent>
 
   <groupId>org.apache.stanbol</groupId>
@@ -32,39 +40,6 @@
   <inceptionYear>2010</inceptionYear>
 
   <modules>
-  
-  	<!-- KReS parent -->
-    <!--<module>eu.iksproject.kres.parent</module>-->
-    
-    <!-- OWL API bundle -->
-	<!-- Dependency bundle -->
-	<!--module>eu.iksproject.kres.shared</module-->
-	<!--<module>eu.iksproject.kres.shared/dependency/owlapi3</module>
-	
-	<module>eu.iksproject.kres.shared/dependency/hermit124</module>
-    <module>eu.iksproject.kres.shared/dependency/owllink102</module>
-    <module>eu.iksproject.kres.shared/dependency/xerces</module>
-    <module>eu.iksproject.kres.shared/dependency/mysql</module>-->
-
-	
-	<!-- Transformation utils -->
-<!--	<module>eu.iksproject.kres.shared/dependency/silk</module> -->
-	<!--<module>eu.iksproject.kres.shared/transformation</module> -->
-	
-	<!-- Obsolete KReS modules -->
-	<!--
-	<module>eu.iksproject.kres.api</module>
-	<module>eu.iksproject.kres.manager</module>
-	<module>eu.iksproject.kres.ontologies</module>
-	<module>eu.iksproject.kres.reasoners</module>
-	<module>eu.iksproject.kres.rules</module>
-	<module>eu.iksproject.kres.storage</module>
-	<module>eu.iksproject.kres.storage.provider</module>
-	<module>eu.iksproject.kres.semion.manager</module>
-	<module>eu.iksproject.kres.semion.reengineer.db</module>
-	<module>eu.iksproject.kres.semion.reengineer.xml</module>
-    <module>eu.iksproject.kres.semion.refactorer</module>
-	-->
 
     <!-- Jersey -->
     <module>owlapi</module>
