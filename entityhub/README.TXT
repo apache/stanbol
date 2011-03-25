@@ -45,7 +45,7 @@ Configuring Referenced Sites
 First configure one or more Referenced Sites by clicking on
    Apache Stanbol Entityhub Referenced Site Configuration
 
-The default values can be used to configure dbPedia.org. Other examples can be
+The default values can be used to configure dbpedia.org. Other examples can be
 found in *-siteConfig.txt files (e.g. musicbrainz-siteConfig.txt)
 
 Configuring Yards
@@ -72,7 +72,7 @@ The default values provided by the Yard Configuration Dialog do contain values
 suitable for the RickYard. If you need to configure Yard instances for other
 purposes you need to change the ID to a different value.
 The suggestion is to use the id of the site followed by Yard (e.g. the yard for
-a site with the ID "dbPedia" should be called "dbPediaYard".
+a site with the ID "dbpedia" should be called "dbpediaYard".
 
 Configuring the Apache Stanbol Entityhub
 --------------------------------------------
@@ -164,7 +164,7 @@ Description: This service returns a json array containing the IDs of all
 Example:
    curl  "http://localhost:8080/entityhub/sites/referenced"
 Response
-   ["http:\/\/localhost:8080\/entityhub\/site\/dbPedia\/",
+   ["http:\/\/localhost:8080\/entityhub\/site\/dbpedia\/",
     "http:\/\/localhost:8080\/entityhub\/site\/musicbrainz\/"]
 
 
@@ -208,7 +208,7 @@ Parameter:
     query: the JSON serialized FieldQuery (see section "FieldQuery JSON format" 
            below)
 Example:
-   curl -X POST -F "query=@fieldQuery.json" http://localhost:8080/entityhub/site/dbPedia/query
+   curl -X POST -F "query=@fieldQuery.json" http://localhost:8080/entityhub/site/dbpedia/query
 Note: that "@fieldQuery.json" links to a local file that contains the parsed
     Fieldquery (see ection "FieldQuery JSON format" for examples)
 Note: This method suffers form very bad performance on SPARQL Endpoints that do 
@@ -233,10 +233,10 @@ endpoint
 
 Request: GET /site/{site}/entity?id={entityID}
 Parameter
-    site: is the ID configured for the referenced site (e.g. "dbPedia")
+    site: is the ID configured for the referenced site (e.g. "dbpedia")
     id: is the URI of the requested Entity
 Example
-   curl -X GET -H "Accept: application/json" http://localhost:8080/entityhub/site/dbPedia/entity?id=http://dbpedia.org/resource/Paris
+   curl -X GET -H "Accept: application/json" http://localhost:8080/entityhub/site/dbpedia/entity?id=http://dbpedia.org/resource/Paris
 
 
     /site/{site}/find?name={name}
@@ -245,7 +245,7 @@ Request:
     GET /site/{site}/find?name={name}&field={field}&lang={lang}&limit={limit}&offset={offset}
     POST -d "name={query}&field={field}&lang={lang}&limit={limit}&offset={offset}" /site/{site}/find
 Parameter:
-    site: is the ID configured for the referenced site (e.g. "dbPedia")
+    site: is the ID configured for the referenced site (e.g. "dbpedia")
     name: the name of the entity (supports wildcards e.g. "Frankf*")
     field: the name of the field used for the query. One MUST parse the full
            name. Namespace prefixes are not supported yet. (default is rdfs:label)
@@ -256,7 +256,7 @@ Note: This method suffers form very bad performance on SPARQL Endpoints that do
     not support extensions for full text searches. On Virtuoso Endpoints do 
     performance well under normal conditions
 Example:
-   curl -X POST -d "name=Frankf*&lang=de&limit=10&offset=0" http://localhost:8080/entityhub/site/dbPedia/find
+   curl -X POST -d "name=Frankf*&lang=de&limit=10&offset=0" http://localhost:8080/entityhub/site/dbpedia/find
 
 
     /site/{site}/query&query={query}
@@ -266,11 +266,11 @@ Allows to parse JSON serialzed FieldQueries to the site endpoint.
 Request:
     POST -d "query={query}" /site/{site}/query
 Parameter:
-    site: is the ID configured for the referenced site (e.g. "dbPedia")
+    site: is the ID configured for the referenced site (e.g. "dbpedia")
     query: the JSON serialized FieldQuery (see section "FieldQuery JSON format" 
            below)
 Example:
-   curl -X POST -F "query=@fieldQuery.json" http://localhost:8080/entityhub/site/dbPedia/query
+   curl -X POST -F "query=@fieldQuery.json" http://localhost:8080/entityhub/site/dbpedia/query
 Note: that "@fieldQuery.json" links to a local file that contains the parsed
     Fieldquery (see ection "FieldQuery JSON format" for examples)
 Note: This method suffers form very bad performance on SPARQL Endpoints that do 
@@ -332,7 +332,7 @@ Example 1: without the create parameter (default value for create=false)
 
     curl -H "Accept: application/json" "http://localhost:8080/entityhub/symbol/lookup/?id=http://dbpedia.org/resource/Wien"
 
-This Example looksup the Symbol for the dbPedia Entity "Wien" (The German name 
+This Example looksup the Symbol for the dbpedia Entity "Wien" (The German name 
 for Vienna). If a EntityMapping for this Entity is present in the Apache Stanbol 
 Entityhub, than this call returns the Symbol. For a example see the Response of 
 the example of the "/symbol?id={symbolId}" above. A request with the ID of the 
@@ -544,7 +544,7 @@ Keys required by all Constraint types:
 Reference Constraint keys: 
  - value: the value (usually an URI) (required) 
 Example:
-Search for instances of the type Place as defined in the dbPedia ontology
+Search for instances of the type Place as defined in the dbpedia ontology
     { 
         "type": "reference", 
         "field": "http:\/\/www.w3.org\/1999\/02\/22-rdf-syntax-ns#type", 
