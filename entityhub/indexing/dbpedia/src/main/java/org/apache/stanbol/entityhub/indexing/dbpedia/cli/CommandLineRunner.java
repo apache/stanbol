@@ -275,7 +275,6 @@ public final class CommandLineRunner {
         final Iterator<String> lines = IOUtils.lineIterator(
                 new FileInputStream(tsvScoreFile), "utf-8");
         long lineNumber = 0;
-        int maxIncommung = 0;
         float maxScore = 0;
         long filtered  = 0;
         log.info("  ... init Entity Ranks based on "+tsvScoreFile);
@@ -285,13 +284,12 @@ public final class CommandLineRunner {
             if (parts.length != 2) {
                 log.warn(String.format("skipping line: '%s'", line));
             }
-            int incomming = Integer.parseInt(parts[1].trim());
+            int incoming = Integer.parseInt(parts[1].trim());
             // take the log to avoid over popular entities to
             // dominate the results (attenuate the Zipf law of
             // culturally generated distribution)
-            float score = (float)Math.log1p(incomming);
+            float score = (float)Math.log1p(incoming);
             if (lineNumber == 0 && score > 0) {
-                maxIncommung = incomming;
                 maxScore = score;
                 if(minIncommings <= 0){
                     minRequiredRanking = -1f; //deactivate
