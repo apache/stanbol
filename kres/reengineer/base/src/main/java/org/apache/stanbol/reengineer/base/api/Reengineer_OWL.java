@@ -4,7 +4,7 @@ import org.semanticweb.owlapi.model.IRI;
 
 
 
-public class Semion_OWL {
+public class Reengineer_OWL {
 
 	public static final String URI = "http://ontologydesignpatterns.org/ont/iks/semion.owl";
 	

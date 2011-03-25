@@ -10,7 +10,7 @@ import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 
-public class SemionUriRefGenerator {
+public class ReengineerUriRefGenerator {
 
     // // Unused protected method that relies on a specific reengineer implementation
     // protected UriRef createTypedResource(MGraph mGraph, String resourceURI, UriRef type){

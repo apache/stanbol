@@ -8,34 +8,34 @@ import org.semanticweb.owlapi.model.OWLOntology;
 
 /**
  * 
- * The {@code SemionManager} is responsible of the coordination of all the tasks performed by Semion in KReS
+ * The {@code ReengineerManager} is responsible of the coordination of all the tasks performed by Semion in KReS
  * 
  * @author andrea.nuzzolese
  *
  */
 
-public interface SemionManager {
+public interface ReengineerManager {
 
 	/**
-	 * The {@link SemionManager} can add a new reengineer to the list of available reengineers. This is performed through the method
+	 * The {@link ReengineerManager} can add a new reengineer to the list of available reengineers. This is performed through the method
 	 * {@cod bindReengineer}.
 	 * 
-	 * @param semionReengineer {@link SemionReengineer}
+	 * @param semionReengineer {@link Reengineer}
 	 * @return true if the reengineer is bound, false otherwise
 	 */
-	public boolean bindReengineer(SemionReengineer semionReengineer);
+	public boolean bindReengineer(Reengineer semionReengineer);
 	
 	/**
-	 * The {@link SemionManager} can remove a reengineer from the list of available reengineers. This is performed through the method
+	 * The {@link ReengineerManager} can remove a reengineer from the list of available reengineers. This is performed through the method
 	 * {@cod unbindReengineer}.
 	 * 
-	 * @param semionReengineer {@link SemionReengineer}
+	 * @param semionReengineer {@link Reengineer}
 	 * @return true if the reengineer is unbound, false otherwise
 	 */
-	public boolean unbindReengineer(SemionReengineer semionReengineer);
+	public boolean unbindReengineer(Reengineer semionReengineer);
 	
 	/**
-	 * The {@link SemionManager} can remove a reengineer from the list of available reengineers. This is performed through the method
+	 * The {@link ReengineerManager} can remove a reengineer from the list of available reengineers. This is performed through the method
 	 * {@cod unbindReengineer}.
 	 * 
 	 * @param reenginnerType {@code int}
@@ -45,7 +45,7 @@ public interface SemionManager {
 	
 	
 //	/**
-//	 * The {@link SemionManager} can register a single instance of {@link SemionRefactorer}.
+//	 * The {@link ReengineerManager} can register a single instance of {@link SemionRefactorer}.
 //	 * 
 //	 * @param semionRefactorer {@link SemionRefactorer}
 //	 */
@@ -68,9 +68,9 @@ public interface SemionManager {
 	/**
 	 * Gets the active reengineers of KReS.
 	 * 
-	 * @return the {@link Collection< SemionReengineer >} of active reengineers. 
+	 * @return the {@link Collection< Reengineer >} of active reengineers.
 	 */
-	public Collection<SemionReengineer> listReengineers();
+	public Collection<Reengineer> listReengineers();
 	
 	/**
 	 * Gets the number of active reengineers.

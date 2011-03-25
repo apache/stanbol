@@ -7,7 +7,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 
 /**
  * 
- * A SemionReengineer provides methods for transforming in KReS both the schema and the data of a non-RDF data source into RDF.
+ * A Reengineer provides methods for transforming in KReS both the schema and the data of a non-RDF data source into RDF.
  * <br>
  * <br>
  * Accepted data sources are:
@@ -22,7 +22,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
  *
  */
 
-public interface SemionReengineer {
+public interface Reengineer {
 
 	/**
 	 * The method returns one of the following values related to a particular data souce:

@@ -14,12 +14,12 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.ReengineeringException;
-import org.apache.stanbol.reengineer.base.api.SemionManager;
-import org.apache.stanbol.reengineer.base.api.SemionReengineer;
+import org.apache.stanbol.reengineer.base.api.ReengineerManager;
+import org.apache.stanbol.reengineer.base.api.Reengineer;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Concrete implementation of the
- * {@link eu.iksproject.kres.api.semion.SemionManager} interface defined in the
+ * {@link org.apache.stanbol.reengineer.base.api.ReengineerManager} interface defined in the
  * KReS APIs.
  * 
  * @author andrea.nuzzolese
@@ -36,8 +36,8 @@ import org.slf4j.LoggerFactory;
  */
 
 @Component(immediate = true, metatype = true)
-@Service(SemionManager.class)
-public class SemionManagerImpl implements SemionManager{
+@Service(ReengineerManager.class)
+public class ReengineerManagerImpl implements ReengineerManager{
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	
@@ -49,7 +49,7 @@ public class SemionManagerImpl implements SemionManager{
     
     private OntologyStorage storage;
 	
-	private ArrayList<SemionReengineer> reengineers;
+	private ArrayList<Reengineer> reengineers;
 //
 //	private SemionRefactorer semionRefactorer;
 
@@ -57,14 +57,14 @@ public class SemionManagerImpl implements SemionManager{
 	 * This default constructor is <b>only</b> intended to be used by the OSGI
 	 * environment with Service Component Runtime support.
 	 * <p>
-	 * DO NOT USE to manually create instances - the SemionManagerImpl instances
+	 * DO NOT USE to manually create instances - the ReengineerManagerImpl instances
 	 * do need to be configured! YOU NEED TO USE
-	 * {@link #SemionManagerImpl(KReSONManager)} or its overloads, to parse the
+	 * {@link #ReengineerManagerImpl(ONManager)} or its overloads, to parse the
 	 * configuration and then initialise the rule store if running outside a
 	 * OSGI environment.
 	 */
-	public SemionManagerImpl() {
-		reengineers = new ArrayList<SemionReengineer>();
+	public ReengineerManagerImpl() {
+		reengineers = new ArrayList<Reengineer>();
 	}
 	
 	/**
@@ -73,7 +73,7 @@ public class SemionManagerImpl implements SemionManager{
 	 * 
 	 * @param onm
 	 */
-	public SemionManagerImpl(TcManager tcm, WeightedTcProvider wtcp) {
+	public ReengineerManagerImpl(TcManager tcm, WeightedTcProvider wtcp) {
 		this();
         storage = new OntologyStorage(tcm, wtcp);
 		activate(new Hashtable<String, Object>());
@@ -87,7 +87,7 @@ public class SemionManagerImpl implements SemionManager{
 	@SuppressWarnings("unchecked")
 	@Activate
 	protected void activate(ComponentContext context) throws IOException {
-		log.info("in " + SemionManagerImpl.class + " activate with context "
+		log.info("in " + ReengineerManagerImpl.class + " activate with context "
 				+ context);
 		if (context == null) {
 			throw new IllegalStateException("No valid" + ComponentContext.class
@@ -98,20 +98,20 @@ public class SemionManagerImpl implements SemionManager{
 
 	protected void activate(Dictionary<String, Object> configuration) {
         if (storage == null) storage = new OntologyStorage(this.tcm, this.wtcp);
-		reengineers = new ArrayList<SemionReengineer>();
+		reengineers = new ArrayList<Reengineer>();
 	}
 
 	/**
 	 * @param semionReengineer
-	 *            {@link eu.iksproject.kres.api.semion.SemionReengineer}
+	 *            {@link org.apache.stanbol.reengineer.base.api.Reengineer}
 	 * @return true if the reengineer is bound, false otherwise
 	 */
 	@Override
-	public boolean bindReengineer(SemionReengineer semionReengineer) {
+	public boolean bindReengineer(Reengineer semionReengineer) {
 		boolean found = false;
-		Iterator<SemionReengineer> it = reengineers.iterator();
+		Iterator<Reengineer> it = reengineers.iterator();
 		while(it.hasNext() && !found){
-			SemionReengineer reengineer = it.next();
+			Reengineer reengineer = it.next();
 			if (reengineer.getReengineerType() == semionReengineer
 					.getReengineerType()) {
 				found = true;
@@ -138,7 +138,7 @@ public class SemionManagerImpl implements SemionManager{
 		
 	@Deactivate
 	protected void deactivate(ComponentContext context) {
-		log.info("in " + SemionManagerImpl.class + " deactivate with context "
+		log.info("in " + ReengineerManagerImpl.class + " deactivate with context "
 				+ context);
 		reengineers = null;
 	}
@@ -149,7 +149,7 @@ public class SemionManagerImpl implements SemionManager{
 //		}
 		
 	@Override
-	public Collection<SemionReengineer> listReengineers() {
+	public Collection<Reengineer> listReengineers() {
 		return reengineers;
 	}
 	
@@ -169,9 +169,9 @@ public class SemionManagerImpl implements SemionManager{
 		} else {
 		
 			boolean reengineered = false;
-			Iterator<SemionReengineer> it = reengineers.iterator();
+			Iterator<Reengineer> it = reengineers.iterator();
 			while(it.hasNext() && !reengineered){
-				SemionReengineer semionReengineer = it.next();
+				Reengineer semionReengineer = it.next();
 				if(semionReengineer.canPerformReengineering(schemaOntology)){
 					reengineeredDataOntology = semionReengineer
 							.dataReengineering(graphNS, outputIRI, dataSource,
@@ -192,9 +192,9 @@ public class SemionManagerImpl implements SemionManager{
 		OWLOntology reengineeredDataOntology = null;
 		
 		boolean reengineered = false;
-		Iterator<SemionReengineer> it = reengineers.iterator();
+		Iterator<Reengineer> it = reengineers.iterator();
 		while(it.hasNext() && !reengineered){
-			SemionReengineer semionReengineer = it.next();
+			Reengineer semionReengineer = it.next();
 			if(semionReengineer.canPerformReengineering(schemaOntology)){
 				reengineeredDataOntology = semionReengineer.dataReengineering(
 						graphNS, outputIRI, dataSource, schemaOntology);
@@ -211,9 +211,9 @@ public class SemionManagerImpl implements SemionManager{
 		OWLOntology reengineeredOntology = null;
 
 		boolean reengineered = false;
-		Iterator<SemionReengineer> it = reengineers.iterator();
+		Iterator<Reengineer> it = reengineers.iterator();
 		while (it.hasNext() && !reengineered) {
-			SemionReengineer semionReengineer = it.next();
+			Reengineer semionReengineer = it.next();
 			if (semionReengineer.canPerformReengineering(dataSource)) {
 				log.debug(semionReengineer.getClass().getCanonicalName()
 						+ " can perform the reengineering");
@@ -235,9 +235,9 @@ public class SemionManagerImpl implements SemionManager{
 		OWLOntology reengineeredSchemaOntology = null;
 
 		boolean reengineered = false;
-		Iterator<SemionReengineer> it = reengineers.iterator();
+		Iterator<Reengineer> it = reengineers.iterator();
 		while (it.hasNext() && !reengineered) {
-			SemionReengineer semionReengineer = it.next();
+			Reengineer semionReengineer = it.next();
 			if (semionReengineer.canPerformReengineering(dataSource)) {
 				reengineeredSchemaOntology = semionReengineer
 						.schemaReengineering(graphNS, outputIRI, dataSource);
@@ -260,7 +260,7 @@ public class SemionManagerImpl implements SemionManager{
 	public boolean unbindReengineer(int reenginnerType) {
 		boolean found = false;
 		for(int i=0, j=reengineers.size(); i<j && !found; i++){
-			SemionReengineer reengineer = reengineers.get(i);
+			Reengineer reengineer = reengineers.get(i);
 			if(reengineer.getReengineerType() == reenginnerType){
 				reengineers.remove(i);
 				found = true;
@@ -270,7 +270,7 @@ public class SemionManagerImpl implements SemionManager{
 	}
 	
 	@Override
-	public boolean unbindReengineer(SemionReengineer semionReengineer) {
+	public boolean unbindReengineer(Reengineer semionReengineer) {
 		boolean found = false;
 		for (int i = 0, j = reengineers.size(); i < j && !found; i++) {
 			if (semionReengineer.equals(reengineers.get(i))) {

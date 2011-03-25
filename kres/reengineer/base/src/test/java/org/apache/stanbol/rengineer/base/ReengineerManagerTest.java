@@ -4,24 +4,24 @@ import static org.junit.Assert.fail;
 
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.ReengineeringException;
-import org.apache.stanbol.reengineer.base.api.SemionManager;
-import org.apache.stanbol.reengineer.base.api.SemionReengineer;
+import org.apache.stanbol.reengineer.base.api.ReengineerManager;
+import org.apache.stanbol.reengineer.base.api.Reengineer;
 import org.apache.stanbol.reengineer.base.api.util.ReengineerType;
 import org.apache.stanbol.reengineer.base.api.util.UnsupportedReengineerException;
-import org.apache.stanbol.reengineer.base.impl.SemionManagerImpl;
+import org.apache.stanbol.reengineer.base.impl.ReengineerManagerImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 
-public class SemionManagerTest {
+public class ReengineerManagerTest {
 
-	public static SemionReengineer semionReengineer;
+	public static Reengineer semionReengineer;
 	
 	@BeforeClass
 	public static void setup(){
-		semionReengineer = new SemionReengineer() {
+		semionReengineer = new Reengineer() {
 			
 			@Override
 			public OWLOntology schemaReengineering(String graphNS, IRI outputIRI,
@@ -82,7 +82,7 @@ public class SemionManagerTest {
 	
 	@Test
 	public void bindTest(){
-		SemionManager semionManager = new SemionManagerImpl();
+		ReengineerManager semionManager = new ReengineerManagerImpl();
 		if(!semionManager.bindReengineer(semionReengineer)){
 			fail("Bind test failed for SemionManager");
 		}
@@ -90,7 +90,7 @@ public class SemionManagerTest {
 	
 	@Test
 	public void unbindByReengineerTypeTest(){
-		SemionManager semionManager = new SemionManagerImpl();
+		ReengineerManager semionManager = new ReengineerManagerImpl();
 		semionManager.bindReengineer(semionReengineer);
 		if(!semionManager.unbindReengineer(ReengineerType.XML)){
 			fail("Unbind by reengineer type test failed for SemionManager");
@@ -99,7 +99,7 @@ public class SemionManagerTest {
 	
 	@Test
 	public void unbindByReengineerInstanceTest(){
-		SemionManager semionManager = new SemionManagerImpl();
+		ReengineerManager semionManager = new ReengineerManagerImpl();
 		semionManager.bindReengineer(semionReengineer);
 		if(!semionManager.unbindReengineer(semionReengineer)){
 			fail("Unbind by reengineer instance test failed for SemionManager");
