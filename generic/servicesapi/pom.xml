@@ -23,14 +23,14 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>${stanbol-version}</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
   <packaging>bundle</packaging>
-  <version>0.1-SNAPSHOT</version>
+  <version>${stanbol-version}</version>
 
   <name>Apache Stanbol Entityhub Services API</name>
   <description>The Services API of the Entityhub</description>
@@ -74,35 +74,20 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
-        <version>1.4.4</version>
       </plugin>
     </plugins>
   </build>
 
   <dependencies>
-    <!-- <dependency>  no longer needed!
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.core</artifactId>
-      <version>0.12-incubating-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency> -->
-    <!-- <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <scope>provided</scope>
-    </dependency>  -->
-
     <!-- for tests -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.7</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.5.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
