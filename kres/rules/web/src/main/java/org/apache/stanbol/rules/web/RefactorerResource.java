@@ -15,11 +15,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.reasoners.base.api.InconcistencyException;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
-import org.apache.stanbol.rules.refactor.api.SemionRefactorer;
-import org.apache.stanbol.rules.refactor.api.SemionRefactoringException;
+import org.apache.stanbol.rules.refactor.api.Refactorer;
+import org.apache.stanbol.rules.refactor.api.RefactoringException;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -39,17 +39,17 @@ import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
 
 @Path("/refactorer")
 @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
-public class SemionRefactorerResource extends NavigationMixin {
+public class RefactorerResource extends NavigationMixin {
 
-    protected KReSONManager onManager;
+    protected ONManager onManager;
     // protected SemionManager semionManager;
     protected TcManager tcManager;
-    protected SemionRefactorer semionRefactorer;
+    protected Refactorer semionRefactorer;
 
-    public SemionRefactorerResource(@Context ServletContext servletContext) {
-        semionRefactorer = (SemionRefactorer) (servletContext.getAttribute(SemionRefactorer.class.getName()));
+    public RefactorerResource(@Context ServletContext servletContext) {
+        semionRefactorer = (Refactorer) (servletContext.getAttribute(Refactorer.class.getName()));
 
-        onManager = (KReSONManager) (servletContext.getAttribute(KReSONManager.class.getName()));
+        onManager = (ONManager) (servletContext.getAttribute(ONManager.class.getName()));
 
         tcManager = (TcManager) (servletContext.getAttribute(TcManager.class.getName()));
         if (semionRefactorer == null) {
@@ -71,12 +71,12 @@ public class SemionRefactorerResource extends NavigationMixin {
         IRI inputGraphIRI = IRI.create(inputGraph);
         IRI outputGraphIRI = IRI.create(outputGraph);
 
-        // SemionRefactorer semionRefactorer = semionManager.getRegisteredRefactorer();
+        // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
 
         try {
             semionRefactorer.ontologyRefactoring(outputGraphIRI, inputGraphIRI, recipeIRI);
             return Response.ok().build();
-        } catch (SemionRefactoringException e) {
+        } catch (RefactoringException e) {
             return Response.status(500).build();
         } catch (NoSuchRecipeException e) {
             return Response.status(204).build();
@@ -92,7 +92,7 @@ public class SemionRefactorerResource extends NavigationMixin {
     public Response performRefactoring(@FormParam("recipe") String recipe,
                                        @FormParam("input") InputStream input) {
 
-        // SemionRefactorer semionRefactorer = semionManager.getRegisteredRefactorer();
+        // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
 
         IRI recipeIRI = IRI.create(recipe);
 
@@ -104,7 +104,7 @@ public class SemionRefactorerResource extends NavigationMixin {
             OWLOntology outputOntology;
             try {
                 outputOntology = semionRefactorer.ontologyRefactoring(inputOntology, recipeIRI);
-            } catch (SemionRefactoringException e) {
+            } catch (RefactoringException e) {
                 e.printStackTrace();
                 return Response.status(500).build();
             } catch (NoSuchRecipeException e) {
@@ -129,12 +129,12 @@ public class SemionRefactorerResource extends NavigationMixin {
         IRI inputGraphIRI = IRI.create(inputGraph);
         IRI outputGraphIRI = IRI.create(outputGraph);
 
-        // SemionRefactorer semionRefactorer = semionManager.getRegisteredRefactorer();
+        // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
 
         try {
             semionRefactorer.consistentOntologyRefactoring(outputGraphIRI, inputGraphIRI, recipeIRI);
             return Response.ok().build();
-        } catch (SemionRefactoringException e) {
+        } catch (RefactoringException e) {
             return Response.status(500).build();
         } catch (NoSuchRecipeException e) {
             return Response.status(204).build();
@@ -154,7 +154,7 @@ public class SemionRefactorerResource extends NavigationMixin {
 
         IRI recipeIRI = IRI.create(recipe);
 
-        // SemionRefactorer semionRefactorer = semionManager.getRegisteredRefactorer();
+        // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
 
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLOntology inputOntology;
@@ -164,7 +164,7 @@ public class SemionRefactorerResource extends NavigationMixin {
             OWLOntology outputOntology;
             try {
                 outputOntology = semionRefactorer.consistentOntologyRefactoring(inputOntology, recipeIRI);
-            } catch (SemionRefactoringException e) {
+            } catch (RefactoringException e) {
                 return Response.status(500).build();
             } catch (NoSuchRecipeException e) {
                 return Response.status(204).build();

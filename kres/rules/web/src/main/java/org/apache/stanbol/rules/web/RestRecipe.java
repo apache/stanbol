@@ -30,14 +30,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.manager.changes.KReSAddRecipe;
-import org.apache.stanbol.rules.manager.changes.KReSGetRecipe;
-import org.apache.stanbol.rules.manager.changes.KReSRemoveRecipe;
-import org.apache.stanbol.rules.manager.changes.KReSRuleStore;
+import org.apache.stanbol.rules.manager.changes.AddRecipe;
+import org.apache.stanbol.rules.manager.changes.GetRecipe;
+import org.apache.stanbol.rules.manager.changes.RemoveRecipe;
+import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
@@ -61,9 +61,9 @@ import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
 @Path("/recipe")
 // /{uri:.+}")
 // @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
-public class Recipe extends NavigationMixin {
+public class RestRecipe extends NavigationMixin {
 
-    protected KReSONManager onm;
+    protected ONManager onm;
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -71,14 +71,14 @@ public class Recipe extends NavigationMixin {
     private OntologyStorage storage;
 
     /**
-     * To get the KReSRuleStore where are stored the rules and the recipes
+     * To get the RuleStoreImpl where are stored the rules and the recipes
      * 
      * @param servletContext
      *            {To get the context where the REST service is running.}
      */
-    public Recipe(@Context ServletContext servletContext) {
+    public RestRecipe(@Context ServletContext servletContext) {
         this.kresRuleStore = (RuleStore) servletContext.getAttribute(RuleStore.class.getName());
-        this.onm = (KReSONManager) servletContext.getAttribute(KReSONManager.class.getName());
+        this.onm = (ONManager) servletContext.getAttribute(ONManager.class.getName());
 //      this.storage = (OntologyStorage) servletContext
 //      .getAttribute(OntologyStorage.class.getName());
 // Contingency code for missing components follows.
@@ -89,7 +89,7 @@ public class Recipe extends NavigationMixin {
 if (onm == null) {
     log
             .warn("No KReSONManager in servlet context. Instantiating manually...");
-    onm = new ONManager(new TcManager(), null,
+    onm = new ONManagerImpl(new TcManager(), null,
             new Hashtable<String, Object>());
 }
 this.storage = onm.getOntologyStore();
@@ -104,13 +104,13 @@ if (storage == null) {
 //            OWLOntology o;
 //            try {
 //                o = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(IRI.create(iri));
-//                this.kresRuleStore = new KReSRuleStore(onm, new Hashtable<String,Object>(), "");
+//                this.kresRuleStore = new RuleStoreImpl(onm, new Hashtable<String,Object>(), "");
 //                log.debug("PATH TO OWL FILE LOADED: " + kresRuleStore.getFilePath());
 //            } catch (OWLOntologyCreationException e) {
 //
 //            }
             
-            this.kresRuleStore = new KReSRuleStore(onm, new Hashtable<String,Object>(), "");
+            this.kresRuleStore = new RuleStoreImpl(onm, new Hashtable<String,Object>(), "");
 
         }
     }
@@ -134,7 +134,7 @@ if (storage == null) {
     public Response getRecipe(@PathParam("uri") String uri) {
         try {
 
-            KReSGetRecipe rule = new KReSGetRecipe(kresRuleStore);
+            GetRecipe rule = new GetRecipe(kresRuleStore);
 
             // String ID =
             // kresRuleStore.getOntology().getOntologyID().toString().replace(">","").replace("<","")+"#";
@@ -276,7 +276,7 @@ if (storage == null) {
 
         try {
 
-            KReSAddRecipe instance = new KReSAddRecipe(kresRuleStore);
+            AddRecipe instance = new AddRecipe(kresRuleStore);
 
             // String ID =
             // kresRuleStore.getOntology().getOntologyID().toString().replace(">","").replace("<","")+"#";
@@ -313,7 +313,7 @@ if (storage == null) {
 
         try {
 
-            KReSRemoveRecipe instance = new KReSRemoveRecipe(kresRuleStore);
+            RemoveRecipe instance = new RemoveRecipe(kresRuleStore);
 
             // String ID =
             // kresRuleStore.getOntology().getOntologyID().toString().replace(">","").replace("<","")+"#";

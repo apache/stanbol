@@ -32,17 +32,17 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.manager.changes.KReSAddRecipe;
-import org.apache.stanbol.rules.manager.changes.KReSAddRule;
-import org.apache.stanbol.rules.manager.changes.KReSGetRecipe;
-import org.apache.stanbol.rules.manager.changes.KReSGetRule;
-import org.apache.stanbol.rules.manager.changes.KReSRemoveRecipe;
-import org.apache.stanbol.rules.manager.changes.KReSRemoveRule;
-import org.apache.stanbol.rules.manager.changes.KReSRuleStore;
+import org.apache.stanbol.rules.manager.changes.AddRecipe;
+import org.apache.stanbol.rules.manager.changes.AddRule;
+import org.apache.stanbol.rules.manager.changes.GetRecipe;
+import org.apache.stanbol.rules.manager.changes.GetRule;
+import org.apache.stanbol.rules.manager.changes.RemoveRecipe;
+import org.apache.stanbol.rules.manager.changes.RemoveRule;
+import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
@@ -64,9 +64,9 @@ import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
  * 
  */
 @Path("/rule")
-public class Rule extends NavigationMixin{
+public class RestRule extends NavigationMixin{
 
-	protected KReSONManager onm;
+	protected ONManager onm;
 	protected OntologyStorage storage;
 
 	private Logger log = LoggerFactory.getLogger(getClass());
@@ -76,16 +76,16 @@ public class Rule extends NavigationMixin{
     private String desc;
 
    /**
-     * To get the KReSRuleStore where are stored the rules and the recipes
+     * To get the RuleStoreImpl where are stored the rules and the recipes
      *
 	 * @param servletContext
 	 *            {To get the context where the REST service is running.}
      */
-    public Rule(@Context ServletContext servletContext){
+    public RestRule(@Context ServletContext servletContext){
 		this.kresRuleStore = (RuleStore) servletContext
 				.getAttribute(RuleStore.class.getName());
-		this.onm = (KReSONManager) servletContext
-				.getAttribute(KReSONManager.class.getName());
+		this.onm = (ONManager) servletContext
+				.getAttribute(ONManager.class.getName());
 //		this.storage = (OntologyStorage) servletContext
 //				.getAttribute(OntologyStorage.class.getName());
 		// Contingency code for missing components follows.
@@ -96,7 +96,7 @@ public class Rule extends NavigationMixin{
         if (onm == null) {
             log
                     .warn("No KReSONManager in servlet context. Instantiating manually...");
-            onm = new ONManager(new TcManager(), null,
+            onm = new ONManagerImpl(new TcManager(), null,
                     new Hashtable<String, Object>());
         }
         this.storage = onm.getOntologyStore();
@@ -108,7 +108,7 @@ public class Rule extends NavigationMixin{
        if (kresRuleStore == null) {
 			log
 					.warn("No KReSRuleStore with stored rules and recipes found in servlet context. Instantiating manually with default values...");
-			this.kresRuleStore = new KReSRuleStore(onm,
+			this.kresRuleStore = new RuleStoreImpl(onm,
 					new Hashtable<String, Object>(), "");
 			log
 					.debug("PATH TO OWL FILE LOADED: "
@@ -139,7 +139,7 @@ public class Rule extends NavigationMixin{
  
       try{
 
-       KReSGetRule recipe = new KReSGetRule(kresRuleStore);
+       GetRule recipe = new GetRule(kresRuleStore);
        if(uri.equals("all")){
 
            HashMap<IRI, String> rule = recipe.getAllRules();
@@ -260,7 +260,7 @@ public class Rule extends NavigationMixin{
 	@Produces(value = { KReSFormat.RDF_XML, KReSFormat.RDF_JSON })
     public Response getRulesOfRecipe(@PathParam("uri") String recipeURI){
     	
-    	KReSGetRule kReSGetRule = new KReSGetRule(kresRuleStore);
+    	GetRule kReSGetRule = new GetRule(kresRuleStore);
     	String recipeURIEnc;
 		try {
 			recipeURIEnc = URLEncoder
@@ -334,7 +334,7 @@ public class Rule extends NavigationMixin{
          //The rule is already inside the rule store
          if((kres_syntax==null)){
             //Get the rule
-            KReSGetRule inrule = new KReSGetRule(kresRuleStore);
+            GetRule inrule = new GetRule(kresRuleStore);
             this.map = inrule.getRule(IRI.create(rule));
             
             if(map==null){
@@ -342,7 +342,7 @@ public class Rule extends NavigationMixin{
             }
 
             //Get the recipe
-            KReSGetRecipe getrecipe = new KReSGetRecipe(kresRuleStore);
+            GetRecipe getrecipe = new GetRecipe(kresRuleStore);
             this.map = getrecipe.getRecipe(IRI.create(recipe));
             if(map!=null){
                 this.desc = getrecipe.getDescription(IRI.create(recipe));
@@ -361,14 +361,14 @@ public class Rule extends NavigationMixin{
             //Add the new rule to the end
             ruleseq.add(IRI.create(rule));
             //Remove the old recipe
-            KReSRemoveRecipe remove = new KReSRemoveRecipe(kresRuleStore);
+            RemoveRecipe remove = new RemoveRecipe(kresRuleStore);
             boolean ok = remove.removeRecipe(IRI.create(recipe));
             
             if(!ok)
                 return Response.status(Status.CONFLICT).build();
 
             //Add the recipe with the new rule
-            KReSAddRecipe newadd = new KReSAddRecipe(kresRuleStore);
+            AddRecipe newadd = new AddRecipe(kresRuleStore);
             ok = newadd.addRecipe(IRI.create(recipe), ruleseq, desc);
             
             if(ok){
@@ -382,7 +382,7 @@ public class Rule extends NavigationMixin{
         //The rule is added to the store and to the recipe
          if((kres_syntax!=null)&(description!=null)){
             //Get the rule
-            KReSAddRule inrule = new KReSAddRule(kresRuleStore);
+            AddRule inrule = new AddRule(kresRuleStore);
 				boolean ok = inrule.addRule(IRI.create(rule), kres_syntax,
 						description);
             if(!ok){
@@ -391,7 +391,7 @@ public class Rule extends NavigationMixin{
             }
             
             //Get the recipe
-            KReSGetRecipe getrecipe = new KReSGetRecipe(kresRuleStore);
+            GetRecipe getrecipe = new GetRecipe(kresRuleStore);
             this.map = getrecipe.getRecipe(IRI.create(recipe));
             System.out.println("RECIPE FOR RULE: "+recipe);
             if(map!=null){
@@ -412,7 +412,7 @@ public class Rule extends NavigationMixin{
             //Add the new rule to the end          
             ruleseq.add(IRI.create(rule));
             //Remove the old recipe
-            KReSRemoveRecipe remove = new KReSRemoveRecipe(kresRuleStore);
+            RemoveRecipe remove = new RemoveRecipe(kresRuleStore);
             ok = remove.removeRecipe(IRI.create(recipe));
             if(!ok){
                 System.err.println("ERROR TO REMOVE OLD RECIPE: "+recipe);
@@ -420,7 +420,7 @@ public class Rule extends NavigationMixin{
             }
 
             //Add the recipe with the new rule
-            KReSAddRecipe newadd = new KReSAddRecipe(kresRuleStore);
+            AddRecipe newadd = new AddRecipe(kresRuleStore);
             ok = newadd.addRecipe(IRI.create(recipe), ruleseq, desc);
             if(ok){
                     kresRuleStore.saveOntology();
@@ -471,14 +471,14 @@ public class Rule extends NavigationMixin{
              recipe = recipe.replace(" ","").trim();
              rule = rule.replace(" ","").trim();
             //Get the rule
-            KReSGetRule getrule = new KReSGetRule(kresRuleStore);
+            GetRule getrule = new GetRule(kresRuleStore);
             this.map = getrule.getRule(IRI.create(rule));
             if(map==null){
                 return Response.status(Status.NOT_FOUND).build();
             }
 
             //Get the recipe
-            KReSGetRecipe getrecipe = new KReSGetRecipe(kresRuleStore);
+            GetRecipe getrecipe = new GetRecipe(kresRuleStore);
             this.map = getrecipe.getRecipe(IRI.create(recipe));
             if(map!=null){
                 this.desc = getrecipe.getDescription(IRI.create(recipe));
@@ -488,7 +488,7 @@ public class Rule extends NavigationMixin{
                 return Response.status(Status.NOT_FOUND).build();
             }
             
-            KReSRemoveRule remove = new KReSRemoveRule(kresRuleStore);
+            RemoveRule remove = new RemoveRule(kresRuleStore);
 				ok = remove.removeRuleFromRecipe(IRI.create(rule), IRI
 						.create(recipe));
             if(ok){
@@ -503,14 +503,14 @@ public class Rule extends NavigationMixin{
          if((recipe==null)&&(rule!=null)){
              rule = rule.replace(" ","").trim();
             //Get the rule
-            KReSGetRule getrule = new KReSGetRule(kresRuleStore);
+            GetRule getrule = new GetRule(kresRuleStore);
             this.map = getrule.getRule(IRI.create(rule));
             if(map==null){
                 return Response.status(Status.NOT_FOUND).build();
             }
 
             //Remove the old recipe
-            KReSRemoveRule remove = new KReSRemoveRule(kresRuleStore);
+            RemoveRule remove = new RemoveRule(kresRuleStore);
             ok = remove.removeRule(IRI.create(rule));
 
             if(ok){

@@ -12,7 +12,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import org.apache.stanbol.rules.manager.changes.KReSRuleStore;
+import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
 
 /**
  *
@@ -21,15 +21,15 @@ import org.apache.stanbol.rules.manager.changes.KReSRuleStore;
 @Path("/rulestore")
 public class RuleStoreResource {
     
-    private KReSRuleStore kresRuleStore;
+    private RuleStoreImpl kresRuleStore;
 
    /**
-     * To get the KReSRuleStore where are stored the rules and the recipes
+     * To get the RuleStoreImpl where are stored the rules and the recipes
      *
      * @param servletContext {To get the context where the REST service is running.}
      */
     public RuleStoreResource(@Context ServletContext servletContext){
-       this.kresRuleStore = (KReSRuleStore) servletContext.getAttribute(KReSRuleStore.class.getName());
+       this.kresRuleStore = (RuleStoreImpl) servletContext.getAttribute(RuleStoreImpl.class.getName());
        if (kresRuleStore == null) {
             throw new IllegalStateException(
                     "KReSRuleStore with stored rules and recipes is missing in ServletContext");
@@ -37,8 +37,8 @@ public class RuleStoreResource {
     }
 
    /**
-     * To get the KReSRuleStore in the serveletContext.
-     * @return {An object of type KReSRuleStore.}
+     * To get the RuleStoreImpl in the serveletContext.
+     * @return {An object of type RuleStoreImpl.}
      */
     @GET
     //@Consumes(MediaType.APPLICATION_FORM_URLENCODED)

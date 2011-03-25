@@ -30,9 +30,9 @@ public class JerseyEndpointApplication extends Application {
 
         // Rules manager
         classes.add(RuleStoreResource.class);
-        classes.add(Recipe.class);
-        classes.add(Rule.class);
-        classes.add(SemionRefactorerResource.class);
+        classes.add(RestRecipe.class);
+        classes.add(RestRule.class);
+        classes.add(RefactorerResource.class);
         //classes.add(OntologyStorageResource.class);
         
         // message body writers
