@@ -9,7 +9,7 @@ import org.semanticweb.owlapi.model.IRI;
  *
  */
 
-public class SemionRefactoringException extends Exception {
+public class RefactoringException extends Exception {
 	
 	
 
@@ -21,9 +21,9 @@ public class SemionRefactoringException extends Exception {
 	protected IRI recipeIRI;
 
 	/**
-	 * Creates a new instance of SemionRefactoringException.
+	 * Creates a new instance of RefactoringException.
 	 */
-	public SemionRefactoringException() {
+	public RefactoringException() {
 		
 	}
 	

@@ -13,20 +13,20 @@ import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.sparql.QueryEngine;
 import org.apache.clerezza.rdf.jena.sparql.JenaSparqlEngine;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
-import org.apache.stanbol.reasoners.base.impl.KReSReasonerImpl;
-import org.apache.stanbol.rules.base.api.KReSRule;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
+import org.apache.stanbol.reasoners.base.impl.ReasonerImpl;
+import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.base.api.util.KReSRuleList;
+import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.apache.stanbol.rules.base.api.util.RecipeList;
 import org.apache.stanbol.rules.manager.changes.RecipeImpl;
-import org.apache.stanbol.rules.manager.parse.KReSRuleParser;
-import org.apache.stanbol.rules.refactor.api.SemionRefactorer;
-import org.apache.stanbol.rules.refactor.api.SemionRefactoringException;
-import org.apache.stanbol.rules.refactor.impl.SemionRefactorerImpl;
+import org.apache.stanbol.rules.manager.parse.RuleParserImpl;
+import org.apache.stanbol.rules.refactor.api.Refactorer;
+import org.apache.stanbol.rules.refactor.api.RefactoringException;
+import org.apache.stanbol.rules.refactor.impl.RefactorerImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -42,7 +42,7 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 
 
-public class SemionRefactoringTest {
+public class RefactoringTest {
 
 	static RuleStore ruleStore;
 	static OWLOntology ontology;
@@ -54,9 +54,9 @@ public class SemionRefactoringTest {
 		recipeIRI = IRI
 				.create("http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyTestRecipe");
 
-		InputStream ontologyStream = SemionRefactoringTest.class
+		InputStream ontologyStream = RefactoringTest.class
 				.getResourceAsStream("/META-INF/test/testKReSOnt.owl");
-		InputStream recipeStream = SemionRefactoringTest.class
+		InputStream recipeStream = RefactoringTest.class
 				.getResourceAsStream("/META-INF/test/rmi.owl");
 
 		try {
@@ -142,7 +142,7 @@ public class SemionRefactoringTest {
 
 							/**
 							 * Fetch the rule content expressed as a literal in
-							 * KReSRule Syntax.
+							 * Rule Syntax.
 							 */
 							OWLDataProperty hasBodyAndHead = factory
 									.getOWLDataProperty(IRI.create(ruleNS
@@ -167,7 +167,7 @@ public class SemionRefactoringTest {
 							 * Create the Recipe object.
 							 */
 
-							KReSRuleList ruleList = KReSRuleParser.parse(
+							RuleList ruleList = RuleParserImpl.parse(
 									kReSRulesInKReSSyntax).getkReSRuleList();
 							recipe = new RecipeImpl(recipeIRI,
 									recipeDescription, ruleList);
@@ -233,7 +233,7 @@ public class SemionRefactoringTest {
 				}
 
 				@Override
-				public boolean removeRule(KReSRule rule) {
+				public boolean removeRule(Rule rule) {
 					throw new UnsupportedOperationException(
 							"Not supported yet.");
 				}
@@ -261,13 +261,13 @@ public class SemionRefactoringTest {
 		WeightedTcProvider wtcp = new SimpleTcProvider();
 		TcManager tcm = new SpecialTcManager(qe, wtcp);
 
-	      KReSONManager onm = new ONManager(tcm,wtcp, emptyConfig);
-		SemionRefactorer refactorer = new SemionRefactorerImpl(null,
+	      ONManager onm = new ONManagerImpl(tcm,wtcp, emptyConfig);
+		Refactorer refactorer = new RefactorerImpl(null,
 				new Serializer(), tcm, onm,
-				ruleStore, new KReSReasonerImpl(emptyConfig), emptyConfig);
+				ruleStore, new ReasonerImpl(emptyConfig), emptyConfig);
 		try {
 			refactorer.ontologyRefactoring(ontology, recipeIRI);
-		} catch (SemionRefactoringException e) {
+		} catch (RefactoringException e) {
 			fail("Error while refactoring.");
 		} catch (NoSuchRecipeException e) {
 			fail("Error while refactoring: no such recipe");

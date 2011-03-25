@@ -16,7 +16,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
  * @author andrea.nuzzolese
  *
  */
-public interface SemionRefactorer {
+public interface Refactorer {
 
 	/**
 	 * Fetch the mgraph with the selected uri from the storage.
@@ -27,44 +27,44 @@ public interface SemionRefactorer {
 	public MGraph getRefactoredDataSet(UriRef uriRef);
 	
 	/**
-	 * The refactoring is perfomed by the {@code SemionRefactorer} by invoking this method. The {@code datasetURI} is the {@link IRI}
+	 * The refactoring is perfomed by the {@code Refactorer} by invoking this method. The {@code datasetURI} is the {@link IRI}
 	 * of an IKS ontology and the {@code recipe} is the recipe that needs to be applied to ontology in order to perform the refactoring. 
 	 * 
 	 * @param refactoredDataSetURI {@link IRI}
 	 * @param datasetURI {@link IRI} 
 	 * @param recipeIRI {@link IRI}
 	 */
-	public void ontologyRefactoring(IRI refactoredDataSetURI, IRI datasetURI, IRI recipeIRI) throws SemionRefactoringException, NoSuchRecipeException;
+	public void ontologyRefactoring(IRI refactoredDataSetURI, IRI datasetURI, IRI recipeIRI) throws RefactoringException, NoSuchRecipeException;
 	
 	
 	/**
-	 * The refactoring is perfomed by the {@code SemionRefactorer} by invoking this method. The {@code datasetURI} is the URI
+	 * The refactoring is perfomed by the {@code Refactorer} by invoking this method. The {@code datasetURI} is the URI
 	 * of an RDF graph in KReS and the {@code recipe} is the recipe that needs to be applied to RDF graph in order to obtain the refactoring. 
 	 * 
 	 * @param datasetURI {@link UriRef} 
 	 * @param recipe {@link UriRef}
 	 * @return the refactored {@link MGraph}
-	 * @throws SemionRefactoringException
+	 * @throws RefactoringException
 	 * @throws NoSuchRecipeException
 	 */
-	public OWLOntology ontologyRefactoring(OWLOntology datasetURI, IRI recipeIRI) throws SemionRefactoringException, NoSuchRecipeException;
+	public OWLOntology ontologyRefactoring(OWLOntology datasetURI, IRI recipeIRI) throws RefactoringException, NoSuchRecipeException;
 	
 	/**
-	 * The refactoring is perfomed by the {@code SemionRefactorer} by invoking this method. The {@code datasetURI} is the {@link IRI}
+	 * The refactoring is perfomed by the {@code Refactorer} by invoking this method. The {@code datasetURI} is the {@link IRI}
 	 * of an IKS ontology and the {@code recipe} is the recipe that needs to be applied to ontology in order to perform the refactoring.
 	 * After the refactoring a consistency check is invoked on the data set. 
 	 * 
 	 * @param refactoredDataSetURI {@link IRI}
 	 * @param datasetURI {@link IRI} 
 	 * @param recipeIRI {@link IRI}
-	 * @throws SemionRefactoringException
+	 * @throws RefactoringException
 	 * @throws NoSuchRecipeException
 	 * @throws InconcistencyException
 	 */
-	public void consistentOntologyRefactoring(IRI refactoredOntologyIRI, IRI datasetURI, IRI recipeIRI) throws SemionRefactoringException, NoSuchRecipeException, InconcistencyException;
+	public void consistentOntologyRefactoring(IRI refactoredOntologyIRI, IRI datasetURI, IRI recipeIRI) throws RefactoringException, NoSuchRecipeException, InconcistencyException;
 	
 	/**
-	 * The refactoring is perfomed by the {@code SemionRefactorer} by invoking this method. The {@code datasetURI} is the URI
+	 * The refactoring is perfomed by the {@code Refactorer} by invoking this method. The {@code datasetURI} is the URI
 	 * of an RDF graph in KReS and the {@code recipe} is the recipe that needs to be applied to RDF graph in order to obtain the refactoring.
 	 * After the refactoring a consistency check is invoked on the data set. 
 	 * 
@@ -73,8 +73,8 @@ public interface SemionRefactorer {
 	 * @return the refactored {@link MGraph}
 	 * @throws InconcistencyException
 	 * @throws NoSuchRecipeException
-	 * @throws SemionRefactoringException 
+	 * @throws RefactoringException
 	 */
-	public OWLOntology consistentOntologyRefactoring(OWLOntology inputOntology, IRI recipeIRI) throws SemionRefactoringException, NoSuchRecipeException, InconcistencyException;
+	public OWLOntology consistentOntologyRefactoring(OWLOntology inputOntology, IRI recipeIRI) throws RefactoringException, NoSuchRecipeException, InconcistencyException;
 	
 }
