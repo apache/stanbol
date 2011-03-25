@@ -21,7 +21,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
@@ -30,9 +30,9 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceModi
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.renderers.SessionRenderer;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -44,19 +44,19 @@ import org.apache.stanbol.kres.jersey.format.KReSFormat;
 public class KReSSessionResource extends NavigationMixin {
 
     /*
-     * Placeholder for the KReSONManager to be fetched from the servlet context.
+     * Placeholder for the ONManager to be fetched from the servlet context.
      */
-    protected KReSONManager onm;
+    protected ONManager onm;
 
     protected ServletContext servletContext;
 
     public KReSSessionResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
-        onm = (KReSONManager) this.servletContext.getAttribute(KReSONManager.class.getName());
+        onm = (ONManager) this.servletContext.getAttribute(ONManager.class.getName());
         if (onm == null) {
             System.err
                     .println("[KReS] :: No KReS Ontology Network Manager provided by Servlet Context. Instantiating now...");
-            onm = new ONManager();
+            onm = new ONManagerImpl();
         }
     }
 
@@ -127,7 +127,7 @@ public class KReSSessionResource extends NavigationMixin {
                                   @Context UriInfo uriInfo,
                                   @Context HttpHeaders headers) {
 
-        KReSSession ses = null;
+        Session ses = null;
         KReSSessionManager mgr = onm.getSessionManager();
 
         /*

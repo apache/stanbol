@@ -12,9 +12,9 @@ import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
-import org.apache.stanbol.reengineer.base.api.SemionManager;
-import org.apache.stanbol.reengineer.base.api.SemionReengineer;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.reengineer.base.api.ReengineerManager;
+import org.apache.stanbol.reengineer.base.api.Reengineer;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;
@@ -47,10 +47,10 @@ public class JerseyEndpoint {
     public static final String STATIC_RESOURCES_URL_ROOT_PROPERTY = "org.apache.stanbol.kres.jersey.static.url";
 
     @Property(value = "/META-INF/static")
-    public static final String STATIC_RESOURCES_CLASSPATH_PROPERTY = "eu.iksproject.kres.jersey.static.classpath";
+    public static final String STATIC_RESOURCES_CLASSPATH_PROPERTY = "org.apache.stanbol.kres.jersey.static.classpath";
 
     @Property(value = "/META-INF/templates")
-    public static final String FREEMARKER_TEMPLATE_CLASSPATH_PROPERTY = "eu.iksproject.kres.jersey.templates.classpath";
+    public static final String FREEMARKER_TEMPLATE_CLASSPATH_PROPERTY = "org.apache.stanbol.kres.jersey.templates.classpath";
 
     @Reference
     TcManager tcManager;
