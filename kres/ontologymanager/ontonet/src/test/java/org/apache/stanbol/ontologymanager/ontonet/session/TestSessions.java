@@ -21,7 +21,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session.State;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
@@ -46,7 +46,7 @@ public class TestSessions {
 
 	private static ScopeRegistry scopeRegistry = null;
 	
-	private static KReSSessionManager sesmgr = null;
+	private static SessionManager sesmgr = null;
 
 	private static OntologySpaceFactory spaceFactory = null;
 

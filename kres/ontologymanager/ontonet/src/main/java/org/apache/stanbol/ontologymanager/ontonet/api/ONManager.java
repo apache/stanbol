@@ -5,7 +5,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
@@ -88,7 +88,7 @@ public interface ONManager {
 	 * 
 	 * @return the KreS session manager.
 	 */
-	public KReSSessionManager getSessionManager();
+	public SessionManager getSessionManager();
 
 	/**
 	 * Returns the list of IRIs that identify scopes that should be activated on

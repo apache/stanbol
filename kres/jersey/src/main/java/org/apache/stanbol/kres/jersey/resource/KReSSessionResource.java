@@ -31,7 +31,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.renderers.SessionRenderer;
 import org.semanticweb.owlapi.model.IRI;
@@ -128,7 +128,7 @@ public class KReSSessionResource extends NavigationMixin {
                                   @Context HttpHeaders headers) {
 
         Session ses = null;
-        KReSSessionManager mgr = onm.getSessionManager();
+        SessionManager mgr = onm.getSessionManager();
 
         /*
          * Create the KReS session to associate to the scope.

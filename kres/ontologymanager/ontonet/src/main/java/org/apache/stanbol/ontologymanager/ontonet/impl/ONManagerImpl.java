@@ -28,7 +28,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.InMemoryOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyIndexImpl;
@@ -106,7 +106,7 @@ public class ONManagerImpl implements ONManager {
 
     private ScopeRegistry scopeRegistry;
 
-    private KReSSessionManager sessionManager;
+    private SessionManager sessionManager;
 
     @Reference
     private TcManager tcm;
@@ -427,7 +427,7 @@ public class ONManagerImpl implements ONManager {
         return scopeRegistry;
     }
 
-    public KReSSessionManager getSessionManager() {
+    public SessionManager getSessionManager() {
         return sessionManager;
     }
 
