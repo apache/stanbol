@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.entityhub.site.linkedData.impl;
+package org.apache.stanbol.entityhub.site.linkeddata.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,24 +41,24 @@ import org.slf4j.LoggerFactory;
 
 
 @Component(
-        name="org.apache.stanbol.entityhub.searcher.LarqSearcher",
-        factory="org.apache.stanbol.entityhub.searcher.LarqSearcherFactory",
+        name="org.apache.stanbol.entityhub.searcher.VirtuosoSearcher",
+        factory="org.apache.stanbol.entityhub.searcher.VirtuosoSearcherFactory",
         policy=ConfigurationPolicy.REQUIRE, //the queryUri and the SPARQL Endpoint are required
         specVersion="1.1"
         )
-public class LarqSearcher extends AbstractEntitySearcher implements EntitySearcher {
-
-    public LarqSearcher() {
-        super(LoggerFactory.getLogger(LarqSearcher.class));
-    }
+public class VirtuosoSearcher extends AbstractEntitySearcher implements EntitySearcher{
     @Reference
     private Parser parser;
+
+    public VirtuosoSearcher() {
+        super(LoggerFactory.getLogger(VirtuosoSearcher.class));
+    }
 
     @Override
     public final QueryResultList<Representation> find(FieldQuery parsedQuery) throws IOException {
         long start = System.currentTimeMillis();
         final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
-        query.setEndpointType(EndpointTypeEnum.LARQ);
+        query.setEndpointType(EndpointTypeEnum.Virtuoso);
         String sparqlQuery = query.toSparqlConstruct();
         long initEnd = System.currentTimeMillis();
         log.info("  > InitTime: "+(initEnd-start));
@@ -85,7 +85,7 @@ public class LarqSearcher extends AbstractEntitySearcher implements EntitySearch
     @Override
     public final QueryResultList<String> findEntities(FieldQuery parsedQuery) throws IOException {
         final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
-        query.setEndpointType(EndpointTypeEnum.LARQ);
+        query.setEndpointType(EndpointTypeEnum.Virtuoso);
         String sparqlQuery = query.toSparqlSelect(false);
         InputStream in = SparqlEndpointUtils.sendSparqlRequest(getQueryUri(), sparqlQuery, SparqlSearcher.DEFAULT_SPARQL_RESULT_CONTENT_TYPE);
         //Move to util class!
