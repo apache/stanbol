@@ -90,7 +90,7 @@ public class EnhancerTestBase extends StanbolTestBase {
                 .assertStatus(200)
                 .assertContentType("application/json")
                 .assertContentRegexp(
-                    "http:\\\\/\\\\/.*\\\\/entityhub\\\\/site\\\\/dbPedia\\\\/"
+                    "http:\\\\/\\\\/.*\\\\/entityhub\\\\/site\\\\/dbpedia\\\\/"
                 );
                 log.info("Enhancement engines checked, all present");
                 return true;
