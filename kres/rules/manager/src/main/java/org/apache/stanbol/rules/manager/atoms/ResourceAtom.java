@@ -7,11 +7,11 @@ import org.apache.stanbol.rules.base.api.URIResource;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-public class KReSResource implements URIResource {
+public class ResourceAtom implements URIResource {
 
 	private URI uri;
 	
-	public KReSResource(URI uri){
+	public ResourceAtom(URI uri){
 		this.uri = uri;
 	}
 	

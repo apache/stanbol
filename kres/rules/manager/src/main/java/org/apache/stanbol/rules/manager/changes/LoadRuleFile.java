@@ -62,7 +62,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * N.B. The KReSRuleStore object used as input is not changed and to get the new modified KReSRuleStore there is the method getStore().
  *
  */
-public class KReSLoadRuleFile {
+public class LoadRuleFile {
 
    private OWLOntology owlmodel;
    private OWLClass ontocls;
@@ -83,7 +83,7 @@ public class KReSLoadRuleFile {
      * @param filepath {Path of the file contains thr rules and the recipes}
      * @param store {The KReSRuleStore where the rules will be storage}
      */
-    public KReSLoadRuleFile(String filepath, RuleStore store){
+    public LoadRuleFile(String filepath, RuleStore store){
         this.storeaux = store;
         this.owlIDrmi = "http://kres.iks-project.eu/ontology/meta/rmi.owl#";
         

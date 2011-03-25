@@ -1,9 +1,9 @@
 package org.apache.stanbol.rules.manager.parse;
 
-import org.apache.stanbol.rules.base.api.KReSRule;
-import org.apache.stanbol.rules.base.api.util.KReSRuleList;
-import org.apache.stanbol.rules.manager.KReSKB;
-import org.apache.stanbol.rules.manager.parse.KReSRuleParser;
+import org.apache.stanbol.rules.base.api.Rule;
+import org.apache.stanbol.rules.base.api.util.RuleList;
+import org.apache.stanbol.rules.manager.KB;
+import org.apache.stanbol.rules.manager.parse.RuleParserImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -13,7 +13,7 @@ import org.junit.Test;
  * @author andrea.nuzzolese
  *
  */
-public class KReSRuleParserTest {
+public class RuleParserTest {
 
 	private static String kReSRule;
 	
@@ -27,11 +27,11 @@ public class KReSRuleParserTest {
 	@Test
 	public void testParser(){
 		try{
-			KReSKB kReSKB = KReSRuleParser.parse(kReSRule);
+			KB kReSKB = RuleParserImpl.parse(kReSRule);
 			if(kReSKB != null){
-				KReSRuleList kReSRuleList = kReSKB.getkReSRuleList();
+				RuleList kReSRuleList = kReSKB.getkReSRuleList();
 				if(kReSRuleList != null){
-					for(KReSRule kReSRule : kReSRuleList){
+					for(Rule kReSRule : kReSRuleList){
 						System.out.println("RULE : "+kReSRule.toString());
 					}
 				}

@@ -18,7 +18,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 import org.apache.stanbol.rules.base.SWRL;
 
-public class IndividualPropertyAtom extends KReSCoreAtom {
+public class IndividualPropertyAtom extends CoreAtom {
 
 	
 	private URIResource objectProperty;
@@ -43,7 +43,7 @@ public class IndividualPropertyAtom extends KReSCoreAtom {
 		
 		if(arg1.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			arg1 = "?"+arg1.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
-			KReSVariable variable = (KReSVariable) argument1;
+			VariableAtom variable = (VariableAtom) argument1;
 			if(variable.isNegative()){
 				negativeArg1 = true;
 			}
@@ -51,7 +51,7 @@ public class IndividualPropertyAtom extends KReSCoreAtom {
 		
 		if(arg2.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			arg2 = "?"+arg2.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
-			KReSVariable variable = (KReSVariable) argument2;
+			VariableAtom variable = (VariableAtom) argument2;
 			if(variable.isNegative()){
 				negativeArg2 = true;
 			}
@@ -59,7 +59,7 @@ public class IndividualPropertyAtom extends KReSCoreAtom {
 		
 		if(objP.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			objP = "?"+objP.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
-			KReSVariable variable = (KReSVariable) objectProperty;
+			VariableAtom variable = (VariableAtom) objectProperty;
 			if(variable.isNegative()){
 				negativeObjP = true;
 			}
@@ -115,7 +115,7 @@ public class IndividualPropertyAtom extends KReSCoreAtom {
 		SWRLIArgument swrliArgument1;
 		SWRLIArgument swrliArgument2;
 		
-		if(argument1 instanceof KReSVariable){
+		if(argument1 instanceof VariableAtom){
 			swrliArgument1 = factory.getSWRLVariable(IRI.create(argument1.getURI().toString()));
 		}
 		else{
@@ -123,7 +123,7 @@ public class IndividualPropertyAtom extends KReSCoreAtom {
 			swrliArgument1 = factory.getSWRLIndividualArgument(owlIndividual);
 		}
 		
-		if(argument2 instanceof KReSVariable){
+		if(argument2 instanceof VariableAtom){
 			swrliArgument2 = factory.getSWRLVariable(IRI.create(argument2.getURI().toString()));
 		}
 		else{
@@ -162,7 +162,7 @@ public class IndividualPropertyAtom extends KReSCoreAtom {
 		
 		if(argument1.toString().startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			arg1 = "?"+argument1.toString().replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
-			KReSVariable variable = (KReSVariable) argument1;
+			VariableAtom variable = (VariableAtom) argument1;
 			if(variable.isNegative()){
 				arg1 = "notex(" + arg1 + ")";
 			}
@@ -174,7 +174,7 @@ public class IndividualPropertyAtom extends KReSCoreAtom {
 		
 		if(objectProperty.toString().startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			arg3 = "?"+objectProperty.toString().replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
-			KReSVariable variable = (KReSVariable) objectProperty;
+			VariableAtom variable = (VariableAtom) objectProperty;
 			if(variable.isNegative()){
 				arg3 = "notex(" + arg3 + ")";
 			}
@@ -185,7 +185,7 @@ public class IndividualPropertyAtom extends KReSCoreAtom {
 		
 		if(argument2.toString().startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			arg2 = "?"+argument2.toString().replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
-			KReSVariable variable = (KReSVariable) argument2;
+			VariableAtom variable = (VariableAtom) argument2;
 			if(variable.isNegative()){
 				arg2 = "notex(" + arg2 + ")";
 			}

@@ -35,7 +35,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * If a recipe with a same name or IRI is already inside the KReSRuleStore an error is lunched and the process stopped.<br/>
  * 
  */
-public class KReSAddRecipe {
+public class AddRecipe {
 
    private OWLOntology owlmodel;
    private OWLOntologyManager owlmanager;
@@ -105,7 +105,7 @@ public class KReSAddRecipe {
     * N.B. To get the new KReSRuleStore object there is the method getStore();<br/>
     * @param store {The KReSRuleStore where to add the recipe.}
     */
-   public KReSAddRecipe(RuleStore store){
+   public AddRecipe(RuleStore store){
        this.storeaux = store;
        //cloneOntology(storeaux.getOntology());
        this.owlmanager = OWLManager.createOWLOntologyManager();
@@ -121,7 +121,7 @@ public class KReSAddRecipe {
     * @param store {The KReSRuleStore where to add the recipe.}
     * @param owlid {The base iri of resource}
     */
-   public KReSAddRecipe(RuleStore store, String owlid){
+   public AddRecipe(RuleStore store, String owlid){
        this.storeaux = store;
        cloneOntology(storeaux.getOntology());
        this.factory = owlmanager.getOWLDataFactory();

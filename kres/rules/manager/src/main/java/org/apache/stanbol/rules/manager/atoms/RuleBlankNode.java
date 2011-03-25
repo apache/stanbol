@@ -7,11 +7,11 @@ import org.apache.stanbol.rules.base.api.URIResource;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-public class KReSBlankNode implements URIResource {
+public class RuleBlankNode implements URIResource {
 
 	private String bNode;
 	
-	public KReSBlankNode(String bNode) {
+	public RuleBlankNode(String bNode) {
 		this.bNode = bNode;
 	}
 	

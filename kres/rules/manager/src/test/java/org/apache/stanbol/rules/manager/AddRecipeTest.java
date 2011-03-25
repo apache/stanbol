@@ -14,12 +14,12 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.manager.changes.KReSAddRecipe;
-import org.apache.stanbol.rules.manager.changes.KReSLoadRuleFile;
-import org.apache.stanbol.rules.manager.changes.KReSRuleStore;
+import org.apache.stanbol.rules.manager.changes.AddRecipe;
+import org.apache.stanbol.rules.manager.changes.LoadRuleFile;
+import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -34,9 +34,9 @@ import org.semanticweb.owlapi.model.OWLOntology;
  *
  * @author elvio
  */
-public class KReSAddRecipeTest {
+public class AddRecipeTest {
 
-    public KReSAddRecipeTest() {
+    public AddRecipeTest() {
     }
 
     @BeforeClass
@@ -50,8 +50,8 @@ public class KReSAddRecipeTest {
     @Before
     public void setUp() {
     	Dictionary<String, Object> configuration = new Hashtable<String, Object>();
-    	onm = new ONManager(null,null, new Hashtable<String, Object>());
-    	store = new KReSRuleStore(onm, configuration,"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+    	onm = new ONManagerImpl(null,null, new Hashtable<String, Object>());
+    	store = new RuleStoreImpl(onm, configuration,"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
     }
 
     @After
@@ -61,17 +61,17 @@ public class KReSAddRecipeTest {
     }
 
     public RuleStore store = null;
-    public KReSONManager onm = null;
+    public ONManager onm = null;
 
     /**
-     * Test of addRecipe method, of class KReSAddRecipe.
+     * Test of addRecipe method, of class AddRecipe.
      */
     @Test
     public void testAddRecipe_3args_1() {
-//        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStore store  = new RuleStoreImpl("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         OWLOntology owl = store.getOntology();
         //Load the example file
-        KReSLoadRuleFile load = new KReSLoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
+        LoadRuleFile load = new LoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
 
         String ID = owl.getOntologyID().toString().replace("<","").replace(">","")+"#";
         
@@ -81,7 +81,7 @@ public class KReSAddRecipeTest {
         rules.add(IRI.create(ID+"MyRuleB"));
         rules.add(IRI.create(ID+"MyRuleA"));
         String recipeDescription = "My comment to the recipe";
-        KReSAddRecipe instance = new KReSAddRecipe(load.getStore());
+        AddRecipe instance = new AddRecipe(load.getStore());
         boolean result = instance.addRecipe(recipeName, rules, recipeDescription);
         OWLOntology newonto = instance.getStore().getOntology();
         if(result){
@@ -95,11 +95,11 @@ public class KReSAddRecipeTest {
     }
 
     /**
-     * Test of addRecipe method, of class KReSAddRecipe.
+     * Test of addRecipe method, of class AddRecipe.
      */
     @Test
     public void testAddRecipe_4args_1() {
-//        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStore store  = new RuleStoreImpl("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         OWLOntology owl = store.getOntology();
 
 
@@ -107,7 +107,7 @@ public class KReSAddRecipeTest {
 
         String recipeName = "MyRecipeNew";
         String recipeDescription = "My comment to the recipe";
-        KReSAddRecipe instance = new KReSAddRecipe(store);
+        AddRecipe instance = new AddRecipe(store);
         boolean result = instance.addSimpleRecipe(recipeName,recipeDescription);
         OWLOntology newonto = instance.getStore().getOntology();
         if(result){
@@ -122,14 +122,14 @@ public class KReSAddRecipeTest {
     }
 
     /**
-     * Test of addRecipe method, of class KReSAddRecipe.
+     * Test of addRecipe method, of class AddRecipe.
      */
     @Test
     public void testAddRecipe_3args_2() {
-//     RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//     RuleStore store  = new RuleStoreImpl("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         OWLOntology owl = store.getOntology();
         //Load the example file
-        KReSLoadRuleFile load = new KReSLoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
+        LoadRuleFile load = new LoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
         String ID = owl.getOntologyID().toString().replace("<","").replace(">","")+"#";
 
         IRI recipeName = IRI.create(ID+"MyRecipeNew");
@@ -138,7 +138,7 @@ public class KReSAddRecipeTest {
         rules.add(IRI.create(ID+"MyRuleB"));
         rules.add(IRI.create(ID+"MyRuleA"));
         String recipeDescription = "My comment to the recipe";
-        KReSAddRecipe instance = new KReSAddRecipe(load.getStore());
+        AddRecipe instance = new AddRecipe(load.getStore());
         boolean result = instance.addRecipe(recipeName, rules, recipeDescription);
         OWLOntology newonto = instance.getStore().getOntology();
 
@@ -153,18 +153,18 @@ public class KReSAddRecipeTest {
     }
 
     /**
-     * Test of addRecipeMap method, of class KReSAddRecipe.
+     * Test of addRecipeMap method, of class AddRecipe.
      */
     @Test
     public void testAddRecipeMap() {
-//        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStore store  = new RuleStoreImpl("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         OWLOntology owl = store.getOntology();
         //Load the example file
-        KReSLoadRuleFile load = new KReSLoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
+        LoadRuleFile load = new LoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
         String ID = owl.getOntologyID().toString().replace("<","").replace(">","")+"#";
         HashMap<String, Vector<IRI>> recipeMap = new HashMap();
         HashMap<String, String> recipeDescriptionMap = new HashMap();
-        KReSAddRecipe instance = new KReSAddRecipe(load.getStore());
+        AddRecipe instance = new AddRecipe(load.getStore());
 
         Vector<IRI> rules = new Vector();
         rules.add(IRI.create(ID+"MyRuleC"));
@@ -199,19 +199,19 @@ public class KReSAddRecipeTest {
     }
 
     /**
-     * Test of addRecipeMapIRI method, of class KReSAddRecipe.
+     * Test of addRecipeMapIRI method, of class AddRecipe.
      */
     @Test
     public void testAddRecipeMapIRI() {
-//        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStore store  = new RuleStoreImpl("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         OWLOntology owl = store.getOntology();
         //Load the example file
-        KReSLoadRuleFile load = new KReSLoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
+        LoadRuleFile load = new LoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
 
         String ID = owl.getOntologyID().toString().replace("<","").replace(">","")+"#";
         HashMap<IRI, Vector<IRI>> recipeMap = new HashMap();
         HashMap<IRI, String> recipeDescriptionMap = new HashMap();
-        KReSAddRecipe instance = new KReSAddRecipe(load.getStore());
+        AddRecipe instance = new AddRecipe(load.getStore());
 
         Vector<IRI> rules = new Vector();
         rules.add(IRI.create(ID+"MyRuleC"));

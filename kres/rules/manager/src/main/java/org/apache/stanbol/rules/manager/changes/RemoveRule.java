@@ -37,7 +37,7 @@ import org.semanticweb.owlapi.util.OWLEntityRemover;
  * If the rule name or IRI is not already inside the KReSRuleStore an error is lunched and the process stopped.
  *
  */
-public class KReSRemoveRule {
+public class RemoveRule {
    private OWLOntology owlmodel;
    private OWLOntologyManager owlmanager;
    private OWLDataFactory factory;
@@ -105,7 +105,7 @@ public class KReSRemoveRule {
     * N.B. To get the new KReSRuleStore object there is the method getStore();
     * @param store {The KReSRuleStore where there are the added rules and recipes.}
     */
-   public KReSRemoveRule(RuleStore store){
+   public RemoveRule(RuleStore store){
        this.storeaux = store;
        cloneOntology(storeaux.getOntology());
        this.factory = owlmanager.getOWLDataFactory();
@@ -118,7 +118,7 @@ public class KReSRemoveRule {
     * N.B. To get the new KReSRuleStore object there is the method getStore();
     * @param store {The KReSRuleStore where there are the added rules and recipes.}
     */
-   public KReSRemoveRule(RuleStore store,String owlid){
+   public RemoveRule(RuleStore store,String owlid){
        this.storeaux = store;
        cloneOntology(storeaux.getOntology());
        this.factory = owlmanager.getOWLDataFactory();
@@ -277,7 +277,7 @@ public class KReSRemoveRule {
          }
 
         //Get the recipe
-        KReSGetRecipe getrecipe = new KReSGetRecipe(storeaux);
+        GetRecipe getrecipe = new GetRecipe(storeaux);
         HashMap<IRI, String> map = getrecipe.getRecipe(recipeName);
 
         String[] sequence = map.get(recipeName).split(",");
@@ -299,12 +299,12 @@ public class KReSRemoveRule {
         }
 
             //Remove the old recipe
-            KReSRemoveRecipe remove;
+            RemoveRecipe remove;
             try {
-            remove = new KReSRemoveRecipe(storeaux);
+            remove = new RemoveRecipe(storeaux);
                 ok = remove.removeRecipe(recipeName);
             } catch (Exception ex) {
-                Logger.getLogger(KReSRemoveRule.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(RemoveRule.class.getName()).log(Level.SEVERE, null, ex);
             }
             
             if(!ok){
@@ -313,7 +313,7 @@ public class KReSRemoveRule {
             }
 
             //Add the recipe with without the specified rule
-            KReSAddRecipe newadd = new KReSAddRecipe(storeaux);
+            AddRecipe newadd = new AddRecipe(storeaux);
             if(ruleseq.isEmpty())
                 ok = newadd.addSimpleRecipe(recipeName, desc);
             else

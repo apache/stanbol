@@ -34,7 +34,7 @@ import org.semanticweb.owlapi.util.OWLEntityRemover;
  * If the recipe name or IRI is not already inside the KReSRuleStore an error is lunched and the process stopped.
  *
  */
-public class KReSRemoveRecipe {
+public class RemoveRecipe {
 
 
    private OWLOntology owlmodel;
@@ -105,7 +105,7 @@ public class KReSRemoveRecipe {
     * N.B. To get the new KReSRuleStore object there is the method getStore().
     * @param store {The KReSRuleStore where there are the added rules and recipes.}
     */
-   public KReSRemoveRecipe(RuleStore store){
+   public RemoveRecipe(RuleStore store){
        this.storeaux = store;
        cloneOntology(store.getOntology());
        this.factory = owlmanager.getOWLDataFactory();
@@ -119,7 +119,7 @@ public class KReSRemoveRecipe {
     * @param store {The KReSRuleStore where there are the added rules and recipes.}
     * @param owlid {The base iri of resource}
     */
-   public KReSRemoveRecipe(RuleStore store, String owlid){
+   public RemoveRecipe(RuleStore store, String owlid){
        this.storeaux = store;
        cloneOntology(storeaux.getOntology());
        this.factory = owlmanager.getOWLDataFactory();
@@ -141,7 +141,7 @@ public class KReSRemoveRecipe {
        OWLObjectProperty precedes = factory.getOWLObjectProperty(IRI.create("http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#directlyPrecedes"));
        OWLObjectPropertyAssertionAxiom objectPropAssertion;
 
-        KReSGetRecipe getrecipe = new KReSGetRecipe(storeaux);
+        GetRecipe getrecipe = new GetRecipe(storeaux);
         HashMap<IRI, String> map = getrecipe.getRecipe(recipeName);
         
         String[] sequence = map.get(IRI.create(owlID+recipeName)).split(",");
@@ -218,7 +218,7 @@ public class KReSRemoveRecipe {
        OWLObjectProperty precedes = factory.getOWLObjectProperty(IRI.create("http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#directlyPrecedes"));
        OWLObjectPropertyAssertionAxiom objectPropAssertion;
 
-        KReSGetRecipe getrecipe = new KReSGetRecipe(storeaux);
+        GetRecipe getrecipe = new GetRecipe(storeaux);
         HashMap<IRI, String> map = getrecipe.getRecipe(recipeName);
         
         String[] sequence = map.get(recipeName).split(",");

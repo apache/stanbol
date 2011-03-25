@@ -1,6 +1,6 @@
 package org.apache.stanbol.rules.manager.atoms;
 
-import org.apache.stanbol.rules.base.api.KReSRuleAtom;
+import org.apache.stanbol.rules.base.api.RuleAtom;
 import org.apache.stanbol.rules.base.api.SPARQLObject;
 import org.apache.stanbol.rules.base.api.URIResource;
 import org.apache.stanbol.rules.manager.SPARQLFunction;
@@ -11,7 +11,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 
-public class LetAtom implements KReSRuleAtom {
+public class LetAtom implements RuleAtom {
 
 	private URIResource variable;
 	private StringFunctionAtom parameterFunctionAtom;

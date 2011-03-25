@@ -32,7 +32,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * If a rule with a same name or IRI is already inside the KReSRuleStore an error is lunched and the process stopped.
  *
  */
-public class KReSAddRule {
+public class AddRule {
 
    private OWLOntology owlmodel;
    private OWLOntologyManager owlmanager;
@@ -101,7 +101,7 @@ public class KReSAddRule {
     * N.B. To get the new KReSRuleStore object there is the method getStore().
     * @param store {The KReSRuleStore where to add the rule.}
     */
-   public KReSAddRule(RuleStore store){
+   public AddRule(RuleStore store){
        this.storeaux = store;
        cloneOntology(storeaux.getOntology());
        this.factory = owlmanager.getOWLDataFactory();
@@ -115,7 +115,7 @@ public class KReSAddRule {
     * @param owlid {The base iri of resource}
     * @param store {The KReSRuleStore where to add the rule.}
     */
-   public KReSAddRule(RuleStore store, String owlid){
+   public AddRule(RuleStore store, String owlid){
        this.storeaux = store;
        //cloneOntology(storeaux.getOntology());
        this.owlmanager = OWLManager.createOWLOntologyManager();

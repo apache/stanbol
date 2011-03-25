@@ -11,12 +11,12 @@ import static org.junit.Assert.fail;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.manager.changes.KReSLoadRuleFile;
-import org.apache.stanbol.rules.manager.changes.KReSRemoveRecipe;
-import org.apache.stanbol.rules.manager.changes.KReSRuleStore;
+import org.apache.stanbol.rules.manager.changes.LoadRuleFile;
+import org.apache.stanbol.rules.manager.changes.RemoveRecipe;
+import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -30,9 +30,9 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
  *
  * @author elvio
  */
-public class KReSRemoveRecipeTest {
+public class RemoveRecipeTest {
 
-    public KReSRemoveRecipeTest() {
+    public RemoveRecipeTest() {
     }
 
     @BeforeClass
@@ -46,8 +46,8 @@ public class KReSRemoveRecipeTest {
     @Before
     public void setUp() {
     	Dictionary<String, Object> configuration = new Hashtable<String, Object>();
-    	onm = new ONManager(null,null, new Hashtable<String, Object>());
-    	store = new KReSRuleStore(onm, configuration,"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+    	onm = new ONManagerImpl(null,null, new Hashtable<String, Object>());
+    	store = new RuleStoreImpl(onm, configuration,"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
     }
 
     @After
@@ -57,20 +57,20 @@ public class KReSRemoveRecipeTest {
     }
 
     public RuleStore store = null;
-    public KReSONManager onm = null;
+    public ONManager onm = null;
 
     /**
-     * Test of removeRule method, of class KReSRemoveRecipe.
+     * Test of removeRule method, of class RemoveRecipe.
      */
     @Test
     public void testRemoveRule_String() throws OWLOntologyCreationException {
-//        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStore store  = new RuleStoreImpl("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         String owlID = store.getOntology().getOntologyID().toString().replace("<", "").replace(">", "") + "#";
         //Load the example file
-        KReSLoadRuleFile load = new KReSLoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
+        LoadRuleFile load = new LoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
         OWLOntology owlstart = load.getStore().getOntology();
         String recipeName = owlID+"MyRecipe";
-        KReSRemoveRecipe instance = new KReSRemoveRecipe(load.getStore());
+        RemoveRecipe instance = new RemoveRecipe(load.getStore());
 
         boolean expResult = true;
         boolean result = instance.removeRecipe(IRI.create(recipeName));
@@ -83,16 +83,16 @@ public class KReSRemoveRecipeTest {
     }
 
     /**
-     * Test of removeRule method, of class KReSRemoveRecipe.
+     * Test of removeRule method, of class RemoveRecipe.
      */
     @Test
     public void testRemoveRuleName_String() throws OWLOntologyCreationException {
-//        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStore store  = new RuleStoreImpl("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         //Load the example file
-        KReSLoadRuleFile load = new KReSLoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
+        LoadRuleFile load = new LoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
         OWLOntology owlstart = load.getStore().getOntology();
         String recipeName ="MyRecipe";
-        KReSRemoveRecipe instance = new KReSRemoveRecipe(load.getStore());
+        RemoveRecipe instance = new RemoveRecipe(load.getStore());
 
         boolean expResult = true;
         boolean result = instance.removeRecipe(recipeName);

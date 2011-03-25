@@ -13,11 +13,11 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.manager.changes.KReSLoadRuleFile;
-import org.apache.stanbol.rules.manager.changes.KReSRuleStore;
+import org.apache.stanbol.rules.manager.changes.LoadRuleFile;
+import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -42,9 +42,9 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
  *
  * @author elvio
  */
-public class KReSLoadRuleFileTest {
+public class LoadRuleFileTest {
 
-    public KReSLoadRuleFileTest() {
+    public LoadRuleFileTest() {
     }
 
     @BeforeClass
@@ -64,19 +64,19 @@ public class KReSLoadRuleFileTest {
     }
 
     /**
-     * Test of KReSLoadRuleFile method, of class KReSLoadRuleFile.
+     * Test of LoadRuleFile method, of class LoadRuleFile.
      */
     @Test
     public void testKReSLoadRuleFile() throws OWLOntologyStorageException {
     	Dictionary<String, Object> configuration = new Hashtable<String, Object>();
-    	KReSONManager onm = new ONManager(null,null,configuration);
+    	ONManager onm = new ONManagerImpl(null,null,configuration);
     	Dictionary<String, Object> configuration2 = new Hashtable<String, Object>();
-//    	configuration2.put(KReSRuleStore.RULE_ONTOLOGY, "");
-    	configuration2.put(KReSRuleStore.RULE_ONTOLOGY_NAMESPACE, "http://kres.iks-project.eu/ontology/meta/rmi.owl#");
-        RuleStore store  = new KReSRuleStore(onm,configuration2,"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
-        RuleStore newstore = new KReSRuleStore(new ONManager(null,null,configuration),configuration2,store.getOntology());
+//    	configuration2.put(RuleStoreImpl.RULE_ONTOLOGY, "");
+    	configuration2.put(RuleStoreImpl.RULE_ONTOLOGY_NAMESPACE, "http://kres.iks-project.eu/ontology/meta/rmi.owl#");
+        RuleStore store  = new RuleStoreImpl(onm,configuration2,"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+        RuleStore newstore = new RuleStoreImpl(new ONManagerImpl(null,null,configuration),configuration2,store.getOntology());
         //Load the example file
-        KReSLoadRuleFile load = new KReSLoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
+        LoadRuleFile load = new LoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
         OWLOntology result = load.getStore().getOntology();
 
 

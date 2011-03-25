@@ -25,15 +25,15 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
-import org.apache.stanbol.rules.base.api.KReSRule;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.base.api.util.KReSRuleList;
+import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.apache.stanbol.rules.base.api.util.RecipeList;
-import org.apache.stanbol.rules.manager.KReSKB;
-import org.apache.stanbol.rules.manager.parse.KReSRuleParser;
+import org.apache.stanbol.rules.manager.KB;
+import org.apache.stanbol.rules.manager.parse.RuleParserImpl;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -65,10 +65,10 @@ import org.slf4j.LoggerFactory;
 
 @Component(immediate = true, metatype = true)
 @Service(RuleStore.class)
-public class KReSRuleStore implements RuleStore {
+public class RuleStoreImpl implements RuleStore {
 
     @Reference
-    KReSONManager onManager;
+    ONManager onManager;
 
     @Property(value = "")
     public static final String RULE_ONTOLOGY = "rule.ontology";
@@ -84,27 +84,27 @@ public class KReSRuleStore implements RuleStore {
     private File owlfile;
     private String ruleOntologyNS;
 
-    private KReSRuleParser kReSRuleParser;
+    private RuleParserImpl kReSRuleParser;
 
     /**
-     * This construct returns KReSRuleStore object with inside an ontology where to store the rules.
+     * This construct returns RuleStoreImpl object with inside an ontology where to store the rules.
      * 
      * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
      * Component Runtime support.
      * <p>
-     * DO NOT USE to manually create instances - the KReSRuleStore instances do need to be configured! YOU
-     * NEED TO USE {@link #KReSRuleStore(KReSONManager, Dictionary)} or its overloads, to parse the
+     * DO NOT USE to manually create instances - the RuleStoreImpl instances do need to be configured! YOU
+     * NEED TO USE {@link #RuleStoreImpl(ONManager, Dictionary)} or its overloads, to parse the
      * configuration and then initialise the rule store if running outside a OSGI environment.
      */
-    public KReSRuleStore() {
+    public RuleStoreImpl() {
 
     /*
      * The constructor should be empty as some issue derives from a filled one. The old version can be invoked
-     * with KReSRuleStore(null)
+     * with RuleStoreImpl(null)
      */
     }
 
-    public KReSRuleStore(KReSONManager onm, Dictionary<String,Object> configuration) {
+    public RuleStoreImpl(ONManager onm, Dictionary<String,Object> configuration) {
         this();
         this.onManager = onm;
         activate(configuration);
@@ -116,7 +116,7 @@ public class KReSRuleStore implements RuleStore {
      * @param filepath
      *            {Ontology file path previously stored.}
      */
-    public KReSRuleStore(KReSONManager onm, Dictionary<String,Object> configuration, String filepath) {
+    public RuleStoreImpl(ONManager onm, Dictionary<String,Object> configuration, String filepath) {
         /*
          * FIXME : This won't work if the activate() method is called at the end of the constructor, like it
          * is for other components. Constructors should not override activate().
@@ -177,7 +177,7 @@ public class KReSRuleStore implements RuleStore {
      * @param owl
      *            {OWLOntology object contains rules and recipe}
      */
-    public KReSRuleStore(KReSONManager onm, Dictionary<String,Object> configuration, OWLOntology owl) {
+    public RuleStoreImpl(ONManager onm, Dictionary<String,Object> configuration, OWLOntology owl) {
         /*
          * FIXME : This won't work if the activate() method is called at the end of the constructor, like it
          * is for other components. Constructors should not override activate().
@@ -224,7 +224,7 @@ public class KReSRuleStore implements RuleStore {
     @SuppressWarnings("unchecked")
     @Activate
     protected void activate(ComponentContext context) throws IOException {
-        log.info("in " + KReSRuleStore.class + " activate with context " + context);
+        log.info("in " + RuleStoreImpl.class + " activate with context " + context);
         if (context == null) {
             throw new IllegalStateException("No valid" + ComponentContext.class + " parsed in activate!");
         }
@@ -284,7 +284,7 @@ public class KReSRuleStore implements RuleStore {
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        log.info("in " + KReSRuleStore.class + " deactivate with context " + context);
+        log.info("in " + RuleStoreImpl.class + " deactivate with context " + context);
     }
 
     @Override
@@ -351,7 +351,7 @@ public class KReSRuleStore implements RuleStore {
                 log.debug("The recipe " + recipeIRI.toString() + " has " + rules.size() + " rules.");
 
                 /**
-                 * Fetch the rule content expressed as a literal in KReSRule Syntax.
+                 * Fetch the rule content expressed as a literal in Rule Syntax.
                  */
                 boolean firstLoop = true;
                 OWLDataProperty hasBodyAndHead = factory.getOWLDataProperty(IRI.create(ruleNS
@@ -381,7 +381,7 @@ public class KReSRuleStore implements RuleStore {
                  */
                 log.debug("Recipe in KReS Syntax : " + kReSRulesInKReSSyntax);
 
-                KReSRuleList ruleList = null;
+                RuleList ruleList = null;
 
                 if (!kReSRulesInKReSSyntax.isEmpty()) {
                     ruleList = generateKnowledgeBase(kReSRulesInKReSSyntax);
@@ -469,7 +469,7 @@ public class KReSRuleStore implements RuleStore {
     }
 
     /*
-     * Moved form KReSAddRecipe class. The KReSAddRecipe should not be used anymore.
+     * Moved form AddRecipe class. The AddRecipe should not be used anymore.
      */
     @Override
     public boolean addRecipe(IRI recipeIRI, String recipeDescription) {
@@ -524,7 +524,7 @@ public class KReSRuleStore implements RuleStore {
      * @param recipeIRI
      *            the IRI of the recipe
      * @param kReSRule
-     *            the rule in KReSRule syntax
+     *            the rule in Rule syntax
      */
     @Override
     public Recipe addRuleToRecipe(String recipeID, String kReSRuleInKReSSyntax) throws NoSuchRecipeException {
@@ -539,7 +539,7 @@ public class KReSRuleStore implements RuleStore {
      * @param recipe
      *            the recipe
      * @param kReSRule
-     *            the rule in KReSRule syntax
+     *            the rule in Rule syntax
      * 
      * @return the recipe we the new rule.
      */
@@ -554,7 +554,7 @@ public class KReSRuleStore implements RuleStore {
 
         /**
          * Add the rule to the recipe in the rule ontology managed by the RuleStore. First we define the
-         * object property hasRule and then we add the literal that contains the rule in KReSRule Syntax to
+         * object property hasRule and then we add the literal that contains the rule in Rule Syntax to
          * the recipe individual.
          */
         String ruleNS = "http://kres.iks-project.eu/ontology/meta/rmi.owl#";
@@ -573,9 +573,9 @@ public class KReSRuleStore implements RuleStore {
         /**
          * Finally also the in-memory representation of the Recipe passed as input is modified.
          */
-        KReSKB kReSKB = KReSRuleParser.parse(kReSRuleInKReSSyntax);
-        KReSRuleList ruleList = kReSKB.getkReSRuleList();
-        for (KReSRule rule : ruleList) {
+        KB kReSKB = RuleParserImpl.parse(kReSRuleInKReSSyntax);
+        RuleList ruleList = kReSKB.getkReSRuleList();
+        for (Rule rule : ruleList) {
 
             /**
              * The rule must be added to the ontology, so 1. an IRI is created from its name 2. the KReS
@@ -596,7 +596,7 @@ public class KReSRuleStore implements RuleStore {
             manager.addAxiom(owlmodel, hasRuleAxiom);
 
             /**
-             * The KReSRule is added to the Recipe in-memory object.
+             * The Rule is added to the Recipe in-memory object.
              */
             recipe.addKReSRule(rule);
         }
@@ -607,14 +607,14 @@ public class KReSRuleStore implements RuleStore {
     @Override
     public void createRecipe(String recipeID, String rulesInKReSSyntax) {
         log.debug("Create recipe " + recipeID + " with rules in kres sytnax " + rulesInKReSSyntax, this);
-        KReSKB kb = KReSRuleParser.parse(rulesInKReSSyntax);
-        KReSRuleList rules = kb.getkReSRuleList();
+        KB kb = RuleParserImpl.parse(rulesInKReSSyntax);
+        RuleList rules = kb.getkReSRuleList();
 
-        KReSAddRule addRule = new KReSAddRule(this);
+        AddRule addRule = new AddRule(this);
 
         Vector<IRI> ruleVectorIRIs = new Vector<IRI>();
         log.debug("Rules are " + rules.size());
-        for (KReSRule rule : rules) {
+        for (Rule rule : rules) {
             log.debug("Creating rule " + rule.getRuleName());
             String kReSSyntax = rule.toKReSSyntax();
 
@@ -625,14 +625,14 @@ public class KReSRuleStore implements RuleStore {
 
         if (ruleVectorIRIs.size() > 0) {
             log.debug("Adding rules: " + ruleVectorIRIs.size());
-            KReSAddRecipe addRecipe = new KReSAddRecipe(this);
+            AddRecipe addRecipe = new AddRecipe(this);
             addRecipe.addRecipe(IRI.create(recipeID), ruleVectorIRIs, null);
         }
 
     }
 
-    private KReSRuleList generateKnowledgeBase(String kReSRulesInKReSSyntax) {
-        KReSKB kb = KReSRuleParser.parse(kReSRulesInKReSSyntax);
+    private RuleList generateKnowledgeBase(String kReSRulesInKReSSyntax) {
+        KB kb = RuleParserImpl.parse(kReSRulesInKReSSyntax);
         return kb.getkReSRuleList();
     }
 
@@ -672,7 +672,7 @@ public class KReSRuleStore implements RuleStore {
     }
 
     @Override
-    public boolean removeRule(KReSRule rule) {
+    public boolean removeRule(Rule rule) {
 
         OWLOntologyManager mng = owlmodel.getOWLOntologyManager();
         OWLDataFactory factory = mng.getOWLDataFactory();

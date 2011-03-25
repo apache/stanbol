@@ -18,7 +18,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 import org.apache.stanbol.rules.base.SWRL;
 
-public class ClassAtom extends KReSCoreAtom {
+public class ClassAtom extends CoreAtom {
 
 	private URIResource classResource;
 	private URIResource argument1;
@@ -38,7 +38,7 @@ public class ClassAtom extends KReSCoreAtom {
 		
 		if(argument1.toString().startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			argument1SPARQL = "?"+argument1.toString().replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
-			KReSVariable variable = (KReSVariable) argument1;
+			VariableAtom variable = (VariableAtom) argument1;
 			negativeArg = variable.isNegative();
 		}
 		else{
@@ -47,7 +47,7 @@ public class ClassAtom extends KReSCoreAtom {
 		
 		if(classResource.toString().startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			argument2SPARQL = "?"+classResource.toString().replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
-			KReSVariable variable = (KReSVariable) classResource;
+			VariableAtom variable = (VariableAtom) classResource;
 			negativeClass = variable.isNegative();
 		}
 		else{
@@ -99,7 +99,7 @@ public class ClassAtom extends KReSCoreAtom {
 		OWLClass classPredicate = factory.getOWLClass(IRI.create(classResource.getURI().toString()));
 		
 		SWRLIArgument argumentResource;
-		if(argument1 instanceof KReSResource){
+		if(argument1 instanceof ResourceAtom){
 			OWLIndividual owlIndividual = factory.getOWLNamedIndividual(IRI.create(argument1.getURI().toString()));
 			argumentResource = factory.getSWRLIndividualArgument(owlIndividual);
 		}
@@ -133,7 +133,7 @@ public class ClassAtom extends KReSCoreAtom {
 		
 		if(argument1.toString().startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			arg1 = "?"+argument1.toString().replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
-			KReSVariable variable = (KReSVariable) argument1;
+			VariableAtom variable = (VariableAtom) argument1;
 			if(variable.isNegative()){
 				arg1 = "notex(" + arg1 + ")";
 			}
@@ -144,7 +144,7 @@ public class ClassAtom extends KReSCoreAtom {
 		
 		if(classResource.toString().startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			arg2 = "?"+classResource.toString().replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
-			KReSVariable variable = (KReSVariable) classResource;
+			VariableAtom variable = (VariableAtom) classResource;
 			if(variable.isNegative()){
 				arg2 = "notex(" + arg2 + ")";
 			}

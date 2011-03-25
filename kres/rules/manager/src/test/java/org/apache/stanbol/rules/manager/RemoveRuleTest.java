@@ -11,13 +11,13 @@ import static org.junit.Assert.fail;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.manager.changes.KReSAddRule;
-import org.apache.stanbol.rules.manager.changes.KReSLoadRuleFile;
-import org.apache.stanbol.rules.manager.changes.KReSRemoveRule;
-import org.apache.stanbol.rules.manager.changes.KReSRuleStore;
+import org.apache.stanbol.rules.manager.changes.AddRule;
+import org.apache.stanbol.rules.manager.changes.LoadRuleFile;
+import org.apache.stanbol.rules.manager.changes.RemoveRule;
+import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -30,9 +30,9 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
  *
  * @author elvio
  */
-public class KReSRemoveRuleTest {
+public class RemoveRuleTest {
 
-    public KReSRemoveRuleTest() {
+    public RemoveRuleTest() {
     }
 
     @BeforeClass
@@ -46,8 +46,8 @@ public class KReSRemoveRuleTest {
     @Before
     public void setUp() {
     	Dictionary<String, Object> configuration = new Hashtable<String, Object>();
-    	onm = new ONManager(null,null, new Hashtable<String, Object>());
-    	store = new KReSRuleStore(onm, configuration,"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+    	onm = new ONManagerImpl(null,null, new Hashtable<String, Object>());
+    	store = new RuleStoreImpl(onm, configuration,"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
     }
 
     @After
@@ -57,21 +57,21 @@ public class KReSRemoveRuleTest {
     }
 
     public RuleStore store = null;
-    public KReSONManager onm = null;
+    public ONManager onm = null;
 
     /**
-     * Test of removeRule method, of class KReSRemoveRule.
+     * Test of removeRule method, of class RemoveRule.
      */
     @Test
     public void testRemoveRule() {
-//        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStore store  = new RuleStoreImpl("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         
         //Load the example file
-        KReSLoadRuleFile load = new KReSLoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
-        KReSAddRule rule = new KReSAddRule(load.getStore());
+        LoadRuleFile load = new LoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
+        AddRule rule = new AddRule(load.getStore());
         rule.addRule("MyRuleProva","Body -> Head",null);
         String ruleName = "MyRuleProva";
-        KReSRemoveRule instance = new KReSRemoveRule(rule.getStore());
+        RemoveRule instance = new RemoveRule(rule.getStore());
         boolean expResult = true;
         boolean result = instance.removeRule(ruleName);
         if(result){
@@ -81,18 +81,18 @@ public class KReSRemoveRuleTest {
     }
 
     /**
-     * Test of removeRule method, of class KReSRemoveRule.
+     * Test of removeRule method, of class RemoveRule.
      */
     @Test
     public void testRemoveSingleRule() throws OWLOntologyStorageException {
-//        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStore store  = new RuleStoreImpl("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         String owlID = store.getOntology().getOntologyID().toString().replace("<", "").replace(">", "") + "#";
 
         //Load the example file
-        KReSLoadRuleFile load = new KReSLoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
+        LoadRuleFile load = new LoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
         IRI rule = IRI.create(owlID+"MyRuleB");
         IRI recipe = IRI.create(owlID+"MyRecipe");
-        KReSRemoveRule instance = new KReSRemoveRule(load.getStore());
+        RemoveRule instance = new RemoveRule(load.getStore());
         boolean expResult = true;
         boolean result = instance.removeRuleFromRecipe(rule, recipe);
        

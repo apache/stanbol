@@ -2,12 +2,12 @@ package org.apache.stanbol.rules.manager.atoms;
 
 import org.apache.stanbol.rules.base.api.URIResource;
 
-public class KReSTypedLiteral {
+public class TypedLiteralAtom {
 
 	private Object value;
 	private URIResource xsdType;
 	
-	public KReSTypedLiteral(Object value, URIResource xsdType) {
+	public TypedLiteralAtom(Object value, URIResource xsdType) {
 		this.value = value;
 		this.xsdType = xsdType;
 	}

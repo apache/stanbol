@@ -26,7 +26,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import org.apache.stanbol.rules.base.SWRL;
 
-public class KReSRuleParser {
+public class RuleParser {
 
 	public static String ruleNS = "http://www.prova.org/rules.rdf#";
 	
@@ -36,14 +36,14 @@ public class KReSRuleParser {
 	
 	private OntModel ruleOntology;
 	
-	public KReSRuleParser(Model sourceModel, Model destinationModel, Model ruleOntology) {
+	public RuleParser(Model sourceModel, Model destinationModel, Model ruleOntology) {
 		this.sourceModel = sourceModel;
 		this.destinationModel = destinationModel;
 		this.ruleOntology = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, ruleOntology);
 	}
 	
 	
-	public KReSRuleParser(OntModel inputOntology, Map<String, String>prefixMap, Model ruleOntology) {
+	public RuleParser(OntModel inputOntology, Map<String, String>prefixMap, Model ruleOntology) {
 		this.sourceModel = inputOntology;
 		this.ruleOntology = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, ruleOntology);
 		Set<String> keys = prefixMap.keySet();
@@ -55,7 +55,7 @@ public class KReSRuleParser {
 		}
 	}
 	
-	public KReSRuleParser(OntModel inputOntology, Map<String, String>prefixMap) {
+	public RuleParser(OntModel inputOntology, Map<String, String>prefixMap) {
 		this.sourceModel = inputOntology;
 		this.ruleOntology = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, null);
 		ruleOntology.setNsPrefix("owl", "http://www.w3.org/2002/07/owl#"); 

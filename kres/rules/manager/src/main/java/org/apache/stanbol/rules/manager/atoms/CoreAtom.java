@@ -1,10 +1,10 @@
 package org.apache.stanbol.rules.manager.atoms;
 
-import org.apache.stanbol.rules.base.api.KReSRuleAtom;
+import org.apache.stanbol.rules.base.api.RuleAtom;
 
 
 
-public abstract class KReSCoreAtom implements KReSRuleAtom {
+public abstract class CoreAtom implements RuleAtom {
 
 	
 	@Override

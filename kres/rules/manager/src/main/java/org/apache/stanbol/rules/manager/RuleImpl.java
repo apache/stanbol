@@ -5,9 +5,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.stanbol.rules.base.api.KReSRule;
-import org.apache.stanbol.rules.base.api.KReSRuleAtom;
-import org.apache.stanbol.rules.base.api.KReSRuleExpressiveness;
+import org.apache.stanbol.rules.base.api.Rule;
+import org.apache.stanbol.rules.base.api.RuleAtom;
+import org.apache.stanbol.rules.base.api.RuleExpressiveness;
 import org.apache.stanbol.rules.base.api.SPARQLObject;
 import org.apache.stanbol.rules.base.api.util.AtomList;
 import org.semanticweb.owlapi.model.IRI;
@@ -22,7 +22,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 import org.apache.stanbol.rules.base.SWRL;
 
-public class KReSRuleImpl implements KReSRule {
+public class RuleImpl implements Rule {
 
 	
 	private String ruleName;
@@ -37,9 +37,9 @@ public class KReSRuleImpl implements KReSRule {
 	private boolean sparqlC;
 	private boolean sparqlD;
 	
-	KReSRuleExpressiveness expressiveness;
+	RuleExpressiveness expressiveness;
 	
-	public KReSRuleImpl(String ruleURI, AtomList body, AtomList head, KReSRuleExpressiveness expressiveness) {
+	public RuleImpl(String ruleURI, AtomList body, AtomList head, RuleExpressiveness expressiveness) {
 		this.ruleName = ruleURI;
 		this.head = head;
 		this.body = body;
@@ -70,9 +70,9 @@ public class KReSRuleImpl implements KReSRule {
 		
 		if(isSPARQLConstruct() || isSPARQLDelete()){
 			boolean found = false;
-			Iterator<KReSRuleAtom> it = body.iterator();
+			Iterator<RuleAtom> it = body.iterator();
 			while(it.hasNext() && !found){
-				KReSRuleAtom kReSRuleAtom = it.next();
+				RuleAtom kReSRuleAtom = it.next();
 				sparql = kReSRuleAtom.toSPARQL().getObject();
 				found = true;
 			}
@@ -85,7 +85,7 @@ public class KReSRuleImpl implements KReSRule {
 						
 			boolean firstIte = true;
 			
-			for(KReSRuleAtom kReSRuleAtom : head){
+			for(RuleAtom kReSRuleAtom : head){
 				if(!firstIte){
 					sparql += " . ";
 				}
@@ -98,7 +98,7 @@ public class KReSRuleImpl implements KReSRule {
 			
 			firstIte = true;
 			ArrayList<SPARQLObject> sparqlObjects = new ArrayList<SPARQLObject>();
-			for(KReSRuleAtom kReSRuleAtom : body){
+			for(RuleAtom kReSRuleAtom : body){
 				SPARQLObject sparqlObject = kReSRuleAtom.toSPARQL();
 				if(sparqlObject instanceof SPARQLNot){
 					sparqlObjects.add((SPARQLNot) sparqlObject);
@@ -179,14 +179,14 @@ public class KReSRuleImpl implements KReSRule {
 			
 			//RDF list for body 
 			RDFList list = model.createList();			
-			for(KReSRuleAtom atom : body){
+			for(RuleAtom atom : body){
 				list = list.cons(atom.toSWRL(model));
 			}			
 			imp.addProperty(SWRL.body, list);
 			
 			//RDF list for head
 			list = model.createList();			
-			for(KReSRuleAtom atom : head){
+			for(RuleAtom atom : head){
 				list = list.cons(atom.toSWRL(model));
 			}			
 			imp.addProperty(SWRL.head, list);
@@ -201,10 +201,10 @@ public class KReSRuleImpl implements KReSRule {
 		
 		Set<SWRLAtom> bodyAtoms = new HashSet<SWRLAtom>();
 		Set<SWRLAtom> headAtoms = new HashSet<SWRLAtom>();
-		for(KReSRuleAtom atom : body){
+		for(RuleAtom atom : body){
 			bodyAtoms.add(atom.toSWRL(factory));
 		}
-		for(KReSRuleAtom atom : head){
+		for(RuleAtom atom : head){
 			headAtoms.add(atom.toSWRL(factory));
 		}
 		return factory.getSWRLRule(
@@ -224,7 +224,7 @@ public class KReSRuleImpl implements KReSRule {
 			boolean addAnd = false;
 			rule = "RULE "+ruleName+" ASSERTS THAT "+System.getProperty("line.separator");
 			rule += "IF"+System.getProperty("line.separator");
-			for(KReSRuleAtom atom : body){
+			for(RuleAtom atom : body){
 				rule += tab;
 				if(addAnd){
 					rule += "AND ";
@@ -239,7 +239,7 @@ public class KReSRuleImpl implements KReSRule {
 			rule += "IMPLIES"+System.getProperty("line.separator");
 			
 			addAnd = false;
-			for(KReSRuleAtom atom : head){
+			for(RuleAtom atom : head){
 				rule += tab;
 				if(addAnd){
 					rule += "AND ";
@@ -276,9 +276,9 @@ public class KReSRuleImpl implements KReSRule {
 		
 		if(isSPARQLConstruct() || isSPARQLDelete()){
 			boolean found = false;
-			Iterator<KReSRuleAtom> it = body.iterator();
+			Iterator<RuleAtom> it = body.iterator();
 			while(it.hasNext() && !found){
-				KReSRuleAtom kReSRuleAtom = it.next();
+				RuleAtom kReSRuleAtom = it.next();
 				ruleInKReSSyntax = kReSRuleAtom.toSPARQL().getObject();
 				found = true;
 			}
@@ -287,7 +287,7 @@ public class KReSRuleImpl implements KReSRule {
 		else{
 		
 			boolean firstLoop = true;
-			for(KReSRuleAtom atom : body){
+			for(RuleAtom atom : body){
 				if(!firstLoop){
 					ruleInKReSSyntax += " . ";
 				}
@@ -302,7 +302,7 @@ public class KReSRuleImpl implements KReSRule {
 				ruleInKReSSyntax += " -> ";
 				
 				firstLoop = true;
-				for(KReSRuleAtom atom : head){
+				for(RuleAtom atom : head){
 					if(!firstLoop){
 						ruleInKReSSyntax += " . ";
 					}
@@ -377,7 +377,7 @@ public class KReSRuleImpl implements KReSRule {
 
 	
 	@Override
-	public KReSRuleExpressiveness getExpressiveness() {
+	public RuleExpressiveness getExpressiveness() {
 		return expressiveness;
 	}
 }

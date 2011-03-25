@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Set;
 
-import org.apache.stanbol.rules.base.api.KReSRule;
+import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.Recipe;
-import org.apache.stanbol.rules.base.api.util.KReSRuleList;
+import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.semanticweb.owlapi.model.IRI;
 
 import com.hp.hpl.jena.rdf.model.Model;
@@ -31,7 +31,7 @@ public class RecipeImpl extends Observable implements Recipe {
 	
 	private IRI recipeID;
 	private String recipeDescription;
-	private KReSRuleList kReSRuleList;
+	private RuleList kReSRuleList;
 	
 	
 	
@@ -45,14 +45,14 @@ public class RecipeImpl extends Observable implements Recipe {
 	 * @param recipeDescription
 	 * @param kReSRuleList
 	 */
-	public RecipeImpl(IRI recipeID, String recipeDescription, KReSRuleList kReSRuleList) {
+	public RecipeImpl(IRI recipeID, String recipeDescription, RuleList kReSRuleList) {
 		this.recipeID = recipeID;
 		this.recipeDescription = recipeDescription;
 		this.kReSRuleList = kReSRuleList;
 	}
 	
 	
-	public KReSRuleList getkReSRuleList() {
+	public RuleList getkReSRuleList() {
 		return kReSRuleList;
 	}
 	
@@ -69,7 +69,7 @@ public class RecipeImpl extends Observable implements Recipe {
 		return null;
 	}
 
-	public KReSRule getRule(String ruleURI) {
+	public Rule getRule(String ruleURI) {
 		//return new SWRLToKReSRule(ruleModel).parse(ruleURI);
 		return null;
 	}
@@ -103,7 +103,7 @@ public class RecipeImpl extends Observable implements Recipe {
 	public String[] toSPARQL() {
 		String[] sparqlStrings = new String[kReSRuleList.size()];
 		int i=0;
-		for(KReSRule kReSRule : kReSRuleList){
+		for(Rule kReSRule : kReSRuleList){
 			sparqlStrings[i] = kReSRule.toSPARQL();
 			i++;
 		}
@@ -116,7 +116,7 @@ public class RecipeImpl extends Observable implements Recipe {
 		String kReSSyntax = "";
 		
 		boolean firstLoop = true;
-		for(KReSRule kReSRule : kReSRuleList){
+		for(Rule kReSRule : kReSRuleList){
 			if(!firstLoop){
 				kReSSyntax += " . ";
 			}
@@ -131,9 +131,9 @@ public class RecipeImpl extends Observable implements Recipe {
 
 
 	@Override
-	public void addKReSRule(KReSRule kReSRule) {
+	public void addKReSRule(Rule kReSRule) {
 		if(kReSRuleList == null){
-			kReSRuleList = new KReSRuleList();
+			kReSRuleList = new RuleList();
 		}
 		kReSRuleList.add(kReSRule);
 		

@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Hashtable;
 
-import org.apache.stanbol.rules.base.api.KReSRule;
-import org.apache.stanbol.rules.base.api.util.KReSRuleList;
+import org.apache.stanbol.rules.base.api.Rule;
+import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +17,7 @@ import com.hp.hpl.jena.ontology.OntModel;
  * Missing description
  *
  */
-public class KReSKB {
+public class KB {
 
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
@@ -29,14 +29,14 @@ public class KReSKB {
 	 */
 	private Hashtable<String, OntModel> ontologies;
 	
-	private KReSRuleList kReSRuleList;
+	private RuleList kReSRuleList;
 	
 	
-	public KReSKB() {
+	public KB() {
 		log.debug("Setting up a KReSKB");
 		prefixes = new Hashtable<String, String>();
 		prefixes.put("var", "http://kres.iks-project.eu/ontology/meta/variables#");
-		kReSRuleList = new KReSRuleList();
+		kReSRuleList = new RuleList();
 	}
 	
 	public void addPrefix(String prefixString, String prefixURI){
@@ -48,12 +48,12 @@ public class KReSKB {
 		return prefixes.get(prefixString);
 	}
 	
-	public void addRule(KReSRule kReSRule){
+	public void addRule(Rule kReSRule){
 		System.out.println("Adding rule to Head");
 		kReSRuleList.add(kReSRule);
 	}
 	
-	public KReSRuleList getkReSRuleList() {
+	public RuleList getkReSRuleList() {
 		return kReSRuleList;
 	}
 	
@@ -61,7 +61,7 @@ public class KReSKB {
 		String sparql = null;
 		if(kReSRuleList != null){
 			boolean firstIteration = true;
-			for(KReSRule kReSRule : kReSRuleList){
+			for(Rule kReSRule : kReSRuleList){
 				if(firstIteration){
 					firstIteration = false;
 				}
@@ -77,7 +77,7 @@ public class KReSKB {
 	
 	public void write(OutputStream outputStream) throws IOException{
 		boolean firstIt = true;
-		for(KReSRule kReSRule : kReSRuleList){
+		for(Rule kReSRule : kReSRuleList){
 			
 			String rule;
 			
@@ -96,7 +96,7 @@ public class KReSKB {
 	
 	public void write(FileWriter fileWriter) throws IOException{
 		boolean write = true;
-		for(KReSRule kReSRule : kReSRuleList){
+		for(Rule kReSRule : kReSRuleList){
 			if(write){
 				fileWriter.write(kReSRule.toKReSSyntax());
 				write = false;

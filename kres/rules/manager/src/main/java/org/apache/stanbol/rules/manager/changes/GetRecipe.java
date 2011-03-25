@@ -25,7 +25,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  *
  * @author elvio
  */
-public class KReSGetRecipe {
+public class GetRecipe {
 
     private OWLOntology owlmodel;
     private String owlID;
@@ -38,7 +38,7 @@ public class KReSGetRecipe {
     *
     * @param store {The KReSRuleStore where there are the added rules and recipes.}
     */
-    public KReSGetRecipe(RuleStore store){
+    public GetRecipe(RuleStore store){
         this.owlmodel = store.getOntology();
         this.owlIDrmi = "http://kres.iks-project.eu/ontology/meta/rmi.owl#";
         this.owlID = owlmodel.getOntologyID().toString().replace("<","").replace(">","")+"#";

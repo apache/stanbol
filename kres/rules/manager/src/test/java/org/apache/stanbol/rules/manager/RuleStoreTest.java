@@ -14,9 +14,9 @@ import java.io.File;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.manager.changes.KReSRuleStore;
+import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -33,11 +33,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author elvio
  */
-public class KReSRuleStoreTest {
+public class RuleStoreTest {
 
 	private Logger log = LoggerFactory.getLogger(getClass());
 
-    public KReSRuleStoreTest() {
+    public RuleStoreTest() {
     }
 
     @BeforeClass
@@ -51,10 +51,10 @@ public class KReSRuleStoreTest {
     @Before
     public void setUp() {
 		Dictionary<String, Object> configuration = new Hashtable<String, Object>();
-		store = new KReSRuleStore(new ONManager(null,null, configuration),
+		store = new RuleStoreImpl(new ONManagerImpl(null,null, configuration),
 				configuration,
 				"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
-		blankStore = new KReSRuleStore(new ONManager(null,null, configuration),
+		blankStore = new RuleStoreImpl(new ONManagerImpl(null,null, configuration),
 				configuration, "");
     }
 

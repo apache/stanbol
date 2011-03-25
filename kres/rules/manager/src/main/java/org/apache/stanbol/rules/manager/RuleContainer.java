@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Set;
 
-public class KReSRuleContainer {
+public class RuleContainer {
 
 	private Hashtable<String, String> semionRules;
 	
-	public KReSRuleContainer() {
+	public RuleContainer() {
 		semionRules = new Hashtable<String, String>();
 	}
 	

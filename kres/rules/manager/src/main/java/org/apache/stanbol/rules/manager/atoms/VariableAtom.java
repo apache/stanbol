@@ -9,12 +9,12 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 import org.apache.stanbol.rules.base.SWRL;
 
-public class KReSVariable implements URIResource {
+public class VariableAtom implements URIResource {
 
 	private URI uri;
 	private boolean negative;
 	
-	public KReSVariable(URI uri, boolean negative) {
+	public VariableAtom(URI uri, boolean negative) {
 		this.uri = uri;
 		this.negative = negative;
 	}

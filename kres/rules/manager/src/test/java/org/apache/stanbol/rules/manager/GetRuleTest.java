@@ -14,12 +14,12 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.manager.changes.KReSGetRule;
-import org.apache.stanbol.rules.manager.changes.KReSLoadRuleFile;
-import org.apache.stanbol.rules.manager.changes.KReSRuleStore;
+import org.apache.stanbol.rules.manager.changes.GetRule;
+import org.apache.stanbol.rules.manager.changes.LoadRuleFile;
+import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -32,9 +32,9 @@ import org.semanticweb.owlapi.model.OWLOntology;
  *
  * @author elvio
  */
-public class KReSGetRuleTest {
+public class GetRuleTest {
 
-    public KReSGetRuleTest() {
+    public GetRuleTest() {
     }
 
     @BeforeClass
@@ -48,8 +48,8 @@ public class KReSGetRuleTest {
     @Before
     public void setUp() {
     	Dictionary<String, Object> configuration = new Hashtable<String, Object>();
-    	onm = new ONManager(null,null, new Hashtable<String, Object>());
-    	store = new KReSRuleStore(onm, configuration,"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+    	onm = new ONManagerImpl(null,null, new Hashtable<String, Object>());
+    	store = new RuleStoreImpl(onm, configuration,"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
     }
 
     @After
@@ -59,21 +59,21 @@ public class KReSGetRuleTest {
     }
 
     public RuleStore store = null;
-    public KReSONManager onm = null;
+    public ONManager onm = null;
 
     /**
-     * Test of getRule method, of class KReSGetRule.
+     * Test of getRule method, of class GetRule.
      */
     @Test
     public void testGetRule() {
-//        RuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStore store  = new RuleStoreImpl("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         OWLOntology owl = store.getOntology();
         String ID = owl.getOntologyID().toString().replace("<", "").replace(">", "")+"#";
         //Load the example file
-        KReSLoadRuleFile load = new KReSLoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
+        LoadRuleFile load = new LoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
         owl = load.getStore().getOntology();
         
-        KReSGetRule rule = new KReSGetRule(store);
+        GetRule rule = new GetRule(store);
         HashMap<IRI, String> map = rule.getRule("MyRuleC");
         HashMap<IRI, String> expmap = new HashMap();
         expmap.put(IRI.create(ID+"MyRuleC"), "MyRuleCBody -> MyRuleCHead");
@@ -86,18 +86,18 @@ public class KReSGetRuleTest {
     }
 
     /**
-     * Test of getAllRule method, of class KReSGetRule.
+     * Test of getAllRule method, of class GetRule.
      */
     @Test
     public void testGetAllRule() {
-//        KReSRuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStoreImpl store  = new RuleStoreImpl("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         OWLOntology owl = store.getOntology();
         String ID = owl.getOntologyID().toString().replace("<", "").replace(">", "")+"#";
         //Load the example file
-        KReSLoadRuleFile load = new KReSLoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
+        LoadRuleFile load = new LoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
         owl = load.getStore().getOntology();
 
-        KReSGetRule rule = new KReSGetRule(store);
+        GetRule rule = new GetRule(store);
     
         HashMap<IRI, String> map = rule.getAllRules();
         HashMap<IRI, String> expmap = new HashMap();
@@ -133,18 +133,18 @@ public class KReSGetRuleTest {
     }
 
     /**
-     * Test of getRule method, of class KReSGetRule.
+     * Test of getRule method, of class GetRule.
      */
     @Test
     public void testGetRuleUsage() {
-//        KReSRuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStoreImpl store  = new RuleStoreImpl("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         OWLOntology owl = store.getOntology();
         String ID = owl.getOntologyID().toString().replace("<", "").replace(">", "")+"#";
         //Load the example file
-        KReSLoadRuleFile load = new KReSLoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
+        LoadRuleFile load = new LoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
         owl = load.getStore().getOntology();
 
-        KReSGetRule rule = new KReSGetRule(store);
+        GetRule rule = new GetRule(store);
         Vector<IRI> vector = rule.getRuleUsage(IRI.create(ID + "MyRuleC"));
  
         if(vector!=null){
@@ -157,14 +157,14 @@ public class KReSGetRuleTest {
     
     @Test
     public void testGetRulesOfRecipe() {
-//        KReSRuleStore store  = new KReSRuleStore("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+//        RuleStoreImpl store  = new RuleStoreImpl("./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
         OWLOntology owl = store.getOntology();
         String ID = owl.getOntologyID().toString().replace("<", "").replace(">", "")+"#";
         //Load the example file
-        KReSLoadRuleFile load = new KReSLoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
+        LoadRuleFile load = new LoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",store);
         owl = load.getStore().getOntology();
 
-        KReSGetRule rule = new KReSGetRule(store);
+        GetRule rule = new GetRule(store);
         Vector<IRI> vector = rule.getRuleUsage(IRI.create(ID + "MyRuleC"));
  
         if(vector!=null){
