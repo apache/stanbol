@@ -6,7 +6,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -49,7 +49,7 @@ public interface ONManager {
 	 * 
 	 * @return the default ontology store.
 	 */
-	public OntologyStorage getOntologyStore();
+	public ClerezzaOntologyStorage getOntologyStore();
 
 	/**
 	 * Returns an OWL Ontology Manager that is never cleared of its ontologies,

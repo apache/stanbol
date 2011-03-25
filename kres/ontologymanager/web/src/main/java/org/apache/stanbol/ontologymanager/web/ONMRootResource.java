@@ -20,7 +20,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.renderers.ScopeSetRenderer;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ public class ONMRootResource extends NavigationMixin {
      * Placeholder for the ONManager to be fetched from the servlet context.
      */
     protected ONManager onm;
-    protected OntologyStorage storage;
+    protected ClerezzaOntologyStorage storage;
 
     protected ServletContext servletContext;
 
@@ -71,7 +71,7 @@ if (onm == null) {
 this.storage = onm.getOntologyStore();
 if (storage == null) {
     log.warn("No OntologyStorage in servlet context. Instantiating manually...");
-    storage = new OntologyStorage(new TcManager(),null);
+    storage = new ClerezzaOntologyStorage(new TcManager(),null);
 }
     }
 

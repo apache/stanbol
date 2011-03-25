@@ -21,8 +21,8 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.NoSuchStoreException;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
@@ -46,12 +46,12 @@ public class GraphsResource extends NavigationMixin {
 
     protected TcManager tcManager;
     protected ONManager onManager;
-    protected OntologyStorage storage;
+    protected ClerezzaOntologyStorage storage;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     public GraphsResource(@Context ServletContext servletContext) {
-        storage = (OntologyStorage) (servletContext.getAttribute(OntologyStorage.class.getName()));
+        storage = (ClerezzaOntologyStorage) (servletContext.getAttribute(ClerezzaOntologyStorage.class.getName()));
         tcManager = (TcManager) servletContext.getAttribute(TcManager.class.getName());
         onManager = (ONManager) (servletContext.getAttribute(ONManager.class.getName()));
         if (onManager == null) {

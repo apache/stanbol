@@ -237,6 +237,12 @@
 			<version>1.5.2</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.jena.parser</artifactId>
+			<version>0.10-incubating-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
 
 	</dependencies>
 

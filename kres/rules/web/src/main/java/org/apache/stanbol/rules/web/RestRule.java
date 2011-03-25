@@ -34,7 +34,7 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.manager.changes.AddRecipe;
 import org.apache.stanbol.rules.manager.changes.AddRule;
@@ -67,7 +67,7 @@ import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
 public class RestRule extends NavigationMixin{
 
 	protected ONManager onm;
-	protected OntologyStorage storage;
+	protected ClerezzaOntologyStorage storage;
 
 	private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -102,7 +102,7 @@ public class RestRule extends NavigationMixin{
         this.storage = onm.getOntologyStore();
 		if (storage == null) {
             log.warn("No OntologyStorage in servlet context. Instantiating manually...");
-            storage = new OntologyStorage(new TcManager(),null);
+            storage = new ClerezzaOntologyStorage(new TcManager(),null);
 		}
 
        if (kresRuleStore == null) {

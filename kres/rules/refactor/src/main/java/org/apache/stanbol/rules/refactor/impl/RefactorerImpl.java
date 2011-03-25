@@ -27,7 +27,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.reasoners.base.api.InconcistencyException;
 import org.apache.stanbol.reasoners.base.api.Reasoner;
 import org.apache.stanbol.rules.base.api.Rule;
@@ -328,7 +328,7 @@ public class RefactorerImpl implements Refactorer {
 
         OWLOntology refactoredOntology = null;
 
-        OntologyStorage ontologyStorage = onManager.getOntologyStore();
+        ClerezzaOntologyStorage ontologyStorage = onManager.getOntologyStore();
 
         Recipe recipe;
         try {
@@ -539,7 +539,7 @@ public class RefactorerImpl implements Refactorer {
 
         OWLOntology refactoredOntology = null;
 
-        OntologyStorage ontologyStorage = onManager.getOntologyStore();
+        ClerezzaOntologyStorage ontologyStorage = onManager.getOntologyStore();
 
         Recipe recipe;
         try {

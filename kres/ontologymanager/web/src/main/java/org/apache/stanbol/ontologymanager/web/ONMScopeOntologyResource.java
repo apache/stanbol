@@ -27,7 +27,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceModificationException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.model.IRI;
@@ -60,7 +60,7 @@ public class ONMScopeOntologyResource extends NavigationMixin {
      * Placeholder for the ONManager to be fetched from the servlet context.
      */
     protected ONManager onm;
-    protected OntologyStorage storage;
+    protected ClerezzaOntologyStorage storage;
 
     protected ServletContext servletContext;
 
@@ -83,7 +83,7 @@ if (onm == null) {
 this.storage = onm.getOntologyStore();
 if (storage == null) {
     log.warn("No OntologyStorage in servlet context. Instantiating manually...");
-    storage = new OntologyStorage(new TcManager(),null);
+    storage = new ClerezzaOntologyStorage(new TcManager(),null);
 }
     }
 

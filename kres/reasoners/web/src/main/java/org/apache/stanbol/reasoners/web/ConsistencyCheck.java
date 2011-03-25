@@ -29,7 +29,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.reasoners.base.commands.CreateReasoner;
 import org.apache.stanbol.reasoners.base.commands.RunReasoner;
 import org.apache.stanbol.reasoners.base.commands.RunRules;
@@ -79,7 +79,7 @@ public class ConsistencyCheck {
 
 	private final OWLDuplicateSafeLoader loader = new OWLDuplicateSafeLoader();
 	protected ONManager onm;
-	protected OntologyStorage storage;
+	protected ClerezzaOntologyStorage storage;
 
 	private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -113,7 +113,7 @@ if (onm == null) {
 this.storage = onm.getOntologyStore();
 if (storage == null) {
     log.warn("No OntologyStorage in servlet context. Instantiating manually...");
-    storage = new OntologyStorage(new TcManager(),null);
+    storage = new ClerezzaOntologyStorage(new TcManager(),null);
 }
 		if (kresRuleStore == null) {
 			log

@@ -19,7 +19,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session.State;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent.OperationType;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
@@ -46,9 +46,9 @@ public class SessionManagerImpl implements KReSSessionManager {
 	protected SessionIDGenerator idgen;
 
 	protected ScopeRegistry scopeRegistry;
-	protected OntologyStorage store;
+	protected ClerezzaOntologyStorage store;
 
-	public SessionManagerImpl(IRI baseIri, ScopeRegistry scopeRegistry, OntologyStorage store) {
+	public SessionManagerImpl(IRI baseIri, ScopeRegistry scopeRegistry, ClerezzaOntologyStorage store) {
 		idgen = new TimestampedSessionIDGenerator(baseIri);
 		listeners = new HashSet<SessionListener>();
 		sessionsByID = new HashMap<IRI, Session>();

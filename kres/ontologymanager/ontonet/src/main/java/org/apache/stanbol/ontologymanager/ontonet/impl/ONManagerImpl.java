@@ -29,10 +29,11 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.InMemoryOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyIndexImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologySpaceFactoryImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.ScopeRegistryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.impl.RegistryLoaderImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.session.SessionManagerImpl;
@@ -113,13 +114,21 @@ public class ONManagerImpl implements ONManager {
     @Reference
     private WeightedTcProvider wtcp;
 
-    private OntologyStorage storage;
+    private ClerezzaOntologyStorage storage;
 
     /*
      * The identifiers (not yet parsed as IRIs) of the ontology scopes that should be activated.
      */
     private String[] toActivate = new String[] {};
 
+    /**
+     * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
+     * Component Runtime support.
+     * <p>
+     * DO NOT USE to manually create instances - the ReengineerManagerImpl instances do need to be configured!
+     * YOU NEED TO USE {@link #ONManagerImpl(TcManager, WeightedTcProvider, Dictionary)} or its overloads, to
+     * parse the configuration and then initialise the rule store if running outside an OSGI environment.
+     */
     public ONManagerImpl() {
         super();
         owlFactory = OWLManager.getOWLDataFactory();
@@ -128,6 +137,24 @@ public class ONManagerImpl implements ONManager {
         // These depend on one another
         scopeRegistry = new ScopeRegistryImpl();
         oIndex = new OntologyIndexImpl(this);
+
+        // Defer the call to the bindResources() method to the activator.
+    }
+
+    protected void bindResources(TcManager tcm, WeightedTcProvider wtcp) {
+        // At this stage we know if tcm and wtcp have been provided or not.
+
+        /*
+         * With the current implementation of OntologyStorage, we cannot live with either component being
+         * null. So create the object only if both are not null.
+         */
+        if (tcm != null && wtcp != null) storage = new ClerezzaOntologyStorage(tcm, wtcp);
+        // Manage this in-memory, so it won't have to be null.
+        else {
+            storage = new InMemoryOntologyStorage();
+        }
+
+        // Now create everything that depends on the Storage object.
 
         // These may require the OWL cache manager
         ontologySpaceFactory = new OntologySpaceFactoryImpl(scopeRegistry, storage);
@@ -147,13 +174,17 @@ public class ONManagerImpl implements ONManager {
     }
 
     /**
-     * Instantiates all the default providers.
+     * To be invoked by non-OSGi environments.
      * 
-     * TODO : Felix component constraints prevent this constructor from being private, find a way around...
+     * @param tcm
+     * @param wtcp
+     * @param configuration
      */
     public ONManagerImpl(TcManager tcm, WeightedTcProvider wtcp, Dictionary<String,Object> configuration) {
         this();
-        storage = new OntologyStorage(tcm, wtcp);
+        // Assume this.tcm and this.wtcp were not filled in by OSGi-DS.
+        this.tcm = tcm;
+        this.wtcp = wtcp;
         try {
             activate(configuration);
         } catch (IOException e) {
@@ -176,15 +207,17 @@ public class ONManagerImpl implements ONManager {
         activate((Dictionary<String,Object>) context.getProperties());
     }
 
+    /**
+     * Called within both OSGi and non-OSGi environments.
+     * 
+     * @param configuration
+     * @throws IOException
+     */
     protected void activate(Dictionary<String,Object> configuration) throws IOException {
+//        if (storage == null) storage = new OntologyStorage(this.tcm, this.wtcp);
 
-        // log.debug("KReS :: activating main component...");
-        //
-        // me = this;
-        // this.ce = ce;
-
-        if (storage == null) storage = new OntologyStorage(this.tcm, this.wtcp);
-
+        bindResources(this.tcm, this.wtcp);
+        
         String tfile = (String) configuration.get(CONFIG_FILE_PATH);
         if (tfile != null) this.configPath = tfile;
         String tns = (String) configuration.get(KRES_NAMESPACE);
@@ -358,7 +391,7 @@ public class ONManagerImpl implements ONManager {
         return ontologySpaceFactory;
     }
 
-    public OntologyStorage getOntologyStore() {
+    public ClerezzaOntologyStorage getOntologyStore() {
         return storage;
     }
 

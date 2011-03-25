@@ -14,6 +14,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceModi
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.StringUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -68,7 +69,7 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 	 */
 	protected OWLOntologyManager ontologyManager;
 
-	protected OntologyStorage storage;
+	protected ClerezzaOntologyStorage storage;
 
 	protected IRI parentID = null;
 
@@ -78,7 +79,7 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 
 	protected boolean silent = false;
 
-	protected AbstractOntologySpaceImpl(IRI spaceID, SpaceType type/*, IRI parentID*/, OntologyStorage storage) {
+	protected AbstractOntologySpaceImpl(IRI spaceID, SpaceType type/*, IRI parentID*/, ClerezzaOntologyStorage storage) {
 		this(spaceID, type, /*parentID,*/ storage,OWLManager.createOWLOntologyManager());
 	}
 
@@ -104,7 +105,7 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 	 * @param ontologyManager
 	 *            the default ontology manager for this space.
 	 */
-	protected AbstractOntologySpaceImpl(IRI spaceID, SpaceType type, OntologyStorage storage, /*IRI parentID,*/
+	protected AbstractOntologySpaceImpl(IRI spaceID, SpaceType type, ClerezzaOntologyStorage storage, /*IRI parentID,*/
 			OWLOntologyManager ontologyManager) {
 
 //		this.parentID = parentID;

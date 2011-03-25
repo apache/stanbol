@@ -23,7 +23,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.ReengineeringException;
 import org.apache.stanbol.reengineer.base.api.ReengineerManager;
@@ -53,14 +53,14 @@ public class ReengineerResource extends NavigationMixin {
 
 	protected ReengineerManager reengineeringManager;
 	protected TcManager tcManager;
-	protected OntologyStorage storage;
+	protected ClerezzaOntologyStorage storage;
 	
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	
 	
 	public ReengineerResource(@Context ServletContext servletContext) {
 		tcManager = (TcManager) servletContext.getAttribute(TcManager.class.getName());
-		storage = (OntologyStorage) servletContext.getAttribute(OntologyStorage.class.getName());
+		storage = (ClerezzaOntologyStorage) servletContext.getAttribute(ClerezzaOntologyStorage.class.getName());
 		reengineeringManager  = (ReengineerManager) (servletContext.getAttribute(ReengineerManager.class.getName()));
 		if (reengineeringManager == null) {
             throw new IllegalStateException(

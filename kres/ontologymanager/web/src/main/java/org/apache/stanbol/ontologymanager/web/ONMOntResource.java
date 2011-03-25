@@ -17,7 +17,7 @@ import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
@@ -38,7 +38,7 @@ public class ONMOntResource extends NavigationMixin {
      * Placeholder for the ONManager to be fetched from the servlet context.
      */
     protected ONManager onm;
-    protected OntologyStorage storage;
+    protected ClerezzaOntologyStorage storage;
 
     protected ServletContext servletContext;
 
@@ -63,7 +63,7 @@ if (onm == null) {
 this.storage = onm.getOntologyStore();
 if (storage == null) {
     log.warn("No OntologyStorage in servlet context. Instantiating manually...");
-    storage = new OntologyStorage(new TcManager(),null);
+    storage = new ClerezzaOntologyStorage(new TcManager(),null);
 }
         serializer = (Serializer) this.servletContext.getAttribute(Serializer.class.getName());
     }

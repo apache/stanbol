@@ -15,7 +15,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.ReengineeringException;
 import org.apache.stanbol.reengineer.base.api.ReengineerManager;
@@ -47,7 +47,7 @@ public class ReengineerManagerImpl implements ReengineerManager{
     @Reference
     private WeightedTcProvider wtcp;
     
-    private OntologyStorage storage;
+    private ClerezzaOntologyStorage storage;
 	
 	private ArrayList<Reengineer> reengineers;
 //
@@ -75,7 +75,7 @@ public class ReengineerManagerImpl implements ReengineerManager{
 	 */
 	public ReengineerManagerImpl(TcManager tcm, WeightedTcProvider wtcp) {
 		this();
-        storage = new OntologyStorage(tcm, wtcp);
+        storage = new ClerezzaOntologyStorage(tcm, wtcp);
 		activate(new Hashtable<String, Object>());
 	}
 
@@ -97,7 +97,7 @@ public class ReengineerManagerImpl implements ReengineerManager{
 	}
 
 	protected void activate(Dictionary<String, Object> configuration) {
-        if (storage == null) storage = new OntologyStorage(this.tcm, this.wtcp);
+        if (storage == null) storage = new ClerezzaOntologyStorage(this.tcm, this.wtcp);
 		reengineers = new ArrayList<Reengineer>();
 	}
 

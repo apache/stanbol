@@ -1,4 +1,4 @@
-package org.apache.stanbol.ontologymanager.ontonet.impl.ontology;
+package org.apache.stanbol.ontologymanager.ontonet.impl.io;
 
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -26,12 +26,13 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.util.FileManager;
 
+import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.NoSuchStoreException;
 import org.apache.stanbol.owlapi.trasformation.JenaToClerezzaConverter;
 import org.apache.stanbol.owlapi.trasformation.JenaToOwlConvert;
 
-public class OntologyStorage {
+public class ClerezzaOntologyStorage {
 
-	private static Logger log = LoggerFactory.getLogger(OntologyStorage.class);
+	private static Logger log = LoggerFactory.getLogger(ClerezzaOntologyStorage.class);
 	
 	public static final String URI = "http://ontologydesignpatterns.org/ont/iks/oxml.owl";
 	
@@ -49,7 +50,7 @@ public class OntologyStorage {
 	 * or its overloads, to parse the configuration and then initialise the rule
 	 * store if running outside a OSGI environment.
 	 */
-	private OntologyStorage() {
+	protected ClerezzaOntologyStorage() {
 
 	}
 	
@@ -61,7 +62,7 @@ public class OntologyStorage {
 	 * @param wtcProvider
 	 * @param osProvider
 	 */
-	public OntologyStorage(TcManager tcManager, WeightedTcProvider wtcProvider) {
+	public ClerezzaOntologyStorage(TcManager tcManager, WeightedTcProvider wtcProvider) {
 		this();
 		this.tcManager = tcManager;
 		this.weightedTcProvider = wtcProvider;
@@ -70,7 +71,7 @@ public class OntologyStorage {
 
 	@SuppressWarnings("unchecked")
     protected void activate(ComponentContext context) {
-		log.info("in " + OntologyStorage.class + " activate with context "
+		log.info("in " + ClerezzaOntologyStorage.class + " activate with context "
 				+ context);
 		if (context == null) {
 			throw new IllegalStateException("No valid" + ComponentContext.class
@@ -88,7 +89,7 @@ public class OntologyStorage {
 	}
 
 	protected void deactivate(ComponentContext context) {
-		log.info("in " + OntologyStorage.class + " deactivate with context "
+		log.info("in " + ClerezzaOntologyStorage.class + " deactivate with context "
 				+ context);
 		tcManager = null;
 		weightedTcProvider = null;

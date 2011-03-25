@@ -32,7 +32,7 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.manager.changes.AddRecipe;
 import org.apache.stanbol.rules.manager.changes.GetRecipe;
@@ -68,7 +68,7 @@ public class RestRecipe extends NavigationMixin {
     private Logger log = LoggerFactory.getLogger(getClass());
 
     private RuleStore kresRuleStore;
-    private OntologyStorage storage;
+    private ClerezzaOntologyStorage storage;
 
     /**
      * To get the RuleStoreImpl where are stored the rules and the recipes
@@ -95,7 +95,7 @@ if (onm == null) {
 this.storage = onm.getOntologyStore();
 if (storage == null) {
     log.warn("No OntologyStorage in servlet context. Instantiating manually...");
-    storage = new OntologyStorage(new TcManager(),null);
+    storage = new ClerezzaOntologyStorage(new TcManager(),null);
 }
         if (kresRuleStore == null) {
             log

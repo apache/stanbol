@@ -10,6 +10,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceList
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.semanticweb.owlapi.model.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +27,9 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 	protected Logger log = LoggerFactory.getLogger(getClass());
 
 	protected ScopeRegistry registry;
-	protected OntologyStorage storage;
+	protected ClerezzaOntologyStorage storage;
 
-	public OntologySpaceFactoryImpl(ScopeRegistry registry, OntologyStorage storage) {
+	public OntologySpaceFactoryImpl(ScopeRegistry registry, ClerezzaOntologyStorage storage) {
 		this.registry = registry;
 		this.storage = storage;
 	}
