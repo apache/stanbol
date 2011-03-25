@@ -11,7 +11,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.refactor.api.SemionRefactorer;
+import org.apache.stanbol.rules.refactor.api.Refactorer;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;
@@ -53,7 +53,7 @@ public class JerseyEndpoint {
     HttpService httpService;
     
     @Reference
-    SemionRefactorer semionRefactorer;
+    Refactorer semionRefactorer;
     
 //    @Reference
 //    OntologyStoreProvider ontologyStoreProvider;
@@ -114,7 +114,7 @@ public class JerseyEndpoint {
         //servletContext.setAttribute(Serializer.class.getName(), serializer);
         //servletContext.setAttribute(SemionReengineer.class.getName(),
         //        semionReengineer);
-        servletContext.setAttribute(SemionRefactorer.class.getName(),
+        servletContext.setAttribute(Refactorer.class.getName(),
                 semionRefactorer);
 //        servletContext.setAttribute(LinkDiscovery.class.getName(),
 //        		linkDiscovery);

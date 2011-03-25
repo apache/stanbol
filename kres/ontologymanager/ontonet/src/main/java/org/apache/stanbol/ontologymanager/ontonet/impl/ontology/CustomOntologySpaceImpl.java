@@ -5,6 +5,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CustomOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.StringUtils;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -19,13 +20,13 @@ public class CustomOntologySpaceImpl extends AbstractOntologySpaceImpl
 //		SUFFIX = SpaceType.CUSTOM.getIRISuffix();
 //	}
 	
-	public CustomOntologySpaceImpl(IRI scopeID, OntologyStorage storage) {
+	public CustomOntologySpaceImpl(IRI scopeID, ClerezzaOntologyStorage storage) {
 		super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/"
 				+ SpaceType.CUSTOM.getIRISuffix()), SpaceType.CUSTOM/*, scopeID*/,storage
 				);
 	}
 
-	public CustomOntologySpaceImpl(IRI scopeID, OntologyStorage storage,
+	public CustomOntologySpaceImpl(IRI scopeID, ClerezzaOntologyStorage storage,
 			 OWLOntologyManager ontologyManager) {
 		super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/"
 				+ SpaceType.CUSTOM.getIRISuffix()), SpaceType.CUSTOM, storage, /*scopeID,*/

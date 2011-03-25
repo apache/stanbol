@@ -82,7 +82,7 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Property(value="dbPedia")
+    @Property(value="dbpedia")
     public static final String REFERENCED_SITE_ID = "org.apache.stanbol.enhancer.engines.entitytagging.referencedSiteId";
     @Property(boolValue=true)
     public static final String PERSON_STATE = "org.apache.stanbol.enhancer.engines.entitytagging.personState";

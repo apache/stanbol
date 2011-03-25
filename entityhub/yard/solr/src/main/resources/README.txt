@@ -13,7 +13,7 @@ For some notes about the predefined cores see the notes within the solr.xml
 To add additional Cores one need to add a core within the solr.xml and create
 the directory with the configuration.
 
-Precomputed Indices (e.g. for dbPedia) will be distributed in archive containing
+Precomputed Indices (e.g. for dbpedia) will be distributed in archive containing
 the configuration and the data of the Solr Index. This can be used as
 configuration for a Solr Server or can be configured as an additional core for
 an existing Solr Server using a multi-core configuration.

@@ -22,24 +22,24 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OWLDuplicateSafeLoader;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
-import org.apache.stanbol.reasoners.base.commands.KReSCreateReasoner;
-import org.apache.stanbol.reasoners.base.commands.KReSRunReasoner;
-import org.apache.stanbol.reasoners.base.commands.KReSRunRules;
-import org.apache.stanbol.rules.base.api.KReSRule;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
+import org.apache.stanbol.reasoners.base.commands.CreateReasoner;
+import org.apache.stanbol.reasoners.base.commands.RunReasoner;
+import org.apache.stanbol.reasoners.base.commands.RunRules;
+import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.base.api.util.KReSRuleList;
-import org.apache.stanbol.rules.manager.KReSKB;
-import org.apache.stanbol.rules.manager.changes.KReSRuleStore;
-import org.apache.stanbol.rules.manager.parse.KReSRuleParser;
+import org.apache.stanbol.rules.base.api.util.RuleList;
+import org.apache.stanbol.rules.manager.KB;
+import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
+import org.apache.stanbol.rules.manager.parse.RuleParserImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
@@ -78,8 +78,8 @@ public class ConsistencyCheck {
 	private OWLOntology scopeowl;
 
 	private final OWLDuplicateSafeLoader loader = new OWLDuplicateSafeLoader();
-	protected KReSONManager onm;
-	protected OntologyStorage storage;
+	protected ONManager onm;
+	protected ClerezzaOntologyStorage storage;
 
 	private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -95,8 +95,8 @@ public class ConsistencyCheck {
 		this.kresRuleStore = (RuleStore) servletContext
 				.getAttribute(RuleStore.class.getName());
 		// Retrieve the ontology network manager
-		this.onm = (KReSONManager) servletContext
-				.getAttribute(KReSONManager.class.getName());
+		this.onm = (ONManager) servletContext
+				.getAttribute(ONManager.class.getName());
 //      this.storage = (OntologyStorage) servletContext
 //      .getAttribute(OntologyStorage.class.getName());
 // Contingency code for missing components follows.
@@ -107,18 +107,18 @@ public class ConsistencyCheck {
 if (onm == null) {
     log
             .warn("No KReSONManager in servlet context. Instantiating manually...");
-    onm = new ONManager(new TcManager(), null,
+    onm = new ONManagerImpl(new TcManager(), null,
             new Hashtable<String, Object>());
 }
 this.storage = onm.getOntologyStore();
 if (storage == null) {
     log.warn("No OntologyStorage in servlet context. Instantiating manually...");
-    storage = new OntologyStorage(new TcManager(),null);
+    storage = new ClerezzaOntologyStorage(new TcManager(),null);
 }
 		if (kresRuleStore == null) {
 			log
 					.warn("No KReSRuleStore with stored rules and recipes found in servlet context. Instantiating manually with default values...");
-			this.kresRuleStore = new KReSRuleStore(onm,
+			this.kresRuleStore = new RuleStoreImpl(onm,
 					new Hashtable<String, Object>(), "");
 			log
 					.debug("PATH TO OWL FILE LOADED: "
@@ -138,7 +138,7 @@ if (storage == null) {
 			throws NoSuchRecipeException, OWLOntologyCreationException {
 
 		// FIXME: why the heck is this method re-instantiating a rule store?!?
-		RuleStore store = new KReSRuleStore(onm,
+		RuleStore store = new RuleStoreImpl(onm,
 				new Hashtable<String, Object>(), owl);
 		Model jenamodel = ModelFactory.createDefaultModel();
 
@@ -174,11 +174,11 @@ if (storage == null) {
 
 		// kReSRules =
 		// "ProvaParent = <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#> . rule1[ has(ProvaParent:hasParent, ?x, ?y) . has(ProvaParent:hasBrother, ?y, ?z) -> has(ProvaParent:hasUncle, ?x, ?z) ]";
-		KReSKB kReSKB = KReSRuleParser.parse(kReSRules);
-		KReSRuleList listrules = kReSKB.getkReSRuleList();
-		Iterator<KReSRule> iterule = listrules.iterator();
+		KB kReSKB = RuleParserImpl.parse(kReSRules);
+		RuleList listrules = kReSKB.getkReSRuleList();
+		Iterator<Rule> iterule = listrules.iterator();
 		while (iterule.hasNext()) {
-			KReSRule singlerule = iterule.next();
+			Rule singlerule = iterule.next();
 			Resource resource = singlerule.toSWRL(jenamodel);
 		}
 
@@ -229,10 +229,10 @@ if (storage == null) {
 								ee);
 				return Response.status(Status.NOT_FOUND).build();
 			}
-			KReSCreateReasoner newreasoner = new KReSCreateReasoner(owl);
+			CreateReasoner newreasoner = new CreateReasoner(owl);
 			// KReSReasonerImpl reasoner = new KReSReasonerImpl();
 			try {
-				KReSRunReasoner reasoner = new KReSRunReasoner(newreasoner
+				RunReasoner reasoner = new RunReasoner(newreasoner
 						.getReasoner());
 				ok = reasoner.isConsistent();
 			} catch (InconsistentOntologyException exc) {
@@ -443,16 +443,16 @@ if (storage == null) {
 						Model swrlmodel = fromRecipeToModel(recipeowl);
 						// Create a reasoner to run rules contained in the
 						// recipe
-						KReSRunRules rulereasoner = new KReSRunRules(swrlmodel,
+						RunRules rulereasoner = new RunRules(swrlmodel,
 								inputowl);
 						// Run the rule reasoner to the input RDF with the added
 						// top-ontology
 						inputowl = rulereasoner.runRulesReasoner();
 					}
-					KReSCreateReasoner newreasoner = new KReSCreateReasoner(
+					CreateReasoner newreasoner = new CreateReasoner(
 							inputowl);
 					// Prepare and start the reasoner to check the consistence
-					KReSRunReasoner reasoner = new KReSRunReasoner(newreasoner
+					RunReasoner reasoner = new RunReasoner(newreasoner
 							.getReasoner());
 					ok = reasoner.isConsistent();
 				} catch (InconsistentOntologyException exc) {
@@ -485,17 +485,17 @@ if (storage == null) {
 
 						// Create a reasoner to run rules contained in the
 						// recipe by using the server and-point
-						KReSRunRules rulereasoner = new KReSRunRules(swrlmodel,
+						RunRules rulereasoner = new RunRules(swrlmodel,
 								inputowl, new URL(owllink_endpoint));
 						// Run the rule reasoner to the input RDF with the added
 						// top-ontology
 						inputowl = rulereasoner.runRulesReasoner();
 					}
 
-					KReSCreateReasoner newreasoner = new KReSCreateReasoner(
+					CreateReasoner newreasoner = new CreateReasoner(
 							inputowl, new URL(owllink_endpoint));
 					// Prepare and start the reasoner to check the consistence
-					KReSRunReasoner reasoner = new KReSRunReasoner(newreasoner
+					RunReasoner reasoner = new RunReasoner(newreasoner
 							.getReasoner());
 					ok = reasoner.isConsistent();
 				} catch (InconsistentOntologyException exc) {

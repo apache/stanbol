@@ -22,21 +22,21 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.ReengineeringException;
-import org.apache.stanbol.reengineer.base.api.SemionManager;
-import org.apache.stanbol.reengineer.base.api.SemionReengineer;
-import org.apache.stanbol.reengineer.base.api.Semion_OWL;
+import org.apache.stanbol.reengineer.base.api.ReengineerManager;
+import org.apache.stanbol.reengineer.base.api.Reengineer;
+import org.apache.stanbol.reengineer.base.api.Reengineer_OWL;
 import org.apache.stanbol.reengineer.base.api.util.ReengineerType;
-import org.apache.stanbol.reengineer.base.api.util.SemionUriRefGenerator;
+import org.apache.stanbol.reengineer.base.api.util.ReengineerUriRefGenerator;
 import org.apache.stanbol.reengineer.base.api.util.UnsupportedReengineerException;
 import org.apache.stanbol.reengineer.xml.vocab.XML_OWL;
 import org.apache.stanbol.reengineer.xml.vocab.XSD_OWL;
@@ -69,16 +69,16 @@ import org.xml.sax.SAXException;
 
 /**
  * The {@code XMLExtractor} extends of the {@link XSDExtractor} that implements
- * the {@link SemionReengineer} for XML data sources.
+ * the {@link Reengineer} for XML data sources.
  * 
  * @author andrea.nuzzolese
  * 
  */
 
 @Component(immediate = true, metatype = true)
-@Service(SemionReengineer.class)
-public class XMLExtractor extends SemionUriRefGenerator implements
-		SemionReengineer {
+@Service(Reengineer.class)
+public class XMLExtractor extends ReengineerUriRefGenerator implements
+		Reengineer {
 
 	public static final String _HOST_NAME_AND_PORT_DEFAULT = "localhost:8080";
 	public static final String _REENGINEERING_SCOPE_DEFAULT = "xml_reengineering";
@@ -98,10 +98,10 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 	public final Logger log = LoggerFactory.getLogger(getClass());
 
 	@Reference
-	KReSONManager onManager;
+	ONManager onManager;
 
 	@Reference
-	SemionManager reengineeringManager;
+	ReengineerManager reengineeringManager;
 
 	private OntologyScope scope;
 	private IRI scopeIRI;
@@ -113,7 +113,7 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 	 * <p>
 	 * DO NOT USE to manually create instances - the XMLExtractor instances do
 	 * need to be configured! YOU NEED TO USE
-	 * {@link #XMLExtractor(KReSONManager)} or its overloads, to parse the
+	 * {@link #XMLExtractor(ONManager)} or its overloads, to parse the
 	 * configuration and then initialise the rule store if running outside a
 	 * OSGI environment.
 	 */
@@ -121,8 +121,8 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 
 	}
 
-	public XMLExtractor(SemionManager reengineeringManager,
-			KReSONManager onManager, Dictionary<String, Object> configuration) {
+	public XMLExtractor(ReengineerManager reengineeringManager,
+			ONManager onManager, Dictionary<String, Object> configuration) {
 		this();
 		this.reengineeringManager = reengineeringManager;
 		this.onManager = onManager;
@@ -162,7 +162,7 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 		reengineeringManager.bindReengineer(this);
 
 		KReSSessionManager kReSSessionManager = onManager.getSessionManager();
-		KReSSession kReSSession = kReSSessionManager.createSession();
+		Session kReSSession = kReSSessionManager.createSession();
 
 		kReSSessionID = kReSSession.getID();
 
@@ -237,7 +237,7 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 
 		OWLDataFactory factory = onManager.getOwlFactory();
 
-		OWLClass dataSourceClass = factory.getOWLClass(Semion_OWL.DataSource);
+		OWLClass dataSourceClass = factory.getOWLClass(Reengineer_OWL.DataSource);
 		Set<OWLIndividual> individuals = dataSourceClass
 				.getIndividuals(schemaOntology);
 
@@ -246,7 +246,7 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 		if (individuals != null && individuals.size() == 1) {
 			for (OWLIndividual individual : individuals) {
 				OWLDataProperty hasDataSourceTypeProperty = factory
-						.getOWLDataProperty(Semion_OWL.hasDataSourceType);
+						.getOWLDataProperty(Reengineer_OWL.hasDataSourceType);
 				Set<OWLLiteral> values = individual.getDataPropertyValues(
 						hasDataSourceTypeProperty, schemaOntology);
 				if (values != null && values.size() == 1) {
@@ -403,7 +403,7 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 			String dataNS = graphNS + "#";
 
 			OWLClass dataSourceOwlClass = factory
-					.getOWLClass(Semion_OWL.DataSource);
+					.getOWLClass(Reengineer_OWL.DataSource);
 
 			Set<OWLIndividual> individuals = dataSourceOwlClass
 					.getIndividuals(schemaOntology);
@@ -503,7 +503,7 @@ public class XMLExtractor extends SemionUriRefGenerator implements
 			;
 
 			OWLClass dataSourceOwlClass = factory
-					.getOWLClass(Semion_OWL.DataSource);
+					.getOWLClass(Reengineer_OWL.DataSource);
 
 			Set<OWLIndividual> individuals = dataSourceOwlClass
 					.getIndividuals(schemaOntology);

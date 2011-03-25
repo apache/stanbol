@@ -16,7 +16,7 @@
 	<parent>
 		<groupId>org.apache.stanbol</groupId>
 		<artifactId>org.apache.stanbol.enhancer.parent</artifactId>
-		<version>0.9-SNAPSHOT</version>
+		<version>${stanbol-version}</version>
 		<relativePath>../parent</relativePath>
 	</parent>	
 	
@@ -85,21 +85,29 @@
 			<artifactId>commons-io</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<!-- The Lucene dependencies need to define the version 3.0.1 here
+		     because the parent POM uses 2.9.4 (compatible to Solr 1.4.1)
+		     TODO: Check this as soon as Solr 3.* gets released.
+		     (Rupert Westenthaler 2011-03-23) -->
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-core</artifactId>
+			<version>3.0.1</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-queries</artifactId>
+			<version>3.0.1</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-analyzers</artifactId>
+			<version>3.0.1</version>
 			<scope>compile</scope>
 		</dependency>
+		
 		<dependency>
 			<groupId>com.hp.hpl.jena</groupId>
 			<artifactId>jena</artifactId>

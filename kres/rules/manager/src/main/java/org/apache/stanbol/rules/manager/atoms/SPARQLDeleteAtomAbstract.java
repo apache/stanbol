@@ -1,8 +1,8 @@
 package org.apache.stanbol.rules.manager.atoms;
 
-import org.apache.stanbol.rules.base.api.KReSRuleAtom;
+import org.apache.stanbol.rules.base.api.RuleAtom;
 
-public abstract class SPARQLDeleteAtomAbstract implements KReSRuleAtom {
+public abstract class SPARQLDeleteAtomAbstract implements RuleAtom {
 	
 	@Override
 	public boolean isSPARQLConstruct() {

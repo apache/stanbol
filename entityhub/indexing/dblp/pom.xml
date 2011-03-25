@@ -23,14 +23,14 @@
 	<parent>
 		<groupId>org.apache.stanbol</groupId>
 		<artifactId>org.apache.stanbol.entityhub.parent</artifactId>
-		<version>0.1-SNAPSHOT</version>
+		<version>0.9-SNAPSHOT</version>
 		<relativePath>../../parent</relativePath>
 	</parent>
 -->
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.entityhub.indexing.dblp</artifactId>
 	<packaging>jar</packaging>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.9-SNAPSHOT</version>
 	<name>Apache Stanbol Entityhub Indexing for dblp</name>
 	<description>This uses the RDF dump provided by 
         http://dblp.l3s.de/dblp.rdf.gz to create a Full Cache 
@@ -39,10 +39,10 @@
     </description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/dbPedia
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/dbpedia
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/dbPedia
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/dbpedia
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
@@ -63,27 +63,27 @@
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-			<version>0.1-SNAPSHOT</version>
+			<version>0.9-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.entityhub.core</artifactId>
-			<version>0.1-SNAPSHOT</version>
+			<version>0.9-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
-			<version>0.1-SNAPSHOT</version>
+			<version>0.9-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.entityhub.core</artifactId>
-			<version>0.1-SNAPSHOT</version>
+			<version>0.9-SNAPSHOT</version>
 		</dependency>
         <dependency>
             <groupId>org.apache.stanbol</groupId>
             <artifactId>org.apache.stanbol.entityhub.indexing.genericRdf</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.9-SNAPSHOT</version>
         </dependency>
        <!-- for the main -->
 		<dependency>

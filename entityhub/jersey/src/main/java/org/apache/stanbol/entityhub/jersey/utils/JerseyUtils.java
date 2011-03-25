@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.servlet.ServletContext;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -185,5 +186,37 @@ public final class JerseyUtils {
             query.setOffset(offset);
         }
         return query;
+    }
+    /**
+     * Getter for a Service from the {@link ServletContext} by using the
+     * {@link Class#getName()} as key for {@link ServletContext#getAttribute(String)}.
+     * In case the Service can not be found a {@link WebApplicationException} is
+     * thrown with the message that the Service is currently not available.
+     * @param <T> The type of the Service
+     * @param service the Service interface
+     * @param context the context used to search the service
+     * @return the Service instance
+     * @throws WebApplicationException in case the service instance was not found 
+     * in the parsed servlet context
+     * @throws IllegalArgumentException if <code>null</code> is parsed as
+     * service or context
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getService(Class<T> service, ServletContext context) throws WebApplicationException, IllegalArgumentException {
+        if(service == null){
+            throw new IllegalArgumentException("The parsed ServiceInterface MUST NOT be NULL!");
+        }
+        if(context == null){
+            throw new IllegalArgumentException("The parsed ServletContext MUST NOT be NULL");
+        }
+        T serviceInstance = (T) context.getAttribute(service.getName());
+        if(serviceInstance == null){
+            throw new WebApplicationException(new IllegalStateException(
+                "The "+service.getSimpleName()+" Service is currently not available " +
+                		"(full name= "+service+"| " +
+                				"servlet context name = "+context.getServletContextName()+")"), 
+                Response.Status.INTERNAL_SERVER_ERROR);
+        }
+        return serviceInstance;
     }
 }

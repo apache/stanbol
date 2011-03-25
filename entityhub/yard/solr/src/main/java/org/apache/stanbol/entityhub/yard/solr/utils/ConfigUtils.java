@@ -19,6 +19,8 @@ package org.apache.stanbol.entityhub.yard.solr.utils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
@@ -27,7 +29,7 @@ import java.util.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
-import org.apache.stanbol.entityhub.yard.solr.embedded.EmbeddedSolrPorovider;
+import org.apache.stanbol.entityhub.yard.solr.impl.EmbeddedSolrPorovider;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +79,7 @@ public final class ConfigUtils {
      * information to set up an configuration 
      */
     @SuppressWarnings("unchecked") //Enumeration<URL> required by OSGI specification
-    public static File copyDefaultConfig(Bundle bundle, File rootDir,boolean override) throws IOException, NullPointerException, IllegalStateException, IllegalArgumentException {
+    public static File copyDefaultConfig(Bundle bundle, File rootDir,boolean override) throws IOException, IllegalStateException, IllegalArgumentException {
         if(bundle == null){
             throw new IllegalArgumentException("The parsed Bundle MUST NOT be NULL!");
         }
@@ -88,7 +90,7 @@ public final class ConfigUtils {
             throw new IllegalStateException("The parsed root directory "+rootDir.getAbsolutePath()+" extists but is not a directory!");
         }
         log.info(String.format("Copy Default Config from Bundle %s to %s (override=%s)",
-            (bundle.getSymbolicName()+bundle.getVersion()),rootDir.getAbsolutePath(),override));
+            bundle.getSymbolicName(),rootDir.getAbsolutePath(),override));
         Enumeration<URL> resources = (Enumeration<URL>) bundle.findEntries(CONFIG_DIR, "*.*", true);
         //TODO: check validity of config and thorw IllegalArgumentException if not valid
         while(resources.hasMoreElements()){
@@ -116,7 +118,7 @@ public final class ConfigUtils {
      * rootDir or if the parsed bundle does not contain the required information 
      * to set up an configuration 
      */
-    public static File copyDefaultConfig(Class<?> clazzInArchive,File rootDir,boolean override) throws IOException, NullPointerException, IllegalStateException, IllegalArgumentException {
+    public static File copyDefaultConfig(Class<?> clazzInArchive,File rootDir,boolean override) throws IOException, IllegalStateException, IllegalArgumentException {
         if(rootDir == null){
             throw new IllegalArgumentException("The parsed root directory MUST NOT be NULL!");
         }
@@ -356,5 +358,27 @@ public final class ConfigUtils {
                 throw new FileNotFoundException("The SolrIndex default config was not found in directory "+source.getAbsolutePath());
             }
         }
+    }
+    /**
+     * Converts a parsed String to a File instance. The parsed string can be
+     * formatted as file URL or as path
+     * @param uriOrPath the file location as URL or path
+     * @return the File
+     */
+    public static File toFile(String uriOrPath){
+        File file = null;
+        try {
+            URI fileUri = new URI(uriOrPath);
+            file = new File(fileUri);
+        } catch (URISyntaxException e) {
+            //not an URI -> ignore
+        } catch (IllegalArgumentException e){
+            //this happens if it is a URI but can not be converted to a file
+            //still we should try to work with the parsed file ...
+        }
+        if(file == null){
+            file = new File(uriOrPath);
+        }
+        return file;
     }
 }

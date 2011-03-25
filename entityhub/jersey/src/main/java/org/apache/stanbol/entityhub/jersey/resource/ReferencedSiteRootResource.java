@@ -18,6 +18,7 @@ package org.apache.stanbol.entityhub.jersey.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
+import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.getService;
 
 import java.io.File;
 import java.util.Arrays;
@@ -43,6 +44,7 @@ import javax.ws.rs.core.Response;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
+import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.model.Sign;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
@@ -88,11 +90,7 @@ public class ReferencedSiteRootResource extends NavigationMixin {
     public ReferencedSiteRootResource(@Context ServletContext context, @PathParam(value = "site") String siteId) {
         super();
         log.info("... init ReferencedSiteRootResource for Site {}", siteId);
-        ReferencedSiteManager referencedSiteManager = (ReferencedSiteManager) context.getAttribute(ReferencedSiteManager.class.getName());
-        if (referencedSiteManager == null) {
-            log.error("Missing referencedSiteManager={}", referencedSiteManager);
-            throw new WebApplicationException(Response.Status.NOT_FOUND);
-        }
+        ReferencedSiteManager referencedSiteManager = getService(ReferencedSiteManager.class, context);
         if (siteId == null || siteId.isEmpty()) {
             log.error("Missing path parameter site={}", siteId);
             throw new WebApplicationException(Response.Status.NOT_FOUND);

@@ -163,15 +163,14 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
                 Collection<ReferencedSite> sites = prefixMap.get(prefix);
                 if(sites != null){
                     sites.remove(referencedSite);
-                }
-                if(sites.isEmpty()){
-                    //remove key from the Map
-                    prefixMap.remove(prefix);
-                    //remove also the prefix from the List
-                    prefixList.remove(prefix);
+                    if(sites.isEmpty()){
+                        //remove key from the Map
+                        prefixMap.remove(prefix);
+                        //remove also the prefix from the List
+                        prefixList.remove(prefix);
+                    }
                 }
             }
-
         }
     }
     @Override

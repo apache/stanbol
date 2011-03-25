@@ -22,7 +22,7 @@ public class UObjectAtom extends StringFunctionAtom {
 	public UObjectAtom(Object argument) {
 		this.argument = argument;
 		
-		if(argument instanceof KReSVariable){
+		if(argument instanceof VariableAtom){
 			actualType = 2;
 		}
 		else if(argument instanceof String){

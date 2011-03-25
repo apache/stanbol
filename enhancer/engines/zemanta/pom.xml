@@ -23,14 +23,14 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <version>${stanbol-version}</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engines.zemanta</artifactId>
   <packaging>bundle</packaging>
-  <version>0.9-SNAPSHOT</version>
+  <version>${stanbol-version}</version>
 
   <name>Apache Stanbol Enhancer Enhancement Engine : Zemanta Tagging</name>
   <description></description>

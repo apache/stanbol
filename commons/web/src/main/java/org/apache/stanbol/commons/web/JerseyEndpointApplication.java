@@ -1,31 +1,35 @@
 package org.apache.stanbol.commons.web;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
 import org.apache.stanbol.commons.web.processor.FreemarkerViewProcessor;
-import org.apache.stanbol.commons.web.resource.StanbolRootResource;
 import org.apache.stanbol.commons.web.writers.GraphWriter;
 import org.apache.stanbol.commons.web.writers.ResultSetWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Statically define the list of available resources and providers to be used by the Stanbol JAX-RS Endpoint.
- * <p>
- * The jersey auto-scan mechanism does not seem to work when deployed through OSGi's HttpService
- * initialization.
- * <p>
- * In the future this class might get refactored as an OSGi service to allow for dynamic configuration and
- * deployment of additional JAX-RS resources and providers.
+ * Define the list of available resources and providers to be used by the Stanbol JAX-RS Endpoint.
  */
 public class JerseyEndpointApplication extends Application {
 
+    private static final Logger log = LoggerFactory.getLogger(JerseyEndpointApplication.class);
+    
+    List<JaxrsResource> jaxrsResources = new ArrayList<JaxrsResource>();
+    
     @Override
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
+        
         // resources
-        classes.add(StanbolRootResource.class);
+        for (JaxrsResource jr : this.jaxrsResources) {
+            classes.add(jr.getClass());
+        }
 
         // message body writers
         classes.add(GraphWriter.class);
@@ -40,5 +44,23 @@ public class JerseyEndpointApplication extends Application {
         singletons.add(new FreemarkerViewProcessor());
         return singletons;
     }
+    
+    
+    public void bindJaxrsResource(JaxrsResource jr) {
+        synchronized (this.jaxrsResources) {
+            this.jaxrsResources.add(jr);
+        }
+        if (log.isInfoEnabled()) {
+            log.info("JaxrsResource {} added to list: {}", jr, this.jaxrsResources);
+        }
+    }
 
+    public void unbindEnhancementEngine(JaxrsResource jr) {
+        synchronized (this.jaxrsResources) {
+            this.jaxrsResources.remove(jr);
+        }
+        if (log.isInfoEnabled()) {
+            log.info("JaxrsResource {} removed to list: {}", jr, this.jaxrsResources);
+        }
+    }
 }

@@ -16,14 +16,14 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <version>${stanbol-version}</version>
     <relativePath>parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-reactor</artifactId>
   <packaging>pom</packaging>
-  <version>0.9-SNAPSHOT</version>
+  <version>${stanbol-version}</version>
 
   <name>Apache Stanbol : Reactor</name>
   <description>

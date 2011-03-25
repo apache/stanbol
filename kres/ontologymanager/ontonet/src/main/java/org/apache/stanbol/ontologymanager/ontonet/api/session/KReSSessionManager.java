@@ -30,7 +30,7 @@ public interface KReSSessionManager extends SessionListenable {
 	 * 
 	 * @return the generated KReS session
 	 */
-	public KReSSession createSession();
+	public Session createSession();
 
 	/**
 	 * Generates AND REGISTERS a new KReS session and tries to assign it the
@@ -44,7 +44,7 @@ public interface KReSSessionManager extends SessionListenable {
 	 * @throws DuplicateSessionIDException
 	 *             if a KReS session with that sessionID is already registered
 	 */
-	public KReSSession createSession(IRI sessionID)
+	public Session createSession(IRI sessionID)
 			throws DuplicateSessionIDException;
 
 	/**
@@ -63,7 +63,7 @@ public interface KReSSessionManager extends SessionListenable {
 	 *            the IRI that uniquely identifies the session
 	 * @return the unique KReS session identified by <code>sessionID</code>
 	 */
-	public KReSSession getSession(IRI sessionID);
+	public Session getSession(IRI sessionID);
 
 	/**
 	 * Returns the ontology space associated with this session.

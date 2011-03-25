@@ -1,8 +1,8 @@
 package org.apache.stanbol.rules.manager.atoms;
 
-import org.apache.stanbol.rules.base.api.KReSRuleAtom;
+import org.apache.stanbol.rules.base.api.RuleAtom;
 
-public abstract class StringFunctionAtom implements KReSRuleAtom {
+public abstract class StringFunctionAtom implements RuleAtom {
 
 	
 	@Override

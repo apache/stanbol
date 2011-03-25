@@ -10,7 +10,7 @@ import javax.servlet.ServletException;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;
@@ -52,7 +52,7 @@ public class JerseyEndpoint {
     HttpService httpService;
 
     @Reference
-    KReSONManager onm;
+    ONManager onm;
 
     protected ServletContext servletContext;
 
@@ -101,7 +101,7 @@ public class JerseyEndpoint {
         servletContext = container.getServletContext();
         servletContext.setAttribute(BundleContext.class.getName(),
                 ctx.getBundleContext());
-	servletContext.setAttribute(KReSONManager.class.getName(), onm);
+	servletContext.setAttribute(ONManager.class.getName(), onm);
 
         servletContext.setAttribute(STATIC_RESOURCES_URL_ROOT_PROPERTY,
                 staticUrlRoot);

@@ -23,14 +23,14 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>${stanbol-version}</version>
     <relativePath>./parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.reactor</artifactId>
   <packaging>pom</packaging>
-  <version>0.1-SNAPSHOT</version>
+  <version>${stanbol-version}</version>
 
   <name>Apache Stanbol Entityhub reactor</name>
   <description>
@@ -57,15 +57,15 @@
     <module>generic/core</module>
     <module>model/clerezza</module>
     <module>query/clerezza</module>
-    <module>site/linkedData</module>
+    <module>site/linkeddata</module>
     <module>yard/clerezza</module>
     <module>yard/solr</module>
     <module>jersey</module>
     <module>launchers/sling</module>
     <!-- Utils for createing local caches (indexing utils) -->
     <module>indexing/geonames</module>
-    <module>indexing/genericRdf</module>
-    <module>indexing/dbPedia</module>
+    <module>indexing/genericrdf</module>
+    <module>indexing/dbpedia</module>
     <module>indexing/dblp</module>
   </modules>
 </project>

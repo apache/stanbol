@@ -78,7 +78,7 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
     public static final Integer defaultOrder = ORDERING_EXTRACTION_ENHANCEMENT;
 
     /**
-     * This maps geonames.org feature classes to dbPedia.org ontology classes
+     * This maps geonames.org feature classes to dbpedia.org ontology classes
      */
     public static final Map<FeatureClass, Collection<UriRef>> FEATURE_CLASS_CONCEPT_MAPPINGS;
 
@@ -139,10 +139,10 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
         for (FeatureClass fc : FeatureClass.values()) {
             List<UriRef> conceptMappings = new ArrayList<UriRef>();
             conceptMappings.add(CONCEPT_GEONAMES_FEATURE); //all things are features
-            conceptMappings.add(DBPEDIA_PLACE); //all things are dbPedia places
+            conceptMappings.add(DBPEDIA_PLACE); //all things are dbpedia places
             mappings.put(fc, conceptMappings);
         }
-        //now add additional mappings to the dbPedia Ontology
+        //now add additional mappings to the dbpedia Ontology
         UriRef populatedPlace = new UriRef(dbpedia_ont + "PopulatedPlace");
         mappings.get(FeatureClass.P).addAll(Arrays.asList(populatedPlace, new UriRef(dbpedia_ont + "Settlement")));
         mappings.get(FeatureClass.A).addAll(Arrays.asList(populatedPlace, new UriRef(dbpedia_ont + "AdministrativeRegion")));
@@ -268,7 +268,7 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
         //get all the textAnnotations
         /*
          * this Map holds the name as key and all the text annotations of
-         * dc:type dbPedia:Place that select this name as value
+         * dc:type dbpedia:Place that select this name as value
          * this map is used to avoid multiple lookups for text annotations
          * selecting the same name.
          */
@@ -294,7 +294,7 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
                     placeEnhancements.add(placeEnhancement);
                 }
             } else {
-                //TODO: if we also ant to process EntityAnnotations with the dc:type dbPedia:Place
+                //TODO: if we also ant to process EntityAnnotations with the dc:type dbpedia:Place
                 //      than we need to parse the name based on the enhancer:entity-name property
             }
         }

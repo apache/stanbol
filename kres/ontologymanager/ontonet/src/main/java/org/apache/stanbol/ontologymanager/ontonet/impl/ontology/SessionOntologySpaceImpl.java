@@ -6,6 +6,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.StringUtils;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -23,7 +24,7 @@ public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl
 //		SUFFIX = SpaceType.SESSION.getIRISuffix();
 //	}
 	
-	public SessionOntologySpaceImpl(IRI scopeID, OntologyStorage storage) {
+	public SessionOntologySpaceImpl(IRI scopeID, ClerezzaOntologyStorage storage) {
 		// FIXME : sync session id with session space ID
 		super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/"
 				+ SpaceType.SESSION.getIRISuffix() + "-"
@@ -48,7 +49,7 @@ public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl
 		}
 	}
 
-	public SessionOntologySpaceImpl(IRI scopeID, OntologyStorage storage,
+	public SessionOntologySpaceImpl(IRI scopeID, ClerezzaOntologyStorage storage,
 			OWLOntologyManager ontologyManager) {
 		// FIXME : sync session id with session space ID
 		super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/"

@@ -13,18 +13,18 @@ import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession.State;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.Session.State;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -54,8 +54,8 @@ public class TestSessions {
 
 	@BeforeClass
 	public static void setup() {
-		// An ONManager with no store and default settings
-		KReSONManager onm = new ONManager(null,null, new Hashtable<String, Object>());
+		// An ONManagerImpl with no store and default settings
+		ONManager onm = new ONManagerImpl(null,null, new Hashtable<String, Object>());
 		sesmgr = onm.getSessionManager();
 		scopeFactory = onm.getOntologyScopeFactory();
 		spaceFactory = onm.getOntologySpaceFactory();
@@ -85,7 +85,7 @@ public class TestSessions {
 					+ e.getDulicateID());
 		}
 		assertNotNull(scope);
-		KReSSession ses = sesmgr.createSession();
+		Session ses = sesmgr.createSession();
 		assertTrue(scope.getSessionSpaces().isEmpty());
 		scope.addSessionSpace(spaceFactory
 				.createSessionOntologySpace(scopeIri1), ses.getID());
@@ -111,7 +111,7 @@ public class TestSessions {
 			fail("Unexpected DuplicateIDException was caught while testing scope "
 					+ e.getDulicateID());
 		}
-		KReSSession ses = sesmgr.createSession();
+		Session ses = sesmgr.createSession();
 		IRI sesid = ses.getID();
 		assertFalse(scope1.getSessionSpaces().isEmpty());
 		assertNotNull(scope1.getSessionSpace(sesid));
@@ -123,7 +123,7 @@ public class TestSessions {
 	@Test
 	public void testRegisterSession() {
 		int before = sesmgr.getRegisteredSessionIDs().size();
-		KReSSession ses = sesmgr.createSession();
+		Session ses = sesmgr.createSession();
 		assertNotNull(ses);
 		assertEquals(before + 1, sesmgr.getRegisteredSessionIDs().size());
 	}
@@ -132,11 +132,11 @@ public class TestSessions {
 	public void testSessionCreationDestruction() {
 		int size = 500;
 		int initialSize = sesmgr.getRegisteredSessionIDs().size();
-		Set<KReSSession> sessions = new HashSet<KReSSession>();
+		Set<Session> sessions = new HashSet<Session>();
 		// Create and open 500 sessions.
 		synchronized (sesmgr) {
 			for (int i = 0; i < size; i++) {
-				KReSSession ses = sesmgr.createSession();
+				Session ses = sesmgr.createSession();
 				try {
 					ses.open();
 				} catch (NonReferenceableSessionException e) {
@@ -149,24 +149,24 @@ public class TestSessions {
 					.size());
 		}
 		boolean open = true;
-		for (KReSSession ses : sessions)
+		for (Session ses : sessions)
 			open &= ses.getSessionState() == State.ACTIVE;
 		// Check that all created sessions have been opened
 		assertTrue(open);
 		// Kill 'em all, to quote Metallica
 		synchronized (sesmgr) {
-			for (KReSSession ses : sessions)
+			for (Session ses : sessions)
 				sesmgr.destroySession(ses.getID());
 			assertEquals(initialSize, sesmgr.getRegisteredSessionIDs().size());
 		}
 		// Check that they are all zombies
 		boolean zombi = true;
-		for (KReSSession ses : sessions)
+		for (Session ses : sessions)
 			zombi &= ses.getSessionState() == State.ZOMBIE;
 		assertTrue(zombi);
 		// Try to resurrect them (hopefully failing)
 		boolean resurrect = false;
-		for (KReSSession ses : sessions)
+		for (Session ses : sessions)
 			try {
 				ses.open();
 				resurrect |= true;

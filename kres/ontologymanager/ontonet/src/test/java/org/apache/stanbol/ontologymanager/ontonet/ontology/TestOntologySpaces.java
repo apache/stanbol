@@ -8,7 +8,7 @@ import static org.junit.Assert.fail;
 import java.util.Hashtable;
 
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
@@ -18,7 +18,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceModificationException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -46,7 +46,7 @@ public class TestOntologySpaces {
 
 	private static OWLOntology ont = null, ont2 = null;
 
-	private static KReSONManager onm;
+	private static ONManager onm;
 	
 	private static OntologyInputSource ontSrc, ont2Src, pizzaSrc, wineSrc;
 
@@ -56,8 +56,8 @@ public class TestOntologySpaces {
 
 	@BeforeClass
 	public static void setup() {
-		// An ONManager with no store and default settings
-		onm = new ONManager(null,null, new Hashtable<String, Object>());
+		// An ONManagerImpl with no store and default settings
+		onm = new ONManagerImpl(null,null, new Hashtable<String, Object>());
 		spaceFactory = onm.getOntologySpaceFactory();
 		if (spaceFactory == null)
 			fail("Could not instantiate ontology space factory");

@@ -55,44 +55,21 @@ import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
  *
  */
 public class ValueConverterFactory {
+    
+    private static ValueConverterFactory defaultInstance;
     /**
-     * Map with the instances. Weak references are used for both keys and values.
-     */
-    @SuppressWarnings("unchecked")
-    private static Map<ValueFactory,ValueConverterFactory> instances = Collections.synchronizedMap(
-            new ReferenceMap(ReferenceMap.WEAK, ReferenceMap.WEAK, true));
-    /**
-     * Getter for the ValueConverterFactory instance using the default {@link ValueFactory}
+     * Getter for the ValueConverterFactory instance using the default configurations
+     * of converters. This configuration can not be changed.<p>
+     * If you need to use a specific configuration use the public constructor
+     * to create your own private instance!
      * @return the default ValueConverterFactory instance
      */
-    public static ValueConverterFactory getInstance(){
-        return getInstance(null);
-    }
-    /**
-     * Getter for the ValueConverterFactory instance using a specific
-     * {@link ValueFactory}.
-     * @param valueFactory the valueFatory
-     * @return the ValueConverterFactory for the parsed {@link ValueFactory}.
-     */
-    public static ValueConverterFactory getInstance(ValueFactory valueFactory){
-        if(valueFactory == null){
-            valueFactory = InMemoryValueFactory.getInstance();
+    public static ValueConverterFactory getDefaultInstance(){
+        if(defaultInstance == null){
+            defaultInstance = new ValueConverterFactory(true);
         }
-        synchronized (instances) {
-            ValueConverterFactory converter = instances.get(valueFactory);
-            if(converter == null){
-                //create read only instance!
-                converter = new ValueConverterFactory(valueFactory,true);
-                instances.put(valueFactory, converter);
-            }
-            return converter;
-        }
+        return defaultInstance;
     }
-    /**
-     * The {@link ValueFactory} used by converters to create instances for converted
-     * values.
-     */
-    private final ValueFactory valueFactory;
     private boolean readonly = false;
     /**
      * Creates a new factory instance that supports conversions for all
@@ -104,20 +81,15 @@ public class ValueConverterFactory {
      * create {@link Text} and {@link Reference} instances. If <code>null</code>
      * the {@link InMemoryValueFactory} is used.
      */
-    public ValueConverterFactory(ValueFactory valueFactory){
-        this(valueFactory,false);
+    public ValueConverterFactory(){
+        this(false);
     }
     /**
      * Internally used to ensure readonly state for instances created by the
      * static {@link #getInstance(ValueFactory)} methods.
      * @see #ValueConverterFactory(ValueFactory)
      */
-    private ValueConverterFactory(ValueFactory valueFactory,boolean readonly){
-        if(valueFactory == null){
-            this.valueFactory = InMemoryValueFactory.getInstance();
-        } else {
-            this.valueFactory = valueFactory;
-        }
+    private ValueConverterFactory(boolean readonly){
         init();
         this.readonly = readonly;
     }
@@ -183,12 +155,12 @@ public class ValueConverterFactory {
      * possible.
      * @throws IllegalArgumentException if the parsed dataTyeUri is <code>null</code>
      */
-    public Object convert(Object value,String dataTypeUri) throws IllegalArgumentException {
+    public Object convert(Object value,String dataTypeUri,ValueFactory valueFactory) throws IllegalArgumentException {
         if(dataTypeUri == null){
             throw new IllegalArgumentException("The parsed datatype URI MUST NOT be NULL!");
         }
         ValueConverter<?> converter = uri2converter.get(dataTypeUri);
-        return converter != null?converter.convert(value):null;
+        return converter != null?converter.convert(value,valueFactory):null;
     }
 
 
@@ -220,15 +192,16 @@ public class ValueConverterFactory {
          *    converter and may be supported for some datatypes. If not supported,
          *    than parsing <code>null</code> results in <code>null</code> to be
          *    returned.
+         * @param valueFactory the ValueFactory used to create the converted value
          * @return the converted value or <code>null</code> if the conversion was not
          * possible
          */
-        T convert(Object value);
+        T convert(Object value,ValueFactory valueFactory);
     }
     public class BooleanConverter implements ValueConverter<Boolean>{
 
         @Override
-        public Boolean convert(Object value) {
+        public Boolean convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
                 return null;
             }
@@ -249,7 +222,7 @@ public class ValueConverterFactory {
     }
     public class ByteConverter implements ValueConverter<Byte>{
         @Override
-        public Byte convert(Object value) {
+        public Byte convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
                 return null;
             }
@@ -267,7 +240,7 @@ public class ValueConverterFactory {
     }
     public class ShortConverter implements ValueConverter<Short>{
         @Override
-        public Short convert(Object value) {
+        public Short convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
                 return null;
             }
@@ -285,7 +258,7 @@ public class ValueConverterFactory {
     }
     public class IntConverter implements ValueConverter<Integer>{
         @Override
-        public Integer convert(Object value) {
+        public Integer convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
                 return null;
             }
@@ -303,7 +276,7 @@ public class ValueConverterFactory {
     }
     public class LongConverter implements ValueConverter<Long>{
         @Override
-        public Long convert(Object value) {
+        public Long convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
                 return null;
             }
@@ -320,7 +293,7 @@ public class ValueConverterFactory {
     }
     public class FloatConverter implements ValueConverter<Float>{
         @Override
-        public Float convert(Object value) {
+        public Float convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
                 return null;
             }
@@ -337,7 +310,7 @@ public class ValueConverterFactory {
     }
     public class DoubleConverter implements ValueConverter<Double>{
         @Override
-        public Double convert(Object value) {
+        public Double convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
                 return null;
             }
@@ -354,7 +327,7 @@ public class ValueConverterFactory {
     }
     public class IntegerConverter implements ValueConverter<BigInteger>{
         @Override
-        public BigInteger convert(Object value) {
+        public BigInteger convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
                 return null;
             }
@@ -371,7 +344,7 @@ public class ValueConverterFactory {
     }
     public class DecimalConverter implements ValueConverter<BigDecimal>{
         @Override
-        public BigDecimal convert(Object value) {
+        public BigDecimal convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
                 return null;
             }
@@ -388,7 +361,7 @@ public class ValueConverterFactory {
     }
     public class AnyUriConverter implements ValueConverter<Reference>{
         @Override
-        public Reference convert(Object value) {
+        public Reference convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
                 return null;
             }
@@ -423,7 +396,7 @@ public class ValueConverterFactory {
             this.dataType = dataType;
         }
         @Override
-        public Date convert(Object value) {
+        public Date convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
                 return null;
             }
@@ -454,7 +427,7 @@ public class ValueConverterFactory {
     }
     public class TextConverter implements ValueConverter<Text> {
         @Override
-        public Text convert(Object value) {
+        public Text convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
                 return null;
             }
@@ -469,7 +442,7 @@ public class ValueConverterFactory {
     }
     public class StringConverter implements ValueConverter<String> {
         @Override
-        public String convert(Object value) { return value.toString(); }
+        public String convert(Object value, ValueFactory valueFactory) { return value.toString(); }
         @Override
         public String getDataType() { return DataTypeEnum.String.getUri(); }
     }
@@ -490,7 +463,7 @@ public class ValueConverterFactory {
             this.nullAsZeroLengthDuration = nullAsZeroLengthDuration;
         }
         @Override
-        public Duration convert(Object value) {
+        public Duration convert(Object value, ValueFactory valueFactory) {
             if(value == null){
                 if(nullAsZeroLengthDuration){
                     return TimeUtils.toDuration(null,true);

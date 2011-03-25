@@ -6,12 +6,20 @@
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
     <relativePath>../parent</relativePath>
-    <version>0.9-SNAPSHOT</version>
+    <version>${stanbol-version}</version>
   </parent>
-
+  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.frameworkfragment</artifactId>
   <packaging>jar</packaging>
   <name>Apache Stanbol Default Framework Fragment Bundle</name>
+
+  <!-- XXX: the version number is intentionnally not stanbol-version since the
+  groovy script converting it into a bundle version number is not good enough to
+  insert the required but missing third numercial element
+
+  Also: version numbers should also be updated to handle the -incubating suffix
+  at some point (before the first release).
+  -->
   <version>0.9.0-SNAPSHOT</version>
 
   <description>
@@ -37,6 +45,8 @@
               <properties>
                 <rawVersion>${project.version}</rawVersion>
               </properties>
+              <!-- TODO: make it possible to insert a '.0' if there are only two
+              numerical element in the maven version -->
               <source>
                 // Convert POM version to valid OSGi version identifier
                 project.properties['osgi.version'] =

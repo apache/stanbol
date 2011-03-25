@@ -1,302 +1,329 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-    List of initial bundles for the RICK Sling-based
-    standalone launcher.
- -->
+	<!--
+		List of initial bundles for the RICK Sling-based standalone launcher.
+	-->
 <bundles>
 
-  <!-- OSGi infrastructure -->
-  <startLevel level="5">
-    <bundle>
-      <groupId>org.apache.sling</groupId>
-      <artifactId>org.apache.sling.commons.log</artifactId>
-      <version>2.0.6</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.osgi.core</artifactId>
-      <version>1.4.0</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr</artifactId>
-      <version>1.6.0</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.configadmin</artifactId>
-      <version>1.2.8</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.metatype</artifactId>
-      <version>1.0.4</version>
-    </bundle>
-    <bundle>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
-      <version>4.2.0</version>
-    </bundle>
-  </startLevel>
+	<!-- OSGi infrastructure -->
+	<startLevel level="5">
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.frameworkfragment</artifactId>
+			<version>0.9.0-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.commons.log</artifactId>
+			<version>2.0.6</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<version>1.4.0</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.scr</artifactId>
+			<version>1.6.0</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.configadmin</artifactId>
+			<version>1.2.8</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.metatype</artifactId>
+			<version>1.0.4</version>
+		</bundle>
+		<bundle>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+			<version>4.2.0</version>
+		</bundle>
+	</startLevel>
 
-  <!-- HTTP service -->
-  <startLevel level="5">
-    <bundle>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.http.whiteboard</artifactId>
-      <version>2.0.4</version>
-    </bundle>
-  </startLevel>
+	<!-- HTTP service -->
+	<startLevel level="5">
+		<bundle>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.http.whiteboard</artifactId>
+			<version>2.0.4</version>
+		</bundle>
+		<bundle>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+			<version>4.1.0</version>
+		</bundle>
+	</startLevel>
 
-  <!-- Felix web console and plugins -->
-  <startLevel level="10">
-    <bundle>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.webconsole</artifactId>
-      <version>3.1.2</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.webconsole.plugins.memoryusage</artifactId>
-      <version>1.0.2</version>
-    </bundle>
-  </startLevel>
+	<!-- Felix web console and plugins -->
+	<startLevel level="10">
+		<bundle>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.webconsole</artifactId>
+			<version>3.1.8</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.webconsole.plugins.memoryusage
+			</artifactId>
+			<version>1.0.2</version>
+		</bundle>
+	</startLevel>
 
-  <!-- General-purpose libraries -->
-  <startLevel level="10">
-    <bundle>
-        <groupId>commons-cli</groupId>
-        <artifactId>commons-cli</artifactId>
-        <version>1.2</version>
-    </bundle>
-    <bundle>
-        <groupId>commons-lang</groupId>
-        <artifactId>commons-lang</artifactId>
-        <version>2.4</version>
-    </bundle>
-    <bundle>
-        <groupId>commons-collections</groupId>
-        <artifactId>commons-collections</artifactId>
-        <version>3.2.1</version>
-    </bundle>
-    <bundle>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>1.4</version>
-    </bundle>
-    <bundle>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-compress</artifactId>
-        <version>1.0</version>
-    </bundle>
-    <bundle>
-	    <groupId>org.apache.httpcomponents</groupId>
-	    <artifactId>httpcore-osgi</artifactId>
-	    <version>4.0.1</version>
-    </bundle>
-	<bundle>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>1.4</version>
-    </bundle>
-    <bundle>
-      <groupId>commons-fileupload</groupId>
-      <artifactId>commons-fileupload</artifactId>
-      <version>1.2.1</version>    
-    </bundle>
-    <bundle>
-        <groupId>joda-time</groupId>
-        <artifactId>joda-time</artifactId>
-        <version>1.6.2</version>
-    </bundle>
-    <bundle>
-        <groupId>org.codehaus.jettison</groupId>
-        <artifactId>jettison</artifactId>
-        <version>1.2</version>    
-    </bundle>
-  </startLevel>
+	<!-- Sling utility bundles -->
+	<startLevel level="10">
+		<bundle>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.launchpad.installer</artifactId>
+			<version>1.0.0</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.launchpad.api</artifactId>
+			<version>1.0.0</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.installer.core</artifactId>
+			<version>3.1.2</version>
+		</bundle>
+	</startLevel>
 
-  <!-- RICK infrastructure and required libraries-->
-  <startLevel level="15">
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.query.clerezza</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.site.linkedData</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.yard.clerezza</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </bundle>
-  </startLevel>
-  <startLevel level="16">
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-	  <groupId>org.apache.stanbol</groupId>
-	  <artifactId>org.apache.stanbol.entityhub.jersey</artifactId>
-	  <version>0.1-SNAPSHOT</version>
-    </bundle>
-  </startLevel>
-  
-  <!-- Clerezza storage and sparql infrastructure -->
-  <startLevel level="17">
-    <bundle>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.core</artifactId>
-      <version>0.12-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.utils</artifactId>
-      <version>0.13-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.utils</artifactId>
-      <version>0.1-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.ontologies</artifactId>
-      <version>0.11-incubating-SNAPSHOT</version>
-    </bundle>
-    <!--
-    <bundle>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.simple.storage</artifactId>
-      <version>0.7-incubating-SNAPSHOT</version>
-    </bundle>
-    -->
-    <bundle>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.sparql</artifactId>
-      <version>0.5-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.commons</artifactId>
-      <version>0.5-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.facade</artifactId>
-      <version>0.12-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.clerezza.ext</groupId>
-      <artifactId>com.hp.hpl.jena.tdb</artifactId>
-      <version>0.3-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.clerezza.ext</groupId>
-      <artifactId>javax.mail</artifactId>
-      <version>0.4-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.wymiwyg</groupId>
-      <artifactId>wymiwyg-commons-core</artifactId>
-      <version>0.7.5</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.clerezza.ext</groupId>
-      <artifactId>com.ibm.icu</artifactId>
-      <version>0.5-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.storage</artifactId>
-      <version>0.5-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.tdb.storage</artifactId>
-      <version>0.5-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
-      <version>0.9-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.parser</artifactId>
-      <version>0.10-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.rdfjson</artifactId>
-      <version>0.3-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.clerezza.ext</groupId>
-      <artifactId>org.json.simple</artifactId>
-      <version>0.3-incubating-SNAPSHOT</version>
-    </bundle>
-  </startLevel>
+	<!-- General-purpose libraries -->
+	<startLevel level="10">
+		<bundle>
+			<groupId>commons-cli</groupId>
+			<artifactId>commons-cli</artifactId>
+			<version>1.2</version>
+		</bundle>
+		<bundle>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.4</version>
+		</bundle>
+		<bundle>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.1</version>
+		</bundle>
+		<bundle>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>1.4</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.0</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore-osgi</artifactId>
+			<version>4.0.1</version>
+		</bundle>
+		<bundle>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.4</version>
+		</bundle>
+		<bundle>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.2.2</version>
+		</bundle>
+		<bundle>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>1.6.2</version>
+		</bundle>
+		<bundle>
+			<groupId>org.codehaus.jettison</groupId>
+			<artifactId>jettison</artifactId>
+			<version>1.2</version>
+		</bundle>
+	</startLevel>
 
-  <!-- Additional Clerezza serializers -->
+	<!-- RICK infrastructure and required libraries-->
+	<startLevel level="15">
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.query.clerezza</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.site.linkeddata</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.yard.clerezza</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+        <bundle>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.entityhub.core</artifactId>
+            <version>0.9-SNAPSHOT</version>
+        </bundle>
+	</startLevel>
+	<startLevel level="20">
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.jersey</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+	</startLevel>
 
-  <startLevel level="18">
-    <bundle>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
-      <version>0.9-incubating-SNAPSHOT</version>
-    </bundle>
-  </startLevel>
+	<!-- Clerezza storage and sparql infrastructure -->
+	<startLevel level="17">
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.core</artifactId>
+			<version>0.12-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.utils</artifactId>
+			<version>0.13-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.utils</artifactId>
+			<version>0.1-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.ontologies</artifactId>
+			<version>0.11-incubating-SNAPSHOT</version>
+		</bundle>
+		<!--
+			<bundle> <groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.simple.storage</artifactId>
+			<version>0.7-incubating-SNAPSHOT</version> </bundle>
+		-->
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.jena.sparql</artifactId>
+			<version>0.5-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.jena.commons</artifactId>
+			<version>0.5-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.jena.facade</artifactId>
+			<version>0.12-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza.ext</groupId>
+			<artifactId>com.hp.hpl.jena.tdb</artifactId>
+			<version>0.3-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza.ext</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>0.4-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.wymiwyg</groupId>
+			<artifactId>wymiwyg-commons-core</artifactId>
+			<version>0.7.5</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza.ext</groupId>
+			<artifactId>com.ibm.icu</artifactId>
+			<version>0.5-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.jena.storage</artifactId>
+			<version>0.5-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.jena.tdb.storage</artifactId>
+			<version>0.5-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
+			<version>0.9-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.jena.parser</artifactId>
+			<version>0.10-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.rdfjson</artifactId>
+			<version>0.3-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza.ext</groupId>
+			<artifactId>org.json.simple</artifactId>
+			<version>0.3-incubating-SNAPSHOT</version>
+		</bundle>
+	</startLevel>
 
-  <!-- JAX-RS -->
-  <startLevel level="5">
-    <!--
-         WARNING: jersey-core bug, must start before jersey-server
-         to avoid jersey spi class not found errors. Restart jersey-server
-         manually if getting those.
-    -->
-    <bundle>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-core</artifactId>
-      <version>1.2</version>
-    </bundle>
-  </startLevel>
-  <startLevel level="16">
-    <bundle>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>jsr311-api</artifactId>
-      <version>1.1.1</version>
-    </bundle>
-    <bundle>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-server</artifactId>
-      <version>1.2</version>
-    </bundle>
-	<bundle>
-      <groupId>org.codehaus.jettison</groupId>
-      <artifactId>jettison</artifactId>
-      <version>1.2</version>
-    </bundle>
-  </startLevel>
+	<!-- Additional Clerezza serializers -->
+
+	<startLevel level="18">
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
+			<version>0.9-incubating-SNAPSHOT</version>
+		</bundle>
+	</startLevel>
+
+	<!-- JAX-RS -->
+	<startLevel level="5">
+		<!--
+			WARNING: jersey-core bug, must start before jersey-server to avoid
+			jersey spi class not found errors. Restart jersey-server manually if
+			getting those.
+		-->
+		<bundle>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-core</artifactId>
+			<version>1.2</version>
+		</bundle>
+	</startLevel>
+	<startLevel level="16">
+		<bundle>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>jsr311-api</artifactId>
+			<version>1.1.1</version>
+		</bundle>
+		<bundle>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-server</artifactId>
+			<version>1.2</version>
+		</bundle>
+		<bundle>
+			<groupId>org.codehaus.jettison</groupId>
+			<artifactId>jettison</artifactId>
+			<version>1.2</version>
+		</bundle>
+	</startLevel>
 
 </bundles>

@@ -11,7 +11,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 
 
-public class BlankNodeAtom extends KReSCoreAtom {
+public class BlankNodeAtom extends CoreAtom {
 
 	private URIResource argument1;
 	private URIResource argument2;

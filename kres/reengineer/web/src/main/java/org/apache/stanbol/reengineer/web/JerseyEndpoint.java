@@ -10,8 +10,8 @@ import javax.servlet.ServletException;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.stanbol.reengineer.base.api.SemionManager;
-import org.apache.stanbol.reengineer.base.api.SemionReengineer;
+import org.apache.stanbol.reengineer.base.api.ReengineerManager;
+import org.apache.stanbol.reengineer.base.api.Reengineer;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;
@@ -53,10 +53,10 @@ public class JerseyEndpoint {
     HttpService httpService;
 
     @Reference
-    SemionReengineer semionReengineer;
+    Reengineer semionReengineer;
     
     @Reference
-    SemionManager reengineeringManager;
+    ReengineerManager reengineeringManager;
 
     protected ServletContext servletContext;
 
@@ -105,12 +105,12 @@ public class JerseyEndpoint {
         servletContext = container.getServletContext();
         servletContext.setAttribute(BundleContext.class.getName(),
                 ctx.getBundleContext());
-        servletContext.setAttribute(SemionReengineer.class.getName(),
+        servletContext.setAttribute(Reengineer.class.getName(),
                 semionReengineer);
 
 //        servletContext.setAttribute(LinkDiscovery.class.getName(),
 //        		linkDiscovery);
-        servletContext.setAttribute(SemionManager.class.getName(),
+        servletContext.setAttribute(ReengineerManager.class.getName(),
         		reengineeringManager);
 
         servletContext.setAttribute(STATIC_RESOURCES_URL_ROOT_PROPERTY,

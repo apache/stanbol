@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.NoSuchScopeException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
@@ -26,9 +26,9 @@ public class OntologyIndexImpl implements OntologyIndex {
 
 	private ScopeRegistry scopeRegistry;
 
-	private KReSONManager onm;
+	private ONManager onm;
 
-	public OntologyIndexImpl(KReSONManager onm) {
+	public OntologyIndexImpl(ONManager onm) {
 
 		ontScopeMap = new HashMap<IRI, Set<IRI>>();
 		if (onm == null)

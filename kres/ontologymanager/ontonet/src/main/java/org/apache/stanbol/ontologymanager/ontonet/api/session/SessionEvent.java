@@ -15,7 +15,7 @@ public class SessionEvent {
 	/**
 	 * The KReS session affected by this event.
 	 */
-	private KReSSession affectedSession;
+	private Session affectedSession;
 
 	private OperationType operationType;
 
@@ -29,7 +29,7 @@ public class SessionEvent {
 	 * @param session
 	 *            the KReS session affected by this event
 	 */
-	public SessionEvent(KReSSession session, OperationType operationType)
+	public SessionEvent(Session session, OperationType operationType)
 			throws Exception {
 		if (operationType == null)
 			throw new Exception(
@@ -46,7 +46,7 @@ public class SessionEvent {
 	 * 
 	 * @return the affected KReS session
 	 */
-	public KReSSession getSession() {
+	public Session getSession() {
 		return affectedSession;
 	}
 

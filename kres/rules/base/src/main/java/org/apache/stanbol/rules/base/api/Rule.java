@@ -1,0 +1,107 @@
+package org.apache.stanbol.rules.base.api;
+
+import org.apache.stanbol.rules.base.api.util.AtomList;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.SWRLRule;
+
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.Resource;
+
+
+
+/**
+ * A Rule is a Java object that represent a rule in KReS. It contains methods to transform a rule both in SWRL and in Rule
+ * syntax. 
+ * 
+ * @author andrea.nuzzolese
+ *
+ */
+public interface Rule {
+	
+	/**
+	 * Gets the name of the rule.
+	 * 
+	 * @return the {@link String} representing the name of the rule.
+	 */
+	public String getRuleName();
+	
+	/**
+	 * Sets the rule's name
+	 * 
+	 * @param ruleName {@link String}
+	 */
+	public void setRuleName(String ruleName);
+	
+	/**
+	 * Returns the representation of the rule in Rule syntax.
+	 * 
+	 * @return the {@link String} of the rule in Rule syntax.
+	 */
+	public String getRule();
+	
+	/**
+	 * Sets the rule expressed in Rule syntax
+	 * 
+	 * @param rule {@link String}
+	 */
+	public void setRule(String rule);
+	
+	/**
+	 * Maps a {@code Rule} to a Jena {@link Resource} object in a given Jena {@link Model}.
+	 * @param model {@link Model}
+	 * @return the {@link Resource} containing the rule.
+	 */
+	public Resource toSWRL(Model model);
+	
+	/**
+	 * Maps a {@code Rule} to an OWL-API {@link SWRLRule}.
+	 * @param factory {@link OWLDataFactory}
+	 * @return the {@link SWRLRule} containing the rule.
+	 */
+	public SWRLRule toSWRL(OWLDataFactory factory);
+	
+	/**
+	 * Transforms the rule to a SPARQL CONSTRUCT.
+	 * 
+	 * @return the string containing the SPARQL CONSTRUCT.
+	 */
+	public String toSPARQL();
+	
+	/**
+	 * Rules are composed by an antecedent (body) and a consequent (head). This method returnn the consequent
+	 * expressed as a list of its atoms ({@link AtomList}).
+	 * @return the {@link AtomList} of the consequent's atoms. 
+	 */
+	public AtomList getHead();
+	
+	/**
+	 * Rules are composed by an antecedent (body) and a consequent (head). This method returnn the antecedent
+	 * expressed as a list of its atoms ({@link AtomList}).
+	 * @return the {@link AtomList} of the antecedent's atoms. 
+	 */
+	public AtomList getBody();
+	
+	
+	/**
+	 * Retunr the KReS syntax representation of the rule.
+	 * @return the string of the rule in Rule syntax.
+	 */
+	public String toKReSSyntax();
+	
+	/**
+	 * If the variable forwardChain is set true than the forward chain mechanism is ebled for that rule.
+	 * @return {@link boolean}.
+	 */
+	public boolean isForwardChain();
+	
+	public boolean isSPARQLConstruct();
+	
+	public boolean isSPARQLDelete();
+	
+	public boolean isSPARQLDeleteData();
+	
+	public boolean isReflexive();
+	
+	public RuleExpressiveness getExpressiveness();
+	
+}

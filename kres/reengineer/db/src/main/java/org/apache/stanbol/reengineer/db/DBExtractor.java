@@ -13,18 +13,18 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.ReengineeringException;
-import org.apache.stanbol.reengineer.base.api.SemionManager;
-import org.apache.stanbol.reengineer.base.api.SemionReengineer;
+import org.apache.stanbol.reengineer.base.api.ReengineerManager;
+import org.apache.stanbol.reengineer.base.api.Reengineer;
 import org.apache.stanbol.reengineer.base.api.settings.ConnectionSettings;
 import org.apache.stanbol.reengineer.base.api.util.ReengineerType;
 import org.apache.stanbol.reengineer.base.api.util.UnsupportedReengineerException;
@@ -40,15 +40,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@code DBExtractor} is an implementation of the {@link SemionReengineer} for relational databases.
+ * The {@code DBExtractor} is an implementation of the {@link Reengineer} for relational databases.
  * 
  * @author andrea.nuzzolese
  * 
  */
 
 @Component(immediate = true, metatype = true)
-@Service(SemionReengineer.class)
-public class DBExtractor implements SemionReengineer {
+@Service(Reengineer.class)
+public class DBExtractor implements Reengineer {
 
     public static final String _DB_DATA_REENGINEERING_SESSION_DEFAULT = "/db-data-reengineering-session";
     public static final String _DB_DATA_REENGINEERING_SESSION_SPACE_DEFAULT = "/db-data-reengineering-session-space";
@@ -59,19 +59,19 @@ public class DBExtractor implements SemionReengineer {
     public static final String _REENGINEERING_SCOPE_DEFAULT = "db_reengineering";
 
     @Property(value = _DB_DATA_REENGINEERING_SESSION_DEFAULT)
-    public static final String DB_DATA_REENGINEERING_SESSION = "eu.iksproject.kres.semion.reengineer.db.data";
+    public static final String DB_DATA_REENGINEERING_SESSION = "org.apache.stanbol.reengineer.db.data";
 
     @Property(value = _DB_DATA_REENGINEERING_SESSION_SPACE_DEFAULT)
-    public static final String DB_DATA_REENGINEERING_SESSION_SPACE = "eu.iksproject.kres.semion.reengineer.space.db.data";
+    public static final String DB_DATA_REENGINEERING_SESSION_SPACE = "org.apache.stanbol.reengineer.space.db.data";
 
     @Property(value = _DB_REENGINEERING_SESSION_SPACE_DEFAULT)
     public static final String DB_REENGINEERING_SESSION_SPACE = "http://kres.iks-project.eu/space/reengineering/db";
 
     @Property(value = _DB_SCHEMA_REENGINEERING_ONTOLOGY_SPACE_DEFAULT)
-    public static final String DB_SCHEMA_REENGINEERING_ONTOLOGY_SPACE = "eu.iksproject.kres.semion.reengineer.ontology.space.db";
+    public static final String DB_SCHEMA_REENGINEERING_ONTOLOGY_SPACE = "org.apache.stanbol.reengineer.ontology.space.db";
 
     @Property(value = _DB_SCHEMA_REENGINEERING_SESSION_DEFAULT)
-    public static final String DB_SCHEMA_REENGINEERING_SESSION = "eu.iksproject.kres.semion.reengineer.db.schema";
+    public static final String DB_SCHEMA_REENGINEERING_SESSION = "org.apache.stanbol.reengineer.db.schema";
 
     @Property(value = _HOST_NAME_AND_PORT_DEFAULT)
     public static final String HOST_NAME_AND_PORT = "host.name.port";
@@ -88,10 +88,10 @@ public class DBExtractor implements SemionReengineer {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Reference
-    KReSONManager onManager;
+    ONManager onManager;
 
     @Reference
-    SemionManager reengineeringManager;
+    ReengineerManager reengineeringManager;
 
     private IRI reengineeringScopeIRI;
 
@@ -111,7 +111,7 @@ public class DBExtractor implements SemionReengineer {
      * Component Runtime support.
      * <p>
      * DO NOT USE to manually create instances - the DBExtractor instances do need to be configured! YOU NEED
-     * TO USE {@link #DBExtractor(KReSONManager)} or its overloads, to parse the configuration and then
+     * TO USE {@link #DBExtractor(ONManager)} or its overloads, to parse the configuration and then
      * initialise the rule store if running outside a OSGI environment.
      */
     public DBExtractor() {
@@ -120,11 +120,11 @@ public class DBExtractor implements SemionReengineer {
 
     /**
      * 
-     * Create a new {@link DBExtractor} that is formally a {@link SemionReengineer}.
+     * Create a new {@link DBExtractor} that is formally a {@link Reengineer}.
      * 
      */
-    public DBExtractor(SemionManager reengineeringManager,
-                       KReSONManager onManager,
+    public DBExtractor(ReengineerManager reengineeringManager,
+                       ONManager onManager,
                        TcManager tcManager,
                        WeightedTcProvider weightedTcProvider,
                        Dictionary<String,Object> configuration) {
@@ -137,7 +137,7 @@ public class DBExtractor implements SemionReengineer {
     }
 
     /**
-     * Create a new {@link DBExtractor} that is formally a {@link SemionReengineer}.
+     * Create a new {@link DBExtractor} that is formally a {@link Reengineer}.
      * 
      * @param databaseURI
      *            {@link String}
@@ -146,8 +146,8 @@ public class DBExtractor implements SemionReengineer {
      * @param connectionSettings
      *            {@link ConnectionSettings}
      */
-    public DBExtractor(SemionManager reengineeringManager,
-                       KReSONManager onManager,
+    public DBExtractor(ReengineerManager reengineeringManager,
+                       ONManager onManager,
                        TcManager tcManager,
                        WeightedTcProvider weightedTcProvider,
                        Dictionary<String,Object> configuration,
@@ -192,13 +192,13 @@ public class DBExtractor implements SemionReengineer {
 
         hostNameAndPort = "http://" + hostNameAndPort;
 
-        reengineeringScopeIRI = IRI.create(hostNameAndPort + "/kres/ontology/" + reengineeringScopeID);
+        reengineeringScopeIRI = IRI.create(hostNameAndPort + "/kres/ontoman/ontology/ontology/" + reengineeringScopeID);
         reengineeringSpaceIRI = IRI.create(DB_REENGINEERING_SESSION_SPACE);
 
         reengineeringManager.bindReengineer(this);
 
         KReSSessionManager kReSSessionManager = onManager.getSessionManager();
-        KReSSession kReSSession = kReSSessionManager.createSession();
+        Session kReSSession = kReSSessionManager.createSession();
 
         kReSSessionID = kReSSession.getID();
 
@@ -279,7 +279,7 @@ public class DBExtractor implements SemionReengineer {
                                          DataSource dataSource,
                                          OWLOntology schemaOntology) throws ReengineeringException {
 
-        SemionDBDataTransformer semionDBDataTransformer = new SemionDBDataTransformer(onManager,
+        DBDataTransformer semionDBDataTransformer = new DBDataTransformer(onManager,
                 schemaOntology);
         return semionDBDataTransformer.transformData(graphNS, outputIRI);
 
@@ -335,7 +335,7 @@ public class DBExtractor implements SemionReengineer {
         OntologyScope reengineeringScope = getScope();
         if (reengineeringScope != null) {
             ConnectionSettings connectionSettings = (ConnectionSettings) dataSource.getDataSource();
-            SemionDBSchemaGenerator schemaGenerator = new SemionDBSchemaGenerator(outputIRI,
+            DBSchemaGenerator schemaGenerator = new DBSchemaGenerator(outputIRI,
                     connectionSettings);
 
             System.out.println("OWL MANAGER IN SEMION: " + onManager);

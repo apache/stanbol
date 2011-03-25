@@ -9,13 +9,13 @@ import java.util.Hashtable;
 
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.CoreOntologySpaceImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.CustomOntologySpaceImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFactoryImpl;
@@ -44,7 +44,7 @@ public class TestOntologyScope {
 	 */
 	private static OntologyScope blankScope;
 
-	private static KReSONManager onm;
+	private static ONManager onm;
 	
 	private static OntologyScopeFactory factory = null;
 
@@ -58,8 +58,8 @@ public class TestOntologyScope {
 
 	@BeforeClass
 	public static void setup() {
-		// An ONManager with no store and default settings
-		onm = new ONManager(null,null, new Hashtable<String, Object>());
+		// An ONManagerImpl with no store and default settings
+		onm = new ONManagerImpl(null,null, new Hashtable<String, Object>());
 		factory = onm.getOntologyScopeFactory();
 		if (factory == null)
 			fail("Could not instantiate ontology space factory");

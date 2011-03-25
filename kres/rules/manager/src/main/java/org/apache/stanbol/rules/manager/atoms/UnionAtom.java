@@ -1,6 +1,6 @@
 package org.apache.stanbol.rules.manager.atoms;
 
-import org.apache.stanbol.rules.base.api.KReSRuleAtom;
+import org.apache.stanbol.rules.base.api.RuleAtom;
 import org.apache.stanbol.rules.base.api.SPARQLObject;
 import org.apache.stanbol.rules.base.api.util.AtomList;
 import org.apache.stanbol.rules.manager.SPARQLFunction;
@@ -11,7 +11,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 
-public class UnionAtom implements KReSRuleAtom {
+public class UnionAtom implements RuleAtom {
 
 	private AtomList atomList1;
 	private AtomList atomList2;
@@ -31,7 +31,7 @@ public class UnionAtom implements KReSRuleAtom {
 	public SPARQLObject toSPARQL() {
 		String scope1 = "";
 		
-		for(KReSRuleAtom kReSRuleAtom : atomList1){
+		for(RuleAtom kReSRuleAtom : atomList1){
 			if(!scope1.isEmpty()){
 				scope1 += " . ";
 			}
@@ -40,7 +40,7 @@ public class UnionAtom implements KReSRuleAtom {
 		
 		String scope2 = "";
 		
-		for(KReSRuleAtom kReSRuleAtom : atomList2){
+		for(RuleAtom kReSRuleAtom : atomList2){
 			if(!scope2.isEmpty()){
 				scope2 += " . ";
 			}
@@ -62,7 +62,7 @@ public class UnionAtom implements KReSRuleAtom {
 	public String toKReSSyntax() {
 		String scope1 = "";
 		
-		for(KReSRuleAtom kReSRuleAtom : atomList1){
+		for(RuleAtom kReSRuleAtom : atomList1){
 			if(!scope1.isEmpty()){
 				scope1 += " . ";
 			}
@@ -71,7 +71,7 @@ public class UnionAtom implements KReSRuleAtom {
 		
 		String scope2 = "";
 		
-		for(KReSRuleAtom kReSRuleAtom : atomList2){
+		for(RuleAtom kReSRuleAtom : atomList2){
 			if(!scope2.isEmpty()){
 				scope2 += " . ";
 			}

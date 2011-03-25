@@ -4,25 +4,25 @@ package org.apache.stanbol.rules.base.api.util;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.apache.stanbol.rules.base.api.KReSRuleAtom;
+import org.apache.stanbol.rules.base.api.RuleAtom;
 import org.apache.stanbol.rules.base.api.util.AtomIterator;
 
 
-public class AtomList implements Collection<KReSRuleAtom> {
+public class AtomList implements Collection<RuleAtom> {
 
-	private KReSRuleAtom[] kReSRuleAtoms;
+	private RuleAtom[] kReSRuleAtoms;
 	
 	public AtomList() {
 		
 	}
 
-	public boolean add(KReSRuleAtom kReSRuleAtom) {
+	public boolean add(RuleAtom kReSRuleAtom) {
 		if(kReSRuleAtoms == null){
-			kReSRuleAtoms = new KReSRuleAtom[1];
+			kReSRuleAtoms = new RuleAtom[1];
 			kReSRuleAtoms[0] = kReSRuleAtom;
 		}
 		else{
-			KReSRuleAtom[] semionRulesCopy = new KReSRuleAtom[kReSRuleAtoms.length+1];
+			RuleAtom[] semionRulesCopy = new RuleAtom[kReSRuleAtoms.length+1];
 			System.arraycopy(kReSRuleAtoms, 0, semionRulesCopy, 0, kReSRuleAtoms.length);
 			semionRulesCopy[semionRulesCopy.length-1] = kReSRuleAtom;
 			kReSRuleAtoms = semionRulesCopy;
@@ -30,13 +30,13 @@ public class AtomList implements Collection<KReSRuleAtom> {
 		return true;
 	}
 	
-	public boolean addToHead(KReSRuleAtom kReSRuleAtom) {
+	public boolean addToHead(RuleAtom kReSRuleAtom) {
 		if(kReSRuleAtoms == null){
-			kReSRuleAtoms = new KReSRuleAtom[1];
+			kReSRuleAtoms = new RuleAtom[1];
 			kReSRuleAtoms[0] = kReSRuleAtom;
 		}
 		else{
-			KReSRuleAtom[] semionRulesCopy = new KReSRuleAtom[kReSRuleAtoms.length+1];
+			RuleAtom[] semionRulesCopy = new RuleAtom[kReSRuleAtoms.length+1];
 			System.arraycopy(kReSRuleAtoms, 0, semionRulesCopy, 1, kReSRuleAtoms.length);
 			semionRulesCopy[0] = kReSRuleAtom;
 			kReSRuleAtoms = semionRulesCopy;
@@ -44,16 +44,16 @@ public class AtomList implements Collection<KReSRuleAtom> {
 		return true;
 	}
 
-	public boolean addAll(Collection<? extends KReSRuleAtom> c) {
+	public boolean addAll(Collection<? extends RuleAtom> c) {
 		
-		KReSRuleAtom[] collectionOfSemionRules = new KReSRuleAtom[c.size()];
+		RuleAtom[] collectionOfSemionRules = new RuleAtom[c.size()];
 		collectionOfSemionRules = c.toArray(collectionOfSemionRules);
 		
 		if(kReSRuleAtoms == null){
 			kReSRuleAtoms = collectionOfSemionRules;
 		}
 		else{
-			KReSRuleAtom[] semionRulesCopy = new KReSRuleAtom[kReSRuleAtoms.length+collectionOfSemionRules.length];
+			RuleAtom[] semionRulesCopy = new RuleAtom[kReSRuleAtoms.length+collectionOfSemionRules.length];
 			System.arraycopy(kReSRuleAtoms, 0, semionRulesCopy, 0, kReSRuleAtoms.length);
 			System.arraycopy(collectionOfSemionRules, 0, semionRulesCopy, kReSRuleAtoms.length, collectionOfSemionRules.length);
 			kReSRuleAtoms = semionRulesCopy;
@@ -67,7 +67,7 @@ public class AtomList implements Collection<KReSRuleAtom> {
 	}
 
 	public boolean contains(Object o) {
-		for(KReSRuleAtom semionRule : kReSRuleAtoms){
+		for(RuleAtom semionRule : kReSRuleAtoms){
 			if(semionRule.equals(o)){
 				return true;
 			}
@@ -78,7 +78,7 @@ public class AtomList implements Collection<KReSRuleAtom> {
 	public boolean containsAll(Collection<?> c) {
 		
 		for(Object o : c){
-			for(KReSRuleAtom semionRule : kReSRuleAtoms){
+			for(RuleAtom semionRule : kReSRuleAtoms){
 				if(!semionRule.equals(o)){
 					return false;
 				}
@@ -99,16 +99,16 @@ public class AtomList implements Collection<KReSRuleAtom> {
 		}
 	}
 
-	public Iterator<KReSRuleAtom> iterator() {
+	public Iterator<RuleAtom> iterator() {
 		return new AtomIterator(this);
 	}
 
 	public boolean remove(Object o) {
 		boolean removed = false;
 		for(int i=0; i<kReSRuleAtoms.length && !removed; i++){
-			KReSRuleAtom semionRule = kReSRuleAtoms[i];
+			RuleAtom semionRule = kReSRuleAtoms[i];
 			if(semionRule.equals(o)){
-				KReSRuleAtom[] semionRulesCopy = new KReSRuleAtom[kReSRuleAtoms.length-1];
+				RuleAtom[] semionRulesCopy = new RuleAtom[kReSRuleAtoms.length-1];
 				System.arraycopy(kReSRuleAtoms, 0, semionRulesCopy, 0, i);
 				System.arraycopy(kReSRuleAtoms, i+1, semionRulesCopy, 0, semionRulesCopy.length-i);
 				kReSRuleAtoms = semionRulesCopy;
@@ -123,9 +123,9 @@ public class AtomList implements Collection<KReSRuleAtom> {
 			for(Object o : c){
 				boolean removed = false;
 				for(int i=0; i<kReSRuleAtoms.length && !removed; i++){
-					KReSRuleAtom semionRule = kReSRuleAtoms[i];
+					RuleAtom semionRule = kReSRuleAtoms[i];
 					if(semionRule.equals(o)){
-						KReSRuleAtom[] semionRulesCopy = new KReSRuleAtom[kReSRuleAtoms.length-1];
+						RuleAtom[] semionRulesCopy = new RuleAtom[kReSRuleAtoms.length-1];
 						System.arraycopy(kReSRuleAtoms, 0, semionRulesCopy, 0, i);
 						System.arraycopy(kReSRuleAtoms, i+1, semionRulesCopy, 0, semionRulesCopy.length-i);
 						kReSRuleAtoms = semionRulesCopy;
@@ -141,19 +141,19 @@ public class AtomList implements Collection<KReSRuleAtom> {
 	}
 
 	public boolean retainAll(Collection<?> c) {
-		KReSRuleAtom[] semionRulesCopy = null;
-		KReSRuleAtom[] semionRulesTMP = null;
+		RuleAtom[] semionRulesCopy = null;
+		RuleAtom[] semionRulesTMP = null;
 		for(Object o : c){
-			if(o instanceof KReSRuleAtom){
+			if(o instanceof RuleAtom){
 				if(contains(o)){
 					if(semionRulesCopy == null){
-						semionRulesCopy = new KReSRuleAtom[1];
-						semionRulesCopy[0] = (KReSRuleAtom) o;
+						semionRulesCopy = new RuleAtom[1];
+						semionRulesCopy[0] = (RuleAtom) o;
 					}
 					else{
-						semionRulesTMP = new KReSRuleAtom[semionRulesCopy.length+1];
+						semionRulesTMP = new RuleAtom[semionRulesCopy.length+1];
 						System.arraycopy(semionRulesCopy, 0, semionRulesTMP, 0, semionRulesCopy.length);
-						semionRulesTMP[semionRulesTMP.length-1] = (KReSRuleAtom) o;
+						semionRulesTMP[semionRulesTMP.length-1] = (RuleAtom) o;
 						semionRulesCopy = semionRulesTMP;
 					}
 				}

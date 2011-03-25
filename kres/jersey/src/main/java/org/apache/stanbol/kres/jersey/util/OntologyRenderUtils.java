@@ -3,7 +3,7 @@ package org.apache.stanbol.kres.jersey.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxOntologyFormat;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -37,7 +37,7 @@ public class OntologyRenderUtils {
 	 * @throws OWLOntologyStorageException
 	 */
 	public static String renderOntology(OWLOntology ont,
-			OWLOntologyFormat format, String rewritePrefix, KReSONManager onm)
+			OWLOntologyFormat format, String rewritePrefix, ONManager onm)
 			throws OWLOntologyStorageException {
 		OWLOntologyManager tmpmgr = OWLManager.createOWLOntologyManager();
 		OWLDataFactory df = tmpmgr.getOWLDataFactory();
@@ -87,7 +87,7 @@ public class OntologyRenderUtils {
 	}
 
 	public static String renderOntology(OWLOntology ont, String format,
-			String rewritePrefix, KReSONManager onm)
+			String rewritePrefix, ONManager onm)
 			throws OWLOntologyStorageException {
 		OWLOntologyManager tmpmgr = OWLManager.createOWLOntologyManager();
 		OWLDataFactory df = tmpmgr.getOWLDataFactory();
