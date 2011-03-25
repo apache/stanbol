@@ -38,6 +38,6 @@ public interface RuleStore {
 
     public boolean removeRecipe(IRI recipeIRI);
 
-    public boolean removeRule(KReSRule rule);
+    public boolean removeRule(Rule rule);
 	
 }

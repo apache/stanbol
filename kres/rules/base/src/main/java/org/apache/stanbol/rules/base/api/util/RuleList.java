@@ -4,29 +4,29 @@ package org.apache.stanbol.rules.base.api.util;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.apache.stanbol.rules.base.api.KReSRule;
-import org.apache.stanbol.rules.base.api.util.KReSRuleIterator;
+import org.apache.stanbol.rules.base.api.Rule;
+import org.apache.stanbol.rules.base.api.util.RuleIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class KReSRuleList implements Collection<KReSRule> {
+public class RuleList implements Collection<Rule> {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	
-	private KReSRule[] kReSRules;
+	private Rule[] kReSRules;
 
-	public KReSRuleList() {
+	public RuleList() {
 
 	}
 
 	
-	public boolean add(KReSRule semionRule) {
+	public boolean add(Rule semionRule) {
 		if (kReSRules == null) {
-			kReSRules = new KReSRule[1];
+			kReSRules = new Rule[1];
 			kReSRules[0] = semionRule;
 		} else {
-			KReSRule[] semionRulesCopy = new KReSRule[kReSRules.length + 1];
+			Rule[] semionRulesCopy = new Rule[kReSRules.length + 1];
 			System
 					.arraycopy(kReSRules, 0, semionRulesCopy, 0,
 							kReSRules.length);
@@ -38,12 +38,12 @@ public class KReSRuleList implements Collection<KReSRule> {
 		return true;
 	}
 	
-	public boolean addToHead(KReSRule semionRule) {
+	public boolean addToHead(Rule semionRule) {
 		if (kReSRules == null) {
-			kReSRules = new KReSRule[1];
+			kReSRules = new Rule[1];
 			kReSRules[0] = semionRule;
 		} else {
-			KReSRule[] semionRulesCopy = new KReSRule[kReSRules.length + 1];
+			Rule[] semionRulesCopy = new Rule[kReSRules.length + 1];
 			System
 					.arraycopy(kReSRules, 0, semionRulesCopy, 1,
 							kReSRules.length);
@@ -55,15 +55,15 @@ public class KReSRuleList implements Collection<KReSRule> {
 		return true;
 	}
 
-	public boolean addAll(Collection<? extends KReSRule> c) {
+	public boolean addAll(Collection<? extends Rule> c) {
 
-		KReSRule[] collectionOfSemionRules = new KReSRule[c.size()];
+		Rule[] collectionOfSemionRules = new Rule[c.size()];
 		collectionOfSemionRules = c.toArray(collectionOfSemionRules);
 
 		if (kReSRules == null) {
 			kReSRules = collectionOfSemionRules;
 		} else {
-			KReSRule[] semionRulesCopy = new KReSRule[kReSRules.length
+			Rule[] semionRulesCopy = new Rule[kReSRules.length
 					+ collectionOfSemionRules.length];
 			System
 					.arraycopy(kReSRules, 0, semionRulesCopy, 0,
@@ -85,7 +85,7 @@ public class KReSRuleList implements Collection<KReSRule> {
 	}
 
 	public boolean contains(Object o) {
-		for (KReSRule semionRule : kReSRules) {
+		for (Rule semionRule : kReSRules) {
 			if (semionRule.equals(o)) {
 				return true;
 			}
@@ -96,7 +96,7 @@ public class KReSRuleList implements Collection<KReSRule> {
 	public boolean containsAll(Collection<?> c) {
 
 		for (Object o : c) {
-			for (KReSRule semionRule : kReSRules) {
+			for (Rule semionRule : kReSRules) {
 				if (!semionRule.equals(o)) {
 					return false;
 				} else {
@@ -116,16 +116,16 @@ public class KReSRuleList implements Collection<KReSRule> {
 		}
 	}
 
-	public Iterator<KReSRule> iterator() {
-		return new KReSRuleIterator(this);
+	public Iterator<Rule> iterator() {
+		return new RuleIterator(this);
 	}
 
 	public boolean remove(Object o) {
 		boolean removed = false;
 		for (int i = 0; i < kReSRules.length && !removed; i++) {
-			KReSRule semionRule = kReSRules[i];
+			Rule semionRule = kReSRules[i];
 			if (semionRule.equals(o)) {
-				KReSRule[] semionRulesCopy = new KReSRule[kReSRules.length - 1];
+				Rule[] semionRulesCopy = new Rule[kReSRules.length - 1];
 				System.arraycopy(kReSRules, 0, semionRulesCopy, 0, i);
 				System.arraycopy(kReSRules, i + 1, semionRulesCopy, 0,
 						semionRulesCopy.length - i);
@@ -141,9 +141,9 @@ public class KReSRuleList implements Collection<KReSRule> {
 			for (Object o : c) {
 				boolean removed = false;
 				for (int i = 0; i < kReSRules.length && !removed; i++) {
-					KReSRule semionRule = kReSRules[i];
+					Rule semionRule = kReSRules[i];
 					if (semionRule.equals(o)) {
-						KReSRule[] semionRulesCopy = new KReSRule[kReSRules.length - 1];
+						Rule[] semionRulesCopy = new Rule[kReSRules.length - 1];
 						System.arraycopy(kReSRules, 0, semionRulesCopy, 0, i);
 						System.arraycopy(kReSRules, i + 1, semionRulesCopy, 0,
 								semionRulesCopy.length - i);
@@ -159,19 +159,19 @@ public class KReSRuleList implements Collection<KReSRule> {
 	}
 
 	public boolean retainAll(Collection<?> c) {
-		KReSRule[] semionRulesCopy = null;
-		KReSRule[] semionRulesTMP = null;
+		Rule[] semionRulesCopy = null;
+		Rule[] semionRulesTMP = null;
 		for (Object o : c) {
-			if (o instanceof KReSRule) {
+			if (o instanceof Rule) {
 				if (contains(o)) {
 					if (semionRulesCopy == null) {
-						semionRulesCopy = new KReSRule[1];
-						semionRulesCopy[0] = (KReSRule) o;
+						semionRulesCopy = new Rule[1];
+						semionRulesCopy[0] = (Rule) o;
 					} else {
-						semionRulesTMP = new KReSRule[semionRulesCopy.length + 1];
+						semionRulesTMP = new Rule[semionRulesCopy.length + 1];
 						System.arraycopy(semionRulesCopy, 0, semionRulesTMP, 0,
 								semionRulesCopy.length);
-						semionRulesTMP[semionRulesTMP.length - 1] = (KReSRule) o;
+						semionRulesTMP[semionRulesTMP.length - 1] = (Rule) o;
 						semionRulesCopy = semionRulesTMP;
 					}
 				}

@@ -2,18 +2,18 @@ package org.apache.stanbol.rules.base.api.util;
 
 import java.util.Iterator;
 
-import org.apache.stanbol.rules.base.api.KReSRule;
+import org.apache.stanbol.rules.base.api.Rule;
 
 
-public class KReSRuleIterator implements Iterator<KReSRule> {
+public class RuleIterator implements Iterator<Rule> {
 
 	private int currentIndex;
 	private int listSize;
-	private KReSRule[] semionRules;
+	private Rule[] semionRules;
 	
-	public KReSRuleIterator(KReSRuleList semionRuleList) {
+	public RuleIterator(RuleList semionRuleList) {
 		this.listSize = semionRuleList.size();
-		this.semionRules = new KReSRule[listSize];
+		this.semionRules = new Rule[listSize];
 		this.semionRules = semionRuleList.toArray(this.semionRules);
 		this.currentIndex = 0;
 		
@@ -28,8 +28,8 @@ public class KReSRuleIterator implements Iterator<KReSRule> {
 		}
 	}
 
-	public KReSRule next() {
-		KReSRule semionRule = semionRules[currentIndex];
+	public Rule next() {
+		Rule semionRule = semionRules[currentIndex];
 		currentIndex++;
 		return semionRule;
 	}

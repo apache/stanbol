@@ -5,7 +5,7 @@ import java.util.Collection;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.sparql.ResultSet;
-import org.apache.stanbol.rules.base.api.util.KReSRuleList;
+import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.semanticweb.owlapi.model.IRI;
 
 import com.hp.hpl.jena.rdf.model.Model;
@@ -15,12 +15,12 @@ public interface Recipe {
 	
 	/**
 	 * Get the rule of the recipe identified by the ruleURI. The rule is returned as
-	 * a {@link KReSRule} object. 
+	 * a {@link Rule} object.
 	 * 
 	 * @param ruleURI
-	 * @return the object that represents a {@link KReSRule}
+	 * @return the object that represents a {@link Rule}
 	 */
-	public KReSRule getRule(String ruleURI);
+	public Rule getRule(String ruleURI);
 	
 	/**
 	 * Trasnform the rules contained in the recipe in a set of SPARQL CONSTRUCT queries.
@@ -37,17 +37,17 @@ public interface Recipe {
 	public Model getRecipeAsRDFModel();
 	
 	/**
-	 * Serialize the rules contained in the recipe to KReSRule Syntax.
+	 * Serialize the rules contained in the recipe to Rule Syntax.
 	 * @return the {@link String} containing the serialization of the recipe's rules
-	 * in KReSRule Syntax.
+	 * in Rule Syntax.
 	 */
 	public String getRulesInKReSSyntax();
 	
 	/**
-	 * Get the list of the {@link KReSRule} contained in the recipe.
-	 * @return the {@link KReSRuleList}.
+	 * Get the list of the {@link Rule} contained in the recipe.
+	 * @return the {@link RuleList}.
 	 */
-	public KReSRuleList getkReSRuleList();
+	public RuleList getkReSRuleList();
 	
 	/**
 	 * Get the ID of the recipe in the {@link RuleStore}.
@@ -62,10 +62,10 @@ public interface Recipe {
 	public String getRecipeDescription();
 	
 	/**
-	 * Add a KReSRule to the recipe.
+	 * Add a Rule to the recipe.
 	 * This operation does not effect a change on recipe in the rule store, but only in the in-memory
 	 * representation of a specific recipe. To permanently change the recipe use {@link RuleStore#addRuleToRecipe(IRI, String)}.
-	 * @param kReSRule the {@link KReSRule}.
+	 * @param kReSRule the {@link Rule}.
 	 */
-	public void addKReSRule(KReSRule kReSRule);
+	public void addKReSRule(Rule kReSRule);
 }

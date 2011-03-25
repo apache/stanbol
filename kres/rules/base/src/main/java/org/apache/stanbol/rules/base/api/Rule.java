@@ -10,13 +10,13 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 
 /**
- * A KReSRule is a Java object that represent a rule in KReS. It contains methods to transform a rule both in SWRL and in KReSRule
+ * A Rule is a Java object that represent a rule in KReS. It contains methods to transform a rule both in SWRL and in Rule
  * syntax. 
  * 
  * @author andrea.nuzzolese
  *
  */
-public interface KReSRule {
+public interface Rule {
 	
 	/**
 	 * Gets the name of the rule.
@@ -33,28 +33,28 @@ public interface KReSRule {
 	public void setRuleName(String ruleName);
 	
 	/**
-	 * Returns the representation of the rule in KReSRule syntax.
+	 * Returns the representation of the rule in Rule syntax.
 	 * 
-	 * @return the {@link String} of the rule in KReSRule syntax.
+	 * @return the {@link String} of the rule in Rule syntax.
 	 */
 	public String getRule();
 	
 	/**
-	 * Sets the rule expressed in KReSRule syntax
+	 * Sets the rule expressed in Rule syntax
 	 * 
 	 * @param rule {@link String}
 	 */
 	public void setRule(String rule);
 	
 	/**
-	 * Maps a {@code KReSRule} to a Jena {@link Resource} object in a given Jena {@link Model}.
+	 * Maps a {@code Rule} to a Jena {@link Resource} object in a given Jena {@link Model}.
 	 * @param model {@link Model}
 	 * @return the {@link Resource} containing the rule.
 	 */
 	public Resource toSWRL(Model model);
 	
 	/**
-	 * Maps a {@code KReSRule} to an OWL-API {@link SWRLRule}.
+	 * Maps a {@code Rule} to an OWL-API {@link SWRLRule}.
 	 * @param factory {@link OWLDataFactory}
 	 * @return the {@link SWRLRule} containing the rule.
 	 */
@@ -84,7 +84,7 @@ public interface KReSRule {
 	
 	/**
 	 * Retunr the KReS syntax representation of the rule.
-	 * @return the string of the rule in KReSRule syntax.
+	 * @return the string of the rule in Rule syntax.
 	 */
 	public String toKReSSyntax();
 	
@@ -102,6 +102,6 @@ public interface KReSRule {
 	
 	public boolean isReflexive();
 	
-	public KReSRuleExpressiveness getExpressiveness();
+	public RuleExpressiveness getExpressiveness();
 	
 }

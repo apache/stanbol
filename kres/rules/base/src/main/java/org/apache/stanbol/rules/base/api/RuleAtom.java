@@ -6,7 +6,7 @@ import org.semanticweb.owlapi.model.SWRLAtom;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-public interface KReSRuleAtom {
+public interface RuleAtom {
 
 	public Resource toSWRL(Model model);
 	public SPARQLObject toSPARQL();

@@ -10,10 +10,10 @@ import org.semanticweb.owlapi.model.IRI;
  * @author andrea.nuzzolese
  *
  */
-public interface KReSRuleManager {
+public interface RuleManager {
 	
 	/**
-	 * Adds one or more rules to the rule ontology of KReS. Rules are passed as {@link String} contantining rules in KReSRule format
+	 * Adds one or more rules to the rule ontology of KReS. Rules are passed as {@link String} contantining rules in Rule format
 	 * @param kReSRuleString {@link String}
 	 * @return true if the rule is added, false otherwise.
 	 */
@@ -66,8 +66,8 @@ public interface KReSRuleManager {
 	 * Gets the selected rule from the rule base.
 	 * 
 	 * @param ruleIRI {@link IRI}
-	 * @return the {@link KReSRule}.
+	 * @return the {@link Rule}.
 	 */
-	public KReSRule getRule(IRI ruleIRI);
+	public Rule getRule(IRI ruleIRI);
 
 }
