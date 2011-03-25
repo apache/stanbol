@@ -11,8 +11,8 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.stanbol.reasoners.base.commands.KReSCreateReasoner;
-import org.apache.stanbol.reasoners.base.commands.KReSRunReasoner;
+import org.apache.stanbol.reasoners.base.commands.CreateReasoner;
+import org.apache.stanbol.reasoners.base.commands.RunReasoner;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -31,12 +31,12 @@ import org.semanticweb.owlapi.util.InferredOntologyGenerator;
  *
  * @author elvio
  */
-public class KReSRunReasonerTest {
+public class RunReasonerTest {
 
     public OWLOntologyManager owlmanager;
     public OWLOntology owl;
 
-    public KReSRunReasonerTest() throws OWLOntologyCreationException {
+    public RunReasonerTest() throws OWLOntologyCreationException {
         this.owlmanager = OWLManager.createOWLOntologyManager();
         this.owl = owlmanager.loadOntologyFromOntologyDocument(new File("./src/main/resources/TestFile/ProvaParent.owl"));
     }
@@ -60,19 +60,19 @@ public class KReSRunReasonerTest {
    
 
     /**
-     * Test of runClassifyInference method, of class KReSRunReasoner.
+     * Test of runClassifyInference method, of class RunReasoner.
      */
     @Test
     public void testRunClassifyInference_arg0() throws OWLOntologyCreationException {
 
         OWLOntology inf = OWLManager.createOWLOntologyManager().createOntology(owl.getOntologyID());
-        KReSCreateReasoner reasoner = new KReSCreateReasoner(owl);
-        KReSRunReasoner instance = new KReSRunReasoner(reasoner.getReasoner());
+        CreateReasoner reasoner = new CreateReasoner(owl);
+        RunReasoner instance = new RunReasoner(reasoner.getReasoner());
 
         inf = instance.runClassifyInference(inf);
 
-        KReSCreateReasoner reasonerforcheck = new KReSCreateReasoner(inf);
-        KReSRunReasoner run = new KReSRunReasoner(reasonerforcheck.getReasoner());
+        CreateReasoner reasonerforcheck = new CreateReasoner(inf);
+        RunReasoner run = new RunReasoner(reasonerforcheck.getReasoner());
         System.out.println(":::::::::::::::: consistency check "+run.isConsistent());
 
         int ax = inf.getAxiomCount();
@@ -87,19 +87,19 @@ public class KReSRunReasonerTest {
     }
 
     /**
-     * Test of runClassifyInference method, of class KReSRunReasoner.
+     * Test of runClassifyInference method, of class RunReasoner.
      */
     @Test
     public void testRunClassifyInference() throws OWLOntologyCreationException {
         int contin = owl.getAxiomCount();
 
-        KReSCreateReasoner reasoner = new KReSCreateReasoner(owl);
-        KReSRunReasoner instance = new KReSRunReasoner(reasoner.getReasoner());    
+        CreateReasoner reasoner = new CreateReasoner(owl);
+        RunReasoner instance = new RunReasoner(reasoner.getReasoner());
         
         owl = instance.runClassifyInference(owl);
 
-        KReSCreateReasoner reasonerforcheck = new KReSCreateReasoner(owl);
-        KReSRunReasoner run = new KReSRunReasoner(reasonerforcheck.getReasoner());
+        CreateReasoner reasonerforcheck = new CreateReasoner(owl);
+        RunReasoner run = new RunReasoner(reasonerforcheck.getReasoner());
         System.out.println(":::::::::::::::: consistency check "+run.isConsistent());
 
         int ax = owl.getAxiomCount();
@@ -114,14 +114,14 @@ public class KReSRunReasonerTest {
     }
 
     /**
-     * Test of isConsistence method, of class KReSRunReasoner.
+     * Test of isConsistence method, of class RunReasoner.
      */
     @Test
     public void testIsConsistence() {
         OWLReasoner expris = (new ReasonerFactory()).createReasoner(owl);
         expris.prepareReasoner();
-        KReSCreateReasoner reasoner = new KReSCreateReasoner(owl);
-        KReSRunReasoner instance = new KReSRunReasoner(reasoner.getReasoner());
+        CreateReasoner reasoner = new CreateReasoner(owl);
+        RunReasoner instance = new RunReasoner(reasoner.getReasoner());
         boolean expResult = expris.isConsistent();
         boolean result = instance.isConsistent();
         if(result){
@@ -133,16 +133,16 @@ public class KReSRunReasonerTest {
     }
 
     /**
-     * Test of runGeneralInference method, of class KReSRunReasoner.
+     * Test of runGeneralInference method, of class RunReasoner.
      */
     @Test
     public void testRunGeneralInference_0args(){
-        KReSCreateReasoner reasoner = new KReSCreateReasoner(owl);
-        KReSRunReasoner instance = new KReSRunReasoner(reasoner.getReasoner());
+        CreateReasoner reasoner = new CreateReasoner(owl);
+        RunReasoner instance = new RunReasoner(reasoner.getReasoner());
         OWLOntology result = instance.runGeneralInference();
 
-        KReSCreateReasoner reasonerforcheck = new KReSCreateReasoner(result);
-        KReSRunReasoner run = new KReSRunReasoner(reasonerforcheck.getReasoner());
+        CreateReasoner reasonerforcheck = new CreateReasoner(result);
+        RunReasoner run = new RunReasoner(reasonerforcheck.getReasoner());
         System.out.println(":::::::::::::::: consistency check "+run.isConsistent());
 
         OWLReasoner expris = (new ReasonerFactory()).createReasoner(owl);
@@ -170,17 +170,17 @@ public class KReSRunReasonerTest {
     }
 
     /**
-     * Test of runGeneralInference method, of class KReSRunReasoner.
+     * Test of runGeneralInference method, of class RunReasoner.
      */
     @Test
     public void testRunGeneralInference_OWLOntology() throws OWLOntologyCreationException {
         OWLOntology newmodel = OWLManager.createOWLOntologyManager().createOntology(owl.getOntologyID());
-        KReSCreateReasoner reasoner = new KReSCreateReasoner(owl);
-        KReSRunReasoner instance = new KReSRunReasoner(reasoner.getReasoner());
+        CreateReasoner reasoner = new CreateReasoner(owl);
+        RunReasoner instance = new RunReasoner(reasoner.getReasoner());
         OWLOntology result = instance.runGeneralInference(newmodel);
 
-        KReSCreateReasoner reasonerforcheck = new KReSCreateReasoner(result);
-        KReSRunReasoner run = new KReSRunReasoner(reasonerforcheck.getReasoner());
+        CreateReasoner reasonerforcheck = new CreateReasoner(result);
+        RunReasoner run = new RunReasoner(reasonerforcheck.getReasoner());
         System.out.println(":::::::::::::::: consistency check "+run.isConsistent());
         
         OWLReasoner expris = (new ReasonerFactory()).createReasoner(owl);

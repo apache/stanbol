@@ -19,7 +19,7 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
  * This class create an OWLReasoner. The used reasoner is HermiT but alternatively can be used an online reasoner.
  * 
  */
-public class KReSCreateReasoner {
+public class CreateReasoner {
 
     private OWLReasoner reasoner;
 
@@ -28,7 +28,7 @@ public class KReSCreateReasoner {
      *
      * @param owl {An OWLOntology object where to perform the inferences.}
      */
-    public KReSCreateReasoner(OWLOntology owl){
+    public CreateReasoner(OWLOntology owl){
         //ConsoleProgressMonitor progressMonitor = new ConsoleProgressMonitor();
         OWLReasonerConfiguration config = new SimpleConfiguration();
         ReasonerFactory risfactory = new ReasonerFactory();
@@ -41,7 +41,7 @@ public class KReSCreateReasoner {
      * @param owl {An OWLOntology object where to perform the inferences.}
      * @param owlrc {An OWLReasonerConfiguration object contains particular configuration to set the resaoner.}
      */
-    public KReSCreateReasoner(OWLOntology owl,OWLReasonerConfiguration owlrc){
+    public CreateReasoner(OWLOntology owl,OWLReasonerConfiguration owlrc){
         ReasonerFactory risfactory = new ReasonerFactory();
         this.reasoner = risfactory.createReasoner(owl,owlrc);
     }
@@ -53,7 +53,7 @@ public class KReSCreateReasoner {
      * @param owl {An OWLOntology object where to perform the inferences.}
      * @param reasonerurl {The url of the reasoner server end-point.}
      */
-    public KReSCreateReasoner(OWLOntology owl,URL reasonerurl){
+    public CreateReasoner(OWLOntology owl,URL reasonerurl){
         OWLlinkReasonerConfiguration reasonerConfiguration = new OWLlinkReasonerConfiguration(reasonerurl);
         OWLlinkHTTPXMLReasonerFactory factory = new OWLlinkHTTPXMLReasonerFactory();
         this.reasoner = factory.createNonBufferingReasoner(owl, reasonerConfiguration);

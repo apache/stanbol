@@ -6,10 +6,10 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.reasoners.base.api.KReSReasoner;
-import org.apache.stanbol.reasoners.base.commands.KReSCreateReasoner;
-import org.apache.stanbol.reasoners.base.commands.KReSRunReasoner;
-import org.apache.stanbol.reasoners.base.commands.KReSRunRules;
+import org.apache.stanbol.reasoners.base.api.Reasoner;
+import org.apache.stanbol.reasoners.base.commands.CreateReasoner;
+import org.apache.stanbol.reasoners.base.commands.RunReasoner;
+import org.apache.stanbol.reasoners.base.commands.RunRules;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
@@ -17,8 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(immediate = true, metatype = true)
-@Service(KReSReasoner.class)
-public class KReSReasonerImpl implements KReSReasoner {
+@Service(Reasoner.class)
+public class ReasonerImpl implements Reasoner {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	
@@ -28,11 +28,11 @@ public class KReSReasonerImpl implements KReSReasoner {
 	 * <p>
 	 * DO NOT USE to manually create instances - the KReSRuleStore instances do
 	 * need to be configured! YOU NEED TO USE
-	 * {@link #KReSReasonerImpl(Dictionary)} or its overloads, to parse the
+	 * {@link #ReasonerImpl(Dictionary)} or its overloads, to parse the
 	 * configuration and then initialise the rule store if running outside a
 	 * OSGI environment.
 	 */
-	public KReSReasonerImpl() {
+	public ReasonerImpl() {
 	}
 		
 	/**
@@ -40,7 +40,7 @@ public class KReSReasonerImpl implements KReSReasoner {
 	 * default constructor.
 	 * 
 	 */
-	public KReSReasonerImpl(Dictionary<String, Object> configuration) {
+	public ReasonerImpl(Dictionary<String, Object> configuration) {
 		// Always call activate(Dictionary) in the constructor as a golden rule.
 		activate(configuration);
 	}
@@ -48,7 +48,7 @@ public class KReSReasonerImpl implements KReSReasoner {
 	@SuppressWarnings("unchecked")
 	@Activate
 	protected void activate(ComponentContext context) {
-		log.info("in " + KReSReasonerImpl.class + " activate with context "
+		log.info("in " + ReasonerImpl.class + " activate with context "
 				+ context);
 		if (context == null) {
 			throw new IllegalStateException("No valid" + ComponentContext.class
@@ -63,35 +63,35 @@ public class KReSReasonerImpl implements KReSReasoner {
 	
 	/*
 	 * (non-Javadoc)
-	 * @see eu.iksproject.kres.api.reasoners.KReSReasoner#consistencyCheck(org.semanticweb.owlapi.reasoner.OWLReasoner)
+	 * @see eu.iksproject.kres.api.reasoners.Reasoner#consistencyCheck(org.semanticweb.owlapi.reasoner.OWLReasoner)
 	 */
 	public boolean consistencyCheck(OWLReasoner owlReasoner){
-		KReSRunReasoner kReSRunReasoner = new KReSRunReasoner(owlReasoner);
+		RunReasoner kReSRunReasoner = new RunReasoner(owlReasoner);
 		return kReSRunReasoner.isConsistent();
 	}
 	
 	@Deactivate
 	protected void deactivate(ComponentContext context) {
-		log.info("in " + KReSReasonerImpl.class + " deactivate with context "
+		log.info("in " + ReasonerImpl.class + " deactivate with context "
 				+ context);
 	}
 	
 	/*
 	 * (non-Javadoc)
-	 * @see eu.iksproject.kres.api.reasoners.KReSReasoner#getReasoner(org.semanticweb.owlapi.model.OWLOntology)
+	 * @see eu.iksproject.kres.api.reasoners.Reasoner#getReasoner(org.semanticweb.owlapi.model.OWLOntology)
 	 */
 	public OWLReasoner getReasoner(OWLOntology ontology) {
-		KReSCreateReasoner kReSCreateReasoner = new KReSCreateReasoner(ontology);
+		CreateReasoner kReSCreateReasoner = new CreateReasoner(ontology);
 		return kReSCreateReasoner.getReasoner();
 	}
 	
 	/*
 	 * (non-Javadoc)
-	 * @see eu.iksproject.kres.api.reasoners.KReSReasoner#runRules(org.semanticweb.owlapi.model.OWLOntology, org.semanticweb.owlapi.model.OWLOntology)
+	 * @see eu.iksproject.kres.api.reasoners.Reasoner#runRules(org.semanticweb.owlapi.model.OWLOntology, org.semanticweb.owlapi.model.OWLOntology)
 	 */
 	@Override
 	public OWLOntology runRules(OWLOntology ontology, OWLOntology ruleOntology){
-        KReSRunRules kReSRunRules = new KReSRunRules(ruleOntology, ontology);
+        RunRules kReSRunRules = new RunRules(ruleOntology, ontology);
         return kReSRunRules.runRulesReasoner();
 	}
 	

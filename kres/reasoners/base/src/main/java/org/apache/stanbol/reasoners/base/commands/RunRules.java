@@ -35,7 +35,7 @@ import org.apache.stanbol.owlapi.trasformation.JenaToOwlConvert;
  *
  * @author elvio
  */
-public final class KReSRunRules {
+public final class RunRules {
 
 
     private OWLOntology targetontology;
@@ -93,7 +93,7 @@ public final class KReSRunRules {
             if(additions.size()>0)
                 manager.applyChanges(additions);
         } catch (OWLOntologyCreationException ex) {
-            Logger.getLogger(KReSRunRules.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RunRules.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
@@ -104,7 +104,7 @@ public final class KReSRunRules {
      * @param SWRLruleOntology {The OWLOntology contains the SWRL rules.}
      * @param targetOntology {The OWLOntology model where to perform the SWRL rule reasoner.}
      */
-    public KReSRunRules(OWLOntology SWRLruleOntology, OWLOntology targetOntology){  
+    public RunRules(OWLOntology SWRLruleOntology, OWLOntology targetOntology){
 
         cloneOntology(targetOntology);
         this.targetontology = targetOntology;
@@ -117,7 +117,7 @@ public final class KReSRunRules {
             owlmanager.applyChanges(additions);
 
         //Create the reasoner
-        this.reasoner = (new KReSCreateReasoner(originalowl)).getReasoner();
+        this.reasoner = (new CreateReasoner(originalowl)).getReasoner();
 
         //Prepare the reasoner
         this.reasoner.prepareReasoner();
@@ -131,7 +131,7 @@ public final class KReSRunRules {
      * @param targetOntology {The OWLOntology model where to perform the SWRL rule reasoner.}
      * @param reasonerurl {The url of reasoner server end-point.}
      */
-    public KReSRunRules(OWLOntology SWRLruleOntology, OWLOntology targetOntology, URL reasonerurl){
+    public RunRules(OWLOntology SWRLruleOntology, OWLOntology targetOntology, URL reasonerurl){
 
         cloneOntology(targetOntology);
         this.targetontology = targetOntology;
@@ -144,7 +144,7 @@ public final class KReSRunRules {
             owlmanager.applyChanges(additions);
 
         //Create the reasoner
-        this.reasoner = (new KReSCreateReasoner(originalowl,reasonerurl)).getReasoner();
+        this.reasoner = (new CreateReasoner(originalowl,reasonerurl)).getReasoner();
 
         //Prepare the reasoner
         this.reasoner.prepareReasoner();
@@ -156,7 +156,7 @@ public final class KReSRunRules {
      * @param SWRLruleOntology {The Jena Model contains the SWRL rules.}
      * @param targetOntology {The OWLOntology model where to perform the SWRL rule reasoner.}
      */
-    public KReSRunRules(Model SWRLruleOntology, OWLOntology targetOntology){
+    public RunRules(Model SWRLruleOntology, OWLOntology targetOntology){
 
         JenaToOwlConvert j2o = new JenaToOwlConvert();
         OntModel jenamodel = ModelFactory.createOntologyModel();
@@ -173,7 +173,7 @@ public final class KReSRunRules {
             owlmanager.applyChanges(additions);
 
         //Create the reasoner
-        this.reasoner = (new KReSCreateReasoner(originalowl)).getReasoner();
+        this.reasoner = (new CreateReasoner(originalowl)).getReasoner();
 
         //Prepare the reasoner
         this.reasoner.prepareReasoner();
@@ -187,7 +187,7 @@ public final class KReSRunRules {
      * @param targetOntology {The OWLOntology model where to perform the SWRL rule reasoner.}
      * @param reasonerurl {The url of the the reasoner server end-point.}
      */
-    public KReSRunRules(Model SWRLruleOntology, OWLOntology targetOntology, URL reasonerurl){
+    public RunRules(Model SWRLruleOntology, OWLOntology targetOntology, URL reasonerurl){
         JenaToOwlConvert j2o = new JenaToOwlConvert();
         OntModel jenamodel = ModelFactory.createOntologyModel();
         jenamodel.add(SWRLruleOntology);
@@ -204,7 +204,7 @@ public final class KReSRunRules {
             owlmanager.applyChanges(additions);
         
         //Create the reasoner
-        this.reasoner = (new KReSCreateReasoner(originalowl,reasonerurl)).getReasoner();
+        this.reasoner = (new CreateReasoner(originalowl,reasonerurl)).getReasoner();
         //Prepare the reasoner
         this.reasoner.prepareReasoner();
 

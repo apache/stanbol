@@ -11,7 +11,7 @@ import org.semanticweb.owlapi.reasoner.OWLReasoner;
  * @author andrea.nuzzolese
  *
  */
-public interface KReSReasoner {
+public interface Reasoner {
 	
 	/**
 	 * Gets the reasoner.

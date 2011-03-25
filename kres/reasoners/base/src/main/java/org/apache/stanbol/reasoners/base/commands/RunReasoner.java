@@ -28,7 +28,7 @@ import org.semanticweb.owlapi.util.InferredSubClassAxiomGenerator;
  *
  * @author elvio
  */
-public class KReSRunReasoner {
+public class RunReasoner {
 
     private OWLOntology owlmodel;
     private OWLReasoner loadreasoner;
@@ -39,7 +39,7 @@ public class KReSRunReasoner {
      *
      * @param reasoner {The OWLReasoner object containing the ontology to be inferred.}
      */
-    public KReSRunReasoner(OWLReasoner reasoner){
+    public RunReasoner(OWLReasoner reasoner){
 
         this.owlmodel = reasoner.getRootOntology();
         this.owlmanager = owlmodel.getOWLOntologyManager();

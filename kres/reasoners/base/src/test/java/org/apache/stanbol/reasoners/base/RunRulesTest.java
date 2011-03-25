@@ -11,9 +11,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.stanbol.reasoners.base.commands.KReSCreateReasoner;
-import org.apache.stanbol.reasoners.base.commands.KReSRunReasoner;
-import org.apache.stanbol.reasoners.base.commands.KReSRunRules;
+import org.apache.stanbol.reasoners.base.commands.CreateReasoner;
+import org.apache.stanbol.reasoners.base.commands.RunReasoner;
+import org.apache.stanbol.reasoners.base.commands.RunRules;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -32,7 +32,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
  *
  * @author elvio
  */
-public class KReSRunRulesTest {
+public class RunRulesTest {
 
     public OWLOntologyManager owlmanagertarget;
     public OWLOntologyManager owlnamagerswrlt;
@@ -40,7 +40,7 @@ public class KReSRunRulesTest {
     public OWLOntology owlswrl;
     public OntModel jenaswrl;
 
-    public KReSRunRulesTest() throws OWLOntologyCreationException, IOException {
+    public RunRulesTest() throws OWLOntologyCreationException, IOException {
         this.owltarget = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(new File("./src/main/resources/TestFile/ProvaParent.owl"));
         this.owlswrl = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(new File("./src/main/resources/TestFile/OnlyRuledProvaParent.owl"));
         this.owlmanagertarget = owltarget.getOWLOntologyManager();
@@ -66,18 +66,18 @@ public class KReSRunRulesTest {
     }
 
     /**
-     * Test of runRulesReasoner method, of class KReSRunRules.
+     * Test of runRulesReasoner method, of class RunRules.
      */
     @Test
     public void testRunRulesReasoner_OWLOntology_1() throws OWLOntologyCreationException{
 
         OWLOntology newmodel = OWLManager.createOWLOntologyManager().createOntology(owltarget.getOntologyID());
-        KReSRunRules instance = new KReSRunRules(owlswrl,owltarget);
+        RunRules instance = new RunRules(owlswrl,owltarget);
        
         newmodel = instance.runRulesReasoner(newmodel);
         
-        KReSCreateReasoner reasonerforcheck = new KReSCreateReasoner(newmodel);
-        KReSRunReasoner run = new KReSRunReasoner(reasonerforcheck.getReasoner());
+        CreateReasoner reasonerforcheck = new CreateReasoner(newmodel);
+        RunReasoner run = new RunReasoner(reasonerforcheck.getReasoner());
         System.out.println(":::::::::::::::: consistency check "+run.isConsistent());
         
         Iterator<OWLAxiom> axiom = newmodel.getAxioms().iterator();
@@ -108,16 +108,16 @@ public class KReSRunRulesTest {
     }
 
     /**
-     * Test of runRulesReasoner method, of class KReSRunRules.
+     * Test of runRulesReasoner method, of class RunRules.
      */
     @Test
     public void testRunRulesReasoner_0args_1(){
 
-        KReSRunRules instance = new KReSRunRules(owlswrl,owltarget);
+        RunRules instance = new RunRules(owlswrl,owltarget);
         OWLOntology newmodel = instance.runRulesReasoner();
 
-        KReSCreateReasoner reasonerforcheck = new KReSCreateReasoner(newmodel);
-        KReSRunReasoner run = new KReSRunReasoner(reasonerforcheck.getReasoner());
+        CreateReasoner reasonerforcheck = new CreateReasoner(newmodel);
+        RunReasoner run = new RunReasoner(reasonerforcheck.getReasoner());
         System.out.println(":::::::::::::::: consistency check "+run.isConsistent());
 
         Iterator<OWLAxiom> axiom = newmodel.getAxioms().iterator();
@@ -137,18 +137,18 @@ public class KReSRunRulesTest {
     }
 
     /**
-     * Test of runRulesReasoner method, of class KReSRunRules.
+     * Test of runRulesReasoner method, of class RunRules.
      */
     @Test
     public void testRunRulesReasoner_OWLOntology_2() throws OWLOntologyCreationException {
 
         OWLOntology newmodel = OWLManager.createOWLOntologyManager().createOntology(owltarget.getOntologyID());
-        KReSRunRules instance = new KReSRunRules(jenaswrl.getBaseModel(),owltarget);
+        RunRules instance = new RunRules(jenaswrl.getBaseModel(),owltarget);
 
         newmodel = instance.runRulesReasoner(newmodel);
 
-        KReSCreateReasoner reasonerforcheck = new KReSCreateReasoner(newmodel);
-        KReSRunReasoner run = new KReSRunReasoner(reasonerforcheck.getReasoner());
+        CreateReasoner reasonerforcheck = new CreateReasoner(newmodel);
+        RunReasoner run = new RunReasoner(reasonerforcheck.getReasoner());
         System.out.println(":::::::::::::::: consistency check "+run.isConsistent());
 
         Iterator<OWLAxiom> axiom = newmodel.getAxioms().iterator();
@@ -179,16 +179,16 @@ public class KReSRunRulesTest {
     }
 
     /**
-     * Test of runRulesReasoner method, of class KReSRunRules.
+     * Test of runRulesReasoner method, of class RunRules.
      */
     @Test
     public void testRunRulesReasoner_0args_2(){
 
-        KReSRunRules instance = new KReSRunRules(jenaswrl,owltarget);
+        RunRules instance = new RunRules(jenaswrl,owltarget);
         OWLOntology newmodel = instance.runRulesReasoner();
 
-        KReSCreateReasoner reasonerforcheck = new KReSCreateReasoner(newmodel);
-        KReSRunReasoner run = new KReSRunReasoner(reasonerforcheck.getReasoner());
+        CreateReasoner reasonerforcheck = new CreateReasoner(newmodel);
+        RunReasoner run = new RunReasoner(reasonerforcheck.getReasoner());
         System.out.println(":::::::::::::::: consistency check "+run.isConsistent());
 
         Iterator<OWLAxiom> axiom = newmodel.getAxioms().iterator();
