@@ -58,10 +58,10 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.entityhub.site.linkedData;version=${pom.version},
+              org.apache.stanbol.entityhub.site.linkeddata;version=${pom.version},
             </Export-Package>
            <Private-Package>
-              org.apache.stanbol.entityhub.site.linkedData.impl;version=${pom.version},
+              org.apache.stanbol.entityhub.site.linkeddata.impl;version=${pom.version},
             </Private-Package>
            </instructions>
         </configuration>

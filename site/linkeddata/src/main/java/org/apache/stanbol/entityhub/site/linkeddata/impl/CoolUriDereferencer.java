@@ -14,10 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.entityhub.site.linkedData.impl;
+package org.apache.stanbol.entityhub.site.linkeddata.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
@@ -27,7 +29,6 @@ import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.entityhub.core.site.AbstractEntityDereferencer;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -35,53 +36,38 @@ import org.apache.stanbol.entityhub.servicesapi.site.EntityDereferencer;
 import org.slf4j.LoggerFactory;
 
 
-/**
- *
- * @author Rupert Westenthaler
- *
- */
+
 @Component(
-        name="org.apache.stanbol.entityhub.dereferencer.SparqlDereferencer",
-        factory="org.apache.stanbol.entityhub.dereferencer.SparqlDereferencerFactory",
-        policy=ConfigurationPolicy.REQUIRE, //the baseUri and the SPARQL Endpoint are required
+        name="org.apache.stanbol.entityhub.dereferencer.CoolUriDereferencer",
+        factory="org.apache.stanbol.entityhub.dereferencer.CoolUriDereferencerFactory",
+        policy=ConfigurationPolicy.REQUIRE, //the baseUri is required!
         specVersion="1.1"
         )
-@Service(value=EntityDereferencer.class)
-public class SparqlDereferencer extends AbstractEntityDereferencer {
-    private final RdfValueFactory valueFactory = RdfValueFactory.getInstance();
-
-    public SparqlDereferencer(){
-        super(LoggerFactory.getLogger(SparqlDereferencer.class));
-    }
-
+public class CoolUriDereferencer extends AbstractEntityDereferencer implements EntityDereferencer{
     @Reference
     private Parser parser;
 
+    private final RdfValueFactory valueFactory = RdfValueFactory.getInstance();
 
-    /*
-     * TODO: Supports only Triple serialisations as content types.
-     * To support other types one would need to create a select query and
-     * format the output accordingly.
-     * However it is not clear if such a functionality is needed.
-     */
-    @Override
-    public final InputStream dereference(String uri, String contentType) throws IOException {
-        if(uri==null){
-            return null;
-        }
-        UriRef reference = new UriRef(uri);
-        StringBuilder query = new StringBuilder();
-        query.append("CONSTRUCT { ");
-        query.append(reference);
-        query.append(" ?p ?o } WHERE { ");
-        query.append(reference);
-        query.append(" ?p ?o }");
 
-        //String format = SupportedFormat.RDF_XML;
-        return SparqlEndpointUtils.sendSparqlRequest(getAccessUri(),query.toString(),contentType);
+    public CoolUriDereferencer(){
+        super(LoggerFactory.getLogger(CoolUriDereferencer.class));
     }
 
-    public final Representation dereference(String uri) throws IOException {
+    @Override
+    public final InputStream dereference(String uri, String contentType) throws IOException{
+        if(uri!=null){
+            final URL url = new URL(uri);
+            final URLConnection con = url.openConnection();
+            con.addRequestProperty("Accept", contentType);
+            return con.getInputStream();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public final Representation dereference(String uri) throws IOException{
         long start = System.currentTimeMillis();
         String format = SupportedFormat.RDF_XML;
         InputStream in = dereference(uri, format);
@@ -96,21 +82,4 @@ public class SparqlDereferencer extends AbstractEntityDereferencer {
             return null;
         }
     }
-
-//    /**
-//     * We need also to check for the endpointURI of the SPARQL service. So override
-//     * the default implementation and check for the additional property!
-//     */
-//    @Activate
-//    @Override
-//    public void activate(ComponentContext context) {
-//        //super config
-//        super.activate(context);
-//        log.info("  init sparql endpoint property");
-//    }
-//    @Deactivate
-//    @Override
-//    protected void deactivate(ComponentContext context) {
-//        super.deactivate(context);
-//    }
 }
