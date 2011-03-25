@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.reengineer.base.api.ReengineeringException;
-import org.apache.stanbol.reengineer.base.api.util.SemionUriRefGenerator;
+import org.apache.stanbol.reengineer.base.api.util.ReengineerUriRefGenerator;
 import org.apache.stanbol.reengineer.db.connection.DatabaseConnection;
 import org.apache.stanbol.reengineer.db.vocab.DBS_L1;
 import org.apache.stanbol.reengineer.db.vocab.DBS_L1_OWL;
@@ -36,14 +36,14 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 import org.apache.stanbol.owlapi.trasformation.JenaToOwlConvert;
 
-public class SemionDBDataTransformer extends SemionUriRefGenerator {
+public class DBDataTransformer extends ReengineerUriRefGenerator {
 
-	private KReSONManager onManager;
+	private ONManager onManager;
 	private OWLOntology schemaOntology;
 	private DatabaseConnection databaseConnection;
 	
 	
-	public SemionDBDataTransformer(KReSONManager onManager, OWLOntology schemaOntology) {
+	public DBDataTransformer(ONManager onManager, OWLOntology schemaOntology) {
 		this.onManager = onManager;
 		this.schemaOntology = schemaOntology;
 		this.databaseConnection = new DatabaseConnection(schemaOntology);

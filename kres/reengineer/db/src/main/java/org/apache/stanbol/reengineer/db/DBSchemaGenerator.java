@@ -11,7 +11,7 @@ import java.util.Hashtable;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.stanbol.reengineer.base.api.settings.ConnectionSettings;
-import org.apache.stanbol.reengineer.base.api.util.SemionUriRefGenerator;
+import org.apache.stanbol.reengineer.base.api.util.ReengineerUriRefGenerator;
 import org.apache.stanbol.reengineer.db.vocab.DBS_L1_OWL;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
@@ -23,13 +23,13 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 
 /**
- * The {@code SemionDBSchemaGenerator} is responsible of the generation of the RDF of the schema of a relational database.
+ * The {@code DBSchemaGenerator} is responsible of the generation of the RDF of the schema of a relational database.
  * 
  * @author andrea.nuzzolese
  *
  */
 
-public class SemionDBSchemaGenerator extends SemionUriRefGenerator implements Serializable {
+public class DBSchemaGenerator extends ReengineerUriRefGenerator implements Serializable {
 
 	private String graphNS; 
 	private IRI outputIRI;
@@ -37,21 +37,21 @@ public class SemionDBSchemaGenerator extends SemionUriRefGenerator implements Se
 	
 	
 	/**
-	 * Creates a new standard {@code SemionDBSchemaGenerator} 
+	 * Creates a new standard {@code DBSchemaGenerator}
 	 */
-	public SemionDBSchemaGenerator() {
+	public DBSchemaGenerator() {
 		
 	}
 	
 	/**
-	 * Creates a new {@code SemionDBSchemaGenerator} that can generate the RDF of the database's schema. The database is available
+	 * Creates a new {@code DBSchemaGenerator} that can generate the RDF of the database's schema. The database is available
 	 * thanks to the {@code connectionSettings} passed as input. The URI of the RDF will be that one passed as actual parameter to the
 	 * formal parameter {@code databaseURI}.
 	 * 
 	 * @param databaseURI {@link String}
 	 * @param connectionSettings {@link ConnectionSettings}
 	 */
-	public SemionDBSchemaGenerator(IRI outputIRI, ConnectionSettings connectionSettings){
+	public DBSchemaGenerator(IRI outputIRI, ConnectionSettings connectionSettings){
 		
 		this.connectionSettings = connectionSettings;
 		this.outputIRI = outputIRI;

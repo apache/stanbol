@@ -8,9 +8,9 @@ import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.sparql.QueryEngine;
 import org.apache.clerezza.rdf.jena.sparql.JenaSparqlEngine;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
-import org.apache.stanbol.reengineer.base.impl.SemionManagerImpl;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
+import org.apache.stanbol.reengineer.base.impl.ReengineerManagerImpl;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -20,7 +20,7 @@ public class DBExtractorTest {
 
 	static DBExtractor dbExtractor;
 	static String graphNS;
-	static KReSONManager onManager;
+	static ONManager onManager;
 	static IRI outputIRI;
 	
 	@BeforeClass
@@ -41,8 +41,8 @@ public class DBExtractorTest {
         // Two different ontology storagez, the same sparql engine and tcprovider
 		
 		
-		onManager = new ONManager(tcm, wtcp,emptyConf);
-		dbExtractor = new DBExtractor(new SemionManagerImpl(tcm, wtcp),
+		onManager = new ONManagerImpl(tcm, wtcp,emptyConf);
+		dbExtractor = new DBExtractor(new ReengineerManagerImpl(tcm, wtcp),
 				onManager, tcm, wtcp, emptyConf);
 		graphNS = "http://kres.iks-project.eu/reengineering/test";
 		outputIRI = IRI.create(graphNS);
