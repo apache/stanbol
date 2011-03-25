@@ -20,13 +20,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>${stanbol-version}</version>
     <relativePath>../../parent</relativePath>
   </parent>
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.launchers.sling</artifactId>
   <packaging>jar</packaging>
-  <version>0.1-SNAPSHOT</version>
+  <version>${stanbol-version}</version>
   <name>Apache Stanbol Entityhub Sling-based standalone launcher</name>
   <description>Runnable jar that runs the standard IKS Entityhub configuration</description>
   <scm>
@@ -42,13 +42,12 @@
     <plugins>
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>2.2</version>
         <configuration>
           <filesets>
             <fileset>
               <directory>${basedir}</directory>
               <includes>
-                <include>sling</include>
+                <include>sling/**</include>
               </includes>
             </fileset>
           </filesets>
@@ -62,7 +61,6 @@
             and Karaf description, we could add this.
             See http://sling.apache.org/site/maven-launchpad-plugin.html
          -->
-        <version>2.0.6</version>
         <executions>
           <execution>
             <id>prepare-package</id>
@@ -75,7 +73,7 @@
               <jarWebSupport>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.http.jetty</artifactId>
-                <version>2.0.4</version>
+                <version>2.2.0</version>
               </jarWebSupport>
             </configuration>
           </execution>
@@ -102,9 +100,7 @@
       <!-- maven-launchpad-plugin builds on the launchpad.base app -->
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.launchpad.base</artifactId>
-      <version>2.1.1-SNAPSHOT</version>
       <classifier>app</classifier>
-      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>
