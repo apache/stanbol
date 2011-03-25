@@ -28,7 +28,7 @@ public class JerseyEndpointApplication extends Application {
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
 
-        classes.add(SemionReengineerResource.class);
+        classes.add(ReengineerResource.class);
         
         // message body writers
         classes.add(GraphWriter.class);

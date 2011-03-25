@@ -26,8 +26,8 @@ import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.ReengineeringException;
-import org.apache.stanbol.reengineer.base.api.SemionManager;
-import org.apache.stanbol.reengineer.base.api.SemionReengineer;
+import org.apache.stanbol.reengineer.base.api.ReengineerManager;
+import org.apache.stanbol.reengineer.base.api.Reengineer;
 import org.apache.stanbol.reengineer.base.api.datasources.DataSourceFactory;
 import org.apache.stanbol.reengineer.base.api.datasources.InvalidDataSourceForTypeSelectedException;
 import org.apache.stanbol.reengineer.base.api.datasources.NoSuchDataSourceExpection;
@@ -47,21 +47,21 @@ import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
 
 @Path("/reengineer")
 @ImplicitProduces("text/html")
-public class SemionReengineerResource extends NavigationMixin {
+public class ReengineerResource extends NavigationMixin {
 	
 
 
-	protected SemionManager reengineeringManager;
+	protected ReengineerManager reengineeringManager;
 	protected TcManager tcManager;
 	protected OntologyStorage storage;
 	
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	
 	
-	public SemionReengineerResource(@Context ServletContext servletContext) {
+	public ReengineerResource(@Context ServletContext servletContext) {
 		tcManager = (TcManager) servletContext.getAttribute(TcManager.class.getName());
 		storage = (OntologyStorage) servletContext.getAttribute(OntologyStorage.class.getName());
-		reengineeringManager  = (SemionManager) (servletContext.getAttribute(SemionManager.class.getName()));
+		reengineeringManager  = (ReengineerManager) (servletContext.getAttribute(ReengineerManager.class.getName()));
 		if (reengineeringManager == null) {
             throw new IllegalStateException(
                     "ReengineeringManager missing in ServletContext");
@@ -170,10 +170,10 @@ public class SemionReengineerResource extends NavigationMixin {
 	@GET
 	@Path("/reengineers")
 	public Response listReengineers(@Context HttpHeaders headers){
-		Collection<SemionReengineer> reengineers = reengineeringManager.listReengineers();
+		Collection<Reengineer> reengineers = reengineeringManager.listReengineers();
 		MGraph mGraph = new SimpleMGraph();
 		UriRef semionRef = new UriRef("http://semion.kres.iksproject.eu#Semion");
-		for(SemionReengineer semionReengineer : reengineers){
+		for(Reengineer semionReengineer : reengineers){
 			UriRef hasReengineer = new UriRef("http://semion.kres.iksproject.eu#hasReengineer");
 			Literal reenginnerLiteral = LiteralFactory.getInstance().createTypedLiteral(semionReengineer.getClass().getCanonicalName());
 			mGraph.add(new TripleImpl(semionRef, hasReengineer, reenginnerLiteral));
