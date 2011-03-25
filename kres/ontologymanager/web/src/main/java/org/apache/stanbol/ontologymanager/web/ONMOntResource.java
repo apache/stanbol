@@ -14,9 +14,9 @@ import javax.ws.rs.core.Response;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -35,9 +35,9 @@ public class ONMOntResource extends NavigationMixin {
     private Logger log = LoggerFactory.getLogger(getClass());
 
     /*
-     * Placeholder for the KReSONManager to be fetched from the servlet context.
+     * Placeholder for the ONManager to be fetched from the servlet context.
      */
-    protected KReSONManager onm;
+    protected ONManager onm;
     protected OntologyStorage storage;
 
     protected ServletContext servletContext;
@@ -46,7 +46,7 @@ public class ONMOntResource extends NavigationMixin {
 
     public ONMOntResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
-        this.onm = (KReSONManager) servletContext.getAttribute(KReSONManager.class.getName());
+        this.onm = (ONManager) servletContext.getAttribute(ONManager.class.getName());
 //      this.storage = (OntologyStorage) servletContext
 //      .getAttribute(OntologyStorage.class.getName());
 // Contingency code for missing components follows.
@@ -57,7 +57,7 @@ public class ONMOntResource extends NavigationMixin {
 if (onm == null) {
     log
             .warn("No KReSONManager in servlet context. Instantiating manually...");
-    onm = new ONManager(new TcManager(), null,
+    onm = new ONManagerImpl(new TcManager(), null,
             new Hashtable<String, Object>());
 }
 this.storage = onm.getOntologyStore();
