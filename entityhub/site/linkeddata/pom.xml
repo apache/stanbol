@@ -28,7 +28,7 @@
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.entityhub.site.linkedData</artifactId>
+  <artifactId>org.apache.stanbol.entityhub.site.linkeddata</artifactId>
   <packaging>bundle</packaging>
   <version>${stanbol-version}</version>
 
@@ -41,10 +41,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/site/linkedData
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/site/linkeddata
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/site/linkedData
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/site/linkeddata
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>

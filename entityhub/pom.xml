@@ -57,7 +57,7 @@
     <module>generic/core</module>
     <module>model/clerezza</module>
     <module>query/clerezza</module>
-    <module>site/linkedData</module>
+    <module>site/linkeddata</module>
     <module>yard/clerezza</module>
     <module>yard/solr</module>
     <module>jersey</module>

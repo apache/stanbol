@@ -164,7 +164,7 @@
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.entityhub.site.linkedData</artifactId>
+			<artifactId>org.apache.stanbol.entityhub.site.linkeddata</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>
