@@ -117,7 +117,7 @@ public class CacheImpl implements Cache {
         Object mappings = context.getProperties().get(Cache.ADDITIONAL_MAPPINGS);
         FieldMapper configuredMappings = null;
         if (mappings instanceof String[] && ((String[]) mappings).length > 0) {
-            configuredMappings = new DefaultFieldMapperImpl(ValueConverterFactory.getInstance(yard.getValueFactory()));
+            configuredMappings = new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
             for (String mappingString : (String[]) mappings) {
                 FieldMapping fieldMapping = FieldMappingUtils.parseFieldMapping(mappingString);
                 if (fieldMapping != null) {
@@ -253,16 +253,16 @@ public class CacheImpl implements Cache {
     private Representation applyCacheMappings(Yard yard, Representation representation) {
         long start = System.currentTimeMillis();
         Representation mapped = null;
-        ;
+        ValueFactory valueFactory = getValueFactory();
         if (baseMapper != null) {
             mapped = yard.getValueFactory().createRepresentation(representation.getId());
-            baseMapper.applyMappings(representation, mapped);
+            baseMapper.applyMappings(representation, mapped,valueFactory);
         }
         if (additionalMapper != null) {
             if (mapped == null) {
                 mapped = yard.getValueFactory().createRepresentation(representation.getId());
             }
-            additionalMapper.applyMappings(representation, mapped);
+            additionalMapper.applyMappings(representation, mapped,valueFactory);
         }
         log.info("  -- applied mappings in " + (System.currentTimeMillis() - start) + "ms");
         return mapped != null ? mapped : representation;

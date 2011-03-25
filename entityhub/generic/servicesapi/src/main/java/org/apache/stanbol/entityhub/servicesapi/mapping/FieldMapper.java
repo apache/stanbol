@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
+import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 
 public interface FieldMapper extends Cloneable{
 
@@ -46,12 +47,13 @@ public interface FieldMapper extends Cloneable{
      * are NOT used as source fields for further mappings.
      * @param source the source for the mapping process
      * @param target the target for the processed mappings (can be the same as source)
+     * @param valueFactory The valueFactory used to create values while applying the mappings
      * @return the {@link Representation} parsed as target.
      * TODO: This Method should return a MappingReport, that can be stored with
      * the {@link EntityMapping}. However the MappingActivity functionality is
      * not yet designed/implemented!
      */
-    Representation applyMappings(Representation source, Representation target);
+    Representation applyMappings(Representation source, Representation target,ValueFactory valueFactory);
     /**
      * Getter for the unmodifiable collection of all mappings
      * @return the configured mappings

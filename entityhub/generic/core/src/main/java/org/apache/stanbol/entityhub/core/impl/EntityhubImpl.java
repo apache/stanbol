@@ -34,6 +34,7 @@ import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
 import org.apache.stanbol.entityhub.core.model.DefaultEntityMappingImpl;
 import org.apache.stanbol.entityhub.core.model.DefaultSymbolImpl;
+import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.core.utils.ModelUtils;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
@@ -54,12 +55,13 @@ import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
-import org.apache.stanbol.entityhub.servicesapi.yard.YardManager;
+import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +70,7 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  *
  */
-@Component()
+@Component(immediate=true)
 @Service
 public final class EntityhubImpl implements Entityhub, ServiceListener {
 
@@ -77,6 +79,7 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
     /**
      * The OSGI component context of the Entityhub
      */
+    @SuppressWarnings("unused")
     private ComponentContext context;
     /**
      * The field mapper holding global mappings that are used for mapping
@@ -85,28 +88,9 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
     private FieldMapper fieldMapper;
 
     /**
-     * The yard where this Entityhub instance stores its data
-     * TODO: this reference is currently initialised in the activate method.
-     * however there are some issues with that.
-     * <ul>
-     * <li> If this Component is activated, before this yard is active, the
-     *      activate method throws an Exception and is therefore in the
-     *      "unsatisfied" state.
-     * <li> If now the needed Yard is configured this component gets not notified
-     * <li> However defining a Reference is also not possible, because it would
-     *      be nice to be able to change the Entityhub-Yard (e.g. to change the data
-     *      set of the Entityhub at runtime)
-     * <li> I could register a {@link ServiceListener} in the activate method.
-     *      But I am not sure if it is allowed to have an active Service Listener
-     *      on an component that is in the "unsatisfied" state.
-     * </ul>
+     * Tracks the availability of the Yard used by the Entityhub.
      */
-    private Yard entityhubYard; //reference initialised in the activate method
-    /*
-     * TODO: The YardManager is currently not used.
-     */
-    @Reference // 1..1, static
-    private YardManager yardManager;
+    private ServiceTracker entityhubYardTracker; //reference initialised in the activate method
     /**
      * The Configuration of the Entityhub
      * TODO: Maybe refactor this implementation to implement this interface or
@@ -129,13 +113,12 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
      * the Entityhub
      */
     @Activate
-    protected void activate(ComponentContext context) throws ConfigurationException {
-        log.info("activating Entityhub ...");
+    protected void activate(final ComponentContext context) throws ConfigurationException {
         if(context == null){
             throw new IllegalStateException("Unable to activate if parsed ComponentContext is NULL");
-        } else {
-            this.context = context;
         }
+        log.info("activating Entityhub with configuration "+context.getProperties());
+        this.context = context;
         //First check the entityhub ID and
         log.info(" ... init Basic Properties");
         if(config.getID() == null || config.getID().isEmpty()){
@@ -161,26 +144,29 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
             throw new ConfigurationException(EntityhubConfiguration.PREFIX, "The Prefix configured for the Entityhub is not an valied URI (prefix="+config.getEntityhubPrefix()+")");
         }
         //next get the reference to the configured EntityhubYard
-        log.info(" ... init EntityhubYard");
-        if(yardManager.isYard(config.getEntityhubYardId())){
-            this.entityhubYard = yardManager.getYard(config.getEntityhubYardId());
-            String entityhubYardFilterString = '('+Yard.ID+'='+config.getEntityhubYardId()+')';
-            try {
-                context.getBundleContext().addServiceListener(this,entityhubYardFilterString);
-            } catch (InvalidSyntaxException e) {
-                log.warn(String.format("Unable to set Filter %s to ServiceListener for EntityhubYard! -> add ServiceListener without Filter",
-                    entityhubYardFilterString),e);
-                context.getBundleContext().addServiceListener(this);
-            }
-        } else {
-            throw new ConfigurationException(EntityhubConfiguration.ENTITYHUB_YARD_ID, "Unable to get Yard for parsed value "+config.getEntityhubYardId());
+        if(config.getEntityhubPrefix() == null){
+            throw new ConfigurationException(EntityhubConfiguration.ENTITYHUB_YARD_ID, "The ID of the Yard used by the Entityhub MUST NOT be NULL");
         }
+        if(config.getEntityhubYardId().isEmpty()){
+            throw new ConfigurationException(EntityhubConfiguration.ENTITYHUB_YARD_ID, "The ID of the Yard used by the Entityhub MUST NOT be empty");
+        }
+        String entityhubYardFilterString = String.format("(&(%s=%s)(%s=%s))",
+            Constants.OBJECTCLASS,Yard.class.getName(),
+            Yard.ID,config.getEntityhubYardId());
+        log.info(" ... tracking EntityhubYard by Filter:"+entityhubYardFilterString);
+        try {
+            entityhubYardTracker = new ServiceTracker(context.getBundleContext(), 
+                context.getBundleContext().createFilter(entityhubYardFilterString), null);
+        } catch (InvalidSyntaxException e) {
+            throw new IllegalStateException("Got Invalid Syntax Exception for Entityhub filter ",e);
+        }
+        entityhubYardTracker.open(); //start the tracking
         //at last get the FieldMappingConfig and create the FieldMappings instance
         // -> we need to do that after the init of the Entityhub-yard, because than we
         //    can use the valueFactory of the configured Yard to create instances
         //    of converted values!
         log.info(" ... init FieldMappings");
-        fieldMapper = new DefaultFieldMapperImpl(ValueConverterFactory.getInstance(entityhubYard.getValueFactory()));
+        fieldMapper = new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
         for(String mappingString : config.getFieldMappingConfig()){
             FieldMapping mapping = FieldMappingUtils.parseFieldMapping(mappingString);
             if(mapping != null){
@@ -203,13 +189,12 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        log.info("!!deactivate");
-        if(this.entityhubYard != null){
-            //unregister the serviceListener
-            this.context.getBundleContext().removeServiceListener(this);
-        }
+        log.info("deactivate "+EntityhubImpl.class);
         this.fieldMapper = null;
-        this.entityhubYard = null;
+        if(entityhubYardTracker != null){
+            this.entityhubYardTracker.close();
+            this.entityhubYardTracker = null;
+        }
         this.context = null;
     }
 
@@ -219,7 +204,20 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
 //    }
     @Override
     public Yard getYard() {
-        return entityhubYard;
+        return (Yard)entityhubYardTracker.getService();
+    }
+    /**
+     * Internally used to lookup the yard. This throws an {@link YardException}
+     * in case the yard is currently not available
+     * @return the yard
+     * @throws YardException in case the yard is not active
+     */
+    private Yard lookupYard() throws YardException {
+        Yard yard = getYard();
+        if(yard == null){
+            throw new YardException("The Entityhub Yard (ID="+config.getEntityhubYardId()+") is not active! Please check the configuration!!");
+        }
+        return yard;
     }
 
     @Override
@@ -302,7 +300,7 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
         if(symbolId == null || symbolId.isEmpty()){
             throw new IllegalArgumentException("The parsed symbolID MUST NOT be NULL nor empty!");
         }
-        Representation rep = entityhubYard.getRepresentation(symbolId);
+        Representation rep = lookupYard().getRepresentation(symbolId);
         if(rep != null){
             try {
                 return new DefaultSymbolImpl(config.getEntityhubPrefix(),rep);
@@ -327,6 +325,7 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
             log.warn("Unable to create Symbol because the ReferencedSite "+sign.getSignSite()+" for sign "+sign.getId()+" is currently not active -> return null");
             return null;
         }
+        Yard entityhubYard = lookupYard();
         Representation symbolRep = entityhubYard.create(constructResourceId(DEFAULT_SYMBOL_PREFIX));
         //and set the initial state
         symbolRep.addReference(Symbol.STATE, config.getDefaultSymbolState().getUri());
@@ -340,7 +339,7 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
         Representation signRep = sign.getRepresentation();
         //TODO: As soon as MappingActivities are implemented we need to add such
         //      information to the EntityMapping instance!
-        mapper.applyMappings(signRep, symbolRep);
+        mapper.applyMappings(signRep, symbolRep,entityhubYard.getValueFactory());
         //Second create the symbol and init the data
         Symbol symbol;
         try {
@@ -417,7 +416,7 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
         }
         FieldQuery fieldQuery = getQueryFavtory().createFieldQuery();
         fieldQuery.setConstraint(RdfResourceEnum.mappedEntity.getUri(), new ReferenceConstraint(reference));
-        QueryResultList<String> resultList = entityhubYard.findReferences(fieldQuery);
+        QueryResultList<String> resultList = lookupYard().findReferences(fieldQuery);
         if(!resultList.isEmpty()){
             Iterator<String> resultIterator = resultList.iterator();
             EntityMapping entityMapping = getEntityMappingFromYard(resultIterator.next());
@@ -442,7 +441,7 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
         }
         FieldQuery fieldQuery = getQueryFavtory().createFieldQuery();
         fieldQuery.setConstraint(RdfResourceEnum.mappedSymbol.getUri(), new ReferenceConstraint(symbol));
-        QueryResultList<String> resultList = entityhubYard.findReferences(fieldQuery);
+        QueryResultList<String> resultList = lookupYard().findReferences(fieldQuery);
         Collection<EntityMapping> mappings = new HashSet<EntityMapping>();
         for(String mappingId : resultList){
             EntityMapping entityMapping = getEntityMappingFromYard(mappingId);
@@ -463,7 +462,7 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
      * is not an valid {@link EntityMapping}.
      */
     protected EntityMapping getEntityMappingFromYard(String id) throws IllegalArgumentException,YardException {
-        Representation rep = entityhubYard.getRepresentation(id);
+       Representation rep = lookupYard().getRepresentation(id);
         if(rep != null){
             return new DefaultEntityMappingImpl(config.getEntityhubPrefix(),rep);
         } else {
@@ -477,7 +476,10 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
     }
     @Override
     public FieldQueryFactory getQueryFavtory() {
-        return entityhubYard.getQueryFactory();
+        Yard entityhubYard = getYard();
+        return entityhubYard==null? //if no yard available
+                DefaultQueryFactory.getInstance(): //use the default
+                    entityhubYard.getQueryFactory(); //else return the query factory used by the yard
     }
     @Override
     public FieldMapper getFieldMappings() {
@@ -485,22 +487,22 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
     }
     @Override
     public QueryResultList<Representation> find(FieldQuery query) throws YardException{
-        return entityhubYard.find(query);
+        return lookupYard().find(query);
     }
     @Override
     public QueryResultList<String> findSymbolReferences(FieldQuery query) throws YardException{
-        return entityhubYard.findReferences(query);
+        return lookupYard().findReferences(query);
     }
     @Override
     public QueryResultList<Symbol> findSymbols(FieldQuery query) throws YardException{
-        QueryResultList<String> references = entityhubYard.findReferences(query);
+        QueryResultList<String> references = lookupYard().findReferences(query);
         List<Symbol> symbols = new ArrayList<Symbol>(references.size());
         for(String reference : references){
             Symbol symbol = lookupSymbol(reference);
             if(symbol != null){
                 symbols.add(symbol);
             } else {
-                log.warn("Unable to create Symbol for Reference "+reference+" in the Yard usd by the entity hub [id="+entityhubYard.getId()+"] -> ignore reference");
+                log.warn("Unable to create Symbol for Reference "+reference+" in the Yard usd by the entity hub [id="+config.getEntityhubYardId()+"] -> ignore reference");
             }
         }
         return new QueryResultListImpl<Symbol>(references.getQuery(), symbols, Symbol.class);

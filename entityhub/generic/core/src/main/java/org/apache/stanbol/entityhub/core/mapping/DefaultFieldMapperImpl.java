@@ -34,6 +34,7 @@ import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
+import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint.ConstraintType;
@@ -201,7 +202,7 @@ public class DefaultFieldMapperImpl implements FieldMapper, Cloneable {
     /* (non-Javadoc)
      * @see org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper#applyMappings(org.apache.stanbol.entityhub.servicesapi.model.Representation, org.apache.stanbol.entityhub.servicesapi.model.Representation)
      */
-    public Representation applyMappings(Representation source, Representation target) {
+    public Representation applyMappings(Representation source, Representation target, ValueFactory valueFactory) {
         Collection<String> fields = new HashSet<String>();
         for(Iterator<String> fieldIt = source.getFieldNames();fieldIt.hasNext();){
             fields.add(fieldIt.next());
@@ -268,7 +269,7 @@ public class DefaultFieldMapperImpl implements FieldMapper, Cloneable {
                 for(FieldMapping mapping : activeMappings){
                     if(!mapping.ignoreField() &&
                             !Collections.disjoint(targetFields, mapping.getMappings())){
-                        processMapping(mapping, field,  values,globalFiltered, targetFields, target);
+                        processMapping(mapping, valueFactory, field,  values,globalFiltered, targetFields, target);
 //                    } else if(!mapping.ignoreField()) {
 //                        log.info(String.format("  << ignore mapping %s ",mapping));
 //                    } else {
@@ -287,12 +288,13 @@ public class DefaultFieldMapperImpl implements FieldMapper, Cloneable {
     /**
      *
      * @param mapping
+     * @param valueFactory The value factory used to create converted values
      * @param field
      * @param values
      * @param globalFiltered
      * @param targets
      */
-    private void processMapping(FieldMapping mapping, String field,  Collection<Object> values, Collection<Object> globalFiltered, Set<String> activeTargets,Representation targetRepresentation) {
+    private void processMapping(FieldMapping mapping, ValueFactory valueFactory,String field,  Collection<Object> values, Collection<Object> globalFiltered, Set<String> activeTargets,Representation targetRepresentation) {
         //parsed mappings are all !ignore and some mappings are active
         Collection<Object> filtered; //this collection will be modified by the filters later on
         if(globalFiltered == null || //if no global filter is present and therefore globalFiltered == null or
@@ -306,7 +308,7 @@ public class DefaultFieldMapperImpl implements FieldMapper, Cloneable {
             switch (mapping.getFilter().getType()) {
             case value:
                 ValueConstraint valueConstraint = (ValueConstraint)mapping.getFilter();
-                processFilter(valueConstraint,filtered);
+                processFilter(valueConstraint,filtered,valueFactory);
                 break;
             case text:
                 TextConstraint textConstraint = (TextConstraint)mapping.getFilter();
@@ -394,7 +396,7 @@ public class DefaultFieldMapperImpl implements FieldMapper, Cloneable {
      * @param values
      * @return
      */
-    private Collection<Object> processFilter(ValueConstraint valueConstraint, Collection<Object> values) {
+    private Collection<Object> processFilter(ValueConstraint valueConstraint, Collection<Object> values,ValueFactory valueFactory) {
         if(valueConstraint.getValue() != null){
             log.warn("Filtering based on values is not yet implemented");
         }
@@ -457,7 +459,7 @@ public class DefaultFieldMapperImpl implements FieldMapper, Cloneable {
             for(Iterator<DataTypeEnum> dataTypes = sortedActiveDataTypes.iterator(); //iterate over all active dataTypes
                 converted == null && dataTypes.hasNext();){ //while converted still null and more dataTypes to try
                 convertedTo = dataTypes.next();
-                converted = valueConverter.convert(value, convertedTo.getUri()); //try the conversion
+                converted = valueConverter.convert(value, convertedTo.getUri(),valueFactory); //try the conversion
             }
             if(converted != null){
 //                log.info(String.format("   + value %s(javaType=%s) successfully converted to %s(datatype=%s)",

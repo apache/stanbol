@@ -27,6 +27,8 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XM
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 
+import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.getService;
+
 import java.util.Collection;
 
 import javax.servlet.ServletContext;
@@ -71,12 +73,12 @@ public class EntityMappingResource extends NavigationMixin {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private Entityhub entityhub;
-
+    private ServletContext context;
+    
     // bind the job manager by looking it up from the servlet request context
     public EntityMappingResource(@Context ServletContext context) {
         super();
-        entityhub = (Entityhub) context.getAttribute(Entityhub.class.getName());
+        this.context = context;
     }
 
     @GET
@@ -90,6 +92,7 @@ public class EntityMappingResource extends NavigationMixin {
             //TODO: how to parse an error message
             throw new WebApplicationException(BAD_REQUEST);
         }
+        Entityhub entityhub = getService(Entityhub.class, context);
         EntityMapping mapping;
         try {
             mapping = entityhub.getMappingById(reference);
@@ -115,6 +118,7 @@ public class EntityMappingResource extends NavigationMixin {
             //TODO: how to parse an error message
             throw new WebApplicationException(BAD_REQUEST);
         }
+        Entityhub entityhub = getService(Entityhub.class, context);
         EntityMapping mapping;
         try {
             mapping = entityhub.getMappingByEntity(entity);
@@ -140,6 +144,7 @@ public class EntityMappingResource extends NavigationMixin {
             //TODO: how to parse an error message
             throw new WebApplicationException(BAD_REQUEST);
         }
+        Entityhub entityhub = getService(Entityhub.class, context);
         Collection<EntityMapping> mappings;
         try {
             mappings = entityhub.getMappingsBySymbol(symbol);

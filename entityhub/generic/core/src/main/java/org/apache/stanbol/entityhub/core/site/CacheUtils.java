@@ -106,7 +106,7 @@ public final class CacheUtils {
     private static FieldMapper readFieldConfig(Yard yard,Representation config) {
         Object mappingValue = config.getFirst(Cache.FIELD_MAPPING_CONFIG_FIELD);
         if(mappingValue != null){
-            DefaultFieldMapperImpl fieldMapper = new DefaultFieldMapperImpl(ValueConverterFactory.getInstance(yard.getValueFactory()));
+            DefaultFieldMapperImpl fieldMapper = new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
             for(String mappingStirng : mappingValue.toString().split("\n")){
                 FieldMapping mapping = FieldMappingUtils.parseFieldMapping(mappingStirng);
                 if(mapping != null){

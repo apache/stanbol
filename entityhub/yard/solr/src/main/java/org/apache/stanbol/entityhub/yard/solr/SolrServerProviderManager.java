@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.entityhub.yard.solr.provider;
+package org.apache.stanbol.entityhub.yard.solr;
 
 import java.util.Collections;
 import java.util.EnumMap;
@@ -33,7 +33,9 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.solr.client.solrj.SolrServer;
-import org.apache.stanbol.entityhub.yard.solr.provider.SolrServerProvider.Type;
+import org.apache.stanbol.entityhub.yard.solr.SolrServerProvider.Type;
+import org.apache.stanbol.entityhub.yard.solr.impl.DefaultSolrServerProvider;
+import org.apache.stanbol.entityhub.yard.solr.impl.EmbeddedSolrPorovider;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +45,22 @@ import org.slf4j.LoggerFactory;
  * environment.
  * This manager works both within an OSGI Environment by defining an Reference
  * and outside by using {@link #getInstance()}.
- * 
+ * <p>
+ * <b>TODO:</b> Race Condition (Rupert Westenthaler, 2011-03-21)
+ *   There are cases where the SolrYard requests a provider {@link Type} before
+ *   the actual {@link SolrServerProvider} instance that supports this type has
+ *   initialised. In such cases the {@link #getSolrServer(Type, String, String...)}
+ *   would return an {@link IllegalArgumentException} what causes the
+ *   initialisation of the SolrYard to fail.<br>
+ *   For now this problem is solved by declaring a dependency of this manager
+ *   implementation to both the {@link EmbeddedSolrPorovider} and the
+ *   {@link DefaultSolrServerProvider}. This ensures that this manager is only
+ *   activated after this two implementations are available. <br>
+ *   A different solution that could ensure that the SolrYard does not request
+ *   an SolrServer before all the internal {@link SolrServerProvider}
+ *   implementations are initialised would be favourable.
+ *   
+ *   
  * @author Rupert Westenthaler
  *
  */
@@ -56,6 +73,14 @@ public final class SolrServerProviderManager {
      * when {@link #activate(ComponentContext)} is called.
      */
     private static SolrServerProviderManager solrServerProviderManager;
+    
+//    //TODO See Race Condition in class doc
+//    @Reference
+//    private EmbeddedSolrPorovider embeddedProvider;
+//    
+//    //TODO See Race Condition in class doc
+//    @Reference
+//    private DefaultSolrServerProvider defaultProvider;
     
     private final static Logger log = LoggerFactory.getLogger(SolrServerProviderManager.class);
     @Reference(

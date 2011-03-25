@@ -1,2 +1,2 @@
 org.apache.stanbol.entityhub.yard.solr.impl.DefaultSolrServerProvider
-org.apache.stanbol.entityhub.yard.solr.embedded.EmbeddedSolrPorovider
+org.apache.stanbol.entityhub.yard.solr.impl.EmbeddedSolrPorovider

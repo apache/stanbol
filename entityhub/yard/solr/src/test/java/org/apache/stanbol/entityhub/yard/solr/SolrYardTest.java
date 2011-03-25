@@ -21,7 +21,6 @@ import java.io.File;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.apache.stanbol.entityhub.test.yard.YardTest;
-import org.apache.stanbol.entityhub.yard.solr.embedded.EmbeddedSolrPorovider;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYard;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig;
 import org.junit.AfterClass;
@@ -34,18 +33,23 @@ import org.slf4j.LoggerFactory;
  * This test uses the system property "basedir" to configure an embedded Solr
  * Server. This property is set by the mvn surefire plugin. When using this
  * Unit Test within a build environment that does not set this property one need
- * to set it manually to the base directory of this module.
+ * to set it manually to the base directory of this module.<p>
  * @author Rupert Westenthaler
  *
  */
 public class SolrYardTest extends YardTest {
-    
+    /**
+     * The SolrYard used for the tests
+     */
     private static Yard yard;
+    /**
+     * The SolrDirectoryManager also tested within this unit test
+     */
     public static final String TEST_YARD_ID = "testYard";
     public static final String TEST_SOLR_CORE_NAME = "test";
-    private static final String TEST_INDEX_REL_PATH = 
+    protected static final String TEST_INDEX_REL_PATH = 
         File.separatorChar + "target"+
-        File.separatorChar + EmbeddedSolrPorovider.DEFAULT_SOLR_DATA_DIR;
+        File.separatorChar + SolrDirectoryManager.DEFAULT_SOLR_DATA_DIR;
     private static final Logger log = LoggerFactory.getLogger(SolrYardTest.class);
     
     @BeforeClass
@@ -54,10 +58,11 @@ public class SolrYardTest extends YardTest {
         //use property substitution to test this feature!
         String solrServerDir = "${basedir}"+TEST_INDEX_REL_PATH;
         log.info("Test Solr Server Directory: "+solrServerDir);
-        System.setProperty(EmbeddedSolrPorovider.SOLR_DATA_DIR_PROPERTY, solrServerDir);
+        System.setProperty(SolrDirectoryManager.MANAGED_SOLR_DIR_PROPERTY, solrServerDir);
         SolrYardConfig config = new SolrYardConfig(TEST_YARD_ID,TEST_SOLR_CORE_NAME);
         config.setName("Solr Yard Test");
         config.setDescription("The Solr Yard instance used to execute the Unit Tests defined for the Yard Interface");
+        //create the Yard used for the tests
         yard = new SolrYard(config);
     }
     

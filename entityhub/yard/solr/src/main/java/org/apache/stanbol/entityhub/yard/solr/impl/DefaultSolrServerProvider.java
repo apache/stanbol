@@ -30,7 +30,7 @@ import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.impl.LBHttpSolrServer;
 import org.apache.solr.client.solrj.impl.StreamingUpdateSolrServer;
-import org.apache.stanbol.entityhub.yard.solr.provider.SolrServerProvider;
+import org.apache.stanbol.entityhub.yard.solr.SolrServerProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
