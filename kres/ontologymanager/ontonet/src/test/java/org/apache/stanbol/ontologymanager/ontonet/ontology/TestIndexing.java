@@ -9,13 +9,13 @@ import static org.junit.Assert.fail;
 import java.util.Hashtable;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceModificationException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.OntologyRegistryIRISource;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,7 +28,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class TestIndexing {
 
-	private static KReSONManager onm;
+	private static ONManager onm;
 
 	private static OWLOntologyManager mgr = OWLManager
 			.createOWLOntologyManager();
@@ -49,8 +49,8 @@ public class TestIndexing {
 
 	@BeforeClass
 	public static void setup() {
-		// An ONManager with no store and default settings
-		onm = new ONManager(null,null, new Hashtable<String, Object>());
+		// An ONManagerImpl with no store and default settings
+		onm = new ONManagerImpl(null,null, new Hashtable<String, Object>());
 
 		// Since it is registered, this scope must be unique, or subsequent
 		// tests will fail on duplicate ID exceptions!

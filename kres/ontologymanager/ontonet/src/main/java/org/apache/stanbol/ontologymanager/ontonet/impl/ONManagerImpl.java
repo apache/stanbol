@@ -14,7 +14,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
@@ -34,8 +34,8 @@ import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFac
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologySpaceFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.ScopeRegistryImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.impl.RegistryLoader;
-import org.apache.stanbol.ontologymanager.ontonet.impl.session.KReSSessionManagerImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.impl.RegistryLoaderImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.session.SessionManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.session.ScopeSessionSynchronizer;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -59,19 +59,19 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @Component(immediate = true, metatype = true)
-@Service(KReSONManager.class)
+@Service(ONManager.class)
 // @Property(name="service.ranking",intValue=5)
-public class ONManager implements KReSONManager {
+public class ONManagerImpl implements ONManager {
 
     public static final String _ALIAS_DEFAULT = "/ontology";
     public static final String _CONFIG_FILE_PATH_DEFAULT = "";
     public static final String _KRES_NAMESPACE_DEFAULT = "http://kres.iksproject.eu/";
 
     // @Property(value = _ALIAS_DEFAULT)
-    public static final String ALIAS = "eu.iksproject.kres.manager.ontologyNetworkManager.alias";
+    public static final String ALIAS = "org.apache.stanbol.ontologyNetworkManager.alias";
 
     @Property(value = _CONFIG_FILE_PATH_DEFAULT)
-    public static String CONFIG_FILE_PATH = "eu.iksproject.kres.manager.ontologyNetworkManager.config_ont";
+    public static String CONFIG_FILE_PATH = "org.apache.stanbol.ontologyNetworkManager.config_ont";
 
     @Property(value = _KRES_NAMESPACE_DEFAULT)
     public static String KRES_NAMESPACE = "kres.namespace";
@@ -81,9 +81,9 @@ public class ONManager implements KReSONManager {
     private String configPath = _CONFIG_FILE_PATH_DEFAULT;
     private String kresNs = _KRES_NAMESPACE_DEFAULT;
 
-    // private static ONManager me = new ONManager();
+    // private static ONManagerImpl me = new ONManagerImpl();
     //
-    // public static ONManager get() {
+    // public static ONManagerImpl get() {
     // return me;
     // }
 
@@ -101,7 +101,7 @@ public class ONManager implements KReSONManager {
 
     private OWLDataFactory owlFactory;
 
-    private RegistryLoader registryLoader;
+    private RegistryLoaderImpl registryLoader;
 
     private ScopeRegistry scopeRegistry;
 
@@ -120,7 +120,7 @@ public class ONManager implements KReSONManager {
      */
     private String[] toActivate = new String[] {};
 
-    public ONManager() {
+    public ONManagerImpl() {
         super();
         owlFactory = OWLManager.getOWLDataFactory();
         owlCacheManager = OWLManager.createOWLOntologyManager();
@@ -135,13 +135,13 @@ public class ONManager implements KReSONManager {
         ontologyScopeFactory.addScopeEventListener(oIndex);
 
         // This requires the OWL cache manager
-        registryLoader = new RegistryLoader(this);
+        registryLoader = new RegistryLoaderImpl(this);
 
         // TODO : assign dynamically in case the FISE persistence store is not
         // available.
         // storage = new FISEPersistenceStorage();
 
-        sessionManager = new KReSSessionManagerImpl(IRI.create("http://kres.iks-project.eu/"),
+        sessionManager = new SessionManagerImpl(IRI.create("http://kres.iks-project.eu/"),
                 getScopeRegistry(), storage);
         sessionManager.addSessionListener(new ScopeSessionSynchronizer(this));
     }
@@ -151,7 +151,7 @@ public class ONManager implements KReSONManager {
      * 
      * TODO : Felix component constraints prevent this constructor from being private, find a way around...
      */
-    public ONManager(TcManager tcm, WeightedTcProvider wtcp, Dictionary<String,Object> configuration) {
+    public ONManagerImpl(TcManager tcm, WeightedTcProvider wtcp, Dictionary<String,Object> configuration) {
         this();
         storage = new OntologyStorage(tcm, wtcp);
         try {
@@ -169,7 +169,7 @@ public class ONManager implements KReSONManager {
     @SuppressWarnings("unchecked")
     @Activate
     protected void activate(ComponentContext context) throws IOException {
-        log.info("in " + ONManager.class + " activate with context " + context);
+        log.info("in " + ONManagerImpl.class + " activate with context " + context);
         if (context == null) {
             throw new IllegalStateException("No valid" + ComponentContext.class + " parsed in activate!");
         }
@@ -324,11 +324,11 @@ public class ONManager implements KReSONManager {
     }
 
     /**
-     * Deactivation of the ONManager resets all its resources.
+     * Deactivation of the ONManagerImpl resets all its resources.
      */
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        log.info("in " + ONManager.class + " deactivate with context " + context);
+        log.info("in " + ONManagerImpl.class + " deactivate with context " + context);
     }
 
     @Override
@@ -381,7 +381,7 @@ public class ONManager implements KReSONManager {
      * 
      * @return the default ontology registry loader
      */
-    public RegistryLoader getRegistryLoader() {
+    public RegistryLoaderImpl getRegistryLoader() {
         return registryLoader;
     }
 

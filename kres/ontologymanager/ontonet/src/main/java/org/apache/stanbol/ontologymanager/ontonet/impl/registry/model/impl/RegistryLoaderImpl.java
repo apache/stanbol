@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.KReSRegistryLoader;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.io.XDRegistrySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.AbstractRegistryItem;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
@@ -50,11 +50,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class RegistryLoader implements KReSRegistryLoader {
+public class RegistryLoaderImpl implements RegistryLoader {
 
 	private final OWLClass cRegistryLibrary;
 
-	private KReSONManager onm;
+	private ONManager onm;
 
 	private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -67,7 +67,7 @@ public class RegistryLoader implements KReSRegistryLoader {
 
 	/**
 	 */
-	public RegistryLoader(KReSONManager onm) {
+	public RegistryLoaderImpl(ONManager onm) {
 		this.onm = onm;
 		OWLDataFactory factory = OWLManager.getOWLDataFactory();
 		cRegistryLibrary = factory.getOWLClass(IRI

@@ -6,12 +6,12 @@ import static org.junit.Assert.fail;
 import java.util.Hashtable;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.OntologyRegistryIRISource;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -20,7 +20,7 @@ import org.semanticweb.owlapi.model.IRI;
 
 public class TestRegistry {
 
-	private static KReSONManager onm;
+	private static ONManager onm;
 
 	private static IRI testRegistryIri = IRI
 			.create("http://www.ontologydesignpatterns.org/registry/krestest.owl");
@@ -31,8 +31,8 @@ public class TestRegistry {
 
 	@BeforeClass
 	public static void setup() {
-		// An ONManager with no store and default settings
-		onm = new ONManager(null,null, new Hashtable<String, Object>());
+		// An ONManagerImpl with no store and default settings
+		onm = new ONManagerImpl(null,null, new Hashtable<String, Object>());
 	}
 
 	@Test

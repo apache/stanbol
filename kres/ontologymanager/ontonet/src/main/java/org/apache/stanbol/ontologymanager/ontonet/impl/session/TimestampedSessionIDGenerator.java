@@ -3,12 +3,12 @@ package org.apache.stanbol.ontologymanager.ontonet.impl.session;
 import java.util.Date;
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionIDGenerator;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionIDGenerator;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.StringUtils;
 import org.semanticweb.owlapi.model.IRI;
 
 
-public class TimestampedSessionIDGenerator implements KReSSessionIDGenerator {
+public class TimestampedSessionIDGenerator implements SessionIDGenerator {
 
 	private IRI baseIRI;
 

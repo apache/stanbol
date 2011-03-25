@@ -4,23 +4,23 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession.State;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.Session.State;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent.OperationType;
 import org.semanticweb.owlapi.model.IRI;
 import org.slf4j.LoggerFactory;
 
 /**
- * Standard implementation of the {@link KReSSession} interface. A
- * KReSSessionImpl is initially inactive and creates its own identifier.
+ * Standard implementation of the {@link Session} interface. A
+ * SessionImpl is initially inactive and creates its own identifier.
  * 
  * @author alessandro
  * 
  */
-public class KReSSessionImpl implements KReSSession {
+public class SessionImpl implements Session {
 
 	/**
 	 * A KReS session knows about its own ID.
@@ -41,12 +41,12 @@ public class KReSSessionImpl implements KReSSession {
 	 * @param sessionID
 	 *            the IRI to be set as unique identifier for this session
 	 */
-	public KReSSessionImpl(IRI sessionID) {
+	public SessionImpl(IRI sessionID) {
 		this.id = sessionID;
 		listeners = new HashSet<SessionListener>();
 	}
 
-	public KReSSessionImpl(IRI sessionID, State initialState)
+	public SessionImpl(IRI sessionID, State initialState)
 			throws NonReferenceableSessionException {
 		this(sessionID);
 		if (initialState == State.ZOMBIE)
@@ -82,7 +82,7 @@ public class KReSSessionImpl implements KReSSession {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see eu.iksproject.kres.api.manager.session.KReSSession#close()
+	 * @see eu.iksproject.kres.api.manager.session.Session#close()
 	 */
 	@Override
 	public void close() throws NonReferenceableSessionException {
@@ -95,7 +95,7 @@ public class KReSSessionImpl implements KReSSession {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see eu.iksproject.kres.api.manager.session.KReSSession#getID()
+	 * @see eu.iksproject.kres.api.manager.session.Session#getID()
 	 */
 	@Override
 	public IRI getID() {
@@ -117,7 +117,7 @@ public class KReSSessionImpl implements KReSSession {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see eu.iksproject.kres.api.manager.session.KReSSession#getSessionState()
+	 * @see eu.iksproject.kres.api.manager.session.Session#getSessionState()
 	 */
 	@Override
 	public State getSessionState() {
@@ -127,7 +127,7 @@ public class KReSSessionImpl implements KReSSession {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see eu.iksproject.kres.api.manager.session.KReSSession#isActive()
+	 * @see eu.iksproject.kres.api.manager.session.Session#isActive()
 	 */
 	@Override
 	public boolean isActive() {
@@ -143,7 +143,7 @@ public class KReSSessionImpl implements KReSSession {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * eu.iksproject.kres.api.manager.session.KReSSession#setActive(boolean)
+	 * eu.iksproject.kres.api.manager.session.Session#setActive(boolean)
 	 */
 	@Override
 	public State setActive(boolean active)

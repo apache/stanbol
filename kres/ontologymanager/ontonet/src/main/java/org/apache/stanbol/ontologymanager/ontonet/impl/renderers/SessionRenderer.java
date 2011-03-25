@@ -3,7 +3,7 @@ package org.apache.stanbol.ontologymanager.ontonet.impl.renderers;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.io.StringDocumentTarget;
@@ -41,7 +41,7 @@ public class SessionRenderer {
 
 	}
 
-	public static String getSessionMetadataRDF(KReSSession session) {
+	public static String getSessionMetadataRDF(Session session) {
 		OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
 		OWLOntology ont = null;
 		try {

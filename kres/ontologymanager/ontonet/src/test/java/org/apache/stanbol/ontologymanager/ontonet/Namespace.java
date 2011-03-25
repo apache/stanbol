@@ -4,19 +4,19 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Hashtable;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class Namespace {
 	
-	private static KReSONManager onm;
+	private static ONManager onm;
 	
 	@BeforeClass
 	public static void setUp() {
-		// An ONManager with no store and default settings
-		onm = new ONManager(null,null, new Hashtable<String, Object>());
+		// An ONManagerImpl with no store and default settings
+		onm = new ONManagerImpl(null,null, new Hashtable<String, Object>());
 	}
 	
 	@Test

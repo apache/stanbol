@@ -8,7 +8,7 @@ import org.semanticweb.owlapi.model.IRI;
  * @author alessandro
  * 
  */
-public interface KReSSession extends SessionListenable {
+public interface Session extends SessionListenable {
 
 	/**
 	 * The states a KReS session can be in: ACTIVE (for running sessions),

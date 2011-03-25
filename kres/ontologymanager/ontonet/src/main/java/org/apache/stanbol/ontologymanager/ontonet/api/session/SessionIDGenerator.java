@@ -12,7 +12,7 @@ import org.semanticweb.owlapi.model.IRI;
  * @author alessandro
  * 
  */
-public interface KReSSessionIDGenerator {
+public interface SessionIDGenerator {
 
 	/**
 	 * Generates a new context-free session ID. Whether this causes duplicate

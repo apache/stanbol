@@ -1,18 +1,18 @@
 package org.apache.stanbol.ontologymanager.ontonet.impl.session;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSession;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
 import org.semanticweb.owlapi.model.IRI;
 
 public class ScopeSessionSynchronizer implements SessionListener {
 
-	private KReSONManager manager;
+	private ONManager manager;
 
-	public ScopeSessionSynchronizer(KReSONManager manager) {
+	public ScopeSessionSynchronizer(ONManager manager) {
 		// WARN do not use ONManager here, as it will most probably be
 		// instantiated by it.
 		this.manager = manager;
@@ -32,7 +32,7 @@ public class ScopeSessionSynchronizer implements SessionListener {
 	public void sessionChanged(SessionEvent event) {
 		// System.err.println("Session " + event.getSession() + " has been "
 		// + event.getOperationType());
-		KReSSession ses = event.getSession();
+		Session ses = event.getSession();
 		switch (event.getOperationType()) {
 		case CREATE:
 			ses.addSessionListener(this);

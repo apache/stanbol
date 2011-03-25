@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.io.AbstractOntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.KReSRegistryLoader;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
@@ -31,7 +31,7 @@ public class OntologyRegistryIRISource extends AbstractOntologyInputSource {
 	protected IRI registryIRI = null;
 
 	public OntologyRegistryIRISource(IRI registryIRI,
-			OWLOntologyManager ontologyManager, KReSRegistryLoader loader) {
+			OWLOntologyManager ontologyManager, RegistryLoader loader) {
 		this(registryIRI, ontologyManager, loader, null);
 	}
 
@@ -43,7 +43,7 @@ public class OntologyRegistryIRISource extends AbstractOntologyInputSource {
 	 * @param registryIRI
 	 */
 	public OntologyRegistryIRISource(IRI registryIRI,
-			OWLOntologyManager ontologyManager, KReSRegistryLoader loader,
+			OWLOntologyManager ontologyManager, RegistryLoader loader,
 			OntologyInputSource parentSrc) {
 
 		this.registryIRI = registryIRI;

@@ -4,7 +4,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.KReSRegistryLoader;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyStorage;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -18,7 +18,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * @author andrea.nuzzolese
  * 
  */
-public interface KReSONManager {
+public interface ONManager {
 
 	/**
 	 * Returns the default object that automatically indexes ontologies as they
@@ -74,7 +74,7 @@ public interface KReSONManager {
 	 * 
 	 * @return the default ontology registry loader.
 	 */
-	public KReSRegistryLoader getRegistryLoader();
+	public RegistryLoader getRegistryLoader();
 
 	/**
 	 * Returns the unique ontology scope registry for this context.

@@ -11,7 +11,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-public interface KReSRegistryLoader {
+public interface RegistryLoader {
 
 	
 	public Set<OWLOntology> gatherOntologies(RegistryItem registryItem,
