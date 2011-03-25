@@ -9,12 +9,12 @@ import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.sparql.QueryEngine;
 import org.apache.clerezza.rdf.jena.sparql.JenaSparqlEngine;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.reengineer.base.api.DataSource;
-import org.apache.stanbol.reengineer.base.api.SemionReengineer;
+import org.apache.stanbol.reengineer.base.api.Reengineer;
 import org.apache.stanbol.reengineer.base.api.util.ReengineerType;
-import org.apache.stanbol.reengineer.base.impl.SemionManagerImpl;
+import org.apache.stanbol.reengineer.base.impl.ReengineerManagerImpl;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -26,7 +26,7 @@ public class XMLReengineerTest {
 	static DataSource dataSource;
 	static String graphNS;
 	static IRI outputIRI;
-	static SemionReengineer xmlExtractor;
+	static Reengineer xmlExtractor;
 	
 	@BeforeClass
 	public static void setupClass() {
@@ -89,8 +89,8 @@ public class XMLReengineerTest {
 	        TcManager tcm = new SpecialTcManager(qe, wtcp);
 
 	        // Two different ontology storagez, the same sparql engine and tcprovider
-		KReSONManager onManager = new ONManager(tcm, wtcp ,emptyConf);
-		xmlExtractor = new XMLExtractor(new SemionManagerImpl(tcm, wtcp),
+		ONManager onManager = new ONManagerImpl(tcm, wtcp ,emptyConf);
+		xmlExtractor = new XMLExtractor(new ReengineerManagerImpl(tcm, wtcp),
 				onManager, emptyConf);
 	}
 

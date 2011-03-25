@@ -9,9 +9,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.KReSONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.reengineer.base.api.DataSource;
-import org.apache.stanbol.reengineer.base.api.util.SemionUriRefGenerator;
+import org.apache.stanbol.reengineer.base.api.util.ReengineerUriRefGenerator;
 import org.apache.stanbol.reengineer.xml.vocab.XSD_OWL;
 import org.apache.xerces.dom.PSVIDocumentImpl;
 import org.apache.xerces.impl.dv.DatatypeException;
@@ -60,12 +60,12 @@ import org.w3c.dom.traversal.TreeWalker;
 import org.xml.sax.SAXException;
 
 
-public class XSDExtractor extends SemionUriRefGenerator {
+public class XSDExtractor extends ReengineerUriRefGenerator {
 
 
 	private WeightedTcProvider weightedTcProvider;
 	
-	private KReSONManager onManager;
+	private ONManager onManager;
 	
 	public final Logger log = LoggerFactory.getLogger(getClass());
 	
@@ -73,7 +73,7 @@ public class XSDExtractor extends SemionUriRefGenerator {
 		this.weightedTcProvider = weightedTcProvider;
 	}
 	
-	public XSDExtractor(KReSONManager onManager) {
+	public XSDExtractor(ONManager onManager) {
 		this.onManager = onManager;
 	}
 	

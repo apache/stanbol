@@ -22,13 +22,9 @@
 	<parent>
 		<groupId>org.apache.stanbol</groupId>
 		<artifactId>stanbol-parent</artifactId>
-		<version>0.9-SNAPSHOT</version>
+		<version>${stanbol-version}</version>
 		<relativePath>../../../parent</relativePath>
 	</parent>
-
-	<properties>
-		<kres-version>0.7</kres-version>
-	</properties>
 
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.reengineer.xml</artifactId>
