@@ -22,7 +22,7 @@ import org.apache.stanbol.owlapi.trasformation.JenaToOwlConvert;
  *
  * @author elvio
  */
-public class KReSRunSPARQL {
+public class RunSingleSPARQL {
 
     private OWLOntology owlmodel;
     private OntModel jenamodel;
@@ -33,7 +33,7 @@ public class KReSRunSPARQL {
      *
      * @param owl {The OWLOntology to be querying.}
      */
-    public KReSRunSPARQL(OWLOntology owl){
+    public RunSingleSPARQL(OWLOntology owl){
         this.owlmodel = owl;
 
         try{
@@ -67,7 +67,7 @@ public class KReSRunSPARQL {
      * @param owl {The OWLOntology to be querying}
      * @param prefix {The map where the keys are the prefix label and the value the IRI of the prefix on the form: http://www.w3.org/2000/01/rdf-schema#.}
      */
-    public KReSRunSPARQL(OWLOntology owl, HashMap<String,String> prefix){
+    public RunSingleSPARQL(OWLOntology owl, HashMap<String,String> prefix){
         this.owlmodel = owl;
         JenaToOwlConvert j2o = new JenaToOwlConvert();
         this.jenamodel = j2o.ModelOwlToJenaConvert(owlmodel,"RDF/XML");

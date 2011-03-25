@@ -10,7 +10,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.util.HashMap;
 
-import org.apache.stanbol.owlapi.KReSRunSPARQL;
+import org.apache.stanbol.owlapi.RunSingleSPARQL;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -27,13 +27,13 @@ import com.hp.hpl.jena.query.ResultSet;
  *
  * @author elvio
  */
-public class KReSRunSPARQLTest {
+public class RunSingleSPARQLTest {
 
     public OWLOntologyManager owlmanager;
     public OWLOntology owl;
     public HashMap<String,String> sparqlprefix;
 
-    public KReSRunSPARQLTest() throws OWLOntologyCreationException {
+    public RunSingleSPARQLTest() throws OWLOntologyCreationException {
         this.owlmanager = OWLManager.createOWLOntologyManager();
         this.owl = owlmanager.loadOntologyFromOntologyDocument(new File("./src/main/resources/TestFile/ProvaParent.owl"));
     }
@@ -55,7 +55,7 @@ public class KReSRunSPARQLTest {
     }
 
     /**
-     * Test of getSPARQLprefix method, of class KReSRunSPARQL.
+     * Test of getSPARQLprefix method, of class RunSingleSPARQL.
      */
     @Test
     public void testGetSPARQLprefix() {
@@ -67,7 +67,7 @@ public class KReSRunSPARQLTest {
         map.put("rdf","<http://www.w3.org/1999/02/22-rdf-syntax-ns#>");
         map.put("ex","<http://www.w3.org/1999/02/22-rdf-syntax-ns#>");
 
-        KReSRunSPARQL instance = new KReSRunSPARQL(owl,map);
+        RunSingleSPARQL instance = new RunSingleSPARQL(owl,map);
         HashMap expResult = map;
         HashMap result = instance.getSPARQLprefix();
         if(!result.isEmpty()){
@@ -79,7 +79,7 @@ public class KReSRunSPARQLTest {
     }
 
     /**
-     * Test of addSPARQLprefix method, of class KReSRunSPARQL.
+     * Test of addSPARQLprefix method, of class RunSingleSPARQL.
      */
     @Test
     public void testAddSPARQLprefix() {
@@ -93,7 +93,7 @@ public class KReSRunSPARQLTest {
         map.put("rdf","<http://www.w3.org/1999/02/22-rdf-syntax-ns#>");
         map.put("ex","<http://www.w3.org/1999/02/22-rdf-syntax-ns#>");
 
-        KReSRunSPARQL instance = new KReSRunSPARQL(owl,map);
+        RunSingleSPARQL instance = new RunSingleSPARQL(owl,map);
         boolean result = instance.addSPARQLprefix(label, prefix);
         if(result){
             HashMap<String, String> mymap = instance.getSPARQLprefix();
@@ -106,7 +106,7 @@ public class KReSRunSPARQLTest {
     }
 
     /**
-     * Test of removeSPARQLprefix method, of class KReSRunSPARQL.
+     * Test of removeSPARQLprefix method, of class RunSingleSPARQL.
      */
     @Test
     public void testRemoveSPARQLprefix() {
@@ -118,7 +118,7 @@ public class KReSRunSPARQLTest {
         map.put("rdf","<http://www.w3.org/1999/02/22-rdf-syntax-ns#>");
         map.put("ex","<http://www.w3.org/1999/02/22-rdf-syntax-ns#>");
 
-        KReSRunSPARQL instance = new KReSRunSPARQL(owl,map);
+        RunSingleSPARQL instance = new RunSingleSPARQL(owl,map);
         boolean result = instance.removeSPARQLprefix("ex");
 
         if(result){
@@ -131,7 +131,7 @@ public class KReSRunSPARQLTest {
     }
 
     /**
-     * Test of runSPARQL method, of class KReSRunSPARQL.
+     * Test of runSPARQL method, of class RunSingleSPARQL.
      */
     @Test
     public void testRunSPARQL() {
@@ -142,7 +142,7 @@ public class KReSRunSPARQLTest {
         map.put("rdf","<http://www.w3.org/1999/02/22-rdf-syntax-ns#>");
         map.put("ex","<http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#>");
         String query = "SELECT * WHERE {?p rdf:type ex:Person .}";
-        KReSRunSPARQL instance = new KReSRunSPARQL(owl,map);
+        RunSingleSPARQL instance = new RunSingleSPARQL(owl,map);
         ResultSet result = instance.runSPARQL(query);
 
         if(result!=null){
