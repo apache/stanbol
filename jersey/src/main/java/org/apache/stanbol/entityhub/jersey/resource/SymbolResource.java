@@ -29,6 +29,7 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JS
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
+import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.getService;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -84,12 +85,12 @@ public class SymbolResource extends NavigationMixin {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private Entityhub entityhub;
+    private ServletContext context;
 
     // bind the job manager by looking it up from the servlet request context
     public SymbolResource(@Context ServletContext context) {
         super();
-        entityhub = (Entityhub) context.getAttribute(Entityhub.class.getName());
+        this.context = context;
     }
 
     @GET
@@ -104,7 +105,8 @@ public class SymbolResource extends NavigationMixin {
             //TODO: how to parse an error message
             throw new WebApplicationException(BAD_REQUEST);
         }
-        Symbol symbol;
+        Entityhub entityhub = getService(Entityhub.class, context);
+       Symbol symbol;
         try {
             symbol = entityhub.getSymbol(symbolId);
         } catch (EntityhubException e) {
@@ -131,6 +133,7 @@ public class SymbolResource extends NavigationMixin {
             //TODO: how to parse an error message
             throw new WebApplicationException(BAD_REQUEST);
         }
+        Entityhub entityhub = getService(Entityhub.class, context);
         Symbol symbol;
         try {
             symbol = entityhub.lookupSymbol(reference, create);
@@ -225,6 +228,7 @@ public class SymbolResource extends NavigationMixin {
      */
     private Response executeQuery(FieldQuery query, HttpHeaders headers) throws WebApplicationException {
         final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, MediaType.APPLICATION_JSON_TYPE);
+        Entityhub entityhub = getService(Entityhub.class, context);
         try {
             return Response.ok(entityhub.find(query), acceptedMediaType).build();
         } catch (EntityhubException e) {

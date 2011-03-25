@@ -28,6 +28,7 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JS
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
+import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.getService;
 
 import java.io.File;
 import java.util.Arrays;
@@ -84,16 +85,11 @@ public class SiteManagerRootResource extends NavigationMixin {
      */
     private static final int DEFAULT_FIND_RESULT_LIMIT = 5;
 
-    private ReferencedSiteManager referencedSiteManager;
-
+    private ServletContext context;
+    
     public SiteManagerRootResource(@Context ServletContext context) {
         super();
-        log.info("... init SiteManagerRootResource");
-        referencedSiteManager = (ReferencedSiteManager) context.getAttribute(ReferencedSiteManager.class.getName());
-        if (referencedSiteManager == null) {
-            log.error("Missing referencedSiteManager={}", referencedSiteManager);
-            throw new WebApplicationException(NOT_FOUND);
-        }
+        this.context = context;
     }
 
     /**
@@ -107,6 +103,7 @@ public class SiteManagerRootResource extends NavigationMixin {
     public JSONArray getReferencedSites(@Context UriInfo uriInfo) {
         log.info("sites/referenced Request");
         JSONArray referencedSites = new JSONArray();
+        ReferencedSiteManager referencedSiteManager = getService(ReferencedSiteManager.class, context);
         for (String site : referencedSiteManager.getReferencedSiteIds()) {
             referencedSites.put(String.format("%ssite/%s/", uriInfo.getBaseUri(), site));
         }
@@ -133,6 +130,7 @@ public class SiteManagerRootResource extends NavigationMixin {
             log.error("No or emptpy ID was parsed as query parameter (id={})", id);
             throw new WebApplicationException(BAD_REQUEST);
         }
+        ReferencedSiteManager referencedSiteManager = getService(ReferencedSiteManager.class, context);
         Sign sign;
 //        try {
         sign = referencedSiteManager.getSign(id);
@@ -181,6 +179,7 @@ public class SiteManagerRootResource extends NavigationMixin {
                 field = DEFAULT_FIND_FIELD;
             }
         }
+        ReferencedSiteManager referencedSiteManager = getService(ReferencedSiteManager.class, context);
         FieldQuery query = JerseyUtils.createFieldQueryForFindRequest(name, field, language, 
             limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, offset);
         final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
@@ -208,6 +207,7 @@ public class SiteManagerRootResource extends NavigationMixin {
             @FormParam("query") String queryString,
             @FormParam("query") File file,
             @Context HttpHeaders headers) {
+        ReferencedSiteManager referencedSiteManager = getService(ReferencedSiteManager.class, context);
         FieldQuery query = JerseyUtils.parseFieldQuery(queryString, file);
         final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, MediaType.APPLICATION_JSON_TYPE);
         return Response.ok(referencedSiteManager.find(query), acceptedMediaType).build();

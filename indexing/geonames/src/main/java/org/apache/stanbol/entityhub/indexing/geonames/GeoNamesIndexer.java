@@ -303,7 +303,7 @@ public class GeoNamesIndexer {
      * last possible opportunity :(
      */
     private void writeCacheBaseConfiguration() throws YardException {
-        FieldMapper baseMapper = new DefaultFieldMapperImpl(ValueConverterFactory.getInstance(vf));
+        FieldMapper baseMapper = new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
         log.info("Write BaseMappings for geonames.org Cache");
         log.info(" > Mappings");
         for(String mapping : GeoNamesIndexer.fieldMappings){

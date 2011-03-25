@@ -708,7 +708,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
      */
     private void initFieldmappings(final ComponentContext context) throws ConfigurationException, InvalidSyntaxException {
         //create the FieldMappings config
-        fieldMappings = new DefaultFieldMapperImpl(ValueConverterFactory.getInstance());
+        fieldMappings = new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
         Object configuredMappingsObject = properties.get(ConfiguredSite.SITE_FIELD_MAPPINGS);
         log.info(" > Parse FieldMappungs");
         if(configuredMappingsObject != null){

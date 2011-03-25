@@ -367,7 +367,7 @@ public class RdfIndexer {
 				}
 			}
 			if(!fieldMappings.isEmpty()){
-				this.mapper = new DefaultFieldMapperImpl(ValueConverterFactory.getInstance(vf));
+				this.mapper = new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
 				for(FieldMapping mapping : fieldMappings){
 					mapper.addMapping(mapping);
 				}
@@ -866,7 +866,7 @@ public class RdfIndexer {
             chunkCache.add(
                 mapper ==null?source: //if no mappings -> store the source
                     //else process the field mappings
-                    mapper.applyMappings(source,vf.createRepresentation(source.getId())));
+                    mapper.applyMappings(source,vf.createRepresentation(source.getId()),vf));
         }
         if(chunkCache.size()>=indexingChunkSize){
             yard.store(chunkCache);

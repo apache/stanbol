@@ -18,16 +18,21 @@ package org.apache.stanbol.entityhub.jersey;
 
 import java.io.IOException;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.References;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
 import org.osgi.framework.BundleContext;
@@ -50,6 +55,29 @@ import com.sun.jersey.spi.container.servlet.ServletContainer;
  */
 
 @Component(immediate = true, metatype = true)
+@References(value={
+       @Reference(
+           name="entityhub",
+           referenceInterface=Entityhub.class,
+           policy=ReferencePolicy.DYNAMIC,
+           bind="bindEntityhub",
+           unbind="unbindEntityhub",
+           cardinality=ReferenceCardinality.OPTIONAL_UNARY),
+       @Reference(
+           name="referencedSiteManager",
+           referenceInterface=ReferencedSiteManager.class,
+           policy=ReferencePolicy.DYNAMIC,
+           bind="bindReferencedSiteManager",
+           unbind="unbindReferencedSiteManager",
+           cardinality=ReferenceCardinality.OPTIONAL_UNARY),
+       @Reference(
+           name="serializer",
+           referenceInterface=Serializer.class,
+           policy=ReferencePolicy.DYNAMIC,
+           bind="bindSerializer",
+           unbind="unbindSerializer",
+           cardinality=ReferenceCardinality.OPTIONAL_UNARY)
+       })
 public class JerseyEndpoint {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -66,21 +94,134 @@ public class JerseyEndpoint {
     //@Property(value = "/META-INF/templates")
     //public static final String FREEMARKER_TEMPLATE_CLASSPATH_PROPERTY = "org.apache.stanbol.entityhub.jersey.templates.classpath";
 
-    @Reference
-    private TcManager tcManager;
+//    @Reference
+//    private TcManager tcManager;
 
-    @Reference
-    private Entityhub entityhub;
+    /**
+     * Dynamically adds the {@link Entityhub} to the {@link ServletContext}
+     */
+    protected void bindEntityhub(Entityhub entityhub){
+        log.info("add "+entityhub.getClass().getSimpleName()+" to ServletContext");
+        addManagedAttribute(Entityhub.class.getName(), entityhub);
+    }
+    /**
+     * Dynamically removes the {@link Entityhub} to the {@link ServletContext}
+     */
+    protected void unbindEntityhub(Entityhub entityhub){
+        log.info("remove"+entityhub.getClass().getSimpleName()+" from ServletContext");
+        removeManagedAttribute(Entityhub.class.getName());
+    }
+    /**
+     * Dynamically adds the {@link ReferencedSiteManager} to the {@link ServletContext}
+     */
+    protected void bindReferencedSiteManager(ReferencedSiteManager referencedSiteManager){
+        log.info("add "+referencedSiteManager.getClass().getSimpleName()+" to ServletContext");
+        addManagedAttribute(ReferencedSiteManager.class.getName(), referencedSiteManager);
+    }
+    /**
+     * Dynamically removes the {@link ReferencedSiteManager} to the {@link ServletContext}
+     */
+    protected void unbindReferencedSiteManager(ReferencedSiteManager referencedSiteManager){
+        log.info("remove "+referencedSiteManager.getClass().getSimpleName()+" from ServletContext");
+        removeManagedAttribute(ReferencedSiteManager.class.getName());
+    }
 
-    @Reference
-    private ReferencedSiteManager referencedSiteManager;
+    /**
+     * Dynamically adds the {@link Serializer} to the {@link ServletContext}
+     */
+    protected void bindSerializer(Serializer serializer){
+        log.info("add "+serializer.getClass().getSimpleName()+" to ServletContext");
+        addManagedAttribute(Serializer.class.getName(), serializer);
+    }
+    /**
+     * Dynamically removes the {@link Serializer} to the {@link ServletContext}
+     */
+    protected void unbindSerializer(Serializer serializer){
+        log.info("remove"+serializer.getClass().getSimpleName()+" from ServletContext");
+        removeManagedAttribute(Serializer.class.getName());
+    }
 
+    /**
+     * Internally manages the attributes currently added to the {@link ServletContext}.
+     * This is necessary because Properties can bind/unbind even when this
+     * Component is not activated (e.g. between construction and 
+     * {@link #activate(ComponentContext)} is called). Therefore the
+     * {@link #servletContext} might still be <code>null</code> 
+     */
+    private Map<String,Object> managedAttributes = new HashMap<String,Object>();
 
+    /**
+     * Adds a managed Attribute and to the {@link #servletContext} if not <code>null</code>
+     * @param key the key
+     * @param value the value
+     * @throws IllegalArgumentException if the key is <code>null</code>
+     */
+    private void addManagedAttribute(String key, Object value) throws IllegalArgumentException {
+        if(key == null){ //throw Exception to find bugs early!
+            throw new IllegalArgumentException("The key for Managed Attributes MUST NOT be NULL");
+        }
+        //use local copy to avoid NullPointers in multi thread environments
+        ServletContext servletContext = this.servletContext;
+        synchronized (managedAttributes) {
+            managedAttributes.put(key, value);
+            if(servletContext != null){
+                servletContext.setAttribute(key, value);
+            }
+        }
+    }
+    /**
+     * Removes a managed Attribute and to the {@link #servletContext} if not <code>null</code>
+     * @param key the key to remove
+     * @throws IllegalArgumentException if the key is <code>null</code>
+     */
+    private void removeManagedAttribute(String key) throws IllegalArgumentException {
+        if(key == null){ //throw Exception to find bugs early!
+            throw new IllegalArgumentException("The key for Managed Attributes MUST NOT be NULL");
+        }
+        //use local copy to avoid NullPointers in multi thread environments
+        ServletContext servletContext = this.servletContext;
+        synchronized (managedAttributes) {
+            if(managedAttributes.containsKey(key) && servletContext != null){
+                servletContext.removeAttribute(key);
+            }
+            managedAttributes.remove(key);
+        }
+    }
+    /**
+     * Adds all currently managed Attributes to the parsed {@link ServletContext}.
+     * Used in {@link #activate(ComponentContext)} to initialise the new
+     * servlet context with previously added
+     * managed attributes.
+     * @param servletContext the context to add the managed attributes
+     */
+    private void addManagedAttributes(ServletContext servletContext){
+        if(servletContext == null){
+            return;
+        }
+        synchronized (managedAttributes) {
+            for(Entry<String,Object> managedEntry: managedAttributes.entrySet()){
+                servletContext.setAttribute(managedEntry.getKey(), managedEntry.getValue());
+            }
+        }
+    }
+    /**
+     * Removes all currently managed Attributes from the parsed {@link ServletContext}.
+     * Used in {@link #deactivate(ComponentContext)} to reset the servlet context.
+     * @param servletContext the context to add the managed attributes
+     */
+    private void removeManagedAttributes(ServletContext servletContext){
+        if(servletContext == null){
+            return;
+        }
+        synchronized (managedAttributes) {
+            for(Entry<String,Object> managedEntry: managedAttributes.entrySet()){
+                servletContext.removeAttribute(managedEntry.getKey());
+            }
+        }
+    }
+    
     @Reference
     private HttpService httpService;
-
-    @Reference
-    private Serializer serializer;
 
 
     protected ServletContext servletContext;
@@ -100,7 +241,7 @@ public class JerseyEndpoint {
 
     protected void activate(ComponentContext ctx) throws IOException,
             ServletException, NamespaceException {
-
+        log.info("activate "+JerseyEndpoint.class+" ...");
         // register the JAX-RS resources as a servlet under configurable alias
         ServletContainer container = new ServletContainer();
         String alias = (String) ctx.getProperties().get(ALIAS_PROPERTY);
@@ -122,20 +263,18 @@ public class JerseyEndpoint {
             Thread.currentThread().setContextClassLoader(classLoader);
         }
 
-        // forward the main FISE OSGi components to the servlet context so that
-        // they can be looked up by the JAX-RS resources
+        
+        // This is now done dynamically based on there activation/deactivation
         servletContext = container.getServletContext();
-        //servletContext.setAttribute(EnhancementJobManager.class.getName(),
-        //        referencedSiteManager);
-        servletContext.setAttribute(Entityhub.class.getName(), entityhub);
         servletContext.setAttribute(BundleContext.class.getName(),
                 ctx.getBundleContext());
-        servletContext.setAttribute(Serializer.class.getName(), serializer);
-        servletContext.setAttribute(TcManager.class.getName(), tcManager);
-        servletContext.setAttribute(ReferencedSiteManager.class.getName(),
-                referencedSiteManager);
         servletContext.setAttribute(STATIC_RESOURCES_URL_ROOT_PROPERTY,
                 staticUrlRoot);
+        // References (such as entityhub and ReferencedSiteManager) are no 
+        // longer statically forwarded to JAX-RS components.
+        //But still we need to add all managed attributes that where added
+        //prior to activating Jersey
+        addManagedAttributes(servletContext);
         log.info("Jersey servlet registered at {}", alias);
     }
 
@@ -143,43 +282,11 @@ public class JerseyEndpoint {
         log.info("Deactivating jersey bundle");
         String alias = (String) ctx.getProperties().get(ALIAS_PROPERTY);
         httpService.unregister(alias);
+        //clean up managed Attributes 
+        // ... just to make sure that they are no longer referenced by this
+        //     object even if an other component keep the context!
+        removeManagedAttributes(servletContext);
         servletContext = null;
-    }
-
-    protected void bindRick(Entityhub entityhub) {
-        this.entityhub = entityhub;
-        if (servletContext != null) {
-            servletContext.setAttribute(Entityhub.class.getName(), entityhub);
-        }
-    }
-
-    protected void unbindRick(Entityhub entityhub) {
-        this.entityhub = null;
-        if (servletContext != null) {
-            servletContext.removeAttribute(Entityhub.class.getName());
-        }
-    }
-
-    protected void bindReferencedSiteManager(ReferencedSiteManager referencedSiteManager) {
-        this.referencedSiteManager = referencedSiteManager;
-        if (servletContext != null) {
-            servletContext.setAttribute(ReferencedSiteManager.class.getName(), referencedSiteManager);
-        }
-    }
-
-    protected void unbindReferencedSiteManager(ReferencedSiteManager referencedSiteManager) {
-        this.referencedSiteManager = null;
-        if (servletContext != null) {
-            servletContext.removeAttribute(ReferencedSiteManager.class.getName());
-        }
-    }
-
-    protected void bindHttpService(HttpService httpService) {
-        this.httpService = httpService;
-    }
-
-    protected void unbindHttpService(HttpService httpService) {
-        this.httpService = null;
     }
 
 }

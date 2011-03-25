@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.entityhub.yard.solr.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -57,15 +59,17 @@ import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
+import org.apache.stanbol.entityhub.yard.solr.SolrDirectoryManager;
+import org.apache.stanbol.entityhub.yard.solr.SolrServerProviderManager;
+import org.apache.stanbol.entityhub.yard.solr.SolrServerProvider.Type;
 import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrQueryFactory.SELECT;
 import org.apache.stanbol.entityhub.yard.solr.model.FieldMapper;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexField;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
-import org.apache.stanbol.entityhub.yard.solr.provider.SolrServerProviderManager;
-import org.apache.stanbol.entityhub.yard.solr.provider.SolrServerProvider.Type;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
+import org.apache.stanbol.entityhub.yard.solr.utils.ConfigUtils;
 import org.apache.stanbol.entityhub.yard.solr.utils.SolrUtil;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -235,6 +239,9 @@ public class SolrYard extends AbstractYard implements Yard {
      */
     @Reference
     private SolrServerProviderManager solrServerProviderManager;
+    
+    @Reference
+    private SolrDirectoryManager solrDirectoryManager;
     /**
      * Default constructor as used by the OSGI environment.<p> DO NOT USE to
      * manually create instances! The SolrYard instances do need to be configured.
@@ -265,10 +272,10 @@ public class SolrYard extends AbstractYard implements Yard {
     @SuppressWarnings("unchecked")
     @Activate
     protected final void activate(ComponentContext context) throws ConfigurationException,IOException,SolrServerException {
-        log.info("in "+SolrYard.class+" activate with context "+context);
         if(context == null){
             throw new IllegalStateException("No valid"+ComponentContext.class+" parsed in activate!");
         }
+        log.info("in "+SolrYard.class+" activate with config "+context.getProperties());
         activate(new SolrYardConfig((Dictionary<String, Object>)context.getProperties()));
     }
     /**
@@ -287,9 +294,30 @@ public class SolrYard extends AbstractYard implements Yard {
         if(solrServerProviderManager == null){ //not within an OSGI environment
             solrServerProviderManager = SolrServerProviderManager.getInstance();
         }
+        if(solrDirectoryManager == null) { //not within an OSGI environment
+            //init via java.util.ServiceLoader
+            Iterator<SolrDirectoryManager> providerIt = 
+                ServiceLoader.load(SolrDirectoryManager.class,SolrDirectoryManager.class.getClassLoader()).iterator();
+            if(providerIt.hasNext()){
+                solrDirectoryManager = providerIt.next();
+            } else {
+                throw new IllegalStateException("Unable to instantiate "+SolrDirectoryManager.class.getSimpleName()+" service by using "+ServiceLoader.class.getName()+"!");
+            }
+        }
+        String solrIndexLocation;
+        if(config.getSolrServerType() == Type.EMBEDDED){
+            File indexDirectory = ConfigUtils.toFile(config.getSolrServerLocation());
+            if(!indexDirectory.isAbsolute()){ //relative paths
+                // need to be resolved based on the internally managed Solr directory
+                indexDirectory = solrDirectoryManager.getSolrDirectory(indexDirectory.toString());
+            }
+            solrIndexLocation = indexDirectory.toString();
+        } else {
+            solrIndexLocation = config.getSolrServerLocation();
+        }
         server = solrServerProviderManager.getSolrServer(
             config.getSolrServerType(), 
-            config.getSolrServerLocation().toString());
+            solrIndexLocation);
         //test the server
         SolrPingResponse pingResponse = server.ping();
         log.info(String.format("Successful ping for SolrServer %s ( %d ms) Details: %s",config.getSolrServerLocation(),pingResponse.getElapsedTime(),pingResponse));
