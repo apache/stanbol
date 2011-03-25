@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.entityhub.indexing.dbPedia.cli;
+package org.apache.stanbol.entityhub.indexing.dbpedia.cli;
 
 import static org.apache.stanbol.entityhub.indexing.rdf.RdfIndexer.KEY_CHUNK_SIZE;
 import static org.apache.stanbol.entityhub.indexing.rdf.RdfIndexer.KEY_ENTITY_RANKINGS;
@@ -98,7 +98,7 @@ public final class CommandLineRunner {
         "foaf:img | d=xsd:anyURI",
         "foaf:logo | d=xsd:anyURI",
         "foaf:page | d=xsd:anyURI", //page about the entity
-        // --- dbPedia specific
+        // --- dbpedia specific
         "dbp-ont:*",
         "dbp-ont:thumbnail | d=xsd:anyURI > foaf:depiction",
 //        "dbp-prop:latitude | d=xsd:decimal > geo:lat",
@@ -123,11 +123,11 @@ public final class CommandLineRunner {
     private static final String header;
     static {
         StringBuilder builder = new StringBuilder();
-        builder.append("Description:\nThis Utility creates a full Yard for dbPedia.org by using the SolrYard implementation.\n");
+        builder.append("Description:\nThis Utility creates a full Yard for dbpedia.org by using the SolrYard implementation.\n");
         builder.append("\nParameter:\n");
         builder.append(" - \"-Xmx\": This implementation does not need much memory. RDF data are loaded into the file based Jena TDB store. Indexing is done in chunks of 1000 (default). In case of OutOfMemory errors you need to increase this value!");
         builder.append(" - solrServerUri : The URL of the Solr Server used to index the data. Make sure to use the schema.xml as needed by the SolrYard!\n");
-        builder.append(" - dbPediaDumpDir: The relative or absolute path to the Dir with the source RDF files to be used for indexing. You can direcly use the compressed archives. All files in that directory are used to create the index\n");
+        builder.append(" - dbpediaDumpDir: The relative or absolute path to the Dir with the source RDF files to be used for indexing. You can direcly use the compressed archives. All files in that directory are used to create the index\n");
         builder.append("\nOptions:\n");
         header = builder.toString();
         builder = null;
@@ -139,7 +139,7 @@ public final class CommandLineRunner {
         options.addOption("d", "debug", false, "show debug stacktrace upon error");
         //options.addOption("yt","yardtype",false, "the type of the yard used as target 'solr' or 'rdf' (default:'solr')");
         //options.addOption("i","index",true, "Base URI of the used Solr Server used to index the data");
-        options.addOption("n", "name", true, "the id and name used for the Yard (default: 'dbPedia')");
+        options.addOption("n", "name", true, "the id and name used for the Yard (default: 'dbpedia')");
         options.addOption("m","mappings",true, "file with the fieldMappings used for indexing (this will replace the defaults)");
         options.addOption("c","chunksize",true, "the number of documents stored in one chunk (default: 1000");
         options.addOption("s","skipRdf",false, "this options allow to skip the loading of the RDF Data (e.g. if alredy loaded to the Triple Store)");
@@ -168,7 +168,7 @@ public final class CommandLineRunner {
         if (line.getArgs().length < 2 || line.hasOption("h")) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp(
-                    "java -Xmx1024M -jar org.apache.stanbol.indexing.dbPedia-0.1-SNAPSHOT-jar-with-dependencies.jar [options] solrServerUri dbPediaDataDumpDir",
+                    "java -Xmx1024M -jar org.apache.stanbol.indexing.dbpedia-0.1-SNAPSHOT-jar-with-dependencies.jar [options] solrServerUri dbpediaDataDumpDir",
                     header,
                     options,
                     footer);
@@ -176,7 +176,7 @@ public final class CommandLineRunner {
         }
         String yardName = line.getOptionValue("n");
         if(yardName == null){
-            yardName = "dbPedia";
+            yardName = "dbpedia";
         }
         Dictionary<String, Object> indexingConfig = new Hashtable<String, Object>();
         //first the SolrServer used to store the index
@@ -203,7 +203,7 @@ public final class CommandLineRunner {
         }
         File[] files = dataDir.listFiles();
         indexingConfig.put(KEY_RDF_FILES, Arrays.asList(files));
-        indexingConfig.put(KEY_RDF_STORE_DIR, "dbPedia-rdf-data");
+        indexingConfig.put(KEY_RDF_STORE_DIR, "dbpedia-rdf-data");
         Integer chunkSize;
         try {
             chunkSize = Integer.valueOf(line.getOptionValue("c", "1000"));

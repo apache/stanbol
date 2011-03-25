@@ -1,4 +1,4 @@
-Indexer for the DBpedia dataset (see http://dbPedia.org/)
+Indexer for the DBpedia dataset (see http://dbpedia.org/)
 
 This Tool creates a full cache for DBPedia based on the RDF Dump available via
 the download section of the dbpedia.org web page.
@@ -15,7 +15,7 @@ To create the runable jar that contains all the dependencies call
 If everything completes successfully, than there should be two jar files within
 the target directory.
 The one called 
-   org.apache.stanbol.entityhub.indexing.dbPedia-0.1*-jar-with-dependencies.jar
+   org.apache.stanbol.entityhub.indexing.dbpedia-0.1*-jar-with-dependencies.jar
 is the one to be used for indexing.
 
 Creating the index:

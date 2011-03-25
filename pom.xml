@@ -65,7 +65,7 @@
     <!-- Utils for createing local caches (indexing utils) -->
     <module>indexing/geonames</module>
     <module>indexing/genericrdf</module>
-    <module>indexing/dbPedia</module>
+    <module>indexing/dbpedia</module>
     <module>indexing/dblp</module>
   </modules>
 </project>

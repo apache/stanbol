@@ -300,7 +300,7 @@ public abstract class AbstractYard implements Yard {
         }
         /**
          * Setter for the ID of the yard. The id is usually a sort name such as
-         * "dbPedia", "freebase", "geonames.org", "my.projects" ...<p>
+         * "dbpedia", "freebase", "geonames.org", "my.projects" ...<p>
          * If {@link #isMultiYardIndexLayout()} than this ID is used to identify
          * Representations of this Yard within the SolrIndex.
          * @param the id of the yard. Required, not null, not empty!

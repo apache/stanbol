@@ -136,7 +136,7 @@ import org.slf4j.LoggerFactory;
         )
 @Service(value=ReferencedSite.class)
 @Properties(value={
-        @Property(name=ConfiguredSite.ID,value="dbPedia"),
+        @Property(name=ConfiguredSite.ID,value="dbpedia"),
         @Property(name=ConfiguredSite.NAME,value="DB Pedia"),
         @Property(name=ConfiguredSite.DESCRIPTION, value="The OLD Endpoint for Wikipedia"),
         /*

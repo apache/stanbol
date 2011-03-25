@@ -28,17 +28,17 @@
 	</parent>
 -->
 	<groupId>org.apache.stanbol</groupId>
-	<artifactId>org.apache.stanbol.entityhub.indexing.dbPedia</artifactId>
+	<artifactId>org.apache.stanbol.entityhub.indexing.dbpedia</artifactId>
 	<packaging>jar</packaging>
 	<version>0.9-SNAPSHOT</version>
 	<name>Apache Stanbol Entityhub Indexing for geonames.org</name>
-	<description>This uses the RDF dump of dbPedia.org to create a Full Yard for dbPedia.org  </description>
+	<description>This uses the RDF dump of dbpedia.org to create a Full Yard for dbpedia.org  </description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/dbPedia
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/dbpedia
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/dbPedia
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/dbpedia
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
@@ -124,7 +124,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>org.apache.stanbol.entityhub.indexing.dbPedia.cli.CommandLineRunner</mainClass>
+							<mainClass>org.apache.stanbol.entityhub.indexing.dbpedia.cli.CommandLineRunner</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

@@ -165,7 +165,7 @@ public final class CommandLineRunner {
         if (line.getArgs().length < 2 || line.hasOption("h")) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp(
-                    "java -Xmx1024M -jar org.apache.stanbol.indexing.dbPedia-0.1-SNAPSHOT-jar-with-dependencies.jar [options] solrServerUri rdfDump",
+                    "java -Xmx1024M -jar org.apache.stanbol.indexing.dbpedia-0.1-SNAPSHOT-jar-with-dependencies.jar [options] solrServerUri rdfDump",
                     header,
                     options,
                     footer);
