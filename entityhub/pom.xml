@@ -64,7 +64,7 @@
     <module>launchers/sling</module>
     <!-- Utils for createing local caches (indexing utils) -->
     <module>indexing/geonames</module>
-    <module>indexing/genericRdf</module>
+    <module>indexing/genericrdf</module>
     <module>indexing/dbPedia</module>
     <module>indexing/dblp</module>
   </modules>

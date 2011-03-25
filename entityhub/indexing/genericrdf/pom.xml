@@ -28,7 +28,7 @@
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.entityhub.indexing.genericRdf</artifactId>
+  <artifactId>org.apache.stanbol.entityhub.indexing.genericrdf</artifactId>
   <packaging>jar</packaging>
   <version>${stanbol-version}</version>
   <name>Apache Stanbol Entityhub Indexing for rdf Resource</name>
@@ -38,10 +38,10 @@
   </description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/genericRdf
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/genericrdf
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/genericRdf
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/indexing/genericrdf
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
