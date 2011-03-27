@@ -7,9 +7,6 @@ import java.util.List;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.io.LineIterator;
-import org.apache.commons.lang.ArrayUtils;
-
 public class NavigationMixin {
 
     @Context

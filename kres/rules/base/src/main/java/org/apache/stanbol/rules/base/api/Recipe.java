@@ -1,10 +1,5 @@
 package org.apache.stanbol.rules.base.api;
 
-import java.net.URI;
-import java.util.Collection;
-
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.sparql.ResultSet;
 import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.semanticweb.owlapi.model.IRI;
 

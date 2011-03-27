@@ -3,8 +3,7 @@ package org.apache.stanbol.reengineer.base.api.datasources;
 import org.apache.stanbol.reengineer.base.api.IdentifiedDataSource;
 import org.apache.stanbol.reengineer.base.api.settings.ConnectionSettings;
 import org.apache.stanbol.reengineer.base.api.util.ReengineerType;
-import org.apache.stanbol.rules.refactor.api.util.URIGenerator;
-
+import org.apache.stanbol.reengineer.base.api.util.URIGenerator;
 
 /**
  * An object representing a relational database in Semion.

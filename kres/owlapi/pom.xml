@@ -29,7 +29,7 @@
 	<artifactId>org.apache.stanbol.owlapi</artifactId>
 	<version>${stanbol-version}</version>
 	<packaging>bundle</packaging>
-	<name>Apache Stanbol Owlapi Dependecy</name>
+	<name>Apache Stanbol OSGi bundle for OWL API</name>
 
 	<repositories>
 		<repository>

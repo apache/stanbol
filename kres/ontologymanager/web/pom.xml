@@ -164,6 +164,20 @@
 			<version>1.2.0</version>
 			<scope>provided</scope>
 		</dependency>
+        
+        <!-- Stanbol deps -->
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.kres.jersey</artifactId>
+			<version>${stanbol-version}</version>
+			<scope>provided</scope>            
+		</dependency>        
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
+			<version>${stanbol-version}</version>
+			<scope>provided</scope>            
+		</dependency>
 
 		<!-- for tests -->
 		<dependency>
@@ -207,53 +221,7 @@
 			<version>${pax-exam-version}</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
-			<version>${stanbol-version}</version>
-		</dependency>
-		<!--<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.ontologymanager.store</artifactId>
-			<version>${stanbol-version}</version>
-		</dependency>-->
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.reasoners.base</artifactId>
-			<version>${stanbol-version}</version>
-		</dependency>
-                <dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.rules.base</artifactId>
-			<version>${stanbol-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.reengineer.base</artifactId>
-			<version>${stanbol-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.rules.manager</artifactId>
-			<version>${stanbol-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.rules.refactor</artifactId>
-			<version>${stanbol-version}</version>
-		</dependency>
-                <dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.kres.jersey</artifactId>
-			<version>${stanbol-version}</version>
-			<scope>provided</scope>
-		</dependency>
-                <dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.owlapi</artifactId>
-			<version>${stanbol-version}</version>
-			<scope>provided</scope>
-		</dependency>
+        
 		<dependency>
 			<groupId>com.hp.hpl.jena</groupId>
 			<artifactId>jena</artifactId>
@@ -261,10 +229,6 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
-
-
-
-
 
 	<repositories>
 		<!-- needed for jersey -->

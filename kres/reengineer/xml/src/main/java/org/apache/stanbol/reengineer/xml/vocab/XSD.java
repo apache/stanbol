@@ -2,11 +2,7 @@ package org.apache.stanbol.reengineer.xml.vocab;
 
 /* CVS $Id$ */
  
-import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-
-import com.hp.hpl.jena.rdf.model.*;
  
 /**
  * Vocabulary definitions from http://ontologydesignpatterns.org/ont/iks/xsd.owl 

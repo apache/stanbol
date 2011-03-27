@@ -116,13 +116,8 @@
 			<artifactId>org.apache.stanbol.reengineer.base</artifactId>
 			<version>${stanbol-version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.owlapi</artifactId>
-			<version>${stanbol-version}</version>
-		</dependency>
 
-		<!-- Jena deps -->
+		<!-- OWL deps -->
 		<dependency>
 			<groupId>com.hp.hpl.jena</groupId>
 			<artifactId>iri</artifactId>
@@ -152,6 +147,11 @@
 			<artifactId>tdb</artifactId>
 			<version>0.8.5</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>owlapi</groupId>
+			<artifactId>owlapi</artifactId>
+			<version>3.0.0</version>
 		</dependency>
 
 		<!-- Clerezza deps -->
