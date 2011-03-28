@@ -1,19 +1,21 @@
 package org.apache.stanbol.commons.web;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.stanbol.commons.web.processor.FreemarkerViewProcessor;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;
@@ -23,6 +25,8 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 
+import freemarker.cache.ClassTemplateLoader;
+
 /**
  * Jersey-based RESTful endpoint for the Stanbol Enhancer engines and store.
  * <p>
@@ -30,6 +34,7 @@ import com.sun.jersey.spi.container.servlet.ServletContainer;
  * resources.
  */
 @Component(immediate = true, metatype = true)
+@Reference(name = "webFragment", referenceInterface = WebFragment.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
 public class JerseyEndpoint {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -49,10 +54,9 @@ public class JerseyEndpoint {
     @Reference
     HttpService httpService;
 
-    @Reference
-    Serializer serializer;
-
     protected ServletContext servletContext;
+
+    protected final List<WebFragment> webFragments = new ArrayList<WebFragment>();
 
     public Dictionary<String,String> getInitParams() {
         Dictionary<String,String> initParams = new Hashtable<String,String>();
@@ -68,35 +72,43 @@ public class JerseyEndpoint {
         // register all the JAX-RS resources into a a JAX-RS application and bind it to a configurable URL
         // prefix
         JerseyEndpointApplication app = new JerseyEndpointApplication();
-
-        // TODO contribute classes and singletons to the app here
-
-        ServletContainer container = new ServletContainer(app);
-        String alias = (String) ctx.getProperties().get(ALIAS_PROPERTY);
         String staticUrlRoot = (String) ctx.getProperties().get(STATIC_RESOURCES_URL_ROOT_PROPERTY);
         String staticClasspath = (String) ctx.getProperties().get(STATIC_RESOURCES_CLASSPATH_PROPERTY);
-        String freemakerTemplates = (String) ctx.getProperties().get(FREEMARKER_TEMPLATE_CLASSPATH_PROPERTY);
+        String templateClasspath = (String) ctx.getProperties().get(FREEMARKER_TEMPLATE_CLASSPATH_PROPERTY);
 
+        // register the base template loader
+        templateClasspath.replaceAll("/$", "");
+        app.contributeTemplateLoader(new ClassTemplateLoader(getClass(), templateClasspath));
+
+        // register the root of static resources
+        httpService.registerResources(staticUrlRoot, staticClasspath, null);
+
+        // incrementally contribute fragment resources
+        for (WebFragment fragment : webFragments) {
+            app.contributeClasses(fragment.getJaxrsResourceClasses());
+            app.contributeSingletons(fragment.getJaxrsResourceSingletons());
+            app.contributeTemplateLoader(fragment.getTemplateLoader());
+            httpService.registerResources(staticUrlRoot + '/' + fragment.getName(),
+                fragment.getStaticResourceClassPath(), null);
+        }
         log.info("Registering servlets with HTTP service " + httpService.toString());
+        ServletContainer container = new ServletContainer(app);
+        String alias = (String) ctx.getProperties().get(ALIAS_PROPERTY);
+        
+        // TODO: check whether this class-loading hack is still necessary or not
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         try {
             httpService.registerServlet(alias, container, getInitParams(), null);
-            httpService.registerResources(staticUrlRoot, staticClasspath, null);
         } finally {
             Thread.currentThread().setContextClassLoader(classLoader);
         }
 
-        // forward the main Stanbol Enhancer OSGi components to the servlet context so that
-        // they can be looked up by the JAX-RS resources
+        // forward the main Stanbol OSGi runtime context so that JAX-RS resources can lookup arbitrary
+        // services
         servletContext = container.getServletContext();
         servletContext.setAttribute(BundleContext.class.getName(), ctx.getBundleContext());
-        servletContext.setAttribute(Serializer.class.getName(), serializer);
-
         servletContext.setAttribute(STATIC_RESOURCES_URL_ROOT_PROPERTY, staticUrlRoot);
-        servletContext.setAttribute(FreemarkerViewProcessor.FREEMARKER_TEMPLATE_PATH_INIT_PARAM,
-            freemakerTemplates);
-
         log.info("Jersey servlet registered at {}", alias);
     }
 
@@ -114,6 +126,15 @@ public class JerseyEndpoint {
 
     protected void unbindHttpService(HttpService httpService) {
         this.httpService = null;
+    }
+
+    protected void bindWebFragment(WebFragment webFragment) {
+        // TODO: support some ordering for jax-rs resource and template overrides?
+        webFragments.add(webFragment);
+    }
+
+    protected void unbindWebFragment(WebFragment webFragment) {
+        webFragments.remove(webFragment);
     }
 
 }

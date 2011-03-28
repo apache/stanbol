@@ -1,6 +1,8 @@
 package org.apache.stanbol.commons.web;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.core.Application;
@@ -11,6 +13,9 @@ import org.apache.stanbol.commons.web.writers.ResultSetWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import freemarker.cache.MultiTemplateLoader;
+import freemarker.cache.TemplateLoader;
+
 /**
  * Define the list of available resources and providers to be used by the Stanbol JAX-RS Endpoint.
  */
@@ -19,9 +24,11 @@ public class JerseyEndpointApplication extends Application {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(JerseyEndpointApplication.class);
 
-    public final Set<Class<?>> contributedClasses = new HashSet<Class<?>>();
+    protected final Set<Class<?>> contributedClasses = new HashSet<Class<?>>();
 
-    public final Set<Object> contributedSingletons = new HashSet<Object>();
+    protected final Set<Object> contributedSingletons = new HashSet<Object>();
+
+    protected List<TemplateLoader> templateLoaders = new ArrayList<TemplateLoader>();
 
     @Override
     public Set<Class<?>> getClasses() {
@@ -40,9 +47,8 @@ public class JerseyEndpointApplication extends Application {
         Set<Object> singletons = new HashSet<Object>();
         singletons.addAll(contributedSingletons);
 
-        // view processors, hard-coded for now
-        // TODO make it possible to pass the template loaders from the OSGi context here:
-        singletons.add(new FreemarkerViewProcessor());
+        MultiTemplateLoader templateLoader = new MultiTemplateLoader((TemplateLoader[]) templateLoaders.toArray());
+        singletons.add(new FreemarkerViewProcessor(templateLoader));
         return singletons;
     }
 
@@ -52,5 +58,9 @@ public class JerseyEndpointApplication extends Application {
 
     public void contributeSingletons(Set<Object> singletons) {
         contributedSingletons.addAll(singletons);
+    }
+
+    public void contributeTemplateLoader(TemplateLoader templateLoader) {
+        this.templateLoaders.add(templateLoader);
     }
 }

@@ -20,7 +20,7 @@ import com.sun.jersey.api.view.Viewable;
 import com.sun.jersey.spi.resource.Singleton;
 import com.sun.jersey.spi.template.ViewProcessor;
 
-import freemarker.cache.ClassTemplateLoader;
+import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 
@@ -58,18 +58,19 @@ import freemarker.template.Template;
 @Provider
 public class FreemarkerViewProcessor implements ViewProcessor<Template> {
 
-    public static final String FREEMARKER_TEMPLATE_PATH_INIT_PARAM = "freemarker.template.path";
-
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     protected Configuration freemarkerConfig;
 
     protected String rootPath;
+    
+    protected TemplateLoader templateLoader;
 
     @Context
     protected ServletContext context;
 
-    public FreemarkerViewProcessor() {
+    public FreemarkerViewProcessor(TemplateLoader templateLoader) {
+        this.templateLoader = templateLoader;
     }
 
     /**
@@ -139,20 +140,9 @@ public class FreemarkerViewProcessor implements ViewProcessor<Template> {
     protected Configuration getConfig() {
         if (freemarkerConfig == null) {
             // deferred initialization of the freemarker config to ensure that
-            // the injected ServletContext is fully functional and for some
-            // reason the #getInitParam access does not work hence using the
-            // #getAttribute access after servlet init.
+            // the injected ServletContext is fully functional
             Configuration config = new Configuration();
-            if (context != null) {
-                rootPath = (String) context.getAttribute(FREEMARKER_TEMPLATE_PATH_INIT_PARAM);
-            }
-            if (rootPath == null || rootPath.trim().length() == 0) {
-                log.info("No 'freemarker.template.path' context-param, "
-                        + "defaulting to '/WEB-INF/templates'");
-                rootPath = "/WEB-INF/templates";
-            }
-            rootPath = rootPath.replaceAll("/$", "");
-            config.setTemplateLoader(new ClassTemplateLoader(getClass(), rootPath));
+            config.setTemplateLoader(templateLoader);
 
             // TODO: make the usage of a freemaker properties file an explicit
             // parameter declared in the servlet context instead of magic
