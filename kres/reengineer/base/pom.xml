@@ -96,20 +96,10 @@
 		<!-- Stanbol deps -->
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.owlapi</artifactId>
-			<version>${stanbol-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
 			<version>${stanbol-version}</version>
 		</dependency>
-		<!-- NEEDED FOR Semion refactorer -->
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.rules.refactor</artifactId>
-			<version>${stanbol-version}</version>
-		</dependency>
+
 		<dependency>
 			<groupId>owlapi</groupId>
 			<artifactId>owlapi</artifactId>

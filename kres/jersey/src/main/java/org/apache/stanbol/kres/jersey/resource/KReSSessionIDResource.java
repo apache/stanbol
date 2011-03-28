@@ -13,7 +13,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.renderers.SessionRenderer;
 import org.semanticweb.owlapi.model.IRI;
@@ -46,7 +46,7 @@ public class KReSSessionIDResource extends NavigationMixin {
 			@Context HttpHeaders headers) {
 
 		Session ses = null;
-		KReSSessionManager mgr = onm.getSessionManager();
+		SessionManager mgr = onm.getSessionManager();
 		ses = mgr.getSession(IRI.create(sessionId));
 		if (ses == null)
 			return Response.status(Status.NO_CONTENT).build();

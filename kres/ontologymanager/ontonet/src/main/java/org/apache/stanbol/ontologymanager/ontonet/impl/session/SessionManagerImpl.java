@@ -13,7 +13,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySp
 import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionIDGenerator;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * @author alessandro
  * 
  */
-public class SessionManagerImpl implements KReSSessionManager {
+public class SessionManagerImpl implements SessionManager {
 
 	private Map<IRI, Session> sessionsByID;
 

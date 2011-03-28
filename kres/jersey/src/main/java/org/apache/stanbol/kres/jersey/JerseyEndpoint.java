@@ -12,9 +12,7 @@ import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.reengineer.base.api.ReengineerManager;
-import org.apache.stanbol.reengineer.base.api.Reengineer;
+import org.apache.stanbol.kres.jersey.processors.KReSViewProcessor;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;
@@ -23,8 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.spi.container.servlet.ServletContainer;
-
-import org.apache.stanbol.kres.jersey.processors.KReSViewProcessor;
 
 /**
  * Jersey-based RESTful endpoint for KReS.

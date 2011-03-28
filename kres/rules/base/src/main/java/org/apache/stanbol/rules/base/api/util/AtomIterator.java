@@ -2,7 +2,6 @@ package org.apache.stanbol.rules.base.api.util;
 
 import java.util.Iterator;
 
-import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.RuleAtom;
 
 

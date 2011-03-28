@@ -26,7 +26,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.KReSSessionManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.reasoners.base.api.InconcistencyException;
 import org.apache.stanbol.reasoners.base.api.Reasoner;
@@ -272,7 +272,7 @@ public class RefactorerImpl implements Refactorer {
         refactoringSpaceIRI = IRI.create(refactoringSpaceID);
         defaultRefactoringIRI = IRI.create(defaultRefactoringID);
 
-        KReSSessionManager kReSSessionManager = onManager.getSessionManager();
+        SessionManager kReSSessionManager = onManager.getSessionManager();
 
         Session kReSSession = kReSSessionManager.getSession(kReSSessionID);
 
@@ -515,7 +515,7 @@ public class RefactorerImpl implements Refactorer {
     protected void deactivate(ComponentContext context) {
         log.info("in " + RefactorerImpl.class + " deactivate with context " + context);
 
-        KReSSessionManager kReSSessionManager = onManager.getSessionManager();
+        SessionManager kReSSessionManager = onManager.getSessionManager();
         kReSSessionManager.destroySession(kReSSessionID);
         // semionManager.unregisterRefactorer();
 

@@ -1,7 +1,6 @@
 package org.apache.stanbol.ontologymanager.ontonet.api.session;
 
 import java.io.OutputStream;
-import java.util.Collection;
 import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
@@ -21,34 +20,23 @@ import org.semanticweb.owlapi.model.IRI;
  * @author alessandro
  * 
  */
-public interface SessionManager {
+public interface SessionManager extends SessionListenable {
+
+	public Set<IRI> getRegisteredSessionIDs();
 
 	/**
-	 * Adds the given SessionListener to the pool of registered listeners.
-	 * 
-	 * @param listener
-	 *            the session listener to be added
-	 */
-	public void addSessionListener(SessionListener listener);
-
-	/**
-	 * Clears the pool of registered session listeners.
-	 */
-	public void clearSessionListeners();
-
-	/**
-	 * Generates a new KReS session and assigns a unique session ID generated
-	 * internally.
+	 * Generates AND REGISTERS a new KReS session and assigns a unique session
+	 * ID generated internally.
 	 * 
 	 * @return the generated KReS session
 	 */
 	public Session createSession();
 
 	/**
-	 * Generates a new KReS session and tries to assign it the supplied session
-	 * ID. If a session with that ID is already registered, the new session is
-	 * <i>not</i> created and a <code>DuplicateSessionIDException</code> is
-	 * thrown.
+	 * Generates AND REGISTERS a new KReS session and tries to assign it the
+	 * supplied session ID. If a session with that ID is already registered, the
+	 * new session is <i>not</i> created and a
+	 * <code>DuplicateSessionIDException</code> is thrown.
 	 * 
 	 * @param sessionID
 	 *            the IRI that uniquely identifies the session
@@ -78,30 +66,12 @@ public interface SessionManager {
 	public Session getSession(IRI sessionID);
 
 	/**
-	 * Returns all the registered session listeners. It is up to developers to
-	 * decide whether implementations should return sets (unordered but without
-	 * redundancy), lists (e.g. in the order they wer registered but potentially
-	 * redundant) or other data structures that implement {@link Collection}.
-	 * 
-	 * @return a collection of registered session listeners.
-	 */
-	public Collection<SessionListener> getSessionListeners();
-
-	/**
 	 * Returns the ontology space associated with this session.
 	 * 
 	 * @return the session space
 	 */
 	public Set<SessionOntologySpace> getSessionSpaces(IRI sessionID)
 			throws NonReferenceableSessionException;
-
-	/**
-	 * Removes the given SessionListener from the pool of active listeners.
-	 * 
-	 * @param listener
-	 *            the session listener to be removed
-	 */
-	public void removeSessionListener(SessionListener listener);
 
 	/**
 	 * Stores the KReS session identified by <code>sessionID</code> using the
@@ -112,6 +82,7 @@ public interface SessionManager {
 	 * @param out
 	 *            the output stream to store the session
 	 */
-	public void storeSession(IRI sessionID, OutputStream out);
+	public void storeSession(IRI sessionID, OutputStream out)
+			throws NonReferenceableSessionException;
 
 }

@@ -5,19 +5,15 @@
 
 package org.apache.stanbol.reasoners.web;
 
-import com.sun.jersey.api.client.ClientResponse;
-import javax.ws.rs.core.MediaType;
-import com.sun.jersey.api.representation.Form;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.Client;
 import org.apache.stanbol.kres.jersey.JettyServer;
-import java.io.File;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
 
 /**
  *

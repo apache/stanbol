@@ -3,8 +3,6 @@ package org.apache.stanbol.reengineer.xml.vocab;
 /* CVS $Id$ */
  
 import org.apache.clerezza.rdf.core.UriRef;
-
-import com.hp.hpl.jena.rdf.model.*;
  
 /**
  * Vocabulary definitions from http://ontologydesignpatterns.org/ont/iks/xml.owl 
