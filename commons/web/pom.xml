@@ -41,7 +41,7 @@
 				<configuration>
 					<instructions>
 						<Export-Package>
-							org.apache.stanbol.commons.web.*
+							org.apache.stanbol.commons.web.*,freemarker.cache.*
             			</Export-Package>
 						<Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl</Embed-Dependency>
 						<Embed-Dependency>freemarker</Embed-Dependency>

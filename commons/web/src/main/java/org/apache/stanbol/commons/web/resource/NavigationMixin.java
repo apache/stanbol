@@ -7,6 +7,11 @@ import java.util.List;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
+/**
+ * Mixin class to provide the controller method for the navigation template.
+ * 
+ * TODO: make the list of menu items dynamically contributed by WebFragments from the OSGi runtime.
+ */
 public class NavigationMixin {
 
     @Context
@@ -17,10 +22,8 @@ public class NavigationMixin {
     }
 
     public List<MenuItem> getMainMenuItems() {
-        return Arrays.asList(
-                new MenuItem("/engines", "/engines", uriInfo),
-                new MenuItem("/store", "/store", uriInfo),
-                new MenuItem("/sparql", "/sparql", uriInfo));
+        return Arrays.asList(new MenuItem("/engines", "/engines", uriInfo), new MenuItem("/store", "/store",
+                uriInfo), new MenuItem("/sparql", "/sparql", uriInfo));
     }
 
     public static class MenuItem {
@@ -33,9 +36,9 @@ public class NavigationMixin {
 
         protected final String label;
 
-        protected final  String link;
+        protected final String link;
 
-        protected final  String cssClass;
+        protected final String cssClass;
 
         public String getLabel() {
             return label;
