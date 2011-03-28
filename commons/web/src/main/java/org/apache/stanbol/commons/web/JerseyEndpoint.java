@@ -54,9 +54,13 @@ public class JerseyEndpoint {
     @Reference
     HttpService httpService;
 
+    protected ComponentContext componentContext;
+
     protected ServletContext servletContext;
 
     protected final List<WebFragment> webFragments = new ArrayList<WebFragment>();
+
+    protected ArrayList<String> registeredAlias;
 
     public Dictionary<String,String> getInitParams() {
         Dictionary<String,String> initParams = new Hashtable<String,String>();
@@ -68,6 +72,8 @@ public class JerseyEndpoint {
 
     @Activate
     protected void activate(ComponentContext ctx) throws IOException, ServletException, NamespaceException {
+        this.componentContext = ctx;
+        this.registeredAlias = new ArrayList<String>();
 
         // register all the JAX-RS resources into a a JAX-RS application and bind it to a configurable URL
         // prefix
@@ -82,24 +88,28 @@ public class JerseyEndpoint {
 
         // register the root of static resources
         httpService.registerResources(staticUrlRoot, staticClasspath, null);
+        registeredAlias.add(staticUrlRoot);
 
         // incrementally contribute fragment resources
         for (WebFragment fragment : webFragments) {
+            log.info("Registering web fragment '{}' into jaxrs application", fragment.getName());
             app.contributeClasses(fragment.getJaxrsResourceClasses());
             app.contributeSingletons(fragment.getJaxrsResourceSingletons());
             app.contributeTemplateLoader(fragment.getTemplateLoader());
-            httpService.registerResources(staticUrlRoot + '/' + fragment.getName(),
-                fragment.getStaticResourceClassPath(), null);
+            String resourceAlias = staticUrlRoot + '/' + fragment.getName();
+            httpService.registerResources(resourceAlias, fragment.getStaticResourceClassPath(), null);
+            registeredAlias.add(resourceAlias);
         }
-        log.info("Registering servlets with HTTP service " + httpService.toString());
+
         ServletContainer container = new ServletContainer(app);
         String alias = (String) ctx.getProperties().get(ALIAS_PROPERTY);
-        
+
         // TODO: check whether this class-loading hack is still necessary or not
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         try {
             httpService.registerServlet(alias, container, getInitParams(), null);
+            registeredAlias.add(alias);
         } finally {
             Thread.currentThread().setContextClassLoader(classLoader);
         }
@@ -109,14 +119,14 @@ public class JerseyEndpoint {
         servletContext = container.getServletContext();
         servletContext.setAttribute(BundleContext.class.getName(), ctx.getBundleContext());
         servletContext.setAttribute(STATIC_RESOURCES_URL_ROOT_PROPERTY, staticUrlRoot);
-        log.info("Jersey servlet registered at {}", alias);
+        log.info("JerseyEndpoint servlet registered at {}", alias);
     }
 
     @Deactivate
     protected void deactivate(ComponentContext ctx) {
-        log.info("Deactivating jersey bundle");
-        String alias = (String) ctx.getProperties().get(ALIAS_PROPERTY);
-        httpService.unregister(alias);
+        for (String alias : registeredAlias) {
+            httpService.unregister(alias);
+        }
         servletContext = null;
     }
 
@@ -128,13 +138,25 @@ public class JerseyEndpoint {
         this.httpService = null;
     }
 
-    protected void bindWebFragment(WebFragment webFragment) {
+    protected void bindWebFragment(WebFragment webFragment) throws IOException,
+                                                           ServletException,
+                                                           NamespaceException {
         // TODO: support some ordering for jax-rs resource and template overrides?
         webFragments.add(webFragment);
+        if (componentContext != null) {
+            deactivate(componentContext);
+            activate(componentContext);
+        }
     }
 
-    protected void unbindWebFragment(WebFragment webFragment) {
+    protected void unbindWebFragment(WebFragment webFragment) throws IOException,
+                                                             ServletException,
+                                                             NamespaceException {
         webFragments.remove(webFragment);
+        if (componentContext != null) {
+            deactivate(componentContext);
+            activate(componentContext);
+        }
     }
 
 }

@@ -1,5 +1,4 @@
 <#import "/imports/common.ftl" as common>
-<#import "/imports/sparql.ftl" as sparql>
 <#escape x as x?html>
 <@common.page title="Welcome to Apache Stanbol!" hasrestapi=false> 
 
