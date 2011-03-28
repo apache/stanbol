@@ -5,6 +5,8 @@ import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
+import org.apache.stanbol.kres.jersey.SessionIDResource;
+import org.apache.stanbol.kres.jersey.SessionResource;
 import org.apache.stanbol.kres.jersey.processors.KReSViewProcessor;
 import org.apache.stanbol.kres.jersey.writers.GraphWriter;
 import org.apache.stanbol.kres.jersey.writers.OWLOntologyWriter;
@@ -32,6 +34,9 @@ public class JerseyEndpointApplication extends Application {
         classes.add(ONMScopeResource.class);
         classes.add(ONMScopeOntologyResource.class);
         classes.add(ONMOntResource.class);
+        
+        classes.add(SessionResource.class);
+        classes.add(SessionIDResource.class);
        
         // message body writers
         classes.add(GraphWriter.class);

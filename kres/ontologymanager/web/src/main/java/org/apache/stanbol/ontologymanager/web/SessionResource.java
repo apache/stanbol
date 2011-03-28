@@ -1,4 +1,4 @@
-package org.apache.stanbol.kres.jersey.resource;
+package org.apache.stanbol.ontologymanager.web;
 
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
@@ -39,9 +39,10 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import org.apache.stanbol.kres.jersey.format.KReSFormat;
+import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
 
 @Path("/session")
-public class KReSSessionResource extends NavigationMixin {
+public class SessionResource extends NavigationMixin {
 
     /*
      * Placeholder for the ONManager to be fetched from the servlet context.
@@ -50,7 +51,7 @@ public class KReSSessionResource extends NavigationMixin {
 
     protected ServletContext servletContext;
 
-    public KReSSessionResource(@Context ServletContext servletContext) {
+    public SessionResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
         onm = (ONManager) this.servletContext.getAttribute(ONManager.class.getName());
         if (onm == null) {

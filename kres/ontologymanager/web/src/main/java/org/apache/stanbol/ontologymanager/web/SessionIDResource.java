@@ -1,4 +1,4 @@
-package org.apache.stanbol.kres.jersey.resource;
+package org.apache.stanbol.ontologymanager.web;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
@@ -19,7 +20,7 @@ import org.apache.stanbol.ontologymanager.ontonet.impl.renderers.SessionRenderer
 import org.semanticweb.owlapi.model.IRI;
 
 @Path("/session/{id:.+}")
-public class KReSSessionIDResource extends NavigationMixin {
+public class SessionIDResource extends NavigationMixin {
 
 	/*
 	 * Placeholder for the ONManager to be fetched from the servlet context.
@@ -28,7 +29,7 @@ public class KReSSessionIDResource extends NavigationMixin {
 
 	protected ServletContext servletContext;
 
-	public KReSSessionIDResource(@Context ServletContext servletContext) {
+	public SessionIDResource(@Context ServletContext servletContext) {
 		this.servletContext = servletContext;
 		onm = (ONManager) this.servletContext
 				.getAttribute(ONManager.class.getName());

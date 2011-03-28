@@ -13,6 +13,6 @@ import com.sun.jersey.api.view.ImplicitProduces;
 
 @Path("/")
 @ImplicitProduces("text/html")
-public class KReSResource extends NavigationMixin {
+public class RootResource extends NavigationMixin {
 
 }

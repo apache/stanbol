@@ -8,10 +8,8 @@ import javax.ws.rs.core.Application;
 import org.apache.stanbol.kres.jersey.processors.KReSViewProcessor;
 import org.apache.stanbol.kres.jersey.resource.DocumentationResource;
 import org.apache.stanbol.kres.jersey.resource.GraphsResource;
-import org.apache.stanbol.kres.jersey.resource.KReSResource;
-import org.apache.stanbol.kres.jersey.resource.KReSSessionIDResource;
-import org.apache.stanbol.kres.jersey.resource.KReSSessionResource;
 import org.apache.stanbol.kres.jersey.resource.RESTfulResource;
+import org.apache.stanbol.kres.jersey.resource.RootResource;
 import org.apache.stanbol.kres.jersey.writers.GraphWriter;
 import org.apache.stanbol.kres.jersey.writers.OWLOntologyWriter;
 import org.apache.stanbol.kres.jersey.writers.ResultSetWriter;
@@ -35,9 +33,7 @@ public class JerseyEndpointApplication extends Application {
         Set<Class<?>> classes = new HashSet<Class<?>>();
 
         // resources
-        classes.add(KReSResource.class);
-        classes.add(KReSSessionResource.class);
-        classes.add(KReSSessionIDResource.class);
+        classes.add(RootResource.class);
         classes.add(GraphsResource.class);
         classes.add(DocumentationResource.class);
 
