@@ -83,7 +83,7 @@ public class JerseyEndpoint {
         String templateClasspath = (String) ctx.getProperties().get(FREEMARKER_TEMPLATE_CLASSPATH_PROPERTY);
 
         // register the base template loader
-        templateClasspath.replaceAll("/$", "");
+        templateClasspath = templateClasspath.replaceAll("/$", "");
         app.contributeTemplateLoader(new ClassTemplateLoader(getClass(), templateClasspath));
 
         // register the root of static resources

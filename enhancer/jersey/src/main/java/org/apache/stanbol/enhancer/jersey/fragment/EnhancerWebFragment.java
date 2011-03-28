@@ -24,9 +24,9 @@ public class EnhancerWebFragment implements WebFragment {
 
     private static final String NAME = "enhancer";
 
-    private static final String STATIC_RESOURCE_PATH = "org/apache/stanbol/enhancer/jersey/static";
+    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/enhancer/jersey/static";
 
-    private static final String TEMPLATE_PATH = "org/apache/stanbol/enhancer/jersey/templates";
+    private static final String TEMPLATE_PATH = "/org/apache/stanbol/enhancer/jersey/templates";
 
     @Override
     public String getName() {

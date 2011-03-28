@@ -1,7 +1,6 @@
 package org.apache.stanbol.enhancer.jersey.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
@@ -10,8 +9,6 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JS
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 
 import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,12 +23,12 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
+import org.apache.stanbol.commons.web.ContextHelper;
 import org.apache.stanbol.commons.web.resource.NavigationMixin;
 import org.apache.stanbol.enhancer.jersey.cache.EntityCacheProvider;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -39,22 +36,19 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
-import org.codehaus.jettison.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.view.ImplicitProduces;
 import com.sun.jersey.api.view.Viewable;
 
 /**
- * RESTful interface to browse the list of available engines and allow to call
- * them in a stateless, synchronous way.
+ * RESTful interface to browse the list of available engines and allow to call them in a stateless,
+ * synchronous way.
  * <p>
- * If you need the content of the extractions to be stored on the server, use
- * the StoreRootResource API instead.
+ * If you need the content of the extractions to be stored on the server, use the StoreRootResource API
+ * instead.
  */
 @Path("/engines")
-@ImplicitProduces(TEXT_HTML + ";qs=2")
 public class EnginesRootResource extends NavigationMixin {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -69,13 +63,20 @@ public class EnginesRootResource extends NavigationMixin {
 
     // bind the job manager by looking it up from the servlet request context
     public EnginesRootResource(@Context ServletContext context) {
-        jobManager = (EnhancementJobManager) context.getAttribute(EnhancementJobManager.class.getName());
-        tcManager = (TcManager) context.getAttribute(TcManager.class.getName());
-        serializer = (Serializer) context.getAttribute(Serializer.class.getName());
-        EntityCacheProvider entityCacheProvider = (EntityCacheProvider) context.getAttribute(EntityCacheProvider.class.getName());
+        jobManager = ContextHelper.getServiceFromContext(EnhancementJobManager.class, context);
+        tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
+        serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
+        EntityCacheProvider entityCacheProvider = ContextHelper.getServiceFromContext(
+            EntityCacheProvider.class, context);
         if (entityCacheProvider != null) {
             entityCache = entityCacheProvider.getEntityCache();
         }
+    }
+
+    @GET
+    @Produces(TEXT_HTML)
+    public Response get() {
+        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
     }
 
     public List<EnhancementEngine> getActiveEngines() {
@@ -86,84 +87,56 @@ public class EnginesRootResource extends NavigationMixin {
         }
     }
 
-    private List<EnhancementEngine> getEngines() {
-        if (jobManager != null) {
-            return jobManager.getActiveEngines();
-        }
-        return new ArrayList<EnhancementEngine>();
-    }
-    
-    @GET
-    @Produces(APPLICATION_JSON)
-    public JSONArray getEnginesAsJsonArray() {
-        JSONArray uriArray = new JSONArray();
-        for (EnhancementEngine engine : getEngines()) {
-            UriBuilder ub = uriInfo.getAbsolutePathBuilder();
-            URI userUri = ub.path(makeEngineId(engine)).build();
-            uriArray.put(userUri.toASCIIString());
-        }
-        return uriArray;
-    }
-
-    @GET
-    @Produces(TEXT_PLAIN)
-    public String getEnginesAsString() {
-        final StringBuilder sb = new StringBuilder();
-        for (EnhancementEngine engine : getEngines()) {
-            sb.append(engine.getClass().getName());
-            sb.append("\n");
-        }
-        return sb.toString();
-    }
-
     public static String makeEngineId(EnhancementEngine engine) {
         // TODO: add a property on engines to provided custom local ids and make
         // this static method a method of the interface EnhancementEngine
         String engineClassName = engine.getClass().getSimpleName();
         String suffixToRemove = "EnhancementEngine";
         if (engineClassName.endsWith(suffixToRemove)) {
-            engineClassName = engineClassName.substring(0,
-                    engineClassName.length() - suffixToRemove.length());
+            engineClassName = engineClassName
+                    .substring(0, engineClassName.length() - suffixToRemove.length());
         }
         return engineClassName.toLowerCase();
     }
 
     /**
      * Form-based OpenCalais-compatible interface
-     *
-     * TODO: should we parse the OpenCalais paramsXML and find the closest 
-     * Stanbol Enhancer semantics too?
-     *
+     * 
+     * TODO: should we parse the OpenCalais paramsXML and find the closest Stanbol Enhancer semantics too?
+     * 
      * Note: the format parameter is not part of the official API
-     *
-     * @throws EngineException if the content is somehow corrupted
+     * 
+     * @throws EngineException
+     *             if the content is somehow corrupted
      * @throws IOException
      */
     @POST
     @Consumes(APPLICATION_FORM_URLENCODED)
     public Response enhanceFromForm(@FormParam("content") String content,
-            @FormParam("format") String format,
-            @FormParam("ajax") boolean buildAjaxview,
-            @Context HttpHeaders headers) throws EngineException, IOException {
-        log.info("enhance from From: "+content);        ContentItem ci = new InMemoryContentItem(content.getBytes("UTF-8"),
-                TEXT_PLAIN);
+                                    @FormParam("format") String format,
+                                    @FormParam("ajax") boolean buildAjaxview,
+                                    @Context HttpHeaders headers) throws EngineException, IOException {
+        log.info("enhance from From: " + content);
+        ContentItem ci = new InMemoryContentItem(content.getBytes("UTF-8"), TEXT_PLAIN);
         return enhanceAndBuildResponse(format, headers, ci, buildAjaxview);
     }
 
     /**
      * Media-Type based handling of the raw POST data.
-     *
-     * @param data binary payload to analyze
-     * @param uri optional URI for the content items (to be used as an
-     *            identifier in the enhancement graph)
-     * @throws EngineException if the content is somehow corrupted
+     * 
+     * @param data
+     *            binary payload to analyze
+     * @param uri
+     *            optional URI for the content items (to be used as an identifier in the enhancement graph)
+     * @throws EngineException
+     *             if the content is somehow corrupted
      * @throws IOException
      */
     @POST
     @Consumes(WILDCARD)
     public Response enhanceFromData(byte[] data,
-            @QueryParam(value = "uri") String uri, @Context HttpHeaders headers)
-            throws EngineException, IOException {
+                                    @QueryParam(value = "uri") String uri,
+                                    @Context HttpHeaders headers) throws EngineException, IOException {
         String format = TEXT_PLAIN;
         if (headers.getMediaType() != null) {
             format = headers.getMediaType().toString();
@@ -177,27 +150,26 @@ public class EnginesRootResource extends NavigationMixin {
     }
 
     protected Response enhanceAndBuildResponse(String format,
-            HttpHeaders headers, ContentItem ci, boolean buildAjaxview)
-            throws EngineException, IOException {
+                                               HttpHeaders headers,
+                                               ContentItem ci,
+                                               boolean buildAjaxview) throws EngineException, IOException {
         if (jobManager != null) {
             jobManager.enhanceContent(ci);
         }
         MGraph graph = ci.getMetadata();
 
         if (buildAjaxview) {
-            ContentItemResource contentItemResource = new ContentItemResource(
-                    null, ci, entityCache, uriInfo, tcManager, serializer);
+            ContentItemResource contentItemResource = new ContentItemResource(null, ci, entityCache, uriInfo,
+                    tcManager, serializer);
             contentItemResource.setRdfSerializationFormat(format);
-            Viewable ajaxView = new Viewable("/ajax/contentitem",
-                    contentItemResource);
+            Viewable ajaxView = new Viewable("/ajax/contentitem", contentItemResource);
             return Response.ok(ajaxView).type(TEXT_HTML).build();
         }
         if (format != null) {
             // force mimetype from form params
             return Response.ok(graph, format).build();
         }
-        if (headers.getAcceptableMediaTypes().contains(
-                APPLICATION_JSON_TYPE)) {
+        if (headers.getAcceptableMediaTypes().contains(APPLICATION_JSON_TYPE)) {
             // force RDF JSON media type (TODO: move this logic
             return Response.ok(graph, RDF_JSON).build();
         } else if (headers.getAcceptableMediaTypes().isEmpty()) {

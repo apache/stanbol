@@ -62,8 +62,6 @@ public class FreemarkerViewProcessor implements ViewProcessor<Template> {
 
     protected Configuration freemarkerConfig;
 
-    protected String rootPath;
-    
     protected TemplateLoader templateLoader;
 
     @Context
@@ -178,8 +176,7 @@ public class FreemarkerViewProcessor implements ViewProcessor<Template> {
         try {
             return getConfig().getTemplate(filePath);
         } catch (IOException e) {
-            log.error("Failed to load freemaker template: " + rootPath
-                    + filePath);
+            log.error("Failed to load freemaker template: " + filePath);
             return null;
         }
     }

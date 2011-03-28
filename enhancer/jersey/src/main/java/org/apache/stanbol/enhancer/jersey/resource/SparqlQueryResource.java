@@ -17,6 +17,7 @@ import org.apache.clerezza.rdf.core.sparql.QueryParser;
 import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
 import org.apache.clerezza.rdf.core.sparql.query.DescribeQuery;
 import org.apache.clerezza.rdf.core.sparql.query.Query;
+import org.apache.stanbol.commons.web.ContextHelper;
 import org.apache.stanbol.commons.web.resource.NavigationMixin;
 import org.apache.stanbol.enhancer.servicesapi.Store;
 import org.apache.stanbol.enhancer.servicesapi.SparqlQueryEngine.SparqlQueryEngineException;
@@ -46,9 +47,9 @@ public class SparqlQueryResource extends NavigationMixin {
 
     protected TcManager tcManager;
 
-    public SparqlQueryResource(@Context ServletContext servletContext) {
-        tcManager = (TcManager) servletContext.getAttribute(TcManager.class.getName());
-        store = (Store) servletContext.getAttribute(Store.class.getName());
+    public SparqlQueryResource(@Context ServletContext ctx) {
+        tcManager = ContextHelper.getServiceFromContext(TcManager.class, ctx);
+        store = ContextHelper.getServiceFromContext(Store.class, ctx);
     }
 
     @GET

@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
@@ -52,9 +55,8 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.view.ImplicitProduces;
+import com.sun.jersey.api.view.Viewable;
 
-@ImplicitProduces(TEXT_HTML + ";qs=2")
 public class ContentItemResource extends NavigationMixin {
 
     @SuppressWarnings("unused")
@@ -472,6 +474,12 @@ public class ContentItemResource extends NavigationMixin {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         serializer.serialize(out, g, SupportedFormat.RDF_JSON);
         return out.toString("utf-8");
+    }
+    
+    @GET
+    @Produces(TEXT_HTML)
+    public Response get() {
+        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
     }
 
 }

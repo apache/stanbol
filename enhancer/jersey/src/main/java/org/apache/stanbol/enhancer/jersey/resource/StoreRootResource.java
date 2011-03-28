@@ -59,6 +59,7 @@ import org.apache.clerezza.rdf.core.sparql.SolutionMapping;
 import org.apache.clerezza.rdf.core.sparql.query.SelectQuery;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.stanbol.commons.web.ContextHelper;
 import org.apache.stanbol.commons.web.resource.NavigationMixin;
 import org.apache.stanbol.enhancer.jersey.cache.EntityCacheProvider;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -150,21 +151,21 @@ public class StoreRootResource extends NavigationMixin {
     }
 
     public StoreRootResource(@Context ServletContext context,
-            @Context UriInfo uriInfo, @QueryParam(value = "offset") int offset,
-            @QueryParam(value = "pageSize") @DefaultValue("5") int pageSize)
-            throws ParseException {
-        tcManager = (TcManager) context.getAttribute(TcManager.class.getName());
-        store = (Store) context.getAttribute(Store.class.getName());
-        jobManager = (EnhancementJobManager) context.getAttribute(EnhancementJobManager.class.getName());
-        serializer = (Serializer) context.getAttribute(Serializer.class.getName());
-        EntityCacheProvider entityCacheProvider = (EntityCacheProvider) context.getAttribute(EntityCacheProvider.class.getName());
+                             @Context UriInfo uriInfo,
+                             @QueryParam(value = "offset") int offset,
+                             @QueryParam(value = "pageSize") @DefaultValue("5") int pageSize) throws ParseException {
+        store = ContextHelper.getServiceFromContext(Store.class, context);
+        jobManager = ContextHelper.getServiceFromContext(EnhancementJobManager.class, context);
+        tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
+        serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
+        EntityCacheProvider entityCacheProvider = ContextHelper.getServiceFromContext(
+            EntityCacheProvider.class, context);
         if (entityCacheProvider != null) {
             entityCache = entityCacheProvider.getEntityCache();
         }
 
         if (store == null || tcManager == null) {
-            log.error("Missing either store={} or tcManager={}", store,
-                    tcManager);
+            log.error("Missing either store={} or tcManager={}", store, tcManager);
             throw new WebApplicationException(404);
         }
         this.uriInfo = uriInfo;
