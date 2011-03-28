@@ -55,12 +55,7 @@ public class JerseyEndpoint {
     protected ServletContext servletContext;
 
     public Dictionary<String,String> getInitParams() {
-        // pass configuration for Jersey resource
-        // TODO: make the list of enabled JAX-RS resources and providers
-        // configurable using an OSGi service
         Dictionary<String,String> initParams = new Hashtable<String,String>();
-        initParams.put("javax.ws.rs.Application", JerseyEndpointApplication.class.getName());
-
         // make jersey automatically turn resources into Viewable models and
         // hence lookup matching freemarker templates
         initParams.put("com.sun.jersey.config.feature.ImplicitViewables", "true");
@@ -70,8 +65,13 @@ public class JerseyEndpoint {
     @Activate
     protected void activate(ComponentContext ctx) throws IOException, ServletException, NamespaceException {
 
-        // register the JAX-RS resources as a servlet under configurable alias
-        ServletContainer container = new ServletContainer();
+        // register all the JAX-RS resources into a a JAX-RS application and bind it to a configurable URL
+        // prefix
+        JerseyEndpointApplication app = new JerseyEndpointApplication();
+
+        // TODO contribute classes and singletons to the app here
+
+        ServletContainer container = new ServletContainer(app);
         String alias = (String) ctx.getProperties().get(ALIAS_PROPERTY);
         String staticUrlRoot = (String) ctx.getProperties().get(STATIC_RESOURCES_URL_ROOT_PROPERTY);
         String staticClasspath = (String) ctx.getProperties().get(STATIC_RESOURCES_CLASSPATH_PROPERTY);

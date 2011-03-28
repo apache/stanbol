@@ -1,8 +1,6 @@
 package org.apache.stanbol.commons.web;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.core.Application;
@@ -18,20 +16,20 @@ import org.slf4j.LoggerFactory;
  */
 public class JerseyEndpointApplication extends Application {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(JerseyEndpointApplication.class);
-    
-    List<JaxrsResource> jaxrsResources = new ArrayList<JaxrsResource>();
-    
+
+    public final Set<Class<?>> contributedClasses = new HashSet<Class<?>>();
+
+    public final Set<Object> contributedSingletons = new HashSet<Object>();
+
     @Override
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
-        
-        // resources
-        for (JaxrsResource jr : this.jaxrsResources) {
-            classes.add(jr.getClass());
-        }
 
-        // message body writers
+        classes.addAll(contributedClasses);
+
+        // message body writers, hard-coded for now
         classes.add(GraphWriter.class);
         classes.add(ResultSetWriter.class);
         return classes;
@@ -40,27 +38,19 @@ public class JerseyEndpointApplication extends Application {
     @Override
     public Set<Object> getSingletons() {
         Set<Object> singletons = new HashSet<Object>();
-        // view processors
+        singletons.addAll(contributedSingletons);
+
+        // view processors, hard-coded for now
+        // TODO make it possible to pass the template loaders from the OSGi context here:
         singletons.add(new FreemarkerViewProcessor());
         return singletons;
     }
-    
-    
-    public void bindJaxrsResource(JaxrsResource jr) {
-        synchronized (this.jaxrsResources) {
-            this.jaxrsResources.add(jr);
-        }
-        if (log.isInfoEnabled()) {
-            log.info("JaxrsResource {} added to list: {}", jr, this.jaxrsResources);
-        }
+
+    public void contributeClasses(Set<Class<?>> classes) {
+        contributedClasses.addAll(classes);
     }
 
-    public void unbindEnhancementEngine(JaxrsResource jr) {
-        synchronized (this.jaxrsResources) {
-            this.jaxrsResources.remove(jr);
-        }
-        if (log.isInfoEnabled()) {
-            log.info("JaxrsResource {} removed to list: {}", jr, this.jaxrsResources);
-        }
+    public void contributeSingletons(Set<Object> singletons) {
+        contributedSingletons.addAll(singletons);
     }
 }
