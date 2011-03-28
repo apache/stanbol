@@ -5,12 +5,17 @@ import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
-import org.apache.stanbol.kres.jersey.SessionIDResource;
-import org.apache.stanbol.kres.jersey.SessionResource;
 import org.apache.stanbol.kres.jersey.processors.KReSViewProcessor;
 import org.apache.stanbol.kres.jersey.writers.GraphWriter;
 import org.apache.stanbol.kres.jersey.writers.OWLOntologyWriter;
 import org.apache.stanbol.kres.jersey.writers.ResultSetWriter;
+import org.apache.stanbol.ontologymanager.web.resources.GraphsResource;
+import org.apache.stanbol.ontologymanager.web.resources.ONMOntResource;
+import org.apache.stanbol.ontologymanager.web.resources.ONMRootResource;
+import org.apache.stanbol.ontologymanager.web.resources.ONMScopeOntologyResource;
+import org.apache.stanbol.ontologymanager.web.resources.ONMScopeResource;
+import org.apache.stanbol.ontologymanager.web.resources.SessionIDResource;
+import org.apache.stanbol.ontologymanager.web.resources.SessionResource;
 
 /**
  * Statically define the list of available resources and providers to be used by the KReS JAX-RS Endpoint.
@@ -30,6 +35,8 @@ public class JerseyEndpointApplication extends Application {
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
 
+        classes.add(GraphsResource.class);
+        
         classes.add(ONMRootResource.class);
         classes.add(ONMScopeResource.class);
         classes.add(ONMScopeOntologyResource.class);

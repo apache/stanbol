@@ -7,7 +7,6 @@ import javax.ws.rs.core.Application;
 
 import org.apache.stanbol.kres.jersey.processors.KReSViewProcessor;
 import org.apache.stanbol.kres.jersey.resource.DocumentationResource;
-import org.apache.stanbol.kres.jersey.resource.GraphsResource;
 import org.apache.stanbol.kres.jersey.resource.RESTfulResource;
 import org.apache.stanbol.kres.jersey.resource.RootResource;
 import org.apache.stanbol.kres.jersey.writers.GraphWriter;
@@ -34,7 +33,6 @@ public class JerseyEndpointApplication extends Application {
 
         // resources
         classes.add(RootResource.class);
-        classes.add(GraphsResource.class);
         classes.add(DocumentationResource.class);
 
         /* REST services */

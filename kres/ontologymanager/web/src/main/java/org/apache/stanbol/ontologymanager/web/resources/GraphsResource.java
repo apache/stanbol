@@ -1,4 +1,4 @@
-package org.apache.stanbol.kres.jersey.resource;
+package org.apache.stanbol.ontologymanager.web.resources;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -20,6 +20,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.stanbol.kres.jersey.format.KReSFormat;
+import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.NoSuchStoreException;
@@ -37,8 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.ImplicitProduces;
-
-import org.apache.stanbol.kres.jersey.format.KReSFormat;
 
 @Path("/graphs")
 @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")

@@ -1,4 +1,4 @@
-package org.apache.stanbol.ontologymanager.web;
+package org.apache.stanbol.ontologymanager.web.resources;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;

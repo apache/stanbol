@@ -1,4 +1,4 @@
-package org.apache.stanbol.ontologymanager.web;
+package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
@@ -28,6 +28,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceModi
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
+import org.apache.stanbol.ontologymanager.web.util.OntologyRenderUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.model.IRI;
@@ -43,7 +44,6 @@ import org.slf4j.LoggerFactory;
 
 import org.apache.stanbol.kres.jersey.format.KReSFormat;
 import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
-import org.apache.stanbol.kres.jersey.util.OntologyRenderUtils;
 
 /**
  * This resource represents ontologies loaded within a scope.

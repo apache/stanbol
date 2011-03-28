@@ -1,4 +1,4 @@
-package org.apache.stanbol.kres.jersey.util;
+package org.apache.stanbol.ontologymanager.web.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +26,12 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 import org.apache.stanbol.kres.jersey.format.KReSFormat;
 
+/**
+ * Contains hacks to regular ontology renderers with replacements for input statements.
+ * 
+ * @author alessandro
+ *
+ */
 public class OntologyRenderUtils {
 
 	/**
