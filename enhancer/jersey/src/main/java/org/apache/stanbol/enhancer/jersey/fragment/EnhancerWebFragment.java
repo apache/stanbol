@@ -1,11 +1,15 @@
 package org.apache.stanbol.enhancer.jersey.fragment;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.web.LinkResource;
+import org.apache.stanbol.commons.web.ScriptResource;
 import org.apache.stanbol.commons.web.WebFragment;
 import org.apache.stanbol.enhancer.jersey.resource.EnginesRootResource;
 import org.apache.stanbol.enhancer.jersey.resource.SparqlQueryResource;
@@ -56,6 +60,23 @@ public class EnhancerWebFragment implements WebFragment {
     @Override
     public TemplateLoader getTemplateLoader() {
         return new ClassTemplateLoader(getClass(), TEMPLATE_PATH);
+    }
+
+    @Override
+    public List<LinkResource> getLinkResources() {
+        List<LinkResource> resources = new ArrayList<LinkResource>();
+        resources.add(new LinkResource("stylesheet", "openlayers-2.9/theme/default/style.css", this));
+        resources.add(new LinkResource("stylesheet", "scripts/prettify/prettify.css", this));
+        return resources;
+    }
+
+    @Override
+    public List<ScriptResource> getScriptResources() {
+        List<ScriptResource> resources = new ArrayList<ScriptResource>();
+        resources.add(new ScriptResource("text/javascript", "openlayers-2.9/OpenLayers.js", this));
+        resources.add(new ScriptResource("text/javascript", "scripts/prettify/prettify.js", this));
+        resources.add(new ScriptResource("text/javascript", "scripts/jquery-1.4.2.js", this));
+        return resources;
     }
 
 }

@@ -16,6 +16,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.stanbol.commons.web.resource.NavigationMixin;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;
@@ -91,8 +92,13 @@ public class JerseyEndpoint {
         registeredAlias.add(staticUrlRoot);
 
         // incrementally contribute fragment resources
+        List<LinkResource> linkResources = new ArrayList<LinkResource>();
+        List<ScriptResource> scriptResources = new ArrayList<ScriptResource>();
+        
         for (WebFragment fragment : webFragments) {
             log.info("Registering web fragment '{}' into jaxrs application", fragment.getName());
+            linkResources.addAll(fragment.getLinkResources());
+            scriptResources.addAll(fragment.getScriptResources());
             app.contributeClasses(fragment.getJaxrsResourceClasses());
             app.contributeSingletons(fragment.getJaxrsResourceSingletons());
             app.contributeTemplateLoader(fragment.getTemplateLoader());
@@ -118,7 +124,9 @@ public class JerseyEndpoint {
         // services
         servletContext = container.getServletContext();
         servletContext.setAttribute(BundleContext.class.getName(), ctx.getBundleContext());
-        servletContext.setAttribute(STATIC_RESOURCES_URL_ROOT_PROPERTY, staticUrlRoot);
+        servletContext.setAttribute(NavigationMixin.STATIC_RESOURCES_ROOT_URL, staticUrlRoot);
+        servletContext.setAttribute(NavigationMixin.LINK_RESOURCES, linkResources);
+        servletContext.setAttribute(NavigationMixin.SCRIPT_RESOURCES, scriptResources);
         log.info("JerseyEndpoint servlet registered at {}", alias);
     }
 

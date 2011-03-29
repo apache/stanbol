@@ -34,7 +34,7 @@ public class JerseyEndpointApplication extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
-        // hardcoded root resource class for now (to be externalize into a stanbol.commons.web.home package
+        // hardcoded root resource class for now (to be externalized into a stanbol.commons.web.home package
         // for instance)
         classes.add(StanbolRootResource.class);
 

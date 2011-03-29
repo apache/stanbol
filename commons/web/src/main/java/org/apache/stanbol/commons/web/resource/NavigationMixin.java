@@ -4,8 +4,12 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
+
+import org.apache.stanbol.commons.web.LinkResource;
+import org.apache.stanbol.commons.web.ScriptResource;
 
 /**
  * Mixin class to provide the controller method for the navigation template.
@@ -14,8 +18,17 @@ import javax.ws.rs.core.UriInfo;
  */
 public class NavigationMixin {
 
+    public static final String LINK_RESOURCES = "org.apache.stanbol.commons.web.resource.links";
+
+    public static final String SCRIPT_RESOURCES = "org.apache.stanbol.commons.web.resource.scripts";
+
+    public static final String STATIC_RESOURCES_ROOT_URL = "org.apache.stanbol.commons.web.resource.static.url.root";
+
     @Context
     protected UriInfo uriInfo;
+
+    @Context
+    protected ServletContext servletContext;
 
     public URI getPublicBaseUri() {
         return uriInfo.getBaseUri();
@@ -54,4 +67,17 @@ public class NavigationMixin {
 
     }
 
+    public String getStaticRootUrl() {
+        return (String) servletContext.getAttribute(STATIC_RESOURCES_ROOT_URL);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<LinkResource> getRegisteredLinkResources() {
+        return (List<LinkResource>) servletContext.getAttribute(LINK_RESOURCES);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<ScriptResource> getRegisteredScriptResources() {
+        return (List<ScriptResource>) servletContext.getAttribute(SCRIPT_RESOURCES);
+    }
 }

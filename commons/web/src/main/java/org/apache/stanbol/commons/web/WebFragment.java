@@ -1,5 +1,6 @@
 package org.apache.stanbol.commons.web;
 
+import java.util.List;
 import java.util.Set;
 
 import freemarker.cache.TemplateLoader;
@@ -7,6 +8,8 @@ import freemarker.cache.TemplateLoader;
 /**
  * Interface to be implemented by bundles that want to customize the stanbol web interface and REST API by
  * contributing static resources, JAX-RS resources and Freemarker views.
+ * 
+ * TODO: add some kind of ordering information
  */
 public interface WebFragment {
 
@@ -46,5 +49,21 @@ public interface WebFragment {
      *         should be exported using the Export-Package bundle declaration.
      */
     public TemplateLoader getTemplateLoader();
+
+    /**
+     * CSS and favicon resources to be linked in the head of all HTML pages controlled by the NavigationMixin
+     * abstract resource. The resources will be published under:
+     * 
+     * ${it.staticRootUrl}/${link.fragmentName}/${link.relativePath}
+     */
+    public List<LinkResource> getLinkResources();
+
+    /**
+     * Javascript resources to be linked in the head of all HTML pages controlled by the NavigationMixin
+     * abstract resource. The resources will be published under:
+     * 
+     * ${it.staticRootUrl}/${script.fragmentName}/${script.relativePath}
+     */
+    public List<ScriptResource> getScriptResources();
 
 }

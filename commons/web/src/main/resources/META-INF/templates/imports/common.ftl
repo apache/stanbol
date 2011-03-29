@@ -2,18 +2,20 @@
 <html>
   <head>
 
-    <title>Apache Stanbol - ${title?html}</title>
+    <title>${title?html} - Apache Stanbol</title>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 
+    <!-- to be moved in the dedicated fragment -->
     <link rel="stylesheet" href="/static/style/stanbol.css" />
-    <link rel="stylesheet" href="/static/openlayers-2.9/theme/default/style.css" type="text/css" />
-    <link rel="stylesheet" href="/static/scripts/prettify/prettify.css" />
     <link rel="icon" type="image/png" href="/static/images/favicon.png" />
 
-    <script type="text/javascript" src="/static/openlayers-2.9/OpenLayers.js"></script>
-    <script type="text/javascript" src="/static/scripts/prettify/prettify.js"></script>
-    <script type="text/javascript" src="/static/scripts/jquery-1.4.2.js"></script>
-    <script type="text/javascript" src="/static/scripts/jit.js"></script>
+    <#list it.registeredLinkResources as link>
+    <link rel="${link.rel}" href="${it.staticRootUrl}/${link.fragmentName}/${link.relativePath}" />
+    </#list>
+
+    <#list it.registeredScriptResources as script>
+    <script type="${script.type}" src="${it.staticRootUrl}/${script.fragmentName}/${script.relativePath}"></script>
+    </#list>
 
   </head>
 
