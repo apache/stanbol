@@ -25,18 +25,18 @@ import javax.ws.rs.ext.Provider;
 
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
+import org.apache.stanbol.commons.web.ContextHelper;
 
 
 @Provider
-@Produces( { TEXT_PLAIN, N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE,
-        RDF_JSON, APPLICATION_JSON })
+@Produces({TEXT_PLAIN, N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE, RDF_JSON, APPLICATION_JSON})
 public class GraphWriter implements MessageBodyWriter<TripleCollection> {
 
     @Context
     protected ServletContext servletContext;
 
     protected Serializer getSerializer() {
-        return (Serializer) servletContext.getAttribute(Serializer.class.getName());
+        return ContextHelper.getServiceFromContext(Serializer.class, servletContext);
     }
 
     public boolean isWriteable(Class<?> type, Type genericType,
@@ -56,7 +56,7 @@ public class GraphWriter implements MessageBodyWriter<TripleCollection> {
             WebApplicationException {
 
         if (mediaType == null || mediaType.isWildcardType() || TEXT_PLAIN.equals(mediaType.toString())) {
-           getSerializer().serialize(entityStream, t, APPLICATION_JSON);
+            getSerializer().serialize(entityStream, t, APPLICATION_JSON);
         } else {
             getSerializer().serialize(entityStream, t, mediaType.toString());
         }
