@@ -3,6 +3,8 @@ package org.apache.stanbol.commons.web;
 import java.util.List;
 import java.util.Set;
 
+import org.osgi.framework.BundleContext;
+
 import freemarker.cache.TemplateLoader;
 
 /**
@@ -65,5 +67,7 @@ public interface WebFragment {
      * ${it.staticRootUrl}/${script.fragmentName}/${script.relativePath}
      */
     public List<ScriptResource> getScriptResources();
+    
+    public BundleContext getBundleContext();
 
 }

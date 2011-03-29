@@ -307,7 +307,7 @@ public class StoreRootResource extends NavigationMixin {
             throw new WebApplicationException(404);
         }
         return new ContentItemResource(localId, ci, entityCache, uriInfo,
-                tcManager, serializer);
+                tcManager, serializer, servletContext);
     }
 
     @GET

@@ -87,14 +87,14 @@ public class JerseyEndpoint {
         templateClasspath = templateClasspath.replaceAll("/$", "");
         app.contributeTemplateLoader(new ClassTemplateLoader(getClass(), templateClasspath));
 
-        // register the root of static resources
-        httpService.registerResources(staticUrlRoot, staticClasspath, null);
-        registeredAlias.add(staticUrlRoot);
+        // register the root of static resources (TODO: move me in a dedicated fragment instead)
+        String defaultStaticAlias = staticUrlRoot + "/default";
+        httpService.registerResources(defaultStaticAlias, staticClasspath, null);
+        registeredAlias.add(defaultStaticAlias);
 
         // incrementally contribute fragment resources
         List<LinkResource> linkResources = new ArrayList<LinkResource>();
         List<ScriptResource> scriptResources = new ArrayList<ScriptResource>();
-        
         for (WebFragment fragment : webFragments) {
             log.info("Registering web fragment '{}' into jaxrs application", fragment.getName());
             linkResources.addAll(fragment.getLinkResources());
@@ -103,7 +103,8 @@ public class JerseyEndpoint {
             app.contributeSingletons(fragment.getJaxrsResourceSingletons());
             app.contributeTemplateLoader(fragment.getTemplateLoader());
             String resourceAlias = staticUrlRoot + '/' + fragment.getName();
-            httpService.registerResources(resourceAlias, fragment.getStaticResourceClassPath(), null);
+            httpService.registerResources(resourceAlias, fragment.getStaticResourceClassPath(),
+                new WebFragmentHttpContext(fragment));
             registeredAlias.add(resourceAlias);
         }
 

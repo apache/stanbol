@@ -160,7 +160,7 @@ public class EnginesRootResource extends NavigationMixin {
 
         if (buildAjaxview) {
             ContentItemResource contentItemResource = new ContentItemResource(null, ci, entityCache, uriInfo,
-                    tcManager, serializer);
+                    tcManager, serializer, servletContext);
             contentItemResource.setRdfSerializationFormat(format);
             Viewable ajaxView = new Viewable("/ajax/contentitem", contentItemResource);
             return Response.ok(ajaxView).type(TEXT_HTML).build();

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.web.LinkResource;
@@ -14,6 +15,8 @@ import org.apache.stanbol.commons.web.WebFragment;
 import org.apache.stanbol.enhancer.jersey.resource.EnginesRootResource;
 import org.apache.stanbol.enhancer.jersey.resource.SparqlQueryResource;
 import org.apache.stanbol.enhancer.jersey.resource.StoreRootResource;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
 
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.TemplateLoader;
@@ -32,9 +35,16 @@ public class EnhancerWebFragment implements WebFragment {
 
     private static final String TEMPLATE_PATH = "/org/apache/stanbol/enhancer/jersey/templates";
 
+    private BundleContext bundleContext;
+
     @Override
     public String getName() {
         return NAME;
+    }
+    
+    @Activate
+    protected void activate(ComponentContext ctx) {
+        this.bundleContext = ctx.getBundleContext();
     }
 
     @Override
@@ -77,6 +87,11 @@ public class EnhancerWebFragment implements WebFragment {
         resources.add(new ScriptResource("text/javascript", "scripts/prettify/prettify.js", this));
         resources.add(new ScriptResource("text/javascript", "scripts/jquery-1.4.2.js", this));
         return resources;
+    }
+
+    @Override
+    public BundleContext getBundleContext() {
+        return bundleContext;
     }
 
 }

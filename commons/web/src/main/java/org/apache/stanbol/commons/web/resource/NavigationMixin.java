@@ -2,6 +2,7 @@ package org.apache.stanbol.commons.web.resource;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -73,11 +74,19 @@ public class NavigationMixin {
 
     @SuppressWarnings("unchecked")
     public List<LinkResource> getRegisteredLinkResources() {
-        return (List<LinkResource>) servletContext.getAttribute(LINK_RESOURCES);
+        if (servletContext != null) {
+            return (List<LinkResource>) servletContext.getAttribute(LINK_RESOURCES);
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     @SuppressWarnings("unchecked")
     public List<ScriptResource> getRegisteredScriptResources() {
-        return (List<ScriptResource>) servletContext.getAttribute(SCRIPT_RESOURCES);
+        if (servletContext != null) {
+            return (List<ScriptResource>) servletContext.getAttribute(SCRIPT_RESOURCES);
+        } else {
+            return Collections.emptyList();
+        }
     }
 }

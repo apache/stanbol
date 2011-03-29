@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
@@ -63,14 +64,12 @@ public class ContentItemResource extends NavigationMixin {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     // TODO make this configurable trough a property
-    public static final UriRef SUMMARY = new UriRef(
-            "http://www.w3.org/2000/01/rdf-schema#comment");
+    public static final UriRef SUMMARY = new UriRef("http://www.w3.org/2000/01/rdf-schema#comment");
 
     // TODO make this configurable trough a property
-    public static final UriRef THUMBNAIL = new UriRef(
-            "http://dbpedia.org/ontology/thumbnail");
+    public static final UriRef THUMBNAIL = new UriRef("http://dbpedia.org/ontology/thumbnail");
 
-    public static final Map<UriRef, String> DEFAULT_THUMBNAILS = new HashMap<UriRef, String>();
+    public static final Map<UriRef,String> DEFAULT_THUMBNAILS = new HashMap<UriRef,String>();
     static {
         DEFAULT_THUMBNAILS.put(DBPEDIA_PERSON, "/static/images/user_48.png");
         DEFAULT_THUMBNAILS.put(DBPEDIA_ORGANISATION, "/static/images/organization_48.png");
@@ -103,15 +102,20 @@ public class ContentItemResource extends NavigationMixin {
 
     protected Collection<EntityExtractionSummary> places;
 
-    public ContentItemResource(String localId, ContentItem ci,
-            TripleCollection remoteEntityCache, UriInfo uriInfo,
-            TcManager tcManager, Serializer serializer) throws IOException {
+    public ContentItemResource(String localId,
+                               ContentItem ci,
+                               TripleCollection remoteEntityCache,
+                               UriInfo uriInfo,
+                               TcManager tcManager,
+                               Serializer serializer,
+                               ServletContext servletContext) throws IOException {
         this.contentItem = ci;
         this.localId = localId;
         this.uriInfo = uriInfo;
         this.tcManager = tcManager;
         this.serializer = serializer;
         this.remoteEntityCache = remoteEntityCache;
+        this.servletContext = servletContext;
 
         if (localId != null) {
             URI rawURI = UriBuilder.fromPath("/store/raw/" + localId).build();
@@ -121,13 +125,11 @@ public class ContentItemResource extends NavigationMixin {
                 this.imageSrc = rawURI;
             }
             this.downloadHref = rawURI;
-            this.metadataHref = UriBuilder.fromPath(
-                    "/store/metadata/" + localId).build();
+            this.metadataHref = UriBuilder.fromPath("/store/metadata/" + localId).build();
         }
     }
 
-    public String getRdfMetadata(String mediatype)
-            throws UnsupportedEncodingException {
+    public String getRdfMetadata(String mediatype) throws UnsupportedEncodingException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         serializer.serialize(out, contentItem.getMetadata(), mediatype);
         return out.toString("utf-8");
@@ -161,51 +163,44 @@ public class ContentItemResource extends NavigationMixin {
         return metadataHref;
     }
 
-    public Collection<EntityExtractionSummary> getPersonOccurrences()
-            throws ParseException {
+    public Collection<EntityExtractionSummary> getPersonOccurrences() throws ParseException {
         if (people == null) {
             people = getOccurrences(DBPEDIA_PERSON);
         }
         return people;
     }
 
-    public Collection<EntityExtractionSummary> getOrganizationOccurrences()
-            throws ParseException {
+    public Collection<EntityExtractionSummary> getOrganizationOccurrences() throws ParseException {
         if (organizations == null) {
             organizations = getOccurrences(DBPEDIA_ORGANISATION);
         }
         return organizations;
     }
 
-    public Collection<EntityExtractionSummary> getPlaceOccurrences()
-            throws ParseException {
+    public Collection<EntityExtractionSummary> getPlaceOccurrences() throws ParseException {
         if (places == null) {
             places = getOccurrences(DBPEDIA_PLACE);
         }
         return places;
     }
 
-    public Collection<EntityExtractionSummary> getOccurrences(UriRef type)
-            throws ParseException {
+    public Collection<EntityExtractionSummary> getOccurrences(UriRef type) throws ParseException {
         MGraph graph = contentItem.getMetadata();
         String q = "PREFIX enhancer: <http://fise.iks-project.eu/ontology/> "
-                + "PREFIX dc:   <http://purl.org/dc/terms/> "
-                + "SELECT ?textAnnotation ?text ?entity ?entity_label ?confidence WHERE { "
-                + "  ?textAnnotation a enhancer:TextAnnotation ."
-                + "  ?textAnnotation dc:type %s ."
-                + "  ?textAnnotation enhancer:selected-text ?text ."
-                + " OPTIONAL {"
-                + "   ?entityAnnotation dc:relation ?textAnnotation ."
-                + "   ?entityAnnotation a enhancer:EntityAnnotation . "
-                + "   ?entityAnnotation enhancer:entity-reference ?entity ."
-                + "   ?entityAnnotation enhancer:entity-label ?entity_label ."
-                + "   ?entityAnnotation enhancer:confidence ?confidence . }"
-                + "} ORDER BY ?text ";
+                   + "PREFIX dc:   <http://purl.org/dc/terms/> "
+                   + "SELECT ?textAnnotation ?text ?entity ?entity_label ?confidence WHERE { "
+                   + "  ?textAnnotation a enhancer:TextAnnotation ." + "  ?textAnnotation dc:type %s ."
+                   + "  ?textAnnotation enhancer:selected-text ?text ." + " OPTIONAL {"
+                   + "   ?entityAnnotation dc:relation ?textAnnotation ."
+                   + "   ?entityAnnotation a enhancer:EntityAnnotation . "
+                   + "   ?entityAnnotation enhancer:entity-reference ?entity ."
+                   + "   ?entityAnnotation enhancer:entity-label ?entity_label ."
+                   + "   ?entityAnnotation enhancer:confidence ?confidence . }" + "} ORDER BY ?text ";
         q = String.format(q, type);
 
         SelectQuery query = (SelectQuery) QueryParser.getInstance().parse(q);
         ResultSet result = tcManager.executeSparqlQuery(query, graph);
-        Map<String, EntityExtractionSummary> occurrenceMap = new TreeMap<String, EntityExtractionSummary>();
+        Map<String,EntityExtractionSummary> occurrenceMap = new TreeMap<String,EntityExtractionSummary>();
         LiteralFactory lf = LiteralFactory.getInstance();
         while (result.hasNext()) {
             SolutionMapping mapping = result.next();
@@ -229,8 +224,7 @@ public class ContentItemResource extends NavigationMixin {
             UriRef entityUri = (UriRef) mapping.get("entity");
             if (entityUri != null) {
                 String label = ((Literal) mapping.get("entity_label")).getLexicalForm();
-                Double confidence = lf.createObject(Double.class,
-                        (TypedLiteral) mapping.get("confidence"));
+                Double confidence = lf.createObject(Double.class, (TypedLiteral) mapping.get("confidence"));
                 Graph properties = new GraphNode(entityUri, remoteEntityCache).getNodeContext();
                 entity.addSuggestion(entityUri, label, confidence, properties);
             }
@@ -238,8 +232,7 @@ public class ContentItemResource extends NavigationMixin {
         return occurrenceMap.values();
     }
 
-    public static class EntityExtractionSummary implements
-            Comparable<EntityExtractionSummary> {
+    public static class EntityExtractionSummary implements Comparable<EntityExtractionSummary> {
 
         protected final String name;
 
@@ -255,10 +248,8 @@ public class ContentItemResource extends NavigationMixin {
             mentions.add(name);
         }
 
-        public void addSuggestion(UriRef uri, String label, Double confidence,
-                TripleCollection properties) {
-            EntitySuggestion suggestion = new EntitySuggestion(uri, type,
-                    label, confidence, properties);
+        public void addSuggestion(UriRef uri, String label, Double confidence, TripleCollection properties) {
+            EntitySuggestion suggestion = new EntitySuggestion(uri, type, label, confidence, properties);
             if (!suggestions.contains(suggestion)) {
                 suggestions.add(suggestion);
                 Collections.sort(suggestions);
@@ -339,8 +330,7 @@ public class ContentItemResource extends NavigationMixin {
         }
     }
 
-    public static class EntitySuggestion implements
-            Comparable<EntitySuggestion> {
+    public static class EntitySuggestion implements Comparable<EntitySuggestion> {
 
         protected final UriRef uri;
 
@@ -352,8 +342,11 @@ public class ContentItemResource extends NavigationMixin {
 
         protected TripleCollection entityProperties;
 
-        public EntitySuggestion(UriRef uri, UriRef type, String label,
-                Double confidence, TripleCollection entityProperties) {
+        public EntitySuggestion(UriRef uri,
+                                UriRef type,
+                                String label,
+                                Double confidence,
+                                TripleCollection entityProperties) {
             this.uri = uri;
             this.label = label;
             this.type = type;
@@ -380,8 +373,7 @@ public class ContentItemResource extends NavigationMixin {
         }
 
         public String getThumbnailSrc() {
-            Iterator<Triple> abstracts = entityProperties.filter(uri,
-                    THUMBNAIL, null);
+            Iterator<Triple> abstracts = entityProperties.filter(uri, THUMBNAIL, null);
             while (abstracts.hasNext()) {
                 Resource object = abstracts.next().getObject();
                 if (object instanceof UriRef) {
@@ -396,8 +388,7 @@ public class ContentItemResource extends NavigationMixin {
         }
 
         public String getSummary() {
-            Iterator<Triple> abstracts = entityProperties.filter(uri, SUMMARY,
-                    null);
+            Iterator<Triple> abstracts = entityProperties.filter(uri, SUMMARY, null);
             while (abstracts.hasNext()) {
                 Resource object = abstracts.next().getObject();
                 if (object instanceof PlainLiteral) {
@@ -422,18 +413,13 @@ public class ContentItemResource extends NavigationMixin {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
             EntitySuggestion other = (EntitySuggestion) obj;
             if (uri == null) {
-                if (other.uri != null)
-                    return false;
-            } else if (!uri.equals(other.uri))
-                return false;
+                if (other.uri != null) return false;
+            } else if (!uri.equals(other.uri)) return false;
             return true;
         }
 
@@ -446,8 +432,7 @@ public class ContentItemResource extends NavigationMixin {
     /**
      * @return an RDF/JSON descriptions of places for the word map widget
      */
-    public String getPlacesAsJSON() throws ParseException,
-            UnsupportedEncodingException {
+    public String getPlacesAsJSON() throws ParseException, UnsupportedEncodingException {
         MGraph g = new SimpleMGraph();
         if (remoteEntityCache != null) {
             LiteralFactory lf = LiteralFactory.getInstance();
@@ -457,17 +442,15 @@ public class ContentItemResource extends NavigationMixin {
                     continue;
                 }
                 UriRef uri = new UriRef(bestGuess.getUri());
-                Iterator<Triple> latitudes = remoteEntityCache.filter(uri,
-                        GEO_LAT, null);
+                Iterator<Triple> latitudes = remoteEntityCache.filter(uri, GEO_LAT, null);
                 if (latitudes.hasNext()) {
                     g.add(latitudes.next());
                 }
-                Iterator<Triple> longitutes = remoteEntityCache.filter(uri,
-                        GEO_LONG, null);
+                Iterator<Triple> longitutes = remoteEntityCache.filter(uri, GEO_LONG, null);
                 if (longitutes.hasNext()) {
                     g.add(longitutes.next());
-                    g.add(new TripleImpl(uri, Properties.RDFS_LABEL,
-                            lf.createTypedLiteral(bestGuess.getLabel())));
+                    g.add(new TripleImpl(uri, Properties.RDFS_LABEL, lf.createTypedLiteral(bestGuess
+                            .getLabel())));
                 }
             }
         }
@@ -475,7 +458,7 @@ public class ContentItemResource extends NavigationMixin {
         serializer.serialize(out, g, SupportedFormat.RDF_JSON);
         return out.toString("utf-8");
     }
-    
+
     @GET
     @Produces(TEXT_HTML)
     public Response get() {
