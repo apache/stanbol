@@ -12,7 +12,7 @@ import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.stanbol.kres.jersey.processors.KReSViewProcessor;
+import org.apache.stanbol.kres.jersey.processors.ViewProcessorImpl;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;
@@ -110,7 +110,7 @@ public class JerseyEndpoint {
         servletContext.setAttribute(STATIC_RESOURCES_URL_ROOT_PROPERTY,
                 staticUrlRoot);
         servletContext.setAttribute(
-                KReSViewProcessor.FREEMARKER_TEMPLATE_PATH_INIT_PARAM,
+                ViewProcessorImpl.FREEMARKER_TEMPLATE_PATH_INIT_PARAM,
                 freemakerTemplates);
 
         log.info("Jersey servlet registered at {}", alias);

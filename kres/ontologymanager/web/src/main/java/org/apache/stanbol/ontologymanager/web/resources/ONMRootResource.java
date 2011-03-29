@@ -26,7 +26,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.stanbol.kres.jersey.format.KReSFormat;
+import org.apache.stanbol.kres.jersey.format.KRFormat;
 import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
 
 /**
@@ -108,8 +108,8 @@ if (storage == null) {
      * @return a string representation of the requested scope set, in a format acceptable by the client.
      */
     @GET
-    @Produces(value = {KReSFormat.RDF_XML, KReSFormat.OWL_XML, KReSFormat.TURTLE, KReSFormat.FUNCTIONAL_OWL,
-                       KReSFormat.MANCHESTER_OWL, KReSFormat.RDF_JSON})
+    @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
+                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
     public Response getScopes(@DefaultValue("false") @QueryParam("with-inactive") boolean inactive,
                               @Context HttpHeaders headers,
                               @Context ServletContext servletContext) {

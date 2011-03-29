@@ -38,7 +38,7 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import org.apache.stanbol.kres.jersey.format.KReSFormat;
+import org.apache.stanbol.kres.jersey.format.KRFormat;
 import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
 
 @Path("/session")
@@ -122,8 +122,8 @@ public class SessionResource extends NavigationMixin {
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(value = {KReSFormat.RDF_XML, KReSFormat.OWL_XML, KReSFormat.TURTLE, KReSFormat.FUNCTIONAL_OWL,
-                       KReSFormat.MANCHESTER_OWL, KReSFormat.RDF_JSON})
+    @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
+                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
     public Response createSession(@FormParam("scope") String scope,
                                   @Context UriInfo uriInfo,
                                   @Context HttpHeaders headers) {

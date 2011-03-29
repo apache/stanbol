@@ -20,7 +20,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.stanbol.kres.jersey.format.KReSFormat;
+import org.apache.stanbol.kres.jersey.format.KRFormat;
 import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
@@ -63,8 +63,8 @@ public class GraphsResource extends NavigationMixin {
 
     @GET
     @Path("/resume")
-    @Produces( {KReSFormat.FUNCTIONAL_OWL, KReSFormat.MANCHESTER_OWL, KReSFormat.OWL_XML, KReSFormat.RDF_XML,
-                KReSFormat.TURTLE, KReSFormat.RDF_JSON})
+    @Produces( {KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.OWL_XML, KRFormat.RDF_XML,
+                KRFormat.TURTLE, KRFormat.RDF_JSON})
     public Response graphs(@Context HttpHeaders headers, @Context ServletContext servletContext) {
         Set<IRI> iris = storage.listGraphs();
         if (iris != null) {

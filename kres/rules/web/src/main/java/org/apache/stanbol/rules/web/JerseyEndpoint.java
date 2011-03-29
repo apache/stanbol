@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 
-import org.apache.stanbol.kres.jersey.processors.KReSViewProcessor;
+import org.apache.stanbol.kres.jersey.processors.ViewProcessorImpl;
 
 /**
  * Jersey-based RESTful endpoint for KReS.
@@ -130,7 +130,7 @@ public class JerseyEndpoint {
         servletContext.setAttribute(STATIC_RESOURCES_URL_ROOT_PROPERTY,
                 staticUrlRoot);
         servletContext.setAttribute(
-                KReSViewProcessor.FREEMARKER_TEMPLATE_PATH_INIT_PARAM,
+                ViewProcessorImpl.FREEMARKER_TEMPLATE_PATH_INIT_PARAM,
                 freemakerTemplates);
 				
 		//Rule manager

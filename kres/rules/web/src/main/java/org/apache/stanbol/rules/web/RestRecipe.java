@@ -51,7 +51,7 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.stanbol.kres.jersey.format.KReSFormat;
+import org.apache.stanbol.kres.jersey.format.KRFormat;
 import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
 
 /**
@@ -129,8 +129,8 @@ if (storage == null) {
      */
     @GET
     @Path("/{uri:.+}")
-    @Produces(value = {KReSFormat.RDF_XML, KReSFormat.TURTLE, KReSFormat.OWL_XML, KReSFormat.FUNCTIONAL_OWL,
-                       KReSFormat.MANCHESTER_OWL, KReSFormat.RDF_JSON})
+    @Produces(value = {KRFormat.RDF_XML, KRFormat.TURTLE, KRFormat.OWL_XML, KRFormat.FUNCTIONAL_OWL,
+                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
     public Response getRecipe(@PathParam("uri") String uri) {
         try {
 
@@ -269,8 +269,8 @@ if (storage == null) {
      */
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(value = {KReSFormat.RDF_XML, KReSFormat.TURTLE, KReSFormat.OWL_XML, KReSFormat.FUNCTIONAL_OWL,
-                       KReSFormat.MANCHESTER_OWL, KReSFormat.RDF_JSON})
+    @Produces(value = {KRFormat.RDF_XML, KRFormat.TURTLE, KRFormat.OWL_XML, KRFormat.FUNCTIONAL_OWL,
+                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
     public Response addRecipe(@FormParam(value = "recipe") String recipe,
                               @FormParam(value = "description") String description) {
 

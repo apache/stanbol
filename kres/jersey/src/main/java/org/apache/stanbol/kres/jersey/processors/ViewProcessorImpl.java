@@ -56,7 +56,7 @@ import freemarker.template.Template;
  */
 @Singleton
 @Provider
-public class KReSViewProcessor implements ViewProcessor<Template> {
+public class ViewProcessorImpl implements ViewProcessor<Template> {
 
     public static final String FREEMARKER_TEMPLATE_PATH_INIT_PARAM = "kres.freemarker.template.path";
 
@@ -69,7 +69,7 @@ public class KReSViewProcessor implements ViewProcessor<Template> {
     @Context
     protected ServletContext context;
 
-    public KReSViewProcessor() {
+    public ViewProcessorImpl() {
     }
 
     /**

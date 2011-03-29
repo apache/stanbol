@@ -17,7 +17,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.representation.Form;
 import org.apache.stanbol.kres.jersey.JettyServer;
 
-import org.apache.stanbol.kres.jersey.format.KReSFormat;
+import org.apache.stanbol.kres.jersey.format.KRFormat;
 
 public class JettyServerTest {
 
@@ -159,7 +159,7 @@ public class JettyServerTest {
         WebResource ts2res = client.resource(SCOPE2_URI + "?customont=" + ONT_PIZZA_URI + "&corereg="
                                              + REG_TEST_URI);
         ts2res.put();
-        r = scopeResourceTest2.accept(KReSFormat.RDF_XML).get(String.class);
+        r = scopeResourceTest2.accept(KRFormat.RDF_XML).get(String.class);
         // System.err.println(r);
         // Now add an ontology
         try {
@@ -167,7 +167,7 @@ public class JettyServerTest {
             f.add("location", ONT_PIZZA_URI);
             f.add("registry", "false");
             scopeResourceTest2.post(String.class, f);
-            r = scopeResourceTest2.accept(KReSFormat.RDF_XML).get(String.class);
+            r = scopeResourceTest2.accept(KRFormat.RDF_XML).get(String.class);
             // fail("Addition succeded on existing scope with supposedly locked core space!");
         } catch (WebApplicationException ex) {
             assertTrue(r != null);
@@ -182,7 +182,7 @@ public class JettyServerTest {
     // @Test
     public void testSessionCreation() {
         WebResource resource = client.resource(__TEST_URI + "session");
-        String r = resource.accept(KReSFormat.RDF_XML).post(String.class);
+        String r = resource.accept(KRFormat.RDF_XML).post(String.class);
         // System.err.println(r);
         assertTrue(true);
     }
@@ -197,13 +197,13 @@ public class JettyServerTest {
                                    // + "&customreg="+REG_TEST_URI
                                    + "&activate=true").put(String.class);
         // Check that it appears in the scope set
-        r = ontologyResource.accept(KReSFormat.RDF_XML).get(String.class);
+        r = ontologyResource.accept(KRFormat.RDF_XML).get(String.class);
         // System.err.println(r);
         assertTrue(r.contains(SCOPE1_URI)
                    && r
                            .contains("rdf:type rdf:resource=\"http://kres.iks-project.eu/ontology/onm/meta.owl#Scope\""));
         // Check that the top ontology has the correct ID and imports objectrole
-        r = scopeResourceTest1.accept(KReSFormat.RDF_XML).get(String.class);
+        r = scopeResourceTest1.accept(KRFormat.RDF_XML).get(String.class);
         // System.err.println(r);
         assertTrue(r.contains(rootIdToken));
         assertTrue(r.contains("http://xmlns.com/foaf/spec/index.rdf"));
@@ -212,7 +212,7 @@ public class JettyServerTest {
         f.add("location", "http://www.co-ode.org/ontologies/pizza/2007/02/12/pizza.owl");
         f.add("registry", "false");
         scopeResourceTest1.post(String.class, f);
-        r = scopeResourceTest1.accept(KReSFormat.RDF_XML).get(String.class);
+        r = scopeResourceTest1.accept(KRFormat.RDF_XML).get(String.class);
         // System.err.println(r);
     }
 }

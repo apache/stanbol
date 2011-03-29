@@ -5,7 +5,7 @@ import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
-import org.apache.stanbol.kres.jersey.processors.KReSViewProcessor;
+import org.apache.stanbol.kres.jersey.processors.ViewProcessorImpl;
 import org.apache.stanbol.kres.jersey.resource.DocumentationResource;
 import org.apache.stanbol.kres.jersey.resource.RESTfulResource;
 import org.apache.stanbol.kres.jersey.resource.RootResource;
@@ -50,7 +50,7 @@ public class JerseyEndpointApplication extends Application {
     public Set<Object> getSingletons() {
         Set<Object> singletons = new HashSet<Object>();
         // view processors
-        singletons.add(new KReSViewProcessor());
+        singletons.add(new ViewProcessorImpl());
         return singletons;
     }
 

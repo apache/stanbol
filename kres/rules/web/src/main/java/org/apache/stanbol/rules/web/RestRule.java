@@ -54,7 +54,7 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.stanbol.kres.jersey.format.KReSFormat;
+import org.apache.stanbol.kres.jersey.format.KRFormat;
 import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
 
 /**
@@ -133,8 +133,8 @@ public class RestRule extends NavigationMixin{
      */
     @GET
     @Path("/{uri:.+}")
-	@Produces(value = { KReSFormat.RDF_XML, KReSFormat.TURTLE,
-			KReSFormat.OWL_XML })
+	@Produces(value = { KRFormat.RDF_XML, KRFormat.TURTLE,
+			KRFormat.OWL_XML })
     public Response getRule(@PathParam("uri") String uri){
  
       try{
@@ -257,7 +257,7 @@ public class RestRule extends NavigationMixin{
     
     @GET
     @Path("/of-recipe/{uri:.+}")
-	@Produces(value = { KReSFormat.RDF_XML, KReSFormat.RDF_JSON })
+	@Produces(value = { KRFormat.RDF_XML, KRFormat.RDF_JSON })
     public Response getRulesOfRecipe(@PathParam("uri") String recipeURI){
     	
     	GetRule kReSGetRule = new GetRule(kresRuleStore);
@@ -458,7 +458,7 @@ public class RestRule extends NavigationMixin{
      */
     @DELETE
     //@Consumes(MediaType.TEXT_PLAIN)
-    @Produces(KReSFormat.TEXT_PLAIN)
+    @Produces(KRFormat.TEXT_PLAIN)
 	public Response removeRule(@QueryParam(value = "rule") String rule,
 			@QueryParam(value = "recipe") String recipe) {
 

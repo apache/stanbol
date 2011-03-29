@@ -24,7 +24,7 @@ import org.semanticweb.owlapi.model.OWLOntologyFormat;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
-import org.apache.stanbol.kres.jersey.format.KReSFormat;
+import org.apache.stanbol.kres.jersey.format.KRFormat;
 
 /**
  * Contains hacks to regular ontology renderers with replacements for input statements.
@@ -138,21 +138,21 @@ public class OntologyRenderUtils {
 		else
 			o2 = ont;
 
-		if (format.equals(KReSFormat.RDF_XML)) {
+		if (format.equals(KRFormat.RDF_XML)) {
 			try {
 				tmpmgr.saveOntology(o2, new RDFXMLOntologyFormat(), tgt);
 			} catch (OWLOntologyStorageException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		} else if (format.equals(KReSFormat.OWL_XML)) {
+		} else if (format.equals(KRFormat.OWL_XML)) {
 			try {
 				tmpmgr.saveOntology(o2, new OWLXMLOntologyFormat(), tgt);
 			} catch (OWLOntologyStorageException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		} else if (format.equals(KReSFormat.MANCHESTER_OWL)) {
+		} else if (format.equals(KRFormat.MANCHESTER_OWL)) {
 			try {
 				tmpmgr.saveOntology(o2,
 						new ManchesterOWLSyntaxOntologyFormat(), tgt);
@@ -160,7 +160,7 @@ public class OntologyRenderUtils {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		} else if (format.equals(KReSFormat.FUNCTIONAL_OWL)) {
+		} else if (format.equals(KRFormat.FUNCTIONAL_OWL)) {
 			try {
 				tmpmgr.saveOntology(o2,
 						new OWLFunctionalSyntaxOntologyFormat(), tgt);
@@ -168,7 +168,7 @@ public class OntologyRenderUtils {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		} else if (format.equals(KReSFormat.TURTLE)) {
+		} else if (format.equals(KRFormat.TURTLE)) {
 			try {
 				tmpmgr.saveOntology(o2, new TurtleOntologyFormat(), tgt);
 			} catch (OWLOntologyStorageException e) {

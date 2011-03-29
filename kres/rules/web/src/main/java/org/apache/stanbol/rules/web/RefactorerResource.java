@@ -28,7 +28,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import com.sun.jersey.api.view.ImplicitProduces;
 
-import org.apache.stanbol.kres.jersey.format.KReSFormat;
+import org.apache.stanbol.kres.jersey.format.KRFormat;
 import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
 
 /**
@@ -87,8 +87,8 @@ public class RefactorerResource extends NavigationMixin {
     @POST
     @Path("/lazy")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(value = {KReSFormat.TURTLE, KReSFormat.FUNCTIONAL_OWL, KReSFormat.MANCHESTER_OWL,
-                       KReSFormat.RDF_XML, KReSFormat.OWL_XML, KReSFormat.RDF_JSON})
+    @Produces(value = {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL,
+                       KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.RDF_JSON})
     public Response performRefactoring(@FormParam("recipe") String recipe,
                                        @FormParam("input") InputStream input) {
 
@@ -147,8 +147,8 @@ public class RefactorerResource extends NavigationMixin {
     @POST
     @Path("/consistent")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces( {KReSFormat.TURTLE, KReSFormat.FUNCTIONAL_OWL, KReSFormat.MANCHESTER_OWL, KReSFormat.RDF_XML,
-                KReSFormat.OWL_XML, KReSFormat.RDF_JSON})
+    @Produces( {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
+                KRFormat.OWL_XML, KRFormat.RDF_JSON})
     public Response consistentRefactoringOfNewGraph(@FormParam("recipe") String recipe,
                                                     @FormParam("input") InputStream input) {
 

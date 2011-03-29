@@ -30,12 +30,12 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.stanbol.kres.jersey.format.KReSFormat;
+import org.apache.stanbol.kres.jersey.format.KRFormat;
 import org.apache.stanbol.owlapi.trasformation.OWLAPIToClerezzaConverter;
 
 @Provider
-@Produces( { KReSFormat.RDF_XML, KReSFormat.OWL_XML, KReSFormat.MANCHESTER_OWL,
-		KReSFormat.FUNCTIONAL_OWL, KReSFormat.TURTLE, KReSFormat.RDF_JSON })
+@Produces( { KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.MANCHESTER_OWL,
+		KRFormat.FUNCTIONAL_OWL, KRFormat.TURTLE, KRFormat.RDF_JSON })
 public class OWLOntologyWriter implements MessageBodyWriter<OWLOntology> {
 
 	protected Serializer serializer;
@@ -79,39 +79,39 @@ public class OWLOntologyWriter implements MessageBodyWriter<OWLOntology> {
 		log.debug("Rendering ontology " + ontology.getOntologyID()
 				+ "to KReS format " + mediaType);
 
-		if (mediaType.toString().equals(KReSFormat.RDF_XML)) {
+		if (mediaType.toString().equals(KRFormat.RDF_XML)) {
 			try {
 				manager.saveOntology(ontology, new RDFXMLOntologyFormat(), out);
 			} catch (OWLOntologyStorageException e) {
 				log.error("Failed to store ontology for rendering.", e);
 			}
-		} else if (mediaType.toString().equals(KReSFormat.OWL_XML)) {
+		} else if (mediaType.toString().equals(KRFormat.OWL_XML)) {
 			try {
 				manager.saveOntology(ontology, new OWLXMLOntologyFormat(), out);
 			} catch (OWLOntologyStorageException e) {
 				log.error("Failed to store ontology for rendering.", e);
 			}
-		} else if (mediaType.toString().equals(KReSFormat.MANCHESTER_OWL)) {
+		} else if (mediaType.toString().equals(KRFormat.MANCHESTER_OWL)) {
 			try {
 				manager.saveOntology(ontology,
 						new ManchesterOWLSyntaxOntologyFormat(), out);
 			} catch (OWLOntologyStorageException e) {
 				log.error("Failed to store ontology for rendering.", e);
 			}
-		} else if (mediaType.toString().equals(KReSFormat.FUNCTIONAL_OWL)) {
+		} else if (mediaType.toString().equals(KRFormat.FUNCTIONAL_OWL)) {
 			try {
 				manager.saveOntology(ontology,
 						new OWLFunctionalSyntaxOntologyFormat(), out);
 			} catch (OWLOntologyStorageException e) {
 				log.error("Failed to store ontology for rendering.", e);
 			}
-		} else if (mediaType.toString().equals(KReSFormat.TURTLE)) {
+		} else if (mediaType.toString().equals(KRFormat.TURTLE)) {
 			try {
 				manager.saveOntology(ontology, new TurtleOntologyFormat(), out);
 			} catch (OWLOntologyStorageException e) {
 				log.error("Failed to store ontology for rendering.", e);
 			}
-		} else if (mediaType.toString().equals(KReSFormat.RDF_JSON)) {
+		} else if (mediaType.toString().equals(KRFormat.RDF_JSON)) {
 
 			MGraph mGraph = OWLAPIToClerezzaConverter
 					.owlOntologyToClerezzaMGraph(ontology);

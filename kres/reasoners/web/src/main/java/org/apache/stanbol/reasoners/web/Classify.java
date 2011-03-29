@@ -64,7 +64,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-import org.apache.stanbol.kres.jersey.format.KReSFormat;
+import org.apache.stanbol.kres.jersey.format.KRFormat;
 
 /**
  *
@@ -209,8 +209,8 @@ if (storage == null) {
      */
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-	@Produces(value = { KReSFormat.RDF_XML, KReSFormat.TURTLE,
-			KReSFormat.OWL_XML })
+	@Produces(value = { KRFormat.RDF_XML, KRFormat.TURTLE,
+			KRFormat.OWL_XML })
 	public Response ontologyClassify(
 			@FormParam(value = "session") String session,
 			@FormParam(value = "scope") String scope,
