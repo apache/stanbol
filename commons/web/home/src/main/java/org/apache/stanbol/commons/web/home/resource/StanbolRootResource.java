@@ -1,4 +1,4 @@
-package org.apache.stanbol.commons.web.home;
+package org.apache.stanbol.commons.web.home.resource;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 

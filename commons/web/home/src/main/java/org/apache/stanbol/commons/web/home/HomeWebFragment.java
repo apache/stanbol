@@ -12,6 +12,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
+import org.apache.stanbol.commons.web.home.resource.StanbolRootResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
