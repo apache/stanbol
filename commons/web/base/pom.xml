@@ -15,8 +15,8 @@
   <version>${stanbol-version}</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Commons Web</name>
-  <description>This is the Stanbol HTTP Jersey endpoint bundle.</description>
+  <name>Apache Stanbol Commons Web Base</name>
+  <description>Stanbol HTTP Jersey application bundle.</description>
   <scm>
     <connection>
       scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/web
