@@ -18,7 +18,7 @@
   </head>
 
   <body>
-    <div class="home"><a href="/"><img src="/static/images/apache_stanbol_logo_cropped.png" alt="Stanbol Home" /></a></div>
+    <div class="home"><a href="${it.publicBaseUri}"><img src="/static/images/apache_stanbol_logo_cropped.png" alt="Stanbol Home" /></a></div>
     <div class="header">
       <h1>The RESTful Semantic Engine</h1>
 

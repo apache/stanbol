@@ -61,7 +61,7 @@ function registerFormHandler() {
      // submit the form query using Ajax
      $.ajax({
        type: "POST",
-       url: "/engines",
+       url: "${it.publicBaseUri}engines",
        data: data,
        dataType: "html",
        cache: false,

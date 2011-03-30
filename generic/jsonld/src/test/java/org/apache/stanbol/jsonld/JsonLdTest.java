@@ -25,7 +25,7 @@ public class JsonLdTest {
     @Test
     public void testSpecExample1() {
         JsonLd jsonLd = new JsonLd();
-
+        jsonLd.setUseTypeCoercion(false);
         jsonLd.addNamespacePrefix("http://example.org/myvocab#", "myvocab");
 
         JsonLdResource jsonLdResource = new JsonLdResource();
@@ -48,7 +48,7 @@ public class JsonLdTest {
     @Test
     public void testSpecExample2_JointGraph() {
         JsonLd jsonLd = new JsonLd();
-
+        jsonLd.setUseTypeCoercion(false);
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
 
         JsonLdResource r1 = new JsonLdResource();
@@ -84,8 +84,8 @@ public class JsonLdTest {
     @Test
     public void testSpecExample2_DisjointGraph() {
         JsonLd jsonLd = new JsonLd();
+        jsonLd.setUseTypeCoercion(false);
         jsonLd.setUseJointGraphs(false);
-
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
 
         JsonLdResource r1 = new JsonLdResource();
@@ -121,7 +121,7 @@ public class JsonLdTest {
     @Test
     public void testSpecExample3() {
         JsonLd jsonLd = new JsonLd();
-
+        jsonLd.setUseTypeCoercion(false);
         jsonLd.addNamespacePrefix("http://microformats.org/profile/hcard#vcard", "vcard");
         jsonLd.addNamespacePrefix("http://microformats.org/profile/hcard#url", "url");
         jsonLd.addNamespacePrefix("http://microformats.org/profile/hcard#fn", "fn");
@@ -145,7 +145,7 @@ public class JsonLdTest {
     @Test
     public void testSpecExample3DefaultContext() {
         JsonLd jsonLd = new JsonLd();
-
+        jsonLd.setUseTypeCoercion(false);
         jsonLd.addNamespacePrefix("http://example.org/default-vocab#","#vocab");
         jsonLd.addNamespacePrefix("http://example.org/baseurl/","#base");
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
@@ -173,6 +173,7 @@ public class JsonLdTest {
     @Test
     public void testSpecExample4Microformats() {
         JsonLd jsonLd = new JsonLd();
+        jsonLd.setUseTypeCoercion(false);
         jsonLd.setUseJointGraphs(false);
 
         JsonLdResource r1 = new JsonLdResource();
@@ -208,7 +209,7 @@ public class JsonLdTest {
     @Test
     public void testSpecExample5TypedLiterals() {
         JsonLd jsonLd = new JsonLd();
-
+        jsonLd.setUseTypeCoercion(false);
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://purl.org/dc/terms/", "dc");
 
@@ -228,7 +229,7 @@ public class JsonLdTest {
     @Test
     public void testSpecExample6MultipleObjects() {
         JsonLd jsonLd = new JsonLd();
-
+        jsonLd.setUseTypeCoercion(false);
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
 
@@ -250,8 +251,8 @@ public class JsonLdTest {
     @Test
     public void testSpecExample7NoNSApply() {
         JsonLd jsonLd = new JsonLd();
+        jsonLd.setUseTypeCoercion(false);
         jsonLd.setApplyNamespaces(false);
-
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
 
@@ -273,6 +274,7 @@ public class JsonLdTest {
     @Test
     public void testSpecExample8NoNSApply() {
         JsonLd jsonLd = new JsonLd();
+        jsonLd.setUseTypeCoercion(false);
         jsonLd.setApplyNamespaces(false);
 
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
