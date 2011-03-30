@@ -9,8 +9,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * @author Fabian Christ
- *
+ * JSON-LD serialization API.
+ * 
+ * @author fabianc
  */
 public class JsonLd {
 
@@ -25,7 +26,7 @@ public class JsonLd {
      * to shorten IRIs to prefix notation during serialization. Default
      * value is <code>true</code>.<br />
      * <br />
-     * If you already put values into this JSON-LD instance with prefix
+     * <b>Note:</b> If you already put values into this JSON-LD instance with prefix
      * notation, you should set this to <code>false</code> before starting
      * the serialization.
      */
@@ -37,6 +38,12 @@ public class JsonLd {
      * value is <code>true</code>.
      */
     private boolean useJointGraphs = true;
+    
+    /**
+     * Flag to control whether type coercion should be applied. Default
+     * value is <code>true</code>.
+     */
+    private boolean useTypeCoercion = true;
 
     /**
      * Add the given resource to this JsonLd object using the resourceId
@@ -308,6 +315,25 @@ public class JsonLd {
      */
     public void setApplyNamespaces(boolean applyNamespaces) {
         this.applyNamespaces = applyNamespaces;
+    }
+
+    /**
+     * Flag to control whether type coercion is applied or not.
+     * 
+     * @return <code>True</code> if type coercion is applied, <code>false</code> otherwise.
+     */
+    public boolean isUseTypeCoercion() {
+        return useTypeCoercion;
+    }
+
+    /**
+     * Control whether type coercion should be applied. Set this to <code>false</code>
+     * if you don't want to use type coercion in the output.
+     * 
+     * @param useTypeCoercion
+     */
+    public void setUseTypeCoercion(boolean useTypeCoercion) {
+        this.useTypeCoercion = useTypeCoercion;
     }
 
 }

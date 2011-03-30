@@ -18,16 +18,16 @@ public class NavigationMixin {
 
     public List<MenuItem> getMainMenuItems() {
         return Arrays.asList(
-                new MenuItem("/engines", "/engines", uriInfo),
-                new MenuItem("/store", "/store", uriInfo),
-                new MenuItem("/sparql", "/sparql", uriInfo));
+                new MenuItem("/engines", "engines", uriInfo),
+                new MenuItem("/store", "store", uriInfo),
+                new MenuItem("/sparql", "sparql", uriInfo));
     }
 
     public static class MenuItem {
 
         public MenuItem(String label, String link, UriInfo uriInfo) {
             this.label = label;
-            this.link = link;
+            this.link = uriInfo.getBaseUri() + link;
             cssClass = uriInfo.getPath().startsWith(link.substring(1)) ? "selected" : "unselected";
         }
 
