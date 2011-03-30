@@ -1,4 +1,4 @@
-package org.apache.stanbol.commons.web.writers;
+package org.apache.stanbol.commons.web.base.writers;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 

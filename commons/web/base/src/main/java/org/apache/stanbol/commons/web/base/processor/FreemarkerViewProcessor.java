@@ -1,4 +1,4 @@
-package org.apache.stanbol.commons.web.processor;
+package org.apache.stanbol.commons.web.base.processor;
 
 import java.io.IOException;
 import java.io.InputStream;

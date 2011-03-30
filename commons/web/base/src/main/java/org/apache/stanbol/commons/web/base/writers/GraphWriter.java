@@ -1,4 +1,4 @@
-package org.apache.stanbol.commons.web.writers;
+package org.apache.stanbol.commons.web.base.writers;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
@@ -25,7 +25,7 @@ import javax.ws.rs.ext.Provider;
 
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.stanbol.commons.web.ContextHelper;
+import org.apache.stanbol.commons.web.base.ContextHelper;
 
 
 @Provider

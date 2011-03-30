@@ -1,4 +1,4 @@
-package org.apache.stanbol.commons.web;
+package org.apache.stanbol.commons.web.base;
 
 /**
  * Simple data transfer object for scripts (typically javascript) to be contributed by WebFragment for

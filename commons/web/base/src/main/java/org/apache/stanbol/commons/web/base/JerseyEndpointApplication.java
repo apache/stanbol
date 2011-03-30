@@ -1,4 +1,4 @@
-package org.apache.stanbol.commons.web;
+package org.apache.stanbol.commons.web.base;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -7,10 +7,10 @@ import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
-import org.apache.stanbol.commons.web.processor.FreemarkerViewProcessor;
-import org.apache.stanbol.commons.web.resource.StanbolRootResource;
-import org.apache.stanbol.commons.web.writers.GraphWriter;
-import org.apache.stanbol.commons.web.writers.ResultSetWriter;
+import org.apache.stanbol.commons.web.base.processor.FreemarkerViewProcessor;
+import org.apache.stanbol.commons.web.base.resource.StanbolRootResource;
+import org.apache.stanbol.commons.web.base.writers.GraphWriter;
+import org.apache.stanbol.commons.web.base.writers.ResultSetWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

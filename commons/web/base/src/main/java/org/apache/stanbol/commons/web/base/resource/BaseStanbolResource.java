@@ -1,4 +1,4 @@
-package org.apache.stanbol.commons.web.resource;
+package org.apache.stanbol.commons.web.base.resource;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -9,8 +9,8 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.stanbol.commons.web.LinkResource;
-import org.apache.stanbol.commons.web.ScriptResource;
+import org.apache.stanbol.commons.web.base.LinkResource;
+import org.apache.stanbol.commons.web.base.ScriptResource;
 
 /**
  * Mixin class to provide the controller method for the navigation template.

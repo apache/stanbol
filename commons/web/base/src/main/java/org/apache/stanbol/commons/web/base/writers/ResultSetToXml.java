@@ -1,4 +1,4 @@
-package org.apache.stanbol.commons.web.writers;
+package org.apache.stanbol.commons.web.base.writers;
 
 import java.util.Set;
 

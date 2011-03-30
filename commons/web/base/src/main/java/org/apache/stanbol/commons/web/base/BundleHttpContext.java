@@ -1,4 +1,4 @@
-package org.apache.stanbol.commons.web;
+package org.apache.stanbol.commons.web.base;
 
 import java.net.URL;
 

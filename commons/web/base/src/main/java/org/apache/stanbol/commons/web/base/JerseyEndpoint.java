@@ -1,4 +1,4 @@
-package org.apache.stanbol.commons.web;
+package org.apache.stanbol.commons.web.base;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.stanbol.commons.web.resource.BaseStanbolResource;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
