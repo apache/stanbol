@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.semanticweb.owlapi</groupId>
+  <artifactId>owlapi</artifactId>
+  <version>3.0.0</version>
+  <versioning>
+    <versions>
+      <version>3.0.0</version>
+    </versions>
+    <lastUpdated>20100826084032</lastUpdated>
+  </versioning>
+</metadata>

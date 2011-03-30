@@ -1,0 +1,48 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<artifactId>org.apache.stanbol.ontologymanager.store.parent</artifactId>
+		<groupId>org.apache.stanbol</groupId>
+		<version>0.9-SNAPSHOT</version>
+		<relativePath>../parent</relativePath>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>org.apache.stanbol.ontologymanager.store.api</artifactId>
+	<name>Apache Stanbol Ontology Manager Store - API</name>
+	<packaging>bundle</packaging>
+
+	<description>Interface classes for  store module</description>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<!--  <configuration>
+					<instructions>
+						<Embed-Dependency>jaxb-impl</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
+						<Import-Package>
+							JAXB Impl
+							!org.jvnet.*,
+							!com.sun.xml.fastinfoset.*,
+							*
+						</Import-Package>
+					</instructions>
+				</configuration>-->
+			</plugin>
+		</plugins>
+
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.hp.hpl.jena</groupId>
+			<artifactId>jena</artifactId>
+		</dependency>
+		<!--  <dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+		</dependency>-->
+	</dependencies>
+</project>

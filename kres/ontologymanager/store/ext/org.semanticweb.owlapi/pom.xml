@@ -1,0 +1,64 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<parent>
+		<artifactId>org.apache.stanbol.ontologymanager.store.parent</artifactId>
+		<groupId>org.apache.stanbol</groupId>
+		<version>0.9-SNAPSHOT</version>
+		<relativePath>../parent</relativePath>
+	</parent>
+	
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>org.semanticweb.owlapi</artifactId>
+	<packaging>bundle</packaging>
+	<version>3.0.0-SNAPSHOT</version>
+
+	<name>Apache Stanbol Ontology Manager Store Ext - OWLApi OSGI Bundle  </name>
+	<description>OWLApi OSGI Bundle</description>
+	
+	<repositories>
+		<repository>
+			<releases>
+				<updatePolicy>always</updatePolicy>
+			</releases>
+			<snapshots>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+			<id>local-owlapi-repo</id>
+			<url>file://localhost/${project.basedir}/src/main/resources/local-maven-repository</url>
+		</repository>
+	</repositories>
+		
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+						<Embed-Dependency>*;artifactId=owlapi</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
+						<Export-Package>
+							org.semanticweb.owlapi.*,
+							com.clarkparsia.owlapi.*,
+							de.uulm.ecs.*,
+							org.coode.*,
+							uk.ac.manchester.cs.*
+						</Export-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	
+	<dependencies>
+		<dependency>
+			<groupId>org.semanticweb.owlapi</groupId>
+			<artifactId>owlapi</artifactId>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+	
+</project>

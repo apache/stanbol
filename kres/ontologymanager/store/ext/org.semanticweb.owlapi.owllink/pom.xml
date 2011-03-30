@@ -1,0 +1,84 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<artifactId>org.apache.stanbol.ontologymanager.store.parent</artifactId>
+		<groupId>org.apache.stanbol</groupId>
+		<version>0.9-SNAPSHOT</version>
+		<relativePath>../parent</relativePath>
+	</parent>
+
+	<artifactId>org.semanticweb.owlapi.owllink</artifactId>
+	<version>1.0.2-SNAPSHOT</version>
+	<packaging>bundle</packaging>
+
+	<name>Apache Stanbol Ontology Manager Store Ext - OWLlink OSGI Bundle</name>
+	<description>OWLlink OSGI Bundle should only be used for making requests with an externally established owllink server.</description>
+
+	<repositories>
+		<repository>
+			<id>local-owllink-repo</id>
+			<url>file://localhost/${project.basedir}/src/main/resources/local-maven-repository</url>
+		</repository>
+	</repositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+						<Embed-Dependency>jaxp-ri</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
+						<Import-Package>
+							!com.sun.java_cup.*,
+							!org.mortbay.http,
+							!org.mortbay.http.handler,
+							!org.mortbay.util,
+							!org.semanticweb.owl.apibinding,
+							!org.semanticweb.owl.inference,
+							!org.semanticweb.owl.model,
+							!org.semanticweb.owl.util,
+							!org.semanticweb.owl.vocab,
+							!org.semanticweb.reasonerfactory.pellet,
+
+							!uk.ac.manchester.cs.owl,
+							*
+							</Import-Package>
+						<Export-Package>org.semanticweb.owlapi.owllink.* </Export-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.semanticweb.owlapi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.semanticweb.owlapi</groupId>
+			<artifactId>owllink</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.org.apache</groupId>
+			<artifactId>jaxp-ri</artifactId>
+			<version>1.4</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+
+</project>
