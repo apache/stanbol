@@ -17,7 +17,7 @@ import org.apache.stanbol.commons.web.ScriptResource;
  * 
  * TODO: make the list of menu items dynamically contributed by WebFragments from the OSGi runtime.
  */
-public class NavigationMixin {
+public class BaseStanbolResource {
 
     public static final String LINK_RESOURCES = "org.apache.stanbol.commons.web.resource.links";
 

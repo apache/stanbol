@@ -16,7 +16,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.stanbol.commons.web.resource.NavigationMixin;
+import org.apache.stanbol.commons.web.resource.BaseStanbolResource;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
@@ -121,9 +121,9 @@ public class JerseyEndpoint {
         // services
         servletContext = container.getServletContext();
         servletContext.setAttribute(BundleContext.class.getName(), ctx.getBundleContext());
-        servletContext.setAttribute(NavigationMixin.STATIC_RESOURCES_ROOT_URL, staticUrlRoot);
-        servletContext.setAttribute(NavigationMixin.LINK_RESOURCES, linkResources);
-        servletContext.setAttribute(NavigationMixin.SCRIPT_RESOURCES, scriptResources);
+        servletContext.setAttribute(BaseStanbolResource.STATIC_RESOURCES_ROOT_URL, staticUrlRoot);
+        servletContext.setAttribute(BaseStanbolResource.LINK_RESOURCES, linkResources);
+        servletContext.setAttribute(BaseStanbolResource.SCRIPT_RESOURCES, scriptResources);
         log.info("JerseyEndpoint servlet registered at {}", applicationAlias);
     }
 

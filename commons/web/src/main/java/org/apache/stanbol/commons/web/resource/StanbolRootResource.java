@@ -14,7 +14,7 @@ import com.sun.jersey.api.view.Viewable;
  * META-INF/templates folder.
  */
 @Path("/")
-public class StanbolRootResource extends NavigationMixin {
+public class StanbolRootResource extends BaseStanbolResource {
 
     @GET
     @Produces(TEXT_HTML)
