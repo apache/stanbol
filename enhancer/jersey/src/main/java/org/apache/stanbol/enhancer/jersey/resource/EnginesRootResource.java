@@ -29,7 +29,7 @@ import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.stanbol.commons.web.ContextHelper;
-import org.apache.stanbol.commons.web.resource.NavigationMixin;
+import org.apache.stanbol.commons.web.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.jersey.cache.EntityCacheProvider;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -49,7 +49,7 @@ import com.sun.jersey.api.view.Viewable;
  * instead.
  */
 @Path("/engines")
-public class EnginesRootResource extends NavigationMixin {
+public class EnginesRootResource extends BaseStanbolResource {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 

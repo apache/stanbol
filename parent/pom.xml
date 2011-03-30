@@ -244,7 +244,7 @@
       </dependency>
       <dependency>
         <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.web</artifactId>
+        <artifactId>org.apache.stanbol.commons.web.base</artifactId>
         <version>${stanbol-version}</version>
       </dependency>
       <dependency>

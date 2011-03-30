@@ -18,7 +18,7 @@ import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
 import org.apache.clerezza.rdf.core.sparql.query.DescribeQuery;
 import org.apache.clerezza.rdf.core.sparql.query.Query;
 import org.apache.stanbol.commons.web.ContextHelper;
-import org.apache.stanbol.commons.web.resource.NavigationMixin;
+import org.apache.stanbol.commons.web.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.servicesapi.Store;
 import org.apache.stanbol.enhancer.servicesapi.SparqlQueryEngine.SparqlQueryEngineException;
 
@@ -41,7 +41,7 @@ import static javax.ws.rs.core.MediaType.TEXT_HTML;
  * view with an ajax-ified form to test the SPARQL endpoint from the browser.
  */
 @Path("/sparql")
-public class SparqlQueryResource extends NavigationMixin {
+public class SparqlQueryResource extends BaseStanbolResource {
 
     protected Store store;
 

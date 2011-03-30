@@ -60,7 +60,7 @@ import org.apache.clerezza.rdf.core.sparql.query.SelectQuery;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.web.ContextHelper;
-import org.apache.stanbol.commons.web.resource.NavigationMixin;
+import org.apache.stanbol.commons.web.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.jersey.cache.EntityCacheProvider;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -90,7 +90,7 @@ import com.sun.jersey.core.header.FormDataContentDisposition;
  * The Delete operation is not implemented yet.
  */
 @Path("/store")
-public class StoreRootResource extends NavigationMixin {
+public class StoreRootResource extends BaseStanbolResource {
 
     public static final Set<String> RDF_MEDIA_TYPES = new TreeSet<String>(
             Arrays.asList(N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE, RDF_JSON));

@@ -50,7 +50,7 @@ import org.apache.clerezza.rdf.core.sparql.SolutionMapping;
 import org.apache.clerezza.rdf.core.sparql.query.SelectQuery;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.commons.io.IOUtils;
-import org.apache.stanbol.commons.web.resource.NavigationMixin;
+import org.apache.stanbol.commons.web.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.slf4j.Logger;
@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.Viewable;
 
-public class ContentItemResource extends NavigationMixin {
+public class ContentItemResource extends BaseStanbolResource {
 
     @SuppressWarnings("unused")
     private final Logger log = LoggerFactory.getLogger(getClass());
