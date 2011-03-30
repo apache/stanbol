@@ -1,4 +1,4 @@
-package org.apache.stanbol.commons.web.base.resource;
+package org.apache.stanbol.commons.web.home;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 
@@ -6,6 +6,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
+
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
 import com.sun.jersey.api.view.Viewable;
 

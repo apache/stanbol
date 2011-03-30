@@ -8,7 +8,6 @@ import java.util.Set;
 import javax.ws.rs.core.Application;
 
 import org.apache.stanbol.commons.web.base.processor.FreemarkerViewProcessor;
-import org.apache.stanbol.commons.web.base.resource.StanbolRootResource;
 import org.apache.stanbol.commons.web.base.writers.GraphWriter;
 import org.apache.stanbol.commons.web.base.writers.ResultSetWriter;
 import org.slf4j.Logger;
@@ -34,10 +33,6 @@ public class JerseyEndpointApplication extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
-        // hardcoded root resource class for now (to be externalized into a stanbol.commons.web.home package
-        // for instance)
-        classes.add(StanbolRootResource.class);
-
         // resources contributed buy other bundles
         classes.addAll(contributedClasses);
 

@@ -20,8 +20,8 @@
 
   <modules>
     <module>web/base</module>
-    <!--
     <module>web/home</module>
+    <!--
     <module>web/sparql</module>
     -->
     <module>testing/jarexec</module>

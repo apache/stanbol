@@ -27,8 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 
-import freemarker.cache.ClassTemplateLoader;
-
 /**
  * Jersey-based RESTful endpoint for the Stanbol Enhancer engines and store.
  * <p>
@@ -46,12 +44,6 @@ public class JerseyEndpoint {
 
     @Property(value = "/static")
     public static final String STATIC_RESOURCES_URL_ROOT_PROPERTY = "org.apache.stanbol.commons.web.static.url";
-
-    @Property(value = "/META-INF/static")
-    public static final String STATIC_RESOURCES_CLASSPATH_PROPERTY = "org.apache.stanbol.commons.web.static.classpath";
-
-    @Property(value = "/META-INF/templates")
-    public static final String FREEMARKER_TEMPLATE_CLASSPATH_PROPERTY = "org.apache.stanbol.commons.web.templates.classpath";
 
     @Reference
     HttpService httpService;
@@ -81,17 +73,6 @@ public class JerseyEndpoint {
         // prefix
         JerseyEndpointApplication app = new JerseyEndpointApplication();
         String staticUrlRoot = (String) ctx.getProperties().get(STATIC_RESOURCES_URL_ROOT_PROPERTY);
-        String staticClasspath = (String) ctx.getProperties().get(STATIC_RESOURCES_CLASSPATH_PROPERTY);
-        String templateClasspath = (String) ctx.getProperties().get(FREEMARKER_TEMPLATE_CLASSPATH_PROPERTY);
-
-        // register the base template loader
-        templateClasspath = templateClasspath.replaceAll("/$", "");
-        app.contributeTemplateLoader(new ClassTemplateLoader(getClass(), templateClasspath));
-
-        // register the root of static resources (TODO: move me in a dedicated fragment instead)
-        String defaultStaticAlias = staticUrlRoot + "/default";
-        httpService.registerResources(defaultStaticAlias, staticClasspath, null);
-        registeredAliases.add(defaultStaticAlias);
 
         // incrementally contribute fragment resources
         List<LinkResource> linkResources = new ArrayList<LinkResource>();
