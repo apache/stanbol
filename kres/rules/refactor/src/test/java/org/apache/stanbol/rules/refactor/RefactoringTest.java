@@ -15,13 +15,12 @@ import org.apache.clerezza.rdf.jena.sparql.JenaSparqlEngine;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
-import org.apache.stanbol.reasoners.base.impl.ReasonerImpl;
-import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
+import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.apache.stanbol.rules.base.api.util.RecipeList;
+import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.apache.stanbol.rules.manager.changes.RecipeImpl;
 import org.apache.stanbol.rules.manager.parse.RuleParserImpl;
 import org.apache.stanbol.rules.refactor.api.Refactorer;
@@ -40,238 +39,206 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
-
-
 public class RefactoringTest {
 
-	static RuleStore ruleStore;
-	static OWLOntology ontology;
-	static IRI recipeIRI;
+    static RuleStore ruleStore;
+    static OWLOntology ontology;
+    static IRI recipeIRI;
 
-	@BeforeClass
-	public static void setup() {
+    @BeforeClass
+    public static void setup() {
 
-		recipeIRI = IRI
-				.create("http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyTestRecipe");
+        recipeIRI = IRI.create("http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyTestRecipe");
 
-		InputStream ontologyStream = RefactoringTest.class
-				.getResourceAsStream("/META-INF/test/testKReSOnt.owl");
-		InputStream recipeStream = RefactoringTest.class
-				.getResourceAsStream("/META-INF/test/rmi.owl");
+        InputStream ontologyStream = RefactoringTest.class
+                .getResourceAsStream("/META-INF/test/testKReSOnt.owl");
+        InputStream recipeStream = RefactoringTest.class.getResourceAsStream("/META-INF/test/rmi.owl");
 
-		try {
-			final OWLOntology recipeModel = OWLManager
-					.createOWLOntologyManager()
-					.loadOntologyFromOntologyDocument(recipeStream);
-			ontology = OWLManager.createOWLOntologyManager()
-					.loadOntologyFromOntologyDocument(ontologyStream);
+        try {
+            final OWLOntology recipeModel = OWLManager.createOWLOntologyManager()
+                    .loadOntologyFromOntologyDocument(recipeStream);
+            ontology = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(ontologyStream);
 
-			ruleStore = new RuleStore() {
+            ruleStore = new RuleStore() {
 
-				@Override
-				public void setStore(OWLOntology owl) {
-					// TODO Auto-generated method stub
+                @Override
+                public void setStore(OWLOntology owl) {
+                    // TODO Auto-generated method stub
 
-				}
+                }
 
-				@Override
-				public void saveOntology() throws OWLOntologyStorageException {
-					// TODO Auto-generated method stub
+                @Override
+                public void saveOntology() throws OWLOntologyStorageException {
+                    // TODO Auto-generated method stub
 
-				}
+                }
 
-				@Override
-				public RecipeList listRecipes() {
-					// TODO Auto-generated method stub
-					return null;
-				}
+                @Override
+                public RecipeList listRecipes() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
 
-				@Override
-				public Set<IRI> listIRIRecipes() {
-					// TODO Auto-generated method stub
-					return null;
-				}
+                @Override
+                public Set<IRI> listIRIRecipes() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
 
-				@Override
-				public String getRuleStoreNamespace() {
-					// TODO Auto-generated method stub
-					return null;
-				}
+                @Override
+                public String getRuleStoreNamespace() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
 
-				@Override
-				public Recipe getRecipe(IRI recipeIRI)
-						throws NoSuchRecipeException {
-					Recipe recipe = null;
+                @Override
+                public Recipe getRecipe(IRI recipeIRI) throws NoSuchRecipeException {
+                    Recipe recipe = null;
 
-					if (recipeIRI != null) {
-						OWLDataFactory factory = OWLManager.getOWLDataFactory();
-						OWLIndividual recipeIndividual = factory
-								.getOWLNamedIndividual(recipeIRI);
-						if (recipeIndividual != null) {
-							String ruleNS = "http://kres.iks-project.eu/ontology/meta/rmi.owl#";
+                    if (recipeIRI != null) {
+                        OWLDataFactory factory = OWLManager.getOWLDataFactory();
+                        OWLIndividual recipeIndividual = factory.getOWLNamedIndividual(recipeIRI);
+                        if (recipeIndividual != null) {
+                            String ruleNS = "http://kres.iks-project.eu/ontology/meta/rmi.owl#";
 
-							/**
-							 * First get the recipe description in the
-							 * rule/recipe ontology.
-							 */
-							OWLDataProperty hasDescription = factory
-									.getOWLDataProperty(IRI.create(ruleNS
-											+ "hasDescription"));
+                            /**
+                             * First get the recipe description in the rule/recipe ontology.
+                             */
+                            OWLDataProperty hasDescription = factory.getOWLDataProperty(IRI
+                                    .create(ruleNS + "hasDescription"));
 
-							String recipeDescription = null;
+                            String recipeDescription = null;
 
-							Set<OWLLiteral> descriptions = recipeIndividual
-									.getDataPropertyValues(hasDescription,
-											recipeModel);
-							for (OWLLiteral description : descriptions) {
-								recipeDescription = description.getLiteral();
-							}
+                            Set<OWLLiteral> descriptions = recipeIndividual.getDataPropertyValues(
+                                hasDescription, recipeModel);
+                            for (OWLLiteral description : descriptions) {
+                                recipeDescription = description.getLiteral();
+                            }
 
-							/**
-							 * Then retrieve the rules associated to the recipe
-							 * in the rule store.
-							 */
-							OWLObjectProperty objectProperty = factory
-									.getOWLObjectProperty(IRI.create(ruleNS
-											+ "hasRule"));
-							Set<OWLIndividual> rules = recipeIndividual
-									.getObjectPropertyValues(objectProperty,
-											recipeModel);
+                            /**
+                             * Then retrieve the rules associated to the recipe in the rule store.
+                             */
+                            OWLObjectProperty objectProperty = factory.getOWLObjectProperty(IRI
+                                    .create(ruleNS + "hasRule"));
+                            Set<OWLIndividual> rules = recipeIndividual.getObjectPropertyValues(
+                                objectProperty, recipeModel);
 
-							String kReSRulesInKReSSyntax = "";
+                            String kReSRulesInKReSSyntax = "";
 
-							/**
-							 * Fetch the rule content expressed as a literal in
-							 * Rule Syntax.
-							 */
-							OWLDataProperty hasBodyAndHead = factory
-									.getOWLDataProperty(IRI.create(ruleNS
-											+ "hasBodyAndHead"));
-							for (OWLIndividual rule : rules) {
+                            /**
+                             * Fetch the rule content expressed as a literal in Rule Syntax.
+                             */
+                            OWLDataProperty hasBodyAndHead = factory.getOWLDataProperty(IRI
+                                    .create(ruleNS + "hasBodyAndHead"));
+                            for (OWLIndividual rule : rules) {
 
-								Set<OWLLiteral> kReSRuleLiterals = rule
-										.getDataPropertyValues(hasBodyAndHead,
-												recipeModel);
+                                Set<OWLLiteral> kReSRuleLiterals = rule.getDataPropertyValues(hasBodyAndHead,
+                                    recipeModel);
 
-								for (OWLLiteral kReSRuleLiteral : kReSRuleLiterals) {
-									String ruleTmp = kReSRuleLiteral
-											.getLiteral().replace("&lt;", "<");
-									ruleTmp = ruleTmp.replace("&gt;", ">");
-									kReSRulesInKReSSyntax += ruleTmp
-											+ System
-													.getProperty("line.separator");
-								}
-							}
+                                for (OWLLiteral kReSRuleLiteral : kReSRuleLiterals) {
+                                    String ruleTmp = kReSRuleLiteral.getLiteral().replace("&lt;", "<");
+                                    ruleTmp = ruleTmp.replace("&gt;", ">");
+                                    kReSRulesInKReSSyntax += ruleTmp + System.getProperty("line.separator");
+                                }
+                            }
 
-							/**
-							 * Create the Recipe object.
-							 */
+                            /**
+                             * Create the Recipe object.
+                             */
 
-							RuleList ruleList = RuleParserImpl.parse(
-									kReSRulesInKReSSyntax).getkReSRuleList();
-							recipe = new RecipeImpl(recipeIRI,
-									recipeDescription, ruleList);
-						} else {
-							throw new NoSuchRecipeException(recipeIRI);
-						}
-					}
+                            RuleList ruleList = RuleParserImpl.parse(kReSRulesInKReSSyntax).getkReSRuleList();
+                            recipe = new RecipeImpl(recipeIRI, recipeDescription, ruleList);
+                        } else {
+                            throw new NoSuchRecipeException(recipeIRI);
+                        }
+                    }
 
-					return recipe;
-				}
+                    return recipe;
+                }
 
-				@Override
-				public OWLOntology getOntology() {
-					// TODO Auto-generated method stub
-					return null;
-				}
+                @Override
+                public OWLOntology getOntology() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
 
-				@Override
-				public String getFilePath() {
-					// TODO Auto-generated method stub
-					return null;
-				}
+                @Override
+                public String getFilePath() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
 
-				@Override
-				public boolean addRecipe(IRI recipeIRI, String recipeDescription) {
-					// TODO Auto-generated method stub
-					return false;
-				}
+                @Override
+                public boolean addRecipe(IRI recipeIRI, String recipeDescription) {
+                    // TODO Auto-generated method stub
+                    return false;
+                }
 
-				@Override
-				public Recipe addRuleToRecipe(String recipeID,
-						String kReSRuleInKReSSyntax)
-						throws NoSuchRecipeException {
-					return null;
+                @Override
+                public Recipe addRuleToRecipe(String recipeID, String kReSRuleInKReSSyntax) throws NoSuchRecipeException {
+                    return null;
 
-				}
+                }
 
-				@Override
-				public Recipe addRuleToRecipe(Recipe recipe,
-						String kReSRuleInKReSSyntax) {
-					return null;
-					// TODO Auto-generated method stub
+                @Override
+                public Recipe addRuleToRecipe(Recipe recipe, String kReSRuleInKReSSyntax) {
+                    return null;
+                    // TODO Auto-generated method stub
 
-				}
+                }
 
-				@Override
-				public void createRecipe(String recipeID,
-						String rulesInKReSSyntax) {
-					// TODO Auto-generated method stub
+                @Override
+                public void createRecipe(String recipeID, String rulesInKReSSyntax) {
+                    // TODO Auto-generated method stub
 
-				}
+                }
 
-				@Override
-				public boolean removeRecipe(Recipe recipe) {
-					throw new UnsupportedOperationException(
-							"Not supported yet.");
-				}
+                @Override
+                public boolean removeRecipe(Recipe recipe) {
+                    throw new UnsupportedOperationException("Not supported yet.");
+                }
 
-				@Override
-				public boolean removeRecipe(IRI recipeIRI) {
-					throw new UnsupportedOperationException(
-							"Not supported yet.");
-				}
+                @Override
+                public boolean removeRecipe(IRI recipeIRI) {
+                    throw new UnsupportedOperationException("Not supported yet.");
+                }
 
-				@Override
-				public boolean removeRule(Rule rule) {
-					throw new UnsupportedOperationException(
-							"Not supported yet.");
-				}
-			};
-		} catch (OWLOntologyCreationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+                @Override
+                public boolean removeRule(Rule rule) {
+                    throw new UnsupportedOperationException("Not supported yet.");
+                }
+            };
+        } catch (OWLOntologyCreationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
-	@Test
-	public void refactoringTest() throws Exception {
-		Dictionary<String, Object> emptyConfig = new Hashtable<String, Object>();
+    @Test
+    public void refactoringTest() throws Exception {
+        Dictionary<String,Object> emptyConfig = new Hashtable<String,Object>();
 
+        class SpecialTcManager extends TcManager {
+            public SpecialTcManager(QueryEngine qe, WeightedTcProvider wtcp) {
+                super();
+                bindQueryEngine(qe);
+                bindWeightedTcProvider(wtcp);
+            }
+        }
 
-		class SpecialTcManager extends TcManager {
-			public SpecialTcManager(QueryEngine qe, WeightedTcProvider wtcp) {
-				super();
-				bindQueryEngine(qe);
-				bindWeightedTcProvider(wtcp);
-			}
-		}
+        QueryEngine qe = new JenaSparqlEngine();
+        WeightedTcProvider wtcp = new SimpleTcProvider();
+        TcManager tcm = new SpecialTcManager(qe, wtcp);
 
-		QueryEngine qe = new JenaSparqlEngine();
-		WeightedTcProvider wtcp = new SimpleTcProvider();
-		TcManager tcm = new SpecialTcManager(qe, wtcp);
-
-	      ONManager onm = new ONManagerImpl(tcm,wtcp, emptyConfig);
-		Refactorer refactorer = new RefactorerImpl(null,
-				new Serializer(), tcm, onm,
-				ruleStore, new ReasonerImpl(emptyConfig), emptyConfig);
-		try {
-			refactorer.ontologyRefactoring(ontology, recipeIRI);
-		} catch (RefactoringException e) {
-			fail("Error while refactoring.");
-		} catch (NoSuchRecipeException e) {
-			fail("Error while refactoring: no such recipe");
-		}
-	}
+        ONManager onm = new ONManagerImpl(tcm, wtcp, emptyConfig);
+        Refactorer refactorer = new RefactorerImpl(null, new Serializer(), tcm, onm, ruleStore, emptyConfig);
+        try {
+            refactorer.ontologyRefactoring(ontology, recipeIRI);
+        } catch (RefactoringException e) {
+            fail("Error while refactoring.");
+        } catch (NoSuchRecipeException e) {
+            fail("Error while refactoring: no such recipe");
+        }
+    }
 
 }

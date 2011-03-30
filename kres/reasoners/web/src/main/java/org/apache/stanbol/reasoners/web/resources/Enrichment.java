@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.apache.stanbol.reasoners.web;
+package org.apache.stanbol.reasoners.web.resources;
 
 import java.io.File;
 import java.net.URL;

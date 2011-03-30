@@ -15,8 +15,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.stanbol.kres.jersey.format.KRFormat;
+import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.reasoners.base.api.InconcistencyException;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.refactor.api.Refactorer;
 import org.apache.stanbol.rules.refactor.api.RefactoringException;
@@ -27,9 +28,6 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import com.sun.jersey.api.view.ImplicitProduces;
-
-import org.apache.stanbol.kres.jersey.format.KRFormat;
-import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
 
 /**
  * 
@@ -42,9 +40,9 @@ import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
 public class RefactorerResource extends NavigationMixin {
 
     protected ONManager onManager;
+    protected Refactorer semionRefactorer;
     // protected SemionManager semionManager;
     protected TcManager tcManager;
-    protected Refactorer semionRefactorer;
 
     public RefactorerResource(@Context ServletContext servletContext) {
         semionRefactorer = (Refactorer) (servletContext.getAttribute(Refactorer.class.getName()));
@@ -58,37 +56,15 @@ public class RefactorerResource extends NavigationMixin {
 
     }
 
-    @GET
-    @Path("/lazy")
-    public Response performRefactoringLazyCreateGraph(@QueryParam("recipe") String recipe,
-                                                      @QueryParam("input-graph") String inputGraph,
-                                                      @QueryParam("output-graph") String outputGraph) {
-
-        System.out.println("recipe: " + recipe);
-        System.out.println("input-graph: " + inputGraph);
-        System.out.println("output-graph: " + outputGraph);
-        IRI recipeIRI = IRI.create(recipe);
-        IRI inputGraphIRI = IRI.create(inputGraph);
-        IRI outputGraphIRI = IRI.create(outputGraph);
-
-        // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
-
-        try {
-            semionRefactorer.ontologyRefactoring(outputGraphIRI, inputGraphIRI, recipeIRI);
-            return Response.ok().build();
-        } catch (RefactoringException e) {
-            return Response.status(500).build();
-        } catch (NoSuchRecipeException e) {
-            return Response.status(204).build();
-        }
-
+    public String getNamespace() {
+        return onManager.getKReSNamespace();
     }
 
     @POST
     @Path("/lazy")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(value = {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL,
-                       KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.RDF_JSON})
+    @Produces(value = {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
+                       KRFormat.OWL_XML, KRFormat.RDF_JSON})
     public Response performRefactoring(@FormParam("recipe") String recipe,
                                        @FormParam("input") InputStream input) {
 
@@ -120,11 +96,14 @@ public class RefactorerResource extends NavigationMixin {
     }
 
     @GET
-    @Path("/consistent")
-    public Response performConsistentRefactoringCreateGraph(@QueryParam("recipe") String recipe,
-                                                            @QueryParam("input-graph") String inputGraph,
-                                                            @QueryParam("output-graph") String outputGraph) {
+    @Path("/lazy")
+    public Response performRefactoringLazyCreateGraph(@QueryParam("recipe") String recipe,
+                                                      @QueryParam("input-graph") String inputGraph,
+                                                      @QueryParam("output-graph") String outputGraph) {
 
+        System.out.println("recipe: " + recipe);
+        System.out.println("input-graph: " + inputGraph);
+        System.out.println("output-graph: " + outputGraph);
         IRI recipeIRI = IRI.create(recipe);
         IRI inputGraphIRI = IRI.create(inputGraph);
         IRI outputGraphIRI = IRI.create(outputGraph);
@@ -132,55 +111,14 @@ public class RefactorerResource extends NavigationMixin {
         // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
 
         try {
-            semionRefactorer.consistentOntologyRefactoring(outputGraphIRI, inputGraphIRI, recipeIRI);
+            semionRefactorer.ontologyRefactoring(outputGraphIRI, inputGraphIRI, recipeIRI);
             return Response.ok().build();
         } catch (RefactoringException e) {
             return Response.status(500).build();
         } catch (NoSuchRecipeException e) {
             return Response.status(204).build();
-        } catch (InconcistencyException e) {
-            return Response.status(415).build();
         }
 
-    }
-
-    @POST
-    @Path("/consistent")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces( {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
-                KRFormat.OWL_XML, KRFormat.RDF_JSON})
-    public Response consistentRefactoringOfNewGraph(@FormParam("recipe") String recipe,
-                                                    @FormParam("input") InputStream input) {
-
-        IRI recipeIRI = IRI.create(recipe);
-
-        // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
-
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLOntology inputOntology;
-        try {
-            inputOntology = manager.loadOntologyFromOntologyDocument(input);
-
-            OWLOntology outputOntology;
-            try {
-                outputOntology = semionRefactorer.consistentOntologyRefactoring(inputOntology, recipeIRI);
-            } catch (RefactoringException e) {
-                return Response.status(500).build();
-            } catch (NoSuchRecipeException e) {
-                return Response.status(204).build();
-            } catch (InconcistencyException e) {
-                return Response.status(415).build();
-            }
-
-            return Response.ok(outputOntology).build();
-        } catch (OWLOntologyCreationException e) {
-            return Response.status(404).build();
-        }
-
-    }
-
-    public String getNamespace() {
-        return onManager.getKReSNamespace();
     }
 
 }

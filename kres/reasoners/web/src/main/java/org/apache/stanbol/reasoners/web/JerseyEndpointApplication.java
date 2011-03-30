@@ -9,6 +9,10 @@ import org.apache.stanbol.kres.jersey.processors.ViewProcessorImpl;
 import org.apache.stanbol.kres.jersey.writers.GraphWriter;
 import org.apache.stanbol.kres.jersey.writers.OWLOntologyWriter;
 import org.apache.stanbol.kres.jersey.writers.ResultSetWriter;
+import org.apache.stanbol.reasoners.web.resources.Classify;
+import org.apache.stanbol.reasoners.web.resources.ConsistencyCheck;
+import org.apache.stanbol.reasoners.web.resources.ConsistentRefactoring;
+import org.apache.stanbol.reasoners.web.resources.Enrichment;
 
 /**
  * Statically define the list of available resources and providers to be used by the KReS JAX-RS Endpoint.
@@ -30,6 +34,7 @@ public class JerseyEndpointApplication extends Application {
 
         // Reasoner
         classes.add(ConsistencyCheck.class);
+        classes.add(ConsistentRefactoring.class);
         classes.add(Classify.class);
         classes.add(Enrichment.class);
 

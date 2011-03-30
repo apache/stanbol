@@ -28,11 +28,11 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionID
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
-import org.apache.stanbol.reasoners.base.api.InconcistencyException;
-import org.apache.stanbol.reasoners.base.api.Reasoner;
-import org.apache.stanbol.rules.base.api.Rule;
+import org.apache.stanbol.owlapi.trasformation.JenaToClerezzaConverter;
+import org.apache.stanbol.owlapi.trasformation.OWLAPIToClerezzaConverter;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
+import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.apache.stanbol.rules.manager.arqextention.CreatePropertyURIStringFromLabel;
@@ -53,24 +53,20 @@ import org.semanticweb.owlapi.util.OWLOntologyMerger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.reasoner.Reasoner;
 import com.hp.hpl.jena.sparql.function.FunctionRegistry;
 import com.hp.hpl.jena.sparql.pfunction.PropertyFunctionRegistry;
 import com.hp.hpl.jena.update.UpdateAction;
 
-import org.apache.stanbol.owlapi.trasformation.JenaToClerezzaConverter;
-import org.apache.stanbol.owlapi.trasformation.JenaToOwlConvert;
-import org.apache.stanbol.owlapi.trasformation.OWLAPIToClerezzaConverter;
-
 /**
- * The RefactorerImpl is the concrete implementation of the Refactorer interface defined in the
- * KReS APIs. A SemionRefacter is able to perform ontology refactorings and mappings.
+ * The RefactorerImpl is the concrete implementation of the Refactorer interface defined in the KReS APIs. A
+ * SemionRefacter is able to perform ontology refactorings and mappings.
  * 
  * @author andrea.nuzzolese
  * 
@@ -114,13 +110,10 @@ public class RefactorerImpl implements Refactorer {
     private OntologyScope scope;
 
     @Reference
-    Reasoner kReSReasoner;
+    protected ONManager onManager;
     @Reference
-    ONManager onManager;
-    @Reference
-    RuleStore ruleStore;
-    // @Reference
-    // SemionManager semionManager;
+    protected RuleStore ruleStore;
+
     @Reference
     protected Serializer serializer;
     @Reference
@@ -132,8 +125,8 @@ public class RefactorerImpl implements Refactorer {
      * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
      * Component Runtime support.
      * <p>
-     * DO NOT USE to manually create instances - the RefactorerImpl instances do need to be configured!
-     * YOU NEED TO USE
+     * DO NOT USE to manually create instances - the RefactorerImpl instances do need to be configured! YOU
+     * NEED TO USE
      * {@link #RefactorerImpl(WeightedTcProvider, Serializer, TcManager, ONManager, SemionManager, RuleStore, Reasoner, Dictionary)}
      * or its overloads, to parse the configuration and then initialise the rule store if running outside a
      * OSGI environment.
@@ -155,12 +148,11 @@ public class RefactorerImpl implements Refactorer {
      * @param configuration
      */
     public RefactorerImpl(WeightedTcProvider weightedTcProvider,
-                                Serializer serializer,
-                                TcManager tcManager,
-                                ONManager onManager, /* SemionManager semionManager, */
-                                RuleStore ruleStore,
-                                Reasoner kReSReasoner,
-                                Dictionary<String,Object> configuration) {
+                          Serializer serializer,
+                          TcManager tcManager,
+                          ONManager onManager, /* SemionManager semionManager, */
+                          RuleStore ruleStore,
+                          Dictionary<String,Object> configuration) {
         this();
         this.weightedTcProvider = weightedTcProvider;
         this.serializer = serializer;
@@ -168,7 +160,6 @@ public class RefactorerImpl implements Refactorer {
         this.onManager = onManager;
         // this.semionManager = semionManager;
         this.ruleStore = ruleStore;
-        this.kReSReasoner = kReSReasoner;
         activate(configuration);
     }
 
@@ -180,80 +171,12 @@ public class RefactorerImpl implements Refactorer {
     @SuppressWarnings("unchecked")
     @Activate
     protected void activate(ComponentContext context) throws IOException {
-        log.info("in " + RefactorerImpl.class + " activate with context " + context);
+        log.info("in " + getClass() + " activate with context " + context);
         if (context == null) {
             throw new IllegalStateException("No valid" + ComponentContext.class + " parsed in activate!");
         }
         activate((Dictionary<String,Object>) context.getProperties());
     }
-
-    /*
-     * public void consistentOntologyRefactoring(IRI refactoredOntologyIRI, IRI datasetURI, IRI recipeIRI)
-     * throws RefactoringException, NoSuchRecipeException, InconcistencyException {
-     * 
-     * 
-     * 
-     * OWLOntology refactoredOntology = null;
-     * 
-     * OntologyStorage ontologyStorage = onManager.getOntologyStore();
-     * 
-     * OWLOntology owlOntology = ontologyStorage.load(datasetURI);
-     * 
-     * JenaToOwlConvert jenaToOwlConvert = new JenaToOwlConvert();
-     * 
-     * OntModel ontModel = jenaToOwlConvert.ModelOwlToJenaConvert(owlOntology, "RDF/XML");
-     * 
-     * Recipe recipe; try { recipe = ruleStore.getRecipe(recipeIRI);
-     * 
-     * RuleList kReSRuleList = recipe.getkReSRuleList();
-     * 
-     * OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
-     * 
-     * for(Rule kReSRule : kReSRuleList){ String sparql = kReSRule.toSPARQL();
-     * 
-     * Query sparqlQuery = QueryFactory.create(sparql); QueryExecution qexec =
-     * QueryExecutionFactory.create(sparqlQuery, ontModel) ; Model refactoredModel = qexec.execConstruct();
-     * 
-     * 
-     * OWLOntology refactoredDataSet = jenaToOwlConvert.ModelJenaToOwlConvert(refactoredModel, "RDF/XML");
-     * 
-     * ByteArrayOutputStream out = new ByteArrayOutputStream(); try {
-     * ontologyManager.saveOntology(refactoredDataSet, new RDFXMLOntologyFormat(), out); } catch
-     * (OWLOntologyStorageException e) { // TODO Auto-generated catch block e.printStackTrace(); }
-     * 
-     * ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-     * 
-     * try { ontologyManager.loadOntologyFromOntologyDocument(in); } catch (OWLOntologyCreationException e) {
-     * // TODO Auto-generated catch block e.printStackTrace(); }
-     * 
-     * }
-     * 
-     * OWLOntologyMerger merger = new OWLOntologyMerger(ontologyManager);
-     * 
-     * try { refactoredOntology = merger.createMergedOntology(ontologyManager, refactoredOntologyIRI);
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * if(!kReSReasoner.consistencyCheck(kReSReasoner.getReasoner(refactoredOntology ))){ throw
-     * newInconcistencyException( "Semion Refactorer : the refactored data set seems to be inconsistent"); }
-     * else{ ontologyStorage.store(refactoredOntology); } } catch (OWLOntologyCreationException e) { // TODO
-     * Auto-generated catch block e.printStackTrace(); }
-     * 
-     * 
-     * 
-     * } catch (NoSuchRecipeException e1) {
-     * log.error("Refactorer : No Such recipe in the KReS Rule Store", e1); throw e1; }
-     * 
-     * if(refactoredOntology == null){ throw new RefactoringException(); }
-     * 
-     * }
-     */
 
     protected void activate(Dictionary<String,Object> configuration) {
         String refactoringSessionID = (String) configuration.get(REFACTORING_SESSION_ID);
@@ -321,210 +244,18 @@ public class RefactorerImpl implements Refactorer {
         log.info("Activated KReS Semion Refactorer");
     }
 
-    @Override
-    public void consistentOntologyRefactoring(IRI refactoredOntologyIRI, IRI datasetURI, IRI recipeIRI) throws RefactoringException,
-                                                                                                       NoSuchRecipeException,
-                                                                                                       InconcistencyException {
-
-        OWLOntology refactoredOntology = null;
-
-        ClerezzaOntologyStorage ontologyStorage = onManager.getOntologyStore();
-
-        Recipe recipe;
-        try {
-            recipe = ruleStore.getRecipe(recipeIRI);
-
-            RuleList kReSRuleList = recipe.getkReSRuleList();
-
-            OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
-
-            String fingerPrint = "";
-            for (Rule kReSRule : kReSRuleList) {
-                String sparql = kReSRule.toSPARQL();
-
-                OWLOntology refactoredDataSet = ontologyStorage
-                        .sparqlConstruct(sparql, datasetURI.toString());
-
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                try {
-                    ontologyManager.saveOntology(refactoredDataSet, new RDFXMLOntologyFormat(), out);
-                    if (refactoredOntologyIRI == null) {
-                        ByteArrayOutputStream fpOut = new ByteArrayOutputStream();
-                        fingerPrint += URIGenerator.createID("", fpOut.toByteArray());
-                    }
-
-                } catch (OWLOntologyStorageException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
-                ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-
-                try {
-                    ontologyManager.loadOntologyFromOntologyDocument(in);
-                } catch (OWLOntologyCreationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
-            }
-
-            if (refactoredOntologyIRI == null) {
-                refactoredOntologyIRI = IRI.create(URIGenerator.createID("urn://", fingerPrint.getBytes()));
-            }
-            OWLOntologyMerger merger = new OWLOntologyMerger(ontologyManager);
-
-            try {
-
-                refactoredOntology = merger.createMergedOntology(ontologyManager, refactoredOntologyIRI);
-
-                if (!kReSReasoner.consistencyCheck(kReSReasoner.getReasoner(refactoredOntology))) {
-                    throw new InconcistencyException(
-                            "Semion Refactorer : the refactored data set seems to be inconsistent");
-                } else {
-                    ontologyStorage.store(refactoredOntology);
-                }
-            } catch (OWLOntologyCreationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
-        } catch (NoSuchRecipeException e1) {
-            log.error("SemionRefactorer : No Such recipe in the KReS Rule Store", e1);
-            throw e1;
-        }
-
-        if (refactoredOntology == null) {
-            throw new RefactoringException();
-        }
-
-        /*
-         * UriRef uriRef = new UriRef(refactoredDataSetURI);
-         * 
-         * MGraph mGraph = weightedTcProvider.createMGraph(datasetURI);
-         * 
-         * Set<IRI> ruleIRIs = kReSRuleManager.getRecipe(recipeIRI);
-         * 
-         * for(IRI ruleIRI : ruleIRIs){ Rule kReSRule = kReSRuleManager.getRule(ruleIRI);
-         * 
-         * String sparql = kReSRule.toSPARQL();
-         * 
-         * Query query; try { query = QueryParser.getInstance().parse(sparql); MGraph dataset =
-         * weightedTcProvider.getMGraph(datasetURI); mGraph.addAll((SimpleGraph)
-         * tcManager.executeSparqlQuery(query, dataset));
-         * 
-         * } catch (ParseException e) { // TODO Auto-generated catch block e.printStackTrace(); } }
-         * 
-         * ByteArrayOutputStream out = new ByteArrayOutputStream();
-         * 
-         * SerializingProvider serializingProvider = new JenaSerializerProvider();
-         * 
-         * serializingProvider.serialize(out, mGraph, SupportedFormat.RDF_XML);
-         * 
-         * ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-         * 
-         * OWLOntologyManager owlOntologyManager = onManager.getOwlCacheManager();
-         * 
-         * OWLOntology owlmodel; try { owlmodel = owlOntologyManager.loadOntologyFromOntologyDocument(in);
-         * if(kReSReasoner .consistencyCheck(kReSReasoner.getReasoner(owlmodel))){ return uriRef; } else{
-         * throw newInconcistencyException(
-         * "Semion Refactorer : the refactored data set seems to be inconsistent" ); } } catch
-         * (OWLOntologyCreationException e) { throw new InconcistencyException
-         * ("Semion Refactorer : the refactored data set seems to be invalid"); }
-         */
-
-    }
-
-    @Override
-    public OWLOntology consistentOntologyRefactoring(OWLOntology inputOntology, IRI recipeIRI) throws RefactoringException,
-                                                                                              NoSuchRecipeException,
-                                                                                              InconcistencyException {
-
-        OWLOntology refactoredOntology = null;
-
-        JenaToOwlConvert jenaToOwlConvert = new JenaToOwlConvert();
-
-        OntModel ontModel = jenaToOwlConvert.ModelOwlToJenaConvert(inputOntology, "RDF/XML");
-
-        Recipe recipe;
-        try {
-            recipe = ruleStore.getRecipe(recipeIRI);
-
-            RuleList kReSRuleList = recipe.getkReSRuleList();
-
-            OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
-
-            for (Rule kReSRule : kReSRuleList) {
-                String sparql = kReSRule.toSPARQL();
-
-                Query sparqlQuery = QueryFactory.create(sparql);
-                QueryExecution qexec = QueryExecutionFactory.create(sparqlQuery, ontModel);
-                Model refactoredModel = qexec.execConstruct();
-
-                OWLOntology refactoredDataSet = jenaToOwlConvert.ModelJenaToOwlConvert(refactoredModel,
-                    "RDF/XML");
-
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                try {
-                    ontologyManager.saveOntology(refactoredDataSet, new RDFXMLOntologyFormat(), out);
-                } catch (OWLOntologyStorageException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
-                ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-
-                try {
-                    ontologyManager.loadOntologyFromOntologyDocument(in);
-                } catch (OWLOntologyCreationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
-            }
-
-            OWLOntologyMerger merger = new OWLOntologyMerger(ontologyManager);
-
-            try {
-                IRI defaultOntologyIRI = IRI.create("http://kres.iksproject.eu/semion/autoGeneratedOntology");
-                refactoredOntology = merger.createMergedOntology(ontologyManager, defaultOntologyIRI);
-
-                if (!kReSReasoner.consistencyCheck(kReSReasoner.getReasoner(refactoredOntology))) {
-                    throw new InconcistencyException(
-                            "Semion Refactorer : the refactored data set seems to be inconsistent");
-                }
-
-            } catch (OWLOntologyCreationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
-        } catch (NoSuchRecipeException e1) {
-            log.error("SemionRefactorer : No Such recipe in the KReS Rule Store", e1);
-            throw e1;
-        }
-
-        if (refactoredOntology == null) {
-            throw new RefactoringException();
-        } else {
-            return refactoredOntology;
-        }
-    }
-
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        log.info("in " + RefactorerImpl.class + " deactivate with context " + context);
+        log.info("in " + getClass() + " deactivate with context " + context);
 
         SessionManager kReSSessionManager = onManager.getSessionManager();
         kReSSessionManager.destroySession(kReSSessionID);
         // semionManager.unregisterRefactorer();
-
         this.weightedTcProvider = null;
         this.serializer = null;
         this.tcManager = null;
         this.onManager = null;
         this.ruleStore = null;
-        this.kReSReasoner = null;
     }
 
     @Override
