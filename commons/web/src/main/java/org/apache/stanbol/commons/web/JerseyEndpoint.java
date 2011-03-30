@@ -17,6 +17,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.stanbol.commons.web.resource.NavigationMixin;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;
@@ -61,7 +62,7 @@ public class JerseyEndpoint {
 
     protected final List<WebFragment> webFragments = new ArrayList<WebFragment>();
 
-    protected ArrayList<String> registeredAlias;
+    protected ArrayList<String> registeredAliases;
 
     public Dictionary<String,String> getInitParams() {
         Dictionary<String,String> initParams = new Hashtable<String,String>();
@@ -74,7 +75,7 @@ public class JerseyEndpoint {
     @Activate
     protected void activate(ComponentContext ctx) throws IOException, ServletException, NamespaceException {
         this.componentContext = ctx;
-        this.registeredAlias = new ArrayList<String>();
+        this.registeredAliases = new ArrayList<String>();
 
         // register all the JAX-RS resources into a a JAX-RS application and bind it to a configurable URL
         // prefix
@@ -90,7 +91,7 @@ public class JerseyEndpoint {
         // register the root of static resources (TODO: move me in a dedicated fragment instead)
         String defaultStaticAlias = staticUrlRoot + "/default";
         httpService.registerResources(defaultStaticAlias, staticClasspath, null);
-        registeredAlias.add(defaultStaticAlias);
+        registeredAliases.add(defaultStaticAlias);
 
         // incrementally contribute fragment resources
         List<LinkResource> linkResources = new ArrayList<LinkResource>();
@@ -104,22 +105,17 @@ public class JerseyEndpoint {
             app.contributeTemplateLoader(fragment.getTemplateLoader());
             String resourceAlias = staticUrlRoot + '/' + fragment.getName();
             httpService.registerResources(resourceAlias, fragment.getStaticResourceClassPath(),
-                new WebFragmentHttpContext(fragment));
-            registeredAlias.add(resourceAlias);
+                new BundleHttpContext(fragment));
+            registeredAliases.add(resourceAlias);
         }
 
+        // bind the aggregate JAX-RS application to a dedicated servlet
         ServletContainer container = new ServletContainer(app);
-        String alias = (String) ctx.getProperties().get(ALIAS_PROPERTY);
-
-        // TODO: check whether this class-loading hack is still necessary or not
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-        try {
-            httpService.registerServlet(alias, container, getInitParams(), null);
-            registeredAlias.add(alias);
-        } finally {
-            Thread.currentThread().setContextClassLoader(classLoader);
-        }
+        String applicationAlias = (String) ctx.getProperties().get(ALIAS_PROPERTY);
+        Bundle appBundle = ctx.getBundleContext().getBundle();
+        httpService.registerServlet(applicationAlias, container, getInitParams(), new BundleHttpContext(
+                appBundle));
+        registeredAliases.add(applicationAlias);
 
         // forward the main Stanbol OSGi runtime context so that JAX-RS resources can lookup arbitrary
         // services
@@ -128,12 +124,12 @@ public class JerseyEndpoint {
         servletContext.setAttribute(NavigationMixin.STATIC_RESOURCES_ROOT_URL, staticUrlRoot);
         servletContext.setAttribute(NavigationMixin.LINK_RESOURCES, linkResources);
         servletContext.setAttribute(NavigationMixin.SCRIPT_RESOURCES, scriptResources);
-        log.info("JerseyEndpoint servlet registered at {}", alias);
+        log.info("JerseyEndpoint servlet registered at {}", applicationAlias);
     }
 
     @Deactivate
     protected void deactivate(ComponentContext ctx) {
-        for (String alias : registeredAlias) {
+        for (String alias : registeredAliases) {
             httpService.unregister(alias);
         }
         servletContext = null;

@@ -9,14 +9,18 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 
 /**
- * Custom HTTP Context to lookup the resources from the classloader of the WebFragment bundle.
+ * Custom HTTP Context to lookup the resources from the classloader of the OSGi bundle.
  */
-public class WebFragmentHttpContext implements HttpContext {
+public class BundleHttpContext implements HttpContext {
 
     private Bundle bundle;
 
-    public WebFragmentHttpContext(WebFragment fragment) {
+    public BundleHttpContext(WebFragment fragment) {
         this.bundle = fragment.getBundleContext().getBundle();
+    }
+
+    public BundleHttpContext(Bundle bundle) {
+        this.bundle = bundle;
     }
 
     public String getMimeType(String name) {
