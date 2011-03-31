@@ -93,24 +93,6 @@
 
 	<dependencies>
 
-		<!-- Stanbol deps -->
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
-			<version>${stanbol-version}</version>
-		</dependency>
-                <dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.owl</artifactId>
-			<version>${stanbol-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>owlapi</groupId>
-			<artifactId>owlapi</artifactId>
-			<version>3.0.0</version>
-		</dependency>
-
 		<!-- OSGi deps -->
 		<dependency>
 			<groupId>org.osgi</groupId>
@@ -128,6 +110,14 @@
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.scr.annotations</artifactId>
 			<version>1.2.0</version>
+			<scope>provided</scope>
+		</dependency>
+		
+		<!-- OWL deps -->
+		<dependency>
+			<groupId>owlapi</groupId>
+			<artifactId>owlapi</artifactId>
+			<version>3.0.0</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -194,12 +184,11 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- WebService deps -->
+		<!-- Stanbol deps -->
 		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-client</artifactId>
-			<version>${jersey-version}</version>
-			<scope>provided</scope>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
+			<version>${stanbol-version}</version>
 		</dependency>
 
 		<!-- Disgnostics deps -->

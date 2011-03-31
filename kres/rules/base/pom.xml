@@ -91,12 +91,11 @@
 			<version>2.6.2</version>
 			<scope>provided</scope>
 		</dependency>
-
-		<!-- Stanbol deps -->
 		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.owl</artifactId>
-			<version>${stanbol-version}</version>
+			<groupId>owlapi</groupId>
+			<artifactId>owlapi</artifactId>
+			<version>3.0.0</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Diagnostics deps -->
