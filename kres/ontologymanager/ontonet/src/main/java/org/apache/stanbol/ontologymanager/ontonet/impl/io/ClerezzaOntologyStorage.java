@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.access.EntityAlreadyExistsException;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.impl.SimpleGraph;
@@ -178,8 +179,16 @@ public class ClerezzaOntologyStorage {
 		OntModel om = converter.ModelOwlToJenaConvert(o, "RDF/XML");
 		MGraph mg = JenaToClerezzaConverter.jenaModelToClerezzaMGraph(om);
 		// MGraph mg = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(o);
-		MGraph mg2 = tcManager.createMGraph(new UriRef(o.getOntologyID()
-				.getOntologyIRI().toString()));
+		MGraph mg2 = null;
+UriRef ref = new UriRef(o.getOntologyID()
+    .getOntologyIRI().toString());
+		try {
+		mg2 = tcManager.createMGraph(ref);
+		} catch (EntityAlreadyExistsException ex) {
+		    log.info("Entity "+ref+" already exists in store. Replacing...");
+		    mg2 = tcManager.getMGraph(ref);
+		}
+		
 		mg2.addAll(mg);
 	}
 	

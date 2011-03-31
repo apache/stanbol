@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
+<!-- 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
@@ -73,32 +73,10 @@
 		</plugins>
 	</build>
 
+
 	<dependencies>
 
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.owlapi</artifactId>
-			<version>${stanbol-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>owlapi</groupId>
-			<artifactId>owlapi</artifactId>
-			<version>3.0.0</version>
-		</dependency>
-
 		<!-- OSGi deps -->
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-			<version>4.1.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-			<version>4.1.0</version>
-			<scope>provided</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.scr.annotations</artifactId>
@@ -106,19 +84,27 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- Persistence deps -->
+		<!-- OWL deps -->
 		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.core</artifactId>
-			<version>0.12-incubating-SNAPSHOT</version>
+			<groupId>com.hp.hpl.jena</groupId>
+			<artifactId>jena</artifactId>
+			<version>2.6.2</version>
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- WebService deps -->
+		<!-- Stanbol deps -->
 		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-client</artifactId>
-			<version>${jersey-version}</version>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.owlapi</artifactId>
+			<version>${stanbol-version}</version>
+		</dependency>
+
+		<!-- Diagnostics deps -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.5.2</version>
+			<type>jar</type>
 			<scope>provided</scope>
 		</dependency>
 
@@ -129,32 +115,15 @@
 			<version>4.4</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.5.2</version>
-			<type>jar</type>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>1.5.2</version>
-			<type>jar</type>
-			<scope>provided</scope>
-		</dependency>
-	 <dependency>
-	  <groupId>com.hp.hpl.jena</groupId>
-	  <artifactId>jena</artifactId>
-	  <version>2.6.2</version>
-	 </dependency>
+
 	</dependencies>
 
+
 	<repositories>
-                <repository>
-                    <id>stlab-cnr-repo</id>
-                    <url>http://stlab.istc.cnr.it/software/maven/repo</url>
-                </repository>
-        </repositories>
+		<repository>
+			<id>stlab-cnr-repo</id>
+			<url>http://stlab.istc.cnr.it/software/maven/repo</url>
+		</repository>
+	</repositories>
 
 </project>
