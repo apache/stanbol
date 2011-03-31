@@ -6,8 +6,8 @@
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 
     <!-- to be moved in the dedicated fragment -->
-    <link rel="stylesheet" href="/static/base/style/stanbol.css" />
-    <link rel="icon" type="image/png" href="/static/base/images/favicon.png" />
+    <link rel="stylesheet" href="/static/home/style/stanbol.css" />
+    <link rel="icon" type="image/png" href="/static/home/images/favicon.png" />
 
     <#list it.registeredLinkResources as link>
     <link rel="${link.rel}" href="${it.staticRootUrl}/${link.fragmentName}/${link.relativePath}" />
@@ -20,7 +20,7 @@
   </head>
 
   <body>
-    <div class="home"><a href="/"><img src="/static/base/images/apache_stanbol_logo_cropped.png" alt="Stanbol Home" /></a></div>
+    <div class="home"><a href="/"><img src="/static/home/images/apache_stanbol_logo_cropped.png" alt="Stanbol Home" /></a></div>
     <div class="header">
       <h1>The RESTful Semantic Engine</h1>
 
@@ -63,9 +63,9 @@ $(".restapitabs a").click(function () {
 
     <div class="column">
       <a href="http://www.w3.org/standards/semanticweb/"><img class="swcube"
-        src="/static/base/images/sw-cube.png"/></a>
+        src="/static/home/images/sw-cube.png"/></a>
       <a href="http://www.iks-project.eu"><img
-        height="60px" alt="IKS Project" src="/static/base/images/iks_project_logo.jpg" /></a>
+        height="60px" alt="IKS Project" src="/static/home/images/iks_project_logo.jpg" /></a>
     </div>
     <div class="column right">
       <em>The research leading to these results has received funding from the European Community's
