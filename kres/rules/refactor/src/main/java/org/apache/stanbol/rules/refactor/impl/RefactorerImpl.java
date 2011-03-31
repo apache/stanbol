@@ -28,8 +28,8 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionID
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
-import org.apache.stanbol.owlapi.trasformation.JenaToClerezzaConverter;
-import org.apache.stanbol.owlapi.trasformation.OWLAPIToClerezzaConverter;
+import org.apache.stanbol.owl.trasformation.JenaToClerezzaConverter;
+import org.apache.stanbol.owl.trasformation.OWLAPIToClerezzaConverter;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.Rule;

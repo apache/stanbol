@@ -7,7 +7,7 @@ import javax.ws.rs.core.Application;
 
 import org.apache.stanbol.kres.jersey.processors.ViewProcessorImpl;
 import org.apache.stanbol.kres.jersey.writers.GraphWriter;
-import org.apache.stanbol.kres.jersey.writers.OWLOntologyWriter;
+import org.apache.stanbol.owl.web.OWLOntologyWriter;
 import org.apache.stanbol.kres.jersey.writers.ResultSetWriter;
 import org.apache.stanbol.ontologymanager.web.resources.GraphsResource;
 import org.apache.stanbol.ontologymanager.web.resources.ONMOntResource;

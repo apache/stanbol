@@ -23,7 +23,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import org.apache.stanbol.reengineer.db.vocab.DBS_L1;
 
-import org.apache.stanbol.owlapi.trasformation.JenaToOwlConvert;
+import org.apache.stanbol.owl.trasformation.JenaToOwlConvert;
 
 public class DatabaseConnection {
 

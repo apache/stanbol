@@ -15,7 +15,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
-import org.apache.stanbol.owlapi.trasformation.JenaToOwlConvert;
+import org.apache.stanbol.owl.trasformation.JenaToOwlConvert;
 import org.apache.stanbol.reasoners.base.api.ConsistentRefactorer;
 import org.apache.stanbol.reasoners.base.api.InconcistencyException;
 import org.apache.stanbol.reasoners.base.api.Reasoner;

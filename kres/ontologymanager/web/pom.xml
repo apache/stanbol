@@ -130,6 +130,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
+                        <version>1.5.2</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -178,11 +179,18 @@
 			<version>${stanbol-version}</version>
 			<scope>provided</scope>            
 		</dependency>
+                <dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.owl</artifactId>
+			<version>${stanbol-version}</version>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- for tests -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
+                        <version>1.5.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

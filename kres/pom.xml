@@ -42,7 +42,7 @@
   <modules>
 
     <!-- Jersey -->
-    <module>owlapi</module>
+    <module>owl</module>
 
     <module>jersey</module>
     

@@ -10,7 +10,6 @@ import org.apache.stanbol.kres.jersey.resource.DocumentationResource;
 import org.apache.stanbol.kres.jersey.resource.RESTfulResource;
 import org.apache.stanbol.kres.jersey.resource.RootResource;
 import org.apache.stanbol.kres.jersey.writers.GraphWriter;
-import org.apache.stanbol.kres.jersey.writers.OWLOntologyWriter;
 import org.apache.stanbol.kres.jersey.writers.ResultSetWriter;
 
 /**
@@ -42,7 +41,6 @@ public class JerseyEndpointApplication extends Application {
         classes.add(GraphWriter.class);
         classes.add(ResultSetWriter.class);
         // classes.add(OwlModelWriter.class);
-        classes.add(OWLOntologyWriter.class);
         return classes;
     }
 
