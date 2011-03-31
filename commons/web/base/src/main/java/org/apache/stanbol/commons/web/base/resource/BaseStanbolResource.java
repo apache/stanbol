@@ -1,6 +1,7 @@
 package org.apache.stanbol.commons.web.base.resource;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -38,17 +39,22 @@ public class BaseStanbolResource {
     }
 
     public List<MenuItem> getMainMenuItems() {
-        return Arrays.asList(new MenuItem("/engines", getRootUrl() + "/engines", uriInfo), new MenuItem(
-                "/store", getRootUrl() + "/store", uriInfo), new MenuItem("/sparql",
-                getRootUrl() + "/sparql", uriInfo));
+        List<MenuItem> items = new ArrayList<MenuItem>();
+        for (String path: Arrays.asList("/engines", "/store", "/sparql")) {
+            items.add(new MenuItem(path, path, uriInfo));
+        }
+        return items;
     }
 
     public static class MenuItem {
 
         public MenuItem(String label, String link, UriInfo uriInfo) {
             this.label = label;
+            if (link.startsWith("/")) {
+                link = link.substring(1);
+            }
             this.link = link;
-            cssClass = uriInfo.getPath().startsWith(link.substring(1)) ? "selected" : "unselected";
+            cssClass = uriInfo.getPath().startsWith(link) ? "selected" : "unselected";
         }
 
         protected final String label;

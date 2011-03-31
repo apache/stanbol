@@ -28,7 +28,7 @@
       <div class="mainNavigationMenu">
       <ul>
         <#list it.mainMenuItems as item>
-        <li class="${item.cssClass}"><a href="${item.link}">${item.label}</a></li>
+        <li class="${item.cssClass}"><a href="${it.publicBaseUri}${item.link}">${item.label}</a></li>
         </#list>
       </ul>
       </div>
