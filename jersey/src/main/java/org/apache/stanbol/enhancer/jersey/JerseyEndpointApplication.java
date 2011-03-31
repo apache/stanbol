@@ -22,7 +22,6 @@ import java.util.Set;
 import javax.ws.rs.core.Application;
 
 import org.apache.stanbol.enhancer.jersey.processors.FreemarkerViewProcessor;
-import org.apache.stanbol.enhancer.jersey.resource.BenchmarkRootResource;
 import org.apache.stanbol.enhancer.jersey.resource.EnginesRootResource;
 import org.apache.stanbol.enhancer.jersey.resource.EnhancerRootResource;
 import org.apache.stanbol.enhancer.jersey.resource.SparqlQueryResource;
@@ -52,7 +51,6 @@ public class JerseyEndpointApplication extends Application {
         classes.add(EnginesRootResource.class);
         classes.add(StoreRootResource.class);
         classes.add(SparqlQueryResource.class);
-        classes.add(BenchmarkRootResource.class);
 
         // message body writers
         classes.add(GraphWriter.class);
