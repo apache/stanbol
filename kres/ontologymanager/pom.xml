@@ -40,8 +40,8 @@
   <inceptionYear>2011</inceptionYear>
 
   <modules>
-    <module>../jersey</module>   
-    <module>../owl</module>  
+    <!--module>../jersey</module>   
+    <module>../owl</module-->  
     <module>ontonet</module>    
     <module>web</module>
   </modules>

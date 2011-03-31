@@ -40,9 +40,9 @@
   <inceptionYear>2011</inceptionYear>
 
   <modules>
-    <module>../jersey</module>    
+    <!--module>../jersey</module>    
     <module>../ontologymanager/ontonet</module>   
-    <module>../owl</module>  
+    <module>../owl</module-->  
     <module>base</module>      
     <module>manager</module>
     <module>refactor</module>    

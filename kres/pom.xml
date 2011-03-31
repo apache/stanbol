@@ -40,34 +40,11 @@
   <inceptionYear>2010</inceptionYear>
 
   <modules>
-
-    <!-- Jersey -->
-    <module>owl</module>
-
     <module>jersey</module>
-    
-    <module>ontologymanager/ontonet</module>
-    <module>ontologymanager/web</module>
-    <!--
-    <module>ontologymanager/store</module>
-    -->
-    
-    <module>reasoners/hermit</module>
-    <module>reasoners/owllink</module>
-    <module>reasoners/base</module>
-    <module>reasoners/web</module>
-
-    <module>reengineer/base</module>
-    <module>reengineer/mysql</module>
-    <module>reengineer/xerces</module>
-    <module>reengineer/xml</module>
-    <module>reengineer/db</module>
-    <module>reengineer/web</module>
-
-    <module>rules/base</module>
-    <module>rules/manager</module>
-    <module>rules/refactor</module>
-    <module>rules/web</module>
-    
+    <module>owl</module>
+    <module>ontologymanager</module>
+    <module>rules</module>
+    <module>reengineer</module>
+    <module>reasoners</module>
   </modules>
 </project>
