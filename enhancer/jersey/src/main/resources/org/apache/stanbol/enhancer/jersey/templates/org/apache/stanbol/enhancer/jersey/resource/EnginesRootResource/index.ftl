@@ -80,7 +80,7 @@ function registerFormHandler() {
 --></script>
   <div id="enginesOuputWaiter" style="display: none">
     <p>the Stanbol enhancer is analysing your content...</p>
-    <p><img alt="Waiting..." src="/static/images/ajax-loader.gif" /></p>
+    <p><img alt="Waiting..." src="${it.staticRootUrl}/images/ajax-loader.gif" /></p>
   </div>
   <p id="enginesOuput"></p>
 </#if>

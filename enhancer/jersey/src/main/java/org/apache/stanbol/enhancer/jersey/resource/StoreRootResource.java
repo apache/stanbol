@@ -269,20 +269,20 @@ public class StoreRootResource extends BaseStanbolResource {
         // handle smart redirection to browser view
         for (MediaType mt : headers.getAcceptableMediaTypes()) {
             if (mt.toString().startsWith(TEXT_HTML)) {
-                return Response.temporaryRedirect(
-                        UriBuilder.fromPath("/store/page/" + localId).build()).build();
+                URI pageUri = uriInfo.getBaseUriBuilder().path("/store/page").path(localId).build();
+                return Response.temporaryRedirect(pageUri).build();
             }
         }
 
         // handle smart redirection to RDF metadata view
         for (MediaType mt : headers.getAcceptableMediaTypes()) {
             if (RDF_MEDIA_TYPES.contains(mt.toString())) {
-                return Response.temporaryRedirect(
-                        UriBuilder.fromPath("/store/metadata/" + localId).build()).build();
+                URI metadataUri = uriInfo.getBaseUriBuilder().path("/store/metadata").path(localId).build();
+                return Response.temporaryRedirect(metadataUri).build();
             }
         }
-        return Response.temporaryRedirect(
-                UriBuilder.fromPath("/store/raw/" + localId).build()).build();
+        URI rawUri = uriInfo.getBaseUriBuilder().path("/store/raw").path(localId).build();
+        return Response.temporaryRedirect(rawUri).build();
     }
 
     @GET

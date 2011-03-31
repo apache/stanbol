@@ -10,14 +10,14 @@
   <tr>
     <th>Local ID</th>
     <th>Media type</th>
-    <th>Enhancements <img src="/static/images/rdf.png"
+    <th>Enhancements <img src="${it.staticRootUrl}/images/rdf.png"
        alt="Format: RDF"/></th>
   </tr>
   <#list it.recentlyEnhancedItems as item>
   <tr>
     <td><a href="${item.uri}" title="${item.uri}">${item.localId}</a></td>
     <td>${item.mimetype}</td>
-    <td><a href="/store/metadata/${item.localId}">${item.enhancements}</a></td>
+    <td><a href="${it.rootUrl}/store/metadata/${item.localId}">${item.enhancements}</a></td>
   </tr>
   </#list>
 </ul>
@@ -100,7 +100,7 @@ done
   <p>For instance:</p>
 <pre>
 curl -i -X POST -H "Content-Type:text/plain" \
-     --data "The Stanbol enhacer can detect famous cities such as Paris." \
+     --data "The Stanbol enhancer can detect famous cities such as Paris." \
      ${it.publicBaseUri}store
     
 HTTP/1.1 201 Created

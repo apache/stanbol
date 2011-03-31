@@ -118,14 +118,14 @@ public class ContentItemResource extends BaseStanbolResource {
         this.servletContext = servletContext;
 
         if (localId != null) {
-            URI rawURI = UriBuilder.fromPath("/store/raw/" + localId).build();
+            URI rawURI = uriInfo.getBaseUriBuilder().path("/store/raw").path(localId).build();
             if (ci.getMimeType().equals("text/plain")) {
                 this.textContent = IOUtils.toString(ci.getStream(), "UTF-8");
             } else if (ci.getMimeType().startsWith("image/")) {
                 this.imageSrc = rawURI;
             }
             this.downloadHref = rawURI;
-            this.metadataHref = UriBuilder.fromPath("/store/metadata/" + localId).build();
+            this.metadataHref = uriInfo.getBaseUriBuilder().path("/store/metadata").path(localId).build();
         }
     }
 

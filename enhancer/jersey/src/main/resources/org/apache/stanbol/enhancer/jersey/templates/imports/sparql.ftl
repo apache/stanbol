@@ -1,5 +1,5 @@
 <#macro form>
-<form id="sparql" action="/sparql" method="GET"
+<form id="sparql" action="${it.rootUrl}/sparql" method="GET"
  enctype="application/x-www-form-urlencoded"
  accept="application/sparql-results+xml, application/rdf+xml">
 <textarea class="query" rows="11" name="query">
@@ -30,7 +30,7 @@ function registersSparqlHandler() {
      // submit sparql query using Ajax
      $.ajax({
        type: "POST",
-       url: "/sparql",
+       url: "${it.rootUrl}/sparql",
        data: {query: $("#sparql textarea.query").val()},
        dataType: "html",
        cache: false,
