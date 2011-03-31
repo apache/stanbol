@@ -3,14 +3,14 @@
  * and open the template in the editor.
  */
 
-package org.apache.stanbol.owlapi;
+package org.apache.stanbol.owl;
 
 import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.HashMap;
 
-import org.apache.stanbol.owlapi.RunSingleSPARQL;
+import org.apache.stanbol.owl.RunSingleSPARQL;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

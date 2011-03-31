@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.apache.stanbol.owlapi;
+package org.apache.stanbol.owl;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,7 +16,7 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.ResultSet;
 
-import org.apache.stanbol.owlapi.trasformation.JenaToOwlConvert;
+import org.apache.stanbol.owl.trasformation.JenaToOwlConvert;
 
 /**
  *

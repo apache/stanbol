@@ -26,7 +26,7 @@
 		<relativePath>../../parent</relativePath>
 	</parent>
         
-	<artifactId>org.apache.stanbol.owlapi</artifactId>
+	<artifactId>org.apache.stanbol.owl</artifactId>
 	<version>${stanbol-version}</version>
 	<packaging>bundle</packaging>
 	<name>Apache Stanbol OSGi bundle for OWL API</name>
@@ -89,11 +89,29 @@
 	  <artifactId>jena</artifactId>
 	  <version>2.6.2</version>
 	 </dependency>
+         <dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.4</version>
+			<scope>provided</scope>
+		</dependency>
 	 <dependency>
 	  <groupId>com.hp.hpl.jena</groupId>
 	  <artifactId>arq</artifactId>
 	  <version>2.8.3</version>
 	  <type>jar</type>
+	 </dependency>
+	 <dependency>
+	  <groupId>javax.ws.rs</groupId>
+	  <artifactId>jsr311-api</artifactId>
+	  <version>1.1.1</version>
+	  <type>jar</type>
+	 </dependency>
+	 <dependency>
+	  <groupId>org.apache.clerezza</groupId>
+	  <artifactId>org.apache.clerezza.rdf.rdfjson</artifactId>
+	  <version>0.3-incubating-SNAPSHOT</version>
+	  <type>bundle</type>
 	 </dependency>
 	</dependencies>
 
@@ -106,23 +124,17 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-                                                        com.hp.hpl.jena.graph,
-                                                        com.hp.hpl.jena.ontology,
-                                                        com.hp.hpl.jena.rdf.model,
-                                                        org.apache.clerezza.rdf.core,
-                                                        org.apache.clerezza.rdf.core.impl,
-                                                        org.apache.clerezza.rdf.core.serializedform,
-                                                        org.apache.clerezza.rdf.jena.parser,
-                                                        org.apache.clerezza.rdf.jena.serializer,
-							javax.swing,
-							javax.xml.parsers,
-							org.xml.sax,
-							org.xml.sax.helpers,
+                                                         com.hp.hpl.jena.*,
+                                                        org.apache.clerezza.rdf.*,
+							javax.*,
+							org.xml.sax.*,
 							de.uulm.ecs.ai.*,
 							org.semanticweb.owlapi.*,
 							org.coode.*,
 							uk.ac.manchester.cs.*,
-							com.clarkparsia.owlapi.*
+							com.clarkparsia.owlapi.*,
+                                                        org.slf4j.*;version=1.5.2,
+                                                        *
 						</Import-Package>
 						<Export-Package>
 							de.uulm.ecs.ai.*,
@@ -130,7 +142,7 @@
 							org.coode.*,
 							uk.ac.manchester.cs.*,
 							com.clarkparsia.owlapi.*,
-                                                        org.apache.stanbol.owlapi.trasformation.*;version=${stanbol-version}
+                                                        org.apache.stanbol.owl.*;version=${stanbol-version}
 						</Export-Package>
 						<Private-Package />
 						<_nouses>true</_nouses>

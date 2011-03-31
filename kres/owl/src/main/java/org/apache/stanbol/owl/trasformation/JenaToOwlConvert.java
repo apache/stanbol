@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.apache.stanbol.owlapi.trasformation;
+package org.apache.stanbol.owl.trasformation;
 
 
 import com.hp.hpl.jena.ontology.AnnotationProperty;

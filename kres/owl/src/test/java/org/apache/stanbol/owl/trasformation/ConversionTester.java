@@ -3,13 +3,13 @@
  * and open the template in the editor.
  */
 
-package org.apache.stanbol.owlapi.trasformation;
+package org.apache.stanbol.owl.trasformation;
 
 /**
  *
  * @author elvio
  */
-import org.apache.stanbol.owlapi.trasformation.JenaToOwlConvert;
+import org.apache.stanbol.owl.trasformation.JenaToOwlConvert;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import java.net.URI;
