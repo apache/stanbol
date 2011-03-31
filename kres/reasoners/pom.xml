@@ -42,7 +42,7 @@
   <modules>
     <module>../jersey</module>   
     <module>../ontologymanager/ontonet</module>
-    <module>../owlapi</module>  
+    <module>../owl</module>  
     <module>../rules/base</module>  
     <module>../rules/manager</module> 
     <module>base</module>      

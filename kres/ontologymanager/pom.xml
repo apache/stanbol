@@ -41,7 +41,7 @@
 
   <modules>
     <module>../jersey</module>   
-    <module>../owlapi</module>  
+    <module>../owl</module>  
     <module>ontonet</module>    
     <module>web</module>
   </modules>
