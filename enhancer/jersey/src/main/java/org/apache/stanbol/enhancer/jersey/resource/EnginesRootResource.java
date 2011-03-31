@@ -145,7 +145,12 @@ public class EnginesRootResource extends NavigationMixin {
             @FormParam("format") String format,
             @FormParam("ajax") boolean buildAjaxview,
             @Context HttpHeaders headers) throws EngineException, IOException {
-        log.info("enhance from From: "+content);        ContentItem ci = new InMemoryContentItem(content.getBytes("UTF-8"),
+        if(content == null) {
+            throw new IllegalArgumentException("Content is null");
+        }
+        log.info("enhance from From: "+content);        
+        ContentItem ci = new InMemoryContentItem(
+                content.getBytes("UTF-8"),
                 TEXT_PLAIN);
         return enhanceAndBuildResponse(format, headers, ci, buildAjaxview);
     }
