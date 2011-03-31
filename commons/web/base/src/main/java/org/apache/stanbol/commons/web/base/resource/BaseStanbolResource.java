@@ -19,11 +19,13 @@ import org.apache.stanbol.commons.web.base.ScriptResource;
  */
 public class BaseStanbolResource {
 
-    public static final String LINK_RESOURCES = "org.apache.stanbol.commons.web.resource.links";
+    public static final String LINK_RESOURCES = "org.apache.stanbol.commons.web.base.resource.links";
 
-    public static final String SCRIPT_RESOURCES = "org.apache.stanbol.commons.web.resource.scripts";
+    public static final String SCRIPT_RESOURCES = "org.apache.stanbol.commons.web.base.resource.scripts";
 
-    public static final String STATIC_RESOURCES_ROOT_URL = "org.apache.stanbol.commons.web.resource.static.url.root";
+    public static final String STATIC_RESOURCES_ROOT_URL = "org.apache.stanbol.commons.web.base.resource.static.root";
+
+    public static final String ROOT_URL = "org.apache.stanbol.commons.web.base.root";
 
     @Context
     protected UriInfo uriInfo;
@@ -36,8 +38,9 @@ public class BaseStanbolResource {
     }
 
     public List<MenuItem> getMainMenuItems() {
-        return Arrays.asList(new MenuItem("/engines", "/engines", uriInfo), new MenuItem("/store", "/store",
-                uriInfo), new MenuItem("/sparql", "/sparql", uriInfo));
+        return Arrays.asList(new MenuItem("/engines", getRootUrl() + "/engines", uriInfo), new MenuItem(
+                "/store", getRootUrl() + "/store", uriInfo), new MenuItem("/sparql",
+                getRootUrl() + "/sparql", uriInfo));
     }
 
     public static class MenuItem {
@@ -68,6 +71,10 @@ public class BaseStanbolResource {
 
     }
 
+    public String getRootUrl() {
+        return (String) servletContext.getAttribute(ROOT_URL);
+    }
+    
     public String getStaticRootUrl() {
         return (String) servletContext.getAttribute(STATIC_RESOURCES_ROOT_URL);
     }

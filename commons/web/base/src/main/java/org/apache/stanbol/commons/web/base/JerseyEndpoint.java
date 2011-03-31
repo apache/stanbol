@@ -102,6 +102,7 @@ public class JerseyEndpoint {
         // services
         servletContext = container.getServletContext();
         servletContext.setAttribute(BundleContext.class.getName(), ctx.getBundleContext());
+        servletContext.setAttribute(BaseStanbolResource.ROOT_URL, applicationAlias);
         servletContext.setAttribute(BaseStanbolResource.STATIC_RESOURCES_ROOT_URL, staticUrlRoot);
         servletContext.setAttribute(BaseStanbolResource.LINK_RESOURCES, linkResources);
         servletContext.setAttribute(BaseStanbolResource.SCRIPT_RESOURCES, scriptResources);
