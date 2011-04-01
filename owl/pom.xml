@@ -25,7 +25,8 @@
 		<version>${stanbol-version}</version>
 		<relativePath>../parent</relativePath>
 	</parent>
-        
+
+	<groupId>org.apache.stanbol</groupId>        
 	<artifactId>org.apache.stanbol.owl</artifactId>
 	<version>${stanbol-version}</version>
 	<packaging>bundle</packaging>
@@ -163,5 +164,5 @@
 			</plugin>
 		</plugins>
 	</build>
-    <groupId>org.apache.stanbol</groupId>
+
 </project>
