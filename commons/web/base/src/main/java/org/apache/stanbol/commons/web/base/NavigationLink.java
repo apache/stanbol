@@ -13,6 +13,13 @@ public class NavigationLink implements Comparable<NavigationLink> {
 
     public final int order;
 
+    public NavigationLink(String path, String label, int order) {
+        this.path = path;
+        this.label = label;
+        this.descriptionTemplate = null;
+        this.order = order;
+    }
+
     public NavigationLink(String path, String label, String descriptionTemplate, int order) {
         this.path = path;
         this.label = label;
@@ -41,4 +48,8 @@ public class NavigationLink implements Comparable<NavigationLink> {
         return order;
     }
 
+    public boolean getHasDescriptionTemplate() {
+        return descriptionTemplate != null;
+    }
+    
 }
