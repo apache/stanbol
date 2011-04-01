@@ -61,6 +61,7 @@
     <module>engines/zemanta</module>
 
     <module>jersey</module>
+    <module>benchmark</module>
 
     <module>clerezza/org.apache.stanbol.enhancer.clerezza</module>
     <module>clerezza/clerezza-sparql</module>
