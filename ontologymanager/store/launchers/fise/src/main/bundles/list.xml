@@ -325,8 +325,8 @@
 				</bundle>
                 <bundle>
                         <groupId>org.jdom</groupId>
-                        <artifactId>com.springsource.org.jdom</artifactId>
-                        <version>1.1.0</version>
+                        <artifactId>jdom</artifactId>
+                        <version>1.1</version>
                 </bundle>
                 
         </startLevel>
