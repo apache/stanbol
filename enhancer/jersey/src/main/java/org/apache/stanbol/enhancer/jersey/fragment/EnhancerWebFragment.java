@@ -93,8 +93,8 @@ public class EnhancerWebFragment implements WebFragment {
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
-        links.add(new NavigationLink("engines", "/engines", "todo", 10));
-        links.add(new NavigationLink("store", "/store", "todo", 20));
+        links.add(new NavigationLink("engines", "/engines", "/imports/enginesDescription.ftl", 10));
+        links.add(new NavigationLink("store", "/store", "/imports/storeDescription.ftl", 20));
         return links;
     }
 

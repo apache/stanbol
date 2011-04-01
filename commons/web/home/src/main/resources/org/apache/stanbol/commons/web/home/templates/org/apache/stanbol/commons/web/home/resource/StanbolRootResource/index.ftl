@@ -15,15 +15,10 @@ documentation and join the mailing list.</p>
 view that documents the matching RESTful API for applications:</p>
 <dl>
 
-  <dt><a href="engines">/engines</a><dt>
-  <dd>This is a <strong>stateless interface</strong> to allow clients to submit content to <strong>analyze</strong>
-   by the <code>EnhancementEngine</code>s and get the resulting <strong>RDF enhancements</strong> at once
-   without storing anything on the server-side.</dd>
-
-  <dt><a href="store">/store</a><dt>
-  <dd>This is a <strong>stateful interface</strong> to submit content to <strong>analyze and store
-   the results</strong> on the server. It is then possible to browse the resulting enhanced
-   content items.</dd>
+  <#list it.navigationLinks as link>
+    <dt><a href="${it.publicBaseUri}${link.path}">${link.label}</a><dt>
+    <dd><#include "${link.descriptionTemplate}"></dd>
+  </#list>
 
   <dt><a href="sparql">/sparql</a><dt>
   <dd>This is the <strong>SPARQL endpoint</strong> for the Stanbol store.

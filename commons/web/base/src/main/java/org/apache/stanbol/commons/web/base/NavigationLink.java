@@ -25,4 +25,20 @@ public class NavigationLink implements Comparable<NavigationLink> {
         return order - other.order;
     }
 
+    public String getLabel() {
+        return label;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public String getDescriptionTemplate() {
+        return descriptionTemplate;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
 }
