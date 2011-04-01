@@ -57,7 +57,12 @@
          <activeByDefault>false</activeByDefault>
        </activation>
        <modules>
-         <module>kres</module>
+         <module>owl</module>
+         <module>kres/jersey</module>
+         <module>ontologymanager</module>
+	 <module>rules</module>
+         <module>reengineer</module>
+         <module>reasoners</module>
        </modules>
      </profile>
    </profiles>
