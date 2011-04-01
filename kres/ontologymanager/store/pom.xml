@@ -16,14 +16,17 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.ontologymanager.store.parent</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <version>${stanbol-version}</version>
     <relativePath>./parent</relativePath>
   </parent>
 
+  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.ontologymanager.store.reactor</artifactId>
   <packaging>pom</packaging>
+  <version>${stanbol-version}</version>
 
   <name>Apache Stanbol Ontology Manager Store - Reactor</name>
+
   <description>
     Pseudo project to build the complete  Store project
   </description>
@@ -50,7 +53,7 @@
     <module>jena</module>
     <module>clerezza</module>
 	<module>tdb</module>
-    <module>fise-adapter</module>
+    <!--  <module>fise-adapter</module>-->
     <module>launchers/lite</module>
 	<module>launchers/fise</module> 
   </modules>

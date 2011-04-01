@@ -16,13 +16,15 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.ontologymanager.store.parent</artifactId>
-    <version>0.9-SNAPSHOT</version>
-    <relativePath>../parent</relativePath>
+    <version>${stanbol-version}</version>
+    <relativePath>../../parent</relativePath>
   </parent>
 
+  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.ontologymanager.store.launchers.fise</artifactId>
   <packaging>jar</packaging>
   <name>Apache Stanbol Ontology Manager Store - Sling-based standalone launcher - FISE version</name>
+  <version>${stanbol-version}</version>
   <description>Runnable jar that runs the Apache Stanbol Ontology Manager Store with Enhancer</description>
   
   <build>

@@ -6,10 +6,11 @@
 	<parent>
 		<artifactId>org.apache.stanbol.ontologymanager.store.parent</artifactId>
 		<groupId>org.apache.stanbol</groupId>
-		<version>0.9-SNAPSHOT</version>
-		<relativePath>../parent</relativePath>
+		<version>${stanbol-version}</version>
+		<relativePath>../../parent</relativePath>
 	</parent>
 
+	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.semanticweb.owlapi.owllink</artifactId>
 	<version>1.0.2-SNAPSHOT</version>
 	<packaging>bundle</packaging>

@@ -352,11 +352,11 @@
                         <artifactId>org.apache.stanbol.ontologymanager.store.clerezza</artifactId>
                         <version>0.9-SNAPSHOT</version>
                 </bundle>
-                <bundle>
+                <!-- <bundle>
                         <groupId>org.apache.stanbol</groupId>
                         <artifactId>org.apache.stanbol.ontologymanager.store.adapter</artifactId>
                         <version>0.9-SNAPSHOT</version>
-                </bundle>
+                </bundle> -->
                 <bundle>
                         <groupId>org.apache.stanbol</groupId>
                         <artifactId>org.semanticweb.owlapi.owllink</artifactId>
