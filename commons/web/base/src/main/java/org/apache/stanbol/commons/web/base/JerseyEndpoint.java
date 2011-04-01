@@ -2,6 +2,7 @@ package org.apache.stanbol.commons.web.base;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -77,10 +78,12 @@ public class JerseyEndpoint {
         // incrementally contribute fragment resources
         List<LinkResource> linkResources = new ArrayList<LinkResource>();
         List<ScriptResource> scriptResources = new ArrayList<ScriptResource>();
+        List<NavigationLink> navigationLinks = new ArrayList<NavigationLink>();
         for (WebFragment fragment : webFragments) {
             log.info("Registering web fragment '{}' into jaxrs application", fragment.getName());
             linkResources.addAll(fragment.getLinkResources());
             scriptResources.addAll(fragment.getScriptResources());
+            navigationLinks.addAll(fragment.getNavigationLinks());
             app.contributeClasses(fragment.getJaxrsResourceClasses());
             app.contributeSingletons(fragment.getJaxrsResourceSingletons());
             app.contributeTemplateLoader(fragment.getTemplateLoader());
@@ -89,6 +92,9 @@ public class JerseyEndpoint {
                 new BundleHttpContext(fragment));
             registeredAliases.add(resourceAlias);
         }
+        Collections.sort(linkResources);
+        Collections.sort(scriptResources);
+        Collections.sort(navigationLinks);
 
         // bind the aggregate JAX-RS application to a dedicated servlet
         ServletContainer container = new ServletContainer(app);
@@ -106,6 +112,7 @@ public class JerseyEndpoint {
         servletContext.setAttribute(BaseStanbolResource.STATIC_RESOURCES_ROOT_URL, staticUrlRoot);
         servletContext.setAttribute(BaseStanbolResource.LINK_RESOURCES, linkResources);
         servletContext.setAttribute(BaseStanbolResource.SCRIPT_RESOURCES, scriptResources);
+        servletContext.setAttribute(BaseStanbolResource.NAVIGATION_LINKS, navigationLinks);
         log.info("JerseyEndpoint servlet registered at {}", applicationAlias);
     }
 
@@ -144,6 +151,10 @@ public class JerseyEndpoint {
             deactivate(componentContext);
             activate(componentContext);
         }
+    }
+
+    public List<WebFragment> getWebFragments() {
+        return webFragments;
     }
 
 }

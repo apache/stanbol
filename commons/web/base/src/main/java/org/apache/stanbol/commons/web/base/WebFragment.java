@@ -67,7 +67,16 @@ public interface WebFragment {
      * ${it.staticRootUrl}/${script.fragmentName}/${script.relativePath}
      */
     public List<ScriptResource> getScriptResources();
-    
+
+    /**
+     * List of link descriptions to contribute to the main navigation menu.
+     */
+    public List<NavigationLink> getNavigationLinks();
+
+    /**
+     * @return the bundle context who contributed this fragment (useful for loading the resources from the
+     *         right classloading context)
+     */
     public BundleContext getBundleContext();
 
 }

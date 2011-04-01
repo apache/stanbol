@@ -2,7 +2,6 @@ package org.apache.stanbol.commons.web.base.resource;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,6 +10,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.stanbol.commons.web.base.LinkResource;
+import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 
 /**
@@ -26,6 +26,8 @@ public class BaseStanbolResource {
 
     public static final String STATIC_RESOURCES_ROOT_URL = "org.apache.stanbol.commons.web.base.resource.static.root";
 
+    public static final String NAVIGATION_LINKS = "org.apache.stanbol.commons.web.base.navigation.link";
+
     public static final String ROOT_URL = "org.apache.stanbol.commons.web.base.root";
 
     @Context
@@ -38,10 +40,21 @@ public class BaseStanbolResource {
         return uriInfo.getBaseUri();
     }
 
+    /**
+     * @return the sorted list of navigation links data transfer objects
+     */
+    @SuppressWarnings("unchecked")
+    public List<NavigationLink> getNavigationLinks() {
+        return (List<NavigationLink>) servletContext.getAttribute(NAVIGATION_LINKS);
+    }
+
+    /**
+     * @return menu items with "selected" CSS class for the active link precomputed where applicable
+     */
     public List<MenuItem> getMainMenuItems() {
         List<MenuItem> items = new ArrayList<MenuItem>();
-        for (String path: Arrays.asList("/engines", "/store", "/sparql")) {
-            items.add(new MenuItem(path, path, uriInfo));
+        for (NavigationLink link : getNavigationLinks()) {
+            items.add(new MenuItem(link.label, link.path, uriInfo));
         }
         return items;
     }
@@ -80,7 +93,7 @@ public class BaseStanbolResource {
     public String getRootUrl() {
         return (String) servletContext.getAttribute(ROOT_URL);
     }
-    
+
     public String getStaticRootUrl() {
         return (String) servletContext.getAttribute(STATIC_RESOURCES_ROOT_URL);
     }

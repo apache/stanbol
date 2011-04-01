@@ -10,6 +10,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.web.base.LinkResource;
+import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.enhancer.jersey.resource.EnginesRootResource;
@@ -41,7 +42,7 @@ public class EnhancerWebFragment implements WebFragment {
     public String getName() {
         return NAME;
     }
-    
+
     @Activate
     protected void activate(ComponentContext ctx) {
         this.bundleContext = ctx.getBundleContext();
@@ -75,18 +76,26 @@ public class EnhancerWebFragment implements WebFragment {
     @Override
     public List<LinkResource> getLinkResources() {
         List<LinkResource> resources = new ArrayList<LinkResource>();
-        resources.add(new LinkResource("stylesheet", "openlayers-2.9/theme/default/style.css", this));
-        resources.add(new LinkResource("stylesheet", "scripts/prettify/prettify.css", this));
+        resources.add(new LinkResource("stylesheet", "openlayers-2.9/theme/default/style.css", this, 10));
+        resources.add(new LinkResource("stylesheet", "scripts/prettify/prettify.css", this, 20));
         return resources;
     }
 
     @Override
     public List<ScriptResource> getScriptResources() {
         List<ScriptResource> resources = new ArrayList<ScriptResource>();
-        resources.add(new ScriptResource("text/javascript", "openlayers-2.9/OpenLayers.js", this));
-        resources.add(new ScriptResource("text/javascript", "scripts/prettify/prettify.js", this));
-        resources.add(new ScriptResource("text/javascript", "scripts/jquery-1.4.2.js", this));
+        resources.add(new ScriptResource("text/javascript", "openlayers-2.9/OpenLayers.js", this, 10));
+        resources.add(new ScriptResource("text/javascript", "scripts/prettify/prettify.js", this, 20));
+        resources.add(new ScriptResource("text/javascript", "scripts/jquery-1.4.2.js", this, 30));
         return resources;
+    }
+
+    @Override
+    public List<NavigationLink> getNavigationLinks() {
+        List<NavigationLink> links = new ArrayList<NavigationLink>();
+        links.add(new NavigationLink("engines", "/engines", "todo", 10));
+        links.add(new NavigationLink("store", "/store", "todo", 20));
+        return links;
     }
 
     @Override

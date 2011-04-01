@@ -23,5 +23,5 @@ public class StanbolRootResource extends BaseStanbolResource {
     public Response get() {
         return Response.ok(new Viewable("index", this), TEXT_HTML).build();
     }
-
+    
 }

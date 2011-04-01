@@ -10,6 +10,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.web.base.LinkResource;
+import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.commons.web.home.resource.StanbolRootResource;
@@ -70,20 +71,25 @@ public class HomeWebFragment implements WebFragment {
     @Override
     public List<LinkResource> getLinkResources() {
         List<LinkResource> resources = new ArrayList<LinkResource>();
-        resources.add(new LinkResource("stylesheet", "style/stanbol.css", this));
+        resources.add(new LinkResource("stylesheet", "style/stanbol.css", this, 0));
         return resources;
     }
 
     @Override
     public List<ScriptResource> getScriptResources() {
         List<ScriptResource> resources = new ArrayList<ScriptResource>();
-        // resources.add(new ScriptResource("text/javascript", "scripts/jquery-1.4.2.js", this));
+        // resources.add(new ScriptResource("text/javascript", "scripts/jquery-1.4.2.js", this, 0));
         return resources;
     }
 
     @Override
     public BundleContext getBundleContext() {
         return bundleContext;
+    }
+
+    @Override
+    public List<NavigationLink> getNavigationLinks() {
+        return Collections.emptyList();
     }
 
 }
