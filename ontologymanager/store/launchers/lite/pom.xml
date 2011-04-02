@@ -41,6 +41,7 @@
                                                                 <include>sling/**</include>
                                                                 <!-- Apache Derby database directory -->
                                                                 <include>ps_db/**</include>
+                                                                <include>derby.log</include>
                                                         </includes>
                                                 </fileset>
                                         </filesets>

@@ -42,6 +42,7 @@
   <modules>
     <module>ontonet</module>    
     <module>web</module>
+    <module>store</module>
   </modules>
   
 </project>
