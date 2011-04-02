@@ -26,95 +26,18 @@
 		<relativePath>../parent</relativePath>
 	</parent>
 
-	<groupId>org.apache.stanbol</groupId>        
+	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.owl</artifactId>
 	<version>${stanbol-version}</version>
 	<packaging>bundle</packaging>
-	<name>Apache Stanbol OSGi bundle for OWL</name>
+	
+	<name>Apache Stanbol OWL libraries</name>
+	<description>
+		Includes the libraries and utilities for managing 
+		constructs of the OWL and OWL 2 languages.
+	</description>
 
-	<repositories>
-		<repository>
-			<id>stlab-cnr-repo</id>
-			<url>http://stlab.istc.cnr.it/software/maven/repo</url>
-		</repository>
-	</repositories>
-
-	<dependencies>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.osgi.core</artifactId>
-			<version>1.4.0</version>
-		</dependency>
-		<dependency>
-			<groupId>owlapi</groupId>
-			<artifactId>owlapi</artifactId>
-			<version>3.0.0</version>
-			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.4</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.5.2</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>1.5.2</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.core</artifactId>
-			<version>0.12-incubating-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.jena.parser</artifactId>
-			<version>0.10-incubating-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
-			<version>0.9-incubating-SNAPSHOT</version>
-		</dependency>
-	 <dependency>
-	  <groupId>com.hp.hpl.jena</groupId>
-	  <artifactId>jena</artifactId>
-	  <version>2.6.2</version>
-	 </dependency>
-         <dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.4</version>
-			<scope>provided</scope>
-		</dependency>
-	 <dependency>
-	  <groupId>com.hp.hpl.jena</groupId>
-	  <artifactId>arq</artifactId>
-	  <version>2.8.3</version>
-	  <type>jar</type>
-	 </dependency>
-	 <dependency>
-	  <groupId>javax.ws.rs</groupId>
-	  <artifactId>jsr311-api</artifactId>
-	  <version>1.1.1</version>
-	  <type>jar</type>
-	 </dependency>
-	 <dependency>
-	  <groupId>org.apache.clerezza</groupId>
-	  <artifactId>org.apache.clerezza.rdf.rdfjson</artifactId>
-	  <version>0.3-incubating-SNAPSHOT</version>
-	  <type>bundle</type>
-	 </dependency>
-	</dependencies>
+	<inceptionYear>2010</inceptionYear>
 
 	<build>
 		<plugins>
@@ -125,8 +48,8 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-                                                         com.hp.hpl.jena.*,
-                                                        org.apache.clerezza.rdf.*,
+							com.hp.hpl.jena.*,
+							org.apache.clerezza.rdf.*,
 							javax.*,
 							org.xml.sax.*,
 							de.uulm.ecs.ai.*,
@@ -134,8 +57,8 @@
 							org.coode.*,
 							uk.ac.manchester.cs.*,
 							com.clarkparsia.owlapi.*,
-                                                        org.slf4j.*;version=1.5.2,
-                                                        *
+							org.slf4j.*;version=1.5.2,
+							*
 						</Import-Package>
 						<Export-Package>
 							de.uulm.ecs.ai.*,
@@ -143,7 +66,7 @@
 							org.coode.*,
 							uk.ac.manchester.cs.*,
 							com.clarkparsia.owlapi.*,
-                                                        org.apache.stanbol.owl.*;version=${stanbol-version}
+							org.apache.stanbol.owl.*;version=${stanbol-version}
 						</Export-Package>
 						<Private-Package />
 						<_nouses>true</_nouses>
@@ -164,5 +87,104 @@
 			</plugin>
 		</plugins>
 	</build>
+	
+
+	<dependencies>
+	
+		<!-- OSGi deps -->
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<version>1.4.0</version>
+		</dependency>
+
+		<!-- OWL deps -->
+		<dependency>
+			<groupId>com.hp.hpl.jena</groupId>
+			<artifactId>jena</artifactId>
+			<version>2.6.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.hp.hpl.jena</groupId>
+			<artifactId>arq</artifactId>
+			<version>2.8.3</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>owlapi</groupId>
+			<artifactId>owlapi</artifactId>
+			<version>3.0.0</version>
+			<type>jar</type>
+		</dependency>
+
+		<!-- Persistence deps -->
+		<dependency>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.core</artifactId>
+			<version>0.12-incubating-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.jena.parser</artifactId>
+			<version>0.10-incubating-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
+			<version>0.9-incubating-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.rdfjson</artifactId>
+			<version>0.3-incubating-SNAPSHOT</version>
+			<type>bundle</type>
+		</dependency>
+		
+		<!-- Web Service deps -->
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>jsr311-api</artifactId>
+			<version>1.1.1</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.4</version>
+			<scope>provided</scope>
+		</dependency>
+		
+		<!-- Diagnostics deps -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.5.2</version>
+			<scope>provided</scope>
+		</dependency>
+						
+		<!-- Testing deps -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.4</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.5.2</version>
+			<scope>test</scope>
+		</dependency>
+		
+	</dependencies>
+	
+	
+	<repositories>
+		<repository>
+			<id>stlab-cnr-repo</id>
+			<url>http://stlab.istc.cnr.it/software/maven/repo</url>
+		</repository>
+	</repositories>	
 
 </project>
