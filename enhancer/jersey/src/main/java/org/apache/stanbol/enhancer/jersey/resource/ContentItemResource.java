@@ -68,12 +68,7 @@ public class ContentItemResource extends BaseStanbolResource {
     // TODO make this configurable trough a property
     public static final UriRef THUMBNAIL = new UriRef("http://dbpedia.org/ontology/thumbnail");
 
-    public static final Map<UriRef,String> DEFAULT_THUMBNAILS = new HashMap<UriRef,String>();
-    static {
-        DEFAULT_THUMBNAILS.put(DBPEDIA_PERSON, "/static/images/user_48.png");
-        DEFAULT_THUMBNAILS.put(DBPEDIA_ORGANISATION, "/static/images/organization_48.png");
-        DEFAULT_THUMBNAILS.put(DBPEDIA_PLACE, "/static/images/compass_48.png");
-    }
+    public final Map<UriRef,String> defaultThumbnails = new HashMap<UriRef,String>();
 
     protected ContentItem contentItem;
 
@@ -126,6 +121,10 @@ public class ContentItemResource extends BaseStanbolResource {
             this.downloadHref = rawURI;
             this.metadataHref = uriInfo.getBaseUriBuilder().path("/store/metadata").path(localId).build();
         }
+        defaultThumbnails.put(DBPEDIA_PERSON, getStaticRootUrl() + "/home/images/user_48.png");
+        defaultThumbnails.put(DBPEDIA_ORGANISATION, getStaticRootUrl() + "/home/organization_48.png");
+        defaultThumbnails.put(DBPEDIA_PLACE, getStaticRootUrl() + "/home/images/compass_48.png");
+
     }
 
     public String getRdfMetadata(String mediatype) throws UnsupportedEncodingException {
@@ -217,7 +216,7 @@ public class ContentItemResource extends BaseStanbolResource {
 
             EntityExtractionSummary entity = occurrenceMap.get(text);
             if (entity == null) {
-                entity = new EntityExtractionSummary(text, type);
+                entity = new EntityExtractionSummary(text, type, defaultThumbnails);
                 occurrenceMap.put(text, entity);
             }
             UriRef entityUri = (UriRef) mapping.get("entity");
@@ -241,14 +240,18 @@ public class ContentItemResource extends BaseStanbolResource {
 
         protected List<String> mentions = new ArrayList<String>();
 
-        public EntityExtractionSummary(String name, UriRef type) {
+        public final Map<UriRef,String> defaultThumbnails;
+
+        public EntityExtractionSummary(String name, UriRef type, Map<UriRef,String> defaultThumbnails) {
             this.name = name;
             this.type = type;
             mentions.add(name);
+            this.defaultThumbnails = defaultThumbnails;
         }
 
         public void addSuggestion(UriRef uri, String label, Double confidence, TripleCollection properties) {
-            EntitySuggestion suggestion = new EntitySuggestion(uri, type, label, confidence, properties);
+            EntitySuggestion suggestion = new EntitySuggestion(uri, type, label, confidence, properties,
+                    defaultThumbnails);
             if (!suggestions.contains(suggestion)) {
                 suggestions.add(suggestion);
                 Collections.sort(suggestions);
@@ -280,13 +283,13 @@ public class ContentItemResource extends BaseStanbolResource {
 
         public String getThumbnailSrc() {
             if (suggestions.isEmpty()) {
-                return DEFAULT_THUMBNAILS.get(type);
+                return defaultThumbnails.get(type);
             }
             return suggestions.get(0).getThumbnailSrc();
         }
 
         public String getMissingThumbnailSrc() {
-            return DEFAULT_THUMBNAILS.get(type);
+            return defaultThumbnails.get(type);
         }
 
         public EntitySuggestion getBestGuess() {
@@ -341,16 +344,20 @@ public class ContentItemResource extends BaseStanbolResource {
 
         protected TripleCollection entityProperties;
 
+        protected final Map<UriRef,String> defaultThumbnails;
+
         public EntitySuggestion(UriRef uri,
                                 UriRef type,
                                 String label,
                                 Double confidence,
-                                TripleCollection entityProperties) {
+                                TripleCollection entityProperties,
+                                Map<UriRef,String> defaultThumbnails) {
             this.uri = uri;
             this.label = label;
             this.type = type;
             this.confidence = confidence;
             this.entityProperties = entityProperties;
+            this.defaultThumbnails = defaultThumbnails;
         }
 
         @Override
@@ -379,11 +386,11 @@ public class ContentItemResource extends BaseStanbolResource {
                     return ((UriRef) object).getUnicodeString();
                 }
             }
-            return DEFAULT_THUMBNAILS.get(type);
+            return defaultThumbnails.get(type);
         }
 
         public String getMissingThumbnailSrc() {
-            return DEFAULT_THUMBNAILS.get(type);
+            return defaultThumbnails.get(type);
         }
 
         public String getSummary() {

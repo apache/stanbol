@@ -44,7 +44,7 @@ $(".enginelisting p").click(function () {
       </select> <input class="submit" type="submit" value="Run engines">
     </p>
   </form>
-<script language="javascript"><!--
+<script language="javascript">
 function registerFormHandler() {
    $("#enginesInput input.submit", this).click(function(e) {
      // disable regular form click
@@ -61,7 +61,7 @@ function registerFormHandler() {
      // submit the form query using Ajax
      $.ajax({
        type: "POST",
-       url: "${it.rootUrl}/engines",
+       url: "${it.publicBaseUri}engines",
        data: data,
        dataType: "html",
        cache: false,
@@ -77,10 +77,10 @@ function registerFormHandler() {
    });
  }
  $(document).ready(registerFormHandler);
---></script>
+</script>
   <div id="enginesOuputWaiter" style="display: none">
-    <p>the Stanbol enhancer is analysing your content...</p>
-    <p><img alt="Waiting..." src="${it.staticRootUrl}/images/ajax-loader.gif" /></p>
+    <p>Stanbol is analysing your content...</p>
+    <p><img alt="Waiting..." src="${it.staticRootUrl}/home/images/ajax-loader.gif" /></p>
   </div>
   <p id="enginesOuput"></p>
 </#if>

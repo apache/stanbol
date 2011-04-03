@@ -57,7 +57,7 @@ $(document).ready(function() {
   };
   var graphic = new OpenLayers.Layer.Image(
     'Default World Map',
-    '${it.staticRootUrl}/images/world_map_1024_512.png',
+    '${it.staticRootUrl}/home/images/world_map_1024_512.png',
     extent,
     new OpenLayers.Size(1024, 512),
     options
@@ -103,7 +103,7 @@ $(document).ready(function() {
       var position = new OpenLayers.LonLat(long, lat);
 	  var iconSize = new OpenLayers.Size(32, 32);
       var offset = new OpenLayers.Pixel(-(iconSize.w/2), -iconSize.h);
-      var markerIcon = new OpenLayers.Icon('${it.staticRootUrl}/images/pin_map_32.png', iconSize, offset);
+      var markerIcon = new OpenLayers.Icon('${it.staticRootUrl}/home/images/pin_map_32.png', iconSize, offset);
 	  var popupSize = new OpenLayers.Size(200, 20);
       var marker = new OpenLayers.Marker(position, markerIcon);
       var popup = new OpenLayers.Popup.Anchored("popup-" + id, position, popupSize, label, markerIcon, false);
