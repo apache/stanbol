@@ -87,10 +87,12 @@ public class JerseyEndpoint {
             app.contributeClasses(fragment.getJaxrsResourceClasses());
             app.contributeSingletons(fragment.getJaxrsResourceSingletons());
             app.contributeTemplateLoader(fragment.getTemplateLoader());
-            String resourceAlias = staticUrlRoot + '/' + fragment.getName();
-            httpService.registerResources(resourceAlias, fragment.getStaticResourceClassPath(),
-                new BundleHttpContext(fragment));
-            registeredAliases.add(resourceAlias);
+            String staticPath = fragment.getStaticResourceClassPath();
+            if (staticPath != null) {
+                String resourceAlias = staticUrlRoot + '/' + fragment.getName();
+                httpService.registerResources(resourceAlias, staticPath, new BundleHttpContext(fragment));
+                registeredAliases.add(resourceAlias);
+            }
         }
         Collections.sort(linkResources);
         Collections.sort(scriptResources);

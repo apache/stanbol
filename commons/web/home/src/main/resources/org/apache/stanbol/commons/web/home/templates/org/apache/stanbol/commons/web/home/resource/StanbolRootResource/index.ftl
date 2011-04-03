@@ -22,12 +22,6 @@ view that documents the matching RESTful API for applications:</p>
   </#if>
   </#list>
 
-  <dt><a href="sparql">/sparql</a><dt>
-  <dd>This is the <strong>SPARQL endpoint</strong> for the Stanbol store.
-     <a href="http://en.wikipedia.org/wiki/Sparql">SPARQL</a> is the
-     standard query language the most commonly used to provide interactive
-     access to semantic knowledge bases.</dd>
-
   <dt><a href="system/console">/system/console</a><dt>
   <dd>
     <p>This is the OSGi administration console (for administrators and developers). The initial

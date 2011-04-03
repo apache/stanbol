@@ -62,6 +62,8 @@ public class JerseyEndpointApplication extends Application {
     }
 
     public void contributeTemplateLoader(TemplateLoader templateLoader) {
-        this.templateLoaders.add(templateLoader);
+        if (templateLoader != null) {
+            this.templateLoaders.add(templateLoader);
+        }
     }
 }

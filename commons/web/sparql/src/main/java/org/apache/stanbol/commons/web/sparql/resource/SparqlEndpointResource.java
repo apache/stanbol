@@ -1,4 +1,4 @@
-package org.apache.stanbol.enhancer.jersey.resource;
+package org.apache.stanbol.commons.web.sparql.resource;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -24,47 +24,37 @@ import org.apache.stanbol.enhancer.servicesapi.SparqlQueryEngine.SparqlQueryEngi
 
 import com.sun.jersey.api.view.Viewable;
 
-
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 
 /**
  * Implementation of a SPARQL endpoint as defined by the W3C:
- *
+ * 
  * http://www.w3.org/TR/rdf-sparql-protocol/
- *
- * (not 100% compliant yet, please report bugs/missing features in the issue
- * tracker).
- *
- * If the "query" parameter is not present, then fallback to display and HTML
- * view with an ajax-ified form to test the SPARQL endpoint from the browser.
+ * 
+ * (Might not be 100% compliant yet, please report bugs/missing features in the issue tracker).
+ * 
+ * If the "query" parameter is not present, then fallback to display and HTML view with an ajax-ified form to
+ * test the SPARQL endpoint from the browser.
  */
 @Path("/sparql")
-public class SparqlQueryResource extends BaseStanbolResource {
+public class SparqlEndpointResource extends BaseStanbolResource {
 
     protected Store store;
 
     protected TcManager tcManager;
 
-    public SparqlQueryResource(@Context ServletContext ctx) {
+    public SparqlEndpointResource(@Context ServletContext ctx) {
         tcManager = ContextHelper.getServiceFromContext(TcManager.class, ctx);
         store = ContextHelper.getServiceFromContext(Store.class, ctx);
     }
 
     @GET
     @Consumes(APPLICATION_FORM_URLENCODED)
-    @Produces( { TEXT_HTML + ";qs=2",
-            "application/sparql-results+xml", "application/rdf+xml",
-            APPLICATION_XML })
-    public Object sparql(@QueryParam(value = "query") String sparqlQuery,
-            @Deprecated @QueryParam(value = "q") String q)
-            throws SparqlQueryEngineException, ParseException {
-        if (q != null) {
-            // compat with old REST API that was not respecting the SPARQL RDF
-            // protocol
-            sparqlQuery = q;
-        }
+    @Produces({TEXT_HTML + ";qs=2", "application/sparql-results+xml", "application/rdf+xml", APPLICATION_XML})
+    public Object sparql(@QueryParam(value = "query") String sparqlQuery) throws SparqlQueryEngineException,
+                                                                         ParseException {
         if (sparqlQuery == null) {
             return Response.ok(new Viewable("index", this), TEXT_HTML).build();
         }
@@ -73,18 +63,16 @@ public class SparqlQueryResource extends BaseStanbolResource {
         if (query instanceof DescribeQuery || query instanceof ConstructQuery) {
             mediaType = "application/rdf+xml";
         }
-        Object result = tcManager.executeSparqlQuery(query,
-                store.getEnhancementGraph());
+        Object result = tcManager.executeSparqlQuery(query, store.getEnhancementGraph());
         return Response.ok(result, mediaType).build();
     }
 
     @POST
     @Consumes(APPLICATION_FORM_URLENCODED)
-    @Produces( { "application/sparql-results+xml", "application/rdf+xml",
-            APPLICATION_XML })
-    public Object postSparql(@FormParam("query") String sparqlQuery)
-            throws SparqlQueryEngineException, ParseException {
-        return sparql(sparqlQuery, null);
+    @Produces({"application/sparql-results+xml", "application/rdf+xml", APPLICATION_XML})
+    public Object postSparql(@FormParam("query") String sparqlQuery) throws SparqlQueryEngineException,
+                                                                    ParseException {
+        return sparql(sparqlQuery);
     }
 
 }
