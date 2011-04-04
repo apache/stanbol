@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <version>${stanbol-version}</version>
+    <relativePath>../../../parent</relativePath>
+  </parent>
+
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+  <version>${stanbol-version}</version>
+  <packaging>bundle</packaging>
+
+  <name>Apache Stanbol Commons Web Base</name>
+  <description>Stanbol HTTP Jersey application bundle.</description>
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/web/base
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/web/base
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol/</url>
+  </scm>
+
+  <build>
+    <!-- make it an OSGi bundle -->
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>
+              org.apache.stanbol.commons.web.*,freemarker.cache.*,freemarker.template.*
+            </Export-Package>
+            <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl</Embed-Dependency>
+            <Embed-Dependency>freemarker</Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>
+            <Import-Package>
+              !javax.servlet.jsp.*,
+              !org.apache.tools.*,
+              !org.mortbay.*,
+              !org.apache.xpath.*,
+              !org.jdom.*,
+              !org.jaxen.*,
+              !org.apache.xml.*,
+              !org.mozilla.javascript.*,
+              !org.python.*,
+              !org.dom4j.*,
+              !org.apache.log.*,
+              *
+            </Import-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.jsonld</artifactId>
+    </dependency>
+
+    <!-- Clerezza dependencies -->
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
+    </dependency>
+
+    <!-- Jersey -->
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-server</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+    </dependency>
+    <!-- indirect dependency for freemarker -->
+    <dependency>
+      <groupId>org.codehaus.jettison</groupId>
+      <artifactId>jettison</artifactId>
+    </dependency>
+
+    <!-- generic tax -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+    </dependency>
+
+    <!-- OSGi tax -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
+
+    <!-- Jetty -->
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- for tests -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+</project>
