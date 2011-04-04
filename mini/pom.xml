@@ -12,7 +12,6 @@
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.launchers.mini</artifactId>
 	<packaging>jar</packaging>
-	<version>${stanbol-version}</version>
 
   <name>Apache Stanbol Sling-based standalone launcher - mini version</name>
 	<description>Runnable jar that runs a mini configuration for testing</description>
