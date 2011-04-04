@@ -15,7 +15,7 @@
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-parent</artifactId>
   <packaging>pom</packaging>
-  <version>${stanbol-version}</version>
+  <version>0.9-SNAPSHOT</version>
 
   <name>Apache Stanbol : Parent POM</name>
   <description>Parent POM for the Apache Stanbol project</description>
