@@ -125,8 +125,10 @@ public class JerseyEndpoint {
 
     @Deactivate
     protected void deactivate(ComponentContext ctx) {
-        for (String alias : registeredAliases) {
-            httpService.unregister(alias);
+        if(registeredAliases != null) {
+            for (String alias : registeredAliases) {
+                httpService.unregister(alias);
+            }
         }
         servletContext = null;
         componentContext = null;
