@@ -34,7 +34,7 @@ public class HomepageTest extends StanbolTestBase {
         .assertStatus(200)
         .assertContentType("text/html")
         .assertContentContains(
-            "/static/style/stanbol.css", 
+            "/static/home/style/stanbol.css", 
             "The RESTful Semantic Engine")
         .assertContentRegexp(
             "stylesheet.*stanbol.css",
