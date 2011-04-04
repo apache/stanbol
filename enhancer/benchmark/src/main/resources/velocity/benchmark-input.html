@@ -53,16 +53,25 @@ Description: Bob Marley in the COMPLAIN section should fail
 http://fise.iks-project.eu/ontology/entity-type URI http://dbpedia.org/ontology/MusicalArtist
 http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Bob_Marley
 
+
 = INPUT =
-Here's a second benchmark that talks about Paris, Texas
+Second benchmark: something happened in Geneva yesterday.
 
 = EXPECT =
-Description: Paris, Texas must be found
-http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/page/Paris%2C_Texas
+Description: Geneva, Switzerland must be found
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/page/Geneva
+
+
+= INPUT =
+Third benchmark: something happened in Geneva, Ohio yesterday.
+
+= EXPECT =
+Description: Geneva, Ohio must be found
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/page/Geneva%2C_Ohio
 
 = COMPLAIN =
-Description: Paris, France must not be found
-http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/page/Paris
+Description: Geneva, Switzerland must not be found
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/page/Geneva
 
 	        </textarea>
 		</form>
