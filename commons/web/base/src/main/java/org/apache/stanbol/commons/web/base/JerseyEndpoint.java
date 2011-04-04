@@ -67,9 +67,14 @@ public class JerseyEndpoint {
 
     @Activate
     protected void activate(ComponentContext ctx) throws IOException, ServletException, NamespaceException {
+        if (webFragments.isEmpty()) {
+            // nothing to activate
+            return;
+        }
+        
         this.componentContext = ctx;
         this.registeredAliases = new ArrayList<String>();
-
+        
         // register all the JAX-RS resources into a a JAX-RS application and bind it to a configurable URL
         // prefix
         JerseyEndpointApplication app = new JerseyEndpointApplication();
@@ -124,6 +129,7 @@ public class JerseyEndpoint {
             httpService.unregister(alias);
         }
         servletContext = null;
+        componentContext = null;
     }
 
     protected void bindHttpService(HttpService httpService) {
@@ -140,8 +146,9 @@ public class JerseyEndpoint {
         // TODO: support some ordering for jax-rs resource and template overrides?
         webFragments.add(webFragment);
         if (componentContext != null) {
-            deactivate(componentContext);
-            activate(componentContext);
+            ComponentContext oldContext = componentContext;
+            deactivate(oldContext);
+            activate(oldContext);
         }
     }
 
@@ -150,8 +157,9 @@ public class JerseyEndpoint {
                                                              NamespaceException {
         webFragments.remove(webFragment);
         if (componentContext != null) {
-            deactivate(componentContext);
-            activate(componentContext);
+            ComponentContext oldContext = componentContext;
+            deactivate(oldContext);
+            activate(oldContext);
         }
     }
 
