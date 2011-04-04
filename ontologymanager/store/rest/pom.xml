@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.apache.stanbol</groupId>
 		<artifactId>org.apache.stanbol.ontologymanager.store.parent</artifactId>
-		<version>${stanbol-version}</version>
+		<version>0.9-SNAPSHOT</version>
 		<relativePath>../parent</relativePath>
 	</parent>
 
@@ -17,7 +17,6 @@
 
 	<name>Apache Stanbol Ontology Manager Store - JAX-RS Frontend</name>
 
-	<version>${stanbol-version}</version>
 	<build>
 		<plugins>
 			<plugin>

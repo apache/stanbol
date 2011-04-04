@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>org.apache.stanbol.ontologymanager.store.parent</artifactId>
 		<groupId>org.apache.stanbol</groupId>
-		<version>${stanbol-version}</version>
+		<version>0.9-SNAPSHOT</version>
 		<relativePath>../../parent</relativePath>
 	</parent>
 	

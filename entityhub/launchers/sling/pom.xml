@@ -20,13 +20,12 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
-    <version>${stanbol-version}</version>
+    <version>0.9-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.launchers.sling</artifactId>
   <packaging>jar</packaging>
-  <version>${stanbol-version}</version>
   <name>Apache Stanbol Entityhub Sling-based standalone launcher</name>
   <description>Runnable jar that runs the standard IKS Entityhub configuration</description>
   <scm>

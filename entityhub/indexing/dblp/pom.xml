@@ -19,18 +19,15 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-<!-- 
 	<parent>
 		<groupId>org.apache.stanbol</groupId>
 		<artifactId>org.apache.stanbol.entityhub.parent</artifactId>
 		<version>0.9-SNAPSHOT</version>
 		<relativePath>../../parent</relativePath>
 	</parent>
--->
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.entityhub.indexing.dblp</artifactId>
 	<packaging>jar</packaging>
-	<version>0.9-SNAPSHOT</version>
 	<name>Apache Stanbol Entityhub Indexing for dblp</name>
 	<description>This uses the RDF dump provided by 
         http://dblp.l3s.de/dblp.rdf.gz to create a Full Cache 

@@ -21,13 +21,12 @@
 	<parent>
 		<groupId>org.apache.stanbol</groupId>
 		<artifactId>org.apache.stanbol.enhancer.parent</artifactId>
-		<version>${stanbol-version}</version>
+		<version>0.9-SNAPSHOT</version>
 		<relativePath>../../parent</relativePath>
 	</parent>
 	
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.enhancer.clerezza</artifactId>
-	<version>${stanbol-version}</version>	
 	<packaging>bundle</packaging>
 	
 	<name>Apache Stanbol Enhancer Clerezza</name>

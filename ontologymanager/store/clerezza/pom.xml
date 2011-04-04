@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>org.apache.stanbol.ontologymanager.store.parent</artifactId>
 		<groupId>org.apache.stanbol</groupId>
-		<version>${stanbol-version}</version>
+		<version>0.9-SNAPSHOT</version>
 		<relativePath>../parent</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
@@ -14,7 +14,6 @@
 	<name>Apache Stanbol Ontology Manager Store - Clerezza Adaptor </name>
 
 
-	<version>${stanbol-version}</version>
 	<build>
 		<plugins>
 			<plugin>

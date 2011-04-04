@@ -22,14 +22,13 @@
 	<parent>
 		<groupId>org.apache.stanbol</groupId>
 		<artifactId>stanbol-parent</artifactId>
-		<version>${stanbol-version}</version>
+		<version>0.9-SNAPSHOT</version>
 		<relativePath>../../../parent</relativePath>
 	</parent>
 
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.reengineer.base</artifactId>
 	<packaging>bundle</packaging>
-	<version>${stanbol-version}</version>
 
 	<name>Apache Stanbol Data Reegineer Manager</name>
 	<description>

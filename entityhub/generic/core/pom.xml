@@ -23,14 +23,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
-    <version>${stanbol-version}</version>
+    <version>0.9-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.core</artifactId>
   <packaging>bundle</packaging>
-  <version>${stanbol-version}</version>
 
   <name>Apache Stanbol Entityhub Core </name>
   <description>The Core Components of the Entityhub. This includes the default

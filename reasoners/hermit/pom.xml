@@ -22,12 +22,11 @@
 	<parent>
 		<groupId>org.apache.stanbol</groupId>
 		<artifactId>stanbol-parent</artifactId>
-		<version>${stanbol-version}</version>
+		<version>0.9-SNAPSHOT</version>
 		<relativePath>../../../parent</relativePath>
 	</parent>
 
 	<artifactId>org.apache.stanbol.reasoners.hermit</artifactId>
-	<version>${stanbol-version}</version>
 	<packaging>bundle</packaging>
 
 	<name>Apache Stanbol Reasoners Hermit Dependency</name>

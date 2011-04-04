@@ -4,13 +4,12 @@
 	<parent>
 		<groupId>org.apache.stanbol</groupId>
 		<artifactId>org.apache.stanbol.enhancer.parent</artifactId>
-		<version>${stanbol-version}</version>
+		<version>0.9-SNAPSHOT</version>
 		<relativePath>../../parent</relativePath>
 	</parent>
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.enhancer.stores.jcrstore</artifactId>
 	<packaging>bundle</packaging>
-	<version>${stanbol-version}</version>
 	<name>Apache Stanbol Enhancer JCR Store</name>
 	<description>Implementation of the Stanbol Enhancer Store API that uses JCR
   </description>

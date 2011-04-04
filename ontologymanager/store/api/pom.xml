@@ -3,14 +3,13 @@
 	<parent>
 		<artifactId>org.apache.stanbol.ontologymanager.store.parent</artifactId>
 		<groupId>org.apache.stanbol</groupId>
-		<version>${stanbol-version}</version>
+		<version>0.9-SNAPSHOT</version>
 		<relativePath>../parent</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.ontologymanager.store.api</artifactId>
-	<version>${stanbol-version}</version>
 	<name>Apache Stanbol Ontology Manager Store - API</name>
 	<packaging>bundle</packaging>
 

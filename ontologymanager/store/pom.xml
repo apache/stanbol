@@ -16,14 +16,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.ontologymanager.store.parent</artifactId>
-    <version>${stanbol-version}</version>
+    <version>0.9-SNAPSHOT</version>
     <relativePath>./parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.ontologymanager.store.reactor</artifactId>
   <packaging>pom</packaging>
-  <version>${stanbol-version}</version>
 
   <name>Apache Stanbol Ontology Manager Store - Reactor</name>
 
