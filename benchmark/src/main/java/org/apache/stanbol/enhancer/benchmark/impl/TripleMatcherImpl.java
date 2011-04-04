@@ -50,7 +50,12 @@ class TripleMatcherImpl implements TripleMatcher {
     
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " (" + predicateUri + " " + operator + " " + objectUri + ")";
+        return getClass().getSimpleName() + " (" + getExpression() + ")";
+    }
+    
+    /** Get the expression used to build this matcher */
+    public String getExpression() {
+        return predicateUri + " " + operator + " " + objectUri;
     }
     
     @Override

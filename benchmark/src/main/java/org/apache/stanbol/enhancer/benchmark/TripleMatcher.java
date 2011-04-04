@@ -38,5 +38,9 @@ import org.apache.clerezza.rdf.core.Triple;
  *  concern.
  */
 public interface TripleMatcher {
+    /** True if this matches suppplied Triple */
     boolean matches(Triple t);
+    
+    /** Get the expression used to build this matcher */
+    String getExpression();
 }
