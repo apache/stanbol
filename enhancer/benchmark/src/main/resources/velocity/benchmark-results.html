@@ -1,0 +1,54 @@
+<html>
+<head>
+	<title>$title</title>
+	<link rel="stylesheet" href="$cssPath"/>
+</head>
+<body>
+	<div class="home">
+		<a href="http://incubator.apache.org/stanbol">
+			<img src="/static/images/apache_stanbol_logo_cropped.png" alt="Apache Stanbol" />
+		</a>
+	</div>
+	 
+ 	<div class="header">
+	 	<h1>$title</h1>
+	 	<div style="clear: both"></div> 
+ 	</div>
+ 	 
+ 	<div class="content">
+		<div class="results">
+		#foreach($benchmark in $benchmarks)
+			<div class="benchmark">
+				<div class="input"><span class="label">Benchmark input: </span>$benchmark.getInputText()</div>
+				#foreach($result in $benchmark.execute($jobManager))
+					<div class="result">
+						<div class="description">
+						$result.getTripleMatcherGroup().getDescription()
+						</div>
+						
+						#if($result.successful())
+						<div class="success">SUCCESSFUL</div> 
+						#{else}
+						<div class="failure">**FAILED**: $result.getInfo()</div> 
+						#end
+						
+						<div class="matchers">
+						#foreach($matcher in $result.getTripleMatcherGroup().getMatchers())
+							<div class="matcher">
+								#if($result.getTripleMatcherGroup().isExpectGroup())
+									(E) 
+								#{else}
+									(C) 
+								#end
+								$esc.html($matcher.getExpression())
+							</div>
+						#end
+						</div>
+					</div>
+				#end
+			</div>			
+		#end
+		</div>
+	</div>
+</body>
+</html>

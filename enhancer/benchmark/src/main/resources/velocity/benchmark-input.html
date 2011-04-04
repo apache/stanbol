@@ -1,0 +1,71 @@
+<html>
+<head>
+	<title>$title</title>
+	<link rel="stylesheet" href="$cssPath"/>
+</head>
+<body>
+	<div class="home">
+		<a href="http://incubator.apache.org/stanbol">
+			<img src="/static/images/apache_stanbol_logo_cropped.png" alt="Apache Stanbol" />
+		</a>
+	</div>
+	 
+ 	<div class="header">
+	 	<h1>$title</h1>
+	 	<div style="clear: both"></div> 
+ 	</div>
+ 	 
+ 	<div class="content">
+		<form method='POST' action="$formAction">
+			<div style="text-align:right"><input type='submit'/></div>
+			<br/>
+	        <textarea name='content' rows='80' cols='120' style:"width=100%; height=100%;">
+# Here are examples benchmarks, see unit tests for more detailed syntax information.	        
+= INPUT =
+# Comments such as this one are ignored
+# This is the enhancer input, can be split on several lines
+Bob
+Marley was born in Kingston, Jamaica.
+
+= EXPECT =
+# EXPECT defines groups of predicate/object matchers that we expect to find in the output
+# Each group applies to one given enhancement: for the expectation to succeed, at least
+# one enhancement must match all lines in the group
+
+Description: Kingston must be found
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Kingston%2C_Jamaica
+
+Description: This one should fail
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Basel
+
+# The description: line starts a new group
+Description: Bob Marley must be found as a musical artist
+http://fise.iks-project.eu/ontology/entity-type URI http://dbpedia.org/ontology/MusicalArtist
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Bob_Marley
+
+= COMPLAIN =
+
+Description: Miles Davis must not be found
+http://fise.iks-project.eu/ontology/entity-type URI http://dbpedia.org/ontology/MusicalArtist
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Miles_Davis
+
+Description: Bob Marley in the COMPLAIN section should fail
+http://fise.iks-project.eu/ontology/entity-type URI http://dbpedia.org/ontology/MusicalArtist
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Bob_Marley
+
+= INPUT =
+Here's a second benchmark that talks about Paris, Texas
+
+= EXPECT =
+Description: Paris, Texas must be found
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/page/Paris%2C_Texas
+
+= COMPLAIN =
+Description: Paris, France must not be found
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/page/Paris
+
+	        </textarea>
+		</form>
+	</div>		
+</body>
+</html>
