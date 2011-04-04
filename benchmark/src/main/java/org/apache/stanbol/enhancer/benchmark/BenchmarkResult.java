@@ -16,9 +16,21 @@
  */
 package org.apache.stanbol.enhancer.benchmark;
 
-import java.io.Writer;
+import java.util.Set;
 
-public interface BenchmarkEngine {
-    /** Run supplied benchmarks and write results to output */
-    void runBenchmark(String benchmarks, Writer output) throws Exception;
+import org.apache.clerezza.rdf.core.UriRef;
+
+/** Benchmark result for a single TripleMatcherGroup */
+public interface BenchmarkResult {
+    /** The TripleMatcherGroup that was evaluated */
+    TripleMatcherGroup getTripleMatcherGroup();
+    
+    /** Was the benchmark successful? */
+    boolean successful();
+    
+    /** More info about success or failure */
+    String getInfo();
+    
+    /** Set of subjects that match our TripleMatcherGroup */
+    Set<UriRef> getMatchingSubjects();
 }

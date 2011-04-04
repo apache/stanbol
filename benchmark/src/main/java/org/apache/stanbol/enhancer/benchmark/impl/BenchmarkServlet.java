@@ -17,6 +17,9 @@
 package org.apache.stanbol.enhancer.benchmark.impl;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringReader;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -26,7 +29,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.stanbol.enhancer.benchmark.BenchmarkEngine;
+import org.apache.stanbol.enhancer.benchmark.Benchmark;
+import org.apache.stanbol.enhancer.benchmark.BenchmarkParser;
+import org.apache.stanbol.enhancer.benchmark.BenchmarkResult;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
@@ -44,7 +50,10 @@ public class BenchmarkServlet extends HttpServlet {
     private HttpService httpService;
     
     @Reference
-    private BenchmarkEngine benchmarkEngine;
+    private BenchmarkParser parser;
+    
+    @Reference
+    private EnhancementJobManager jobManager;
     
     public static final String PARAM_CONTENT = "content";
     public static final String DEFAULT_MOUNT_PATH = "/benchmark";
@@ -129,15 +138,23 @@ public class BenchmarkServlet extends HttpServlet {
             throw new ServletException("Missing " + PARAM_CONTENT + " parameter");
         }
         
-        response.setContentType("text/html");
+        response.setContentType("text/plain");
         response.setCharacterEncoding("UTF-8");
+        final PrintWriter pw = response.getWriter();
         
         try {
-            benchmarkEngine.runBenchmark(content, response.getWriter());
+            final List<? extends Benchmark> benchmarks = parser.parse(new StringReader(content));
+            for(Benchmark b : benchmarks) {
+                final List<BenchmarkResult> results = b.execute(jobManager);
+                for(BenchmarkResult r : results) {
+                    pw.println(r.toString());
+                }
+            }
         } catch(Exception e) {
-            // TODO better error reporting
             log.error("Exception in runBenchmark", e);
-            response.getWriter().write(e.toString());
+            e.printStackTrace(pw);
+        } finally {
+            pw.flush();
         }
   }
  }

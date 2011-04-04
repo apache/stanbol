@@ -17,9 +17,15 @@
 package org.apache.stanbol.enhancer.benchmark.impl;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.stanbol.enhancer.benchmark.Benchmark;
+import org.apache.stanbol.enhancer.benchmark.BenchmarkResult;
 import org.apache.stanbol.enhancer.benchmark.TripleMatcherGroup;
+import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.EngineException;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
+import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
 
 @SuppressWarnings("serial")
 public class BenchmarkImpl extends LinkedList<TripleMatcherGroup> implements Benchmark {
@@ -35,6 +41,7 @@ public class BenchmarkImpl extends LinkedList<TripleMatcherGroup> implements Ben
         this.name = name;
     }
 
+    /** @inheritDoc */
     @Override
     public String getName() {
         return name;
@@ -44,8 +51,28 @@ public class BenchmarkImpl extends LinkedList<TripleMatcherGroup> implements Ben
         this.inputText = inputText;
     }
     
+    /** @inheritDoc */
     @Override
     public String getInputText() {
         return inputText;
+    }
+
+    @Override
+    public List<BenchmarkResult> execute(EnhancementJobManager jobManager) throws EngineException {
+        if(isEmpty()) {
+            return null;
+        }
+        if(inputText == null || inputText.length() == 0) {
+            throw new IllegalStateException("inputText is null or empty, cannot run benchmark");
+        }
+        
+        final List<BenchmarkResult> result = new LinkedList<BenchmarkResult>();
+        final ContentItem ci = new InMemoryContentItem(inputText.getBytes(), "text/plain");
+        jobManager.enhanceContent(ci);
+        for(TripleMatcherGroup g :  this) {
+            result.add(new BenchmarkResultImpl(g, ci.getMetadata().getGraph()));
+        }
+
+        return result;
     }
 }
