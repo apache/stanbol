@@ -23,14 +23,13 @@
 	<parent>
 		<groupId>org.apache.stanbol</groupId>
 		<artifactId>org.apache.stanbol.enhancer.parent</artifactId>
-		<version>${stanbol-version}</version>
+		<version>0.9-SNAPSHOT</version>
 		<relativePath>../../parent</relativePath>
 	</parent>
 
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.enhancer.engines.autotagging</artifactId>
 	<packaging>bundle</packaging>
-	<version>${stanbol-version}</version>
 
 	<name>Apache Stanbol Enhancer Enhancement Engine : Semantic (Auto)Tagging</name>
 	<description>
