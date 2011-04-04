@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -66,10 +67,15 @@ public class EnginesRootResource extends BaseStanbolResource {
         jobManager = ContextHelper.getServiceFromContext(EnhancementJobManager.class, context);
         tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
         serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
-        EntityCacheProvider entityCacheProvider = ContextHelper.getServiceFromContext(
-            EntityCacheProvider.class, context);
-        if (entityCacheProvider != null) {
-            entityCache = entityCacheProvider.getEntityCache();
+        entityCache = new SimpleMGraph().getGraph();
+        try {
+            EntityCacheProvider entityCacheProvider = ContextHelper.getServiceFromContext(
+                EntityCacheProvider.class, context);
+            if (entityCacheProvider != null) {
+                entityCache = entityCacheProvider.getEntityCache();
+            }
+        } catch (NullPointerException e) {
+            // service lookup can raise null pointer exception, fall back to empty cache
         }
     }
 
