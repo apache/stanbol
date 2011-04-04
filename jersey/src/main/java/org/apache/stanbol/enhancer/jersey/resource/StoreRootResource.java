@@ -1,5 +1,18 @@
 package org.apache.stanbol.enhancer.jersey.resource;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
+import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
+import static javax.ws.rs.core.MediaType.WILDCARD;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N3;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N_TRIPLE;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JSON;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -30,7 +43,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.MGraph;
@@ -39,7 +51,6 @@ import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
 import org.apache.clerezza.rdf.core.sparql.QueryParser;
 import org.apache.clerezza.rdf.core.sparql.ResultSet;
@@ -47,6 +58,8 @@ import org.apache.clerezza.rdf.core.sparql.SolutionMapping;
 import org.apache.clerezza.rdf.core.sparql.query.SelectQuery;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.jersey.cache.EntityCacheProvider;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -59,10 +72,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.Viewable;
 import com.sun.jersey.core.header.FormDataContentDisposition;
-
-
-import static javax.ws.rs.core.MediaType.*;
-import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.*;
 
 /**
  * Resource to provide a CRU[D] REST API for content items and there related
@@ -80,7 +89,7 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.*;
  * The Delete operation is not implemented yet.
  */
 @Path("/store")
-public class StoreRootResource extends NavigationMixin {
+public class StoreRootResource extends BaseStanbolResource {
 
     public static final Set<String> RDF_MEDIA_TYPES = new TreeSet<String>(
             Arrays.asList(N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE, RDF_JSON));
@@ -141,21 +150,21 @@ public class StoreRootResource extends NavigationMixin {
     }
 
     public StoreRootResource(@Context ServletContext context,
-            @Context UriInfo uriInfo, @QueryParam(value = "offset") int offset,
-            @QueryParam(value = "pageSize") @DefaultValue("5") int pageSize)
-            throws ParseException {
-        tcManager = (TcManager) context.getAttribute(TcManager.class.getName());
-        store = (Store) context.getAttribute(Store.class.getName());
-        jobManager = (EnhancementJobManager) context.getAttribute(EnhancementJobManager.class.getName());
-        serializer = (Serializer) context.getAttribute(Serializer.class.getName());
-        EntityCacheProvider entityCacheProvider = (EntityCacheProvider) context.getAttribute(EntityCacheProvider.class.getName());
+                             @Context UriInfo uriInfo,
+                             @QueryParam(value = "offset") int offset,
+                             @QueryParam(value = "pageSize") @DefaultValue("5") int pageSize) throws ParseException {
+        store = ContextHelper.getServiceFromContext(Store.class, context);
+        jobManager = ContextHelper.getServiceFromContext(EnhancementJobManager.class, context);
+        tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
+        serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
+        EntityCacheProvider entityCacheProvider = ContextHelper.getServiceFromContext(
+            EntityCacheProvider.class, context);
         if (entityCacheProvider != null) {
             entityCache = entityCacheProvider.getEntityCache();
         }
 
         if (store == null || tcManager == null) {
-            log.error("Missing either store={} or tcManager={}", store,
-                    tcManager);
+            log.error("Missing either store={} or tcManager={}", store, tcManager);
             throw new WebApplicationException(404);
         }
         this.uriInfo = uriInfo;
@@ -259,20 +268,20 @@ public class StoreRootResource extends NavigationMixin {
         // handle smart redirection to browser view
         for (MediaType mt : headers.getAcceptableMediaTypes()) {
             if (mt.toString().startsWith(TEXT_HTML)) {
-                return Response.temporaryRedirect(
-                        UriBuilder.fromPath("/store/page/" + localId).build()).build();
+                URI pageUri = uriInfo.getBaseUriBuilder().path("/store/page").path(localId).build();
+                return Response.temporaryRedirect(pageUri).build();
             }
         }
 
         // handle smart redirection to RDF metadata view
         for (MediaType mt : headers.getAcceptableMediaTypes()) {
             if (RDF_MEDIA_TYPES.contains(mt.toString())) {
-                return Response.temporaryRedirect(
-                        UriBuilder.fromPath("/store/metadata/" + localId).build()).build();
+                URI metadataUri = uriInfo.getBaseUriBuilder().path("/store/metadata").path(localId).build();
+                return Response.temporaryRedirect(metadataUri).build();
             }
         }
-        return Response.temporaryRedirect(
-                UriBuilder.fromPath("/store/raw/" + localId).build()).build();
+        URI rawUri = uriInfo.getBaseUriBuilder().path("/store/raw").path(localId).build();
+        return Response.temporaryRedirect(rawUri).build();
     }
 
     @GET
@@ -297,7 +306,7 @@ public class StoreRootResource extends NavigationMixin {
             throw new WebApplicationException(404);
         }
         return new ContentItemResource(localId, ci, entityCache, uriInfo,
-                tcManager, serializer);
+                tcManager, serializer, servletContext);
     }
 
     @GET
