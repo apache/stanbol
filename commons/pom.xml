@@ -1,27 +1,30 @@
 <?xml version="1.0"?>
 <project>
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.apache.stanbol</groupId>
-    <artifactId>org.apache.stanbol.commons.reactor</artifactId>
-    <version>0.9-SNAPSHOT</version>
-    <packaging>pom</packaging>
-    
-    <name>Apache Stanbol Commons Reactor</name>
-    <scm>
-        <connection>
-            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons
-        </connection>
-        <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons
-        </developerConnection>
-        <url>http://incubator.apache.org/stanbol/</url>
-    </scm>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.commons.reactor</artifactId>
+  <version>0.9-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
-    <modules>
-        <module>testing/jarexec</module>
-        <module>testing/http</module>
-        <module>testing/stanbol</module>
-        <module>stanboltools/offline</module>
-    </modules>
+  <name>Apache Stanbol Commons Reactor</name>
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol/</url>
+  </scm>
+
+  <modules>
+    <module>web/base</module>
+    <module>web/home</module>
+    <module>web/sparql</module>
+    <module>testing/jarexec</module>
+    <module>testing/http</module>
+    <module>testing/stanbol</module>
+    <module>stanboltools/offline</module>
+  </modules>
 </project>

@@ -48,6 +48,7 @@
     <module>entityhub</module>
     <module>enhancer</module>
     <module>commons</module>
+    <module>launchers/mini</module>
   </modules>
 
   <profiles>
@@ -60,7 +61,7 @@
          <module>owl</module>
          <module>kres/jersey</module>
          <module>ontologymanager</module>
-	 <module>rules</module>
+         <module>rules</module>
          <module>reengineer</module>
          <module>reasoners</module>
          <module>kres/launchers/full</module>

@@ -282,6 +282,23 @@
 			<artifactId>org.apache.stanbol.jsonld</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
+
+		<!-- Stanbol Web interface -->
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.base</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.home</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.sparql</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
 	</startLevel>
 
 	<!-- Stanbol Enhancer  -->

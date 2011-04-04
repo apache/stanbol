@@ -63,10 +63,10 @@ public class EnhancerTestBase extends StanbolTestBase {
                  */
                 executor.execute(
                         builder.buildGetRequest("/engines")
-                        .withHeader("Accept", "text/plain")
+                        .withHeader("Accept", "text/html")
                 )
                 .assertStatus(200)
-                .assertContentType("text/plain")
+                .assertContentType("text/html")
                 .assertContentRegexp(
                     "org.apache.stanbol.*MetaxaEngine",
                     "org.apache.stanbol.*LangIdEnhancementEngine",
