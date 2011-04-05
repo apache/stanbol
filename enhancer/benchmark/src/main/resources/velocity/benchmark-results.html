@@ -17,9 +17,11 @@
  	 
  	<div class="content">
 		<div class="results">
+		#set($index = 0)
 		#foreach($benchmark in $benchmarks)
 			<div class="benchmark">
-				<div class="input"><span class="label">Benchmark input: </span>$benchmark.getInputText()</div>
+			    #set($index = $index + 1) 
+				<div class="input"><span class="label">Benchmark $index input: </span>$benchmark.getInputText()</div>
 				#foreach($result in $benchmark.execute($jobManager))
 					<div class="result">
 						<div class="description">
