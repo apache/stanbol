@@ -1,4 +1,5 @@
 # Default example benchmarks
+# Some failures are expected in this example
             
 = INPUT =
 # Comments such as this one are ignored
