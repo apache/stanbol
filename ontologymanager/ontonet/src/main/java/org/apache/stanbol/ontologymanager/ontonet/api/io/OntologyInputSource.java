@@ -32,7 +32,7 @@ public interface OntologyInputSource {
 	 * @return the physical location for this ontology source, or null if
 	 *         unknown.
 	 */
-	public IRI getPhysicalIRI();
+    IRI getPhysicalIRI();
 
 	/**
 	 * Returns the OWL Ontology that imports the whole ontology network
@@ -40,7 +40,7 @@ public interface OntologyInputSource {
 	 * 
 	 * @return the ontology network root.
 	 */
-	public OWLOntology getRootOntology();
+    OWLOntology getRootOntology();
 
 	/**
 	 * Determines if a physical IRI is known for this ontology source. Note that
@@ -50,7 +50,7 @@ public interface OntologyInputSource {
 	 * 
 	 * @return true if a physical location is known for this ontology source.
 	 */
-	public boolean hasPhysicalIRI();
+    boolean hasPhysicalIRI();
 
 	/**
 	 * Determines if a root ontology that imports the entire network is
@@ -58,6 +58,6 @@ public interface OntologyInputSource {
 	 * 
 	 * @return true if a root ontology is available, false otherwise.
 	 */
-	public boolean hasRootOntology();
+    boolean hasRootOntology();
 
 }

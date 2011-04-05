@@ -26,16 +26,13 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * The {@code DBSchemaGenerator} is responsible of the generation of the RDF of the schema of a relational database.
  * 
  * @author andrea.nuzzolese
- *
  */
-
 public class DBSchemaGenerator extends ReengineerUriRefGenerator implements Serializable {
 
 	private String graphNS; 
 	private IRI outputIRI;
 	private ConnectionSettings connectionSettings;
-	
-	
+
 	/**
 	 * Creates a new standard {@code DBSchemaGenerator}
 	 */
@@ -52,13 +49,10 @@ public class DBSchemaGenerator extends ReengineerUriRefGenerator implements Seri
 	 * @param connectionSettings {@link ConnectionSettings}
 	 */
 	public DBSchemaGenerator(IRI outputIRI, ConnectionSettings connectionSettings){
-		
 		this.connectionSettings = connectionSettings;
 		this.outputIRI = outputIRI;
-		
 	}
-	
-	
+
 	/**
 	 * Performs the generation of the RDF of the database schema. The RDF graph is added to the {@link MGraph} passed as input.
 	 *  
@@ -77,8 +71,7 @@ public class DBSchemaGenerator extends ReengineerUriRefGenerator implements Seri
 		schemaModel.setNsPrefix("xsd", "http://www.w3.org/2001/XMLSchema#");
 		schemaModel.setNsPrefix("dbs", DBS_L1.NS);
 		*/
-		
-		
+
 		OWLOntology schemaOntology = null;
 		if(outputIRI != null){
 			try {
@@ -145,9 +138,7 @@ public class DBSchemaGenerator extends ReengineerUriRefGenerator implements Seri
 		    	ResultSet pk = md.getPrimaryKeys(catalog, null, table);
 		    	
 		    	ResultSet columnsRs = md.getColumns(catalog, null, table, null);
-		    	
-		    	
-		    	
+
 		    	while(columnsRs.next()){
 		    		String columnName = columnsRs.getString("COLUMN_NAME");
 		    		String columnType = columnsRs.getString("TYPE_NAME");
@@ -159,15 +150,11 @@ public class DBSchemaGenerator extends ReengineerUriRefGenerator implements Seri
 		    		boolean nullable = true;
 		    		try{
 		    			int nullableInt = Integer.valueOf(columnNullable).intValue();
-		    			
-		    			nullable = nullableInt == 0 ? false : true;
-		    			
-		    			
+		    			nullable = nullableInt != 0;
 		    		} catch (NumberFormatException e) {
 						nullable = true;
 					}
-		    		
-		    		
+
 		    		IRI colummIRI = IRI.create(graphNS + table+"-column_"+columnName);
 		    		OWLClassAssertionAxiom columm;
 		    		
@@ -187,15 +174,10 @@ public class DBSchemaGenerator extends ReengineerUriRefGenerator implements Seri
 		    		}
 		    		
 		    		manager.applyChange(new AddAxiom(schemaOntology, createOWLObjectPropertyAssertionAxiom(factory, DBS_L1_OWL.isColumnOf, colummIRI, tableResourceIRI)));
-		    		
 		    		manager.applyChange(new AddAxiom(schemaOntology, createOWLDataPropertyAssertionAxiom(factory, DBS_L1_OWL.RDFS_LABEL, colummIRI, columnName)));
-		    		
 		    		manager.applyChange(new AddAxiom(schemaOntology, createOWLObjectPropertyAssertionAxiom(factory, DBS_L1_OWL.isColumnOf, tableResourceIRI, colummIRI)));
-		    		
-		    		
 		    	}
-		    	
-		    	
+
 		    	Hashtable<String, TablePKRelations> relationTable = new Hashtable<String, TablePKRelations>();
 		    	
 		    	while (fk.next()) {
@@ -222,25 +204,23 @@ public class DBSchemaGenerator extends ReengineerUriRefGenerator implements Seri
 		    		manager.applyChange(new AddAxiom(schemaOntology, createOWLObjectPropertyAssertionAxiom(factory, DBS_L1_OWL.joinsOn, columnIRI, joinColumnIRI)));
 		    		manager.applyChange(new AddAxiom(schemaOntology, createOWLObjectPropertyAssertionAxiom(factory, DBS_L1_OWL.hasForeignKey, tableResourceIRI, foreignKeyResourceIRI)));
 		    		manager.applyChange(new AddAxiom(schemaOntology, createOWLObjectPropertyAssertionAxiom(factory, DBS_L1_OWL.isForeignKeyOf, foreignKeyResourceIRI, tableResourceIRI)));
-		    		
-		    		
-		    		int fkSequence = fk.getInt("KEY_SEQ");
-	    	       	if(fkTableName != null){
-	    	    	   System.out.println("getExportedKeys(): fkTableName="+fkTableName);
-	    	       	}
-	    	       	if(fkColumnName != null){
-	    	    	   System.out.println("getExportedKeys(): fkColumnName="+fkColumnName);
-	    	       	}
-	    	       	if(pkTableName != null){
-	    	       		System.out.println("getExportedKeys(): pkTableName="+pkTableName);
-	    	       	}
-	    	       	if(pkColumnName != null){
-	    	       		System.out.println("getExportedKeys(): pkColumnName="+pkColumnName);
-	    	       	}
-	    	       	System.out.println("getExportedKeys(): fkSequence="+fkSequence);
-	    	       	
-	    	       	
-	    	       	TablePKRelations tableRelations = relationTable.remove(fkTableName);
+
+                    int fkSequence = fk.getInt("KEY_SEQ");
+                    if (fkTableName != null) {
+                        System.out.println("getExportedKeys(): fkTableName=" + fkTableName);
+                    }
+                    if (fkColumnName != null) {
+                        System.out.println("getExportedKeys(): fkColumnName=" + fkColumnName);
+                    }
+                    if (pkTableName != null) {
+                        System.out.println("getExportedKeys(): pkTableName=" + pkTableName);
+                    }
+                    if (pkColumnName != null) {
+                        System.out.println("getExportedKeys(): pkColumnName=" + pkColumnName);
+                    }
+                    System.out.println("getExportedKeys(): fkSequence=" + fkSequence);
+
+                    TablePKRelations tableRelations = relationTable.remove(fkTableName);
 	    	       	System.out.println();
 	    	       	System.out.println(pkTableName);
 	    	       	if(tableRelations == null){
@@ -262,10 +242,8 @@ public class DBSchemaGenerator extends ReengineerUriRefGenerator implements Seri
 	    	       	tableRelations.setPkColumns(pkArrayList);
 	    	       	
 	    	       	relationTable.put(fkTableName, tableRelations);
-	    	       	
 		    	}
-		    	
-		    	
+
 		    	fk.close();
 		    	
 		    	for(int i=0; pk.next(); i++){
@@ -282,27 +260,19 @@ public class DBSchemaGenerator extends ReengineerUriRefGenerator implements Seri
 		    		
 		    		manager.applyChange(new AddAxiom(schemaOntology, createOWLObjectPropertyAssertionAxiom(factory, DBS_L1_OWL.hasPrimaryKey, tableResourceIRI, primaryKeyIRI)));
 		    		manager.applyChange(new AddAxiom(schemaOntology, createOWLObjectPropertyAssertionAxiom(factory, DBS_L1_OWL.isPrimaryKeyOf, primaryKeyIRI, tableResourceIRI)));
-		    		
 		    	}
-		    	
-		    	
-		    	
+
 		    	pk.close();
-		    	
-		    	
 			}
 			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
-		
+
 		return schemaOntology;
 	}
-	
-	
+
 	/*
 	public Model getSchemaL1(){
 		

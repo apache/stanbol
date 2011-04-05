@@ -8,20 +8,20 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 public interface RuleAtom {
 
-	public Resource toSWRL(Model model);
-	public SPARQLObject toSPARQL();
-	public SWRLAtom toSWRL(OWLDataFactory factory);
+	Resource toSWRL(Model model);
+	SPARQLObject toSPARQL();
+	SWRLAtom toSWRL(OWLDataFactory factory);
 	
 	/**
 	 * Retunr the KReS syntax representation of the atom.
 	 * @return the string of the atom in KReSRule syntax.
 	 */
-	public String toKReSSyntax();
+    String toKReSSyntax();
 	
-	public boolean isSPARQLConstruct();
+	boolean isSPARQLConstruct();
 	
-	public boolean isSPARQLDelete();
+	boolean isSPARQLDelete();
 	
-	public boolean isSPARQLDeleteData();
+	boolean isSPARQLDeleteData();
 	
 }

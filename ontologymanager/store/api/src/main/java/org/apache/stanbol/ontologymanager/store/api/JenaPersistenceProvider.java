@@ -6,18 +6,18 @@ import com.hp.hpl.jena.rdf.model.Model;
 
 public interface JenaPersistenceProvider {
 
-    public abstract boolean clear();
+    boolean clear();
 
-    public abstract List<String> listModels();
+    List<String> listModels();
 
-    public abstract Model createModel(String ontologyURI);
+    Model createModel(String ontologyURI);
 
-    public abstract boolean hasModel(String ontologyURI);
+    boolean hasModel(String ontologyURI);
 
-    public abstract Model getModel(String ontologyURI);
+    Model getModel(String ontologyURI);
 
-    public abstract void removeModel(String ontologyURI);
+    void removeModel(String ontologyURI);
 
-    public abstract boolean commit(Model model);
+    boolean commit(Model model);
 
 }

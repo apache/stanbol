@@ -4,7 +4,7 @@ public enum SpaceType {
 
 	CORE("core"), CUSTOM("custom"), SESSION("session");
 
-	private SpaceType(String suffix) {
+	SpaceType(String suffix) {
 		this.suffix = suffix;
 	}
 

@@ -257,7 +257,7 @@ public class RdfEntityFactoryTest {
      * @author westei
      */
     @Rdf(id="urn:test:TestRdfEntity")
-    public static interface TestRdfEntity extends RdfEntity{
+    public interface TestRdfEntity extends RdfEntity{
         @Rdf(id="urn:test:Integer")
         Integer getInteger();
         @Rdf(id="urn:test:Integer")
@@ -325,7 +325,7 @@ public class RdfEntityFactoryTest {
      * @author westei
      */
     @Rdf(id="urn:test:TestRdfEntity2")
-    public static interface TestRdfEntity2 extends RdfEntity {
+    public interface TestRdfEntity2 extends RdfEntity {
         @Rdf(id="urn:test:RdfEntity")
         TestRdfEntity getTestEntity();
         @Rdf(id="urn:test:RdfEntity")
@@ -343,7 +343,7 @@ public class RdfEntityFactoryTest {
      * @author westei
      */
     @Rdf(id="urn:test:SubTestRdfEntity")
-    public static interface SubTestRdfEntity extends TestRdfEntity {
+    public interface SubTestRdfEntity extends TestRdfEntity {
         @Rdf(id="urn:test:RdfEntity2")
         TestRdfEntity2 getTestEntity2();
         @Rdf(id="urn:test:RdfEntity2")

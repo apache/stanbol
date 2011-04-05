@@ -7,7 +7,7 @@ package org.apache.stanbol.ontologymanager.store.api;
  */
 public interface LockManager {
 
-    public static String GLOBAL_SPACE = "GLOBAL_SPACE";
+    String GLOBAL_SPACE = "GLOBAL_SPACE";
 
     /**
      * Obtain a read lock for specified ontology
@@ -15,7 +15,7 @@ public interface LockManager {
      * @param ontologyURI
      *            URI of the ontology
      */
-    public abstract void obtainReadLockFor(String ontologyURI);
+    void obtainReadLockFor(String ontologyURI);
 
     /**
      * Release read lock for specified ontology
@@ -23,7 +23,7 @@ public interface LockManager {
      * @param ontologyURI
      *            URI of the ontology
      */
-    public abstract void releaseReadLockFor(String ontologyURI);
+    void releaseReadLockFor(String ontologyURI);
 
     /**
      * Obtain a write lock for specified ontology
@@ -31,13 +31,13 @@ public interface LockManager {
      * @param ontologyURI
      *            URI of the ontology
      */
-    public abstract void obtainWriteLockFor(String ontologyURI);
+    void obtainWriteLockFor(String ontologyURI);
 
     /**
      * Release write lock for specified ontology
      * 
      * @param ontologyURI
      */
-    public abstract void releaseWriteLockFor(String ontologyURI);
+    void releaseWriteLockFor(String ontologyURI);
 
 }

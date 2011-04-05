@@ -22,7 +22,7 @@ public interface RestClient {
      * @param PsURL
      *            URL of the external Persistence Store.
      */
-    public void setPsURL(String PsURL);
+    void setPsURL(String PsURL);
 
     /**
      * Interface method for registering an ontology to the persistence store
@@ -38,7 +38,7 @@ public interface RestClient {
      *         ontology
      * @throws Exception
      */
-    public OntologyMetaInformation saveOntology(String ontologyContent, String ontologyURI, String encoding) throws RestClientException;
+    OntologyMetaInformation saveOntology(String ontologyContent, String ontologyURI, String encoding) throws RestClientException;
 
     /**
      * Interface method to retrieve a particular ontology
@@ -53,7 +53,7 @@ public interface RestClient {
      * @return the ontology encoded in the given language
      * @throws RestClientException
      */
-    public String retrieveOntology(String ontologyPath, String language, boolean withInferredAxioms) throws RestClientException;
+    String retrieveOntology(String ontologyPath, String language, boolean withInferredAxioms) throws RestClientException;
 
     /**
      * Interface method to return a list of all registered ontologies
@@ -62,7 +62,7 @@ public interface RestClient {
      *         OntologyMetaInformation)
      * @throws RestClientException
      */
-    public AdministeredOntologies retrieveAdministeredOntologies() throws RestClientException;
+    AdministeredOntologies retrieveAdministeredOntologies() throws RestClientException;
 
     /**
      * Interface method to return the OntologyMetaInformation element associated with a particular ontology
@@ -73,7 +73,7 @@ public interface RestClient {
      *         ontology
      * @throws RestClientException
      */
-    public OntologyMetaInformation retrieveOntologyMetaInformation(String ontologyPath) throws RestClientException;
+    OntologyMetaInformation retrieveOntologyMetaInformation(String ontologyPath) throws RestClientException;
 
     /**
      * Interface method to list all of the classes that the ontology contains
@@ -87,7 +87,7 @@ public interface RestClient {
      *         /784360a5-2194-4f4a-8fd6-14f4dbd34262/classes/3f5fa9ff-4 cdc-42c8-8629-f2d7ecdbf16b)
      * @throws RestClientException
      */
-    public ClassesForOntology retrieveClassesOfOntology(String ontologyPath) throws RestClientException;
+    ClassesForOntology retrieveClassesOfOntology(String ontologyPath) throws RestClientException;
 
     /**
      * Interface method to list all of the data type properties that the ontology contains
@@ -102,7 +102,7 @@ public interface RestClient {
      *         datatypeProperties/36c453b5-f619-4828-82cb-2414c9749e87)
      * @throws RestClientException
      */
-    public DatatypePropertiesForOntology retrieveDatatypePropertiesOfOntology(String ontologyPath) throws RestClientException;
+    DatatypePropertiesForOntology retrieveDatatypePropertiesOfOntology(String ontologyPath) throws RestClientException;
 
     /**
      * Interface method to list all of the object properties that the ontology contains
@@ -117,7 +117,7 @@ public interface RestClient {
      *         -dbb3-4d4d-a7d9-187733ba238c)
      * @throws RestClientException
      */
-    public ObjectPropertiesForOntology retrieveObjectPropertiesOfOntology(String ontologyPath) throws RestClientException;
+    ObjectPropertiesForOntology retrieveObjectPropertiesOfOntology(String ontologyPath) throws RestClientException;
 
     /**
      * Interface method to list all of the individuals that the ontology contains
@@ -132,7 +132,7 @@ public interface RestClient {
      *         cad687efb/individuals/1aefd64c-8700-4f24-b705-9ced6caa6951)
      * @throws RestClientException
      */
-    public IndividualsForOntology retrieveIndividualsOfOntology(String ontologyPath) throws RestClientException;
+    IndividualsForOntology retrieveIndividualsOfOntology(String ontologyPath) throws RestClientException;
 
     /**
      * Interface method to get a Protege-like view of the particular ontology class
@@ -146,7 +146,7 @@ public interface RestClient {
      *         class.
      * @throws RestClientException
      */
-    public ClassContext generateClassContext(String classPath, boolean withInferredAxioms) throws RestClientException;
+    ClassContext generateClassContext(String classPath, boolean withInferredAxioms) throws RestClientException;
 
     /**
      * Interface method to get a Protege-like view of the particular data type property
@@ -160,8 +160,8 @@ public interface RestClient {
      *         Finally, some attributes of the data type property (i.e. isFunctional) are also conveyed.
      * @throws RestClientException
      */
-    public DatatypePropertyContext generateDatatypePropertyContext(String datatypePropertyPath,
-                                                                   boolean withInferredAxioms) throws RestClientException;
+    DatatypePropertyContext generateDatatypePropertyContext(String datatypePropertyPath,
+            boolean withInferredAxioms) throws RestClientException;
 
     /**
      * Interface method to get a Protege-like view of the particular object property
@@ -176,8 +176,8 @@ public interface RestClient {
      *         isTransitive, isSymmetric) are also conveyed.
      * @throws RestClientException
      */
-    public ObjectPropertyContext generateObjectPropertyContext(String objectPropertyPath,
-                                                               boolean withInferredAxioms) throws RestClientException;
+    ObjectPropertyContext generateObjectPropertyContext(String objectPropertyPath,
+            boolean withInferredAxioms) throws RestClientException;
 
     /**
      * Interface method to get a Protege-like view of the particular individual
@@ -191,7 +191,7 @@ public interface RestClient {
      *         of any properties associated with this individual.
      * @throws RestClientException
      */
-    public IndividualContext generateIndividualContext(String individualPath, boolean withInferredAxioms) throws RestClientException;
+    IndividualContext generateIndividualContext(String individualPath, boolean withInferredAxioms) throws RestClientException;
 
     /**
      * Interface method to create a new class for a particular ontology
@@ -206,7 +206,7 @@ public interface RestClient {
      *         a9ff-4cdc-42c8-8629-f2d7ecdbf16b).
      * @throws RestClientException
      */
-    public ClassMetaInformation generateClassForOntology(String ontologyPath, String classURI) throws RestClientException;
+    ClassMetaInformation generateClassForOntology(String ontologyPath, String classURI) throws RestClientException;
 
     /**
      * Interface method to create a new data type property for a particular ontology
@@ -221,8 +221,8 @@ public interface RestClient {
      *         /datatypeProperties/36c453b5-f619-4828-82cb-2414c9749e87).
      * @throws RestClientException
      */
-    public PropertyMetaInformation generateDatatypePropertyForOntology(String ontologyPath,
-                                                                       String datatypePropertyURI) throws RestClientException;
+    PropertyMetaInformation generateDatatypePropertyForOntology(String ontologyPath,
+            String datatypePropertyURI) throws RestClientException;
 
     /**
      * Interface method to create a new object property for a particular ontology
@@ -237,8 +237,8 @@ public interface RestClient {
      *         /a2bf8f9a-dbb3-4d4d-a7d9-187733ba238c)
      * @throws RestClientException
      */
-    public PropertyMetaInformation generateObjectPropertyForOntology(String ontologyPath,
-                                                                     String objectPropertyURI) throws RestClientException;
+    PropertyMetaInformation generateObjectPropertyForOntology(String ontologyPath,
+            String objectPropertyURI) throws RestClientException;
 
     /**
      * Interface method to create a new individual for a particular ontology
@@ -255,9 +255,9 @@ public interface RestClient {
      *         /1aefd64c-8700-4f24-b705-9ced6caa6951)
      * @throws RestClientException
      */
-    public IndividualMetaInformation generateIndividualForOntology(String ontologyPath,
-                                                                   String classURI,
-                                                                   String individualURI) throws RestClientException;
+    IndividualMetaInformation generateIndividualForOntology(String ontologyPath,
+            String classURI,
+            String individualURI) throws RestClientException;
 
     /**
      * Interface method to *add* a new super-sub class association
@@ -269,7 +269,7 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void makeSubClassOf(String subClassPath, String superClassURI) throws RestClientException;
+    void makeSubClassOf(String subClassPath, String superClassURI) throws RestClientException;
 
     /**
      * Interface method to *delete* a superclass association
@@ -281,7 +281,7 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void deleteSuperClass(String subClassPath, String superClassURI) throws RestClientException;
+    void deleteSuperClass(String subClassPath, String superClassURI) throws RestClientException;
 
     /**
      * Interface method to *add* a new equivalent class association
@@ -293,7 +293,7 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void addEquivalentClass(String classPath, String equivalentClassURI) throws RestClientException;
+    void addEquivalentClass(String classPath, String equivalentClassURI) throws RestClientException;
 
     /**
      * Interface method to *delete* a new equivalent class association
@@ -305,7 +305,7 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void deleteEquivalentClass(String classPath, String equivalentClassURI) throws RestClientException;
+    void deleteEquivalentClass(String classPath, String equivalentClassURI) throws RestClientException;
 
     /**
      * Interface method to *add* a new disjoint class association
@@ -317,7 +317,7 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void addDisjointClass(String classPath, String disjointClassURI) throws RestClientException;
+    void addDisjointClass(String classPath, String disjointClassURI) throws RestClientException;
 
     /**
      * Interface method to *delete* an existing disjoint class association
@@ -329,7 +329,7 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void deleteDisjointClass(String classPath, String disjointClassURI) throws RestClientException;
+    void deleteDisjointClass(String classPath, String disjointClassURI) throws RestClientException;
 
     /**
      * Interface method to *add* a particular class to union set of another class
@@ -341,7 +341,7 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void addUnionClass(String classPath, String unionClassURI) throws RestClientException;
+    void addUnionClass(String classPath, String unionClassURI) throws RestClientException;
 
     /**
      * Interface method to *delete* a particular class from the union set of another class
@@ -353,7 +353,7 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void deleteUnionClass(String classPath, String unionClassURI) throws RestClientException;
+    void deleteUnionClass(String classPath, String unionClassURI) throws RestClientException;
 
     /**
      * Interface method to *add* a new super-sub property association
@@ -365,7 +365,7 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void makeSubPropertyOf(String subPropertyPath, String superPropertyURI) throws RestClientException;
+    void makeSubPropertyOf(String subPropertyPath, String superPropertyURI) throws RestClientException;
 
     /**
      * Interface method to *delete* a super property association
@@ -377,7 +377,7 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void deleteSuperPropertyAssertion(String subPropertyPath, String superPropertyURI) throws RestClientException;
+    void deleteSuperPropertyAssertion(String subPropertyPath, String superPropertyURI) throws RestClientException;
 
     /**
      * Interface method to *add* multiple domains to domain set of a property
@@ -389,7 +389,7 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void addDomains(String propertyPath, List<String> domainURIs) throws RestClientException;
+    void addDomains(String propertyPath, List<String> domainURIs) throws RestClientException;
 
     /**
      * Interface method to *add* a domain to the domain set of an object and data type property
@@ -399,7 +399,7 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void addDomain(String propertyPath, String domainURI) throws RestClientException;
+    void addDomain(String propertyPath, String domainURI) throws RestClientException;
 
     /**
      * Interface method to *delete* a domain from the domain set of an object or data type property
@@ -411,7 +411,7 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void deleteDomain(String propertyPath, String domainURI) throws RestClientException;
+    void deleteDomain(String propertyPath, String domainURI) throws RestClientException;
 
     /**
      * Interface method to *add* multiple ranges to range set of a property
@@ -423,7 +423,7 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void addRanges(String propertyPath, List<String> rangeURIs) throws RestClientException;
+    void addRanges(String propertyPath, List<String> rangeURIs) throws RestClientException;
 
     /**
      * Interface method to *add* a range to range set of an object or data type property
@@ -435,7 +435,7 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void addRange(String propertyPath, String rangeURI) throws RestClientException;
+    void addRange(String propertyPath, String rangeURI) throws RestClientException;
 
     /**
      * Interface method to *delete* a range from range set of an object or data type property
@@ -447,7 +447,7 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void deleteRange(String propertyPath, String rangeURI) throws RestClientException;
+    void deleteRange(String propertyPath, String rangeURI) throws RestClientException;
 
     /**
      * Interface method to *set* the various property attributes (e.g. isFunctional, isTransitive, etc.)
@@ -466,11 +466,11 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void setPropertyAttributes(String propertyPath,
-                                      Boolean isFunctional,
-                                      Boolean isTransitive,
-                                      Boolean isSymmetric,
-                                      Boolean isInverseFunctional) throws RestClientException;
+    void setPropertyAttributes(String propertyPath,
+            Boolean isFunctional,
+            Boolean isTransitive,
+            Boolean isSymmetric,
+            Boolean isInverseFunctional) throws RestClientException;
 
     /**
      * Interface method to *set* the property value of a particular individual
@@ -486,10 +486,10 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void assertPropertyValue(String individualPath,
-                                    String propertyURI,
-                                    String individualAsValueURI,
-                                    String literalAsValue) throws RestClientException;
+    void assertPropertyValue(String individualPath,
+            String propertyURI,
+            String individualAsValueURI,
+            String literalAsValue) throws RestClientException;
 
     /**
      * Interface method to *delete* the property assertion of a particular individual
@@ -506,10 +506,10 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void deletePropertyAssertion(String individualPath,
-                                        String propertyURI,
-                                        String individualAsValueURI,
-                                        String literalAsValue) throws RestClientException;
+    void deletePropertyAssertion(String individualPath,
+            String propertyURI,
+            String individualAsValueURI,
+            String literalAsValue) throws RestClientException;
 
     /**
      * Interface method to *add* a class for an individual
@@ -521,7 +521,7 @@ public interface RestClient {
      * @return true if successful (e.g. all required resources exit)
      * @throws RestClientException
      */
-    public void addContainerClassForIndividual(String individualPath, String classURI) throws RestClientException;
+    void addContainerClassForIndividual(String individualPath, String classURI) throws RestClientException;
 
     /**
      * Interface method to *delete* a class for an individual
@@ -533,7 +533,7 @@ public interface RestClient {
      * @return true if successful
      * @throws RestClientException
      */
-    public void deleteContainerClassForIndividual(String individualPath, String classURI) throws RestClientException;
+    void deleteContainerClassForIndividual(String individualPath, String classURI) throws RestClientException;
 
     /**
      * Delete any resource on persistence store
@@ -542,7 +542,7 @@ public interface RestClient {
      *            REST path of the resource
      * @throws RestClientException
      */
-    public void deleteResource(String resourcePath) throws RestClientException;
+    void deleteResource(String resourcePath) throws RestClientException;
 
     /**
      * Interface method to *delete* a particular ontology
@@ -551,7 +551,7 @@ public interface RestClient {
      *            the Path of the ontology to delete
      * @return true if successful (e.g. all required resources exit)
      */
-    public void deleteOntology(String ontologyPath) throws RestClientException;
+    void deleteOntology(String ontologyPath) throws RestClientException;
 
     /**
      * Interface method to *delete* all registered ontologies together with their resources
@@ -559,7 +559,7 @@ public interface RestClient {
      * @return true if successful
      * @throws RestClientException
      */
-    public void clearPersistenceStore() throws RestClientException;
+    void clearPersistenceStore() throws RestClientException;
 
     /**
      * Interface method to *merge* resources
@@ -572,5 +572,5 @@ public interface RestClient {
      *            base URI of the target ontology
      * @throws RestClientException
      */
-    public String mergeOntology(String ontologyPath, String targetOntology, String targetOntologyBaseURI) throws RestClientException;
+    String mergeOntology(String ontologyPath, String targetOntology, String targetOntologyBaseURI) throws RestClientException;
 }

@@ -19,7 +19,7 @@ public interface Reasoner {
 	 * @param ontology {@link OWLOntology}
 	 * @return the reasoner {@link OWLReasoner}.
 	 */
-	public OWLReasoner getReasoner(OWLOntology ontology);
+    OWLReasoner getReasoner(OWLOntology ontology);
 	
 	/**
 	 * Runs a consistency check on the ontology.
@@ -27,7 +27,7 @@ public interface Reasoner {
 	 * @param owlReasoner {@link OWLReasoner}
 	 * @return true if the ontology is consistent, false otherwise.
 	 */
-	public boolean consistencyCheck(OWLReasoner owlReasoner);
+    boolean consistencyCheck(OWLReasoner owlReasoner);
 	
 	
 	/**
@@ -36,6 +36,6 @@ public interface Reasoner {
 	 * @param ruleOntology
 	 * @return the inferred ontology
 	 */
-	public OWLOntology runRules(OWLOntology ontology, OWLOntology ruleOntology);
+    OWLOntology runRules(OWLOntology ontology, OWLOntology ruleOntology);
 
 }

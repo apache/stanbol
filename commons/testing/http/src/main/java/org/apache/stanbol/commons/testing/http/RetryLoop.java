@@ -30,7 +30,7 @@ public class RetryLoop {
      * Interface for conditions to check, isTrue will be called
      * repeatedly until success or timeout
      */
-    public static interface Condition {
+    public interface Condition {
 
         /**
          * Used in failure messages to describe what was expected

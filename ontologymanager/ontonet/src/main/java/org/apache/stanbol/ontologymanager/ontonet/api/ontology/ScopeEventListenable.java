@@ -11,12 +11,12 @@ import java.util.Collection;
  */
 public interface ScopeEventListenable {
 
-	public void addScopeEventListener(ScopeEventListener listener);
+	void addScopeEventListener(ScopeEventListener listener);
 
-	public void clearScopeEventListeners();
+	void clearScopeEventListeners();
 
-	public Collection<ScopeEventListener> getScopeEventListeners();
+	Collection<ScopeEventListener> getScopeEventListeners();
 
-	public void removeScopeEventListener(ScopeEventListener listener);
+	void removeScopeEventListener(ScopeEventListener listener);
 
 }

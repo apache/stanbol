@@ -22,5 +22,5 @@ package org.apache.stanbol.enhancer.engines.geonames.impl;
  * @author Rupert Westenthaler
  */
 public enum FeatureClass {
-    A, H, L, P, R, S, T, U, V;
+    A, H, L, P, R, S, T, U, V
 }

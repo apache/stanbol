@@ -31,7 +31,7 @@ public interface ConsistentRefactorer extends Refactorer {
      * @throws NoSuchRecipeException
      * @throws InconcistencyException
      */
-    public void consistentOntologyRefactoring(IRI refactoredOntologyIRI, IRI datasetURI, IRI recipeIRI) throws RefactoringException,
+    void consistentOntologyRefactoring(IRI refactoredOntologyIRI, IRI datasetURI, IRI recipeIRI) throws RefactoringException,
                                                                                                        NoSuchRecipeException,
                                                                                                        InconcistencyException;
 
@@ -50,7 +50,7 @@ public interface ConsistentRefactorer extends Refactorer {
      * @throws NoSuchRecipeException
      * @throws RefactoringException
      */
-    public OWLOntology consistentOntologyRefactoring(OWLOntology inputOntology, IRI recipeIRI) throws RefactoringException,
+    OWLOntology consistentOntologyRefactoring(OWLOntology inputOntology, IRI recipeIRI) throws RefactoringException,
                                                                                               NoSuchRecipeException,
                                                                                               InconcistencyException;
 

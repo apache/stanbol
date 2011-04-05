@@ -24,7 +24,7 @@ public interface DataSource {
 	 * Get the ID of the data source as it is represented in Semion
 	 * @return the {@link String} representing the ID of the physical data source in Semion
 	 */
-	public String getID();
+    String getID();
 	
 	/**
 	 * As a {@code DataSource} is only a representation of the data source in Semion, a method that returns the physical
@@ -32,7 +32,7 @@ public interface DataSource {
 	 * 
 	 * @return the physical data source
 	 */
-	public Object getDataSource();
+    Object getDataSource();
 	
 	/**
 	 * Data sources that Semion is able to manage have an integer that identifies the type of the data source.
@@ -47,5 +47,5 @@ public interface DataSource {
 	 * 
 	 * @return the data source type
 	 */
-	public int getDataSourceType();
+    int getDataSourceType();
 }

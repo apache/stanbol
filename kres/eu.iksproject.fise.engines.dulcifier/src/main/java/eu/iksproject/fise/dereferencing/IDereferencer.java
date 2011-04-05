@@ -18,5 +18,5 @@ public interface IDereferencer {
 	 * @return {@link InputStream} if the location is resolved. Otherwise a {@link FileNotFoundException} is thrown.
 	 * @throws FileNotFoundException
 	 */
-	public InputStream resolve(String location) throws FileNotFoundException;
+    InputStream resolve(String location) throws FileNotFoundException;
 }

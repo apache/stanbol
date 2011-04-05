@@ -69,12 +69,12 @@ public interface SolrDirectoryManager {
      * In case this property is not present the {@link #DEFAULT_SOLR_DATA_DIR}
      * (an relative path) is used.
      */
-    public static final String MANAGED_SOLR_DIR_PROPERTY = "org.apache.stanbol.entityhub.yard.solr.managedSolrDir";
+    String MANAGED_SOLR_DIR_PROPERTY = "org.apache.stanbol.entityhub.yard.solr.managedSolrDir";
     /**
      * Default value for the relative path used if the {@link #MANAGED_SOLR_DIR_PROPERTY}
      * is not present. It is not required that implementations use this as default.
      */
-    public static final String DEFAULT_SOLR_DATA_DIR = "indexes";
+    String DEFAULT_SOLR_DATA_DIR = "indexes";
 
     /**
      * Checks if a solrIndex with the parsed name is managed or not.
@@ -87,7 +87,7 @@ public interface SolrDirectoryManager {
      * @throws IllegalArgumentException In case <code>null</code> or an empty 
      * string is parsed as solrIndexName
      */
-    public abstract boolean isManagedIndex(String solrIndexName) throws IllegalStateException;
+    boolean isManagedIndex(String solrIndexName) throws IllegalStateException;
 
     /**
      * Getter for all the indexes currently available in the managed solr directory.
@@ -98,7 +98,7 @@ public interface SolrDirectoryManager {
      * be obtained (usually indicates that this component is currently 
      * deactivated) or initialised.
      */
-    public abstract Map<String,File> getManagedIndices() throws IllegalStateException;
+    Map<String,File> getManagedIndices() throws IllegalStateException;
 
     /**
      * Getter for the directory of the parsed index. In case the requested index
@@ -114,7 +114,7 @@ public interface SolrDirectoryManager {
      * @throws IllegalArgumentException if the parsed solrIndexName is 
      * <code>null</code> or empty
      */
-    public abstract File getSolrDirectory(final String solrIndexName) throws IllegalArgumentException;
+    File getSolrDirectory(final String solrIndexName) throws IllegalArgumentException;
 
     /**
      * Getter for the managed Solr Directory.
@@ -125,6 +125,6 @@ public interface SolrDirectoryManager {
      * be obtained (usually indicates that this component is currently 
      * deactivated) or initialised.
      */
-    public abstract File getManagedDirectory() throws IllegalStateException;
+    File getManagedDirectory() throws IllegalStateException;
 
 }

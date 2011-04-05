@@ -373,7 +373,6 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
 
             graphNS = graphNS.replace("#", "");
             String schemaNS = graphNS + "/schema#";
-            ;
             String dataNS = graphNS + "#";
 
             OWLClass dataSourceOwlClass = factory.getOWLClass(Reengineer_OWL.DataSource);
@@ -467,9 +466,7 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
             ontologyManager.applyChange(new AddImport(dataOntology, importsDeclaration));
 
             String schemaNS = graphNS + "/schema#";
-            ;
             String dataNS = graphNS + "#";
-            ;
 
             OWLClass dataSourceOwlClass = factory.getOWLClass(Reengineer_OWL.DataSource);
 

@@ -19,6 +19,6 @@ public interface SessionOntologySpace extends OntologySpace {
 	 * 
 	 * @return the associated ontology manager
 	 */
-	public OWLOntologyManager getOntologyManager();
+    OWLOntologyManager getOntologyManager();
 
 }

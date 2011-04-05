@@ -33,7 +33,7 @@ public interface OntologyScope extends ScopeOntologyListenable {
 	 * @param sessionSpace
 	 *            the ontology space to be added.
 	 */
-	public void addSessionSpace(OntologySpace sessionSpace, IRI sessionID);
+    void addSessionSpace(OntologySpace sessionSpace, IRI sessionID);
 
 	/**
 	 * Returns the core ontology space for this ontology scope. The core space
@@ -41,7 +41,7 @@ public interface OntologyScope extends ScopeOntologyListenable {
 	 * 
 	 * @return the core ontology space
 	 */
-	public OntologySpace getCoreSpace();
+    OntologySpace getCoreSpace();
 
 	/**
 	 * Returns the custom ontology space for this ontology scope.
@@ -49,7 +49,7 @@ public interface OntologyScope extends ScopeOntologyListenable {
 	 * @return the custom ontology space, or null if no custom space is
 	 *         registered for this scope.
 	 */
-	public OntologySpace getCustomSpace();
+    OntologySpace getCustomSpace();
 
 	/**
 	 * Returns an object that uniquely identifies this ontology scope.
@@ -58,7 +58,7 @@ public interface OntologyScope extends ScopeOntologyListenable {
 	 * 
 	 * @return the unique identifier for this ontology scope
 	 */
-	public IRI getID();
+    IRI getID();
 
 	/**
 	 * Return the ontology space for this scope that is identified by the
@@ -69,14 +69,14 @@ public interface OntologyScope extends ScopeOntologyListenable {
 	 * @return the ontology space identified by <code>sessionID</code>, or null
 	 *         if no such space is registered for this scope and session.
 	 */
-	public SessionOntologySpace getSessionSpace(IRI sessionID);
+    SessionOntologySpace getSessionSpace(IRI sessionID);
 
 	/**
 	 * Returns all the active ontology spaces for this scope.
 	 * 
 	 * @return a set of active ontology spaces for this scope.
 	 */
-	public Set<OntologySpace> getSessionSpaces();
+    Set<OntologySpace> getSessionSpaces();
 
 	/**
 	 * Sets an ontology space as the custom space for this scope.
@@ -86,7 +86,7 @@ public interface OntologyScope extends ScopeOntologyListenable {
 	 * @throws UnmodifiableOntologySpaceException
 	 *             if either the scope or the supplied space are locked.
 	 */
-	public void setCustomSpace(OntologySpace customSpace)
+    void setCustomSpace(OntologySpace customSpace)
 			throws UnmodifiableOntologySpaceException;
 
 	/**
@@ -98,7 +98,7 @@ public interface OntologyScope extends ScopeOntologyListenable {
 	 * set in the scope constructor. It can be changed in the
 	 * <code>setUp()</code> method though.
 	 */
-	public void setUp();
+    void setUp();
 
 	/**
 	 * Performs whatever operations are required for making sure the custom
@@ -113,7 +113,7 @@ public interface OntologyScope extends ScopeOntologyListenable {
 	 * scope/space. In the default implementation, it is the scope itself, yet
 	 * the method is left public in order to allow for external controllers.
 	 */
-	public void synchronizeSpaces();
+    void synchronizeSpaces();
 
 	/**
 	 * Performs the operations required for deactivating the ontology scope. In
@@ -121,6 +121,6 @@ public interface OntologyScope extends ScopeOntologyListenable {
 	 * collection. It should be possible to activate the same ontology scope
 	 * again if need be.
 	 */
-	public void tearDown();
+    void tearDown();
 
 }

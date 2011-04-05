@@ -27,12 +27,12 @@ public interface OntologySpace {
 	 * @throws UnmodifiableOntologySpaceException
 	 *             if the ontology space is read-only
 	 */
-	public void addOntology(OntologyInputSource ontologySource)
+    void addOntology(OntologyInputSource ontologySource)
 			throws UnmodifiableOntologySpaceException;
 
-	public void addOntologySpaceListener(OntologySpaceListener listener);
+	void addOntologySpaceListener(OntologySpaceListener listener);
 
-	public void clearOntologySpaceListeners();
+	void clearOntologySpaceListeners();
 
 	/**
 	 * Returns a Unique Resource Identifier (URI) that identifies this ontology
@@ -41,14 +41,14 @@ public interface OntologySpace {
 	 * 
 	 * @return the URI that identifies this ontology space
 	 */
-	public IRI getID();
+    IRI getID();
 
 	/**
 	 * Returns all the ontologies encompassed by this ontology space.
 	 * 
 	 * @return the set of ontologies in the ontology space
 	 */
-	public Set<OWLOntology> getOntologies();
+    Set<OWLOntology> getOntologies();
 
 	/**
 	 * Returns the ontology identified by the supplied <i>logical</i> IRI, if
@@ -64,11 +64,11 @@ public interface OntologySpace {
 	 * @return the requested ontology, or null if no ontology with this ID has
 	 *         been loaded.
 	 */
-	public OWLOntology getOntology(IRI ontologyIri);
+    OWLOntology getOntology(IRI ontologyIri);
 	
-	public boolean containsOntology(IRI ontologyIri);
+	boolean containsOntology(IRI ontologyIri);
 
-	public Collection<OntologySpaceListener> getOntologyScopeListeners();
+	Collection<OntologySpaceListener> getOntologyScopeListeners();
 
 	/**
 	 * Returns the ontology that serves as a root module for this ontology
@@ -76,7 +76,7 @@ public interface OntologySpace {
 	 * 
 	 * @return the root module of the ontology space
 	 */
-	public OWLOntology getTopOntology();
+    OWLOntology getTopOntology();
 
 	/**
 	 * Determines if the ontology identified by the supplied <i>logical</i> IRI
@@ -91,7 +91,7 @@ public interface OntologySpace {
 	 * 
 	 * @return true if an ontology with this ID has been loaded in this space.
 	 */
-	public boolean hasOntology(IRI ontologyIri);
+    boolean hasOntology(IRI ontologyIri);
 
 	/**
 	 * Determines if it is no longer possible to modify this space until it is
@@ -99,9 +99,9 @@ public interface OntologySpace {
 	 * 
 	 * @return true if this space is write-locked, false otherwise.
 	 */
-	public boolean isLocked();
+    boolean isLocked();
 
-	public boolean isSilentMissingOntologyHandling();
+	boolean isSilentMissingOntologyHandling();
 
 	/**
 	 * Removes the given ontology from the ontology space, if the ontology is a
@@ -115,12 +115,12 @@ public interface OntologySpace {
 	 * @throws UnmodifiableOntologySpaceException
 	 *             if the ontology space is read-only
 	 */
-	public void removeOntology(OntologyInputSource src)
+    void removeOntology(OntologyInputSource src)
 			throws OntologySpaceModificationException;
 
-	public void removeOntologySpaceListener(OntologySpaceListener listener);
+	void removeOntologySpaceListener(OntologySpaceListener listener);
 	
-	public void setSilentMissingOntologyHandling(boolean silent);
+	void setSilentMissingOntologyHandling(boolean silent);
 	
 	/**
 	 * Sets the supplied ontology as the root ontology that (recursively)
@@ -138,7 +138,7 @@ public interface OntologySpace {
 	 *             if the ontology space is read-only or the ontology could not
 	 *             be removed.
 	 */
-	public void setTopOntology(OntologyInputSource ontologySource)
+    void setTopOntology(OntologyInputSource ontologySource)
 			throws UnmodifiableOntologySpaceException;
 
 	/**
@@ -156,19 +156,19 @@ public interface OntologySpace {
 	 * @throws UnmodifiableOntologySpaceException
 	 *             if the ontology space is read-only.
 	 */
-	public void setTopOntology(OntologyInputSource ontologySource,
-			boolean createParent) throws UnmodifiableOntologySpaceException;
+    void setTopOntology(OntologyInputSource ontologySource,
+            boolean createParent) throws UnmodifiableOntologySpaceException;
 
 	/**
 	 * Bootstraps the ontology space. In some cases (such as with core and
 	 * custom spaces) this also implies write-locking its ontologies.
 	 */
-	public void setUp();
+    void setUp();
 
 	/**
 	 * Performs all required operations for disposing of an ontology space and
 	 * releasing its resources (e.g. removing the writelock).
 	 */
-	public void tearDown();
+    void tearDown();
 
 }

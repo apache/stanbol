@@ -41,8 +41,8 @@ public interface PersistenceStore {
 	 *         the "description" of the ontology
 	 * @throws Exception
 	 */
-	public OntologyMetaInformation saveOntology(String ontologyContent,
-			String ontologyURI, String encoding) throws Exception;
+    OntologyMetaInformation saveOntology(String ontologyContent,
+            String ontologyURI, String encoding) throws Exception;
 
 	/**
 	 * Interface method to retrieve a particular ontology
@@ -58,8 +58,8 @@ public interface PersistenceStore {
 	 * @return the ontology encoded in the given language
 	 * @throws Exception
 	 */
-	public String retrieveOntology(String ontologyURI, String language,
-			boolean withInferredAxioms) throws Exception;
+    String retrieveOntology(String ontologyURI, String language,
+            boolean withInferredAxioms) throws Exception;
 
 	/**
 	 * 
@@ -75,8 +75,8 @@ public interface PersistenceStore {
 	 * @return the main ontology merged with the external ontology
 	 * @throws Exception
 	 */
-	public String mergeOntology(String ontologyURI, String targetOntology,
-			String targetOntologyURI, boolean withInferredAxioms)
+    String mergeOntology(String ontologyURI, String targetOntology,
+            String targetOntologyURI, boolean withInferredAxioms)
 			throws Exception;
 
 	/**
@@ -86,7 +86,7 @@ public interface PersistenceStore {
 	 *         list of OntologyMetaInformation)
 	 * @throws Exception
 	 */
-	public AdministeredOntologies retrieveAdministeredOntologies()
+    AdministeredOntologies retrieveAdministeredOntologies()
 			throws Exception;
 
 	/**
@@ -99,8 +99,8 @@ public interface PersistenceStore {
 	 *         the "description" of the ontology
 	 * @throws Exception
 	 */
-	public OntologyMetaInformation retrieveOntologyMetaInformation(
-			String ontologyURI) throws Exception;
+    OntologyMetaInformation retrieveOntologyMetaInformation(
+            String ontologyURI) throws Exception;
 
 	/**
 	 * Interface method to list all of the classes that the ontology contains
@@ -117,7 +117,7 @@ public interface PersistenceStore {
 	 *         cdc-42c8-8629-f2d7ecdbf16b)
 	 * @throws Exception
 	 */
-	public ClassesForOntology retrieveClassesOfOntology(String ontologyURI)
+    ClassesForOntology retrieveClassesOfOntology(String ontologyURI)
 			throws Exception;
 
 	/**
@@ -136,8 +136,8 @@ public interface PersistenceStore {
 	 *         datatypeProperties/36c453b5-f619-4828-82cb-2414c9749e87)
 	 * @throws Exception
 	 */
-	public DatatypePropertiesForOntology retrieveDatatypePropertiesOfOntology(
-			String ontologyURI) throws Exception;
+    DatatypePropertiesForOntology retrieveDatatypePropertiesOfOntology(
+            String ontologyURI) throws Exception;
 
 	/**
 	 * Interface method to list all of the object properties that the ontology
@@ -156,8 +156,8 @@ public interface PersistenceStore {
 	 *         -dbb3-4d4d-a7d9-187733ba238c)
 	 * @throws Exception
 	 */
-	public ObjectPropertiesForOntology retrieveObjectPropertiesOfOntology(
-			String ontologyURI) throws Exception;
+    ObjectPropertiesForOntology retrieveObjectPropertiesOfOntology(
+            String ontologyURI) throws Exception;
 
 	/**
 	 * Interface method to list all of the individuals that the ontology
@@ -175,8 +175,8 @@ public interface PersistenceStore {
 	 *         cad687efb/individuals/1aefd64c-8700-4f24-b705-9ced6caa6951)
 	 * @throws Exception
 	 */
-	public IndividualsForOntology retrieveIndividualsOfOntology(
-			String ontologyURI) throws Exception;
+    IndividualsForOntology retrieveIndividualsOfOntology(
+            String ontologyURI) throws Exception;
 
 	/**
 	 * Interface method to list the MetaInformation about a particular resource.
@@ -191,8 +191,8 @@ public interface PersistenceStore {
 	 *         IndividualMetaInformation
 	 * @throws Exception
 	 */
-	public ResourceMetaInformationType retrieveResourceWithURI(
-			String resourceURI) throws Exception;
+    ResourceMetaInformationType retrieveResourceWithURI(
+            String resourceURI) throws Exception;
 
 	/**
 	 * Interface method to get a Protege-like view of the particular ontology
@@ -207,8 +207,8 @@ public interface PersistenceStore {
 	 *         question and an unbounded array of the constraints on the class.
 	 * @throws Exception
 	 */
-	public ClassContext generateClassContext(String classURI,
-			boolean withInferredAxioms) throws Exception;
+    ClassContext generateClassContext(String classURI,
+            boolean withInferredAxioms) throws Exception;
 
 	/**
 	 * Interface method to get a Protege-like view of the particular data type
@@ -225,8 +225,8 @@ public interface PersistenceStore {
 	 *         also conveyed.
 	 * @throws Exception
 	 */
-	public DatatypePropertyContext generateDatatypePropertyContext(
-			String datatypePropertyURI, boolean withInferredAxioms)
+    DatatypePropertyContext generateDatatypePropertyContext(
+            String datatypePropertyURI, boolean withInferredAxioms)
 			throws Exception;
 
 	/**
@@ -245,8 +245,8 @@ public interface PersistenceStore {
 	 *         conveyed.
 	 * @throws Exception
 	 */
-	public ObjectPropertyContext generateObjectPropertyContext(
-			String objectPropertyURI, boolean withInferredAxioms)
+    ObjectPropertyContext generateObjectPropertyContext(
+            String objectPropertyURI, boolean withInferredAxioms)
 			throws Exception;
 
 	/**
@@ -262,8 +262,8 @@ public interface PersistenceStore {
 	 *         values of any properties associated with this individual.
 	 * @throws Exception
 	 */
-	public IndividualContext generateIndividualContext(String individualURI,
-			boolean withInferredAxioms) throws Exception;
+    IndividualContext generateIndividualContext(String individualURI,
+            boolean withInferredAxioms) throws Exception;
 
 	/**
 	 * Interface method to create a new class for a particular ontology
@@ -281,8 +281,8 @@ public interface PersistenceStore {
 	 *         a9ff-4cdc-42c8-8629-f2d7ecdbf16b).
 	 * @throws Exception
 	 */
-	public ClassMetaInformation generateClassForOntology(String ontologyURI,
-			String classURI) throws Exception;
+    ClassMetaInformation generateClassForOntology(String ontologyURI,
+            String classURI) throws Exception;
 
 	/**
 	 * Interface method to create a new data type property for a particular
@@ -301,8 +301,8 @@ public interface PersistenceStore {
 	 *         /datatypeProperties/36c453b5-f619-4828-82cb-2414c9749e87).
 	 * @throws Exception
 	 */
-	public PropertyMetaInformation generateDatatypePropertyForOntology(
-			String ontologyURI, String datatypePropertyURI) throws Exception;
+    PropertyMetaInformation generateDatatypePropertyForOntology(
+            String ontologyURI, String datatypePropertyURI) throws Exception;
 
 	/**
 	 * Interface method to create a new object property for a particular
@@ -320,8 +320,8 @@ public interface PersistenceStore {
 	 *         objectProperties /a2bf8f9a-dbb3-4d4d-a7d9-187733ba238c)
 	 * @throws Exception
 	 */
-	public PropertyMetaInformation generateObjectPropertyForOntology(
-			String ontologyURI, String objectPropertyURI) throws Exception;
+    PropertyMetaInformation generateObjectPropertyForOntology(
+            String ontologyURI, String objectPropertyURI) throws Exception;
 
 	/**
 	 * Interface method to create a new individual for a particular ontology
@@ -341,8 +341,8 @@ public interface PersistenceStore {
 	 *         /1aefd64c-8700-4f24-b705-9ced6caa6951)
 	 * @throws Exception
 	 */
-	public IndividualMetaInformation generateIndividualForOntology(
-			String ontologyURI, String classURI, String individualURI)
+    IndividualMetaInformation generateIndividualForOntology(
+            String ontologyURI, String classURI, String individualURI)
 			throws Exception;
 
 	/**
@@ -355,7 +355,7 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean makeSubClassOf(String subClassURI, String superClassURI)
+    boolean makeSubClassOf(String subClassURI, String superClassURI)
 			throws Exception;
 
 	/**
@@ -368,7 +368,7 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean deleteSuperClass(String subClassURI, String superClassURI)
+    boolean deleteSuperClass(String subClassURI, String superClassURI)
 			throws Exception;
 
 	/**
@@ -382,7 +382,7 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean addEquivalentClass(String classURI, String equivalentClassURI)
+    boolean addEquivalentClass(String classURI, String equivalentClassURI)
 			throws Exception;
 
 	/**
@@ -396,8 +396,8 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean deleteEquivalentClass(String classURI,
-			String equivalentClassURI) throws Exception;
+    boolean deleteEquivalentClass(String classURI,
+            String equivalentClassURI) throws Exception;
 
 	/**
 	 * Interface method to *add* a new disjoint class association
@@ -410,7 +410,7 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean addDisjointClass(String classURI, String disjointClassURI)
+    boolean addDisjointClass(String classURI, String disjointClassURI)
 			throws Exception;
 
 	/**
@@ -424,7 +424,7 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean deleteDisjointClass(String classURI, String disjointClassURI)
+    boolean deleteDisjointClass(String classURI, String disjointClassURI)
 			throws Exception;
 
 	/**
@@ -438,7 +438,7 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean makeUnionClassOf(String classURI, List<String> unionClassURIs)
+    boolean makeUnionClassOf(String classURI, List<String> unionClassURIs)
 			throws Exception;
 
 	/**
@@ -452,7 +452,7 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean addUnionClass(String classURI, String unionClassURI)
+    boolean addUnionClass(String classURI, String unionClassURI)
 			throws Exception;
 
 	/**
@@ -466,7 +466,7 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean deleteUnionClass(String classURI, String unionClassURI)
+    boolean deleteUnionClass(String classURI, String unionClassURI)
 			throws Exception;
 
 	/**
@@ -479,8 +479,8 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean makeSubPropertyOf(String subPropertyURI,
-			String superPropertyURI) throws Exception;
+    boolean makeSubPropertyOf(String subPropertyURI,
+            String superPropertyURI) throws Exception;
 
 	/**
 	 * Interface method to *delete* a super property association
@@ -492,8 +492,8 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean deleteSuperPropertyAssertion(String subPropertyURI,
-			String superPropertyURI) throws Exception;
+    boolean deleteSuperPropertyAssertion(String subPropertyURI,
+            String superPropertyURI) throws Exception;
 
 	/**
 	 * Interface method to *set* the domain of an object or data type property
@@ -505,7 +505,7 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean setDomain(String propertyURI, List<String> domainURI)
+    boolean setDomain(String propertyURI, List<String> domainURI)
 			throws Exception;
 
 	/**
@@ -517,7 +517,7 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean addDomain(String propertyURI, String domainURI)
+    boolean addDomain(String propertyURI, String domainURI)
 			throws Exception;
 
 	/**
@@ -531,7 +531,7 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean deleteDomain(String propertyURI, String domainURI)
+    boolean deleteDomain(String propertyURI, String domainURI)
 			throws Exception;
 
 	/**
@@ -545,7 +545,7 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean setRange(String propertyURI, List<String> rangeURI)
+    boolean setRange(String propertyURI, List<String> rangeURI)
 			throws Exception;
 
 	/**
@@ -560,7 +560,7 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean addRange(String propertyURI, String rangeURI)
+    boolean addRange(String propertyURI, String rangeURI)
 			throws Exception;
 
 	/**
@@ -575,7 +575,7 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean deleteRange(String propertyURI, String rangeURI)
+    boolean deleteRange(String propertyURI, String rangeURI)
 			throws Exception;
 
 	/**
@@ -596,9 +596,9 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean setPropertyAttributes(String propertyURI,
-			Boolean isFunctional, Boolean isTransitive, Boolean isSymmetric,
-			Boolean isInverseFunctional) throws Exception;
+    boolean setPropertyAttributes(String propertyURI,
+            Boolean isFunctional, Boolean isTransitive, Boolean isSymmetric,
+            Boolean isInverseFunctional) throws Exception;
 
 	/**
 	 * Interface method to *set* the property value of a particular individual
@@ -615,9 +615,9 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean assertPropertyValue(String individualURI,
-			String propertyURI, String individualAsValueURI,
-			String literalAsValue) throws Exception;
+    boolean assertPropertyValue(String individualURI,
+            String propertyURI, String individualAsValueURI,
+            String literalAsValue) throws Exception;
 
 	/**
 	 * Interface method to *delete* the property assertion of a particular
@@ -636,9 +636,9 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean deletePropertyAssertion(String individualURI,
-			String propertyURI, String individualAsValueURI,
-			String literalAsValue) throws Exception;
+    boolean deletePropertyAssertion(String individualURI,
+            String propertyURI, String individualAsValueURI,
+            String literalAsValue) throws Exception;
 
 	/**
 	 * Interface method to *add* a class for an individual
@@ -650,8 +650,8 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean addContainerClassForIndividual(String individualURI,
-			String classURI) throws Exception;
+    boolean addContainerClassForIndividual(String individualURI,
+            String classURI) throws Exception;
 
 	/**
 	 * Interface method to *delete* a class for an individual
@@ -663,8 +663,8 @@ public interface PersistenceStore {
 	 * @return true if successful
 	 * @throws Exception
 	 */
-	public boolean deleteContainerClassForIndividual(String individualURI,
-			String classURI) throws Exception;
+    boolean deleteContainerClassForIndividual(String individualURI,
+            String classURI) throws Exception;
 
 	/**
 	 * Interface method to *delete* a particular ontology
@@ -673,7 +673,7 @@ public interface PersistenceStore {
 	 *            the URI of the ontology to delete
 	 * @return true if successful (e.g. all required resources exit)
 	 */
-	public boolean deleteOntology(String ontologyURI) throws Exception;
+    boolean deleteOntology(String ontologyURI) throws Exception;
 
 	/**
 	 * Interface method to *delete* a class, property or individual
@@ -683,7 +683,7 @@ public interface PersistenceStore {
 	 * @return true if successful (e.g. all required resources exit)
 	 * @throws Exception
 	 */
-	public boolean deleteResource(String resourceURI) throws Exception;
+    boolean deleteResource(String resourceURI) throws Exception;
 
 	/**
 	 * Interface method to *delete* all registered ontologies together with
@@ -692,5 +692,5 @@ public interface PersistenceStore {
 	 * @return true if successful
 	 * @throws Exception
 	 */
-	public boolean clearPersistenceStore() throws Exception;
+    boolean clearPersistenceStore() throws Exception;
 }

@@ -21,7 +21,7 @@ public interface SessionIDGenerator {
 	 * 
 	 * @return the newly generated session ID.
 	 */
-	public IRI createSessionID();
+    IRI createSessionID();
 
 	/**
 	 * Generates a new session ID that is different from any IRI in the
@@ -34,7 +34,7 @@ public interface SessionIDGenerator {
 	 *            to.
 	 * @return the newly generated session ID.
 	 */
-	public IRI createSessionID(Set<IRI> exclude);
+    IRI createSessionID(Set<IRI> exclude);
 
 	/**
 	 * Returns the base IRI for all generated IDs to start with. It should be
@@ -43,7 +43,7 @@ public interface SessionIDGenerator {
 	 * @param baseIRI
 	 *            the base IRI.
 	 */
-	public IRI getBaseIRI();
+    IRI getBaseIRI();
 
 	/**
 	 * Sets the base IRI for all generated IDs to start with. It should be used
@@ -52,5 +52,5 @@ public interface SessionIDGenerator {
 	 * @param baseIRI
 	 *            the base IRI.
 	 */
-	public void setBaseIRI(IRI baseIRI);
+    void setBaseIRI(IRI baseIRI);
 }

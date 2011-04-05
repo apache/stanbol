@@ -27,8 +27,8 @@ public interface OntologySpaceFactory {
 	 *            the input source for the ontologies in this space.
 	 * @return the generated ontology space.
 	 */
-	public CoreOntologySpace createCoreOntologySpace(IRI scopeID,
-			OntologyInputSource coreSource);
+    CoreOntologySpace createCoreOntologySpace(IRI scopeID,
+            OntologyInputSource coreSource);
 
 	/**
 	 * Creates and sets up a default custom ontology space.
@@ -41,8 +41,8 @@ public interface OntologySpaceFactory {
 	 *            the input source for the ontologies in this space.
 	 * @return the generated ontology space.
 	 */
-	public CustomOntologySpace createCustomOntologySpace(IRI scopeID,
-			OntologyInputSource customSource);
+    CustomOntologySpace createCustomOntologySpace(IRI scopeID,
+            OntologyInputSource customSource);
 
 	/**
 	 * Creates and sets up a default session ontology space.
@@ -53,6 +53,6 @@ public interface OntologySpaceFactory {
 	 *            identifier for this ontology space.
 	 * @return the generated ontology space.
 	 */
-	public SessionOntologySpace createSessionOntologySpace(IRI scopeID);
+    SessionOntologySpace createSessionOntologySpace(IRI scopeID);
 
 }

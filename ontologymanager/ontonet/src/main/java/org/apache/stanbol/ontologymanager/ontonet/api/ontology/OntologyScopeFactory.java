@@ -33,8 +33,8 @@ public interface OntologyScopeFactory extends ScopeEventListenable {
 	 *             <i>registered</i>. The exception is not thrown if another
 	 *             scope with the same ID has been created but not registered.
 	 */
-	public OntologyScope createOntologyScope(IRI scopeID,
-			OntologyInputSource coreSource) throws DuplicateIDException;
+    OntologyScope createOntologyScope(IRI scopeID,
+            OntologyInputSource coreSource) throws DuplicateIDException;
 
 	/**
 	 * Creates and returns a new ontology scope with the core space ontologies
@@ -55,7 +55,7 @@ public interface OntologyScopeFactory extends ScopeEventListenable {
 	 *             <i>registered</i>. The exception is not thrown if another
 	 *             scope with the same ID has been created but not registered.
 	 */
-	public OntologyScope createOntologyScope(IRI scopeID,
-			OntologyInputSource coreSource, OntologyInputSource customSource)
+    OntologyScope createOntologyScope(IRI scopeID,
+            OntologyInputSource coreSource, OntologyInputSource customSource)
 			throws DuplicateIDException;
 }

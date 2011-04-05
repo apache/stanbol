@@ -8,11 +8,11 @@ package org.apache.stanbol.ontologymanager.ontonet.api.session;
  */
 public class SessionEvent {
 
-	public static enum OperationType {
-		ACTIVATE, CLOSE, CREATE, DEACTIVATE, KILL, STORE;
-	};
+	public enum OperationType {
+		ACTIVATE, CLOSE, CREATE, DEACTIVATE, KILL, STORE
+    }
 
-	/**
+    /**
 	 * The KReS session affected by this event.
 	 */
 	private Session affectedSession;

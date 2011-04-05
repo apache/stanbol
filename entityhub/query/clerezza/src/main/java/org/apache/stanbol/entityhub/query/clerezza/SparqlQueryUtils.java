@@ -59,7 +59,7 @@ public final class SparqlQueryUtils {
     
     private static final Logger log = LoggerFactory.getLogger(SparqlQueryUtils.class);
     
-    public static enum EndpointTypeEnum {
+    public enum EndpointTypeEnum {
         Standard,
         Virtuoso,
         LARQ,

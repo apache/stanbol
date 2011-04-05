@@ -16,7 +16,7 @@ public interface ScopeEventListener {
 	 * @param scope
 	 *            the activated ontology scope
 	 */
-	public void scopeActivated(OntologyScope scope);
+    void scopeActivated(OntologyScope scope);
 
 	/**
 	 * Called <i>after</i> a new ontology scope has been created.
@@ -24,7 +24,7 @@ public interface ScopeEventListener {
 	 * @param scope
 	 *            the created ontology scope
 	 */
-	public void scopeCreated(OntologyScope scope);
+    void scopeCreated(OntologyScope scope);
 
 	/**
 	 * Called <i>after</i> an ontology scope, assuming it is already registered
@@ -34,7 +34,7 @@ public interface ScopeEventListener {
 	 * @param scope
 	 *            the deactivated ontology scope
 	 */
-	public void scopeDeactivated(OntologyScope scope);
+    void scopeDeactivated(OntologyScope scope);
 
 	/**
 	 * Called <i>after</i> an ontology scope is removed from the scope registry.
@@ -42,7 +42,7 @@ public interface ScopeEventListener {
 	 * @param scope
 	 *            the deregistered ontology scope
 	 */
-	public void scopeDeregistered(OntologyScope scope);
+    void scopeDeregistered(OntologyScope scope);
 
 	/**
 	 * Called <i>after</i> an ontology scope is added to the scope registry.
@@ -50,6 +50,6 @@ public interface ScopeEventListener {
 	 * @param scope
 	 *            the registered ontology scope
 	 */
-	public void scopeRegistered(OntologyScope scope);
+    void scopeRegistered(OntologyScope scope);
 
 }

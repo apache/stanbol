@@ -22,7 +22,7 @@ import org.semanticweb.owlapi.model.IRI;
  */
 public interface SessionManager extends SessionListenable {
 
-	public Set<IRI> getRegisteredSessionIDs();
+	Set<IRI> getRegisteredSessionIDs();
 
 	/**
 	 * Generates AND REGISTERS a new KReS session and assigns a unique session
@@ -30,7 +30,7 @@ public interface SessionManager extends SessionListenable {
 	 * 
 	 * @return the generated KReS session
 	 */
-	public Session createSession();
+    Session createSession();
 
 	/**
 	 * Generates AND REGISTERS a new KReS session and tries to assign it the
@@ -44,7 +44,7 @@ public interface SessionManager extends SessionListenable {
 	 * @throws DuplicateSessionIDException
 	 *             if a KReS session with that sessionID is already registered
 	 */
-	public Session createSession(IRI sessionID)
+    Session createSession(IRI sessionID)
 			throws DuplicateSessionIDException;
 
 	/**
@@ -54,7 +54,7 @@ public interface SessionManager extends SessionListenable {
 	 * @param sessionID
 	 *            the IRI that uniquely identifies the session
 	 */
-	public void destroySession(IRI sessionID);
+    void destroySession(IRI sessionID);
 
 	/**
 	 * Retrieves the unique KReS session identified by <code>sessionID</code>.
@@ -63,14 +63,14 @@ public interface SessionManager extends SessionListenable {
 	 *            the IRI that uniquely identifies the session
 	 * @return the unique KReS session identified by <code>sessionID</code>
 	 */
-	public Session getSession(IRI sessionID);
+    Session getSession(IRI sessionID);
 
 	/**
 	 * Returns the ontology space associated with this session.
 	 * 
 	 * @return the session space
 	 */
-	public Set<SessionOntologySpace> getSessionSpaces(IRI sessionID)
+    Set<SessionOntologySpace> getSessionSpaces(IRI sessionID)
 			throws NonReferenceableSessionException;
 
 	/**
@@ -82,7 +82,7 @@ public interface SessionManager extends SessionListenable {
 	 * @param out
 	 *            the output stream to store the session
 	 */
-	public void storeSession(IRI sessionID, OutputStream out)
+    void storeSession(IRI sessionID, OutputStream out)
 			throws NonReferenceableSessionException;
 
 }

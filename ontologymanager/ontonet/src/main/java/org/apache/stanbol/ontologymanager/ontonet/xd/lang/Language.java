@@ -14,7 +14,7 @@ public enum Language {
     EN("en"), IT("it"), FR("fr"), DE("de"), ES("es");
     private String value = "";
 
-    private Language(String s) {
+    Language(String s) {
 	this.value = s;
     }
 

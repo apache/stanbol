@@ -24,7 +24,7 @@ public interface Refactorer {
      *            {@link UriRef}
      * @return the {@link MGraph}.
      */
-    public MGraph getRefactoredDataSet(UriRef uriRef);
+    MGraph getRefactoredDataSet(UriRef uriRef);
 
     /**
      * The refactoring is perfomed by the {@code Refactorer} by invoking this method. The {@code datasetURI}
@@ -38,7 +38,7 @@ public interface Refactorer {
      * @param recipeIRI
      *            {@link IRI}
      */
-    public void ontologyRefactoring(IRI refactoredDataSetURI, IRI datasetURI, IRI recipeIRI) throws RefactoringException,
+    void ontologyRefactoring(IRI refactoredDataSetURI, IRI datasetURI, IRI recipeIRI) throws RefactoringException,
                                                                                             NoSuchRecipeException;
 
     /**
@@ -54,7 +54,7 @@ public interface Refactorer {
      * @throws RefactoringException
      * @throws NoSuchRecipeException
      */
-    public OWLOntology ontologyRefactoring(OWLOntology datasetURI, IRI recipeIRI) throws RefactoringException,
+    OWLOntology ontologyRefactoring(OWLOntology datasetURI, IRI recipeIRI) throws RefactoringException,
                                                                                  NoSuchRecipeException;
 
     /**

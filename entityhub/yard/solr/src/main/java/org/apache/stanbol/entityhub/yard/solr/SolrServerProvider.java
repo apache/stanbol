@@ -42,7 +42,7 @@ public interface SolrServerProvider {
      * @author Rupert Westenthaler
      *
      */
-    public static enum Type {
+    enum Type {
         /**
          * Uses an embedded SolrServer that runs within the same virtual machine
          */

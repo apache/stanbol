@@ -14,21 +14,21 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 public interface RegistryLoader {
 
 	
-	public Set<OWLOntology> gatherOntologies(RegistryItem registryItem,
-			OWLOntologyManager manager, boolean recurseRegistries)
+	Set<OWLOntology> gatherOntologies(RegistryItem registryItem,
+            OWLOntologyManager manager, boolean recurseRegistries)
 			throws OWLOntologyCreationException;
 			
-	public RegistryLibrary getLibrary(Registry reg, IRI libraryID);
+	RegistryLibrary getLibrary(Registry reg, IRI libraryID);
 	
-	public Object getParent(Object child);
+	Object getParent(Object child);
 
-	public boolean hasChildren(Object parent);
+	boolean hasChildren(Object parent);
 
-	public boolean hasLibrary(Registry reg, IRI libraryID);
+	boolean hasLibrary(Registry reg, IRI libraryID);
 
 //	public boolean isPrintingLoadedOntologies();
 
-	public void loadLocations() throws RegistryContentException;
+	void loadLocations() throws RegistryContentException;
 	
 	
 	/**
@@ -38,7 +38,7 @@ public interface RegistryLoader {
 	 * @param physicalIRI
 	 * @return
 	 */
-	public Set<Registry> loadRegistriesEager(IRI physicalIRI);
+    Set<Registry> loadRegistriesEager(IRI physicalIRI);
 
 //	public void setPrintLoadedOntologies(boolean doPrint);
 }

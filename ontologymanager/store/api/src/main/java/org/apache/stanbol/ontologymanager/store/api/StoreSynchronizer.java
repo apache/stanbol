@@ -19,7 +19,7 @@ public interface StoreSynchronizer {
      *            <p>
      *            If not set the synchronizer should consider only deletion/addition of graphs.
      */
-    public void synchronizeAll(boolean force);
+    void synchronizeAll(boolean force);
 
     /**
      * Synchronizes only specified graph. After synchronization the resource-graph mappings of the
@@ -28,12 +28,12 @@ public interface StoreSynchronizer {
      * @param graphURI
      *            URI of the graph of which resources will be synchronized
      */
-    public void synchronizeGraph(String graphURI);
+    void synchronizeGraph(String graphURI);
 
     /**
      * StoreSynchronizer is obtained through a factory and when its job is finished this method should be
      * invoked to remove graph listeners.
      */
-    public void clear();
+    void clear();
 
 }

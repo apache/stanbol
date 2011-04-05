@@ -10,34 +10,34 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 public interface RuleStore {
 
-	public OWLOntology getOntology();
+	OWLOntology getOntology();
 
-	public void setStore(OWLOntology owl);
+	void setStore(OWLOntology owl);
 	
-	public Set<IRI> listIRIRecipes();
+	Set<IRI> listIRIRecipes();
 	
-	public RecipeList listRecipes();
+	RecipeList listRecipes();
 	
-	public Recipe getRecipe(IRI recipe) throws NoSuchRecipeException;
+	Recipe getRecipe(IRI recipe) throws NoSuchRecipeException;
 
-    public String getFilePath();
+    String getFilePath();
 
-    public void saveOntology() throws OWLOntologyStorageException;
+    void saveOntology() throws OWLOntologyStorageException;
     
-    public String getRuleStoreNamespace();
+    String getRuleStoreNamespace();
     
-    public boolean addRecipe(IRI recipeIRI, String recipeDescription);
+    boolean addRecipe(IRI recipeIRI, String recipeDescription);
     
-    public Recipe addRuleToRecipe(String recipeID, String kReSRuleInKReSSyntax) throws NoSuchRecipeException;
+    Recipe addRuleToRecipe(String recipeID, String kReSRuleInKReSSyntax) throws NoSuchRecipeException;
     
-    public Recipe addRuleToRecipe(Recipe recipe, String kReSRuleInKReSSyntax);
+    Recipe addRuleToRecipe(Recipe recipe, String kReSRuleInKReSSyntax);
     
-    public void createRecipe(String recipeID, String rulesInKReSSyntax);
+    void createRecipe(String recipeID, String rulesInKReSSyntax);
 
-    public boolean removeRecipe(Recipe recipe);
+    boolean removeRecipe(Recipe recipe);
 
-    public boolean removeRecipe(IRI recipeIRI);
+    boolean removeRecipe(IRI recipeIRI);
 
-    public boolean removeRule(Rule rule);
+    boolean removeRule(Rule rule);
 	
 }

@@ -25,7 +25,7 @@ public interface OntologyIndex extends ScopeOntologyListener,
 	 * @param ontologyIri
 	 * @return
 	 */
-	public OWLOntology getOntology(IRI ontologyIri);
+    OWLOntology getOntology(IRI ontologyIri);
 
 	/**
 	 * Returns the ontology loaded within an ontology scope having the specified
@@ -35,7 +35,7 @@ public interface OntologyIndex extends ScopeOntologyListener,
 	 * @param ontologyIri
 	 * @return
 	 */
-	public OWLOntology getOntology(IRI ontologyIri, IRI scopeId);
+    OWLOntology getOntology(IRI ontologyIri, IRI scopeId);
 
 	/**
 	 * Returns the set of ontology scopes where an ontology with the specified
@@ -46,8 +46,8 @@ public interface OntologyIndex extends ScopeOntologyListener,
 	 * @param includingSessionSpaces
 	 * @return
 	 */
-	public Set<IRI> getReferencingScopes(IRI ontologyIri,
-			boolean includingSessionSpaces);
+    Set<IRI> getReferencingScopes(IRI ontologyIri,
+            boolean includingSessionSpaces);
 
 	/**
 	 * Determines if an ontology with the specified identifier is loaded within
@@ -56,6 +56,6 @@ public interface OntologyIndex extends ScopeOntologyListener,
 	 * @param ontologyIri
 	 * @return
 	 */
-	public boolean isOntologyLoaded(IRI ontologyIri);
+    boolean isOntologyLoaded(IRI ontologyIri);
 
 }

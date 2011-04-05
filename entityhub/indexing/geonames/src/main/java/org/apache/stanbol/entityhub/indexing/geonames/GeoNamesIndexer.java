@@ -182,7 +182,7 @@ public class GeoNamesIndexer {
 
     private static final Map<String,Reference> indexDocRefs = new HashMap<String, Reference>();
 
-    private static enum Properties{
+    private enum Properties{
         rdf_type(NamespaceEnum.rdf.getNamespace(),"type"),
         rdfs_label(NamespaceEnum.rdfs.getNamespace(),"label"),
         dc_creator(NamespaceEnum.dcTerms.getNamespace(),"creator"),

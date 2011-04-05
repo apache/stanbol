@@ -7,6 +7,6 @@ package org.apache.stanbol.rules.base.api;
 
 public interface SetRuleStore {
 
-    public RuleStore returnStore();
+    RuleStore returnStore();
 
 }

@@ -132,7 +132,7 @@ public class SolrQueryFactory {
         constraintEncoders.put(IndexConstraintTypeEnum.GT, new GtEncoder(indexValueFactory));
         constraintEncoders.put(IndexConstraintTypeEnum.LT, new LtEncoder(indexValueFactory));
     }
-    public static enum SELECT {ID,QUERY,ALL}
+    public enum SELECT {ID,QUERY,ALL}
     public SolrQuery parseFieldQuery(FieldQuery fieldQuery,SELECT select){
         SolrQuery query = initSolrQuery(fieldQuery);
         setSelected(query, fieldQuery.getSelectedFields(),select);

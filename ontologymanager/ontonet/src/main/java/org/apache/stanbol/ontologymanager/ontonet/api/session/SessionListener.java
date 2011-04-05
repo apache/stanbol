@@ -15,6 +15,6 @@ public interface SessionListener {
 	 * @param event
 	 *            the session event.
 	 */
-	public void sessionChanged(SessionEvent event);
+    void sessionChanged(SessionEvent event);
 
 }

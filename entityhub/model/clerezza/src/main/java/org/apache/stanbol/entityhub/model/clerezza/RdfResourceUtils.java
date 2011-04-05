@@ -55,7 +55,7 @@ public final class RdfResourceUtils {
      *      (Rupert Westenthaler, 2010-11-12)
      * @author Rupert Westenthaler
      */
-    public static enum XsdDataTypeEnum {
+    public enum XsdDataTypeEnum {
         //NOTE: Commented lines are not supported by org.apache.clerezza.rdf.core.impl.SimpleLiteralFactory
         // see http://svn.apache.org/repos/asf/incubator/clerezza/trunk/org.apache.clerezza.parent/org.apache.clerezza.rdf.core/src/main/java/org/apache/clerezza/rdf/core/impl/SimpleLiteralFactory.java
         Boolean("boolean",Boolean.class),

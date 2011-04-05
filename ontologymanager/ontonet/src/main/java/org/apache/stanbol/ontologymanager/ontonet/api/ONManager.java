@@ -26,7 +26,7 @@ public interface ONManager {
 	 * 
 	 * @return the default ontology index.
 	 */
-	public OntologyIndex getOntologyIndex();
+    OntologyIndex getOntologyIndex();
 
 	/**
 	 * Returns the ontology scope factory that was created along with the
@@ -34,7 +34,7 @@ public interface ONManager {
 	 * 
 	 * @return the default ontology scope factory
 	 */
-	public OntologyScopeFactory getOntologyScopeFactory();
+    OntologyScopeFactory getOntologyScopeFactory();
 
 	/**
 	 * Returns the ontology space factory that was created along with the
@@ -42,14 +42,14 @@ public interface ONManager {
 	 * 
 	 * @return the default ontology space factory.
 	 */
-	public OntologySpaceFactory getOntologySpaceFactory();
+    OntologySpaceFactory getOntologySpaceFactory();
 
 	/**
 	 * Returns the default ontology storage system for this KReS instance.
 	 * 
 	 * @return the default ontology store.
 	 */
-	public ClerezzaOntologyStorage getOntologyStore();
+    ClerezzaOntologyStorage getOntologyStore();
 
 	/**
 	 * Returns an OWL Ontology Manager that is never cleared of its ontologies,
@@ -60,35 +60,35 @@ public interface ONManager {
 	 * 
 	 * @return the OWL Ontology Manager used for caching ontologies.
 	 */
-	public OWLOntologyManager getOwlCacheManager();
+    OWLOntologyManager getOwlCacheManager();
 
 	/**
 	 * Returns a factory object that can be used for obtaining OWL API objects.
 	 * 
 	 * @return the default OWL data factory
 	 */
-	public OWLDataFactory getOwlFactory();
+    OWLDataFactory getOwlFactory();
 
 	/**
 	 * Returns the default ontology registry loader.
 	 * 
 	 * @return the default ontology registry loader.
 	 */
-	public RegistryLoader getRegistryLoader();
+    RegistryLoader getRegistryLoader();
 
 	/**
 	 * Returns the unique ontology scope registry for this context.
 	 * 
 	 * @return the ontology scope registry.
 	 */
-	public ScopeRegistry getScopeRegistry();
+    ScopeRegistry getScopeRegistry();
 
 	/**
 	 * Returns the unique KReS session manager for this context.
 	 * 
 	 * @return the KreS session manager.
 	 */
-	public SessionManager getSessionManager();
+    SessionManager getSessionManager();
 
 	/**
 	 * Returns the list of IRIs that identify scopes that should be activated on
@@ -96,12 +96,12 @@ public interface ONManager {
 	 * 
 	 * @return the list of scope IDs to activate.
 	 */
-	public String[] getUrisToActivate();
+    String[] getUrisToActivate();
 	
 	/**
 	 * Returns the String that represent the namespace used by KReS for its ontologies
 	 * 
 	 * @return the namespace of KReS.
 	 */
-	public String getKReSNamespace();
+    String getKReSNamespace();
 }

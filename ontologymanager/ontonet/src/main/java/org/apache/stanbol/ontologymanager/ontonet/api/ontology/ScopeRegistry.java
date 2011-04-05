@@ -20,12 +20,12 @@ public interface ScopeRegistry {
 	 * @param listener
 	 *            the listener to be added
 	 */
-	public void addScopeRegistrationListener(ScopeEventListener listener);
+    void addScopeRegistrationListener(ScopeEventListener listener);
 
 	/**
 	 * Removes all registered scope registration listeners.
 	 */
-	public void clearScopeRegistrationListeners();
+    void clearScopeRegistrationListeners();
 
 	/**
 	 * 
@@ -33,7 +33,7 @@ public interface ScopeRegistry {
 	 * @return true iff an ontology scope with ID <code>scopeID</code> is
 	 *         registered.
 	 */
-	public boolean containsScope(IRI scopeID);
+    boolean containsScope(IRI scopeID);
 
 	/**
 	 * Removes an ontology scope from this registry, thus deactivating the scope
@@ -43,14 +43,14 @@ public interface ScopeRegistry {
 	 * @param scope
 	 *            the ontology scope to be removed
 	 */
-	public void deregisterScope(OntologyScope scope);
+    void deregisterScope(OntologyScope scope);
 
 	/**
 	 * Returns the set of registered ontology scopes.
 	 * 
 	 * @return the set of ontology scopes
 	 */
-	public Set<OntologyScope> getRegisteredScopes();
+    Set<OntologyScope> getRegisteredScopes();
 
 	/**
 	 * Returns the unique ontology scope identified by the given ID.
@@ -60,13 +60,13 @@ public interface ScopeRegistry {
 	 * @return the ontology scope with that ID, or null if no scope with such ID
 	 *         is registered
 	 */
-	public OntologyScope getScope(IRI scopeID);
+    OntologyScope getScope(IRI scopeID);
 
-	public void setScopeActive(IRI scopeID, boolean active);
+	void setScopeActive(IRI scopeID, boolean active);
 
-	public boolean isScopeActive(IRI scopeID);
+	boolean isScopeActive(IRI scopeID);
 
-	public Set<OntologyScope> getActiveScopes();
+	Set<OntologyScope> getActiveScopes();
 
 	/**
 	 * Returns the set of registered scope registration listeners, in no
@@ -74,7 +74,7 @@ public interface ScopeRegistry {
 	 * 
 	 * @return the set of scope registration listeners
 	 */
-	public Set<ScopeEventListener> getScopeRegistrationListeners();
+    Set<ScopeEventListener> getScopeRegistrationListeners();
 
 	/**
 	 * Equivalent to <code>registerScope(scope, false)</code>.
@@ -82,7 +82,7 @@ public interface ScopeRegistry {
 	 * @param scope
 	 *            the ontology scope to be added
 	 */
-	public void registerScope(OntologyScope scope);
+    void registerScope(OntologyScope scope);
 
 	/**
 	 * Adds an ontology scope to this registry, thus activating the scope if
@@ -93,7 +93,7 @@ public interface ScopeRegistry {
 	 * @param scope
 	 *            the ontology scope to be added
 	 */
-	public void registerScope(OntologyScope scope, boolean activate);
+    void registerScope(OntologyScope scope, boolean activate);
 
 	/**
 	 * Removes a scope registration listener from this registry. If the listener
@@ -102,7 +102,7 @@ public interface ScopeRegistry {
 	 * @param listener
 	 *            the listener to be removed
 	 */
-	public void removeScopeRegistrationListener(
-			ScopeEventListener listener);
+    void removeScopeRegistrationListener(
+            ScopeEventListener listener);
 
 }

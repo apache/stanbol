@@ -11,12 +11,12 @@ import java.util.Collection;
  */
 public interface ScopeOntologyListenable {
 
-	public void addOntologyScopeListener(ScopeOntologyListener listener);
+	void addOntologyScopeListener(ScopeOntologyListener listener);
 
-	public void clearOntologyScopeListeners();
+	void clearOntologyScopeListeners();
 
-	public Collection<ScopeOntologyListener> getOntologyScopeListeners();
+	Collection<ScopeOntologyListener> getOntologyScopeListeners();
 
-	public void removeOntologyScopeListener(ScopeOntologyListener listener);
+	void removeOntologyScopeListener(ScopeOntologyListener listener);
 
 }

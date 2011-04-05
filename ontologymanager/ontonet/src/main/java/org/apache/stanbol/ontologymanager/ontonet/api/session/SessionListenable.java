@@ -10,12 +10,12 @@ public interface SessionListenable {
 	 * @param listener
 	 *            the session listener to be added
 	 */
-	public void addSessionListener(SessionListener listener);
+    void addSessionListener(SessionListener listener);
 
 	/**
 	 * Clears the pool of registered session listeners.
 	 */
-	public void clearSessionListeners();
+    void clearSessionListeners();
 
 	/**
 	 * Returns all the registered session listeners. It is up to developers to
@@ -25,7 +25,7 @@ public interface SessionListenable {
 	 * 
 	 * @return a collection of registered session listeners.
 	 */
-	public Collection<SessionListener> getSessionListeners();
+    Collection<SessionListener> getSessionListeners();
 
 	/**
 	 * Removes the given SessionListener from the pool of active listeners.
@@ -33,6 +33,6 @@ public interface SessionListenable {
 	 * @param listener
 	 *            the session listener to be removed
 	 */
-	public void removeSessionListener(SessionListener listener);
+    void removeSessionListener(SessionListener listener);
 
 }

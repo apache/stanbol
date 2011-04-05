@@ -70,13 +70,13 @@ public enum NamespaceEnum {
     ;
     private String ns;
     private String prefix;
-    private NamespaceEnum(String ns) {
+    NamespaceEnum(String ns) {
         if(ns == null){
             throw new IllegalArgumentException("The namespace MUST NOT be NULL");
         }
         this.ns = ns;
     }
-    private NamespaceEnum(String prefix,String ns) {
+    NamespaceEnum(String prefix, String ns) {
         this(ns);
         this.prefix = prefix;
     }

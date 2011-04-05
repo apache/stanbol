@@ -23,12 +23,12 @@ import java.util.List;
 public interface BenchmarkParser {
     
     // Marker strings in the benchmark text input
-    static final String COMMENT_MARKER = "#";
-    static final String FIELD_SEPARATOR = ":";
-    static final String INPUT_SECTION_MARKER = "= INPUT =";  
-    static final String EXPECT_SECTION_MARKER = "= EXPECT =";  
-    static final String COMPLAIN_SECTION_MARKER = "= COMPLAIN =";  
-    static final String DESCRIPTION_FIELD = "Description";
+    String COMMENT_MARKER = "#";
+    String FIELD_SEPARATOR = ":";
+    String INPUT_SECTION_MARKER = "= INPUT =";
+    String EXPECT_SECTION_MARKER = "= EXPECT =";
+    String COMPLAIN_SECTION_MARKER = "= COMPLAIN =";
+    String DESCRIPTION_FIELD = "Description";
     
     /** Parse the supplied text in a List of Benchmark
      * 

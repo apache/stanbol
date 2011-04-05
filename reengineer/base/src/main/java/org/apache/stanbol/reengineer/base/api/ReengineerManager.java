@@ -23,7 +23,7 @@ public interface ReengineerManager {
 	 * @param semionReengineer {@link Reengineer}
 	 * @return true if the reengineer is bound, false otherwise
 	 */
-	public boolean bindReengineer(Reengineer semionReengineer);
+    boolean bindReengineer(Reengineer semionReengineer);
 	
 	/**
 	 * The {@link ReengineerManager} can remove a reengineer from the list of available reengineers. This is performed through the method
@@ -32,7 +32,7 @@ public interface ReengineerManager {
 	 * @param semionReengineer {@link Reengineer}
 	 * @return true if the reengineer is unbound, false otherwise
 	 */
-	public boolean unbindReengineer(Reengineer semionReengineer);
+    boolean unbindReengineer(Reengineer semionReengineer);
 	
 	/**
 	 * The {@link ReengineerManager} can remove a reengineer from the list of available reengineers. This is performed through the method
@@ -41,7 +41,7 @@ public interface ReengineerManager {
 	 * @param reenginnerType {@code int}
 	 * @return true if the reengineer is unbound, false otherwise
 	 */
-	public boolean unbindReengineer(int reenginnerType);
+    boolean unbindReengineer(int reenginnerType);
 	
 	
 //	/**
@@ -70,21 +70,21 @@ public interface ReengineerManager {
 	 * 
 	 * @return the {@link Collection< Reengineer >} of active reengineers.
 	 */
-	public Collection<Reengineer> listReengineers();
+    Collection<Reengineer> listReengineers();
 	
 	/**
 	 * Gets the number of active reengineers.
 	 * 
 	 * @return the number of active reengineers.
 	 */
-	public int countReengineers();
+    int countReengineers();
 	
-	public OWLOntology performReengineering(String graphNS, IRI outputIRI, DataSource dataSource) throws ReengineeringException;
+	OWLOntology performReengineering(String graphNS, IRI outputIRI, DataSource dataSource) throws ReengineeringException;
 	
-	public OWLOntology performSchemaReengineering(String graphNS, IRI outputIRI, DataSource dataSource) throws ReengineeringException;
+	OWLOntology performSchemaReengineering(String graphNS, IRI outputIRI, DataSource dataSource) throws ReengineeringException;
 	
-	public OWLOntology performDataReengineering(String graphNS, IRI outputIRI, DataSource dataSource, IRI schemaOntologyIRI) throws ReengineeringException, NoSuchOntologyInStoreException;
+	OWLOntology performDataReengineering(String graphNS, IRI outputIRI, DataSource dataSource, IRI schemaOntologyIRI) throws ReengineeringException, NoSuchOntologyInStoreException;
 	
-	public OWLOntology performDataReengineering(String graphNS, IRI outputIRI, DataSource dataSource, OWLOntology schemaOntology) throws ReengineeringException;
+	OWLOntology performDataReengineering(String graphNS, IRI outputIRI, DataSource dataSource, OWLOntology schemaOntology) throws ReengineeringException;
 	
 }

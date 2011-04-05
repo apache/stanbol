@@ -53,7 +53,7 @@ public class AdaptingIterator<T,A> implements Iterator<A> {
      * @param <T>
      * @param <A>
      */
-    public static interface Adapter<T,A> {
+    public interface Adapter<T,A> {
         /**
          * Converts the value of type T to a value of type A. If an instance of
          * T can not be converted to A, than <code>null</code> is returned

@@ -15,46 +15,46 @@ public interface Recipe {
 	 * @param ruleURI
 	 * @return the object that represents a {@link Rule}
 	 */
-	public Rule getRule(String ruleURI);
+    Rule getRule(String ruleURI);
 	
 	/**
 	 * Trasnform the rules contained in the recipe in a set of SPARQL CONSTRUCT queries.
 	 * 
 	 * @return the {@link String} array that contains the SPARQL CONSTRUCT queries.
 	 */
-	public String[] toSPARQL();
+    String[] toSPARQL();
 	
 	/**
 	 * Serialize the {@link Recipe} into a Jena {@link Model}.
 	 * 
 	 * @return the {@link Model} of the Recipe.
 	 */
-	public Model getRecipeAsRDFModel();
+    Model getRecipeAsRDFModel();
 	
 	/**
 	 * Serialize the rules contained in the recipe to Rule Syntax.
 	 * @return the {@link String} containing the serialization of the recipe's rules
 	 * in Rule Syntax.
 	 */
-	public String getRulesInKReSSyntax();
+    String getRulesInKReSSyntax();
 	
 	/**
 	 * Get the list of the {@link Rule} contained in the recipe.
 	 * @return the {@link RuleList}.
 	 */
-	public RuleList getkReSRuleList();
+    RuleList getkReSRuleList();
 	
 	/**
 	 * Get the ID of the recipe in the {@link RuleStore}.
 	 * @return the {@link IRI} expressing the recipe's ID.
 	 */
-	public IRI getRecipeID();
+    IRI getRecipeID();
 	
 	/**
 	 * Get the description about the recipe.
 	 * @return the {@link String} about the recipe's description.
 	 */
-	public String getRecipeDescription();
+    String getRecipeDescription();
 	
 	/**
 	 * Add a Rule to the recipe.
@@ -62,5 +62,5 @@ public interface Recipe {
 	 * representation of a specific recipe. To permanently change the recipe use {@link RuleStore#addRuleToRecipe(IRI, String)}.
 	 * @param kReSRule the {@link Rule}.
 	 */
-	public void addKReSRule(Rule kReSRule);
+    void addKReSRule(Rule kReSRule);
 }

@@ -34,7 +34,7 @@ public interface Reengineer {
 	 * 
 	 * @return {@code int}
 	 */
-	public int getReengineerType();
+    int getReengineerType();
 	
 	/**
 	 * The method enables to test if the Reengineer can perform the reengineering of a particular data source given as input.
@@ -42,7 +42,7 @@ public interface Reengineer {
 	 * @param dataSource {@link DataSource}
 	 * @return true if the Reengineer can perform the reengineering, false otherwise
 	 */
-	public boolean canPerformReengineering(DataSource dataSource);
+    boolean canPerformReengineering(DataSource dataSource);
 	
 	/**
 	 * The method enables to test if the Reengineer can perform the reengineering of a particular data source type given as input.
@@ -50,9 +50,9 @@ public interface Reengineer {
 	 * @param the data source type {@code int}
 	 * @return true if the Reengineer can perform the reengineering, false otherwise
 	 */
-	public boolean canPerformReengineering(int dataSourceType);
+    boolean canPerformReengineering(int dataSourceType);
 	
-	public boolean canPerformReengineering(OWLOntology schemaOntology);
+	boolean canPerformReengineering(OWLOntology schemaOntology);
 	
 	/**
 	 * The method enables to test if the Reengineer can perform the reengineering of a particular data source type given as input.
@@ -60,7 +60,7 @@ public interface Reengineer {
 	 * @param the data source type {@code String}
 	 * @return true if the Reengineer can perform the reengineering, false otherwise
 	 */
-	public boolean canPerformReengineering(String dataSourceType) throws UnsupportedReengineerException;
+    boolean canPerformReengineering(String dataSourceType) throws UnsupportedReengineerException;
 	
 	/**
 	 * The data source (non-RDF) provided is reengineered to RDF. This operation produces an RDF data set that contains information
@@ -71,7 +71,7 @@ public interface Reengineer {
 	 * @param dataSource {@link DataSource}
 	 * @return the reengineered data set - {@link OWLOntology}
 	 */
-	public OWLOntology reengineering(String graphNS, IRI outputIRI, DataSource dataSource) throws ReengineeringException;
+    OWLOntology reengineering(String graphNS, IRI outputIRI, DataSource dataSource) throws ReengineeringException;
 	
 	/**
 	 * The generation of the RDF containing the information about the schema of the data source is obtained passing to this method
@@ -82,7 +82,7 @@ public interface Reengineer {
 	 * @param dataSource {@link DataSource}
 	 * @return the {@link OWLOntology} of the data source shema
 	 */
-	public OWLOntology schemaReengineering(String graphNS, IRI outputIRI, DataSource dataSource);
+    OWLOntology schemaReengineering(String graphNS, IRI outputIRI, DataSource dataSource);
 	
 	
 	/**
@@ -94,7 +94,7 @@ public interface Reengineer {
 	 * @param dataSource {@link DataSource}
 	 * @return the {@link OWLOntology} of the data source shema
 	 */
-	public OWLOntology dataReengineering(String graphNS, IRI outputIRI, DataSource dataSource, OWLOntology schemaOntology) throws ReengineeringException;
+    OWLOntology dataReengineering(String graphNS, IRI outputIRI, DataSource dataSource, OWLOntology schemaOntology) throws ReengineeringException;
 	
 	
 }

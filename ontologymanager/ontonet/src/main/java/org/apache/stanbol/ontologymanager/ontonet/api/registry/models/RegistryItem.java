@@ -4,22 +4,22 @@ import java.net.URL;
 
 public interface RegistryItem {
 
-	public abstract String getName();
+	String getName();
 
-	public abstract RegistryLibrary getParent();
+	RegistryLibrary getParent();
 
-	public abstract URL getURL();
+	URL getURL();
 
-	public abstract boolean isLibrary();
+	boolean isLibrary();
 
-	public abstract boolean isOntology();
+	boolean isOntology();
 
-	public abstract void setName(String string);
+	void setName(String string);
 
-	public abstract void setParent(RegistryLibrary parent);
+	void setParent(RegistryLibrary parent);
 
-	public abstract void setURL(URL url);
+	void setURL(URL url);
 
-	public abstract String toString();
+	String toString();
 
 }

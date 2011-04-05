@@ -19,7 +19,7 @@ public interface Session extends SessionListenable {
 	 * @author alessandro
 	 * 
 	 */
-	public enum State {
+    enum State {
 		/**
 		 * Running session
 		 */
@@ -38,7 +38,7 @@ public interface Session extends SessionListenable {
 	 * Closes this KReS Session irreversibly. Most likely includes setting the
 	 * state to ZOMBIE.
 	 */
-	public void close() throws NonReferenceableSessionException;
+    void close() throws NonReferenceableSessionException;
 
 	/**
 	 * Returns the unique Internationalized Resource Identifier (IRI) that
@@ -49,23 +49,23 @@ public interface Session extends SessionListenable {
 	 * 
 	 * @return the IRI that identifies this session
 	 */
-	public IRI getID();
+    IRI getID();
 
 	/**
 	 * Returns the current state of this KReS session.
 	 * 
 	 * @return the state of this session
 	 */
-	public State getSessionState();
+    State getSessionState();
 
 	/**
 	 * Equivalent to <code>getState() == State.ACTIVE</code>.
 	 * 
 	 * @return true iff this session is in the ACTIVE state
 	 */
-	public boolean isActive();
+    boolean isActive();
 	
-	public void open() throws NonReferenceableSessionException;
+	void open() throws NonReferenceableSessionException;
 
 	/**
 	 * Sets the KReS session as ACTIVE if <code>active</code> is true, INACTIVE
@@ -78,7 +78,7 @@ public interface Session extends SessionListenable {
 	 *            the desired activity state for this session
 	 * @return the resulting state of this KReS session
 	 */
-	public State setActive(boolean active)
+    State setActive(boolean active)
 			throws NonReferenceableSessionException;
 
 }

@@ -17,7 +17,7 @@ public interface RuleManager {
 	 * @param kReSRuleString {@link String}
 	 * @return true if the rule is added, false otherwise.
 	 */
-	public boolean addRules(String kReSRuleString);
+    boolean addRules(String kReSRuleString);
 	
 	/**
 	 * Creates a recipe with the specified ID.
@@ -25,7 +25,7 @@ public interface RuleManager {
 	 * @param recipeID {@link String}
 	 * @return true if the recipe is created, false otherwise.
 	 */
-	public boolean createRecipe(String recipeID);
+    boolean createRecipe(String recipeID);
 	
 	/**
 	 * Creates a recipe with the specified ID and adds the rules identified by the IRIs in the set to the recipe.
@@ -34,8 +34,8 @@ public interface RuleManager {
 	 * @param ruleIRIs {@link Set< IRI >}
 	 * @return true if the recipe is created, false otherwise.
 	 */
-		
-	public boolean createRecipe(String recipeID, Set<IRI> ruleIRIs);
+
+    boolean createRecipe(String recipeID, Set<IRI> ruleIRIs);
 	
 	/**
 	 * Removes the recipe identified by the {@code recipeID}.
@@ -43,7 +43,7 @@ public interface RuleManager {
 	 * @param recipeID {@link String}
 	 * @return true if the recipe is removed, false otherwise.
 	 */
-	public boolean removeRecipe(String recipeID);
+    boolean removeRecipe(String recipeID);
 	
 	/**
 	 * Adds the rule identified by its IRI to a scpecified recipe.
@@ -51,7 +51,7 @@ public interface RuleManager {
 	 * @param swrlRuleIri {@link IRI}
 	 * @return true if the rule is added to the recipe, false otherwise.
 	 */
-	public boolean addRuleToRecipe(IRI recipeIRI, IRI swrlRuleIri);
+    boolean addRuleToRecipe(IRI recipeIRI, IRI swrlRuleIri);
 
 	/**
 	 * Gets the recipe specified by the IRI.
@@ -59,7 +59,7 @@ public interface RuleManager {
 	 * @param recipeIRI {@link IRI}
 	 * @return the set ot the rules' IRIs.
 	 */
-	public Set<IRI> getRecipe(IRI recipeIRI);
+    Set<IRI> getRecipe(IRI recipeIRI);
 	
 	
 	/**
@@ -68,6 +68,6 @@ public interface RuleManager {
 	 * @param ruleIRI {@link IRI}
 	 * @return the {@link Rule}.
 	 */
-	public Rule getRule(IRI ruleIRI);
+    Rule getRule(IRI ruleIRI);
 
 }

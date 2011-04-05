@@ -33,7 +33,7 @@ public interface CustomOntologySpace extends OntologySpace {
 	 *            that construct root ontologies in memory but do not store
 	 *            them.
 	 */
-	public void attachCoreSpace(CoreOntologySpace coreSpace, boolean skipRoot)
+    void attachCoreSpace(CoreOntologySpace coreSpace, boolean skipRoot)
 			throws UnmodifiableOntologySpaceException;
 
 }

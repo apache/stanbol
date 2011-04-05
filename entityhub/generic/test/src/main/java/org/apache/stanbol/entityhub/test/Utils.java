@@ -35,5 +35,5 @@ public final class Utils {
             c.add(it.next());
         }
         return c;
-    };
+    }
 }

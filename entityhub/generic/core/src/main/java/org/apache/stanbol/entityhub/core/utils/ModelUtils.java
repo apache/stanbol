@@ -181,7 +181,7 @@ public final class ModelUtils {
             c.add(it.next());
         }
         return c;
-    };
+    }
 
     /**
      * Splits up a URI in local name and namespace based on the following rules

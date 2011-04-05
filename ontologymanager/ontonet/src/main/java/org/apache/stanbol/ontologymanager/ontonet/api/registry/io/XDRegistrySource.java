@@ -11,19 +11,19 @@ public interface XDRegistrySource {
 	 * 
 	 * @return
 	 */
-	public InputStream getInputStream();
+    InputStream getInputStream();
 
-	public IRI getPhysicalIRI();
+	IRI getPhysicalIRI();
 
 	/**
 	 * Each invocation will return a new Reader.
 	 * 
 	 * @return
 	 */
-	public Reader getReader();
+    Reader getReader();
 
-	public boolean isInputStreamAvailable();
+	boolean isInputStreamAvailable();
 
-	public boolean isReaderAvailable();
+	boolean isReaderAvailable();
 
 }
