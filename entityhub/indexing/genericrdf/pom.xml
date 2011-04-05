@@ -16,7 +16,7 @@
    limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -32,8 +32,8 @@
   <packaging>jar</packaging>
   <name>Apache Stanbol Entityhub Indexing for rdf Resource</name>
   <description>This indexes all kind of RDF sources by using a prased
-  configuration (FieldMapper to define index fields and field values and a set 
-  of indexed rdf:types) configuration for processing Resources in the Graph.
+    configuration (FieldMapper to define index fields and field values and a set
+    of indexed rdf:types) configuration for processing Resources in the Graph.
   </description>
   <scm>
     <connection>
@@ -46,18 +46,18 @@
   </scm>
   <dependencies>
     <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-        <version>${stanbol-version}</version>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
+      <version>${stanbol-version}</version>
     </dependency>
     <dependency>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-        <version>${stanbol-version}</version>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
+      <version>${stanbol-version}</version>
     </dependency>
     <dependency>
       <groupId>com.hp.hpl.jena</groupId>
@@ -70,15 +70,15 @@
         </exclusion>
       </exclusions>
     </dependency>
-	<dependency>
+    <dependency>
       <groupId>com.hp.hpl.jena</groupId>
-	  <artifactId>tdb</artifactId>
-	  <version>0.8.8</version>
-    </dependency>  
+      <artifactId>tdb</artifactId>
+      <version>0.8.8</version>
+    </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
       <version>1.0</version>
     </dependency>
-   </dependencies>
+  </dependencies>
 </project>

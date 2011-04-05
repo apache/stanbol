@@ -16,7 +16,7 @@
    limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -31,9 +31,10 @@
   <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Entityhub Yard implementation hased on Solr </name>
-  <description>This bundle provides implementation of the Entityhub Yard interface(s) 
-  based on a Solr Search Server</description>
+  <name>Apache Stanbol Entityhub Yard implementation hased on Solr</name>
+  <description>This bundle provides implementation of the Entityhub Yard interface(s)
+    based on a Solr Search Server
+  </description>
 
   <inceptionYear>2010</inceptionYear>
 
@@ -74,7 +75,7 @@
               !org.relaxng.datatype,
               *
             </Import-Package>
-           <Private-Package>
+            <Private-Package>
               org.apache.stanbol.entityhub.yard.solr.impl;version=${pom.version},
               org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;version=${pom.version}
             </Private-Package>
@@ -85,7 +86,7 @@
               lucene-spellchecker, lucene-misc, lucene-queries, lucene-snowball,
               stax-api,wstx-asl
             </Embed-Dependency>
-           </instructions>
+          </instructions>
         </configuration>
       </plugin>
       <plugin>
@@ -96,7 +97,7 @@
   </build>
 
   <dependencies>
-  <!-- Stanbol Entityhub internal dependencies -->
+    <!-- Stanbol Entityhub internal dependencies -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
@@ -107,82 +108,78 @@
     </dependency>
     <!-- SolrJ dependencies (needed for using remote Solr servers) -->
     <dependency>
-        <groupId>org.apache.solr</groupId>
-        <artifactId>solr-solrj</artifactId>
-    </dependency>       
-    <dependency>
-        <groupId>commons-httpclient</groupId>
-        <artifactId>commons-httpclient</artifactId>
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-solrj</artifactId>
     </dependency>
-    
+    <dependency>
+      <groupId>commons-httpclient</groupId>
+      <artifactId>commons-httpclient</artifactId>
+    </dependency>
+
     <!-- Solr/Lucene dependencies (needed for using embedded Solr servers) -->
     <dependency>
-        <groupId>org.apache.solr</groupId>
-        <artifactId>solr-core</artifactId>
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-core</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-core</artifactId>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
     </dependency>
     <dependency>
-        <groupId>commons-codec</groupId>
-        <artifactId>commons-codec</artifactId>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
     </dependency>
     <dependency>
-        <groupId>commons-fileupload</groupId>
-        <artifactId>commons-fileupload</artifactId>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
     </dependency>
     <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-analyzers</artifactId>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-highlighter</artifactId>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-highlighter</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-memory</artifactId>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-memory</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-misc</artifactId>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-misc</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-queries</artifactId>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-queries</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-snowball</artifactId>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-snowball</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-memory</artifactId>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-spellchecker</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-spellchecker</artifactId>
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-commons-csv</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.apache.solr</groupId>
-        <artifactId>solr-commons-csv</artifactId>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
     </dependency>
     <dependency>
-        <groupId>commons-collections</groupId>
-        <artifactId>commons-collections</artifactId>
+      <groupId>stax</groupId>
+      <artifactId>stax-api</artifactId>
     </dependency>
     <dependency>
-        <groupId>stax</groupId>
-        <artifactId>stax-api</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.codehaus.woodstox</groupId>
-        <artifactId>wstx-asl</artifactId>
+      <groupId>org.codehaus.woodstox</groupId>
+      <artifactId>wstx-asl</artifactId>
     </dependency>
     <!-- The Solr-Core depends on the Servlet API and in case of running an
          EmbeddedSolrServer the servlet-api is not available -->
@@ -190,12 +187,12 @@
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
     </dependency>
-    
-    
-	<dependency>
-	    <groupId>joda-time</groupId>
-	    <artifactId>joda-time</artifactId>
-	</dependency>
+
+
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.osgi</groupId>
@@ -203,19 +200,19 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-        <groupId>org.osgi</groupId>
-        <artifactId>org.osgi.compendium</artifactId>
-        <scope>provided</scope>
-    </dependency>    
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.scr.annotations</artifactId>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
     </dependency>
 
     <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <scope>provided</scope>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
     </dependency>
     <!-- for tests -->
     <dependency>

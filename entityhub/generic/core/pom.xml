@@ -16,7 +16,7 @@
    limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -31,10 +31,10 @@
   <artifactId>org.apache.stanbol.entityhub.core</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Entityhub Core </name>
+  <name>Apache Stanbol Entityhub Core</name>
   <description>The Core Components of the Entityhub. This includes the default
-  implementations for the services defined by the services API as well as an
-  in-memory implementation of the model.
+    implementations for the services defined by the services API as well as an
+    in-memory implementation of the model.
   </description>
 
   <inceptionYear>2010</inceptionYear>
@@ -69,14 +69,14 @@
             <Private-Package>
               org.apache.stanbol.entityhub.core.impl;version=${pom.version},
             </Private-Package>
-           </instructions>
+          </instructions>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
       </plugin>
-       
+
     </plugins>
   </build>
 
@@ -87,32 +87,32 @@
     </dependency>
     <!-- OSGI framework dependencies -->
     <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.scr.annotations</artifactId>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
       <scope>provided</scope>
     </dependency>
-	<dependency>
-	    <groupId>org.osgi</groupId>
-	    <artifactId>org.osgi.compendium</artifactId>
-	    <scope>provided</scope>
-	</dependency>
-	<!-- utilities -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <!-- utilities -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <scope>provided</scope>
-    </dependency>    
-    <dependency>
-        <groupId>joda-time</groupId>
-        <artifactId>joda-time</artifactId>
     </dependency>
     <dependency>
-        <groupId>commons-collections</groupId>
-        <artifactId>commons-collections</artifactId>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
     </dependency>
     <!-- for tests -->
     <dependency>

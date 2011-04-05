@@ -16,7 +16,7 @@
    limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -33,7 +33,7 @@
 
   <name>Apache Stanbol Entityhub Linked Data Protocol Implementation</name>
   <description>This includes EntityDereferencer and EntitySearcher implementations
-               for the protocols such as CoolURI and SPARQL Endpoints
+    for the protocols such as CoolURI and SPARQL Endpoints
   </description>
 
   <inceptionYear>2010</inceptionYear>
@@ -59,17 +59,16 @@
             <Export-Package>
               org.apache.stanbol.entityhub.site.linkeddata;version=${pom.version},
             </Export-Package>
-           <Private-Package>
+            <Private-Package>
               org.apache.stanbol.entityhub.site.linkeddata.impl;version=${pom.version},
             </Private-Package>
-           </instructions>
+          </instructions>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
       </plugin>
-       
     </plugins>
   </build>
 

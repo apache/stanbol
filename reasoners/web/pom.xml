@@ -60,12 +60,6 @@
 			<version>0.9-incubating-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.rdfjson</artifactId>
-			<version>0.3-incubating-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
 
 		<!-- specific deps for this project -->
 		<dependency>

@@ -9,7 +9,7 @@
   License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -52,20 +52,20 @@
 
   <profiles>
     <profile>
-       <id>kres</id>
-       <activation>
-         <activeByDefault>false</activeByDefault>
-       </activation>
-       <modules>
-         <module>owl</module>
-         <module>kres/jersey</module>
-         <module>ontologymanager</module>
-         <module>rules</module>
-         <module>reengineer</module>
-         <module>reasoners</module>
-         <module>kres/launchers/full</module>
-       </modules>
-     </profile>
-   </profiles>
+      <id>kres</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>owl</module>
+        <module>kres/jersey</module>
+        <module>ontologymanager</module>
+        <module>rules</module>
+        <module>reengineer</module>
+        <module>reasoners</module>
+        <module>kres/launchers/full</module>
+      </modules>
+    </profile>
+  </profiles>
 
 </project>
