@@ -55,7 +55,7 @@ public class JerseyEndpoint {
 
     protected final List<WebFragment> webFragments = new ArrayList<WebFragment>();
 
-    protected ArrayList<String> registeredAliases;
+    protected final List<String> registeredAliases = new ArrayList<String>();
 
     public Dictionary<String,String> getInitParams() {
         Dictionary<String,String> initParams = new Hashtable<String,String>();
@@ -67,18 +67,28 @@ public class JerseyEndpoint {
 
     @Activate
     protected void activate(ComponentContext ctx) throws IOException, ServletException, NamespaceException {
-        if (webFragments.isEmpty()) {
-            // nothing to activate
-            return;
+        componentContext = ctx;
+        
+        if (!webFragments.isEmpty()) {
+            initJersey();
+        }
+    }
+    
+    /** Initialize the Jersey subsystem */
+    private synchronized void initJersey() throws NamespaceException, ServletException {
+        
+        if(componentContext == null) {
+            throw new IllegalStateException("Null ComponentContext, not activated?");
         }
         
-        this.componentContext = ctx;
-        this.registeredAliases = new ArrayList<String>();
+        shutdownJersey();
+        
+        log.info("Initializing the Jersey subsystem");
         
         // register all the JAX-RS resources into a a JAX-RS application and bind it to a configurable URL
         // prefix
         JerseyEndpointApplication app = new JerseyEndpointApplication();
-        String staticUrlRoot = (String) ctx.getProperties().get(STATIC_RESOURCES_URL_ROOT_PROPERTY);
+        String staticUrlRoot = (String) componentContext.getProperties().get(STATIC_RESOURCES_URL_ROOT_PROPERTY);
 
         // incrementally contribute fragment resources
         List<LinkResource> linkResources = new ArrayList<LinkResource>();
@@ -105,8 +115,8 @@ public class JerseyEndpoint {
 
         // bind the aggregate JAX-RS application to a dedicated servlet
         ServletContainer container = new ServletContainer(app);
-        String applicationAlias = (String) ctx.getProperties().get(ALIAS_PROPERTY);
-        Bundle appBundle = ctx.getBundleContext().getBundle();
+        String applicationAlias = (String) componentContext.getProperties().get(ALIAS_PROPERTY);
+        Bundle appBundle = componentContext.getBundleContext().getBundle();
         httpService.registerServlet(applicationAlias, container, getInitParams(), new BundleHttpContext(
                 appBundle));
         registeredAliases.add(applicationAlias);
@@ -114,7 +124,7 @@ public class JerseyEndpoint {
         // forward the main Stanbol OSGi runtime context so that JAX-RS resources can lookup arbitrary
         // services
         servletContext = container.getServletContext();
-        servletContext.setAttribute(BundleContext.class.getName(), ctx.getBundleContext());
+        servletContext.setAttribute(BundleContext.class.getName(), componentContext.getBundleContext());
         servletContext.setAttribute(BaseStanbolResource.ROOT_URL, applicationAlias);
         servletContext.setAttribute(BaseStanbolResource.STATIC_RESOURCES_ROOT_URL, staticUrlRoot);
         servletContext.setAttribute(BaseStanbolResource.LINK_RESOURCES, linkResources);
@@ -122,24 +132,21 @@ public class JerseyEndpoint {
         servletContext.setAttribute(BaseStanbolResource.NAVIGATION_LINKS, navigationLinks);
         log.info("JerseyEndpoint servlet registered at {}", applicationAlias);
     }
+    
+    /** Shutdown Jersey, if there's anything to do */
+    private synchronized void shutdownJersey() {
+        log.info("Unregistering aliases {}", registeredAliases);
+        for (String alias : registeredAliases) {
+            httpService.unregister(alias);
+        }
+        registeredAliases.clear();
+    }
 
     @Deactivate
     protected void deactivate(ComponentContext ctx) {
-        if(registeredAliases != null) {
-            for (String alias : registeredAliases) {
-                httpService.unregister(alias);
-            }
-        }
+        shutdownJersey();
         servletContext = null;
         componentContext = null;
-    }
-
-    protected void bindHttpService(HttpService httpService) {
-        this.httpService = httpService;
-    }
-
-    protected void unbindHttpService(HttpService httpService) {
-        this.httpService = null;
     }
 
     protected void bindWebFragment(WebFragment webFragment) throws IOException,
@@ -147,26 +154,17 @@ public class JerseyEndpoint {
                                                            NamespaceException {
         // TODO: support some ordering for jax-rs resource and template overrides?
         webFragments.add(webFragment);
-        if (componentContext != null) {
-            ComponentContext oldContext = componentContext;
-            deactivate(oldContext);
-            activate(oldContext);
-        }
+        initJersey();
     }
 
     protected void unbindWebFragment(WebFragment webFragment) throws IOException,
                                                              ServletException,
                                                              NamespaceException {
         webFragments.remove(webFragment);
-        if (componentContext != null) {
-            ComponentContext oldContext = componentContext;
-            deactivate(oldContext);
-            activate(oldContext);
-        }
+        initJersey();
     }
 
     public List<WebFragment> getWebFragments() {
         return webFragments;
     }
-
 }
