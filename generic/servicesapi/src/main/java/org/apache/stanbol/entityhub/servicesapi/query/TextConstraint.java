@@ -24,7 +24,7 @@ import java.util.Set;
 
 public class TextConstraint extends Constraint {
 
-    public static enum PatternType {
+    public enum PatternType {
         /**
          * Simple checks if the parsed constraint equals the value
          */

@@ -147,7 +147,7 @@ public class RdfIndexer {
      * @author Rupert Westenthaler
      *
      */
-    public static enum IndexingMode{ NORMAL, RANKING_MAP_BASED }
+    public enum IndexingMode{ NORMAL, RANKING_MAP_BASED }
 
     public static final String RDF_XML = "application/rdf+xml";
     public static final String TURTLE = "text/turtle";
@@ -518,7 +518,7 @@ public class RdfIndexer {
         long lastIndexed = 0;
         long stdCount = 0;
         long indexedStdCount = 0;
-        long repStdCount = 0;;
+        long repStdCount = 0;
         long start = System.currentTimeMillis();
         long startCurrent = start;
         String current = null;

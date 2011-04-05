@@ -87,8 +87,8 @@ public interface EntityMapping extends Sign {
         public static boolean isState(String uri){
             return uri2state.containsKey(uri);
         }
-    };
-//    /**
+    }
+    //    /**
 //     * Getter for the identifier.
 //     * @return the identifier
 //     */
@@ -96,7 +96,8 @@ public interface EntityMapping extends Sign {
     /**
      * The key to be used for the id of the mapped entity
      */
-    String ENTITY_ID = RdfResourceEnum.mappedEntity.toString();;
+    String ENTITY_ID = RdfResourceEnum.mappedEntity.toString();
+
     /**
      * Getter for the ID of the entity
      * @return the mapped entity
@@ -114,7 +115,8 @@ public interface EntityMapping extends Sign {
     /**
      * The key to be used for the state of the MappedEntity instance
      */
-    String STATE = RdfResourceEnum.hasMappingState.toString();;
+    String STATE = RdfResourceEnum.hasMappingState.toString();
+
     /**
      * The state of this mapping
      * @return the state

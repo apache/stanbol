@@ -71,13 +71,13 @@ public enum IndexDataTypeEnum {
      * texts and added to the {@link SolrConst#LANG_MERGER_FIELD} 
      */
     private boolean languageType;
-    private IndexDataTypeEnum(String name,String prefix,Class<?> type) {
+    IndexDataTypeEnum(String name, String prefix, Class<?> type) {
         this(name,prefix,null,type,false);
     }
-    private IndexDataTypeEnum(String name,String prefix,Class<?> type,boolean language) {
+    IndexDataTypeEnum(String name, String prefix, Class<?> type, boolean language) {
         this(name,prefix,null,type,language);
     }
-    private IndexDataTypeEnum(String name,String prefix,String suffix, Class<?> type,boolean language) {
+    IndexDataTypeEnum(String name, String prefix, String suffix, Class<?> type, boolean language) {
         this.indexType = new IndexDataType(name);
         this.prefix = prefix;
         this.suffix = suffix;

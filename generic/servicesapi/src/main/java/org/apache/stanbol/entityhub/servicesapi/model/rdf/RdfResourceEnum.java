@@ -170,7 +170,7 @@ public enum RdfResourceEnum {
      * {@link NamespaceEnum#entityhubModel}).
      * @param uri the uri of the element
      */
-    private RdfResourceEnum(String uri) {
+    RdfResourceEnum(String uri) {
         if(uri == null){
             this.uri = NamespaceEnum.entityhubModel+name();
         }
@@ -182,7 +182,7 @@ public enum RdfResourceEnum {
      * @param ns the namespace of the property or <code>null</code> to use the
      * default namespace
      */
-    private RdfResourceEnum(NamespaceEnum ns){
+    RdfResourceEnum(NamespaceEnum ns){
         this(ns,null);
     }
     /**
@@ -192,7 +192,7 @@ public enum RdfResourceEnum {
      * @param localName the local name of the property or <code>null</code> to
      * use the {@link #name()} as local name.
      */
-    private RdfResourceEnum(NamespaceEnum ns,String localName){
+    RdfResourceEnum(NamespaceEnum ns, String localName){
         String uri;
         if(ns == null){
             uri = NamespaceEnum.entityhubModel.getNamespace();
@@ -210,7 +210,7 @@ public enum RdfResourceEnum {
      * Initialise a new property with {@link NamespaceEnum#entityhubModel}) as namespace
      * and the {@link #name()} as local name.
      */
-    private RdfResourceEnum(){
+    RdfResourceEnum(){
         this(null,null);
     }
     /**

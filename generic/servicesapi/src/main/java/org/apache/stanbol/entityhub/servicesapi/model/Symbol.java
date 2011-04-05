@@ -63,7 +63,8 @@ public interface Symbol extends Sign{
         public String toString() {
             return uri;
         }
-    };
+    }
+
     /**
      * The property to be used for the symbol label
      */

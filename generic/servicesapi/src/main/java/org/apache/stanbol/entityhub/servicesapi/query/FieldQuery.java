@@ -46,31 +46,31 @@ public interface FieldQuery extends Query,Iterable<Entry<String, Constraint>>{
      * Adds Fields to be selected by this Query
      * @param fields the fields to be selected by this query
      */
-    public abstract void addSelectedField(String field);
+    void addSelectedField(String field);
 
     /**
      * Adds Fields to be selected by this Query
      * @param fields the fields to be selected by this query
      */
-    public abstract void addSelectedFields(Collection<String> fields);
+    void addSelectedFields(Collection<String> fields);
 
     /**
      * Removes Fields to be selected by this Query
      * @param fields the fields to be selected by this query
      */
-    public abstract void removeSelectedField(String fields);
+    void removeSelectedField(String fields);
 
     /**
      * Removes Fields to be selected by this Query
      * @param fields the fields to be selected by this query
      */
-    public abstract void removeSelectedFields(Collection<String> fields);
+    void removeSelectedFields(Collection<String> fields);
 
     /**
      * Unmodifiable set with all the fields to be selected by this query
      * @return the fields to be selected by this query
      */
-    public abstract Set<String> getSelectedFields();
+    Set<String> getSelectedFields();
 
     /**
      * Sets/replaces the constraint for a field of the representation. If
@@ -79,27 +79,27 @@ public interface FieldQuery extends Query,Iterable<Entry<String, Constraint>>{
      * @param field the field
      * @param constraint the Constraint
      */
-    public abstract void setConstraint(String field, Constraint constraint);
+    void setConstraint(String field, Constraint constraint);
 
     /**
      * Removes the constraint for the parse field
      * @param field
      */
-    public abstract void removeConstraint(String field);
+    void removeConstraint(String field);
 
     /**
      * Checks if there is a constraint for the given field
      * @param field the field
      * @return the state
      */
-    public abstract boolean isConstraint(String field);
+    boolean isConstraint(String field);
 
     /**
      * Getter for the Constraint of a field
      * @param field the field
      * @return the constraint or <code>null</code> if none is defined.
      */
-    public abstract Constraint getConstraint(String field);
+    Constraint getConstraint(String field);
 
     /**
      * Getter for the unmodifiable list of query elements for the given Path. Use
@@ -107,7 +107,7 @@ public interface FieldQuery extends Query,Iterable<Entry<String, Constraint>>{
      * @param path the path
      * @return the list of query elements for a path
      */
-    public abstract Set<Entry<String, Constraint>> getConstraints();
+    Set<Entry<String, Constraint>> getConstraints();
     /**
      * Removes all constraints form the query
      */

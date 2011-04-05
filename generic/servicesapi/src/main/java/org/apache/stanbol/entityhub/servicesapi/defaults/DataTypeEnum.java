@@ -91,16 +91,16 @@ public enum DataTypeEnum {
     private final String shortName;
     private final String uri;
     private final Set<Class<?>> additional;
-    private DataTypeEnum(Class<?> javaType,Class<?>...additional){
+    DataTypeEnum(Class<?> javaType, Class<?>... additional){
         this(null,null,javaType,additional);
     }
-    private DataTypeEnum(String localName,Class<?> javaType,Class<?>...additional){
+    DataTypeEnum(String localName, Class<?> javaType, Class<?>... additional){
         this(null,localName,javaType,additional);
     }
-    private DataTypeEnum(NamespaceEnum namespace,Class<?> javaType,Class<?>...additional) {
+    DataTypeEnum(NamespaceEnum namespace, Class<?> javaType, Class<?>... additional) {
         this(namespace,null,javaType,additional);
     }
-    private DataTypeEnum(NamespaceEnum namespace,String localName,Class<?> javaType,Class<?>...additional) {
+    DataTypeEnum(NamespaceEnum namespace, String localName, Class<?> javaType, Class<?>... additional) {
         if(namespace == null){
             namespace = NamespaceEnum.xsd;
         }

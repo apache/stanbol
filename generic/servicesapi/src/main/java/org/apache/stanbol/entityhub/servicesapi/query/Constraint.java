@@ -30,7 +30,7 @@ public abstract class Constraint {
      * @author Rupert Westenthaler
      *
      */
-    public static enum ConstraintType{
+    public enum ConstraintType{
 // NOTE (2010-Nov-09,rw) Because a reference constraint is now a special kind of
 //                       a value constraint.
 //        /**

@@ -51,7 +51,7 @@ public class FilteringIterator<T> extends AdaptingIterator<T,T>{
      *
      * @param <T>
      */
-    public static interface Filter<T> {
+    public interface Filter<T> {
         boolean isValid(T value);
     }
     public FilteringIterator(Iterator<T> iterator,Filter<T> filter,Class<T> type) {

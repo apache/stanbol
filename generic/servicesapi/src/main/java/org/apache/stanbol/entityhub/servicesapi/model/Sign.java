@@ -34,7 +34,7 @@ public interface Sign {
      * @author Rupert Westenthaler
      *
      */
-    public static enum SignTypeEnum {
+    enum SignTypeEnum {
         /**
          * The Sign - the default - type
          */

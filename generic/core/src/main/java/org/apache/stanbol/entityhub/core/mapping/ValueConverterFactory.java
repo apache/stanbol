@@ -178,7 +178,7 @@ public class ValueConverterFactory {
      *
      * @param <T> the type of created objects
      */
-    public static interface ValueConverter<T> {
+    public interface ValueConverter<T> {
 
         /**
          * The URI of the dataType created by this converter

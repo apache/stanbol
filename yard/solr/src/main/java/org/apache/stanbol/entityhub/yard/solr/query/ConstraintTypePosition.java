@@ -39,12 +39,12 @@ public class ConstraintTypePosition implements Comparable<ConstraintTypePosition
      * @author Rupert Westenthaler
      *
      */
-    public static enum PositionType {
+    public enum PositionType {
         prefix,
         field,
         suffux,
         assignment,
-        value;
+        value
     }
     private PositionType type;
     private int pos;
