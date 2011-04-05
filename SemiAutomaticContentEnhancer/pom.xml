@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -19,17 +19,17 @@
   <description>
     Experimental content creation client
   </description>
-
   <inceptionYear>2010</inceptionYear>
-    <scm>
-        <connection>
-            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/SemiAutomaticContentEnhancer/
-        </connection>
-        <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/SemiAutomaticContentEnhancer/
-        </developerConnection>
-        <url>http://incubator.apache.org/stanbol/</url>
-    </scm>
+
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/SemiAutomaticContentEnhancer/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/SemiAutomaticContentEnhancer/
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol/</url>
+  </scm>
 
   <repositories>
     <repository>
@@ -45,23 +45,23 @@
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.2-beta-5</version>
         <executions>
-            <execution>
-                <id>create-runnable-jar</id>
-                <phase>package</phase>
-                <goals>
-                    <goal>single</goal>
-                </goals>
-                <configuration>
-                  <descriptorRefs>
-                    <descriptorRef>jar-with-dependencies</descriptorRef>
-                  </descriptorRefs>
-                  <archive>
-                      <manifest>
-                          <mainClass>org.apache.stanbol.enhancer.sace.Sace</mainClass>
-                      </manifest>
-                  </archive>
-                </configuration>
-            </execution>
+          <execution>
+            <id>create-runnable-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptorRefs>
+                <descriptorRef>jar-with-dependencies</descriptorRef>
+              </descriptorRefs>
+              <archive>
+                <manifest>
+                  <mainClass>org.apache.stanbol.enhancer.sace.Sace</mainClass>
+                </manifest>
+              </archive>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>

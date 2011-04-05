@@ -9,7 +9,7 @@
     License.
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -28,17 +28,17 @@
   <description>
     Pseudo project to build the complete Stanbol Enhancer component
   </description>
-
   <inceptionYear>2010</inceptionYear>
-    <scm>
-        <connection>
-            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/
-        </connection>
-        <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/
-        </developerConnection>
-        <url>http://incubator.apache.org/stanbol/</url>
-    </scm>
+
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol/</url>
+  </scm>
 
   <modules>
     <module>parent</module>
@@ -55,8 +55,9 @@
     <module>engines/langid</module>
     <module>engines/metaxa</module>
     <module>engines/geonames</module>
-    <module>engines/entitytagging</module><!-- RICK based enhancement engine(s) -->
-	<module>engines/opencalais</module>
+    <module>engines/entitytagging</module>
+    <!-- RICK based enhancement engine(s) -->
+    <module>engines/opencalais</module>
     <module>engines/zemanta</module>
 
     <module>jersey</module>
