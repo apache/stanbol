@@ -13,7 +13,3 @@ http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/reso
 Description: Miles Davis must not be found
 http://fise.iks-project.eu/ontology/entity-type URI http://dbpedia.org/ontology/MusicalArtist
 http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Miles_Davis
-
-Description: Bob Marley in the COMPLAIN section should fail
-http://fise.iks-project.eu/ontology/entity-type URI http://dbpedia.org/ontology/MusicalArtist
-http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Bob_Marley
