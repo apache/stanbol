@@ -53,7 +53,7 @@ public class SolrYardTest extends YardTest {
     private static final Logger log = LoggerFactory.getLogger(SolrYardTest.class);
     
     @BeforeClass
-    public final static void initYard() throws YardException {
+    public static final void initYard() throws YardException {
         //get the working directory
         //use property substitution to test this feature!
         String solrServerDir = "${basedir}"+TEST_INDEX_REL_PATH;
@@ -94,7 +94,7 @@ public class SolrYardTest extends YardTest {
      * {@link #representationIds} list.
      */
     @AfterClass
-    public final static void clearUpRepresentations() throws YardException {
+    public static final void clearUpRepresentations() throws YardException {
         yard.remove(representationIds);
     }
     

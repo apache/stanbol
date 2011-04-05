@@ -102,8 +102,6 @@ public class JettyServerTest {
     /**
      * Tests that the creation of active and inactive scopes is reflected in the RDF version of the scope set,
      * whether it is set to display all scopes or only the active ones.
-     * 
-     * @throws Exception
      */
     // @Test
     public void testActiveVsAll() throws Exception {

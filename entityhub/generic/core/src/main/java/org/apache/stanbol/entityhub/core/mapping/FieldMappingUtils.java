@@ -73,7 +73,7 @@ public final class FieldMappingUtils {
 
     }
 
-    protected final static Logger log = LoggerFactory.getLogger(FieldMappingUtils.class);
+    protected static final Logger log = LoggerFactory.getLogger(FieldMappingUtils.class);
     private FieldMappingUtils() { /* Do not create Instances of Util Classes*/ }
 
     /**

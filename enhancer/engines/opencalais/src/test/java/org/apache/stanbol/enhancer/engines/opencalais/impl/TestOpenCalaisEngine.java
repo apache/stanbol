@@ -26,8 +26,6 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.stanbol.enhancer.engines.opencalais.impl.CalaisEntityOccurrence;
-import org.apache.stanbol.enhancer.engines.opencalais.impl.OpenCalaisEngine;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;

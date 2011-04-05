@@ -173,7 +173,6 @@ public class RemoveRecipe {
                ok = false;
                return(ok);
            }else{
-
                 for(int i = 0; i<binseq.size(); i++){
                     String[] iris = binseq.get(i).split(" precedes ");
                     OWLNamedIndividual ontoindA = factory.getOWLNamedIndividual(IRI.create(iris[0].replace(" ","").trim()));
@@ -285,13 +284,13 @@ public class RemoveRecipe {
        return ok;
    }
 
-   /**
+    /**
      * Get the KReSRuleStore filled with rules and recipes
-    *
+     *
      * @return {A KReSRuleStore object with the stored rules and recipes.}
      */
-     public RuleStore getStore(){
-         return this.storeaux;
-     }
+    public RuleStore getStore() {
+        return this.storeaux;
+    }
 
 }

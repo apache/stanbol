@@ -95,7 +95,7 @@ public class ODPRegistryCacheManager {
 	 * @throws ODPRegistryCacheException
 	 * @throws URIUnresolvableException
 	 */
-	public synchronized static OWLOntology getOntology(URI uri)
+    public static synchronized OWLOntology getOntology(URI uri)
 			throws ODPRegistryCacheException, URIUnresolvableException {
 		if (getUnresolvedURIs().contains(uri))
 			throw new URIUnresolvableException();
@@ -113,7 +113,7 @@ public class ODPRegistryCacheManager {
 		}
 	}
 
-	public synchronized static OWLOntologyDocumentSource getOntologyInputSource(
+	public static synchronized OWLOntologyDocumentSource getOntologyInputSource(
 			URI uri) throws ODPRegistryCacheException, URIUnresolvableException {
 		if (getUnresolvedURIs().contains(uri))
 			throw new URIUnresolvableException();
@@ -164,7 +164,7 @@ public class ODPRegistryCacheManager {
 		return file;
 	}
 
-	private synchronized static OWLOntology retrieveLocalResource(URI uri)
+	private static synchronized OWLOntology retrieveLocalResource(URI uri)
 			throws OWLOntologyCreationException, ODPRegistryCacheException,
 			URIUnresolvableException {
 		File file = uris.get(uri);
@@ -203,7 +203,7 @@ public class ODPRegistryCacheManager {
 	 * @throws UnknownOWLOntologyException
 	 * @throws OWLOntologyStorageException
 	 */
-	private synchronized static OWLOntology retrieveRemoteResource(URI uri)
+    private static synchronized OWLOntology retrieveRemoteResource(URI uri)
 			throws OWLOntologyCreationException, UnknownOWLOntologyException,
 			OWLOntologyStorageException {
 
@@ -278,7 +278,7 @@ public class ODPRegistryCacheManager {
 		manager.saveOntology(ont, new RDFXMLOntologyFormat(), IRI.create(file));
 	}
 
-	public synchronized static boolean save() {
+	public static synchronized boolean save() {
 		File registry = new File(ODPRegistryCacheManager.getRegistryURI());
 		if (registry.exists())
 			registry.delete();
@@ -297,7 +297,7 @@ public class ODPRegistryCacheManager {
 		return true;
 	}
 
-	public synchronized static boolean load() {
+	public static synchronized boolean load() {
 		File registry = new File(ODPRegistryCacheManager.getRegistryURI());
 		if (!registry.exists())
 			return false;
@@ -328,7 +328,7 @@ public class ODPRegistryCacheManager {
 		return true;
 	}
 
-	public synchronized static boolean clean() {
+	public static synchronized boolean clean() {
 		// FileUriHelper fu = new FileUriHelper();
 		try {
 			// fu

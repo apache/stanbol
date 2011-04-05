@@ -77,8 +77,8 @@ public class JAXBProvider implements MessageBodyReader, MessageBodyWriter {
             XMLUtil.class.getClassLoader());
 
         List<StreamSource> streamSourceList = new Vector<StreamSource>();
-        for (int i = 0; i < schemaLocations.length; i++) {
-            InputStream is = cl.getResourceAsStream(schemaLocations[i]);
+        for (String schemaLocation : schemaLocations) {
+            InputStream is = cl.getResourceAsStream(schemaLocation);
             StreamSource streamSource = new StreamSource(is);
             streamSourceList.add(streamSource);
         }

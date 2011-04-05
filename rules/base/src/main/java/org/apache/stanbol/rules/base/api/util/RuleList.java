@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.apache.stanbol.rules.base.api.Rule;
-import org.apache.stanbol.rules.base.api.util.RuleIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

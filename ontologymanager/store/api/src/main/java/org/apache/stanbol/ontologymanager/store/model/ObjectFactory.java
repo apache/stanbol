@@ -25,8 +25,8 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _URI_QNAME = new QName("model.rest.persistence.iks.srdc.com.tr", "URI");
-    private final static QName _Description_QNAME = new QName("model.rest.persistence.iks.srdc.com.tr",
+    private static final QName _URI_QNAME = new QName("model.rest.persistence.iks.srdc.com.tr", "URI");
+    private static final QName _Description_QNAME = new QName("model.rest.persistence.iks.srdc.com.tr",
             "Description");
 
     /**

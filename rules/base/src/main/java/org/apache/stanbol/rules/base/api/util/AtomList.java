@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.apache.stanbol.rules.base.api.RuleAtom;
-import org.apache.stanbol.rules.base.api.util.AtomIterator;
 
 
 public class AtomList implements Collection<RuleAtom> {

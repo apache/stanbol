@@ -829,21 +829,21 @@ public class RdfIndexer {
 
         Destination<Triple> sink = new Destination<Triple>() {
             long count = 0 ;
-            final public void start()
+            public final void start()
             {
                 loaderTriples.loadStart() ;
                 loaderTriples.loadDataStart() ;
             }
-            final public void send(Triple triple)
+            public final void send(Triple triple)
             {
                 loaderTriples.load(triple.getSubject(), triple.getPredicate(),  triple.getObject()) ;
                 count++ ;
             }
 
-            final public void flush() { }
+            public final void flush() { }
             public void close() { }
 
-            final public void finish()
+            public final void finish()
             {
                 loaderTriples.loadDataFinish() ;
                 loaderTriples.loadIndexStart() ;

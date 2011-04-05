@@ -2,8 +2,6 @@ package org.apache.stanbol.jsonld;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.stanbol.jsonld.JsonLd;
-import org.apache.stanbol.jsonld.JsonLdResource;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

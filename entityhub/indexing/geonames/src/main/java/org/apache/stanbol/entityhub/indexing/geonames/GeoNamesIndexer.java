@@ -180,7 +180,7 @@ public class GeoNamesIndexer {
      */
     public static final String KEY_HIERARCHY = "org.apache.stanbol.entityhub.indexing.geonames.hierarchyFile";
 
-    private final static Map<String,Reference> indexDocRefs = new HashMap<String, Reference>();
+    private static final Map<String,Reference> indexDocRefs = new HashMap<String, Reference>();
 
     private static enum Properties{
         rdf_type(NamespaceEnum.rdf.getNamespace(),"type"),
@@ -963,7 +963,7 @@ public class GeoNamesIndexer {
         private final String lang;
         private final boolean preferred;
         private final boolean shortName;
-        private final static String TRUE = "1";
+        private static final String TRUE = "1";
         protected FeatureName(String line){
             Tokenizer t = new Tokenizer(line);
             labelID = Integer.parseInt(t.next()); //first Elem the labelID

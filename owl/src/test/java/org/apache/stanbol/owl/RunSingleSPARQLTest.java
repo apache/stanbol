@@ -10,7 +10,6 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.util.HashMap;
 
-import org.apache.stanbol.owl.RunSingleSPARQL;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

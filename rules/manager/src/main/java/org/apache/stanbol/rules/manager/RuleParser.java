@@ -29,8 +29,7 @@ import org.apache.stanbol.rules.base.SWRL;
 public class RuleParser {
 
 	public static String ruleNS = "http://www.prova.org/rules.rdf#";
-	
-	
+
 	private Model sourceModel;
 	private Model destinationModel;
 	
@@ -41,8 +40,7 @@ public class RuleParser {
 		this.destinationModel = destinationModel;
 		this.ruleOntology = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, ruleOntology);
 	}
-	
-	
+
 	public RuleParser(OntModel inputOntology, Map<String, String>prefixMap, Model ruleOntology) {
 		this.sourceModel = inputOntology;
 		this.ruleOntology = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, ruleOntology);
@@ -125,11 +123,8 @@ public class RuleParser {
 		}
 		
 		return imp;
-		
 	}
-	
-	
-	
+
 	public OntModel getRuleOntology() {
 		return ruleOntology;
 	}
@@ -175,8 +170,7 @@ public class RuleParser {
 			variableResource = ruleOntology.createResource(variable, SWRL.Variable);
 			System.out.println("LA CREO");
 		}
-		
-		
+
 		return variableResource;
 	}
 	
@@ -214,10 +208,8 @@ public class RuleParser {
 		}
 		
 		return sameASAtom;
-		
 	}
-	
-	
+
 	private Resource createDifferentAtom(String token, int openPar, int closePar){
 		
 		Resource differentIndividualAtom = ruleOntology.createResource(SWRL.DifferentIndividualsAtom);
@@ -252,7 +244,6 @@ public class RuleParser {
 		}
 		
 		return differentIndividualAtom;
-		
 	}
 	
 	private Resource createClassAtom(OntResource ontResource, String token, int openPar, int closePar){
@@ -264,9 +255,8 @@ public class RuleParser {
 		classAtom.addProperty(SWRL.classPredicate, ontResource);
 		
 		String[] arguments = argumentString.split(",");
+
 		if(arguments.length == 1){
-			
-			
 			String argument = arguments[0];
 			argument = argument.replaceAll(" ", "");
 			System.out.println("ARGUMENT : "+argument);
@@ -283,13 +273,9 @@ public class RuleParser {
 		}
 		
 		return classAtom;
-		
 	}
 	
 	private Resource createIndividualAtom(OntResource ontResource, String token, int openPar, int closePar){
-		
-		
-		
 		Resource individualPropertyAtom = ruleOntology.createResource(SWRL.IndividualPropertyAtom);
 		String argumentString = token.substring(openPar+1, closePar);
 		System.out.println("ARGUMENT STRING INDIVIDUAL PROPERTY ATOM: "+argumentString);
@@ -324,7 +310,6 @@ public class RuleParser {
 		}
 		
 		return individualPropertyAtom;
-		
 	}
 	
 	private Resource createDatavaluedPropertyAtom(OntResource ontResource, String token, int openPar, int closePar){
@@ -411,16 +396,16 @@ public class RuleParser {
 				}
 				int openPar = token.indexOf("(");
 				int closePar = token.indexOf(")");
-				
+
 				String atom = token.substring(0, openPar);
 				System.out.println("ATOM : "+atom);
-				
+
 				Resource atomResource = null;
-				
-				
-				
-				if(atom.equals("same")){						
-					atomResource = createSameAsAtom(token, openPar, closePar);						
+
+
+
+				if(atom.equals("same")){
+					atomResource = createSameAsAtom(token, openPar, closePar);
 				}
 				else if(atom.equals("different")){
 					atomResource = createDifferentAtom(token, openPar, closePar);
@@ -435,16 +420,16 @@ public class RuleParser {
 						System.out.println("atomNSPrefix : "+atomNSPrefix);
 						//ruleOntology.write(System.out);
 						String namespaceURI = ruleOntology.getNsPrefixURI(atomNSPrefix);
-						
+
 						System.out.println("SEMION RULE PARSER : ontology "+namespaceURI.replace("#", ""));
-						
+
 						OntModel ontModelExternal = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, null);
 						ontModelExternal.read(namespaceURI.replace("#", ""));
-						
+
 						ontResource = ontModelExternal.getOntResource(namespaceURI+atomName);
-						
+
 						System.out.println("NAME ATOOOOM: "+namespaceURI+atomName);
-						
+
 						if(ontResource != null){
 							System.out.println("QUIIIIIIIIIIIIIIII");
 							if(ontResource.isClass()){
@@ -472,23 +457,23 @@ public class RuleParser {
 									System.out.println(ontResource.getURI()+ " nil");
 								}
 							}
-							
+
 						}
 						else{
 							System.out.println("SONO UNA MINCHIA");
 						}
-						
-						
+
+
 					}
 				}
-				
+
 				if(atomResource != null){
-					
+
 					list = list.cons(atomResource);
 					System.out.println("ENTRO QUI "+list.size());
-					
+
 				}
-				
+
 			}
 		}
 		

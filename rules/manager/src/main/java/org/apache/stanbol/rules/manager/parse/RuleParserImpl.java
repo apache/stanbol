@@ -119,12 +119,12 @@ public class RuleParserImpl implements RuleParserConstants {
                                 }
         }
 
-  final public void start() throws ParseException {
+  public final void start() throws ParseException {
     expression();
     expressionCont();
   }
 
-  final public void expressionCont() throws ParseException {
+  public final void expressionCont() throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case AND:
       jj_consume_token(AND);
@@ -136,13 +136,13 @@ public class RuleParserImpl implements RuleParserConstants {
     }
   }
 
-  final public void expression() throws ParseException {
+  public final void expression() throws ParseException {
  Rule kReSRule;
     prefix();
     expressionCont();
   }
 
-  final public void prefix() throws ParseException {
+  public final void prefix() throws ParseException {
  String nsPrefix; Object obj;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case VAR:
@@ -218,7 +218,7 @@ public class RuleParserImpl implements RuleParserConstants {
     }
   }
 
-  final public String equality() throws ParseException {
+  public final String equality() throws ParseException {
  String nsURI;
     jj_consume_token(EQUAL);
     nsURI = getURI();
@@ -226,7 +226,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public AtomList[] rule() throws ParseException {
+  public final AtomList[] rule() throws ParseException {
  AtomList[] ruleAtoms;
     jj_consume_token(LQUAD);
     ruleAtoms = ruleDefinition();
@@ -235,7 +235,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public AtomList[] ruleDefinition() throws ParseException {
+  public final AtomList[] ruleDefinition() throws ParseException {
  AtomList body; AtomList head; Token t;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case LARROW:
@@ -296,7 +296,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public AtomList atomList() throws ParseException {
+  public final AtomList atomList() throws ParseException {
  AtomList atomList = new AtomList(); RuleAtom kReSAtom;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case SAME:
@@ -325,7 +325,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public AtomList atomListRest() throws ParseException {
+  public final AtomList atomListRest() throws ParseException {
  AtomList atomList = new AtomList(); RuleAtom kReSAtom;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case AND:
@@ -341,7 +341,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public RuleAtom atom() throws ParseException {
+  public final RuleAtom atom() throws ParseException {
  RuleAtom kReSRuleAtom;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case IS:
@@ -387,7 +387,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public RuleAtom unionAtom() throws ParseException {
+  public final RuleAtom unionAtom() throws ParseException {
  AtomList atomList1; AtomList atomList2;
     jj_consume_token(UNION);
     jj_consume_token(LPAR);
@@ -399,7 +399,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public StringFunctionAtom createLabelAtom() throws ParseException {
+  public final StringFunctionAtom createLabelAtom() throws ParseException {
  StringFunctionAtom stringFunctionAtom;
     jj_consume_token(CREATE_LABEL);
     jj_consume_token(LPAR);
@@ -409,7 +409,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public StringFunctionAtom propStringAtom() throws ParseException {
+  public final StringFunctionAtom propStringAtom() throws ParseException {
  StringFunctionAtom stringFunctionAtom1; StringFunctionAtom stringFunctionAtom2;
     jj_consume_token(PROP);
     jj_consume_token(LPAR);
@@ -421,7 +421,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public ComparisonAtom endsWithAtom() throws ParseException {
+  public final ComparisonAtom endsWithAtom() throws ParseException {
  RuleAtom kReSRuleAtom; StringFunctionAtom arg; StringFunctionAtom stringFunctionAtom;
     jj_consume_token(ENDS_WITH);
     jj_consume_token(LPAR);
@@ -433,7 +433,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public ComparisonAtom startsWithAtom() throws ParseException {
+  public final ComparisonAtom startsWithAtom() throws ParseException {
  RuleAtom kReSRuleAtom; StringFunctionAtom arg; StringFunctionAtom stringFunctionAtom;
     jj_consume_token(STARTS_WITH);
     jj_consume_token(LPAR);
@@ -445,7 +445,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public StringFunctionAtom stringFunctionAtom() throws ParseException {
+  public final StringFunctionAtom stringFunctionAtom() throws ParseException {
  Object obj; StringFunctionAtom stringFunctionAtom;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case CONCAT:
@@ -493,7 +493,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public StrAtom strAtom() throws ParseException {
+  public final StrAtom strAtom() throws ParseException {
  URIResource uri;
     jj_consume_token(STR);
     jj_consume_token(LPAR);
@@ -503,7 +503,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public NamespaceAtom namespaceAtom() throws ParseException {
+  public final NamespaceAtom namespaceAtom() throws ParseException {
  URIResource uri;
     jj_consume_token(NAMESPACE);
     jj_consume_token(LPAR);
@@ -513,7 +513,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public LocalNameAtom localnameAtom() throws ParseException {
+  public final LocalNameAtom localnameAtom() throws ParseException {
  URIResource uri;
     jj_consume_token(LOCALNAME);
     jj_consume_token(LPAR);
@@ -523,14 +523,14 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public StringAtom stringAtom() throws ParseException {
+  public final StringAtom stringAtom() throws ParseException {
  Object obj; StringFunctionAtom stringFunctionAtom;
     obj = uObject();
                           {if (true) return new StringAtom(obj.toString());}
     throw new Error("Missing return statement in function");
   }
 
-  final public ConcatAtom concatAtom() throws ParseException {
+  public final ConcatAtom concatAtom() throws ParseException {
  StringFunctionAtom arg1; StringFunctionAtom arg2;
     jj_consume_token(CONCAT);
     jj_consume_token(LPAR);
@@ -542,7 +542,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public UpperCaseAtom upperCaseAtom() throws ParseException {
+  public final UpperCaseAtom upperCaseAtom() throws ParseException {
  StringFunctionAtom arg;
     jj_consume_token(UPPERCASE);
     jj_consume_token(LPAR);
@@ -552,7 +552,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public LowerCaseAtom lowerCaseAtom() throws ParseException {
+  public final LowerCaseAtom lowerCaseAtom() throws ParseException {
  StringFunctionAtom arg;
     jj_consume_token(LOWERCASE);
     jj_consume_token(LPAR);
@@ -562,7 +562,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public SubstringAtom substringAtom() throws ParseException {
+  public final SubstringAtom substringAtom() throws ParseException {
  StringFunctionAtom arg; NumericFunctionAtom start; NumericFunctionAtom length;
     jj_consume_token(SUBSTRING);
     jj_consume_token(LPAR);
@@ -576,7 +576,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public NumericFunctionAtom numericFunctionAtom() throws ParseException {
+  public final NumericFunctionAtom numericFunctionAtom() throws ParseException {
  NumericFunctionAtom numericFunctionAtom;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case PLUS:
@@ -601,7 +601,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public LengthAtom lengthAtom() throws ParseException {
+  public final LengthAtom lengthAtom() throws ParseException {
  StringFunctionAtom stringFunctionAtom;
     jj_consume_token(LENGTH);
     jj_consume_token(LPAR);
@@ -611,7 +611,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public SumAtom sumAtom() throws ParseException {
+  public final SumAtom sumAtom() throws ParseException {
  NumericFunctionAtom numericFunctionAtom1; NumericFunctionAtom numericFunctionAtom2;
     jj_consume_token(PLUS);
     jj_consume_token(LPAR);
@@ -623,7 +623,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public SubtractionAtom subtractionAtom() throws ParseException {
+  public final SubtractionAtom subtractionAtom() throws ParseException {
  NumericFunctionAtom numericFunctionAtom1; NumericFunctionAtom numericFunctionAtom2;
     jj_consume_token(MINUS);
     jj_consume_token(LPAR);
@@ -635,7 +635,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public NumericFunctionAtom numberAtom() throws ParseException {
+  public final NumericFunctionAtom numberAtom() throws ParseException {
  Token t;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NUM:
@@ -653,7 +653,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public ClassAtom classAtom() throws ParseException {
+  public final ClassAtom classAtom() throws ParseException {
  URIResource uri1; URIResource uri2;
     jj_consume_token(IS);
     jj_consume_token(LPAR);
@@ -665,7 +665,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public NewNodeAtom newNodeAtom() throws ParseException {
+  public final NewNodeAtom newNodeAtom() throws ParseException {
  URIResource arg1; Object arg2;
     jj_consume_token(NEW_NODE);
     jj_consume_token(LPAR);
@@ -677,7 +677,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public LetAtom letAtom() throws ParseException {
+  public final LetAtom letAtom() throws ParseException {
  URIResource uri1; StringFunctionAtom fun;
     jj_consume_token(LET);
     jj_consume_token(LPAR);
@@ -689,7 +689,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public IndividualPropertyAtom individualPropertyAtom() throws ParseException {
+  public final IndividualPropertyAtom individualPropertyAtom() throws ParseException {
  URIResource uri1; URIResource uri2; URIResource uri3;
     jj_consume_token(HAS);
     jj_consume_token(LPAR);
@@ -703,7 +703,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public DatavaluedPropertyAtom datavaluedPropertyAtom() throws ParseException {
+  public final DatavaluedPropertyAtom datavaluedPropertyAtom() throws ParseException {
  URIResource uri1; URIResource uri2; Object obj;
     jj_consume_token(VALUES);
     jj_consume_token(LPAR);
@@ -717,7 +717,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public SameAtom sameAsAtom() throws ParseException {
+  public final SameAtom sameAsAtom() throws ParseException {
  StringFunctionAtom stringFunctionAtom1; StringFunctionAtom stringFunctionAtom2;
     jj_consume_token(SAME);
     jj_consume_token(LPAR);
@@ -729,7 +729,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public LessThanAtom lessThanAtom() throws ParseException {
+  public final LessThanAtom lessThanAtom() throws ParseException {
  Object obj1; Object obj2;
     jj_consume_token(LESSTHAN);
     jj_consume_token(LPAR);
@@ -741,7 +741,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public GreaterThanAtom greaterThanAtom() throws ParseException {
+  public final GreaterThanAtom greaterThanAtom() throws ParseException {
  Object obj1; Object obj2;
     jj_consume_token(GREATERTHAN);
     jj_consume_token(LPAR);
@@ -753,7 +753,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public DifferentAtom differentFromAtom() throws ParseException {
+  public final DifferentAtom differentFromAtom() throws ParseException {
  StringFunctionAtom stringFunctionAtom1; StringFunctionAtom stringFunctionAtom2;
     jj_consume_token(DIFFERENT);
     jj_consume_token(LPAR);
@@ -765,7 +765,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public URIResource reference() throws ParseException {
+  public final URIResource reference() throws ParseException {
   String uri1;
   Token colon;
   String uri3;
@@ -793,7 +793,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public URIResource varReference() throws ParseException {
+  public final URIResource varReference() throws ParseException {
   String uri1;
   Token colon;
   String uri3;
@@ -820,35 +820,35 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public String getURI() throws ParseException {
+  public final String getURI() throws ParseException {
         Token t;
     t = jj_consume_token(URI);
                       {if (true) return t.image;}
     throw new Error("Missing return statement in function");
   }
 
-  final public String getVariable() throws ParseException {
+  public final String getVariable() throws ParseException {
         Token t;
     t = jj_consume_token(VAR);
                       {if (true) return t.image;}
     throw new Error("Missing return statement in function");
   }
 
-  final public String getString() throws ParseException {
+  public final String getString() throws ParseException {
         Token t;
     t = jj_consume_token(STRING);
                          {if (true) return t.image;}
     throw new Error("Missing return statement in function");
   }
 
-  final public Integer getInt() throws ParseException {
+  public final Integer getInt() throws ParseException {
         Token t;
     t = jj_consume_token(NUM);
                     {if (true) return Integer.valueOf(t.image);}
     throw new Error("Missing return statement in function");
   }
 
-  final public Object uObject() throws ParseException {
+  public final Object uObject() throws ParseException {
   Object obj;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NOTEX:
@@ -875,7 +875,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public URIResource iObject() throws ParseException {
+  public final URIResource iObject() throws ParseException {
   URIResource uri;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NOTEX:
@@ -897,7 +897,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public Object dObject() throws ParseException {
+  public final Object dObject() throws ParseException {
   Object variable;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NUM:
@@ -918,7 +918,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public Object literal() throws ParseException {
+  public final Object literal() throws ParseException {
   Object literal; URIResource typedLiteral;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case STRING:
@@ -943,7 +943,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public URIResource typedLiteral() throws ParseException {
+  public final URIResource typedLiteral() throws ParseException {
   URIResource type = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case APOX:
@@ -959,7 +959,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public URIResource variable() throws ParseException {
+  public final URIResource variable() throws ParseException {
   Token t; String var;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NOTEX:
@@ -997,7 +997,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public ComparisonAtom notAtom() throws ParseException {
+  public final ComparisonAtom notAtom() throws ParseException {
   ComparisonAtom comparisonAtom;
     jj_consume_token(NOT);
     jj_consume_token(LPAR);
@@ -1007,7 +1007,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public ComparisonAtom isBlankAtom() throws ParseException {
+  public final ComparisonAtom isBlankAtom() throws ParseException {
   URIResource uriRes;
     jj_consume_token(IS_BLANK);
     jj_consume_token(LPAR);
@@ -1017,7 +1017,7 @@ public class RuleParserImpl implements RuleParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public ComparisonAtom comparisonAtom() throws ParseException {
+  public final ComparisonAtom comparisonAtom() throws ParseException {
   ComparisonAtom comparisonAtom;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case SAME:
@@ -1062,9 +1062,9 @@ public class RuleParserImpl implements RuleParserConstants {
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[19];
-  static private int[] jj_la1_0;
-  static private int[] jj_la1_1;
+  private final int[] jj_la1 = new int[19];
+  private static int[] jj_la1_0;
+  private static int[] jj_la1_1;
   static {
       jj_la1_init_0();
       jj_la1_init_1();
@@ -1158,7 +1158,7 @@ public class RuleParserImpl implements RuleParserConstants {
 
 
 /** Get the next Token. */
-  final public Token getNextToken() {
+public final Token getNextToken() {
     if (token.next != null) token = token.next;
     else token = token.next = token_source.getNextToken();
     jj_ntk = -1;
@@ -1167,7 +1167,7 @@ public class RuleParserImpl implements RuleParserConstants {
   }
 
 /** Get the specific Token. */
-  final public Token getToken(int index) {
+public final Token getToken(int index) {
     Token t = token;
     for (int i = 0; i < index; i++) {
       if (t.next != null) t = t.next;
@@ -1222,11 +1222,11 @@ public class RuleParserImpl implements RuleParserConstants {
   }
 
   /** Enable tracing. */
-  final public void enable_tracing() {
+  public final void enable_tracing() {
   }
 
   /** Disable tracing. */
-  final public void disable_tracing() {
+  public final void disable_tracing() {
   }
 
 }

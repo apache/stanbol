@@ -90,12 +90,10 @@ public class RegistryLoaderImpl implements RegistryLoader {
 					result.addAll(gatherOntologies(item, manager,
 							recurseRegistries));
 				} catch (OWLOntologyCreationException e) {
-					log
-							.warn(
-									"KReS :: [NONFATAL] Could not gather ontologies for registry "
-											+ registryItem.getName()
-											+ ". Skipping.", e);
-					continue;
+                    log.warn("KReS :: [NONFATAL] Could not gather ontologies for registry "
+                            + registryItem.getName()
+                            + ". Skipping.", e);
+                    continue;
 				}
 		else if (registryItem.isOntology())
 			try {
@@ -113,10 +111,9 @@ public class RegistryLoaderImpl implements RegistryLoader {
 		else if (registryItem.isLibrary())
 			for (RegistryItem item : ((RegistryLibrary) registryItem)
 					.getChildren()) {
-				result
-						.addAll(gatherOntologies(item, manager,
-								recurseRegistries));
-			}
+                result.addAll(gatherOntologies(item, manager,
+                        recurseRegistries));
+            }
 		return result;
 	}
 
@@ -465,11 +462,10 @@ public class RegistryLoaderImpl implements RegistryLoader {
 				}
 			}
 		} catch (Throwable th) {
-			log
-					.error(
-							"KreS :: Exception occurred while trying to get registry locations.",
-							th);
-		}
+            log.error(
+                    "KreS :: Exception occurred while trying to get registry locations.",
+                    th);
+        }
 	}
 
 	/**

@@ -30,7 +30,7 @@ public class JSONJenaWriter implements RDFWriter{
 	
 	private static final Logger LOG = LoggerFactory.getLogger(JSONJenaWriter.class);
 
-	static protected final String propBase = "http://jena.hpl.hp.com/json/properties/" ;
+	protected static final String propBase = "http://jena.hpl.hp.com/json/properties/" ;
 
 	private String lineSeparator = JenaRuntime.getLineSeparator() ;
 	private RDFErrorHandler errorHandler = null;

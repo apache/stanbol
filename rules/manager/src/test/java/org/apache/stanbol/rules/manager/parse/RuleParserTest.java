@@ -3,7 +3,6 @@ package org.apache.stanbol.rules.manager.parse;
 import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.apache.stanbol.rules.manager.KB;
-import org.apache.stanbol.rules.manager.parse.RuleParserImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

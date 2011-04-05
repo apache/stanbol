@@ -45,7 +45,7 @@ public final class OsgiUtils {
      * @return the value
      * @throws ConfigurationException if the property is not present
      */
-    public final static Object checkProperty(Dictionary<?, ?> properties, String propertyName) throws ConfigurationException{
+    public static final Object checkProperty(Dictionary<?, ?> properties, String propertyName) throws ConfigurationException{
         return checkProperty(properties, propertyName, null);
     }
     /**
@@ -57,7 +57,7 @@ public final class OsgiUtils {
      * @return the value of the property (guaranteed NOT <code>null</code>)
      * @throws ConfigurationException In case the property is not present and no default value was parsed
      */
-    public final static Object checkProperty(Dictionary<?, ?> properties, String propertyName,Object defaultValue) throws ConfigurationException{
+    public static final Object checkProperty(Dictionary<?, ?> properties, String propertyName,Object defaultValue) throws ConfigurationException{
         Object value = properties.get(propertyName);
          if(value == null){
              if(defaultValue != null){
@@ -77,7 +77,7 @@ public final class OsgiUtils {
      * @throws ConfigurationException if the property is not present or the
      * configured value is no valid URI
      */
-    public final static URI checkUriProperty(Dictionary<?, ?> properties,String propertyName) throws ConfigurationException {
+    public static final URI checkUriProperty(Dictionary<?, ?> properties,String propertyName) throws ConfigurationException {
         Object uri = checkProperty(properties,propertyName);
         try {
             return new URI(uri.toString());
@@ -92,7 +92,7 @@ public final class OsgiUtils {
      * @throws ConfigurationException if the property is not present or the
      * configured value is no valid URL
      */
-    public final static URL checkUrlProperty(Dictionary<?, ?> properties,String propertyName) throws ConfigurationException {
+    public static final URL checkUrlProperty(Dictionary<?, ?> properties,String propertyName) throws ConfigurationException {
         Object uri = checkProperty(properties,propertyName);
         try {
             return new URL(uri.toString());
@@ -110,7 +110,7 @@ public final class OsgiUtils {
      * @throws ConfigurationException if the property is missing or the value is
      * not a member of the parsed enumeration
      */
-    public final static <T extends Enum<T>> T checkEnumProperty(Class<T> enumeration,Dictionary<?, ?> properties,String propertyName) throws ConfigurationException{
+    public static final <T extends Enum<T>> T checkEnumProperty(Class<T> enumeration,Dictionary<?, ?> properties,String propertyName) throws ConfigurationException{
         Object value =checkProperty(properties, propertyName);
         try {
             return Enum.valueOf(enumeration,value.toString());

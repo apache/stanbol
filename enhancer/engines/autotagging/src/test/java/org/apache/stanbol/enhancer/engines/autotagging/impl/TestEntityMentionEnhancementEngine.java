@@ -29,8 +29,6 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.commons.io.IOUtils;
-import org.apache.stanbol.enhancer.engines.autotagging.impl.ConfiguredAutotaggerProvider;
-import org.apache.stanbol.enhancer.engines.autotagging.impl.EntityMentionEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.TextAnnotation;
 import org.apache.stanbol.enhancer.servicesapi.helper.RdfEntityFactory;

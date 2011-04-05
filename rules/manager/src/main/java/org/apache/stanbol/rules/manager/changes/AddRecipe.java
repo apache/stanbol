@@ -130,640 +130,656 @@ public class AddRecipe {
    }
 
    /**
-    * Method to add a Recipe. The inputs are: a recipe name string that doesn't exist in the ontology, a string vector with the IRI of each rule and eventualy a description of the recipe.
+    * Adds a Recipe.
+    * The inputs are: a recipe name string that doesn't exist in the ontology,
+    * a string vector with the IRI of each rule and eventualy a description of the recipe.
     *
     * @param recipeName {A string variable contains a name}
     * @param rules {A string vector variable contains the IRI of each rule}
     * @param recipeDescription {A briefly description of the rule}
     * @return {A boolean that is true if the operation is ok}
     */
-   public boolean addRecipe(String recipeName, Vector<IRI> rules, String recipeDescription){
+   public boolean addRecipe(String recipeName, Vector<IRI> rules, String recipeDescription) {
        boolean ok = false;
 
-       OWLClass ontocls = factory.getOWLClass(IRI.create(owlIDrmi+"Recipe"));
-       OWLClass kresrule = factory.getOWLClass(IRI.create(owlIDrmi+"KReSRule"));
-       OWLNamedIndividual ontoind = factory.getOWLNamedIndividual(IRI.create(owlID+recipeName));
-       OWLDataProperty description = factory.getOWLDataProperty(IRI.create(owlIDrmi+"hasDescription"));
-       OWLDataProperty sequence = factory.getOWLDataProperty(IRI.create(owlIDrmi+"hasSequence"));
-       OWLObjectProperty hasrule = factory.getOWLObjectProperty(IRI.create(owlIDrmi+"hasRule"));
-       OWLObjectProperty start = factory.getOWLObjectProperty(IRI.create(owlIDrmi+"startWith"));
-       OWLObjectProperty end = factory.getOWLObjectProperty(IRI.create(owlIDrmi+"endWith"));
+       OWLClass ontocls = factory.getOWLClass(IRI.create(owlIDrmi + "Recipe"));
+       OWLClass kresrule = factory.getOWLClass(IRI.create(owlIDrmi + "KReSRule"));
+       OWLNamedIndividual ontoind = factory.getOWLNamedIndividual(IRI.create(owlID + recipeName));
+       OWLDataProperty description = factory.getOWLDataProperty(IRI.create(owlIDrmi + "hasDescription"));
+       OWLDataProperty sequence = factory.getOWLDataProperty(IRI.create(owlIDrmi + "hasSequence"));
+       OWLObjectProperty hasrule = factory.getOWLObjectProperty(IRI.create(owlIDrmi + "hasRule"));
+       OWLObjectProperty start = factory.getOWLObjectProperty(IRI.create(owlIDrmi + "startWith"));
+       OWLObjectProperty end = factory.getOWLObjectProperty(IRI.create(owlIDrmi + "endWith"));
        OWLObjectProperty precedes = factory.getOWLObjectProperty(IRI.create("http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#directlyPrecedes"));
        OWLObjectPropertyAssertionAxiom objectPropAssertion;
 
-   if(((recipeName!=null)||!recipeName.toString().isEmpty())&&((rules!=null)||!rules.isEmpty())){
-       if(!owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind))){
+       if (((recipeName != null) || !recipeName.toString().isEmpty()) && ((rules != null) || !rules.isEmpty())) {
+           if (!owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind))) {
 
-            //Add the rule istance
-            OWLClassAssertionAxiom classAssertion = factory.getOWLClassAssertionAxiom(ontocls,ontoind);
-            owlmanager.addAxiom(owlmodel, classAssertion);
+               //Add the rule istance
+               OWLClassAssertionAxiom classAssertion = factory.getOWLClassAssertionAxiom(ontocls, ontoind);
+               owlmanager.addAxiom(owlmodel, classAssertion);
 
-            //start and end
-            OWLNamedIndividual ind = factory.getOWLNamedIndividual(rules.firstElement());
-            if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))){
-                objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(start, ontoind,ind);
-                owlmanager.addAxiom(owlmodel, objectPropAssertion);
-                ok =true;
-            }else{
-                    System.err.println("The rule with IRI "+ind.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
-            }
+               //start and end
+               OWLNamedIndividual ind = factory.getOWLNamedIndividual(rules.firstElement());
+               if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))) {
+                   objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(start, ontoind, ind);
+                   owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                   ok = true;
+               } else {
+                   System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                   ok = false;
+                   return (ok);
+               }
 
-            ind = factory.getOWLNamedIndividual(rules.lastElement());
-            if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule,ind))){
-                objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(end, ontoind,ind);
-                owlmanager.addAxiom(owlmodel, objectPropAssertion);
-                ok = true;
-            }else{
-                    System.err.println("The rule with IRI "+ind.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
-                    
-            }
+               ind = factory.getOWLNamedIndividual(rules.lastElement());
+               if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))) {
+                   objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(end, ontoind, ind);
+                   owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                   ok = true;
+               } else {
+                   System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                   ok = false;
+                   return (ok);
 
-            //Add the sequence string
-            OWLDataPropertyAssertionAxiom dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(sequence, ontoind,rules.toString().replace("[","").replace("]",""));
-            owlmanager.addAxiom(owlmodel, dataPropAssertion);
+               }
 
-            //Add description
-            if((recipeDescription!=null)||!recipeDescription.isEmpty()){
-                //Add the rule description
-                dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(description, ontoind, recipeDescription);
-                owlmanager.addAxiom(owlmodel, dataPropAssertion);
-                ok=true;
-            }
+               //Add the sequence string
+               OWLDataPropertyAssertionAxiom dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(sequence, ontoind, rules.toString().replace("[", "").replace("]", ""));
+               owlmanager.addAxiom(owlmodel, dataPropAssertion);
 
-            //Add single rule
-            for(int r = 0; r<rules.size()-1; r++){
-                ind = factory.getOWLNamedIndividual(rules.get(r));
-                if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))){
-                //Add the rule to the recipes
-                objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(hasrule, ontoind,ind);
-                owlmanager.addAxiom(owlmodel, objectPropAssertion);
-                ok = true;
-                //Add precedes
-                OWLNamedIndividual indf = factory.getOWLNamedIndividual(rules.get(r+1));
-                if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, indf))){
-                    objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(precedes,ind,indf);
-                    owlmanager.addAxiom(owlmodel, objectPropAssertion);
+               //Add description
+               if ((recipeDescription != null) || !recipeDescription.isEmpty()) {
+                   //Add the rule description
+                   dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(description, ontoind, recipeDescription);
+                   owlmanager.addAxiom(owlmodel, dataPropAssertion);
+                   ok = true;
+               }
+
+               //Add single rule
+               for (int r = 0; r < rules.size() - 1; r++) {
+                   ind = factory.getOWLNamedIndividual(rules.get(r));
+                   if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))) {
+                       //Add the rule to the recipes
+                       objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(hasrule, ontoind, ind);
+                       owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                       ok = true;
+                       //Add precedes
+                       OWLNamedIndividual indf = factory.getOWLNamedIndividual(rules.get(r + 1));
+                       if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, indf))) {
+                           objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(precedes, ind, indf);
+                           owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                           ok = true;
+                       } else {
+                           System.err.println("The rule with IRI " + indf.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                           ok = false;
+                           return (ok);
+                       }
+                   } else {
+                       System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                       ok = false;
+                       return (ok);
+                   }
+
+               }
+               //Add last element
+               ind = factory.getOWLNamedIndividual(rules.lastElement());
+               if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))) {
+                   //Add the rule to the recipes
+                   objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(hasrule, ontoind, ind);
+                   owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                   ok = true;
+               } else {
+                   System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                   ok = false;
+                   return (ok);
+               }
+
+           } else {
+               System.err.println("The recipe with name " + recipeName + " already exists. Pleas check the name.");
+               ok = false;
+               return (ok);
+           }
+
+       } else {
+           System.err.println("The recipe with name and the set of rules cannot be empity or null.");
+           ok = false;
+           return (ok);
+       }
+
+       if (ok) {
+           storeaux.setStore(owlmodel);
+       }
+
+       return (ok);
+   }
+
+
+    /**
+     * Adds a simple Recipe without rules.
+     * The inputs are: a recipe name string that doesn't exist in the ontology
+     * and eventualy a description of the recipe.
+     *
+     * @param recipeName {A string variable contains a name}
+     * @param recipeDescription {A briefly description of the rule}
+     *
+     * @return {A boolean that is true if the operation is ok}
+     */
+    public boolean addSimpleRecipe(String recipeName, String recipeDescription) {
+        boolean ok = false;
+
+        OWLClass ontocls = factory.getOWLClass(IRI.create(owlIDrmi + "Recipe"));
+        OWLNamedIndividual ontoind = factory.getOWLNamedIndividual(IRI.create(owlID + recipeName));
+        OWLDataProperty description = factory.getOWLDataProperty(IRI.create(owlIDrmi + "hasDescription"));
+        OWLDataPropertyAssertionAxiom dataPropAssertion;
+
+
+        if ((recipeName != null || !recipeName.isEmpty())) {
+            if (!owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind))) {
+
+                //Add the rule istance
+                OWLClassAssertionAxiom classAssertion = factory.getOWLClassAssertionAxiom(ontocls, ontoind);
+                owlmanager.addAxiom(owlmodel, classAssertion);
+
+                //Add description
+                if ((recipeDescription != null) || !recipeDescription.isEmpty()) {
+                    //Add the rule description
+                    dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(description, ontoind, recipeDescription);
+                    owlmanager.addAxiom(owlmodel, dataPropAssertion);
+                }
+
+                if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind)))
                     ok = true;
-                }else{
-                    System.err.println("The rule with IRI "+indf.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
-                }
-                }else{
-                    System.err.println("The rule with IRI "+ind.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
-                }
 
-            }
-                //Add last element
-                ind = factory.getOWLNamedIndividual(rules.lastElement());
-                if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))){
-                    //Add the rule to the recipes
-                    objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(hasrule, ontoind,ind);
-                    owlmanager.addAxiom(owlmodel, objectPropAssertion);
-                    ok=true;
-                }else{
-                    System.err.println("The rule with IRI "+ind.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
-                }
-
-       }else{
-           System.err.println("The recipe with name "+recipeName+" already exists. Pleas check the name.");
-           ok = false;
-           return(ok);
-       }
-
-    }else{
-       System.err.println("The recipe with name and the set of rules cannot be empity or null.");
-       ok=false;
-       return(ok);
-    }
-
-       if(ok)
-         storeaux.setStore(owlmodel);
-
-       return(ok);
-   }
-
-
-  /**
-    * Method to add a simple Recipe without rules. The inputs are: a recipe name string that doesn't exist in the ontology and eventualy a description of the recipe.
-    *
-    * @param recipeName {A string variable contains a name}
-    * @param recipeDescription {A briefly description of the rule}
-    * @return {A boolean that is true if the operation is ok}
-    */
-   public boolean addSimpleRecipe(String recipeName, String recipeDescription){
-       boolean ok = false;
-       
-       OWLClass ontocls = factory.getOWLClass(IRI.create(owlIDrmi+"Recipe"));
-       OWLNamedIndividual ontoind = factory.getOWLNamedIndividual(IRI.create(owlID+recipeName));
-       OWLDataProperty description = factory.getOWLDataProperty(IRI.create(owlIDrmi+"hasDescription"));
-       OWLDataPropertyAssertionAxiom dataPropAssertion;
-
-       
-   if((recipeName!=null||!recipeName.isEmpty())){
-       if(!owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind))){
-
-            //Add the rule istance
-            OWLClassAssertionAxiom classAssertion = factory.getOWLClassAssertionAxiom(ontocls,ontoind);
-            owlmanager.addAxiom(owlmodel, classAssertion);
-
-            //Add description
-            if((recipeDescription!=null)||!recipeDescription.isEmpty()){
-                //Add the rule description
-                dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(description, ontoind, recipeDescription);
-                owlmanager.addAxiom(owlmodel, dataPropAssertion);
+            } else {
+                System.err.println("The recipe with name " + recipeName + " already exists. Pleas check the name.");
+                ok = false;
+                return (ok);
             }
 
-            if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind)))
-                ok = true;
+        } else {
+            System.err.println("The recipe with name and the set of rules cannot be empity or null.");
+            ok = false;
+            return (ok);
+        }
 
-       }else{
-           System.err.println("The recipe with name "+recipeName+" already exists. Pleas check the name.");
-           ok = false;
-           return(ok);
-       }
+        if (ok) {
+            storeaux.setStore(owlmodel);
+        }
 
-    }else{
-       System.err.println("The recipe with name and the set of rules cannot be empity or null.");
-       ok=false;
-       return(ok);
+        return ok;
     }
 
-       if(ok){
-    	   storeaux.setStore(owlmodel);
-       }
-         
+    /**
+     * Add a simple Recipe without rules.
+     * The inputs are: a recipe name string that doesn't exist in the ontology and eventualy a description of the recipe.
+     *
+     * @param recipeIRI {An IRI contains the full recipe name}
+     * @param recipeDescription {A briefly description of the rule}
+     *
+     * @return {A boolean that is true if the operation is ok}
+     */
+    public boolean addSimpleRecipe(IRI recipeIRI, String recipeDescription) {
+        boolean ok = false;
 
-       return(ok);
-   }
+        OWLClass ontocls = factory.getOWLClass(IRI.create(owlIDrmi + "Recipe"));
+        OWLNamedIndividual ontoind = factory.getOWLNamedIndividual(recipeIRI);
+        OWLDataProperty description = factory.getOWLDataProperty(IRI.create(owlIDrmi + "hasDescription"));
+        OWLDataPropertyAssertionAxiom dataPropAssertion;
+
+        if ((recipeIRI != null)) {
+            if (!owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind))) {
+
+                //Add the rule istance
+                OWLClassAssertionAxiom classAssertion = factory.getOWLClassAssertionAxiom(ontocls, ontoind);
+                owlmanager.addAxiom(owlmodel, classAssertion);
+
+                //Add description
+                if ((recipeDescription != null) || !recipeDescription.isEmpty()) {
+                    //Add the rule description
+                    dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(description, ontoind, recipeDescription);
+                    owlmanager.addAxiom(owlmodel, dataPropAssertion);
+                    ok = true;
+                }
+
+            } else {
+                System.err.println("The recipe with name " + recipeIRI + " already exists. Pleas check the name.");
+                ok = false;
+                return (ok);
+            }
+
+        } else {
+            System.err.println("The recipe with name and the set of rules cannot be empity or null.");
+            ok = false;
+            return (ok);
+        }
+
+        if (ok) {
+            storeaux.setStore(owlmodel);
+        }
+
+        return (ok);
+    }
 
    /**
-    * Method to add a simple Recipe without rules. The inputs are: a recipe name string that doesn't exist in the ontology and eventualy a description of the recipe.
-    *
-    * @param recipeIRI {An IRI contains the full recipe name}
-    * @param recipeDescription {A briefly description of the rule}
-    * @return {A boolean that is true if the operation is ok}
-    */
-   public boolean addSimpleRecipe(IRI recipeIRI, String recipeDescription){
-       boolean ok = false;
-
-       OWLClass ontocls = factory.getOWLClass(IRI.create(owlIDrmi+"Recipe"));
-       OWLNamedIndividual ontoind = factory.getOWLNamedIndividual(recipeIRI);
-       OWLDataProperty description = factory.getOWLDataProperty(IRI.create(owlIDrmi+"hasDescription"));
-       OWLDataPropertyAssertionAxiom dataPropAssertion;
-
-   if((recipeIRI!=null)){
-       if(!owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind))){
-
-            //Add the rule istance
-            OWLClassAssertionAxiom classAssertion = factory.getOWLClassAssertionAxiom(ontocls,ontoind);
-            owlmanager.addAxiom(owlmodel, classAssertion);
-
-            //Add description
-            if((recipeDescription!=null)||!recipeDescription.isEmpty()){
-                //Add the rule description
-                dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(description, ontoind, recipeDescription);
-                owlmanager.addAxiom(owlmodel, dataPropAssertion);
-                ok=true;
-            }
-
-       }else{
-           System.err.println("The recipe with name "+recipeIRI+" already exists. Pleas check the name.");
-           ok = false;
-           return(ok);
-       }
-
-    }else{
-       System.err.println("The recipe with name and the set of rules cannot be empity or null.");
-       ok=false;
-       return(ok);
-    }
-
-       if(ok)
-         storeaux.setStore(owlmodel);
-
-       return(ok);
-   }
-
-   /**
-    * Method to add a Recipe. The inputs are: a recipe name string that doesn't exist in the ontology, a string vector with the IRI of each rule and eventualy a description of the recipe.
+    * Adds a Recipe.
+    * The inputs are: a recipe name string that doesn't exist in the ontology, a string vector with the IRI of each rule and eventualy a description of the recipe.
     *
     * @param recipeName {An IRI variable contains the complete recipe name}
     * @param rules {A string vector variable contains the IRI of each rule}
     * @param recipeDescription {A briefly description of the rule}
     * @return {A boolean that is true if the operation is ok}
     */
-   public boolean addRecipe(IRI recipeName, Vector<IRI> rules, String recipeDescription){
+   public boolean addRecipe(IRI recipeName, Vector<IRI> rules, String recipeDescription) {
        boolean ok = false;
 
-       OWLClass ontocls = factory.getOWLClass(IRI.create(owlIDrmi+"Recipe"));
-       OWLClass kresrule = factory.getOWLClass(IRI.create(owlIDrmi+"KReSRule"));
+       OWLClass ontocls = factory.getOWLClass(IRI.create(owlIDrmi + "Recipe"));
+       OWLClass kresrule = factory.getOWLClass(IRI.create(owlIDrmi + "KReSRule"));
        OWLNamedIndividual ontoind = factory.getOWLNamedIndividual(recipeName);
-       OWLDataProperty description = factory.getOWLDataProperty(IRI.create(owlIDrmi+"hasDescription"));
-       OWLDataProperty sequence = factory.getOWLDataProperty(IRI.create(owlIDrmi+"hasSequence"));
-       OWLObjectProperty hasrule = factory.getOWLObjectProperty(IRI.create(owlIDrmi+"hasRule"));
-       OWLObjectProperty start = factory.getOWLObjectProperty(IRI.create(owlIDrmi+"startWith"));
-       OWLObjectProperty end = factory.getOWLObjectProperty(IRI.create(owlIDrmi+"endWith"));
+       OWLDataProperty description = factory.getOWLDataProperty(IRI.create(owlIDrmi + "hasDescription"));
+       OWLDataProperty sequence = factory.getOWLDataProperty(IRI.create(owlIDrmi + "hasSequence"));
+       OWLObjectProperty hasrule = factory.getOWLObjectProperty(IRI.create(owlIDrmi + "hasRule"));
+       OWLObjectProperty start = factory.getOWLObjectProperty(IRI.create(owlIDrmi + "startWith"));
+       OWLObjectProperty end = factory.getOWLObjectProperty(IRI.create(owlIDrmi + "endWith"));
        OWLObjectProperty precedes = factory.getOWLObjectProperty(IRI.create("http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#directlyPrecedes"));
-        OWLObjectPropertyAssertionAxiom objectPropAssertion;
+       OWLObjectPropertyAssertionAxiom objectPropAssertion;
 
-    if(((recipeName!=null)||!recipeName.toString().isEmpty())&&((rules!=null)||!rules.isEmpty())){
-       if(!owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind))){
+       if (((recipeName != null) || !recipeName.toString().isEmpty()) && ((rules != null) || !rules.isEmpty())) {
+           if (!owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind))) {
 
-            //Add the rule istance
-            OWLClassAssertionAxiom classAssertion = factory.getOWLClassAssertionAxiom(ontocls,ontoind);
-            owlmanager.addAxiom(owlmodel, classAssertion);
+               //Add the rule istance
+               OWLClassAssertionAxiom classAssertion = factory.getOWLClassAssertionAxiom(ontocls, ontoind);
+               owlmanager.addAxiom(owlmodel, classAssertion);
 
-            //start and end
-            OWLNamedIndividual ind = factory.getOWLNamedIndividual(rules.firstElement());
-            if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))){
-                objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(start, ontoind,ind);
-                owlmanager.addAxiom(owlmodel, objectPropAssertion);
-                ok = true;
-            }else{
-                    System.err.println("The rule with IRI "+ind.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
-            }
+               //start and end
+               OWLNamedIndividual ind = factory.getOWLNamedIndividual(rules.firstElement());
+               if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))) {
+                   objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(start, ontoind, ind);
+                   owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                   ok = true;
+               } else {
+                   System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                   ok = false;
+                   return (ok);
+               }
 
-            ind = factory.getOWLNamedIndividual(rules.lastElement());
-            if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))){
-                objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(end, ontoind,ind);
-                owlmanager.addAxiom(owlmodel, objectPropAssertion);
-                ok = true;
-            }else{
-                    System.err.println("The rule with IRI "+ind.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
-            }
+               ind = factory.getOWLNamedIndividual(rules.lastElement());
+               if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))) {
+                   objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(end, ontoind, ind);
+                   owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                   ok = true;
+               } else {
+                   System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                   ok = false;
+                   return (ok);
+               }
 
-            //Add the sequence string
-            OWLDataPropertyAssertionAxiom dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(sequence, ontoind,rules.toString().replace("[","").replace("]",""));
-            owlmanager.addAxiom(owlmodel, dataPropAssertion);
+               //Add the sequence string
+               OWLDataPropertyAssertionAxiom dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(sequence, ontoind, rules.toString().replace("[", "").replace("]", ""));
+               owlmanager.addAxiom(owlmodel, dataPropAssertion);
 
-            //Add description
-            if((recipeDescription!=null)||!recipeDescription.isEmpty()){
-                //Add the rule description
-                dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(description, ontoind, recipeDescription);
-                owlmanager.addAxiom(owlmodel, dataPropAssertion);
-                ok = true;
-            }
+               //Add description
+               if ((recipeDescription != null) || !recipeDescription.isEmpty()) {
+                   //Add the rule description
+                   dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(description, ontoind, recipeDescription);
+                   owlmanager.addAxiom(owlmodel, dataPropAssertion);
+                   ok = true;
+               }
 
-            //Add single rule
-            
-            /* 
-             * BUGFIX - previously the check was done on rules.size()-1.
-             * The right code is rules.size(). Moreover is need also a control "if(r+1>(rules.size()-1)) break;" because the last rule has not successive rules.
-             * 
-             */
-            for(int r=0; r<rules.size(); r++){
-                ind = factory.getOWLNamedIndividual(rules.get(r));
-                if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))){
-                //Add the rule to the recipes
-                objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(hasrule, ontoind,ind);
-                owlmanager.addAxiom(owlmodel, objectPropAssertion);
-                ok = true;
-                //Add precedes
-                if(r+1>(rules.size()-1)) break;
-                OWLNamedIndividual indf = factory.getOWLNamedIndividual(rules.get(r+1));
-                if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, indf))){
-                    objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(precedes,ind,indf);
-                    owlmanager.addAxiom(owlmodel, objectPropAssertion);
-                    ok = true;
-                }else{
-                    System.err.println("The rule with IRI "+indf.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
-                }
-                }else{
-                    System.err.println("The rule with IRI "+ind.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
-                }
-          
-            }
-                //Add last element
-                ind = factory.getOWLNamedIndividual(rules.lastElement());
-                if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))){
-                    //Add the rule to the recipes
-                    objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(hasrule, ontoind,ind);
-                    owlmanager.addAxiom(owlmodel, objectPropAssertion);
-                    ok=true;
-                }else{
-                    System.err.println("The rule with IRI "+ind.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
-                }
-               
-       }else{
-           System.err.println("The recipe with name "+recipeName+" already exists. Pleas check the name.");
+               //Add single rule
+
+               /*
+               * BUGFIX - previously the check was done on rules.size()-1.
+               * The right code is rules.size(). Moreover is need also a control "if(r+1>(rules.size()-1)) break;" because the last rule has not successive rules.
+               *
+               */
+               for (int r = 0; r < rules.size(); r++) {
+                   ind = factory.getOWLNamedIndividual(rules.get(r));
+                   if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))) {
+                       //Add the rule to the recipes
+                       objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(hasrule, ontoind, ind);
+                       owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                       ok = true;
+                       //Add precedes
+                       if (r + 1 > (rules.size() - 1)) {
+                           break;
+                       }
+                       OWLNamedIndividual indf = factory.getOWLNamedIndividual(rules.get(r + 1));
+                       if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, indf))) {
+                           objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(precedes, ind, indf);
+                           owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                           ok = true;
+                       } else {
+                           System.err.println("The rule with IRI " + indf.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                           ok = false;
+                           return (ok);
+                       }
+                   } else {
+                       System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                       ok = false;
+                       return (ok);
+                   }
+
+               }
+               //Add last element
+               ind = factory.getOWLNamedIndividual(rules.lastElement());
+               if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))) {
+                   //Add the rule to the recipes
+                   objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(hasrule, ontoind, ind);
+                   owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                   ok = true;
+               } else {
+                   System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                   ok = false;
+                   return (ok);
+               }
+
+           } else {
+               System.err.println("The recipe with name " + recipeName + " already exists. Pleas check the name.");
+               ok = false;
+               return (ok);
+           }
+
+       } else {
+           System.err.println("The recipe with name and the set of rules cannot be empity or null.");
            ok = false;
-           return(ok);
+           return (ok);
        }
 
-    }else{
-       System.err.println("The recipe with name and the set of rules cannot be empity or null.");
-       ok=false;
-       return(ok);
-    }
-
-     if(ok)
-       this.storeaux.setStore(owlmodel);
-
-     return(ok);
-   }
-
-   /**
-    * Method to add a Recipe. The inputs are two HashMap with the key the recipe name and the value is a vector of IRI contains the rule's sequence; the second map contains the description.
-    *
-    * @param recipeMap {An HashMap variable contains string recipe name as key and an IRI vector contains the rules of the sequence as value}
-    * @param recipeDescriptionMap {An HashMap variable contains string recipe name as key and the recipe's description as value}
-    * @return {A boolean that is true if the operation is ok}
-    */
-   public boolean addRecipeMap(HashMap<String,Vector<IRI>> recipeMap, HashMap<String,String> recipeDescriptionMap){
-       boolean ok = false;
-
-       OWLClass ontocls = factory.getOWLClass(IRI.create(owlIDrmi+"Recipe"));
-       OWLClass kresrule = factory.getOWLClass(IRI.create(owlIDrmi+"KReSRule"));
-       OWLDataProperty description = factory.getOWLDataProperty(IRI.create(owlIDrmi+"hasDescription"));
-       OWLDataProperty sequence = factory.getOWLDataProperty(IRI.create(owlIDrmi+"hasSequence"));
-       OWLObjectProperty hasrule = factory.getOWLObjectProperty(IRI.create(owlIDrmi+"hasRule"));
-       OWLObjectProperty start = factory.getOWLObjectProperty(IRI.create(owlIDrmi+"startWith"));
-       OWLObjectProperty end = factory.getOWLObjectProperty(IRI.create(owlIDrmi+"endWith"));
-       OWLObjectProperty precedes = factory.getOWLObjectProperty(IRI.create("http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#directlyPrecedes"));
-
-    Object[] keys = recipeMap.keySet().toArray();
-
-    String recipeDescription = "";
-        OWLObjectPropertyAssertionAxiom objectPropAssertion;
-
-    for(int k = 0; k<keys.length;k++){
-    String recipeName = (String) keys[k];
-
-    OWLNamedIndividual ontoind = factory.getOWLNamedIndividual(IRI.create(owlID+recipeName));
-    Vector<IRI> rules = recipeMap.get(recipeName);
-
-    if((recipeDescriptionMap!=null))
-    if(!recipeDescriptionMap.isEmpty()){
-        recipeDescription = recipeDescriptionMap.get(recipeName);
-    }else{
-        recipeDescription ="";
-    }
-
-    if(((recipeName!=null)||!recipeName.toString().isEmpty())&&((rules!=null)||!rules.isEmpty())){
-       if(!owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind))){
-
-            //Add the rule istance
-            OWLClassAssertionAxiom classAssertion = factory.getOWLClassAssertionAxiom(ontocls,ontoind);
-            owlmanager.addAxiom(owlmodel, classAssertion);
-
-            //start and end
-            OWLNamedIndividual ind = factory.getOWLNamedIndividual(rules.firstElement());
-            if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))){
-                objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(start, ontoind,ind);
-                owlmanager.addAxiom(owlmodel, objectPropAssertion);
-                ok = true;
-            }else{
-                    System.err.println("The rule with IRI "+ind.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
-            }
-
-            ind = factory.getOWLNamedIndividual(rules.lastElement());
-            if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))){
-                objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(end, ontoind,ind);
-                owlmanager.addAxiom(owlmodel, objectPropAssertion);
-                ok = true;
-            }else{
-                    System.err.println("The rule with IRI "+ind.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
-            }
-
-            //Add the sequence string
-            OWLDataPropertyAssertionAxiom dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(sequence, ontoind,rules.toString().replace("[","").replace("]",""));
-            owlmanager.addAxiom(owlmodel, dataPropAssertion);
-            
-            //Add description
-            if((recipeDescription!=null))
-            if(!recipeDescription.isEmpty()){
-                //Add the rule description
-                dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(description, ontoind, recipeDescription);
-                owlmanager.addAxiom(owlmodel, dataPropAssertion);
-                ok = true;
-            }
-
-            //Add single rule
-            for(int r = 0; r<rules.size()-1; r++){
-                ind = factory.getOWLNamedIndividual(rules.get(r));
-                if(owlmodel.containsIndividualInSignature(ind.getIRI())){
-                //Add the rule to the recipes
-                objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(hasrule, ontoind,ind);
-                owlmanager.addAxiom(owlmodel, objectPropAssertion);
-                ok = true;
-                //Add precedes
-                OWLNamedIndividual indf = factory.getOWLNamedIndividual(rules.get(r+1));
-                if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, indf))){
-                    objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(precedes,ind,indf);
-                    owlmanager.addAxiom(owlmodel, objectPropAssertion);
-                    ok = true;
-                }else{
-                    System.err.println("The rule with IRI "+indf.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
-                }
-                }else{
-                    System.err.println("The rule with IRI "+ind.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
-                }
-
-            }
-
-                //Add last element
-                ind = factory.getOWLNamedIndividual(rules.lastElement());
-                if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))){
-                    //Add the rule to the recipes
-                    objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(hasrule, ontoind,ind);
-                    owlmanager.addAxiom(owlmodel, objectPropAssertion);
-                    ok=true;
-                }else{
-                    System.err.println("The rule with IRI "+ind.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
-                }
-            
-       }else{
-           System.err.println("The recipe with name "+recipeName+" already exists. Pleas check the name.");
-           ok = false;
-           return(ok);
+       if (ok) {
+           this.storeaux.setStore(owlmodel);
        }
 
-    }else{
-       System.err.println("The recipe with name and the set of rules cannot be empity or null.");
-       ok=false;
-       return(ok);
-    }
-    }
-
-       if(ok)
-         this.storeaux.setStore(owlmodel);
-        
-       return(ok);
+       return ok;
    }
 
-   /**
-    * Method to add a Recipe. The inputs are two HashMap with the key the recipe IRI name and the value is a vector IRI contains the rule's sequence; the second map contains the description.
-    *
-    * @param recipeMap {An HashMap variable contains the recipe IRI name as key and an IRI vector contains the rules of the sequence as value}
-    * @param recipeDescriptionMap {An HashMap variable contains the recipe IRI name as key and the recipe's description as value}
-    * @return {A boolean that is true if the operation is ok}
-    */
-   public boolean addRecipeMapIRI(HashMap<IRI,Vector<IRI>> recipeMap, HashMap<IRI,String> recipeDescriptionMap){
-       boolean ok = false;
+    /**
+     * Adds a Recipe.
+     * The inputs are two HashMap with the key the recipe name and the value is a vector of IRI contains the rule's sequence; the second map contains the description.
+     *
+     * @param recipeMap {An HashMap variable contains string recipe name as key and an IRI vector contains the rules of the sequence as value}
+     * @param recipeDescriptionMap {An HashMap variable contains string recipe name as key and the recipe's description as value}
+     *
+     * @return {A boolean that is true if the operation is ok}
+     */
+    public boolean addRecipeMap(HashMap<String, Vector<IRI>> recipeMap, HashMap<String, String> recipeDescriptionMap) {
+        boolean ok = false;
 
-       OWLClass ontocls = factory.getOWLClass(IRI.create(owlIDrmi+"Recipe"));
-       OWLClass kresrule = factory.getOWLClass(IRI.create(owlIDrmi+"KReSRule"));
-       OWLDataProperty description = factory.getOWLDataProperty(IRI.create(owlIDrmi+"hasDescription"));
-       OWLDataProperty sequence = factory.getOWLDataProperty(IRI.create(owlIDrmi+"hasSequence"));
-       OWLObjectProperty hasrule = factory.getOWLObjectProperty(IRI.create(owlIDrmi+"hasRule"));
-       OWLObjectProperty start = factory.getOWLObjectProperty(IRI.create(owlIDrmi+"startWith"));
-       OWLObjectProperty end = factory.getOWLObjectProperty(IRI.create(owlIDrmi+"endWith"));
-       OWLObjectProperty precedes = factory.getOWLObjectProperty(IRI.create("http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#directlyPrecedes"));
+        OWLClass ontocls = factory.getOWLClass(IRI.create(owlIDrmi + "Recipe"));
+        OWLClass kresrule = factory.getOWLClass(IRI.create(owlIDrmi + "KReSRule"));
+        OWLDataProperty description = factory.getOWLDataProperty(IRI.create(owlIDrmi + "hasDescription"));
+        OWLDataProperty sequence = factory.getOWLDataProperty(IRI.create(owlIDrmi + "hasSequence"));
+        OWLObjectProperty hasrule = factory.getOWLObjectProperty(IRI.create(owlIDrmi + "hasRule"));
+        OWLObjectProperty start = factory.getOWLObjectProperty(IRI.create(owlIDrmi + "startWith"));
+        OWLObjectProperty end = factory.getOWLObjectProperty(IRI.create(owlIDrmi + "endWith"));
+        OWLObjectProperty precedes = factory.getOWLObjectProperty(IRI.create("http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#directlyPrecedes"));
 
-    Object[] keys = recipeMap.keySet().toArray();
+        Object[] keys = recipeMap.keySet().toArray();
 
-    String recipeDescription = "";
+        String recipeDescription = "";
+        OWLObjectPropertyAssertionAxiom objectPropAssertion;
+
+        for (int k = 0; k < keys.length; k++) {
+            String recipeName = (String) keys[k];
+
+            OWLNamedIndividual ontoind = factory.getOWLNamedIndividual(IRI.create(owlID + recipeName));
+            Vector<IRI> rules = recipeMap.get(recipeName);
+
+            if ((recipeDescriptionMap != null))
+                if (!recipeDescriptionMap.isEmpty()) {
+                    recipeDescription = recipeDescriptionMap.get(recipeName);
+                } else {
+                    recipeDescription = "";
+                }
+
+            if (((recipeName != null) || !recipeName.toString().isEmpty()) && ((rules != null) || !rules.isEmpty())) {
+                if (!owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind))) {
+
+                    //Add the rule istance
+                    OWLClassAssertionAxiom classAssertion = factory.getOWLClassAssertionAxiom(ontocls, ontoind);
+                    owlmanager.addAxiom(owlmodel, classAssertion);
+
+                    //start and end
+                    OWLNamedIndividual ind = factory.getOWLNamedIndividual(rules.firstElement());
+                    if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))) {
+                        objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(start, ontoind, ind);
+                        owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                        ok = true;
+                    } else {
+                        System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                        ok = false;
+                        return (ok);
+                    }
+
+                    ind = factory.getOWLNamedIndividual(rules.lastElement());
+                    if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))) {
+                        objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(end, ontoind, ind);
+                        owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                        ok = true;
+                    } else {
+                        System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                        ok = false;
+                        return (ok);
+                    }
+
+                    //Add the sequence string
+                    OWLDataPropertyAssertionAxiom dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(sequence, ontoind, rules.toString().replace("[", "").replace("]", ""));
+                    owlmanager.addAxiom(owlmodel, dataPropAssertion);
+
+                    //Add description
+                    if ((recipeDescription != null))
+                        if (!recipeDescription.isEmpty()) {
+                            //Add the rule description
+                            dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(description, ontoind, recipeDescription);
+                            owlmanager.addAxiom(owlmodel, dataPropAssertion);
+                            ok = true;
+                        }
+
+                    //Add single rule
+                    for (int r = 0; r < rules.size() - 1; r++) {
+                        ind = factory.getOWLNamedIndividual(rules.get(r));
+                        if (owlmodel.containsIndividualInSignature(ind.getIRI())) {
+                            //Add the rule to the recipes
+                            objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(hasrule, ontoind, ind);
+                            owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                            ok = true;
+                            //Add precedes
+                            OWLNamedIndividual indf = factory.getOWLNamedIndividual(rules.get(r + 1));
+                            if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, indf))) {
+                                objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(precedes, ind, indf);
+                                owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                                ok = true;
+                            } else {
+                                System.err.println("The rule with IRI " + indf.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                                ok = false;
+                                return (ok);
+                            }
+                        } else {
+                            System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                            ok = false;
+                            return (ok);
+                        }
+
+                    }
+
+                    //Add last element
+                    ind = factory.getOWLNamedIndividual(rules.lastElement());
+                    if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))) {
+                        //Add the rule to the recipes
+                        objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(hasrule, ontoind, ind);
+                        owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                        ok = true;
+                    } else {
+                        System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                        ok = false;
+                        return (ok);
+                    }
+
+                } else {
+                    System.err.println("The recipe with name " + recipeName + " already exists. Pleas check the name.");
+                    ok = false;
+                    return (ok);
+                }
+
+            } else {
+                System.err.println("The recipe with name and the set of rules cannot be empity or null.");
+                ok = false;
+                return (ok);
+            }
+        }
+
+        if (ok)
+            this.storeaux.setStore(owlmodel);
+
+        return (ok);
+    }
+
+    /**
+     * Methods to add a Recipe.
+     * The inputs are two HashMap with the key the recipe IRI name and the value is a vector IRI contains the rule's sequence; the second map contains the description.
+     *
+     * @param recipeMap {An HashMap variable contains the recipe IRI name as key and an IRI vector contains the rules of the sequence as value}
+     * @param recipeDescriptionMap {An HashMap variable contains the recipe IRI name as key and the recipe's description as value}
+     *
+     * @return {A boolean that is true if the operation is ok}
+     */
+    public boolean addRecipeMapIRI(HashMap<IRI, Vector<IRI>> recipeMap, HashMap<IRI, String> recipeDescriptionMap) {
+        boolean ok = false;
+
+        OWLClass ontocls = factory.getOWLClass(IRI.create(owlIDrmi + "Recipe"));
+        OWLClass kresrule = factory.getOWLClass(IRI.create(owlIDrmi + "KReSRule"));
+        OWLDataProperty description = factory.getOWLDataProperty(IRI.create(owlIDrmi + "hasDescription"));
+        OWLDataProperty sequence = factory.getOWLDataProperty(IRI.create(owlIDrmi + "hasSequence"));
+        OWLObjectProperty hasrule = factory.getOWLObjectProperty(IRI.create(owlIDrmi + "hasRule"));
+        OWLObjectProperty start = factory.getOWLObjectProperty(IRI.create(owlIDrmi + "startWith"));
+        OWLObjectProperty end = factory.getOWLObjectProperty(IRI.create(owlIDrmi + "endWith"));
+        OWLObjectProperty precedes = factory.getOWLObjectProperty(IRI.create("http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#directlyPrecedes"));
+
+        Object[] keys = recipeMap.keySet().toArray();
+
+        String recipeDescription = "";
         OWLObjectPropertyAssertionAxiom objectPropAssertion;
 
 
-    for(int k = 0; k<keys.length;k++){
-    IRI recipeName = (IRI) keys[k];
+        for (int k = 0; k < keys.length; k++) {
+            IRI recipeName = (IRI) keys[k];
 
-    OWLNamedIndividual ontoind = factory.getOWLNamedIndividual(recipeName);
-    Vector<IRI> rules = recipeMap.get(recipeName);
+            OWLNamedIndividual ontoind = factory.getOWLNamedIndividual(recipeName);
+            Vector<IRI> rules = recipeMap.get(recipeName);
 
-    if((recipeDescriptionMap!=null))
-    if(!recipeDescriptionMap.isEmpty()){
-        recipeDescription = recipeDescriptionMap.get(recipeName);
-    } else {
-        recipeDescription ="";
-    }
-
-    if(((recipeName!=null)||!recipeName.toString().isEmpty())&&((rules!=null)||!rules.isEmpty())){
-       if(!owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind))){
-
-            //Add the rule istance
-            OWLClassAssertionAxiom classAssertion = factory.getOWLClassAssertionAxiom(ontocls,ontoind);
-            owlmanager.addAxiom(owlmodel, classAssertion);
-
-            //start and end
-            OWLNamedIndividual ind = factory.getOWLNamedIndividual(rules.firstElement());
-            if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))){
-                objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(start, ontoind,ind);
-                owlmanager.addAxiom(owlmodel, objectPropAssertion);
-                ok = true;
-            }else{
-                    System.err.println("The rule with IRI "+ind.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
-            }
-
-            ind = factory.getOWLNamedIndividual(rules.lastElement());
-            if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))){
-                objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(end, ontoind,ind);
-                owlmanager.addAxiom(owlmodel, objectPropAssertion);
-                ok = true;
-            }else{
-                    System.err.println("The rule with IRI "+ind.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
-            }
-
-            //Add the sequence string
-            OWLDataPropertyAssertionAxiom dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(sequence, ontoind,rules.toString().replace("[","").replace("]",""));
-            owlmanager.addAxiom(owlmodel, dataPropAssertion);
-
-            //Add description
-            if((recipeDescription!=null))
-            if(!recipeDescription.isEmpty()){
-                //Add the rule description
-                dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(description, ontoind, recipeDescription);
-                owlmanager.addAxiom(owlmodel, dataPropAssertion);
-                ok = true;
-            }
-
-            //Add single rule
-            for(int r = 0; r<rules.size()-1; r++){
-                ind = factory.getOWLNamedIndividual(rules.get(r));
-                if(owlmodel.containsIndividualInSignature(ind.getIRI())){
-                //Add the rule to the recipes
-                objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(hasrule, ontoind,ind);
-                owlmanager.addAxiom(owlmodel, objectPropAssertion);
-
-                //Add precedes
-                OWLNamedIndividual indf = factory.getOWLNamedIndividual(rules.get(r+1));
-                if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, indf))){
-                    objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(precedes,ind,indf);
-                    owlmanager.addAxiom(owlmodel, objectPropAssertion);
-                    ok = true;
-                }else{
-                    System.err.println("The rule with IRI "+indf.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
-                }
-                }else{
-                    System.err.println("The rule with IRI "+ind.getIRI()+" is not inside the ontology. Pleas check its IRI.");
-                    ok = false;
-                    return(ok);
+            if ((recipeDescriptionMap != null))
+                if (!recipeDescriptionMap.isEmpty()) {
+                    recipeDescription = recipeDescriptionMap.get(recipeName);
+                } else {
+                    recipeDescription = "";
                 }
 
-            }
-                //Add last element
-                ind = factory.getOWLNamedIndividual(rules.lastElement());
-                if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))){
-                    //Add the rule to the recipes
-                    objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(hasrule, ontoind,ind);
-                    owlmanager.addAxiom(owlmodel, objectPropAssertion);
-                    ok=true;
-                }else{
-                    System.err.println("The rule with IRI "+ind.getIRI()+" is not inside the ontology. Pleas check its IRI.");
+            if (((recipeName != null) || !recipeName.toString().isEmpty()) && ((rules != null) || !rules.isEmpty())) {
+                if (!owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind))) {
+
+                    //Add the rule istance
+                    OWLClassAssertionAxiom classAssertion = factory.getOWLClassAssertionAxiom(ontocls, ontoind);
+                    owlmanager.addAxiom(owlmodel, classAssertion);
+
+                    //start and end
+                    OWLNamedIndividual ind = factory.getOWLNamedIndividual(rules.firstElement());
+                    if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))) {
+                        objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(start, ontoind, ind);
+                        owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                        ok = true;
+                    } else {
+                        System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                        ok = false;
+                        return (ok);
+                    }
+
+                    ind = factory.getOWLNamedIndividual(rules.lastElement());
+                    if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))) {
+                        objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(end, ontoind, ind);
+                        owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                        ok = true;
+                    } else {
+                        System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                        ok = false;
+                        return (ok);
+                    }
+
+                    //Add the sequence string
+                    OWLDataPropertyAssertionAxiom dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(sequence, ontoind, rules.toString().replace("[", "").replace("]", ""));
+                    owlmanager.addAxiom(owlmodel, dataPropAssertion);
+
+                    //Add description
+                    if ((recipeDescription != null))
+                        if (!recipeDescription.isEmpty()) {
+                            //Add the rule description
+                            dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(description, ontoind, recipeDescription);
+                            owlmanager.addAxiom(owlmodel, dataPropAssertion);
+                            ok = true;
+                        }
+
+                    //Add single rule
+                    for (int r = 0; r < rules.size() - 1; r++) {
+                        ind = factory.getOWLNamedIndividual(rules.get(r));
+                        if (owlmodel.containsIndividualInSignature(ind.getIRI())) {
+                            //Add the rule to the recipes
+                            objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(hasrule, ontoind, ind);
+                            owlmanager.addAxiom(owlmodel, objectPropAssertion);
+
+                            //Add precedes
+                            OWLNamedIndividual indf = factory.getOWLNamedIndividual(rules.get(r + 1));
+                            if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, indf))) {
+                                objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(precedes, ind, indf);
+                                owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                                ok = true;
+                            } else {
+                                System.err.println("The rule with IRI " + indf.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                                ok = false;
+                                return (ok);
+                            }
+                        } else {
+                            System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                            ok = false;
+                            return (ok);
+                        }
+
+                    }
+                    //Add last element
+                    ind = factory.getOWLNamedIndividual(rules.lastElement());
+                    if (owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(kresrule, ind))) {
+                        //Add the rule to the recipes
+                        objectPropAssertion = factory.getOWLObjectPropertyAssertionAxiom(hasrule, ontoind, ind);
+                        owlmanager.addAxiom(owlmodel, objectPropAssertion);
+                        ok = true;
+                    } else {
+                        System.err.println("The rule with IRI " + ind.getIRI() + " is not inside the ontology. Pleas check its IRI.");
+                        ok = false;
+                        return (ok);
+                    }
+
+                } else {
+                    System.err.println("The recipe with name " + recipeName + " already exists. Pleas check the name.");
                     ok = false;
-                    return(ok);
+                    return (ok);
                 }
-                
-       }else{
-           System.err.println("The recipe with name "+recipeName+" already exists. Pleas check the name.");
-           ok = false;
-           return(ok);
-       }
 
-    }else{
-       System.err.println("The recipe with name and the set of rules cannot be empity or null.");
-       ok=false;
-       return(ok);
+            } else {
+                System.err.println("The recipe with name and the set of rules cannot be empity or null.");
+                ok = false;
+                return (ok);
+            }
+        }
+        if (ok)
+            this.storeaux.setStore(owlmodel);
+        return ok;
     }
-    }
-       if(ok)
-         this.storeaux.setStore(owlmodel);
-       return(ok);
-   }
 
-   /**
-     * Get the KReSRuleStore filled with rules and recipes
-    *
+    /**
+     * Gets the KReSRuleStore filled with rules and recipes.
+     *
      * @return {A KReSRuleStore object with the stored rules and recipes.}
      */
-     public RuleStore getStore(){
-         return this.storeaux;
-     }
+    public RuleStore getStore() {
+        return this.storeaux;
+    }
 
 }

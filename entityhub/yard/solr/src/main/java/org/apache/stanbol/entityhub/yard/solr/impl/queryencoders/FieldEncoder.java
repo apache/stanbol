@@ -40,6 +40,7 @@ public class FieldEncoder implements IndexConstraintTypeEncoder<List<String>> {
         }
         this.fieldMapper = fieldMapper;
     }
+
     @Override
     public Collection<IndexConstraintTypeEnum> dependsOn() {
         return Collections.emptySet();
@@ -62,6 +63,7 @@ public class FieldEncoder implements IndexConstraintTypeEncoder<List<String>> {
     public boolean supportsDefault() {
         return false;
     }
+
     @SuppressWarnings("unchecked")
     @Override
     public Class<List<String>> acceptsValueType() {

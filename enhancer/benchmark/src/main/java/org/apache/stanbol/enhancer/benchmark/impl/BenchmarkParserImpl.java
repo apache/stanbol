@@ -38,7 +38,7 @@ public class BenchmarkParserImpl implements BenchmarkParser {
         TripleMatcherGroupImpl currentGroup;
     }
     
-    private static abstract class State {
+    private abstract static class State {
         protected final ParserContext ctx;
         
         State(ParserContext ctx) {
