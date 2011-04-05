@@ -33,15 +33,17 @@ import org.apache.stanbol.entityhub.yard.solr.utils.SolrUtil;
 
 /**
  * Encodes the DataType to the field name.
- * @author Rupert Westenthaler
  *
+ * @author Rupert Westenthaler
  */
 public class DataTypeEncoder implements IndexConstraintTypeEncoder<Object> {
 
     private static final ConstraintTypePosition PREFIX = new ConstraintTypePosition(PositionType.prefix);
     private static final ConstraintTypePosition SUFFIX = new ConstraintTypePosition(PositionType.suffux);
+
     private final FieldMapper fieldMapper;
     private final IndexValueFactory indexValueFactory;
+
     public DataTypeEncoder(IndexValueFactory indexValueFactory, FieldMapper fieldMapper) {
         if(fieldMapper == null){
             throw new IllegalArgumentException("The FieldMapper MUST NOT be NULL!");
@@ -52,6 +54,7 @@ public class DataTypeEncoder implements IndexConstraintTypeEncoder<Object> {
         this.fieldMapper = fieldMapper;
         this.indexValueFactory = indexValueFactory;
     }
+
     @Override
     public void encode(EncodedConstraintParts constraint,Object value) throws IllegalArgumentException {
         IndexDataType indexDataType;
@@ -92,10 +95,10 @@ public class DataTypeEncoder implements IndexConstraintTypeEncoder<Object> {
     public IndexConstraintTypeEnum encodes() {
         return IndexConstraintTypeEnum.DATATYPE;
     }
+
     @Override
     public Class<Object> acceptsValueType() {
         return Object.class;
     }
-
 
 }

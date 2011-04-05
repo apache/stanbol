@@ -267,7 +267,7 @@ public abstract class AbstractYard implements Yard {
 //    public abstract void update(Representation represnetation) throws IllegalArgumentException;
 
 
-    public static abstract class YardConfig {
+    public abstract static class YardConfig {
 
         protected final Dictionary<String, Object> config;
 

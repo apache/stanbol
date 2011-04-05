@@ -37,7 +37,7 @@ public class ClerezzaYardTest extends YardTest {
     private static Yard yard;
     
     @BeforeClass
-    public final static void initYard(){
+    public static final void initYard(){
         YardConfig config = new SimpleYardConfig("urn:yard.clerezza:testYardId");
         config.setName("Clerezza Yard Test");
         config.setDescription("The Clerezza Yard instance used to execute the Unit Tests defined for the Yard Interface");
@@ -80,7 +80,7 @@ public class ClerezzaYardTest extends YardTest {
      * {@link #representationIds} list.
      */
     @AfterClass
-    public final static void clearUpRepresentations() throws YardException {
+    public static final void clearUpRepresentations() throws YardException {
         yard.remove(representationIds);
     }
     

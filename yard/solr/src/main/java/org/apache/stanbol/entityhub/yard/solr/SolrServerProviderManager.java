@@ -82,7 +82,7 @@ public final class SolrServerProviderManager {
 //    @Reference
 //    private DefaultSolrServerProvider defaultProvider;
     
-    private final static Logger log = LoggerFactory.getLogger(SolrServerProviderManager.class);
+    private static final Logger log = LoggerFactory.getLogger(SolrServerProviderManager.class);
     @Reference(
         referenceInterface=SolrServerProvider.class,
         strategy=ReferenceStrategy.EVENT,

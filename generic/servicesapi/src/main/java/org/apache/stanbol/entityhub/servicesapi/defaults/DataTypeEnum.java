@@ -145,12 +145,12 @@ public enum DataTypeEnum {
         return getUri();
     }
 
-    static private Map<Class<?>,Set<DataTypeEnum>> class2DataTypeMap;
-    static private Map<Class<?>,Set<DataTypeEnum>> interface2DataTypeMap;
-    static private Map<Class<?>,Set<DataTypeEnum>> allClass2DataTypeMap;
-    static private Map<Class<?>,Set<DataTypeEnum>> allInterface2DataTypeMap;
-    static private Map<String,DataTypeEnum> uri2DataType;
-    static private Map<String,DataTypeEnum> shortName2DataType;
+    private static Map<Class<?>,Set<DataTypeEnum>> class2DataTypeMap;
+    private static Map<Class<?>,Set<DataTypeEnum>> interface2DataTypeMap;
+    private static Map<Class<?>,Set<DataTypeEnum>> allClass2DataTypeMap;
+    private static Map<Class<?>,Set<DataTypeEnum>> allInterface2DataTypeMap;
+    private static Map<String,DataTypeEnum> uri2DataType;
+    private static Map<String,DataTypeEnum> shortName2DataType;
     static{
         Map<Class<?>,Set<DataTypeEnum>> c2d = new HashMap<Class<?>, Set<DataTypeEnum>>();
         Map<Class<?>,Set<DataTypeEnum>> i2d = new HashMap<Class<?>, Set<DataTypeEnum>>();
