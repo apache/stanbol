@@ -82,7 +82,7 @@ public class GeonamesAPIWrapper {
      *
      * @author Rupert Westenthaler
      */
-    public static enum SearchRequestPropertyEnum {
+    public enum SearchRequestPropertyEnum {
         /**
          * search Toponyms by name
          */
@@ -201,7 +201,7 @@ public class GeonamesAPIWrapper {
         }
     }
 
-    public static enum HierarchyRequestPorpertyEnum {
+    public enum HierarchyRequestPorpertyEnum {
         /**
          * The ID of the Toponym the hierarchy is requested for
          */

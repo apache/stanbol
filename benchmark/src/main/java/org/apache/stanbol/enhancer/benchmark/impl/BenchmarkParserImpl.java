@@ -80,8 +80,8 @@ public class BenchmarkParserImpl implements BenchmarkParser {
          *  (which might this one if no state change is needed) 
          */
         protected abstract State consume(String line) throws IOException;
-    };
-    
+    }
+
     private static class InitState extends State {
         InitState(ParserContext ctx) {
             super(ctx);
@@ -90,8 +90,8 @@ public class BenchmarkParserImpl implements BenchmarkParser {
         protected State consume(String line) {
             return this;
         }
-    };
-    
+    }
+
     private static class InputState extends State {
         InputState(ParserContext ctx) {
             super(ctx);
@@ -110,8 +110,8 @@ public class BenchmarkParserImpl implements BenchmarkParser {
             }
             return this;
         }
-    };
-    
+    }
+
     private static class MatcherGroupState extends State {
         private final boolean isExpect;
         

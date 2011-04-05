@@ -60,7 +60,7 @@ public enum ZemantaOntologyEnum {
      * @param ns    The namespace or <code>null</code> to use the default
      * @param local The local name or <code>null</code> to use the default
      */
-    private ZemantaOntologyEnum(String ns, String local) {
+    ZemantaOntologyEnum(String ns, String local) {
         uri = new UriRef((ns == null ? "http://s.zemanta.com/ns#" : ns) + (local == null ? name() : local));
     }
 
@@ -71,7 +71,7 @@ public enum ZemantaOntologyEnum {
      * @param local the local name or <code>null</code> to use the name() of the
      *              element
      */
-    private ZemantaOntologyEnum(String local) {
+    ZemantaOntologyEnum(String local) {
         this(null, local);
     }
 
@@ -79,7 +79,7 @@ public enum ZemantaOntologyEnum {
      * Creates a new entry of this Enum by using the default Zemanta namespace
      * and the name() of this element as lecal name.
      */
-    private ZemantaOntologyEnum() {
+    ZemantaOntologyEnum() {
         this(null, null);
     }
 
