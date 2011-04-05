@@ -23,7 +23,7 @@
 		<groupId>org.apache.stanbol</groupId>
 		<artifactId>stanbol-parent</artifactId>
 		<version>0.9-SNAPSHOT</version>
-		<relativePath>../../../parent</relativePath>
+		<relativePath>../../parent</relativePath>
 	</parent>
 
 	<artifactId>org.apache.stanbol.reasoners.hermit</artifactId>
