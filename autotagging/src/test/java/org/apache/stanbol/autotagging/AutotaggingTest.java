@@ -24,8 +24,6 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
-import org.apache.stanbol.autotagging.Autotagger;
-import org.apache.stanbol.autotagging.TagInfo;
 import org.apache.stanbol.autotagging.jena.ModelIndexer;
 import org.junit.Before;
 import org.junit.BeforeClass;
