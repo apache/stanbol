@@ -1,52 +1,52 @@
 <?xml version="1.0"?>
 <project>
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.apache.stanbol</groupId>
-    <artifactId>org.apache.stanbol.commons.testing.jarexec</artifactId>
-    <version>0.9-SNAPSHOT</version>
-    <packaging>jar</packaging>
-    
-    <name>Apache Stanbol Jar Executor</name>
-    <description>
-        Jar file execution utilities.
-        Not Stanbol-specific, should be reusable in other contexts.
-    </description>
-    <scm>
-        <connection>
-            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/testing/jarexec
-        </connection>
-        <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/testing/jarexec
-        </developerConnection>
-        <url>http://incubator.apache.org/stanbol/</url>
-    </scm>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.commons.testing.jarexec</artifactId>
+  <version>0.9-SNAPSHOT</version>
+  <packaging>jar</packaging>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-exec</artifactId>
-            <version>1.1</version>
-            <scope>compile</scope>
-        </dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>1.5.2</version>
-		</dependency>
-    </dependencies>
-    
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.1</version>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+  <name>Apache Stanbol Jar Executor</name>
+  <description>
+    Jar file execution utilities.
+    Not Stanbol-specific, should be reusable in other contexts.
+  </description>
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/testing/jarexec
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/testing/jarexec
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol/</url>
+  </scm>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-exec</artifactId>
+      <version>1.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.5.2</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.1</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

@@ -10,7 +10,7 @@
   <name>Apache Stanbol Offline Utilities</name>
   <description>
     Offline mode utilities for Stanbol
-    </description>
+  </description>
   <scm>
     <connection>
       scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/stanboltools/offline
