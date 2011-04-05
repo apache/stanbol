@@ -34,8 +34,6 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.stanbol.enhancer.engines.opennlp.impl.NameOccurrence;
-import org.apache.stanbol.enhancer.engines.opennlp.impl.NamedEntityExtractionEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.junit.AfterClass;
