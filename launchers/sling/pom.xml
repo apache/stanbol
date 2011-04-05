@@ -15,7 +15,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.stanbol</groupId>
@@ -23,11 +24,13 @@
     <version>0.9-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
+
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.launchers.sling</artifactId>
   <packaging>jar</packaging>
   <name>Apache Stanbol Entityhub Sling-based standalone launcher</name>
   <description>Runnable jar that runs the standard IKS Entityhub configuration</description>
+
   <scm>
     <connection>
       scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/launchers/sling
@@ -37,6 +40,7 @@
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
+
   <build>
     <plugins>
       <plugin>
@@ -94,6 +98,7 @@
       </plugin>
     </plugins>
   </build>
+
   <dependencies>
     <dependency>
       <!-- maven-launchpad-plugin builds on the launchpad.base app -->

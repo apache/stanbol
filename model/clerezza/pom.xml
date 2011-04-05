@@ -16,7 +16,7 @@
    limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -31,9 +31,10 @@
   <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Entityhub Model implementation based on RDF (using Clerezza) </name>
-  <description>This bundle provides implementation of the Entityhub Representation interface 
-  based on a RDF inMemory triple store by using the Clerezza framework.</description>
+  <name>Apache Stanbol Entityhub Model implementation based on RDF (using Clerezza)</name>
+  <description>This bundle provides implementation of the Entityhub Representation interface
+    based on a RDF inMemory triple store by using the Clerezza framework.
+  </description>
 
   <inceptionYear>2010</inceptionYear>
 
@@ -59,10 +60,10 @@
               org.apache.stanbol.entityhub.model.clerezza;version=${pom.version},
               org.apache.stanbol.entityhub.model.clerezza.utils;version=${pom.version},
             </Export-Package>
-           <Private-Package>
+            <Private-Package>
               org.apache.stanbol.entityhub.model.clerezza.impl;version=${pom.version}
             </Private-Package>
-           </instructions>
+          </instructions>
         </configuration>
       </plugin>
       <plugin>
@@ -81,7 +82,7 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>org.apache.clerezza.rdf.core</artifactId>
@@ -90,7 +91,7 @@
       <groupId>org.apache.clerezza</groupId>
       <artifactId>org.apache.clerezza.rdf.utils</artifactId>
     </dependency>
-    
+
     <!-- for tests -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>

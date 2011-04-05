@@ -16,26 +16,26 @@
    limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
-	  <parent>
-	    <groupId>org.apache.stanbol</groupId>
-	    <artifactId>stanbol-parent</artifactId>
-	    <version>0.9-SNAPSHOT</version>
-	    <relativePath>../../parent</relativePath>
-	  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <version>0.9-SNAPSHOT</version>
+    <relativePath>../../parent</relativePath>
+  </parent>
 
-	<groupId>org.apache.stanbol</groupId>
-	<artifactId>org.apache.stanbol.entityhub.parent</artifactId>
-	<packaging>pom</packaging>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
+  <packaging>pom</packaging>
 
-	<name>Apache Stanbol Entityhub parent POM</name>
-	<description>
-    	Parent POM for the Apache Stanbol Entityhub component
-  	</description>
+  <name>Apache Stanbol Entityhub parent POM</name>
+  <description>
+    Parent POM for the Apache Stanbol Entityhub component
+  </description>
 
-	<inceptionYear>2010</inceptionYear>
+  <inceptionYear>2010</inceptionYear>
 
   <scm>
     <connection>
@@ -47,14 +47,14 @@
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 
   <build>
     <pluginManagement>
       <plugins>
-         <plugin>
+        <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
           <inherited>true</inherited>
@@ -67,5 +67,5 @@
       </plugins>
     </pluginManagement>
   </build>
-  
+
 </project>
