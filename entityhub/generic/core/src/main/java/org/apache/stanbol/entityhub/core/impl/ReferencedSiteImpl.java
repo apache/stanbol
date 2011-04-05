@@ -405,6 +405,9 @@ public class ReferencedSiteImpl implements ReferencedSite {
             }
         }
         QueryResultList<String> entityIds;
+        if(entitySearcher == null) {
+            throw new ReferencedSiteException(String.format("EntitySearcher %s not available for remote site %s!",entitySearcherComponentName,queryUri));
+        }
         try {
             entityIds = entitySearcher.findEntities(query);
         } catch (IOException e) {
