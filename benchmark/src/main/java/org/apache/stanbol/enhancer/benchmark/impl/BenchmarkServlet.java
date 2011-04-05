@@ -17,7 +17,11 @@
 package org.apache.stanbol.enhancer.benchmark.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 import javax.servlet.ServletException;
@@ -25,6 +29,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.LineIterator;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -58,6 +64,8 @@ public class BenchmarkServlet extends HttpServlet {
     
     public static final String PARAM_CONTENT = "content";
     public static final String DEFAULT_MOUNT_PATH = "/benchmark";
+    public static final String DEFAULT_BENCHMARK = "default.txt";
+    public static final String EXAMPLE_BENCHMARKS_RESOURCE_ROOT = "/examples";
     
     @Property(value=DEFAULT_MOUNT_PATH)
     public static final String MOUNT_PATH_PROPERTY = "mount.path";
@@ -106,18 +114,58 @@ public class BenchmarkServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
     throws ServletException, IOException {
         
-        if(request.getPathInfo() != null && request.getPathInfo().endsWith(".css")) {
+        final String path = request.getPathInfo() == null ? "" : request.getPathInfo(); 
+        if(path.endsWith(".css")) {
+            // Serve our css
             final Template t = velocity.getTemplate("/velocity/benchmark.css");
             response.setContentType("text/css");
             response.setCharacterEncoding("UTF-8");
             t.merge(getVelocityContext(request, null), response.getWriter());
+            
+        } else if(path.length() < 2){
+            // No benchmark specified -> redirect to default
+            response.sendRedirect(getExampleBenchmarkPath(request, DEFAULT_BENCHMARK));
+            
         } else {
+            // Benchmark input form pre-filled with selected example
             final Template t = velocity.getTemplate("/velocity/benchmark-input.html");
             final VelocityContext ctx = getVelocityContext(request, "Benchmark Input");
             ctx.put("formAction", request.getContextPath() + mountPath);
+            ctx.put("benchmarkText", getBenchmarkText(path)); 
+            ctx.put("benchmarkPaths", getExampleBenchmarkPaths(request)); 
+            ctx.put("currentBenchmarkPath", path); 
             response.setContentType("text/html");
             response.setCharacterEncoding("UTF-8");
             t.merge(ctx, response.getWriter());
+        }
+    }
+    
+    private String getExampleBenchmarkPath(HttpServletRequest request, String name) {
+        return request.getContextPath() + mountPath + "/" + name;
+    }
+    
+    private List<String> getExampleBenchmarkPaths(HttpServletRequest request) throws IOException {
+        // TODO how to enumerate bundle resources?
+        final String list = getBenchmarkText("/LIST.txt");
+        final LineIterator it = new LineIterator(new StringReader(list));
+        final List<String> result = new LinkedList<String>();
+        while(it.hasNext()) {
+            result.add(getExampleBenchmarkPath(request, it.nextLine()));
+        }
+        return result;
+    }
+
+    /** Return example benchmark text from our class resources */
+    private String getBenchmarkText(String path) throws IOException {
+        final InputStream is = getClass().getResourceAsStream(EXAMPLE_BENCHMARKS_RESOURCE_ROOT + path);
+        if(is == null) {
+            return "";
+        }
+        
+        try {
+            return IOUtils.toString(is);
+        } finally {
+            is.close();
         }
     }
     
