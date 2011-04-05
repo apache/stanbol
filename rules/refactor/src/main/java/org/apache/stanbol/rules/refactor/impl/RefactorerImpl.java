@@ -414,6 +414,79 @@ public class RefactorerImpl implements Refactorer {
             return refactoredOntology;
         }
     }
+    
+
+    @Override
+    public OWLOntology ontologyRefactoring(OWLOntology inputOntology, Recipe recipe) throws RefactoringException {
+        OWLOntology refactoredOntology = null;
+
+        // JenaToOwlConvert jenaToOwlConvert = new JenaToOwlConvert();
+
+        // OntModel ontModel =
+        // jenaToOwlConvert.ModelOwlToJenaConvert(inputOntology, "RDF/XML");
+
+        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+
+        
+        RuleList ruleList = recipe.getkReSRuleList();
+        log.info("RULE LIST SIZE : " + ruleList.size());
+
+        OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
+        OWLOntologyManager ontologyManager2 = OWLManager.createOWLOntologyManager();
+
+        MGraph unionMGraph = new SimpleMGraph();
+
+        MGraph mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(inputOntology);
+
+        for (Rule kReSRule : ruleList) {
+            String sparql = kReSRule.toSPARQL();
+            log.info("SPARQL : " + sparql);
+
+            Graph constructedGraph = null;
+
+            switch (kReSRule.getExpressiveness()) {
+                case KReSCore:
+                    constructedGraph = kReSCoreOperation(sparql, mGraph);
+                    break;
+                case ForwardChaining:
+                    ForwardChainingRefactoringGraph forwardChainingRefactoringGraph = forwardChainingOperation(
+                        sparql, mGraph);
+                    constructedGraph = forwardChainingRefactoringGraph.getOutputGraph();
+                    mGraph = forwardChainingRefactoringGraph.getInputGraph();
+                    break;
+                case Reflexive:
+                    constructedGraph = kReSCoreOperation(sparql, unionMGraph);
+                    break;
+                case SPARQLConstruct:
+                    constructedGraph = kReSCoreOperation(sparql, mGraph);
+                    break;
+                case SPARQLDelete:
+                    constructedGraph = sparqlUpdateOperation(sparql, unionMGraph);
+                    break;
+                case SPARQLDeleteData:
+                    constructedGraph = sparqlUpdateOperation(sparql, unionMGraph);
+                    break;
+                default:
+                    break;
+            }
+
+            if (constructedGraph != null) {
+                unionMGraph.addAll(constructedGraph);
+            }
+
+        }
+
+        refactoredOntology = OWLAPIToClerezzaConverter.clerezzaMGraphToOWLOntology(unionMGraph);
+
+    
+        if (refactoredOntology == null) {
+            throw new RefactoringException();
+        } else {
+            return refactoredOntology;
+        }
+    }
+    
+
 
     private Graph kReSCoreOperation(String query, MGraph mGraph) {
 

@@ -3,6 +3,7 @@ package org.apache.stanbol.rules.refactor.api;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
+import org.apache.stanbol.rules.base.api.Recipe;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -56,4 +57,16 @@ public interface Refactorer {
     public OWLOntology ontologyRefactoring(OWLOntology datasetURI, IRI recipeIRI) throws RefactoringException,
                                                                                  NoSuchRecipeException;
 
+    /**
+	 * The refactoring is perfomed by the {@code SemionRefactorer} by invoking this method. The {@code datasetURI} is the URI
+	 * of an RDF graph in KReS and the {@code recipe} is the recipe that needs to be applied to RDF graph in order to obtain the refactoring. 
+	 * 
+	 * @param datasetURI {@link UriRef} 
+	 * @param recipe {@link Recipe}
+	 * @return the refactored {@link MGraph}
+	 * @throws SemionRefactoringException
+	 * @throws NoSuchRecipeException
+	 */
+	public OWLOntology ontologyRefactoring(OWLOntology datasetURI, Recipe recipe) throws RefactoringException, NoSuchRecipeException;
+    
 }
