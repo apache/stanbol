@@ -17,15 +17,16 @@ public class CoreOntologySpaceImpl extends AbstractOntologySpaceImpl implements
 //		SUFFIX = SpaceType.CORE.getIRISuffix();
 //	}
 	
-	public CoreOntologySpaceImpl(IRI scopeID, PersistenceStore persistenceStore) {
+	public CoreOntologySpaceImpl(IRI scopeID, ClerezzaOntologyStorage storage) {
+
 		super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/"
-				+ SpaceType.CORE.getIRISuffix()), SpaceType.CORE/*, scopeID*/, persistenceStore);
+				+ SpaceType.CORE.getIRISuffix()), SpaceType.CORE/*, scopeID*/, storage);
 	}
 
-	public CoreOntologySpaceImpl(IRI scopeID, PersistenceStore persistenceStore,
+	public CoreOntologySpaceImpl(IRI scopeID, ClerezzaOntologyStorage storage,
 			OWLOntologyManager ontologyManager) {
 		super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/"
-				+ SpaceType.CORE.getIRISuffix()), SpaceType.CORE, /*scopeID,*/ persistenceStore,
+				+ SpaceType.CORE.getIRISuffix()), SpaceType.CORE, /*scopeID,*/ storage,
 				ontologyManager);
 	}
 

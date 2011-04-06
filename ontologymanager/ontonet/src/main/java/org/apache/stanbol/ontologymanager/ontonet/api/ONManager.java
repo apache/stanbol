@@ -6,7 +6,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
-import org.apache.stanbol.ontologymanager.store.api.PersistenceStore;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -26,7 +26,7 @@ public interface ONManager {
 	 * 
 	 * @return the default ontology index.
 	 */
-    OntologyIndex getOntologyIndex();
+	public OntologyIndex getOntologyIndex();
 
 	/**
 	 * Returns the ontology scope factory that was created along with the
@@ -34,7 +34,7 @@ public interface ONManager {
 	 * 
 	 * @return the default ontology scope factory
 	 */
-    OntologyScopeFactory getOntologyScopeFactory();
+	public OntologyScopeFactory getOntologyScopeFactory();
 
 	/**
 	 * Returns the ontology space factory that was created along with the
@@ -42,14 +42,16 @@ public interface ONManager {
 	 * 
 	 * @return the default ontology space factory.
 	 */
-    OntologySpaceFactory getOntologySpaceFactory();
+	public OntologySpaceFactory getOntologySpaceFactory();
 
 	/**
 	 * Returns the default ontology storage system for this KReS instance.
 	 * 
 	 * @return the default ontology store.
 	 */
-	public PersistenceStore getOntologyStore();
+
+
+	public ClerezzaOntologyStorage getOntologyStore();
 
 	/**
 	 * Returns an OWL Ontology Manager that is never cleared of its ontologies,
@@ -60,35 +62,35 @@ public interface ONManager {
 	 * 
 	 * @return the OWL Ontology Manager used for caching ontologies.
 	 */
-    OWLOntologyManager getOwlCacheManager();
+	public OWLOntologyManager getOwlCacheManager();
 
 	/**
 	 * Returns a factory object that can be used for obtaining OWL API objects.
 	 * 
 	 * @return the default OWL data factory
 	 */
-    OWLDataFactory getOwlFactory();
+	public OWLDataFactory getOwlFactory();
 
 	/**
 	 * Returns the default ontology registry loader.
 	 * 
 	 * @return the default ontology registry loader.
 	 */
-    RegistryLoader getRegistryLoader();
+	public RegistryLoader getRegistryLoader();
 
 	/**
 	 * Returns the unique ontology scope registry for this context.
 	 * 
 	 * @return the ontology scope registry.
 	 */
-    ScopeRegistry getScopeRegistry();
+	public ScopeRegistry getScopeRegistry();
 
 	/**
 	 * Returns the unique KReS session manager for this context.
 	 * 
 	 * @return the KreS session manager.
 	 */
-    SessionManager getSessionManager();
+	public SessionManager getSessionManager();
 
 	/**
 	 * Returns the list of IRIs that identify scopes that should be activated on
@@ -96,12 +98,12 @@ public interface ONManager {
 	 * 
 	 * @return the list of scope IDs to activate.
 	 */
-    String[] getUrisToActivate();
+	public String[] getUrisToActivate();
 	
 	/**
 	 * Returns the String that represent the namespace used by KReS for its ontologies
 	 * 
 	 * @return the namespace of KReS.
 	 */
-    String getKReSNamespace();
+	public String getKReSNamespace();
 }

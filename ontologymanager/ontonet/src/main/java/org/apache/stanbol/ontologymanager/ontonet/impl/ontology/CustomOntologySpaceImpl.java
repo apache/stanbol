@@ -21,16 +21,16 @@ public class CustomOntologySpaceImpl extends AbstractOntologySpaceImpl
 //		SUFFIX = SpaceType.CUSTOM.getIRISuffix();
 //	}
 	
-	public CustomOntologySpaceImpl(IRI scopeID, PersistenceStore persistenceStore) {
+	public CustomOntologySpaceImpl(IRI scopeID, ClerezzaOntologyStorage storage) {
 		super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/"
-				+ SpaceType.CUSTOM.getIRISuffix()), SpaceType.CUSTOM/*, scopeID*/, persistenceStore
+				+ SpaceType.CUSTOM.getIRISuffix()), SpaceType.CUSTOM/*, scopeID*/, storage
 				);
 	}
 
-	public CustomOntologySpaceImpl(IRI scopeID, PersistenceStore persistenceStore,
+	public CustomOntologySpaceImpl(IRI scopeID, ClerezzaOntologyStorage storage,
 			 OWLOntologyManager ontologyManager) {
 		super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/"
-				+ SpaceType.CUSTOM.getIRISuffix()), SpaceType.CUSTOM, persistenceStore, /*scopeID,*/
+				+ SpaceType.CUSTOM.getIRISuffix()), SpaceType.CUSTOM, storage, /*scopeID,*/
 				ontologyManager);
 	}
 	

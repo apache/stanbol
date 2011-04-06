@@ -80,6 +80,7 @@ public class SessionManagerImpl implements SessionManager {
 		listeners.add(listener);
 	}
 
+
 	/*
 	 * (non-Javadoc)
 	 * 

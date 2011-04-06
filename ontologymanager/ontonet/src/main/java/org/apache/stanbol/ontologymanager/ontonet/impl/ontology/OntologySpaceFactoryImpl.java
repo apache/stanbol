@@ -35,11 +35,11 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 	 *
 	 */
 	//protected ClerezzaOntologyStorage storage;
-	protected PersistenceStore persistenceStore;
+	protected ClerezzaOntologyStorage storage;
 
-	public OntologySpaceFactoryImpl(ScopeRegistry registry, PersistenceStore persistenceStore) {
+	public OntologySpaceFactoryImpl(ScopeRegistry registry, ClerezzaOntologyStorage storage) {
 		this.registry = registry;
-		this.persistenceStore = persistenceStore;
+		this.storage = storage;
 	}
 
 	/*
@@ -49,7 +49,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 	@Override
 	public CoreOntologySpace createCoreOntologySpace(IRI scopeID,
 			OntologyInputSource coreSource) {
-		CoreOntologySpace s = new CoreOntologySpaceImpl(scopeID, persistenceStore);
+		CoreOntologySpace s = new CoreOntologySpaceImpl(scopeID, storage);
 		setupSpace(s, scopeID, coreSource);
 		return s;
 	}
@@ -61,7 +61,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 	@Override
 	public CustomOntologySpace createCustomOntologySpace(IRI scopeID,
 			OntologyInputSource customSource) {
-		CustomOntologySpace s = new CustomOntologySpaceImpl(scopeID, persistenceStore);
+		CustomOntologySpace s = new CustomOntologySpaceImpl(scopeID, storage);
 		setupSpace(s, scopeID, customSource);
 		return s;
 	}
@@ -72,7 +72,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 	 */
 	@Override
 	public SessionOntologySpace createSessionOntologySpace(IRI scopeID) {
-		SessionOntologySpace s = new SessionOntologySpaceImpl(scopeID, persistenceStore);
+		SessionOntologySpace s = new SessionOntologySpaceImpl(scopeID, storage);
 		// s.setUp();
 		return s;
 	}
