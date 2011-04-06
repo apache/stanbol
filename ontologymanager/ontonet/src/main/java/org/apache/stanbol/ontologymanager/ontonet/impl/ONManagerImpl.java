@@ -288,6 +288,7 @@ public class ONManagerImpl implements ONManager {
 
     }
 
+   
     private void bootstrapOntologyNetwork(OWLOntology configOntology) {
         if (configOntology == null) {
             log.debug("KReS :: Ontology Network Manager starting with empty scope set.");
