@@ -28,7 +28,6 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JS
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
-import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.getService;
 
 import java.io.File;
 import java.util.Arrays;
@@ -52,6 +51,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.ontologies.RDFS;
+import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.servicesapi.model.Sign;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
@@ -60,41 +61,40 @@ import org.codehaus.jettison.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Resource to provide a REST API for the {@link ReferencedSiteManager}.
- *
+ * 
  * TODO: add description
  */
-@Path("/sites")
-public class SiteManagerRootResource extends NavigationMixin {
-
+@Path("/entityhub/sites")
+public class SiteManagerRootResource extends BaseStanbolResource {
+    
     private final Logger log = LoggerFactory.getLogger(getClass());
-
-    public static final Set<String> RDF_MEDIA_TYPES = new TreeSet<String>(
-            Arrays.asList(N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE, RDF_JSON));
-
+    
+    public static final Set<String> RDF_MEDIA_TYPES = new TreeSet<String>(Arrays.asList(N3, N_TRIPLE,
+        RDF_XML, TURTLE, X_TURTLE, RDF_JSON));
+    
     /**
-     * The Field used for find requests if not specified
-     * TODO: Will be depreciated as soon as EntityQuery is implemented
+     * The Field used for find requests if not specified TODO: Will be depreciated as soon as EntityQuery is
+     * implemented
      */
     private static final String DEFAULT_FIND_FIELD = RDFS.label.getUnicodeString();
-
+    
     /**
      * The default number of maximal results of searched sites.
      */
     private static final int DEFAULT_FIND_RESULT_LIMIT = 5;
-
+    
     private ServletContext context;
     
     public SiteManagerRootResource(@Context ServletContext context) {
         super();
         this.context = context;
     }
-
+    
     /**
      * Getter for the id's of all referenced sites
-     *
+     * 
      * @return the id's of all referenced sites.
      */
     @GET
@@ -103,21 +103,23 @@ public class SiteManagerRootResource extends NavigationMixin {
     public JSONArray getReferencedSites(@Context UriInfo uriInfo) {
         log.info("sites/referenced Request");
         JSONArray referencedSites = new JSONArray();
-        ReferencedSiteManager referencedSiteManager = getService(ReferencedSiteManager.class, context);
+        ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
+            ReferencedSiteManager.class, context);
         for (String site : referencedSiteManager.getReferencedSiteIds()) {
-            referencedSites.put(String.format("%ssite/%s/", uriInfo.getBaseUri(), site));
+            referencedSites.put(String.format("%sentityhub/site/%s/", uriInfo.getBaseUri(), site));
         }
         log.info("  ... return " + referencedSites.toString());
         return referencedSites;
     }
-
+    
     /**
      * Cool URI handler for Signs.
-     *
-     * @param id The id of the entity (required)
-     * @param headers the request headers used to get the requested {@link MediaType}
-     * @return a redirection to either a browser view, the RDF meta data or the
-     *         raw binary content
+     * 
+     * @param id
+     *            The id of the entity (required)
+     * @param headers
+     *            the request headers used to get the requested {@link MediaType}
+     * @return a redirection to either a browser view, the RDF meta data or the raw binary content
      */
     @GET
     @Path("/entity")
@@ -130,86 +132,96 @@ public class SiteManagerRootResource extends NavigationMixin {
             log.error("No or emptpy ID was parsed as query parameter (id={})", id);
             throw new WebApplicationException(BAD_REQUEST);
         }
-        ReferencedSiteManager referencedSiteManager = getService(ReferencedSiteManager.class, context);
+        ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
+            ReferencedSiteManager.class, context);
         Sign sign;
-//        try {
+        // try {
         sign = referencedSiteManager.getSign(id);
-//        } catch (IOException e) {
-//            log.error("IOException while accessing ReferencedSiteManager",e);
-//            throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-//        }
-        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
+        // } catch (IOException e) {
+        // log.error("IOException while accessing ReferencedSiteManager",e);
+        // throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+        // }
+        final MediaType acceptedMediaType = JerseyUtils
+                .getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
         if (sign != null) {
             return Response.ok(sign, acceptedMediaType).build();
         } else {
-            //TODO: How to parse an ErrorMessage?
+            // TODO: How to parse an ErrorMessage?
             // create an Response with the the Error?
             log.info(" ... Entity {} not found on any referenced site");
             throw new WebApplicationException(NOT_FOUND);
         }
     }
-
+    
     @GET
     @Path("/find")
     public Response findEntityfromGet(@QueryParam(value = "name") String name,
-            @FormParam(value="field") String field,
-            @QueryParam(value = "lang") String language,
-            //@FormParam(value="select") String select,
-            @QueryParam(value = "limit") @DefaultValue(value = "-1") int limit,
-            @QueryParam(value = "offset") @DefaultValue(value = "0") int offset,
-            @Context HttpHeaders headers) {
-        return findEntity(name, field,language, limit, offset, headers);
+                                      @FormParam(value = "field") String field,
+                                      @QueryParam(value = "lang") String language,
+                                      // @FormParam(value="select") String select,
+                                      @QueryParam(value = "limit") @DefaultValue(value = "-1") int limit,
+                                      @QueryParam(value = "offset") @DefaultValue(value = "0") int offset,
+                                      @Context HttpHeaders headers) {
+        return findEntity(name, field, language, limit, offset, headers);
     }
-
+    
     @POST
     @Path("/find")
     public Response findEntity(@FormParam(value = "name") String name,
-            @FormParam(value="field") String field,
-            @FormParam(value = "lang") String language,
-            //@FormParam(value="select") String select,
-            @FormParam(value = "limit") Integer limit,
-            @FormParam(value = "offset") Integer offset,
-            @Context HttpHeaders headers) {
+                               @FormParam(value = "field") String field,
+                               @FormParam(value = "lang") String language,
+                               // @FormParam(value="select") String select,
+                               @FormParam(value = "limit") Integer limit,
+                               @FormParam(value = "offset") Integer offset,
+                               @Context HttpHeaders headers) {
         log.debug("sites/find Request");
-        if(field == null){
+        if (field == null) {
             field = DEFAULT_FIND_FIELD;
         } else {
             field = field.trim();
-            if(field.isEmpty()){
+            if (field.isEmpty()) {
                 field = DEFAULT_FIND_FIELD;
             }
         }
-        ReferencedSiteManager referencedSiteManager = getService(ReferencedSiteManager.class, context);
-        FieldQuery query = JerseyUtils.createFieldQueryForFindRequest(name, field, language, 
+        ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
+            ReferencedSiteManager.class, context);
+        FieldQuery query = JerseyUtils.createFieldQueryForFindRequest(name, field, language,
             limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, offset);
-        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
+        final MediaType acceptedMediaType = JerseyUtils
+                .getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
         return Response.ok(referencedSiteManager.find(query), acceptedMediaType).build();
     }
+    
     /**
-     * Allows to parse any kind of {@link FieldQuery} in its JSON Representation.
-     * Note that the maximum number of results (limit) and the offset of the
-     * first result (offset) are parsed as seperate parameters and are not
-     * part of the field query as in the java API.<p>
-     * TODO: as soon as the entityhub supports multiple query types this need
-     *       to be refactored. The idea is that this dynamically detects query
-     *       types and than redirects them to the referenced site implementation.
-     * @param query The field query in JSON format
-     * @param limit the maximum number of results starting at offset
-     * @param offset the offset of the first result
-     * @param headers the header information of the request
+     * Allows to parse any kind of {@link FieldQuery} in its JSON Representation. Note that the maximum number
+     * of results (limit) and the offset of the first result (offset) are parsed as seperate parameters and
+     * are not part of the field query as in the java API.
+     * <p>
+     * TODO: as soon as the entityhub supports multiple query types this need to be refactored. The idea is
+     * that this dynamically detects query types and than redirects them to the referenced site
+     * implementation.
+     * 
+     * @param query
+     *            The field query in JSON format
+     * @param limit
+     *            the maximum number of results starting at offset
+     * @param offset
+     *            the offset of the first result
+     * @param headers
+     *            the header information of the request
      * @return the results of the query
      */
     @POST
     @Path("/query")
-    @Consumes( { APPLICATION_FORM_URLENCODED + ";qs=1.0",
-            MULTIPART_FORM_DATA + ";qs=0.9" })
-    public Response queryEntities(
-            @FormParam("query") String queryString,
-            @FormParam("query") File file,
-            @Context HttpHeaders headers) {
-        ReferencedSiteManager referencedSiteManager = getService(ReferencedSiteManager.class, context);
+    @Consumes( {APPLICATION_FORM_URLENCODED + ";qs=1.0", MULTIPART_FORM_DATA + ";qs=0.9"})
+    public Response queryEntities(@FormParam("query") String queryString,
+                                  @FormParam("query") File file,
+                                  @Context HttpHeaders headers) {
+        ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
+            ReferencedSiteManager.class, context);
         FieldQuery query = JerseyUtils.parseFieldQuery(queryString, file);
-        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, MediaType.APPLICATION_JSON_TYPE);
+        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers,
+            MediaType.APPLICATION_JSON_TYPE);
         return Response.ok(referencedSiteManager.find(query), acceptedMediaType).build();
     }
     

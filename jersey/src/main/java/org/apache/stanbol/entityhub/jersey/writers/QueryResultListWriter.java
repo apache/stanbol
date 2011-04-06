@@ -42,8 +42,12 @@ import javax.ws.rs.ext.Provider;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.commons.io.IOUtils;
+import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.codehaus.jettison.json.JSONException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * TODO: Replace with Serializer infrastructure similar to {@link Serializer}
@@ -52,12 +56,14 @@ import org.codehaus.jettison.json.JSONException;
 @Produces({APPLICATION_JSON, N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE, RDF_JSON})
 public class QueryResultListWriter implements MessageBodyWriter<QueryResultList<?>> {
 
-//    private final Logger log = LoggerFactory.getLogger(QueryResultListWriter.class);
+    @SuppressWarnings("unused")
+    private final Logger log = LoggerFactory.getLogger(QueryResultListWriter.class);
+    
     @Context
-    private ServletContext servletContext;
-
+    protected ServletContext servletContext;
+    
     protected Serializer getSerializer() {
-        return (Serializer) servletContext.getAttribute(Serializer.class.getName());
+        return ContextHelper.getServiceFromContext(Serializer.class, servletContext);
     }
 
     @Override

@@ -16,23 +16,23 @@
  */
 package org.apache.stanbol.entityhub.jersey.resource;
 
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
+
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 
-import com.sun.jersey.api.view.ImplicitProduces;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
-/**
- * Root JAX-RS resource. The HTML view is implicitly rendered by a freemarker
- * template to be found in the META-INF/templates folder.
- */
-@Path("/")
-@ImplicitProduces("text/html")
-public class EntityhubRootResource extends NavigationMixin {
+import com.sun.jersey.api.view.Viewable;
 
-    // TODO: add here some controllers to provide some stats on the usage of the
-    // FISE instances: np of content items in the store, nb of registered
-    // engines, nb of extracted enhancements, ...
-
-    // Also disable some of the features in the HTML view if the store, sparql
-    // engine, engines are not registered.
-
+@Path("/entityhub")
+public class EntityhubRootResource extends BaseStanbolResource {
+    
+    @GET
+    @Produces(TEXT_HTML)
+    public Response get() {
+        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+    }
 }
