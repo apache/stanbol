@@ -90,7 +90,7 @@ public class XMLReengineerTest {
 
 	        // Two different ontology storagez, the same sparql engine and tcprovider
 		ONManager onManager = new ONManagerImpl(tcm, wtcp ,emptyConf);
-		xmlExtractor = new XMLExtractor(new ReengineerManagerImpl(tcm, wtcp),
+		xmlExtractor = new XMLExtractor(new ReengineerManagerImpl(),
 				onManager, emptyConf);
 	}
 
