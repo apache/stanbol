@@ -122,7 +122,7 @@ public class ContentItemResource extends BaseStanbolResource {
             this.metadataHref = uriInfo.getBaseUriBuilder().path("/store/metadata").path(localId).build();
         }
         defaultThumbnails.put(DBPEDIA_PERSON, getStaticRootUrl() + "/home/images/user_48.png");
-        defaultThumbnails.put(DBPEDIA_ORGANISATION, getStaticRootUrl() + "/home/organization_48.png");
+        defaultThumbnails.put(DBPEDIA_ORGANISATION, getStaticRootUrl() + "/home/images/organization_48.png");
         defaultThumbnails.put(DBPEDIA_PLACE, getStaticRootUrl() + "/home/images/compass_48.png");
 
     }
