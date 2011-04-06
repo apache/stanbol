@@ -30,6 +30,6 @@ public class EngineException extends Exception {
         super(String.format(
                 "'%s' failed to process content item '%s' with type '%s': %s",
                 ee.getClass().getSimpleName(), ci.getId(), ci.getMimeType(),
-                cause.getMessage()), cause);
+                cause), cause);
     }
 }
