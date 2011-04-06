@@ -18,6 +18,7 @@ package org.apache.stanbol.commons.stanboltools.datafileprovider;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * Used to provide read-only data files (indexes, models etc.) from various
@@ -34,9 +35,8 @@ public interface DataFileProvider {
      *  @param bundleSymbolicName can be used to differentiate 
      *      between files which have the same name
      *  @param filename name of the file to open
-     *  @param downloadExplanation explains how to get the "full"
-     *      version of the data file, in case we don't find it or in
-     *      case we supply a default small variant.
+     *  @param comments Optional - how to get a more complete version
+     *          of the data file, licensing information, etc.
      * @return InputStream to read the file, must be closed by 
      *      caller when done
      * @throws IOException problem finding or reading the file
@@ -44,5 +44,5 @@ public interface DataFileProvider {
     InputStream getInputStream(
             String bundleSymbolicName, 
             String filename,
-            String downloadExplanation) throws IOException;
+            Map<String, String> comments) throws IOException;
 }

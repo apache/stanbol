@@ -26,6 +26,7 @@ import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -129,7 +130,7 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
     @SuppressWarnings("unchecked")
     @Override
     public InputStream getInputStream(String bundleSymbolicName,
-            String filename, String downloadExplanation) throws IOException {
+            String filename, Map<String, String> comments) throws IOException {
         InputStream result = null;
         String fileUrl = null;
         
@@ -162,7 +163,7 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
                     continue;
                 }
                 final DataFileProvider dfp = (DataFileProvider)o;
-                result = dfp.getInputStream(bundleSymbolicName, filename, downloadExplanation);
+                result = dfp.getInputStream(bundleSymbolicName, filename, comments);
                 if(result == null) {
                     log.debug("{} does not provide file {}", dfp, filename);
                 } else {
@@ -174,7 +175,7 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
         // Add event
         final DataFileProviderEvent event = new DataFileProviderEvent(
                 bundleSymbolicName, filename, 
-                downloadExplanation, fileUrl);
+                comments, fileUrl);
         
         synchronized (events) {
             if(events.size() >= maxEvents) {
