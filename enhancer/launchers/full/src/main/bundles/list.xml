@@ -67,7 +67,25 @@
 		</bundle>
 	</startLevel>
     
-    <!-- Sling utility bundles -->
+    <!-- Sling installer and Stanbol extensions -->
+    <startLevel level="9">
+        <bundle>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.installer.core</artifactId>
+            <version>3.1.2</version>
+        </bundle>
+        <bundle>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.commons.installer.bundleprovider</artifactId>
+            <version>0.9-SNAPSHOT</version>
+        </bundle>
+<!-- 		<bundle>
+		    <groupId>org.apache.sling</groupId>
+		    <artifactId>org.apache.sling.installer.provider.file</artifactId>
+		    <version>1.0.0</version>
+		</bundle>  -->
+    </startLevel>
+    <!-- Sling launchpad -->
     <startLevel level="10">
         <bundle>
             <groupId>org.apache.sling</groupId>
@@ -78,11 +96,6 @@
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.launchpad.api</artifactId>
             <version>1.0.0</version>
-        </bundle>
-        <bundle>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.installer.core</artifactId>
-            <version>3.1.2</version>
         </bundle>
     </startLevel>
 
