@@ -132,7 +132,6 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
             String filename, String downloadExplanation) throws IOException {
         InputStream result = null;
         String fileUrl = null;
-        String loadingClass = null;
         
         // First look for the file in our data folder,
         // with and without bundle symbolic name prefix
@@ -147,7 +146,6 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
                 log.debug("File found in data files folder: {}", filename);
                 result = new FileInputStream(f);
                 fileUrl = "file://" + f.getAbsolutePath();
-                loadingClass = this.getClass().getName();
                 break;
             }
         }
@@ -169,7 +167,6 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
                     log.debug("{} does not provide file {}", dfp, filename);
                 } else {
                     fileUrl = dfp.getClass().getName() + "://" + filename;
-                    loadingClass = dfp.getClass().getName();
                 }
             }
         }
@@ -177,7 +174,7 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
         // Add event
         final DataFileProviderEvent event = new DataFileProviderEvent(
                 bundleSymbolicName, filename, 
-                downloadExplanation, loadingClass, fileUrl);
+                downloadExplanation, fileUrl);
         
         synchronized (events) {
             if(events.size() >= maxEvents) {
