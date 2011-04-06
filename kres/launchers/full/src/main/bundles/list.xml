@@ -453,11 +453,6 @@
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.reengineer.mysql</artifactId>
-			<version>0.9-SNAPSHOT</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.reengineer.xerces</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
