@@ -18,6 +18,9 @@ package org.apache.stanbol.entityhub.yard.solr.utils;
 
 import java.util.regex.Pattern;
 
+import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
+import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
+
 
 public final class SolrUtil {
     private SolrUtil(){}
@@ -35,6 +38,36 @@ public final class SolrUtil {
      */
     public static String escapeSolrSpecialChars(String string) {
         return string != null?LUCENE_PATTERN.matcher(string).replaceAll(REPLACEMENT_STRING):null;
+    }
+    /**
+     * This method encodes a parsed index value as needed for queries.<p> 
+     * In case of TXT it is assumed that a whitespace tokenizer is used
+     * by the index. Therefore values with multiple words need to be
+     * treated and connected with AND to find only values that contain all.
+     * In case of STR no whitespace is assumed. Therefore spaces need to
+     * be replaced with '+' to search for tokens with the exact name.
+     * In all other cases the string need not to be converted.
+     * 
+     * Note also that text queries are converted to lower case
+     * @param value the index value
+     * @return the (possible multiple) values that need to be connected with AND
+     */
+    public static String[] encodeQueryValue(IndexValue indexValue){
+        if(indexValue == null){
+            return null;
+        }
+        String[] queryConstraints;
+        String escapedValue = SolrUtil.escapeSolrSpecialChars(indexValue.getValue());
+        if(IndexDataTypeEnum.TXT.getIndexType().equals(indexValue.getType())){
+            escapedValue = escapedValue.toLowerCase();
+            queryConstraints = escapedValue.split(" ");
+        } else if(IndexDataTypeEnum.STR.equals(indexValue.getType())){
+            escapedValue = escapedValue.toLowerCase();
+            queryConstraints = new String[]{escapedValue.replace(' ', '+')};
+        } else {
+            queryConstraints = new String[]{escapedValue};
+        }
+        return queryConstraints;
     }
 
 }

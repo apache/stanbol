@@ -37,7 +37,6 @@ import org.apache.solr.core.CoreDescriptor;
 import org.apache.solr.core.SolrCore;
 import org.apache.stanbol.entityhub.yard.solr.SolrServerProvider;
 import org.apache.stanbol.entityhub.yard.solr.SolrServerProvider.Type;
-import org.apache.stanbol.entityhub.yard.solr.utils.ConfigUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

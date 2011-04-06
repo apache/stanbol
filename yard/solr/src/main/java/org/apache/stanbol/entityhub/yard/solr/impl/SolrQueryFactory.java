@@ -256,17 +256,18 @@ public class SolrQueryFactory {
      */
     private void initIndexConstraint(IndexConstraint indexConstraint, TextConstraint textConstraint) {
         Text text = valueFactory.createText(textConstraint.getText());
+        IndexValue textValue = indexValueFactory.createIndexValue(text);
         indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.DATATYPE, text);
         indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.LANG, textConstraint.getLanguages());
         switch (textConstraint.getPatternType()) {
         case none:
-            indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.EQ, text);
+            indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.EQ, textValue);
             break;
         case wildcard:
-            indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.WILDCARD, textConstraint.getText());
+            indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.WILDCARD, textValue);
             break;
         case regex:
-            indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.REGEX, textConstraint.getText());
+            indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.REGEX, textValue);
             break;
         default:
             indexConstraint.setInvalied(String.format("PatterType %s not supported for Solr Index Queries!",
@@ -525,49 +526,88 @@ public class SolrQueryFactory {
         }
         private StringBuilder encodeSolrConstraint(StringBuilder queryString,EncodedConstraintParts encodedConstraintParts) {
             //list of all constraints that need to be connected with OR
-            List<StringBuilder> constraints = new ArrayList<StringBuilder>();
+            List<List<StringBuilder>> constraints = new ArrayList<List<StringBuilder>>();
             //init with a single constraint
-            constraints.add(new StringBuilder());
-            for(Entry<ConstraintTypePosition, Set<String>> entry : encodedConstraintParts){
+            constraints.add(new ArrayList<StringBuilder>(Arrays.asList(new StringBuilder())));
+            for(Entry<ConstraintTypePosition, Set<Set<String>>> entry : encodedConstraintParts){
                 //one position may contain multiple options that need to be connected with OR
-                Set<String> parts = entry.getValue();
+                Set<Set<String>> orParts = entry.getValue();
                 int i=0;
                 int constraintsSize = constraints.size();
-                for(String part : parts){
+                for(Set<String> andParts : orParts){
                     i++;
-                    if(i == parts.size()){
+                    //add the and constraints to all or
+                    List<StringBuilder> andConstaints;
+                    if(i == orParts.size()){
                         //for the last iteration, append the part to the existing constraints
                         for(int j=0;j<constraintsSize;j++){
-                            constraints.get(j).append(part);
+                            encodeAndParts(andParts, constraints.get(j));
                         }
                     } else {
                         //if there is more than one value, we need to generate new variants for
                         //every option other than the last.
                         for(int j=0;j<constraintsSize;j++){
-                            StringBuilder additional = new StringBuilder(constraints.get(j));
-                            additional.append(part);
+                            List<StringBuilder> additional = new ArrayList<StringBuilder>(constraints.get(j));
+                            encodeAndParts(andParts, additional);
+//                            additional.append(part);
                             constraints.add(additional);
                         }
                     }
                 }
             }
             //now combine the different options to a single query string
-            boolean first = true;
-            for(StringBuilder constraint : constraints){
-                if(constraint.length()>0){
-                    if(first){
+            boolean firstOr = true;
+            for(List<StringBuilder> constraint : constraints){
+                if(constraint.size()>0){
+                    if(firstOr){
                         queryString.append('(');
-                        first = false;
+                        firstOr = false;
                     } else {
-                        queryString.append(" OR ");
+                        queryString.append(" OR (");
                     }
-                    queryString.append(constraint);
+                    boolean firstAnd = true;
+                    for(StringBuilder andConstraint: constraint){
+                        if(andConstraint.length()>0){
+                            if(firstAnd){
+                                queryString.append('(');
+                                firstAnd = false;
+                            } else {
+                                queryString.append(" AND (");
+                            }
+                            queryString.append(andConstraint);
+                            queryString.append(')');
+                        }
+                    }
                 } //else ignore empty constraints
             }
-            if(!first){
-                queryString.append(')');
-            }
+            queryString.append(')');
             return queryString;
+        }
+        /**
+         * @param andParts
+         * @param andConstaint
+         */
+        private void encodeAndParts(Set<String> andParts, List<StringBuilder> andConstaint) {
+            int andConstaintSize = andConstaint.size();
+            int k = 0;
+            for(String part : andParts){
+                k++;
+                //add the AND part of this constraint position with all parts of the others
+                if(k == andParts.size()){
+                    //for the last iteration, append the part to the existing constraints
+                    for(int j=0;j<andConstaintSize;j++){
+                        andConstaint.get(j).append(part);
+                    }
+                } else {
+                    //if there is more than one value, we need to generate new variants for
+                    //every option other than the last.
+                    for(int j=0;j<andConstaintSize;j++){
+                        StringBuilder additional = new StringBuilder(andConstaint.get(j));
+                        additional.append(part);
+                        andConstaint.add(additional);
+                    }
+                }
+            }
         }
 
 //        /**

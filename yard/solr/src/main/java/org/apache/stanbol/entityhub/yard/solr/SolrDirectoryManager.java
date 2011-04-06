@@ -17,12 +17,14 @@
 package org.apache.stanbol.entityhub.yard.solr;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
+import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.core.CoreContainer;
 import org.apache.stanbol.entityhub.yard.solr.SolrServerProvider.Type;
-import org.apache.stanbol.entityhub.yard.solr.utils.ConfigUtils;
+import org.apache.stanbol.entityhub.yard.solr.impl.ConfigUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -101,20 +103,33 @@ public interface SolrDirectoryManager {
     Map<String,File> getManagedIndices() throws IllegalStateException;
 
     /**
-     * Getter for the directory of the parsed index. In case the requested index
-     * does not already exist (in the managed solr directory) it is initialised
-     * by using the default solr core configuration contained in this bundle.<p>
+     * Getter for the directory of the parsed index. Implementations need to 
+     * ensure that returned directories are valid Solr indices (or Solr Cores)<p>
      * Directories returned by this method are typically used as second parameter
      * of {@link SolrServerProvider#getSolrServer(Type, String, String...)} to
      * create an {@link SolrServer} instance.
      * @param solrPathOrUri the name of the requested solr index. If no index
      * with that name does exist a new one will be initialised base on the
      * default core configuration part of this bundle.
-     * @return the directory (instanceDir) of the index.
+     * @param If <code>true</code> the Solr directory is created  and initialised
+     * with the default configuration if it does not already exist.
+     * @return the directory (instanceDir) of the index or <code>null</code> if
+     * <code>false</code> was parsed as create and the index does not already
+     * exist. 
      * @throws IllegalArgumentException if the parsed solrIndexName is 
      * <code>null</code> or empty
      */
-    File getSolrDirectory(final String solrIndexName) throws IllegalArgumentException;
+    File getSolrDirectory(final String solrIndexName,boolean create) throws IllegalArgumentException;
+    /**
+     * 
+     * @param solrIndexName the name of the index to create
+     * @param ais the stream providing the data for the new index
+     * @return the directory (instanceDir) of the index.
+     * @throws IOException On any error while reading from the parsed input stream
+     * @throws IllegalArgumentException if the parsed solrIndexName is 
+     * <code>null</code> or empty
+     */
+    File createSolrDirectory(final String solrIndexName, ArchiveInputStream ais) throws IllegalArgumentException, IOException;
 
     /**
      * Getter for the managed Solr Directory.

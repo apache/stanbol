@@ -19,8 +19,11 @@ package org.apache.stanbol.entityhub.yard.solr.impl;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -29,8 +32,10 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.entityhub.yard.solr.SolrDirectoryManager;
-import org.apache.stanbol.entityhub.yard.solr.utils.ConfigUtils;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of the {@link SolrDirectoryManager} interface that supports
@@ -46,9 +51,12 @@ import org.osgi.service.component.ComponentContext;
            @Property(name=SolrDirectoryManager.MANAGED_SOLR_DIR_PROPERTY,value=SolrDirectoryManager.DEFAULT_SOLR_DATA_DIR)
     })
 public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
-    //private final Logger log = LoggerFactory.getLogger(DefaultSolrDirectoryManager.class);
+    private final Logger log = LoggerFactory.getLogger(DefaultSolrDirectoryManager.class);
     /**
-     * The directory used by the internally managed embedded solr server.
+     * The directory used by the internally managed embedded solr server. 
+     * Use {@link #lookupManagedSolrDir()} instead of using this member, because
+     * this member is not initialised within the constructor or the 
+     * {@link #activate(ComponentContext)} method.
      */
     private File solrDataDir;
     
@@ -66,6 +74,18 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
      * change!
      */
     private boolean withinOSGI = false;
+    /**
+     * Initialising Solr Indexes with a lot of data may take some time. Especially
+     * if the data need to be copied to the managed directory. Therefore it is
+     * important to wait for the initialisation to be complete before opening
+     * an Solr Index on it.<p>
+     * To this set all cores that are currently initialised are added. As soon
+     * as an initialisation completed this set is notified.
+     */
+    private Set<String> initCores = new HashSet<String>();
+    
+    public DefaultSolrDirectoryManager() {
+    }
     
     /* (non-Javadoc)
      * @see org.apache.stanbol.entityhub.yard.solr.impl.ManagedSolrDirectory#isSolrDir(java.lang.String)
@@ -78,13 +98,13 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
             throw new IllegalArgumentException("The parsed name of the Solr index MUST NOT be empty");
         }
         //also here we need to initialise the SolrDirectory if not already done
-        return new File(initSolrDirectory(null),solrIndexName).exists();
+        return new File(lookupManagedSolrDir(componentContext),solrIndexName).exists();
     }
     /* (non-Javadoc)
      * @see org.apache.stanbol.entityhub.yard.solr.impl.ManagedSolrDirectory#getManagedIndices()
      */
     public final Map<String,File> getManagedIndices() throws IllegalStateException {
-        File solrDir = initSolrDirectory(null);
+        File solrDir = lookupManagedSolrDir(componentContext);
         String[] indexNames = solrDir.list(DirectoryFileFilter.INSTANCE);
         Map<String,File> indexes = new HashMap<String,File>();
         for(String indexName:indexNames){
@@ -96,51 +116,55 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
     /* (non-Javadoc)
      * @see org.apache.stanbol.entityhub.yard.solr.impl.ManagedSolrDirectory#getSolrDirectory(java.lang.String)
      */
-    public final File getSolrDirectory(final String solrIndexName) throws IllegalArgumentException {
-        if(solrIndexName == null){
-            throw new IllegalArgumentException("The parsed name of the Solr index MUST NOT be NULL");
-        }
-        if(solrIndexName.isEmpty()){
-            throw new IllegalArgumentException("The parsed name of the Solr index MUST NOT be empty");
-        }
-        return initSolrDirectory(solrIndexName);
+    public final File getSolrDirectory(final String solrIndexName,boolean create) throws IllegalArgumentException {
+        return initSolrDirectory(solrIndexName,null,create,componentContext);
+    }
+    public final File createSolrDirectory(final String solrIndexName, ArchiveInputStream ais){
+        return initSolrDirectory(solrIndexName,ais,true,componentContext);
     }
     /**
      * Internally used to get/init the Solr directory of a SolrCore or the root
      * Solr directory (if <code>null</code> is parsed)
      * @param solrIndexName the name of the Core or <code>null</code> to get/init
      * the root solr directory
+     * @param ais The Input stream of the Archive to load the index from or
+     * <code>null</code> to load the default core configuration.
+     * @param create If <code>true</code> a new core is initialised if not already
+     * present. Make sure this is set to <code>true</code> if parsing an InputStream.
+     * Otherwise the index will not be created from the parsed stream!
+     * @param context A reference to the component context or <code>null</code> if
+     * running outside an OSGI container. This is needed to avoid that 
+     * {@link #deactivate(ComponentContext)} sets the context to <code>null</code> 
+     * during this method does its initialisation work.
      * @return the Solr directory or <code>null</code> in case this component is
      * deactivated
      * @throws IllegalStateException in case this method is called when this
      * component is running within an OSGI environment and it is deactivated or
      * the initialisation for the parsed index failed.
+     * @throws IllegalArgumentException if the parsed solrIndexName is <code>null</code> or
+     * empty.
      */
-    private final File initSolrDirectory(final String solrIndexName) throws IllegalStateException {
-        File managedCoreContainerDirectory = lookupManagedSolrDir();
-        ComponentContext context = componentContext;
-        if(!managedCoreContainerDirectory.exists()){
-            try {
-                if(context != null){ //load via bundle
-                    managedCoreContainerDirectory = ConfigUtils.copyDefaultConfig(
-                        context.getBundleContext().getBundle(),managedCoreContainerDirectory, false);
-                } else { //load from jar
-                    managedCoreContainerDirectory = ConfigUtils.copyDefaultConfig(
-                        (Class<?>)null, managedCoreContainerDirectory, false);
-                }
-            } catch (IOException e) {
-                throw new IllegalStateException(
-                    String.format("Unable to copy default configuration for the manages Solr Directory to the configured path %s!"
-                        , managedCoreContainerDirectory.getAbsoluteFile()),e);
-            }
+    private final File initSolrDirectory(final String solrIndexName,ArchiveInputStream ais,boolean create,ComponentContext context) throws IllegalStateException {
+        if(solrIndexName == null){
+            throw new IllegalArgumentException("The parsed name of the Solr index MUST NOT be NULL");
         }
+        if(solrIndexName.isEmpty()){
+            throw new IllegalArgumentException("The parsed name of the Solr index MUST NOT be empty");
+        }
+        File managedCoreContainerDirectory = lookupManagedSolrDir(context);
         if(solrIndexName == null){
             return managedCoreContainerDirectory;
         }
         File coreDir = new File(managedCoreContainerDirectory,solrIndexName);
-        if(!coreDir.exists()){
+        if(create && !coreDir.exists()){
+            synchronized (initCores) {
+                log.info(" > start initializing SolrIndex "+solrIndexName);
+                initCores.add(solrIndexName);
+            }
             try {
-                if(context != null){ //load via bundle
+                if(ais != null){
+                    ConfigUtils.copyCore(ais, coreDir, solrIndexName, false);
+                } else if(context != null){ //load via bundle
                     ConfigUtils.copyCore(context.getBundleContext().getBundle(),
                         coreDir, null, false);
                 } else { //load from jar
@@ -150,6 +174,26 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
                 throw new IllegalStateException(
                     String.format("Unable to copy default configuration for Solr Index %s to the configured path %s"
                         ,solrIndexName==null?"":solrIndexName,managedCoreContainerDirectory.getAbsoluteFile()),e);
+            } finally {
+                synchronized (initCores) {
+                    initCores.remove(solrIndexName);
+                    log.info("   ... finished inizializaiton of SolrIndex "+solrIndexName);
+                    //notify that the initialisation completed or failed
+                    initCores.notifyAll(); 
+                }
+            }
+        } else { //the dir exists
+            //check if still initialising ... and wait until the initialisation
+            //is complete
+            synchronized (initCores) {
+                while(initCores.contains(solrIndexName)){
+                    log.info(" > wait for initialisation of SolrIndex "+solrIndexName);
+                    try {
+                        initCores.wait();
+                    } catch (InterruptedException e) {
+                        // a core is initialised ... back to work
+                    }
+                }
             }
         }
         return coreDir;
@@ -159,20 +203,20 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
      * @see org.apache.stanbol.entityhub.yard.solr.impl.ManagedSolrDirectory#getManagedSolrDir()
      */
     public File getManagedDirectory() {
-        // call initSolrDirectory(null) to initialise the internally managed
-        // Solr directory in case it is not already initialised.
-        return initSolrDirectory(null);
+        return lookupManagedSolrDir(componentContext);
     }
     /**
-     * Lookup the location of the managed Solr directory
+     * Lookup the location of the managed Solr directory. Also initialised the
+     * default configuration if the directory does not yet exist.
+     * @param context A reference to the component context or <code>null</code> if
+     * running outside an OSGI container. This is needed to avoid that 
+     * {@link #deactivate(ComponentContext)} sets the context to <code>null</code> 
+     * during this method does its initialisation work.
      * @return the directory based on the current configuration
      * @throws IllegalStateException in case this method is called when this
      * component is running within an OSGI environment and it is deactivated.
      */
-    private File lookupManagedSolrDir() throws IllegalStateException {
-        //local copy to avoid NullPointerExceptions when deactivate is called
-        //during this method
-        ComponentContext context = componentContext;
+    private File lookupManagedSolrDir(ComponentContext context) throws IllegalStateException {
         if(solrDataDir == null){
             String configuredDataDir;
             if(context == null){ //load via system properties
@@ -186,7 +230,8 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
                 }
             }
             //property substitution
-            configuredDataDir = substituteProperty(configuredDataDir);
+            configuredDataDir = substituteProperty(configuredDataDir,
+                context != null?context.getBundleContext():null);
             //determine the directory holding the SolrIndex
             /*
              * NOTE:
@@ -200,6 +245,21 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
             } else { //set the the absolute path
                 solrDataDir = new File(configuredDataDir);
             }
+            if(!solrDataDir.exists()){
+                try {
+                    if(context != null){ //load via bundle
+                        solrDataDir = ConfigUtils.copyDefaultConfig(
+                            context.getBundleContext().getBundle(),solrDataDir, false);
+                    } else { //load from jar
+                        solrDataDir = ConfigUtils.copyDefaultConfig(
+                            (Class<?>)null, solrDataDir, false);
+                    }
+                } catch (IOException e) {
+                    throw new IllegalStateException(
+                        String.format("Unable to copy default configuration for the manages Solr Directory to the configured path %s!"
+                            , solrDataDir.getAbsoluteFile()),e);
+                }
+            }
         }
         return solrDataDir;
     }
@@ -208,11 +268,17 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
      * Substitutes ${property.name} with the values retrieved via
      * {@link System#getProperty(String, String)}. An empty string is used as
      * default<p>
+     * Nested substitutions are NOTE supported. However multiple substitutions
+     * are supported. <p>
      * If someone knows a default implementation feel free to replace!
      * @param value the value to substitute
+     * @param bundleContext If not <code>null</code> the 
+     * {@link BundleContext#getProperty(String)} is used instead of the 
+     * {@link System#getProperty(String)}. By that it is possible to use
+     * OSGI only properties for substitution.
      * @return the substituted value
      */
-    private static String substituteProperty(String value) {
+    private static String substituteProperty(String value,BundleContext bundleContext) {
         int prevAt = 0;
         int foundAt = 0;
         StringBuilder substitution = new StringBuilder();
@@ -220,19 +286,22 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
             substitution.append(value.substring(prevAt, foundAt));
             String propertyName = value.substring(
                 foundAt+2,value.indexOf('}',foundAt));
-            substitution.append(System.getProperty(propertyName, ""));
-            prevAt = foundAt+propertyName.length()+3;
+            String propertyValue = bundleContext == null? //if no bundleContext is available
+                    System.getProperty(propertyName): //use the System properties
+                        bundleContext.getProperty(propertyName);
+            substitution.append(propertyValue==null?"":propertyValue);
+            prevAt = foundAt+propertyName.length()+3; //+3 -> "${}".length
         }
         substitution.append(value.substring(prevAt, value.length()));
         return substitution.toString();
     }
     @Activate
     protected void activate(ComponentContext context) {
-        this.componentContext = context;
-        this.withinOSGI = true;
+        componentContext = context;
+        withinOSGI = true;
     }
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        this.componentContext = null;
+        componentContext = null;
     }
 }

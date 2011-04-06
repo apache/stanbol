@@ -14,22 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.entityhub.yard.solr.utils;
+package org.apache.stanbol.entityhub.yard.solr.impl;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
-import org.apache.stanbol.entityhub.yard.solr.impl.EmbeddedSolrPorovider;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,17 +132,17 @@ public final class ConfigUtils {
         if(sourceRoot.isFile()){
             ZipFile archive = new ZipFile(sourceRoot);
             log.info(String.format("Copy Default Config from jar-file %s to %s (override=%s)",
-                archive.getName(),rootDir.getAbsolutePath(),override));
+                sourceRoot.getName(),rootDir.getAbsolutePath(),override));
             try {
-                for(Enumeration<? extends ZipEntry> entries = archive.entries();entries.hasMoreElements();){
-                    ZipEntry entry = entries.nextElement();
+                for(Enumeration<ZipArchiveEntry> entries = (Enumeration<ZipArchiveEntry>)archive.getEntries();entries.hasMoreElements();){
+                    ZipArchiveEntry entry = entries.nextElement();
                     if(entry.getName().startsWith(CONFIG_DIR)){
                         copyResource(rootDir, archive, entry, CONFIG_DIR, override);
                     }
                 }
             } finally {
                 //regardless what happens we need to close the archive!
-                archive.close();
+                ZipFile.closeQuietly(archive);
             }
         } else { //load from file
             File source = new File(sourceRoot,CONFIG_DIR);
@@ -209,7 +212,7 @@ public final class ConfigUtils {
      * be deleted
      * @throws IOException in case of an error while reading or writing the resource
      */
-    private static void copyResource(File rootDir,ZipFile archive, ZipEntry entry,String context,boolean override) throws IOException {
+    private static void copyResource(File rootDir,ZipFile archive, ZipArchiveEntry entry,String context,boolean override) throws IOException {
         File file = prepairCopy(entry.getName(), rootDir, context);
         if(file != null){
             boolean overrideState = false;
@@ -218,8 +221,17 @@ public final class ConfigUtils {
                 overrideState = true;
             }
             if(!file.exists()) {
-                IOUtils.copy(archive.getInputStream(entry), FileUtils.openOutputStream(file));
-                log.debug(String.format(" > %s %s",overrideState?"override":"copy",file));
+                OutputStream os = null;
+                InputStream is = null;
+                try {
+                    os = FileUtils.openOutputStream(file);
+                    is = archive.getInputStream(entry);
+                    IOUtils.copy(is, os);
+                    log.debug(String.format(" > %s %s",overrideState?"override":"copy",file));
+                } finally {
+                    IOUtils.closeQuietly(is);
+                    IOUtils.closeQuietly(os);
+                }
             }
         } //else can not cppy logging already provided
         
@@ -305,6 +317,75 @@ public final class ConfigUtils {
         }
     }
     /**
+     * Copies a core from the parsed archive input stream to the target location
+     * @param ais The input stream of the archive (not closed by this method)
+     * @param coreDir the directory for the core
+     * @param coreName the name of the core (used as context when reading relative
+     * paths from the archive
+     * @param override if existing files should be overridden
+     * @throws IOException On any error while accessing the data of the archive
+     * @throws IllegalArgumentException if any of the parameter is <code>null</code>
+     * or if the coreDir exists but is not an directory or if the core name is
+     * empty
+     */
+    public static void copyCore(ArchiveInputStream ais, File coreDir,String coreName,boolean override) throws IOException{
+        if(ais == null){
+            throw new IllegalArgumentException("The parsed ArchiveInputStream MUST NOT be NULL!");
+        }
+        if(coreDir == null){
+            throw new IllegalArgumentException("The parsed core directory MUST NOT be NULL!");
+        }
+        if(coreDir.exists() && !coreDir.isDirectory()){
+            throw new IllegalStateException("The parsed core directory "+coreDir.getAbsolutePath()+" extists but is not a directory!");
+        }
+        if(coreName== null || coreName.isEmpty()){
+            throw new IllegalArgumentException("The parsed core name MUST NOT be NULL or empty!");
+        }
+        ArchiveEntry entry;
+        while((entry = ais.getNextEntry())!=null){
+            if(!entry.isDirectory()){
+                copyArchiveEntry(ais, entry, coreDir, coreName, override);
+                /*
+                 * NOTE: Here we use the coreName as context (last argument to 
+                 * prepairCopy(..)). This ensures that it matter if the archive 
+                 * contains the data directly in the root or within an folder 
+                 * with the name of the core.
+                 */
+            } //else - directories are created automatically and empty directories are not needed
+        }
+    }
+    /**
+     * Copy an Entry of an Archive to the target (File) within the Core Directory
+     * @param ais the ArchiveInputStream
+     * @param entry The Entry to copy
+     * @param coreDir the root directory
+     * @param context the context used to calculate the relative path of the
+     * resource within the target directory
+     * @param override if an existing resource within the target directory should
+     * be deleted
+     * @throws IOException in case of an error while reading or writing the resource
+     */
+    private static void copyArchiveEntry(ArchiveInputStream ais, ArchiveEntry entry, File coreDir, String context, boolean override) throws IOException {
+        File file = prepairCopy(entry.getName(), coreDir, context);
+        if(file != null){
+            boolean overrideState = false;
+            if(file.exists() && override){
+                FileUtils.deleteQuietly(file);
+                overrideState = true;
+            }
+            if(!file.exists()) {
+                OutputStream os = null;
+                try {
+                    os= FileUtils.openOutputStream(file);
+                    IOUtils.copy(ais, os);
+                    log.debug(String.format(" > %s %s",overrideState?"override":"copy",file));
+                }finally {
+                    IOUtils.closeQuietly(os);
+                }
+            }
+        } //else can not cppy logging already provided
+    }
+    /**
      * Copy the configuration of an core.
      * @param clazzInArchive This class is used to identify the archive containing
      * the default configuration. Parsing <code>null</code> causes this class to
@@ -338,17 +419,17 @@ public final class ConfigUtils {
         if(sourceRoot.isFile()){
             ZipFile archive = new ZipFile(sourceRoot);
             log.info(String.format("Copy core %s config from jar-file %s to %s (override=%s)",
-                (coreName == null?"":coreName),archive.getName(),coreDir.getAbsolutePath(),override));
+                (coreName == null?"":coreName),sourceRoot.getName(),coreDir.getAbsolutePath(),override));
             try {
-                for(Enumeration<? extends ZipEntry> entries = archive.entries();entries.hasMoreElements();){
-                    ZipEntry entry = entries.nextElement();
+                for(Enumeration<ZipArchiveEntry> entries = (Enumeration<ZipArchiveEntry>)archive.getEntries();entries.hasMoreElements();){
+                    ZipArchiveEntry entry = entries.nextElement();
                     if(entry.getName().startsWith(context)){
                         copyResource(coreDir, archive, entry, context, override);
                     }
                 }
             } finally {
                 //regardless what happens we need to close the archive!
-                archive.close();
+                ZipFile.closeQuietly(archive);
             }
         } else { //load from file
             File source = new File(sourceRoot,context);

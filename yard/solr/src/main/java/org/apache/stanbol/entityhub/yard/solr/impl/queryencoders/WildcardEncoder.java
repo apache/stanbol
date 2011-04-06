@@ -18,34 +18,43 @@ package org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Set;
 
+import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
+import org.apache.stanbol.entityhub.yard.solr.model.IndexDataType;
+import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition;
 import org.apache.stanbol.entityhub.yard.solr.query.EncodedConstraintParts;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition.PositionType;
+import org.apache.stanbol.entityhub.yard.solr.utils.SolrUtil;
 
 
-public class WildcardEncoder implements IndexConstraintTypeEncoder<String>{
+public class WildcardEncoder implements IndexConstraintTypeEncoder<IndexValue>{
 
     private static final ConstraintTypePosition POS = new ConstraintTypePosition(PositionType.value);
+    
+    private static final Set<IndexDataType> SUPPORTED_TYPES;
+    static {
+        Set<IndexDataType> types = new HashSet<IndexDataType>();
+        types.add(IndexDataTypeEnum.TXT.getIndexType());
+        types.add(IndexDataTypeEnum.STR.getIndexType());
+        SUPPORTED_TYPES = Collections.unmodifiableSet(types);
+    }
 
     @Override
-    public void encode(EncodedConstraintParts constraint, String value) {
+    public void encode(EncodedConstraintParts constraint, IndexValue value) {
         if(value == null){
             throw new IllegalArgumentException("This encoder does not support the NULL IndexValue!");
+        } else if(!SUPPORTED_TYPES.contains(value.getType())){
+            throw new IllegalArgumentException(String.format("This encoder does not support the IndexDataType %s (supported: %s)",
+                value.getType(),SUPPORTED_TYPES));
         } else {
-            //TODO: Use toLoverCase here, because I had problems with Solr that
-            //     Queries where not converted to lower case even that the
-            //     LowerCaseFilterFactory was present in the query analyser :(
-            value = value.toLowerCase();
-            /* NOTE:
-             *   When searching for multiple words we assume that we need to find
-             *   the exact pattern e.g. "best pract*" because of that we replace
-             *   spaces with '+'
-             */
-            value = value.replace(' ', '+');
-            constraint.addEncoded(POS, value);
+            constraint.addEncoded(POS, SolrUtil.encodeQueryValue(value));
         }
     }
 
@@ -65,8 +74,8 @@ public class WildcardEncoder implements IndexConstraintTypeEncoder<String>{
     }
 
     @Override
-    public Class<String> acceptsValueType() {
-        return String.class;
+    public Class<IndexValue> acceptsValueType() {
+        return IndexValue.class;
     }
 
 }
