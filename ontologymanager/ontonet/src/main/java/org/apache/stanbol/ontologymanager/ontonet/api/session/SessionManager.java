@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 
 /**
@@ -81,8 +82,9 @@ public interface SessionManager extends SessionListenable {
 	 *            the IRI that uniquely identifies the session
 	 * @param out
 	 *            the output stream to store the session
+	 * @throws OWLOntologyStorageException 
 	 */
     void storeSession(IRI sessionID, OutputStream out)
-			throws NonReferenceableSessionException;
+			throws NonReferenceableSessionException, OWLOntologyStorageException;
 
 }

@@ -1,6 +1,8 @@
 package org.apache.stanbol.ontologymanager.ontonet.impl.session;
 
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,8 +22,10 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session.State;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent.OperationType;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
+import org.apache.stanbol.ontologymanager.store.api.PersistenceStore;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,14 +50,22 @@ public class SessionManagerImpl implements SessionManager {
 	protected SessionIDGenerator idgen;
 
 	protected ScopeRegistry scopeRegistry;
-	protected ClerezzaOntologyStorage store;
 
-	public SessionManagerImpl(IRI baseIri, ScopeRegistry scopeRegistry, ClerezzaOntologyStorage store) {
+	/*
+	 * 
+	 * The local ClerezzaOntologyStorage has been changed with the global Stanbol component
+	 * PersistenceStore.
+	 * 
+	 */
+	//protected ClerezzaOntologyStorage store;
+	protected PersistenceStore persistenceStore;
+
+	public SessionManagerImpl(IRI baseIri, ScopeRegistry scopeRegistry, PersistenceStore persistenceStore) {
 		idgen = new TimestampedSessionIDGenerator(baseIri);
 		listeners = new HashSet<SessionListener>();
 		sessionsByID = new HashMap<IRI, Session>();
-this.scopeRegistry = scopeRegistry;
-		this.store = store;
+		this.scopeRegistry = scopeRegistry;
+		this.persistenceStore = persistenceStore;
 	}
 
 	/*
@@ -263,10 +275,41 @@ this.scopeRegistry = scopeRegistry;
 	 */
 	@Override
 	public void storeSession(IRI sessionID, OutputStream out)
-			throws NonReferenceableSessionException {
-		for (SessionOntologySpace so : getSessionSpaces(sessionID))
-			for (OWLOntology o : so.getOntologies())
-				store.store(o);
+			throws NonReferenceableSessionException, OWLOntologyStorageException {
+		/*
+		 * For each gession space in the session save all the ontologies contained in the space.
+		 */
+		for (SessionOntologySpace so : getSessionSpaces(sessionID)){
+			for (OWLOntology owlOntology : so.getOntologies()){
+				
+				/*
+				 * As the store saves ontology as string serializations first it is needed to convert the ontology content
+				 * to a string (the UTF-8 charset is used) and then it is possible to save the ontology specifying to the storage
+				 * the ontology ID.
+				 */
+				ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+				
+				owlOntology.getOWLOntologyManager().saveOntology(owlOntology, outStream);
+				
+				String ontologyID = owlOntology.getOntologyID().getOntologyIRI().toString();
+				
+				String ontologyString;
+				try {
+					ontologyString = outStream.toString("UTF-8");
+					persistenceStore.saveOntology(ontologyString, ontologyID, "UTF-8");
+				} catch (UnsupportedEncodingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				
+				
+			}
+		}
+				
 	}
 
 }

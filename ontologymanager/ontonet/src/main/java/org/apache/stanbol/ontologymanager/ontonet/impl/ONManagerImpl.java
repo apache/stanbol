@@ -38,6 +38,7 @@ import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.ScopeRegistryImp
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.impl.RegistryLoaderImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.session.SessionManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.session.ScopeSessionSynchronizer;
+import org.apache.stanbol.ontologymanager.store.api.PersistenceStore;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.FileDocumentSource;
@@ -114,7 +115,10 @@ public class ONManagerImpl implements ONManager {
     @Reference
     private WeightedTcProvider wtcp;
 
-    private ClerezzaOntologyStorage storage;
+    @Reference
+    private PersistenceStore persistenceStore;
+    
+    //private ClerezzaOntologyStorage storage;
 
     /*
      * The identifiers (not yet parsed as IRIs) of the ontology scopes that should be activated.
@@ -148,16 +152,22 @@ public class ONManagerImpl implements ONManager {
          * With the current implementation of OntologyStorage, we cannot live with either component being
          * null. So create the object only if both are not null.
          */
-        if (tcm != null && wtcp != null) storage = new ClerezzaOntologyStorage(tcm, wtcp);
+    	
+    	/*
+    	 * NOW WE USE THE STANBOL PERSISTENCE STORE.
+    	 * 
+    	if (tcm != null && wtcp != null) storage = new ClerezzaOntologyStorage(tcm, wtcp);
         // Manage this in-memory, so it won't have to be null.
         else {
             storage = new InMemoryOntologyStorage();
         }
+        
+        */
 
         // Now create everything that depends on the Storage object.
 
         // These may require the OWL cache manager
-        ontologySpaceFactory = new OntologySpaceFactoryImpl(scopeRegistry, storage);
+        ontologySpaceFactory = new OntologySpaceFactoryImpl(scopeRegistry, persistenceStore);
         ontologyScopeFactory = new OntologyScopeFactoryImpl(scopeRegistry, ontologySpaceFactory);
         ontologyScopeFactory.addScopeEventListener(oIndex);
 
@@ -169,7 +179,7 @@ public class ONManagerImpl implements ONManager {
         // storage = new FISEPersistenceStorage();
 
         sessionManager = new SessionManagerImpl(IRI.create("http://kres.iks-project.eu/"),
-                getScopeRegistry(), storage);
+                getScopeRegistry(), persistenceStore);
         sessionManager.addSessionListener(new ScopeSessionSynchronizer(this));
     }
 
@@ -391,8 +401,8 @@ public class ONManagerImpl implements ONManager {
         return ontologySpaceFactory;
     }
 
-    public ClerezzaOntologyStorage getOntologyStore() {
-        return storage;
+    public PersistenceStore getOntologyStore() {
+        return persistenceStore;
     }
 
     public OWLOntologyManager getOwlCacheManager() {

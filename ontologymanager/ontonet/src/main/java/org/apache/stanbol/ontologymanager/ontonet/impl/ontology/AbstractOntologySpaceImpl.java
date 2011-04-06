@@ -1,5 +1,6 @@
 package org.apache.stanbol.ontologymanager.ontonet.impl.ontology;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,6 +18,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntol
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.StringUtils;
+import org.apache.stanbol.ontologymanager.store.api.PersistenceStore;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.io.StringDocumentSource;
@@ -69,7 +71,13 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 	 */
 	protected OWLOntologyManager ontologyManager;
 
-	protected ClerezzaOntologyStorage storage;
+	
+	/* 
+	 * The ClerezzaOntologyStorage (local to OntoNet) has been changed with
+	 * PersistenceStore (general from Stanbol)
+	 */
+	//protected ClerezzaOntologyStorage storage;
+	protected PersistenceStore persistenceStore;
 
 	protected IRI parentID = null;
 
@@ -79,8 +87,8 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 
 	protected boolean silent = false;
 
-	protected AbstractOntologySpaceImpl(IRI spaceID, SpaceType type/*, IRI parentID*/, ClerezzaOntologyStorage storage) {
-		this(spaceID, type, /*parentID,*/ storage,OWLManager.createOWLOntologyManager());
+	protected AbstractOntologySpaceImpl(IRI spaceID, SpaceType type/*, IRI parentID*/, PersistenceStore persistenceStore) {
+		this(spaceID, type, /*parentID,*/ persistenceStore,OWLManager.createOWLOntologyManager());
 	}
 
 //	/**
@@ -105,19 +113,19 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 	 * @param ontologyManager
 	 *            the default ontology manager for this space.
 	 */
-	protected AbstractOntologySpaceImpl(IRI spaceID, SpaceType type, ClerezzaOntologyStorage storage, /*IRI parentID,*/
+	protected AbstractOntologySpaceImpl(IRI spaceID, SpaceType type, PersistenceStore persistenceStore, /*IRI parentID,*/
 			OWLOntologyManager ontologyManager) {
 
-//		this.parentID = parentID;
-//		SUFFIX = type.getIRISuffix();
-
-//		// FIXME: ensure that this is not null
-//		OntologyScope parentScope = ONManager.get().getScopeRegistry()
-//				.getScope(parentID);
-//
-//		if (parentScope != null && parentScope instanceof OntologySpaceListener)
-//			this.addOntologySpaceListener((OntologySpaceListener) parentScope);
-this.storage = storage;
+		//		this.parentID = parentID;
+		//		SUFFIX = type.getIRISuffix();
+		
+		//		// FIXME: ensure that this is not null
+		//		OntologyScope parentScope = ONManager.get().getScopeRegistry()
+		//				.getScope(parentID);
+		//
+		//		if (parentScope != null && parentScope instanceof OntologySpaceListener)
+		//			this.addOntologySpaceListener((OntologySpaceListener) parentScope);
+		this.persistenceStore = persistenceStore;
 		this._id = spaceID;
 		if (ontologyManager != null)
 			this.ontologyManager = ontologyManager;
@@ -312,13 +320,27 @@ this.storage = storage;
 		try {
 			// Store the top ontology
 			if (!(this instanceof SessionOntologySpace)) {
-				if (storage == null)
+				if (persistenceStore == null)
 					log
 							.error("KReS :: [NONFATAL] no ontology storage found. Ontology "
 									+ ontology.getOntologyID()
 									+ " will be stored in-memory only.");
 				else {
-					storage.store(ontology);
+					/*
+					 * If the persistence store is not null then the ontology can be saved in the storage.
+					 * As the store saves ontology as string serializations first it is needed to convert the ontology content
+					 * to a string (the UTF-8 charset is used) and then it is possible to save the ontology specifying to the storage
+					 * the ontology ID.
+					 */
+					ByteArrayOutputStream out = new ByteArrayOutputStream();
+					
+					ontology.getOWLOntologyManager().saveOntology(ontology, out);
+					
+					String ontologyID = ontology.getOntologyID().getOntologyIRI().toString();
+					
+					String ontologyString = out.toString("UTF-8");
+					
+					persistenceStore.saveOntology(ontologyString, ontologyID, "UTF-8");
 				}
 			}
 			// ONManager.get().getOntologyStore().load(rootOntology.getOntologyID().getOntologyIRI());
@@ -474,13 +496,28 @@ this.storage = storage;
 
 			// Store the top ontology
 			if (!(this instanceof SessionOntologySpace)) {
-				if (storage == null)
+				if (persistenceStore == null)
 					log
 							.error("KReS :: [NONFATAL] no ontology storage found. Ontology "
 									+ rootOntology.getOntologyID()
 									+ " will be stored in-memory only.");
 				else {
-					storage.store(rootOntology);
+					
+					/*
+					 * If the persistence store is not null then the root ontology can be saved in the storage.
+					 * As the store saves ontology as string serializations first it is needed to convert the ontology content
+					 * to a string (the UTF-8 charset is used) and then it is possible to save the ontology specifying to the storage
+					 * the ontology ID.
+					 */
+					ByteArrayOutputStream out = new ByteArrayOutputStream();
+					
+					rootOntology.getOWLOntologyManager().saveOntology(rootOntology, out);
+					
+					String ontologyID = rootOntology.getOntologyID().getOntologyIRI().toString();
+					
+					String ontologyString = out.toString("UTF-8");
+					
+					persistenceStore.saveOntology(ontologyString, ontologyID, "UTF-8");
 				}
 			}
 		} catch (Exception ex) {

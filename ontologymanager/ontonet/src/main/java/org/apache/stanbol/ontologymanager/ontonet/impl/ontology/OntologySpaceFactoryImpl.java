@@ -11,6 +11,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
+import org.apache.stanbol.ontologymanager.store.api.PersistenceStore;
 import org.semanticweb.owlapi.model.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +28,18 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 	protected Logger log = LoggerFactory.getLogger(getClass());
 
 	protected ScopeRegistry registry;
-	protected ClerezzaOntologyStorage storage;
+	
+	/* 
+	 * The ClerezzaOntologyStorage (local to OntoNet) has been changed with
+	 * PersistenceStore (general from Stanbol)
+	 *
+	 */
+	//protected ClerezzaOntologyStorage storage;
+	protected PersistenceStore persistenceStore;
 
-	public OntologySpaceFactoryImpl(ScopeRegistry registry, ClerezzaOntologyStorage storage) {
+	public OntologySpaceFactoryImpl(ScopeRegistry registry, PersistenceStore persistenceStore) {
 		this.registry = registry;
-		this.storage = storage;
+		this.persistenceStore = persistenceStore;
 	}
 
 	/*
@@ -41,7 +49,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 	@Override
 	public CoreOntologySpace createCoreOntologySpace(IRI scopeID,
 			OntologyInputSource coreSource) {
-		CoreOntologySpace s = new CoreOntologySpaceImpl(scopeID,storage);
+		CoreOntologySpace s = new CoreOntologySpaceImpl(scopeID, persistenceStore);
 		setupSpace(s, scopeID, coreSource);
 		return s;
 	}
@@ -53,7 +61,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 	@Override
 	public CustomOntologySpace createCustomOntologySpace(IRI scopeID,
 			OntologyInputSource customSource) {
-		CustomOntologySpace s = new CustomOntologySpaceImpl(scopeID,storage);
+		CustomOntologySpace s = new CustomOntologySpaceImpl(scopeID, persistenceStore);
 		setupSpace(s, scopeID, customSource);
 		return s;
 	}
@@ -64,7 +72,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 	 */
 	@Override
 	public SessionOntologySpace createSessionOntologySpace(IRI scopeID) {
-		SessionOntologySpace s = new SessionOntologySpaceImpl(scopeID,storage);
+		SessionOntologySpace s = new SessionOntologySpaceImpl(scopeID, persistenceStore);
 		// s.setUp();
 		return s;
 	}
