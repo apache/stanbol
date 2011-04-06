@@ -16,110 +16,110 @@
    limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.apache.stanbol</groupId>
-		<artifactId>org.apache.stanbol.enhancer.parent</artifactId>
-		<version>0.9-SNAPSHOT</version>
-		<relativePath>../../parent</relativePath>
-	</parent>
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
+    <version>0.9-SNAPSHOT</version>
+    <relativePath>../../parent</relativePath>
+  </parent>
 
-	<groupId>org.apache.stanbol</groupId>
-	<artifactId>org.apache.stanbol.enhancer.engine.entitytagging</artifactId>
-	<packaging>bundle</packaging>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.enhancer.engine.entitytagging</artifactId>
+  <packaging>bundle</packaging>
 
-	<name>Apache Stanbol Enhancer Enhancement Engine : for Entityhub ReferencedSites</name>
-	<description>
-		Implementation of an annotation engine that links named entities
-        extracted from a text (TextAnnotations) to semantic entities
-        managed by the Entityhub.
-        This engine depends on the Apache Stanbol Entityhub.
-	</description>
+  <name>Apache Stanbol Enhancer Enhancement Engine : for Entityhub ReferencedSites</name>
+  <description>
+    Implementation of an annotation engine that links named entities
+    extracted from a text (TextAnnotations) to semantic entities
+    managed by the Entityhub.
+    This engine depends on the Apache Stanbol Entityhub.
+  </description>
 
-	<inceptionYear>2010</inceptionYear>
+  <inceptionYear>2010</inceptionYear>
 
-    <scm>
-        <connection>
-            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/entitytagging/
-        </connection>
-        <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/entitytagging/
-        </developerConnection>
-        <url>http://incubator.apache.org/stanbol/</url>
-    </scm>
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/entitytagging/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/entitytagging/
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol/</url>
+  </scm>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<Export-Package>
-							org.apache.stanbol.enhancer.engines.entitytagging;version=${pom.version}
-                        </Export-Package>
-						<Private-Package>
-							org.apache.stanbol.enhancer.engines.entitytagging.impl.*
-        			    </Private-Package>
-						<!-- TODO those should be bundles! -->
-						<Embed-Dependency>
-            			</Embed-Dependency>
-					</instructions>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-scr-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>
+              org.apache.stanbol.enhancer.engines.entitytagging;version=${pom.version}
+            </Export-Package>
+            <Private-Package>
+              org.apache.stanbol.enhancer.engines.entitytagging.impl.*
+            </Private-Package>
+            <!-- TODO those should be bundles! -->
+            <Embed-Dependency>
+            </Embed-Dependency>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 
-	<dependencies>		
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-		</dependency>
-        <dependency>
-            <groupId>org.apache.stanbol</groupId>
-            <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.stanbol</groupId>
-            <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-            <scope>compile</scope>
-        </dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-		</dependency>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
 
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.scr.annotations</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>org.apache.clerezza.rdf.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
 
-		<!-- Testing -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>		
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-		</dependency>
-	</dependencies>
+    <!-- Testing -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+    </dependency>
+  </dependencies>
 
 </project>

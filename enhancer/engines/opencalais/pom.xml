@@ -16,118 +16,121 @@
    limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<artifactId>org.apache.stanbol.enhancer.parent</artifactId>
-		<groupId>org.apache.stanbol</groupId>
-		<version>0.9-SNAPSHOT</version>
-		<relativePath>../../parent</relativePath>
-	</parent>
+  <parent>
+    <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
+    <groupId>org.apache.stanbol</groupId>
+    <version>0.9-SNAPSHOT</version>
+    <relativePath>../../parent</relativePath>
+  </parent>
 
-	<groupId>org.apache.stanbol</groupId>
-	<artifactId>org.apache.stanbol.enhancer.engines.opencalais</artifactId>
-	<packaging>bundle</packaging>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.enhancer.engines.opencalais</artifactId>
+  <packaging>bundle</packaging>
 
-	<name>Apache Stanbol Enhancer Enhancement Engine : OpenCalais</name>
-	<description>Retrieves named entities from OpenCalais</description>
+  <name>Apache Stanbol Enhancer Enhancement Engine : OpenCalais</name>
+  <description>Retrieves named entities from OpenCalais</description>
 
-	<inceptionYear>2010</inceptionYear>
-    <scm>
-        <connection>
-            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/opencalais/
-        </connection>
-        <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/opencalais/
-        </developerConnection>
-        <url>http://incubator.apache.org/stanbol/</url>
-    </scm>
+  <inceptionYear>2010</inceptionYear>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<Export-Package>
-							org.apache.stanbol.enhancer.engines.opencalais;version=${project.version},
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/opencalais/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/opencalais/
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol/</url>
+  </scm>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>
+              org.apache.stanbol.enhancer.engines.opencalais;version=${project.version},
             </Export-Package>
-						<Embed-Dependency>
-							*;scope=compile
+            <Embed-Dependency>
+              *;scope=compile
             </Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>
-							*
+              *
             </Import-Package>
-					</instructions>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-scr-plugin</artifactId>
-			</plugin>
-			<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<configuration>
-						<systemPropertyVariables>
-							<org.apache.stanbol.enhancer.engines.opencalais.license>${org.apache.stanbol.enhancer.engines.opencalais.license}</org.apache.stanbol.enhancer.engines.opencalais.license>
-						</systemPropertyVariables>						
-					</configuration>
-				</plugin>		
-		</plugins>
-	</build>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <org.apache.stanbol.enhancer.engines.opencalais.license>
+              ${org.apache.stanbol.enhancer.engines.opencalais.license}
+            </org.apache.stanbol.enhancer.engines.opencalais.license>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.scr.annotations</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.core</artifactId>
-		</dependency>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>org.apache.clerezza.rdf.core</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>org.apache.clerezza.rdf.jena.parser</artifactId>
       <version>0.10-incubating-SNAPSHOT</version>
       <scope>provided</scope>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>org.apache.clerezza.rdf.jena.sparql</artifactId>
       <version>0.5-incubating-SNAPSHOT</version>
       <scope>provided</scope>
-    </dependency>    
-		
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-		</dependency>
-		
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>		
-	</dependencies>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
 </project>
