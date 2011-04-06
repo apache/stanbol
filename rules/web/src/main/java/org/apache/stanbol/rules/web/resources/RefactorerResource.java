@@ -15,8 +15,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.stanbol.kres.jersey.format.KRFormat;
-import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
+import org.apache.stanbol.commons.web.base.format.KRFormat;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.refactor.api.Refactorer;
@@ -37,7 +37,7 @@ import com.sun.jersey.api.view.ImplicitProduces;
 
 @Path("/refactorer")
 @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
-public class RefactorerResource extends NavigationMixin {
+public class RefactorerResource extends BaseStanbolResource {
 
     protected ONManager onManager;
     protected Refactorer semionRefactorer;

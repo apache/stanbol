@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0" localization="OSGI-INF/metatype/metatype">
+    <OCD id="org.apache.stanbol.ontologymanager.web.JerseyEndpoint" name="%org.apache.stanbol.ontologymanager.web.JerseyEndpoint.name" description="%org.apache.stanbol.ontologymanager.web.JerseyEndpoint.description">
+        <AD id="org.apache.stanbol.ontologymanager.web.alias" type="String" default="/ontomgr" name="%org.apache.stanbol.ontologymanager.web.alias.name" description="%org.apache.stanbol.ontologymanager.web.alias.description"/>
+        <AD id="org.apache.stanbol.ontologymanager.web.static.url" type="String" default="/kres/static" name="%org.apache.stanbol.ontologymanager.web.static.url.name" description="%org.apache.stanbol.ontologymanager.web.static.url.description"/>
+        <AD id="org.apache.stanbol.ontologymanager.web.static.classpath" type="String" default="/META-INF/static" name="%org.apache.stanbol.ontologymanager.web.static.classpath.name" description="%org.apache.stanbol.ontologymanager.web.static.classpath.description"/>
+        <AD id="org.apache.stanbol.ontologymanager.web.templates.classpath" type="String" default="/META-INF/templates" name="%org.apache.stanbol.ontologymanager.web.templates.classpath.name" description="%org.apache.stanbol.ontologymanager.web.templates.classpath.description"/>
+    </OCD>
+    <Designate pid="org.apache.stanbol.ontologymanager.web.JerseyEndpoint">
+        <Object ocdref="org.apache.stanbol.ontologymanager.web.JerseyEndpoint"/>
+    </Designate>
+</metatype:MetaData>

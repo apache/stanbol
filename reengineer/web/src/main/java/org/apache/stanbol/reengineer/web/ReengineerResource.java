@@ -23,11 +23,12 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.reengineer.base.api.DataSource;
-import org.apache.stanbol.reengineer.base.api.ReengineeringException;
-import org.apache.stanbol.reengineer.base.api.ReengineerManager;
 import org.apache.stanbol.reengineer.base.api.Reengineer;
+import org.apache.stanbol.reengineer.base.api.ReengineerManager;
+import org.apache.stanbol.reengineer.base.api.ReengineeringException;
 import org.apache.stanbol.reengineer.base.api.datasources.DataSourceFactory;
 import org.apache.stanbol.reengineer.base.api.datasources.InvalidDataSourceForTypeSelectedException;
 import org.apache.stanbol.reengineer.base.api.datasources.NoSuchDataSourceExpection;
@@ -42,12 +43,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.ImplicitProduces;
-import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
 
 
 @Path("/reengineer")
 @ImplicitProduces("text/html")
-public class ReengineerResource extends NavigationMixin {
+public class ReengineerResource extends BaseStanbolResource {
 	
 
 

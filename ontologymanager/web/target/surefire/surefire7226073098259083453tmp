@@ -1,0 +1,6 @@
+#surefire
+#Thu Apr 07 00:25:18 CEST 2011
+sling.url=http\://localhost\:8080/system/console
+user.dir=/Users/alessandro/workspaces/IKS/stanbol/ontologymanager/web
+localRepository=/Users/alessandro/.m2/repository
+basedir=/Users/alessandro/workspaces/IKS/stanbol/ontologymanager/web

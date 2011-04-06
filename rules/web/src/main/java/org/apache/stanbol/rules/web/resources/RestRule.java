@@ -32,6 +32,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.stanbol.commons.web.base.format.KRFormat;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
@@ -54,9 +56,6 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.stanbol.kres.jersey.format.KRFormat;
-import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
-
 /**
  *
  * @author elvio
@@ -64,7 +63,7 @@ import org.apache.stanbol.kres.jersey.resource.NavigationMixin;
  * 
  */
 @Path("/rule")
-public class RestRule extends NavigationMixin{
+public class RestRule extends BaseStanbolResource{
 
 	protected ONManager onm;
 	protected ClerezzaOntologyStorage storage;

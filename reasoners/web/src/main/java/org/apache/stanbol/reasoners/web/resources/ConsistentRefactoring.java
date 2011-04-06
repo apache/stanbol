@@ -16,7 +16,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.stanbol.kres.jersey.format.KRFormat;
+import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.reasoners.base.api.ConsistentRefactorer;
 import org.apache.stanbol.reasoners.base.api.InconcistencyException;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;

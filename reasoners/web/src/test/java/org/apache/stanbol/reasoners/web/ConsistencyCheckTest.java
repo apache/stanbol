@@ -5,7 +5,6 @@
 
 package org.apache.stanbol.reasoners.web;
 
-import org.apache.stanbol.kres.jersey.JettyServer;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

@@ -5,10 +5,9 @@ import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
-import org.apache.stanbol.kres.jersey.processors.ViewProcessorImpl;
-import org.apache.stanbol.kres.jersey.writers.GraphWriter;
+import org.apache.stanbol.commons.web.base.writers.GraphWriter;
+import org.apache.stanbol.commons.web.base.writers.ResultSetWriter;
 import org.apache.stanbol.owl.web.OWLOntologyWriter;
-import org.apache.stanbol.kres.jersey.writers.ResultSetWriter;
 import org.apache.stanbol.reasoners.web.resources.Classify;
 import org.apache.stanbol.reasoners.web.resources.ConsistencyCheck;
 import org.apache.stanbol.reasoners.web.resources.ConsistentRefactoring;
@@ -50,7 +49,7 @@ public class JerseyEndpointApplication extends Application {
     public Set<Object> getSingletons() {
         Set<Object> singletons = new HashSet<Object>();
         // view processors
-        singletons.add(new ViewProcessorImpl());
+//        singletons.add(new ViewProcessorImpl());
         return singletons;
     }
 

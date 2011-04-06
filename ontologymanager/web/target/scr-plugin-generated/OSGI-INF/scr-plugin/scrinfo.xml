@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+    <scr:component enabled="true" immediate="true" name="org.apache.stanbol.ontologymanager.web.JerseyEndpoint">
+        <implementation class="org.apache.stanbol.ontologymanager.web.JerseyEndpoint"/>
+        <property name="org.apache.stanbol.ontologymanager.web.alias" type="String" value="/ontomgr" private="false"/>
+        <property name="org.apache.stanbol.ontologymanager.web.static.url" type="String" value="/kres/static" private="false"/>
+        <property name="org.apache.stanbol.ontologymanager.web.static.classpath" type="String" value="/META-INF/static" private="false"/>
+        <property name="org.apache.stanbol.ontologymanager.web.templates.classpath" type="String" value="/META-INF/templates" private="false"/>
+        <property name="service.vendor" type="String" value="Apache Stanbol (incubating)" private="true"/>
+        <property name="service.pid" value="org.apache.stanbol.ontologymanager.web.JerseyEndpoint" private="false"/>
+        <reference name="httpService" interface="org.osgi.service.http.HttpService" cardinality="1..1" policy="static" bind="bindHttpService" unbind="unbindHttpService" checked="true"/>
+        <reference name="onm" interface="org.apache.stanbol.ontologymanager.ontonet.api.ONManager" cardinality="1..1" policy="static" bind="bindOnm" unbind="unbindOnm" checked="true"/>
+    </scr:component>
+</components>

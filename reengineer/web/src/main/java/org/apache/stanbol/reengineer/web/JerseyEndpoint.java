@@ -10,8 +10,8 @@ import javax.servlet.ServletException;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.stanbol.reengineer.base.api.ReengineerManager;
 import org.apache.stanbol.reengineer.base.api.Reengineer;
+import org.apache.stanbol.reengineer.base.api.ReengineerManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;
@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 
-import org.apache.stanbol.kres.jersey.processors.ViewProcessorImpl;
 
 /**
  * Jersey-based RESTful endpoint for KReS.
@@ -115,9 +114,9 @@ public class JerseyEndpoint {
 
         servletContext.setAttribute(STATIC_RESOURCES_URL_ROOT_PROPERTY,
                 staticUrlRoot);
-        servletContext.setAttribute(
-                ViewProcessorImpl.FREEMARKER_TEMPLATE_PATH_INIT_PARAM,
-                freemakerTemplates);
+//        servletContext.setAttribute(
+//                ViewProcessorImpl.FREEMARKER_TEMPLATE_PATH_INIT_PARAM,
+//                freemakerTemplates);
 
         log.info("Jersey servlet registered at {}", alias);
     }

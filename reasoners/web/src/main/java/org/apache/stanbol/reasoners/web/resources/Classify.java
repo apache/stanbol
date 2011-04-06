@@ -64,7 +64,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-import org.apache.stanbol.kres.jersey.format.KRFormat;
+import org.apache.stanbol.commons.web.base.format.KRFormat;
 
 /**
  *

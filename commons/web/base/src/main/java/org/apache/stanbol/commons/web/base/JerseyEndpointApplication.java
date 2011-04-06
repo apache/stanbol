@@ -9,6 +9,7 @@ import javax.ws.rs.core.Application;
 
 import org.apache.stanbol.commons.web.base.processor.FreemarkerViewProcessor;
 import org.apache.stanbol.commons.web.base.writers.GraphWriter;
+import org.apache.stanbol.commons.web.base.writers.JenaModelWriter;
 import org.apache.stanbol.commons.web.base.writers.ResultSetWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,7 @@ public class JerseyEndpointApplication extends Application {
 
         // message body writers, hard-coded for now
         classes.add(GraphWriter.class);
+        classes.add(JenaModelWriter.class);
         classes.add(ResultSetWriter.class);
         return classes;
     }

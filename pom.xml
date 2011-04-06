@@ -58,7 +58,9 @@
       </activation>
       <modules>
         <module>owl</module>
+        <!--
         <module>kres/jersey</module>
+        -->
         <module>ontologymanager</module>
         <module>rules</module>
         <module>reengineer</module>

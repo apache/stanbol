@@ -175,9 +175,24 @@
     
 	<!-- Stanbol Enhancer infrastructure and required libraries-->
 	<startLevel level="15">
-		<bundle>
+    		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.base</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.home</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.sparql</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>
@@ -195,6 +210,11 @@
 			<artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
+        <bundle>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
+            <version>0.9-SNAPSHOT</version>
+        </bundle>
 	</startLevel>
 
 	<!-- Clerezza storage and sparql infrastructure -->
@@ -486,6 +506,7 @@
 		</bundle>
   </startLevel>
     
+  <!--  
   <startLevel level="29">
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
@@ -493,6 +514,7 @@
 			<version>0.9-SNAPSHOT</version>
 		</bundle>  
   </startLevel>
+  -->
   
   <startLevel level="30">
 		<bundle>

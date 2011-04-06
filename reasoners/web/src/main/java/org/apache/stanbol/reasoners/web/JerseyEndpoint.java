@@ -10,7 +10,6 @@ import javax.servlet.ServletException;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.stanbol.kres.jersey.processors.ViewProcessorImpl;
 import org.apache.stanbol.reasoners.base.api.ConsistentRefactorer;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
@@ -97,8 +96,8 @@ public class JerseyEndpoint {
 
         // Register templates
         servletContext.setAttribute(STATIC_RESOURCES_URL_ROOT_PROPERTY, staticUrlRoot);
-        servletContext
-                .setAttribute(ViewProcessorImpl.FREEMARKER_TEMPLATE_PATH_INIT_PARAM, freemakerTemplates);
+//        servletContext
+//                .setAttribute(ViewProcessorImpl.FREEMARKER_TEMPLATE_PATH_INIT_PARAM, freemakerTemplates);
 
         log.info("Jersey servlet registered at {}", alias);
     }
