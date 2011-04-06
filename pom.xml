@@ -864,6 +864,21 @@
         <classifier>app</classifier>
         <scope>provided</scope>
       </dependency>
+      <dependency>
+        <groupId>org.apache.sling</groupId>
+        <artifactId>org.apache.sling.launchpad.installer</artifactId>
+        <version>1.0.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.sling</groupId>
+        <artifactId>org.apache.sling.launchpad.api</artifactId>
+        <version>1.0.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.sling</groupId>
+        <artifactId>org.apache.sling.installer.core</artifactId>
+        <version>3.1.2</version>
+      </dependency>
 
       <!-- Testing Deps -->
       <dependency>
