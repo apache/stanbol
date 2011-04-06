@@ -27,8 +27,6 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XM
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 
-import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.getService;
-
 import java.util.Collection;
 
 import javax.servlet.ServletContext;
@@ -42,6 +40,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
@@ -51,28 +51,16 @@ import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * RESTful interface for the {@link EntityMapping}s defined by the  {@link Entityhub}.
- *
+ * RESTful interface for the {@link EntityMapping}s defined by the {@link Entityhub}.
+ * 
  * @author Rupert Westenthaler
  */
-@Path("/mapping")
-//@ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
-public class EntityMappingResource extends NavigationMixin {
-
-//    /**
-//     * The default result fields for /find queries is the reference to the
-//     * mapped symbol and the mapped entity
-//     */
-//    private static final Collection<? extends String> DEFAULT_FIND_SELECTED_FIELDS =
-//        Arrays.asList(
-//                RdfResourceEnum.mappedEntity.getUri(),
-//                RdfResourceEnum.mappedSymbol.getUri());
-
-
+@Path("/entityhub/mapping")
+public class EntityMappingResource extends BaseStanbolResource {
+    
     private final Logger log = LoggerFactory.getLogger(getClass());
-
+    
     private ServletContext context;
     
     // bind the job manager by looking it up from the servlet request context
@@ -80,19 +68,19 @@ public class EntityMappingResource extends NavigationMixin {
         super();
         this.context = context;
     }
-
+    
     @GET
     @Path("/")
-    @Produces({APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
+    @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
     public Response getMapping(@QueryParam("id") String reference, @Context HttpHeaders headers) throws WebApplicationException {
         log.info("/symbol/ POST Request");
         log.info("  > id    : " + reference);
         log.info("  > accept: " + headers.getAcceptableMediaTypes());
         if (reference == null || reference.isEmpty()) {
-            //TODO: how to parse an error message
+            // TODO: how to parse an error message
             throw new WebApplicationException(BAD_REQUEST);
         }
-        Entityhub entityhub = getService(Entityhub.class, context);
+        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
         EntityMapping mapping;
         try {
             mapping = entityhub.getMappingById(reference);
@@ -106,19 +94,19 @@ public class EntityMappingResource extends NavigationMixin {
             return Response.ok(mapping, acceptedMediaType).build();
         }
     }
-
+    
     @GET
     @Path("/entity")
-    @Produces({APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
+    @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
     public Response getEntityMapping(@QueryParam("id") String entity, @Context HttpHeaders headers) throws WebApplicationException {
         log.info("/symbol/ POST Request");
         log.info("  > entity: " + entity);
         log.info("  > accept: " + headers.getAcceptableMediaTypes());
         if (entity == null || entity.isEmpty()) {
-            //TODO: how to parse an error message
+            // TODO: how to parse an error message
             throw new WebApplicationException(BAD_REQUEST);
         }
-        Entityhub entityhub = getService(Entityhub.class, context);
+        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
         EntityMapping mapping;
         try {
             mapping = entityhub.getMappingByEntity(entity);
@@ -132,19 +120,19 @@ public class EntityMappingResource extends NavigationMixin {
             return Response.ok(mapping, acceptedMediaType).build();
         }
     }
-
+    
     @GET
     @Path("/symbol")
-    @Produces({APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
+    @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
     public Response getSymbolMappings(@QueryParam("id") String symbol, @Context HttpHeaders headers) throws WebApplicationException {
         log.info("/symbol/ POST Request");
         log.info("  > symbol: " + symbol);
         log.info("  > accept: " + headers.getAcceptableMediaTypes());
         if (symbol == null || symbol.isEmpty()) {
-            //TODO: how to parse an error message
+            // TODO: how to parse an error message
             throw new WebApplicationException(BAD_REQUEST);
         }
-        Entityhub entityhub = getService(Entityhub.class, context);
+        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
         Collection<EntityMapping> mappings;
         try {
             mappings = entityhub.getMappingsBySymbol(symbol);
@@ -155,9 +143,10 @@ public class EntityMappingResource extends NavigationMixin {
             throw new WebApplicationException(404);
         } else {
             MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
-            //TODO: Implement Support for list of Signs, Representations and Strings
-            //      For now use a pseudo QueryResultList
-            QueryResultList<EntityMapping> mappingResultList = new QueryResultListImpl<EntityMapping>(null, mappings, EntityMapping.class);
+            // TODO: Implement Support for list of Signs, Representations and Strings
+            // For now use a pseudo QueryResultList
+            QueryResultList<EntityMapping> mappingResultList = new QueryResultListImpl<EntityMapping>(null,
+                    mappings, EntityMapping.class);
             return Response.ok(mappingResultList, acceptedMediaType).build();
         }
     }

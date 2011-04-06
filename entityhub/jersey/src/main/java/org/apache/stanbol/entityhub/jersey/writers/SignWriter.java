@@ -37,26 +37,23 @@ import javax.ws.rs.ext.Provider;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.commons.io.IOUtils;
+import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.entityhub.servicesapi.model.Sign;
 import org.codehaus.jettison.json.JSONException;
 
+
 /**
- * TODO: Replace with Serializer infrastrucutre similar to
- * {@link Serializer}
+ * TODO: Replace with Serializer infrastrucutre similar to {@link Serializer}
+ * 
  * @author Rupert Westenthaler
- *
+ * 
  */
 @Provider
-@Produces({
-        MediaType.APPLICATION_JSON,
-        SupportedFormat.N3,
-        SupportedFormat.N_TRIPLE,
-        SupportedFormat.RDF_XML,
-        SupportedFormat.TURTLE,
-        SupportedFormat.X_TURTLE,
-        SupportedFormat.RDF_JSON })
-public class SignWriter implements MessageBodyWriter<Sign>{
-
+@Produces( {MediaType.APPLICATION_JSON, SupportedFormat.N3, SupportedFormat.N_TRIPLE,
+            SupportedFormat.RDF_XML, SupportedFormat.TURTLE, SupportedFormat.X_TURTLE,
+            SupportedFormat.RDF_JSON})
+public class SignWriter implements MessageBodyWriter<Sign> {
+    
     public static final Set<String> supportedMediaTypes;
     static {
         Set<String> types = new HashSet<String>();
@@ -69,38 +66,45 @@ public class SignWriter implements MessageBodyWriter<Sign>{
         types.add(SupportedFormat.X_TURTLE);
         supportedMediaTypes = Collections.unmodifiableSet(types);
     }
+
     @Context
-    private ServletContext servletContext;
-
+    protected ServletContext servletContext;
+    
     protected Serializer getSerializer() {
-        return (Serializer) servletContext.getAttribute(Serializer.class.getName());
+        return ContextHelper.getServiceFromContext(Serializer.class, servletContext);
     }
+    
     @Override
-    public long getSize(Sign sign, Class<?> type, Type genericType,
-            Annotation[] annotations, MediaType mediaType) {
-        return -1; //to hard to calculate
+    public long getSize(Sign sign,
+                        Class<?> type,
+                        Type genericType,
+                        Annotation[] annotations,
+                        MediaType mediaType) {
+        return -1; // to hard to calculate
     }
-
+    
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return Sign.class.isAssignableFrom(type) &&
-            supportedMediaTypes.contains(mediaType.toString());
+        return Sign.class.isAssignableFrom(type) && supportedMediaTypes.contains(mediaType.toString());
     }
-
+    
     @Override
-    public void writeTo(Sign sign, Class<?> type, Type genericType,
-            Annotation[] annotations, MediaType mediaType,
-            MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
-            throws IOException, WebApplicationException {
-        if(mediaType == null || MediaType.APPLICATION_JSON.equals(mediaType.toString())){
+    public void writeTo(Sign sign,
+                        Class<?> type,
+                        Type genericType,
+                        Annotation[] annotations,
+                        MediaType mediaType,
+                        MultivaluedMap<String,Object> httpHeaders,
+                        OutputStream entityStream) throws IOException, WebApplicationException {
+        if (mediaType == null || MediaType.APPLICATION_JSON.equals(mediaType.toString())) {
             try {
                 IOUtils.write(SignToJSON.toJSON(sign).toString(4), entityStream);
             } catch (JSONException e) {
                 throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
             }
-        } else { //RDF
+        } else { // RDF
             getSerializer().serialize(entityStream, SignToRDF.toRDF(sign), mediaType.toString());
         }
     }
-
+    
 }
