@@ -42,7 +42,7 @@ public class DBExtractorTest {
 		
 		
 		onManager = new ONManagerImpl(tcm, wtcp,emptyConf);
-		dbExtractor = new DBExtractor(new ReengineerManagerImpl(tcm, wtcp),
+		dbExtractor = new DBExtractor(new ReengineerManagerImpl(),
 				onManager, tcm, wtcp, emptyConf);
 		graphNS = "http://kres.iks-project.eu/reengineering/test";
 		outputIRI = IRI.create(graphNS);

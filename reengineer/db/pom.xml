@@ -160,56 +160,6 @@
 			<version>3.0.0</version>
 		</dependency>		
 
-		<!-- Clerezza deps -->
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.core</artifactId>
-			<version>0.12-incubating-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
-			<version>0.9-incubating-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.jena.sparql</artifactId>
-			<version>0.5-incubating-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.simple.storage</artifactId>
-			<version>0.7-incubating-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- XML deps -->
-		<dependency>
-			<groupId>stax</groupId>
-			<artifactId>stax-api</artifactId>
-			<version>1.0.1</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.woodstox</groupId>
-			<artifactId>wstx-asl</artifactId>
-			<version>3.9.9-3</version>
-		</dependency>
-		<dependency>
-			<groupId>com.ibm.icu</groupId>
-			<artifactId>icu4j</artifactId>
-			<version>3.4.4</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>xerces</groupId>
-			<artifactId>xercesImpl</artifactId>
-			<version>2.7.1</version>
-			<scope>compile</scope>
-		</dependency>
-
 		<!-- Diagnostics deps -->
 		<dependency>
 			<groupId>org.slf4j</groupId>

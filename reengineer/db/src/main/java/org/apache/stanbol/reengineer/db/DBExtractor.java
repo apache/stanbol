@@ -100,12 +100,7 @@ public class DBExtractor implements Reengineer {
     MGraph schemaGraph;
     protected OntologyScope scope;
 
-    @Reference
-    TcManager tcManager;
-
-    @Reference
-    WeightedTcProvider weightedTcProvider;
-
+    
     /**
      * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
      * Component Runtime support.
@@ -131,8 +126,6 @@ public class DBExtractor implements Reengineer {
         this();
         this.reengineeringManager = reengineeringManager;
         this.onManager = onManager;
-        this.tcManager = tcManager;
-        this.weightedTcProvider = weightedTcProvider;
         activate(configuration);
     }
 
@@ -159,8 +152,6 @@ public class DBExtractor implements Reengineer {
         this();
         this.reengineeringManager = reengineeringManager;
         this.onManager = onManager;
-        this.tcManager = tcManager;
-        this.weightedTcProvider = weightedTcProvider;
         this.databaseURI = databaseURI;
         this.schemaGraph = schemaGraph;
         this.connectionSettings = connectionSettings;
@@ -332,6 +323,9 @@ public class DBExtractor implements Reengineer {
             log.info("Semion DBExtractor : starting to generate RDF graph of a db schema ");
         }
 
+        /*
+         * Fetch the reengineering scope.
+         */
         OntologyScope reengineeringScope = getScope();
         if (reengineeringScope != null) {
             ConnectionSettings connectionSettings = (ConnectionSettings) dataSource.getDataSource();
@@ -339,9 +333,11 @@ public class DBExtractor implements Reengineer {
                     connectionSettings);
 
             System.out.println("OWL MANAGER IN SEMION: " + onManager);
-            OWLOntologyManager ontologyManager = onManager.getOwlCacheManager();
-            OWLDataFactory dataFactory = onManager.getOwlFactory();
-            schemaOntology = schemaGenerator.getSchema(ontologyManager, dataFactory);
+            
+            /*
+             * Extract the schema from the source.
+             */
+            schemaOntology = schemaGenerator.getSchema();
 
             if (outputIRI != null) {
                 log.info("Created graph with URI " + outputIRI.toString() + " of DB Schema.");

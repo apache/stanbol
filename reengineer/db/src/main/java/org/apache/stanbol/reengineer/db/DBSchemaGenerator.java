@@ -9,10 +9,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.stanbol.reengineer.base.api.settings.ConnectionSettings;
 import org.apache.stanbol.reengineer.base.api.util.ReengineerUriRefGenerator;
 import org.apache.stanbol.reengineer.db.vocab.DBS_L1_OWL;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
@@ -57,10 +57,13 @@ public class DBSchemaGenerator extends ReengineerUriRefGenerator implements Seri
 	 * Performs the generation of the RDF of the database schema. The RDF graph is added to the {@link MGraph} passed as input.
 	 *  
 	 * 
-	 * @param mGraph {@link MGraph}
+	 * @param mGraph {@link OWLOntology}
 	 * @return the {@link MGraph} containing the database schema into RDF.
 	 */
-	public OWLOntology getSchema(OWLOntologyManager manager, OWLDataFactory factory){
+	public OWLOntology getSchema(){
+		
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLDataFactory factory = manager.getOWLDataFactory();
 		
 		Connection con = openConnection(connectionSettings);
 		
@@ -113,8 +116,6 @@ public class DBSchemaGenerator extends ReengineerUriRefGenerator implements Seri
 			md = con.getMetaData();
 			
 			ResultSet rs = md.getTables(null, null, "%", null);
-			
-			String rdfs = "http://www.w3.org/2000/01/rdf-schema#";
 			
 			for(int k=0; rs.next(); k++) {
 		    	String table = rs.getString(3);

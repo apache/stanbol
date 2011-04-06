@@ -7,7 +7,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.util.ReengineerUriRefGenerator;
@@ -60,15 +59,9 @@ import org.xml.sax.SAXException;
 
 public class XSDExtractor extends ReengineerUriRefGenerator {
 
-    private WeightedTcProvider weightedTcProvider;
-
     private ONManager onManager;
 
     public final Logger log = LoggerFactory.getLogger(getClass());
-
-    public XSDExtractor(WeightedTcProvider weightedTcProvider) {
-        this.weightedTcProvider = weightedTcProvider;
-    }
 
     public XSDExtractor(ONManager onManager) {
         this.onManager = onManager;

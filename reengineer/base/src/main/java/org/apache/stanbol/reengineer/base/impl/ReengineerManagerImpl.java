@@ -41,41 +41,17 @@ public class ReengineerManagerImpl implements ReengineerManager{
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	
-    @Reference
-    private TcManager tcm;
-
-    @Reference
-    private WeightedTcProvider wtcp;
-    
-    private ClerezzaOntologyStorage storage;
+   	private ArrayList<Reengineer> reengineers;
 	
-	private ArrayList<Reengineer> reengineers;
-//
-//	private SemionRefactorer semionRefactorer;
-
-	/**
-	 * This default constructor is <b>only</b> intended to be used by the OSGI
-	 * environment with Service Component Runtime support.
-	 * <p>
-	 * DO NOT USE to manually create instances - the ReengineerManagerImpl instances
-	 * do need to be configured! YOU NEED TO USE
-	 * {@link #ReengineerManagerImpl(ONManager)} or its overloads, to parse the
-	 * configuration and then initialise the rule store if running outside a
-	 * OSGI environment.
-	 */
-	public ReengineerManagerImpl() {
-		reengineers = new ArrayList<Reengineer>();
-	}
-	
+   	
 	/**
 	 * Basic constructor to be used if outside of an OSGi environment. Invokes
 	 * default constructor.
 	 * 
 	 * @param onm
 	 */
-	public ReengineerManagerImpl(TcManager tcm, WeightedTcProvider wtcp) {
-		this();
-        storage = new ClerezzaOntologyStorage(tcm, wtcp);
+	public ReengineerManagerImpl() {
+		
 		activate(new Hashtable<String, Object>());
 	}
 
@@ -97,8 +73,9 @@ public class ReengineerManagerImpl implements ReengineerManager{
 	}
 
 	protected void activate(Dictionary<String, Object> configuration) {
-        if (storage == null) storage = new ClerezzaOntologyStorage(this.tcm, this.wtcp);
+        
 		reengineers = new ArrayList<Reengineer>();
+		
 	}
 
 	/**
@@ -153,36 +130,6 @@ public class ReengineerManagerImpl implements ReengineerManager{
 		return reengineers;
 	}
 	
-	@Override
-	public OWLOntology performDataReengineering(String graphNS, IRI outputIRI,
-			DataSource dataSource, IRI schemaOntologyIRI)
-			throws ReengineeringException, NoSuchOntologyInStoreException {
-		
-		OWLOntology reengineeredDataOntology = null;
-		
-//		OntologyStorage ontologyStorage = onManager.getOntologyStore();
-		
-		OWLOntology schemaOntology = storage.load(schemaOntologyIRI);
-		
-		if(schemaOntology == null){
-			throw new NoSuchOntologyInStoreException(schemaOntologyIRI);
-		} else {
-		
-			boolean reengineered = false;
-			Iterator<Reengineer> it = reengineers.iterator();
-			while(it.hasNext() && !reengineered){
-				Reengineer semionReengineer = it.next();
-				if(semionReengineer.canPerformReengineering(schemaOntology)){
-					reengineeredDataOntology = semionReengineer
-							.dataReengineering(graphNS, outputIRI, dataSource,
-									schemaOntology);
-					reengineered = true;
-				}
-			}
-		}
-		
-		return reengineeredDataOntology;
-	}
 	
 	@Override
 	public OWLOntology performDataReengineering(String graphNS, IRI outputIRI,

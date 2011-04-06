@@ -83,8 +83,6 @@ public interface ReengineerManager {
 	
 	OWLOntology performSchemaReengineering(String graphNS, IRI outputIRI, DataSource dataSource) throws ReengineeringException;
 	
-	OWLOntology performDataReengineering(String graphNS, IRI outputIRI, DataSource dataSource, IRI schemaOntologyIRI) throws ReengineeringException, NoSuchOntologyInStoreException;
-	
 	OWLOntology performDataReengineering(String graphNS, IRI outputIRI, DataSource dataSource, OWLOntology schemaOntology) throws ReengineeringException;
 	
 }
