@@ -19,6 +19,7 @@ package org.apache.stanbol.commons.stanboltools.datafileprovider.impl;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -77,9 +78,20 @@ public class WebConsolePlugin extends HttpServlet {
             cell(pw, 
                     null, e.getBundleSymbolicName(), 
                     "b", e.getFilename());
+            
+            final StringBuilder sb = new StringBuilder();
+            for(Map.Entry<String, String> comment : e.getComments().entrySet()) {
+                if(sb.length() > 0) {
+                    sb.append("<br/>");
+                }
+                sb.append(comment.getKey());
+                sb.append(": ");
+                sb.append(comment.getValue());
+            }
+            
             cell(pw, 
                     null, e.getActualFileLocation(), 
-                    "i" , "Download info: " + e.getDownloadExplanation());
+                    "i" , sb.toString());
             pw.println("</tr>");
         }
         pw.println("</tbody></table>");

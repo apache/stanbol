@@ -17,6 +17,8 @@
 package org.apache.stanbol.commons.stanboltools.datafileprovider;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /** Used to record a log of {@link DataFileProvider} operations */
@@ -24,15 +26,17 @@ public class DataFileProviderEvent {
     private final Date timestamp;
     private final String bundleSymbolicName;
     private final String filename;
-    private final String downloadExplanation;
+    private final Map<String, String> comments;
     private final String actualFileLocation;
     
-    public DataFileProviderEvent(String bundleSymbolicName, String filename, String downloadExplanation, 
+    private static final Map<String, String> EMPTY_COMMENTS = new HashMap<String, String>(); 
+    
+    public DataFileProviderEvent(String bundleSymbolicName, String filename, Map<String, String> comments, 
             String actualFileLocation) {
         this.timestamp = new Date();
         this.bundleSymbolicName = bundleSymbolicName;
         this.filename = filename;
-        this.downloadExplanation = downloadExplanation;
+        this.comments = comments == null ? EMPTY_COMMENTS : comments;
         this.actualFileLocation = actualFileLocation;
     }
     
@@ -69,9 +73,9 @@ public class DataFileProviderEvent {
         return filename;
     }
 
-    /** @return the download explanation that was passed to the DataFileProvider */ 
-    public String getDownloadExplanation() {
-        return downloadExplanation;
+    /** @return the optional comments about this file */ 
+    public Map<String, String> getComments() {
+        return comments;
     }
 
     /** @return the actual location of the file that was loaded, 
