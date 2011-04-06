@@ -32,5 +32,9 @@
     <module>testing/http</module>
     <module>testing/stanbol</module>
     <module>stanboltools/offline</module>
-  </modules>
+    <module>installer/bundleprovider</module>
+    <!-- not in a stable state right now 
+    <module>installer/jarprovider</module>
+    -->
+    </modules>
 </project>
