@@ -55,7 +55,7 @@ form  {
 
 .header {
   padding: 0.5em 1em;
-  background: #4c4c4c url("/static/images/header_bg.png") repeat-x top left;  
+  background: #4c4c4c url("/static/home/images/header_bg.png") repeat-x top left;  
   border-bottom: 1px solid black;
 }
 
@@ -251,11 +251,11 @@ table {
 .entitylisting table {
   border: 1px solid #eee;
   border-radius: 8px;
-  background: url("/static/images/foldable_unfolded.png") no-repeat scroll right 17px transparent;
+  background: url("/static/home/images/foldable_unfolded.png") no-repeat scroll right 17px transparent;
 }
 
 .entitylisting table.collapsed {
-  background: url("/static/images/foldable_folded.png") no-repeat scroll right center transparent;
+  background: url("/static/home/images/foldable_folded.png") no-repeat scroll right center transparent;
   }
 
 .entitylisting .subheader {
@@ -326,27 +326,27 @@ table {
   }
 
 li.older a {
-  background: url("/static/images/next.png") no-repeat scroll right center transparent;
+  background: url("/static/home/images/next.png") no-repeat scroll right center transparent;
   padding: 0 12px 0 0;
   }
   
 li.moreRecent a {
-  background: url("/static/images/previous.png") no-repeat scroll left center transparent;
+  background: url("/static/home/images/previous.png") no-repeat scroll left center transparent;
   padding: 0 0 0 13px;
   }
 
 .download {
-  background: url("/static/images/download.png") no-repeat scroll left center transparent;
+  background: url("/static/home/images/download.png") no-repeat scroll left center transparent;
   padding: 0 0 2px 20px;
   }
 
 .downloadRDF {
-  background: url("/static/images/download_rdf.png") no-repeat scroll left center transparent;
+  background: url("/static/home/images/download_rdf.png") no-repeat scroll left center transparent;
   padding: 0 0 2px 20px;
   }
 
 .external {
-  background: url("/static/images/external.png") no-repeat scroll right center transparent;
+  background: url("/static/home/images/external.png") no-repeat scroll right center transparent;
   padding: 0 18px 0 0;
   }
   
@@ -369,11 +369,11 @@ li.moreRecent a {
 .enginelisting .collapseheader {
   margin: 0.1em;
   cursor: pointer;
-  background: url("/static/images/foldable_unfolded.png") no-repeat scroll right center transparent;
+  background: url("/static/home/images/foldable_unfolded.png") no-repeat scroll right center transparent;
 }
 
 .enginelisting .collapsed .collapseheader {
-  background: url("/static/images/foldable_folded.png") no-repeat scroll right center transparent;
+  background: url("/static/home/images/foldable_folded.png") no-repeat scroll right center transparent;
 }
 
 .enginelisting ul {
@@ -387,7 +387,7 @@ li.moreRecent a {
 .enginelisting li {
   list-style: none;
   padding-left: 20px; 
-  background: transparent url(/static/images/black_gear_16.png) no-repeat scroll 0% 50%;
+  background: transparent url(/static/home/images/black_gear_16.png) no-repeat scroll 0% 50%;
 }
 
 #enginesInput .submitButtons {
