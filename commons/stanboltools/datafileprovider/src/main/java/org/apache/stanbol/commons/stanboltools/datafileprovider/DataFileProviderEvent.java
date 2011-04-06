@@ -25,16 +25,14 @@ public class DataFileProviderEvent {
     private final String bundleSymbolicName;
     private final String filename;
     private final String downloadExplanation;
-    private final String loadingClass;
     private final String actualFileLocation;
     
     public DataFileProviderEvent(String bundleSymbolicName, String filename, String downloadExplanation, 
-            String loadingClass, String actualFileLocation) {
+            String actualFileLocation) {
         this.timestamp = new Date();
         this.bundleSymbolicName = bundleSymbolicName;
         this.filename = filename;
         this.downloadExplanation = downloadExplanation;
-        this.loadingClass = loadingClass;
         this.actualFileLocation = actualFileLocation;
     }
     
@@ -50,9 +48,6 @@ public class DataFileProviderEvent {
         sb.append(", filename=");
         sb.append(filename);
 
-        sb.append(", loadingClass=");
-        sb.append(loadingClass);
-        
         sb.append(", actualFileLocation=");
         sb.append(actualFileLocation);
         
@@ -79,12 +74,8 @@ public class DataFileProviderEvent {
         return downloadExplanation;
     }
 
-    /** @return the name of the class which provided the file */ 
-    public String getLoadingClass() {
-        return loadingClass;
-    }
-    
-    /** @return the actual location of the file that was loaded, empty if file was not found */ 
+    /** @return the actual location of the file that was loaded, 
+     *      null if file was not found */ 
     public String getActualFileLocation() {
         return actualFileLocation;
     }
