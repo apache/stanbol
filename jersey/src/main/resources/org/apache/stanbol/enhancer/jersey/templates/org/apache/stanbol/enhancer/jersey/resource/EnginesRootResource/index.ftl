@@ -99,8 +99,7 @@ in the format specified in the <code>Accept</code> header:</p>
    
 <pre>
 curl -X POST -H "Accept: text/turtle" -H "Content-type: text/plain" \
-     --data "The Stanbol enhancer can detect famous cities such as Paris." \
-     ${it.publicBaseUri}engines/
+     --data "John Smith was born in London." ${it.publicBaseUri}engines
 </pre> 
 
 <p>The list of mimetypes accepted as inputs depends on the deployed engines. By default only
@@ -123,8 +122,8 @@ to be used in the enhancements RDF graph. This can be achieved by passing a
 
 <pre>
 curl -X POST -H "Accept: text/turtle" -H "Content-type: text/plain" \
-     --data "The Stanbol enhancer can detect famous cities such as Paris." \
-     "${it.publicBaseUri}engines/?uri=urn:fise-example-content-item"
+     --data "John Smith was born in London." \
+     "${it.publicBaseUri}engines?uri=urn:fise-example-content-item"
 </pre> 
 
 </div>
