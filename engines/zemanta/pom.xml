@@ -16,7 +16,7 @@
    limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -33,20 +33,19 @@
 
   <name>Apache Stanbol Enhancer Enhancement Engine : Zemanta Tagging</name>
   <description></description>
-
   <inceptionYear>2010</inceptionYear>
-    <scm>
-        <connection>
-            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/zemanta/
-        </connection>
-        <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/zemanta/
-        </developerConnection>
-        <url>http://incubator.apache.org/stanbol/</url>
-    </scm>
+
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/zemanta/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/zemanta/
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol/</url>
+  </scm>
 
   <dependencies>
-
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
@@ -61,7 +60,7 @@
       <groupId>org.apache.clerezza</groupId>
       <artifactId>org.apache.clerezza.rdf.jena.parser</artifactId>
       <scope>provided</scope>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
@@ -71,20 +70,19 @@
       <artifactId>commons-io</artifactId>
     </dependency>
 
-
     <!-- generic tax -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <scope>provided</scope>
     </dependency>
- 
 
     <!-- for tests -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.7</version>
+      <scope>test</scope>
     </dependency>
     <dependency><!--  for debugging enhancements -->
       <groupId>org.apache.clerezza</groupId>
@@ -97,7 +95,6 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
 
   <build>
     <plugins>
@@ -124,7 +121,6 @@
               !net.didion.*,
               !gnu.getopt,
               !org.apache.log.*,
-              !junit.framework.*,
               !org.apache.avalon.framework.*,
               *
             </Import-Package>
