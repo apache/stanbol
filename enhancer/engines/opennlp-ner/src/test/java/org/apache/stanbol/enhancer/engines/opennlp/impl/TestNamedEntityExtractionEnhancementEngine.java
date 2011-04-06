@@ -16,12 +16,17 @@
  */
 package org.apache.stanbol.enhancer.engines.opennlp.impl;
 
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_END;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTION_CONTEXT;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -36,14 +41,9 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.*;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
 
 public class TestNamedEntityExtractionEnhancementEngine extends Assert {
 
@@ -57,18 +57,11 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
             + " without any name.\n"
             + "A new paragraph is being written. This paragraph has two sentences.";
 
-    static NamedEntityExtractionEnhancementEngine nerEngine = new NamedEntityExtractionEnhancementEngine();
+    static EngineCore nerEngine;
 
     @BeforeClass
     public static void setUpServices() throws IOException {
-        Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        MockComponentContext context = new MockComponentContext(properties);
-        nerEngine.activate(context);
-    }
-
-    @AfterClass
-    public static void shutdownServices() {
-        nerEngine.deactivate(null);
+        nerEngine = new EngineCore(new ClasspathDataFileProvider(), "TEST_BUNDLE_SYMBOLIC_NAME");
     }
 
     public static ContentItem wrapAsContentItem(final String id,
@@ -223,5 +216,4 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
             assertTrue(!endPosIterator.hasNext());
         }
     }
-
 }

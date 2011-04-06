@@ -37,7 +37,7 @@ public class StatelessEngineTest extends EnhancerTestBase {
                 "http://purl.org/dc/terms/creator.*LangIdEnhancementEngine",
                 "http://purl.org/dc/terms/language.*en",
                 "http://fise.iks-project.eu/ontology/entity-label.*Paris",
-                "http://purl.org/dc/terms/creator.*NamedEntityExtractionEnhancementEngine",
+                "http://purl.org/dc/terms/creator.*org.apache.stanbol.enhancer.engines.opennlp.*EngineCore",
                 "http://fise.iks-project.eu/ontology/entity-label.*Bob Marley"
                 )
         .generateDocumentation(
