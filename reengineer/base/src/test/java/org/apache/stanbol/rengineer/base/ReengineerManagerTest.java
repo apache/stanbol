@@ -2,6 +2,8 @@ package org.apache.stanbol.rengineer.base;
 
 import static org.junit.Assert.fail;
 
+import java.util.Hashtable;
+
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.ReengineeringException;
 import org.apache.stanbol.reengineer.base.api.ReengineerManager;
@@ -82,7 +84,7 @@ public class ReengineerManagerTest {
 	
 	@Test
 	public void bindTest(){
-		ReengineerManager semionManager = new ReengineerManagerImpl();
+		ReengineerManager semionManager = new ReengineerManagerImpl(new Hashtable<String,Object>());
 		if(!semionManager.bindReengineer(semionReengineer)){
 			fail("Bind test failed for SemionManager");
 		}
@@ -90,7 +92,7 @@ public class ReengineerManagerTest {
 	
 	@Test
 	public void unbindByReengineerTypeTest(){
-		ReengineerManager semionManager = new ReengineerManagerImpl();
+		ReengineerManager semionManager = new ReengineerManagerImpl(new Hashtable<String,Object>());
 		semionManager.bindReengineer(semionReengineer);
 		if(!semionManager.unbindReengineer(ReengineerType.XML)){
 			fail("Unbind by reengineer type test failed for SemionManager");
@@ -99,7 +101,7 @@ public class ReengineerManagerTest {
 	
 	@Test
 	public void unbindByReengineerInstanceTest(){
-		ReengineerManager semionManager = new ReengineerManagerImpl();
+		ReengineerManager semionManager = new ReengineerManagerImpl(new Hashtable<String,Object>());
 		semionManager.bindReengineer(semionReengineer);
 		if(!semionManager.unbindReengineer(semionReengineer)){
 			fail("Unbind by reengineer instance test failed for SemionManager");
