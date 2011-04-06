@@ -332,15 +332,6 @@
 			<artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
-		<!--
-			The geonames.org LocationEnhancement Engines needs only jettyjson and
-			commons-io as additional bundels. Both are already in this list.
-		-->
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId>
-			<version>0.9-SNAPSHOT</version>
-		</bundle>
 	</startLevel>
 	
 </bundles>
