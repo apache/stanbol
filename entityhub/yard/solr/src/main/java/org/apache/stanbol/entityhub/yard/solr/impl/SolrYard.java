@@ -43,6 +43,8 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
+import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
+import org.apache.solr.client.solrj.impl.StreamingUpdateSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.common.SolrDocument;
@@ -69,7 +71,6 @@ import org.apache.stanbol.entityhub.yard.solr.model.IndexField;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
-import org.apache.stanbol.entityhub.yard.solr.utils.ConfigUtils;
 import org.apache.stanbol.entityhub.yard.solr.utils.SolrUtil;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -236,10 +237,26 @@ public class SolrYard extends AbstractYard implements Yard {
     
     /**
      * Manager used to create the {@link SolrServer} instance used by this yard.
+     * Supports also {@link Type#STREAMING} and {@link Type#LOAD_BALANCE} type
+     * of servers.
+     * TODO: In case a remove SolrServer is configured by the
+     * {@link SolrYardConfig#getSolrServerLocation()}, than it would be possible
+     * to create both an {@link StreamingUpdateSolrServer} (by parsing 
+     * {@link Type#STREAMING}) and an normal {@link CommonsHttpSolrServer}. The
+     * streaming update one should be used for indexing requests and the
+     * commons http one for all other requests. This would provide performance
+     * advantages when updating {@link Representation}s stored in a SolrYard
+     * using an remote SolrServer.
      */
     @Reference
     private SolrServerProviderManager solrServerProviderManager;
-    
+    /**
+     * Used to retrieve (and init if not already present) the Solr Index directory
+     * for relative paths parsed for {@link SolrYardConfig#getSolrServerLocation()}.
+     * Note that the {@link SolrDirectoryManager} only provides the path to the
+     * files. The {@link SolrServer} instance is created by the
+     * {@link SolrServerProviderManager}!
+     */
     @Reference
     private SolrDirectoryManager solrDirectoryManager;
     /**
@@ -269,6 +286,17 @@ public class SolrYard extends AbstractYard implements Yard {
             new IllegalArgumentException("Unable to initialise SolrYard with the provided configuration",e);
         }
     }
+    /**
+     * Builds an {@link SolrYardConfig} instance based on the parsed {@link ComponentContext}
+     * and forwards to {@link #activate(SolrYardConfig)}.
+     * @param context The component context only used to create the {@link SolrYardConfig}
+     * based on {@link ComponentContext#getProperties()}.
+     * @throws ConfigurationException If the configuration is not valid
+     * @throws IOException In case the initialisation of the Solr index was not
+     * possible
+     * @throws SolrServerException Indicates that the referenced SolrServer has
+     * some problems (usually an invalid configuration).
+     */
     @SuppressWarnings("unchecked")
     @Activate
     protected final void activate(ComponentContext context) throws ConfigurationException,IOException,SolrServerException {
@@ -282,9 +310,11 @@ public class SolrYard extends AbstractYard implements Yard {
      * Internally used to configure an instance (within and without an OSGI
      * container
      * @param config The configuration
-     * @throws ConfigurationException
-     * @throws IOException
-     * @throws SolrServerException
+     * @throws ConfigurationException If the configuration is not valid
+     * @throws IOException In case the initialisation of the Solr index was not
+     * possible
+     * @throws SolrServerException Indicates that the referenced SolrServer has
+     * some problems (usually an invalid configuration).
      */
     private void activate(SolrYardConfig config) throws ConfigurationException,IOException,SolrServerException {
         //init with the default implementations of the ValueFactory and the QueryFactory
@@ -309,7 +339,10 @@ public class SolrYard extends AbstractYard implements Yard {
             File indexDirectory = ConfigUtils.toFile(config.getSolrServerLocation());
             if(!indexDirectory.isAbsolute()){ //relative paths
                 // need to be resolved based on the internally managed Solr directory
-                indexDirectory = solrDirectoryManager.getSolrDirectory(indexDirectory.toString());
+                //TODO: for now parse TRUE to allow automatic creation if the index
+                //      does not already exist. We might add this as an additional
+                //      parameter to the SolrIndexConfig 
+                indexDirectory = solrDirectoryManager.getSolrDirectory(indexDirectory.toString(),true);
             }
             solrIndexLocation = indexDirectory.toString();
         } else {
@@ -333,10 +366,14 @@ public class SolrYard extends AbstractYard implements Yard {
         this.documentBoostFieldName = config.getDocumentBoostFieldName();
         this.fieldBoostMap = config.getFieldBoosts();
     }
+    /**
+     * Deactivates this SolrYard instance after committing remaining changes
+     * @param context
+     */
     @Deactivate
     protected final void deactivate(ComponentContext context) {
-        log.info("in "+SolrYard.class+" deactivate with context "+context);
         SolrYardConfig config = (SolrYardConfig)getConfig();
+        log.info("... deactivating SolrYard "+config.getName()+" (id="+config.getId()+")");
         try {
             this.server.commit();
         } catch (SolrServerException e) {
@@ -353,13 +390,22 @@ public class SolrYard extends AbstractYard implements Yard {
         super.deactivate(); //deactivate the super implementation
     }
 
+    /**
+     * Calls the {@link #deactivate(ComponentContext)} with <code>null</code>
+     * as component context
+     */
+    @Override
+    protected void finalize() throws Throwable {
+        deactivate(null);
+        super.finalize();
+    }
 
     @Override
     public final QueryResultList<Representation> find(final FieldQuery parsedQuery) throws YardException{
         return find(parsedQuery,SELECT.QUERY);
     }
     private QueryResultList<Representation> find(final FieldQuery parsedQuery,SELECT select) throws YardException {
-        log.debug(String.format("find %s",parsedQuery));
+        log.debug("find "+parsedQuery);
         long start = System.currentTimeMillis();
         SolrQuery query = solrQueryFactoy.parseFieldQuery(parsedQuery,select);
         long queryGeneration = System.currentTimeMillis();
@@ -472,20 +518,16 @@ public class SolrYard extends AbstractYard implements Yard {
         }
         Representation rep = getValueFactory().createRepresentation(id.toString());
         for(String fieldName : doc.getFieldNames()){
-//            log.debug(String.format(" > process SolrDocument.field: %s",fieldName));
             IndexField indexField = fieldMapper.getField(fieldName);
             if(indexField != null && indexField.getPath().size() == 1){
                 String lang = indexField.getLanguages().isEmpty()?null:indexField.getLanguages().iterator().next();
                 if(fields == null || fields.contains(indexField.getPath().get(0))){
-//                    log.debug(String.format("   -> process IndexField %s ...",indexField));
                     for(Object value : doc.getFieldValues(fieldName)){
-//                        log.debug(String.format("   -> index value %s (type=%s)",value,value!=null?value.getClass():"---"));
                         if(value != null){
                             IndexDataTypeEnum dataTypeEnumEntry = IndexDataTypeEnum.forIndexType(indexField.getDataType());
                             if(dataTypeEnumEntry != null){
                                 Object javaValue = indexValueFactory.createValue(dataTypeEnumEntry.getJavaType(), indexField.getDataType(),value,lang);
                                 if(javaValue != null){
-//                                    log.debug(String.format("   <- java value %s (type=%s)",javaValue,javaValue.getClass()));
                                     rep.add(indexField.getPath().iterator().next(), javaValue);
                                 } else {
                                     log.warn(String.format("java value=null for index value %s",value));
@@ -495,14 +537,10 @@ public class SolrYard extends AbstractYard implements Yard {
                             }
                         } //else index value == null -> ignore
                     } //end for all values
-//                } else {
-//                    log.debug(String.format("   - IndexField %s filtered, because Path is not selected",indexField));
                 }
             } else {
                 if(indexField != null){
                     log.warn(String.format("Unable to prozess Index Field %s (for IndexDocument Field: %s)",indexField,fieldName));
-//                } else {
-//                    log.debug(String.format("IndexDocument Field %s does not represent a IndexField", fieldName));
                 }
             }
         } //end for all fields
@@ -642,9 +680,14 @@ public class SolrYard extends AbstractYard implements Yard {
         return added;
     }
     /**
-     * boost if present!
-     * @param representation
-     * @return
+     * Internally used to create Solr input documents for parsed representations.<p>
+     * This method supports boosting of fields. The boost is calculated by combining<ol>
+     * <li> the boot for the whole representation - by calling 
+     * {@link #getDocumentBoost(Representation)}
+     * <li> the boost of each field - by using the configured {@link #fieldBoostMap}
+     * </ol>
+     * @param representation the representation
+     * @return the Solr document for indexing
      */
     protected final SolrInputDocument createSolrInputDocument(Representation representation) {
         SolrYardConfig config = (SolrYardConfig)getConfig();
@@ -660,10 +703,11 @@ public class SolrYard extends AbstractYard implements Yard {
         for(Iterator<String> fields = representation.getFieldNames();fields.hasNext();){
             //TODO: maybe add some functionality to prevent indexing of the
             //      field configured as documentBoostFieldName!
+            //      But this would also prevent the possibility to intentionally
+            //      override the boost. 
             String field = fields.next();
             Float fieldBoost = fieldBoostMap == null ? null : fieldBoostMap.get(field);
             float boost = fieldBoost == null ? documentBoost : fieldBoost >= 0 ? fieldBoost * documentBoost: documentBoost;
-//            log.debug(String.format(" > Process Representation Field %s",field));
             for(Iterator<Object> values = representation.get(field);values.hasNext();){
                 //now we need to get the indexField for the value
                 Object next = values.next();
@@ -671,7 +715,6 @@ public class SolrYard extends AbstractYard implements Yard {
                 try {
                     value = indexValueFactory.createIndexValue(next);
                     for(String fieldName : fieldMapper.getFieldNames(Arrays.asList(field), value)){
-//                        log.debug(String.format("  - add: %s=%s",fieldName,value));
                         inputDocument.addField(fieldName, value.getValue(),boost);
                     }
                 }catch(Exception e){

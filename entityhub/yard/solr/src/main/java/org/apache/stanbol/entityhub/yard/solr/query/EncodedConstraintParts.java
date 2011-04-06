@@ -49,11 +49,11 @@ import java.util.Map.Entry;
  * @author Rupert Westenthaler
  *
  */
-public class EncodedConstraintParts implements Iterable<Entry<ConstraintTypePosition,Set<String>>>{
+public class EncodedConstraintParts implements Iterable<Entry<ConstraintTypePosition,Set<Set<String>>>>{
     /**
      * This maps contains all the encoded parts of the query.
      */
-    private SortedMap<ConstraintTypePosition,Set<String>> constraintMap = new TreeMap<ConstraintTypePosition, Set<String>>();
+    private SortedMap<ConstraintTypePosition,Set<Set<String>>> constraintMap = new TreeMap<ConstraintTypePosition, Set<Set<String>>>();
     /**
      * Adds an constraint type
      * @param pos
@@ -63,12 +63,12 @@ public class EncodedConstraintParts implements Iterable<Entry<ConstraintTypePosi
         if(values == null || values.length<1){
             return;
         } else {
-            Set<String> constraints = constraintMap.get(pos);
+            Set<Set<String>> constraints = constraintMap.get(pos);
             if(constraints == null){
-                constraints = new HashSet<String>();
+                constraints = new HashSet<Set<String>>();
                 constraintMap.put(pos, constraints);
             }
-            constraints.addAll(Arrays.asList(values));
+            constraints.add(new HashSet<String>(Arrays.asList(values)));
         }
     }
 
@@ -78,7 +78,7 @@ public class EncodedConstraintParts implements Iterable<Entry<ConstraintTypePosi
     }
 
     @Override
-    public Iterator<Entry<ConstraintTypePosition, Set<String>>> iterator() {
+    public Iterator<Entry<ConstraintTypePosition, Set<Set<String>>>> iterator() {
         return constraintMap.entrySet().iterator();
     }
     @Override

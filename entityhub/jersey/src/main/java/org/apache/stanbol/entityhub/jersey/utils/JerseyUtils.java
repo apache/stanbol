@@ -105,7 +105,7 @@ public final class JerseyUtils {
             try {
                 fieldQuery = JSONToFieldQuery.fromJSON(queryFactory,query);
             } catch (JSONException e) {
-                log.warn("unable to parse FieldQuery from \"application/x-www-form-urlencoded\" encoded query string "+query);
+                log.warn("unable to parse FieldQuery from \"application/x-www-form-urlencoded\" encoded query string "+query,e);
                 fieldQuery = null;
                 exception = e;
             }
@@ -117,12 +117,12 @@ public final class JerseyUtils {
             } catch (IOException e) {
                 throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
             } catch (JSONException e) {
-                log.warn("unable to parse FieldQuery from \"multipart/form-data\" encoded query string "+query);
+                log.warn("unable to parse FieldQuery from \"multipart/form-data\" encoded query string "+query,e);
                 exception = e;
             }
         }//fieldquery already initialised or no query via multipart/form-data parsed
         if(fieldQuery == null){
-            throw new WebApplicationException(new IllegalArgumentException("Unable to parse FieldQuery for the parsed query\n"+query, exception),Response.Status.BAD_REQUEST);
+            throw new WebApplicationException(new IllegalArgumentException("Unable to parse FieldQuery form the parsed query String:"+query, exception),Response.Status.BAD_REQUEST);
         }
         return fieldQuery;
     }

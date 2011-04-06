@@ -19,6 +19,8 @@ package org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
+import org.apache.stanbol.entityhub.yard.solr.model.IndexDataType;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition;
@@ -58,14 +60,18 @@ public class AssignmentEncoder implements IndexConstraintTypeEncoder<Object>{
         } else {
             indexValue = indexValueFactory.createIndexValue(value);
         }
-        String eqConstraint = EQ;
-        if(value != null){
-            String escapedValue = SolrUtil.escapeSolrSpecialChars(indexValue.getValue());
-            //now we need to replace spaces with '+' because only than the query
-            //is treated as EQUALS by solr
-            eqConstraint = EQ+escapedValue.replace(' ', '+');
+        //encode the value based on the type
+        String[] queryConstraints = SolrUtil.encodeQueryValue(indexValue);
+        String[] eqConstraints;
+        if(queryConstraints != null){
+            eqConstraints = new String[queryConstraints.length];
+            for(int i=0;i<eqConstraints.length;i++){
+                eqConstraints[i] = EQ+queryConstraints[i];
+            }
+        } else {
+            eqConstraints = new String[]{EQ};
         }
-        constraint.addEncoded(POS, eqConstraint);
+        constraint.addEncoded(POS, eqConstraints);
     }
 
     @Override
