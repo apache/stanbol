@@ -18,6 +18,7 @@ package org.apache.stanbol.enhancer.engines.opennlp.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 
@@ -26,7 +27,7 @@ public class ClasspathDataFileProvider implements DataFileProvider {
 
     @Override
     public InputStream getInputStream(String bundleSymbolicName,
-            String filename, String downloadExplanation) 
+            String filename, Map<String, String> comments) 
     throws IOException {
         // load default OpenNLP models from classpath (embedded in the defaultdata bundle)
         final String resourcePath = "org/apache/stanbol/defaultdata/opennlp/" + filename;

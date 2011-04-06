@@ -73,8 +73,12 @@ public class EngineCore implements EnhancementEngine {
     protected final TokenNameFinderModel organizationNameModel;
     protected Map<String,Object[]> entityTypes = new HashMap<String,Object[]>();
 
-    /** Explain where to get more models */
-    public static final String MODEL_DOWNLOAD_EXPLANATION = "Ask on the Apache Stanbol mailing list";
+    /** Comments about our models */
+    public static final Map<String, String> DATA_FILE_COMMENTS;
+    static {
+        DATA_FILE_COMMENTS = new HashMap<String, String>();
+        DATA_FILE_COMMENTS.put("Default data files", "provided by the org.apache.stanbol.defaultdata bundle");
+    }
 
     EngineCore(DataFileProvider dfp, String bundleSymbolicName) throws InvalidFormatException, IOException {
         dataFileProvider = dfp;
@@ -86,7 +90,7 @@ public class EngineCore implements EnhancementEngine {
     }
     
     protected InputStream lookupModelStream(String modelRelativePath) throws IOException {
-        return dataFileProvider.getInputStream(bundleSymbolicName, modelRelativePath, MODEL_DOWNLOAD_EXPLANATION);
+        return dataFileProvider.getInputStream(bundleSymbolicName, modelRelativePath, DATA_FILE_COMMENTS);
     }
 
     protected TokenNameFinderModel buildNameModel(String name, UriRef typeUri) throws IOException {
