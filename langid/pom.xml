@@ -16,7 +16,7 @@
    limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -34,18 +34,20 @@
   <name>Apache Stanbol Enhancer Enhancement Engine : Language Identifier</name>
   <description>identifies a text as: German(de), English(en), French(fr), Spanish(es), Italian(it),
     Swedish(sv), Polish(pl), Dutch(nl), Norwegian(no), Finnish(fi), Albanian(sq), Slovakian(sk),
-    Slovenian(sl), Danish(da), Hungarian(hu)</description>
+    Slovenian(sl), Danish(da), Hungarian(hu)
+  </description>
 
   <inceptionYear>2010</inceptionYear>
-    <scm>
-        <connection>
-            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/langid/
-        </connection>
-        <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/langid/
-        </developerConnection>
-        <url>http://incubator.apache.org/stanbol/</url>
-    </scm>
+
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/langid/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines/langid/
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol/</url>
+  </scm>
 
   <build>
     <plugins>
@@ -104,7 +106,7 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
