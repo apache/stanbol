@@ -8,7 +8,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.Session.State;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent.OperationType;
 import org.semanticweb.owlapi.model.IRI;
 import org.slf4j.LoggerFactory;

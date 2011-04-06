@@ -4,7 +4,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.StringUtils;
-import org.apache.stanbol.ontologymanager.store.api.PersistenceStore;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 

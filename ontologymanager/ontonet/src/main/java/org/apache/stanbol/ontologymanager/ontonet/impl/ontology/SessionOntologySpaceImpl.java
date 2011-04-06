@@ -8,7 +8,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.StringUtils;
-import org.apache.stanbol.ontologymanager.store.api.PersistenceStore;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -25,11 +24,11 @@ public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl
 //		SUFFIX = SpaceType.SESSION.getIRISuffix();
 //	}
 	
-	public SessionOntologySpaceImpl(IRI scopeID, PersistenceStore persistenceStore) {
+	public SessionOntologySpaceImpl(IRI scopeID, ClerezzaOntologyStorage store) {
 		// FIXME : sync session id with session space ID
 		super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/"
 				+ SpaceType.SESSION.getIRISuffix() + "-"
-				+ new Random().nextLong()), SpaceType.SESSION, persistenceStore/*, scopeID*/);
+				+ new Random().nextLong()), SpaceType.SESSION, store/*, scopeID*/);
 
 		IRI iri = IRI.create(StringUtils.stripIRITerminator(getID())
 				+ "/root.owl");
@@ -50,13 +49,13 @@ public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl
 		}
 	}
 
-	public SessionOntologySpaceImpl(IRI scopeID, PersistenceStore persistenceStore,
+	public SessionOntologySpaceImpl(IRI scopeID, ClerezzaOntologyStorage store,
 			OWLOntologyManager ontologyManager) {
 		
 		// FIXME : sync session id with session space ID
 		super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/"
 				+ SpaceType.SESSION.getIRISuffix() + "-"
-				+ new Random().nextLong()), SpaceType.SESSION, persistenceStore, /*scopeID,*/ ontologyManager);
+				+ new Random().nextLong()), SpaceType.SESSION, store, /*scopeID,*/ ontologyManager);
 		
 		Logger log = LoggerFactory.getLogger(getClass());
 		IRI iri = IRI.create(StringUtils.stripIRITerminator(getID())

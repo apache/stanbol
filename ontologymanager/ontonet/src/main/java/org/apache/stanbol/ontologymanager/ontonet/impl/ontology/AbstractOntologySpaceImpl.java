@@ -1,6 +1,5 @@
 package org.apache.stanbol.ontologymanager.ontonet.impl.ontology;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
