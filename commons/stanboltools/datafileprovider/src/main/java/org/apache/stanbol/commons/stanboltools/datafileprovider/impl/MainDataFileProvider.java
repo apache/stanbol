@@ -168,6 +168,7 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
                     log.debug("{} does not provide file {}", dfp, filename);
                 } else {
                     fileUrl = dfp.getClass().getName() + "://" + filename;
+                    break; //break as soon as a resource was found
                 }
             }
         }
