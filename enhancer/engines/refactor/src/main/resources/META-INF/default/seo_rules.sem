@@ -1,0 +1,63 @@
+dbpedia = <http://dbpedia.org/ontology/> . 
+dbprop = <http://dbpedia.org/property/> . 
+google = <http://rdf.data-vocabulary.org/#> . 
+foaf = <http://xmlns.com/foaf/0.1/> . 
+rdf = <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . 
+wgs84_pos = <http://www.w3.org/2003/01/geo/wgs84_pos#> . 
+skos = <http://www.w3.org/2004/02/skos/core#> . 
+gn = <http://www.geonames.org/ontology#> . 
+fise = <http://fise.iks-project.eu/ontology/> . 
+owl = <http://www.w3.org/2002/07/owl#> . 
+dc = <http://purl.org/dc/elements/1.1/> . 
+
+peopleTypeRule[is(dbpedia:Person, ?x) -> is(google:Person, ?x)] .  
+myRule[has(fise:entity-reference,  ?y,  ?x) . has(<http://purl.org/dc/terms/relation>,  ?y,  ?r) ->  has(<http://purl.org/dc/terms/relation>,  ?x,  ?r)] . 
+fiseStartRul1[has(fise:entity-reference,  ?y,  ?x) . has(<http://purl.org/dc/terms/relation>,  ?y,  ?r) . values(fise:selected-text,  ?r,  ?t) . values(fise:start,  ?r,  ?start) -> is(fise:enhancementContext,  ?t) . values(fise:start-position,  ?r,  ?start) . has(fise:hasEnhancementContext,  ?x,  ?r)] . 
+fiseEndRule1[has(fise:entity-reference,  ?y,  ?x) . has(<http://purl.org/dc/terms/relation>,  ?y,  ?r) . values(fise:selected-text,  ?r,  ?t) . values(fise:end,  ?r,  ?end) -> is(fise:enhancementContext,  ?t) . values(fise:end-position,  ?r,  ?end) . has(fise:hasEnhancementContext,  ?x,  ?r) ] . 
+fiseContextRule1[has(fise:entity-reference,  ?y,  ?x) . has(<http://purl.org/dc/terms/relation>,  ?y,  ?r) . values(fise:selected-text,  ?r,  ?t) . values(fise:selection-context,  ?r,  ?context) -> is(fise:enhancementContext,  ?t) . values(fise:context,  ?r,  ?context) . has(fise:hasEnhancementContext,  ?x,  ?r)] . 
+peopleNameRule[is(dbpedia:Person, ?x) . values(foaf:name, ?x, ?y) -> values(google:name, ?x, ?y)] . 
+peopleNickRule[is(dbpedia:Person, ?x) . values(foaf:nick, ?x, ?y) -> values(google:nickname, ?x, ?y)] . 
+peoplePhotoRule[is(dbpedia:Person, ?x) . has(dbpedia:thumbnail, ?x, ?y) -> has(google:photo, ?x, ?y)] . 
+peopleProfessionRule[is(dbpedia:Person, ?x) . has(dbpedia:profession, ?x, ?y) -> has(google:title, ?x, ?y)] . 
+peopleOccupationRule[is(dbpedia:Person, ?x) . has(dbpedia:occupation, ?x, ?y) -> has(google:title, ?x, ?y)] . 
+peopleRoleRule[is(dbpedia:Person, ?x) . values(dbpedia:role, ?x, ?y) -> values(google:role, ?x, ?y)] . 
+peopleHomepageRule[is(dbpedia:Person, ?x) . has(foaf:homepage, ?x, ?y) -> has(google:url, ?x, ?y)] . 
+peopleAffiliationRule[is(dbpedia:Person, ?x) . has(dbpedia:employer, ?x, ?y) -> has(google:affiliation, ?x, ?y)] . 
+peopleKnowsRule[is(dbpedia:Person, ?x) . has(foaf:knows, ?x, ?y) -> has(google:friend, ?x, ?y)] . 
+peopleAddressRule[is(dbpedia:Person, ?x) . values(dbpedia:address, ?x, ?y) -> values(google:address, ?x, ?y)] . 
+peopleOccupationRule2[is(dbpedia:Person, ?x) . has(dc:description, ?x, ?y) -> has(google:title, ?x, ?y)] . 
+peopleOccupationRule3[is(dbpedia:Person, ?x) . has(skos:subject, ?x, ?y) -> has(google:affiliation, ?x, ?y)] . 
+productTypeRule[is(dbpedia:Organisation, ?x) . has(dbpedia:product, ?x, ?y) -> is(google:Product, ?y)] . 
+productNameRule1[is(dbpedia:Organisation, ?x) . has(dbpedia:product, ?x, ?y) . values(foaf:name, ?y, ?z) -> values(google:name, ?y, ?z)] . 
+productNameRule2[is(dbpedia:Organisation, ?x) . has(dbpedia:product, ?x, ?y) . values(dbprop:name, ?y, ?z) -> values(google:name, ?y, ?z)] . 
+productNameRule3[is(dbpedia:Organisation, ?x) . has(dbpedia:product, ?x, ?y) . values(rdf:label, ?y, ?z) -> values(google:name, ?y, ?z)] . 
+productImageRule[is(dbpedia:Organisation, ?x) . has(dbpedia:product, ?x, ?y) . has(dbpedia:thumbnail, ?y, ?z) -> has(google:photo, ?y, ?z)] . 
+productDescriptionRule[is(dbpedia:Organisation, ?x) . has(dbpedia:product, ?x, ?y) . values(dbpedia:thumbnail, ?y, ?z) -> values(google:description, ?y, ?z)] . 
+productBrandRule[is(dbpedia:Organisation, ?x) . has(dbpedia:product, ?x, ?y) . values(rdf:label, ?y, ?z) -> values(google:brand, ?y, ?z)] . 
+productIdentifierRule[is(dbpedia:Organisation, ?x) . has(dbpedia:product, ?x, ?y) . values(dbpedia:isbn, ?y, ?z) -> values(google:identifier, ?y, ?z)] . 
+productHomepageRule[is(dbpedia:Organisation, ?x) . has(dbpedia:product, ?x, ?y) . values(foaf:homepage, ?y, ?z) -> values(google:url, ?y, ?z)] . 
+productCategoryRule[is(dbpedia:Organisation, ?x) . has(dbpedia:product, ?x, ?y) . has(skos:currency, ?y, ?z) -> has(google:category, ?y, ?z)] . 
+organizationTypeRule[is(dbpedia:Organisation, ?x) -> is(google:Organization, ?x)] . 
+organizationNameRule[is(dbpedia:Organisation, ?x) . values(foaf:name, ?x, ?y) -> values(google:name, ?x, ?y)] . 
+organizationHomepageRule[is(dbpedia:Organisation, ?x) . values(foaf:homepage, ?x, ?y) -> values(google:url, ?x, ?y)] . 
+organizationRegionRule[is(dbpedia:Organisation, ?x) . has(dbpedia:region, ?x, ?y) -> has(google:region, ?x, ?y)] . 
+organizationCountryRule[is(dbpedia:Organisation, ?x) . has(dbpedia:locationCountry, ?x, ?y) -> has(google:country-name, ?x, ?y)] . 
+organizationAddressRule[is(dbpedia:Organisation, ?x) . values(dbprop:address, ?x, ?y) -> values(google:address, ?x, ?y)] . 
+organizationStreetAddressRule[is(dbpedia:Organisation, ?x) . values(dbprop:streetaddress, ?x, ?y) -> values(google:street-address, ?x, ?y)] . 
+organizationLocationRule[is(dbpedia:Organisation, ?x) . has(dbpedia:location, ?x, ?y) -> has(google:locality, ?x, ?y)] . 
+organizationTelephoneRule[is(dbpedia:Organisation, ?x) . values(dbprop:telephon, ?x, ?y) -> values(google:tel, ?x, ?y)] . 
+organizationPostalCodeRule[is(dbpedia:Organisation, ?x) . values(dbpedia:postalCode, ?x, ?y) -> has(google:postal-code, ?x, ?y)] . 
+organizationGeoLatRule[is(dbpedia:Organisation, ?x) . values(gn:lat, ?x, ?y) -> values(google:latitude, ?x, ?y)] . 
+organizationGeoLongRule[is(dbpedia:Organisation, ?x) . values(gn:long, ?x, ?y) -> values(google:longitude, ?x, ?y)] . 
+organizationCategoryRule[is(dbpedia:Organisation, ?x) . has(skos:subject, ?x, ?y) -> has(google:category, ?x, ?y)] . 
+eventTypeRule[is(dbpedia:Event, ?x) -> is(google:Event, ?x)] . 
+eventURLRule[is(dbpedia:Event, ?x) . has(foaf:page, ?x, ?y) -> has(google:url, ?x, ?y)] . 
+eventLocationRule1[is(dbpedia:Event, ?x) . has(dbpedia:place, ?x, ?y) -> has(google:location, ?x, ?y)] . 
+eventLocationRule2[is(dbpedia:Event, ?x) . has(dbpedia:place, ?x, ?y) . has(owl:sameAs, ?y, ?z) . is(gn:Feature, ?z) . values(wgs84_pos:lat, ?z, ?lat) . values(wgs84_pos:long, ?z, ?long) -> is(google:geo, ?z) . has(google:location, ?x, ?y) . has(google:geo, ?y, ?z) . values(google:latitude, ?z, ?lat) . values(google:longitude, ?z, ?long)] . 
+eventDateRule1[is(dbpedia:Event, ?x) . values(dbpedia:date, ?x, ?y) -> values(google:startDate, ?x, ?y)] . 
+eventCategoryRule[is(dbpedia:Event, ?x) . has(skos:subject, ?x, ?y) -> has(google:eventType, ?x, ?y)] . 
+eventPhotoRule[is(dbpedia:Event, ?x) . has(dbpedia:thumbnail, ?x, ?y) -> has(google:photo, ?x, ?y)] . 
+recipeClassAssertionRule[has(skos:subject, ?x, <http://dbpedia.org/page/Category:World_cuisine>) -> is(google:Recipe, ?x)] . 
+recipeTypeRule[has(skos:subject, ?x, <http://dbpedia.org/page/Category:World_cuisine>) . has(skos:subject, ?x, ?y) -> has(google:recipeType, ?x, ?y)] . 
+recipePhotoRule1[has(skos:subject, ?x, <http://dbpedia.org/page/Category:World_cuisine>) . has(dbpedia:thumbnail, ?x, ?y) -> has(google:photo, ?x, ?y)] . 
+recipePhotoRule2[has(skos:subject, ?x, <http://dbpedia.org/page/Category:World_cuisine>) . values(dbpedia:abstract, ?x, ?y) -> values(google:summary, ?x, ?y)]
