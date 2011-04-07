@@ -35,7 +35,7 @@ public class BenchmarkResultImpl implements BenchmarkResult {
         matchingSubjects = tmg.getMatchingSubjects(graph);
         
         if(tmg.isExpectGroup()) {
-            if(matchingSubjects.size() == 1) {
+            if(matchingSubjects.size() > 0) {
                 successful = true;
                 info = "EXPECT OK";
             } else {
