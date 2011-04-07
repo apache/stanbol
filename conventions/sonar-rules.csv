@@ -1,0 +1,492 @@
+title,key,plugin,priority,status
+Anon Inner Length,com.puppycrawl.tools.checkstyle.checks.sizes.AnonInnerLengthCheck,checkstyle,MAJOR,ACTIVE
+Architectural constraint,ArchitecturalConstraint,squid,MAJOR,ACTIVE
+Avoid Array Loops,AvoidArrayLoops,pmd,MAJOR,ACTIVE
+Avoid Assert As Identifier,AvoidAssertAsIdentifier,pmd,MAJOR,ACTIVE
+Avoid Calling Finalize,AvoidCallingFinalize,pmd,MAJOR,ACTIVE
+Avoid Catching NPE,AvoidCatchingNPE,pmd,MAJOR,ACTIVE
+Avoid Catching Throwable,AvoidCatchingThrowable,pmd,CRITICAL,ACTIVE
+Avoid Decimal Literals In Big Decimal Constructor,AvoidDecimalLiteralsInBigDecimalConstructor,pmd,MAJOR,ACTIVE
+Avoid Duplicate Literals,AvoidDuplicateLiterals,pmd,MAJOR,ACTIVE
+Avoid Enum As Identifier,AvoidEnumAsIdentifier,pmd,MAJOR,ACTIVE
+Avoid Instanceof Checks In Catch Clause,AvoidInstanceofChecksInCatchClause,pmd,MINOR,ACTIVE
+Avoid Print Stack Trace,AvoidPrintStackTrace,pmd,MAJOR,ACTIVE
+Avoid Rethrowing Exception,AvoidRethrowingException,pmd,MAJOR,ACTIVE
+Avoid Throwing Null Pointer Exception,AvoidThrowingNullPointerException,pmd,MAJOR,ACTIVE
+Avoid Throwing Raw Exception Types,AvoidThrowingRawExceptionTypes,pmd,MAJOR,ACTIVE
+Avoid too complex class,ClassCyclomaticComplexity,squid,MAJOR,ACTIVE
+Avoid too complex method,MethodCyclomaticComplexity,squid,MAJOR,ACTIVE
+Avoid use of deprecated method,CallToDeprecatedMethod,squid,MINOR,ACTIVE
+Bad practice - Abstract class defines covariant compareTo() method,CO_ABSTRACT_SELF,findbugs,MAJOR,ACTIVE
+Bad practice - Abstract class defines covariant equals() method,EQ_ABSTRACT_SELF,findbugs,MAJOR,ACTIVE
+Bad practice - Certain swing methods needs to be invoked in Swing thread,SW_SWING_METHODS_INVOKED_IN_SWING_THREAD,findbugs,MAJOR,ACTIVE
+Bad practice - Check for sign of bitwise operation,BIT_SIGNED_CHECK,findbugs,CRITICAL,ACTIVE
+Bad practice - Class defines clone() but doesn't implement Cloneable,CN_IMPLEMENTS_CLONE_BUT_NOT_CLONEABLE,findbugs,MAJOR,ACTIVE
+Bad practice - Class defines compareTo(...) and uses Object.equals(),EQ_COMPARETO_USE_OBJECT_EQUALS,findbugs,CRITICAL,ACTIVE
+Bad practice - Class defines equals() and uses Object.hashCode(),HE_EQUALS_USE_HASHCODE,findbugs,CRITICAL,ACTIVE
+Bad practice - Class defines equals() but not hashCode(),HE_EQUALS_NO_HASHCODE,findbugs,MAJOR,ACTIVE
+Bad practice - Class defines hashCode() and uses Object.equals(),HE_HASHCODE_USE_OBJECT_EQUALS,findbugs,CRITICAL,ACTIVE
+Bad practice - Class defines hashCode() but not equals(),HE_HASHCODE_NO_EQUALS,findbugs,CRITICAL,ACTIVE
+Bad practice - Class implements Cloneable but does not define or use clone method,CN_IDIOM,findbugs,MAJOR,ACTIVE
+Bad practice - Class inherits equals() and uses Object.hashCode(),HE_INHERITS_EQUALS_USE_HASHCODE,findbugs,CRITICAL,ACTIVE
+Bad practice - Class is Externalizable but doesn't define a void constructor,SE_NO_SUITABLE_CONSTRUCTOR_FOR_EXTERNALIZATION,findbugs,MAJOR,ACTIVE
+"Bad practice - Class is not derived from an Exception, even though it is named as such",NM_CLASS_NOT_EXCEPTION,findbugs,MAJOR,ACTIVE
+"Bad practice - Class is Serializable, but doesn't define serialVersionUID",SE_NO_SERIALVERSIONID,findbugs,MAJOR,ACTIVE
+Bad practice - Class is Serializable but its superclass doesn't define a void constructor,SE_NO_SUITABLE_CONSTRUCTOR,findbugs,MAJOR,ACTIVE
+Bad practice - Classloaders should only be created inside doPrivileged block,DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED,findbugs,MAJOR,ACTIVE
+Bad practice - Class names shouldn't shadow simple name of implemented interface,NM_SAME_SIMPLE_NAME_AS_INTERFACE,findbugs,MAJOR,ACTIVE
+Bad practice - Class names shouldn't shadow simple name of superclass,NM_SAME_SIMPLE_NAME_AS_SUPERCLASS,findbugs,MAJOR,ACTIVE
+Bad practice - clone method does not call super.clone(),CN_IDIOM_NO_SUPER_CALL,findbugs,MAJOR,ACTIVE
+Bad practice - Clone method may return null,NP_CLONE_COULD_RETURN_NULL,findbugs,CRITICAL,ACTIVE
+Bad practice - Comparator doesn't implement Serializable,SE_COMPARATOR_SHOULD_BE_SERIALIZABLE,findbugs,MAJOR,ACTIVE
+Bad practice - Comparison of String objects using == or !=,ES_COMPARING_STRINGS_WITH_EQ,findbugs,MAJOR,ACTIVE
+Bad practice - Comparison of String parameter using == or !=,ES_COMPARING_PARAMETER_STRING_WITH_EQ,findbugs,MAJOR,ACTIVE
+Bad practice - Confusing method names,NM_CONFUSING,findbugs,MAJOR,ACTIVE
+Bad practice - Covariant compareTo() method defined,CO_SELF_NO_OBJECT,findbugs,MAJOR,ACTIVE
+Bad practice - Covariant equals() method defined,EQ_SELF_NO_OBJECT,findbugs,MAJOR,ACTIVE
+Bad practice - Creates an empty jar file entry,AM_CREATES_EMPTY_JAR_FILE_ENTRY,findbugs,MAJOR,ACTIVE
+Bad practice - Creates an empty zip file entry,AM_CREATES_EMPTY_ZIP_FILE_ENTRY,findbugs,MAJOR,ACTIVE
+Bad practice - Dubious catching of IllegalMonitorStateException,IMSE_DONT_CATCH_IMSE,findbugs,MAJOR,ACTIVE
+Bad practice - Empty finalizer should be deleted,FI_EMPTY,findbugs,MAJOR,ACTIVE
+Bad practice - Equals checks for noncompatible operand,EQ_CHECK_FOR_OPERAND_NOT_COMPATIBLE_WITH_THIS,findbugs,MAJOR,ACTIVE
+Bad practice - equals() method does not check for null argument,NP_EQUALS_SHOULD_HANDLE_NULL_ARGUMENT,findbugs,CRITICAL,ACTIVE
+Bad practice - equals method fails for subtypes,EQ_GETCLASS_AND_CLASS_CONSTANT,findbugs,CRITICAL,ACTIVE
+Bad practice - Equals method should not assume anything about the type of its argument,BC_EQUALS_METHOD_SHOULD_WORK_FOR_ALL_OBJECTS,findbugs,CRITICAL,ACTIVE
+Bad practice - Explicit invocation of finalizer,FI_EXPLICIT_INVOCATION,findbugs,MAJOR,ACTIVE
+Bad practice - Fields of immutable classes should be final,JCIP_FIELD_ISNT_FINAL_IN_IMMUTABLE_CLASS,findbugs,MINOR,ACTIVE
+Bad practice - Finalizer does not call superclass finalizer,FI_MISSING_SUPER_CALL,findbugs,MAJOR,ACTIVE
+Bad practice - Finalizer does nothing but call superclass finalizer,FI_USELESS,findbugs,MINOR,ACTIVE
+Bad practice - Finalizer nullifies superclass finalizer,FI_NULLIFY_SUPER,findbugs,CRITICAL,ACTIVE
+Bad practice - Finalizer nulls fields,FI_FINALIZER_NULLS_FIELDS,findbugs,MAJOR,ACTIVE
+Bad practice - Finalizer only nulls fields,FI_FINALIZER_ONLY_NULLS_FIELDS,findbugs,MAJOR,ACTIVE
+Bad practice - Iterator next() method can't throw NoSuchElementException,IT_NO_SUCH_ELEMENT,findbugs,MINOR,ACTIVE
+Bad practice - Method doesn't override method in superclass due to wrong package for parameter,NM_WRONG_PACKAGE_INTENTIONAL,findbugs,MAJOR,ACTIVE
+Bad practice - Method ignores exceptional return value,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,findbugs,MAJOR,ACTIVE
+Bad practice - Method ignores results of InputStream.read(),RR_NOT_CHECKED,findbugs,MAJOR,ACTIVE
+Bad practice - Method ignores results of InputStream.skip(),SR_NOT_CHECKED,findbugs,MAJOR,ACTIVE
+Bad practice - Method invoked that should be only be invoked inside a doPrivileged block,DP_DO_INSIDE_DO_PRIVILEGED,findbugs,MAJOR,ACTIVE
+Bad practice - Method invokes dangerous method runFinalizersOnExit,DM_RUN_FINALIZERS_ON_EXIT,findbugs,MAJOR,ACTIVE
+Bad practice - Method invokes System.exit(...),DM_EXIT,findbugs,MAJOR,ACTIVE
+Bad practice - Method may fail to close database resource,ODR_OPEN_DATABASE_RESOURCE,findbugs,CRITICAL,ACTIVE
+Bad practice - Method may fail to close database resource on exception,ODR_OPEN_DATABASE_RESOURCE_EXCEPTION_PATH,findbugs,CRITICAL,ACTIVE
+Bad practice - Method may fail to close stream,OS_OPEN_STREAM,findbugs,CRITICAL,ACTIVE
+Bad practice - Method may fail to close stream on exception,OS_OPEN_STREAM_EXCEPTION_PATH,findbugs,CRITICAL,ACTIVE
+Bad practice - Method might drop exception,DE_MIGHT_DROP,findbugs,MAJOR,ACTIVE
+Bad practice - Method might ignore exception,DE_MIGHT_IGNORE,findbugs,MAJOR,ACTIVE
+Bad practice - Method with Boolean return type returns explicit null,NP_BOOLEAN_RETURN_NULL,findbugs,MAJOR,ACTIVE
+Bad practice - Needless instantiation of class that only supplies static methods,ISC_INSTANTIATE_STATIC_CLASS,findbugs,MAJOR,ACTIVE
+Bad practice - Non-serializable class has a serializable inner class,SE_BAD_FIELD_INNER_CLASS,findbugs,MINOR,ACTIVE
+Bad practice - Non-serializable value stored into instance field of a serializable class,SE_BAD_FIELD_STORE,findbugs,CRITICAL,ACTIVE
+Bad practice - Random object created and used only once,DMI_RANDOM_USED_ONLY_ONCE,findbugs,CRITICAL,ACTIVE
+Bad practice - Serializable inner class,SE_INNER_CLASS,findbugs,MAJOR,ACTIVE
+Bad practice - serialVersionUID isn't final,SE_NONFINAL_SERIALVERSIONID,findbugs,CRITICAL,ACTIVE
+Bad practice - serialVersionUID isn't long,SE_NONLONG_SERIALVERSIONID,findbugs,MAJOR,ACTIVE
+Bad practice - serialVersionUID isn't static,SE_NONSTATIC_SERIALVERSIONID,findbugs,MAJOR,ACTIVE
+Bad practice - Static initializer creates instance before all static final fields assigned,SI_INSTANCE_BEFORE_FINALS_ASSIGNED,findbugs,CRITICAL,ACTIVE
+Bad practice - Store of non serializable object into HttpSession,J2EE_STORE_OF_NON_SERIALIZABLE_OBJECT_INTO_SESSION,findbugs,CRITICAL,ACTIVE
+Bad practice - Superclass uses subclass during initialization,IC_SUPERCLASS_USES_SUBCLASS_DURING_INITIALIZATION,findbugs,MAJOR,ACTIVE
+Bad practice - Suspicious reference comparison,RC_REF_COMPARISON,findbugs,CRITICAL,ACTIVE
+Bad practice - The readResolve method must be declared with a return type of Object.,SE_READ_RESOLVE_MUST_RETURN_OBJECT,findbugs,MAJOR,ACTIVE
+Bad practice - toString method may return null,NP_TOSTRING_COULD_RETURN_NULL,findbugs,CRITICAL,ACTIVE
+Bad practice - Transient field that isn't set by deserialization.,SE_TRANSIENT_FIELD_NOT_RESTORED,findbugs,MAJOR,ACTIVE
+Bad practice - Unchecked type in generic call,GC_UNCHECKED_TYPE_IN_GENERIC_CALL,findbugs,CRITICAL,ACTIVE
+Bad practice - Usage of GetResource may be unsafe if class is extended,UI_INHERITANCE_UNSAFE_GETRESOURCE,findbugs,MAJOR,ACTIVE
+Bad practice - Use of identifier that is a keyword in later versions of Java,NM_FUTURE_KEYWORD_USED_AS_MEMBER_IDENTIFIER,findbugs,MAJOR,ACTIVE
+Bad practice - Use of identifier that is a keyword in later versions of Java,NM_FUTURE_KEYWORD_USED_AS_IDENTIFIER,findbugs,MAJOR,ACTIVE
+Bad practice - Very confusing method names (but perhaps intentional),NM_VERY_CONFUSING_INTENTIONAL,findbugs,MAJOR,ACTIVE
+Big Integer Instantiation,BigIntegerInstantiation,pmd,MAJOR,ACTIVE
+Boolean Expression Complexity,com.puppycrawl.tools.checkstyle.checks.metrics.BooleanExpressionComplexityCheck,checkstyle,MAJOR,ACTIVE
+Boolean Instantiation,BooleanInstantiation,pmd,MAJOR,ACTIVE
+Broken Null Check,BrokenNullCheck,pmd,CRITICAL,ACTIVE
+Class Cast Exception With To Array,ClassCastExceptionWithToArray,pmd,MAJOR,ACTIVE
+Class defines equal(Object); should it be equals(Object)?,NM_BAD_EQUAL,findbugs,CRITICAL,ACTIVE
+Class defines hashcode(); should it be hashCode()?,NM_LCASE_HASHCODE,findbugs,CRITICAL,ACTIVE
+Class defines tostring(); should it be toString()?,NM_LCASE_TOSTRING,findbugs,MAJOR,ACTIVE
+Class names should start with an upper case letter,NM_CLASS_NAMING_CONVENTION,findbugs,MAJOR,ACTIVE
+Clone method must implement Cloneable,CloneMethodMustImplementCloneable,pmd,MAJOR,ACTIVE
+Clone Throws Clone Not Supported Exception,CloneThrowsCloneNotSupportedException,pmd,MAJOR,ACTIVE
+Close Resource,CloseResource,pmd,MAJOR,ACTIVE
+Collapsible If Statements,CollapsibleIfStatements,pmd,MINOR,ACTIVE
+Compare Objects With Equals,CompareObjectsWithEquals,pmd,MAJOR,ACTIVE
+Constant Name,com.puppycrawl.tools.checkstyle.checks.naming.ConstantNameCheck,checkstyle,MINOR,ACTIVE
+Constructor Calls Overridable Method,ConstructorCallsOverridableMethod,pmd,MAJOR,ACTIVE
+Correctness - A collection is added to itself,IL_CONTAINER_ADDED_TO_ITSELF,findbugs,CRITICAL,ACTIVE
+Correctness - A known null value is checked to see if it is an instance of a type,NP_NULL_INSTANCEOF,findbugs,BLOCKER,ACTIVE
+Correctness - An apparent infinite loop,IL_INFINITE_LOOP,findbugs,CRITICAL,ACTIVE
+Correctness - An apparent infinite recursive loop,IL_INFINITE_RECURSIVE_LOOP,findbugs,CRITICAL,ACTIVE
+Correctness - A parameter is dead upon entry to a method but overwritten,IP_PARAMETER_IS_DEAD_BUT_OVERWRITTEN,findbugs,CRITICAL,ACTIVE
+Correctness - Apparent method/constructor confusion,NM_METHOD_CONSTRUCTOR_CONFUSION,findbugs,MAJOR,ACTIVE
+Correctness - Array formatted in useless way using format string,VA_FORMAT_STRING_BAD_CONVERSION_FROM_ARRAY,findbugs,MAJOR,ACTIVE
+Correctness - Bad attempt to compute absolute value of signed 32-bit hashcode,RV_ABSOLUTE_VALUE_OF_HASHCODE,findbugs,CRITICAL,ACTIVE
+Correctness - Bad attempt to compute absolute value of signed 32-bit random integer,RV_ABSOLUTE_VALUE_OF_RANDOM_INT,findbugs,CRITICAL,ACTIVE
+Correctness - Bad comparison of nonnegative value with negative constant,INT_BAD_COMPARISON_WITH_NONNEGATIVE_VALUE,findbugs,CRITICAL,ACTIVE
+Correctness - Bad comparison of signed byte,INT_BAD_COMPARISON_WITH_SIGNED_BYTE,findbugs,CRITICAL,ACTIVE
+Correctness - Bad constant value for month,DMI_BAD_MONTH,findbugs,CRITICAL,ACTIVE
+Correctness - Bitwise add of signed byte value,BIT_ADD_OF_SIGNED_BYTE,findbugs,CRITICAL,ACTIVE
+Correctness - Bitwise OR of signed byte value,BIT_IOR_OF_SIGNED_BYTE,findbugs,CRITICAL,ACTIVE
+Correctness - Call to equals() comparing different interface types,EC_UNRELATED_INTERFACES,findbugs,CRITICAL,ACTIVE
+Correctness - Call to equals() comparing different types,EC_UNRELATED_TYPES,findbugs,CRITICAL,ACTIVE
+Correctness - Call to equals() comparing unrelated class and interface,EC_UNRELATED_CLASS_AND_INTERFACE,findbugs,CRITICAL,ACTIVE
+Correctness - Call to equals() with null argument,EC_NULL_ARG,findbugs,CRITICAL,ACTIVE
+Correctness - Can't use reflection to check for presence of annotation without runtime retention,DMI_ANNOTATION_IS_NOT_VISIBLE_TO_REFLECTION,findbugs,MAJOR,ACTIVE
+Correctness - Check for sign of bitwise operation,BIT_SIGNED_CHECK_HIGH_BIT,findbugs,CRITICAL,ACTIVE
+Correctness - Check to see if ((...) & 0) == 0,BIT_AND_ZZ,findbugs,CRITICAL,ACTIVE
+Correctness - Class defines field that masks a superclass field,MF_CLASS_MASKS_FIELD,findbugs,MAJOR,ACTIVE
+Correctness - Class overrides a method implemented in super class Adapter wrongly,BOA_BADLY_OVERRIDDEN_ADAPTER,findbugs,CRITICAL,ACTIVE
+Correctness - close() invoked on a value that is always null,NP_CLOSING_NULL,findbugs,BLOCKER,ACTIVE
+Correctness - Collections should not contain themselves,DMI_COLLECTIONS_SHOULD_NOT_CONTAIN_THEMSELVES,findbugs,CRITICAL,ACTIVE
+Correctness - Covariant equals() method defined for enum,EQ_DONT_DEFINE_EQUALS_FOR_ENUM,findbugs,MAJOR,ACTIVE
+"Correctness - Covariant equals() method defined, Object.equals(Object) inherited",EQ_SELF_USE_OBJECT,findbugs,MAJOR,ACTIVE
+Correctness - Creation of ScheduledThreadPoolExecutor with zero core threads,DMI_SCHEDULED_THREAD_POOL_EXECUTOR_WITH_ZERO_CORE_THREADS,findbugs,MINOR,ACTIVE
+Correctness - Deadly embrace of non-static inner class and thread local,SIC_THREADLOCAL_DEADLY_EMBRACE,findbugs,MAJOR,ACTIVE
+Correctness - Dead store of class literal,DLS_DEAD_STORE_OF_CLASS_LITERAL,findbugs,CRITICAL,ACTIVE
+Correctness - Don't use removeAll to clear a collection,DMI_USING_REMOVEALL_TO_CLEAR_COLLECTION,findbugs,CRITICAL,ACTIVE
+Correctness - Doomed attempt to append to an object output stream,IO_APPENDING_TO_OBJECT_OUTPUT_STREAM,findbugs,CRITICAL,ACTIVE
+Correctness - Doomed test for equality to NaN,FE_TEST_IF_EQUAL_TO_NOT_A_NUMBER,findbugs,CRITICAL,ACTIVE
+Correctness - Double assignment of field,SA_FIELD_DOUBLE_ASSIGNMENT,findbugs,CRITICAL,ACTIVE
+Correctness - Double.longBitsToDouble invoked on an int,DMI_LONG_BITS_TO_DOUBLE_INVOKED_ON_INT,findbugs,CRITICAL,ACTIVE
+Correctness - equals method always returns false,EQ_ALWAYS_FALSE,findbugs,BLOCKER,ACTIVE
+Correctness - equals method always returns true,EQ_ALWAYS_TRUE,findbugs,BLOCKER,ACTIVE
+Correctness - equals method compares class names rather than class objects,EQ_COMPARING_CLASS_NAMES,findbugs,MAJOR,ACTIVE
+Correctness - equals() method defined that doesn't override equals(Object),EQ_OTHER_NO_OBJECT,findbugs,MAJOR,ACTIVE
+Correctness - equals() method defined that doesn't override Object.equals(Object),EQ_OTHER_USE_OBJECT,findbugs,MAJOR,ACTIVE
+Correctness - equals method overrides equals in superclass and may not be symmetric,EQ_OVERRIDING_EQUALS_NOT_SYMMETRIC,findbugs,MAJOR,ACTIVE
+Correctness - equals() used to compare array and nonarray,EC_ARRAY_AND_NONARRAY,findbugs,CRITICAL,ACTIVE
+Correctness - equals(...) used to compare incompatible arrays,EC_INCOMPATIBLE_ARRAY_COMPARE,findbugs,BLOCKER,ACTIVE
+Correctness - Exception created and dropped rather than thrown,RV_EXCEPTION_NOT_THROWN,findbugs,CRITICAL,ACTIVE
+Correctness - Explicit annotation inconsistent with use,TQ_EXPLICIT_UNKNOWN_SOURCE_VALUE_REACHES_ALWAYS_SINK,findbugs,CRITICAL,ACTIVE
+Correctness - Explicit annotation inconsistent with use,TQ_EXPLICIT_UNKNOWN_SOURCE_VALUE_REACHES_NEVER_SINK,findbugs,CRITICAL,ACTIVE
+Correctness - Field not initialized in constructor,UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR,findbugs,MINOR,ACTIVE
+Correctness - Field only ever set to null,UWF_NULL_FIELD,findbugs,CRITICAL,ACTIVE
+Correctness - File.separator used for regular expression,RE_CANT_USE_FILE_SEPARATOR_AS_REGULAR_EXPRESSION,findbugs,CRITICAL,ACTIVE
+Correctness - Format string placeholder incompatible with passed argument,VA_FORMAT_STRING_BAD_ARGUMENT,findbugs,CRITICAL,ACTIVE
+Correctness - Format string references missing argument,VA_FORMAT_STRING_MISSING_ARGUMENT,findbugs,CRITICAL,ACTIVE
+Correctness - Futile attempt to change max pool size of ScheduledThreadPoolExecutor,DMI_FUTILE_ATTEMPT_TO_CHANGE_MAXPOOL_SIZE_OF_SCHEDULED_THREAD_POOL_EXECUTOR,findbugs,MINOR,ACTIVE
+Correctness - hasNext method invokes next,DMI_CALLING_NEXT_FROM_HASNEXT,findbugs,CRITICAL,ACTIVE
+Correctness - Illegal format string,VA_FORMAT_STRING_ILLEGAL,findbugs,CRITICAL,ACTIVE
+Correctness - Impossible cast,BC_IMPOSSIBLE_CAST,findbugs,BLOCKER,ACTIVE
+Correctness - Impossible downcast,BC_IMPOSSIBLE_DOWNCAST,findbugs,BLOCKER,ACTIVE
+Correctness - Impossible downcast of toArray() result,BC_IMPOSSIBLE_DOWNCAST_OF_TOARRAY,findbugs,BLOCKER,ACTIVE
+Correctness - Incompatible bit masks,BIT_IOR,findbugs,CRITICAL,ACTIVE
+Correctness - Incompatible bit masks,BIT_AND,findbugs,CRITICAL,ACTIVE
+Correctness - instanceof will always return false,BC_IMPOSSIBLE_INSTANCEOF,findbugs,CRITICAL,ACTIVE
+Correctness - Integer multiply of result of integer remainder,IM_MULTIPLYING_RESULT_OF_IREM,findbugs,CRITICAL,ACTIVE
+Correctness - Integer remainder modulo 1,INT_BAD_REM_BY_1,findbugs,CRITICAL,ACTIVE
+Correctness - Integer shift by an amount not in the range 0..31,ICAST_BAD_SHIFT_AMOUNT,findbugs,CRITICAL,ACTIVE
+Correctness - int value cast to double and then passed to Math.ceil,ICAST_INT_CAST_TO_DOUBLE_PASSED_TO_CEIL,findbugs,CRITICAL,ACTIVE
+Correctness - int value cast to float and then passed to Math.round,ICAST_INT_CAST_TO_FLOAT_PASSED_TO_ROUND,findbugs,CRITICAL,ACTIVE
+Correctness - Invalid syntax for regular expression,RE_BAD_SYNTAX_FOR_REGULAR_EXPRESSION,findbugs,CRITICAL,ACTIVE
+"Correctness - Invocation of equals() on an array, which is equivalent to ==",EC_BAD_ARRAY_COMPARE,findbugs,CRITICAL,ACTIVE
+Correctness - Invocation of hashCode on an array,DMI_INVOKING_HASHCODE_ON_ARRAY,findbugs,CRITICAL,ACTIVE
+Correctness - Invocation of toString on an array,DMI_INVOKING_TOSTRING_ON_ANONYMOUS_ARRAY,findbugs,CRITICAL,ACTIVE
+Correctness - Invocation of toString on an array,DMI_INVOKING_TOSTRING_ON_ARRAY,findbugs,CRITICAL,ACTIVE
+Correctness - JUnit assertion in run method will not be noticed by JUnit,IJU_ASSERT_METHOD_INVOKED_FROM_RUN_METHOD,findbugs,CRITICAL,ACTIVE
+Correctness - MessageFormat supplied where printf style format expected,VA_FORMAT_STRING_EXPECTED_MESSAGE_FORMAT_SUPPLIED,findbugs,MAJOR,ACTIVE
+Correctness - Method assigns boolean literal in boolean expression,QBA_QUESTIONABLE_BOOLEAN_ASSIGNMENT,findbugs,CRITICAL,ACTIVE
+Correctness - Method attempts to access a prepared statement parameter with index 0,SQL_BAD_PREPARED_STATEMENT_ACCESS,findbugs,CRITICAL,ACTIVE
+Correctness - Method attempts to access a result set field with index 0,SQL_BAD_RESULTSET_ACCESS,findbugs,CRITICAL,ACTIVE
+Correctness - Method call passes null for nonnull parameter,NP_NULL_PARAM_DEREF,findbugs,CRITICAL,ACTIVE
+Correctness - Method call passes null for nonnull parameter,NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS,findbugs,CRITICAL,ACTIVE
+Correctness - Method call passes null to a nonnull parameter,NP_NONNULL_PARAM_VIOLATION,findbugs,CRITICAL,ACTIVE
+Correctness - Method defines a variable that obscures a field,MF_METHOD_MASKS_FIELD,findbugs,MAJOR,ACTIVE
+Correctness - Method does not check for null argument,NP_ARGUMENT_MIGHT_BE_NULL,findbugs,MAJOR,ACTIVE
+Correctness - Method doesn't override method in superclass due to wrong package for parameter,NM_WRONG_PACKAGE,findbugs,MAJOR,ACTIVE
+Correctness - Method ignores return value,RV_RETURN_VALUE_IGNORED,findbugs,MINOR,ACTIVE
+Correctness - Method ignores return value,RV_RETURN_VALUE_IGNORED2,findbugs,MAJOR,ACTIVE
+"Correctness - Method may return null, but is declared @NonNull",NP_NONNULL_RETURN_VIOLATION,findbugs,CRITICAL,ACTIVE
+Correctness - Method must be private in order for serialization to work,SE_METHOD_MUST_BE_PRIVATE,findbugs,MAJOR,ACTIVE
+Correctness - Method performs math using floating point precision,FL_MATH_USING_FLOAT_PRECISION,findbugs,CRITICAL,ACTIVE
+Correctness - More arguments are passed that are actually used in the format string,VA_FORMAT_STRING_EXTRA_ARGUMENTS_PASSED,findbugs,MAJOR,ACTIVE
+"Correctness - Nonsensical self computation involving a field (e.g., x & x)",SA_FIELD_SELF_COMPUTATION,findbugs,CRITICAL,ACTIVE
+"Correctness - Nonsensical self computation involving a variable (e.g., x & x)",SA_LOCAL_SELF_COMPUTATION,findbugs,CRITICAL,ACTIVE
+Correctness - Non-virtual method call passes null for nonnull parameter,NP_NULL_PARAM_DEREF_NONVIRTUAL,findbugs,CRITICAL,ACTIVE
+Correctness - No previous argument for format string,VA_FORMAT_STRING_NO_PREVIOUS_ARGUMENT,findbugs,CRITICAL,ACTIVE
+Correctness - No relationship between generic parameter and method argument,GC_UNRELATED_TYPES,findbugs,CRITICAL,ACTIVE
+Correctness - Nullcheck of value previously dereferenced,RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE,findbugs,CRITICAL,ACTIVE
+Correctness - Null pointer dereference in method on exception path,NP_ALWAYS_NULL_EXCEPTION,findbugs,CRITICAL,ACTIVE
+Correctness - Null value is guaranteed to be dereferenced,NP_GUARANTEED_DEREF,findbugs,BLOCKER,ACTIVE
+Correctness - Number of format-string arguments does not correspond to number of placeholders,VA_FORMAT_STRING_ARG_MISMATCH,findbugs,CRITICAL,ACTIVE
+Correctness - Overwritten increment,DLS_OVERWRITTEN_INCREMENT,findbugs,CRITICAL,ACTIVE
+Correctness - Possible null pointer dereference,NP_NULL_ON_SOME_PATH,findbugs,CRITICAL,ACTIVE
+Correctness - Possible null pointer dereference in method on exception path,NP_NULL_ON_SOME_PATH_EXCEPTION,findbugs,CRITICAL,ACTIVE
+Correctness - Primitive array passed to function expecting a variable number of object arguments,VA_PRIMITIVE_ARRAY_PASSED_TO_OBJECT_VARARG,findbugs,CRITICAL,ACTIVE
+Correctness - Primitive value is unboxed and coerced for ternary operator,BX_UNBOXED_AND_COERCED_FOR_TERNARY_OPERATOR,findbugs,MAJOR,ACTIVE
+Correctness - Random value from 0 to 1 is coerced to the integer 0,RV_01_TO_INT,findbugs,MAJOR,ACTIVE
+Correctness - Read of unwritten field,NP_UNWRITTEN_FIELD,findbugs,MAJOR,ACTIVE
+Correctness - Repeated conditional tests,RpC_REPEATED_CONDITIONAL_TEST,findbugs,MAJOR,ACTIVE
+"Correctness - Return value of putIfAbsent ignored, value passed to putIfAbsent reused",RV_RETURN_VALUE_OF_PUTIFABSENT_IGNORED,findbugs,MAJOR,ACTIVE
+Correctness - Self assignment of field,SA_FIELD_SELF_ASSIGNMENT,findbugs,CRITICAL,ACTIVE
+Correctness - Self comparison of field with itself,SA_FIELD_SELF_COMPARISON,findbugs,CRITICAL,ACTIVE
+Correctness - Self comparison of value with itself,SA_LOCAL_SELF_COMPARISON,findbugs,CRITICAL,ACTIVE
+Correctness - Signature declares use of unhashable class in hashed construct,HE_SIGNATURE_DECLARES_HASHING_OF_UNHASHABLE_CLASS,findbugs,CRITICAL,ACTIVE
+Correctness - Static Thread.interrupted() method invoked on thread instance,STI_INTERRUPTED_ON_UNKNOWNTHREAD,findbugs,CRITICAL,ACTIVE
+Correctness - Store of null value into field annotated NonNull,NP_STORE_INTO_NONNULL_FIELD,findbugs,CRITICAL,ACTIVE
+Correctness - Suspicious reference comparison of Boolean values,RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN,findbugs,MAJOR,ACTIVE
+Correctness - Suspicious reference comparison to constant,RC_REF_COMPARISON_BAD_PRACTICE,findbugs,MAJOR,ACTIVE
+Correctness - TestCase declares a bad suite method,IJU_BAD_SUITE_METHOD,findbugs,CRITICAL,ACTIVE
+Correctness - TestCase defines setUp that doesn't call super.setUp(),IJU_SETUP_NO_SUPER,findbugs,CRITICAL,ACTIVE
+Correctness - TestCase defines tearDown that doesn't call super.tearDown(),IJU_TEARDOWN_NO_SUPER,findbugs,CRITICAL,ACTIVE
+Correctness - TestCase has no tests,IJU_NO_TESTS,findbugs,CRITICAL,ACTIVE
+Correctness - TestCase implements a non-static suite method,IJU_SUITE_NOT_STATIC,findbugs,CRITICAL,ACTIVE
+Correctness - The readResolve method must not be declared as a static method.,SE_READ_RESOLVE_IS_STATIC,findbugs,MAJOR,ACTIVE
+Correctness - The type of a supplied argument doesn't match format specifier,VA_FORMAT_STRING_BAD_CONVERSION,findbugs,CRITICAL,ACTIVE
+Correctness - Uncallable method defined in anonymous class,UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS,findbugs,CRITICAL,ACTIVE
+Correctness - Uninitialized read of field in constructor,UR_UNINIT_READ,findbugs,MAJOR,ACTIVE
+Correctness - Uninitialized read of field method called from constructor of superclass,UR_UNINIT_READ_CALLED_FROM_SUPER_CONSTRUCTOR,findbugs,MAJOR,ACTIVE
+Correctness - Unnecessary type check done using instanceof operator,SIO_SUPERFLUOUS_INSTANCEOF,findbugs,CRITICAL,ACTIVE
+"Correctness - Unneeded use of currentThread() call, to call interrupted()",STI_INTERRUPTED_ON_CURRENTTHREAD,findbugs,CRITICAL,ACTIVE
+Correctness - Unwritten field,UWF_UNWRITTEN_FIELD,findbugs,MINOR,ACTIVE
+"Correctness - ""."" used for regular expression",RE_POSSIBLE_UNINTENDED_PATTERN,findbugs,CRITICAL,ACTIVE
+Correctness - Useless assignment in return statement,DLS_DEAD_LOCAL_STORE_IN_RETURN,findbugs,CRITICAL,ACTIVE
+Correctness - Useless control flow to next line,UCF_USELESS_CONTROL_FLOW_NEXT_LINE,findbugs,CRITICAL,ACTIVE
+Correctness - Use of class without a hashCode() method in a hashed data structure,HE_USE_OF_UNHASHABLE_CLASS,findbugs,CRITICAL,ACTIVE
+Correctness - Using pointer equality to compare different types,EC_UNRELATED_TYPES_USING_POINTER_EQUALITY,findbugs,CRITICAL,ACTIVE
+Correctness - Vacuous call to collections,DMI_VACUOUS_SELF_COLLECTION_CALL,findbugs,CRITICAL,ACTIVE
+Correctness - Value annotated as carrying a type qualifier used where a value that must not carry that qualifier is required,TQ_ALWAYS_VALUE_USED_WHERE_NEVER_REQUIRED,findbugs,CRITICAL,ACTIVE
+Correctness - Value annotated as never carrying a type qualifier used where value carrying that qualifier is required,TQ_NEVER_VALUE_USED_WHERE_ALWAYS_REQUIRED,findbugs,CRITICAL,ACTIVE
+Correctness - Value is null and guaranteed to be dereferenced on exception path,NP_GUARANTEED_DEREF_ON_EXCEPTION_PATH,findbugs,CRITICAL,ACTIVE
+Correctness - Value that might carry a type qualifier is always used in a way prohibits it from having that type qualifier,TQ_MAYBE_SOURCE_VALUE_REACHES_NEVER_SINK,findbugs,CRITICAL,ACTIVE
+Correctness - Value that might not carry a type qualifier is always used in a way requires that type qualifier,TQ_MAYBE_SOURCE_VALUE_REACHES_ALWAYS_SINK,findbugs,CRITICAL,ACTIVE
+Correctness - Very confusing method names,NM_VERY_CONFUSING,findbugs,MAJOR,ACTIVE
+Cyclomatic Complexity,com.puppycrawl.tools.checkstyle.checks.metrics.CyclomaticComplexityCheck,checkstyle,MAJOR,ACTIVE
+Dead store due to switch statement fall through,SF_DEAD_STORE_DUE_TO_SWITCH_FALLTHROUGH,findbugs,CRITICAL,ACTIVE
+Dead store due to switch statement fall through to throw,SF_DEAD_STORE_DUE_TO_SWITCH_FALLTHROUGH_TO_THROW,findbugs,CRITICAL,ACTIVE
+Default Comes Last,com.puppycrawl.tools.checkstyle.checks.coding.DefaultComesLastCheck,checkstyle,MAJOR,ACTIVE
+Dodgy - Ambiguous invocation of either an inherited or outer method,IA_AMBIGUOUS_INVOCATION_OF_INHERITED_OR_OUTER_METHOD,findbugs,MAJOR,ACTIVE
+Dodgy - Call to unsupported method,DMI_UNSUPPORTED_METHOD,findbugs,MAJOR,ACTIVE
+Dodgy - Check for oddness that won't work for negative numbers,IM_BAD_CHECK_FOR_ODD,findbugs,CRITICAL,ACTIVE
+Dodgy - Class doesn't override equals in superclass,EQ_DOESNT_OVERRIDE_EQUALS,findbugs,MAJOR,ACTIVE
+Dodgy - Class exposes synchronization and semaphores in its public interface,PS_PUBLIC_SEMAPHORES,findbugs,CRITICAL,ACTIVE
+Dodgy - Class extends Servlet class and uses instance variables,MTIA_SUSPECT_SERVLET_INSTANCE_FIELD,findbugs,CRITICAL,ACTIVE
+Dodgy - Class extends Struts Action class and uses instance variables,MTIA_SUSPECT_STRUTS_INSTANCE_FIELD,findbugs,CRITICAL,ACTIVE
+Dodgy - Class implements same interface as superclass,RI_REDUNDANT_INTERFACES,findbugs,MAJOR,ACTIVE
+Dodgy - Class is final but declares protected field,CI_CONFUSED_INHERITANCE,findbugs,MINOR,ACTIVE
+Dodgy - Class too big for analysis,SKIPPED_CLASS_TOO_BIG,findbugs,MINOR,ACTIVE
+Dodgy - Code contains a hard coded reference to an absolute pathname,DMI_HARDCODED_ABSOLUTE_FILENAME,findbugs,CRITICAL,ACTIVE
+"Dodgy - Complicated, subtle or wrong increment in for-loop",QF_QUESTIONABLE_FOR_LOOP,findbugs,CRITICAL,ACTIVE
+Dodgy - Computation of average could overflow,IM_AVERAGE_COMPUTATION_COULD_OVERFLOW,findbugs,CRITICAL,ACTIVE
+Dodgy - Consider returning a zero length array rather than null,PZLA_PREFER_ZERO_LENGTH_ARRAYS,findbugs,MAJOR,ACTIVE
+Dodgy - Dead store of null to local variable,DLS_DEAD_LOCAL_STORE_OF_NULL,findbugs,CRITICAL,ACTIVE
+Dodgy - Dead store to local variable,DLS_DEAD_LOCAL_STORE,findbugs,CRITICAL,ACTIVE
+Dodgy - Dereference of the result of readLine() without nullcheck,NP_DEREFERENCE_OF_READLINE_VALUE,findbugs,CRITICAL,ACTIVE
+Dodgy - Double assignment of local variable,SA_LOCAL_DOUBLE_ASSIGNMENT,findbugs,CRITICAL,ACTIVE
+Dodgy - Exception is caught when Exception is not thrown,REC_CATCH_EXCEPTION,findbugs,MAJOR,ACTIVE
+Dodgy - Immediate dereference of the result of readLine(),NP_IMMEDIATE_DEREFERENCE_OF_READLINE,findbugs,CRITICAL,ACTIVE
+Dodgy - Initialization circularity,IC_INIT_CIRCULARITY,findbugs,CRITICAL,ACTIVE
+Dodgy - instanceof will always return true,BC_VACUOUS_INSTANCEOF,findbugs,CRITICAL,ACTIVE
+Dodgy - int division result cast to double or float,ICAST_IDIV_CAST_TO_DOUBLE,findbugs,CRITICAL,ACTIVE
+"Dodgy - Invocation of substring(0), which returns the original value",DMI_USELESS_SUBSTRING,findbugs,CRITICAL,ACTIVE
+Dodgy - Load of known null value,NP_LOAD_OF_KNOWN_NULL_VALUE,findbugs,CRITICAL,ACTIVE
+Dodgy - Method checks to see if result of String.indexOf is positive,RV_CHECK_FOR_POSITIVE_INDEXOF,findbugs,MINOR,ACTIVE
+Dodgy - Method directly allocates a specific implementation of xml interfaces,XFB_XML_FACTORY_BYPASS,findbugs,CRITICAL,ACTIVE
+Dodgy - Method discards result of readLine after checking if it is nonnull,RV_DONT_JUST_NULL_CHECK_READLINE,findbugs,MAJOR,ACTIVE
+Dodgy - Method uses the same code for two branches,DB_DUPLICATE_BRANCHES,findbugs,CRITICAL,ACTIVE
+Dodgy - Method uses the same code for two switch clauses,DB_DUPLICATE_SWITCH_CLAUSES,findbugs,CRITICAL,ACTIVE
+Dodgy - Non-Boolean argument formatted using %b format specifier,VA_FORMAT_STRING_BAD_CONVERSION_TO_BOOLEAN,findbugs,MAJOR,ACTIVE
+Dodgy - Non serializable object written to ObjectOutput,DMI_NONSERIALIZABLE_OBJECT_WRITTEN,findbugs,CRITICAL,ACTIVE
+Dodgy - Parameter must be nonnull but is marked as nullable,NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE,findbugs,CRITICAL,ACTIVE
+Dodgy - Possible null pointer dereference due to return value of called method,NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE,findbugs,CRITICAL,ACTIVE
+Dodgy - Possible null pointer dereference on path that might be infeasible,NP_NULL_ON_SOME_PATH_MIGHT_BE_INFEASIBLE,findbugs,CRITICAL,ACTIVE
+Dodgy - Potentially dangerous use of non-short-circuit logic,NS_DANGEROUS_NON_SHORT_CIRCUIT,findbugs,CRITICAL,ACTIVE
+Dodgy - private readResolve method not inherited by subclasses,SE_PRIVATE_READ_RESOLVE_NOT_INHERITED,findbugs,MAJOR,ACTIVE
+Dodgy - Questionable cast to abstract collection,BC_BAD_CAST_TO_ABSTRACT_COLLECTION,findbugs,MAJOR,ACTIVE
+Dodgy - Questionable cast to concrete collection,BC_BAD_CAST_TO_CONCRETE_COLLECTION,findbugs,CRITICAL,ACTIVE
+Dodgy - Questionable use of non-short-circuit logic,NS_NON_SHORT_CIRCUIT,findbugs,MAJOR,ACTIVE
+Dodgy - Redundant comparison of non-null value to null,RCN_REDUNDANT_COMPARISON_OF_NULL_AND_NONNULL_VALUE,findbugs,CRITICAL,ACTIVE
+Dodgy - Redundant comparison of two null values,RCN_REDUNDANT_COMPARISON_TWO_NULL_VALUES,findbugs,CRITICAL,ACTIVE
+Dodgy - Redundant nullcheck of value known to be non-null,RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE,findbugs,CRITICAL,ACTIVE
+Dodgy - Redundant nullcheck of value known to be null,RCN_REDUNDANT_NULLCHECK_OF_NULL_VALUE,findbugs,CRITICAL,ACTIVE
+Dodgy - Remainder of 32-bit signed random integer,RV_REM_OF_RANDOM_INT,findbugs,CRITICAL,ACTIVE
+Dodgy - Remainder of hashCode could be negative,RV_REM_OF_HASHCODE,findbugs,CRITICAL,ACTIVE
+Dodgy - Result of integer multiplication cast to long,ICAST_INTEGER_MULTIPLY_CAST_TO_LONG,findbugs,CRITICAL,ACTIVE
+Dodgy - Self assignment of local variable,SA_LOCAL_SELF_ASSIGNMENT,findbugs,CRITICAL,ACTIVE
+Dodgy - Test for floating point equality,FE_FLOATING_POINT_EQUALITY,findbugs,CRITICAL,ACTIVE
+Dodgy - Thread passed where Runnable expected,DMI_THREAD_PASSED_WHERE_RUNNABLE_EXPECTED,findbugs,MAJOR,ACTIVE
+Dodgy - Transient field of class that isn't Serializable.,SE_TRANSIENT_FIELD_OF_NONSERIALIZABLE_CLASS,findbugs,MAJOR,ACTIVE
+Dodgy - Unchecked/unconfirmed cast,BC_UNCONFIRMED_CAST,findbugs,CRITICAL,ACTIVE
+Dodgy - Unsigned right shift cast to short/byte,ICAST_QUESTIONABLE_UNSIGNED_RIGHT_SHIFT,findbugs,CRITICAL,ACTIVE
+Dodgy - Unusual equals method,EQ_UNUSUAL,findbugs,MINOR,ACTIVE
+Dodgy - Useless control flow,UCF_USELESS_CONTROL_FLOW,findbugs,CRITICAL,ACTIVE
+Dodgy - Vacuous bit mask operation on integer value,INT_VACUOUS_BIT_OPERATION,findbugs,CRITICAL,ACTIVE
+Dodgy - Vacuous comparison of integer value,INT_VACUOUS_COMPARISON,findbugs,CRITICAL,ACTIVE
+Dodgy - Write to static field from instance method,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,findbugs,CRITICAL,ACTIVE
+Dont Import Java Lang,DontImportJavaLang,pmd,MINOR,ACTIVE
+Dont Import Sun,DontImportSun,pmd,MINOR,ACTIVE
+Double Checked Locking,com.puppycrawl.tools.checkstyle.checks.coding.DoubleCheckedLockingCheck,checkstyle,MAJOR,ACTIVE
+Empty Finalizer,EmptyFinalizer,pmd,MAJOR,ACTIVE
+Empty Finally Block,EmptyFinallyBlock,pmd,CRITICAL,ACTIVE
+Empty If Stmt,EmptyIfStmt,pmd,CRITICAL,ACTIVE
+Empty Statement,com.puppycrawl.tools.checkstyle.checks.coding.EmptyStatementCheck,checkstyle,MINOR,ACTIVE
+Empty Static Initializer,EmptyStaticInitializer,pmd,MAJOR,ACTIVE
+Empty Switch Statements,EmptySwitchStatements,pmd,MAJOR,ACTIVE
+Empty Synchronized Block,EmptySynchronizedBlock,pmd,CRITICAL,ACTIVE
+Empty Try Block,EmptyTryBlock,pmd,MAJOR,ACTIVE
+Empty While Stmt,EmptyWhileStmt,pmd,CRITICAL,ACTIVE
+Equals Hash Code,com.puppycrawl.tools.checkstyle.checks.coding.EqualsHashCodeCheck,checkstyle,CRITICAL,ACTIVE
+Equals Null,EqualsNull,pmd,CRITICAL,ACTIVE
+Exception As Flow Control,ExceptionAsFlowControl,pmd,MAJOR,ACTIVE
+Experimental - Potential lost logger changes due to weak reference in OpenJDK,LG_LOST_LOGGER_DUE_TO_WEAK_REFERENCE,findbugs,INFO,ACTIVE
+Field names should start with a lower case letter,NM_FIELD_NAMING_CONVENTION,findbugs,MAJOR,ACTIVE
+Final Class,com.puppycrawl.tools.checkstyle.checks.design.FinalClassCheck,checkstyle,MAJOR,ACTIVE
+Final Field Could Be Static,FinalFieldCouldBeStatic,pmd,MINOR,ACTIVE
+Finalize Does Not Call Super Finalize,FinalizeDoesNotCallSuperFinalize,pmd,MAJOR,ACTIVE
+Finalize Overloaded,FinalizeOverloaded,pmd,MAJOR,ACTIVE
+For Loops Must Use Braces,ForLoopsMustUseBraces,pmd,MAJOR,ACTIVE
+Hidden Field,com.puppycrawl.tools.checkstyle.checks.coding.HiddenFieldCheck,checkstyle,MAJOR,ACTIVE
+Hide Utility Class Constructor,com.puppycrawl.tools.checkstyle.checks.design.HideUtilityClassConstructorCheck,checkstyle,MAJOR,ACTIVE
+Idempotent Operations,IdempotentOperations,pmd,MAJOR,ACTIVE
+If Else Stmts Must Use Braces,IfElseStmtsMustUseBraces,pmd,MAJOR,ACTIVE
+If Stmts Must Use Braces,IfStmtsMustUseBraces,pmd,MAJOR,ACTIVE
+Illegal Throws,com.puppycrawl.tools.checkstyle.checks.coding.IllegalThrowsCheck,checkstyle,MAJOR,ACTIVE
+Inefficient String Buffering,InefficientStringBuffering,pmd,MAJOR,ACTIVE
+Inner Assignment,com.puppycrawl.tools.checkstyle.checks.coding.InnerAssignmentCheck,checkstyle,MAJOR,ACTIVE
+Instantiation To Get Class,InstantiationToGetClass,pmd,MAJOR,ACTIVE
+Integer Instantiation,IntegerInstantiation,pmd,MAJOR,ACTIVE
+Internationalization - Consider using Locale parameterized version of invoked method,DM_CONVERT_CASE,findbugs,INFO,ACTIVE
+Local Final Variable Name,com.puppycrawl.tools.checkstyle.checks.naming.LocalFinalVariableNameCheck,checkstyle,MAJOR,ACTIVE
+Local Variable Name,com.puppycrawl.tools.checkstyle.checks.naming.LocalVariableNameCheck,checkstyle,MAJOR,ACTIVE
+Loose coupling,LooseCoupling,pmd,MAJOR,ACTIVE
+Malicious code vulnerability - Field is a mutable array,MS_MUTABLE_ARRAY,findbugs,MAJOR,ACTIVE
+Malicious code vulnerability - Field is a mutable Hashtable,MS_MUTABLE_HASHTABLE,findbugs,MAJOR,ACTIVE
+Malicious code vulnerability - Field isn't final and can't be protected from malicious code,MS_CANNOT_BE_FINAL,findbugs,MAJOR,ACTIVE
+Malicious code vulnerability - Field isn't final but should be,MS_SHOULD_BE_FINAL,findbugs,MAJOR,ACTIVE
+Malicious code vulnerability - Field should be both final and package protected,MS_FINAL_PKGPROTECT,findbugs,MAJOR,ACTIVE
+Malicious code vulnerability - Field should be moved out of an interface and made package protected,MS_OOI_PKGPROTECT,findbugs,MAJOR,ACTIVE
+Malicious code vulnerability - Field should be package protected,MS_PKGPROTECT,findbugs,MAJOR,ACTIVE
+"Malicious code vulnerability - Finalizer should be protected, not public",FI_PUBLIC_SHOULD_BE_PROTECTED,findbugs,MAJOR,ACTIVE
+Malicious code vulnerability - May expose internal representation by incorporating reference to mutable object,EI_EXPOSE_REP2,findbugs,MAJOR,ACTIVE
+Malicious code vulnerability - May expose internal representation by returning reference to mutable object,EI_EXPOSE_REP,findbugs,MAJOR,ACTIVE
+Malicious code vulnerability - May expose internal static state by storing a mutable object into a static field,EI_EXPOSE_STATIC_REP2,findbugs,MAJOR,ACTIVE
+Malicious code vulnerability - Public static method may expose internal representation by returning array,MS_EXPOSE_REP,findbugs,CRITICAL,ACTIVE
+Member name,com.puppycrawl.tools.checkstyle.checks.naming.MemberNameCheck,checkstyle,MAJOR,ACTIVE
+Method Name,com.puppycrawl.tools.checkstyle.checks.naming.MethodNameCheck,checkstyle,MAJOR,ACTIVE
+Method names should start with a lower case letter,NM_METHOD_NAMING_CONVENTION,findbugs,MAJOR,ACTIVE
+Missing Static Method In Non Instantiatable Class,MissingStaticMethodInNonInstantiatableClass,pmd,MAJOR,ACTIVE
+Modifier Order,com.puppycrawl.tools.checkstyle.checks.modifier.ModifierOrderCheck,checkstyle,MINOR,ACTIVE
+Multithreaded correctness - A thread was created using the default empty run method,DM_USELESS_THREAD,findbugs,MAJOR,ACTIVE
+Multithreaded correctness - A volatile reference to an array doesn't treat the array elements as volatile,VO_VOLATILE_REFERENCE_TO_ARRAY,findbugs,MAJOR,ACTIVE
+Multithreaded correctness - Call to static Calendar,STCAL_INVOKE_ON_STATIC_CALENDAR_INSTANCE,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Call to static DateFormat,STCAL_INVOKE_ON_STATIC_DATE_FORMAT_INSTANCE,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Class's readObject() method is synchronized,RS_READOBJECT_SYNC,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Class's writeObject() method is synchronized but nothing else is,WS_WRITEOBJECT_SYNC,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Condition.await() not in loop,WA_AWAIT_NOT_IN_LOOP,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Constructor invokes Thread.start(),SC_START_IN_CTOR,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Empty synchronized block,ESync_EMPTY_SYNC,findbugs,MAJOR,ACTIVE
+Multithreaded correctness - Field not guarded against concurrent access,IS_FIELD_NOT_GUARDED,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Inconsistent synchronization,IS_INCONSISTENT_SYNC,findbugs,MAJOR,ACTIVE
+Multithreaded correctness - Inconsistent synchronization,IS2_INCONSISTENT_SYNC,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Incorrect lazy initialization and update of static field,LI_LAZY_INIT_UPDATE_STATIC,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Incorrect lazy initialization of static field,LI_LAZY_INIT_STATIC,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Invokes run on a thread (did you mean to start it instead?),RU_INVOKE_RUN,findbugs,MAJOR,ACTIVE
+Multithreaded correctness - Method calls Thread.sleep() with a lock held,SWL_SLEEP_WITH_LOCK_HELD,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Method does not release lock on all exception paths,UL_UNRELEASED_LOCK_EXCEPTION_PATH,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Method does not release lock on all paths,UL_UNRELEASED_LOCK,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Method spins on field,SP_SPIN_ON_FIELD,findbugs,MAJOR,ACTIVE
+Multithreaded correctness - Method synchronizes on an updated field,ML_SYNC_ON_UPDATED_FIELD,findbugs,MAJOR,ACTIVE
+Multithreaded correctness - Mismatched notify(),MWN_MISMATCHED_NOTIFY,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Mismatched wait(),MWN_MISMATCHED_WAIT,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Monitor wait() called on Condition,DM_MONITOR_WAIT_ON_CONDITION,findbugs,MAJOR,ACTIVE
+Multithreaded correctness - Mutable servlet field,MSF_MUTABLE_SERVLET_FIELD,findbugs,MAJOR,ACTIVE
+Multithreaded correctness - Naked notify,NN_NAKED_NOTIFY,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Possible double check of field,DC_DOUBLECHECK,findbugs,MAJOR,ACTIVE
+Multithreaded correctness - Static Calendar,STCAL_STATIC_CALENDAR_INSTANCE,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Static DateFormat,STCAL_STATIC_SIMPLE_DATE_FORMAT_INSTANCE,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Sychronization on getClass rather than class literal,WL_USING_GETCLASS_RATHER_THAN_CLASS_LITERAL,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Synchronization on Boolean could lead to deadlock,DL_SYNCHRONIZATION_ON_BOOLEAN,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Synchronization on boxed primitive could lead to deadlock,DL_SYNCHRONIZATION_ON_BOXED_PRIMITIVE,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Synchronization on boxed primitive values,DL_SYNCHRONIZATION_ON_UNSHARED_BOXED_PRIMITIVE,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Synchronization on field in futile attempt to guard that field,ML_SYNC_ON_FIELD_TO_GUARD_CHANGING_THAT_FIELD,findbugs,MAJOR,ACTIVE
+Multithreaded correctness - Synchronization on interned String could lead to deadlock,DL_SYNCHRONIZATION_ON_SHARED_CONSTANT,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Synchronization performed on java.util.concurrent Lock,JLM_JSR166_LOCK_MONITORENTER,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Synchronize and null check on the same field.,NP_SYNC_AND_NULL_CHECK_FIELD,findbugs,MAJOR,ACTIVE
+Multithreaded correctness - Unconditional wait,UW_UNCOND_WAIT,findbugs,MAJOR,ACTIVE
+"Multithreaded correctness - Unsynchronized get method, synchronized set method",UG_SYNC_SET_UNSYNC_GET,findbugs,MAJOR,ACTIVE
+Multithreaded correctness - Using notify() rather than notifyAll(),NO_NOTIFY_NOT_NOTIFYALL,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Wait not in loop,WA_NOT_IN_LOOP,findbugs,CRITICAL,ACTIVE
+Multithreaded correctness - Wait with two locks held,TLW_TWO_LOCK_WAIT,findbugs,MAJOR,ACTIVE
+Naming - Avoid dollar signs,AvoidDollarSigns,pmd,MINOR,ACTIVE
+Naming - Class naming conventions,ClassNamingConventions,pmd,MAJOR,ACTIVE
+Naming - Method with same name as enclosing class,MethodWithSameNameAsEnclosingClass,pmd,MAJOR,ACTIVE
+Naming - Suspicious constant field name,SuspiciousConstantFieldName,pmd,MAJOR,ACTIVE
+Naming - Suspicious equals method name,SuspiciousEqualsMethodName,pmd,CRITICAL,ACTIVE
+Naming - Suspicious Hashcode method name,SuspiciousHashcodeMethodName,pmd,MAJOR,ACTIVE
+Ncss Method Count,NcssMethodCount,pmd,MAJOR,ACTIVE
+Ncss Type Count,NcssTypeCount,pmd,MAJOR,ACTIVE
+Non-transient non-serializable instance field in serializable class,SE_BAD_FIELD,findbugs,MAJOR,ACTIVE
+Package name,com.puppycrawl.tools.checkstyle.checks.naming.PackageNameCheck,checkstyle,MAJOR,ACTIVE
+Parameter Name,com.puppycrawl.tools.checkstyle.checks.naming.ParameterNameCheck,checkstyle,MAJOR,ACTIVE
+Performance - Could be refactored into a named static inner class,SIC_INNER_SHOULD_BE_STATIC_ANON,findbugs,MAJOR,ACTIVE
+Performance - Could be refactored into a static inner class,SIC_INNER_SHOULD_BE_STATIC_NEEDS_THIS,findbugs,MAJOR,ACTIVE
+Performance - Explicit garbage collection; extremely dubious except in benchmarking code,DM_GC,findbugs,MAJOR,ACTIVE
+Performance - Huge string constants is duplicated across multiple class files,HSC_HUGE_SHARED_STRING_CONSTANT,findbugs,CRITICAL,ACTIVE
+Performance - Inefficient use of keySet iterator instead of entrySet iterator,WMI_WRONG_MAP_ITERATOR,findbugs,CRITICAL,ACTIVE
+Performance - Maps and sets of URLs can be performance hogs,DMI_COLLECTION_OF_URLS,findbugs,BLOCKER,ACTIVE
+Performance - Method allocates a boxed primitive just to call toString,DM_BOXED_PRIMITIVE_TOSTRING,findbugs,MAJOR,ACTIVE
+"Performance - Method allocates an object, only to get the class object",DM_NEW_FOR_GETCLASS,findbugs,MAJOR,ACTIVE
+Performance - Method calls static Math class method on a constant value,UM_UNNECESSARY_MATH,findbugs,CRITICAL,ACTIVE
+Performance - Method concatenates strings using + in a loop,SBSC_USE_STRINGBUFFER_CONCATENATION,findbugs,CRITICAL,ACTIVE
+Performance - Method invokes inefficient Boolean constructor; use Boolean.valueOf(...) instead,DM_BOOLEAN_CTOR,findbugs,MAJOR,ACTIVE
+Performance - Method invokes inefficient floating-point Number constructor; use static valueOf instead,DM_FP_NUMBER_CTOR,findbugs,MAJOR,ACTIVE
+Performance - Method invokes inefficient new String() constructor,DM_STRING_VOID_CTOR,findbugs,MAJOR,ACTIVE
+Performance - Method invokes inefficient new String(String) constructor,DM_STRING_CTOR,findbugs,MAJOR,ACTIVE
+Performance - Method invokes inefficient Number constructor; use static valueOf instead,DM_NUMBER_CTOR,findbugs,CRITICAL,ACTIVE
+Performance - Method invokes toString() method on a String,DM_STRING_TOSTRING,findbugs,INFO,ACTIVE
+Performance - Method uses toArray() with zero-length array argument,ITA_INEFFICIENT_TO_ARRAY,findbugs,CRITICAL,ACTIVE
+Performance - Primitive value is boxed and then immediately unboxed,BX_BOXING_IMMEDIATELY_UNBOXED,findbugs,MAJOR,ACTIVE
+Performance - Primitive value is boxed then unboxed to perform primitive coercion,BX_BOXING_IMMEDIATELY_UNBOXED_TO_PERFORM_COERCION,findbugs,MAJOR,ACTIVE
+Performance - Private method is never called,UPM_UNCALLED_PRIVATE_METHOD,findbugs,CRITICAL,ACTIVE
+Performance - Should be a static inner class,SIC_INNER_SHOULD_BE_STATIC,findbugs,MAJOR,ACTIVE
+Performance - The equals and hashCode methods of URL are blocking,DMI_BLOCKING_METHODS_ON_URL,findbugs,BLOCKER,ACTIVE
+Performance - Unread field,URF_UNREAD_FIELD,findbugs,MAJOR,ACTIVE
+Performance - Unread field: should this field be static?,SS_SHOULD_BE_STATIC,findbugs,MAJOR,ACTIVE
+Performance - Unused field,UUF_UNUSED_FIELD,findbugs,MAJOR,ACTIVE
+Performance - Use the nextInt method of Random rather than nextDouble to generate a random integer,DM_NEXTINT_VIA_NEXTDOUBLE,findbugs,MAJOR,ACTIVE
+Preserve Stack Trace,PreserveStackTrace,pmd,MAJOR,ACTIVE
+Redundant Modifier,com.puppycrawl.tools.checkstyle.checks.modifier.RedundantModifierCheck,checkstyle,MINOR,ACTIVE
+Redundant Throws,com.puppycrawl.tools.checkstyle.checks.coding.RedundantThrowsCheck,checkstyle,MINOR,ACTIVE
+Replace Enumeration With Iterator,ReplaceEnumerationWithIterator,pmd,MAJOR,ACTIVE
+Replace Hashtable With Map,ReplaceHashtableWithMap,pmd,MAJOR,ACTIVE
+Replace Vector With List,ReplaceVectorWithList,pmd,MAJOR,ACTIVE
+Security - A prepared statement is generated from a nonconstant String,SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING,findbugs,CRITICAL,ACTIVE
+Security - Array is stored directly,ArrayIsStoredDirectly,pmd,CRITICAL,ACTIVE
+Security - Empty database password,DMI_EMPTY_DB_PASSWORD,findbugs,CRITICAL,ACTIVE
+Security - Hardcoded constant database password,DMI_CONSTANT_DB_PASSWORD,findbugs,BLOCKER,ACTIVE
+Security - HTTP cookie formed from untrusted input,HRS_REQUEST_PARAMETER_TO_COOKIE,findbugs,MAJOR,ACTIVE
+Security - HTTP Response splitting vulnerability,HRS_REQUEST_PARAMETER_TO_HTTP_HEADER,findbugs,MAJOR,ACTIVE
+Security - JSP reflected cross site scripting vulnerability,XSS_REQUEST_PARAMETER_TO_JSP_WRITER,findbugs,CRITICAL,ACTIVE
+Security - Nonconstant string passed to execute method on an SQL statement,SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE,findbugs,CRITICAL,ACTIVE
+Security - Servlet reflected cross site scripting vulnerability,XSS_REQUEST_PARAMETER_TO_SEND_ERROR,findbugs,CRITICAL,ACTIVE
+Security - Servlet reflected cross site scripting vulnerability,XSS_REQUEST_PARAMETER_TO_SERVLET_WRITER,findbugs,CRITICAL,ACTIVE
+Simplify Boolean Expression,com.puppycrawl.tools.checkstyle.checks.coding.SimplifyBooleanExpressionCheck,checkstyle,MAJOR,ACTIVE
+Simplify Boolean Return,com.puppycrawl.tools.checkstyle.checks.coding.SimplifyBooleanReturnCheck,checkstyle,MAJOR,ACTIVE
+Simplify Conditional,SimplifyConditional,pmd,MAJOR,ACTIVE
+Singular Field,SingularField,pmd,MINOR,ACTIVE
+Static Variable Name,com.puppycrawl.tools.checkstyle.checks.naming.StaticVariableNameCheck,checkstyle,MAJOR,ACTIVE
+String Buffer Instantiation With Char,StringBufferInstantiationWithChar,pmd,MAJOR,ACTIVE
+String Instantiation,StringInstantiation,pmd,MAJOR,ACTIVE
+String Literal Equality,com.puppycrawl.tools.checkstyle.checks.coding.StringLiteralEqualityCheck,checkstyle,MAJOR,ACTIVE
+String To String,StringToString,pmd,MAJOR,ACTIVE
+Switch statement found where default case is missing,SF_SWITCH_NO_DEFAULT,findbugs,MAJOR,ACTIVE
+Switch statement found where one case falls through to the next case,SF_SWITCH_FALLTHROUGH,findbugs,CRITICAL,ACTIVE
+System Println,SystemPrintln,pmd,MAJOR,ACTIVE
+Unconditional If Statement,UnconditionalIfStatement,pmd,CRITICAL,ACTIVE
+Undocumented API,UndocumentedApi,squid,MAJOR,ACTIVE
+Unnecessary Case Change,UnnecessaryCaseChange,pmd,MINOR,ACTIVE
+Unnecessary Local Before Return,UnnecessaryLocalBeforeReturn,pmd,MAJOR,ACTIVE
+Unused formal parameter,UnusedFormalParameter,pmd,MAJOR,ACTIVE
+Unused Imports,com.puppycrawl.tools.checkstyle.checks.imports.UnusedImportsCheck,checkstyle,INFO,ACTIVE
+Unused local variable,UnusedLocalVariable,pmd,MAJOR,ACTIVE
+Unused Modifier,UnusedModifier,pmd,INFO,ACTIVE
+Unused Null Check In Equals,UnusedNullCheckInEquals,pmd,MAJOR,ACTIVE
+Unused Private Field,UnusedPrivateField,pmd,MAJOR,ACTIVE
+Unused private method,UnusedPrivateMethod,pmd,MAJOR,ACTIVE
+Unused private method,UnusedPrivateMethod,squid,MAJOR,ACTIVE
+Use Array List Instead Of Vector,UseArrayListInsteadOfVector,pmd,MAJOR,ACTIVE
+Use Arrays As List,UseArraysAsList,pmd,MAJOR,ACTIVE
+Use Correct Exception Logging,UseCorrectExceptionLogging,pmd,MAJOR,ACTIVE
+Use Index Of Char,UseIndexOfChar,pmd,MAJOR,ACTIVE
+Useless Operation On Immutable,UselessOperationOnImmutable,pmd,CRITICAL,ACTIVE
+Useless Overriding Method,UselessOverridingMethod,pmd,MAJOR,ACTIVE
+Useless String Value Of,UselessStringValueOf,pmd,MINOR,ACTIVE
+Use String Buffer Length,UseStringBufferLength,pmd,MINOR,ACTIVE
+While Loops Must Use Braces,WhileLoopsMustUseBraces,pmd,MAJOR,ACTIVE
