@@ -11,7 +11,6 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
-  <version>0.9-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Data File Provider</name>
