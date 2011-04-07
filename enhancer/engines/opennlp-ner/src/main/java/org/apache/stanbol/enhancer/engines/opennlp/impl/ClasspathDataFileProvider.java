@@ -21,20 +21,39 @@ import java.io.InputStream;
 import java.util.Map;
 
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** DataFileProvider that looks in our class resources */
 public class ClasspathDataFileProvider implements DataFileProvider {
 
+    private final Logger log = LoggerFactory.getLogger(getClass());
+    public static final String RESOURCE_BASE_PATH = "org/apache/stanbol/defaultdata/opennlp/";
+    
+    private final String symbolicName;
+    
+    ClasspathDataFileProvider(String bundleSymbolicName) {
+        symbolicName = bundleSymbolicName;
+    }
+    
     @Override
     public InputStream getInputStream(String bundleSymbolicName,
             String filename, Map<String, String> comments) 
     throws IOException {
-        // load default OpenNLP models from classpath (embedded in the defaultdata bundle)
-        final String resourcePath = "org/apache/stanbol/defaultdata/opennlp/" + filename;
-        final InputStream in = getClass().getClassLoader().getResourceAsStream(resourcePath);
-        if (in == null) {
-            throw new IOException("Resource not found in my classpath: " + resourcePath);
+        
+        if(!symbolicName.equals(bundleSymbolicName)) {
+            log.debug("Requested bundleSymbolicName {} does not match mine ({}), request ignored",
+                    bundleSymbolicName, symbolicName);
+            return null;
         }
+        
+        // load default OpenNLP models from classpath (embedded in the defaultdata bundle)
+        final String resourcePath = RESOURCE_BASE_PATH + filename;
+        final InputStream in = getClass().getClassLoader().getResourceAsStream(resourcePath);
+        log.debug("Resource {} found: {}", (in == null ? "NOT" : ""), resourcePath);
+        
+        // Returning null is fine - if we don't have the data file, another
+        // provider might supply it
         return in;
     }
 }
