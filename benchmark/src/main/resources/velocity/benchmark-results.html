@@ -2,6 +2,7 @@
 <head>
 	<title>$title</title>
 	<link rel="stylesheet" href="$cssPath"/>
+    <script type="text/javascript" src="$contextPath/static/enhancer/scripts/jquery-1.4.2.js"></script>
 </head>
 <body>
 	<div class="home">
@@ -20,8 +21,21 @@
 		#set($index = 0)
 		#foreach($benchmark in $benchmarks)
 			<div class="benchmark">
-			    #set($index = $index + 1) 
+			    #set($index = $index + 1)
+			     
 				<div class="input"><span class="label">Benchmark $index input: </span>$benchmark.getInputText()</div>
+				
+                <div class="outputGraph">
+                    <div class="collapsed">
+                        <p class="collapseheader">
+                            EnhancementEngines output:
+                        </p>                                                      
+                        <div class="collapsable">
+                            <pre>$esc.html($graphFormatter.format($benchmark.getGraph($jobManager), "text/turtle"))</pre>
+                        </div>
+                    </div>                          
+                </div>
+                
 				#foreach($result in $benchmark.execute($jobManager))
 					<div class="result">
 						<div class="description">
@@ -52,5 +66,10 @@
 		#end
 		</div>
 	</div>
+    <script>
+    $(".outputGraph p").click(function () {
+      $(this).parents("div").toggleClass("collapsed");
+    });    
+    </script>
 </body>
 </html>

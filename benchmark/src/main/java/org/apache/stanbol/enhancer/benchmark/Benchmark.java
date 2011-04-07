@@ -18,6 +18,7 @@ package org.apache.stanbol.enhancer.benchmark;
 
 import java.util.List;
 
+import org.apache.clerezza.rdf.core.Graph;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 
@@ -32,4 +33,7 @@ public interface Benchmark extends List<TripleMatcherGroup >{
     /** Execute the benchmark and return results 
      *  @return null */
     List<BenchmarkResult> execute(EnhancementJobManager jobManager) throws EngineException;
+    
+    /** Return the enhanced Graph of our input text */
+    Graph getGraph(EnhancementJobManager jobManager) throws EngineException;
 }

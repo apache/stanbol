@@ -18,6 +18,7 @@ package org.apache.stanbol.enhancer.benchmark;
 
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.UriRef;
 
 /** Benchmark result for a single TripleMatcherGroup */

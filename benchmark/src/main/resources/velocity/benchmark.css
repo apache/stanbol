@@ -37,3 +37,16 @@
 	margin-left: 2em;
 	font-size: 90%;
 }
+
+.outputGraph .collapseheader {
+  margin: 0.1em;
+  cursor: pointer;
+  background: url("$contextPath/static/home/images/foldable_unfolded.png") no-repeat scroll right center transparent;
+}
+
+.outputGraph .collapsed .collapseheader {
+  background: url("$contextPath/static/home/images/foldable_folded.png") no-repeat scroll right center transparent;
+}
+.outputGraph .collapsed .collapsable {
+  display: none;
+}

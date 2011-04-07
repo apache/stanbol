@@ -19,6 +19,7 @@ package org.apache.stanbol.enhancer.benchmark.impl;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.clerezza.rdf.core.Graph;
 import org.apache.stanbol.enhancer.benchmark.Benchmark;
 import org.apache.stanbol.enhancer.benchmark.BenchmarkResult;
 import org.apache.stanbol.enhancer.benchmark.TripleMatcherGroup;
@@ -32,6 +33,7 @@ public class BenchmarkImpl extends LinkedList<TripleMatcherGroup> implements Ben
     
     private String name;
     private String inputText;
+    private Graph graph;
     
     /** Not public: meant to be constructed by parsing */
     BenchmarkImpl() {
@@ -67,12 +69,20 @@ public class BenchmarkImpl extends LinkedList<TripleMatcherGroup> implements Ben
         }
         
         final List<BenchmarkResult> result = new LinkedList<BenchmarkResult>();
-        final ContentItem ci = new InMemoryContentItem(inputText.getBytes(), "text/plain");
-        jobManager.enhanceContent(ci);
         for(TripleMatcherGroup g :  this) {
-            result.add(new BenchmarkResultImpl(g, ci.getMetadata().getGraph()));
+            result.add(new BenchmarkResultImpl(g, getGraph(jobManager)));
         }
 
         return result;
+    }
+    
+    /** @inheritDoc */
+    public Graph getGraph(EnhancementJobManager jobManager) throws EngineException {
+        if(graph == null) {
+            final ContentItem ci = new InMemoryContentItem(inputText.getBytes(), "text/plain");
+            jobManager.enhanceContent(ci);
+            graph = ci.getMetadata().getGraph();
+        }
+        return graph;
     }
 }
