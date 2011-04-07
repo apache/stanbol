@@ -299,12 +299,14 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
         }
         query.setLimit(this.numSuggestions);
         QueryResultList<Sign> results = site.findSigns(query);
+        log.debug("{} results returned by query {}",  results.size(), query);
 
         List<NonLiteral> annotationsToRelate = new ArrayList<NonLiteral>();
         annotationsToRelate.add(textAnnotation);
         annotationsToRelate.addAll(subsumedAnnotations);
 
         for (Sign guess : results) {
+            log.debug("Adding {} to ContentItem {}", guess, contentItemId);
             EnhancementRDFUtils.writeEntityAnnotation(this, literalFactory,
                     graph, contentItemId, annotationsToRelate, guess);
         }

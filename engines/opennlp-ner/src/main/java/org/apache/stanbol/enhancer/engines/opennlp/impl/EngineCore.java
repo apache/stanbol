@@ -48,8 +48,6 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -57,6 +55,8 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Core of our EnhancementEngine, separated from the OSGi service to make it easier to test this.
@@ -64,7 +64,7 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 public class EngineCore implements EnhancementEngine {
     protected static final String TEXT_PLAIN_MIMETYPE = "text/plain";
 
-    public static final Log log = LogFactory.getLog(NamedEntityExtractionEnhancementEngine.class);
+    private final Logger log = LoggerFactory.getLogger(getClass());
     private final DataFileProvider dataFileProvider;
     private final String bundleSymbolicName;
     protected final SentenceModel sentenceModel;
@@ -112,9 +112,10 @@ public class EngineCore implements EnhancementEngine {
             // TODO: make the length of the data a field of the ContentItem
             // interface to be able to filter out empty items in the canEnhance
             // method
-            log.warn("nothing to extract knowledge from");
+            log.warn("nothing to extract knowledge from in ContentItem {}", ci);
             return;
         }
+        log.debug("computeEnhancements {} text={}", ci.getId(), StringUtils.abbreviate(text, 100));
 
         try {
             for (Map.Entry<String,Object[]> type : entityTypes.entrySet()) {
@@ -124,7 +125,7 @@ public class EngineCore implements EnhancementEngine {
                 TokenNameFinderModel nameFinderModel = (TokenNameFinderModel) typeInfo[1];
                 findNamedEntities(ci, text, typeUri, typeLabel, nameFinderModel);
             }
-        } catch (Exception e) { // TODO: makes it sense to catch Exception here?
+        } catch (Exception e) {
             throw new EngineException(this, ci, e);
         }
     }
@@ -142,6 +143,8 @@ public class EngineCore implements EnhancementEngine {
             log.warn("NULL was parsed as text for content item " + ci.getId() + "! -> call ignored");
             return;
         }
+        log.debug("findNamedEntities typeUri={}, type={}, text=", 
+                new Object[]{ typeUri, typeLabel, StringUtils.abbreviate(text, 100) });
         LiteralFactory literalFactory = LiteralFactory.getInstance();
         MGraph g = ci.getMetadata();
         Map<String,List<NameOccurrence>> entityNames = extractNameOccurrences(nameFinderModel, text);
@@ -298,12 +301,7 @@ public class EngineCore implements EnhancementEngine {
             }
         }
         finder.clearAdaptiveData();
-
-        if (log.isDebugEnabled()) {
-            for (List<NameOccurrence> occurrences : nameOccurrences.values()) {
-                log.debug("Occurrences found: " + StringUtils.join(occurrences, ", "));
-            }
-        }
+        log.debug("{} name occurrences found: {}", nameOccurrences.size(), nameOccurrences);
         return nameOccurrences;
     }
 
