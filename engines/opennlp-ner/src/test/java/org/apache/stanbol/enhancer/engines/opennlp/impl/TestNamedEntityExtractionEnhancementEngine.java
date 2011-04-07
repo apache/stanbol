@@ -114,7 +114,7 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
         assertEquals("Patrick Marshall", secondOccurrence.name);
         assertEquals(33, secondOccurrence.start.intValue());
         assertEquals(49, secondOccurrence.end.intValue());
-        assertEquals(0.85, secondOccurrence.confidence, 0.005);
+        assertEquals(0.997, secondOccurrence.confidence, 0.005);
     }
 
     @Test
