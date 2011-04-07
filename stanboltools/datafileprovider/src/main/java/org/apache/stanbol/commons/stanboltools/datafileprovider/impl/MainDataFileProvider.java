@@ -58,20 +58,22 @@ import org.slf4j.LoggerFactory;
 @Property(name=Constants.SERVICE_RANKING, intValue=Integer.MAX_VALUE)
 public class MainDataFileProvider implements DataFileProvider, DataFileProviderLog {
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
-    
     @Property(value="datafiles")
     public static final String DATA_FILES_FOLDER_PROP = "data.files.folder";
-    private File dataFilesFolder;
-    
+
     @Property(intValue=100)
     public static final String MAX_EVENTS_PROP = "max.events";
+
+    private static final Logger log = LoggerFactory.getLogger(MainDataFileProvider.class);
+
+    private File dataFilesFolder;
+
     private int maxEvents;
     
     /** List of past events, up to maxEvents in size */
     private final List<DataFileProviderEvent> events = new LinkedList<DataFileProviderEvent>();
     
-    /** Track providers to which we can delegate */
+    /** Tracks providers to which we can delegate */
     private ServiceTracker providersTracker;
     
     @Activate

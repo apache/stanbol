@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Simple {@link BundleActivator} that also listens to the {@link OsgiInstaller}
  * service.
+ * <p>
  * If the Bundle is active and the {@link OsgiInstaller} is available the
  * {@link BundleInstaller} is created. If the bundle is stopped or the
  * {@link OsgiInstaller} goes away the {@link BundleInstaller} is closed. 
@@ -36,23 +37,23 @@ import org.slf4j.LoggerFactory;
  */
 public class Activator implements BundleActivator, ServiceTrackerCustomizer {
     
+    private static final Logger log = LoggerFactory.getLogger(Activator.class);
 
     private ServiceTracker installerTracker;
     
-    private static final Logger log = LoggerFactory.getLogger(Activator.class);
     private BundleContext bundleContext;
     
     private BundleInstaller bundleInstaller;
-    
     
     @Override
     public void start(BundleContext context) throws Exception {
         bundleContext = context;
         //Note that this class implements ServiceTrackerCustomizer to init/stop
         // the BundleInstaller
-        installerTracker = new ServiceTracker(context,OsgiInstaller.class.getName(),this);
+        installerTracker = new ServiceTracker(context, OsgiInstaller.class.getName(),this);
         installerTracker.open();
     }
+
     @Override
     public void stop(BundleContext context) throws Exception {
         closeBundleInstaller();
@@ -70,9 +71,11 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
             return null;
         }
     }
+
     /* not needed for the OsgiInstaller */
     @Override
     public void modifiedService(ServiceReference arg0, Object arg1) { /* unused */ }
+
     @Override
     public void removedService(ServiceReference sr, Object s) {
         //stop the BundleInstaller
