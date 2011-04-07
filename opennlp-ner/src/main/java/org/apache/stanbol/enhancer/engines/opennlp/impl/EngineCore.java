@@ -37,8 +37,8 @@ import opennlp.tools.namefind.NameFinderME;
 import opennlp.tools.namefind.TokenNameFinderModel;
 import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.sentdetect.SentenceModel;
+import opennlp.tools.tokenize.SimpleTokenizer;
 import opennlp.tools.tokenize.Tokenizer;
-import opennlp.tools.tokenize.WhitespaceTokenizer;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.Span;
 
@@ -58,8 +58,8 @@ import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 
-/** Core of our EnhancementEngine, separated from the OSGi service
- *  to make it easier to test this.
+/**
+ * Core of our EnhancementEngine, separated from the OSGi service to make it easier to test this.
  */
 public class EngineCore implements EnhancementEngine {
     protected static final String TEXT_PLAIN_MIMETYPE = "text/plain";
@@ -88,7 +88,7 @@ public class EngineCore implements EnhancementEngine {
         locationNameModel = buildNameModel("location", OntologicalClasses.DBPEDIA_PLACE);
         organizationNameModel = buildNameModel("organization", OntologicalClasses.DBPEDIA_ORGANISATION);
     }
-    
+
     protected InputStream lookupModelStream(String modelRelativePath) throws IOException {
         return dataFileProvider.getInputStream(bundleSymbolicName, modelRelativePath, DATA_FILE_COMMENTS);
     }
@@ -239,9 +239,8 @@ public class EngineCore implements EnhancementEngine {
         Span[] sentenceSpans = sentenceDetector.sentPosDetect(textWithDots);
 
         NameFinderME finder = new NameFinderME(nameFinderModel);
-
+        Tokenizer tokenizer = SimpleTokenizer.INSTANCE;
         Map<String,List<NameOccurrence>> nameOccurrences = new LinkedHashMap<String,List<NameOccurrence>>();
-        Tokenizer tokenizer = WhitespaceTokenizer.INSTANCE;
         for (int i = 0; i < sentenceSpans.length; i++) {
             String sentence = sentenceSpans[i].getCoveredText(text).toString().trim();
 
