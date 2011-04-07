@@ -9,6 +9,7 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -355,8 +356,20 @@ public class JenaPersistenceStore implements PersistenceStore {
         }
         return administeredOntologies;
     }
+    
+    @Override
+    public OntologyMetaInformation saveOntology(String ontologyContent, String ontologyURI, String encoding) throws Exception {
+        InputStream is = new ByteArrayInputStream(ontologyContent.getBytes(encoding));
+        return saveOntology(is, ontologyURI, encoding);
+    }
+    
+    @Override
+    public OntologyMetaInformation saveOntology(URL ontologyContent, String ontologyURI, String encoding) throws Exception {
+        InputStream is = ontologyContent.openStream();
+        return saveOntology(is, ontologyURI, encoding);
+    }
 
-    public OntologyMetaInformation saveOntology(String ontologyContent, String ontologyURI, String encoding) throws UnsupportedEncodingException {
+    public OntologyMetaInformation saveOntology(InputStream content, String ontologyURI, String encoding) throws UnsupportedEncodingException {
         long t1 = System.currentTimeMillis();
         OntologyMetaInformation ontMetaInformation = null;
         OntModel om = null;
@@ -368,7 +381,7 @@ public class JenaPersistenceStore implements PersistenceStore {
             }
             long st1 = System.currentTimeMillis();
             logger.info("Creating a new ontology store for: " + ontologyURI);
-            InputStream is = new ByteArrayInputStream(ontologyContent.getBytes(encoding));
+//            InputStream is = new ByteArrayInputStream(ontologyContent.getBytes(encoding));
             long st2 = System.currentTimeMillis();
             // ModelMaker modelMaker = getModelMaker();
             OntModelSpec oms = getOntModelSpec(true);
@@ -383,7 +396,7 @@ public class JenaPersistenceStore implements PersistenceStore {
             Model createdModel = null;
             resourceManager.registerOntology(ontologyURI);
             try {
-                createdModel = om.read(is, ontologyURI, "RDF/XML");
+                createdModel = om.read(content, ontologyURI, "RDF/XML");
             } catch (Exception e) {
                 resourceManager.registerOntology(ontologyURI);
                 logger.warn("Unable to read ontology {} ", ontologyURI);

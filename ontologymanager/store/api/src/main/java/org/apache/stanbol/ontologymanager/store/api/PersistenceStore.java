@@ -1,5 +1,7 @@
 package org.apache.stanbol.ontologymanager.store.api;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 
 import org.apache.stanbol.ontologymanager.store.model.AdministeredOntologies;
@@ -42,6 +44,42 @@ public interface PersistenceStore {
 	 * @throws Exception
 	 */
     OntologyMetaInformation saveOntology(String ontologyContent,
+            String ontologyURI, String encoding) throws Exception;
+    
+    /**
+     * Interface method for registering an ontology to the persistence store
+     * 
+     * @param ontologyContent
+     *            the input stream of the ontology serialization
+     * @param ontologyURI
+     *            the base URI to be used for the ontology
+     * @param encoding
+     *            the encoding of ontologyContent (e.g. UTF-8), important: not
+     *            to be mixed up with the output style of an ontology (i.e.
+     *            RDF/XML, OWL, etc.)
+     * @return OntologyMetaInformation: the XSD element contains the "URI" and
+     *         the "description" of the ontology
+     * @throws Exception
+     */
+    OntologyMetaInformation saveOntology(InputStream ontologyContent,
+            String ontologyURI, String encoding) throws Exception;
+    
+    /**
+     * Interface method for registering an ontology to the persistence store
+     * 
+     * @param ontologyContent
+     *            the URL of the ontology
+     * @param ontologyURI
+     *            the base URI to be used for the ontology
+     * @param encoding
+     *            the encoding of ontologyContent (e.g. UTF-8), important: not
+     *            to be mixed up with the output style of an ontology (i.e.
+     *            RDF/XML, OWL, etc.)
+     * @return OntologyMetaInformation: the XSD element contains the "URI" and
+     *         the "description" of the ontology
+     * @throws Exception
+     */
+    OntologyMetaInformation saveOntology(URL ontologyContent,
             String ontologyURI, String encoding) throws Exception;
 
 	/**
