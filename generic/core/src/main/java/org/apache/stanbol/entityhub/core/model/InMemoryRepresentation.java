@@ -424,7 +424,7 @@ public class InMemoryRepresentation implements Representation,Cloneable {
     }
     @Override
     public String toString() {
-        return InMemoryRepresentation.class.getSimpleName()+getId();
+        return getClass().getSimpleName() + " " + getId();
     }
     @Override
     public int hashCode() {

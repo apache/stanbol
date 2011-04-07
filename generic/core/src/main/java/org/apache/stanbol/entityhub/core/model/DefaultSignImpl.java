@@ -50,6 +50,19 @@ public class DefaultSignImpl implements Sign{
     }
 
     @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName());
+        sb.append(", site=");
+        sb.append(getSignSite());
+        sb.append(", id=");
+        sb.append(getId());
+        sb.append(", representation=");
+        sb.append(getRepresentation());
+        return sb.toString();
+    }
+    
+    @Override
     public String getSignSite() {
         return signSite;
     }
