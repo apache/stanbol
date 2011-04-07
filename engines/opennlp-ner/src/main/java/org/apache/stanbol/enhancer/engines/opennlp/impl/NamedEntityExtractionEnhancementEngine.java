@@ -56,7 +56,7 @@ public class NamedEntityExtractionEnhancementEngine implements EnhancementEngine
         // Need our DataFileProvider before building the models
         dfpServiceRegistration = ctx.getBundleContext().registerService(
                 DataFileProvider.class.getName(), 
-                new ClasspathDataFileProvider(), null);
+                new ClasspathDataFileProvider(ctx.getBundleContext().getBundle().getSymbolicName()), null);
         
         engineCore = new EngineCore(dataFileProvider, ctx.getBundleContext().getBundle().getSymbolicName());
     }
