@@ -66,11 +66,11 @@
 			<artifactId>httpcore-osgi</artifactId>
 			<version>4.0.1</version>
 		</bundle>
-		<bundle>
+		<!--  <bundle>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math</artifactId>
 			<version>2.1</version>
-		</bundle>
+		</bundle>-->
 		<bundle>
             <groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
@@ -189,7 +189,31 @@
 		</bundle>
 	</startLevel>
 	
+	<!-- Stanbol Web -->
 	<startLevel level="17">
+	<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.base</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.home</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.sparql</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.jsonld</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+	</startLevel>
+	
+	<startLevel level="18">
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.ontologymanager.store.api</artifactId>
@@ -197,7 +221,7 @@
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.ontologymanager.store.web</artifactId>
+			<artifactId>org.apache.stanbol.commons.web.ontology</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>

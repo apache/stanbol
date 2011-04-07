@@ -61,6 +61,7 @@ import org.apache.stanbol.ontologymanager.store.model.Superclasses;
 import org.apache.stanbol.ontologymanager.store.model.PropertyAssertions.PropertyAssertion;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentFactory;
+import org.osgi.service.component.ComponentInstance;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.model.AddAxiom;
@@ -101,6 +102,7 @@ import org.semanticweb.owlapi.util.InferredSubDataPropertyAxiomGenerator;
 import org.semanticweb.owlapi.util.InferredSubObjectPropertyAxiomGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.ComplementClass;
@@ -229,9 +231,10 @@ public class JenaPersistenceStore implements PersistenceStore {
         if (this.componentFactory != null) {
             final Dictionary props = new Hashtable();
             props.put(ResourceManager.class.getName(), resourceManager);
-            StoreSynchronizer storeSynchronizer = (StoreSynchronizer) this.componentFactory.newInstance(
-                props).getInstance();
-            this.synchronizerThread = new SynchronizerThread(storeSynchronizer);
+            ComponentInstance componentInstance = this.componentFactory.newInstance(props);
+            StoreSynchronizer storeSynchronizer = (StoreSynchronizer) componentInstance.getInstance(); 
+            
+            this.synchronizerThread = new SynchronizerThread(storeSynchronizer, componentInstance);
             synchronizerThread.start();
         } else {
             logger.info("No synchronizer factory found");
@@ -2185,6 +2188,7 @@ public class JenaPersistenceStore implements PersistenceStore {
         Set<OWLObjectProperty> equiProperties = reasoner.getEquivalentObjectProperties(owlObjectProperty)
                 .getEntities();
         for (OWLObjectProperty objectProp : equiProperties) {
+
             PropertyMetaInformation datatypePropertyMetaInformation = generatePropertyMetaInformation(objectProp
                     .getIRI().toString());
             equivalentProperties.getPropertyMetaInformation().add(datatypePropertyMetaInformation);
@@ -2987,10 +2991,9 @@ public class JenaPersistenceStore implements PersistenceStore {
         OWLlinkReasonerConfiguration config = new OWLlinkReasonerConfiguration(progressMonitor, REASONER_URL,
                 IndividualNodeSetPolicy.BY_NAME);
 
-        OWLReasoner reasoner = factory.createNonBufferingReasoner(ontology, config);
+        OWLlinkHTTPXMLReasoner reasoner = (OWLlinkHTTPXMLReasoner) factory.createNonBufferingReasoner(ontology, config);
         reasoner.flush();
-        reasoner.prepareReasoner();
-        return (OWLlinkHTTPXMLReasoner) reasoner;
+        return reasoner;
     }
 
     private OntModel addInferencesToModel(OntModel model, String ontologyURI, InferenceScope infScope) {
@@ -3009,7 +3012,6 @@ public class JenaPersistenceStore implements PersistenceStore {
             IRI kb = reasoner.getDefaultKB();
             try {
                 reasoner.flush();
-                reasoner.prepareReasoner();
                 long t2 = System.currentTimeMillis();
                 OWLOntology ont = manager.createOntology();
                 generateInferredAxioms(manager, ont, reasoner, inferredAxiomGenerators);

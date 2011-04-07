@@ -47,13 +47,11 @@
     <module>ext/org.semanticweb.owlapi</module>
     <module>ext/org.semanticweb.owlapi.owllink</module>
     <module>api</module>
-    <module>rest</module>
     <module>rest-client</module>
     <module>jena</module>
     <module>clerezza</module>
     <module>tdb</module>
     <!--<module>fise-adapter</module>-->
-    <module>launchers/lite</module>
-    <!--<module>launchers/fise</module>--> 
+    <!--<module>launchers/lite</module>-->
   </modules>
 </project>

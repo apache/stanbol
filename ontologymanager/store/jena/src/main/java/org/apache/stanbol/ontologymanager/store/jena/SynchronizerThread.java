@@ -1,5 +1,6 @@
 package org.apache.stanbol.ontologymanager.store.jena;
 
+import org.osgi.service.component.ComponentInstance;
 import org.apache.stanbol.ontologymanager.store.api.StoreSynchronizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,10 +10,12 @@ public class SynchronizerThread extends Thread {
     Logger logger = LoggerFactory.getLogger(SynchronizerThread.class);
 
     private StoreSynchronizer synchronizer;
+    private ComponentInstance instance;
     private Boolean done = false;
 
-    public SynchronizerThread(StoreSynchronizer synchronizer) {
+    public SynchronizerThread(StoreSynchronizer synchronizer, ComponentInstance instance) {
         this.synchronizer = synchronizer;
+        this.instance = instance;
     }
 
     @Override
@@ -45,5 +48,6 @@ public class SynchronizerThread extends Thread {
             this.synchronizer.clear();
             logger.info("Stopped synchronizer");
         }
+        this.instance.dispose();
     }
 }
