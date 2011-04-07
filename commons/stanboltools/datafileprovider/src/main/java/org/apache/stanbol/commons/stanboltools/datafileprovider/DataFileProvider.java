@@ -24,25 +24,28 @@ import java.util.Map;
  * Used to provide read-only data files (indexes, models etc.) from various
  * locations (bundle resources, filesystem folders etc.) allowing users to
  * overrides default data files with their own.
- * 
+ *
  * See STANBOL-146 for requirements.
  */
 public interface DataFileProvider {
-    /** Get the InputStream of the specified
-     *  data file, according to this provider's
-     *  priority rules.
-     *  
-     *  @param bundleSymbolicName can be used to differentiate 
-     *      between files which have the same name
-     *  @param filename name of the file to open
-     *  @param comments Optional - how to get a more complete version
-     *          of the data file, licensing information, etc.
-     * @return InputStream to read the file, must be closed by 
-     *      caller when done
+
+    /**
+     * Get the InputStream of the specified data file, according to this provider's
+     * priority rules.
+     *
+     * @param bundleSymbolicName can be used to differentiate
+     *        between files which have the same name
+     * @param filename name of the file to open
+     * @param comments Optional - how to get a more complete version
+     *        of the data file, licensing information, etc.
+     *
+     * @return InputStream to read the file, must be closed by
+     *         caller when done
+     *
      * @throws IOException problem finding or reading the file
      */
     InputStream getInputStream(
-            String bundleSymbolicName, 
+            String bundleSymbolicName,
             String filename,
             Map<String, String> comments) throws IOException;
 }

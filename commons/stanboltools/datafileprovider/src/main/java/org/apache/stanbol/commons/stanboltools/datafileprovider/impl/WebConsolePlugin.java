@@ -91,13 +91,11 @@ public class WebConsolePlugin extends HttpServlet {
         for(DataFileProviderEvent e : dataFileProviderLog) {
             pw.println("<tr>");
             cell(pw, null, fmt.format(e.getTimestamp()));
-            cell(pw, 
-                    null, e.getBundleSymbolicName(), 
-                    "b", e.getFilename());
-            
+            cell(pw, null, e.getBundleSymbolicName(), "b", e.getFilename());
+
             final StringBuilder sb = new StringBuilder();
             for(Map.Entry<String, String> comment : e.getComments().entrySet()) {
-                if(sb.length() > 0) {
+                if (sb.length() > 0) {
                     sb.append("<br/>");
                 }
                 sb.append(comment.getKey());

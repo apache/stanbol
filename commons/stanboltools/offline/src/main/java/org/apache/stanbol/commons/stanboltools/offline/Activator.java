@@ -27,8 +27,9 @@ import org.slf4j.LoggerFactory;
  */
 public class Activator implements BundleActivator {
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
     public static final String OFFLINE_MODE_PROPERTY = "org.apache.stanbol.offline.mode";
+    private static final Logger log = LoggerFactory.getLogger(Activator.class);
+
     private ServiceRegistration serviceReg;
 
     @Override

@@ -31,7 +31,8 @@ view that documents the matching RESTful API for applications:</p>
        For instance to re-deploy a new version of this web interface, go to the <tt>$STANBOL_HOME/enhancer/jersey</tt>
        source folder and run the following command:</p>
 <pre>
-mvn install -o -DskipTests -PinstallBundle -Dsling.url=${it.publicBaseUri}system/console
+mvn install -o -DskipTests -PinstallBundle \
+    -Dsling.url=${it.publicBaseUri}system/console
 </pre>
   </dd>
 

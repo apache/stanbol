@@ -21,17 +21,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-/** Used to record a log of {@link DataFileProvider} operations */
+/**
+ * Used to record a log of {@link DataFileProvider} operations.
+ */
 public class DataFileProviderEvent {
+
+    private static final Map<String, String> EMPTY_COMMENTS = new HashMap<String, String>();
+
     private final Date timestamp;
     private final String bundleSymbolicName;
     private final String filename;
     private final Map<String, String> comments;
     private final String actualFileLocation;
     
-    private static final Map<String, String> EMPTY_COMMENTS = new HashMap<String, String>(); 
-    
-    public DataFileProviderEvent(String bundleSymbolicName, String filename, Map<String, String> comments, 
+    public DataFileProviderEvent(String bundleSymbolicName, String filename, Map<String, String> comments,
             String actualFileLocation) {
         this.timestamp = new Date();
         this.bundleSymbolicName = bundleSymbolicName;
@@ -42,7 +45,6 @@ public class DataFileProviderEvent {
     
     @Override
     public String toString() {
-        
         final StringBuilder sb = new StringBuilder();
         sb.append(getClass().getName());
 

@@ -16,16 +16,21 @@
  */
 package org.apache.stanbol.commons.stanboltools.datafileprovider;
 
-/** Holds the {@link DataFileProviderEvent}s generated
- *  by the main {@link DataFileProvider}
+/**
+ * Holds the {@link DataFileProviderEvent}s generated
+ * by the main {@link DataFileProvider}.
  */
 public interface DataFileProviderLog extends Iterable<DataFileProviderEvent> {
-    /** @return the maximum number of events that this service holds.
-     *      If the current size() is greater or equal than this, events
-     *      might have been discarded. 
+
+    /**
+     * @return the maximum number of events that this service holds.
+     *         If the current size() is greater or equal than this, events
+     *         might have been discarded.
      */
     int maxEventsCount();
-    
-    /** @return the actual number of events stored */
+
+    /**
+     * @return the actual number of events stored
+     */
     int size();
 }
