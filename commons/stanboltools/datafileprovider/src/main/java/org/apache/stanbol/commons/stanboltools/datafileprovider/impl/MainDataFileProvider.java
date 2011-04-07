@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
 @Property(name=Constants.SERVICE_RANKING, intValue=Integer.MAX_VALUE)
 public class MainDataFileProvider implements DataFileProvider, DataFileProviderLog {
 
-    @Property(value="datafiles")
+    @Property(value="sling/datafiles")
     public static final String DATA_FILES_FOLDER_PROP = "data.files.folder";
 
     @Property(intValue=100)
@@ -79,6 +79,13 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
     @Activate
     protected void activate(ComponentContext ctx) throws ConfigurationException {
         dataFilesFolder = new File(requireProperty(ctx.getProperties(), DATA_FILES_FOLDER_PROP, String.class));
+        if(!dataFilesFolder.exists()){
+            if(!dataFilesFolder.mkdirs()){
+                throw new ConfigurationException(DATA_FILES_FOLDER_PROP, "Unable to create the configured Directory "+dataFilesFolder);
+            }
+        } else if(!dataFilesFolder.isDirectory()){
+            throw new ConfigurationException(DATA_FILES_FOLDER_PROP, "The configured DataFile directory "+dataFilesFolder+" does already exists but is not a directory!");
+        } //else exists and is a directory!
         maxEvents = requireProperty(ctx.getProperties(), MAX_EVENTS_PROP, Integer.class).intValue();
         
         providersTracker = new ServiceTracker(ctx.getBundleContext(), DataFileProvider.class.getName(), null);
@@ -168,7 +175,14 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
                     continue;
                 }
                 final DataFileProvider dfp = (DataFileProvider)o;
-                result = dfp.getInputStream(bundleSymbolicName, filename, comments);
+                try {
+                    result = dfp.getInputStream(bundleSymbolicName, filename, comments);
+                } catch (Exception e) {
+                    //Exceptions thrown by an implementation should never
+                    //affect the MainDataFileProvider
+                    log.debug(String.format("Eception while searching DataFile %s by using provider %s (ignore)",
+                        filename,dfp),e);
+                }
                 if(result == null) {
                     log.debug("{} does not provide file {}", dfp, filename);
                 } else {
