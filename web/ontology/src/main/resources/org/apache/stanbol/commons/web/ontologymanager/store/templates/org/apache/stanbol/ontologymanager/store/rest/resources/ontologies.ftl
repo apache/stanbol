@@ -12,6 +12,7 @@
 		  <fieldset>
 			  <legend>Submit raw text in RDF/XML format</legend>
 			  <p>Ontology URI: <textarea rows="1" name="ontologyURI"></textarea></p>
+			  <p>Ontology URL: <textarea rows="1" name="ontologyURL"></textarea></p>
 			  <p>Ontology Content:<textarea rows="15" name="ontologyContent"></textarea></p>
 			  <p><input type="submit" value="Submit Ontology"></p>
 		  </fieldset>
@@ -46,7 +47,7 @@
 	function clearStore()
 	{
 		xmlhttp=new XMLHttpRequest();
-		xmlhttp.open('DELETE',"ontologies",false);
+		xmlhttp.open('DELETE',"/ontology",false);
 		xmlhttp.send();
 		location.reload('true');
 	}
