@@ -71,6 +71,18 @@ You can then apply the formatter to a selected area of a Java source code files
 by pressing `Shift+Ctrl+F`.
 
 
+## Debugging a Stanbol instance from Eclipse
+
+To debug a locally running Stanbol instance from eclipse, run the stanbol
+launcher with::
+
+    java -Xdebug -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n \
+         -jar org.apache.stanbol.some.launcher.0.9-SNAPSHOT.jar -p 8080
+
+In eclipse, you can then create a new "Debug Configuration" with type "Remote
+Java Application" and connect it to localhost on port 8787.
+
+
 ## Useful links
 
   - Documentation will be published and mailing lists info on [the official
