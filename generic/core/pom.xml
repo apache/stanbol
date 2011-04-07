@@ -58,16 +58,16 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.entityhub.core;version=${pom.version},
-              org.apache.stanbol.entityhub.core.mapping;version=${pom.version},
-              org.apache.stanbol.entityhub.core.model;version=${pom.version},
-              org.apache.stanbol.entityhub.core.query;version=${pom.version},
-              org.apache.stanbol.entityhub.core.site;version=${pom.version},
-              org.apache.stanbol.entityhub.core.yard;version=${pom.version},
-              org.apache.stanbol.entityhub.core.utils;version=${pom.version}
+              org.apache.stanbol.entityhub.core;version=${project.version},
+              org.apache.stanbol.entityhub.core.mapping;version=${project.version},
+              org.apache.stanbol.entityhub.core.model;version=${project.version},
+              org.apache.stanbol.entityhub.core.query;version=${project.version},
+              org.apache.stanbol.entityhub.core.site;version=${project.version},
+              org.apache.stanbol.entityhub.core.yard;version=${project.version},
+              org.apache.stanbol.entityhub.core.utils;version=${project.version}
             </Export-Package>
             <Private-Package>
-              org.apache.stanbol.entityhub.core.impl;version=${pom.version},
+              org.apache.stanbol.entityhub.core.impl;version=${project.version},
             </Private-Package>
           </instructions>
         </configuration>
