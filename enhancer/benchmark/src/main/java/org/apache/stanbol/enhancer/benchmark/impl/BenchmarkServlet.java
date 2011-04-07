@@ -16,10 +16,11 @@
  */
 package org.apache.stanbol.enhancer.benchmark.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -29,6 +30,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.felix.scr.annotations.Component;
@@ -62,6 +65,9 @@ public class BenchmarkServlet extends HttpServlet {
     @Reference
     private EnhancementJobManager jobManager;
     
+    @Reference
+    private Serializer graphSerializer;
+    
     public static final String PARAM_CONTENT = "content";
     public static final String DEFAULT_MOUNT_PATH = "/benchmark";
     public static final String DEFAULT_BENCHMARK = "default.txt";
@@ -71,6 +77,21 @@ public class BenchmarkServlet extends HttpServlet {
     public static final String MOUNT_PATH_PROPERTY = "mount.path";
     private String mountPath; 
     private final VelocityEngine velocity = new VelocityEngine();
+    
+    // Formatter for benchmark graphs
+    public static class GraphFormatter {
+        private final Serializer serializer;
+        
+        GraphFormatter(Serializer s) {
+            serializer = s;
+        }
+        
+        public String format(Graph g, String mimeType) throws UnsupportedEncodingException {
+            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            serializer.serialize(bos, g, mimeType);
+            return bos.toString("UTF-8");
+        }
+    };
 
     /** Register with HttpService when activated */
     public void activate(ComponentContext ctx) throws ServletException, NamespaceException {
@@ -181,6 +202,7 @@ public class BenchmarkServlet extends HttpServlet {
         final VelocityContext ctx = getVelocityContext(request, "Benchmark Results");
         ctx.put("jobManager", jobManager);
         ctx.put("benchmarks", parser.parse(new StringReader(content)));
+        ctx.put("graphFormatter", new GraphFormatter(graphSerializer));
         
         response.setContentType("text/html");
         response.setCharacterEncoding("UTF-8");
