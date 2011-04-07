@@ -80,10 +80,10 @@ public class Ontologies extends BaseStanbolResource {
         lockManager.obtainWriteLockFor(ontologyURI);
         try {
             OntologyMetaInformation ontologyMetaInformation = null;
-            if (ontologyContent != null && ontologyContent.isEmpty()) {
+            if (ontologyContent != null && !ontologyContent.isEmpty()) {
                 ontologyMetaInformation = persistenceStore
                         .saveOntology(ontologyContent, ontologyURI, "UTF-8");
-            } else if (ontologyURL != null && ontologyURL.isEmpty()) {
+            } else if (ontologyURL != null && !ontologyURL.isEmpty()) {
                 try{
                 ontologyMetaInformation = persistenceStore.saveOntology(new URL(ontologyURL), ontologyURI,
                     "UTF-8");
