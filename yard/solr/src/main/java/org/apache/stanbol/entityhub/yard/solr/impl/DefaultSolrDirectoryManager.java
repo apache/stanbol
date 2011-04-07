@@ -18,6 +18,7 @@ package org.apache.stanbol.entityhub.yard.solr.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -30,7 +31,9 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.apache.stanbol.entityhub.yard.solr.SolrDirectoryManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
@@ -51,7 +54,16 @@ import org.slf4j.LoggerFactory;
            @Property(name=SolrDirectoryManager.MANAGED_SOLR_DIR_PROPERTY,value=SolrDirectoryManager.DEFAULT_SOLR_DATA_DIR)
     })
 public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
+    /**
+     * The logger
+     */
     private final Logger log = LoggerFactory.getLogger(DefaultSolrDirectoryManager.class);
+    
+    /**
+     * The dataFileProvider used to lookup index data
+     */
+    @Reference
+    private DataFileProvider dataFileProvider;
     /**
      * The directory used by the internally managed embedded solr server. 
      * Use {@link #lookupManagedSolrDir()} instead of using this member, because
@@ -119,8 +131,21 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
     public final File getSolrDirectory(final String solrIndexName,boolean create) throws IllegalArgumentException {
         return initSolrDirectory(solrIndexName,null,create,componentContext);
     }
-    public final File createSolrDirectory(final String solrIndexName, ArchiveInputStream ais){
+    public final File createSolrIndex(final String solrIndexName, ArchiveInputStream ais){
         return initSolrDirectory(solrIndexName,ais,true,componentContext);
+    }
+    @Override
+    public final File createSolrDirectory(String solrIndexName, String indexPath, Map<String,String> comments) throws IllegalArgumentException,IOException {
+        ComponentContext context = componentContext;
+        if(componentContext == null){
+            throw new IllegalStateException("Creating an Index by using the DataFileProvider does only work when running within an OSGI");
+        }
+        //TODO add the comments how to download the index!
+       InputStream is = dataFileProvider.getInputStream(context.getBundleContext().getBundle().getSymbolicName(), indexPath, comments);
+       if(is == null){
+           throw new IllegalStateException("SolrServer arvive "+indexPath+" is currently not available via the "+DataFileProvider.class.getSimpleName()+" service");
+       }
+       return createSolrIndex(solrIndexName,ConfigUtils.getArchiveInputStream(indexPath, is));
     }
     /**
      * Internally used to get/init the Solr directory of a SolrCore or the root
@@ -136,8 +161,9 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
      * running outside an OSGI container. This is needed to avoid that 
      * {@link #deactivate(ComponentContext)} sets the context to <code>null</code> 
      * during this method does its initialisation work.
-     * @return the Solr directory or <code>null</code> in case this component is
-     * deactivated
+     * @return the Solr directory or <code>null</code> if the requested index
+     * could not be created (e.g. because of <code>false</code> was parsed as 
+     * create) orin case this component is deactivated
      * @throws IllegalStateException in case this method is called when this
      * component is running within an OSGI environment and it is deactivated or
      * the initialisation for the parsed index failed.
@@ -156,7 +182,10 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
             return managedCoreContainerDirectory;
         }
         File coreDir = new File(managedCoreContainerDirectory,solrIndexName);
-        if(create && !coreDir.exists()){
+        if(!coreDir.exists()){
+            if(!create){ //we are not allowed to create it
+                return null; //return null
+            }
             synchronized (initCores) {
                 log.info(" > start initializing SolrIndex "+solrIndexName);
                 initCores.add(solrIndexName);

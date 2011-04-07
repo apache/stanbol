@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.stanbol.entityhub.core.yard.AbstractYard.YardConfig;
+import org.apache.stanbol.entityhub.yard.solr.SolrDirectoryManager;
 import org.apache.stanbol.entityhub.yard.solr.SolrServerProvider.Type;
 import org.osgi.service.cm.ConfigurationException;
 
@@ -161,6 +162,44 @@ public final class SolrYardConfig extends YardConfig {
             }
         } else {
             return false;
+        }
+    }
+    /**
+     * Getter for the state if this SolrYard can be initialised by using the
+     * default configuration or if it is required to use a provided configuration.
+     * The default is set to <code>true</code>.<p>
+     * If this property is set to <code>false</code> than the SolrYard can only
+     * be initialised if the Index is already available or the initial
+     * configuration is provided to the {@link SolrDirectoryManager}.
+     * @return the state or <code>true</code> as default
+     */
+    public boolean isDefaultInitialisation() {
+        Object value = config.get(SolrYard.SOLR_INDEX_DEFAULT_CONFIG);
+        if(value != null){
+            if(value instanceof Boolean){
+                return (Boolean) value;
+            } else {
+                return Boolean.parseBoolean(value.toString());
+            }
+        } else {
+            return true;
+        }
+    }
+    /**
+     * Setter for the state if this SolrYard can be initialised by using the
+     * default configuration or if it is required to use a provided configuration.
+     * The default is set to <code>true</code>.<p>
+     * If this property is set to <code>false</code> than the SolrYard can only
+     * be initialised if the Index is already available or the initial
+     * configuration is provided to the {@link SolrDirectoryManager}.
+     * @param defaultInitialisationState the state or <code>null</code> to
+     * remove the current configuration. The default state is <code>true</code>.
+     */
+    public void setDefaultInitialisation(Boolean defaultInitialisationState){
+        if(defaultInitialisationState != null){
+            config.put(SolrYard.SOLR_INDEX_DEFAULT_CONFIG, defaultInitialisationState);
+        } else {
+            config.remove(SolrYard.SOLR_INDEX_DEFAULT_CONFIG);
         }
     }
     /**

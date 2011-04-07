@@ -29,19 +29,6 @@ public final class IndexInstallerConstants {
     private IndexInstallerConstants(){ /* do not create instances*/ }
     
     /**
-     * Supported archive types.
-     */
-    public static final Map<String,String> SUPPORTED_COMPRESSION_FORMAT;
-    static {
-        Map<String,String> cfm = new HashMap<String,String>();
-        cfm.put("SOLR_INDEX_ARCHIVE_EXTENSION", "zip"); //the default if not specified
-        cfm.put("gz", "gz");
-        cfm.put("bz2", "bz2");
-        cfm.put("zip", "zip");
-        cfm.put("jar", "zip");
-        SUPPORTED_COMPRESSION_FORMAT = Collections.unmodifiableMap(cfm);
-    }
-    /**
      * Use &lt;indexName&gt;.solrindex[.&lt;archiveType&gt;] as file name
      */
     public static final String SOLR_INDEX_ARCHIVE_EXTENSION = "solrindex";
@@ -61,4 +48,9 @@ public final class IndexInstallerConstants {
      */
     public static final String PROPERTY_ARCHIVE_FORMAT = PROPERTY_PREFIX+"archive.format";
 
+    /**
+     * The key used to configure the name of the Index-Archive
+     * The default name is \"&lt;indexName&gt;.solrarchive\".
+     */
+    public static final String PROPERTY_INDEX_ARCHIVE = "Index-Archive";
 }

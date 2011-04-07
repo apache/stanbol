@@ -177,6 +177,11 @@ public class SolrYard extends AbstractYard implements Yard {
      */
     public static final String SOLR_SERVER_TYPE = "org.apache.stanbol.entityhub.yard.solr.solrServerType";
     /**
+     * Key used to to enable/disable the use of the default configuration when 
+     * initialising the SolrYard. The default value MUST BE <code>true</code>
+     */
+    public static final String SOLR_INDEX_DEFAULT_CONFIG = "org.apache.stanbol.entityhub.yard.solr.allowDefaultConfig";
+    /**
      * The default value for the maxBooleanClauses of SolrQueries. Set to
      * {@value #defaultMaxBooleanClauses} the default of Slor 1.4
      */
@@ -339,10 +344,13 @@ public class SolrYard extends AbstractYard implements Yard {
             File indexDirectory = ConfigUtils.toFile(config.getSolrServerLocation());
             if(!indexDirectory.isAbsolute()){ //relative paths
                 // need to be resolved based on the internally managed Solr directory
-                //TODO: for now parse TRUE to allow automatic creation if the index
-                //      does not already exist. We might add this as an additional
-                //      parameter to the SolrIndexConfig 
-                indexDirectory = solrDirectoryManager.getSolrDirectory(indexDirectory.toString(),true);
+                indexDirectory = solrDirectoryManager.getSolrDirectory(
+                    indexDirectory.toString(),config.isDefaultInitialisation());
+                if(indexDirectory == null){
+                    throw new ConfigurationException(SolrYard.SOLR_SERVER_LOCATION, 
+                        "SolrIndex "+config.getSolrServerLocation()+" is not available"+
+                        (config.isDefaultInitialisation()?" and could not be initialised!":". The necessary Index is not yet installed."));
+                }
             }
             solrIndexLocation = indexDirectory.toString();
         } else {

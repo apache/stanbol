@@ -23,6 +23,7 @@ import java.util.Map;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.core.CoreContainer;
+import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.apache.stanbol.entityhub.yard.solr.SolrServerProvider.Type;
 import org.apache.stanbol.entityhub.yard.solr.impl.ConfigUtils;
 import org.osgi.framework.BundleContext;
@@ -121,7 +122,7 @@ public interface SolrDirectoryManager {
      */
     File getSolrDirectory(final String solrIndexName,boolean create) throws IllegalArgumentException;
     /**
-     * 
+     * Creates a new Solr Index based on the data in the provided {@link ArchiveInputStream}
      * @param solrIndexName the name of the index to create
      * @param ais the stream providing the data for the new index
      * @return the directory (instanceDir) of the index.
@@ -129,7 +130,20 @@ public interface SolrDirectoryManager {
      * @throws IllegalArgumentException if the parsed solrIndexName is 
      * <code>null</code> or empty
      */
-    File createSolrDirectory(final String solrIndexName, ArchiveInputStream ais) throws IllegalArgumentException, IOException;
+    File createSolrIndex(final String solrIndexName, ArchiveInputStream ais) throws IllegalArgumentException, IOException;
+
+    /**
+     * Creates a new Solr Index based on looking up the Index data via the
+     * {@link DataFileProvider} service
+     * @param solrIndexName The name of the solrIndex to create
+     * @param indexPath the name of the dataFile looked up via the {@link DataFileProvider}
+     * @param comments The comments describing the data on how to get the index
+     * @return the directory (instanceDir) of the index or null if the index 
+     * data could not be found
+     * @throws IllegalArgumentException
+     * @throws IOException
+     */
+    File createSolrDirectory(final String solrIndexName, String indexPath,Map<String,String> comments) throws IllegalArgumentException, IOException;
 
     /**
      * Getter for the managed Solr Directory.
