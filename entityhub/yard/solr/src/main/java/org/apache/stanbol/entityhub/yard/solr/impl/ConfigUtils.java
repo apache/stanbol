@@ -24,15 +24,24 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.stanbol.entityhub.yard.solr.impl.install.IndexInstallerConstants;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +59,48 @@ import org.slf4j.LoggerFactory;
  */
 public final class ConfigUtils {
     private ConfigUtils(){}
+
+    /**
+     * Supported archive types.
+     */
+    public static final Map<String,String> SUPPORTED_SOLR_ARCHIVE_FORMAT;
+    static {
+        Map<String,String> cfm = new HashMap<String,String>();
+        cfm.put("SOLR_INDEX_ARCHIVE_EXTENSION", "zip"); //the default if not specified
+        cfm.put("gz", "gz");
+        cfm.put("bz2", "bz2");
+        cfm.put("zip", "zip");
+        cfm.put("jar", "zip");
+        cfm.put("ref", "properties"); //reference
+        SUPPORTED_SOLR_ARCHIVE_FORMAT = Collections.unmodifiableMap(cfm);
+    }
+
+    public static ArchiveInputStream getArchiveInputStream(String solrArchiveName,InputStream is) throws IOException {
+        String archiveFormat;
+        String solrArchiveExtension = FilenameUtils.getExtension(solrArchiveName);
+        if(solrArchiveExtension == null || solrArchiveExtension.isEmpty()){
+            archiveFormat = solrArchiveName; //assume that the archiveExtension was parsed
+        } else {
+            archiveFormat = SUPPORTED_SOLR_ARCHIVE_FORMAT.get(solrArchiveExtension);
+        }
+        ArchiveInputStream ais;
+        if("zip".equals(archiveFormat)){
+            ais = new ZipArchiveInputStream(is);
+        } else {
+            if ("gz".equals(archiveFormat)) {
+                    is = new GZIPInputStream(is);
+            } else if ("bz2".equals(archiveFormat)) {
+                    is = new BZip2CompressorInputStream(is);
+            } else {
+                throw new IllegalStateException("Unsupported compression format "+archiveFormat+" " +
+                        "(implementation out of sync with Constants defined in "+IndexInstallerConstants.class.getName()+"). " +
+                                "Please report this to stanbol-dev mailing list!");
+            }
+            ais = new TarArchiveInputStream(is);
+        }
+        return ais;
+    }
+    
     /**
      * The logger
      */

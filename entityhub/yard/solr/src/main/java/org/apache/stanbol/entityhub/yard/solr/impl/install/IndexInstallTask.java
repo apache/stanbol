@@ -21,7 +21,11 @@ import static org.apache.stanbol.entityhub.yard.solr.impl.install.IndexInstaller
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Map.Entry;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -34,8 +38,13 @@ import org.apache.sling.installer.api.tasks.InstallationContext;
 import org.apache.sling.installer.api.tasks.ResourceState;
 import org.apache.sling.installer.api.tasks.TaskResourceGroup;
 import org.apache.stanbol.entityhub.yard.solr.SolrDirectoryManager;
+import org.apache.stanbol.entityhub.yard.solr.impl.ConfigUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IndexInstallTask extends InstallTask {
+    
+    private static final Logger log = LoggerFactory.getLogger(IndexInstallTask.class);
     /**
      * use 19 because the config install uses 20 and the files MUST be installed
      * before the config triggering the initialisation of the services. 
@@ -60,38 +69,47 @@ public class IndexInstallTask extends InstallTask {
         } else { //this index does not exist
             String archiveFormat = (String)getResource().getAttribute(PROPERTY_ARCHIVE_FORMAT);
             InputStream is = null;
-            ArchiveInputStream ais = null;
             try {
                 is = getResource().getInputStream();
-                ais = null;
-                if("zip".equals(archiveFormat)){
-                    ais = new ZipArchiveInputStream(is);
-                } else {
-                    if ("gz".equals(archiveFormat)) {
-                            is = new GZIPInputStream(is);
-                    } else if ("bz2".equals(archiveFormat)) {
-                            is = new BZip2CompressorInputStream(is);
-                    } else {
-                        throw new IllegalStateException("Unsupported compression format "+archiveFormat+" " +
-                        		"(implementation out of sync with Constants defined in "+IndexInstallerConstants.class.getName()+"). " +
-                        				"Please report this to stanbol-dev mailing list!");
+                if("properties".equals(archiveFormat)){
+                    Map<String,String> properties = new HashMap<String,String>();
+                    InputStreamReader reader = new InputStreamReader(is,"UTF-8");
+                    try {
+                        Properties props = new Properties();
+                        props.load(reader);
+                        for(Entry<Object,Object> config : props.entrySet()){
+                            properties.put(config.getKey().toString(),config.getValue()!= null?config.getValue().toString():null);
+                        }
+                    } finally {
+                       IOUtils.closeQuietly(reader);
                     }
-                    ais = new TarArchiveInputStream(is);
+                    String indexPath = properties.get(PROPERTY_INDEX_ARCHIVE);
+                    if(indexPath == null){
+                        indexPath = indexName+'.'+IndexInstallerConstants.SOLR_INDEX_ARCHIVE_EXTENSION;
+                        log.info("Property \""+PROPERTY_INDEX_ARCHIVE+"\" not present within the SolrIndex references file. Will use the default name \""+indexPath+"\"");
+                    }
+                    solrDirectoryManager.createSolrDirectory(indexName,indexPath,properties);
+                    setFinishedState(ResourceState.INSTALLED);
+                } else {
+                    ArchiveInputStream ais = null;
+                    try {
+                        ais = ConfigUtils.getArchiveInputStream(archiveFormat, is);
+                        solrDirectoryManager.createSolrIndex(indexName, ais);
+                        //we are done ... set the state to installed!
+                        setFinishedState(ResourceState.INSTALLED);
+                    } finally {
+                        IOUtils.closeQuietly(ais);
+                    }
                 }
                 //now we can copy the core!
-                solrDirectoryManager.createSolrDirectory(indexName, ais);
-                //we are done ... set the state to installed!
-                setFinishedState(ResourceState.INSTALLED);
-            }catch (IOException e) {
-                ctx.log("Unable to open SolrIndexArchive for index name \"%s\"! (resource=%s, arviceFormat=%s)", 
+            }catch (Exception e) {
+                String message = String.format("Unable to install SolrIndexArchive for index name \"%s\"! (resource=%s, arviceFormat=%s)", 
                     indexName,getResource().getURL(),archiveFormat);
+                log.error(message,e);
+                ctx.log("%s! Reason: %s",message,e.getMessage());
                 setFinishedState(ResourceState.IGNORED);
             } finally {
-                if(ais != null){ //close the top most stream
-                    IOUtils.closeQuietly(ais);
-                } else if(is != null){
-                    IOUtils.closeQuietly(is);
-                }
+                IOUtils.closeQuietly(is);
             }
             
         }

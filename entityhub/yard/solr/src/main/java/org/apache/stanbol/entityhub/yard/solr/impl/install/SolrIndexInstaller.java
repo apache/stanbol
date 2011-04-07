@@ -20,7 +20,7 @@ import static org.apache.stanbol.entityhub.yard.solr.impl.install.IndexInstaller
 import static org.apache.stanbol.entityhub.yard.solr.impl.install.IndexInstallerConstants.PROPERTY_INDEX_NAME;
 import static org.apache.stanbol.entityhub.yard.solr.impl.install.IndexInstallerConstants.SOLR_INDEX_ARCHIVE_EXTENSION;
 import static org.apache.stanbol.entityhub.yard.solr.impl.install.IndexInstallerConstants.SOLR_INDEX_ARCHIVE_RESOURCE_TYPE;
-import static org.apache.stanbol.entityhub.yard.solr.impl.install.IndexInstallerConstants.SUPPORTED_COMPRESSION_FORMAT;
+import static org.apache.stanbol.entityhub.yard.solr.impl.ConfigUtils.SUPPORTED_SOLR_ARCHIVE_FORMAT;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -99,7 +99,7 @@ public class SolrIndexInstaller implements InstallTaskFactory, ResourceTransform
      */
     @Reference
     private SolrDirectoryManager solrDirectoryManager;
-    
+        
     public InstallTask createTask(TaskResourceGroup taskResourceGroup) {
         TaskResource toActivate = taskResourceGroup.getActiveResource();
         if(SOLR_INDEX_ARCHIVE_RESOURCE_TYPE.equals(toActivate.getType())){
@@ -145,10 +145,10 @@ public class SolrIndexInstaller implements InstallTaskFactory, ResourceTransform
             return null; // -> can not transform
         }
         String extension = FilenameUtils.getExtension(filePath);
-        String archiveFormat = SUPPORTED_COMPRESSION_FORMAT.get(extension);
+        String archiveFormat = SUPPORTED_SOLR_ARCHIVE_FORMAT.get(extension);
         if(archiveFormat == null){
             log.error("Unable to process Solr Index Archive from Resource "+registeredResource.getURL()+
-                "because of unsupported archive format \""+extension+"\" (supported are "+SUPPORTED_COMPRESSION_FORMAT.keySet()+")");
+                "because of unsupported archive format \""+extension+"\" (supported are "+SUPPORTED_SOLR_ARCHIVE_FORMAT.keySet()+")");
             return null;
         } else {
             properties.put(PROPERTY_ARCHIVE_FORMAT, archiveFormat);
