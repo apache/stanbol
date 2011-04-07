@@ -28,6 +28,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+// DO NOT REMOVE - workaround for FELIX-2906 
+import java.lang.Integer;
+
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -47,17 +50,17 @@ import org.slf4j.LoggerFactory;
 /** The main DatafileProvider, delegates to other DataFileProvider if 
  *  the requested file is not found in its datafiles folder.
  *  
- *  Must have the lowest service ranking of all DatafileProvider, so
- *  that this is the default one which delegates to others. 
+ *  Must have the highest service ranking of all DatafileProvider, so
+ *  that this is the default one which delegates to others.
  */
 @Component(immediate=true, metatype=true)
 @Service
-@Property(name=Constants.SERVICE_RANKING, intValue=0)
+@Property(name=Constants.SERVICE_RANKING, intValue=Integer.MAX_VALUE)
 public class MainDataFileProvider implements DataFileProvider, DataFileProviderLog {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
     
-    @Property(value="./datafiles")
+    @Property(value="datafiles")
     public static final String DATA_FILES_FOLDER_PROP = "data.files.folder";
     private File dataFilesFolder;
     
@@ -191,5 +194,9 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
         
         log.info("Successfully loaded file {}", event);
         return result;
+    }
+    
+    File getDataFilesFolder() {
+        return dataFilesFolder;
     }
 }

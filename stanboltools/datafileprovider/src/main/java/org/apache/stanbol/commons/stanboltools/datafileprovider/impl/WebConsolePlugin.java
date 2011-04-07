@@ -31,6 +31,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProviderEvent;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProviderLog;
 
@@ -47,13 +48,28 @@ public class WebConsolePlugin extends HttpServlet {
     @Reference
     private DataFileProviderLog dataFileProviderLog;
     
+    @Reference
+    private DataFileProvider dataFileProvider;
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
         final PrintWriter pw = response.getWriter();
         
         pw.println("<p class='statline ui-state-highlight'>");
-        pw.println("Last " + dataFileProviderLog.size() + " DataFileProvider events");
+        pw.println("Displaying the last " + dataFileProviderLog.size() + " DataFileProvider events");
+
+        String dfPath = "<PATH NOT FOUND??>";
+        if(dataFileProvider instanceof MainDataFileProvider) {
+            dfPath = ((MainDataFileProvider)dataFileProvider).getDataFilesFolder().getAbsolutePath();
+        }
+            
+        pw.println("<br/>");
+        pw.println("Data files found in the " + dfPath + " folder have precedence");
+        
+        pw.println("<br/>");
+        pw.println("The main DataFileProvider is " + dataFileProvider.getClass().getName());
+        
         pw.println("</p>");
         
         pw.println("<table class='nicetable'>");
