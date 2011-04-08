@@ -9,6 +9,7 @@
 			<li><a href="${it.metadata.href}/objectProperties">Object Properties</a></li>
 			<li><a href="${it.metadata.href}/datatypeProperties">Datatype Properties</a></li>
 			<li><a href="${it.metadata.href}/individuals">Individuals</a></li>
+			<li><a href="${it.metadata.href}/imports">Imports</a></li>
 		</ul>
 	</fieldset>
 </div>
