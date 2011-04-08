@@ -58,7 +58,7 @@ public class NamedEntityExtractionEnhancementEngine implements EnhancementEngine
                 DataFileProvider.class.getName(), 
                 new ClasspathDataFileProvider(ctx.getBundleContext().getBundle().getSymbolicName()), null);
         
-        engineCore = new EngineCore(dataFileProvider, ctx.getBundleContext().getBundle().getSymbolicName());
+        engineCore = new NEREngineCore(dataFileProvider, ctx.getBundleContext().getBundle().getSymbolicName());
     }
 
     protected void deactivate(ComponentContext ce) {

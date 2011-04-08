@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Core of our EnhancementEngine, separated from the OSGi service to make it easier to test this.
  */
-public class EngineCore implements EnhancementEngine {
+public class NEREngineCore implements EnhancementEngine {
     protected static final String TEXT_PLAIN_MIMETYPE = "text/plain";
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -80,7 +80,7 @@ public class EngineCore implements EnhancementEngine {
         DATA_FILE_COMMENTS.put("Default data files", "provided by the org.apache.stanbol.defaultdata bundle");
     }
 
-    EngineCore(DataFileProvider dfp, String bundleSymbolicName) throws InvalidFormatException, IOException {
+    NEREngineCore(DataFileProvider dfp, String bundleSymbolicName) throws InvalidFormatException, IOException {
         dataFileProvider = dfp;
         this.bundleSymbolicName = bundleSymbolicName;
         sentenceModel = new SentenceModel(lookupModelStream("en-sent.bin"));
