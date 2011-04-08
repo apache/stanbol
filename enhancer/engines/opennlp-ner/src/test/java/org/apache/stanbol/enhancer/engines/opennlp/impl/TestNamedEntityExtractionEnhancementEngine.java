@@ -57,13 +57,13 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
             + " without any name.\n"
             + "A new paragraph is being written. This paragraph has two sentences.";
 
-    static EngineCore nerEngine;
+    static NEREngineCore nerEngine;
     
     public static final String FAKE_BUNDLE_SYMBOLIC_NAME = "FAKE_BUNDLE_SYMBOLIC_NAME";
 
     @BeforeClass
     public static void setUpServices() throws IOException {
-        nerEngine = new EngineCore(new ClasspathDataFileProvider(FAKE_BUNDLE_SYMBOLIC_NAME), FAKE_BUNDLE_SYMBOLIC_NAME);
+        nerEngine = new NEREngineCore(new ClasspathDataFileProvider(FAKE_BUNDLE_SYMBOLIC_NAME), FAKE_BUNDLE_SYMBOLIC_NAME);
     }
 
     public static ContentItem wrapAsContentItem(final String id,
