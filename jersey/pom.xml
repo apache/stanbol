@@ -15,7 +15,7 @@
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancer Jersey JAX-RS API and front-end</name>
-  <description>To be refactored to org.apache.stanbol.web!</description>
+  <description>To be renamed as org.apache.stanbol.enhancer.web</description>
 
   <scm>
     <connection>
