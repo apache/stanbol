@@ -88,13 +88,13 @@ import com.sun.jersey.core.header.FormDataContentDisposition;
  * <p>
  * The Delete operation is not implemented yet.
  */
-@Path("/store")
-public class StoreRootResource extends BaseStanbolResource {
+@Path("/contenthub")
+public class ContentHubRootResource extends BaseStanbolResource {
 
     public static final Set<String> RDF_MEDIA_TYPES = new TreeSet<String>(
             Arrays.asList(N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE, RDF_JSON));
 
-    private static final Logger log = LoggerFactory.getLogger(StoreRootResource.class);
+    private static final Logger log = LoggerFactory.getLogger(ContentHubRootResource.class);
 
     protected TcManager tcManager;
 
@@ -149,7 +149,7 @@ public class StoreRootResource extends BaseStanbolResource {
 
     }
 
-    public StoreRootResource(@Context ServletContext context,
+    public ContentHubRootResource(@Context ServletContext context,
                              @Context UriInfo uriInfo,
                              @QueryParam(value = "offset") int offset,
                              @QueryParam(value = "pageSize") @DefaultValue("5") int pageSize) throws ParseException {
@@ -232,12 +232,12 @@ public class StoreRootResource extends BaseStanbolResource {
     public UriRef makeContentItemUri(byte[] data) {
         // TODO: factorize this logic out in a dedicated OSGi service
         return ContentItemHelper.makeDefaultUri(uriInfo.getBaseUri()
-                + "store/content/", data);
+                + "contenthub/content/", data);
     }
 
     public UriRef makeContentItemUri(String localId) {
         // TODO: factorize this logic out in a dedicated OSGi service
-        return new UriRef(uriInfo.getBaseUri() + "store/content/" + localId);
+        return new UriRef(uriInfo.getBaseUri() + "contenthub/content/" + localId);
     }
 
     @GET
@@ -268,7 +268,7 @@ public class StoreRootResource extends BaseStanbolResource {
         // handle smart redirection to browser view
         for (MediaType mt : headers.getAcceptableMediaTypes()) {
             if (mt.toString().startsWith(TEXT_HTML)) {
-                URI pageUri = uriInfo.getBaseUriBuilder().path("/store/page").path(localId).build();
+                URI pageUri = uriInfo.getBaseUriBuilder().path("/contenthub/page").path(localId).build();
                 return Response.temporaryRedirect(pageUri).build();
             }
         }
@@ -276,11 +276,11 @@ public class StoreRootResource extends BaseStanbolResource {
         // handle smart redirection to RDF metadata view
         for (MediaType mt : headers.getAcceptableMediaTypes()) {
             if (RDF_MEDIA_TYPES.contains(mt.toString())) {
-                URI metadataUri = uriInfo.getBaseUriBuilder().path("/store/metadata").path(localId).build();
+                URI metadataUri = uriInfo.getBaseUriBuilder().path("/contenthub/metadata").path(localId).build();
                 return Response.temporaryRedirect(metadataUri).build();
             }
         }
-        URI rawUri = uriInfo.getBaseUriBuilder().path("/store/raw").path(localId).build();
+        URI rawUri = uriInfo.getBaseUriBuilder().path("/contenthub/raw").path(localId).build();
         return Response.temporaryRedirect(rawUri).build();
     }
 

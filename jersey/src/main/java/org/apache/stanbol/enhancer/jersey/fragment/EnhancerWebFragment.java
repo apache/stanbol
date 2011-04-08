@@ -14,7 +14,7 @@ import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.enhancer.jersey.resource.EnginesRootResource;
-import org.apache.stanbol.enhancer.jersey.resource.StoreRootResource;
+import org.apache.stanbol.enhancer.jersey.resource.ContentHubRootResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -52,7 +52,7 @@ public class EnhancerWebFragment implements WebFragment {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         // resources
         classes.add(EnginesRootResource.class);
-        classes.add(StoreRootResource.class);
+        classes.add(ContentHubRootResource.class);
         return classes;
     }
 
@@ -92,7 +92,7 @@ public class EnhancerWebFragment implements WebFragment {
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
         links.add(new NavigationLink("engines", "/engines", "/imports/enginesDescription.ftl", 10));
-        links.add(new NavigationLink("store", "/store", "/imports/storeDescription.ftl", 20));
+        links.add(new NavigationLink("contenthub", "/contenthub", "/imports/contenthubDescription.ftl", 20));
         return links;
     }
 
