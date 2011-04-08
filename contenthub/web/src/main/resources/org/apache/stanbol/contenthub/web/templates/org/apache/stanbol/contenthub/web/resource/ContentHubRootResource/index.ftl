@@ -87,7 +87,7 @@ on the disk, just in memory.</em>
     sample content items:</p>
 
 <pre>
-for file in data/text-examples/*.txt;
+for file in enhancer/data/text-examples/*.txt;
 do
   curl -i -X PUT -H "Content-Type:text/plain" -T $file ${it.publicBaseUri}contenthub/content/$(basename $file) ;
 done

@@ -1,4 +1,4 @@
-package org.apache.stanbol.enhancer.jersey.fragment;
+package org.apache.stanbol.contenthub.web.fragment;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,7 +13,7 @@ import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
-import org.apache.stanbol.enhancer.jersey.resource.EnginesRootResource;
+import org.apache.stanbol.contenthub.web.resource.ContentHubRootResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -26,13 +26,11 @@ import freemarker.cache.TemplateLoader;
  */
 @Component(immediate = true, metatype = true)
 @Service
-public class EnhancerWebFragment implements WebFragment {
+public class ContentHubWebFragment implements WebFragment {
 
-    private static final String NAME = "enhancer";
+    private static final String NAME = "contenthub";
 
-    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/enhancer/jersey/static";
-
-    private static final String TEMPLATE_PATH = "/org/apache/stanbol/enhancer/jersey/templates";
+    private static final String TEMPLATE_PATH = "/org/apache/stanbol/contenthub/web/templates";
 
     private BundleContext bundleContext;
 
@@ -49,8 +47,7 @@ public class EnhancerWebFragment implements WebFragment {
     @Override
     public Set<Class<?>> getJaxrsResourceClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
-        // resources
-        classes.add(EnginesRootResource.class);
+        classes.add(ContentHubRootResource.class);
         return classes;
     }
 
@@ -61,7 +58,7 @@ public class EnhancerWebFragment implements WebFragment {
 
     @Override
     public String getStaticResourceClassPath() {
-        return STATIC_RESOURCE_PATH;
+        return null;
     }
 
     @Override
@@ -71,25 +68,18 @@ public class EnhancerWebFragment implements WebFragment {
 
     @Override
     public List<LinkResource> getLinkResources() {
-        List<LinkResource> resources = new ArrayList<LinkResource>();
-        resources.add(new LinkResource("stylesheet", "openlayers-2.9/theme/default/style.css", this, 10));
-        resources.add(new LinkResource("stylesheet", "scripts/prettify/prettify.css", this, 20));
-        return resources;
+        return Collections.emptyList();
     }
 
     @Override
     public List<ScriptResource> getScriptResources() {
-        List<ScriptResource> resources = new ArrayList<ScriptResource>();
-        resources.add(new ScriptResource("text/javascript", "openlayers-2.9/OpenLayers.js", this, 10));
-        resources.add(new ScriptResource("text/javascript", "scripts/prettify/prettify.js", this, 20));
-        resources.add(new ScriptResource("text/javascript", "scripts/jquery-1.4.2.js", this, 30));
-        return resources;
+        return Collections.emptyList();
     }
 
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
-        links.add(new NavigationLink("engines", "/engines", "/imports/enginesDescription.ftl", 10));
+        links.add(new NavigationLink("contenthub", "/contenthub", "/imports/contenthubDescription.ftl", 20));
         return links;
     }
 

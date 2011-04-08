@@ -134,7 +134,7 @@
             <server.ready.timeout.seconds>180</server.ready.timeout.seconds>
             <server.ready.path.1>/:stanbol.css</server.ready.path.1>
             <server.ready.path.2>/engines:There are currently</server.ready.path.2>
-            <server.ready.path.3>/store:Recently uploaded Content Items</server.ready.path.3>
+            <server.ready.path.3>/contenthub:Recently uploaded Content Items</server.ready.path.3>
           </systemPropertyVariables>
         </configuration>
       </plugin>

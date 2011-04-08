@@ -1,4 +1,4 @@
-package org.apache.stanbol.enhancer.jersey.resource;
+package org.apache.stanbol.contenthub.web.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
@@ -61,6 +61,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.jersey.cache.EntityCacheProvider;
+import org.apache.stanbol.enhancer.jersey.resource.ContentItemResource;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
