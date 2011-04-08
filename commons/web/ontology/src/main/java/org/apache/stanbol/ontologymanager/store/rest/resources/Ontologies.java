@@ -72,8 +72,7 @@ public class Ontologies extends BaseStanbolResource {
     @Consumes("application/x-www-form-urlencoded")
     @Produces(MediaType.APPLICATION_XML)
     public Response saveOntology(@FormParam("ontologyURI") String ontologyURI,
-                                 @FormParam("ontologyContent") String ontologyContent,
-                                 @FormParam("ontologyURL") String ontologyURL) {
+                                 @FormParam("ontologyContent") String ontologyContent) {
         Response response = null;
         LockManager lockManager = LockManagerImp.getInstance();
         lockManager.obtainReadLockFor(LockManagerImp.GLOBAL_SPACE);
@@ -83,15 +82,15 @@ public class Ontologies extends BaseStanbolResource {
             if (ontologyContent != null && !ontologyContent.isEmpty()) {
                 ontologyMetaInformation = persistenceStore
                         .saveOntology(ontologyContent, ontologyURI, "UTF-8");
-            } else if (ontologyURL != null && !ontologyURL.isEmpty()) {
+            } else if (ontologyURI != null && !ontologyURI.isEmpty()) {
                 try{
-                ontologyMetaInformation = persistenceStore.saveOntology(new URL(ontologyURL), ontologyURI,
+                ontologyMetaInformation = persistenceStore.saveOntology(new URL(ontologyURI), ontologyURI,
                     "UTF-8");
                 }catch (MalformedURLException e) {
                     throw new WebApplicationException(e, Status.BAD_REQUEST);
                 }
             }else{
-                throw new WebApplicationException(new IllegalArgumentException("Ontology Content or URL can not be both null"),Status.BAD_REQUEST);
+                throw new WebApplicationException(new IllegalArgumentException("Ontology Content or URI can not be both null"),Status.BAD_REQUEST);
             }
             response = Response.ok(ontologyMetaInformation, MediaType.APPLICATION_XML_TYPE).build();
         } catch (Exception e) {
@@ -133,9 +132,8 @@ public class Ontologies extends BaseStanbolResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_HTML + ";qs=2")
     public Response createAndRedirect(@FormParam("ontologyURI") String ontologyURI,
-                                      @FormParam("ontologyContent") String ontologyContent,
-                                      @FormParam("ontologyURL") String ontologyURL ) {
-        Response response = this.saveOntology(ontologyURI, ontologyContent, ontologyURL);
+                                      @FormParam("ontologyContent") String ontologyContent) {
+        Response response = this.saveOntology(ontologyURI, ontologyContent);
         OntologyMetaInformation ont = ((OntologyMetaInformation) response.getEntity());
         try {
             return Response.seeOther(URI.create(ont.getHref())).type(MediaType.TEXT_HTML)

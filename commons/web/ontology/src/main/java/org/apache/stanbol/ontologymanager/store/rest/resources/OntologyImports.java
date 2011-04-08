@@ -2,7 +2,6 @@ package org.apache.stanbol.ontologymanager.store.rest.resources;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
