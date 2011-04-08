@@ -38,12 +38,14 @@ import org.apache.stanbol.ontologymanager.store.model.DisjointClasses;
 import org.apache.stanbol.ontologymanager.store.model.Domain;
 import org.apache.stanbol.ontologymanager.store.model.EquivalentClasses;
 import org.apache.stanbol.ontologymanager.store.model.EquivalentProperties;
+import org.apache.stanbol.ontologymanager.store.model.ImportsForOntology;
 import org.apache.stanbol.ontologymanager.store.model.IndividualContext;
 import org.apache.stanbol.ontologymanager.store.model.IndividualMetaInformation;
 import org.apache.stanbol.ontologymanager.store.model.IndividualsForOntology;
 import org.apache.stanbol.ontologymanager.store.model.ObjectFactory;
 import org.apache.stanbol.ontologymanager.store.model.ObjectPropertiesForOntology;
 import org.apache.stanbol.ontologymanager.store.model.ObjectPropertyContext;
+import org.apache.stanbol.ontologymanager.store.model.OntologyImport;
 import org.apache.stanbol.ontologymanager.store.model.OntologyMetaInformation;
 import org.apache.stanbol.ontologymanager.store.model.PropertyAssertions;
 import org.apache.stanbol.ontologymanager.store.model.PropertyMetaInformation;
@@ -108,7 +110,8 @@ public class JAXBProvider implements MessageBodyReader, MessageBodyWriter {
             || type.equals(ObjectPropertyContext.class) || type.equals(OntologyMetaInformation.class)
             || type.equals(PropertyAssertions.class) || type.equals(PropertyMetaInformation.class)
             || type.equals(Range.class) || type.equals(ResourceMetaInformationType.class)
-            || type.equals(Superclasses.class) || type.equals(SuperProperties.class)) {
+            || type.equals(Superclasses.class) || type.equals(SuperProperties.class)
+            || type.equals(OntologyImport.class) || type.equals(ImportsForOntology.class)) {
             return true;
         } else {
             return false;
@@ -144,7 +147,8 @@ public class JAXBProvider implements MessageBodyReader, MessageBodyWriter {
             || type.equals(ObjectPropertyContext.class) || type.equals(OntologyMetaInformation.class)
             || type.equals(PropertyAssertions.class) || type.equals(PropertyMetaInformation.class)
             || type.equals(Range.class) || type.equals(ResourceMetaInformationType.class)
-            || type.equals(Superclasses.class) || type.equals(SuperProperties.class)) {
+            || type.equals(Superclasses.class) || type.equals(SuperProperties.class)
+            || type.equals(OntologyImport.class) || type.equals(ImportsForOntology.class)) {
             return true;
         } else {
             return false;

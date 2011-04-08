@@ -15,6 +15,7 @@ import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.ontologymanager.store.rest.resources.Ontologies;
 import org.apache.stanbol.ontologymanager.store.rest.resources.OntologyClasses;
 import org.apache.stanbol.ontologymanager.store.rest.resources.OntologyDatatypeProperties;
+import org.apache.stanbol.ontologymanager.store.rest.resources.OntologyImports;
 import org.apache.stanbol.ontologymanager.store.rest.resources.OntologyIndividuals;
 import org.apache.stanbol.ontologymanager.store.rest.resources.OntologyObjectProperties;
 import org.apache.stanbol.ontologymanager.store.rest.resources.ParticularClass;
@@ -70,6 +71,7 @@ public class StoreWebFragment implements WebFragment {
 		classes.add(OntologyDatatypeProperties.class);
 		classes.add(OntologyObjectProperties.class);
 		classes.add(OntologyIndividuals.class);
+		classes.add(OntologyImports.class);
 		classes.add(ParticularClass.class);
 		classes.add(ParticularDatatypeProperty.class);
 		classes.add(ParticularOntology.class);
