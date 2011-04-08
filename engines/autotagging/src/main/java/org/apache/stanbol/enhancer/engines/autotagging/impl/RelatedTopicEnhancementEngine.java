@@ -48,8 +48,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author ogrisel
  */
-@Component(immediate = false, metatype = true)
-@Service
+//@Component(immediate = false, metatype = true)
+//@Service
 public class RelatedTopicEnhancementEngine implements EnhancementEngine {
 
     protected static final String TEXT_PLAIN_MIMETYPE = "text/plain";
