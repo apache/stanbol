@@ -47,6 +47,7 @@
     <module>commons</module>
     <module>entityhub</module>
     <module>enhancer</module>
+    <module>contenthub/web</module>
     <module>launchers/mini</module>
   </modules>
 
