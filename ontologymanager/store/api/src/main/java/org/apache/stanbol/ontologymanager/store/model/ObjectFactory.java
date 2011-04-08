@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.namespace.QName;
 
+
 /**
  * This object contains factory methods for each Java content interface and Java element interface generated
  * in the eu.iksproject.fise.stores.persistencestore.rest.model package.
@@ -66,6 +67,13 @@ public class ObjectFactory {
      */
     public DatatypePropertyContext createDatatypePropertyContext() {
         return new DatatypePropertyContext();
+    }
+    
+    /**
+     * Create an instance of {@link ImportsForOntology}
+     */
+    public ImportsForOntology createImportsForOntology(){
+        return new ImportsForOntology();
     }
 
     /**
@@ -122,6 +130,14 @@ public class ObjectFactory {
      */
     public ObjectPropertiesForOntology createObjectPropertiesForOntology() {
         return new ObjectPropertiesForOntology();
+    }
+    
+    /**
+     * Create an instance of {@link OntologyImport }
+     * 
+     */
+    public OntologyImport createOntologyImport() {
+        return new OntologyImport();
     }
 
     /**

@@ -10,11 +10,13 @@ import org.apache.stanbol.ontologymanager.store.model.ClassMetaInformation;
 import org.apache.stanbol.ontologymanager.store.model.ClassesForOntology;
 import org.apache.stanbol.ontologymanager.store.model.DatatypePropertiesForOntology;
 import org.apache.stanbol.ontologymanager.store.model.DatatypePropertyContext;
+import org.apache.stanbol.ontologymanager.store.model.ImportsForOntology;
 import org.apache.stanbol.ontologymanager.store.model.IndividualContext;
 import org.apache.stanbol.ontologymanager.store.model.IndividualMetaInformation;
 import org.apache.stanbol.ontologymanager.store.model.IndividualsForOntology;
 import org.apache.stanbol.ontologymanager.store.model.ObjectPropertiesForOntology;
 import org.apache.stanbol.ontologymanager.store.model.ObjectPropertyContext;
+import org.apache.stanbol.ontologymanager.store.model.OntologyImport;
 import org.apache.stanbol.ontologymanager.store.model.OntologyMetaInformation;
 import org.apache.stanbol.ontologymanager.store.model.PropertyMetaInformation;
 import org.apache.stanbol.ontologymanager.store.model.ResourceMetaInformationType;
@@ -723,6 +725,37 @@ public interface PersistenceStore {
 	 */
     boolean deleteResource(String resourceURI) throws Exception;
 
+    /**
+     * Interface method to *list* ontology imports of an ontology
+     * @param ontologyURI 
+     *          the URI of the ontology
+     * @return
+     *          A {@link ImportsForOntology} objects.
+     * @throws Exception
+     */
+    ImportsForOntology retrieveOntologyImports(String ontologyURI) throws Exception;
+    
+    /**
+     * Interface method to *add* an import to an existing ontology
+     * @param ontologyURI
+     *          the URI of the ontology.
+     * @param importURI
+     *          the URI of the ontology to be imported.
+     * @throws Exception
+     */
+    void addOntologyImport(String ontologyURI, String importURI) throws Exception;
+    
+    /**
+     * Interface method to *delete* an import from an existing ontology.
+     * If the ontology does not import the specified one, then nothing happens.
+     * @param ontologyURI
+     *          the URI of the ontology.
+     * @param importURI
+     *          the URI of the imported ontology
+     * @throws Exception
+     */
+    void removeOntologyImport(String ontologyURI, String importURI) throws Exception;
+    
 	/**
 	 * Interface method to *delete* all registered ontologies together with
 	 * their resources

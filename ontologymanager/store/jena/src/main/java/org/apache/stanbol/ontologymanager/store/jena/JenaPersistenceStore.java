@@ -9,7 +9,6 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
-import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -46,20 +45,22 @@ import org.apache.stanbol.ontologymanager.store.model.DisjointClasses;
 import org.apache.stanbol.ontologymanager.store.model.Domain;
 import org.apache.stanbol.ontologymanager.store.model.EquivalentClasses;
 import org.apache.stanbol.ontologymanager.store.model.EquivalentProperties;
+import org.apache.stanbol.ontologymanager.store.model.ImportsForOntology;
 import org.apache.stanbol.ontologymanager.store.model.IndividualContext;
 import org.apache.stanbol.ontologymanager.store.model.IndividualMetaInformation;
 import org.apache.stanbol.ontologymanager.store.model.IndividualsForOntology;
 import org.apache.stanbol.ontologymanager.store.model.ObjectFactory;
 import org.apache.stanbol.ontologymanager.store.model.ObjectPropertiesForOntology;
 import org.apache.stanbol.ontologymanager.store.model.ObjectPropertyContext;
+import org.apache.stanbol.ontologymanager.store.model.OntologyImport;
 import org.apache.stanbol.ontologymanager.store.model.OntologyMetaInformation;
 import org.apache.stanbol.ontologymanager.store.model.PropertyAssertions;
+import org.apache.stanbol.ontologymanager.store.model.PropertyAssertions.PropertyAssertion;
 import org.apache.stanbol.ontologymanager.store.model.PropertyMetaInformation;
 import org.apache.stanbol.ontologymanager.store.model.Range;
 import org.apache.stanbol.ontologymanager.store.model.ResourceMetaInformationType;
 import org.apache.stanbol.ontologymanager.store.model.SuperProperties;
 import org.apache.stanbol.ontologymanager.store.model.Superclasses;
-import org.apache.stanbol.ontologymanager.store.model.PropertyAssertions.PropertyAssertion;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentFactory;
 import org.osgi.service.component.ComponentInstance;
@@ -104,7 +105,6 @@ import org.semanticweb.owlapi.util.InferredSubObjectPropertyAxiomGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.ComplementClass;
 import com.hp.hpl.jena.ontology.ConversionException;
@@ -139,6 +139,7 @@ import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.RDFWriter;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.shared.ReificationStyle;
@@ -233,8 +234,8 @@ public class JenaPersistenceStore implements PersistenceStore {
             final Dictionary props = new Hashtable();
             props.put(ResourceManager.class.getName(), resourceManager);
             ComponentInstance componentInstance = this.componentFactory.newInstance(props);
-            StoreSynchronizer storeSynchronizer = (StoreSynchronizer) componentInstance.getInstance(); 
-            
+            StoreSynchronizer storeSynchronizer = (StoreSynchronizer) componentInstance.getInstance();
+
             this.synchronizerThread = new SynchronizerThread(storeSynchronizer, componentInstance);
             synchronizerThread.start();
         } else {
@@ -356,13 +357,13 @@ public class JenaPersistenceStore implements PersistenceStore {
         }
         return administeredOntologies;
     }
-    
+
     @Override
     public OntologyMetaInformation saveOntology(String ontologyContent, String ontologyURI, String encoding) throws Exception {
         InputStream is = new ByteArrayInputStream(ontologyContent.getBytes(encoding));
         return saveOntology(is, ontologyURI, encoding);
     }
-    
+
     @Override
     public OntologyMetaInformation saveOntology(URL ontologyContent, String ontologyURI, String encoding) throws Exception {
         InputStream is = ontologyContent.openStream();
@@ -381,7 +382,7 @@ public class JenaPersistenceStore implements PersistenceStore {
             }
             long st1 = System.currentTimeMillis();
             logger.info("Creating a new ontology store for: " + ontologyURI);
-//            InputStream is = new ByteArrayInputStream(ontologyContent.getBytes(encoding));
+            // InputStream is = new ByteArrayInputStream(ontologyContent.getBytes(encoding));
             long st2 = System.currentTimeMillis();
             // ModelMaker modelMaker = getModelMaker();
             OntModelSpec oms = getOntModelSpec(true);
@@ -471,51 +472,57 @@ public class JenaPersistenceStore implements PersistenceStore {
                 Iterator importsItr = imports.iterator();
                 while (importsItr.hasNext()) {
                     String importedOntologyURI = (String) importsItr.next();
-                    resourceManager.registerOntology(importedOntologyURI);
-                    Model baseModel = persistenceProvider.createModel(importedOntologyURI);
+                    try {
 
-                    // Model baseModel =
-                    // modelMaker.getModel(importedOntologyURI);
-                    OntModel imported_om = ModelFactory
-                            .createOntologyModel(getOntModelSpec(false), baseModel);
-                    // FIXME Test this case
-                    imported_om.read(importedOntologyURI);
-                    ExtendedIterator importedOntClassesItr = imported_om.listClasses();
-                    while (importedOntClassesItr.hasNext()) {
-                        OntClass curOntClass = (OntClass) importedOntClassesItr.next();
-                        String curOntClassURI = curOntClass.getURI();
-                        if (curOntClassURI != null) {
-                            resourceManager.registerClass(importedOntologyURI, curOntClassURI);
+                        resourceManager.registerOntology(importedOntologyURI);
+                        Model baseModel = persistenceProvider.createModel(importedOntologyURI);
+
+                        // Model baseModel =
+                        // modelMaker.getModel(importedOntologyURI);
+                        OntModel imported_om = ModelFactory.createOntologyModel(getOntModelSpec(false),
+                            baseModel);
+                        // FIXME Test this case
+                        imported_om.read(importedOntologyURI);
+                        ExtendedIterator importedOntClassesItr = imported_om.listClasses();
+                        while (importedOntClassesItr.hasNext()) {
+                            OntClass curOntClass = (OntClass) importedOntClassesItr.next();
+                            String curOntClassURI = curOntClass.getURI();
+                            if (curOntClassURI != null) {
+                                resourceManager.registerClass(importedOntologyURI, curOntClassURI);
+                            }
                         }
-                    }
-                    ExtendedIterator importedDatatypePropertiesItr = imported_om.listDatatypeProperties();
-                    while (importedDatatypePropertiesItr.hasNext()) {
-                        DatatypeProperty curDatatypeProperty = (DatatypeProperty) importedDatatypePropertiesItr
-                                .next();
-                        String curDatatypePropertyURI = curDatatypeProperty.getURI();
-                        if (curDatatypePropertyURI != null) {
-                            resourceManager.registerDatatypeProperty(importedOntologyURI,
-                                curDatatypePropertyURI);
+                        ExtendedIterator importedDatatypePropertiesItr = imported_om.listDatatypeProperties();
+                        while (importedDatatypePropertiesItr.hasNext()) {
+                            DatatypeProperty curDatatypeProperty = (DatatypeProperty) importedDatatypePropertiesItr
+                                    .next();
+                            String curDatatypePropertyURI = curDatatypeProperty.getURI();
+                            if (curDatatypePropertyURI != null) {
+                                resourceManager.registerDatatypeProperty(importedOntologyURI,
+                                    curDatatypePropertyURI);
+                            }
                         }
-                    }
-                    ExtendedIterator importedObjectPropertiesItr = imported_om.listObjectProperties();
-                    while (importedObjectPropertiesItr.hasNext()) {
-                        ObjectProperty curObjectProperty = (ObjectProperty) importedObjectPropertiesItr
-                                .next();
-                        String curObjectPropertyURI = curObjectProperty.getURI();
-                        if (curObjectPropertyURI != null) {
-                            resourceManager.registerObjectProperty(importedOntologyURI, curObjectPropertyURI);
+                        ExtendedIterator importedObjectPropertiesItr = imported_om.listObjectProperties();
+                        while (importedObjectPropertiesItr.hasNext()) {
+                            ObjectProperty curObjectProperty = (ObjectProperty) importedObjectPropertiesItr
+                                    .next();
+                            String curObjectPropertyURI = curObjectProperty.getURI();
+                            if (curObjectPropertyURI != null) {
+                                resourceManager.registerObjectProperty(importedOntologyURI,
+                                    curObjectPropertyURI);
+                            }
                         }
-                    }
-                    ExtendedIterator importedOntIndividualsItr = imported_om.listIndividuals();
-                    while (importedOntIndividualsItr.hasNext()) {
-                        Individual curIndividual = (Individual) importedOntIndividualsItr.next();
-                        String curIndividualURI = curIndividual.getURI();
-                        if (curIndividualURI != null) {
-                            resourceManager.registerIndividual(importedOntologyURI, curIndividualURI);
+                        ExtendedIterator importedOntIndividualsItr = imported_om.listIndividuals();
+                        while (importedOntIndividualsItr.hasNext()) {
+                            Individual curIndividual = (Individual) importedOntIndividualsItr.next();
+                            String curIndividualURI = curIndividual.getURI();
+                            if (curIndividualURI != null) {
+                                resourceManager.registerIndividual(importedOntologyURI, curIndividualURI);
+                            }
                         }
+                        persistenceProvider.commit(imported_om);
+                    } catch (Exception e) {
+                        logger.warn("Error at importing ontology: " + importedOntologyURI, e);
                     }
-                    persistenceProvider.commit(imported_om);
                 }
                 long t9 = System.currentTimeMillis();
                 ontMetaInformation = retrieveOntologyMetaInformation(ontologyURI);
@@ -3004,7 +3011,8 @@ public class JenaPersistenceStore implements PersistenceStore {
         OWLlinkReasonerConfiguration config = new OWLlinkReasonerConfiguration(progressMonitor, REASONER_URL,
                 IndividualNodeSetPolicy.BY_NAME);
 
-        OWLlinkHTTPXMLReasoner reasoner = (OWLlinkHTTPXMLReasoner) factory.createNonBufferingReasoner(ontology, config);
+        OWLlinkHTTPXMLReasoner reasoner = (OWLlinkHTTPXMLReasoner) factory.createNonBufferingReasoner(
+            ontology, config);
         reasoner.flush();
         return reasoner;
     }
@@ -3113,5 +3121,45 @@ public class JenaPersistenceStore implements PersistenceStore {
     public void unbindResourceManager(ResourceManager resourceManager) {
         this.synchronizerThread.done();
         this.resourceManager = null;
+    }
+
+    @Override
+    public ImportsForOntology retrieveOntologyImports(String ontologyURI) throws Exception {
+        ObjectFactory of = new ObjectFactory();
+        Model model = persistenceProvider.getModel(ontologyURI);
+        OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM, model);
+        ImportsForOntology imports = of.createImportsForOntology();
+        imports.setOntologyMetaInformation(retrieveOntologyMetaInformation(ontologyURI));
+        for (String importedOntologyURI : ontModel.listImportedOntologyURIs()) {
+            OntologyImport ontImport = new OntologyImport();
+            ontImport.setURI(importedOntologyURI);
+            ontImport.setHref(resourceManager.getOntologyFullPath(importedOntologyURI));
+            imports.getOntologyImport().add(ontImport);
+        }
+        return imports;
+    }
+
+    @Override
+    public void addOntologyImport(String ontologyURI, String importURI) throws Exception {
+        Model model = persistenceProvider.getModel(ontologyURI);
+        OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM, model);
+        ontModel.add(ResourceFactory.createResource(ontologyURI), OWL.imports,
+            ResourceFactory.createResource(importURI));
+        if (!persistenceProvider.hasModel(importURI)) {
+            saveOntology(new URL(importURI), importURI, "UTF-8");
+        }
+
+    }
+
+    @Override
+    public void removeOntologyImport(String ontologyURI, String importURI) throws Exception {
+        Model model = persistenceProvider.getModel(ontologyURI);
+        OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM, model);
+        ontModel.remove(ResourceFactory.createResource(ontologyURI), OWL.imports,
+            ResourceFactory.createResource(importURI));
+        List<Statement> toDelete = ontModel.listStatements(null, OWL.imports,
+            ResourceFactory.createResource(importURI)).toList();
+        ontModel.remove(toDelete);
+
     }
 }

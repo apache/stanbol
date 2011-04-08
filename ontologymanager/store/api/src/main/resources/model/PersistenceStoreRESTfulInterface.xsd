@@ -251,4 +251,23 @@
 			<xsd:enumeration value="has_value"/>
 		</xsd:restriction>
 	</xsd:simpleType>
+
+	<xsd:element name="OntologyImport">
+	<xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="tns:URI"/>
+        <xsd:element ref="tns:Description" minOccurs="0"/>
+      </xsd:sequence>
+      <xsd:attribute ref="xlink:href" use="required"/>
+    </xsd:complexType>
+	</xsd:element>
+
+    <xsd:element name="ImportsForOntology">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="tns:OntologyMetaInformation"/>
+        <xsd:element ref="tns:OntologyImport" minOccurs="0" maxOccurs="unbounded"/>
+      </xsd:sequence>
+    </xsd:complexType>
+    </xsd:element>
 </xsd:schema>
