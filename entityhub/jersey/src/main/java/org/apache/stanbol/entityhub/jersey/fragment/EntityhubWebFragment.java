@@ -88,7 +88,7 @@ public class EntityhubWebFragment implements WebFragment {
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> navList = new ArrayList<NavigationLink>();
-        navList.add(new NavigationLink("entityhub", "/entityhub", null, 10));
+        navList.add(new NavigationLink("entityhub", "/entityhub", null, 30));
         return navList;
     }
     
