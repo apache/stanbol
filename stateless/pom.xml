@@ -10,18 +10,18 @@
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.launchers.lite</artifactId>
+  <artifactId>org.apache.stanbol.launchers.stateless</artifactId>
   <packaging>jar</packaging>
 
-  <name>Apache Stanbol Enhancer Sling-based standalone launcher - lite version</name>
-  <description>Runnable jar that runs the lite Stanbol configuration</description>
+  <name>Apache Stanbol Enhancer Sling-based standalone launcher - stateless version</name>
+  <description>Runnable jar that runs the stateless Stanbol configuration</description>
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/launchers/lite/
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/launchers/stateless/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/launchers/lite/
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/launchers/stateless/
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>
