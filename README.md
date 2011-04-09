@@ -25,14 +25,17 @@ If you want to skip the tests, add `-DskipTests` to the Maven command.
 
 ## Launching the Stanbol server
 
-Currently the recommended lanchers are packaged under
-`enhancer/launchers`.  Please follow the README from those folders for
-further instructions.
+The recommended lanchers are packaged under the `launchers/` folder. For
+instance:
 
-It is planned to build toplevel folders that combine all the services
-(enhancer, entityhub and kres) into toplevel launchers once the Web
-interface has been refactored to be able to deploy them all at once in
-a consistent way.
+    $ java -Xmx1g -jar launchers/org.apache.stanbol.launchers.full.jar -p 8080
+
+Your instance is then available on <http://localhost:8080>.
+
+
+## Preloading the Entity Hub cache with a DBpedia index
+
+TODO: write me!
 
 
 ## Importing the source code as Eclipse projects
@@ -76,8 +79,8 @@ by pressing `Shift+Ctrl+F`.
 To debug a locally running Stanbol instance from eclipse, run the stanbol
 launcher with::
 
-    java -Xdebug -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n \
-         -jar org.apache.stanbol.some.launcher.0.9-SNAPSHOT.jar -p 8080
+    $ java -Xdebug -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n \
+           -jar org.apache.stanbol.some.launcher.0.9-SNAPSHOT.jar -p 8080
 
 In eclipse, you can then create a new "Debug Configuration" with type "Remote
 Java Application" and connect it to localhost on port 8787.
