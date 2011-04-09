@@ -6,14 +6,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.commons.web.sparql.resource.SparqlEndpointResource;
+import org.apache.stanbol.enhancer.servicesapi.Store;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -26,6 +30,7 @@ import freemarker.cache.TemplateLoader;
  */
 @Component(immediate = true, metatype = true)
 @Service
+@References({})
 public class SparqlEndpointWebFragment implements WebFragment {
 
     private static final String NAME = "sparql";
@@ -33,6 +38,13 @@ public class SparqlEndpointWebFragment implements WebFragment {
     private static final String TEMPLATE_PATH = "/org/apache/stanbol/commons/web/sparql/templates";
 
     private BundleContext bundleContext;
+    
+    // put references to the required OSGi services
+    @Reference
+    TcManager tcManager;
+    
+    @Reference
+    Store store;
 
     @Override
     public String getName() {

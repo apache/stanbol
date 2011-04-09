@@ -63,6 +63,8 @@ public class SparqlEndpointResource extends BaseStanbolResource {
         if (query instanceof DescribeQuery || query instanceof ConstructQuery) {
             mediaType = "application/rdf+xml";
         }
+        // TODO: remove dependency on the "store" service and make it possible to select the default graph
+        // instead
         Object result = tcManager.executeSparqlQuery(query, store.getEnhancementGraph());
         return Response.ok(result, mediaType).build();
     }
