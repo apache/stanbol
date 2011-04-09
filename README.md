@@ -28,9 +28,14 @@ If you want to skip the tests, add `-DskipTests` to the Maven command.
 The recommended lanchers are packaged under the `launchers/` folder. For
 instance:
 
-    $ java -Xmx1g -jar launchers/org.apache.stanbol.launchers.full.jar -p 8080
+    $ java -Xmx1g -jar launchers/full/target/org.apache.stanbol.launchers.full-0.9-SNAPSHOT.jar
 
-Your instance is then available on <http://localhost:8080>.
+Your instance is then available on <http://localhost:8080>. You can change the
+default port number by passing a `-p 9090` options to the commandline launcher.
+
+Upon first startup, a folder named `sling/` is created in the current folder.
+This folder will hold the files for any database used by Stanbol, deployment
+configuration and logs.
 
 
 ## Preloading the Entity Hub cache with a DBpedia index
