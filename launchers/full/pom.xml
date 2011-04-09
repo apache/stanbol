@@ -4,24 +4,24 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.stanbol</groupId>
-    <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
+    <artifactId>stanbol-parent</artifactId>
     <version>0.9-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.enhancer.launchers.lite</artifactId>
+  <artifactId>org.apache.stanbol.launchers.full</artifactId>
   <packaging>jar</packaging>
 
-  <name>Apache Stanbol Enhancer Sling-based standalone launcher - lite version</name>
-  <description>Runnable jar that runs the lite Enhancer configuration</description>
+  <name>Apache Stanbol Enhancer Sling-based standalone launcher</name>
+  <description>Runnable jar that runs the full Stanbol configuration</description>
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/launchers/lite/
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/launchers/full/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/launchers/lite/
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/launchers/full/
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>
@@ -93,4 +93,5 @@
       <classifier>app</classifier>
     </dependency>
   </dependencies>
+
 </project>

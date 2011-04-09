@@ -5,23 +5,22 @@
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
-    <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
+    <artifactId>stanbol-parent</artifactId>
     <version>0.9-SNAPSHOT</version>
     <relativePath>../parent/pom.xml</relativePath>
   </parent>
 
-  <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.enhancer.integration-tests</artifactId>
+  <artifactId>org.apache.stanbol.integration-tests</artifactId>
   <packaging>jar</packaging>
 
-  <name>Apache Stanbol Enhancer Integration Tests</name>
+  <name>Apache Stanbol Integration Tests</name>
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/integration-tests/
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/integration-tests/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/integration-tests/
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/integration-tests/
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>
@@ -43,7 +42,7 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.launchers.full</artifactId>
+      <artifactId>org.apache.stanbol.launchers.full</artifactId>
       <version>0.9-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
@@ -93,7 +92,7 @@
             </goals>
             <phase>process-resources</phase>
             <configuration>
-              <includeArtifactIds>org.apache.stanbol.enhancer.launchers.full</includeArtifactIds>
+              <includeArtifactIds>org.apache.stanbol.launchers.full</includeArtifactIds>
               <excludeTransitive>true</excludeTransitive>
               <overWriteReleases>false</overWriteReleases>
               <overWriteSnapshots>false</overWriteSnapshots>

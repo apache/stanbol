@@ -48,7 +48,9 @@
     <module>entityhub</module>
     <module>enhancer</module>
     <module>contenthub/web</module>
-    <module>launchers/mini</module>
+    <module>launchers/lite</module>
+    <module>launchers/full</module>
+    <module>integration-tests</module>
   </modules>
 
   <profiles>
