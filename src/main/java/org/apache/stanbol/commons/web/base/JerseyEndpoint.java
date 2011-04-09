@@ -10,8 +10,6 @@ import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -50,12 +48,6 @@ public class JerseyEndpoint {
 
     @Reference
     HttpService httpService;
-    
-    @Reference
-    TcManager tcManager;
-    
-    @Reference
-    Serializer serializer;
 
     protected ComponentContext componentContext;
 
@@ -138,10 +130,6 @@ public class JerseyEndpoint {
         servletContext.setAttribute(BaseStanbolResource.LINK_RESOURCES, linkResources);
         servletContext.setAttribute(BaseStanbolResource.SCRIPT_RESOURCES, scriptResources);
         servletContext.setAttribute(BaseStanbolResource.NAVIGATION_LINKS, navigationLinks);
-        
-        // (temporary) Make sure Clerezza persistence services are registered.
-        servletContext.setAttribute(Serializer.class.getName(), serializer);
-        servletContext.setAttribute(TcManager.class.getName(), tcManager);
         
         log.info("JerseyEndpoint servlet registered at {}", applicationAlias);
     }
