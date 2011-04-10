@@ -73,8 +73,9 @@ public class EnhancerTestBase extends StanbolTestBase {
                     "org.apache.stanbol.*NamedEntityExtractionEnhancementEngine",
                     "org.apache.stanbol.*OpenCalaisEngine",
                     "org.apache.stanbol.*EntityMentionEnhancementEngine",
-                    "org.apache.stanbol.*CachingDereferencerEngine",
-                    "org.apache.stanbol.*ReferencedSiteEntityTaggingEnhancementEngine"
+                    "org.apache.stanbol.*CachingDereferencerEngine"
+                    //removed because not available in offline mode
+                    //"org.apache.stanbol.*ReferencedSiteEntityTaggingEnhancementEngine"
                 );
                 
                 /*  List of expected referencedSites could also be made 
