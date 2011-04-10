@@ -36,6 +36,8 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
+import org.apache.stanbol.commons.stanboltools.offline.OnlineMode;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -71,7 +73,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
  *
  * @author ogrisel, rwesten
  */
-@Component(getConfigurationFactory = true,
+@Component(configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE, //the baseUri is required!
         specVersion = "1.1",
         metatype = true,
@@ -82,6 +84,15 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    /**
+     * TODO: workaround for STANBOL-162
+     * This Reference is used to statically mark this Engine as to require 
+     * {@link OnlineMode} until it can dynamically detect the mode based on the
+     * used ReferencedSite. See STANBOL-162 for details.
+     */
+    @Reference
+    OnlineMode offlineMode;
+    
     @Property(value="dbpedia")
     public static final String REFERENCED_SITE_ID = "org.apache.stanbol.enhancer.engines.entitytagging.referencedSiteId";
     @Property(boolValue=true)
@@ -267,6 +278,8 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
                     + " because property" + DC_TYPE + " is not present");
             return Collections.emptyList();
         }
+        //remove punctations form the search string
+        name = cleanupKeywords(name);
 
         log.debug("Process TextAnnotation " + name + " type=" + type);
         FieldQuery query = site.getQueryFactory().createFieldQuery();
@@ -327,5 +340,13 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
         return Collections.unmodifiableMap(Collections.singletonMap(
                 ENHANCEMENT_ENGINE_ORDERING,
                 (Object) defaultOrder));
+    }
+    /**
+     * Removes punctuations form a parsed string 
+     * @param keywords 
+     * @return
+     */
+    private static String cleanupKeywords(String keywords) {
+        return keywords.replaceAll("\\p{P}", " ").trim();
     }
 }
