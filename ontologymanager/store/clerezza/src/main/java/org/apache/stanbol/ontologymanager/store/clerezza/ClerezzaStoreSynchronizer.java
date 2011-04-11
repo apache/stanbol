@@ -1,5 +1,6 @@
 package org.apache.stanbol.ontologymanager.store.clerezza;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.ontologymanager.store.api.PersistenceStore;
 import org.apache.stanbol.ontologymanager.store.api.ResourceManager;
 import org.apache.stanbol.ontologymanager.store.api.StoreSynchronizer;
 import org.osgi.service.component.ComponentContext;
@@ -34,6 +36,8 @@ import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
+import com.hp.hpl.jena.vocabulary.OWL;
 
 /**
  * Synchronizer for {@link ResourceManager}. Uses a {@link TcManager} to access graphs stored by Clerezza.
@@ -48,7 +52,10 @@ public class ClerezzaStoreSynchronizer implements StoreSynchronizer {
 
     @Property(name = "org.apache.stanbol.ontologymanager.store.ResourceManager")
     private ResourceManager resourceManager;
-
+    
+    @Property(name="org.apache.stanbol.ontologymanager.store.PersistenceStore")
+    private PersistenceStore store;
+    
     @Reference
     private TcManager tcManager;
 
@@ -60,6 +67,7 @@ public class ClerezzaStoreSynchronizer implements StoreSynchronizer {
         // .get(IJenaPersistenceProvider.class.getName());
 
         this.resourceManager = (ResourceManager) properties.get(ResourceManager.class.getName());
+        this.store = (PersistenceStore) properties.get(PersistenceStore.class.getName());
 
         // FIXME Is it necessary to listen Immutable Graphs
 
@@ -166,7 +174,7 @@ public class ClerezzaStoreSynchronizer implements StoreSynchronizer {
         try {
             JenaGraph jgraph = new JenaGraph(mgraph);
             Model model = ModelFactory.createModelForGraph(jgraph);
-            GraphSynchronizer es = new GraphSynchronizer(resourceManager, model, graphURI);
+            GraphSynchronizer es = new GraphSynchronizer(resourceManager, store, tcManager, model, graphURI);
             es.synchronize();
         } finally {
             lock.unlock();
@@ -198,7 +206,16 @@ public class ClerezzaStoreSynchronizer implements StoreSynchronizer {
                 } else if (individual != null) {
                     resourceManager.registerIndividual(graphURI, resourceURI);
                     logger.info("Added Individual" + resourceURI);
-                } else {
+                } else if(ontology.listStatements(null, OWL.imports, ResourceFactory.createResource(resourceURI)).hasNext()){
+                    try {
+                        store.saveOntology(new URL(resourceURI), resourceURI, "UTF-8");
+                        logger.info("Added imported ontology: {}", resourceURI);
+                    } catch (Exception e) {
+                        logger.warn("Failed to import ontology: {}", resourceURI);
+                    }
+                }
+                
+                else {
                     // Not found, delete if the resource belongs to this graph
                     String ontologyURI = resourceManager.resolveOntologyURIFromResourceURI(resourceURI);
                     if (ontologyURI != null && ontologyURI.equals(graphURI)) {

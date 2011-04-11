@@ -1,7 +1,12 @@
 package org.apache.stanbol.ontologymanager.store.clerezza;
 
+import java.net.URL;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.stanbol.ontologymanager.store.api.PersistenceStore;
 import org.apache.stanbol.ontologymanager.store.api.ResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +24,19 @@ public class GraphSynchronizer {
     Logger logger = LoggerFactory.getLogger(GraphSynchronizer.class);
 
     private ResourceManager resourceManager;
+    private PersistenceStore store;
+    private TcManager tcManager;
     private OntModel model;
     private String graphURI;
 
-    public GraphSynchronizer(ResourceManager resourceManager, Model model, String graphURI) {
+    public GraphSynchronizer(ResourceManager resourceManager,
+                             PersistenceStore store,
+                             TcManager tcManager,
+                             Model model,
+                             String graphURI) {
         this.resourceManager = resourceManager;
+        this.store = store;
+        this.tcManager = tcManager;
         this.model = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM, model);
         this.graphURI = graphURI;
     }
@@ -36,6 +49,7 @@ public class GraphSynchronizer {
         synchronizeObjectProperties();
         synchronizeDataProperties();
         synchronizeIndividuals();
+        synchronizeImports();
 
     }
 
@@ -109,7 +123,26 @@ public class GraphSynchronizer {
                 logger.warn("Resource found on another ontology (This case will be handled later)");
             }
         }
+    }
 
+    private void synchronizeImports() {
+        for (String uri : model.listImportedOntologyURIs()) {
+            Set<UriRef> graphs = tcManager.listTripleCollections();
+            UriRef current = new UriRef(uri);
+            boolean found = false;
+            for (UriRef currentGraph : graphs) {
+                if (currentGraph.equals(current)) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                try {
+                    store.saveOntology(new URL(uri), uri, "UTF-8");
+                } catch (Exception e) {
+                    logger.debug("Registered imported graph with uri {}", uri);
+                }
+            }
+        }
     }
 
 }
