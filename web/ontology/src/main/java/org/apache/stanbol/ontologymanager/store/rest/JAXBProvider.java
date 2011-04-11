@@ -53,7 +53,6 @@ import org.apache.stanbol.ontologymanager.store.model.Range;
 import org.apache.stanbol.ontologymanager.store.model.ResourceMetaInformationType;
 import org.apache.stanbol.ontologymanager.store.model.SuperProperties;
 import org.apache.stanbol.ontologymanager.store.model.Superclasses;
-import org.apache.stanbol.ontologymanager.store.rest.util.XMLUtil;
 import org.xml.sax.SAXException;
 
 import com.sun.jersey.spi.resource.Singleton;
@@ -76,7 +75,7 @@ public class JAXBProvider implements MessageBodyReader, MessageBodyWriter {
                                     "model/SearchRESTfulInterface.xsd"};
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI,
             "com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory",
-            XMLUtil.class.getClassLoader());
+            JAXBProvider.class.getClassLoader());
 
         List<StreamSource> streamSourceList = new Vector<StreamSource>();
         for (String schemaLocation : schemaLocations) {
