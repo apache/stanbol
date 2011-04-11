@@ -102,7 +102,6 @@ public class ClerezzaAdaptor implements JenaPersistenceProvider {
 
     @Override
     public void removeModel(String ontologyURI) {
-        // tcManager.getMGraph(new UriRef(ontologyURI)).clear();
         tcManager.deleteTripleCollection(new UriRef(ontologyURI));
     }
 

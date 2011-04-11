@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 public class ContentManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ContentManager.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(ContentManager.class.getName());
 
     private static final String CONTENT_INDEX_FILE = "content_index.properties";
 
@@ -37,13 +37,13 @@ public class ContentManager {
         this.contentFolder = contentFolder;
         Thread.currentThread().getContextClassLoader();
         checkContentFolder();
-        LOGGER.info("Content folder OK");
+        log.info("Content folder OK");
 
         indexFile = getIndexFile();
-        LOGGER.info("Index file OK");
+        log.info("Index file OK");
 
         loadIndexEntries(indexFile);
-        LOGGER.info("Content loaded OK");
+        log.info("Content loaded OK");
 
         printContentMap();
 
@@ -56,7 +56,7 @@ public class ContentManager {
         byte[] content = triple.getEntry2();
         String uri = triple.getEntry3();
         if (contentMap.get(id) != null) {
-            LOGGER.warn("Overriding previous content for: " + id);
+            log.warn("Overriding previous content for: {}", id);
             delete(id);
         }
 
@@ -68,7 +68,7 @@ public class ContentManager {
             f.createNewFile();
             ioUtil.writeBytesToFile(f, content);
         } catch (IOException e) {
-            LOGGER.error("Unable to create file: " + f.getAbsolutePath());
+            log.error("Unable to create file: {}", f.getAbsolutePath());
             delete(id);
             return;
         }
@@ -100,16 +100,16 @@ public class ContentManager {
 
                 File file = new File(contentFolder.getAbsolutePath() + "/" + fileName);
                 if (!file.exists()) {
-                    LOGGER.warn("Content file for " + item.getValue().getEntry1()
-                                + " does not exist. Sycnhronizing ...");
+                    log.warn("Content file for {}  does not exist. Sycnhronizing ...", item.getValue()
+                            .getEntry1());
                     ioUtil.writeBytesToFile(file, item.getValue().getEntry2());
-                    LOGGER.info(". Sycnhronization Completed ...");
+                    log.info(". Sycnhronization Completed ...");
                 }
             }
         } catch (FileNotFoundException e) {
-            LOGGER.error("Cannot find file", e);
+            log.error("Cannot find file", e);
         } catch (IOException e) {
-            LOGGER.error("IOException", e);
+            log.error("IOException", e);
         }
     }
 
@@ -121,9 +121,9 @@ public class ContentManager {
         try {
             contentIndex.load(new FileInputStream(indexFile));
         } catch (FileNotFoundException e) {
-            LOGGER.error("Can not get index file");
+            log.error("Can not get index file");
         } catch (IOException e) {
-            LOGGER.error("Can not get content of index file: " + e.getMessage());
+            log.error("Can not get content of index file: " + e.getMessage());
         }
 
         // Populate in memory cache with real content-contentType-uri triples
@@ -145,7 +145,7 @@ public class ContentManager {
         // Remove dangling content entries
         for (Object di : danglingItems) {
             contentIndex.remove(di);
-            LOGGER.info("Dangling Item Removed: " + di);
+            log.info("Dangling Item Removed: {}", di);
         }
 
     }
@@ -156,7 +156,7 @@ public class ContentManager {
             try {
                 indexFile.createNewFile();
             } catch (IOException e) {
-                LOGGER.error("Can not create index file: " + e.getMessage());
+                log.error("Can not create index file: {}", e.getMessage());
                 return null;
             }
         }
@@ -173,10 +173,10 @@ public class ContentManager {
     }
 
     private void printContentMap() {
-        LOGGER.info("Content Items Dump");
+        log.info("Content Items Dump");
         for (Entry<String,Triple<String,byte[],String>> entry : this.contentMap.entrySet()) {
-            LOGGER.info("Item: " + entry.getKey() + "," + entry.getValue().getEntry1() + "  "
-                        + entry.getValue().getEntry2().length);
+            log.info("Item: {}, {}, {}.", new Object[]{ entry.getKey(), entry.getValue().getEntry1(), 
+                        , entry.getValue().getEntry2().length});
         }
 
     }

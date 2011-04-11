@@ -101,7 +101,7 @@ public class PersistenceStoreAdapter implements Store {
         uri = ContentItemHelper.ensureUri(ci).getUnicodeString();
         try {
             Boolean deleted = pStore.deleteOntology(uri);
-            logger.info("Previous ontology deleted:" + deleted.toString());
+            logger.info("Previous ontology deleted: {}", deleted.toString());
         } catch (Exception e1) {
             // No need to log since it is actually an existence check
         }

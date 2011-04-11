@@ -23,13 +23,13 @@ public final class IOUtil {
         return Holder.INSTANCE;
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(IOUtil.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(IOUtil.class.getName());
 
     public byte[] getBytesFromFile(File file) throws IOException {
         InputStream is = new FileInputStream(file);
         long length = file.length();
         if (length > Integer.MAX_VALUE) {
-            LOGGER.warn("Content too long for file: " + file.getAbsolutePath());
+            log.warn("Content too long for file: {}", file.getAbsolutePath());
         }
         byte[] bytes = new byte[(int) length];
         int offset = 0;

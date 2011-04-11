@@ -39,7 +39,7 @@ public class TDBPersistenceProvider implements JenaPersistenceProvider {
         datasetPath = cc.getBundleContext().getDataFile("Jena TDB Store").getAbsolutePath();
         dataset = TDBFactory.createDataset(datasetPath);
         long end = System.currentTimeMillis();
-        logger.info("Dataset restored in " + (end - start) + " miliseconds");
+        logger.info("Dataset restored in {} ms ", (end - start));
     }
 
     @Deactivate
@@ -57,9 +57,9 @@ public class TDBPersistenceProvider implements JenaPersistenceProvider {
         File file = new File(datasetPath);
         boolean deleted = file.delete();
         if (deleted) {
-            logger.info("Deleted TDB Store at " + datasetPath);
+            logger.info("Deleted TDB Store at {} ", datasetPath);
         } else {
-            logger.warn("Can not delete TDB Store at " + datasetPath);
+            logger.warn("Can not delete TDB Store at {} ", datasetPath);
         }
         dataset = TDBFactory.createDataset(datasetPath);
         return true;
@@ -70,7 +70,7 @@ public class TDBPersistenceProvider implements JenaPersistenceProvider {
         if (dataset.containsNamedModel(ontologyURI)) {
             Model model = dataset.getNamedModel(ontologyURI);
             model.removeAll();
-            logger.info("Deleted model at " + ontologyURI);
+            logger.info("Deleted model at  {}", ontologyURI);
         }
 
         return dataset.getNamedModel(ontologyURI);

@@ -122,14 +122,5 @@ public class TDBPersistenceProviderTest {
             Model model = TDBProvider.getModel(uri);
             assertNull(model);
         }
-
-        // List<String> URIs = TDBProvider.listModels();
-        // for(String URI : URIs){
-        // TDBProvider.getModel(URI).write(System.out);
-        // }
-        //
-        // for (String uri : testURIs) {
-        // createAndLoadOntology(uri);
-        // }
     }
 }

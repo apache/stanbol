@@ -39,7 +39,7 @@ public class SynchronizerGraphListener implements GraphListener {
                     resourceURIs.add(((UriRef) subject).getUnicodeString());
                 } catch (ClassCastException e) {
                     // Blank node, just skipping
-                    logger.info("Subject " + subject.toString() + " is a blanknode");
+                    logger.info("Subject {} is a blank node.", subject.toString());
                 }
             }else if (predicate.equals(new UriRef(OWL.imports.asResource().getURI()))){
                 logger.info("Listened triple change: {}", triple);
@@ -51,7 +51,7 @@ public class SynchronizerGraphListener implements GraphListener {
             }
         }
         if (resourceURIs.size() > 0) {
-            logger.info("Listener: " + this.toString() + "URIs:" + resourceURIs);
+            logger.info("Listener {} starts synchronization on URIs {}", this.toString(), resourceURIs);
             synchronizer.synchronizeResourceOnGraph(graphURI, resourceURIs);
         }
     }

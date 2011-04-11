@@ -81,8 +81,6 @@ public interface ResourceManager {
 
     void removeResource(String resourceURI);
 
-    // FIXME:: make sure that this method returns the reference to the imported
-    // class!!!
     String resolveOntologyURIFromResourceURI(String resourceURI);
 
     /**

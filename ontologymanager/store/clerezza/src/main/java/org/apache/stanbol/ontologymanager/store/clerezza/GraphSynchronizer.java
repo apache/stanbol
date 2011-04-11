@@ -42,7 +42,7 @@ public class GraphSynchronizer {
     }
 
     public void synchronize() {
-        logger.info("Synchronizing: " + graphURI);
+        logger.info("Synchronizing: {}", graphURI);
         // Remove ontology so that every resource is unregistered
         resourceManager.registerOntology(graphURI);
         synchronizeClasses();
@@ -60,11 +60,11 @@ public class GraphSynchronizer {
             if (individualURI == null) continue;
             String ontologyURI = resourceManager.resolveOntologyURIFromResourceURI(individualURI);
             if (ontologyURI == null) {
-                logger.warn("Resource not found:" + individualURI);
+                logger.warn("Resource not found:{} ", individualURI);
                 resourceManager.registerIndividual(graphURI, individualURI);
-                logger.info("Resource registered:" + individualURI + "on ontology " + graphURI);
+                logger.info("Resource registered:{} on ontology {}", individualURI, graphURI);
             } else if (graphURI.equals(ontologyURI)) {
-                logger.debug("Resource already registered: " + individualURI);
+                logger.debug("Resource already registered:{} ", individualURI);
             } else {
                 logger.warn("Resource found on another ontology (This case will be handled later)");
             }
@@ -78,11 +78,11 @@ public class GraphSynchronizer {
             if (propertyURI == null) continue;
             String ontologyURI = resourceManager.resolveOntologyURIFromResourceURI(propertyURI);
             if (ontologyURI == null) {
-                logger.warn("Resource not found:" + propertyURI);
+                logger.warn("Resource not found:{} ", propertyURI);
                 resourceManager.registerDatatypeProperty(graphURI, propertyURI);
-                logger.info("Resource registered:" + propertyURI + "on ontology " + graphURI);
+                logger.info("Resource registered:{} on ontology {}", propertyURI, graphURI);
             } else if (graphURI.equals(ontologyURI)) {
-                logger.debug("Resource already registered: " + propertyURI);
+                logger.debug("Resource already registered:{} ", propertyURI);
             } else {
                 logger.warn("Resource found on another ontology (This case will be handled later)");
             }
@@ -96,11 +96,11 @@ public class GraphSynchronizer {
             if (propertyURI == null) continue;
             String ontologyURI = resourceManager.resolveOntologyURIFromResourceURI(propertyURI);
             if (ontologyURI == null) {
-                logger.warn("Resource not found:" + propertyURI);
+                logger.warn("Resource not found: {}", propertyURI);
                 resourceManager.registerObjectProperty(graphURI, propertyURI);
-                logger.info("Resource registered:" + propertyURI + "on ontology " + graphURI);
+                logger.info("Resource registered:{} on ontology {}", propertyURI, graphURI);
             } else if (graphURI.equals(ontologyURI)) {
-                logger.debug("Resource already registered: " + propertyURI);
+                logger.debug("Resource already registered:{} ", propertyURI);
             } else {
                 logger.warn("Resource found on another ontology (This case will be handled later)");
             }
@@ -114,11 +114,11 @@ public class GraphSynchronizer {
             if (classURI == null) continue;
             String ontologyURI = resourceManager.resolveOntologyURIFromResourceURI(classURI);
             if (ontologyURI == null) {
-                logger.warn("Resource not found:" + classURI);
+                logger.warn("Resource not found: {}", classURI);
                 resourceManager.registerClass(graphURI, classURI);
-                logger.info("Resource registered:" + classURI + "on ontology " + graphURI);
+                logger.info("Resource registered: {} on ontology {}", classURI, graphURI);
             } else if (graphURI.equals(ontologyURI)) {
-                logger.debug("Resource already registered: " + classURI);
+                logger.debug("Resource already registered: {}", classURI);
             } else {
                 logger.warn("Resource found on another ontology (This case will be handled later)");
             }

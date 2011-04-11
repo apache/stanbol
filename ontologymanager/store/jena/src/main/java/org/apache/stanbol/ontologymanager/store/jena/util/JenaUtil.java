@@ -31,7 +31,6 @@ public class JenaUtil {
             || (XSD.decimal).getURI().contains(resourceURI)
             || (XSD.duration).getURI().contains(resourceURI)
             ||
-            // resourceURI.equalsIgnoreCase((XSD.ENTITIES).getURI()) ||
             (XSD.ENTITY).getURI().contains(resourceURI)
             || (XSD.gDay).getURI().contains(resourceURI)
             || (XSD.gMonth).getURI().contains(resourceURI)
@@ -42,7 +41,6 @@ public class JenaUtil {
             || (XSD.ID).getURI().contains(resourceURI)
             || (XSD.IDREF).getURI().contains(resourceURI)
             ||
-            // resourceURI.equalsIgnoreCase((XSD.IDREFS).getURI()) ||
             (XSD.integer).getURI().contains(resourceURI)
             || (XSD.language).getURI().contains(resourceURI)
             || (XSD.Name).getURI().contains(resourceURI)
@@ -50,7 +48,6 @@ public class JenaUtil {
             || (XSD.negativeInteger).getURI().contains(resourceURI)
             || (XSD.NMTOKEN).getURI().contains(resourceURI)
             ||
-            // resourceURI.equalsIgnoreCase((XSD.NMTOKENS).getURI()) ||
             (XSD.nonNegativeInteger).getURI().contains(resourceURI)
             || (XSD.nonPositiveInteger).getURI().contains(resourceURI)
             || (XSD.normalizedString).getURI().contains(resourceURI)
@@ -76,7 +73,6 @@ public class JenaUtil {
         if ((XSD.dateTime).getURI().contains(resourceURI)) return XSD.dateTime;
         if ((XSD.decimal).getURI().contains(resourceURI)) return XSD.decimal;
         if ((XSD.duration).getURI().contains(resourceURI)) return XSD.duration;
-        // resourceURI.equalsIgnoreCase((XSD.ENTITIES).getURI())
         if ((XSD.ENTITY).getURI().contains(resourceURI)) return XSD.ENTITY;
         if ((XSD.gDay).getURI().contains(resourceURI)) return XSD.gDay;
         if ((XSD.gMonth).getURI().contains(resourceURI)) return XSD.gMonth;
@@ -86,14 +82,12 @@ public class JenaUtil {
         if ((XSD.hexBinary).getURI().contains(resourceURI)) return XSD.hexBinary;
         if ((XSD.ID).getURI().contains(resourceURI)) return XSD.ID;
         if ((XSD.IDREF).getURI().contains(resourceURI)) return XSD.IDREF;
-        // resourceURI.equalsIgnoreCase((XSD.IDREFS).getURI())
         if ((XSD.integer).getURI().contains(resourceURI)) return XSD.integer;
         if ((XSD.language).getURI().contains(resourceURI)) return XSD.language;
         if ((XSD.Name).getURI().contains(resourceURI)) return XSD.Name;
         if ((XSD.NCName).getURI().contains(resourceURI)) return XSD.NCName;
         if ((XSD.negativeInteger).getURI().contains(resourceURI)) return XSD.negativeInteger;
         if ((XSD.NMTOKEN).getURI().contains(resourceURI)) return XSD.NMTOKEN;
-        // resourceURI.equalsIgnoreCase((XSD.NMTOKENS).getURI())
         if ((XSD.nonNegativeInteger).getURI().contains(resourceURI)) return XSD.nonNegativeInteger;
         if ((XSD.nonPositiveInteger).getURI().contains(resourceURI)) return XSD.nonPositiveInteger;
         if ((XSD.normalizedString).getURI().contains(resourceURI)) return XSD.normalizedString;
@@ -123,13 +117,11 @@ public class JenaUtil {
 
             @Override
             public void warn(String s, Exception e) {
-                // TODO Auto-generated method stub
 
             }
 
             @Override
             public void warn(String s) {
-                // TODO Auto-generated method stub
 
             }
         };

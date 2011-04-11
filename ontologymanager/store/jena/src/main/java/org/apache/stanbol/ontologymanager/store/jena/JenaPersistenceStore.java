@@ -17,6 +17,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.Vector;
 
 import org.apache.felix.scr.annotations.Activate;
@@ -226,13 +227,14 @@ public class JenaPersistenceStore implements PersistenceStore {
                 REASONER_URL = new URL(reasonerUrl);
                 this.useReasoner = true;
             } catch (MalformedURLException e) {
-                logger.warn("Invalid URL for reasoner : " + reasonerUrl);
+                logger.warn("Invalid URL for reasoner {} ", reasonerUrl);
             }
         }
-        // Get IStoreSycnhronizer from component factory
+        // Get StoreSycnhronizer from component factory
         if (this.componentFactory != null) {
             final Dictionary props = new Hashtable();
             props.put(ResourceManager.class.getName(), resourceManager);
+            props.put(PersistenceStore.class.getName(), this);
             ComponentInstance componentInstance = this.componentFactory.newInstance(props);
             StoreSynchronizer storeSynchronizer = (StoreSynchronizer) componentInstance.getInstance();
 
@@ -375,19 +377,19 @@ public class JenaPersistenceStore implements PersistenceStore {
         OntologyMetaInformation ontMetaInformation = null;
         OntModel om = null;
         long t2 = System.currentTimeMillis();
+        if (ontologyURI == null || ontologyURI.isEmpty()) {
+            ontologyURI = UUID.randomUUID().toString();
+        }
         try {
             if (persistenceProvider.hasModel(ontologyURI)) {
-                logger.info("Ontology store for: " + ontologyURI + " already exists: Updating ontology");
+                logger.info("Ontology store for {}   already exists: Updating ontology", ontologyURI);
                 deleteOntology(ontologyURI);
             }
             long st1 = System.currentTimeMillis();
-            logger.info("Creating a new ontology store for: " + ontologyURI);
-            // InputStream is = new ByteArrayInputStream(ontologyContent.getBytes(encoding));
+            logger.info("Creating a new ontology store for: {} ", ontologyURI);
             long st2 = System.currentTimeMillis();
-            // ModelMaker modelMaker = getModelMaker();
             OntModelSpec oms = getOntModelSpec(true);
             long st3 = System.currentTimeMillis();
-            // oms.setDocumentManager(new DbAwareDocumentManager(modelMaker));
             long st4 = System.currentTimeMillis();
             Model base = persistenceProvider.createModel(ontologyURI);
             long st5 = System.currentTimeMillis();
@@ -402,15 +404,14 @@ public class JenaPersistenceStore implements PersistenceStore {
                 resourceManager.registerOntology(ontologyURI);
                 logger.warn("Unable to read ontology {} ", ontologyURI);
             }
-            logger.info(ontologyURI + "model read as RDF/XML");
+            logger.info("{} read as RDF/XML", ontologyURI);
             long st7 = System.currentTimeMillis();
-            logger.info(" Create input stream: " + (st2 - st1));
-            logger.info(" Get Model Spec: " + (st3 - st2));
-
-            logger.info(" Create Base Model: " + (st5 - st4));
-            logger.info(" Create Ont Model: " + (st6 - st5));
-            logger.info(" Read Model: " + (st7 - st6));
-            logger.info(" Total Creation: " + (st7 - st1));
+            logger.info(" Create input stream: {} ms", (st2 - st1));
+            logger.info(" Get Model Spec: {} ms", (st3 - st2));
+            logger.info(" Create Base Model: {} ms", (st5 - st4));
+            logger.info(" Create Ont Model: {} ms", (st6 - st5));
+            logger.info(" Read Model: {} ms", (st7 - st6));
+            logger.info(" Total Creation: {} ms", (st7 - st1));
 
             long t3 = System.currentTimeMillis();
 
@@ -435,18 +436,6 @@ public class JenaPersistenceStore implements PersistenceStore {
                         resourceManager.registerDatatypeProperty(ontologyURI, curDatatypePropertyURI);
                     }
                 }
-
-                // XXX Get referenced properties from OWL.Restrictions
-                // StmtIterator stmts = om.listStatements(null, OWL.onProperty,
-                // (RDFNode) null);
-                // List<Statement> stmtsToBeAdded = new ArrayList<Statement>();
-                // while (stmts.hasNext()) {
-                // RDFNode node = stmts.next().getObject();
-                // if (node.isURIResource()) {
-                // stmtsToBeAdded.add(new StatementImpl(node.asResource(),
-                // RDF.type, RDF.Property));
-                // }
-                // }
 
                 long t6 = System.currentTimeMillis();
                 ExtendedIterator ontObjectPropertiesItr = om.listObjectProperties();
@@ -477,8 +466,6 @@ public class JenaPersistenceStore implements PersistenceStore {
                         resourceManager.registerOntology(importedOntologyURI);
                         Model baseModel = persistenceProvider.createModel(importedOntologyURI);
 
-                        // Model baseModel =
-                        // modelMaker.getModel(importedOntologyURI);
                         OntModel imported_om = ModelFactory.createOntologyModel(getOntModelSpec(false),
                             baseModel);
                         // FIXME Test this case
@@ -521,22 +508,21 @@ public class JenaPersistenceStore implements PersistenceStore {
                         }
                         persistenceProvider.commit(imported_om);
                     } catch (Exception e) {
-                        logger.warn("Error at importing ontology: " + importedOntologyURI, e);
+                        logger.warn("Error at importing ontology " + importedOntologyURI, e);
                     }
                 }
                 long t9 = System.currentTimeMillis();
                 ontMetaInformation = retrieveOntologyMetaInformation(ontologyURI);
                 long t10 = System.currentTimeMillis();
-                logger.info(" Get Connection: " + (t2 - t1) + " miliseconds");
-                logger.info(" Create Ontology Model : " + (t3 - t2) + " miliseconds");
-
-                logger.info(" Classes : " + (t5 - t4) + " miliseconds");
-                logger.info(" Datatype Properties : " + (t6 - t5) + " miliseconds");
-                logger.info(" Object Props : " + (t7 - t6) + " miliseconds");
-                logger.info(" Individuals : " + (t8 - t7) + " miliseconds");
-                logger.info(" Imports : " + (t9 - t8) + " miliseconds");
-                logger.info(" MetaInf : " + (t10 - t9) + " miliseconds");
-                logger.info(" Total Save Time " + (t10 - t1) + " miliseconds");
+                logger.info(" Get Connection: {} ms", (t2 - t1));
+                logger.info(" Create Ontology Model: {} ms", (t3 - t2));
+                logger.info(" Classes: {} ms", (t5 - t4));
+                logger.info(" Datatype Properties: {} ms", (t6 - t5));
+                logger.info(" Object Props: {} ms ", (t7 - t6));
+                logger.info(" Individuals: {} ms ", (t8 - t7));
+                logger.info(" Imports: {} ms", (t9 - t8));
+                logger.info(" MetaInf: {} ms", (t10 - t9));
+                logger.info(" Total Save Time {} ms ", (t10 - t1));
 
             }
         } catch (Exception e) {
@@ -607,9 +593,7 @@ public class JenaPersistenceStore implements PersistenceStore {
     public ClassMetaInformation generateClassForOntology(String ontologyURI, String classURI) {
         OntModel ontModel = null;
         try {
-            // System.out.println(ontologyURI);
-            // System.out.println(classURI);
-
+            
             if (persistenceProvider.hasModel(ontologyURI)) {
                 Model baseModel = persistenceProvider.getModel(ontologyURI);
                 ontModel = ModelFactory.createOntologyModel(getOntModelSpec(false), baseModel);
@@ -1014,7 +998,6 @@ public class JenaPersistenceStore implements PersistenceStore {
                 if (isFunctional != null && isFunctional.booleanValue()) {
                     property.convertToFunctionalProperty();
                 } else {
-                    // FIXME:: check if fix works
                     List<Statement> stmts = ontModelForProperty.listStatements(property, RDF.type,
                         OWL.FunctionalProperty).toList();
                     ontModelForProperty.remove(stmts);
@@ -1022,7 +1005,6 @@ public class JenaPersistenceStore implements PersistenceStore {
                 if (isTransitive != null && isTransitive.booleanValue()) {
                     property.convertToTransitiveProperty();
                 } else {
-                    // FIXME:: check if fix works
                     List<Statement> stmts = ontModelForProperty.listStatements(property, RDF.type,
                         OWL.TransitiveProperty).toList();
                     ontModelForProperty.remove(stmts);
@@ -1031,7 +1013,6 @@ public class JenaPersistenceStore implements PersistenceStore {
                 if (isSymmetric != null && isSymmetric.booleanValue()) {
                     property.convertToSymmetricProperty();
                 } else {
-                    // FIXME:: check if fix works
                     List<Statement> stmts = ontModelForProperty.listStatements(property, RDF.type,
                         OWL.SymmetricProperty).toList();
                     ontModelForProperty.remove(stmts);
@@ -1039,7 +1020,6 @@ public class JenaPersistenceStore implements PersistenceStore {
                 if (isInverseFunctional != null && isInverseFunctional.booleanValue()) {
                     property.convertToInverseFunctionalProperty();
                 } else {
-                    // FIXME:: check if fix works
                     List<Statement> stmts = ontModelForProperty.listStatements(property, RDF.type,
                         OWL.InverseFunctionalProperty).toList();
                     ontModelForProperty.remove(stmts);
@@ -1074,8 +1054,6 @@ public class JenaPersistenceStore implements PersistenceStore {
                 OntProperty ontProperty = ontModelForProperty.getOntProperty(propertyURI);
 
                 if (individualAsValueURI != null) {
-                    // System.out.println("individualAsValueURI==="
-                    // + individualAsValueURI);
                     String ontologyFor_arg2 = resourceManager
                             .resolveOntologyURIFromResourceURI(individualAsValueURI);
                     if (ontologyFor_arg2 != null) {
@@ -1508,7 +1486,7 @@ public class JenaPersistenceStore implements PersistenceStore {
                     superclasses.getClassMetaInformation().add(classMetaInformation);
                 }
             } else {
-                logger.debug("super class without uri, localName=" + curClass.getLocalName());
+                logger.debug("super class without uri, localName {}", curClass.getLocalName());
             }
         }
         return superclasses;
@@ -1524,7 +1502,7 @@ public class JenaPersistenceStore implements PersistenceStore {
                 ClassMetaInformation classMetaInformation = generateClassMetaInformation(curClass_classURI);
                 equivalentClasses.getClassMetaInformation().add(classMetaInformation);
             } else {
-                logger.debug("equivalent class without uri, localName=" + curClass.getLocalName());
+                logger.debug("equivalent class without uri, localName {}", curClass.getLocalName());
             }
         }
         return equivalentClasses;
@@ -1557,7 +1535,7 @@ public class JenaPersistenceStore implements PersistenceStore {
                     disjointClasses.getClassMetaInformation().add(classMetaInformation);
                 }
             } else {
-                logger.debug("disjoint class without uri, localName=" + curClass.getLocalName());
+                logger.debug("disjoint class without uri, localName {}", curClass.getLocalName());
             }
         }
         return disjointClasses;
@@ -1649,7 +1627,7 @@ public class JenaPersistenceStore implements PersistenceStore {
                         containerClasses.getClassMetaInformation().add(classMetaInformation);
                     }
                 } else {
-                    logger.debug("equivalent class without uri, localName=" + curClass.getLocalName());
+                    logger.debug("equivalent class without uri, localName {}", curClass.getLocalName());
                 }
             } catch (ConversionException ce) {
                 logger.warn(ce.getMessage());
@@ -1705,7 +1683,7 @@ public class JenaPersistenceStore implements PersistenceStore {
                                 propertyAssertion.getIndividualMetaInformationOrLiteral().add(
                                     individualMetaInformation);
                             } else {
-                                logger.debug("Unable to resolve property value = " + curValue.toString());
+                                logger.debug("Unable to resolve property value {}", curValue.toString());
                             }
                         }
                     }
@@ -1770,8 +1748,6 @@ public class JenaPersistenceStore implements PersistenceStore {
 
             DatatypeProperty datatypeProperty = ontModel.getDatatypeProperty(datatypePropertyURI);
 
-            // FIXME(Cihan) Domain and Range of a property can have multiple
-            // class values which is not handled in our current schema
             if (this.useReasoner && withInferredAxioms) {
                 OWLOntology owlOntology = jenaToOWlApi(ontModel);
                 OWLlinkHTTPXMLReasoner reasoner = getOWLLinkReasoner(owlOntology);
@@ -1867,12 +1843,13 @@ public class JenaPersistenceStore implements PersistenceStore {
                             generateClassMetaInformation(domainClass.getURI()));
                     }
                 } else {
-                    logger.debug("domain for datatypeProperty =" + datatypeProperty.getURI()
-                                 + " is resolved to OntClass but it does not have URI");
+                    logger.debug(
+                        "domain for datatypeProperty {}  is resolved to OntClass but it does not have URI",
+                        datatypeProperty.getURI());
                 }
             } else {
-                logger.debug("domain for datatypeProperty =" + datatypeProperty.getURI()
-                             + " cannot be resolved to OntClass");
+                logger.debug("domain for datatypeProperty {} cannot be resolved to OntClass",
+                    datatypeProperty.getURI());
             }
         }
         return domain;
@@ -1914,12 +1891,13 @@ public class JenaPersistenceStore implements PersistenceStore {
                             generateClassMetaInformation(rangeClass.getURI()));
                     }
                 } else {
-                    logger.debug("range for datatypeProperty =" + datatypeProperty.getURI()
-                                 + " is resolved to OntClass but it does not have URI");
+                    logger.debug(
+                        "range for datatypeProperty {}  is resolved to OntClass but it does not have URI",
+                        datatypeProperty.getURI());
                 }
             } else {
-                logger.debug("domain for datatypeProperty =" + datatypeProperty.getURI()
-                             + " cannot be resolved to OntClass");
+                logger.debug("domain for datatypeProperty {}  cannot be resolved to OntClass",
+                    datatypeProperty.getURI());
             }
         }
         return range;
@@ -1938,8 +1916,8 @@ public class JenaPersistenceStore implements PersistenceStore {
                         .getURI());
                 equivalentProperties.getPropertyMetaInformation().add(datatypePropertyMetaInformation);
             } else {
-                logger.debug("equivalent property with uri, localName="
-                             + curEquivalentProperty.getLocalName());
+                logger.debug("equivalent property with uri, localName {}",
+                    curEquivalentProperty.getLocalName());
             }
         }
         return equivalentProperties;
@@ -1970,7 +1948,7 @@ public class JenaPersistenceStore implements PersistenceStore {
                         .getURI());
                 superProperties.getPropertyMetaInformation().add(datatypePropertyMetaInformation);
             } else {
-                logger.debug("equivalent property with uri, localName=" + curSuperProperty.getLocalName());
+                logger.debug("equivalent property with uri, localName {}", curSuperProperty.getLocalName());
             }
         }
         return superProperties;
@@ -2009,9 +1987,6 @@ public class JenaPersistenceStore implements PersistenceStore {
                     ObjectPropertyContext objectPropertyContext = objectFactory.createObjectPropertyContext();
                     objectPropertyContext
                             .setPropertyMetaInformation(generatePropertyMetaInformation(objectPropertyURI));
-                    // Domain
-                    // FIXME Current Schema can not handle multiple domains and
-                    // ranges
                     Domain domain = generateObjectPropertyDomain(objectFactory, owlObjectProperty, reasoner);
                     if (domain != null) {
                         objectPropertyContext.setDomain(domain);
@@ -2105,12 +2080,13 @@ public class JenaPersistenceStore implements PersistenceStore {
                             generateClassMetaInformation(domainClass.getURI()));
                     }
                 } else {
-                    logger.debug("domain for datatypeProperty =" + objectProperty.getURI()
-                                 + " is resolved to OntClass but it does not have URI");
+                    logger.debug(
+                        "domain for datatypeProperty {} is resolved to OntClass but it does not have URI",
+                        objectProperty.getURI());
                 }
             } else {
-                logger.debug("domain for datatypeProperty =" + objectProperty.getURI()
-                             + " cannot be resolved to OntClass");
+                logger.debug("domain for datatypeProperty {} cannot be resolved to OntClass",
+                    objectProperty.getURI());
             }
         }
         return domain;
@@ -2152,12 +2128,13 @@ public class JenaPersistenceStore implements PersistenceStore {
                             generateClassMetaInformation(rangeClass.getURI()));
                     }
                 } else {
-                    logger.debug("range for datatypeProperty =" + objectProperty.getURI()
-                                 + " is resolved to OntClass but it does not have URI");
+                    logger.debug(
+                        "range for datatypeProperty {}  is resolved to OntClass but it does not have URI",
+                        objectProperty.getURI());
                 }
             } else {
-                logger.debug("domain for datatypeProperty =" + objectProperty.getURI()
-                             + " cannot be resolved to OntClass");
+                logger.debug("domain for datatypeProperty {}  cannot be resolved to OntClass",
+                    objectProperty.getURI());
             }
         }
         return range;
@@ -2194,8 +2171,8 @@ public class JenaPersistenceStore implements PersistenceStore {
                         .getURI());
                 equivalentProperties.getPropertyMetaInformation().add(datatypePropertyMetaInformation);
             } else {
-                logger.debug("equivalent property with uri, localName="
-                             + curEquivalentProperty.getLocalName());
+                logger.debug("equivalent property with uri, localName {}",
+                    curEquivalentProperty.getLocalName());
             }
         }
         return equivalentProperties;
@@ -2227,7 +2204,7 @@ public class JenaPersistenceStore implements PersistenceStore {
                         .getURI());
                 superProperties.getPropertyMetaInformation().add(datatypePropertyMetaInformation);
             } else {
-                logger.debug("equivalent property with uri, localName=" + curSuperProperty.getLocalName());
+                logger.debug("equivalent property with uri, localName {}", curSuperProperty.getLocalName());
             }
         }
         return superProperties;
@@ -2269,8 +2246,6 @@ public class JenaPersistenceStore implements PersistenceStore {
             }
         } catch (Exception e) {
             logger.error("Error ", e);
-        } finally {
-            // closeDBConnection(m_conn);
         }
         return false;
     }
@@ -2297,8 +2272,6 @@ public class JenaPersistenceStore implements PersistenceStore {
             }
         } catch (Exception e) {
             logger.error("Error ", e);
-        } finally {
-            // closeDBConnection(m_conn);
         }
         return false;
     }
@@ -2325,8 +2298,6 @@ public class JenaPersistenceStore implements PersistenceStore {
             }
         } catch (Exception e) {
             logger.error("Error ", e);
-        } finally {
-            // closeDBConnection(m_conn);
         }
         return false;
     }
@@ -2353,8 +2324,6 @@ public class JenaPersistenceStore implements PersistenceStore {
             }
         } catch (Exception e) {
             logger.error("Error ", e);
-        } finally {
-            // closeDBConnection(m_conn);
         }
         return false;
     }
@@ -2509,41 +2478,12 @@ public class JenaPersistenceStore implements PersistenceStore {
         return null;
     }
 
-    /**
-     * Assumes individualURI1 and objectPropertyURI are in the same ontology
-     * 
-     * @param individualURI1
-     * @param objectPropertyURI
-     * @param individualURI2
-     * @return
-     */
-    /*
-     * public boolean externallyAnnotateIndividual(String individualURI1, String objectPropertyURI, String
-     * individualURI2) {
-     * 
-     * try { String ontologyURI1 = resourceManager .resolveOntologyURIFromResourceURI(individualURI1); if
-     * (ontologyURI1 != null) { Model baseModel1 = persistenceProvider.getModel(ontologyURI1); OntModel
-     * ontModel1 = ModelFactory.createOntologyModel( getOntModelSpec(false), baseModel1); Individual
-     * individual1 = ontModel1 .getIndividual(individualURI1); ObjectProperty objectProperty = ontModel1
-     * .createObjectProperty(objectPropertyURI); resourceManager.registerObjectProperty(ontologyURI1,
-     * objectProperty.getURI());
-     * 
-     * DBPediaClient dbPediaClientInstance = DBPediaClient .getInstance(); dbPediaClientInstance
-     * .populateWithObjectPropertyValues(individualURI2);
-     * 
-     * String ontologyURI2 = resourceManager .resolveOntologyURIFromResourceURI(individualURI2); if
-     * (ontologyURI2 != null) { Model baseModel2 = persistenceProvider .getModel(ontologyURI2); OntModel
-     * ontModel2 = ModelFactory.createOntologyModel( getOntModelSpec(false), baseModel2); Individual
-     * individual2 = ontModel2 .getIndividual(individualURI2); if (individual1 != null && objectProperty !=
-     * null && individual2 != null) { individual1.setPropertyValue(objectProperty, individual2); return true;
-     * } } } } catch (Exception e) { logger.error("Error ", e); } finally { // closeDBConnection(m_conn); }
-     * return false; }
-     */
+    
 
     /**
      * Non-Interface Functions *
      * 
-     * @throws SQLException
+     * 
      */
 
     private List<String> getSavedOntologyURIs() {
@@ -2655,18 +2595,14 @@ public class JenaPersistenceStore implements PersistenceStore {
     /** FIXME:: You have to deal with them to!!! **/
     /** FIXME OWLLinkReasoner should be used here too. **/
     private List<ClassConstraint> resolveOntClass(OntClass ontClass) {
-        // System.out.println("resolveOntClass");
         List<ClassConstraint> allConstraints = new Vector<ClassConstraint>();
         ObjectFactory objectFactory = new ObjectFactory();
-        // ClassConstraint classConstraint =
-        // objectFactory.createClassConstraint();
         List<OntClass> restrictionClasses = ontClass.listEquivalentClasses().toList();
         restrictionClasses.addAll(ontClass.listSuperClasses().toList());
         restrictionClasses.add(ontClass);
         for (OntClass restrictionClass : restrictionClasses) {
 
             if (restrictionClass.isComplementClass()) {
-                // System.out.println("complement");
                 ClassConstraint classConstraint = objectFactory.createClassConstraint();
                 classConstraint.setType(ConstraintType.COMPLEMENT_OF);
                 ComplementClass complementClass = restrictionClass.asComplementClass();
@@ -2689,14 +2625,13 @@ public class JenaPersistenceStore implements PersistenceStore {
                         }
                     } catch (Exception e) {
                         logger.debug(e.getMessage());
-                        logger.debug("error in resolve OntClass " + restrictionClass.toString()
-                                     + " proceeding with next input.");
+                        logger.debug("error in resolve OntClass {}  proceeding with next input.",
+                            restrictionClass.toString());
                     }
                 }
                 allConstraints.add(classConstraint);
             }
             if (restrictionClass.isEnumeratedClass()) {
-                // System.out.println("enumerated");
                 ClassConstraint classConstraint = objectFactory.createClassConstraint();
                 classConstraint.setType(ConstraintType.ENUMERATION_OF);
                 EnumeratedClass enumeratedClass = restrictionClass.asEnumeratedClass();
@@ -2722,14 +2657,13 @@ public class JenaPersistenceStore implements PersistenceStore {
                         }
                     } catch (Exception e) {
                         logger.debug(e.getMessage());
-                        logger.debug("error in resolve OntClass " + restrictionClass.toString()
-                                     + " proceeding with next input.");
+                        logger.debug("error in resolve OntClass {}  proceeding with next input.",
+                            restrictionClass.toString());
                     }
                 }
                 allConstraints.add(classConstraint);
             }
             if (restrictionClass.isIntersectionClass()) {
-                // System.out.println("intersection");
                 ClassConstraint classConstraint = objectFactory.createClassConstraint();
                 classConstraint.setType(ConstraintType.INTERSECTION_OF);
                 IntersectionClass intersectionClass = restrictionClass.asIntersectionClass();
@@ -2752,8 +2686,8 @@ public class JenaPersistenceStore implements PersistenceStore {
                         }
                     } catch (Exception e) {
                         logger.debug(e.getMessage());
-                        logger.debug("error in resolve OntClass " + restrictionClass.toString()
-                                     + " proceeding with next input.");
+                        logger.debug("error in resolve OntClass {} proceeding with next input.",
+                            restrictionClass.toString());
                     }
                 }
                 allConstraints.add(classConstraint);
@@ -2785,13 +2719,13 @@ public class JenaPersistenceStore implements PersistenceStore {
                                             .add(resolvedConstraintsItr.next());
                                 }
                             } catch (ClassCastException e) {
-                                logger.debug("Can not convert " + resource.toString() + " to OntClass");
+                                logger.debug("Can not convert {}  to OntClass", resource.toString());
                             }
 
                             try {
                                 organizeDataRange(resource, classConstraint);
                             } catch (ClassCastException e) {
-                                logger.debug("Can not convert " + resource.toString() + " to DataRange");
+                                logger.debug("Can not convert {} to DataRange", resource.toString());
                             }
 
                         }
@@ -2819,12 +2753,12 @@ public class JenaPersistenceStore implements PersistenceStore {
                                             .add(resolvedConstraintsItr.next());
                                 }
                             } catch (ClassCastException e) {
-                                logger.debug("Can not convert " + resource.toString() + " to OntClass");
+                                logger.debug("Can not convert {} to OntClass", resource.toString());
                             }
                             try {
                                 organizeDataRange(resource, classConstraint);
                             } catch (ClassCastException e) {
-                                logger.debug("Can not convert " + resource.toString() + " to DataRange");
+                                logger.debug("Can not convert {} to DataRange", resource.toString());
                             }
                         }
                         allConstraints.add(classConstraint);
@@ -2834,7 +2768,6 @@ public class JenaPersistenceStore implements PersistenceStore {
                         classConstraint.setType(ConstraintType.HAS_VALUE);
                         HasValueRestriction hasValueRestriction = restriction.asHasValueRestriction();
 
-                        // FIXME:: has values are on properties
                         organizePropertyReference(classConstraint, hasValueRestriction);
                         RDFNode node = hasValueRestriction.getHasValue();
                         if (node.isLiteral()) {
@@ -2881,31 +2814,25 @@ public class JenaPersistenceStore implements PersistenceStore {
                     }
                 } catch (Exception e) {
                     logger.debug(e.getMessage());
-                    logger.debug("error in resolve OntClass " + restrictionClass.toString()
-                                 + " proceeding with next input.");
+                    logger.debug("error in resolve OntClass {}  proceeding with next input.",
+                        restrictionClass.toString());
                 }
             }
             if (restrictionClass.isUnionClass()) {
-                // System.out.println("union");
                 ClassConstraint classConstraint = objectFactory.createClassConstraint();
                 classConstraint.setType(ConstraintType.UNION_OF);
                 UnionClass unionClass = restrictionClass.asUnionClass();
                 ExtendedIterator operandsItr = unionClass.listOperands();
-                // System.out.println("before while loop");
                 while (operandsItr.hasNext()) {
-                    // System.out.println("in while loop");
                     try {
                         OntClass nextClass = (OntClass) operandsItr.next();
                         if (nextClass.getURI() != null) {
-                            // System.out.println("IN UNION_OF :: "
-                            // + nextClass.getURI());
                             ClassMetaInformation classMetaInformation = generateClassMetaInformation(nextClass
                                     .getURI());
                             classConstraint
                                     .getClassConstraintOrClassMetaInformationOrPropertyMetaInformation().add(
                                         classMetaInformation);
                         } else {
-                            // System.out.println("IN UNION_OF nextClassURI null:: ");
                             List<ClassConstraint> resolvedConstraints = resolveOntClass(nextClass);
                             Iterator resolvedConstraintsItr = resolvedConstraints.iterator();
                             while (resolvedConstraintsItr.hasNext()) {
@@ -2916,8 +2843,8 @@ public class JenaPersistenceStore implements PersistenceStore {
                         }
                     } catch (Exception e) {
                         logger.debug(e.getMessage());
-                        logger.debug("error in resolve OntClass " + restrictionClass.toString()
-                                     + " proceeding with next input.");
+                        logger.debug("error in resolve OntClass {} proceeding with next input.",
+                            restrictionClass.toString());
                     }
                 }
                 allConstraints.add(classConstraint);
@@ -2940,7 +2867,7 @@ public class JenaPersistenceStore implements PersistenceStore {
                 classConstraint.getClassConstraintOrClassMetaInformationOrPropertyMetaInformation().add(
                     resource.asLiteral().getValue());
             } else {
-                logger.warn("RDFNode " + node.toString() + " is neither Literal nor URI Resource");
+                logger.warn("RDFNode {}  is neither Literal nor URI Resource", node.toString());
             }
         }
     }
@@ -2958,42 +2885,7 @@ public class JenaPersistenceStore implements PersistenceStore {
         }
     }
 
-    // (Cihan)
-    // Query Type = SELECT | CONSTRUCT | DESCRIBE | ASK
-    public String sparqlQuery(String ontologyURI, String queryString, String queryType) {
-        Query query = QueryFactory.create(queryString);
 
-        try {
-            if (persistenceProvider.hasModel(ontologyURI)) {
-                Model baseModel = persistenceProvider.getModel(ontologyURI);
-                OntModel ontModel = ModelFactory.createOntologyModel(getOntModelSpec(true), baseModel);
-                QueryExecution exec = QueryExecutionFactory.create(query, ontModel);
-                if ("SELECT".equals(queryType)) {
-                    ResultSet results = exec.execSelect();
-                    return ResultSetFormatter.asXMLString(results);
-                } else if ("CONSTRUCT".equals(queryType)) {
-                    Model model = exec.execConstruct();
-                    Writer wr = new StringWriter();
-                    model.write(wr);
-                    return wr.toString();
-                } else if ("DESCRIBE".equals(queryType)) {
-                    Model model = exec.execDescribe();
-                    Writer wr = new StringWriter();
-                    model.write(wr);
-                    return wr.toString();
-                } else if ("ASK".equals(queryType)) {
-                    boolean ans = exec.execAsk();
-                    return String.valueOf(ans);
-                }
-
-            }
-        } catch (Exception e) {
-            logger.error("Error ", e);
-            return "An error occured";
-        }
-
-        return "Query Type Not Specified";
-    }
 
     private OntModelSpec getOntModelSpecWithoutModelMaker() {
         if (this.useReasoner) {
@@ -3040,11 +2932,11 @@ public class JenaPersistenceStore implements PersistenceStore {
                 long t3 = System.currentTimeMillis();
                 OntModel newModel = owlApiToJena(original);
                 long end = System.currentTimeMillis();
-                logger.info("Jena -> OWlapi " + (t1 - start) + " ms");
-                logger.info("Inferring Statements " + (t2 - t1) + " ms");
-                logger.info("Prepare inferred model " + (t3 - t2) + " ms");
-                logger.info("Owlapi -> Jena " + (end - t3) + " ms");
-                logger.info("Inferred statements are computed in " + (end - start) + " ms");
+                logger.info("Jena -> OWlapi {} ms", (t1 - start));
+                logger.info("Inferring Statements {} ms ", (t2 - t1));
+                logger.info("Prepare inferred model {} ms ", (t3 - t2));
+                logger.info("Owlapi -> Jena {} ms ", (end - t3));
+                logger.info("Inferred statements are computed in {} ms ", (end - start));
                 returnModel = newModel;
             } finally {
                 reasoner.answer(new ReleaseKB(kb));
@@ -3070,7 +2962,6 @@ public class JenaPersistenceStore implements PersistenceStore {
         RDFWriter rdfWriter = model.getWriter("RDF/XML");
         rdfWriter.setProperty("xmlbase", ontologyURI);
         rdfWriter.write(model.getBaseModel(), bos, ontologyURI);
-        // model.write(bos, "RDF/XML", null);
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLOntology owlOntology = manager.loadOntologyFromOntologyDocument(new ByteArrayInputStream(bos
                 .toByteArray()));
@@ -3104,7 +2995,7 @@ public class JenaPersistenceStore implements PersistenceStore {
                     changes.add(new AddAxiom(ontology, ax));
                 }
             } catch (OWLlinkReasonerRuntimeException e) {
-                logger.warn("Can not compute inferred statements: " + e.getMessage());
+                logger.warn("Can not compute inferred statements {} ", e.getMessage());
             }
         }
         manager.applyChanges(changes);

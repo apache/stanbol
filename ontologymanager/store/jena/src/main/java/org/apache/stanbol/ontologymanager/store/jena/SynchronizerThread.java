@@ -30,7 +30,7 @@ public class SynchronizerThread extends Thread {
                 logger.info("Started Synchronizing");
                 synchronizer.synchronizeAll(false);
                 long t2 = System.currentTimeMillis();
-                logger.info("Completed Synchronizing in " + (t2 - t1) + " miliseconds");
+                logger.info("Completed Synchronizing in {} ms", (t2 - t1));
             }
             try {
                 Thread.sleep(10000);

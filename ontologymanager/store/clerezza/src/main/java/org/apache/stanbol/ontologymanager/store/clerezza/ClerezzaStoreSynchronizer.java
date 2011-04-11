@@ -52,10 +52,10 @@ public class ClerezzaStoreSynchronizer implements StoreSynchronizer {
 
     @Property(name = "org.apache.stanbol.ontologymanager.store.ResourceManager")
     private ResourceManager resourceManager;
-    
-    @Property(name="org.apache.stanbol.ontologymanager.store.PersistenceStore")
+
+    @Property(name = "org.apache.stanbol.ontologymanager.store.PersistenceStore")
     private PersistenceStore store;
-    
+
     @Reference
     private TcManager tcManager;
 
@@ -63,8 +63,6 @@ public class ClerezzaStoreSynchronizer implements StoreSynchronizer {
 
     @Activate
     public void activate(final Map<?,?> properties) {
-        // this.persistenceProvider = (IJenaPersistenceProvider) properties
-        // .get(IJenaPersistenceProvider.class.getName());
 
         this.resourceManager = (ResourceManager) properties.get(ResourceManager.class.getName());
         this.store = (PersistenceStore) properties.get(PersistenceStore.class.getName());
@@ -79,7 +77,7 @@ public class ClerezzaStoreSynchronizer implements StoreSynchronizer {
                 GraphListener listener = new SynchronizerGraphListener(this, graphURI.getUnicodeString());
                 graph.addGraphListener(listener, new FilterTriple(null, null, null), 100);
                 listeningMGraph.put(graphURI, listener);
-                logger.info("Added listener to the mgraph  " + graphURI.toString() + " : " + listener);
+                logger.info("Added listener to the mgraph {} : {} ", graphURI.toString(), listener);
             }
         }
     }
@@ -93,8 +91,8 @@ public class ClerezzaStoreSynchronizer implements StoreSynchronizer {
         // Unregister GraphListeners
 
         for (UriRef graphUri : listeningMGraph.keySet()) {
-            logger.info("Removing graph listener " + listeningMGraph.get(graphUri) + " on "
-                        + graphUri.toString());
+            logger.info("Removing graph listener {}  on {} ", listeningMGraph.get(graphUri),
+                graphUri.toString());
             tcManager.getMGraph(graphUri).removeGraphListener(listeningMGraph.get(graphUri));
 
         }
@@ -107,8 +105,7 @@ public class ClerezzaStoreSynchronizer implements StoreSynchronizer {
         // Unregister GraphListeners
 
         for (UriRef graphUri : listeningMGraph.keySet()) {
-            logger.info("Removing graph listener " + listeningMGraph.get(graphUri) + " on "
-                        + graphUri.toString());
+            logger.info("Removing graph listener {} on ", listeningMGraph.get(graphUri), graphUri.toString());
             tcManager.getMGraph(graphUri).removeGraphListener(listeningMGraph.get(graphUri));
         }
         listeningMGraph.clear();
@@ -145,8 +142,7 @@ public class ClerezzaStoreSynchronizer implements StoreSynchronizer {
                 for (UriRef graphURI : toBedeleted) {
                     listeningMGraph.remove(graphURI);
                     resourceManager.removeOntology(graphURI.getUnicodeString());
-                    logger.info("Stopped Listening MGraph: " + graphURI.getUnicodeString());
-                    logger.info("Stopped Listening MGraph: " + graphURI.getUnicodeString());
+                    logger.info("Stopped Listening MGraph: {}", graphURI.getUnicodeString());
 
                 }
 
@@ -159,7 +155,7 @@ public class ClerezzaStoreSynchronizer implements StoreSynchronizer {
                                 graphURI.getUnicodeString());
                         graph.addGraphListener(listener, new FilterTriple(null, null, null), 100);
                         listeningMGraph.put(graphURI, listener);
-                        logger.info("Added listener to the mgraph  " + graphURI.toString() + " : " + listener);
+                        logger.info("Added listener to the mgraph  {} : {}", graphURI.toString(), listener);
                     }
                 }
             }
@@ -196,17 +192,18 @@ public class ClerezzaStoreSynchronizer implements StoreSynchronizer {
                 Individual individual = ontology.getIndividual(resourceURI);
                 if (klazz != null) {
                     resourceManager.registerClass(graphURI, resourceURI);
-                    logger.info("Added Class " + resourceURI);
+                    logger.info("Added Class {}", resourceURI);
                 } else if (objectProp != null) {
                     resourceManager.registerObjectProperty(graphURI, resourceURI);
-                    logger.info("Added ObjectProperty " + resourceURI);
+                    logger.info("Added ObjectProperty {}", resourceURI);
                 } else if (datatypeProp != null) {
                     resourceManager.registerDatatypeProperty(graphURI, resourceURI);
-                    logger.info("Added DataProperty " + resourceURI);
+                    logger.info("Added DataProperty {}", resourceURI);
                 } else if (individual != null) {
                     resourceManager.registerIndividual(graphURI, resourceURI);
-                    logger.info("Added Individual" + resourceURI);
-                } else if(ontology.listStatements(null, OWL.imports, ResourceFactory.createResource(resourceURI)).hasNext()){
+                    logger.info("Added Individual {}", resourceURI);
+                } else if (ontology.listStatements(null, OWL.imports,
+                    ResourceFactory.createResource(resourceURI)).hasNext()) {
                     try {
                         store.saveOntology(new URL(resourceURI), resourceURI, "UTF-8");
                         logger.info("Added imported ontology: {}", resourceURI);
@@ -214,13 +211,13 @@ public class ClerezzaStoreSynchronizer implements StoreSynchronizer {
                         logger.warn("Failed to import ontology: {}", resourceURI);
                     }
                 }
-                
+
                 else {
                     // Not found, delete if the resource belongs to this graph
                     String ontologyURI = resourceManager.resolveOntologyURIFromResourceURI(resourceURI);
                     if (ontologyURI != null && ontologyURI.equals(graphURI)) {
                         resourceManager.removeResource(resourceURI);
-                        logger.info("Removed Resource" + resourceURI);
+                        logger.info("Removed Resource {}", resourceURI);
                     }
                 }
             }
@@ -232,7 +229,7 @@ public class ClerezzaStoreSynchronizer implements StoreSynchronizer {
     private void registerOntologyIfNotExist(String graphURI) {
         String ontologyURI = resourceManager.getOntologyFullPath(graphURI);
         if (ontologyURI == null) {
-            logger.info("Registering ontology: " + graphURI);
+            logger.info("Registering ontology: {}", graphURI);
             resourceManager.registerOntology(graphURI);
             synchronizeGraph(graphURI);
         }
