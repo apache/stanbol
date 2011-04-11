@@ -19,14 +19,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <parent>
+<!-- <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
     <version>0.9-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
-  </parent>
+  </parent>  -->  
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.entityhub.indexing.dbpedia</artifactId>
+  <version>0.9-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Apache Stanbol Entityhub Indexing for geonames.org</name>
   <description>This uses the RDF dump of dbpedia.org to create a Full Yard for dbpedia.org</description>
