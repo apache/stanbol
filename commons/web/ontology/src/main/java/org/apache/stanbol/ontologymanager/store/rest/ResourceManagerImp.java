@@ -193,8 +193,7 @@ public class ResourceManagerImp implements ResourceManager {
     public static ResourceManagerImp getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new ResourceManagerImp();
-            // logger.warn("Creating Resource Manager: Properties must be set");
-        } else {}
+        }
 
         return INSTANCE;
     }
@@ -250,7 +249,6 @@ public class ResourceManagerImp implements ResourceManager {
                                             + CLASS_RESOURCE + "')");
                 }
                 con.close();
-                // logger.info("Connection Closed");
             }
         } catch (Exception e) {
             logger.error("Error ", e);
@@ -283,7 +281,6 @@ public class ResourceManagerImp implements ResourceManager {
                                             + dataPropertyPath + "', '" + DATA_PROPERTY_RESOURCE + "')");
                 }
                 con.close();
-                // logger.info("Connection Closed");
             }
         } catch (Exception e) {
             logger.error("Error ", e);
@@ -470,7 +467,7 @@ public class ResourceManagerImp implements ResourceManager {
             // first clear hashtables
             String ontologyPath = ontologies.get(ontologyURI);
             if (ontologyPath == null) {
-                logger.warn("Ontology " + ontologyURI + " already deleted");
+                logger.warn("Ontology {} already deleted ", ontologyURI);
                 return;
             }
             ontologies.remove(ontologyURI);
@@ -552,7 +549,6 @@ public class ResourceManagerImp implements ResourceManager {
             statement.executeUpdate(sql);
 
             con.close();
-            // logger.info("Connection Closed");
 
         } catch (Exception e) {
             logger.error("Error ", e);
@@ -569,7 +565,7 @@ public class ResourceManagerImp implements ResourceManager {
             // first clear hashtables
             String classPath = resources.get(resourceURI);
             if (classPath == null) {
-                logger.warn("Resource" + resourceURI + "not found");
+                logger.warn("Resource {} not found", resourceURI);
                 return;
             }
 
@@ -591,8 +587,6 @@ public class ResourceManagerImp implements ResourceManager {
         }
     }
 
-    // FIXME:: make sure that this method returns the reference to the imported
-    // class!!!
     /*
      * (non-Javadoc)
      * 
@@ -647,7 +641,7 @@ public class ResourceManagerImp implements ResourceManager {
                                         IllegalAccessException,
                                         ClassNotFoundException,
                                         SQLException {
-        return DriverManager.getConnection(DB_URL);// , DB_USER, DB_PW);
+        return DriverManager.getConnection(DB_URL);
     }
 
     private String normalizeURI(String uri) {
