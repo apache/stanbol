@@ -344,7 +344,7 @@ public class SolrYard extends AbstractYard implements Yard {
             File indexDirectory = ConfigUtils.toFile(config.getSolrServerLocation());
             if(!indexDirectory.isAbsolute()){ //relative paths
                 // need to be resolved based on the internally managed Solr directory
-                indexDirectory = solrDirectoryManager.getSolrDirectory(
+                indexDirectory = solrDirectoryManager.getSolrIndexDirectory(
                     indexDirectory.toString(),config.isDefaultInitialisation());
                 if(indexDirectory == null){
                     throw new ConfigurationException(SolrYard.SOLR_SERVER_LOCATION, 

@@ -16,6 +16,8 @@
  */
 package org.apache.stanbol.entityhub.yard.solr.impl;
 
+import static org.apache.stanbol.entityhub.yard.solr.impl.ConfigUtils.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -60,6 +63,13 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
     private final Logger log = LoggerFactory.getLogger(DefaultSolrDirectoryManager.class);
     
     /**
+     * This key is used to store the file name of the archive supposed to provide
+     * the data for the uninitialised index within the configuration the configuration
+     */
+    private static final String UNINITIALISED_INDEX_ARCHIVE_NAME_KEY = "Uninitialised-Index-Archive-Name";
+    
+    
+    /**
      * The dataFileProvider used to lookup index data
      */
     @Reference
@@ -95,6 +105,17 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
      * as an initialisation completed this set is notified.
      */
     private Set<String> initCores = new HashSet<String>();
+    /**
+     * Holds the list of cores that where installed by using 
+     * {@link #createSolrDirectory(String, String, java.util.Properties)} but the
+     * {@link DataFileProvider} could not yet provide the necessary data for the
+     * initialisation.<p>
+     * The list of uninitialised cores is stored within the data folder of the
+     * bundle under {@link #UNINITIALISED_SITE_DIRECTORY_NAME} and loaded at
+     * activation.
+     * 
+     */
+    private Map<String,java.util.Properties> uninitialisedCores = new HashMap<String,java.util.Properties>();
     
     public DefaultSolrDirectoryManager() {
     }
@@ -109,8 +130,12 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
         if(solrIndexName.isEmpty()){
             throw new IllegalArgumentException("The parsed name of the Solr index MUST NOT be empty");
         }
-        //also here we need to initialise the SolrDirectory if not already done
-        return new File(lookupManagedSolrDir(componentContext),solrIndexName).exists();
+        //first check if the directory for the parsed index exists
+        boolean exists = new File(lookupManagedSolrDir(componentContext),solrIndexName).exists();
+        return !exists ? //if no directory exists
+            //check also if an uninitialised index was requested
+            uninitialisedCores.containsKey(solrIndexName):
+                true;
     }
     /* (non-Javadoc)
      * @see org.apache.stanbol.entityhub.yard.solr.impl.ManagedSolrDirectory#getManagedIndices()
@@ -123,29 +148,110 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
             //TODO: validate that this is actually a SolrCore!
             indexes.put(indexName, new File(solrDir,indexName));
         }
+        //we need also add the uninitialised indexes (with a null as value)
+        for(String indexName: uninitialisedCores.keySet()){
+            if(!indexes.containsKey(indexName)){
+                indexes.put(indexName, null);
+            }
+        }
         return indexes;
+    }
+    public boolean isInitialisedIndex(String solrIndexName){
+        if(solrIndexName == null){
+            throw new IllegalArgumentException("The parsed name of the Solr index MUST NOT be NULL");
+        }
+        if(solrIndexName.isEmpty()){
+            throw new IllegalArgumentException("The parsed name of the Solr index MUST NOT be empty");
+        }
+        if(initCores.contains(solrIndexName)){ //if it is currently initialised
+            return false; //return false 
+        } else { //check if the dir is there
+            return new File(lookupManagedSolrDir(componentContext),solrIndexName).exists();
+        }
     }
     /* (non-Javadoc)
      * @see org.apache.stanbol.entityhub.yard.solr.impl.ManagedSolrDirectory#getSolrDirectory(java.lang.String)
      */
-    public final File getSolrDirectory(final String solrIndexName,boolean create) throws IllegalArgumentException {
-        return initSolrDirectory(solrIndexName,null,create,componentContext);
+    public final File getSolrIndexDirectory(final String solrIndexName,boolean allowDefaultInit) throws IllegalArgumentException {
+        return initSolrDirectory(solrIndexName,null,allowDefaultInit,componentContext);
     }
     public final File createSolrIndex(final String solrIndexName, ArchiveInputStream ais){
-        return initSolrDirectory(solrIndexName,ais,true,componentContext);
+        return initSolrDirectory(solrIndexName,ais,false,componentContext);
     }
     @Override
-    public final File createSolrDirectory(String solrIndexName, String indexPath, Map<String,String> comments) throws IllegalArgumentException,IOException {
-        ComponentContext context = componentContext;
+    public final File createSolrDirectory(String solrIndexName, String indexArchiveRef, java.util.Properties properties) throws IllegalArgumentException,IOException {
         if(componentContext == null){
             throw new IllegalStateException("Creating an Index by using the DataFileProvider does only work when running within an OSGI");
         }
-        //TODO add the comments how to download the index!
-       InputStream is = dataFileProvider.getInputStream(context.getBundleContext().getBundle().getSymbolicName(), indexPath, comments);
-       if(is == null){
-           throw new IllegalStateException("SolrServer arvive "+indexPath+" is currently not available via the "+DataFileProvider.class.getSimpleName()+" service");
-       }
-       return createSolrIndex(solrIndexName,ConfigUtils.getArchiveInputStream(indexPath, is));
+        //now add the index to the list of uninitialised
+        addUninitialisedIndex(solrIndexName,indexArchiveRef, properties);
+        return initSolrDirectory(solrIndexName, null, false, componentContext);
+    }
+
+    /**
+     * Tries to get the {@link ArchiveInputStream} for the index from the
+     * {@link DataFileProvider}.
+     * @param context the context used to perform the operations
+     * @param solrIndexName the name of the index to initialise
+     * @param properties the properties for this index. Must contain the 
+     * {@link #UNINITIALISED_INDEX_ARCHIVE_NAME_KEY}.
+     * @return The {@link ArchiveInputStream} or <code>null</code> if the
+     * data are still not available
+     * @throws IOException on any IO related error while initialising the index
+     * @throws IllegalStateException if the parsed configuration does not provide
+     * a value for {@link #UNINITIALISED_INDEX_ARCHIVE_NAME_KEY}.
+     */
+    private ArchiveInputStream lookupIndexArchive(ComponentContext context, String solrIndexName,java.util.Properties properties) throws IOException, IllegalStateException {
+        String archiveName = properties.getProperty(UNINITIALISED_INDEX_ARCHIVE_NAME_KEY);
+        if(archiveName == null){
+            throw new IllegalStateException("Found uninitialised index config that does not contain the required "+
+                UNINITIALISED_INDEX_ARCHIVE_NAME_KEY+" property!");
+        }
+        //we need to copy the properties to a map
+        Map<String,String> propMap;
+        if(properties == null){
+            properties = new java.util.Properties(); //create an empty properties file
+            propMap = null;
+        } else {
+            propMap = new HashMap<String,String>();
+            for(Entry<Object,Object> entry : properties.entrySet()){
+                propMap.put(entry.getKey().toString(), entry.getValue()!=null?entry.getValue().toString():null);
+            }
+        }
+        propMap.remove(UNINITIALISED_INDEX_ARCHIVE_NAME_KEY);//do not parse this internal property
+        InputStream is = dataFileProvider.getInputStream(context.getBundleContext().getBundle().getSymbolicName(), archiveName, propMap);
+        return is == null?null:ConfigUtils.getArchiveInputStream(archiveName, is);
+    }
+    private void addUninitialisedIndex(String indexName,String sourceFileName,java.util.Properties config) throws IOException {
+        ComponentContext context = componentContext;
+        if(context == null){
+            throw new IllegalStateException("This feature is only available when running within an OSGI environment");
+        }
+        if(config == null){
+            config = new java.util.Properties();
+        }
+        config.setProperty(UNINITIALISED_INDEX_ARCHIVE_NAME_KEY, sourceFileName);
+        synchronized (uninitialisedCores) {
+            if(uninitialisedCores.put(indexName, config) != null){
+                removeUninitialisedIndexConfig(context,indexName); //remove the old version
+            }
+            saveUninitialisedIndexConfig(context,indexName, config); //save the new version
+        }
+    }
+    private void removeUninitialisedIndex(String indexName){
+        ComponentContext context = componentContext;
+        synchronized (uninitialisedCores) {
+            if(uninitialisedCores.remove(indexName) != null){
+                if(context == null){
+                    //check only for the context if we need actually to remove
+                    //an entry, because this method is also called outside an
+                    //OSGI environment (but will never remove something from 
+                    //uninitialisedCores)
+                    throw new IllegalStateException("This feature is only available when running within an OSGI environment");
+                }
+                removeUninitialisedIndexConfig(context,indexName); //remove the old version
+            }
+        }
     }
     /**
      * Internally used to get/init the Solr directory of a SolrCore or the root
@@ -154,23 +260,24 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
      * the root solr directory
      * @param ais The Input stream of the Archive to load the index from or
      * <code>null</code> to load the default core configuration.
-     * @param create If <code>true</code> a new core is initialised if not already
-     * present. Make sure this is set to <code>true</code> if parsing an InputStream.
-     * Otherwise the index will not be created from the parsed stream!
+     * @param allowDefaultInitialisation If <code>true</code> a new core is 
+     * initialised with the default configuration (empty index with the default
+     * Solr schema and configuration). If <code>false</code> the core is only
+     * created if a valid configuration is parsed.
      * @param context A reference to the component context or <code>null</code> if
      * running outside an OSGI container. This is needed to avoid that 
      * {@link #deactivate(ComponentContext)} sets the context to <code>null</code> 
      * during this method does its initialisation work.
      * @return the Solr directory or <code>null</code> if the requested index
      * could not be created (e.g. because of <code>false</code> was parsed as 
-     * create) orin case this component is deactivated
+     * create) or in case this component is deactivated
      * @throws IllegalStateException in case this method is called when this
      * component is running within an OSGI environment and it is deactivated or
      * the initialisation for the parsed index failed.
      * @throws IllegalArgumentException if the parsed solrIndexName is <code>null</code> or
      * empty.
      */
-    private final File initSolrDirectory(final String solrIndexName,ArchiveInputStream ais,boolean create,ComponentContext context) throws IllegalStateException {
+    private final File initSolrDirectory(final String solrIndexName,ArchiveInputStream ais,boolean allowDefaultInitialisation,ComponentContext context) throws IllegalStateException {
         if(solrIndexName == null){
             throw new IllegalArgumentException("The parsed name of the Solr index MUST NOT be NULL");
         }
@@ -178,35 +285,64 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
             throw new IllegalArgumentException("The parsed name of the Solr index MUST NOT be empty");
         }
         File managedCoreContainerDirectory = lookupManagedSolrDir(context);
-        if(solrIndexName == null){
-            return managedCoreContainerDirectory;
+        if(solrIndexName == null){ //if the indexName is null
+            return managedCoreContainerDirectory; //return the root directory
         }
         File coreDir = new File(managedCoreContainerDirectory,solrIndexName);
         if(!coreDir.exists()){
-            if(!create){ //we are not allowed to create it
-                return null; //return null
-            }
+            //first add the index to the list of currently init cores
             synchronized (initCores) {
-                log.info(" > start initializing SolrIndex "+solrIndexName);
+                log.debug(" > start initializing SolrIndex {}"+solrIndexName);
                 initCores.add(solrIndexName);
             }
+            //second check if the Index is an uninitialised one and if this is the case
+            //try to get the ArchiveInputStream form the DataFileProvider
+            java.util.Properties uninitialisedProperties;
+            synchronized (uninitialisedCores) {
+                uninitialisedProperties = uninitialisedCores.get(solrIndexName);
+                if(uninitialisedProperties != null){
+                    //NOTE: this may override an parsed ArchiveInputStream
+                    // -> this is an error by the implementation of this class
+                    //    so throw an Exception to detect such errors early!
+                    if(ais != null){
+                        throw new IllegalStateException("The parsed ArchiveInputStream is not null for an uninitialised Index. " +
+                        		"Please report this error the the stanbol-def mailing list!");
+                    }
+                    try {
+                        ais = lookupIndexArchive(context, solrIndexName, uninitialisedProperties);
+                    } catch (Exception e) {
+                        log.warn("The Index Archive for index {} not available (see \"Stanbol Data File Provider\" Tab of the Apache Webconsole for details).", solrIndexName);
+                    }
+                }
+            }
+            //third do the actual initialisation work
             try {
                 if(ais != null){
                     ConfigUtils.copyCore(ais, coreDir, solrIndexName, false);
-                } else if(context != null){ //load via bundle
-                    ConfigUtils.copyCore(context.getBundleContext().getBundle(),
-                        coreDir, null, false);
-                } else { //load from jar
-                    ConfigUtils.copyCore((Class<?>)null, coreDir, null, false);
+                    //try to remove from uninitialised
+                    removeUninitialisedIndex(solrIndexName); 
+                } else if(allowDefaultInitialisation){
+                    //TODO: Refactor so that the lookup via Bundle and/or jar
+                    //      file works via an internal implementation of an
+                    //      FileDataProvider
+                    if(context != null){ //load via bundle
+                        ConfigUtils.copyCore(context.getBundleContext().getBundle(),
+                            coreDir, null, false);
+                    } else { //load from jar
+                        ConfigUtils.copyCore((Class<?>)null, coreDir, null, false);
+                    }
                 }
             } catch (Exception e) {
                 throw new IllegalStateException(
                     String.format("Unable to copy default configuration for Solr Index %s to the configured path %s"
                         ,solrIndexName==null?"":solrIndexName,managedCoreContainerDirectory.getAbsoluteFile()),e);
             } finally {
+                //regardless what happened remove the index from the currently init
+                //indexes and notify all other waiting for the initialisation
                 synchronized (initCores) {
+                    //initialisation done
                     initCores.remove(solrIndexName);
-                    log.info("   ... finished inizializaiton of SolrIndex "+solrIndexName);
+                    log.debug("   ... notify after trying to init SolrIndex {}"+solrIndexName);
                     //notify that the initialisation completed or failed
                     initCores.notifyAll(); 
                 }
@@ -324,13 +460,22 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
         substitution.append(value.substring(prevAt, value.length()));
         return substitution.toString();
     }
+    
     @Activate
-    protected void activate(ComponentContext context) {
+    protected void activate(ComponentContext context) throws IOException {
         componentContext = context;
         withinOSGI = true;
+        Map<String,java.util.Properties> uninitIndexes;
+        synchronized (uninitialisedCores) {
+            uninitialisedCores.putAll(loadUninitialisedIndexConfigs(componentContext));
+        }
     }
     @Deactivate
     protected void deactivate(ComponentContext context) {
+        synchronized (uninitialisedCores) {
+            uninitialisedCores.clear();
+        }
         componentContext = null;
+        
     }
 }
