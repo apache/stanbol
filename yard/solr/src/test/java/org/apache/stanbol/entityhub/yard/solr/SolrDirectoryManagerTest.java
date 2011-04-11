@@ -71,12 +71,12 @@ public class SolrDirectoryManagerTest {
     
     @Test(expected=IllegalArgumentException.class)
     public void testNullIndexName(){
-        solrDirectoryManager.getSolrDirectory(null,true);
+        solrDirectoryManager.getSolrIndexDirectory(null,true);
     }
 
     @Test(expected=IllegalArgumentException.class)
     public void testEmptyIndexName(){
-        solrDirectoryManager.getSolrDirectory("",true);
+        solrDirectoryManager.getSolrIndexDirectory("",true);
     }
 
     @Test
@@ -105,7 +105,7 @@ public class SolrDirectoryManagerTest {
         //this is actually tested already by the initialisation of the
         //SolrYardTest ...
         String indexName = "testIndexInitialisation_"+System.currentTimeMillis();
-        File indexDir = solrDirectoryManager.getSolrDirectory(indexName,true);
+        File indexDir = solrDirectoryManager.getSolrIndexDirectory(indexName,true);
         assertEquals(new File(expectedManagedDirectory,indexName), indexDir);
         assertTrue(indexDir.isDirectory());
     }

@@ -16,11 +16,11 @@
  */
 package org.apache.stanbol.entityhub.yard.solr.impl.install;
 
+import static org.apache.stanbol.entityhub.yard.solr.impl.ConfigUtils.SOLR_INDEX_ARCHIVE_EXTENSION;
+import static org.apache.stanbol.entityhub.yard.solr.impl.ConfigUtils.SUPPORTED_SOLR_ARCHIVE_FORMAT;
 import static org.apache.stanbol.entityhub.yard.solr.impl.install.IndexInstallerConstants.PROPERTY_ARCHIVE_FORMAT;
 import static org.apache.stanbol.entityhub.yard.solr.impl.install.IndexInstallerConstants.PROPERTY_INDEX_NAME;
-import static org.apache.stanbol.entityhub.yard.solr.impl.install.IndexInstallerConstants.SOLR_INDEX_ARCHIVE_EXTENSION;
 import static org.apache.stanbol.entityhub.yard.solr.impl.install.IndexInstallerConstants.SOLR_INDEX_ARCHIVE_RESOURCE_TYPE;
-import static org.apache.stanbol.entityhub.yard.solr.impl.ConfigUtils.SUPPORTED_SOLR_ARCHIVE_FORMAT;
 
 import java.util.HashMap;
 import java.util.Map;

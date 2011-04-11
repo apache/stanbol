@@ -29,15 +29,16 @@ public final class IndexInstallerConstants {
     private IndexInstallerConstants(){ /* do not create instances*/ }
     
     /**
-     * Use &lt;indexName&gt;.solrindex[.&lt;archiveType&gt;] as file name
-     */
-    public static final String SOLR_INDEX_ARCHIVE_EXTENSION = "solrindex";
-    /**
      * The schema used for transformed resources.
      */
     public static final String SOLR_INDEX_ARCHIVE_RESOURCE_TYPE = "solrarchive";
     
     private static final String PROPERTY_PREFIX = "org.apache.stanbol.yard.solr.installer.";
+    /**
+     * The key used to configure the name of the Index-Archive
+     * The default name is \"&lt;indexName&gt;.solrarchive\".
+     */
+    public static final String PROPERTY_INDEX_ARCHIVE = "Index-Archive";
     
     /**
      * The key used for the name of the index
@@ -48,9 +49,4 @@ public final class IndexInstallerConstants {
      */
     public static final String PROPERTY_ARCHIVE_FORMAT = PROPERTY_PREFIX+"archive.format";
 
-    /**
-     * The key used to configure the name of the Index-Archive
-     * The default name is \"&lt;indexName&gt;.solrarchive\".
-     */
-    public static final String PROPERTY_INDEX_ARCHIVE = "Index-Archive";
 }

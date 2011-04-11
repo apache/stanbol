@@ -16,22 +16,17 @@
  */
 package org.apache.stanbol.entityhub.yard.solr.impl.install;
 
-import static org.apache.stanbol.entityhub.yard.solr.impl.install.IndexInstallerConstants.*;
+import static org.apache.stanbol.entityhub.yard.solr.impl.install.IndexInstallerConstants.PROPERTY_ARCHIVE_FORMAT;
+import static org.apache.stanbol.entityhub.yard.solr.impl.install.IndexInstallerConstants.PROPERTY_INDEX_ARCHIVE;
+import static org.apache.stanbol.entityhub.yard.solr.impl.install.IndexInstallerConstants.PROPERTY_INDEX_NAME;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Map.Entry;
-import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.archivers.ArchiveInputStream;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.installer.api.tasks.InstallTask;
 import org.apache.sling.installer.api.tasks.InstallationContext;
@@ -72,23 +67,19 @@ public class IndexInstallTask extends InstallTask {
             try {
                 is = getResource().getInputStream();
                 if("properties".equals(archiveFormat)){
-                    Map<String,String> properties = new HashMap<String,String>();
                     InputStreamReader reader = new InputStreamReader(is,"UTF-8");
+                    Properties props = new Properties();
                     try {
-                        Properties props = new Properties();
                         props.load(reader);
-                        for(Entry<Object,Object> config : props.entrySet()){
-                            properties.put(config.getKey().toString(),config.getValue()!= null?config.getValue().toString():null);
-                        }
                     } finally {
                        IOUtils.closeQuietly(reader);
                     }
-                    String indexPath = properties.get(PROPERTY_INDEX_ARCHIVE);
+                    String indexPath = props.getProperty(PROPERTY_INDEX_ARCHIVE);
                     if(indexPath == null){
-                        indexPath = indexName+'.'+IndexInstallerConstants.SOLR_INDEX_ARCHIVE_EXTENSION;
+                        indexPath = indexName+'.'+ConfigUtils.SOLR_INDEX_ARCHIVE_EXTENSION;
                         log.info("Property \""+PROPERTY_INDEX_ARCHIVE+"\" not present within the SolrIndex references file. Will use the default name \""+indexPath+"\"");
                     }
-                    solrDirectoryManager.createSolrDirectory(indexName,indexPath,properties);
+                    solrDirectoryManager.createSolrDirectory(indexName,indexPath,props);
                     setFinishedState(ResourceState.INSTALLED);
                 } else {
                     ArchiveInputStream ais = null;
