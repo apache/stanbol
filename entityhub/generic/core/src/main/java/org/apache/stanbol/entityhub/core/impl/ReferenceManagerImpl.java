@@ -98,13 +98,11 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
 
     @Activate
     protected void activate(ComponentContext context) {
-//        this.context = context;
-        log.info("Activate ReferenceManager with context" + context);
+        log.debug("Activate ReferenceManager");
     }
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        log.info("Deactivate ReferenceManager with context" + context);
-//        this.context = null;
+        log.debug("Deactivate ReferenceManager");
         synchronized (prefixMap) {
             this.prefixList.clear();
             this.prefixMap.clear();
@@ -119,13 +117,13 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
     }
 
     protected void bindReferencedSites(ReferencedSite referencedSite){
-        log.info(" ... binding ReferencedSite "+referencedSite.getId());
+        log.debug(" ... binding ReferencedSite {}",referencedSite.getId());
         referencedSites.add(referencedSite);
         idMap.put(referencedSite.getId(), referencedSite);
         addEntityPrefixes(referencedSite);
     }
     protected void unbindReferencedSites(ReferencedSite referencedSite){
-        log.info(" ... unbinding ReferencedSite "+referencedSite.getId());
+        log.debug(" ... unbinding ReferencedSite {}",referencedSite.getId());
         referencedSites.remove(referencedSite);
         idMap.remove(referencedSite.getId());
         removeEntityPrefixes(referencedSite);
@@ -135,7 +133,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
      * @param referencedSite
      */
     private void addEntityPrefixes(ReferencedSite referencedSite) {
-        for(String prefix : referencedSite.getEntityPrefixes()){
+        for(String prefix : referencedSite.getConfiguration().getEntityPrefixes()){
             synchronized (prefixMap) {
                 Collection<ReferencedSite> sites = prefixMap.get(prefix);
                 if(sites == null){
@@ -158,7 +156,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
      * @param referencedSite
      */
     private void removeEntityPrefixes(ReferencedSite referencedSite) {
-        for(String prefix : referencedSite.getEntityPrefixes()){
+        for(String prefix : referencedSite.getConfiguration().getEntityPrefixes()){
             synchronized (prefixMap) {
                 Collection<ReferencedSite> sites = prefixMap.get(prefix);
                 if(sites != null){
@@ -218,13 +216,13 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
             } else {
                 String prefix = prefixList.get(prefixPos);
                 if(entityUri.startsWith(prefix)){
-                    log.debug("Found prefix "+prefix+" for Entity "+entityUri);
+                    log.debug("Found prefix {} for Entity {}",prefix,entityUri);
                     return prefixMap.get(prefix);
                 } //else the parsed entityPrefix does not start with the found prefix
                 // this may only happen, when the prefixPos == prefixList.size()
             }
         }
-        log.info("No registered prefix for entity "+entityUri);
+        log.info("No registered prefix for entity {}",entityUri);
         return Collections.emptySet();
     }
     @Override
@@ -237,7 +235,8 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
                     entityIds.add(entityId);
                 }
             } catch (ReferencedSiteException e) {
-                log.warn("Unable to access Site "+site.getName()+" (url = "+site.getAccessUri()+")",e);
+                log.warn("Unable to access Site "+site.getConfiguration().getName()+
+                    " (id = "+site.getId()+")",e);
             }
         }
         return new QueryResultListImpl<String>(query, entityIds.iterator(),String.class);
@@ -251,11 +250,14 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
                     if(!representations.contains(rep)){ //do not override
                         representations.add(rep);
                     } else {
-                        log.info("Entity "+rep.getId()+" found on more than one Referenced Site -> Representation of Site "+site.getName()+" is ignored");
+                        log.info("Entity {} found on more than one Referenced Site" +
+                        		" -> Representation of Site {} is ignored",
+                        		rep.getId(),site.getConfiguration().getName());
                     }
                 }
             } catch (ReferencedSiteException e) {
-                log.warn("Unable to access Site "+site.getName()+" (url = "+site.getAccessUri()+")",e);
+                log.warn("Unable to access Site "+site.getConfiguration().getName()+
+                    " (id = "+site.getId()+")",e);
             }
         }
         return new QueryResultListImpl<Representation>(query, representations,Representation.class);
@@ -269,11 +271,14 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
                     if(!entities.contains(rep)){ //do not override
                         entities.add(rep);
                     } else {
-                        log.info("Entity "+rep.getId()+" found on more than one Referenced Site -> Representation of Site "+site.getName()+" is ignored");
+                        log.info("Entity {} found on more than one Referenced Site" +
+                        		" -> Representation of Site {} is ignored",
+                        		rep.getId(),site.getConfiguration().getName());
                     }
                 }
             } catch (ReferencedSiteException e) {
-                log.warn("Unable to access Site "+site.getName()+" (url = "+site.getAccessUri()+")",e);
+                log.warn("Unable to access Site "+site.getConfiguration().getName()+
+                    " (id = "+site.getId()+")",e);
             }
         }
         return new QueryResultListImpl<Sign>(query, entities,Sign.class);
@@ -282,8 +287,8 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
     public InputStream getContent(String entityId, String contentType) {
         Collection<ReferencedSite> sites = getReferencedSitesByEntityPrefix(entityId);
         if(sites.isEmpty()){
-            log.info("No Referenced Site registered for Entity "+entityId+"");
-            log.debug("Registered Prefixes "+prefixList);
+            log.info("No Referenced Site registered for Entity {}",entityId);
+            log.debug("Registered Prefixes {}",prefixList);
             return null;
         }
         for(ReferencedSite site : sites){
@@ -291,23 +296,25 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
             try {
                 content = site.getContent(entityId, contentType);
                 if(content != null){
-                    log.debug("Return Content of type "+contentType+" for Entity "+entityId+" from referenced site "+site.getName());
+                    log.debug("Return Content of type {} for Entity {} from referenced site {}",
+                        new Object[]{contentType,entityId,site.getConfiguration().getName()});
                     return content;
                 }
             } catch (ReferencedSiteException e) {
-                log.warn("Unable to access Site "+site.getName()+" (url = "+site.getAccessUri()+")",e);
+                log.warn("Unable to access Site "+site.getConfiguration().getName()+
+                    " (id = "+site.getId()+")",e);
             }
 
         }
-        log.debug("Entity "+entityId+" not found on any of the following Sites "+sites);
+        log.debug("Entity {} not found on any of the following Sites {}",entityId,sites);
         return null;
     }
     @Override
     public Sign getSign(String entityId) {
         Collection<ReferencedSite> sites = getReferencedSitesByEntityPrefix(entityId);
         if(sites.isEmpty()){
-            log.info("No Referenced Site registered for Entity "+entityId+"");
-            log.debug("Registered Prefixes "+prefixList);
+            log.info("No Referenced Site registered for Entity {}",entityId);
+            log.debug("Registered Prefixes {}",prefixList);
             return null;
         }
         for(ReferencedSite site : sites){
@@ -315,15 +322,17 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
             try {
                 entity = site.getSign(entityId);
                 if(entity != null){
-                    log.debug("Return Representation of Site "+site.getName()+" for Entity "+entityId);
+                    log.debug("Return Representation of Site {} for Entity {}",
+                        site.getConfiguration().getName(),entityId);
                     return entity;
                 }
             } catch (ReferencedSiteException e) {
-                log.warn("Unable to access Site "+site.getName()+" (url = "+site.getAccessUri()+")",e);
+                log.warn("Unable to access Site "+site.getConfiguration().getName()+
+                    " (id = "+site.getId()+")",e);
             }
 
         }
-        log.debug("Entity "+entityId+" not found on any of the following Sites "+sites);
+        log.debug("Entity {} not found on any of the following Sites {}",entityId,sites);
         return null;
     }
 

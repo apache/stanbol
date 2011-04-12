@@ -18,14 +18,14 @@ package org.apache.stanbol.entityhub.servicesapi.mapping;
 
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubConfiguration;
-import org.apache.stanbol.entityhub.servicesapi.site.ConfiguredSite;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
 /**
  * Intended to define the configuration of the fieldMapper.
  *
  * @author Rupert Westenthaler
  * @deprecated unsure - Currently the functionality of this service is part of
- * the {@link EntityhubConfiguration} and the {@link ConfiguredSite} interfaces. 
+ * the {@link EntityhubConfiguration} and the {@link SiteConfiguration} interfaces. 
  * Access Methods for the {@link FieldMapper} are defined by the 
  * {@link Entityhub} and the {@link ReferencedSite} interfaces
  */

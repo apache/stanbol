@@ -26,8 +26,15 @@ import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 
-public interface ReferencedSite extends ConfiguredSite {
+public interface ReferencedSite {
 
+    /**
+     * The Id of this site. This Method MUST return the same value as
+     * <code>{@link #getConfiguration()}.getId()</code>. It is only there to
+     * make it more easy to access the Id of the site
+     * @return the ID of this site
+     */
+    String getId();
     /**
      * Searches for entities based on the parsed {@link FieldQuery} and returns
      * the references (ids). Note that selected fields of the query are ignored.
@@ -111,4 +118,9 @@ public interface ReferencedSite extends ConfiguredSite {
      */
     FieldQueryFactory getQueryFactory();
 
+    /**
+     * Getter for the configuration of this referenced site
+     * @return the configuration 
+     */
+    SiteConfiguration getConfiguration();
 }

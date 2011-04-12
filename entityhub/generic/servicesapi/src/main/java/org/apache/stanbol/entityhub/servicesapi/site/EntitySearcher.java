@@ -33,9 +33,9 @@ public interface EntitySearcher {
     /**
      * The key used to define the baseUri of the query service used for the
      * implementation of this interface.<br>
-     * This constants actually uses the value of {@link ConfiguredSite#QUERY_URI}
+     * This constants actually uses the value of {@link SiteConfiguration#QUERY_URI}
      */
-    String QUERY_URI = ConfiguredSite.QUERY_URI;
+    String QUERY_URI = SiteConfiguration.QUERY_URI;
     /**
      * Searches for Entities based on the parsed {@link FieldQuery}
      * @param query the query
