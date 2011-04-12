@@ -30,7 +30,12 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.entityhub.core.mapping.DefaultFieldMapperImpl;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
@@ -69,7 +74,6 @@ import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentFactory;
 import org.osgi.service.component.ComponentInstance;
-import org.osgi.service.metatype.MetaTypeProvider;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,11 +122,6 @@ import org.slf4j.LoggerFactory;
  *      only the local cache can not be used to retrieve entity representations.
  * </ul>
  *
- * TODO: implement {@link MetaTypeProvider} for this Component!
- * The Goal is to dynamically provide the PropertyOptions for
- *  - Properties that use Enumerations
- *  - available EntityDereferencer Types
- *  - available EntitySearcher Types
  * @author Rupert Westenthaler
  *
  */
@@ -258,7 +257,27 @@ public class ReferencedSiteImpl implements ReferencedSite {
     private CacheStrategy cacheStrategy;
     private String cacheId;
     private ServiceTracker cacheTracker;
+    
+    /**
+     * The {@link OfflineMode} is used by Stanbol to indicate that no external
+     * service should be referenced. For the ReferencedSiteImpl this means that
+     * the {@link EntityDereferencer} and {@link EntitySearcher} interfaces
+     * are no longer used.<p>
+     * @see #enableOfflineMode(OfflineMode)
+     * @see #disableOfflineMode(OfflineMode)
+     * @see #isOfflineMode()
+     * @see #ensureOnline(String, Class)
+     */
+    @Reference(
+        cardinality=ReferenceCardinality.OPTIONAL_UNARY,
+        policy=ReferencePolicy.DYNAMIC,
+        bind="enableOfflineMode",
+        unbind="disableOfflineMode",
+        strategy=ReferenceStrategy.EVENT)
+    private OfflineMode offlineMode;
 
+
+    
     public ReferencedSiteImpl(){
         this(LoggerFactory.getLogger(ReferencedSiteImpl.class));
     }
@@ -390,15 +409,15 @@ public class ReferencedSiteImpl implements ReferencedSite {
                     }
                     return new QueryResultListImpl<Sign>(query, results, Sign.class);
                 } catch (YardException e) {
-                    if(entitySearcherComponentName==null){
+                    if(entitySearcherComponentName==null || isOfflineMode()){
                         throw new ReferencedSiteException("Unable to execute query on Cache "+cacheId,e);
                     } else {
                         log.warn(String.format("Error while performing query on Cache %s! Try to use remote site %s as fallback!",cacheId,queryUri),e);
                     }
                 }
             } else {
-                if(entitySearcherComponentName==null){
-                    throw new ReferencedSiteException(String.format("Cache %s not active and no EntitySeracher configured that could be used as Fallback",cacheId));
+                if(entitySearcherComponentName==null || isOfflineMode()){
+                    throw new ReferencedSiteException(String.format("Unable to execute query on Cache %s because it is currently not active",cacheId));
                 } else {
                     log.warn(String.format("Cache %s currently not active will query remote Site %s as fallback",cacheId,queryUri));
                 }
@@ -408,6 +427,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
         if(entitySearcher == null) {
             throw new ReferencedSiteException(String.format("EntitySearcher %s not available for remote site %s!",entitySearcherComponentName,queryUri));
         }
+        ensureOnline(getQueryUri(),entitySearcher.getClass());
         try {
             entityIds = entitySearcher.findEntities(query);
         } catch (IOException e) {
@@ -456,15 +476,15 @@ public class ReferencedSiteImpl implements ReferencedSite {
                 try {
                     return cache.find(query);
                 } catch (YardException e) {
-                    if(entitySearcherComponentName==null){
+                    if(entitySearcherComponentName==null || isOfflineMode()){
                         throw new ReferencedSiteException("Unable to execute query on Cache "+cacheId,e);
                     } else {
                         log.warn(String.format("Error while performing query on Cache %s! Try to use remote site %s as fallback!",cacheId,queryUri),e);
                     }
                 }
             } else {
-                if(entitySearcherComponentName==null){
-                    throw new ReferencedSiteException(String.format("Cache %s not active and no EntitySeracher configured that could be used as Fallback",cacheId));
+                if(entitySearcherComponentName==null || isOfflineMode()){
+                    throw new ReferencedSiteException(String.format("Unable to execute query because Cache %s is currently not active",cacheId));
                 } else {
                     log.warn(String.format("Cache %s currently not active will query remote Site %s as fallback",cacheId,queryUri));
                 }
@@ -472,12 +492,12 @@ public class ReferencedSiteImpl implements ReferencedSite {
         }
         if(entitySearcher == null){
             throw new ReferencedSiteException(String.format("EntitySearcher %s not available for remote site %s!",entitySearcherComponentName,queryUri));
-        } else {
-            try {
-                return entitySearcher.find(query);
-            } catch (IOException e) {
-                throw new ReferencedSiteException("Unable execute Query on remote site "+queryUri,e);
-            }
+        }
+        ensureOnline(getQueryUri(), entitySearcher.getClass());
+        try {
+            return entitySearcher.find(query);
+        } catch (IOException e) {
+            throw new ReferencedSiteException("Unable execute Query on remote site "+queryUri,e);
         }
     }
     @Override
@@ -489,15 +509,15 @@ public class ReferencedSiteImpl implements ReferencedSite {
                 try {
                     return cache.findReferences(query);
                 } catch (YardException e) {
-                    if(entitySearcherComponentName==null){
+                    if(entitySearcherComponentName==null || isOfflineMode()){
                         throw new ReferencedSiteException("Unable to execute query on Cache "+cacheId,e);
                     } else {
                         log.warn(String.format("Error while performing query on Cache %s! Try to use remote site %s as fallback!",cacheId,queryUri),e);
                     }
                 }
             } else {
-                if(entitySearcherComponentName==null){
-                    throw new ReferencedSiteException(String.format("Cache %s not active and no EntitySeracher configured that could be used as Fallback",cacheId));
+                if(entitySearcherComponentName==null  || isOfflineMode()){
+                    throw new ReferencedSiteException(String.format("Unable to execute query on Cache %s because it is currently not active",cacheId));
                 } else {
                     log.warn(String.format("Cache %s currently not active will query remote Site %s as fallback",cacheId,queryUri));
                 }
@@ -505,12 +525,12 @@ public class ReferencedSiteImpl implements ReferencedSite {
         }
         if(entitySearcher == null){
             throw new ReferencedSiteException(String.format("EntitySearcher %s not available for remote site %s!",entitySearcherComponentName,queryUri));
-        } else {
-            try {
-                return entitySearcher.findEntities(query);
-            } catch (IOException e) {
-                throw new ReferencedSiteException("Unable execute Query on remote site "+queryUri,e);
-            }
+        }
+        ensureOnline(getQueryUri(), entitySearcher.getClass());
+        try {
+            return entitySearcher.findEntities(query);
+        } catch (IOException e) {
+            throw new ReferencedSiteException("Unable execute Query on remote site "+queryUri,e);
         }
     }
     @Override
@@ -521,13 +541,13 @@ public class ReferencedSiteImpl implements ReferencedSite {
         }
         if(dereferencer == null){
             throw new ReferencedSiteException(String.format("Dereferencer %s for remote site %s is not available",dereferencerComponentName,accessUri));
-        } else {
-            try {
-                return dereferencer.dereference(id, contentType);
-            } catch (IOException e) {
-                throw new ReferencedSiteException(String.format("Unable to load content for Entity %s and mediaType %s from remote site %s by using dereferencer %s",
-                        id,contentType,accessUri,entitySearcherComponentName),e);
-            }
+        }
+        ensureOnline(getAccessUri(), dereferencer.getClass());
+        try {
+            return dereferencer.dereference(id, contentType);
+        } catch (IOException e) {
+            throw new ReferencedSiteException(String.format("Unable to load content for Entity %s and mediaType %s from remote site %s by using dereferencer %s",
+                    id,contentType,accessUri,entitySearcherComponentName),e);
         }
     }
     @Override
@@ -539,7 +559,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
             try {
                 rep = cache.getRepresentation(id);
             } catch (YardException e) {
-                if (dereferencerComponentName == null) {
+                if (dereferencerComponentName == null || isOfflineMode()) {
                     throw new ReferencedSiteException(String.format("Unable to get Represetnation %s form Cache %s", id, cacheId), e);
                 } else {
                     log.warn(String.format("Unable to get Represetnation %s form Cache %s. Will dereference from remote site %s",
@@ -547,7 +567,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
                 }
             }
         } else {
-            if (dereferencerComponentName == null) {
+            if (dereferencerComponentName == null || isOfflineMode()) {
                 throw new ReferencedSiteException(String.format("Unable to get Represetnation %s because configured Cache %s is currently not available",
                         id, cacheId));
             } else {
@@ -559,13 +579,13 @@ public class ReferencedSiteImpl implements ReferencedSite {
             if(dereferencer == null){
                 throw new ReferencedSiteException(String.format("Entity Dereferencer %s for accessing remote site %s is not available",
                         dereferencerComponentName,accessUri));
-            } else {
-                try {
-                    rep = dereferencer.dereference(id);
-                } catch (IOException e) {
-                    throw new ReferencedSiteException(String.format("Unable to load Representation for entity %s form remote site %s with dereferencer %s",
-                            id, accessUri, dereferencerComponentName), e);
-                }
+            }
+            ensureOnline(getAccessUri(), dereferencer.getClass());
+            try {
+                rep = dereferencer.dereference(id);
+            } catch (IOException e) {
+                throw new ReferencedSiteException(String.format("Unable to load Representation for entity %s form remote site %s with dereferencer %s",
+                        id, accessUri, dereferencerComponentName), e);
             }
             //representation loaded from remote site and cache is available
             if (rep != null && cache != null) {// -> cache the representation
@@ -889,5 +909,50 @@ public class ReferencedSiteImpl implements ReferencedSite {
         this.queryUri = null;
         this.context = null;
         this.properties = null;
+    }
+    
+    /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+     * Method for handling the OfflineMode
+     * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+     */
+    
+    /**
+     * Called by the ConfigurationAdmin to bind the {@link #offlineMode} if the
+     * service becomes available
+     * @param mode 
+     */
+    protected final void enableOfflineMode(OfflineMode mode){
+        this.offlineMode = mode;
+    }
+    /**
+     * Called by the ConfigurationAdmin to unbind the {@link #offlineMode} if the
+     * service becomes unavailable
+     * @param mode
+     */
+    protected final void disableOfflineMode(OfflineMode mode){
+        this.offlineMode = null;
+    }
+    /**
+     * Returns <code>true</code> only if Stanbol operates in {@link OfflineMode}.
+     * @return the offline state
+     */
+    protected final boolean isOfflineMode(){
+        return offlineMode != null;
+    }
+    /**
+     * Basically this Method throws an {@link ReferencedSiteException} in case
+     * Stanbol operates in offline mode
+     * @param uri the URI of the remote service
+     * @param clazz the clazz of the service that would like to refer the remote
+     * service
+     * @throws ReferencedSiteException in case {@link #isOfflineMode()} returns
+     * <code>true</code>
+     */
+    private void ensureOnline(String uri, Class<?> clazz) throws ReferencedSiteException {
+        if(isOfflineMode()){
+            throw new ReferencedSiteException(String.format(
+                "Unable to access remote Service %s by using %s because Stanbol runs in OfflineMode",
+                uri,clazz.getSimpleName()));
+        }
     }
 }
