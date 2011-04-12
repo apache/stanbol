@@ -32,9 +32,9 @@ public interface EntityDereferencer {
     /**
      * The key used to define the baseUri of the service used for the
      * implementation of this interface.<br>
-     * This constants actually uses the value of {@link ConfiguredSite#ACCESS_URI}
+     * This constants actually uses the value of {@link SiteConfiguration#ACCESS_URI}
      */
-    String ACCESS_URI = ConfiguredSite.ACCESS_URI;
+    String ACCESS_URI = SiteConfiguration.ACCESS_URI;
 
     /**
      * The base uri used to access this site

@@ -110,7 +110,8 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     @Path(value = "/")
     @Produces(MediaType.TEXT_HTML)
     public String getInfo() {
-        return "<html><head>" + site.getName() + "</head><body>" + "<h1>Referenced Site " + site.getName()
+        return "<html><head>" + site.getConfiguration().getName() + "</head><body>" + 
+                 "<h1>Referenced Site " + site.getConfiguration().getName()
                + ":</h1></body></html>";
     }
     
@@ -130,7 +131,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     @GET
     @Path("/entity")
     public Response getSignById(@QueryParam(value = "id") String id, @Context HttpHeaders headers) {
-        log.info("site/" + site.getId() + "/entity Request");
+        log.info("site/{}/entity Request",site.getId());
         log.info("  > id       : " + id);
         log.info("  > accept   : " + headers.getAcceptableMediaTypes());
         log.info("  > mediaType: " + headers.getMediaType());
@@ -143,8 +144,8 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         try {
             sign = site.getSign(id);
         } catch (ReferencedSiteException e) {
-            log.error("ReferencedSiteException while accessing Site " + site.getName() + " (id="
-                      + site.getId() + ")", e);
+            log.error("ReferencedSiteException while accessing Site " + site.getConfiguration().getName() + 
+                " (id=" + site.getId() + ")", e);
             throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
         }
         final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers,
@@ -154,7 +155,8 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         } else {
             // TODO: How to parse an ErrorMessage?
             // create an Response with the the Error?
-            log.info(" ... Entity {} not found on referenced site {}", id, site.getId());
+            log.info(" ... Entity {} not found on referenced site {}", 
+                id, site.getId());
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
     }
@@ -180,7 +182,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                                @FormParam(value = "limit") Integer limit,
                                @FormParam(value = "offset") Integer offset,
                                @Context HttpHeaders headers) {
-        log.debug("site/" + site.getId() + "/find Request");
+        log.debug("site/{}/find Request",site.getId());
         // process the optional search field parameter
         if (field == null) {
             field = DEFAULT_FIND_FIELD;
@@ -238,7 +240,8 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         try {
             return Response.ok(site.find(query), acceptedMediaType).build();
         } catch (ReferencedSiteException e) {
-            log.error("ReferencedSiteException while accessing Site " + site.getName() + " (id="
+            log.error("ReferencedSiteException while accessing Site " +
+                site.getConfiguration().getName() + " (id="
                       + site.getId() + ")", e);
             throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
         }

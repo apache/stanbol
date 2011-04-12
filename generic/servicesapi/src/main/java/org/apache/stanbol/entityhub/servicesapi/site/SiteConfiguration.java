@@ -17,7 +17,7 @@
 package org.apache.stanbol.entityhub.servicesapi.site;
 
 
-import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
+import org.apache.stanbol.entityhub.servicesapi.EntityhubConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.Symbol;
@@ -26,22 +26,21 @@ import org.apache.stanbol.entityhub.servicesapi.yard.CacheStrategy;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 
 /**
- * This interface defines the getter as well as the property keys for the
- * configuration of a {@link ReferencedSite}.<p>
+ * This interface defines the getter as well as the keys used to configure
+ * such properties when parsing an configuration for a {@link ReferencedSite}.<p>
  *
- * TODO: No Idea how to handle that in an OSGI context.
  * @author Rupert Westenthaler
  *
  */
-public interface ConfiguredSite {
+public interface SiteConfiguration {
 
     /**
      * The key to be used for the site id
      */
     String ID = "org.apache.stanbol.entityhub.site.id";
     /**
-     * Getter for the id of this site
-     * @return
+     * Getter for the id of this site.
+     * @return The id of the Site
      */
     String getId();
     /**
@@ -88,34 +87,33 @@ public interface ConfiguredSite {
      * Key used for the configuration of the name of the dereferencer type to be
      * used for this site
      */
-    String DEREFERENCER_TYPE = "org.apache.stanbol.entityhub.site.dereferencerType";
+    String ENTITY_DEREFERENCER_TYPE = "org.apache.stanbol.entityhub.site.dereferencerType";
     /**
      * The name of the {@link EntityDereferencer} to be used for accessing
      * representations of entities managed by this Site
      * @return the id of the entity dereferencer implementation
      */
-    String getDereferencerType();
+    String getEntityDereferencerType();
     /**
      * Key used for the configuration of the uri to access the query service of
      * the site
      */
     String QUERY_URI = "org.apache.stanbol.entityhub.site.queryUri";
     /**
-     * Getter for the queryUri of the site. IF not defined the {@link #ACCESS_URI}
-     * is used.
+     * Getter for the queryUri of the site.
      * @return the uri to access the query service of this site
      */
     String getQueryUri();
     /**
      * Key used for the configuration of the type of the query
      */
-    String SEARCHER_TYPE = "org.apache.stanbol.entityhub.site.searcherType";
+    String ENTITY_SEARCHER_TYPE = "org.apache.stanbol.entityhub.site.searcherType";
     /**
-     * The name of the {@link EntitySearcher} to be used to query for
+     * The type of the {@link EntitySearcher} to be used to query for
      * representations of entities managed by this Site.
      * @return the id of the entity searcher implementation.
      */
-    String getQueryType();
+    String getEntitySearcherType();
     /**
      * Key used for the configuration of the default {@link SymbolState} for a site
      */
@@ -188,8 +186,50 @@ public interface ConfiguredSite {
      */
     String SITE_FIELD_MAPPINGS = "org.apache.stanbol.entityhub.site.fieldMappings";
     /**
-     * The {@link FieldMapper} as configured for this Site.
-     * @return the FieldMappings
+     * Getter for the field mappings used for this site when importing entities
+     * to the Entityhub.<p>
+     * Note that this field mappings are used in addition to the field mappings
+     * defined by the {@link EntityhubConfiguration}.
+     * @return the FieldMappings or <code>null</code> if none.
      */
-    FieldMapper getFieldMapper();
+    String[] getFieldMappings();
+    /**
+     * The key used to configure the name of License used by a referenced Site
+     */
+    String SITE_LICENCE_NAME = "org.apache.stanbol.entityhub.site.licenseName";
+    
+    /**
+     * Getter for the Name of the License used for the data provided by this site. 
+     * @return The name of the license
+     */
+    String getLicenseName();
+    /**
+     * The key used to configure the License of a referenced Site
+     */
+    String SITE_LICENCE_TEXT = "org.apache.stanbol.entityhub.site.licenseText";
+    /**
+     * Getter for the full text of the License used for the data provided by
+     * this site
+     * @return the license
+     */
+    String getLicenseText();
+    /**
+     * The key used to configure the link to the License used by a referenced Site
+     */
+    String SITE_LICENCE_URL = "org.apache.stanbol.entityhub.site.licenseUrl";
+    /**
+     * The URL pointing to a site that provides additional information of the
+     * License
+     * @return the licenseUrl
+     */
+    String getLicenseUrl();
+    /**
+     * The attribution for the data provided by this referenced site
+     */
+    String SITE_ATTRIBUTION = "org.apache.stanbol.entityhub.site.attribution";
+    /**
+     * The Attribution for all data provided by this site
+     * @return the attribution
+     */
+    String getAttribution();
 }

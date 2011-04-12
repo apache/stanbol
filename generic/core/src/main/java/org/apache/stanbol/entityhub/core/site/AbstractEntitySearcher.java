@@ -21,12 +21,12 @@ import java.util.Dictionary;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.stanbol.entityhub.servicesapi.site.ConfiguredSite;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.site.EntitySearcher;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 
-@Property(name=ConfiguredSite.QUERY_URI)
+@Property(name=SiteConfiguration.QUERY_URI)
 public abstract class AbstractEntitySearcher implements EntitySearcher {
 
     protected final Logger log;
@@ -54,7 +54,7 @@ public abstract class AbstractEntitySearcher implements EntitySearcher {
             this.context = context;
             Dictionary<String,?> properties = context.getProperties();
             Object queryUriObject = properties.get(EntitySearcher.QUERY_URI);
-            Object accessUriObject = properties.get(ConfiguredSite.ACCESS_URI); //use as an fallback
+            Object accessUriObject = properties.get(SiteConfiguration.ACCESS_URI); //use as an fallback
             if(queryUriObject != null){
                 this.queryUri = queryUriObject.toString();
                 //now set the new config

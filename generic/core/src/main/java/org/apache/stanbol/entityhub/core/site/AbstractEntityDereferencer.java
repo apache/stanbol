@@ -27,7 +27,7 @@ import java.util.RandomAccess;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.stanbol.entityhub.servicesapi.site.ConfiguredSite;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.site.EntityDereferencer;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -71,7 +71,7 @@ public abstract class AbstractEntityDereferencer implements EntityDereferencer {
             }
             //TODO: I am sure, there is some Utility, that supports getting multiple
             //      values from a OSGI Dictionary
-            Object prefixObject = properties.get(ConfiguredSite.ENTITY_PREFIX);
+            Object prefixObject = properties.get(SiteConfiguration.ENTITY_PREFIX);
             ArrayList<String> prefixList = new ArrayList<String>();
             if (prefixObject == null) {
                 prefixList = null;
