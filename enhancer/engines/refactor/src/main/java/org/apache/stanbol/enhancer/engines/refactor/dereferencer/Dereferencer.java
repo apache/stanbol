@@ -13,6 +13,8 @@ import java.net.URLConnection;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -24,20 +26,23 @@ import org.apache.felix.scr.annotations.Service;
 @Service(IDereferencer.class)
 public class Dereferencer implements IDereferencer {
 
+	private final Logger log = LoggerFactory.getLogger(getClass());
+	
 	@Override
 	public InputStream resolve(String location) throws FileNotFoundException {
 		InputStream inputStream = null;
 		try {
 			URI uri = new URI(location);
 			if(uri.isAbsolute()){
-				System.out.println("URL : absolute");
+				log.info("The Refactor is fecthing on-line the graph associated to the resource "+location);
 				URL url = new URL(location);
 				
 				URLConnection connection= url.openConnection();
+				connection.addRequestProperty("Accept","application/rdf+xml");
 				inputStream = connection.getInputStream();
 			}
 			else{
-				System.out.println("URL : not absolute "+location);
+				log.info("The Refactor is fecthing on your local machine the graph associated to the resource "+location);
 				inputStream = new FileInputStream(location);
 			}
 			
