@@ -88,7 +88,7 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
 	 * In future implementation this will be configurable
 	 */
     
-	@Property(value = "http://http://incubator.apache.org/stanbol/enhancer/engines/refactor/scope")
+	@Property(value = "http://incubator.apache.org/stanbol/enhancer/engines/refactor/scope")
 	public static final String SCOPE = "engine.refactor.scope";
 
 	@Property(value = "")
@@ -97,8 +97,11 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
     @Property(value={"http://ontologydesignpatterns.org/ont/iks/kres/dbpedia_demo.owl",""}, cardinality=1000, description="To fix a set of resolvable ontology URIs for the scope's ontologies.")
     public static final String SCOPE_CORE_ONTOLOGY ="engine.refactor.scope.core.ontology";
 
-    @Property(value="true",description="If true: the previously generated RDF is deleted and substituted with the new one. If false: the new one is appended to the old RDF. Possible value: true or false.")
+    @Property(boolValue=true, description="If true: the previously generated RDF is deleted and substituted with the new one. If false: the new one is appended to the old RDF. Possible value: true or false.")
     public static final String APPEND_OTHER_ENHANCEMENT_GRAPHS = "engine.refactor.append.graphs";
+    
+    @Property(boolValue=true, description="If true: entities are fetched via the EntityHub. If false: entities are fetched on-line. Possible value: true or false.")
+    public static final String USAGE_OF_ENTITY_HUB = "engine.refactor.entityhub";
 
 	@Reference
 	ONManager onManager;
@@ -117,7 +120,8 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
 
 	private OntologyScope scope;
 	private IRI recipeIRI;
-        private boolean graph_append;
+    private boolean graph_append;
+    private boolean useEntityHub;
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -185,31 +189,48 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
 				 * the entity to the EntityHub and wrap the RDF graph into
 				 * an OWLOntology.
 				 */
-				final OWLOntology fetched = getEntityOntology(entityReferenceString);
-								
-				OntologyInputSource ontologySource = new OntologyInputSource() {
-
-					@Override
-					public boolean hasRootOntology() {
-						return (fetched != null);
+				OWLOntology fetched = null;
+				
+				if(useEntityHub){
+					fetched = getEntityOntology(entityReferenceString);
+				}				
+				else{
+					Dereferencer dereferencer = new Dereferencer();
+					try {
+						fetched = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(dereferencer.resolve(entityReferenceString));
+					} catch (OWLOntologyCreationException e) {
+						log.error("An error occurred while trying to create the ontology related to the entity " + entityReferenceString);
+					} catch (FileNotFoundException e) {
+						log.error("The entity " + entityReferenceString + " does not exist or is unreachable");
 					}
-
-					@Override
-					public boolean hasPhysicalIRI() {
-						return true;
-					}
-
-					@Override
-					public OWLOntology getRootOntology() {
-						return fetched;
-					}
-
-					@Override
-					public IRI getPhysicalIRI() {
-						return fetchedIri;
-					}
-				};
-				sessionSpace.addOntology(ontologySource);
+				}
+				
+				if(fetched != null){
+					final OWLOntology fetchedFinal = fetched;
+					OntologyInputSource ontologySource = new OntologyInputSource() {
+	
+						@Override
+						public boolean hasRootOntology() {
+							return (fetchedFinal != null);
+						}
+	
+						@Override
+						public boolean hasPhysicalIRI() {
+							return true;
+						}
+	
+						@Override
+						public OWLOntology getRootOntology() {
+							return fetchedFinal;
+						}
+	
+						@Override
+						public IRI getPhysicalIRI() {
+							return fetchedIri;
+						}
+					};
+					sessionSpace.addOntology(ontologySource);
+				}
 
 				log.debug("Added " + entityReferenceString
 						+ " to the session space of scope "
@@ -412,7 +433,9 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
      	/*
      	 * Read property to indicate if the the new eanchment metada must be append to the existing mGraph 
      	 */
-		graph_append = Boolean.parseBoolean(((String)context.getProperties().get(APPEND_OTHER_ENHANCEMENT_GRAPHS)).toLowerCase());
+		graph_append = ((Boolean)context.getProperties().get(APPEND_OTHER_ENHANCEMENT_GRAPHS)).booleanValue();
+		
+		useEntityHub = ((Boolean)context.getProperties().get(USAGE_OF_ENTITY_HUB)).booleanValue();
 		
 		/*
 		 * Get the Scope Factory from the ONM of KReS that allows to create new
