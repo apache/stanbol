@@ -91,7 +91,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     public ReferencedSiteRootResource(@Context ServletContext context,
                                       @PathParam(value = "site") String siteId) {
         super();
-        log.info("... init ReferencedSiteRootResource for Site {}", siteId);
+        log.info("<init> with site {}", siteId);
         ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
             ReferencedSiteManager.class, context);
         if (siteId == null || siteId.isEmpty()) {
@@ -100,7 +100,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         }
         site = referencedSiteManager.getReferencedSite(siteId);
         if (site == null) {
-            log.error("Site {} not found (No referenced site with that ID is present within the Entityhub",
+            log.error("Site {} not found (no referenced site with that ID is present within the Entityhub",
                 siteId);
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }

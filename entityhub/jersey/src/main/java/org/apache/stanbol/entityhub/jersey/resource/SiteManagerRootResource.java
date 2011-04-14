@@ -68,30 +68,30 @@ import org.slf4j.LoggerFactory;
  */
 @Path("/entityhub/sites")
 public class SiteManagerRootResource extends BaseStanbolResource {
-    
+
     private final Logger log = LoggerFactory.getLogger(getClass());
-    
+
     public static final Set<String> RDF_MEDIA_TYPES = new TreeSet<String>(Arrays.asList(N3, N_TRIPLE,
         RDF_XML, TURTLE, X_TURTLE, RDF_JSON));
-    
+
     /**
      * The Field used for find requests if not specified TODO: Will be depreciated as soon as EntityQuery is
      * implemented
      */
     private static final String DEFAULT_FIND_FIELD = RDFS.label.getUnicodeString();
-    
+
     /**
      * The default number of maximal results of searched sites.
      */
     private static final int DEFAULT_FIND_RESULT_LIMIT = 5;
-    
+
     private ServletContext context;
-    
+
     public SiteManagerRootResource(@Context ServletContext context) {
         super();
         this.context = context;
     }
-    
+
     /**
      * Getter for the id's of all referenced sites
      * 
@@ -101,17 +101,17 @@ public class SiteManagerRootResource extends BaseStanbolResource {
     @Path(value = "/referenced")
     @Produces(APPLICATION_JSON)
     public JSONArray getReferencedSites(@Context UriInfo uriInfo) {
-        log.info("sites/referenced Request");
+        log.debug("getReferencedSites() request");
         JSONArray referencedSites = new JSONArray();
         ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
             ReferencedSiteManager.class, context);
         for (String site : referencedSiteManager.getReferencedSiteIds()) {
             referencedSites.put(String.format("%sentityhub/site/%s/", uriInfo.getBaseUri(), site));
         }
-        log.info("  ... return " + referencedSites.toString());
+        log.debug("getReferencedSites() returns {}", referencedSites.toString());
         return referencedSites;
     }
-    
+
     /**
      * Cool URI handler for Signs.
      * 
@@ -124,12 +124,11 @@ public class SiteManagerRootResource extends BaseStanbolResource {
     @GET
     @Path("/entity")
     public Response getSignById(@QueryParam(value = "id") String id, @Context HttpHeaders headers) {
-        log.info("sites/entity Request");
-        log.info("  > id       : " + id);
-        log.info("  > accept   : " + headers.getAcceptableMediaTypes());
-        log.info("  > mediaType: " + headers.getMediaType());
+        log.debug("getSignById() request\n\t> id       : {}\n\t> accept   : {}\n\t> mediaType: {}",
+            new Object[] {id, headers.getAcceptableMediaTypes(), headers.getMediaType()});
+
         if (id == null || id.isEmpty()) {
-            log.error("No or emptpy ID was parsed as query parameter (id={})", id);
+            log.error("getSignById() No or emptpy ID was parsed as query parameter (id={})", id);
             throw new WebApplicationException(BAD_REQUEST);
         }
         ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
@@ -148,11 +147,11 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         } else {
             // TODO: How to parse an ErrorMessage?
             // create an Response with the the Error?
-            log.info(" ... Entity {} not found on any referenced site");
+            log.info("getSignById() entity {} not found on any referenced site");
             throw new WebApplicationException(NOT_FOUND);
         }
     }
-    
+
     @GET
     @Path("/find")
     public Response findEntityfromGet(@QueryParam(value = "name") String name,
@@ -164,7 +163,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
                                       @Context HttpHeaders headers) {
         return findEntity(name, field, language, limit, offset, headers);
     }
-    
+
     @POST
     @Path("/find")
     public Response findEntity(@FormParam(value = "name") String name,
@@ -174,7 +173,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
                                @FormParam(value = "limit") Integer limit,
                                @FormParam(value = "offset") Integer offset,
                                @Context HttpHeaders headers) {
-        log.debug("sites/find Request");
+        log.debug("findEntity() Request");
         if (field == null) {
             field = DEFAULT_FIND_FIELD;
         } else {
@@ -191,7 +190,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
                 .getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
         return Response.ok(referencedSiteManager.find(query), acceptedMediaType).build();
     }
-    
+
     /**
      * Allows to parse any kind of {@link FieldQuery} in its JSON Representation. Note that the maximum number
      * of results (limit) and the offset of the first result (offset) are parsed as seperate parameters and
@@ -224,5 +223,5 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             MediaType.APPLICATION_JSON_TYPE);
         return Response.ok(referencedSiteManager.find(query), acceptedMediaType).build();
     }
-    
+
 }

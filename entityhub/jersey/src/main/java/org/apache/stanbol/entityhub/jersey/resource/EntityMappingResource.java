@@ -58,24 +58,25 @@ import org.slf4j.LoggerFactory;
  */
 @Path("/entityhub/mapping")
 public class EntityMappingResource extends BaseStanbolResource {
-    
+
     private final Logger log = LoggerFactory.getLogger(getClass());
-    
+
     private ServletContext context;
-    
+
     // bind the job manager by looking it up from the servlet request context
     public EntityMappingResource(@Context ServletContext context) {
         super();
         this.context = context;
     }
-    
+
     @GET
     @Path("/")
     @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
-    public Response getMapping(@QueryParam("id") String reference, @Context HttpHeaders headers) throws WebApplicationException {
-        log.info("/symbol/ POST Request");
-        log.info("  > id    : " + reference);
-        log.info("  > accept: " + headers.getAcceptableMediaTypes());
+    public Response getMapping(@QueryParam("id") String reference, @Context HttpHeaders headers)
+                                                                            throws WebApplicationException {
+        log.debug("getMapping() POST Request > id : {} > accept: {}",
+            reference, headers.getAcceptableMediaTypes());
+        
         if (reference == null || reference.isEmpty()) {
             // TODO: how to parse an error message
             throw new WebApplicationException(BAD_REQUEST);
@@ -94,14 +95,15 @@ public class EntityMappingResource extends BaseStanbolResource {
             return Response.ok(mapping, acceptedMediaType).build();
         }
     }
-    
+
     @GET
     @Path("/entity")
     @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
-    public Response getEntityMapping(@QueryParam("id") String entity, @Context HttpHeaders headers) throws WebApplicationException {
-        log.info("/symbol/ POST Request");
-        log.info("  > entity: " + entity);
-        log.info("  > accept: " + headers.getAcceptableMediaTypes());
+    public Response getEntityMapping(@QueryParam("id") String entity, @Context HttpHeaders headers)
+                                                                            throws WebApplicationException {
+        log.debug("getEntityMapping() POST Request > entity: {} > accept: {}",
+            entity, headers.getAcceptableMediaTypes());
+
         if (entity == null || entity.isEmpty()) {
             // TODO: how to parse an error message
             throw new WebApplicationException(BAD_REQUEST);
@@ -120,14 +122,15 @@ public class EntityMappingResource extends BaseStanbolResource {
             return Response.ok(mapping, acceptedMediaType).build();
         }
     }
-    
+
     @GET
     @Path("/symbol")
     @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
-    public Response getSymbolMappings(@QueryParam("id") String symbol, @Context HttpHeaders headers) throws WebApplicationException {
-        log.info("/symbol/ POST Request");
-        log.info("  > symbol: " + symbol);
-        log.info("  > accept: " + headers.getAcceptableMediaTypes());
+    public Response getSymbolMappings(@QueryParam("id") String symbol, @Context HttpHeaders headers)
+                                                                            throws WebApplicationException {
+        log.debug("getSymbolMappings() POST Request > symbol: {} > accept: {}",
+            symbol, headers.getAcceptableMediaTypes());
+
         if (symbol == null || symbol.isEmpty()) {
             // TODO: how to parse an error message
             throw new WebApplicationException(BAD_REQUEST);
