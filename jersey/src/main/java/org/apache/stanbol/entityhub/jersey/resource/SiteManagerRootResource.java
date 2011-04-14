@@ -16,12 +16,7 @@
  */
 package org.apache.stanbol.entityhub.jersey.resource;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N3;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N_TRIPLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JSON;
@@ -49,6 +44,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.commons.web.base.ContextHelper;
@@ -60,6 +56,8 @@ import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
 import org.codehaus.jettison.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sun.jersey.api.view.Viewable;
 
 /**
  * Resource to provide a REST API for the {@link ReferencedSiteManager}.
@@ -92,6 +90,19 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         this.context = context;
     }
 
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public Response getSitesPage() {
+        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+    }
+    
+    @GET
+    @Path("/referenced")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getReferencedSitesPage() {
+        return Response.ok(new Viewable("referenced", this), TEXT_HTML).build();
+    }
+    
     /**
      * Getter for the id's of all referenced sites
      * 
@@ -99,17 +110,22 @@ public class SiteManagerRootResource extends BaseStanbolResource {
      */
     @GET
     @Path(value = "/referenced")
-    @Produces(APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public JSONArray getReferencedSites(@Context UriInfo uriInfo) {
-        log.debug("getReferencedSites() request");
         JSONArray referencedSites = new JSONArray();
         ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
             ReferencedSiteManager.class, context);
         for (String site : referencedSiteManager.getReferencedSiteIds()) {
             referencedSites.put(String.format("%sentityhub/site/%s/", uriInfo.getBaseUri(), site));
         }
-        log.debug("getReferencedSites() returns {}", referencedSites.toString());
         return referencedSites;
+    }
+    
+    @GET
+    @Path("/entity")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getEntityPage() {
+        return Response.ok(new Viewable("entity", this), TEXT_HTML).build();        
     }
 
     /**
@@ -129,7 +145,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
 
         if (id == null || id.isEmpty()) {
             log.error("getSignById() No or emptpy ID was parsed as query parameter (id={})", id);
-            throw new WebApplicationException(BAD_REQUEST);
+            throw new WebApplicationException(Status.BAD_REQUEST);
         }
         ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
             ReferencedSiteManager.class, context);
@@ -141,17 +157,24 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         // throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
         // }
         final MediaType acceptedMediaType = JerseyUtils
-                .getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
+                .getAcceptableMediaType(headers, MediaType.APPLICATION_JSON_TYPE);
         if (sign != null) {
             return Response.ok(sign, acceptedMediaType).build();
         } else {
             // TODO: How to parse an ErrorMessage?
             // create an Response with the the Error?
             log.info("getSignById() entity {} not found on any referenced site");
-            throw new WebApplicationException(NOT_FOUND);
+            throw new WebApplicationException(Status.NOT_FOUND);
         }
     }
 
+    @GET
+    @Path("/find")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getFindPage() {
+        return Response.ok(new Viewable("find", this), TEXT_HTML).build();
+    }
+    
     @GET
     @Path("/find")
     public Response findEntityfromGet(@QueryParam(value = "name") String name,
@@ -187,10 +210,17 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         FieldQuery query = JerseyUtils.createFieldQueryForFindRequest(name, field, language,
             limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, offset);
         final MediaType acceptedMediaType = JerseyUtils
-                .getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
+                .getAcceptableMediaType(headers, MediaType.APPLICATION_JSON_TYPE);
         return Response.ok(referencedSiteManager.find(query), acceptedMediaType).build();
     }
 
+    @GET
+    @Path("/query")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getQueryPage() {
+        return Response.ok(new Viewable("query", this), TEXT_HTML).build();
+    }
+    
     /**
      * Allows to parse any kind of {@link FieldQuery} in its JSON Representation. Note that the maximum number
      * of results (limit) and the offset of the first result (offset) are parsed as seperate parameters and
@@ -212,7 +242,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
      */
     @POST
     @Path("/query")
-    @Consumes( {APPLICATION_FORM_URLENCODED + ";qs=1.0", MULTIPART_FORM_DATA + ";qs=0.9"})
+    @Consumes( {MediaType.APPLICATION_FORM_URLENCODED + ";qs=1.0", MediaType.MULTIPART_FORM_DATA + ";qs=0.9"})
     public Response queryEntities(@FormParam("query") String queryString,
                                   @FormParam("query") File file,
                                   @Context HttpHeaders headers) {
