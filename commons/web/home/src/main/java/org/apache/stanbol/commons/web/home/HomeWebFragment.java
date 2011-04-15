@@ -78,7 +78,7 @@ public class HomeWebFragment implements WebFragment {
     @Override
     public List<ScriptResource> getScriptResources() {
         List<ScriptResource> resources = new ArrayList<ScriptResource>();
-        // resources.add(new ScriptResource("text/javascript", "scripts/jquery-1.4.2.js", this, 0));
+        resources.add(new ScriptResource("text/javascript", "scripts/jquery-1.4.2.js", this, 0));
         return resources;
     }
 

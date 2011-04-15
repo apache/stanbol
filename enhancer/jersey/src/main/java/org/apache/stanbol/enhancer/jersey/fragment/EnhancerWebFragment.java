@@ -95,7 +95,6 @@ public class EnhancerWebFragment implements WebFragment {
         List<ScriptResource> resources = new ArrayList<ScriptResource>();
         resources.add(new ScriptResource("text/javascript", "openlayers-2.9/OpenLayers.js", this, 10));
         resources.add(new ScriptResource("text/javascript", "scripts/prettify/prettify.js", this, 20));
-        resources.add(new ScriptResource("text/javascript", "scripts/jquery-1.4.2.js", this, 30));
         return resources;
     }
 
