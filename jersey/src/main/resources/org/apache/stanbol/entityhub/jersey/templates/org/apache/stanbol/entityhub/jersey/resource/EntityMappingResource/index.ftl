@@ -4,8 +4,11 @@
 
 <p>List of subresources:</p>
 <ul>
+	<li><a href="${it.publicBaseUri}entityhub/mapping/symbol">/entityhub/mapping/symbol</a></li>
 	<li><a href="${it.publicBaseUri}entityhub/mapping/entity">/entityhub/mapping/entity</a></li>
 </ul>
+
+<#include "inc_mapping.ftl">
 
 </@common.page>
 </#escape>

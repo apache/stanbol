@@ -6,8 +6,6 @@
 <div class="panel" id="restapi">
 <h3>Service Endpoint <a href="${it.publicBaseUri}entityhub/mapping">/entityhub/mapping</a></h3>
 
-<#include "inc_mapping.ftl">
-
 <#nested>
 
 </div>

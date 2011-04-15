@@ -5,8 +5,7 @@
 	<tr>
 		<th>Description</th>
 		<td>Service to get a mapping by its ID which is encoded as an URI. You need to know the mapping URI
-		to use this service and you can retrieve such a mapping URI by creating a new symbol using the
-		<a href="${it.publicBaseUri}entityhub/symbol/lookup">symbol/lookup</a> endpoint.</td>
+		to use this service.</td>
 	</tr>
 	<tr>
 		<th>Request</th>
@@ -25,11 +24,8 @@
 
 <h5>Example</h5>
 
-<pre>curl "${it.publicBaseUri}entityhub/mapping?id=urn:org.apache.stanbol:entityhub:symbol.1e05cc86-07bb-7281-5a19-0d4d0d8e054e"</pre>
-
+<pre>curl "${it.publicBaseUri}entityhub/mapping?id=</pre>
 <h5>Test</h5>
-
-<p>To test this 
 
 <form id="getMappingForUriForm">
 <p>Get mapping for URI
@@ -44,7 +40,7 @@ function getMappingForUri() {
    type: "GET",
    url: "${it.publicBaseUri}entityhub/mapping",
    data: $("#getMappingForUriForm").serialize(),
-   dataType: "json",
+   dataType: "text/plain",
    cache: false,
    success: function(data, textStatus, jqXHR) {
      $("#mappingResultText").text(data);

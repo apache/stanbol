@@ -8,6 +8,7 @@
 </ul>
 
 <#include "inc_lookup.ftl">
+<#include "inc_find.ftl">
 
 </@common.page>
 </#escape>
