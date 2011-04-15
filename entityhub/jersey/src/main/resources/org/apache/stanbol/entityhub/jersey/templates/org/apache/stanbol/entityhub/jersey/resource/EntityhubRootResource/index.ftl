@@ -13,7 +13,9 @@
 <p>The Entityhub supports the following service endpoints:</p>
 
 <ul>
-	<li>Site Manager @ <a href="${it.publicBaseUri}entityhub/sites/">/entityhub/sites</a></li>
+	<li>Site Manager @ <a href="${it.publicBaseUri}entityhub/sites">/entityhub/sites</a></li>
+	<li>Symbols @ <a href="${it.publicBaseUri}entityhub/symbol">/entityhub/symbol</a></li>
+	<li>Mappings @ <a href="${it.publicBaseUri}entityhub/mapping">/entityhub/mapping</a></li>
 </ul>
 
 </div>

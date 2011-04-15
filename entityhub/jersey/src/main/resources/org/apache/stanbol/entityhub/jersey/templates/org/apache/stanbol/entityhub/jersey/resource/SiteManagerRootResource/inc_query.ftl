@@ -24,7 +24,7 @@
 
 <h5>Example</h5>
 
-<pre>curl -X POST -F "query=@fieldQuery.json" http://localhost:8080/entityhub/site/dbpedia/query</pre>
+<pre>curl -X POST -F "query=@fieldQuery.json" ${it.publicBaseUri}entityhub/site/dbpedia/query</pre>
 
 <p><em>Note</em>: "@fieldQuery.json" links to a local file that contains the parsed
     Fieldquery (see ection "FieldQuery JSON format" for examples).</p>

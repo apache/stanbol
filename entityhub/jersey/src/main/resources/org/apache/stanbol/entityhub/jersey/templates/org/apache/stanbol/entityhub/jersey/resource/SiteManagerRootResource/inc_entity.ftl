@@ -25,11 +25,11 @@
 
 <h5>Example</h5>
 
-<pre>curl "http://localhost:8080/entityhub/sites/entity?id=http://dbpedia.org/resource/Paris"</pre>
+<pre>curl "${it.publicBaseUri}entityhub/sites/entity?id=http://dbpedia.org/resource/Paris"</pre>
 
 <h5>Test</h5>
 
-<a href="javascript:searchEntityParis()">Search for entity 'Paris' in DBPedia</a>.
+<a href="#" onclick="searchEntityParis(); return false;">Search for entity 'Paris' in DBPedia</a>.
 
 <script language="javascript">
 function searchEntityParis() {

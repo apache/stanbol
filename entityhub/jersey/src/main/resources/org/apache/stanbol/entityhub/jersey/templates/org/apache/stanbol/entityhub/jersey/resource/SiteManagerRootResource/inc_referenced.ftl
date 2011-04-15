@@ -24,7 +24,7 @@
 </table>
 
 <h5>Example</h5>
-<pre>curl "http://localhost:8080/entityhub/sites/referenced"</pre>
+<pre>curl "${it.publicBaseUri}entityhub/sites/referenced"</pre>
 
 <h5>Example response</h5>
 <pre>["http:\/\/localhost:8080\/entityhub\/site\/dbpedia\/",

@@ -18,6 +18,7 @@ package org.apache.stanbol.entityhub.jersey.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N3;
@@ -39,6 +40,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -50,6 +52,8 @@ import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sun.jersey.api.view.Viewable;
 
 /**
  * RESTful interface for the {@link EntityMapping}s defined by the {@link Entityhub}.
@@ -70,28 +74,36 @@ public class EntityMappingResource extends BaseStanbolResource {
     }
 
     @GET
-    @Path("/")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getEntityMappingPage() {
+        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+    }
+    
+    @GET
     @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
     public Response getMapping(@QueryParam("id") String reference, @Context HttpHeaders headers)
                                                                             throws WebApplicationException {
-        log.debug("getMapping() POST Request > id : {} > accept: {}",
+        log.debug("get mapping for request > id : {} > accept: {}",
             reference, headers.getAcceptableMediaTypes());
+
+        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
         
         if (reference == null || reference.isEmpty()) {
-            // TODO: how to parse an error message
-            throw new WebApplicationException(BAD_REQUEST);
+            return Response.status(Status.BAD_REQUEST).entity("The mapping ID (URI) is missing.").header(
+                HttpHeaders.ACCEPT, acceptedMediaType).build();
         }
         Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
         EntityMapping mapping;
         try {
             mapping = entityhub.getMappingById(reference);
         } catch (EntityhubException e) {
-            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+            log.error("error while getting the mapping for {}", reference, e);
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
         if (mapping == null) {
-            throw new WebApplicationException(404);
+            return Response.status(Status.NOT_FOUND).entity("No mapping found for '" + reference + "'.")
+                    .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
         } else {
-            MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
             return Response.ok(mapping, acceptedMediaType).build();
         }
     }
