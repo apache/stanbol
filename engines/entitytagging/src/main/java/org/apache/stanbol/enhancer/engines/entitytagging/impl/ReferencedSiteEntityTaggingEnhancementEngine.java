@@ -35,6 +35,9 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.commons.stanboltools.offline.OnlineMode;
@@ -53,6 +56,8 @@ import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
+import org.apache.stanbol.entityhub.servicesapi.site.EntityDereferencer;
+import org.apache.stanbol.entityhub.servicesapi.site.EntitySearcher;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteException;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
@@ -83,15 +88,6 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
         ServiceProperties {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-
-    /**
-     * TODO: workaround for STANBOL-162
-     * This Reference is used to statically mark this Engine as to require 
-     * {@link OnlineMode} until it can dynamically detect the mode based on the
-     * used ReferencedSite. See STANBOL-162 for details.
-     */
-    @Reference
-    OnlineMode offlineMode;
     
     @Property(value="dbpedia")
     public static final String REFERENCED_SITE_ID = "org.apache.stanbol.enhancer.engines.entitytagging.referencedSiteId";
@@ -171,7 +167,44 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
      * The number of Suggestions to be added
      */
     public Integer numSuggestions = 3;
-
+    /**
+     * The {@link OfflineMode} is used by Stanbol to indicate that no external
+     * service should be referenced. For this engine that means it is necessary
+     * to check if the used {@link ReferencedSite} can operate offline or not.
+     * @see #enableOfflineMode(OfflineMode)
+     * @see #disableOfflineMode(OfflineMode)
+     */
+    @Reference(
+        cardinality=ReferenceCardinality.OPTIONAL_UNARY,
+        policy=ReferencePolicy.DYNAMIC,
+        bind="enableOfflineMode",
+        unbind="disableOfflineMode",
+        strategy=ReferenceStrategy.EVENT)
+    private OfflineMode offlineMode;
+    /**
+     * Called by the ConfigurationAdmin to bind the {@link #offlineMode} if the
+     * service becomes available
+     * @param mode 
+     */
+    protected final void enableOfflineMode(OfflineMode mode){
+        this.offlineMode = mode;
+    }
+    /**
+     * Called by the ConfigurationAdmin to unbind the {@link #offlineMode} if the
+     * service becomes unavailable
+     * @param mode
+     */
+    protected final void disableOfflineMode(OfflineMode mode){
+        this.offlineMode = null;
+    }
+    /**
+     * Returns <code>true</code> only if Stanbol operates in {@link OfflineMode}.
+     * @return the offline state
+     */
+    protected final boolean isOfflineMode(){
+        return offlineMode != null;
+    }
+    
     @SuppressWarnings("unchecked")
     @Activate
     protected void activate(ComponentContext context) throws ConfigurationException {
@@ -221,6 +254,11 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
             //TODO: throwing Exceptions is currently deactivated. We need a more clear
             //policy what do to in such situations
             //throw new EngineException(msg);
+            return;
+        }
+        if(isOfflineMode() && !site.supportsLocalMode()){
+            log.warn("Unable to enhance ci {} because OfflineMode is not supported by ReferencedSite {}.",
+                ci.getId(),site.getId());
             return;
         }
         UriRef contentItemId = new UriRef(ci.getId());
