@@ -227,58 +227,78 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
     }
     @Override
     public QueryResultList<String> findIds(FieldQuery query) {
+        log.debug("findIds for query{}", query);
         // We need to search all referenced Sites
         Set<String> entityIds = new HashSet<String>();
         for(ReferencedSite site : referencedSites){
-            try {
-                for(String entityId : site.findReferences(query)){
-                    entityIds.add(entityId);
+            if(site.supportsSearch()){
+                log.debug(" > query site {}",site.getId());
+                try {
+                    for(String entityId : site.findReferences(query)){
+                        entityIds.add(entityId);
+                    }
+                } catch (ReferencedSiteException e) {
+                    log.warn("Unable to access Site "+site.getConfiguration().getName()+
+                        " (id = "+site.getId()+")",e);
                 }
-            } catch (ReferencedSiteException e) {
-                log.warn("Unable to access Site "+site.getConfiguration().getName()+
-                    " (id = "+site.getId()+")",e);
+            } else {
+                log.debug(" > Site {} does not support queries",site.getId());
             }
         }
         return new QueryResultListImpl<String>(query, entityIds.iterator(),String.class);
     }
     @Override
     public QueryResultList<Representation> find(FieldQuery query) {
+        log.debug("find with query{}", query);
         Set<Representation> representations = new HashSet<Representation>();
         for(ReferencedSite site : referencedSites){
-            try {
-                for(Representation rep : site.find(query)){
-                    if(!representations.contains(rep)){ //do not override
-                        representations.add(rep);
-                    } else {
-                        log.info("Entity {} found on more than one Referenced Site" +
-                        		" -> Representation of Site {} is ignored",
-                        		rep.getId(),site.getConfiguration().getName());
+            if(site.supportsSearch()){
+                log.debug(" > query site {}",site.getId());
+                try {
+                    for(Representation rep : site.find(query)){
+                        if(!representations.contains(rep)){ //do not override
+                            representations.add(rep);
+                        } else {
+                            log.info("Entity {} found on more than one Referenced Site" +
+                            		" -> Representation of Site {} is ignored",
+                            		rep.getId(),site.getConfiguration().getName());
+                        }
                     }
+                } catch (ReferencedSiteException e) {
+                    log.warn("Unable to access Site "+site.getConfiguration().getName()+
+                        " (id = "+site.getId()+")",e);
                 }
-            } catch (ReferencedSiteException e) {
-                log.warn("Unable to access Site "+site.getConfiguration().getName()+
-                    " (id = "+site.getId()+")",e);
+            } else {
+                log.debug(" > Site {} does not support queries",site.getId());
             }
         }
         return new QueryResultListImpl<Representation>(query, representations,Representation.class);
     }
     @Override
     public QueryResultList<Sign> findEntities(FieldQuery query) {
+        log.debug("findEntities for query{}", query);
         Set<Sign> entities = new HashSet<Sign>();
         for(ReferencedSite site : referencedSites){
-            try {
-                for(Sign rep : site.findSigns(query)){
-                    if(!entities.contains(rep)){ //do not override
-                        entities.add(rep);
-                    } else {
-                        log.info("Entity {} found on more than one Referenced Site" +
-                        		" -> Representation of Site {} is ignored",
-                        		rep.getId(),site.getConfiguration().getName());
+            if(site.supportsSearch()){ //do not search on sites that do not support it
+                log.debug(" > query site {}",site.getId());
+                try {
+                    for(Sign rep : site.findSigns(query)){
+                        if(!entities.contains(rep)){ //do not override
+                            entities.add(rep);
+                        } else {
+                            //TODO: find a solution for this problem
+                            //      e.g. allow to add the site for entities
+                            log.info("Entity {} found on more than one Referenced Site" +
+                            		" -> Representation of Site {} is ignored",
+                            		rep.getId(),site.getConfiguration().getName());
+                        }
                     }
+                } catch (ReferencedSiteException e) {
+                    log.warn("Unable to access Site "+site.getConfiguration().getName()+
+                        " (id = "+site.getId()+")",e);
                 }
-            } catch (ReferencedSiteException e) {
-                log.warn("Unable to access Site "+site.getConfiguration().getName()+
-                    " (id = "+site.getId()+")",e);
+            } else {
+                log.debug(" > Site {} does not support queries",site.getId());
             }
         }
         return new QueryResultListImpl<Sign>(query, entities,Sign.class);

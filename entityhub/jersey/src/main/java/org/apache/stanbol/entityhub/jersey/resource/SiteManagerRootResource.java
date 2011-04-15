@@ -50,6 +50,7 @@ import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
+import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Sign;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
@@ -84,7 +85,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
     private static final int DEFAULT_FIND_RESULT_LIMIT = 5;
 
     private ServletContext context;
-
+        
     public SiteManagerRootResource(@Context ServletContext context) {
         super();
         this.context = context;

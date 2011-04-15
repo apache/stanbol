@@ -571,6 +571,14 @@ public class ReferencedSiteImpl implements ReferencedSite {
         }
         return factory;
     }
+    public boolean supportsLocalMode(){
+        return siteConfiguration.getCacheStrategy() == CacheStrategy.all &&
+            getCache() != null;
+    }
+    public boolean supportsSearch(){
+        return supportsLocalMode() ||
+            entitySearcher != null;
+    }
     /**
      * Internally used to get the Cache for this site. If
      * {@link CacheStrategy#none}, this methods always returns <code>null</code>,
