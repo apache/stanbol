@@ -20,6 +20,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
@@ -49,6 +50,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -60,6 +62,8 @@ import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sun.jersey.api.view.Viewable;
 
 /**
  * RESTful interface for The {@link Entityhub}. To access referenced sites directly see
@@ -94,6 +98,12 @@ public class SymbolResource extends BaseStanbolResource {
     }
     
     @GET
+    @Produces(MediaType.TEXT_HTML)
+    public Response getSymbolPage() {
+        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+    }
+    
+    @GET
     @Path("/")
     @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
     public Response getSymbol(@QueryParam("id") String symbolId, @Context HttpHeaders headers) throws WebApplicationException {
@@ -121,6 +131,13 @@ public class SymbolResource extends BaseStanbolResource {
     
     @GET
     @Path("/lookup")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getSymbolLookupPage() {
+        return Response.ok(new Viewable("lookup", this), TEXT_HTML).build();
+    }
+    
+    @GET
+    @Path("/lookup")
     @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
     public Response lookupSymbol(@QueryParam("id") String reference,
                                  @QueryParam("create") boolean create,
@@ -134,6 +151,8 @@ public class SymbolResource extends BaseStanbolResource {
             throw new WebApplicationException(BAD_REQUEST);
         }
         Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
+        
+        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
         Symbol symbol;
         try {
             symbol = entityhub.lookupSymbol(reference, create);
@@ -141,9 +160,9 @@ public class SymbolResource extends BaseStanbolResource {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
         if (symbol == null) {
-            throw new WebApplicationException(404);
+            return Response.status(Status.NOT_FOUND).entity("No symbol found for '" + reference + "'.")
+                    .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
         } else {
-            MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
             return Response.ok(symbol, acceptedMediaType).build();
         }
     }

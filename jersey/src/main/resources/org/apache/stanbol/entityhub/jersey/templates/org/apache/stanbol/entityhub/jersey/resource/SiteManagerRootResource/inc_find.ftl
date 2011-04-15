@@ -36,7 +36,7 @@
 
 <h5>Example</h5>
 
-<pre>curl -X POST -d "name=Bishofsh*&limit=10&offset=0" http://localhost:8080/entityhub/sites/find</pre>
+<pre>curl -X POST -d "name=Bishofsh*&limit=10&offset=0" ${it.publicBaseUri}entityhub/sites/find</pre>
 
 <h5>Test</h5>
 
