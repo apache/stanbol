@@ -19,7 +19,6 @@ package org.apache.stanbol.entityhub.jersey.resource;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N3;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N_TRIPLE;
@@ -74,12 +73,14 @@ public class EntityMappingResource extends BaseStanbolResource {
     }
 
     @GET
+    @Path("/")
     @Produces(MediaType.TEXT_HTML)
-    public Response getEntityMappingPage() {
+    public Response getMappingPage() {
         return Response.ok(new Viewable("index", this), TEXT_HTML).build();
     }
     
     @GET
+    @Path("/")
     @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
     public Response getMapping(@QueryParam("id") String reference, @Context HttpHeaders headers)
                                                                             throws WebApplicationException {
@@ -107,6 +108,13 @@ public class EntityMappingResource extends BaseStanbolResource {
             return Response.ok(mapping, acceptedMediaType).build();
         }
     }
+    
+    @GET
+    @Path("/entity")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getEntityMappingPage() {
+        return Response.ok(new Viewable("entity", this), TEXT_HTML).build();
+    }
 
     @GET
     @Path("/entity")
@@ -115,11 +123,14 @@ public class EntityMappingResource extends BaseStanbolResource {
                                                                             throws WebApplicationException {
         log.debug("getEntityMapping() POST Request > entity: {} > accept: {}",
             entity, headers.getAcceptableMediaTypes());
+        
+        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
 
         if (entity == null || entity.isEmpty()) {
-            // TODO: how to parse an error message
-            throw new WebApplicationException(BAD_REQUEST);
+            return Response.status(Status.BAD_REQUEST).entity("No entity given. Missing parameter ID.")
+                    .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
         }
+        
         Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
         EntityMapping mapping;
         try {
@@ -128,13 +139,20 @@ public class EntityMappingResource extends BaseStanbolResource {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
         if (mapping == null) {
-            throw new WebApplicationException(404);
+            return Response.status(Status.NOT_FOUND).entity("No mapping found for entity '" + entity + "'.")
+                    .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
         } else {
-            MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
             return Response.ok(mapping, acceptedMediaType).build();
         }
     }
 
+    @GET
+    @Path("/symbol")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getSymbolMappingPage() {
+        return Response.ok(new Viewable("symbol", this), TEXT_HTML).build();
+    }
+    
     @GET
     @Path("/symbol")
     @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
@@ -142,10 +160,12 @@ public class EntityMappingResource extends BaseStanbolResource {
                                                                             throws WebApplicationException {
         log.debug("getSymbolMappings() POST Request > symbol: {} > accept: {}",
             symbol, headers.getAcceptableMediaTypes());
+        
+        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
 
         if (symbol == null || symbol.isEmpty()) {
-            // TODO: how to parse an error message
-            throw new WebApplicationException(BAD_REQUEST);
+            return Response.status(Status.BAD_REQUEST).entity("No symbol given. Missing parameter ID.")
+            .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
         }
         Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
         Collection<EntityMapping> mappings;
@@ -155,9 +175,9 @@ public class EntityMappingResource extends BaseStanbolResource {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
         if (mappings == null || mappings.isEmpty()) {
-            throw new WebApplicationException(404);
+            return Response.status(Status.NOT_FOUND).entity("No mapping found for symbol '" + symbol + "'.")
+            .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
         } else {
-            MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
             // TODO: Implement Support for list of Signs, Representations and Strings
             // For now use a pseudo QueryResultList
             QueryResultList<EntityMapping> mappingResultList = new QueryResultListImpl<EntityMapping>(null,

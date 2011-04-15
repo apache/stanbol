@@ -167,6 +167,13 @@ public class SymbolResource extends BaseStanbolResource {
         }
     }
     
+    @GET
+    @Path("/find")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getSymbolFindPage() {
+        return Response.ok(new Viewable("find", this), TEXT_HTML).build();
+    }
+
     @POST
     @Path("/find")
     @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
@@ -242,7 +249,7 @@ public class SymbolResource extends BaseStanbolResource {
         return executeQuery(JerseyUtils.parseFieldQuery(query, file), headers);
     }
     
-/**
+    /**
      * Executes the query parsed by {@link #queryEntities(String, File, HttpHeaders)}
      * or created based {@link #findEntity(String, String, String, String, HttpHeaders)
      * @param query The query to execute

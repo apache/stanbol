@@ -44,7 +44,7 @@
 
 <h5>Example</h5>
 
-<pre>curl "${it.publicBaseUri}entityhub/symbol/lookup/?id=http://dbpedia.org/resource/Paris"</pre>
+<pre>curl "${it.publicBaseUri}entityhub/symbol/lookup/?id=http://dbpedia.org/resource/Paris&create=false"</pre>
 
 <h5>Test</h5>
 
