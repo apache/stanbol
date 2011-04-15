@@ -197,39 +197,52 @@ public interface SiteConfiguration {
      * The key used to configure the name of License used by a referenced Site
      */
     String SITE_LICENCE_NAME = "org.apache.stanbol.entityhub.site.licenseName";
-    
-    /**
-     * Getter for the Name of the License used for the data provided by this site. 
-     * @return The name of the license
-     */
-    String getLicenseName();
     /**
      * The key used to configure the License of a referenced Site
      */
     String SITE_LICENCE_TEXT = "org.apache.stanbol.entityhub.site.licenseText";
     /**
-     * Getter for the full text of the License used for the data provided by
-     * this site
-     * @return the license
-     */
-    String getLicenseText();
-    /**
      * The key used to configure the link to the License used by a referenced Site
      */
     String SITE_LICENCE_URL = "org.apache.stanbol.entityhub.site.licenseUrl";
+    
     /**
-     * The URL pointing to a site that provides additional information of the
-     * License
-     * @return the licenseUrl
+     * Getter for the the License(s) used for the data provided by this 
+     * site. If multiple Liceneses are given it is assumed that any of them can
+     * be used. <p>
+     * Licenses are defined by the name ({@link #SITE_LICENCE_NAME}),
+     * the text ({@link #SITE_LICENCE_TEXT}) and the url 
+     * ({@link #SITE_LICENCE_URL}) to the page of the license. This three keys
+     * are combined to the {@link License} object.<p>
+     * It is recommended to use "cc:license" to link those licenses to the
+     * page.
+     * @return The name of the license
      */
-    String getLicenseUrl();
+    License[] getLicenses();
     /**
      * The attribution for the data provided by this referenced site
      */
     String SITE_ATTRIBUTION = "org.apache.stanbol.entityhub.site.attribution";
     /**
-     * The Attribution for all data provided by this site
-     * @return the attribution
+     * The name the creator of the Work (representations in case of referenced
+     * sites) would like used when attributing re-use. <code>null</code> if
+     * none is required by the license.<p>
+     * It is recommended to use "cc:attributionName" to represent this in
+     * RDF graphs
+     * @return the attribution name
      */
     String getAttribution();
+    /**
+     * The URL to the attribution for the data provided by this referenced site
+     */
+    String SITE_ATTRIBUTION_URL = "org.apache.stanbol.entityhub.site.attributionUrl";
+    /**
+     * The URL the creator of a Work (representations in case of referenced
+     * sites) would like used when attributing re-use.  <code>null</code> if
+     * none is required by the license.<p>
+     * It is recommended to use "cc:attributionURL" to represent this in
+     * RDF graphs
+     * @return the link to the URL providing the full attribution
+     */
+    String getAttributionUrl();
 }

@@ -20,6 +20,7 @@ import org.apache.stanbol.entityhub.jersey.resource.SiteManagerRootResource;
 import org.apache.stanbol.entityhub.jersey.resource.SymbolResource;
 import org.apache.stanbol.entityhub.jersey.writers.JettisonWriter;
 import org.apache.stanbol.entityhub.jersey.writers.QueryResultListWriter;
+import org.apache.stanbol.entityhub.jersey.writers.RepresentationWriter;
 import org.apache.stanbol.entityhub.jersey.writers.SignWriter;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
@@ -61,6 +62,7 @@ public class EntityhubWebFragment implements WebFragment {
         // message body writers
         classes.add(QueryResultListWriter.class);
         classes.add(SignWriter.class);
+        classes.add(RepresentationWriter.class);
         //TODO: somehow writing of Json has not worked because of
         //      A message body writer for Java class org.codehaus.jettison.json.JSONArray,
         //     and Java type class org.codehaus.jettison.json.JSONArray, and MIME media

@@ -27,13 +27,23 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.commons.io.FileUtils;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
 import org.apache.stanbol.entityhub.jersey.parsers.JSONToFieldQuery;
+import org.apache.stanbol.entityhub.jersey.resource.ReferencedSiteRootResource;
+import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
+import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
+import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint.PatternType;
+import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
+import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
+import org.apache.stanbol.entityhub.servicesapi.yard.CacheStrategy;
 import org.codehaus.jettison.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -187,20 +197,20 @@ public final class JerseyUtils {
         }
         return query;
     }
-    /**
-     * Getter for a Service from the {@link ServletContext} by using the
-     * {@link Class#getName()} as key for {@link ServletContext#getAttribute(String)}.
-     * In case the Service can not be found a {@link WebApplicationException} is
-     * thrown with the message that the Service is currently not available.
-     * @param <T> The type of the Service
-     * @param service the Service interface
-     * @param context the context used to search the service
-     * @return the Service instance
-     * @throws WebApplicationException in case the service instance was not found 
-     * in the parsed servlet context
-     * @throws IllegalArgumentException if <code>null</code> is parsed as
-     * service or context
-     */
+//    /**
+//     * Getter for a Service from the {@link ServletContext} by using the
+//     * {@link Class#getName()} as key for {@link ServletContext#getAttribute(String)}.
+//     * In case the Service can not be found a {@link WebApplicationException} is
+//     * thrown with the message that the Service is currently not available.
+//     * @param <T> The type of the Service
+//     * @param service the Service interface
+//     * @param context the context used to search the service
+//     * @return the Service instance
+//     * @throws WebApplicationException in case the service instance was not found 
+//     * in the parsed servlet context
+//     * @throws IllegalArgumentException if <code>null</code> is parsed as
+//     * service or context
+//     */
 //    @SuppressWarnings("unchecked")
 //    public static <T> T getService(Class<T> service, ServletContext context) throws WebApplicationException, IllegalArgumentException {
 //        if(service == null){
@@ -219,4 +229,5 @@ public final class JerseyUtils {
 //        }
 //        return serviceInstance;
 //    }
+
 }

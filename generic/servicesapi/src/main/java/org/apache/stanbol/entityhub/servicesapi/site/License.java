@@ -1,0 +1,56 @@
+package org.apache.stanbol.entityhub.servicesapi.site;
+
+public final class License {
+    
+    /**
+     * Constructs an License. At least one of the three parameters MUST NOT be
+     * <code>null</code> otherwise an {@link IllegalArgumentException} is 
+     * thrown
+     * @param name the name of the license
+     * @param url the link to the page about the license
+     * @param text the natural language text defining the license
+     * @throws IllegalArgumentException if all three parameters are 
+     * <code>null</code> or empty strings
+     */
+    public License(String name,String url,String text) throws IllegalArgumentException {
+        super();
+        if((name == null || name.isEmpty()) && 
+                (url == null || url.isEmpty()) &&
+                (text == null || text.isEmpty())){
+            throw new IllegalArgumentException("One of name, url and text MUST NOT be NULL nor emtpy");
+        }
+        this.name = name;
+        this.url = url;
+        this.text = text;
+    }
+    
+    private final String name;
+    private final String url;
+    private final String text;
+    
+    /**
+     * Getter for the name of the License
+     * @return
+     */
+    public final String getName() {
+        return name;
+    }
+    /**
+     * Getter for the Url of the License
+     * @return
+     */
+    public final String getUrl() {
+        return url;
+    }
+    /**
+     * Getter for the text of the License
+     * @return
+     */
+    public final String getText() {
+        return text;
+    }
+    
+    
+    
+
+}

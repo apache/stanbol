@@ -67,6 +67,8 @@ public enum NamespaceEnum {
     dbpediaOnt("dbp-ont","http://dbpedia.org/ontology/"),
     dbpediaProp("dbp-prop","http://dbpedia.org/property/"),
     geonames("http://www.geonames.org/ontology#"),
+    //copyright and license
+    cc("http://creativecommons.org/ns#"),
     ;
     private String ns;
     private String prefix;

@@ -7,11 +7,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-
 import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping.MappingState;
 import org.apache.stanbol.entityhub.servicesapi.model.Symbol.SymbolState;
-import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
+import org.apache.stanbol.entityhub.servicesapi.site.License;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.yard.CacheStrategy;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
@@ -35,6 +35,13 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
      */
     private final static Logger log = LoggerFactory.getLogger(DefaultSiteConfiguration.class);
 
+    /**
+     * Key internally used to store the {@link License}s object parsed based on
+     * the configured values for {@link SiteConfiguration#SITE_LICENCE_NAME}, 
+     * {@link SiteConfiguration#SITE_LICENCE_TEXT} and 
+     * {@link SiteConfiguration#SITE_LICENCE_URL}.
+     */
+    public static final String LICENSES_KEY = "org.apache.stanbol.entityhub.site.defaultSiteConfig.licenses";
     /**
      * Internally used to store the configuration.
      */
@@ -171,6 +178,8 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
                         ENTITY_DEREFERENCER_TYPE,CacheStrategy.all));
             }
         }
+        //check the configured licenses and create the License array
+        setLicenses(getLicenses());
     }
     /**
      * Getter for the readonly state.
@@ -217,6 +226,25 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
             config.remove(SITE_ATTRIBUTION);
         } else {
             config.put(SITE_ATTRIBUTION, attribution);
+        }
+    }
+    @Override
+    public String getAttributionUrl() {
+        Object attribution = config.get(SITE_ATTRIBUTION_URL);
+        return attribution == null || attribution.toString().isEmpty() ?
+                null : attribution.toString();
+    }
+    /**
+     * 
+     * @param attribution
+     * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
+     * @see #getAttribution()
+     */
+    public final void setAttributionUrl(String attributionUrl) throws UnsupportedOperationException {
+        if(attributionUrl == null || attributionUrl.isEmpty()){
+            config.remove(SITE_ATTRIBUTION_URL);
+        } else {
+            config.put(SITE_ATTRIBUTION_URL, attributionUrl);
         }
     }
 
@@ -380,26 +408,7 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
     }
     @Override
     public String[] getFieldMappings() {
-        Object fieldMappings = config.get(SITE_FIELD_MAPPINGS);
-        if(fieldMappings == null){
-            return null;
-        } else if (fieldMappings instanceof String[]){
-            return (String[]) fieldMappings;
-        } else if (fieldMappings instanceof Iterable<?>){
-            Collection<String> prefixes = new ArrayList<String>();
-            for(Object value : (Iterable<?>)fieldMappings){
-                if(value != null && value.toString().isEmpty()){
-                    prefixes.add(value.toString());
-                }
-            }
-            return prefixes.toArray(new String[prefixes.size()]);
-        } else if(fieldMappings instanceof String) {
-            return new String[]{fieldMappings.toString()};
-        } else {
-            throw new IllegalArgumentException(
-                String.format("Unable to parse FieldMappings form class %s (supported are String, String[] and Iterables)",
-                    fieldMappings.getClass()));
-        }
+        return getStringValues(SITE_FIELD_MAPPINGS);
     }
     public final void setFieldMappings(String[] mappings) throws UnsupportedOperationException {
         if(mappings == null){
@@ -411,26 +420,7 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
     
     @Override
     public final String[] getEntityPrefixes() {
-        Object entityPrefixes = config.get(ENTITY_PREFIX);
-        if(entityPrefixes == null){
-            return null;
-        } else if (entityPrefixes instanceof String[]){
-            return (String[]) entityPrefixes;
-        } else if (entityPrefixes instanceof Iterable<?>){
-            Collection<String> prefixes = new ArrayList<String>();
-            for(Object value : (Iterable<?>)entityPrefixes){
-                if(value != null){
-                    prefixes.add(value.toString());
-                }
-            }
-            return prefixes.toArray(new String[prefixes.size()]);
-        } else if(entityPrefixes instanceof String) {
-            return new String[]{entityPrefixes.toString()};
-        } else {
-            throw new IllegalArgumentException(
-                String.format("Unable to parse EnityPrefixes form class %s (supported are String String[] and Iterables)",
-                    entityPrefixes.getClass()));
-        }
+        return getStringValues(ENTITY_PREFIX);
     }
     /**
      * 
@@ -467,62 +457,60 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
             config.put(ID, id);
         }
     }
+    @Override
+    public final License[] getLicenses() {
+        Object licenses = config.get(LICENSES_KEY);
+        if(licenses instanceof License[]){
+            return (License[])licenses;
+        }
+        // get based on related keys
+        int elements = 0;
+        String[] names = getLicenseName();
+        if(names == null){
+            names = new String[]{};
+        } else {
+            elements = Math.max(elements, names.length);
+        }
+        String[] texts = getLicenseText();
+        if(texts == null){
+            texts = new String[]{};
+        } else {
+            elements = Math.max(elements, texts.length);
+        }
+        String[] urls = getLicenseUrl();
+        if(urls == null){
+            urls = new String[]{};
+        } else {
+            elements = Math.max(elements, urls.length);
+        }
+        Collection<License> licenseList = new ArrayList<License>();
+        for(int i=0;i<elements;i++){
+            try {
+                licenseList.add(new License(
+                    names.length>i?names[i]:null,
+                            urls.length>i?urls[i]:null,
+                                    texts.length>i?texts[i]:null));
+            } catch(IllegalArgumentException e){
+                //ignore if name, text and url == null and/or empty
+            }
+        }
+        return licenseList.isEmpty()?null:licenseList.toArray(new License[licenseList.size()]);
+    }
+    public final void setLicenses(License[] licenses){
+        
+    }
     
-    @Override
-    public final String getLicenseName() {
-        Object name = config.get(SITE_LICENCE_NAME);
-        return name == null || name.toString().isEmpty() ? null : name.toString();
-    }
-    /**
-     * 
-     * @param name
-     * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
-     * @see #getLicenseName()
-     */
-    public final void setLicenseName(String name) throws UnsupportedOperationException {
-        if(name == null){
-            config.remove(SITE_LICENCE_NAME);
-        } else {
-            config.put(SITE_LICENCE_NAME, name);
-        }
+    
+    protected final String[] getLicenseName() {
+        return getStringValues(SITE_LICENCE_NAME);
     }
 
-    @Override
-    public String getLicenseText() {
-        Object text = config.get(SITE_LICENCE_TEXT);
-        return text == null || text.toString().isEmpty() ? null : text.toString();
-    }
-    /**
-     * 
-     * @param licenseText
-     * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
-     * @see #getLicenseText()
-     */
-    public void setLicenseText(String licenseText) throws UnsupportedOperationException {
-        if(licenseText == null){
-            config.remove(SITE_LICENCE_TEXT);
-        } else {
-            config.put(SITE_LICENCE_TEXT, licenseText);
-        }
+    protected String[] getLicenseText() {
+        return getStringValues(SITE_LICENCE_TEXT);
     }
 
-    @Override
-    public String getLicenseUrl() {
-        Object url = config.get(SITE_LICENCE_URL);
-        return url == null || url.toString().isEmpty() ? null : url.toString();
-    }
-    /**
-     * 
-     * @param licenseUrl
-     * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
-     * @see #getLicenseUrl()
-     */
-    public final void setLicenseUrl(String licenseUrl) throws UnsupportedOperationException {
-        if(licenseUrl == null){
-            config.remove(SITE_LICENCE_URL);
-        } else {
-            config.put(SITE_LICENCE_URL, licenseUrl);
-        }
+    protected String[] getLicenseUrl() {
+        return getStringValues(SITE_LICENCE_URL);
     }
 
     @Override
@@ -588,5 +576,35 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
     protected final Map<String,Object> getConfiguration(){
         return config;
     }
-
+    /**
+     * Internally used to parse String[] based on key values. This method
+     * supports Stirng, Stirng[] and Iterables&lt;?&gt;. For Iterables&lt;?&gt;
+     * the {@link Object#toString()} is used and <code>null</code> elementes are
+     * kept.
+     * @return
+     */
+    private String[] getStringValues(String key) {
+        Object values = config.get(key);
+        if(values == null){
+            return null;
+        } else if (values instanceof String[]){
+            if(((String[])values).length<1){ //return null if empty
+                return null;
+            } else {
+                return (String[]) values;
+            }
+        } else if (values instanceof Iterable<?>){
+            Collection<String> prefixes = new ArrayList<String>();
+            for(Object value : (Iterable<?>)values){
+                prefixes.add(value==null ? null : value.toString());
+            }
+            return prefixes.toArray(new String[prefixes.size()]);
+        } else if(values instanceof String) {
+            return new String[]{values.toString()};
+        } else {
+            throw new IllegalArgumentException(
+                String.format("Unable to parse Sting[] for field %s form type %s (supported are String, String[] and Iterables)",
+                    key,values.getClass()));
+        }
+    }
 }

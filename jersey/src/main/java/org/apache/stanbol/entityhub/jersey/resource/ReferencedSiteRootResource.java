@@ -39,17 +39,26 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
+import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
+import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
+import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
+import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Sign;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
+import org.apache.stanbol.entityhub.servicesapi.site.License;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteException;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,11 +70,21 @@ import org.slf4j.LoggerFactory;
 @Path("/entityhub/site/{site}")
 public class ReferencedSiteRootResource extends BaseStanbolResource {
     
+
     private final Logger log = LoggerFactory.getLogger(getClass());
     
     public static final Set<String> RDF_MEDIA_TYPES = new TreeSet<String>(Arrays.asList(SupportedFormat.N3,
         SupportedFormat.N_TRIPLE, SupportedFormat.RDF_XML, SupportedFormat.TURTLE, SupportedFormat.X_TURTLE,
         SupportedFormat.RDF_JSON));
+    /**
+     * The relative path used to publish the license.
+     */
+    public static final String LICENSE_PATH = "license";
+    /**
+     * The name of the resource used for Licenses of no {@link License#getUrl()} 
+     * is present
+     */
+    private static final String LICENSE_NAME = "LICENSE";
     
     /**
      * The Field used for find requests if not specified TODO: This will be replaced by the EntitySearch. With
@@ -108,11 +127,57 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     
     @GET
     @Path(value = "/")
-    @Produces(MediaType.TEXT_HTML)
-    public String getInfo() {
+    @Consumes(value=MediaType.TEXT_HTML)
+    public String getHtmlInfo(){
         return "<html><head>" + site.getConfiguration().getName() + "</head><body>" + 
-                 "<h1>Referenced Site " + site.getConfiguration().getName()
-               + ":</h1></body></html>";
+            "<h1>Referenced Site " + site.getConfiguration().getName()+ 
+            ":</h1></body></html>";
+    }
+    /**
+     * Provides metadata about this referenced site as representation
+     * @param headers the request headers used to get the requested {@link MediaType}
+     * @param uriInfo used to get the URI of the current request
+     * @return the response
+     */
+    @GET
+    @Path(value = "/")
+    public Response getInfo(@Context HttpHeaders headers,
+                            @Context UriInfo uriInfo) {
+        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, MediaType.APPLICATION_JSON_TYPE);
+        return Response.ok(site2Representation(uriInfo.getAbsolutePath().toString()), acceptedMediaType).build();
+    }
+    @GET
+    @Path(value=ReferencedSiteRootResource.LICENSE_PATH+"/{name}")
+    public Response getLicenseInfo(@Context HttpHeaders headers,
+                                   @Context UriInfo uriInfo,
+                                   @PathParam(value = "name") String name) {
+        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, MediaType.APPLICATION_JSON_TYPE);
+        if(name == null || name.isEmpty()){
+            //return all
+        } else if(name.startsWith(LICENSE_NAME)){
+            int number;
+            try {
+                String numberString = name.substring(LICENSE_NAME.length());
+                if(numberString.isEmpty()){
+                    numberString = "0";
+                }
+                int count = -1; //license0 is the first one
+                if(site.getConfiguration().getLicenses() != null){
+                    for(License license : site.getConfiguration().getLicenses()){
+                        if(license.getUrl() == null){
+                            count++;
+                        }
+                        if(Integer.toString(count).equals(numberString)){
+                            return Response.ok(license2Representation(uriInfo.getAbsolutePath().toString(),license),acceptedMediaType).build();
+                        }
+                    }
+                }
+            }catch (NumberFormatException e) {
+                //not a valid licenseName
+                throw new WebApplicationException(Response.Status.NOT_FOUND);
+            }
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
     
     /**
@@ -247,5 +312,84 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         }
         
     }
-    
+    /**
+     * Transforms a site to a Representation that can be serialised 
+     * @param context
+     * @return
+     */
+    public Representation site2Representation(String id){
+        RdfValueFactory valueFactory = RdfValueFactory.getInstance();
+        RdfRepresentation rep = valueFactory.createRepresentation(id);
+        String namespace = NamespaceEnum.entityhubModel.getNamespace();
+        rep.add(namespace+"localMode", site.supportsLocalMode());
+        rep.add(namespace+"supportsSearch", site.supportsSearch());
+        SiteConfiguration config = site.getConfiguration();
+        rep.add(NamespaceEnum.rdfs+"label", config.getName());
+        rep.add(NamespaceEnum.rdf+"type", valueFactory.createReference(namespace+"ReferencedSite"));
+        if(config.getDescription() != null){
+            rep.add(NamespaceEnum.rdfs+"description", config.getDescription());
+        }
+        if(config.getCacheStrategy() != null){
+            rep.add(namespace+"cacheStrategy", valueFactory.createReference(namespace+"cacheStrategy-"+config.getCacheStrategy().name()));
+        }
+        //keep accessUri and queryUri private for now
+//        if(config.getAccessUri() != null){
+//            rep.add(namespace+"accessUri", valueFactory.createReference(config.getAccessUri()));
+//        }
+//        if(config.getQueryUri() != null){
+//            rep.add(namespace+"queryUri", valueFactory.createReference(config.getQueryUri()));
+//        }
+        if(config.getAttribution() != null){
+            rep.add(NamespaceEnum.cc.getNamespace()+"attributionName", config.getAttribution());
+        }
+        if(config.getAttributionUrl() != null){
+            rep.add(NamespaceEnum.cc.getNamespace()+"attributionURL", config.getAttributionUrl());
+        }
+        //add the licenses
+        if(config.getLicenses() != null){
+            int count = 0;
+            for(License license : config.getLicenses()){
+                String licenseUrl;
+                if(license.getUrl() != null){
+                    licenseUrl = license.getUrl();
+                } else {
+                    
+                    licenseUrl = id+(!id.endsWith("/")?"/":"")+
+                        LICENSE_PATH+'/'+LICENSE_NAME+(count>0?count:"");
+                    count++;
+                }
+                //if defined add the name to dc:license
+                if(license.getName() != null){
+                    rep.add(NamespaceEnum.dcTerms.getNamespace()+"license", licenseUrl);
+                }
+                //link to the license via cc:license
+                rep.add(NamespaceEnum.cc.getNamespace()+"license", licenseUrl);
+            }
+        }
+        if(config.getEntityPrefixes() != null){
+            for(String prefix : config.getEntityPrefixes()){
+                rep.add(namespace+"entityPrefix", prefix);
+            }
+        } else { //all entities are allowed/processed
+            rep.add(namespace+"entityPrefix", "*");
+        }
+        return rep;
+    }
+    private Representation license2Representation(String id, License license) {
+        RdfValueFactory valueFactory = RdfValueFactory.getInstance();
+        RdfRepresentation rep = valueFactory.createRepresentation(id);
+        
+        if(license.getName() != null){
+            rep.add(NamespaceEnum.dcTerms.getNamespace()+"license", license.getName());
+            rep.add(NamespaceEnum.rdfs+"label", license.getName());
+            rep.add(NamespaceEnum.dcTerms+"title", license.getName());
+        }
+        if(license.getText() != null){
+            rep.add(NamespaceEnum.rdfs+"description", license.getText());
+            
+        }
+        rep.add(NamespaceEnum.cc.getNamespace()+"licenseUrl", 
+            license.getUrl() == null ? id:license.getUrl());
+        return rep;
+    }
 }

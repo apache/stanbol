@@ -25,6 +25,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.Sign;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
+import org.apache.stanbol.entityhub.servicesapi.yard.CacheStrategy;
 
 public interface ReferencedSite {
 
@@ -123,4 +124,31 @@ public interface ReferencedSite {
      * @return the configuration 
      */
     SiteConfiguration getConfiguration();
+    /**
+     * Returns if this referenced site supports local mode - meaning, that
+     * it can be used to search and retrieve entities in offline mode. <p>
+     * The result MUST reflect the current situation and not be based on the
+     * configuration. Meaning, that if the configuration defines a local cache
+     * but the cache is currently not available this method needs to return
+     * <code>false</code>.
+     * @return if the local mode is currently supported by this referenced site
+     */
+    boolean supportsLocalMode();
+    /**
+     * Returns if this referenced site supports queries. Some Referenced sites
+     * might not be able to support queries (e.g. if a remote linked data
+     * endpoint does not support an SPARQL endpoint). In such cases the
+     * dereferencing functionality can still be used to retrieve representations
+     * for entities by IDs. However all find** methods could not be used.<p>
+     * The result MUST refelct the current situation and not be based on the
+     * configuration. E.g. if the remote site does not support querys and the 
+     * local cache is temporary not available this method would need to support
+     * <code>false</code> even that based on the configuration the site would
+     * theoretically support queries.<p>
+     * TODO: This need to be extended as soon as support for multiple query
+     * languages is added.
+     * @return if this referenced site supports queries for entities.
+     */
+    boolean supportsSearch();
+
 }
