@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.apache.stanbol.owl.trasformation;
+package org.apache.stanbol.owl.transformation;
 
 /**
  *
@@ -16,6 +16,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.apache.stanbol.owl.transformation.JenaToOwlConvert;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
@@ -62,9 +63,9 @@ public class ConversionTester extends TestCase {
 
 	private static final URI DP = URI.create(_BASE + "#" + "hasAge");
 
-        private static final URI label = URI.create("http://www.w3.org/2000/01/rdf-schema#label");
+    private static final URI label = URI.create("http://www.w3.org/2000/01/rdf-schema#label");
 
-        private static final String clazzlabel = "Peanut";
+    private static final String clazzlabel = "Peanut";
 
 	private static final String VALUE = "8";
 

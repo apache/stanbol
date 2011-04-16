@@ -1,4 +1,4 @@
-package org.apache.stanbol.owl.trasformation;
+package org.apache.stanbol.owl.transformation;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

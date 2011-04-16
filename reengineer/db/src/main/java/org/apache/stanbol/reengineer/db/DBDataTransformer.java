@@ -34,7 +34,7 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-import org.apache.stanbol.owl.trasformation.JenaToOwlConvert;
+import org.apache.stanbol.owl.transformation.JenaToOwlConvert;
 
 public class DBDataTransformer extends ReengineerUriRefGenerator {
 

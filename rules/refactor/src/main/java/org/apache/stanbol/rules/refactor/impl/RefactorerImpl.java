@@ -28,8 +28,8 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionID
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
-import org.apache.stanbol.owl.trasformation.JenaToClerezzaConverter;
-import org.apache.stanbol.owl.trasformation.OWLAPIToClerezzaConverter;
+import org.apache.stanbol.owl.transformation.JenaToClerezzaConverter;
+import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.Rule;
@@ -346,7 +346,6 @@ public class RefactorerImpl implements Refactorer {
         // OntModel ontModel =
         // jenaToOwlConvert.ModelOwlToJenaConvert(inputOntology, "RDF/XML");
 
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
         Recipe recipe;
         try {
@@ -354,9 +353,6 @@ public class RefactorerImpl implements Refactorer {
 
             RuleList kReSRuleList = recipe.getkReSRuleList();
             log.info("RULE LIST SIZE : " + kReSRuleList.size());
-
-            OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
-            OWLOntologyManager ontologyManager2 = OWLManager.createOWLOntologyManager();
 
             MGraph unionMGraph = new SimpleMGraph();
 

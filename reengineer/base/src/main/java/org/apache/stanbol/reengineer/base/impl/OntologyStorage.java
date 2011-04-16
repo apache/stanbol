@@ -27,8 +27,8 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.util.FileManager;
 
-import org.apache.stanbol.owl.trasformation.JenaToClerezzaConverter;
-import org.apache.stanbol.owl.trasformation.JenaToOwlConvert;
+import org.apache.stanbol.owl.transformation.JenaToClerezzaConverter;
+import org.apache.stanbol.owl.transformation.JenaToOwlConvert;
 
 /**
  * Copied to avoid cross-dependencies

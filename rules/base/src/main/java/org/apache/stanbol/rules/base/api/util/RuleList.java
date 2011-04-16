@@ -32,8 +32,6 @@ public class RuleList implements Collection<Rule> {
 			semionRulesCopy[semionRulesCopy.length - 1] = semionRule;
 			kReSRules = semionRulesCopy;
 		}
-		log.debug("Added rule " + semionRule, this);
-		System.out.println("Added rule " + semionRule);
 		return true;
 	}
 	
@@ -49,8 +47,6 @@ public class RuleList implements Collection<Rule> {
 			semionRulesCopy[0] = semionRule;
 			kReSRules = semionRulesCopy;
 		}
-		log.debug("Added to HEAD rule " + semionRule, this);
-		System.out.println("Added to HEAD rule " + semionRule);
 		return true;
 	}
 
@@ -72,7 +68,6 @@ public class RuleList implements Collection<Rule> {
 			kReSRules = semionRulesCopy;
 		}
 
-		log.debug("Added all rules : " + c, this);
 		return true;
 	}
 

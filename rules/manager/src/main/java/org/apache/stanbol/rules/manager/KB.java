@@ -49,7 +49,6 @@ public class KB {
 	}
 	
 	public void addRule(Rule kReSRule){
-		System.out.println("Adding rule to Head");
 		kReSRuleList.add(kReSRule);
 	}
 	

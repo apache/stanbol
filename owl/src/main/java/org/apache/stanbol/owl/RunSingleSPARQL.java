@@ -16,7 +16,7 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.ResultSet;
 
-import org.apache.stanbol.owl.trasformation.JenaToOwlConvert;
+import org.apache.stanbol.owl.transformation.JenaToOwlConvert;
 
 /**
  *

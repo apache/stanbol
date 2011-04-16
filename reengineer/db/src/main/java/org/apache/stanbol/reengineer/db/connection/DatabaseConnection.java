@@ -5,12 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.access.TcManager;
-
+import org.apache.stanbol.owl.transformation.JenaToOwlConvert;
+import org.apache.stanbol.reengineer.db.vocab.DBS_L1;
 import org.semanticweb.owlapi.model.OWLOntology;
-
 
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.query.Query;
@@ -19,11 +16,6 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.vocabulary.RDF;
-
-
-import org.apache.stanbol.reengineer.db.vocab.DBS_L1;
-
-import org.apache.stanbol.owl.trasformation.JenaToOwlConvert;
 
 public class DatabaseConnection {
 

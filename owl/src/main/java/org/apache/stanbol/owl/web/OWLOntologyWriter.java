@@ -30,7 +30,7 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.stanbol.owl.trasformation.OWLAPIToClerezzaConverter;
+import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
 
 @Provider
 @Produces( { KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.MANCHESTER_OWL,
