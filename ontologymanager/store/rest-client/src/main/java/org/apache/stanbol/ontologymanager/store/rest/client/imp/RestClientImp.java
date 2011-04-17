@@ -1,6 +1,7 @@
 package org.apache.stanbol.ontologymanager.store.rest.client.imp;
 
 import java.io.StringReader;
+import java.util.Dictionary;
 import java.util.List;
 import java.util.Locale;
 
@@ -10,7 +11,9 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.store.model.AdministeredOntologies;
 import org.apache.stanbol.ontologymanager.store.model.ClassContext;
@@ -29,16 +32,17 @@ import org.apache.stanbol.ontologymanager.store.model.PropertyMetaInformation;
 import org.apache.stanbol.ontologymanager.store.model.ResourceMetaInformationType;
 import org.apache.stanbol.ontologymanager.store.rest.client.RestClient;
 import org.apache.stanbol.ontologymanager.store.rest.client.RestClientException;
+import org.osgi.service.component.ComponentContext;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
-@Component(immediate = true)
+@Component(immediate = true, metatype=true)
 @Service
 public class RestClientImp implements RestClient {
-    private static final String ONTOLOGIES = "/ontologies/";
+    private static final String ONTOLOGY = "/ontology/";
 
     private static final String CLASSES = "/classes/";
 
@@ -77,13 +81,17 @@ public class RestClientImp implements RestClient {
     private static final String WITH_INFERRED_AXIOMS = "withInferredAxioms";
 
     private static final String DELIMITER = "/";
-
-    private Client client;
-
+    
+    public static final String PROPERTY_STORE_URI= "org.apache.stanbol.ontologymanager.store.uri";
+    
+    
     /**
      * Base URL for Persistence Store RESTful interface.
      */
-    private String PSAddress;
+    @Property(name=PROPERTY_STORE_URI, value="http://localhost:8080")
+    private String storeURI;
+
+    private Client client;
 
     public RestClientImp() {
         this.client = Client.create();
@@ -109,10 +117,16 @@ public class RestClientImp implements RestClient {
             Locale.setDefault(oldLocale);
         }
     }
+    
+    @Activate
+    public void activate(ComponentContext context){
+    	Dictionary properties = context.getProperties();
+    	this.storeURI = (String) properties.get(PROPERTY_STORE_URI);
+    }
 
     @Override
     public void setPsURL(String PsURL) {
-        PSAddress = PsURL;
+        storeURI = PsURL;
     }
 
     public RestClientImp getRestClient() {
@@ -122,7 +136,7 @@ public class RestClientImp implements RestClient {
     @Override
     public AdministeredOntologies retrieveAdministeredOntologies() throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + ONTOLOGIES);
+            WebResource webResource = client.resource(storeURI + ONTOLOGY);
             String content = webResource.accept(MediaType.APPLICATION_XML).get(String.class);
             AdministeredOntologies onts = (AdministeredOntologies) unmarshall(content);
             return onts;
@@ -134,7 +148,7 @@ public class RestClientImp implements RestClient {
     @Override
     public ClassesForOntology retrieveClassesOfOntology(String ontologyURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + ontologyURI + CLASSES);
+            WebResource webResource = client.resource(storeURI + DELIMITER + ontologyURI + CLASSES);
             String content = webResource.accept(MediaType.APPLICATION_XML).get(String.class);
             ClassesForOntology classes = (ClassesForOntology) unmarshall(content);
             return classes;
@@ -146,7 +160,7 @@ public class RestClientImp implements RestClient {
     @Override
     public DatatypePropertiesForOntology retrieveDatatypePropertiesOfOntology(String ontologyURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + ontologyURI
+            WebResource webResource = client.resource(storeURI + DELIMITER + ontologyURI
                                                       + DATATYPE_PROPERTIES);
             String content = webResource.accept(MediaType.APPLICATION_XML).get(String.class);
             DatatypePropertiesForOntology datatypeProps = (DatatypePropertiesForOntology) unmarshall(content);
@@ -159,7 +173,7 @@ public class RestClientImp implements RestClient {
     @Override
     public IndividualsForOntology retrieveIndividualsOfOntology(String ontologyURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + ontologyURI + INDIVIDUALS);
+            WebResource webResource = client.resource(storeURI + DELIMITER + ontologyURI + INDIVIDUALS);
             String content = webResource.accept(MediaType.APPLICATION_XML).get(String.class);
             IndividualsForOntology onts = (IndividualsForOntology) unmarshall(content);
             return onts;
@@ -172,7 +186,7 @@ public class RestClientImp implements RestClient {
     public ObjectPropertiesForOntology retrieveObjectPropertiesOfOntology(String ontologyURI) throws RestClientException {
         try {
             WebResource webResource = client
-                    .resource(PSAddress + DELIMITER + ontologyURI + OBJECT_PROPERTIES);
+                    .resource(storeURI + DELIMITER + ontologyURI + OBJECT_PROPERTIES);
             String content = webResource.accept(MediaType.APPLICATION_XML).get(String.class);
             ObjectPropertiesForOntology objectProps = (ObjectPropertiesForOntology) unmarshall(content);
             return objectProps;
@@ -184,7 +198,7 @@ public class RestClientImp implements RestClient {
     @Override
     public String retrieveOntology(String ontologyURI, String language, boolean withInferredAxioms) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + ontologyURI);
+            WebResource webResource = client.resource(storeURI + DELIMITER + ontologyURI);
             String content = webResource.accept(APPLICATION_RDF_XML).get(String.class);
             return content;
         } catch (UniformInterfaceException e) {
@@ -195,7 +209,7 @@ public class RestClientImp implements RestClient {
     @Override
     public OntologyMetaInformation retrieveOntologyMetaInformation(String ontologyURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + ontologyURI);
+            WebResource webResource = client.resource(storeURI + DELIMITER + ontologyURI);
             String content = webResource.accept(MediaType.APPLICATION_XML).get(String.class);
             OntologyMetaInformation ont = (OntologyMetaInformation) unmarshall(content);
             return ont;
@@ -206,7 +220,7 @@ public class RestClientImp implements RestClient {
 
     public ResourceMetaInformationType retrieveResourceWithURI(String resourceURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + resourceURI);
+            WebResource webResource = client.resource(storeURI + DELIMITER + resourceURI);
             String content = webResource.accept(MediaType.APPLICATION_XML).get(String.class);
             ResourceMetaInformationType resourceInfo = (ResourceMetaInformationType) unmarshall(content);
             return resourceInfo;
@@ -218,7 +232,7 @@ public class RestClientImp implements RestClient {
     @Override
     public OntologyMetaInformation saveOntology(String ontologyContent, String ontologyURI, String encoding) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + ONTOLOGIES);
+            WebResource webResource = client.resource(storeURI + ONTOLOGY);
             MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
             formData.add("ontologyURI", ontologyURI);
             formData.add("ontologyContent", ontologyContent);
@@ -234,7 +248,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void addContainerClassForIndividual(String individualURI, String classURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + individualURI + TYPES);
+            WebResource webResource = client.resource(storeURI + DELIMITER + individualURI + TYPES);
             MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
             formData.add("containerClassURIs", classURI);
             webResource.type(MediaType.APPLICATION_FORM_URLENCODED).accept(MediaType.APPLICATION_XML_TYPE)
@@ -247,7 +261,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void addDisjointClass(String classURI, String disjointClassURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + classURI + DISJOINT_CLASSES);
+            WebResource webResource = client.resource(storeURI + DELIMITER + classURI + DISJOINT_CLASSES);
             MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
             formData.add("disjointClassURIs", disjointClassURI);
             webResource.type(MediaType.APPLICATION_FORM_URLENCODED).accept(MediaType.APPLICATION_XML_TYPE)
@@ -260,7 +274,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void addDomain(String propertyURI, String domainURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + propertyURI + DOMAINS);
+            WebResource webResource = client.resource(storeURI + DELIMITER + propertyURI + DOMAINS);
             MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
             formData.add("domainURIs", domainURI);
             webResource.type(MediaType.APPLICATION_FORM_URLENCODED).accept(MediaType.APPLICATION_XML_TYPE)
@@ -273,7 +287,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void addEquivalentClass(String classURI, String equivalentClassURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + classURI + EQUIVALENT_CLASSES);
+            WebResource webResource = client.resource(storeURI + DELIMITER + classURI + EQUIVALENT_CLASSES);
             MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
             formData.add("equivalentClassURIs", equivalentClassURI);
             webResource.type(MediaType.APPLICATION_FORM_URLENCODED).accept(MediaType.APPLICATION_XML_TYPE)
@@ -286,7 +300,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void addRange(String propertyURI, String rangeURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + propertyURI + RANGES);
+            WebResource webResource = client.resource(storeURI + DELIMITER + propertyURI + RANGES);
             MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
             formData.add("rangeURIs", rangeURI);
             webResource.type(MediaType.APPLICATION_FORM_URLENCODED).accept(MediaType.APPLICATION_XML_TYPE)
@@ -300,7 +314,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void addUnionClass(String classURI, String unionClassURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + classURI + UNION_CLASSES);
+            WebResource webResource = client.resource(storeURI + DELIMITER + classURI + UNION_CLASSES);
             MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
             formData.add("unionClassURIs", unionClassURI);
             webResource.type(MediaType.APPLICATION_FORM_URLENCODED).accept(MediaType.APPLICATION_XML_TYPE)
@@ -317,7 +331,7 @@ public class RestClientImp implements RestClient {
                                     String individualAsValueURI,
                                     String literalAsValue) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + individualURI
+            WebResource webResource = client.resource(storeURI + DELIMITER + individualURI
                                                       + PROPERTY_ASSERTIONS + normalizeURI(propertyURI));
             MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
             formData.add("literalValues", literalAsValue);
@@ -332,7 +346,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void clearPersistenceStore() throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + ONTOLOGIES);
+            WebResource webResource = client.resource(storeURI + ONTOLOGY);
             webResource.delete();
         } catch (UniformInterfaceException e) {
             throw new RestClientException("REST service exception", e);
@@ -342,7 +356,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void deleteContainerClassForIndividual(String individualURI, String classURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + individualURI + TYPES
+            WebResource webResource = client.resource(storeURI + DELIMITER + individualURI + TYPES
                                                       + normalizeURI(classURI));
             webResource.delete();
         } catch (UniformInterfaceException e) {
@@ -353,7 +367,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void deleteDisjointClass(String classURI, String disjointClassURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + classURI + DISJOINT_CLASSES
+            WebResource webResource = client.resource(storeURI + DELIMITER + classURI + DISJOINT_CLASSES
                                                       + normalizeURI(disjointClassURI));
             webResource.delete();
         } catch (UniformInterfaceException e) {
@@ -365,7 +379,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void deleteDomain(String propertyURI, String domainURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + propertyURI + DOMAINS
+            WebResource webResource = client.resource(storeURI + DELIMITER + propertyURI + DOMAINS
                                                       + normalizeURI(domainURI));
             webResource.delete();
         } catch (UniformInterfaceException e) {
@@ -376,7 +390,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void deleteEquivalentClass(String classURI, String equivalentClassURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + classURI + EQUIVALENT_CLASSES
+            WebResource webResource = client.resource(storeURI + DELIMITER + classURI + EQUIVALENT_CLASSES
                                                       + normalizeURI(equivalentClassURI));
             webResource.delete();
         } catch (UniformInterfaceException e) {
@@ -387,7 +401,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void deleteOntology(String ontologyURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + ontologyURI);
+            WebResource webResource = client.resource(storeURI + DELIMITER + ontologyURI);
             webResource.delete();
         } catch (UniformInterfaceException e) {
             throw new RestClientException("REST service exception", e);
@@ -404,12 +418,12 @@ public class RestClientImp implements RestClient {
             if (literalAsValue != null) {
                 MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
                 formData.add("value", literalAsValue);
-                webResource = client.resource(PSAddress + DELIMITER + individualURI + PROPERTY_ASSERTIONS
+                webResource = client.resource(storeURI + DELIMITER + individualURI + PROPERTY_ASSERTIONS
                                               + normalizeURI(propertyURI) + LITERALS);
                 webResource.type(MediaType.APPLICATION_FORM_URLENCODED)
                         .header("X-HTTP-Method-Override", "DELETE").post(String.class, formData);
             } else if (individualAsValueURI != null) {
-                webResource = client.resource(PSAddress + DELIMITER + individualURI + PROPERTY_ASSERTIONS
+                webResource = client.resource(storeURI + DELIMITER + individualURI + PROPERTY_ASSERTIONS
                                               + normalizeURI(propertyURI) + OBJECTS
                                               + normalizeURI(individualAsValueURI));
                 webResource.delete();
@@ -427,7 +441,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void deleteRange(String propertyURI, String rangeURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + propertyURI + RANGES
+            WebResource webResource = client.resource(storeURI + DELIMITER + propertyURI + RANGES
                                                       + normalizeURI(rangeURI));
             webResource.delete();
         } catch (UniformInterfaceException e) {
@@ -438,7 +452,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void deleteResource(String resourceURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + resourceURI);
+            WebResource webResource = client.resource(storeURI + DELIMITER + resourceURI);
             webResource.delete();
         } catch (UniformInterfaceException e) {
             throw new RestClientException("REST service exception", e);
@@ -449,7 +463,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void deleteSuperClass(String subClassURI, String superClassURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + subClassURI + SUPER_CLASSES
+            WebResource webResource = client.resource(storeURI + DELIMITER + subClassURI + SUPER_CLASSES
                                                       + normalizeURI(superClassURI));
             webResource.delete();
         } catch (UniformInterfaceException e) {
@@ -460,7 +474,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void deleteSuperPropertyAssertion(String subPropertyURI, String superPropertyURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + subPropertyURI
+            WebResource webResource = client.resource(storeURI + DELIMITER + subPropertyURI
                                                       + SUPER_PROPERTIES + normalizeURI(superPropertyURI));
             webResource.delete();
         } catch (UniformInterfaceException e) {
@@ -472,7 +486,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void deleteUnionClass(String classURI, String unionClassURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + classURI + UNION_CLASSES
+            WebResource webResource = client.resource(storeURI + DELIMITER + classURI + UNION_CLASSES
                                                       + normalizeURI(unionClassURI));
             webResource.delete();
         } catch (UniformInterfaceException e) {
@@ -483,7 +497,7 @@ public class RestClientImp implements RestClient {
     @Override
     public ClassContext generateClassContext(String classURI, boolean withInferredAxioms) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + classURI);
+            WebResource webResource = client.resource(storeURI + DELIMITER + classURI);
             String content = webResource
                     .queryParam(WITH_INFERRED_AXIOMS, Boolean.toString(withInferredAxioms))
                     .accept(MediaType.APPLICATION_XML).get(String.class);
@@ -497,7 +511,7 @@ public class RestClientImp implements RestClient {
     @Override
     public ClassMetaInformation generateClassForOntology(String ontologyURI, String classURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + ontologyURI + CLASSES);
+            WebResource webResource = client.resource(storeURI + DELIMITER + ontologyURI + CLASSES);
             MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
             formData.add("classURI", classURI);
             String content = webResource.type(MediaType.APPLICATION_FORM_URLENCODED)
@@ -513,7 +527,7 @@ public class RestClientImp implements RestClient {
     public DatatypePropertyContext generateDatatypePropertyContext(String datatypePropertyURI,
                                                                    boolean withInferredAxioms) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + datatypePropertyURI);
+            WebResource webResource = client.resource(storeURI + DELIMITER + datatypePropertyURI);
             String content = webResource
                     .queryParam(WITH_INFERRED_AXIOMS, Boolean.toString(withInferredAxioms))
                     .accept(MediaType.APPLICATION_XML).get(String.class);
@@ -528,7 +542,7 @@ public class RestClientImp implements RestClient {
     public PropertyMetaInformation generateDatatypePropertyForOntology(String ontologyURI,
                                                                        String datatypePropertyURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + ontologyURI
+            WebResource webResource = client.resource(storeURI + DELIMITER + ontologyURI
                                                       + DATATYPE_PROPERTIES);
             MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
             formData.add("datatypePropertyURI", datatypePropertyURI);
@@ -544,7 +558,7 @@ public class RestClientImp implements RestClient {
     @Override
     public IndividualContext generateIndividualContext(String individualURI, boolean withInferredAxioms) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + individualURI);
+            WebResource webResource = client.resource(storeURI + DELIMITER + individualURI);
             String content = webResource
                     .queryParam(WITH_INFERRED_AXIOMS, Boolean.toString(withInferredAxioms))
                     .accept(MediaType.APPLICATION_XML).get(String.class);
@@ -560,7 +574,7 @@ public class RestClientImp implements RestClient {
                                                                    String classURI,
                                                                    String individualURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + ontologyURI + INDIVIDUALS);
+            WebResource webResource = client.resource(storeURI + DELIMITER + ontologyURI + INDIVIDUALS);
             MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
             formData.add("classURI", classURI);
             formData.add("individualURI", individualURI);
@@ -577,7 +591,7 @@ public class RestClientImp implements RestClient {
     public ObjectPropertyContext generateObjectPropertyContext(String objectPropertyURI,
                                                                boolean withInferredAxioms) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + objectPropertyURI);
+            WebResource webResource = client.resource(storeURI + DELIMITER + objectPropertyURI);
             String content = webResource
                     .queryParam(WITH_INFERRED_AXIOMS, Boolean.toString(withInferredAxioms))
                     .accept(MediaType.APPLICATION_XML).get(String.class);
@@ -593,7 +607,7 @@ public class RestClientImp implements RestClient {
                                                                      String objectPropertyURI) throws RestClientException {
         try {
             WebResource webResource = client
-                    .resource(PSAddress + DELIMITER + ontologyURI + OBJECT_PROPERTIES);
+                    .resource(storeURI + DELIMITER + ontologyURI + OBJECT_PROPERTIES);
             MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
             formData.add("objectPropertyURI", objectPropertyURI);
             String content = webResource.type(MediaType.APPLICATION_FORM_URLENCODED)
@@ -608,7 +622,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void makeSubClassOf(String subClassURI, String superClassURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + subClassURI + SUPER_CLASSES);
+            WebResource webResource = client.resource(storeURI + DELIMITER + subClassURI + SUPER_CLASSES);
             MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
             formData.add("superClassURIs", superClassURI);
             webResource.type(MediaType.APPLICATION_FORM_URLENCODED).accept(MediaType.APPLICATION_XML_TYPE)
@@ -621,7 +635,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void makeSubPropertyOf(String subPropertyURI, String superPropertyURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + subPropertyURI
+            WebResource webResource = client.resource(storeURI + DELIMITER + subPropertyURI
                                                       + SUPER_PROPERTIES);
             MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
             formData.add("superPropertyURIs", superPropertyURI);
@@ -636,7 +650,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void addDomains(String propertyURI, List<String> domainURIs) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + propertyURI + DOMAINS);
+            WebResource webResource = client.resource(storeURI + DELIMITER + propertyURI + DOMAINS);
             MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
             for (String domainURI : domainURIs) {
                 formData.add("domainURIs", domainURI);
@@ -655,7 +669,7 @@ public class RestClientImp implements RestClient {
                                       Boolean isSymmetric,
                                       Boolean isInverseFunctional) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + propertyURI);
+            WebResource webResource = client.resource(storeURI + DELIMITER + propertyURI);
             MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
             if (isFunctional != null) {
                 formData.add("isFunctional", Boolean.toString(isFunctional));
@@ -681,7 +695,7 @@ public class RestClientImp implements RestClient {
     @Override
     public void addRanges(String propertyURI, List<String> rangeURIs) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + propertyURI + RANGES);
+            WebResource webResource = client.resource(storeURI + DELIMITER + propertyURI + RANGES);
             MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
             for (String rangeURI : rangeURIs) {
                 formData.add("rangeURIs", rangeURI);
@@ -696,7 +710,7 @@ public class RestClientImp implements RestClient {
     @Override
     public String mergeOntology(String ontologyPath, String targetOntology, String targetOntologyBaseURI) throws RestClientException {
         try {
-            WebResource webResource = client.resource(PSAddress + DELIMITER + ontologyPath);
+            WebResource webResource = client.resource(storeURI + DELIMITER + ontologyPath);
             MultivaluedMap<String,String> formData = new MultivaluedMapImpl();
             formData.add("targetOntology", targetOntology);
             formData.add("targetOntologyBaseURI", targetOntologyBaseURI);
