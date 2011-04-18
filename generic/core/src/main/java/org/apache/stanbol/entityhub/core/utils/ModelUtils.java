@@ -31,9 +31,6 @@ import java.util.UUID;
 
 import javax.xml.namespace.QName;
 
-import org.apache.stanbol.entityhub.core.model.DefaultEntityMappingImpl;
-import org.apache.stanbol.entityhub.core.model.DefaultSignImpl;
-import org.apache.stanbol.entityhub.core.model.DefaultSymbolImpl;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -267,45 +264,46 @@ public final class ModelUtils {
             }
         }
     }
-    /**
-     * Creates a Sign for the parsed Representation and the signSite id
-     * @param rep the Represetnation
-     * @param signSite the id of the site for the sign
-     * @return the sign
-     * @throws IllegalArgumentException if any of the two parameter is <code>null</code>.
-     */
-    public static Sign createSign(Representation rep,String signSite) throws IllegalArgumentException {
-        if(rep == null){
-            throw new IllegalArgumentException("The parsed Representation MUST NOT be NULL!");
-        }
-        if(signSite == null){
-            throw new IllegalArgumentException("The parsed ID of the SignSite MUST NOT be NULL!");
-        }
-        rep.setReference(Sign.SIGN_SITE, signSite);
-        SignTypeEnum signType = ModelUtils.getSignType(rep);
-        //instantiate the correct Sign Implementation
-        Sign sign;
-        /*
-         * TODO: change this part to separate the implementation of the
-         * ReferencedSite with the instantiation of Sign Type Implementations
-         * Maybe introduce an SignFactory or add such Methods to the
-         * existing ValueFactory
-         */
-        switch (signType) {
-        case Symbol:
-            sign = new DefaultSymbolImpl(signSite,rep);
-            break;
-        case EntityMapping:
-            sign = new DefaultEntityMappingImpl(signSite,rep);
-            break;
-        case Sign:
-            sign = new DefaultSignImpl(signSite,rep);
-            break;
-        default:
-            log.warn("Unsupported SignType "+signType.getUri()+" (create Sign instance). Please adapt this implementation!");
-            sign = new DefaultSignImpl(signSite,rep);
-            break;
-        }
-        return sign;
-    }
+    //No longer needed after the introduction of the DefaultSignFactory!
+//    /**
+//     * Creates a Sign for the parsed Representation and the signSite id
+//     * @param rep the Represetnation
+//     * @param signSite the id of the site for the sign
+//     * @return the sign
+//     * @throws IllegalArgumentException if any of the two parameter is <code>null</code>.
+//     */
+//    public static Sign createSign(Representation rep,String signSite) throws IllegalArgumentException {
+//        if(rep == null){
+//            throw new IllegalArgumentException("The parsed Representation MUST NOT be NULL!");
+//        }
+//        if(signSite == null){
+//            throw new IllegalArgumentException("The parsed ID of the SignSite MUST NOT be NULL!");
+//        }
+//        rep.setReference(Sign.SIGN_SITE, signSite);
+//        SignTypeEnum signType = ModelUtils.getSignType(rep);
+//        //instantiate the correct Sign Implementation
+//        Sign sign;
+//        /*
+//         * TODO: change this part to separate the implementation of the
+//         * ReferencedSite with the instantiation of Sign Type Implementations
+//         * Maybe introduce an SignFactory or add such Methods to the
+//         * existing ValueFactory
+//         */
+//        switch (signType) {
+//        case Symbol:
+//            sign = new DefaultSymbolImpl(signSite,rep);
+//            break;
+//        case EntityMapping:
+//            sign = new DefaultEntityMappingImpl(signSite,rep);
+//            break;
+//        case Sign:
+//            sign = new DefaultSignImpl(signSite,rep);
+//            break;
+//        default:
+//            log.warn("Unsupported SignType "+signType.getUri()+" (create Sign instance). Please adapt this implementation!");
+//            sign = new DefaultSignImpl(signSite,rep);
+//            break;
+//        }
+//        return sign;
+//    }
 }

@@ -16,10 +16,7 @@
  */
 package org.apache.stanbol.entityhub.core.model;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
@@ -36,46 +33,37 @@ public class DefaultEntityMappingImpl extends DefaultSignImpl implements EntityM
 
     private static final Logger log = LoggerFactory.getLogger(DefaultEntityMappingImpl.class);
 
-    public static final Map<String,MappingState> MAPPING_STATE_MAP;
-    static{
-        Map<String,MappingState> tmp = new HashMap<String, MappingState>();
-        for(MappingState state : MappingState.values()){
-            tmp.put(state.getUri(), state);
-        }
-        MAPPING_STATE_MAP = Collections.unmodifiableMap(tmp);
-    }
-    /**
-     * Creates a new EntityMapping between the parsed symbol and entity
-     * @param entityhubId The ID of the Entityhub that defines this mapping
-     * @param symbol the ID of the symbol
-     * @param entity the ID of the entity
-     * @param state the state or <code>null</code> to use the {@link EntityMapping#DEFAULT_MAPPING_STATE}
-     * @param representation The representation to store the information of this EntityMapping
-     * @throws IllegalArgumentException If the EntityMapping Instance can not be created based on the parsed parameter.
-     * This includes <ul>
-     * <li> the Entityhub ID is <code>null</code> or empty
-     * <li> the symbol ID is <code>null</code> or empty
-     * <li> the entity ID is <code>null</code> or empty
-     * <li> the representation is <code>null</code>
-     * </ul>
-     * TODO: Maybe also add an valid {@link MappingState} value for the {@link EntityMapping#STATE}
-     *       to the requirements
-     */
-    public DefaultEntityMappingImpl(String entityhubId, String symbol,String entity,MappingState state,Representation representation) throws IllegalArgumentException {
-        super(entityhubId,representation);
-        if(symbol == null || symbol.isEmpty()){
-            throw new IllegalArgumentException("Parsed symbol ID MUST NOT be NULL nor empty");
-        }
-        if(entity == null || entity.isEmpty()){
-            throw new IllegalArgumentException("Parsed entity ID MUST NOT be NULL nor empty");
-        }
-        representation.setReference(EntityMapping.SYMBOL_ID, symbol);
-        representation.setReference(EntityMapping.ENTITY_ID, entity);
-        if(state == null){
-            state = EntityMapping.DEFAULT_MAPPING_STATE;
-        }
-        representation.setReference(EntityMapping.STATE, state.getUri());
-    }
+// NOTE: No longer used after switching to the DefaultSignFactory 
+//    /**
+//     * Creates a new EntityMapping between the parsed symbol and entity
+//     * @param entityhubId The ID of the Entityhub that defines this mapping
+//     * @param symbol the ID of the symbol
+//     * @param entity the ID of the entity
+//     * @param state the state or <code>null</code> to use the {@link EntityMapping#DEFAULT_MAPPING_STATE}
+//     * @param representation The representation to store the information of this EntityMapping
+//     * @throws IllegalArgumentException If the EntityMapping Instance can not be created based on the parsed parameter.
+//     * This includes <ul>
+//     * <li> the Entityhub ID is <code>null</code> or empty
+//     * <li> the symbol ID is <code>null</code> or empty
+//     * <li> the entity ID is <code>null</code> or empty
+//     * <li> the representation is <code>null</code>
+//     * </ul>
+//     */
+//    protected DefaultEntityMappingImpl(String entityhubId, String symbol,String entity,MappingState state,Representation representation) throws IllegalArgumentException {
+//        super(entityhubId,representation);
+//        if(symbol == null || symbol.isEmpty()){
+//            throw new IllegalArgumentException("Parsed symbol ID MUST NOT be NULL nor empty");
+//        }
+//        if(entity == null || entity.isEmpty()){
+//            throw new IllegalArgumentException("Parsed entity ID MUST NOT be NULL nor empty");
+//        }
+//        representation.setReference(EntityMapping.SYMBOL_ID, symbol);
+//        representation.setReference(EntityMapping.ENTITY_ID, entity);
+//        if(state == null){
+//            state = EntityMapping.DEFAULT_MAPPING_STATE;
+//        }
+//        representation.setReference(EntityMapping.STATE, state.getUri());
+//    }
     /**
      *
      * @param siteId
@@ -90,15 +78,15 @@ public class DefaultEntityMappingImpl extends DefaultSignImpl implements EntityM
      * <li> the representation is <code>null</code>
      * </ul>
      */
-    public DefaultEntityMappingImpl(String siteId, Representation representation) {
+    protected DefaultEntityMappingImpl(String siteId, Representation representation) {
         super(siteId,representation);
-        //check required fields
-        if(getEntityId() == null){
-            throw new IllegalArgumentException("Representation "+getId()+" does not define required field "+EntityMapping.ENTITY_ID);
-        }
-        if(getSymbolId() == null){
-            throw new IllegalArgumentException("Representation "+getId()+" does not define required field "+EntityMapping.SYMBOL_ID);
-        }
+        //check no longer required -> allows to set values after creation ...
+//        if(getEntityId() == null){
+//            throw new IllegalArgumentException("Representation "+getId()+" does not define required field "+EntityMapping.ENTITY_ID);
+//        }
+//        if(getSymbolId() == null){
+//            throw new IllegalArgumentException("Representation "+getId()+" does not define required field "+EntityMapping.SYMBOL_ID);
+//        }
     }
     @Override
     public final String getEntityId() {
@@ -114,17 +102,16 @@ public class DefaultEntityMappingImpl extends DefaultSignImpl implements EntityM
     @Override
     public final MappingState getState() {
         Reference stateUri = representation.getFirstReference(EntityMapping.STATE);
-        MappingState state;
         if(stateUri != null){
-            state = MAPPING_STATE_MAP.get(stateUri.getReference());
+            if(MappingState.isState(stateUri.getReference())){
+                return MappingState.getState(stateUri.getReference());
+            } else {
+                log.warn("Value {} for field {} is not a valied MappingState! -> return null",
+                    stateUri,EntityMapping.STATE);
+                return null;
+            }
         } else {
-            state = null;
-        }
-        if(state == null){
-            log.warn("Value "+stateUri+" for field "+EntityMapping.STATE+" is not a valied MappingState! -> return null");
             return null;
-        } else {
-            return state;
         }
     }
 

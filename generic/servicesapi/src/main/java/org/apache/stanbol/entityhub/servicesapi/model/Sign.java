@@ -16,6 +16,11 @@
  */
 package org.apache.stanbol.entityhub.servicesapi.model;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping.MappingState;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 /**
  * A Sign links three things together
@@ -51,7 +56,7 @@ public interface Sign {
         ;
         private String uri;
         SignTypeEnum(String uri){
-
+            this.uri = uri;
         }
         public String getUri(){
             return uri;
@@ -59,6 +64,34 @@ public interface Sign {
         @Override
         public String toString() {
             return uri;
+        }
+        // ---- reverse Mapping based on URI ----
+        private static Map<String,SignTypeEnum> URI_TO_STATE;
+        static {
+            Map<String, SignTypeEnum> mappings = new HashMap<String, SignTypeEnum>();
+            for(SignTypeEnum state : SignTypeEnum.values()){
+                mappings.put(state.getUri(), state);
+            }
+            URI_TO_STATE = Collections.unmodifiableMap(mappings);
+        }
+        /**
+         * Getter for the SignType based on the URI.
+         * @param uri the URI
+         * @return the State
+         * @throws IllegalArgumentException if the parsed URI does not represent
+         * a state
+         */
+        public static SignTypeEnum getType(String uri) throws IllegalArgumentException{
+            SignTypeEnum state = URI_TO_STATE.get(uri);
+            if(state == null){
+                throw new IllegalArgumentException(String.format(
+                    "Unknown SignType URI %s (supported states URIs: %s)",
+                    uri,URI_TO_STATE.keySet()));
+            }
+            return state;
+        }
+        public static boolean isState(String uri){
+            return URI_TO_STATE.containsKey(uri);
         }
     }
     /**
@@ -87,13 +120,18 @@ public interface Sign {
      * @return the site of this Sign
      */
     String getSignSite();
-//    /**
-//     * Getter for the type of a sign. Subclasses may restrict values of this
-//     * property. (e.g. {@link #getType()} for {@link Symbol} always returns
-//     * {@link SignTypeEnum#Symbol})
-//     * @return the type
-//     */
-//    SignTypeEnum getType();
+    
+    /**
+     * The property used to store the type of the type
+     */
+    String SIGN_TYPE = RdfResourceEnum.signType.getUri();
+    /**
+     * Getter for the type of a sign. Subclasses may restrict values of this
+     * property. (e.g. {@link #getType()} for {@link Symbol} always returns
+     * {@link SignTypeEnum#Symbol})
+     * @return the type
+     */
+    SignTypeEnum getType();
 
     /**
      * Getter for the {@link Representation} of that sign as defined/managed by the site

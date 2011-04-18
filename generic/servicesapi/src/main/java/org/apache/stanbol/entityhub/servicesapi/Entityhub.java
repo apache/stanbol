@@ -109,7 +109,8 @@ public interface Entityhub {
      * @return the Symbol or <code>null</code> if no {@link Symbol} with that
      * ID is managed by the Entityhub.
      * @throws IllegalArgumentException if <code>null</code> or an empty String
-     * is parsed as symbolId
+     * is parsed as symbolId or if the parsed ID does not represent a
+     * {@link Symbol}
      * @throws EntityhubException On any error while performing the operation
      */
     Symbol getSymbol(String symbolId) throws IllegalArgumentException, EntityhubException;
@@ -138,8 +139,11 @@ public interface Entityhub {
      * @param id the id of the mapped entity
      * @return the MappedEntity or <code>null</code> if none was found
      * @throws EntityhubException On any error while performing the operation
+     * @throws IllegalArgumentException If <code>null</code> or an empty string
+     * is parsed as ID or if the parsed ID does not represent an 
+     * {@link EntityMapping}
      */
-    EntityMapping getMappingById(String id) throws EntityhubException;
+    EntityMapping getMappingById(String id) throws EntityhubException, IllegalArgumentException;
     /**
      * Getter for all mappings for a entity
      * TODO: check if an Entity can be mapped to more than one Symbol

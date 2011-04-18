@@ -26,6 +26,8 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURT
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -38,7 +40,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -50,7 +51,6 @@ import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
-import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Sign;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
@@ -96,13 +96,15 @@ public class SiteManagerRootResource extends BaseStanbolResource {
     public Response getSitesPage() {
         return Response.ok(new Viewable("index", this), TEXT_HTML).build();
     }
-    
-    @GET
-    @Path("/referenced")
-    @Produces(MediaType.TEXT_HTML)
-    public Response getReferencedSitesPage() {
-        return Response.ok(new Viewable("referenced", this), TEXT_HTML).build();
-    }
+
+// removed to allow request with Accept headers other than text/html to return
+// the JSON array
+//    @GET
+//    @Path("/referenced")
+//    @Produces(MediaType.TEXT_HTML)
+//    public Response getReferencedSitesPage() {
+//        return Response.ok(new Viewable("referenced", this), TEXT_HTML).build();
+//    }
     
     /**
      * Getter for the id's of all referenced sites
@@ -111,24 +113,25 @@ public class SiteManagerRootResource extends BaseStanbolResource {
      */
     @GET
     @Path(value = "/referenced")
-    @Produces(MediaType.APPLICATION_JSON)
-    public JSONArray getReferencedSites(@Context UriInfo uriInfo) {
-        JSONArray referencedSites = new JSONArray();
-        ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
-            ReferencedSiteManager.class, context);
-        for (String site : referencedSiteManager.getReferencedSiteIds()) {
-            referencedSites.put(String.format("%sentityhub/site/%s/", uriInfo.getBaseUri(), site));
+    @Produces({MediaType.APPLICATION_JSON,MediaType.TEXT_HTML})
+    public Response getReferencedSites(@Context UriInfo uriInfo,
+                                        @Context HttpHeaders headers) {
+        MediaType acceptable = JerseyUtils.getAcceptableMediaType(headers,
+           Arrays.asList(MediaType.APPLICATION_JSON,MediaType.TEXT_HTML) ,
+           MediaType.APPLICATION_JSON_TYPE);
+        if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptable)){
+            return Response.ok(new Viewable("referenced", this), TEXT_HTML).build();
+        } else {
+            JSONArray referencedSites = new JSONArray();
+            ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
+                ReferencedSiteManager.class, context);
+            for (String site : referencedSiteManager.getReferencedSiteIds()) {
+                referencedSites.put(String.format("%sentityhub/site/%s/", uriInfo.getBaseUri(), site));
+            }
+            return Response.ok(referencedSites,acceptable).build();
         }
-        return referencedSites;
     }
     
-    @GET
-    @Path("/entity")
-    @Produces(MediaType.TEXT_HTML)
-    public Response getEntityPage() {
-        return Response.ok(new Viewable("entity", this), TEXT_HTML).build();        
-    }
-
     /**
      * Cool URI handler for Signs.
      * 
@@ -144,9 +147,18 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         log.debug("getSignById() request\n\t> id       : {}\n\t> accept   : {}\n\t> mediaType: {}",
             new Object[] {id, headers.getAcceptableMediaTypes(), headers.getMediaType()});
 
+        Collection<String> supported = new HashSet<String>(JerseyUtils.SIGN_SUPPORTED_MEDIA_TYPES);
+        supported.add(TEXT_HTML);
+        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(
+            headers, supported, MediaType.APPLICATION_JSON_TYPE);
         if (id == null || id.isEmpty()) {
-            log.error("getSignById() No or emptpy ID was parsed as query parameter (id={})", id);
-            throw new WebApplicationException(Status.BAD_REQUEST);
+            if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
+                return Response.ok(new Viewable("entity", this), TEXT_HTML).build();        
+            } else {
+                return Response.status(Status.BAD_REQUEST)
+                    .entity("No or empty ID was parsed. Missing parameter id.\n")
+                    .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
+            }
         }
         ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
             ReferencedSiteManager.class, context);
@@ -157,24 +169,24 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         // log.error("IOException while accessing ReferencedSiteManager",e);
         // throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
         // }
-        final MediaType acceptedMediaType = JerseyUtils
-                .getAcceptableMediaType(headers, MediaType.APPLICATION_JSON_TYPE);
         if (sign != null) {
             return Response.ok(sign, acceptedMediaType).build();
         } else {
             // TODO: How to parse an ErrorMessage?
             // create an Response with the the Error?
             log.info("getSignById() entity {} not found on any referenced site");
-            throw new WebApplicationException(Status.NOT_FOUND);
+            return Response.status(Status.NOT_FOUND)
+                .entity("Entity with ID '"+id+"' not found an any referenced site\n")
+                .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
         }
     }
 
-    @GET
-    @Path("/find")
-    @Produces(MediaType.TEXT_HTML)
-    public Response getFindPage() {
-        return Response.ok(new Viewable("find", this), TEXT_HTML).build();
-    }
+//    @GET
+//    @Path("/find")
+//    @Produces(MediaType.TEXT_HTML)
+//    public Response getFindPage() {
+//        return Response.ok(new Viewable("find", this), TEXT_HTML).build();
+//    }
     
     @GET
     @Path("/find")
@@ -198,6 +210,19 @@ public class SiteManagerRootResource extends BaseStanbolResource {
                                @FormParam(value = "offset") Integer offset,
                                @Context HttpHeaders headers) {
         log.debug("findEntity() Request");
+        Collection<String> supported = new HashSet<String>(JerseyUtils.SIGN_SUPPORTED_MEDIA_TYPES);
+        supported.add(TEXT_HTML);
+        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(
+            headers, supported, MediaType.APPLICATION_JSON_TYPE);
+        if(name == null || name.isEmpty()){
+            if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
+                return Response.ok(new Viewable("find", this), TEXT_HTML).build();        
+            } else {
+                return Response.status(Status.BAD_REQUEST)
+                    .entity("The name must not be null nor empty for find requests. Missing parameter name.\n")
+                    .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
+            }
+        }
         if (field == null) {
             field = DEFAULT_FIND_FIELD;
         } else {
@@ -210,17 +235,15 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             ReferencedSiteManager.class, context);
         FieldQuery query = JerseyUtils.createFieldQueryForFindRequest(name, field, language,
             limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, offset);
-        final MediaType acceptedMediaType = JerseyUtils
-                .getAcceptableMediaType(headers, MediaType.APPLICATION_JSON_TYPE);
         return Response.ok(referencedSiteManager.find(query), acceptedMediaType).build();
     }
 
-    @GET
-    @Path("/query")
-    @Produces(MediaType.TEXT_HTML)
-    public Response getQueryPage() {
-        return Response.ok(new Viewable("query", this), TEXT_HTML).build();
-    }
+//    @GET
+//    @Path("/query")
+//    @Produces(MediaType.TEXT_HTML)
+//    public Response getQueryPage() {
+//        return Response.ok(new Viewable("query", this), TEXT_HTML).build();
+//    }
     
     /**
      * Allows to parse any kind of {@link FieldQuery} in its JSON Representation. Note that the maximum number
@@ -249,9 +272,20 @@ public class SiteManagerRootResource extends BaseStanbolResource {
                                   @Context HttpHeaders headers) {
         ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
             ReferencedSiteManager.class, context);
+        Collection<String> supported = new HashSet<String>(JerseyUtils.SIGN_SUPPORTED_MEDIA_TYPES);
+        supported.add(TEXT_HTML);
+        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(
+            headers, supported, MediaType.APPLICATION_JSON_TYPE);
+        if(queryString == null || queryString.isEmpty()){
+            if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
+                return Response.ok(new Viewable("query", this), TEXT_HTML).build();        
+            } else {
+                return Response.status(Status.BAD_REQUEST)
+                    .entity("The query must not be null nor empty for query requests. Missing parameter query.\n")
+                    .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
+            }
+        }
         FieldQuery query = JerseyUtils.parseFieldQuery(queryString, file);
-        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers,
-            MediaType.APPLICATION_JSON_TYPE);
         return Response.ok(referencedSiteManager.find(query), acceptedMediaType).build();
     }
 

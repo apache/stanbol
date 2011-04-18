@@ -32,7 +32,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -40,9 +39,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.Status;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.commons.web.base.ContextHelper;
@@ -155,7 +153,6 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         if(name == null || name.isEmpty()){
             //return all
         } else if(name.startsWith(LICENSE_NAME)){
-            int number;
             try {
                 String numberString = name.substring(LICENSE_NAME.length());
                 if(numberString.isEmpty()){
@@ -173,8 +170,9 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                     }
                 }
             }catch (NumberFormatException e) {
-                //not a valid licenseName
-                throw new WebApplicationException(Response.Status.NOT_FOUND);
+                return Response.status(Status.NOT_FOUND).
+                entity("No License found.\n")
+                .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();
@@ -200,9 +198,13 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         log.info("  > id       : " + id);
         log.info("  > accept   : " + headers.getAcceptableMediaTypes());
         log.info("  > mediaType: " + headers.getMediaType());
+        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers,
+            JerseyUtils.SIGN_SUPPORTED_MEDIA_TYPES, MediaType.APPLICATION_JSON_TYPE);
         if (id == null || id.isEmpty()) {
             log.error("No or emptpy ID was parsd as query parameter (id={})", id);
-            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+            return Response.status(Status.BAD_REQUEST).
+            entity("No or empty Entity ID parsed. Missing parameter id={entityID}.\n")
+            .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
         }
         log.info("handle Request for Entity {} of Site {}", id, site.getId());
         Sign sign;
@@ -213,8 +215,6 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                 " (id=" + site.getId() + ")", e);
             throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
         }
-        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers,
-            MediaType.APPLICATION_JSON_TYPE);
         if (sign != null) {
             return Response.ok(sign, acceptedMediaType).build();
         } else {
@@ -222,7 +222,9 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
             // create an Response with the the Error?
             log.info(" ... Entity {} not found on referenced site {}", 
                 id, site.getId());
-            throw new WebApplicationException(Response.Status.NOT_FOUND);
+            return Response.status(Status.NOT_FOUND).
+            entity("Entity '"+id+"' not found on referenced site '"+site.getId()+"'\n")
+            .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
         }
     }
     
