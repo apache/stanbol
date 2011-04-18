@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.stanbol.entityhub.servicesapi.model.Symbol.SymbolState;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 
 public interface EntityMapping extends Sign {
@@ -73,19 +74,32 @@ public interface EntityMapping extends Sign {
             return uri;
         }
         // ---- reverse Mapping based on URI ----
-        private static Map<String,MappingState> uri2state;
+        private static Map<String,MappingState> URI_TO_STATE;
         static {
             Map<String, MappingState> mappings = new HashMap<String, MappingState>();
             for(MappingState state : MappingState.values()){
                 mappings.put(state.getUri(), state);
             }
-            uri2state = Collections.unmodifiableMap(mappings);
+            URI_TO_STATE = Collections.unmodifiableMap(mappings);
         }
-        public static MappingState getState(String uri){
-            return uri2state.get(uri);
+        /**
+         * Getter for the State based on the URI.
+         * @param uri the URI
+         * @return the State
+         * @throws IllegalArgumentException if the parsed URI does not represent
+         * a state
+         */
+        public static MappingState getState(String uri) throws IllegalArgumentException{
+            MappingState state = URI_TO_STATE.get(uri);
+            if(state == null){
+                throw new IllegalArgumentException(String.format(
+                    "Unknown MappingState URI %s (supported states URIs: %s)",
+                    uri,URI_TO_STATE.keySet()));
+            }
+            return state;
         }
         public static boolean isState(String uri){
-            return uri2state.containsKey(uri);
+            return URI_TO_STATE.containsKey(uri);
         }
     }
     //    /**

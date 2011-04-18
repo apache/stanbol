@@ -18,7 +18,7 @@ package org.apache.stanbol.entityhub.jersey.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static javax.ws.rs.core.MediaType.*;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N3;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N_TRIPLE;
@@ -27,9 +27,13 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XM
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -57,6 +61,13 @@ import com.sun.jersey.api.view.Viewable;
 /**
  * RESTful interface for the {@link EntityMapping}s defined by the {@link Entityhub}.
  * 
+ * NOTE to RESTful Service Documentation in the header:
+ *   Removed all Methods used to provide the RESTful Service documentation and
+ *   incorporated them to the methods using the same path but with the id
+ *   parameter. The reason for that was that the documentation methods where
+ *   called even if an id parameter was provided if the "Accept:" header was
+ *   not specified in requests.
+ * 
  * @author Rupert Westenthaler
  */
 @Path("/entityhub/mapping")
@@ -65,33 +76,41 @@ public class EntityMappingResource extends BaseStanbolResource {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private ServletContext context;
-
+    
     // bind the job manager by looking it up from the servlet request context
     public EntityMappingResource(@Context ServletContext context) {
         super();
         this.context = context;
     }
 
-    @GET
-    @Path("/")
-    @Produces(MediaType.TEXT_HTML)
-    public Response getMappingPage() {
-        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
-    }
+// see NOTE to RESTful Service Documentation in the header
+//    @GET
+//    @Path("/")
+//    @Produces(MediaType.TEXT_HTML)
+//    public Response getMappingPage() {
+//        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+//    }
     
     @GET
     @Path("/")
-    @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
+    @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE,TEXT_HTML})
     public Response getMapping(@QueryParam("id") String reference, @Context HttpHeaders headers)
                                                                             throws WebApplicationException {
         log.debug("get mapping for request > id : {} > accept: {}",
             reference, headers.getAcceptableMediaTypes());
-
-        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
+        Set<String> supported = new HashSet<String>(JerseyUtils.REPRESENTATION_SUPPORTED_MEDIA_TYPES);
+        supported.add(TEXT_HTML);
+        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(
+            headers,supported, APPLICATION_JSON_TYPE);
         
         if (reference == null || reference.isEmpty()) {
-            return Response.status(Status.BAD_REQUEST).entity("The mapping ID (URI) is missing.").header(
-                HttpHeaders.ACCEPT, acceptedMediaType).build();
+            //if HTML -> print the docu of the restfull service
+            if(TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
+              return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+            } else {
+                return Response.status(Status.BAD_REQUEST).entity("The mapping id (URI) is missing.\n").header(
+                    HttpHeaders.ACCEPT, acceptedMediaType).build();
+            }
         }
         Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
         EntityMapping mapping;
@@ -102,33 +121,41 @@ public class EntityMappingResource extends BaseStanbolResource {
             return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
         if (mapping == null) {
-            return Response.status(Status.NOT_FOUND).entity("No mapping found for '" + reference + "'.")
+            return Response.status(Status.NOT_FOUND).entity("No mapping found for '" + reference + "'.\n")
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
         } else {
             return Response.ok(mapping, acceptedMediaType).build();
         }
     }
-    
-    @GET
-    @Path("/entity")
-    @Produces(MediaType.TEXT_HTML)
-    public Response getEntityMappingPage() {
-        return Response.ok(new Viewable("entity", this), TEXT_HTML).build();
-    }
+// see NOTE to RESTful Service Documentation in the header
+//    @GET
+//    @Path("/entity")
+//    @Produces(MediaType.TEXT_HTML)
+//    public Response getEntityMappingPage() {
+//        return Response.ok(new Viewable("entity", this), TEXT_HTML).build();
+//    }
 
     @GET
     @Path("/entity")
-    @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
+    @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE,TEXT_HTML})
     public Response getEntityMapping(@QueryParam("id") String entity, @Context HttpHeaders headers)
                                                                             throws WebApplicationException {
         log.debug("getEntityMapping() POST Request > entity: {} > accept: {}",
             entity, headers.getAcceptableMediaTypes());
         
-        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
+        Set<String> supported = new HashSet<String>(JerseyUtils.REPRESENTATION_SUPPORTED_MEDIA_TYPES);
+        supported.add(TEXT_HTML);
+        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(
+            headers,supported, APPLICATION_JSON_TYPE);
 
         if (entity == null || entity.isEmpty()) {
-            return Response.status(Status.BAD_REQUEST).entity("No entity given. Missing parameter ID.")
+            //if HTML -> print the docu of the restfull service
+            if(TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
+                return Response.ok(new Viewable("entity", this), TEXT_HTML).build();
+            } else {
+                return Response.status(Status.BAD_REQUEST).entity("No entity given. Missing parameter id.\n")
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
+            }
         }
         
         Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
@@ -139,33 +166,41 @@ public class EntityMappingResource extends BaseStanbolResource {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
         if (mapping == null) {
-            return Response.status(Status.NOT_FOUND).entity("No mapping found for entity '" + entity + "'.")
+            return Response.status(Status.NOT_FOUND).entity("No mapping found for entity '" + entity + "'.\n")
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
         } else {
             return Response.ok(mapping, acceptedMediaType).build();
         }
     }
-
-    @GET
-    @Path("/symbol")
-    @Produces(MediaType.TEXT_HTML)
-    public Response getSymbolMappingPage() {
-        return Response.ok(new Viewable("symbol", this), TEXT_HTML).build();
-    }
+ // see NOTE to RESTful Service Documentation in the header
+//    @GET
+//    @Path("/symbol")
+//    @Produces(MediaType.TEXT_HTML)
+//    public Response getSymbolMappingPage() {
+//        return Response.ok(new Viewable("symbol", this), TEXT_HTML).build();
+//    }
     
     @GET
     @Path("/symbol")
-    @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE})
+    @Produces( {APPLICATION_JSON, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE,TEXT_HTML})
     public Response getSymbolMappings(@QueryParam("id") String symbol, @Context HttpHeaders headers)
                                                                             throws WebApplicationException {
         log.debug("getSymbolMappings() POST Request > symbol: {} > accept: {}",
             symbol, headers.getAcceptableMediaTypes());
         
-        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, APPLICATION_JSON_TYPE);
+        Set<String> supported = new HashSet<String>(JerseyUtils.REPRESENTATION_SUPPORTED_MEDIA_TYPES);
+        supported.add(TEXT_HTML);
+        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(
+            headers,supported, APPLICATION_JSON_TYPE);
 
         if (symbol == null || symbol.isEmpty()) {
-            return Response.status(Status.BAD_REQUEST).entity("No symbol given. Missing parameter ID.")
-            .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
+            //if HTML -> print the docu of the restfull service
+            if(TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
+                return Response.ok(new Viewable("symbol", this), TEXT_HTML).build();
+            } else {
+                return Response.status(Status.BAD_REQUEST).entity("No symbol given. Missing parameter id.\n")
+                    .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
+            }
         }
         Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
         Collection<EntityMapping> mappings;
@@ -175,7 +210,7 @@ public class EntityMappingResource extends BaseStanbolResource {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
         if (mappings == null || mappings.isEmpty()) {
-            return Response.status(Status.NOT_FOUND).entity("No mapping found for symbol '" + symbol + "'.")
+            return Response.status(Status.NOT_FOUND).entity("No mapping found for symbol '" + symbol + "'.\n")
             .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
         } else {
             // TODO: Implement Support for list of Signs, Representations and Strings

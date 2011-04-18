@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.entityhub.core.model;
 
+import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Sign;
 import org.slf4j.Logger;
@@ -26,7 +27,6 @@ public class DefaultSignImpl implements Sign{
     Logger log = LoggerFactory.getLogger(DefaultSignImpl.class);
     
     protected final Representation representation;
-//    private final String TYPE = RdfResourceEnum.signType.getUri();
     private final String signSite;
 
 //    public DefaultSignImpl(Representation representation) {
@@ -38,7 +38,8 @@ public class DefaultSignImpl implements Sign{
 //        }
 //        this.representation = representation;
 //    }
-    public DefaultSignImpl(String siteId,Representation representation) {
+    protected DefaultSignImpl(String siteId,Representation representation) {
+        super();
         if(representation == null){
             throw new IllegalArgumentException("NULL value ist not allowed for the Representation");
         }
@@ -63,33 +64,41 @@ public class DefaultSignImpl implements Sign{
     }
     
     @Override
-    public String getSignSite() {
+    public final String getSignSite() {
         return signSite;
     }
 
     @Override
-    public String getId() {
+    public final String getId() {
         return representation.getId();
     }
 
     @Override
-    public Representation getRepresentation() {
+    public final Representation getRepresentation() {
         return representation;
     }
-//    @Override
-//    public SignTypeEnum getType() {
-//        Reference ref = representation.getFirstReference(TYPE);
-//        if(ref == null){
-//            return DEFAULT_SIGN_TYPE;
-//        } else {
-//            SignTypeEnum type = ModelUtils.getSignType(ref.getReference());
-//            if(type == null){
-//                log.warn("Sign "+getId()+" is set to an unknown SignType "+ref.getReference()+"! -> return default type (value is not reseted)");
-//                return DEFAULT_SIGN_TYPE;
-//            } else {
-//                return type;
-//            }
-//        }
-//    }
-
+    @Override
+    public final SignTypeEnum getType() {
+        SignTypeEnum type = parseSignType(representation);
+        return type == null?SignTypeEnum.Sign:type;
+    }
+    /**
+     * Parses the SignType from the parsed Representation
+     * @param rep the representation
+     * @return the type of the sign or <code>null</code> if the representation
+     * does not contain the necessary information
+     * @throws IllegalArgumentException if the parsed Representation contains an
+     * {@link Sign#SIGN_TYPE} value that is not an valid URI for 
+     * {@link SignTypeEnum#getType(String)}.
+     */
+    public static SignTypeEnum parseSignType(Representation rep) throws IllegalArgumentException {
+        SignTypeEnum signType;
+        Reference typeRef = rep.getFirstReference(Sign.SIGN_TYPE);
+        if(typeRef != null){
+            signType = SignTypeEnum.getType(typeRef.getReference());
+        } else {
+            signType = null;
+        }
+        return signType;
+    }
 }

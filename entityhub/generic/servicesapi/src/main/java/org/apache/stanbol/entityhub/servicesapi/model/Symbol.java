@@ -16,8 +16,12 @@
  */
 package org.apache.stanbol.entityhub.servicesapi.model;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
+import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping.MappingState;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 
 public interface Symbol extends Sign{
@@ -63,6 +67,34 @@ public interface Symbol extends Sign{
         public String toString() {
             return uri;
         }
+        private static Map<String,SymbolState> URI_TO_STATE;
+        static {
+            Map<String, SymbolState> mappings = new HashMap<String, SymbolState>();
+            for(SymbolState state : SymbolState.values()){
+                mappings.put(state.getUri(), state);
+            }
+            URI_TO_STATE = Collections.unmodifiableMap(mappings);
+        }
+        /**
+         * Getter for the State based on the URI.
+         * @param uri the URI
+         * @return the State
+         * @throws IllegalArgumentException if the parsed URI does not represent
+         * a state
+         */
+        public static SymbolState getState(String uri) throws IllegalArgumentException{
+            SymbolState state = URI_TO_STATE.get(uri);
+            if(state == null){
+                throw new IllegalArgumentException(String.format(
+                    "Unknown SymbolState URI %s (supported states URIs: %s)",
+                    uri,URI_TO_STATE.keySet()));
+            }
+            return state;
+        }
+        public static boolean isState(String uri){
+            return URI_TO_STATE.containsKey(uri);
+        }
+
     }
 
     /**

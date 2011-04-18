@@ -16,10 +16,22 @@
  */
 package org.apache.stanbol.entityhub.jersey.utils;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N3;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N_TRIPLE;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JSON;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.WebApplicationException;
@@ -36,6 +48,7 @@ import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
+import org.apache.stanbol.entityhub.servicesapi.model.Sign;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
@@ -56,6 +69,17 @@ import org.slf4j.LoggerFactory;
 public final class JerseyUtils {
     
     private static Logger log = LoggerFactory.getLogger(JerseyUtils.class);
+    /**
+     * Unmodifiable Set with the Media Types supported for {@link Representation}
+     */
+    public static final Set<String> REPRESENTATION_SUPPORTED_MEDIA_TYPES = 
+        Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+            APPLICATION_JSON,RDF_XML,N3,TURTLE,X_TURTLE,RDF_JSON,N_TRIPLE)));
+    /**
+     * Unmodifiable Set with the Media Types supported for {@link Sign}
+     */
+    public static final Set<String> SIGN_SUPPORTED_MEDIA_TYPES = 
+        REPRESENTATION_SUPPORTED_MEDIA_TYPES;
     
     /**
      * This utility class used the {@link DefaultQueryFactory} as
@@ -80,6 +104,31 @@ public final class JerseyUtils {
         if (!headers.getAcceptableMediaTypes().isEmpty()) {
             for (MediaType accepted : headers.getAcceptableMediaTypes()) {
                 if (!accepted.isWildcardType()) {
+                    acceptedMediaType = accepted;
+                    break;
+                }
+            }
+        }
+        if (acceptedMediaType == null) {
+            acceptedMediaType = defaultType;
+        }
+        return acceptedMediaType;
+    }
+    /**
+     * Checks the parsed MediaTypes for supported types. WildCards are not
+     * supported by this method. If no supported is found the defaultType
+     * is returned
+     * @param headers the headers of the request
+     * @param supported the supported types
+     * @param defaultType the default type used of no match is found
+     * @return the first supported media type part of the header or the default
+     * type 
+     */
+    public static MediaType getAcceptableMediaType(HttpHeaders headers, Collection<String> supported,MediaType defaultType) {
+        MediaType acceptedMediaType = null;
+        if (!headers.getAcceptableMediaTypes().isEmpty()) {
+            for (MediaType accepted : headers.getAcceptableMediaTypes()) {
+                if (!accepted.isWildcardType() && supported.contains(accepted.getType()+'/'+accepted.getSubtype())) {
                     acceptedMediaType = accepted;
                     break;
                 }

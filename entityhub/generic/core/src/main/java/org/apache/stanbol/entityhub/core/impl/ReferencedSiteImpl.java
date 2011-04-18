@@ -41,9 +41,9 @@ import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.entityhub.core.mapping.DefaultFieldMapperImpl;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
+import org.apache.stanbol.entityhub.core.model.DefaultSignFactory;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
-import org.apache.stanbol.entityhub.core.utils.ModelUtils;
 import org.apache.stanbol.entityhub.core.utils.OsgiUtils;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
@@ -236,6 +236,10 @@ public class ReferencedSiteImpl implements ReferencedSite {
     private final Logger log;
     private ComponentContext context;
     private FieldMapper fieldMappings;
+    /**
+     * Used to create Sign instances
+     */
+    private DefaultSignFactory signFactory = DefaultSignFactory.getInstance();
 
     private final Object searcherAndDereferencerLock = new Object();
     private Boolean dereferencerEqualsEntitySearcherComponent;
@@ -296,7 +300,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
                     QueryResultList<Representation> representations = cache.findRepresentation((query));
                     results = new ArrayList<Sign>(representations.size());
                     for(Representation result : representations){
-                        results.add(ModelUtils.createSign(result, getId()));
+                        results.add(signFactory.getSign(getId(),result));
                     }
                     return new QueryResultListImpl<Sign>(query, results, Sign.class);
                 } catch (YardException e) {
@@ -520,7 +524,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
             log.info(String.format("  - loaded Representation %s from Cache in %d ms",
                     id, (System.currentTimeMillis() - start)));
         }
-        return rep != null ? ModelUtils.createSign(rep, getId()) : null;
+        return rep != null ? signFactory.getSign(getId(),rep) : null;
     }
     @Override
     public SiteConfiguration getConfiguration() {
