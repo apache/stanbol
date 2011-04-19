@@ -45,6 +45,7 @@
     <module>parent</module>
     <module>frameworkfragment</module>
     <module>commons</module>
+    <module>owl</module>
     <module>entityhub</module>
     <module>enhancer</module>
     <module>contenthub/web</module>
@@ -60,9 +61,8 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
-        <module>owl</module>
         <!--
-        <module>kres/jersey</module>
+        <module>owl</module>
         -->
         <module>ontologymanager</module>
         <module>rules</module>
