@@ -324,7 +324,8 @@ public class NEREngineCore implements EnhancementEngine {
         if (null == text) {
             return null;
         }
-        byte[] bytes = text.getBytes(Charset.forName("UTF-8"));
+        Charset UTF8 = Charset.forName("UTF-8");
+        byte[] bytes = text.getBytes(UTF8);
         for (int i = 0; i < bytes.length; i++) {
             byte ch = bytes[i];
             // remove any characters outside the valid UTF-8 range as well as all control characters
@@ -333,6 +334,6 @@ public class NEREngineCore implements EnhancementEngine {
                 bytes[i] = ' ';
             }
         }
-        return new String(bytes);
+        return new String(bytes, UTF8);
     }
 }
