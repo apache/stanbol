@@ -26,6 +26,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ST
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -236,6 +237,7 @@ public class NEREngineCore implements EnhancementEngine {
         // version with explicit sentence endings to reflect heading / paragraph
         // structure of an HTML or PDF document converted to text
         String textWithDots = text.replaceAll("\\n\\n", ".\n");
+        text = removeNonUtf8CompliantCharacters(text);
 
         SentenceDetectorME sentenceDetector = new SentenceDetectorME(sentenceModel);
 
@@ -312,5 +314,25 @@ public class NEREngineCore implements EnhancementEngine {
             return ENHANCE_SYNCHRONOUS;
         }
         return CANNOT_ENHANCE;
+    }
+
+    /**
+     * Remove non UTF-8 compliant characters (typically control characters) so has to avoid polluting the
+     * annotation graph with snippets that are not serializable as XML.
+     */
+    protected static String removeNonUtf8CompliantCharacters(final String text) {
+        if (null == text) {
+            return null;
+        }
+        byte[] bytes = text.getBytes(Charset.forName("UTF-8"));
+        for (int i = 0; i < bytes.length; i++) {
+            byte ch = bytes[i];
+            // remove any characters outside the valid UTF-8 range as well as all control characters
+            // except tabs and new lines
+            if (!((ch > 31 && ch < 253) || ch == '\t' || ch == '\n' || ch == '\r')) {
+                bytes[i] = ' ';
+            }
+        }
+        return new String(bytes);
     }
 }

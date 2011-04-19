@@ -49,6 +49,9 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
 
     public static final String SINGLE_SENTENCE = "Dr Patrick Marshall (1869 - November 1950) was a"
             + " geologist who lived in New Zealand and worked at the University of Otago.";
+    
+    public static final String SINGLE_SENTENCE_WITH_CONTROL_CHARS = "Dr Patrick Marshall (1869 - November 1950) was a" 
+    		+ " \u0014geologist\u0015 who lived in New Zealand and worked at the University of Otago.";
 
     public static final String MULTI_SENTENCES = "The life of Patrick Marshall\n\n"
             + "Dr Patrick Marshall (1869 - November 1950) was a"
@@ -119,6 +122,20 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
         assertEquals(0.997, secondOccurrence.confidence, 0.05);
     }
 
+    @Test
+    public void testPersonNameOccurrencesExtractionWithControlChars() {
+        Map<String, List<NameOccurrence>> nameOccurrences = nerEngine.extractPersonNameOccurrences(SINGLE_SENTENCE_WITH_CONTROL_CHARS);
+        assertEquals(1, nameOccurrences.size());
+
+        List<NameOccurrence> pmOccurrences = nameOccurrences.get("Patrick Marshall");
+        assertNotNull(pmOccurrences);
+        assertEquals(1, pmOccurrences.size());
+
+        NameOccurrence firstOccurrence = pmOccurrences.get(0);
+        assertEquals("Patrick Marshall", firstOccurrence.name);
+        assertFalse(firstOccurrence.context.contains("\u0014"));
+    }
+    
     @Test
     public void testLocationNamesExtraction() {
         Collection<String> names = nerEngine.extractLocationNames(SINGLE_SENTENCE);
