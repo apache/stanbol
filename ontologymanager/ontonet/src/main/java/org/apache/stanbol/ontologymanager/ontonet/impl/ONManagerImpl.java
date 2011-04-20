@@ -36,8 +36,8 @@ import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFac
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologySpaceFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.ScopeRegistryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.impl.RegistryLoaderImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.session.SessionManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.session.ScopeSessionSynchronizer;
+import org.apache.stanbol.ontologymanager.ontonet.impl.session.SessionManagerImpl;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.FileDocumentSource;
@@ -534,45 +534,15 @@ public class ONManagerImpl implements ONManager {
         }
 
         private OntologyInputSource createOntologyInputSource(final String uri) {
-            /*
-             * The scope factory needs an OntologyInputSource as input for the core ontology space. We want to
-             * use the dbpedia ontology as core ontology of our scope.
-             */
-            OntologyInputSource ois = new OntologyInputSource() {
-
-                @Override
-                public boolean hasRootOntology() {
-                    return true;
-                }
-
-                @Override
-                public boolean hasPhysicalIRI() {
-                    return false;
-                }
-
-                @Override
-                public OWLOntology getRootOntology() {
-
-                    try {
-
-                        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-                        return manager.loadOntologyFromOntologyDocument(IRI.create(uri));
-                    } catch (OWLOntologyCreationException e) {
-                        log.error("Cannot load the ontology " + uri, e);
-                    } catch (Exception e) {
-                        log.error("Cannot load the ontology " + uri, e);
-                    }
-                    /** If some errors occur **/
-                    return null;
-                }
-
-                @Override
-                public IRI getPhysicalIRI() {
-                    return null;
-                }
-            };
-
-            return ois;
+            try {
+            return new RootOntologyIRISource(IRI.create(uri));
+            } catch (OWLOntologyCreationException e) {
+                log.error("Cannot load the ontology {}", uri, e);
+                return null;
+            } catch (Exception e) {
+                log.error("Cannot load the ontology {}", uri, e);
+                return null;
+            }
         }
     }
 }

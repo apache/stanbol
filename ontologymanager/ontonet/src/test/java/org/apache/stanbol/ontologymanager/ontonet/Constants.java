@@ -2,9 +2,9 @@ package org.apache.stanbol.ontologymanager.ontonet;
 
 public class Constants {
 
-	public static final String base = "http://kres.iks-project.eu/ontology/peanuts/maincharacters.owl";
+	public static final String base = "http://stanbol.apache.org/ontologies/peanuts/maincharacters.owl";
 
-	public static final String base2 = "http://kres.iks-project.eu/ontology/minorcharacters.owl";
+	public static final String base2 = "http://stanbol.apache.org/ontologies/peanuts/minorcharacters.owl";
 
 	public static final String dog = "Dog";
 
