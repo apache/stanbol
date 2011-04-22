@@ -2,6 +2,7 @@ package org.apache.stanbol.rules.manager.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Set;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
@@ -69,6 +70,12 @@ public class RuleOntologyInputSource implements OntologyInputSource {
 	@Override
 	public boolean hasRootOntology() {
 		return rootOntology != null;
+	}
+
+	@Override
+	public Set<OWLOntology> getClosure() {
+		// TODO Auto-generated method stub
+		return null;
 	} 
 
 }
