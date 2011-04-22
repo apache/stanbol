@@ -36,10 +36,10 @@ public class JerseyEndpoint {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Property(value = "/ontomgr")
+    @Property(value = "/ontonet")
     public static final String ALIAS_PROPERTY = "org.apache.stanbol.ontologymanager.web.alias";
 
-    @Property(value = "/kres/static")
+    @Property(value = "/ontonet/static")
     public static final String STATIC_RESOURCES_URL_ROOT_PROPERTY = "org.apache.stanbol.ontologymanager.web.static.url";
 
     @Property(value = "/META-INF/static")

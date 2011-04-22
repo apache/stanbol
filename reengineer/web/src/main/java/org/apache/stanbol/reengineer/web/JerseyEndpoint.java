@@ -36,10 +36,10 @@ public class JerseyEndpoint {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Property(value = "/kres/reengineer")
+    @Property(value = "/reengineer")
     public static final String ALIAS_PROPERTY = "org.apache.stanbol.reengineer.web.jersey.alias";
 
-    @Property(value = "/kres/reengineer/static")
+    @Property(value = "/reengineer/static")
     public static final String STATIC_RESOURCES_URL_ROOT_PROPERTY = "org.apache.stanbol.reengineer.web.jersey.static.url";
 
     @Property(value = "/META-INF/static")

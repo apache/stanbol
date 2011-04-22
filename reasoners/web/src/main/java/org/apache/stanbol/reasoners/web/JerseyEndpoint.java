@@ -34,17 +34,17 @@ public class JerseyEndpoint {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Property(value = "/kres/reasoners")
-    public static final String ALIAS_PROPERTY = "org.apache.stanbol.reasoners.web.jersey.alias";
+    @Property(value = "/reasoner")
+    public static final String ALIAS_PROPERTY = "org.apache.stanbol.reasoner.web.jersey.alias";
 
-    @Property(value = "/kres/reasoners/static")
-    public static final String STATIC_RESOURCES_URL_ROOT_PROPERTY = "org.apache.stanbol.reasoners.web.jersey.static.url";
+    @Property(value = "/reasoner/static")
+    public static final String STATIC_RESOURCES_URL_ROOT_PROPERTY = "org.apache.stanbol.reasoner.web.jersey.static.url";
 
     @Property(value = "/META-INF/static")
-    public static final String STATIC_RESOURCES_CLASSPATH_PROPERTY = "org.apache.stanbol.reasoners.web.jersey.static.classpath";
+    public static final String STATIC_RESOURCES_CLASSPATH_PROPERTY = "org.apache.stanbol.reasoner.web.jersey.static.classpath";
 
     @Property(value = "/META-INF/templates")
-    public static final String FREEMARKER_TEMPLATE_CLASSPATH_PROPERTY = "org.apache.stanbol.reasoners.web.jersey.templates.classpath";
+    public static final String FREEMARKER_TEMPLATE_CLASSPATH_PROPERTY = "org.apache.stanbol.reasoner.web.jersey.templates.classpath";
 
     @Reference
     HttpService httpService;

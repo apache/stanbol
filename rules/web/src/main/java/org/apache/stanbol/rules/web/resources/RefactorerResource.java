@@ -35,7 +35,7 @@ import com.sun.jersey.api.view.ImplicitProduces;
  * 
  */
 
-@Path("/refactorer")
+@Path("/refactor")
 @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
 public class RefactorerResource extends BaseStanbolResource {
 
@@ -61,7 +61,6 @@ public class RefactorerResource extends BaseStanbolResource {
     }
 
     @POST
-    @Path("/lazy")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(value = {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
                        KRFormat.OWL_XML, KRFormat.RDF_JSON})
