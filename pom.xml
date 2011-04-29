@@ -62,9 +62,6 @@
     <module>jersey</module>
     <module>launchers/sling</module>
     <!-- Utils for createing local caches (indexing utils) -->
-    <module>indexing/geonames</module>
-    <module>indexing/genericrdf</module>
-    <module>indexing/dbpedia</module>
-    <module>indexing/dblp</module>
+    <module>indexing</module>
   </modules>
 </project>

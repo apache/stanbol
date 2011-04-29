@@ -66,12 +66,17 @@ public final class ConfigUtils {
     private ConfigUtils(){}
 
     /**
+     * Use &lt;indexName&gt;.solrindex[.&lt;archiveType&gt;] as file name
+     */
+    public static final String SOLR_INDEX_ARCHIVE_EXTENSION = "solrindex";
+
+    /**
      * Supported archive types.
      */
     public static final Map<String,String> SUPPORTED_SOLR_ARCHIVE_FORMAT;
     static {
         Map<String,String> cfm = new HashMap<String,String>();
-        cfm.put("SOLR_INDEX_ARCHIVE_EXTENSION", "zip"); //the default if not specified
+        cfm.put(SOLR_INDEX_ARCHIVE_EXTENSION, "zip"); //the default if not specified
         cfm.put("gz", "gz");
         cfm.put("bz2", "bz2");
         cfm.put("zip", "zip");
@@ -80,10 +85,6 @@ public final class ConfigUtils {
         cfm.put("properties", "properties"); //also accept properties as references
         SUPPORTED_SOLR_ARCHIVE_FORMAT = Collections.unmodifiableMap(cfm);
     }
-    /**
-     * Use &lt;indexName&gt;.solrindex[.&lt;archiveType&gt;] as file name
-     */
-    public static final String SOLR_INDEX_ARCHIVE_EXTENSION = "solrindex";
 
     public static ArchiveInputStream getArchiveInputStream(String solrArchiveName,InputStream is) throws IOException {
         String archiveFormat;
@@ -229,7 +230,21 @@ public final class ConfigUtils {
         try {
             classPath = new File(classLocation.toURI()).getAbsolutePath();
         } catch (Exception e) {
-            throw new IOException("Unable to Access Source at location "+classLocation,e);
+            //if we can not convert it to an URI, try directly with the URL
+            //URLs with jar:file:/{jarPath}!{classPath} can cause problems
+            //so try to parse manually by using the substring from the first
+            //'/' to (including '!')
+            String urlString = classLocation.toString();
+            int slashIndex =  urlString.indexOf('/');
+            int exclamationIndex = urlString.indexOf('!');
+            if(slashIndex >=0 && exclamationIndex > 0){
+                classPath = urlString.substring(slashIndex, exclamationIndex+1);
+                log.info("manually parsed plassPath: {} from {}",classPath,classLocation);
+            } else {
+                //looks like there is an other reason than an URL as described above
+                //so better to throw an exception than to guess ...
+                throw new IOException("Unable to Access Source at location "+classLocation,e);
+            }
         }
         if(classPath.indexOf('!')>0){
             return new File(classPath.substring(0,classPath.indexOf('!')));

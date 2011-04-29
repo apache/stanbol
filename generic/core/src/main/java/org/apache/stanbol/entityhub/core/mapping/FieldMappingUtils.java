@@ -128,7 +128,13 @@ public final class FieldMappingUtils {
      *    String can not be parsed.
      */
     public static FieldMapping parseFieldMapping(String mapping){
-        if(mapping == null || mapping.isEmpty()){
+        if(mapping == null){
+            return null;
+        }
+        if(mapping.isEmpty()){
+            return null;
+        }
+        if(mapping.charAt(0) == '#'){ //commend
             return null;
         }
         final boolean ignore = mapping.charAt(0) == '!';
@@ -156,11 +162,69 @@ public final class FieldMappingUtils {
             }
         }
         if(ignore && filter != null){
-            log.warn(String.format("Filters are not supported for '!<fieldPatter>' type field mappings! Filter %s ignored",filter));
+            log.warn("Filters are not supported for '!<fieldPatter>' type field mappings! Filter {} ignored",filter);
             filter = null;
         }
         return new FieldMapping(fieldPattern, filter, mappedTo.toArray(new String[mappedTo.size()]));
     }
+    /**
+     * Parses FieldMappings from the parsed strings
+     * @param mappings the mappings to parse
+     * @return the parsed mappings
+     */
+    public static List<FieldMapping> parseFieldMappings(Iterator<String> mappings) {
+        List<FieldMapping> fieldMappings = new ArrayList<FieldMapping>();
+        log.debug("Parse FieldMappings");
+        while(mappings.hasNext()){
+            String mappingString = mappings.next();
+            log.debug(mappingString);
+            if(mappingString != null && 
+                    !mappingString.isEmpty() && //not an empty line
+                    !(mappingString.charAt(0) == FieldMapping.COMMENT_CHAR)){ //not an comment
+                FieldMapping fieldMapping = FieldMappingUtils.parseFieldMapping(mappingString.toString());
+                if(fieldMapping != null){
+                    fieldMappings.add(fieldMapping);
+                } else {
+                    log.warn("Unable to parse FieldMapping for '{}'",mappingString);
+                }
+            }
+        }
+        return fieldMappings;
+    }
+    /**
+     * Creates an FieldMapper instance by using the {@link DefaultFieldMapperImpl}
+     * and the default instance if the {@link ValueConverterFactory} and configure
+     * it with {@link FieldMapping}s parsed form the list of string parsed as
+     * argument to this method.
+     * @param mappings The mappings or <code>null</code> if none
+     * @return A new and configured FieldMapper instance.
+     */
+    public static FieldMapper createDefaultFieldMapper(Iterator<String> mappings){
+        FieldMapper mapper =  new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
+        if(mappings != null){
+            for(FieldMapping mapping : parseFieldMappings(mappings)){
+                mapper.addMapping(mapping);
+            }
+        }
+        return mapper;
+    }
+    /**
+     * Creates an FieldMapper instance by using the {@link DefaultFieldMapperImpl}
+     * and the default instance if the {@link ValueConverterFactory} and configure
+     * it with {@link FieldMapping}s
+     * @param mappings The mappings or <code>null</code> if none
+     * @return A new and configured FieldMapper instance.
+     */
+    public static FieldMapper createDefaultFieldMapper(Iterable<FieldMapping> mappings){
+        FieldMapper mapper =  new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
+        if(mappings != null){
+            for(FieldMapping mapping : mappings){
+                mapper.addMapping(mapping);
+            }
+        }
+        return mapper;
+    }
+
 //moved to NamespaceEnum
 //    private static String getFullUri(String value){
 //        int index = value.indexOf(':');

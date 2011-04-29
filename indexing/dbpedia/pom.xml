@@ -19,7 +19,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-<!-- <parent>
+<!-- Do not use a parent because of problems with missing dependencies with
+     mvn assembly:assembly
+  <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
     <version>0.9-SNAPSHOT</version>
