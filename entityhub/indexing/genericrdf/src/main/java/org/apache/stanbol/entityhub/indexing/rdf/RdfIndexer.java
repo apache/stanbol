@@ -489,6 +489,7 @@ public class RdfIndexer {
 	 * from a single stream and therefore gives the OS the best opportunities to
 	 * optimise file access.
 	 * @throws YardException
+	 * @see {@link #indexRanked()}
 	 */
 	private void indexResources() throws YardException{
         StringBuilder qb = new StringBuilder();
@@ -888,48 +889,15 @@ public class RdfIndexer {
         }
         log.info(" < completed");
     }
-//------------------------------------------------------------------------------
-// Other implemented variants with less performance than indexResource3!
-//------------------------------------------------------------------------------
-//    private void indexResource2(Resource resource){
-//        Query q = QueryFactory.create(String.format(resourceQuery,resource.getURI(),resource.getURI()), Syntax.syntaxARQ);
-//        final ResultSet resultSet = QueryExecutionFactory.create(q, indexingDataset.toDataset()).execSelect();
-//        Representation source = vf.createRepresentation(resource.getURI());
-//        while(resultSet.hasNext()){
-//            QuerySolution solution =resultSet.next();
-//            RDFNode fieldNode = solution.get("field");
-//            if(fieldNode.isURIResource()){
-//                String field = fieldNode.asResource().getURI();
-//                RDFNode value = solution.get("value");
-//                if(value.isURIResource()){
-//                    source.addReference(field, value.asResource().getURI());
-//                } else if(value.isLiteral()){
-//                    Literal literal = value.asLiteral();
-//                    if(literal.getDatatype() != null){
-//                        Object literalValue;
-//                        try {
-//                            literalValue = literal.getValue();
-//                        } catch (DatatypeFormatException e) {
-//                            log.warn(" Unable to convert "+literal.getLexicalForm()+" to "+literal.getDatatype()+"-> use lecicalForm");
-//                            literalValue = literal.getLexicalForm();
-//                        }
-//                        if(literalValue instanceof BaseDatatype.TypedValue){
-//                            source.add(field, literal.getLexicalForm());
-//                        } else {
-//                            source.add(field, literal.getValue());
-//                        }
-//                    } else {
-//                        String lang = literal.getLanguage();
-//                        if(lang != null && lang.isEmpty()){
-//                            lang = null;
-//                        }
-//                        source.addNaturalText(field, literal.getLexicalForm(),lang);
-//                    }
-//                }
-//            }
-//        }
-//        //log.info("S<source Resource:\n"+ModelUtils.getRepresentationInfo(source));
-//    }
+
+    /**
+     * This indexing method uses the list of Entities to index as input, queries
+     * for the data and indexes them. This performs a query/entity and therefore
+     * does not provide the same read performance that {@link #indexResources()}.
+     * However where only a small amount of all entities are indexed, this 
+     * method will be significant faster. 
+     * @throws YardException
+     */
     private void indexRanked() throws YardException {
         if(entityRankings == null){
             throw new IllegalStateException("Unable to index with Etity Ranking Mode if no Entity Rankings are present!");

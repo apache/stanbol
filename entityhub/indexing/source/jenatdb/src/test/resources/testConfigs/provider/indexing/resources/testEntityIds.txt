@@ -1,0 +1,3 @@
+http://sws.geonames.org/3017382/	100
+http://sws.geonames.org/2983751/	34
+http://sws.geonames.org/2985244/	10

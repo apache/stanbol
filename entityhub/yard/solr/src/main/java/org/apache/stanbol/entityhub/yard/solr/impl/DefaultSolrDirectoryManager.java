@@ -410,7 +410,9 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
             } else { //set the the absolute path
                 solrDataDir = new File(configuredDataDir);
             }
-            if(!solrDataDir.exists()){
+            //check if the "solr.xml" file exists in the directory
+            File solrConf = new File(solrDataDir,"solr.xml");
+            if(!solrConf.exists()){
                 try {
                     if(context != null){ //load via bundle
                         solrDataDir = ConfigUtils.copyDefaultConfig(

@@ -44,6 +44,10 @@ import org.apache.stanbol.entityhub.servicesapi.util.PatternUtils;
  */
 public class FieldMapping {
 
+    /**
+     * The '#' char is used for comments
+     */
+    public static final char COMMENT_CHAR = '#';
     private final String pattern;
     private final Pattern regex;
     private final boolean usesWildcard;

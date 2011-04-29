@@ -22,9 +22,9 @@
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
-    <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
+    <artifactId>org.apache.stanbol.entityhub.indexing.parent</artifactId>
     <version>0.9-SNAPSHOT</version>
-    <relativePath>../../parent</relativePath>
+    <relativePath>../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
@@ -52,12 +52,22 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-      <version>${stanbol-version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-      <version>${stanbol-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.indexing.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
     </dependency>
     <dependency>
       <groupId>com.hp.hpl.jena</groupId>
@@ -74,11 +84,6 @@
       <groupId>com.hp.hpl.jena</groupId>
       <artifactId>tdb</artifactId>
       <version>0.8.8</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-compress</artifactId>
-      <version>1.0</version>
     </dependency>
   </dependencies>
 </project>

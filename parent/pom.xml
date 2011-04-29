@@ -140,7 +140,7 @@
             <dependency>
               <groupId>org.slf4j</groupId>
               <artifactId>slf4j-simple</artifactId>
-              <version>1.5.2</version>
+              <version>1.6.1</version>
             </dependency>
           </dependencies>
           <executions>
@@ -345,6 +345,24 @@
         <version>${stanbol-version}</version>
         <scope>provided</scope>
       </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
+        <version>${stanbol-version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.entityhub.yard.clerezza</artifactId>
+        <version>${stanbol-version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.entityhub.indexing.core</artifactId>
+        <version>${stanbol-version}</version>
+        <scope>provided</scope>
+      </dependency>
 
 
 
@@ -536,19 +554,19 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>1.5.2</version>
+        <version>1.6.1</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>jcl-over-slf4j</artifactId>
-        <version>1.5.2</version>
+        <version>1.6.1</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-jdk14</artifactId>
-        <version>1.5.2</version>
+        <version>1.6.1</version>
         <scope>provided</scope>
       </dependency>
 
@@ -900,7 +918,7 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
-        <version>1.5.2</version>
+        <version>1.6.1</version>
         <scope>test</scope>
       </dependency>
 
