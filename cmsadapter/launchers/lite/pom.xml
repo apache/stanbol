@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>org.apache.stanbol.cmsadapter.parent</artifactId>
+		<version>0.9-SNAPSHOT</version>
+		<relativePath>../../parent</relativePath>
+	</parent>
+
+	<groupId>org.apache.stanbol</groupId>
+	<artifactId>org.apache.stanbol.cmsadapter.launchers.lite</artifactId>
+	<packaging>jar</packaging>
+	<name>Apache Stanbol CMS Adapter Lite Launcher</name>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>2.2</version>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${basedir}</directory>
+							<includes>
+								<include>sling</include>
+							</includes>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.sling</groupId>
+				<artifactId>maven-launchpad-plugin</artifactId>
+				<!-- TODO the maven-launchpad-plugin can also generate a war file and 
+					Karaf description, we could add this. See http://sling.apache.org/site/maven-launchpad-plugin.html -->
+				<version>2.0.6</version>
+				<executions>
+					<execution>
+						<id>prepare-package</id>
+						<goals>
+							<goal>prepare-package</goal>
+						</goals>
+						<configuration>
+							<includeDefaultBundles>false</includeDefaultBundles>
+							<!-- Standalone jar requires an OSGi http service implementation -->
+							<jarWebSupport>
+								<groupId>org.apache.felix</groupId>
+								<artifactId>org.apache.felix.http.jetty</artifactId>
+								<version>2.0.4</version>
+							</jarWebSupport>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<!-- make the generated jar runnable -->
+							<addClasspath>true</addClasspath>
+							<mainClass>org.apache.sling.launchpad.app.Main</mainClass>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<!-- maven-launchpad-plugin builds on the launchpad.base app -->
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.launchpad.base</artifactId>
+			<version>2.1.1-SNAPSHOT</version>
+			<classifier>app</classifier>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+</project>
