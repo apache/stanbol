@@ -77,8 +77,8 @@ public class ResourceLoaderTest {
     public void testSingleFile(){
         DummyResourceImporter importer = new DummyResourceImporter(
             Arrays.asList(rootDir+"singleFileTest.txt"));
-        ResourceLoader loader = new ResourceLoader(importer, false, 
-            new File(rootDir,"singleFileTest.txt"));
+        ResourceLoader loader = new ResourceLoader(importer, false);
+        loader.addResource(new File(rootDir,"singleFileTest.txt"));
         assertEquals(new HashSet<String>(Arrays.asList(rootDir+"singleFileTest.txt")), 
             loader.getResources(ResourceState.REGISTERED));
         assertTrue(loader.getResources(ResourceState.ERROR).isEmpty());
@@ -106,8 +106,8 @@ public class ResourceLoaderTest {
             folder+"otherFileInFolder.txt"));
         DummyResourceImporter importer = new DummyResourceImporter(
             expectedFolderResources);
-        ResourceLoader loader = new ResourceLoader(importer, false, 
-            new File(rootDir,"testFolder"));
+        ResourceLoader loader = new ResourceLoader(importer, false);
+        loader.addResource(new File(rootDir,"testFolder"));
         assertEquals(expectedFolderResources, loader.getResources(ResourceState.REGISTERED));
         assertTrue(loader.getResources(ResourceState.ERROR).isEmpty());
         assertTrue(loader.getResources(ResourceState.LOADED).isEmpty());
@@ -150,8 +150,8 @@ public class ResourceLoaderTest {
             "otherFileInFolder.txt");
         DummyResourceImporter importer = new DummyResourceImporter(
             expectedResourceNames);
-        ResourceLoader loader = new ResourceLoader(importer, true, 
-            new File(rootDir,TEST_FOLDER_NAME));
+        ResourceLoader loader = new ResourceLoader(importer, true);
+        loader.addResource(new File(rootDir,TEST_FOLDER_NAME));
 
         assertEquals(expectedResources, loader.getResources(ResourceState.REGISTERED));
         assertTrue(loader.getResources(ResourceState.ERROR).isEmpty());

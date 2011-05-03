@@ -16,6 +16,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYard;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -42,33 +43,49 @@ import static org.junit.Assert.*;
 public class SolrYardIndexingDestinationTest {
 
     private static final Logger log = LoggerFactory.getLogger(SolrYardIndexingDestinationTest.class);
+    private static final String CONFIG_ROOT = "testConfigs/";
     /**
-     * mvn copies the resources in "src/test/resources" to target/test-classes
+     * mvn copies the resources in "src/test/resources" to target/test-classes.
+     * This folder is than used as classpath.<p>
+     * "/target/test-files/" does not exist, but is created by the
+     * {@link IndexingConfig}.
      */
-    private static final String TEST_CONFIGS_ROOT = "/target/test-classes/testConfigs/";
-
-    /**
-     * The path to the folder used as root for the tests
-     */
+    private static final String TEST_ROOT = "/target/test-files";
+    private static String  userDir;
     private static String testRoot;
+    /**
+     * The methods resets the "user.dir" system property
+     */
     @BeforeClass
-    public static void init(){
-        //initialise based on basedir or user.dir
+    public static void initTestRootFolder(){
         String baseDir = System.getProperty("basedir");
         if(baseDir == null){
             baseDir = System.getProperty("user.dir");
         }
-        testRoot = baseDir+TEST_CONFIGS_ROOT;
-        log.info("Test Root ="+testRoot);
+        //store the current user.dir
+        userDir = System.getProperty("user.dir");
+        testRoot = baseDir+TEST_ROOT;
+        log.info("ConfigTest Root : "+testRoot);
+        //set the user.dir to the testRoot (needed to test loading of missing
+        //configurations via classpath
+        //store the current user.dir and reset it after the tests
+        System.setProperty("user.dir", testRoot);
+    }
+    /**
+     * resets the "user.dir" system property the the original value
+     */
+    @AfterClass
+    public static void cleanup(){
+        System.setProperty("user.dir", userDir);
     }
     @Test(expected=IllegalArgumentException.class)
     public void testMissingBoostConfig(){
-        IndexingConfig config = new IndexingConfig(testRoot+"missingBoostConfig");
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"missingBoostConfig");
         config.getIndexingDestination();
     }
     @Test(expected=IllegalArgumentException.class)
     public void testInvalidBoostConfig(){
-        IndexingConfig config = new IndexingConfig(testRoot+"invalidBoostConfig");
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"invalidBoostConfig");
         config.getIndexingDestination();
     }
     /**
@@ -77,7 +94,7 @@ public class SolrYardIndexingDestinationTest {
      */
     @Test(expected=IllegalArgumentException.class)
     public void testMissingDefaultSolrSchemaConfig(){
-        IndexingConfig config = new IndexingConfig(testRoot+"missingDefaultSolrConf");
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"missingDefaultSolrConf");
         config.getIndexingDestination();
     }
     /**
@@ -86,17 +103,17 @@ public class SolrYardIndexingDestinationTest {
      */
     @Test(expected=IllegalArgumentException.class)
     public void testMissingSolrSchemaConfig(){
-        IndexingConfig config = new IndexingConfig(testRoot+"missingSolrConf");
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"missingSolrConf");
         config.getIndexingDestination();
     }
     @Test
     public void testSimple() throws YardException, IOException {
-        IndexingConfig config = new IndexingConfig(testRoot+"simple");
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"simple");
         validateSolrDestination(config);
     }
     @Test
     public void testWithSolrConf() throws YardException, IOException {
-        IndexingConfig config = new IndexingConfig(testRoot+"withSolrConf");
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"withSolrConf");
         validateSolrDestination(config);
     }
     

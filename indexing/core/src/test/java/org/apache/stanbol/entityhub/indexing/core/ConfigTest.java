@@ -1,5 +1,7 @@
 package org.apache.stanbol.entityhub.indexing.core;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +14,7 @@ import org.apache.stanbol.entityhub.indexing.core.source.LineBasedEntityIterator
 
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -19,36 +22,97 @@ import org.slf4j.LoggerFactory;
 
 public class ConfigTest {
     private static final Logger log = LoggerFactory.getLogger(ConfigTest.class);
+    private static final String CONFIG_ROOT = "testConfigs/";
     /**
-     * mvn copies the resources in "src/test/resources" to target/test-classes
+     * mvn copies the resources in "src/test/resources" to target/test-classes.
+     * This folder is than used as classpath.<p>
+     * "/target/test-files/" does not exist, but is created by the
+     * {@link IndexingConfig}.
      */
-    private static final String TEST_CONFIGS_ROOT = "/target/test-classes/testConfigs/";
+    private static final String TEST_ROOT = "/target/test-files";
+    private static String  userDir;
     private static String testRoot;
+    /**
+     * The methods resets the "user.dir" system property
+     */
     @BeforeClass
     public static void initTestRootFolder(){
         String baseDir = System.getProperty("basedir");
         if(baseDir == null){
             baseDir = System.getProperty("user.dir");
         }
-        testRoot = baseDir+TEST_CONFIGS_ROOT;
-        log.info("ConfigTest Root ="+testRoot);
+        //store the current user.dir
+        userDir = System.getProperty("user.dir");
+        testRoot = baseDir+TEST_ROOT;
+        log.info("ConfigTest Root : "+testRoot);
+        //set the user.dir to the testRoot (needed to test loading of missing
+        //configurations via classpath
+        //store the current user.dir and reset it after the tests
+        System.setProperty("user.dir", testRoot);
     }
+    /**
+     * resets the "user.dir" system property the the original value
+     */
+    @AfterClass
+    public static void cleanup(){
+        System.setProperty("user.dir", userDir);
+    }
+    /**
+     * In the test setup there is no default configuration
+     */
     @Test(expected=IllegalArgumentException.class)
-    public void missingRoot(){
+    public void missingDefault(){
         new IndexingConfig(); //there is no indexing folder in the user.dir
     }
+    /**
+     * Tests failed initialisation because the configuration folder does not 
+     * exist and no configuration with the name does exist
+     */
+    @Test(expected=IllegalArgumentException.class)
+    public void missingConfig(){
+        //this should create the specified folder and than throw an
+        //illegalArgumentException because the indexing.properties file can not
+        //be found in the classpath under
+        new IndexingConfig(CONFIG_ROOT+"noConfig");
+    }
+    /**
+     * In this case the config exists in the classpath, but is not valid because
+     * the required indexing.properties is missing
+     */
     @Test(expected=IllegalArgumentException.class)
     public void missingConfigDir(){
-        new IndexingConfig(testRoot+"missingconfig");
+        new IndexingConfig(CONFIG_ROOT+"missingconfig");
     }
+    /**
+     * Loads a simple but not functional configuration to test the loading and
+     * parsing of configuration files
+     */
     @Test
-    public void loadSimpleConfigDir(){
-        IndexingConfig config = new IndexingConfig(testRoot+"simple");
+    public void loadSimpleConfigDir() throws IOException {
+        String name = CONFIG_ROOT+"simple";
+        IndexingConfig config = new IndexingConfig(name);
+        //assert that this directory exists (is created)
+        File expectedRoot = new File(testRoot,name);
+        expectedRoot = new File(expectedRoot,"indexing");
+        assertTrue("Root Dir not created",expectedRoot.isDirectory());
+        assertEquals("Root dir other the expected ",
+            expectedRoot.getCanonicalPath(),config.getRootFolder().getCanonicalPath());
+        assertTrue(config.getConfigFolder().isDirectory());
+        assertTrue(config.getSourceFolder().isDirectory());
+        assertTrue(config.getDestinationFolder().isDirectory());
+        assertTrue(config.getDistributionFolder().isDirectory());
         //test the name
         assertEquals(config.getName(),"simple");
         assertEquals(config.getDescription(), "Simple Configuration");
         //test if the normaliser configuration was parsed correctly!
         final ScoreNormaliser normaliser = config.getNormaliser();
+        //test if the config files where copied form the classpath to the
+        //config directory.
+        assertTrue("Config File for the RangeNormaliser not copied",
+            new File(config.getConfigFolder(),"range.properties").isFile());
+        assertTrue("Config File for the MinScoreNormalizer not copied",
+            new File(config.getConfigFolder(),"minIncomming.properties").isFile());
+        //now test if the configuration was parsed correctly
         ScoreNormaliser testNormaliser = normaliser;
         assertNotNull(testNormaliser);
         assertEquals(testNormaliser.getClass(), RangeNormaliser.class);

@@ -11,6 +11,7 @@ import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -21,10 +22,6 @@ public class RdfIndexingSourceTest {
     
     
     private static final Logger log = LoggerFactory.getLogger(RdfIndexingSourceTest.class);
-    /**
-     * mvn copies the resources in "src/test/resources" to target/test-classes
-     */
-    private static final String TEST_CONFIGS_ROOT = "/target/test-classes/testConfigs/";
 
     private static final String TEXT_TEST_FIELD = "http://www.geonames.org/ontology#alternateName";
     private static final String VALUE_TEST_FIELD = "http://www.w3.org/2003/01/geo/wgs84_pos#lat";
@@ -32,23 +29,44 @@ public class RdfIndexingSourceTest {
     
     private static final long NUMBER_OF_ENTITIES_EXPECTED = 3;
     
+    private static final String CONFIG_ROOT = "testConfigs/";
     /**
-     * The path to the folder used as root for the tests
+     * mvn copies the resources in "src/test/resources" to target/test-classes.
+     * This folder is than used as classpath.<p>
+     * "/target/test-files/" does not exist, but is created by the
+     * {@link IndexingConfig}.
      */
+    private static final String TEST_ROOT = "/target/test-files";
+    private static String  userDir;
     private static String testRoot;
+    /**
+     * The methods resets the "user.dir" system property
+     */
     @BeforeClass
-    public static void init(){
-        //initialise based on basedir or user.dir
+    public static void initTestRootFolder(){
         String baseDir = System.getProperty("basedir");
         if(baseDir == null){
             baseDir = System.getProperty("user.dir");
         }
-        testRoot = baseDir+TEST_CONFIGS_ROOT;
-        log.info("Test Root ="+testRoot);
+        //store the current user.dir
+        userDir = System.getProperty("user.dir");
+        testRoot = baseDir+TEST_ROOT;
+        log.info("ConfigTest Root : "+testRoot);
+        //set the user.dir to the testRoot (needed to test loading of missing
+        //configurations via classpath
+        //store the current user.dir and reset it after the tests
+        System.setProperty("user.dir", testRoot);
+    }
+    /**
+     * resets the "user.dir" system property the the original value
+     */
+    @AfterClass
+    public static void cleanup(){
+        System.setProperty("user.dir", userDir);
     }
     @Test
     public void testEntityDataIterable(){
-        IndexingConfig config = new IndexingConfig(testRoot+"iterable");
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"iterable");
         EntityDataIterable iterable = config.getDataInterable();
         assertNotNull(iterable);
         assertEquals(iterable.getClass(), RdfIndexingSource.class);
@@ -70,7 +88,7 @@ public class RdfIndexingSourceTest {
     }
     @Test
     public void testEntityDataProvider(){
-        IndexingConfig config = new IndexingConfig(testRoot+"provider");
+        IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"provider");
         EntityIterator entityIdIterator = config.getEntityIdIterator();
         assertNotNull("Unable to perform test whithout EntityIterator",entityIdIterator);
         EntityDataProvider dataProvider = config.getEntityDataProvider();

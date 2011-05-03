@@ -60,7 +60,6 @@ public class IndexerImpl implements Indexer {
      */
     private final Set<IndexingListener> listeners;
 
-    public static final int DEFAULT_CHUNK_SIZE = 10;
     private int chunkSize;
     public static final int MIN_QUEUE_SIZE = 500;
     /**

@@ -137,7 +137,8 @@ public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider 
         }
         //init the store
         this.indexingDataset = createRdfModel(modelLocation);
-        this.loader = createResourceLoader(sourceFileOrDirectory);
+        this.loader =  new ResourceLoader(new RdfResourceImporter(indexingDataset), true);
+        loader.addResource(sourceFileOrDirectory);
     }
     @Override
     public void setConfiguration(Map<String,Object> config) {
@@ -152,7 +153,8 @@ public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider 
         }
         this.indexingDataset = createRdfModel(modelLocation);
         //second we need to check if we need to import RDF files to the RDF model
-        this.loader = createResourceLoader(null); //create the ResourceLoader
+        //create the ResourceLoader
+        this.loader =  new ResourceLoader(new RdfResourceImporter(indexingDataset), true); 
         //check if importing is deactivated
         boolean importSource = true; //default is true
         value = config.get(PARAM_IMPORT_SOURCE);
@@ -166,7 +168,7 @@ public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider 
                 value = DEFAULT_SOURCE_FOLDER_NAME;
             }
             for(String source : value.toString().split(",")){
-                File sourceFileOrDirectory = new File(indexingConfig.getSourceFolder(),source);
+                File sourceFileOrDirectory = indexingConfig.getSourceFile(source);
                 if(sourceFileOrDirectory.exists()){
                     //register the configured source with the ResourceLoader
                     this.loader.addResource(sourceFileOrDirectory);
@@ -182,14 +184,6 @@ public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider 
         } else {
             log.info("Importing RDF data deactivated by parameer {}={}"+PARAM_IMPORT_SOURCE,value);
         }
-    }
-    /**
-     * @param sourceFileOrDirectory
-     */
-    private ResourceLoader createResourceLoader(File sourceFileOrDirectory) {
-        return loader = new ResourceLoader(
-            new RdfResourceImporter(indexingDataset),
-            true,sourceFileOrDirectory);
     }
     /**
      * @param modelLocation
