@@ -5,7 +5,10 @@ import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstant
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -15,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
@@ -47,16 +51,25 @@ public class IndexingConfig {
     
     private static final Logger log = LoggerFactory.getLogger(IndexingConfig.class);
     private static final String DEFAULT_INDEX_FIELD_CONFIG_FILE_NAME = "indexFieldConfig.txt";
+    private static final boolean ALLOW_CLASSPATH = true;
+    
+    /**
+     * This stores the context within the classpath to load the 
+     */
+    private final File classPathRootDir;
     
     private final File rootDir;
     private final File configDir;
     private final File sourceDir;
     private final File destinationDir;
     private final File distributionDir;
+    
+    private final Map<File,File> canonicalDirs = new HashMap<File,File>();
+    
     private final Map<String,Object> configuration;
     
     private String name;
-
+        
     private EntityDataIterable entityDataIterable = null;
     private EntityDataProvider entityDataProvider = null;
 
@@ -79,72 +92,87 @@ public class IndexingConfig {
     
     public IndexingConfig(String rootPath){
         //first get the root
-        File root = new File(System.getProperty("user.dir"));
+        File root;// = new File(System.getProperty("user.dir"));
         if(rootPath != null){
-            File parsed = new File(rootPath);
-            if(!parsed.isAbsolute()){
-                root = new File(root,rootPath); //add parsed to "user.dir"
-            } else {
-                root = parsed; //use the parsed absolute path
-            }
-        }
-        //now we need to add the name of the root folder
-        root = new File(root,DEFAULT_ROOT_PATH);
-        //check if root exists
-        if(!root.isDirectory()){
-            throw new IllegalArgumentException(
-                "The root folder for the indexing '"+root.getAbsolutePath()+
-                "' does not exist!");
+            root = new File(rootPath,DEFAULT_ROOT_PATH);
         } else {
-            this.rootDir = root;
+            root = new File(DEFAULT_ROOT_PATH);
         }
-        //check also for the config
+        log.info("Indexing directory: {}",root.getAbsoluteFile());
+        this.rootDir = root;
         this.configDir = new File(root,CONFIG_PATH);
         if(!configDir.isDirectory()){
-            throw new IllegalArgumentException(
-                "The root folder for the indexing configuration '"+
-                root.getAbsolutePath()+"' does not exist!");
+            log.info(" > config directory {} does not exist",configDir);
+            if(!configDir.mkdirs()){
+                throw new IllegalStateException(
+                    "Unable to create configuration folder '"+
+                    configDir.getAbsolutePath()+"'!");
+            } else {
+                log.info("  - created");
+            }
         }
         this.sourceDir = new File(root,SOURCE_PATH);
         if(!sourceDir.exists()){
-            log.info("The resource folder '"+sourceDir.getAbsolutePath()+
-                "' (typically containing the sources used for indexing) does not exist");
-            log.info(" - this might be OK if no (local) resources are needed for the indexing");
+            log.info(" > resource folder '{} does not exist ",sourceDir);
+            if(!sourceDir.mkdirs()){
+                throw new IllegalStateException(
+                    "Unable to create resource folder '"+
+                    sourceDir.getAbsolutePath()+"'!");
+            } else {
+                log.info("  - created");
+            }
         }
         this.destinationDir = new File(root,DESTINATION_PATH);
         if(!destinationDir.exists()){
+            log.debug(" > destination folder '{} does not exist ",destinationDir);
             if(!destinationDir.mkdirs()){
                 throw new IllegalStateException(
-                    "Unable to create target folder for indexing '"+
+                    "Unable to create target folder '"+
                     destinationDir.getAbsolutePath()+"'!");
+            } else {
+                log.debug("  - created");
             }
         }
         this.distributionDir = new File(root,DISTRIBUTION_PATH);
         if(!distributionDir.exists()){
+            log.debug(" > distribution folder '{} does not exist ",distributionDir);
             if(!distributionDir.mkdirs()){
                 throw new IllegalStateException(
-                    "Unable to create distribution folder for indexing '"+
+                    "Unable to create distribution '"+
                     destinationDir.getAbsolutePath()+"'!");
+            } else {
+                log.debug("  - created");
             }
         }
+        try {
+            canonicalDirs.put(rootDir, rootDir.getCanonicalFile());
+            canonicalDirs.put(configDir, configDir.getCanonicalFile());
+            canonicalDirs.put(sourceDir, sourceDir.getCanonicalFile());
+            canonicalDirs.put(destinationDir, destinationDir.getCanonicalFile());
+            canonicalDirs.put(distributionDir, distributionDir.getCanonicalFile());
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to get canonical indexing directory",e);
+        }
+        //set up the root folder for the classpath
+        this.classPathRootDir = getConfigClasspathRootFolder();
+        log.info("Classpath Indexing Root {}",classPathRootDir);
         //check the main configuration
-        File indexingConfigFile = new File(this.configDir,INDEXING_PROERTIES);
-        this.configuration = loadConfig(indexingConfigFile,true);
+        this.configuration = loadConfig(INDEXING_PROERTIES,true);
         Object value = configuration.get(KEY_NAME);
         if(value == null){
             throw new IllegalArgumentException("Indexing Configuration '"+
-                indexingConfigFile+"' is missing the required key "+KEY_NAME+"!");
+                INDEXING_PROERTIES+"' is missing the required key "+KEY_NAME+"!");
         }
         this.name = value.toString();
         if(name.isEmpty()){
             throw new IllegalArgumentException("Invalid Indexing Configuration '"+
-                indexingConfigFile+"': The value for the parameter"+KEY_NAME+" MUST NOT be empty!");
+                INDEXING_PROERTIES+"': The value for the parameter"+KEY_NAME+" MUST NOT be empty!");
         }
         value = configuration.get(KEY_INDEX_FIELD_CONFIG);
         if(value == null || value.toString().isEmpty()){
             value = DEFAULT_INDEX_FIELD_CONFIG_FILE_NAME;
         }
-        final File indexFieldConfig = new File(configDir,value.toString());
+        final File indexFieldConfig = getConfigFile(value.toString());
         if(indexFieldConfig.isFile()){
             try {
                 this.fieldMappings = FieldMappingUtils.parseFieldMappings(new Iterator<String>() {
@@ -170,10 +198,177 @@ public class IndexingConfig {
             throw new IllegalArgumentException("Invalid Indexing Configuration: " +
             		"IndexFieldConfiguration '"+indexFieldConfig+"' not found. " +
             		"Provide the missing file or use the '"+KEY_INDEX_FIELD_CONFIG+
-            		"' in the '"+indexingConfigFile+"' to configure a different one!");
+            		"' in the '"+INDEXING_PROERTIES+"' to configure a different one!");
         }
     }
 
+    /**
+     * Searches for a configuration file. If the configuration is not found
+     * within the {@link #getConfigFolder()} than it searches the Classpath for
+     * the configuration. If the configuration is found within the Classpath it
+     * is copied the the configuration folder and than opened.<p>
+     * The intension behind that is that the default values are provided within
+     * the indexer archive but that the user can modify the configuration after
+     * the first call.
+     * @param configFile the name of the configuration file
+     * @return
+     * @throws IOException
+     */
+    public InputStream openConfig(String configFileName) throws IOException {
+        return openResource(configDir,configFileName);
+    }
+    public InputStream openSource(String sourceFileName) throws IOException {
+        return openResource(sourceDir,sourceFileName);
+    }
+    /**
+     * Getter for the config file with the given name. If the file/directory is 
+     * not present within the {@link #getConfigFolder()} it is searched via the 
+     * classpath and created (if found).
+     * @param configName
+     * @return
+     */
+    public File getConfigFile(String configName) {
+        return getResource(configDir, configName);
+    }
+    /**
+     * Getter for the source file with the given name. If the file/directory is 
+     * not present within the {@link #getSourceFolder()} it is searched via the 
+     * classpath and created (if found).
+     * @param configName
+     * @return
+     */
+    public File getSourceFile(String configName) {
+        return getResource(sourceDir, configName);
+    }
+    
+    private InputStream openResource(File root,String fileName) throws IOException {
+        File resource = getResource(root, fileName);
+        InputStream in = null;
+        if(resource.isFile()){
+            in = new FileInputStream(resource);
+        } //else not found -> return null
+        return in;
+    }
+
+    /**
+     * Searches for a resource with the parsed name in the parsed directory.
+     * If it can not be found, than it looks up the file within the classpath
+     * and if found copies it to the parsed location. In case the parsed
+     * file refers to a directory, then all the contents of that directory
+     * are copied. 
+     * @param root the (relative path) to the directory containing the file.
+     * typically on of {@link #configDir} or {@link #sourceDir}.
+     * @param fileName the name of the file (file or directory)
+     * @return the absolute File or <code>null</code> if not found.
+     */
+    private File getResource(File root, String fileName) {
+        File resource = new File(root,fileName);
+        File absoluteResource = resource.getAbsoluteFile();
+        log.info("reauest for Resource {} (folder: {})",fileName,root);
+        if(absoluteResource.exists()){
+            log.info(" > rquested Resource present");
+        } else if(classPathRootDir != null){
+            log.info(" > rquested Resource missing ");
+            log.info("     ... try to init via Classpath {}",classPathRootDir);
+            File classpathResource = new File(classPathRootDir,resource.getPath());
+            try {
+                if(classpathResource.isFile()){
+                    FileUtils.copyFile(classpathResource, absoluteResource);
+                    log.info(" > resource created");
+                } else if(classpathResource.isDirectory()){
+                    FileUtils.copyDirectory(classpathResource, absoluteResource);
+                    log.info(" > directory created");
+                } else {
+                    log.info(" > not found in Classpath");
+                }
+            } catch(IOException e){
+                throw new IllegalStateException(
+                    String.format("Unable to copy Configuration form classpath " +
+                            "resource %s to target file %s!", 
+                            classpathResource, absoluteResource),e);
+            }
+        } else {
+            log.info(" > initialisation of resources via classpath not possible ");
+        }
+        return absoluteResource;
+    }
+
+    /**
+     * First uses the {@link Thread#currentThread() current threads} class loader
+     * to load the parsed resource. If not found the class loader of this class
+     * is used.
+     * @param resource the resource to load
+     * @return the URL for the resource or <code>null</code> if not found
+     */
+    private static URL loadViaClasspath(String resource) {
+        URL resourceUrl = Thread.currentThread().getContextClassLoader().getResource(
+            resource);
+        if(resourceUrl == null){
+            resourceUrl = IndexingConfig.class.getClassLoader().getResource(
+                resource);
+        }
+        return resourceUrl;
+    }
+    /**
+     * Uses the Classpath to search for the File (maybe within a jar archive)
+     * that is the root to load the config. This is needed in cases directories
+     * are requested by the {@link #getResource(File, String)} methods because
+     * the normal {@link ClassLoader#getResource(String)} method does not work
+     * for directories.
+     * @param clazz the class used as context to find the jar file
+     * @return the archive the parsed class was loaded from
+     * @throws IOException In case the jar file can not be accessed.
+     */
+    private File getConfigClasspathRootFolder() {
+        //use the indexing.properties file as context
+        String contextResource = new File(configDir,INDEXING_PROERTIES).getPath();
+        URL contextUrl = loadViaClasspath(contextResource);
+        if(contextUrl == null){// if indexing.properties is not found via classpath
+            log.warn("No '{}' found via classpath. Will try to init via '{}' but that usually does not work.",
+                INDEXING_PROERTIES,IndexingConfig.class);
+            //use this class ...
+            contextResource = IndexingConfig.class.getName().replace('.', '/')+".class";
+            contextUrl = loadViaClasspath(contextResource);
+        }
+        String resourcePath;
+        try {
+            resourcePath = new File(contextUrl.toURI()).getAbsolutePath();
+        } catch (Exception e) {
+            //if we can not convert it to an URI, try directly with the URL
+            //URLs with jar:file:/{jarPath}!{classPath} can cause problems
+            //so try to parse manually by using the substring from the first
+            //'/' to (including '!')
+            String urlString = contextUrl.toString();
+            int slashIndex =  urlString.indexOf('/');
+            int exclamationIndex = urlString.indexOf('!');
+            if(slashIndex >=0 && exclamationIndex > 0){
+                resourcePath = urlString.substring(slashIndex, exclamationIndex+1);
+                log.info("manually parsed plassPath: {} from {}",resourcePath,contextUrl);
+            } else {
+                //looks like there is an other reason than an URL as described above
+                //so better to throw an exception than to guess ...
+                throw new IllegalStateException("Unable to Access Source at location "+contextUrl,e);
+            }
+        }
+        //now get the file for the root folder in the archive containing the config
+        File classpathRoot;
+        if(resourcePath.indexOf('!')>0){
+            classpathRoot = new File(resourcePath.substring(0,resourcePath.indexOf('!')));
+        } else {
+            classpathRoot = new File(resourcePath.substring(0,resourcePath.length()-contextResource.length()));
+        }
+        //and now the folder representing the rootDir (but within the Classpath)
+        //to validate if this folder is present in the classpath
+        File indexingClasspathRoot = new File(classpathRoot,rootDir.getPath());
+        if(indexingClasspathRoot.isDirectory()){
+            //but return still the root, because configDir, ... are all relative
+            //to this root
+            return classpathRoot; 
+        } else {
+            return null;
+        }
+    }
+    
     /**
      * Loads an {@link Properties} configuration from the parsed file and
      * returns it as Map
@@ -183,43 +378,47 @@ public class IndexingConfig {
      * be returned
      * @return The configuration as Map
      */
-    @SuppressWarnings("unchecked")
-    private Map<String,Object> loadConfig(File configFile, boolean required) {
+    private Map<String,Object> loadConfig(String configFile, boolean required) {
         //Uses an own implementation to parse key=value configuration
         //The problem with the java properties is that keys do not support
         //UTF-8, but some configurations might want to use URLs as keys!
         Map<String,Object> configMap = new HashMap<String,Object>();
         try {
-            LineIterator lines = IOUtils.lineIterator(new FileInputStream(configFile), "UTF-8");
-            while(lines.hasNext()){
-                String line = (String)lines.next();
-                if(!line.isEmpty()){
-                    int indexOfEquals = line.indexOf('=');
-                    String key = indexOfEquals > 0 ?
-                            line.substring(0,indexOfEquals).trim():
-                                line.trim();
-                    if(key.charAt(0) != '#' && key.charAt(0) != '!'){ //no comment
-                        String value;
-                        if(indexOfEquals > 0 && indexOfEquals < line.length()-1){
-                            value = line.substring(indexOfEquals+1,line.length());
-                        } else {
-                            value = null;
-                        }
-                        configMap.put(key,value);
-                    } // else ignore comments
-                } //else ignore empty lines
-            }
-        } catch (FileNotFoundException e) {
-            if(required){
+            InputStream in = openConfig(configFile);
+            if(in != null){
+                LineIterator lines = IOUtils.lineIterator(in, "UTF-8");
+                while(lines.hasNext()){
+                    String line = (String)lines.next();
+                    if(!line.isEmpty()){
+                        int indexOfEquals = line.indexOf('=');
+                        String key = indexOfEquals > 0 ?
+                                line.substring(0,indexOfEquals).trim():
+                                    line.trim();
+                        if(key.charAt(0) != '#' && key.charAt(0) != '!'){ //no comment
+                            String value;
+                            if(indexOfEquals > 0 && indexOfEquals < line.length()-1){
+                                value = line.substring(indexOfEquals+1,line.length());
+                            } else {
+                                value = null;
+                            }
+                            configMap.put(key,value);
+                        } // else ignore comments
+                    } //else ignore empty lines
+                }
+            } else if(required){
                 throw new IllegalArgumentException(
                     "Unable to find configuration file '"+
-                    configFile.getAbsolutePath()+"'!");
+                    configFile+"'!");
+            } else {//-> optional and not found -> return empty map
+                log.info("Unable to find optional configuration {}",configFile);
             }
         } catch (IOException e) {
             if(required){
                 throw new IllegalStateException(
                     "Unable to read configuration file '"+
-                    configFile.getAbsolutePath()+"'!",e);
+                    configFile+"'!",e);
+            } else {
+                log.warn("Unable to read configuration file '"+configFile+"'!",e);
             }
         }
         // Old code that used java.util.Properties to load configurations!
@@ -252,7 +451,7 @@ public class IndexingConfig {
      * @return the root folder (containing the config, resources, target and dist folders)
      */
     public final File getRootFolder() {
-        return rootDir;
+        return canonicalDirs.get(rootDir);
     }
 
     /**
@@ -260,7 +459,7 @@ public class IndexingConfig {
      * @return the root folder for the configuration
      */
     public final File getConfigFolder() {
-        return configDir;
+        return canonicalDirs.get(configDir);
     }
 
     /**
@@ -269,7 +468,7 @@ public class IndexingConfig {
      * @return the root folder for the resources
      */
     public final File getSourceFolder() {
-        return sourceDir;
+        return canonicalDirs.get(sourceDir);
     }
 
     /**
@@ -278,14 +477,14 @@ public class IndexingConfig {
      * @return the target folder
      */
     public final File getDestinationFolder() {
-        return destinationDir;
+        return canonicalDirs.get(destinationDir);
     }
     /**
      * The root folder for the distribution. Guaranteed to exist.
      * @return the distribution folder
      */
     public final File getDistributionFolder() {
-        return distributionDir;
+        return canonicalDirs.get(distributionDir);
     }
     /**
      * Getter for the name as configured by the {@link IndexingConstants#KEY_NAME}
@@ -539,8 +738,7 @@ public class IndexingConfig {
                 return new HashMap<String,Object>();
             }
         }
-        File configFile = new File(configDir,name);
-        loadedConfig = loadConfig(configFile,required);
+        loadedConfig = loadConfig(name,required);
         return loadedConfig;
     }
 

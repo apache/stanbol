@@ -47,7 +47,13 @@ public interface Indexer {
          * Indicates that the indexing has finished and the {@link IndexingTarget}
          * has completed the finalisation. 
          */
-        FINISHED};
+        FINISHED
+    };
+    /**
+     * The default number of documents sent in one chunk to the {@link Yard} 
+     * provided by the configured {@link IndexingDestination}
+     */
+    public static final int DEFAULT_CHUNK_SIZE = 10;
 
     /**
      * Setter for the chunk size. parsing values &lt;= 0 results in the

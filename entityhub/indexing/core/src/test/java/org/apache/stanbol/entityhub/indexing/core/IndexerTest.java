@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
+import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -20,6 +21,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -45,10 +47,6 @@ public class IndexerTest {
      * Hold the results of the indexing process
      */
     protected static final Map<String,Representation> indexedData = new HashMap<String,Representation>();
-    /**
-     * mvn copies the resources in "src/test/resources" to target/test-classes
-     */
-    private static final String TEST_FOLDER_NAME = "/target/test-classes/indexerTests/";
     protected static Logger log = LoggerFactory.getLogger(IndexerTest.class);
     private static String rootDir;
     private static IndexerFactory factory;
@@ -63,30 +61,54 @@ public class IndexerTest {
     private static final float EXPECTED_MAX_RANK = 100;
     private static final float MAX_INCOMMING = 10000;
 
+    private static final String CONFIG_ROOT = "indexerTests/";
+    /**
+     * mvn copies the resources in "src/test/resources" to target/test-classes.
+     * This folder is than used as classpath.<p>
+     * "/target/test-files/" does not exist, but is created by the
+     * {@link IndexingConfig}.
+     */
+    private static final String TEST_ROOT = "/target/test-files";
+    private static String  userDir;
+    private static String testRoot;
+    /**
+     * The methods resets the "user.dir" system property
+     */
     @BeforeClass
-    public static void init(){
+    public static void initTestRootFolder(){
         String baseDir = System.getProperty("basedir");
         if(baseDir == null){
             baseDir = System.getProperty("user.dir");
         }
-        rootDir = baseDir+TEST_FOLDER_NAME;
+        //store the current user.dir
+        userDir = System.getProperty("user.dir");
+        testRoot = baseDir+TEST_ROOT;
+        log.info("ConfigTest Root : "+testRoot);
+        //set the user.dir to the testRoot (needed to test loading of missing
+        //configurations via classpath
+        //store the current user.dir and reset it after the tests
+        System.setProperty("user.dir", testRoot);
         factory = IndexerFactory.getInstance();
     }
-    @After
-    public void cleanIndexed(){
+    /**
+     * resets the "user.dir" system property the the original value
+     */
+    @AfterClass
+    public static void cleanup(){
+        System.setProperty("user.dir", userDir);
         indexedData.clear();
     }
     
     @Test
     public void testDataInteratingMode(){
-        Indexer indexer = factory.create(rootDir+"dataIterating");
+        Indexer indexer = factory.create(CONFIG_ROOT+"dataIterating");
         indexer.index();
         //check that all entities have been indexed
         validateAllIndexed();
     }
     @Test
     public void testEntityIdIteratingMode(){
-        Indexer indexer = factory.create(rootDir+"idIterating");
+        Indexer indexer = factory.create(CONFIG_ROOT+"idIterating");
         indexer.index();
         //check that all entities have been indexed
         validateAllIndexed();

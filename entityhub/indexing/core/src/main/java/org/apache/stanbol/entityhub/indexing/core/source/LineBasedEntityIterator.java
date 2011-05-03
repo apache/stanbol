@@ -129,9 +129,9 @@ public class LineBasedEntityIterator implements EntityIterator {
         }
         value = config.get(PARAM_ENTITY_SCORE_FILE);
         if(value == null || value.toString().isEmpty()){
-            score = new File(DEFAULT_ENTITY_SCORE_FILE);
+            score = indexingConfig.getSourceFile(DEFAULT_ENTITY_SCORE_FILE);
         } else {
-            score = new File(indexingConfig.getSourceFolder(),value.toString());
+            score = indexingConfig.getSourceFile(value.toString());
         }
         try {
             initReader(new FileInputStream(score));

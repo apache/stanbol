@@ -35,12 +35,9 @@ public class ResourceLoader {
      */
     private boolean loadEntriesWithinZipArchives = true;
     public ResourceLoader(ResourceImporter resourceImporter) {
-        this(resourceImporter,true,null);
+        this(resourceImporter,true);
     }
     public ResourceLoader(ResourceImporter resourceImporter, boolean processEntriesWithinArchives) {
-        this(resourceImporter,processEntriesWithinArchives,null);
-    }
-    public ResourceLoader(ResourceImporter resourceImporter, boolean processEntriesWithinArchives,File fileOrDirectory) {
         if(resourceImporter == null){
             throw new IllegalStateException("The parsed ResourceProcessor instance MUST NOT be NULL!");
         }
@@ -48,7 +45,6 @@ public class ResourceLoader {
         this.loadEntriesWithinZipArchives = processEntriesWithinArchives;
         //use a tree map to have the files sorted
         this.files = new TreeMap<String,ResourceState>();
-        addResource(fileOrDirectory);
     }
 
     /**

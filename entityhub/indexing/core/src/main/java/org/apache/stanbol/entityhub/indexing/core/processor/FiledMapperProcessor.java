@@ -113,13 +113,22 @@ public class FiledMapperProcessor implements EntityProcessor{
                 indexingConfig.getIndexFieldConfiguration());
         } else {
             //load (other) mappings based on the provided mappings parameter
-            final File file = new File(indexingConfig.getConfigFolder(),value.toString());
-            try {
-                this.mapper = createMapperFormStream(new FileInputStream(file));
-            } catch (FileNotFoundException e) {
-                throw new IllegalArgumentException("FieldMapping file "+value+" not found in configuration directory "+indexingConfig.getConfigFolder());
-            } catch (IOException e) {
-                throw new IllegalArgumentException("Unable to access FieldMapping file "+value+" not found in configuration directory "+indexingConfig.getConfigFolder());
+            //final File file = new File(indexingConfig.getConfigFolder(),value.toString());
+            File mappings = indexingConfig.getConfigFile(value.toString());
+            if(mappings != null){
+                try {
+                    InputStream in = new FileInputStream(mappings);
+                    this.mapper = createMapperFormStream(in);
+                    IOUtils.closeQuietly(in);
+                } catch (IOException e) {
+                    throw new IllegalArgumentException("Unable to access FieldMapping file "+
+                        value+" not found in configuration directory "+
+                        indexingConfig.getConfigFolder());
+                }
+            } else {
+                throw new IllegalArgumentException("FieldMapping file "+
+                    value+" not found in configuration directory "+
+                    indexingConfig.getConfigFolder());
             }
         }
         //TODO: get the valueFactory form the config (currently an InMemory is

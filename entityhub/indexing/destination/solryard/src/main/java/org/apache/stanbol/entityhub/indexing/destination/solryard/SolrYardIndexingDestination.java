@@ -346,7 +346,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         //get the directors holding the solr configuration
         String solrConfig;
         if(!config.containsKey(PARAM_SOLR_CONFIG)){ //not present -> allow default
-            File configDir = new File(indexingConfig.getConfigFolder(),indexName);
+            File configDir = indexingConfig.getConfigFile(indexName);
             if(!configDir.isDirectory()){
                 log.info("use default Solr index configuration for index "+indexName);
                 solrConfig = null;
@@ -358,7 +358,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
             if(value == null || value.toString().isEmpty()){
                 value = indexName; //use the indexName as default
             }
-            File configDir = new File(indexingConfig.getConfigFolder(),value.toString());
+            File configDir = indexingConfig.getConfigFile(value.toString());
             if(!configDir.isDirectory()){
                 throw new IllegalArgumentException("Required Solr Configuration "+
                     value.toString()+" not found within the config directory "+
