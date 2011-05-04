@@ -260,7 +260,8 @@ public final class FieldMappingUtils {
                 if(dataType != null){
                     dataTypes.add(dataType.getUri());
                 } else {
-                    log.warn(String.format("DataType %s not supported! Datatype get not used by this Filter"));
+                    log.warn(String.format("DataType %s not supported! Datatype get not used by this Filter",
+                        dataTypeStrings[i]));
                 }
             }
             if(dataTypes.isEmpty()){

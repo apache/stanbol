@@ -248,6 +248,49 @@ public final class SolrYardConfig extends YardConfig {
             config.remove(SolrYard.FIELD_BOOST_MAPPINGS);
         }
     }
+    public Boolean isImmediateCommit(){
+        Object value = config.get(SolrYard.IMMEDIATE_COMMIT);
+        if(value != null){
+            if(value instanceof Boolean){
+                return (Boolean) value;
+            } else {
+                return Boolean.parseBoolean(value.toString());
+            }
+        } else {
+            return null;
+        }
+    }
+    public void setImmediateCommit(Boolean state){
+        if(state != null){
+            config.put(SolrYard.IMMEDIATE_COMMIT, state);
+        } else {
+            config.remove(SolrYard.IMMEDIATE_COMMIT);
+        }
+    }
+    public final Integer getCommitWithinDuration(){
+        Object value = config.get(SolrYard.COMMIT_WITHIN_DURATION);
+        if(value != null){
+            if(value instanceof Integer){
+                return (Integer)value;
+            } else {
+                try {
+                    return Integer.parseInt(value.toString());
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+        } else {
+            return null;
+        }
+        
+    }
+    public final void setCommitWithinDuration(Integer duration){
+        if( duration == null || duration.intValue()<=0){
+            config.remove(SolrYard.COMMIT_WITHIN_DURATION);
+        } else {
+            config.put(SolrYard.COMMIT_WITHIN_DURATION, duration);
+        }
+    }
     @SuppressWarnings("unchecked")
     public Map<String,Float> getFieldBoosts(){
         Object fieldBoosts = config.get(SolrYard.FIELD_BOOST_MAPPINGS);

@@ -13,7 +13,7 @@ public interface IndexingConstants {
     String KEY_DESCRIPTION           = "description";
     String KEY_ENTITY_DATA_ITERABLE  = "entityDataIterable";
     String KEY_ENTITY_DATA_PROVIDER  = "entityDataProvider";
-    String KEY_ENTITY_ID_ITERATPR    = "entityIdIterator";
+    String KEY_ENTITY_ID_ITERATOR    = "entityIdIterator";
     String KEY_ENTITY_SCORE_PROVIDER = "entityScoreProvider";
     String KEY_INDEXING_DESTINATION = "indexingDestination";
     String KEY_INDEX_FIELD_CONFIG = "fieldConfiguration";

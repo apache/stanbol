@@ -357,9 +357,22 @@
         <version>${stanbol-version}</version>
         <scope>provided</scope>
       </dependency>
+      <!-- Stanbol Entityhub Indexing Bundles -->
       <dependency>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.entityhub.indexing.core</artifactId>
+        <version>${stanbol-version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.entityhub.indexing.source.jenatdb</artifactId>
+        <version>${stanbol-version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.entityhub.indexing.destination.solryard</artifactId>
         <version>${stanbol-version}</version>
         <scope>provided</scope>
       </dependency>
@@ -569,7 +582,19 @@
         <version>1.6.1</version>
         <scope>provided</scope>
       </dependency>
-
+      <dependency>  <!-- when using log4j for the logging -->
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>1.6.1</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>1.2.16</version>
+        <scope>provided</scope>
+      </dependency>
+      
       <!-- Servlet API -->
       <dependency>
         <groupId>javax.servlet</groupId>

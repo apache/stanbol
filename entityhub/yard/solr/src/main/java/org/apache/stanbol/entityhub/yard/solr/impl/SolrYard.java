@@ -43,8 +43,10 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
+import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.impl.StreamingUpdateSolrServer;
+import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.common.SolrDocument;
@@ -187,6 +189,28 @@ public class SolrYard extends AbstractYard implements Yard {
      */
     protected static final int defaultMaxBooleanClauses = 1024;
     /**
+     * Key used to enable/disable committing of update(..) and
+     * store(..) operations. Enabling this ensures that indexed documents are
+     * immediately available for searches, but it will also decrease the
+     * performance for updates.
+     */
+    public static final String IMMEDIATE_COMMIT = "org.apache.stanbol.entityhub.yard.solr.immediateCommit";
+    /**
+     * By default {@link #IMMEDIATE_COMMIT} is enabled
+     */
+    public static final boolean DEFAULT_IMMEDIATE_COMMIT_STATE = true;
+    /**
+     * If {@link #IMMEDIATE_COMMIT} is deactivated, than this time is parsed to
+     * update(..) and store(..) operations as the maximum time (in ms) until
+     * a commit. 
+     */
+    public static final String COMMIT_WITHIN_DURATION = "org.apache.stanbol.entityhub.yard.solr.commitWithinDuration";
+    /**
+     * The default value for the {@link #COMMIT_WITHIN_DURATION} parameter is
+     * 10 sec.
+     */
+    public static final int DEFAULT_COMMIT_WITHIN_DURATION = 1000*10;
+    /**
      * What a surprise it's the logger!
      */
     private Logger log = LoggerFactory.getLogger(SolrYard.class);
@@ -264,6 +288,16 @@ public class SolrYard extends AbstractYard implements Yard {
      */
     @Reference
     private SolrDirectoryManager solrDirectoryManager;
+    /**
+     * If update(..) and store(..) calls should be immediately committed.
+     */
+    private boolean immediateCommit = DEFAULT_IMMEDIATE_COMMIT_STATE;
+    /**
+     * If <code>{@link #immediateCommit} == false</code> this is the time in
+     * ms parsed to Solr until the documents parsed to update(..) and store(..)
+     * need to be committed.
+     */
+    private int commitWithin = DEFAULT_COMMIT_WITHIN_DURATION;
     /**
      * Default constructor as used by the OSGI environment.<p> DO NOT USE to
      * manually create instances! The SolrYard instances do need to be configured.
@@ -362,6 +396,18 @@ public class SolrYard extends AbstractYard implements Yard {
         //test the server
         SolrPingResponse pingResponse = server.ping();
         log.info(String.format("Successful ping for SolrServer %s ( %d ms) Details: %s",config.getSolrServerLocation(),pingResponse.getElapsedTime(),pingResponse));
+        //check if immediateCommit is enable or disabled
+        if(config.isImmediateCommit() != null){
+            immediateCommit = config.isImmediateCommit().booleanValue();
+        } else {
+            immediateCommit = DEFAULT_IMMEDIATE_COMMIT_STATE;
+        }
+        //check the maximum duration until changes are commited
+        if(config.getCommitWithinDuration() != null){
+            commitWithin = config.getCommitWithinDuration().intValue();
+        } else {
+            commitWithin = DEFAULT_COMMIT_WITHIN_DURATION;
+        }
         //the fieldMapper need the Server to store it's namespace prefix configuration
         this.fieldMapper = new SolrFieldMapper(server);
         this.indexValueFactory = IndexValueFactory.getInstance();
@@ -384,6 +430,7 @@ public class SolrYard extends AbstractYard implements Yard {
         log.info("... deactivating SolrYard "+config.getName()+" (id="+config.getId()+")");
         try {
             this.server.commit();
+            this.server.optimize();
         } catch (SolrServerException e) {
             log.error(String.format("Unable to commit unsaved changes to SolrServer %s during deactivate!",config.getSolrServerLocation()),e);
         } catch (IOException e) {
@@ -395,9 +442,18 @@ public class SolrYard extends AbstractYard implements Yard {
         this.solrQueryFactoy = null;
         this.documentBoostFieldName  = null;
         this.fieldBoostMap = null;
+        //reset the commitWithin and immediateCommit to the defaults
+        this.commitWithin = DEFAULT_COMMIT_WITHIN_DURATION;
+        this.immediateCommit = DEFAULT_IMMEDIATE_COMMIT_STATE;
         super.deactivate(); //deactivate the super implementation
     }
-
+    /**
+     * can be used outside of the OSGI environment to deactivate this instance.
+     * Thiw will cause the SolrIndex to be committed and optimised.
+     */
+    public void close(){
+        deactivate(null);
+    }
     /**
      * Calls the {@link #deactivate(ComponentContext)} with <code>null</code>
      * as component context
@@ -639,7 +695,7 @@ public class SolrYard extends AbstractYard implements Yard {
     }
     @Override
     public final Representation store(Representation representation) throws YardException,IllegalArgumentException {
-        log.debug(String.format("Store %s",representation!= null?representation.getId():null));
+        log.debug("Store {}",representation!= null?representation.getId():null);
         if(representation == null){
             throw new IllegalArgumentException("The parsed Representation MUST NOT be NULL!");
         }
@@ -647,11 +703,18 @@ public class SolrYard extends AbstractYard implements Yard {
         SolrInputDocument inputDocument = createSolrInputDocument(representation);
         long create = System.currentTimeMillis();
         try {
-            server.add(inputDocument);
-            server.commit();
+            UpdateRequest update = new UpdateRequest();
+            if(!immediateCommit){
+                update.setCommitWithin(commitWithin);
+            }
+            update.add(inputDocument);
+            update.process(server);
+            if(immediateCommit){
+                server.commit();
+            }
             long stored = System.currentTimeMillis();
-            log.debug(String.format("  ... done [create=%dms|store=%dms|sum=%dms]",
-                    (create-start),(stored-create),(stored-start)));
+            log.debug("  ... done [create={}ms|store={}ms|sum={}ms]",
+                    new Object[]{(create-start),(stored-create),(stored-start)});
         } catch (SolrServerException e) {
             throw new YardException(String.format("Exception while adding Document to Solr",representation.getId()),e);
         } catch (IOException e) {
@@ -675,8 +738,15 @@ public class SolrYard extends AbstractYard implements Yard {
         }
         long created = System.currentTimeMillis();
         try {
-            server.add(inputDocs);
-            server.commit();
+            UpdateRequest update = new UpdateRequest();
+            if(!immediateCommit){
+                update.setCommitWithin(commitWithin);
+            }
+            update.add(inputDocs);
+            update.process(server);
+            if(immediateCommit){
+                server.commit();
+            }
         } catch (SolrServerException e) {
             throw new YardException("Exception while adding Documents to the Solr Server!",e);
         } catch (IOException e) {
@@ -802,8 +872,15 @@ public class SolrYard extends AbstractYard implements Yard {
         long created = System.currentTimeMillis();
         if(!inputDocs.isEmpty()) {
             try {
-                server.add(inputDocs);
-                server.commit();
+                UpdateRequest update = new UpdateRequest();
+                if(!immediateCommit){
+                    update.setCommitWithin(commitWithin);
+                }
+                update.add(inputDocs);
+                update.process(server);
+                if(immediateCommit){
+                    server.commit();
+                }
             } catch (SolrServerException e) {
                 throw new YardException("Error while adding updated Documents to the SolrServer",e);
             } catch (IOException e) {
