@@ -57,7 +57,7 @@
             <Import-Package>
               !org.apache.xml.resolver.*,
               !sun.io.*,
-              org.slf4j.*;version=1.5.2,
+              org.slf4j.*,
               org.xml.sax.*,
               *
             </Import-Package>
@@ -202,39 +202,30 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- Diagnostics deps -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.5.2</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.13</version>
-      <scope>provided</scope>
-    </dependency>
+		<!-- Diagnostics deps -->
+		<dependency> <!-- we use log4j 1.2 -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency> <!-- see also the log4j.properties in src/main/resources -->
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 
-    <!-- Testing deps -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.4</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>1.5.2</version>
-      <scope>test</scope>
-    </dependency>
+		<!-- Testing deps -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<scope>test</scope>
+		</dependency>
+    
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>org.apache.clerezza.rdf.jena.parser</artifactId>

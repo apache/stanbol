@@ -50,7 +50,7 @@
               org.apache.stanbol.reengineer.base.*;version=${stanbol-version}
             </Export-Package>
             <Import-Package>
-              org.slf4j.*;version=1.5.2,
+              org.slf4j.*,
               *
             </Import-Package>
             <_nouses>true</_nouses>
@@ -190,40 +190,29 @@
       <version>${stanbol-version}</version>
     </dependency>
 
-    <!-- Disgnostics deps -->
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.13</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.5.2</version>
-      <type>jar</type>
-      <scope>provided</scope>
-    </dependency>
+		<!-- Diagnostics deps -->
+		<dependency> <!-- we use log4j 1.2 -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency> <!-- see also the log4j.properties in src/main/resources -->
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 
-    <!-- Testing deps -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.4</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>1.5.2</version>
-      <scope>test</scope>
-    </dependency>
+		<!-- Testing deps -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<scope>test</scope>
+		</dependency>
 
   </dependencies>
 

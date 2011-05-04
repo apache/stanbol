@@ -1,127 +1,128 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
-   Licensed to the Apache Software Foundation (ASF) under one or more
-   contributor license agreements.  See the NOTICE file distributed with
-   this work for additional information regarding copyright ownership.
-   The ASF licenses this file to You under the Apache License, Version 2.0
-   (the "License"); you may not use this file except in compliance with
-   the License.  You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
--->
+<!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor 
+	license agreements. See the NOTICE file distributed with this work for additional 
+	information regarding copyright ownership. The ASF licenses this file to 
+	You under the Apache License, Version 2.0 (the "License"); you may not use 
+	this file except in compliance with the License. You may obtain a copy of 
+	the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required 
+	by applicable law or agreed to in writing, software distributed under the 
+	License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
+	OF ANY KIND, either express or implied. See the License for the specific 
+	language governing permissions and limitations under the License. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.apache.stanbol</groupId>
-    <artifactId>stanbol-parent</artifactId>
-    <version>0.9-SNAPSHOT</version>
-    <relativePath>../../parent</relativePath>
-  </parent>
+	<parent>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>stanbol-parent</artifactId>
+		<version>0.9-SNAPSHOT</version>
+		<relativePath>../../parent</relativePath>
+	</parent>
 
-  <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.rules.base</artifactId>
-  <packaging>bundle</packaging>
+	<groupId>org.apache.stanbol</groupId>
+	<artifactId>org.apache.stanbol.rules.base</artifactId>
+	<packaging>bundle</packaging>
 
-  <name>Apache Stanbol Base Rule Engine</name>
-  <description>
+	<name>Apache Stanbol Base Rule Engine</name>
+	<description>
     The basic Stanbol engine for rule management and execution.
   </description>
 
-  <inceptionYear>2010</inceptionYear>
+	<inceptionYear>2010</inceptionYear>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Export-Package>
-              org.apache.stanbol.rules.base.*;version=${stanbol-version}
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Export-Package>
+							org.apache.stanbol.rules.base.*;version=${stanbol-version}
             </Export-Package>
-            <Import-Package>
-              org.slf4j.*;version=1.5.2,
-              *
+						<Import-Package>
+							org.slf4j.*,
+							*
             </Import-Package>
-            <_nouses>true</_nouses>
-          </instructions>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+						<_nouses>true</_nouses>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-scr-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 
-  <dependencies>
+	<dependencies>
 
-    <!-- OSGi deps -->
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr.annotations</artifactId>
-      <version>1.2.0</version>
-      <scope>provided</scope>
-    </dependency>
+		<!-- OSGi deps -->
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.scr.annotations</artifactId>
+			<version>1.2.0</version>
+			<scope>provided</scope>
+		</dependency>
 
-    <!-- OWL deps -->
-    <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>jena</artifactId>
-      <version>2.6.2</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>owlapi</groupId>
-      <artifactId>owlapi</artifactId>
-      <version>3.0.0</version>
-      <scope>provided</scope>
-    </dependency>
+		<!-- OWL deps -->
+		<dependency>
+			<groupId>com.hp.hpl.jena</groupId>
+			<artifactId>jena</artifactId>
+			<version>2.6.2</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>owlapi</groupId>
+			<artifactId>owlapi</artifactId>
+			<version>3.0.0</version>
+			<scope>provided</scope>
+		</dependency>
 
-    <!-- Diagnostics deps -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.5.2</version>
-      <type>jar</type>
-      <scope>provided</scope>
-    </dependency>
+		<!-- Diagnostics deps -->
+		<dependency> <!-- we use log4j 1.2 -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency> <!-- see also the log4j.properties in src/main/resources -->
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 
-    <!-- Testing deps -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.4</version>
-      <scope>test</scope>
-    </dependency>
+		<!-- Testing deps -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<scope>test</scope>
+		</dependency>
 
-  </dependencies>
+	</dependencies>
 
 
-  <repositories>
-    <repository>
-      <id>stlab-cnr-repo</id>
-      <url>http://stlab.istc.cnr.it/software/maven/repo</url>
-    </repository>
-  </repositories>
+	<repositories>
+		<repository>
+			<id>stlab-cnr-repo</id>
+			<url>http://stlab.istc.cnr.it/software/maven/repo</url>
+		</repository>
+	</repositories>
 
 </project>
