@@ -42,14 +42,14 @@ import com.sun.jersey.api.view.ImplicitProduces;
 
 @Path("/refactor")
 @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
-public class RefactorerResource extends BaseStanbolResource {
+public class RefactorResource extends BaseStanbolResource {
 
     protected ONManager onManager;
     protected Refactorer semionRefactorer;
     // protected SemionManager semionManager;
     protected TcManager tcManager;
 
-    public RefactorerResource(@Context ServletContext servletContext) {
+    public RefactorResource(@Context ServletContext servletContext) {
         semionRefactorer = (Refactorer) (servletContext.getAttribute(Refactorer.class.getName()));
 
         onManager = (ONManager) (servletContext.getAttribute(ONManager.class.getName()));
@@ -154,6 +154,7 @@ public class RefactorerResource extends BaseStanbolResource {
     			 * TODO
     			 * ADD A RESPONSE FOR THIS CASE
     			 */
+    			return Response.status(404).build();
     		}
     	}
     	else{
@@ -161,6 +162,7 @@ public class RefactorerResource extends BaseStanbolResource {
 			 * TODO
 			 * ADD A RESPONSE FOR THIS CASE
 			 */
+    		return Response.status(404).build();
 		}
 
     }
