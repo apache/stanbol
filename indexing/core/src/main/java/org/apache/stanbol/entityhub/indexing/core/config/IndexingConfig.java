@@ -1,13 +1,21 @@
 package org.apache.stanbol.entityhub.indexing.core.config;
 
-import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstants.*;
+import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstants.KEY_DESCRIPTION;
+import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstants.KEY_ENTITY_DATA_ITERABLE;
+import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstants.KEY_ENTITY_DATA_PROVIDER;
+import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstants.KEY_ENTITY_ID_ITERATOR;
+import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstants.KEY_ENTITY_PROCESSOR;
+import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstants.KEY_ENTITY_SCORE_PROVIDER;
+import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstants.KEY_INDEXING_DESTINATION;
+import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstants.KEY_INDEX_FIELD_CONFIG;
+import static org.apache.stanbol.entityhub.indexing.core.config.IndexingConstants.KEY_NAME;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,8 +25,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
@@ -30,6 +41,7 @@ import org.apache.stanbol.entityhub.indexing.core.EntityScoreProvider;
 import org.apache.stanbol.entityhub.indexing.core.IndexingDestination;
 import org.apache.stanbol.entityhub.indexing.core.normaliser.DefaultNormaliser;
 import org.apache.stanbol.entityhub.indexing.core.normaliser.ScoreNormaliser;
+import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,45 +63,133 @@ public class IndexingConfig {
     
     private static final Logger log = LoggerFactory.getLogger(IndexingConfig.class);
     private static final String DEFAULT_INDEX_FIELD_CONFIG_FILE_NAME = "indexFieldConfig.txt";
-    private static final boolean ALLOW_CLASSPATH = true;
     
     /**
-     * This stores the context within the classpath to load the 
+     * This stores the context within the classpath to initialise missing
+     * configurations and source based on the defaults in the classpath.
+     * This might be a directory or an jar file. 
+     * @see {@link #loadViaClasspath(String)}
+     * @see #getConfigClasspathRootFolder()
      */
     private final File classPathRootDir;
     
+    /**
+     * The root directory for the indexing (defaults to {@link #DEFAULT_ROOT_PATH})
+     */
     private final File rootDir;
+    /**
+     * The root directory for the configuration
+     */
     private final File configDir;
+    /**
+     * The root directory for the resources (indexing source files)
+     */
     private final File sourceDir;
+    /**
+     * The root directory for the files created during the indexing process
+     */
     private final File destinationDir;
+    /**
+     * The root directory for the distribution files created in the finalisation
+     * phase of the indexing (e.g. The archive with the index,
+     * OSGI configuration, ...)
+     */
     private final File distributionDir;
     
+    /**
+     * Map between the relative paths stored in {@link #rootDir}, {@link #configDir},
+     * {@link #sourceDir}, {@link #destinationDir} and {@link #distributionDir}
+     * to the {@link File#getCanonicalFile()} counterparts as returned by the
+     * {@link #getRootFolder()} ... methods.
+     */
     private final Map<File,File> canonicalDirs = new HashMap<File,File>();
     
+    /**
+     * The main indexing configuration as parsed form {@link #INDEXING_PROERTIES}
+     * file within the {@link #configDir}.
+     */
     private final Map<String,Object> configuration;
     
+    /**
+     * The value of the {@link IndexingConstants#KEY_NAME} property
+     */
     private String name;
-        
+    /**
+     * The {@link EntityDataIterable} instance initialised based on the value
+     * of the {@link IndexingConstants#KEY_ENTITY_DATA_ITERABLE} key or
+     * <code>null</code> if not configured.
+     * This variable uses lazy initialisation
+     * @see #getDataInterable()
+     */
     private EntityDataIterable entityDataIterable = null;
+    /**
+     * The {@link EntityDataProvider} instance initialised based on the value
+     * of the {@link IndexingConstants#KEY_ENTITY_DATA_PROVIDER} key or
+     * <code>null</code> if not configured.
+     * This variable uses lazy initialisation
+     * @see #getEntityDataProvider()
+     */
     private EntityDataProvider entityDataProvider = null;
 
+    /**
+     * The {@link EntityIterator} instance initialised based on the value
+     * of the {@link IndexingConstants#KEY_ENTITY_ID_ITERATOR} key or
+     * <code>null</code> if not configured.
+     * This variable uses lazy initialisation
+     * @see #getEntityIdIterator()
+     */
     private EntityIterator entityIdIterator = null;
+    /**
+     * The {@link EntityScoreProvider} instance initialised based on the value
+     * of the {@link IndexingConstants#KEY_ENTITY_SCORE_PROVIDER} key or
+     * <code>null</code> if not configured.
+     * This variable uses lazy initialisation
+     * @see #getEntityScoreProvider()
+     */
     private EntityScoreProvider entityScoreProvider = null;
-    
+    /**
+     * The {@link ScoreNormaliser} instance initialised based on the value
+     * of the {@link IndexingConstants#KEY_SCORE_NORMALIZER} key or
+     * <code>null</code> if not configured.
+     * This variable uses lazy initialisation
+     * @see #getNormaliser()
+     */
     private ScoreNormaliser scoreNormaliser = null;
-    
+    /**
+     * The {@link EntityProcessor} instance initialised based on the value
+     * of the {@link IndexingConstants#KEY_ENTITY_PROCESSOR} key or
+     * <code>null</code> if not configured.
+     * This variable uses lazy initialisation
+     * @see #getEntityProcessor()
+     */
     private EntityProcessor entityProcessor = null;
-    
+    /**
+     * The {@link IndexingDestination} instance initialised based on the value
+     * of the {@link IndexingConstants#KEY_INDEXING_DESTINATION} key or
+     * <code>null</code> if not configured.
+     * This variable uses lazy initialisation
+     * @see #getIndexingDestination()
+     */
     private IndexingDestination indexingDestination = null;
     /**
-     * The configuration of the fields/languages included/excluded in the index.
+     * The configuration of the fields/languages included/excluded in the index
+     * as parsed based on the value of the 
+     * {@link IndexingConstants#KEY_INDEX_FIELD_CONFIG} key.
      */
     private Collection<FieldMapping> fieldMappings;
     
+    /**
+     * Creates an instance using {@link #DEFAULT_ROOT_PATH} (relative to the
+     * working directory) as {@link #getRootFolder()} for the indexing
+     */
     public IndexingConfig(){
         this(null);
     }
-    
+    /**
+     * Creates an isntace using the parsed offset plus {@link #DEFAULT_ROOT_PATH}
+     * as {@link #getRootFolder()} for the indexing
+     * @param rootPath
+     */
     public IndexingConfig(String rootPath){
         //first get the root
         File root;// = new File(System.getProperty("user.dir"));
@@ -252,10 +352,7 @@ public class IndexingConfig {
 
     /**
      * Searches for a resource with the parsed name in the parsed directory.
-     * If it can not be found, than it looks up the file within the classpath
-     * and if found copies it to the parsed location. In case the parsed
-     * file refers to a directory, then all the contents of that directory
-     * are copied. 
+     * If it can not be found it tries to initialise it via the classpath.
      * @param root the (relative path) to the directory containing the file.
      * typically on of {@link #configDir} or {@link #sourceDir}.
      * @param fileName the name of the file (file or directory)
@@ -263,34 +360,112 @@ public class IndexingConfig {
      */
     private File getResource(File root, String fileName) {
         File resource = new File(root,fileName);
-        File absoluteResource = resource.getAbsoluteFile();
         log.info("reauest for Resource {} (folder: {})",fileName,root);
-        if(absoluteResource.exists()){
+        if(resource.getAbsoluteFile().exists()){
             log.info(" > rquested Resource present");
-        } else if(classPathRootDir != null){
-            log.info(" > rquested Resource missing ");
-            log.info("     ... try to init via Classpath {}",classPathRootDir);
+        } else if(copyFromClasspath(resource)){
+            log.info(" > rquested Resource copied from Classpath ");
+        } else {
+            log.info(" > rquested Resource not found");
+        }
+        return resource.getAbsoluteFile();
+    }
+    /**
+     * This method copies Resources from the Classpath over to the target
+     * resource. It supports both files and directories. In case of directories
+     * all sub-directories and there files are copied.<p> 
+     * One can not use {@link ClassLoader#getResource(String)} because it does
+     * only support files and no directories.
+     * @param resource the target resource (relative path also found in the jar)
+     * @return <code>true</code> if the resource was found and copied.
+     */
+    private boolean copyFromClasspath(File resource){
+        if(classPathRootDir == null){ //not available
+            return false;
+        } else if(classPathRootDir.isDirectory()){ // loaded from directory
             File classpathResource = new File(classPathRootDir,resource.getPath());
             try {
                 if(classpathResource.isFile()){
-                    FileUtils.copyFile(classpathResource, absoluteResource);
-                    log.info(" > resource created");
+                    FileUtils.copyFile(classpathResource, resource.getAbsoluteFile());
+                    return true;
                 } else if(classpathResource.isDirectory()){
-                    FileUtils.copyDirectory(classpathResource, absoluteResource);
-                    log.info(" > directory created");
+                    FileUtils.copyDirectory(classpathResource, resource.getAbsoluteFile());
+                    return true;
                 } else {
-                    log.info(" > not found in Classpath");
+                    return false;
                 }
             } catch(IOException e){
                 throw new IllegalStateException(
                     String.format("Unable to copy Configuration form classpath " +
                             "resource %s to target file %s!", 
-                            classpathResource, absoluteResource),e);
+                            classpathResource, resource.getAbsolutePath()),e);
             }
-        } else {
-            log.info(" > initialisation of resources via classpath not possible ");
+        } else { //loaded form a jar file
+            boolean found = false;
+            JarFile jar = null;
+            try {
+                jar = new JarFile(classPathRootDir);
+                String resourceName = resource.getPath();
+                Enumeration<JarEntry> entries = jar.entries();
+                boolean completed = false;
+                //we need to iterate over the entries because the resource might
+                //refer to an file but missing the tailing '/'
+                while(entries.hasMoreElements() && !completed){
+                    JarEntry entry = entries.nextElement();
+                    String entryName = entry.getName();
+                    if(entryName.startsWith(resourceName)){
+                        log.info("found entry : {}[dir={}]",entryName,entry.isDirectory());
+                        if(entryName.equals(resourceName) && !entry.isDirectory()){
+                            //found the resource and it is an file -> copy and return
+                            completed = true;
+                        }
+                        if(!entry.isDirectory()){ //copy a file
+                            //still check if the target folder exist
+                            //TODO: this depends on user.dir is root dir
+                            File targetFolder = new File(
+                                FilenameUtils.getPathNoEndSeparator(entryName));
+                            if(targetFolder.exists() || targetFolder.mkdirs()){
+                                File outFile = new File(targetFolder,
+                                    FilenameUtils.getName(entry.getName()));
+                                InputStream is = jar.getInputStream(entry);
+                                OutputStream os = new FileOutputStream(outFile);
+                                IOUtils.copyLarge(is,os);
+                                IOUtils.closeQuietly(is);
+                                IOUtils.closeQuietly(os);
+                                //found one resource
+                                found = true;
+                                log.info(" > created File {}",outFile);
+                            } else {
+                                throw new IllegalStateException("Unable to create" +
+                                		"folder "+targetFolder);
+                            }
+                        } else { //directory
+                            //TODO: this depends on user.dir is root dir
+                            File targetFolder = new File(entryName);
+                            if(!targetFolder.exists() && !targetFolder.mkdirs()){
+                                throw new IllegalStateException("Unable to create" +
+                                    "folder "+targetFolder);
+                            } else { //created a directory
+                                log.info(" > created Directory {}",targetFolder);
+                                found = true;
+                            }
+                        }
+                    } // else entry does not start with the parsed resource
+                } //end while entries
+            } catch (IOException e) {
+               throw new IllegalStateException("Unable to copy resources from" +
+               		"jar file "+classPathRootDir+"!",e);
+            } finally {
+                if(jar != null){
+                    try {
+                        jar.close();
+                    } catch (IOException e) {
+                        //ignore
+                    }
+                }
+            }
+            return found;
         }
-        return absoluteResource;
     }
 
     /**
@@ -324,11 +499,10 @@ public class IndexingConfig {
         String contextResource = new File(configDir,INDEXING_PROERTIES).getPath();
         URL contextUrl = loadViaClasspath(contextResource);
         if(contextUrl == null){// if indexing.properties is not found via classpath
-            log.warn("No '{}' found via classpath. Will try to init via '{}' but that usually does not work.",
-                INDEXING_PROERTIES,IndexingConfig.class);
-            //use this class ...
-            contextResource = IndexingConfig.class.getName().replace('.', '/')+".class";
-            contextUrl = loadViaClasspath(contextResource);
+            log.info("No '{}' found via classpath. Loading Resource via" +
+            		"the classpath is deactivated.",
+                INDEXING_PROERTIES);
+            return null;
         }
         String resourcePath;
         try {
@@ -357,16 +531,7 @@ public class IndexingConfig {
         } else {
             classpathRoot = new File(resourcePath.substring(0,resourcePath.length()-contextResource.length()));
         }
-        //and now the folder representing the rootDir (but within the Classpath)
-        //to validate if this folder is present in the classpath
-        File indexingClasspathRoot = new File(classpathRoot,rootDir.getPath());
-        if(indexingClasspathRoot.isDirectory()){
-            //but return still the root, because configDir, ... are all relative
-            //to this root
-            return classpathRoot; 
-        } else {
-            return null;
-        }
+        return classpathRoot;
     }
     
     /**
@@ -545,8 +710,8 @@ public class IndexingConfig {
     public EntityIterator getEntityIdIterator() {
         if(entityIdIterator != null){
             return entityIdIterator;
-        } else if(configuration.containsKey(KEY_ENTITY_ID_ITERATPR)){
-            ConfigEntry config = parseConfigEntry(configuration.get(KEY_ENTITY_ID_ITERATPR).toString());
+        } else if(configuration.containsKey(KEY_ENTITY_ID_ITERATOR)){
+            ConfigEntry config = parseConfigEntry(configuration.get(KEY_ENTITY_ID_ITERATOR).toString());
             try {
                 entityIdIterator = (EntityIterator)Class.forName(config.getClassName()).newInstance();
             } catch (Exception e) {

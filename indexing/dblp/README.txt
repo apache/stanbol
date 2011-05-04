@@ -9,30 +9,38 @@ If not yet build by the built process of the entityhub call
    mvn install
 in this directory.
 
-To create the runable jar that contains all the dependencies call
-   mvn assembly:assembly
-   
-If everything completes successfully, than there should be two jar files within
-the target directory.
-The one called 
-   org.apache.stanbol.entityhub.indexing.dblp-0.1*-jar-with-dependencies.jar
-is the one to be used for indexing.
+If the build succeeds go to the /target directory and copy the
+   org.apache.stanbol.entityhub.indexing.dblp-*-jar-with-dependencies.jar
+to the directory you would like to start the indexing.
 
-Creating the index:
+Index:
 ==================
 
-(1) download the dump from http://dblp.l3s.de/dblp.rdf.gz
-(2) rename the dump file to "dblp.nt.gz" to allow the RdfIndexer to correctly 
-    set the RDF format to NTRIPLES!
-(3) The Indexer will need a SolrServer. So you need to prepare the Solr Index
-    to store the data.
-    A default configuration is provided within the "/solrConf" directory. This
-    can be used to configure a SorlServer or a new Core to an existing SolrServer.
-    You can also copy the "dblp" folder within the "/solrConf" directory to an
-    other location and than parse the absolute path as SolrServer location to the
-    Tool. In that case an EmbeddedSolrServer will be used for indexing. 
-(4) call the tool with the -h option to print the help screen
-    java -jar ./target/org.apache.stanbol.entityhub.indexing.dblp-*-jar-with-dependencies.jar -h
+(1) Initialise the configuration by calling
+java -jar org.apache.stanbol.entityhub.indexing.dblp-*-jar-with-dependencies.jar init
 
-Indexing took about 3h on my Computer. Indexing time heavily depends on the
-used hard disc.
+This will create a sub-folder with the name indexing in the current directory.
+Within this folder all the
+ - configurations (indexing/config)
+ - source files (indexing/resources)
+ - created files (indexing/destination)
+ - distribution files (indexing/distribution)
+will be located.
+
+(2) Download the Source File:
+
+Download the DBLP RDF dump from http://dblp.l3s.de/dblp.rdf.gz to
+"indexing/resources/rdfData" and rename it to "dblp.nt.gz" (because this file
+does not use rdf/xml but N-Triples).
+You can use the following two commands to accomplish this step
+
+curl -C - -O http://dblp.l3s.de/dblp.rdf.gz
+mv dblp.rdf.gz indexing/resources/rdfData/dblp.rdf.gz
+
+(3) Start the indexing by calling
+java -Xmx1024m -jar org.apache.stanbol.entityhub.indexing.dblp-*-jar-with-dependencies.jar index
+
+Note that calling the utility with the option -h will print the help.
+
+Indexing took about 3h on a normal hard disk and about 40min on a SSD (on a
+2010 MacBook Pro).

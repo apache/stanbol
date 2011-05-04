@@ -63,7 +63,7 @@ public class IndexingSourceInitialiser implements Runnable {
         private static final long serialVersionUID = -1L;
         private final IndexingComponent indexingSource;
         protected IndexingSourceEventObject(IndexingSourceInitialiser initialiser,IndexingComponent source){
-            super(source);
+            super(initialiser);
             indexingSource = source;
         }
         @Override

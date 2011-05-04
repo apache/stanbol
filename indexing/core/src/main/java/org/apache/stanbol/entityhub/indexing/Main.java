@@ -32,26 +32,53 @@ public class Main {
         CommandLineParser parser = new PosixParser();
         CommandLine line = parser.parse(options, args);
         args = line.getArgs();
-        if(line.hasOption('h')){
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp(
-                "java -Xmx{size} -jar org.apache.stanbol.indexing.core-*" +
-                "-jar-with-dependencies.jar [options] [configDir]",
-                "Indexing Commandline Utility: \n"+
-                "  size: Heap requirements depend on the dataset and the configuration.\n"+
-                "        1024m should be a reasonable default.",
-                options,
-                null);
-        System.exit(0);
+        if(line.hasOption('h') || args.length <= 0){
+            printHelp();
+            System.exit(0);
         }
         Indexer indexer;
         IndexerFactory factory = IndexerFactory.getInstance();
-        if(args.length > 0){
-            indexer = factory.create(args[0]);
-        } else {
-            indexer = factory.create();
+        String path = null;
+        if(args.length > 1){
+            path = args[1];
         }
-        indexer.index();
+        if("init".equalsIgnoreCase(args[0]) ||
+                "index".equalsIgnoreCase(args[0])){
+            if(path != null){
+                indexer = factory.create(path);
+            } else {
+                indexer = factory.create();
+            }
+            if(line.hasOption('c')){
+                int cunckSize = Integer.parseInt(line.getOptionValue('c'));
+                indexer.setChunkSize(cunckSize);
+            }
+            if("index".equalsIgnoreCase(args[0])){
+                indexer.index();
+            }
+        } else {
+            System.err.println("Unknown command "+args[0]+" (supported: init,index)\n\n");
+            printHelp();
+        }
+        System.exit(0);
+    }
+    /**
+     * 
+     */
+    private static void printHelp() {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp(
+            "java -Xmx{size} -jar org.apache.stanbol.indexing.core-*" +
+            "-jar-with-dependencies.jar [options] init|index [configDir]",
+            "Indexing Commandline Utility: \n"+
+            "  size:  Heap requirements depend on the dataset and the configuration.\n"+
+            "         1024m should be a reasonable default.\n" +
+            "  init:  Initialise the configuration with the defaults \n" +
+            "  index: Needed to start the indexing process\n" +
+            "  configDir: the path to the configuration directory (default:" +
+            " user.dir)",
+            options,
+            null);
     }
 
 }

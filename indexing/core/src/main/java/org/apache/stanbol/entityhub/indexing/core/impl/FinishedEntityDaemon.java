@@ -162,7 +162,7 @@ public class FinishedEntityDaemon extends IndexingDaemon<Representation,Object> 
         
         double itemSourceDurationAll = countedAll>0? sourceDurationAll/countedAll:-1;
         double itemProcessingDurationAll = countedAll>0? processDurationAll/countedAll:-1;
-        double itemStoreDurationAll = countedAll>0? sourceDurationAll/countedAll:-1;
+        double itemStoreDurationAll = countedAll>0? storeDurationAll/countedAll:-1;
         
         double itemSourceDurationMajor = countedMajor>0? sourceDurationMajor/countedMajor:-1;
         double itemProcessingDurationMajor = countedMajor>0? processDurationMajor/countedMajor:-1;

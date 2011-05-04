@@ -186,8 +186,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
             throw new IllegalArgumentException("Tha parsed Solr location MUST NOT be NULL nor empty!");
         }
         this.indexFieldConfiguration = indexFieldConfig;
-        this.solrYardConfig = new SolrYardConfig(yardName, parsedSolrLocation);
-        this.solrYardConfig.setMultiYardIndexLayout(Boolean.FALSE);
+        this.solrYardConfig = createSolrYardConfig(yardName, parsedSolrLocation);
         //init the manages solr directory relative to the working directory
         File managedDirectory = new File(
             System.getProperty("user.dir"),DEFAULT_SOLR_INDEX_DIRECTORY);
@@ -331,8 +330,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         } else {
             indexName = value.toString();
         }
-        this.solrYardConfig = new SolrYardConfig(yardName, indexName);
-        this.solrYardConfig.setMultiYardIndexLayout(Boolean.FALSE);
+        this.solrYardConfig = createSolrYardConfig(yardName, indexName);
         this.solrYardConfig.setName("SolrIndex for "+indexingConfig.getName());
         //set the Index Field Configuration
         this.indexFieldConfiguration = indexingConfig.getIndexFieldConfiguration();
@@ -404,6 +402,20 @@ public class SolrYardIndexingDestination implements IndexingDestination {
             solrYardConfig.setFieldBoosts(fieldBoosts);
         }
     }
+    /**
+     * Creates a {@link SolrYardConfig} and initialised it to used single Yard
+     * Layout, lazy commits and a commitWithin duration of an minute
+     * @param yardName the name of the yard
+     * @param indexName the name of the index
+     */
+    private SolrYardConfig createSolrYardConfig(String yardName, String indexName) {
+        SolrYardConfig solrYardConfig = new SolrYardConfig(yardName, indexName);
+        solrYardConfig.setMultiYardIndexLayout(Boolean.FALSE);
+        //use the lazy commit feature
+        solrYardConfig.setImmediateCommit(Boolean.FALSE);
+        solrYardConfig.setCommitWithinDuration(1000*60);//one minute
+        return solrYardConfig;
+    }
 
     @Override
     public boolean needsInitialisation() {
@@ -457,6 +469,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         } catch (YardException e) {
             log.error("Unable to store FieldMapperConfiguration to the Store!",e);
         }
+        solrYard.close();
         //zip the index and copy it over to distribution
         if(solrArchive != null){
             //we need to get the length of the parent to calc the entry names for
@@ -485,7 +498,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
                 IOUtils.closeQuietly(out);
             }catch (IOException e) {
                 log.error("Error while creating Solr Archive "+solrArchive.getAbsolutePath()+
-                    "! The archive will not be created!");
+                    "! The archive will not be created!",e);
                 log.error("As a Workaround you can manually create the Solr Archive " +
                 		"by creating a ZIP archive with the contents of the Folder " +
                 		solrIndexLocation+"!");
@@ -503,7 +516,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
             } catch (IOException e) {
                 log.error("Error while creating Solr Archive Reference "+
                     solrArchiveRef.getAbsolutePath()+
-                    "! The file will not be created!");
+                    "! The file will not be created!",e);
                 log.error("As a Workaround you can manually create this text file " +
                 		"and adding \"Index-Archive="+solrArchive.getName()+"\"!");
             }
