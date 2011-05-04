@@ -1,5 +1,8 @@
 package org.apache.stanbol.rules.web.resources;
 
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+
 import java.io.InputStream;
 
 import javax.servlet.ServletContext;
@@ -10,6 +13,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -31,6 +35,8 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.ImplicitProduces;
 
@@ -44,6 +50,8 @@ import com.sun.jersey.api.view.ImplicitProduces;
 @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
 public class RefactorResource extends BaseStanbolResource {
 
+    private Logger log = LoggerFactory.getLogger(getClass());
+
     protected ONManager onManager;
     protected Refactorer semionRefactorer;
     // protected SemionManager semionManager;
@@ -51,12 +59,58 @@ public class RefactorResource extends BaseStanbolResource {
 
     public RefactorResource(@Context ServletContext servletContext) {
         semionRefactorer = (Refactorer) (servletContext.getAttribute(Refactorer.class.getName()));
-
         onManager = (ONManager) (servletContext.getAttribute(ONManager.class.getName()));
-
         tcManager = (TcManager) (servletContext.getAttribute(TcManager.class.getName()));
         if (semionRefactorer == null) {
             throw new IllegalStateException("SemionRefactorer missing in ServletContext");
+        }
+
+    }
+
+    /**
+     * The apply mode allows the client to compose a recipe, by mean of string containg the rules, and apply
+     * it "on the fly" to the graph in input.
+     * 
+     * @param recipe
+     *            String
+     * @param input
+     *            InputStream
+     * @return a Response containing the transformed graph
+     */
+    @POST
+    @Path("/apply")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(value = {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
+                       KRFormat.OWL_XML, KRFormat.RDF_JSON})
+    public Response applyRefactoring(@FormParam("recipe") String recipe, @FormParam("input") InputStream input) {
+
+        // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
+
+        KB kb = RuleParserImpl.parse(recipe);
+
+        if (kb == null) return Response.status(NOT_FOUND).build();
+
+        RuleList ruleList = kb.getkReSRuleList();
+        if (ruleList == null) return Response.status(NOT_FOUND).build();
+        Recipe actualRecipe = new RecipeImpl(null, null, ruleList);
+
+        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+        OWLOntology inputOntology;
+        try {
+            inputOntology = manager.loadOntologyFromOntologyDocument(input);
+            OWLOntology outputOntology;
+            try {
+                outputOntology = semionRefactorer.ontologyRefactoring(inputOntology, actualRecipe);
+            } catch (RefactoringException e) {
+                // refactoring exceptions are re-thrown
+                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+            } catch (NoSuchRecipeException e) {
+                // missing recipes result in a status 404
+                return Response.status(NOT_FOUND).build();
+            }
+            return Response.ok(outputOntology).build();
+        } catch (OWLOntologyCreationException e) {
+            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
 
     }
@@ -85,85 +139,16 @@ public class RefactorResource extends BaseStanbolResource {
             try {
                 outputOntology = semionRefactorer.ontologyRefactoring(inputOntology, recipeIRI);
             } catch (RefactoringException e) {
-                e.printStackTrace();
-                return Response.status(500).build();
+                // refactoring exceptions are re-thrown
+                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             } catch (NoSuchRecipeException e) {
-                return Response.status(204).build();
+                // missing recipes result in a status 404
+                return Response.status(NOT_FOUND).build();
             }
-
             return Response.ok(outputOntology).build();
         } catch (OWLOntologyCreationException e) {
-            e.printStackTrace();
-            return Response.status(404).build();
+            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
-
-    }
-    
-    
-    /**
-     * The apply mode allows the client to compose a recipe, by mean of string containg the rules, and
-     * apply it "on the fly" to the graph in input.
-     * 
-     * @param recipe String
-     * @param input InputStream
-     * @return a Response containing the transformed graph
-     */
-    @POST
-    @Path("/apply")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(value = {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
-                       KRFormat.OWL_XML, KRFormat.RDF_JSON})
-    public Response applyRefactoring(@FormParam("recipe") String recipe,
-                                       @FormParam("input") InputStream input) {
-
-        // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
-
-
-    	KB kb = RuleParserImpl.parse(recipe);
-    	
-    	if(kb != null){
-    		
-    		RuleList ruleList = kb.getkReSRuleList();
-    		if(ruleList != null){
-		    	Recipe actualRecipe = new RecipeImpl(null, null, ruleList);
-		    	
-		    	
-		        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		        OWLOntology inputOntology;
-		        try {
-		            inputOntology = manager.loadOntologyFromOntologyDocument(input);
-		
-		            OWLOntology outputOntology;
-		            try {
-		                outputOntology = semionRefactorer.ontologyRefactoring(inputOntology, actualRecipe);
-		            } catch (RefactoringException e) {
-		                e.printStackTrace();
-		                return Response.status(500).build();
-		            } catch (NoSuchRecipeException e) {
-		                return Response.status(204).build();
-		            }
-		
-		            return Response.ok(outputOntology).build();
-		        } catch (OWLOntologyCreationException e) {
-		            e.printStackTrace();
-		            return Response.status(404).build();
-		        }
-    		}
-    		else{
-    			/**
-    			 * TODO
-    			 * ADD A RESPONSE FOR THIS CASE
-    			 */
-    			return Response.status(404).build();
-    		}
-    	}
-    	else{
-			/**
-			 * TODO
-			 * ADD A RESPONSE FOR THIS CASE
-			 */
-    		return Response.status(404).build();
-		}
 
     }
 
@@ -172,9 +157,9 @@ public class RefactorResource extends BaseStanbolResource {
                                                       @QueryParam("input-graph") String inputGraph,
                                                       @QueryParam("output-graph") String outputGraph) {
 
-        System.out.println("recipe: " + recipe);
-        System.out.println("input-graph: " + inputGraph);
-        System.out.println("output-graph: " + outputGraph);
+        log.info("recipe: {}", recipe);
+        log.info("input-graph: {}", inputGraph);
+        log.info("output-graph: {}", outputGraph);
         IRI recipeIRI = IRI.create(recipe);
         IRI inputGraphIRI = IRI.create(inputGraph);
         IRI outputGraphIRI = IRI.create(outputGraph);
@@ -185,9 +170,11 @@ public class RefactorResource extends BaseStanbolResource {
             semionRefactorer.ontologyRefactoring(outputGraphIRI, inputGraphIRI, recipeIRI);
             return Response.ok().build();
         } catch (RefactoringException e) {
-            return Response.status(500).build();
+            // refactoring exceptions are re-thrown
+            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         } catch (NoSuchRecipeException e) {
-            return Response.status(204).build();
+            // missing recipes result in a status 404
+            return Response.status(NOT_FOUND).build();
         }
 
     }

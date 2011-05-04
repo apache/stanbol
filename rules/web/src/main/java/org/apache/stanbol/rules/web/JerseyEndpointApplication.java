@@ -8,7 +8,7 @@ import javax.ws.rs.core.Application;
 import org.apache.stanbol.commons.web.base.writers.GraphWriter;
 import org.apache.stanbol.commons.web.base.writers.ResultSetWriter;
 import org.apache.stanbol.owl.web.OWLOntologyWriter;
-import org.apache.stanbol.rules.web.resources.RefactorerResource;
+import org.apache.stanbol.rules.web.resources.RefactorResource;
 import org.apache.stanbol.rules.web.resources.RestRecipe;
 import org.apache.stanbol.rules.web.resources.RestRule;
 import org.apache.stanbol.rules.web.resources.RuleStoreResource;
@@ -35,7 +35,7 @@ public class JerseyEndpointApplication extends Application {
         classes.add(RuleStoreResource.class);
         classes.add(RestRecipe.class);
         classes.add(RestRule.class);
-        classes.add(RefactorerResource.class);
+        classes.add(RefactorResource.class);
         //classes.add(OntologyStorageResource.class);
         
         // message body writers
