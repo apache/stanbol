@@ -16,39 +16,34 @@ import java.util.TreeMap;
 public class JsonLd {
 
     // Map Namespace -> Prefix
-    private Map<String, String> namespacePrefixMap = new HashMap<String, String>();
+    private Map<String,String> namespacePrefixMap = new HashMap<String,String>();
 
     // Map Subject -> Resource
-    private Map<String, JsonLdResource> resourceMap = new TreeMap<String, JsonLdResource>(new JsonComparator());
+    private Map<String,JsonLdResource> resourceMap = new TreeMap<String,JsonLdResource>(new JsonComparator());
 
     /**
-     * Flag to control whether the namespace prefix map should be used
-     * to shorten IRIs to prefix notation during serialization. Default
-     * value is <code>true</code>.<br />
+     * Flag to control whether the namespace prefix map should be used to shorten IRIs to prefix notation
+     * during serialization. Default value is <code>true</code>.<br />
      * <br />
-     * <b>Note:</b> If you already put values into this JSON-LD instance with prefix
-     * notation, you should set this to <code>false</code> before starting
-     * the serialization.
+     * <b>Note:</b> If you already put values into this JSON-LD instance with prefix notation, you should set
+     * this to <code>false</code> before starting the serialization.
      */
     private boolean applyNamespaces = true;
 
     /**
-     * Flag to control whether the serialized JSON-LD output will use
-     * joint or disjoint graphs for subjects and namespaces.  Default
-     * value is <code>true</code>.
+     * Flag to control whether the serialized JSON-LD output will use joint or disjoint graphs for subjects
+     * and namespaces. Default value is <code>true</code>.
      */
     private boolean useJointGraphs = true;
-    
-    /**
-     * Flag to control whether type coercion should be applied. Default
-     * value is <code>true</code>.
-     */
-    private boolean useTypeCoercion = true;
 
     /**
-     * Add the given resource to this JsonLd object using the resourceId
-     * as key.
-     *
+     * Flag to control whether type coercion should be applied. Default value is <code>true</code>.
+     */
+    private boolean useTypeCoercion = false;
+
+    /**
+     * Add the given resource to this JsonLd object using the resourceId as key.
+     * 
      * @param resourceId
      * @param resource
      */
@@ -59,11 +54,10 @@ public class JsonLd {
     @Override
     public String toString() {
         if (useJointGraphs) {
-            Map<String, Object> json = createJointGraph();
+            Map<String,Object> json = createJointGraph();
 
             return JsonSerializer.toString(json);
-        }
-        else {
+        } else {
             List<Object> json = createDisjointGraph();
 
             return JsonSerializer.toString(json);
@@ -72,11 +66,10 @@ public class JsonLd {
 
     public String toString(int indent) {
         if (useJointGraphs) {
-            Map<String, Object> json = createJointGraph();
+            Map<String,Object> json = createJointGraph();
 
             return JsonSerializer.toString(json, indent);
-        }
-        else {
+        } else {
             List<Object> json = createDisjointGraph();
 
             return JsonSerializer.toString(json, indent);
@@ -88,18 +81,20 @@ public class JsonLd {
         if (!resourceMap.isEmpty()) {
 
             for (String subject : resourceMap.keySet()) {
-                Map<String, Object> subjectObject = new TreeMap<String, Object>(new JsonComparator());
+                Map<String,Object> subjectObject = new TreeMap<String,Object>(new JsonComparator());
+                JsonLdResource resource = resourceMap.get(subject);
 
                 // put the namespaces
-                if (!namespacePrefixMap.isEmpty()) {
-                    Map<String, Object> nsObject = new TreeMap<String, Object>(new JsonComparator());
-                    for (String ns : namespacePrefixMap.keySet()) {
-                        nsObject.put(namespacePrefixMap.get(ns), ns);
+                if ((this.applyNamespaces && !this.namespacePrefixMap.isEmpty()) || this.useTypeCoercion) {
+                    Map<String,Object> nsObject = new TreeMap<String,Object>(new JsonComparator());
+                    for (String ns : this.namespacePrefixMap.keySet()) {
+                        nsObject.put(this.namespacePrefixMap.get(ns), ns);
+                    }
+                    if (this.useTypeCoercion) {
+                        putCoercionTypes(nsObject, resource.getCoercionMap());
                     }
                     subjectObject.put("#", nsObject);
                 }
-
-                JsonLdResource resource = resourceMap.get(subject);
 
                 // put subject
                 if (resource.getSubject() != null) {
@@ -122,14 +117,16 @@ public class JsonLd {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, Object> createJointGraph() {
-        Map<String, Object> json = new TreeMap<String, Object>(new JsonComparator());
+    private Map<String,Object> createJointGraph() {
+        Map<String,Object> json = new TreeMap<String,Object>(new JsonComparator());
+        Map<String,String> coercionMap = new TreeMap<String,String>(new JsonComparator());
+
         if (!resourceMap.isEmpty()) {
             List<Object> subjects = new ArrayList<Object>();
 
             for (String subject : resourceMap.keySet()) {
                 // put subject
-                Map<String, Object> subjectObject = new TreeMap<String, Object>(new JsonComparator());
+                Map<String,Object> subjectObject = new TreeMap<String,Object>(new JsonComparator());
 
                 JsonLdResource resource = resourceMap.get(subject);
 
@@ -141,6 +138,10 @@ public class JsonLd {
                 // put types
                 putTypes(subjectObject, resource);
 
+                if (this.useTypeCoercion) {
+                    coercionMap.putAll(resource.getCoercionMap());
+                }
+
                 // put properties = objects
                 putProperties(subjectObject, resource);
 
@@ -151,7 +152,7 @@ public class JsonLd {
             // put subjects
             if (!subjects.isEmpty()) {
                 if (subjects.size() == 1) {
-                    json = (Map<String, Object>) subjects.get(0);
+                    json = (Map<String,Object>) subjects.get(0);
                 } else {
                     json.put("@", subjects);
                 }
@@ -159,10 +160,16 @@ public class JsonLd {
         }
 
         // put the namespaces
-        if (!namespacePrefixMap.isEmpty()) {
-            Map<String, Object> nsObject = new TreeMap<String, Object>(new JsonComparator());
+        if ((this.applyNamespaces && !this.namespacePrefixMap.isEmpty())
+            || (this.useTypeCoercion && !coercionMap.isEmpty())) {
+
+            Map<String,Object> nsObject = new TreeMap<String,Object>(new JsonComparator());
             for (String ns : namespacePrefixMap.keySet()) {
                 nsObject.put(namespacePrefixMap.get(ns), ns);
+            }
+
+            if (this.useTypeCoercion && !coercionMap.isEmpty()) {
+                putCoercionTypes(nsObject, coercionMap);
             }
             json.put("#", nsObject);
         }
@@ -170,7 +177,7 @@ public class JsonLd {
         return json;
     }
 
-    private void putTypes(Map<String, Object> subjectObject, JsonLdResource resource) {
+    private void putTypes(Map<String,Object> subjectObject, JsonLdResource resource) {
         if (!resource.getTypes().isEmpty()) {
             List<String> types = new ArrayList<String>();
             for (String type : resource.getTypes()) {
@@ -178,8 +185,7 @@ public class JsonLd {
             }
             if (types.size() == 1) {
                 subjectObject.put("a", types.get(0));
-            }
-            else {
+            } else {
                 Collections.sort(types, new Comparator<String>() {
 
                     @Override
@@ -192,35 +198,67 @@ public class JsonLd {
             }
         }
     }
+    
+    private void putCoercionTypes(Map<String,Object> jsonObject, Map<String,String> coercionMap) {
+        if (!coercionMap.isEmpty()) {
+            if (this.applyNamespaces) {
+                Map<String,String> nsCoercionMap = new TreeMap<String,String>(new JsonComparator()); 
+                for (String property : coercionMap.keySet()) {
+                    nsCoercionMap.put(property, applyNamespace(coercionMap.get(property)));
+                }
+                jsonObject.put("#types", nsCoercionMap);
+            }
+            else {
+                jsonObject.put("#types", coercionMap);
+            }
+        }
+    }
 
-    private void putProperties(Map<String, Object> jsonObject, JsonLdResource resource) {
+    private void putProperties(Map<String,Object> jsonObject, JsonLdResource resource) {
         for (String property : resource.getPropertyMap().keySet()) {
             Object value = resource.getPropertyMap().get(property);
             if (value instanceof String) {
-                value = applyNamespace((String) value);
+                String strValue = (String) value;
+                if (!this.useTypeCoercion) {
+                    String type = resource.getCoercionTypeOf(property);
+                    if (type != null) {
+                        strValue = formatWithType(strValue, type);
+                    }
+                }
+                value = applyNamespace(strValue);
                 jsonObject.put(applyNamespace(property), value);
-            }
-            else if (value instanceof String[]) {
+            } else if (value instanceof String[]) {
                 String[] stringArray = (String[]) value;
                 List<String> valueList = new ArrayList<String>();
                 for (String uri : stringArray) {
-                    valueList.add(applyNamespace(uri));
+                    valueList.add(uri);
                 }
                 List<Object> jsonArray = new ArrayList<Object>(valueList);
                 jsonObject.put(applyNamespace(property), jsonArray);
-            }
-            else if (value instanceof Object[]) {
+            } else if (value instanceof Object[]) {
                 Object[] objectArray = (Object[]) value;
                 List<Object> jsonArray = new ArrayList<Object>();
                 for (Object object : objectArray) {
                     jsonArray.add(object);
                 }
                 jsonObject.put(applyNamespace(property), jsonArray);
-            }
-            else {
-                jsonObject.put(applyNamespace(property), value);
+            } else {
+                if (!this.useTypeCoercion) {
+                    String type = resource.getCoercionTypeOf(property);
+                    if (type != null) {
+                        String strValue = formatWithType(value.toString(), type);
+                        jsonObject.put(applyNamespace(property), applyNamespace(strValue));
+                    }
+                } else {
+                    jsonObject.put(applyNamespace(property), value);
+                }
             }
         }
+    }
+
+    private String formatWithType(String strValue, String type) {
+        strValue = "\"" + strValue + "\"^^<" + type + ">";
+        return strValue;
     }
 
     private String applyNamespace(String uri) {
@@ -242,30 +280,30 @@ public class JsonLd {
 
     /**
      * Get the known namespace to prefix mapping.
-     *
+     * 
      * @return A {@link Map} from namespace String to prefix String.
      */
-    public Map<String, String> getNamespacePrefixMap() {
+    public Map<String,String> getNamespacePrefixMap() {
         return namespacePrefixMap;
     }
 
     /**
      * Sets the known namespaces for the serializer.
-     *
+     * 
      * @param namespacePrefixMap
-     *            A {@link Map} from namespace String to prefix
-     *            String.
+     *            A {@link Map} from namespace String to prefix String.
      */
-    public void setNamespacePrefixMap(Map<String, String> namespacePrefixMap) {
+    public void setNamespacePrefixMap(Map<String,String> namespacePrefixMap) {
         this.namespacePrefixMap = namespacePrefixMap;
     }
 
     /**
-     * Adds a new namespace and its prefix to the list of used namespaces for this
-     * JSON-LD instance.
-     *
-     * @param namespace A namespace IRI.
-     * @param prefix A prefix to use and identify this namespace in serialized JSON-LD.
+     * Adds a new namespace and its prefix to the list of used namespaces for this JSON-LD instance.
+     * 
+     * @param namespace
+     *            A namespace IRI.
+     * @param prefix
+     *            A prefix to use and identify this namespace in serialized JSON-LD.
      */
     public void addNamespacePrefix(String namespace, String prefix) {
         namespacePrefixMap.put(namespace, prefix);
@@ -273,7 +311,7 @@ public class JsonLd {
 
     /**
      * Determine whether currently joint or disjoint graphs are serialized with this JSON-LD instance.
-     *
+     * 
      * @return <code>True</code> if joint graphs are used, <code>False</code>otherwise.
      */
     public boolean isUseJointGraphs() {
@@ -282,7 +320,7 @@ public class JsonLd {
 
     /**
      * Set to <code>true</code> if you want to use joint graphs (default) or <code>false</code> otherwise.
-     *
+     * 
      * @param useJointGraphs
      */
     public void setUseJointGraphs(boolean useJointGraphs) {
@@ -290,14 +328,12 @@ public class JsonLd {
     }
 
     /**
-     * Flag to control whether the namespace prefix map should be used
-     * to shorten IRIs to prefix notation during serialization. Default
-     * value is <code>true</code>.
+     * Flag to control whether the namespace prefix map should be used to shorten IRIs to prefix notation
+     * during serialization. Default value is <code>true</code>.
      * <p>
-     * If you already put values into this JSON-LD instance with prefix
-     * notation, you should set this to <code>false</code> before starting
-     * the serialization.
-     *
+     * If you already put values into this JSON-LD instance with prefix notation, you should set this to
+     * <code>false</code> before starting the serialization.
+     * 
      * @return <code>True</code> if namespaces are applied during serialization, <code>false</code> otherwise.
      */
     public boolean isApplyNamespaces() {
@@ -305,12 +341,10 @@ public class JsonLd {
     }
 
     /**
-     * Control whether namespaces from the namespace prefix map are
-     * applied to URLs during serialization.
+     * Control whether namespaces from the namespace prefix map are applied to URLs during serialization.
      * <p>
-     * Set this to <code>false</code> if you already have shortened IRIs
-     * with prefixes.
-     *
+     * Set this to <code>false</code> if you already have shortened IRIs with prefixes.
+     * 
      * @param applyNamespaces
      */
     public void setApplyNamespaces(boolean applyNamespaces) {
@@ -327,8 +361,8 @@ public class JsonLd {
     }
 
     /**
-     * Control whether type coercion should be applied. Set this to <code>false</code>
-     * if you don't want to use type coercion in the output.
+     * Control whether type coercion should be applied. Set this to <code>false</code> if you don't want to
+     * use type coercion in the output.
      * 
      * @param useTypeCoercion
      */

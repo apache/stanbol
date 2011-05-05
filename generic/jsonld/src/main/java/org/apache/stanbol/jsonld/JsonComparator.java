@@ -35,6 +35,10 @@ public class JsonComparator implements Comparator<Object> {
             value = -1;
         } else if (arg1.equals("#vocab")) {
             value = 1;
+        } else if (arg0.equals("#types")) {
+            value = 1;
+        } else if (arg1.equals("#types")) {
+            value = -1;
         } else {
             value = String.valueOf(arg0).toLowerCase().compareTo(String.valueOf(arg1).toLowerCase());
         }

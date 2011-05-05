@@ -45,7 +45,7 @@ public class JsonSerializer {
 
         return sb.toString();
     }
-
+    
     private static void appendJsonMap(Map<String, Object> jsonMap, StringBuffer sb, int indent, int level) {
         sb.append('{');
         level = increaseIndentationLevel(sb, indent, level);
@@ -176,10 +176,20 @@ public class JsonSerializer {
         }
     }
 
+    /**
+     * During the serialization there are added ',' and line breaks '\n' by
+     * default that need to be deleted when not needed, e.g. at the end
+     * of a list.
+     * 
+     * @param sb
+     * @param indent
+     */
     private static void removeOddChars(StringBuffer sb, int indent) {
-        sb.deleteCharAt(sb.length()-1);
-        if (indent > 0) {
+        if (sb.length() > 2) {
             sb.deleteCharAt(sb.length()-1);
+            if (indent > 0) {
+                sb.deleteCharAt(sb.length()-1);
+            }
         }
     }
 }

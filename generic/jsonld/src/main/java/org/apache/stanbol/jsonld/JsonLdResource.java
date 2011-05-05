@@ -13,6 +13,7 @@ public class JsonLdResource {
 
     private String subject;
     private List<String> types = new ArrayList<String>();
+    private Map<String, String> coercionMap = new HashMap<String, String>();
     private Map<String, Object> propertyMap = new HashMap<String, Object>();
 
     public String getSubject() {
@@ -29,6 +30,18 @@ public class JsonLdResource {
 
     public void addAllTypes(List<String> types) {
         this.types.addAll(types);
+    }
+    
+    public void putCoercionType(String property, String type) {
+        this.coercionMap.put(property, type);
+    }
+    
+    public String getCoercionTypeOf(String property) {
+        return this.coercionMap.get(property);
+    }
+    
+    public Map<String, String> getCoercionMap() {
+        return this.coercionMap;
     }
 
     public List<String> getTypes() {
