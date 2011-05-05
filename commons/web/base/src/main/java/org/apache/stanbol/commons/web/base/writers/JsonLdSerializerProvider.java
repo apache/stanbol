@@ -14,6 +14,7 @@ import org.apache.clerezza.rdf.core.BNode;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
@@ -49,6 +50,7 @@ public class JsonLdSerializerProvider implements SerializingProvider {
     private Map<String, String> namespacePrefixMap = new HashMap<String, String>();
 
     private int indentation = 2;
+    private boolean useTypeCoercion = false;
 
     @Override
     public void serialize(OutputStream serializedGraph, TripleCollection tc, String formatIdentifier) {
@@ -79,8 +81,15 @@ public class JsonLdSerializerProvider implements SerializingProvider {
                     }
 
                     String property = currentTriple.getPredicate().getUnicodeString();
-                    String value = currentTriple.getObject().toString();
-                    resource.putProperty(property, value);
+                    String strValue = currentTriple.getObject().toString();
+                    if (currentTriple.getObject() instanceof TypedLiteral) {
+                        TypedLiteral typedObject = (TypedLiteral) currentTriple.getObject();
+                        String type = typedObject.getDataType().getUnicodeString();
+                        strValue = typedObject.getLexicalForm();
+                        resource.putCoercionType(property, type);
+                    }
+                    
+                    resource.putProperty(property, convertValueType(strValue));
                 }
             }
 
@@ -89,6 +98,7 @@ public class JsonLdSerializerProvider implements SerializingProvider {
 
         try {
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(serializedGraph));
+            jsonLd.setUseTypeCoercion(this.useTypeCoercion);
             writer.write(jsonLd.toString(this.indentation));
             writer.flush();
         } catch (IOException ioe) {
@@ -96,7 +106,7 @@ public class JsonLdSerializerProvider implements SerializingProvider {
             throw new RuntimeException(ioe.getMessage());
         }
     }
-
+    
     private Map<NonLiteral, String> createSubjectsMap(TripleCollection tc) {
         Map<NonLiteral, String> subjects = new HashMap<NonLiteral, String>();
         int bNodeCounter = 0;
@@ -113,6 +123,21 @@ public class JsonLdSerializerProvider implements SerializingProvider {
         }
         return subjects;
     }
+    
+    private Object convertValueType(String strValue) {
+        // check if value can be interpreted as integer
+        try {
+            return Integer.valueOf(strValue);
+        }
+        catch (Throwable t) {};
+        
+        // check if value can be interpreted as boolean
+        if (strValue.equalsIgnoreCase("true") || strValue.equalsIgnoreCase("false")) {
+            return Boolean.valueOf(strValue);
+        }
+        
+        return strValue;
+    }    
 
     /**
      * Get the known namespace to prefix mapping.
@@ -151,4 +176,24 @@ public class JsonLdSerializerProvider implements SerializingProvider {
     public void setIndentation(int indentation) {
         this.indentation = indentation;
     }
+
+    /**
+     * Check if JSON-LD type coercion is applied on serialization.
+     * 
+     * @return
+     */
+    public boolean isUseTypeCoercion() {
+        return useTypeCoercion;
+    }
+
+    /**
+     * If JSON-LD type coercion should be applied set this
+     * to <code>true</code>.
+     * 
+     * @param useTypeCoercion
+     */
+    public void setUseTypeCoercion(boolean useTypeCoercion) {
+        this.useTypeCoercion = useTypeCoercion;
+    }
+    
 }
