@@ -262,10 +262,6 @@ public class JsonLdTest {
 
         String actual = jsonLd.toString();
         String expected = "{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"},\"@\":\"<http:\\/\\/example.org\\/people#joebob>\",\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/nick\":[\"\\\"stu\\\"^^http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string\",\"\\\"groknar\\\"^^http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string\",\"\\\"radface\\\"^^http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string\"]}";
-        
-        toConsole(actual);
-        toConsole(expected);
-        
         assertEquals(expected, actual);
 
         String actualIndent = jsonLd.toString(4);

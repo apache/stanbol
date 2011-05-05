@@ -70,7 +70,6 @@ public class JsonLdSerializerProviderTest {
         
         String expected = "{\n\n}";
         String result = serializedGraph.toString();
-        toConsole(result);
         Assert.assertEquals(expected, result);
     }
     
