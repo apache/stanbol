@@ -85,7 +85,7 @@ public class JsonLd {
                 JsonLdResource resource = resourceMap.get(subject);
 
                 // put the namespaces
-                if ((this.applyNamespaces && !this.namespacePrefixMap.isEmpty()) || this.useTypeCoercion) {
+                if (!this.namespacePrefixMap.isEmpty() || this.useTypeCoercion) {
                     Map<String,Object> nsObject = new TreeMap<String,Object>(new JsonComparator());
                     for (String ns : this.namespacePrefixMap.keySet()) {
                         nsObject.put(this.namespacePrefixMap.get(ns), ns);
@@ -160,8 +160,7 @@ public class JsonLd {
         }
 
         // put the namespaces
-        if ((this.applyNamespaces && !this.namespacePrefixMap.isEmpty())
-            || (this.useTypeCoercion && !coercionMap.isEmpty())) {
+        if (!this.namespacePrefixMap.isEmpty() || (this.useTypeCoercion && !coercionMap.isEmpty())) {
 
             Map<String,Object> nsObject = new TreeMap<String,Object>(new JsonComparator());
             for (String ns : namespacePrefixMap.keySet()) {
@@ -231,7 +230,7 @@ public class JsonLd {
                 String[] stringArray = (String[]) value;
                 List<String> valueList = new ArrayList<String>();
                 for (String uri : stringArray) {
-                    valueList.add(uri);
+                    valueList.add(applyNamespace(uri));
                 }
                 List<Object> jsonArray = new ArrayList<Object>(valueList);
                 jsonObject.put(applyNamespace(property), jsonArray);
@@ -248,6 +247,9 @@ public class JsonLd {
                     if (type != null) {
                         String strValue = formatWithType(value.toString(), type);
                         jsonObject.put(applyNamespace(property), applyNamespace(strValue));
+                    }
+                    else {
+                        jsonObject.put(applyNamespace(property), value);
                     }
                 } else {
                     jsonObject.put(applyNamespace(property), value);
