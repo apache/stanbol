@@ -11,8 +11,12 @@ import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DObjectType
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DProperty;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccess;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DObjectImp implements DObject {
+
+    private static final Logger log = LoggerFactory.getLogger(DObjectImp.class);
 
     private CMSObject instance;
     private DObjectAdapter factory;
@@ -50,53 +54,112 @@ public class DObjectImp implements DObject {
 
     @Override
     public List<DObject> getChildren() throws RepositoryAccessException {
-        if (children != null) {
-            return children;
+        if (children == null) {
+            switch (factory.getMode()) {
+                case ONLINE:
+                    children = getChildrenOnline();
+                    break;
+                case TOLERATED_OFFLINE:
+                    children = getChildrenTOffline();
+                    break;
+                case STRICT_OFFLINE:
+                    children = getChildrenSOffline();
+                    break;
+            }
         }
 
-        List<CMSObject> nodes = access.getChildren(instance, factory.getSession());
-
-        children = new ArrayList<DObject>(nodes.size());
-        for (CMSObject node : nodes) {
-            children.add(this.factory.wrapAsDObject(node));
-        }
         return children;
+
+    }
+
+    private List<DObject> getChildrenOnline() throws RepositoryAccessException {
+        List<CMSObject> nodes = access.getChildren(instance, factory.getSession());
+        return wrapAsDObject(nodes);
+    }
+
+    private List<DObject> getChildrenTOffline() {
+        try {
+            return getChildrenOnline();
+        } catch (RepositoryAccessException e) {
+            log.debug("Error accesing repository at fetching children of {}. Tyring offline",
+                instance.getPath());
+            return getChildrenSOffline();
+        }
+    }
+
+    private List<DObject> getChildrenSOffline() {
+        return wrapAsDObject(instance.getChildren());
     }
 
     @Override
     public DObject getParent() throws RepositoryAccessException {
-        if (parent != null) {
-            return parent;
+        if (parent == null) {
+            switch (factory.getMode()) {
+                case ONLINE:
+                    parent = factory.wrapAsDObject(access.getParentByNode(instance, factory.getSession()));
+                    break;
+                case TOLERATED_OFFLINE:
+                    try {
+                        parent = factory
+                                .wrapAsDObject(access.getParentByNode(instance, factory.getSession()));
+                    } catch (RepositoryAccessException e) {
+                        log.debug("Can not access repository at fetching parent of {}.", instance.getPath());
+                    }
+                    break;
+                case STRICT_OFFLINE:
+                    break;
+            }
         }
-
-        parent = factory.wrapAsDObject(access.getParentByNode(instance, factory.getSession()));
 
         return parent;
     }
 
     @Override
     public DObjectType getObjectType() throws RepositoryAccessException {
-        if (objectType != null) {
-            return this.objectType;
+        if (objectType == null) {
+            String typeRef = instance.getObjectTypeRef();
+            switch (factory.getMode()) {
+                case ONLINE:
+                    objectType = factory.wrapAsDObjectType(access.getObjectTypeDefinition(typeRef,
+                        factory.getSession()));
+                    break;
+                case TOLERATED_OFFLINE:
+                    try {
+                        objectType = factory.wrapAsDObjectType(access.getObjectTypeDefinition(typeRef,
+                            factory.getSession()));
+                    } catch (RepositoryAccessException e) {
+                        log.debug("Can not access repository at fetching object type of {}.",
+                            instance.getPath());
+                    }
+                    break;
+                case STRICT_OFFLINE:
+                    break;
+            }
         }
 
-        String typeRef = instance.getObjectTypeRef();
-        objectType = factory.wrapAsDObjectType(access.getObjectTypeDefinition(typeRef, factory.getSession()));
         return objectType;
     }
 
     @Override
     public List<DProperty> getProperties() throws RepositoryAccessException {
-        if (properties != null) {
-            return properties;
-        }
-
-        List<Property> props = access.getProperties(instance, factory.getSession());
-
-        properties = new ArrayList<DProperty>(props.size());
-
-        for (Property prop : props) {
-            properties.add(factory.wrapAsDProperty(prop));
+        if (properties == null) {
+            switch (factory.getMode()) {
+                case ONLINE:
+                    properties = getPropertiesOnline();
+                    break;
+                case TOLERATED_OFFLINE:
+                    try {
+                        properties = getPropertiesOnline();
+                    } catch (RepositoryAccessException e) {
+                        log.debug("Can not access repository at fetching properties of {}.",
+                            instance.getPath());
+                        properties = wrapAsDProperty(instance.getProperty());
+                    }
+                    break;
+                case STRICT_OFFLINE:
+                    properties = wrapAsDProperty(instance.getProperty());
+                    break;
+            }
         }
         return properties;
     }
@@ -105,5 +168,27 @@ public class DObjectImp implements DObject {
     public CMSObject getInstance() {
         return this.instance;
     }
+    
+    private List<DProperty> getPropertiesOnline() throws RepositoryAccessException {
+        List<Property> props = access.getProperties(instance, factory.getSession());
+        return wrapAsDProperty(props);
+    }
 
+
+    private List<DObject> wrapAsDObject(List<CMSObject> cmsObjects) {
+        List<DObject> wrappeds = new ArrayList<DObject>(cmsObjects.size());
+        for (CMSObject node : cmsObjects) {
+            wrappeds.add(this.factory.wrapAsDObject(node));
+        }
+        return wrappeds;
+    }
+
+    private List<DProperty> wrapAsDProperty(List<Property> props) {
+        List<DProperty> properties = new ArrayList<DProperty>(props.size());
+
+        for (Property prop : props) {
+            properties.add(factory.wrapAsDProperty(prop));
+        }
+        return properties;
+    }
 }

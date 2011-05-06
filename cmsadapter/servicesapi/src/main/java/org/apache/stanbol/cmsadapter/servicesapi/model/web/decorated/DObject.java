@@ -19,10 +19,18 @@ public interface DObject {
 	
 	List<DObject> getChildren() throws RepositoryAccessException;
 	
-	//Make list?
+	/**
+	 * Fetches parent of the item from CMS repository.
+	 * @return parent of the object, null in <b>OFFLINE</b> mode. 
+	 * @throws RepositoryAccessException If repository can not be accessed in <b>ONLINE</b> mode.
+	 */
 	DObject getParent() throws RepositoryAccessException;
 	
-	//Make list?
+	/**
+	 * Fetches object type of the item from CMS repository.
+	 * @return Object type of the object, null in <b>OFFLINE</b> mode. 
+	 * @throws RepositoryAccessException If repository can not be accessed in <b>ONLINE</b> mode.
+	 */
 	DObjectType getObjectType() throws RepositoryAccessException;
 	
 	List<DProperty> getProperties() throws RepositoryAccessException;

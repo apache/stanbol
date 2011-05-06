@@ -12,8 +12,18 @@ public interface DProperty {
 
     PropType getType();
 
+    /**
+     * 
+     * @return Property definition of property, null if <b>STRICT_OFFLINE</b> mode.
+     * @throws RepositoryAccessException if can not access repository in <b>ONLINE</> mode.
+     */
     DPropertyDefinition getDefinition() throws RepositoryAccessException;
 
+    /**
+     * 
+     * @return source object of property, null if <b>STRICT_OFFLINE</b> mode.
+     * @throws RepositoryAccessException if can not access repository in <b>ONLINE</> mode.
+     */
     DObject getSourceObject() throws RepositoryAccessException;
 
     List<String> getValue();

@@ -1,11 +1,12 @@
 package org.apache.stanbol.cmsadapter.core.decorated;
 
+import org.apache.stanbol.cmsadapter.servicesapi.model.web.CMSObject;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ChildObjectDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ConnectionInfo;
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.CMSObject;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectTypeDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.Property;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropertyDefinition;
+import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.AdapterMode;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DChildObjectType;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DObject;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DObjectAdapter;
@@ -19,15 +20,30 @@ public class DObjectFactoryImp implements DObjectAdapter {
 
     private RepositoryAccess access;
     private Object session;
+    private AdapterMode mode;
 
     public DObjectFactoryImp(RepositoryAccess access, Object session) {
         this.access = access;
         this.session = session;
+        this.mode = AdapterMode.ONLINE;
     }
-    
+
     public DObjectFactoryImp(RepositoryAccess access, ConnectionInfo connectionInfo) throws RepositoryAccessException {
         this.access = access;
         this.session = access.getSession(connectionInfo);
+        this.mode = AdapterMode.ONLINE;
+    }
+
+    public DObjectFactoryImp(RepositoryAccess access, Object session, AdapterMode mode) {
+        this.access = access;
+        this.session = session;
+        this.mode = mode;
+    }
+
+    public DObjectFactoryImp(RepositoryAccess access, ConnectionInfo connectionInfo, AdapterMode mode) throws RepositoryAccessException {
+        this.access = access;
+        this.session = access.getSession(connectionInfo);
+        this.mode = mode;
     }
 
     @Override
@@ -58,6 +74,16 @@ public class DObjectFactoryImp implements DObjectAdapter {
     @Override
     public Object getSession() {
         return session;
+    }
+
+    @Override
+    public void setMode(AdapterMode mode) {
+        this.mode = mode;
+    }
+
+    @Override
+    public AdapterMode getMode() {
+        return mode;
     }
 
 }
