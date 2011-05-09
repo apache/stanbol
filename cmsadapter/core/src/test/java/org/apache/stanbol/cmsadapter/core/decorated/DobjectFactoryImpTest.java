@@ -1,12 +1,15 @@
 package org.apache.stanbol.cmsadapter.core.decorated;
 
+import static org.apache.stanbol.cmsadapter.core.decorated.NamingHelper.LOCAL_NAME;
+import static org.apache.stanbol.cmsadapter.core.decorated.NamingHelper.NAMESPACE;
+import static org.apache.stanbol.cmsadapter.core.decorated.NamingHelper.PATH;
+import static org.apache.stanbol.cmsadapter.core.decorated.NamingHelper.UNIQUE_REF;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.util.List;
 
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.CMSObject;
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectFactory;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.AdapterMode;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DObject;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DObjectAdapter;
@@ -20,11 +23,6 @@ import org.junit.rules.ExpectedException;
 
 public class DobjectFactoryImpTest {
 
-    public static final String LOCAL_NAME = "localname";
-    public static final String PATH = "path";
-    public static final String UNIQUE_REF = "unique_ref";
-    public static final String ROOT_PARENT_REF = null;
-    public static final String NAMESPACE = "namespace";
     public static final String PREFIX_ROOT = "root_";
     public static final String PREFIX_CHILD_1 = "child_1_";
     public static final String PREFIX_CHILD_2 = "child_2_";
@@ -47,47 +45,6 @@ public class DobjectFactoryImpTest {
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {}
-
-    // Unnecessarily, eagerly builds objects but OK for tests.
-    public static class CMSObjectBuilder {
-        private static ObjectFactory of = new ObjectFactory();
-        private CMSObject instance = of.createCMSObject();
-        private String prefix;
-
-        public CMSObjectBuilder(String prefix) {
-            this.prefix = prefix;
-            instance.setUniqueRef(prefix + UNIQUE_REF);
-            instance.setLocalname(prefix + LOCAL_NAME);
-            instance.setPath(prefix + PATH);
-        }
-
-        public CMSObjectBuilder(String prefix, String id, String name, String path) {
-            this.prefix = prefix;
-            instance.setUniqueRef(prefix + id);
-            instance.setLocalname(prefix + name);
-            instance.setPath(prefix + path);
-        }
-
-        public CMSObjectBuilder namespace() {
-            instance.setNamespace(prefix + NAMESPACE);
-            return this;
-        }
-
-        public CMSObjectBuilder namespace(String namespace) {
-            instance.setNamespace(prefix + namespace);
-            return this;
-        }
-
-        public CMSObjectBuilder child(CMSObject child) {
-            instance.getChildren().add(child);
-            return this;
-        }
-
-        public CMSObject build() {
-            return instance;
-        }
-
-    }
 
     @Before
     public void setUp() {
@@ -128,43 +85,43 @@ public class DobjectFactoryImpTest {
         DObject root = sOfflineAdapter.wrapAsDObject(rootStripped);
         assertNull(root.getParent());
     }
-    
+
     @Test
-    public void testDObjectChildsOnline() throws RepositoryAccessException{
+    public void testDObjectChildsOnline() throws RepositoryAccessException {
         DObject root = onlineAdapter.wrapAsDObject(rootStripped);
         List<DObject> children = root.getChildren();
         assertEquals(2, children.size());
     }
-    
+
     @Test
-    public void testDObjectChildsOffline() throws RepositoryAccessException{
+    public void testDObjectChildsOffline() throws RepositoryAccessException {
         DObject rootd = sOfflineAdapter.wrapAsDObject(root);
         List<DObject> children = rootd.getChildren();
         assertEquals(2, children.size());
     }
-    
+
     @Test
-    public void testDObjectChildsOfflineStripped() throws RepositoryAccessException{
+    public void testDObjectChildsOfflineStripped() throws RepositoryAccessException {
         DObject rootd = sOfflineAdapter.wrapAsDObject(rootStripped);
         List<DObject> children = rootd.getChildren();
         assertEquals(0, children.size());
     }
-    
+
     @Test
-    public void testDObjectChildsTOfflineStripped() throws RepositoryAccessException{
+    public void testDObjectChildsTOfflineStripped() throws RepositoryAccessException {
         DObject rootd = tOfflineAdapter.wrapAsDObject(root);
         List<DObject> children = rootd.getChildren();
         assertEquals(2, children.size());
     }
-    
-    @Test 
-    public void testDObjectTypeSOffline() throws RepositoryAccessException{
+
+    @Test
+    public void testDObjectTypeSOffline() throws RepositoryAccessException {
         DObject rootd = sOfflineAdapter.wrapAsDObject(root);
         assertNull(rootd.getObjectType());
     }
-    
-    @Test 
-    public void testDObjectTypeOnline() throws RepositoryAccessException{
+
+    @Test
+    public void testDObjectTypeOnline() throws RepositoryAccessException {
         DObject rootd = onlineAdapter.wrapAsDObject(rootStripped);
         expectedException.expect(RepositoryAccessException.class);
         rootd.getObjectType();

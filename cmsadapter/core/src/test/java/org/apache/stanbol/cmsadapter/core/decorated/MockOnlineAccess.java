@@ -1,10 +1,10 @@
 package org.apache.stanbol.cmsadapter.core.decorated;
 
+import static org.apache.stanbol.cmsadapter.core.decorated.NamingHelper.UNIQUE_REF;
+
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import org.apache.stanbol.cmsadapter.core.decorated.DobjectFactoryImpTest.CMSObjectBuilder;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.CMSObject;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ChildObjectDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ConnectionInfo;
@@ -103,9 +103,7 @@ public class MockOnlineAccess implements RepositoryAccess {
 
     @Override
     public List<CMSObject> getChildren(CMSObject node, Object session) throws RepositoryAccessException {
-        if (node == null
-            || !node.getUniqueRef().equals(
-                DobjectFactoryImpTest.PREFIX_ROOT + DobjectFactoryImpTest.UNIQUE_REF)) {
+        if (node == null || !node.getUniqueRef().equals(DobjectFactoryImpTest.PREFIX_ROOT + UNIQUE_REF)) {
             return null;
 
         } else {
@@ -118,7 +116,7 @@ public class MockOnlineAccess implements RepositoryAccess {
     @Override
     public ObjectTypeDefinition getObjectTypeDefinition(String typeRef, Object session) throws RepositoryAccessException {
         // TODO Auto-generated method stub
-        if(typeRef == null){
+        if (typeRef == null) {
             throw new RepositoryAccessException("Null typeRef", null);
         }
         return null;

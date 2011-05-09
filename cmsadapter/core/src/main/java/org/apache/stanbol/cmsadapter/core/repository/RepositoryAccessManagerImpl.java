@@ -57,6 +57,16 @@ public class RepositoryAccessManagerImpl implements RepositoryAccessManager {
             }
         }
 
+        if (session instanceof List<?>) {
+            try {
+                return new OfflineAccess((List<Object>) session);
+            } catch (IllegalArgumentException e) {
+                logger.debug(e.getMessage());
+            }
+            logger.debug("Using offline accessor");
+
+        }
+
         logger.warn("No suitable repository access implementation for session {} ", session);
         return null;
     }
