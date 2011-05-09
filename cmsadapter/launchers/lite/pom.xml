@@ -27,6 +27,8 @@
 							<directory>${basedir}</directory>
 							<includes>
 								<include>sling</include>
+								<include>ps_db</include>
+								<include>derby.log</include>
 							</includes>
 						</fileset>
 					</filesets>
