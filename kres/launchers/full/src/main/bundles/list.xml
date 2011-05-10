@@ -14,7 +14,7 @@
 		<bundle>
 			<groupId>org.apache.sling</groupId>
 			<artifactId>org.apache.sling.commons.log</artifactId>
-			<version>2.0.6</version>
+			<version>2.1.2</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.felix</groupId>
@@ -67,7 +67,25 @@
 		</bundle>
 	</startLevel>
     
-    <!-- Sling utility bundles -->
+    <!-- Sling installer and Stanbol extensions -->
+    <startLevel level="9">
+        <bundle>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.installer.core</artifactId>
+            <version>3.1.2</version>
+        </bundle>
+        <bundle>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.commons.installer.bundleprovider</artifactId>
+            <version>0.9-SNAPSHOT</version>
+        </bundle>
+<!-- 		<bundle>
+		    <groupId>org.apache.sling</groupId>
+		    <artifactId>org.apache.sling.installer.provider.file</artifactId>
+		    <version>1.0.0</version>
+		</bundle>  -->
+    </startLevel>
+    <!-- Sling launchpad -->
     <startLevel level="10">
         <bundle>
             <groupId>org.apache.sling</groupId>
@@ -78,11 +96,6 @@
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.launchpad.api</artifactId>
             <version>1.0.0</version>
-        </bundle>
-        <bundle>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.installer.core</artifactId>
-            <version>3.1.2</version>
         </bundle>
     </startLevel>
 
@@ -175,24 +188,9 @@
     
 	<!-- Stanbol Enhancer infrastructure and required libraries-->
 	<startLevel level="15">
-    		<bundle>
+		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-			<version>0.9-SNAPSHOT</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.web.base</artifactId>
-			<version>0.9-SNAPSHOT</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.web.home</artifactId>
-			<version>0.9-SNAPSHOT</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.web.sparql</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>
@@ -334,6 +332,21 @@
             <artifactId>org.apache.stanbol.jsonld</artifactId>
             <version>0.9-SNAPSHOT</version>
         </bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.base</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.home</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.sparql</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
 	</startLevel>
 
 	<!-- Stanbol Enhancer plug-ins -->
@@ -344,7 +357,17 @@
         </bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.contenthub.web</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.engines.metaxa</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.benchmark</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
