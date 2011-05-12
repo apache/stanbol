@@ -52,10 +52,10 @@ To avoid (re)importing of already imported resources one need to remove such
 RDF files from the "indexing/resources/rdfData" or - typically the better
 option - rename the "rdfData" folder after the initial run.
 
-It is also save to
+It is also safe to
   - cancel the indexing process after the initialisation has competed
-    (as soon as the loging says that the indexing has started).
-  - load additinal RDF dumps by putting additional RDF files to the "rdfData"
+    (as soon as the log says that the indexing has started).
+  - load additional RDF dumps by putting additional RDF files to the "rdfData"
     directory. This files will be added to the others on the next start of the
     indexing tool.
 
@@ -87,12 +87,12 @@ Important NOTES:
    It is strongly suggested to
     - first check if still Category: is used as prefix (e.g. by checking if
       http://dbpedia.org/page/Category:Political_culture is still valid) and
-    - second if that is the case replace all appearances of "CAT:" to "Category:"
+    - second if that is the case replace all occurrences of "CAT:" to "Category:"
 
 The resulting file MUST BE copied to
   indexing/resources/incoming_links.txt
 
-There is also the possibility do download a precomputed file form
+There is also the possibility do download a precomputed file from:
   TODO: add download loaction
 
 (4) Configuration of the Index
@@ -126,9 +126,9 @@ of the indexing tool.
 The default configuration stores creates an index with the following features:
 
 Languages:
-By default English, German, France and Italien and all literals without any
-language information are indexed. Pleas note also that one needs to provide
-also the RDF dumps for this languages.
+By default English, German, France and Italian and all literals without any
+language information are indexed. Please also note that one needs to provide
+also the RDF dumps for those languages.
 
 Labels and Descriptions:
 DBpedia.org uses "rdfs:label" for labels. Short description are stored within
