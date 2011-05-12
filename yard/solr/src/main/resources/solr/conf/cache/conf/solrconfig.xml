@@ -931,6 +931,9 @@
     </lst>
   </requestHandler>
 
+  <!-- Request Handler for similarity queries and topic classification -->
+  <requestHandler name="/mlt" class="solr.MoreLikeThisHandler" startup="lazy" />
+
   <highlighting>
    <!-- Configure the standard fragmenter -->
    <!-- This could most likely be commented out in the "default" case -->
