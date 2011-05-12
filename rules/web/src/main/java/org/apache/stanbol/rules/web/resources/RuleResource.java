@@ -58,8 +58,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author elvio
- * @author andrea.nuzzolese
+ * @author elvio, andrea.nuzzolese
  * 
  */
 @Path("/rule")

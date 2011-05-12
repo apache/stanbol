@@ -17,7 +17,7 @@ import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
 
 /**
  *
- * @author elvio
+ * @author elvio, andrea.nuzzolese
  */
 @Path("/rulestore")
 public class RuleStoreResource extends BaseStanbolResource {

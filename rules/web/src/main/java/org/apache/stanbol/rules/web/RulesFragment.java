@@ -27,6 +27,12 @@ import org.osgi.service.component.ComponentContext;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.TemplateLoader;
 
+/**
+ * Implementation of WebFragment for the Stanbol Rules end-point.
+ * 
+ * @author andrea.nuzzolese
+ *
+ */
 
 @Component(immediate = true, metatype = true)
 @Service(WebFragment.class)

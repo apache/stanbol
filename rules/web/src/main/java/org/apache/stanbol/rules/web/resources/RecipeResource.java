@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 
- * @author elvio
+ * @author elvio, andrea.nuzzolese
  */
 @Path("/recipe")
 // /{uri:.+}")
