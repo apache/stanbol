@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Dictionary;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
@@ -247,8 +246,8 @@ public class ONManagerImpl implements ONManager {
         try {
             URI uri = ONManagerImpl.this.getClass().getResource("/ontologies").toURI();
             conf.addDirectory(new File(uri));
-        } catch (URISyntaxException e3) {
-            log.warn("Could not add ontology resource.", e3);
+        } catch (Exception e3) {
+            log.warn("Could not add ontology resource /ontologies.");
         }
         omgrFactory = new OntologyManagerFactory(conf);
 

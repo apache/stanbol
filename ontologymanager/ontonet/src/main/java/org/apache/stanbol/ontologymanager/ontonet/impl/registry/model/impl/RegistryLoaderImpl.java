@@ -93,7 +93,7 @@ public class RegistryLoaderImpl implements RegistryLoader {
                 continue;
             }
         else if (registryItem.isOntology()) try {
-            result.add(manager.loadOntology(IRI.create(((RegistryOntology) registryItem)
+            result.add(manager.loadOntologyFromOntologyDocument(IRI.create(((RegistryOntology) registryItem)
                     .getURL())));
         } catch (OWLOntologyAlreadyExistsException ex) {
             // E chissenefrega, ce la aggiungiamo lo stesso.
