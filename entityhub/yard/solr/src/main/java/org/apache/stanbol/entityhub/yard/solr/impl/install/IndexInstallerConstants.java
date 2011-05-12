@@ -16,9 +16,6 @@
  */
 package org.apache.stanbol.entityhub.yard.solr.impl.install;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Constants and static configuration used by the {@link SolrIndexInstaller}
