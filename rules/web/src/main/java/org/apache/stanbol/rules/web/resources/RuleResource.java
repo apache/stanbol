@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @Path("/rule")
-public class RestRule extends BaseStanbolResource{
+public class RuleResource extends BaseStanbolResource{
 
 	protected ONManager onm;
 	protected ClerezzaOntologyStorage storage;
@@ -80,7 +80,7 @@ public class RestRule extends BaseStanbolResource{
 	 * @param servletContext
 	 *            {To get the context where the REST service is running.}
      */
-    public RestRule(@Context ServletContext servletContext){
+    public RuleResource(@Context ServletContext servletContext){
 		this.kresRuleStore = (RuleStore) servletContext
 				.getAttribute(RuleStore.class.getName());
 		this.onm = (ONManager) servletContext

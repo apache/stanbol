@@ -12,6 +12,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
 
 /**
@@ -19,7 +20,7 @@ import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
  * @author elvio
  */
 @Path("/rulestore")
-public class RuleStoreResource {
+public class RuleStoreResource extends BaseStanbolResource {
     
     private RuleStoreImpl kresRuleStore;
 

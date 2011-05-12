@@ -5,25 +5,13 @@
 
 package org.apache.stanbol.rules.web;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 
 /**
  *
  * @author elvio
  */
 public class RecipeTest {
-
+/*
     public static final int __PORT = 9999;
     public static final String __TEST_URI = "http://localhost:" + __PORT + "/";
     public static final String _ROOT_URI = __TEST_URI + "recipe";
@@ -61,9 +49,12 @@ public class RecipeTest {
     public void tearDown() {
     }
 
+*/
+	
     /**
      * Test of getRecipe method, of class GetRecipe.
      */
+	/*
     @Test
     public void testGetRecipe() {
         WebResource webresget = webres.path("http://kres.iks-project.eu/ontology/meta/rmi_config.owl#ProvaParentRecipe");
@@ -78,10 +69,11 @@ public class RecipeTest {
         else
             fail("Some errors occurred");
     }
-
+*/
     /**
      * Test of getRecipe method, of class GetRecipe.
      */
+	/*
     @Test
     public void testGetAllRecipes() {
 
@@ -95,7 +87,7 @@ public class RecipeTest {
         else
             fail("Some errors occurred");
     }
-
+*/
 //   /**
 //     * Test of getRecipe method, of class GetRecipe.
 //     */

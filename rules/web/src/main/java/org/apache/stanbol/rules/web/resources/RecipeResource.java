@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
 @Path("/recipe")
 // /{uri:.+}")
 // @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
-public class RestRecipe extends BaseStanbolResource {
+public class RecipeResource extends BaseStanbolResource {
 
     protected ONManager onm;
 
@@ -75,40 +75,30 @@ public class RestRecipe extends BaseStanbolResource {
      * @param servletContext
      *            {To get the context where the REST service is running.}
      */
-    public RestRecipe(@Context ServletContext servletContext) {
+    public RecipeResource(@Context ServletContext servletContext) {
         this.kresRuleStore = (RuleStore) servletContext.getAttribute(RuleStore.class.getName());
         this.onm = (ONManager) servletContext.getAttribute(ONManager.class.getName());
-//      this.storage = (OntologyStorage) servletContext
-//      .getAttribute(OntologyStorage.class.getName());
-// Contingency code for missing components follows.
-/*
- * FIXME! The following code is required only for the tests. This should
- * be removed and the test should work without this code.
- */
-if (onm == null) {
-    log
-            .warn("No KReSONManager in servlet context. Instantiating manually...");
-    onm = new ONManagerImpl(new TcManager(), null,
-            new Hashtable<String, Object>());
-}
-this.storage = onm.getOntologyStore();
-if (storage == null) {
-    log.warn("No OntologyStorage in servlet context. Instantiating manually...");
-    storage = new ClerezzaOntologyStorage(new TcManager(),null);
-}
+        //      this.storage = (OntologyStorage) servletContext
+        //      .getAttribute(OntologyStorage.class.getName());
+        // Contingency code for missing components follows.
+
+        /*
+			 * FIXME! The following code is required only for the tests. This should
+			 * be removed and the test should work without this code.
+		 */
+		if (onm == null) {
+		    log.warn("No ONManager in servlet context. Instantiating manually...");
+		    onm = new ONManagerImpl(new TcManager(), null,
+		            new Hashtable<String, Object>());
+		}
+		this.storage = onm.getOntologyStore();
+		if (storage == null) {
+		    log.warn("No OntologyStorage in servlet context. Instantiating manually...");
+		    storage = new ClerezzaOntologyStorage(new TcManager(),null);
+		}
         if (kresRuleStore == null) {
-            log
-                    .warn("No KReSRuleStore with stored rules and recipes found in servlet context. Instantiating manually with default values...");
-//            String iri = "http://www.ontologydesignpatterns.org/ont/iks/kres/rmi_config.owl";
-//            OWLOntology o;
-//            try {
-//                o = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(IRI.create(iri));
-//                this.kresRuleStore = new RuleStoreImpl(onm, new Hashtable<String,Object>(), "");
-//                log.debug("PATH TO OWL FILE LOADED: " + kresRuleStore.getFilePath());
-//            } catch (OWLOntologyCreationException e) {
-//
-//            }
-            
+            log.warn("No RuleStore with stored rules and recipes found in servlet context. Instantiating manually with default values...");
+
             this.kresRuleStore = new RuleStoreImpl(onm, new Hashtable<String,Object>(), "");
 
         }
