@@ -51,8 +51,8 @@ public class TestOntologySpaces {
                                                                                                   URISyntaxException {
         URL url = TestOntologySpaces.class.getResource(resourcePath);
         File f = new File(url.toURI());
-        return new ParentPathInputSource(f, mgr != null ? mgr
-                : onm.getOntologyManagerFactory().createOntologyManager(true));
+        return new ParentPathInputSource(f, mgr != null ? mgr : onm.getOntologyManagerFactory()
+                .createOntologyManager(true));
     }
 
     @BeforeClass
@@ -97,10 +97,6 @@ public class TestOntologySpaces {
             fail("Add operation on " + scopeIri + " custom space was denied due to unexpected lock.");
         }
 
-        for (OWLOntology o : space.getOntologies()) {
-            System.out.println("ah " + o);
-        }
-
         assertTrue(space.containsOntology(logicalId));
         logicalId = pizzaSrc.getRootOntology().getOntologyID().getOntologyIRI();
         assertTrue(space.containsOntology(logicalId));
@@ -143,8 +139,6 @@ public class TestOntologySpaces {
         space = spaceFactory.createCustomOntologySpace(scopeIri, pizzaSrc);
         IRI pizzaId = pizzaSrc.getRootOntology().getOntologyID().getOntologyIRI();
         IRI wineId = colleSrc.getRootOntology().getOntologyID().getOntologyIRI();
-        System.err.println(pizzaId);
-        System.err.println(wineId);
         try {
             space.addOntology(ontSrc);
             space.addOntology(colleSrc);

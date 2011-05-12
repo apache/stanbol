@@ -33,21 +33,21 @@
   </rdf:Description>
   
   <!-- For testing already loaded ontologies -->
-  <rdf:Description rdf:about="http://ontologydesignpatterns.org/cp/owl/objectrole.owl">
+  <rdf:Description rdf:about="http://www.ontologydesignpatterns.org/cp/owl/objectrole.owl">
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Object-Role</rdfs:label>
     <meta:isOntologyOf rdf:resource="#TestRegistry"/>
     <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
   </rdf:Description>
   
   <!-- For testing anonymous ontologies -->
-  <rdf:Description rdf:about="http://ontologydesignpatterns.org/ont/iks/nameless_ontology.owl">
+  <rdf:Description rdf:about="http://www.ontologydesignpatterns.org/ont/iks/nameless_ontology.owl">
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Nameless</rdfs:label>
     <meta:isOntologyOf rdf:resource="#TestRegistry"/>
     <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
   </rdf:Description>
   
   <!-- For testing undefined registries -->
-  <rdf:Description rdf:about="http://ontologydesignpatterns.org/cp/owl/classification.owl">
+  <rdf:Description rdf:about="http://www.ontologydesignpatterns.org/cp/owl/classification.owl">
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Classification</rdfs:label>
     <meta:isOntologyOf rdf:resource="#NonExistentRegistry"/>
     <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
