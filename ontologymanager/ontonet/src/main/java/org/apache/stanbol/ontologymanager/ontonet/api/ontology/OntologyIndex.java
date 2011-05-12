@@ -15,6 +15,8 @@ import org.semanticweb.owlapi.model.OWLOntology;
 public interface OntologyIndex extends ScopeOntologyListener,
 		ScopeEventListener {
 
+    Set<IRI> getIndexedOntologyIRIs();
+    
 	/**
 	 * Returns an ontology having the specified IRI as its identifier, or null
 	 * if no such ontology is indexed.<br>

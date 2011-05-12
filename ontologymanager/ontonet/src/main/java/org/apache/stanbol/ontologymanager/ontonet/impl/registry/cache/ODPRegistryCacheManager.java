@@ -64,8 +64,7 @@ public class ODPRegistryCacheManager {
 
 	private static Set<URI> unresolvedURIs = new HashSet<URI>();
 
-	private static OWLOntologyManager manager = OWLManager
-			.createOWLOntologyManager();
+	private static OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
 	public static OWLOntologyManager getManager() {
 		return manager;

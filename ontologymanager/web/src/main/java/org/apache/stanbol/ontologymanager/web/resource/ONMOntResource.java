@@ -18,7 +18,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.io.StringDocumentTarget;
 import org.semanticweb.owlapi.model.IRI;
@@ -83,7 +82,7 @@ if (storage == null) {
         return Response.status(404).build();
 
         OWLOntology ont = index.getOntology(iri);
-        OWLOntologyManager tmpmgr = OWLManager.createOWLOntologyManager();
+        OWLOntologyManager tmpmgr = onm.getOntologyManagerFactory().createOntologyManager(true);
         StringDocumentTarget tgt = new StringDocumentTarget();
         try {
             tmpmgr.saveOntology(ont, new RDFXMLOntologyFormat(), tgt);
@@ -109,7 +108,7 @@ if (storage == null) {
         return Response.status(404).build();
 
         OWLOntology ont = index.getOntology(iri);
-        OWLOntologyManager tmpmgr = OWLManager.createOWLOntologyManager();
+        OWLOntologyManager tmpmgr = onm.getOntologyManagerFactory().createOntologyManager(true);
         StringDocumentTarget tgt = new StringDocumentTarget();
         try {
             tmpmgr.saveOntology(ont, new TurtleOntologyFormat(), tgt);

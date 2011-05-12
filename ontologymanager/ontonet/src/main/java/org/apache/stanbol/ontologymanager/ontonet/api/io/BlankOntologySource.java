@@ -7,7 +7,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 /**
  * A utility input source that contains an unnamed, empty ontology. An example usage of this class is to avoid
  * a {@link NullPointerException} to be thrown when an {@link OntologyInputSource} is to be passed to a
- * method, but we are not interested in the ontologh to pass.
+ * method, but we are not actually interested in the ontology to pass.
  * 
  * @author alessandro
  * 

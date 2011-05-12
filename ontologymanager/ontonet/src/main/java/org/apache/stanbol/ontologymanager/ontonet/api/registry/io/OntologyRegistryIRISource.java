@@ -1,4 +1,4 @@
-package org.apache.stanbol.ontologymanager.ontonet.impl.io;
+package org.apache.stanbol.ontologymanager.ontonet.api.registry.io;
 
 import java.util.HashSet;
 import java.util.Set;

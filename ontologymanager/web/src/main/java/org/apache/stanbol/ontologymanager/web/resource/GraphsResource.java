@@ -50,7 +50,8 @@ public class GraphsResource extends NavigationMixin {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     public GraphsResource(@Context ServletContext servletContext) {
-        storage = (ClerezzaOntologyStorage) (servletContext.getAttribute(ClerezzaOntologyStorage.class.getName()));
+        storage = (ClerezzaOntologyStorage) (servletContext.getAttribute(ClerezzaOntologyStorage.class
+                .getName()));
         tcManager = (TcManager) servletContext.getAttribute(TcManager.class.getName());
         onManager = (ONManager) (servletContext.getAttribute(ONManager.class.getName()));
         if (onManager == null) {
@@ -62,13 +63,13 @@ public class GraphsResource extends NavigationMixin {
 
     @GET
     @Path("/resume")
-    @Produces( {KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.OWL_XML, KRFormat.RDF_XML,
-                KRFormat.TURTLE, KRFormat.RDF_JSON})
+    @Produces({KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.OWL_XML, KRFormat.RDF_XML,
+               KRFormat.TURTLE, KRFormat.RDF_JSON})
     public Response graphs(@Context HttpHeaders headers, @Context ServletContext servletContext) {
         Set<IRI> iris = storage.listGraphs();
         if (iris != null) {
 
-            OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+            OWLOntologyManager manager = onManager.getOntologyManagerFactory().createOntologyManager(true);
             OWLDataFactory factory = OWLManager.getOWLDataFactory();
 
             OWLOntology ontology;
@@ -120,8 +121,8 @@ public class GraphsResource extends NavigationMixin {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response storeGraph(@FormParam("graph") InputStream graph, @FormParam("id") String id) {
         try {
-            OWLOntology ontology = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(
-                graph);
+            OWLOntology ontology = onManager.getOntologyManagerFactory().createOntologyManager(true)
+                    .loadOntologyFromOntologyDocument(graph);
             storage.store(ontology, IRI.create(id));
             return Response.ok().build();
         } catch (OWLOntologyCreationException e) {

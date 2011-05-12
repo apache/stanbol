@@ -1,0 +1,162 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY description "http://www.ontologydesignpatterns.org/cp/owl/description.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.ontologydesignpatterns.org/cp/owl/description.owl#"
+     xml:base="http://www.ontologydesignpatterns.org/cp/owl/description.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:description="http://www.ontologydesignpatterns.org/cp/owl/description.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://www.ontologydesignpatterns.org/cp/owl/description.owl">
+        <rdfs:label rdf:datatype="&rdf;PlainLiteral">description</rdfs:label>
+        <owl:versionInfo rdf:datatype="&xsd;string">1.1 added rdfs:isDefinedBy for all named entities</owl:versionInfo>
+        <owl:versionInfo rdf:datatype="&xsd;string">Created by Aldo Gangemi and Valentina Presutti</owl:versionInfo>
+        <rdfs:comment rdf:datatype="&rdf;PlainLiteral">The description pattern. 
+It is extracted from DOLCE-UltraLite by partial clone of elements.</rdfs:comment>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/schemas/cpannotationschema.owl"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:AnnotationProperty rdf:about="&owl;versionInfo"/>
+    <owl:AnnotationProperty rdf:about="&rdfs;isDefinedBy"/>
+    <owl:AnnotationProperty rdf:about="&rdfs;label"/>
+    <owl:AnnotationProperty rdf:about="&rdfs;comment"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/description.owl#defines -->
+
+    <owl:ObjectProperty rdf:about="&description;defines">
+        <rdfs:label xml:lang="en">defines</rdfs:label>
+        <rdfs:comment>A relation between a Description and a Concept, e.g. a Workflow for a governmental Organization defines the Role &#39;officer&#39;, or &#39;the Italian Traffic Law defines the role Vehicle&#39;.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/description.owl"/>
+        <rdfs:range rdf:resource="&description;Concept"/>
+        <rdfs:domain rdf:resource="&description;Description"/>
+        <rdfs:subPropertyOf rdf:resource="&description;usesConcept"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/description.owl#isConceptUsedIn -->
+
+    <owl:ObjectProperty rdf:about="&description;isConceptUsedIn">
+        <rdfs:label xml:lang="en">is concept used in</rdfs:label>
+        <rdfs:label xml:lang="it">è un concetto usato in</rdfs:label>
+        <rdfs:comment>A more generic relation holding between a Description and a Concept. In order to be used, a Concept must be previously definedIn another Description</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/description.owl"/>
+        <rdfs:domain rdf:resource="&description;Concept"/>
+        <rdfs:range rdf:resource="&description;Description"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/description.owl#isDefinedIn -->
+
+    <owl:ObjectProperty rdf:about="&description;isDefinedIn">
+        <rdfs:label xml:lang="en">is defined in</rdfs:label>
+        <rdfs:label xml:lang="it">è definito in</rdfs:label>
+        <rdfs:comment>A relation between a Description and a Concept, e.g. a Workflow for a governmental Organization defines the Role &#39;officer&#39;, or &#39;the Italian Traffic Law defines the role Vehicle&#39;.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/description.owl"/>
+        <rdfs:domain rdf:resource="&description;Concept"/>
+        <rdfs:range rdf:resource="&description;Description"/>
+        <owl:inverseOf rdf:resource="&description;defines"/>
+        <rdfs:subPropertyOf rdf:resource="&description;isConceptUsedIn"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/description.owl#usesConcept -->
+
+    <owl:ObjectProperty rdf:about="&description;usesConcept">
+        <rdfs:label xml:lang="en">uses concept</rdfs:label>
+        <rdfs:label xml:lang="it">usa il concetto</rdfs:label>
+        <rdfs:comment>A generic relation holding between a Description and a Concept. In order to be used, a Concept must be previously definedIn another Description. This last condition cannot be encoded for object properties in OWL.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/description.owl"/>
+        <rdfs:range rdf:resource="&description;Concept"/>
+        <rdfs:domain rdf:resource="&description;Description"/>
+        <owl:inverseOf rdf:resource="&description;isConceptUsedIn"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/description.owl#Concept -->
+
+    <owl:Class rdf:about="&description;Concept">
+        <rdfs:label xml:lang="en">Concept</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&description;isConceptUsedIn"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="&description;Description"/>
+        <rdfs:comment>A concept can be an idea, notion, role, or even a reified class, and isDefinedIn a Description . 
+Once defined, a Concept can be used in other descriptions. 
+The classifies relation (see &#39;classification&#39; pattern) relates concepts to entities at some time.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/description.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/description.owl#Description -->
+
+    <owl:Class rdf:about="&description;Description">
+        <rdfs:label xml:lang="en">Description</rdfs:label>
+        <rdfs:comment>A Description represents a conceptualization. It can be thought also as a &#39;descriptive context&#39; that defines concepts in order to see a &#39;relational context&#39; out of a set of data or observations. For example, a Plan is a description of some actions to be executed by agents in a certain way, with certain parameters; a Diagnosis is a description that provides an interpretation to a set of observed entities, etc.
+A Description typically defines at least one Concept, for example the &#39;preparing a coffee&#39; Description could define concepts such as &#39;Heater&#39;, &#39;AmountOfWater&#39;, &#39;CoffeeMix&#39;, etc.
+With respect to other patterns, descriptions are &#39;abstractions&#39; of situations (cf. the &#39;situation&#39; pattern), and in some complex use cases (e.g. matching executions to plan models), the two patterns can be composed (see the descriptionsituation pattern).</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/description.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.1.0.1602) http://owlapi.sourceforge.net -->
+

@@ -7,6 +7,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyManagerFactory;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -19,6 +20,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * 
  */
 public interface ONManager {
+    
+    public OntologyManagerFactory getOntologyManagerFactory();
 
 	/**
 	 * Returns the default object that automatically indexes ontologies as they

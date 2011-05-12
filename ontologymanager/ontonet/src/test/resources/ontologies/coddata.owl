@@ -1,0 +1,449 @@
+<?xml version="1.0"?>
+<rdf:RDF
+    xmlns:codkernel="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#"
+    xmlns:partof="http://www.ontologydesignpatterns.org/cp/owl/partof.owl#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:collectionentity="http://www.ontologydesignpatterns.org/cp/owl/collectionentity.owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#"
+    xmlns:topic="http://www.ontologydesignpatterns.org/cp/owl/topic.owl#"
+  xml:base="http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl"/>
+    <rdfs:comment>This module of codolite contains the main notions classifying the data managed when designing an ontology: KOS, KOS elements, rules, modules, encoding syntaxes, etc.</rdfs:comment>
+    <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/partof.owl"/>
+    <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/collectionentity.owl"/>
+    <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >0.6: Added missing comments
+0.5: Moved KnowledgeType to codkernel for architectural consistency
+0.4: Added English labels
+0.3: Added classes OntologyAxiom and OntologyMapping based on requirements from NTK plugin descriptions
+0.2: Added version info and comments
+0.1: Created by Aldo Gangemi</owl:versionInfo>
+  </owl:Ontology>
+  <owl:Class rdf:ID="OntologyLibrary">
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/collectionentity.owl#Collection"/>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >An ontology repository.</rdfs:comment>
+    <rdfs:label xml:lang="en">Ontology library</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:ID="NetworkedOntology">
+    <rdfs:subClassOf>
+      <rdf:Description rdf:about="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology">
+        <rdfs:subClassOf>
+          <owl:Class rdf:ID="DataStructure"/>
+        </rdfs:subClassOf>
+      </rdf:Description>
+    </rdfs:subClassOf>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >An ontology that is member of an ontology network. 
+In practice, an ontology is networked when it has some relation to other ontologies. An ontology can be networked because it started a relation after its creation, or because it emerges from a (qualified) relation between other ontologies, as in the case of qualified ontology networks.
+In the second case, it can be called a 'inherently networked' ontology.
+For example, two ontologies O1 and O2 that have an equivalence relation, are networked ontologies.
+More interestingly, an ontology O3 that has been designed by reusing components from two ontologies O4 and O5 is also a (distributed) networked ontology.
+Modules and content design patterns are also networked ontologies.</rdfs:comment>
+    <owl:equivalentClass>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class rdf:ID="NetworkOfOntologies"/>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/partof.owl#isPartOf"/>
+      </owl:Restriction>
+    </owl:equivalentClass>
+    <rdfs:label xml:lang="en">Networked ontology</rdfs:label>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#isClassifiedBy"/>
+        <owl:hasValue>
+          <codkernel:KnowledgeType rdf:ID="NetworkedOntologyKType">
+            <rdfs:label xml:lang="en">Networked ontology KType</rdfs:label>
+            <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >The NetworkedOntology knowledge type.</rdfs:comment>
+          </codkernel:KnowledgeType>
+        </owl:hasValue>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="EncodingSyntax">
+    <rdfs:comment>The syntax used for encoding a KnowledgeResource or in general a LogicalLanguage; e.g. OWL-RDF.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/informationobjectsandrepresentationlanguages.owl#Language"/>
+    <rdfs:label xml:lang="en">Encoding syntax</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:ID="OntologyMapping">
+    <rdfs:subClassOf>
+      <rdf:Description rdf:about="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#KnowledgeResource">
+        <rdfs:subClassOf>
+          <owl:Restriction>
+            <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#isClassifiedBy"/>
+            <owl:someValuesFrom>
+              <rdf:Description rdf:about="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#KnowledgeType">
+                <rdfs:subClassOf>
+                  <owl:Restriction>
+                    <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#classifies"/>
+                    <owl:allValuesFrom rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#KnowledgeResource"/>
+                  </owl:Restriction>
+                </rdfs:subClassOf>
+              </rdf:Description>
+            </owl:someValuesFrom>
+          </owl:Restriction>
+        </rdfs:subClassOf>
+      </rdf:Description>
+    </rdfs:subClassOf>
+    <rdfs:comment>A set of axioms that include ontology elements from two different ontologies.</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/collectionentity.owl#hasMember"/>
+        <owl:someValuesFrom>
+          <owl:Class rdf:ID="OntologyAxiom"/>
+        </owl:someValuesFrom>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/collectionentity.owl#Collection"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/intensionextension.owl#isAbout"/>
+        <owl:someValuesFrom>
+          <owl:Class rdf:about="#NetworkOfOntologies"/>
+        </owl:someValuesFrom>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:label xml:lang="en">Ontology mapping</rdfs:label>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#isClassifiedBy"/>
+        <owl:hasValue>
+          <codkernel:KnowledgeType rdf:ID="OntologyMappingKType">
+            <rdfs:label xml:lang="en">Ontology mapping KType</rdfs:label>
+            <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >The OntologyMapping knowledge type.</rdfs:comment>
+          </codkernel:KnowledgeType>
+        </owl:hasValue>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="OntologyModule">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#DataStructure"/>
+    </rdfs:subClassOf>
+    <rdfs:label xml:lang="en">Ontology module</rdfs:label>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#isClassifiedBy"/>
+        <owl:hasValue>
+          <codkernel:KnowledgeType rdf:ID="OntologyModuleKType">
+            <rdfs:label xml:lang="en">Ontology module KType</rdfs:label>
+            <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >The OntologyModule knowledge type.</rdfs:comment>
+          </codkernel:KnowledgeType>
+        </owl:hasValue>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >An ontology that is considered modularly, i.e. within a compositional architecture. Each module in a compositional network is supposed to cover a domain aspect, a task, etc.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="LogicalLanguage">
+    <rdfs:comment>The logical language, in which a KnowledgeResource is expressed.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/informationobjectsandrepresentationlanguages.owl#FormalLanguage"/>
+    <rdfs:label xml:lang="en">Logical language</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:ID="KOS">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#DataStructure"/>
+    </rdfs:subClassOf>
+    <rdfs:comment>Knowledge Organization Systems: thesauri, terminologies, classification schemes, subject hierarchies, etc.</rdfs:comment>
+    <rdfs:label xml:lang="it">Sistema di organizzazione della conoscenza</rdfs:label>
+    <rdfs:label xml:lang="en">Knowledge organization system</rdfs:label>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#isClassifiedBy"/>
+        <owl:hasValue>
+          <codkernel:KnowledgeType rdf:ID="KOSKType">
+            <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >KOS KType</rdfs:label>
+            <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >The KOS knowledge type.</rdfs:comment>
+          </codkernel:KnowledgeType>
+        </owl:hasValue>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#OntologyAxiom">
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#OntologyElement"/>
+    <rdfs:comment>An axiom from within an ontology.</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/partof.owl#hasPart"/>
+        <owl:someValuesFrom rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#OntologyElement"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:label xml:lang="en">Ontology axiom</rdfs:label>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#isClassifiedBy"/>
+        <owl:hasValue>
+          <codkernel:KnowledgeType rdf:ID="OntologyAxiomKType">
+            <rdfs:label xml:lang="en">Ontology axiom KType</rdfs:label>
+            <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >The OntologyAxiom knowledge type.</rdfs:comment>
+          </codkernel:KnowledgeType>
+        </owl:hasValue>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Annotation">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#isClassifiedBy"/>
+        <owl:hasValue>
+          <codkernel:KnowledgeType rdf:ID="AnnotationKType">
+            <rdfs:label xml:lang="en">Annotation KType</rdfs:label>
+            <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >The Annotation knowledge type.</rdfs:comment>
+          </codkernel:KnowledgeType>
+        </owl:hasValue>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#KnowledgeResource"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/intensionextension.owl#isAbout"/>
+        <owl:someValuesFrom rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#KnowledgeResource"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:comment>Any KnowledgeResource used to talk about another existing KnowledgeResource</rdfs:comment>
+    <rdfs:label xml:lang="en">Annotation</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:about="#DataStructure">
+    <rdfs:label xml:lang="en">Data structure</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Any data structure, including databases, schemas, lexica, knowledge organizations systems, etc.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#KnowledgeResource"/>
+    <rdfs:label xml:lang="it">Struttura di dati</rdfs:label>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#isClassifiedBy"/>
+        <owl:hasValue>
+          <codkernel:KnowledgeType rdf:ID="DataStructureKType">
+            <rdfs:label xml:lang="en">Data structure KType</rdfs:label>
+            <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >The DataStructure knowledge type.</rdfs:comment>
+          </codkernel:KnowledgeType>
+        </owl:hasValue>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="OntologyTopic">
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/topic.owl#Topic"/>
+    <rdfs:comment>The topic to be covered by an Ontology.</rdfs:comment>
+    <rdfs:label xml:lang="en">Ontology topic</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:ID="Query">
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#KnowledgeResource"/>
+    <rdfs:label xml:lang="en">Query</rdfs:label>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#isClassifiedBy"/>
+        <owl:hasValue>
+          <codkernel:KnowledgeType rdf:ID="QueryKType">
+            <rdfs:label xml:lang="en">Query KType</rdfs:label>
+            <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >The Query knowledge type.</rdfs:comment>
+          </codkernel:KnowledgeType>
+        </owl:hasValue>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >A request for information from a database, a knowledge base, a search engine, etc.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#NetworkOfOntologies">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >A network of ontologies (or ontology network) is a collection of ontologies with a specified unifying criterion (description),  provided by (reifying a) relation such as 'being a version of', 'imports', 'identical to', 'equivalent to', 'is clone of', 'mapped to', 'contains module', etc.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#KnowledgeResource"/>
+    <rdfs:label xml:lang="en">Network of ontologies</rdfs:label>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#isClassifiedBy"/>
+        <owl:hasValue>
+          <codkernel:KnowledgeType rdf:ID="NetworkOfOntologiesKType">
+            <rdfs:label xml:lang="en">Network of ontologies KType</rdfs:label>
+            <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >The NetworkOfOntologies knowledge type.</rdfs:comment>
+          </codkernel:KnowledgeType>
+        </owl:hasValue>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="KOSElement">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >An (identified) element from a KOS.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#KnowledgeResource"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="#KOS"/>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/partof.owl#isPartOf"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:label xml:lang="en">KOS Element</rdfs:label>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#isClassifiedBy"/>
+        <owl:hasValue>
+          <codkernel:KnowledgeType rdf:ID="KOSElementKType">
+            <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >KOS Element KType</rdfs:label>
+            <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >The KOSElement knowledge type.</rdfs:comment>
+          </codkernel:KnowledgeType>
+        </owl:hasValue>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Rule">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >An axiom that is asserted independently from a specific ontology element, i.e. not within the axioms that are proper to that element.
+BTW, depending on the particular 'style' of a logical language and its reasoning system, rules (and axioms in general) can be considered within or or outside other elements' characterization.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#KnowledgeResource"/>
+    <rdfs:label xml:lang="en">Rule</rdfs:label>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#isClassifiedBy"/>
+        <owl:hasValue>
+          <codkernel:KnowledgeType rdf:ID="RuleKType">
+            <rdfs:label xml:lang="en">Rule KType</rdfs:label>
+            <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >The Rule knowledge type.</rdfs:comment>
+          </codkernel:KnowledgeType>
+        </owl:hasValue>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:ObjectProperty rdf:ID="hasVersion">
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:ID="relatedToOntology"/>
+    </rdfs:subPropertyOf>
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="isVersionOf"/>
+    </owl:inverseOf>
+    <rdfs:label xml:lang="en">has version</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >A relation between an ontology and one of its versions. This assumes that an ontology abstracts from its versions.</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="hasLogicalLanguage">
+    <rdfs:subPropertyOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/informationobjectsandrepresentationlanguages.owl#hasRepresentationLanguage"/>
+    <rdfs:range rdf:resource="#LogicalLanguage"/>
+    <rdfs:domain rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#KnowledgeResource"/>
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="isLogicalLanguageOf"/>
+    </owl:inverseOf>
+    <rdfs:label xml:lang="en">has logical language</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >A relation between an ontology and a logical language.</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="isEncodingOf">
+    <rdfs:subPropertyOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/informationobjectsandrepresentationlanguages.owl#isRepresentationLanguageOf"/>
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="hasEncoding"/>
+    </owl:inverseOf>
+    <rdfs:range>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <rdf:Description rdf:about="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#KnowledgeResource"/>
+          <owl:Class rdf:about="#LogicalLanguage"/>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:range>
+    <rdfs:domain rdf:resource="#EncodingSyntax"/>
+    <rdfs:label xml:lang="en">is encoding of</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >A relation between an ontology and a syntactic language (e.g. RDF-XML or N3).</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#hasEncoding">
+    <rdfs:subPropertyOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/informationobjectsandrepresentationlanguages.owl#hasRepresentationLanguage"/>
+    <rdfs:range rdf:resource="#EncodingSyntax"/>
+    <owl:inverseOf rdf:resource="#isEncodingOf"/>
+    <rdfs:domain>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <rdf:Description rdf:about="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#KnowledgeResource"/>
+          <owl:Class rdf:about="#LogicalLanguage"/>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:domain>
+    <rdfs:label xml:lang="en">has encoding</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >A relation between an ontology and a syntactic language (e.g. RDF-XML or N3).</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#isLogicalLanguageOf">
+    <rdfs:subPropertyOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/informationobjectsandrepresentationlanguages.owl#isRepresentationLanguageOf"/>
+    <rdfs:domain rdf:resource="#LogicalLanguage"/>
+    <rdfs:range rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#KnowledgeResource"/>
+    <owl:inverseOf rdf:resource="#hasLogicalLanguage"/>
+    <rdfs:label xml:lang="en">is logical language of</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >A relation between an ontology and a logical language.</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="imports">
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#relatedToOntology"/>
+    </rdfs:subPropertyOf>
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="isImportedBy"/>
+    </owl:inverseOf>
+    <rdfs:label xml:lang="en">imports</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >A relation between ontologies, in which one inherits all vocabulary and axioms from the other.</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#isVersionOf">
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#relatedToOntology"/>
+    </rdfs:subPropertyOf>
+    <owl:inverseOf rdf:resource="#hasVersion"/>
+    <rdfs:label xml:lang="en">is version of</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >A relation between an ontology and one of its versions. This assumes that an ontology abstracts from its versions.</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#isImportedBy">
+    <rdfs:subPropertyOf>
+      <owl:SymmetricProperty rdf:about="#relatedToOntology"/>
+    </rdfs:subPropertyOf>
+    <owl:inverseOf rdf:resource="#imports"/>
+    <rdfs:label xml:lang="en">is imported by</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >A relation between ontologies, in which one inherits all vocabulary and axioms from the other.</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:SymmetricProperty rdf:about="#relatedToOntology">
+    <rdfs:domain rdf:resource="#NetworkedOntology"/>
+    <rdfs:range rdf:resource="#NetworkedOntology"/>
+    <owl:inverseOf rdf:resource="#relatedToOntology"/>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Any relation between two (networked) ontologies.</rdfs:comment>
+    <rdfs:label xml:lang="en">related to ontology</rdfs:label>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:SymmetricProperty>
+  <codkernel:KnowledgeType rdf:ID="OntologyKType">
+    <rdfs:label xml:lang="en">Ontology KType</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >The Ontology knowledge type.</rdfs:comment>
+  </codkernel:KnowledgeType>
+  <codkernel:KnowledgeType rdf:ID="OntologyElementKType">
+    <rdfs:label xml:lang="en">Ontology element KType</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >The OntologyElement knowledge type.</rdfs:comment>
+  </codkernel:KnowledgeType>
+  <rdf:Description rdf:about="http://www.ontologydesignpatterns.org/cp/owl/informationobjectsandrepresentationlanguages.owl#LinguisticObject">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:hasValue>
+          <codkernel:KnowledgeType rdf:ID="LinguisticKType">
+            <rdfs:label xml:lang="en">Linguistic KType</rdfs:label>
+            <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >The LinguisticObject knowledge type.</rdfs:comment>
+          </codkernel:KnowledgeType>
+        </owl:hasValue>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#isClassifiedBy"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </rdf:Description>
+</rdf:RDF>

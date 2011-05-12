@@ -1,11 +1,6 @@
 package org.apache.stanbol.ontologymanager.ontonet.session;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -20,14 +15,13 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session.State;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -35,8 +29,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class TestSessions {
 
-	public static IRI baseIri = IRI.create(Constants.base),
-			baseIri2 = IRI.create(Constants.base2),
+	public static IRI baseIri = IRI.create(Constants.PEANUTS_MAIN_BASE),
+			baseIri2 = IRI.create(Constants.PEANUTS_MINOR_BASE),
 			scopeIri1 = IRI.create("http://kres.iks-project.eu/scope/Ranma12"),
 			scopeIri2 = IRI
 					.create("http://kres.iks-project.eu/scope/HokutoNoKen"),
@@ -64,12 +58,12 @@ public class TestSessions {
 			fail("Could not instantiate ontology space factory");
 		if (scopeFactory == null)
 			fail("Could not instantiate ontology scope factory");
-		OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
+		OWLOntologyManager mgr = onm.getOntologyManagerFactory().createOntologyManager(true);
 		try {
 			src1 = new RootOntologySource(mgr.createOntology(baseIri), null);
 			src2 = new RootOntologySource(mgr.createOntology(baseIri2), null);
 		} catch (OWLOntologyCreationException e) {
-			fail("Could not setup ontology with base IRI " + Constants.base);
+			fail("Could not setup ontology with base IRI " + Constants.PEANUTS_MAIN_BASE);
 		}
 	}
 
@@ -130,10 +124,10 @@ public class TestSessions {
 
 	@Test
 	public void testSessionCreationDestruction() {
-		int size = 500;
+		int size = 100;
 		int initialSize = sesmgr.getRegisteredSessionIDs().size();
 		Set<Session> sessions = new HashSet<Session>();
-		// Create and open 500 sessions.
+		// Create and open many sessions.
 		synchronized (sesmgr) {
 			for (int i = 0; i < size; i++) {
 				Session ses = sesmgr.createSession();

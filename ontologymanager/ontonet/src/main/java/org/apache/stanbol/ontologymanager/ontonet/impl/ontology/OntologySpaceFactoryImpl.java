@@ -16,81 +16,95 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Utility class that generates default implementations of the three types of
- * ontology scope.
+ * Utility class that generates default implementations of the three types of ontology scope.
  * 
  * @author alessandro
  * 
  */
 public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 
-	protected Logger log = LoggerFactory.getLogger(getClass());
+    protected Logger log = LoggerFactory.getLogger(getClass());
 
-	protected ScopeRegistry registry;
-	
-	/* 
-	 * The ClerezzaOntologyStorage (local to OntoNet) has been changed with
-	 * PersistenceStore (general from Stanbol)
-	 *
-	 */
-	//protected ClerezzaOntologyStorage storage;
-	protected ClerezzaOntologyStorage storage;
+    protected ScopeRegistry registry;
 
-	public OntologySpaceFactoryImpl(ScopeRegistry registry, ClerezzaOntologyStorage storage) {
-		this.registry = registry;
-		this.storage = storage;
-	}
+    /*
+     * The ClerezzaOntologyStorage (local to OntoNet) has been changed with PersistenceStore (general from
+     * Stanbol)
+     */
+    protected ClerezzaOntologyStorage storage;
+    
+    protected OntologyManagerFactory mgrFactory;
 
-	/*
-	 * (non-Javadoc)
-	 * @see eu.iksproject.kres.api.manager.ontology.OntologySpaceFactory#createCoreOntologySpace(org.semanticweb.owlapi.model.IRI, eu.iksproject.kres.api.manager.ontology.OntologyInputSource)
-	 */
-	@Override
-	public CoreOntologySpace createCoreOntologySpace(IRI scopeID,
-			OntologyInputSource coreSource) {
-		CoreOntologySpace s = new CoreOntologySpaceImpl(scopeID, storage);
-		setupSpace(s, scopeID, coreSource);
-		return s;
-	}
+    public OntologySpaceFactoryImpl(ScopeRegistry registry, ClerezzaOntologyStorage storage, OntologyManagerFactory mgrFactory) {
+        this.registry = registry;
+        this.storage = storage;
+        this.mgrFactory = mgrFactory;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see eu.iksproject.kres.api.manager.ontology.OntologySpaceFactory#createCustomOntologySpace(org.semanticweb.owlapi.model.IRI, eu.iksproject.kres.api.manager.ontology.OntologyInputSource)
-	 */
-	@Override
-	public CustomOntologySpace createCustomOntologySpace(IRI scopeID,
-			OntologyInputSource customSource) {
-		CustomOntologySpace s = new CustomOntologySpaceImpl(scopeID, storage);
-		setupSpace(s, scopeID, customSource);
-		return s;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory#createCoreOntologySpace
+     * (org.semanticweb.owlapi.model.IRI,
+     * org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource)
+     */
+    @Override
+    public CoreOntologySpace createCoreOntologySpace(IRI scopeID, OntologyInputSource coreSource) {
+        CoreOntologySpace s = new CoreOntologySpaceImpl(scopeID, storage,mgrFactory.createOntologyManager(true));
+        configureSpace(s, scopeID, coreSource);
+        return s;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see eu.iksproject.kres.api.manager.ontology.OntologySpaceFactory#createSessionOntologySpace(org.semanticweb.owlapi.model.IRI)
-	 */
-	@Override
-	public SessionOntologySpace createSessionOntologySpace(IRI scopeID) {
-		SessionOntologySpace s = new SessionOntologySpaceImpl(scopeID, storage);
-		// s.setUp();
-		return s;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory#createCustomOntologySpace
+     * (org.semanticweb.owlapi.model.IRI,
+     * org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource)
+     */
+    @Override
+    public CustomOntologySpace createCustomOntologySpace(IRI scopeID, OntologyInputSource customSource) {
+        CustomOntologySpace s = new CustomOntologySpaceImpl(scopeID, storage,mgrFactory.createOntologyManager(true));
+        configureSpace(s, scopeID, customSource);
+        return s;
+    }
 
-	private void setupSpace(OntologySpace s, IRI scopeID,
-			OntologyInputSource rootSource) {
-		// FIXME: ensure that this is not null
-		OntologyScope parentScope = registry.getScope(scopeID);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory#createSessionOntologySpace
+     * (org.semanticweb.owlapi.model.IRI)
+     */
+    @Override
+    public SessionOntologySpace createSessionOntologySpace(IRI scopeID) {
+        SessionOntologySpace s = new SessionOntologySpaceImpl(scopeID, storage,mgrFactory.createOntologyManager(true));
+        // s.setUp();
+        return s;
+    }
 
-		if (parentScope != null && parentScope instanceof OntologySpaceListener)
-			s.addOntologySpaceListener((OntologySpaceListener) parentScope);
-		// Set the supplied ontology's parent as the root for this space.
-		try {
-			s.setTopOntology(rootSource, true);
-		} catch (UnmodifiableOntologySpaceException e) {
-			log.error("KReS :: Ontology space " + s.getID()
-					+ " found locked at creation time!", e);
-		}
-		// s.setUp();
-	}
+    /**
+     * Utility method for configuring ontology spaces after creating them.
+     * 
+     * @param s
+     * @param scopeID
+     * @param rootSource
+     */
+    private void configureSpace(OntologySpace s, IRI scopeID, OntologyInputSource rootSource) {
+        // FIXME: ensure that this is not null
+        OntologyScope parentScope = registry.getScope(scopeID);
+
+        if (parentScope != null && parentScope instanceof OntologySpaceListener) s
+                .addOntologySpaceListener((OntologySpaceListener) parentScope);
+        // Set the supplied ontology's parent as the root for this space.
+        try {
+            s.setTopOntology(rootSource, true);
+        } catch (UnmodifiableOntologySpaceException e) {
+            log.error("Ontology space " + s.getID() + " was found locked at creation time!", e);
+        }
+        // s.setUp();
+    }
 
 }

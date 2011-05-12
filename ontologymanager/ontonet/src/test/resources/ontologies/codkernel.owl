@@ -1,0 +1,268 @@
+<?xml version="1.0"?>
+<rdf:RDF
+    xmlns:intensionextension="http://www.ontologydesignpatterns.org/cp/owl/intensionextension.owl#"
+    xmlns:taskexecution="http://www.ontologydesignpatterns.org/cp/owl/taskexecution.owl#"
+    xmlns="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#"
+    xmlns:description="http://www.ontologydesignpatterns.org/cp/owl/description.owl#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:descriptionandsituation="http://www.ontologydesignpatterns.org/cp/owl/descriptionandsituation.owl#"
+    xmlns:representation="http://www.ontologydesignpatterns.org/cp/owl/informationobjectsandrepresentationlanguages.owl#"
+    xmlns:topic="http://www.ontologydesignpatterns.org/cp/owl/topic.owl#"
+    xmlns:situation="http://www.ontologydesignpatterns.org/cp/owl/situation.owl#"
+  xml:base="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/topic.owl"/>
+    <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/informationobjectsandrepresentationlanguages.owl"/>
+    <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/taskexecution.owl"/>
+    <rdfs:comment>The core vocabulary of ontology design. This only contains the main classes of Codo-Light, aligned to ontology design patterns.</rdfs:comment>
+    <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/descriptionandsituation.owl"/>
+    <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >0.1: Designed by Aldo Gangemi
+0.2: Added pattern for representation languages (as asked by Wim Peters), which allows generalization over programming, logical, grammars, and natural languages.
+0.3: Corrected bug: wrong subClassOf axiom (DesignOperation rdfs:subClassOf KnowledgeResource) revised as: DesignOperation rdfs:subClassOf taskexecution:Action
+0.4: Changed some comments, added English labels
+0.5: Moved here some classes from refactoring of petals in the corolla library: InterfaceObject, InteractionPattern, UserType, KnowledgeType.</owl:versionInfo>
+  </owl:Ontology>
+  <owl:Class rdf:ID="OntologyElement">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="KnowledgeResource"/>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class rdf:ID="Ontology"/>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/partof.owl#isPartOf"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/informationobjectsandrepresentationlanguages.owl#FormalExpression"/>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >An (identified) element from an ontology.</rdfs:comment>
+    <rdfs:label xml:lang="en">Ontology element</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:about="#Ontology">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/topic.owl#Topic"/>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/topic.owl#hasTopic"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#KnowledgeResource"/>
+    </rdfs:subClassOf>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Here: a (usually complex) typed formal expression, which can be realized either analogically or as a non-executable digital object.
+An ontology is a typed logical theory, i.e. its characteristic elements are named after a non-logical vocabulary.
+Ontology is taken here independently from a particular logical language, but excludes languages that do not have a formal semantics (e.g. folksonomies, lexicons, thesauri).</rdfs:comment>
+    <rdfs:label xml:lang="en">Ontology</rdfs:label>
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/informationobjectsandrepresentationlanguages.owl#FormalExpression"/>
+  </owl:Class>
+  <owl:Class rdf:ID="KnowledgeType">
+    <rdfs:comment>A type of KnowledgeResource. Used as the reification for the intension for any class of knowledge resources.
+Within codologht, knowledge types are very relevant, because they are used to annotate tools, workflows and functionalities with input and output types, to obtain awareness of design aspects covered by design tools, and finally to determine what kind of annotations are maintained across the ontology design lifecycle.</rdfs:comment>
+    <rdfs:subClassOf>
+      <rdf:Description rdf:about="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#Concept">
+        <owl:equivalentClass>
+          <rdf:Description rdf:about="http://www.ontologydesignpatterns.org/cp/owl/description.owl#Concept">
+            <owl:equivalentClass rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#Concept"/>
+            <owl:equivalentClass>
+              <rdf:Description rdf:about="http://www.ontologydesignpatterns.org/cp/owl/topic.owl#Concept">
+                <owl:equivalentClass rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/description.owl#Concept"/>
+                <owl:equivalentClass rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#Concept"/>
+              </rdf:Description>
+            </owl:equivalentClass>
+          </rdf:Description>
+        </owl:equivalentClass>
+        <owl:equivalentClass rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/topic.owl#Concept"/>
+      </rdf:Description>
+    </rdfs:subClassOf>
+    <rdfs:label xml:lang="en">Knowledge type</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:ID="UserType">
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/objectrole.owl#Role"/>
+    <rdfs:label xml:lang="en">User type</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:ID="DesignRationale">
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/description.owl#Description"/>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Here: the principles behind the motivations underlying design making, involving design operations, patterns, and rational agents (the designers). An Argument is usually an application of a DesignRationale.
+Ontology design rationales typically include different types of semantics (extensional, intensional, linguistic, approximate, etc.), best practices, etc. For example, when argumenting about the subClass axiom: 'EuropeanCountry subClassOf (hasTerritory all (hasLocation Europe))', someone can have a negative Position motivated by the counterexample Argument: 'Turkey is a European country but has territories outside Europe'. This argument is motivated by the DesignRationale: 'extensional semantics', by which all instances of a class must have the properties asserted as axioms for the class; notice that a different rationale, e.g. 'approximate semantics', might support the axiom, although this may lead to inconsistencies when a crisp OWL reasoner is applied to the ontology.</rdfs:comment>
+    <rdfs:label xml:lang="en">Design rationale</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:ID="DesignWorkflow">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class rdf:about="#KnowledgeResource"/>
+        </owl:someValuesFrom>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="reuses"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="needs"/>
+        </owl:onProperty>
+        <owl:someValuesFrom>
+          <owl:Class rdf:ID="DesignFunctionality"/>
+        </owl:someValuesFrom>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#needs"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/agentrole.owl#Agent"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Any workflow that guides the interaction between ontology designers.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/description.owl#Description"/>
+    <rdfs:label xml:lang="en">Design workflow</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:ID="DesignTool">
+    <rdfs:comment>A tool that implements ontology design functionalities. It has at least one input type, a user type, implements at least one functionality, with at least one interaction pattern, and is maintained by at least one project.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/objectrole.owl#Object"/>
+    <rdfs:label xml:lang="en">Design tool</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:ID="InterfaceObject">
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/informationobjectsandrepresentationlanguages.owl#IconicObject"/>
+    <rdfs:label xml:lang="en">Interface object</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:ID="SoftwareEngineeringPattern">
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/description.owl#Description"/>
+    <rdfs:comment>A software engineering pattern.</rdfs:comment>
+    <rdfs:label xml:lang="en">Software engineering pattern</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:ID="Project">
+    <rdfs:label xml:lang="en">Project</rdfs:label>
+    <rdfs:comment>Here a project is conceptualized as it is intended in ontology engineering or software engineering tools, or in an open source platform such as Sourceforge. In the context of codolight a project collects all data related to an ontology project.</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#KnowledgeResource"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:nodeID="A0">
+    <owl:unionOf rdf:parseType="Collection">
+      <owl:Class rdf:ID="OntologyProject"/>
+      <owl:Class rdf:about="#DesignWorkflow"/>
+      <owl:Class rdf:about="#SoftwareEngineeringPattern"/>
+    </owl:unionOf>
+  </owl:Class>
+  <owl:Class rdf:ID="DesignOperation">
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/taskexecution.owl#Action"/>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >An Action carried out to accomplish some required Functionality.
+Design operations are the prominent entities in a design making situation.
+In the requirement-specification-implementation cycle, ideally, each design operation should be performed, assisted, or represented by a computational operation.</rdfs:comment>
+    <rdfs:label xml:lang="en">Design operation</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:about="#OntologyProject">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#reuses"/>
+        </owl:onProperty>
+        <owl:someValuesFrom>
+          <owl:Class rdf:about="#KnowledgeResource"/>
+        </owl:someValuesFrom>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#needs"/>
+        </owl:onProperty>
+        <owl:someValuesFrom>
+          <owl:Class rdf:about="#DesignFunctionality"/>
+        </owl:someValuesFrom>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#needs"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/agentrole.owl#Agent"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/description.owl#Description"/>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Any project that aims to manage the lifecycle of an ontology. As all projects, ontology projects inherit the characteristics and constraints typical of projects: teams, persons, schedules, time, funding, strategical considerations, etc.</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/partof.owl#hasPart"/>
+        <owl:someValuesFrom rdf:resource="#DesignWorkflow"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:label xml:lang="en">Ontology project</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:nodeID="A1">
+    <owl:unionOf rdf:parseType="Collection">
+      <owl:Class rdf:about="#OntologyProject"/>
+      <owl:Class rdf:about="#DesignWorkflow"/>
+    </owl:unionOf>
+  </owl:Class>
+  <owl:Class rdf:ID="DesignSolution">
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/situation.owl#Situation"/>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >A structural situation (state) of a (part of an) ontology, which includes only formal expressions and their relations.
+For example, the occurrence of a subClassOf axiom (which is an ontology element) and its elements, as included in a design solution complying to the OWL Macro: 'subClassOf an intersection between a Class and a Restriction', where OWL Macros are ontology design patterns.
+Notice that not all states of an ontology or its parts are DesignSolutions.</rdfs:comment>
+    <rdfs:label xml:lang="en">Design solution</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:ID="InteractionPattern">
+    <rdfs:comment>A SoftwareEngineeringPattern that describes how some configurations of InterfaceObject(s) can be implemented for a certain ComputationalTask and UserType. Some examples are provided from an online library.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#SoftwareEngineeringPattern"/>
+    <rdfs:label xml:lang="en">Interaction pattern</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:about="#KnowledgeResource">
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/intensionextension.owl#InformationObject"/>
+    <rdfs:comment xml:lang="en">A knowledge object used as a resource in an OntologyProject.</rdfs:comment>
+    <rdfs:label xml:lang="en">Knowledge resource</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:about="#DesignFunctionality">
+    <rdfs:comment xml:lang="en">An ontology design functionality is considered here as a task to be performed within an ontology project, e.g. an 'evaluation' functionality. Not all functionalities are expected to be types of specific design operations (i.e.they can involve more than one type), neither computational tasks (i.e. functionalities that are implemented in a tool).</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/taskrole.owl#Task"/>
+    <rdfs:label xml:lang="en">Design functionality</rdfs:label>
+  </owl:Class>
+  <owl:ObjectProperty rdf:about="#reuses">
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="isReusedBy"/>
+    </owl:inverseOf>
+    <rdfs:range rdf:resource="#KnowledgeResource"/>
+    <rdfs:subPropertyOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/descriptionandsituation.owl#describes"/>
+    <rdfs:domain rdf:nodeID="A1"/>
+    <rdfs:label xml:lang="en">reuses</rdfs:label>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#needs">
+    <rdfs:subPropertyOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/descriptionandsituation.owl#describes"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:ID="isNeededBy"/>
+    </owl:inverseOf>
+    <rdfs:label xml:lang="en">needs</rdfs:label>
+    <rdfs:domain rdf:nodeID="A0"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#isReusedBy">
+    <owl:inverseOf rdf:resource="#reuses"/>
+    <rdfs:domain rdf:resource="#KnowledgeResource"/>
+    <rdfs:subPropertyOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/descriptionandsituation.owl#isDescribedBy"/>
+    <rdfs:range rdf:nodeID="A1"/>
+    <rdfs:label xml:lang="en">is reused by</rdfs:label>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#isNeededBy">
+    <owl:inverseOf rdf:resource="#needs"/>
+    <rdfs:subPropertyOf rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/descriptionandsituation.owl#isDescribedBy"/>
+    <rdfs:domain rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:label xml:lang="en">is needed by</rdfs:label>
+    <rdfs:range rdf:nodeID="A0"/>
+  </owl:ObjectProperty>
+</rdf:RDF>
+
+<!-- Created with TopBraid Composer -->

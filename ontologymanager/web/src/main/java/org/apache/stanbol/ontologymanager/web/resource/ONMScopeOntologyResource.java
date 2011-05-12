@@ -20,6 +20,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
@@ -29,7 +30,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.web.util.OntologyRenderUtils;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLImportsDeclaration;
@@ -41,8 +41,6 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.util.OWLOntologyMerger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.apache.stanbol.commons.web.base.format.KRFormat;
 
 /**
  * This resource represents ontologies loaded within a scope.
@@ -136,7 +134,7 @@ if (storage == null) {
         if (space != null) ont = space.getOntology(ontiri);
 
         if (ont == null) {
-            OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+            OWLOntologyManager man = onm.getOntologyManagerFactory().createOntologyManager(true);
             final Set<OWLOntology> ontologies = scope.getSessionSpace(ontiri).getOntologies();
 
             OWLOntologySetProvider provider = new OWLOntologySetProvider() {

@@ -8,6 +8,13 @@ import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.NoSuchStoreExcep
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
+/**
+ * A hack that stores ontologies in volatile memory (e.g. for unit tests) but prevents the incessant logging
+ * of related error messages.
+ * 
+ * @author alessandro
+ * 
+ */
 public class InMemoryOntologyStorage extends ClerezzaOntologyStorage {
 
     private Map<IRI,OWLOntology> store;
@@ -42,8 +49,7 @@ public class InMemoryOntologyStorage extends ClerezzaOntologyStorage {
     }
 
     public OWLOntology sparqlConstruct(String arg0, String arg1) {
-        // TODO Auto-generated method stub
-        return null;
+        return super.sparqlConstruct(arg0, arg1);
     }
 
     public void store(OWLOntology arg0) {

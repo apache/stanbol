@@ -1,0 +1,146 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY participation "http://www.ontologydesignpatterns.org/cp/owl/participation.owl#" >
+    <!ENTITY cpannotationschema "http://www.ontologydesignpatterns.org/schemas/cpannotationschema.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.ontologydesignpatterns.org/cp/owl/participation.owl#"
+     xml:base="http://www.ontologydesignpatterns.org/cp/owl/participation.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:cpannotationschema="http://www.ontologydesignpatterns.org/schemas/cpannotationschema.owl#"
+     xmlns:participation="http://www.ontologydesignpatterns.org/cp/owl/participation.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://www.ontologydesignpatterns.org/cp/owl/participation.owl">
+        <rdfs:label rdf:datatype="&rdf;PlainLiteral">participation</rdfs:label>
+        <owl:versionInfo rdf:datatype="&xsd;string">1.1
+- Improved annotation
+1.0 
+- Created by Aldo Gangemi and Valentina Presutti</owl:versionInfo>
+        <owl:versionInfo rdf:datatype="&xsd;string">1.1 added rdfs:isDefinedBy for all named entities</owl:versionInfo>
+        <cpannotationschema:scenarios rdf:datatype="&xsd;string">Aldo Gangemi participated in the premiere of La Dolce Vita.</cpannotationschema:scenarios>
+        <cpannotationschema:relatedCPs rdf:datatype="&xsd;string">Co-participation allows to model the relation between two objects that 
+par ticipate in a same event (implicitly); n-ary participation allows to model par ticipation over different dimensions e.g., temporal, spatial, etc., as well as explicitly relate more than one object to the same event; object role, n-ary classiﬁcation are examples of CPs that can be composed with this CP.</cpannotationschema:relatedCPs>
+        <cpannotationschema:hasConsequences rdf:datatype="&xsd;string">It is possible to model whatever relation between objects and events. Using cardinality restrictions appropriately allows to limit the number of participants, e.g. &#39;life of&#39; is a specialization of this pattern that requires a functional object property (cardinality 1. . .1).
+This is a non-temporal version of the particpation relation. If we need a time-indexed relation, use http://ontologydesignpatterns.owl/cp/owl/timeindexedparticipation.owl</cpannotationschema:hasConsequences>
+        <rdfs:comment rdf:datatype="&rdf;PlainLiteral">The basic participation pattern, without temporal indexing. 
+It clones equivalent elements from DOLCE-UltraLite.</rdfs:comment>
+        <cpannotationschema:relatedCPs rdf:datatype="&rdf;PlainLiteral">Time indexed participation</cpannotationschema:relatedCPs>
+        <cpannotationschema:hasIntent rdf:datatype="&xsd;string">To represent participation of an object in an event.</cpannotationschema:hasIntent>
+        <cpannotationschema:coversRequirements rdf:datatype="&xsd;string">Which objects do participate in this event? Which events do this object participate in?</cpannotationschema:coversRequirements>
+        <cpannotationschema:extractedFrom rdf:datatype="&rdf;PlainLiteral">http://ontologydesignpatterns.org/ont/dul/DUL.owl</cpannotationschema:extractedFrom>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/schemas/cpannotationschema.owl"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:AnnotationProperty rdf:about="&owl;versionInfo"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;hasConsequences"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;scenarios"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;extractedFrom"/>
+    <owl:AnnotationProperty rdf:about="&rdfs;isDefinedBy"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;coversRequirements"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;hasIntent"/>
+    <owl:AnnotationProperty rdf:about="&rdfs;label"/>
+    <owl:AnnotationProperty rdf:about="&rdfs;comment"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;relatedCPs"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/participation.owl#hasParticipant -->
+
+    <owl:ObjectProperty rdf:about="&participation;hasParticipant">
+        <rdfs:label xml:lang="en">has participant</rdfs:label>
+        <rdfs:isDefinedBy rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/participation.owl"/>
+        <rdfs:domain rdf:resource="&participation;Event"/>
+        <rdfs:range rdf:resource="&participation;Object"/>
+        <owl:inverseOf rdf:resource="&participation;isParticipantIn"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/participation.owl#isParticipantIn -->
+
+    <owl:ObjectProperty rdf:about="&participation;isParticipantIn">
+        <rdfs:label xml:lang="en">is participant in</rdfs:label>
+        <rdfs:isDefinedBy rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/participation.owl"/>
+        <rdfs:range rdf:resource="&participation;Event"/>
+        <rdfs:domain rdf:resource="&participation;Object"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/participation.owl#Event -->
+
+    <owl:Class rdf:about="&participation;Event">
+        <rdfs:label xml:lang="en">Event</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&participation;hasParticipant"/>
+                <owl:someValuesFrom rdf:resource="&participation;Object"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="&participation;Object"/>
+        <rdfs:comment>Any physical, social, or mental process, event, or state.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/participation.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/participation.owl#Object -->
+
+    <owl:Class rdf:about="&participation;Object">
+        <rdfs:label xml:lang="en">Object</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&participation;isParticipantIn"/>
+                <owl:someValuesFrom rdf:resource="&participation;Event"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>Any physical, social, or mental object, or substance</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/participation.owl"/>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.1.0.1602) http://owlapi.sourceforge.net -->
+

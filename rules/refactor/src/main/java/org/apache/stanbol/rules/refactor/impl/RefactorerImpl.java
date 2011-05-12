@@ -421,14 +421,14 @@ public class RefactorerImpl implements Refactorer {
         // OntModel ontModel =
         // jenaToOwlConvert.ModelOwlToJenaConvert(inputOntology, "RDF/XML");
 
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+//        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
         
         RuleList ruleList = recipe.getkReSRuleList();
         log.info("RULE LIST SIZE : " + ruleList.size());
 
-        OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
-        OWLOntologyManager ontologyManager2 = OWLManager.createOWLOntologyManager();
+//        OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
+//        OWLOntologyManager ontologyManager2 = OWLManager.createOWLOntologyManager();
 
         MGraph unionMGraph = new SimpleMGraph();
 

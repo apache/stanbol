@@ -3,10 +3,10 @@ package org.apache.stanbol.ontologymanager.web.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxOntologyFormat;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLFunctionalSyntaxOntologyFormat;
 import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
@@ -24,8 +24,6 @@ import org.semanticweb.owlapi.model.OWLOntologyFormat;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
-import org.apache.stanbol.commons.web.base.format.KRFormat;
-
 /**
  * Contains hacks to regular ontology renderers with replacements for input statements.
  * 
@@ -42,10 +40,11 @@ public class OntologyRenderUtils {
 	 * @return
 	 * @throws OWLOntologyStorageException
 	 */
+    @Deprecated
 	public static String renderOntology(OWLOntology ont,
 			OWLOntologyFormat format, String rewritePrefix, ONManager onm)
 			throws OWLOntologyStorageException {
-		OWLOntologyManager tmpmgr = OWLManager.createOWLOntologyManager();
+		OWLOntologyManager tmpmgr = onm.getOntologyManagerFactory().createOntologyManager(true);
 		OWLDataFactory df = tmpmgr.getOWLDataFactory();
 
 		// Now the hack
@@ -92,10 +91,11 @@ public class OntologyRenderUtils {
 		return tgt.toString();
 	}
 
+	@Deprecated
 	public static String renderOntology(OWLOntology ont, String format,
 			String rewritePrefix, ONManager onm)
 			throws OWLOntologyStorageException {
-		OWLOntologyManager tmpmgr = OWLManager.createOWLOntologyManager();
+		OWLOntologyManager tmpmgr = onm.getOntologyManagerFactory().createOntologyManager(true);
 		OWLDataFactory df = tmpmgr.getOWLDataFactory();
 		StringDocumentTarget tgt = new StringDocumentTarget();
 

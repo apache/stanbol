@@ -11,7 +11,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class StructureTest {
 
-	private static IRI baseIri = IRI.create(Constants.base);
+	private static IRI baseIri = IRI.create(Constants.PEANUTS_MAIN_BASE);
 
 	private static OWLOntologyManager ontMgr = null;
 

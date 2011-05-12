@@ -11,34 +11,34 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
+/**
+ * A registry loader is a toolkit for loading all ontologies indexed by an ontology registry, or those
+ * referenced by one of the libraries within a registry.
+ * 
+ * @author alessandro
+ * 
+ */
 public interface RegistryLoader {
 
-	
-	Set<OWLOntology> gatherOntologies(RegistryItem registryItem,
-            OWLOntologyManager manager, boolean recurseRegistries)
-			throws OWLOntologyCreationException;
-			
-	RegistryLibrary getLibrary(Registry reg, IRI libraryID);
-	
-	Object getParent(Object child);
+    Set<OWLOntology> gatherOntologies(RegistryItem registryItem,
+                                      OWLOntologyManager manager,
+                                      boolean recurseRegistries) throws OWLOntologyCreationException;
 
-	boolean hasChildren(Object parent);
+    RegistryLibrary getLibrary(Registry reg, IRI libraryID);
 
-	boolean hasLibrary(Registry reg, IRI libraryID);
+    Object getParent(Object child);
 
-//	public boolean isPrintingLoadedOntologies();
+    boolean hasChildren(Object parent);
 
-	void loadLocations() throws RegistryContentException;
-	
-	
-	/**
-	 * The ontology at <code>physicalIRI</code> may in turn include more than
-	 * one registry.
-	 * 
-	 * @param physicalIRI
-	 * @return
-	 */
+    boolean hasLibrary(Registry reg, IRI libraryID);
+
+    void loadLocations() throws RegistryContentException;
+
+    /**
+     * The ontology at <code>physicalIRI</code> may in turn include more than one registry.
+     * 
+     * @param physicalIRI
+     * @return
+     */
     Set<Registry> loadRegistriesEager(IRI physicalIRI);
-
-//	public void setPrintLoadedOntologies(boolean doPrint);
 }

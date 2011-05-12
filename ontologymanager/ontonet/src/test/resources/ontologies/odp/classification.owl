@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY classification "http://www.ontologydesignpatterns.org/cp/owl/classification.owl#" >
+    <!ENTITY cpannotationschema "http://www.ontologydesignpatterns.org/schemas/cpannotationschema.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#"
+     xml:base="http://www.ontologydesignpatterns.org/cp/owl/classification.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:cpannotationschema="http://www.ontologydesignpatterns.org/schemas/cpannotationschema.owl#"
+     xmlns:classification="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://www.ontologydesignpatterns.org/cp/owl/classification.owl">
+        <rdfs:label rdf:datatype="&rdf;PlainLiteral">classification</rdfs:label>
+        <owl:versionInfo rdf:datatype="&xsd;string">1.1 added rdfs:isDefinedBy for all named entities</owl:versionInfo>
+        <owl:versionInfo rdf:datatype="&xsd;string">Created by Valentina Presutti</owl:versionInfo>
+        <cpannotationschema:hasConsequences rdf:datatype="&xsd;string">It is possible to make asser tions about e.g., categories, types, roles, which are typically considered at the meta-level of an ontology. Instances of Concept reify such elements, which are therefore put in the ordinary domain of an ontology. It is not possible to parametrize the classiﬁcation over different dimensions e.g., time, space, etc. </cpannotationschema:hasConsequences>
+        <cpannotationschema:scenarios rdf:datatype="&xsd;string">Mac OSX 10.5 is classiﬁed as an an operating system in the Fujitsu-Siemens product catalog.</cpannotationschema:scenarios>
+        <rdfs:comment rdf:datatype="&rdf;PlainLiteral">The classification content ontology design pattern. This CP represents the realtions between concepts e.g., roles, task, and entities to which concepts are assigned to e.g., person, activities. The CP is extracted form DOLCE Ultra Lite ontology.</rdfs:comment>
+        <cpannotationschema:hasIntent rdf:datatype="&xsd;string">To represent the relations between concepts (roles, task, parameters) and entities (person, events, values), which concepts can be assigned to. To formalize the application (e.g. tagging) of informal knowledge 
+organization systems such as lexica, thesauri, subject directories, folksonomies, etc., where concepts are ﬁrst-order elements.</cpannotationschema:hasIntent>
+        <cpannotationschema:relatedCPs rdf:datatype="&xsd;string">Typically combined with descriptionandsituation. It is specialized by cat:objectrole. The n-ary classiﬁcation CP provides an alternative to this if classiﬁcation has to be qualiﬁed over different dimensions.</cpannotationschema:relatedCPs>
+        <cpannotationschema:coversRequirements rdf:datatype="&xsd;string">What concept is assigned to this entity? Which category does this entity belong to?</cpannotationschema:coversRequirements>
+        <cpannotationschema:extractedFrom rdf:datatype="&rdf;PlainLiteral">http://www.ontologydesignpatterns.org/ont/dul/DUL.owl</cpannotationschema:extractedFrom>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/schemas/cpannotationschema.owl"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:AnnotationProperty rdf:about="&owl;versionInfo"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;hasConsequences"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;scenarios"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;extractedFrom"/>
+    <owl:AnnotationProperty rdf:about="&rdfs;isDefinedBy"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;coversRequirements"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;hasIntent"/>
+    <owl:AnnotationProperty rdf:about="&rdfs;label"/>
+    <owl:AnnotationProperty rdf:about="&rdfs;comment"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;relatedCPs"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/classification.owl#classifies -->
+
+    <owl:ObjectProperty rdf:about="&classification;classifies">
+        <rdfs:label xml:lang="en">classifies</rdfs:label>
+        <rdfs:label xml:lang="it">classifica</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">A relation between a Concept and an Entity, e.g. the Role &#39;student&#39; classifies a Person &#39;John&#39;.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl"/>
+        <rdfs:domain rdf:resource="&classification;Concept"/>
+        <owl:inverseOf rdf:resource="&classification;isClassifiedBy"/>
+        <rdfs:range rdf:resource="&owl;Thing"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/classification.owl#isClassifiedBy -->
+
+    <owl:ObjectProperty rdf:about="&classification;isClassifiedBy">
+        <rdfs:label xml:lang="en">is classified by</rdfs:label>
+        <rdfs:label xml:lang="it">è classificato da</rdfs:label>
+        <rdfs:comment>A relation between a Concept and an Entity, e.g. &#39;John is considered a typical rude man&#39;; your last concert constitutes the achievement of a lifetime; &#39;20-year-old means she&#39;s mature enough&#39;.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl"/>
+        <rdfs:range rdf:resource="&classification;Concept"/>
+        <rdfs:domain rdf:resource="&owl;Thing"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/classification.owl#Concept -->
+
+    <owl:Class rdf:about="&classification;Concept">
+        <rdfs:label xml:lang="en">Concept</rdfs:label>
+        <rdfs:label xml:lang="it">Concetto</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">A concept is a Social Object. 
+The classifies relation relates concepts to entities at some time, but time can only be expressed in the alternative pattern: timeindexedclassification.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/classification.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.1.0.1602) http://owlapi.sourceforge.net -->
+

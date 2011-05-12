@@ -41,6 +41,7 @@ public class SessionRenderer {
 
 	}
 
+	@Deprecated
 	public static String getSessionMetadataRDF(Session session) {
 		OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
 		OWLOntology ont = null;

@@ -1,0 +1,222 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY taskrole "http://www.ontologydesignpatterns.org/cp/owl/taskrole.owl#" >
+    <!ENTITY agentrole "http://www.ontologydesignpatterns.org/cp/owl/agentrole.owl#" >
+    <!ENTITY objectrole "http://www.ontologydesignpatterns.org/cp/owl/objectrole.owl#" >
+    <!ENTITY taskexecution "http://www.ontologydesignpatterns.org/cp/owl/taskexecution.owl#" >
+    <!ENTITY participation "http://www.ontologydesignpatterns.org/cp/owl/participation.owl#" >
+    <!ENTITY classification "http://www.ontologydesignpatterns.org/cp/owl/classification.owl#" >
+    <!ENTITY cpannotationschema "http://www.ontologydesignpatterns.org/schemas/cpannotationschema.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.ontologydesignpatterns.org/cp/owl/taskexecution.owl#"
+     xml:base="http://www.ontologydesignpatterns.org/cp/owl/taskexecution.owl"
+     xmlns:agentrole="http://www.ontologydesignpatterns.org/cp/owl/agentrole.owl#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:cpannotationschema="http://www.ontologydesignpatterns.org/schemas/cpannotationschema.owl#"
+     xmlns:participation="http://www.ontologydesignpatterns.org/cp/owl/participation.owl#"
+     xmlns:taskrole="http://www.ontologydesignpatterns.org/cp/owl/taskrole.owl#"
+     xmlns:classification="http://www.ontologydesignpatterns.org/cp/owl/classification.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:objectrole="http://www.ontologydesignpatterns.org/cp/owl/objectrole.owl#"
+     xmlns:taskexecution="http://www.ontologydesignpatterns.org/cp/owl/taskexecution.owl#">
+    <owl:Ontology rdf:about="http://www.ontologydesignpatterns.org/cp/owl/taskexecution.owl">
+        <owl:versionInfo rdf:datatype="&xsd;string">1.1 added rdfs:isDefinedBy for all named entities</owl:versionInfo>
+        <owl:versionInfo rdf:datatype="&xsd;string">Created by Aldo Gangemi</owl:versionInfo>
+        <cpannotationschema:scenarios rdf:datatype="&rdf;PlainLiteral">She smiled at us, so obtaining the effect of making us feeling positive.</cpannotationschema:scenarios>
+        <cpannotationschema:relatedCPs rdf:datatype="&rdf;PlainLiteral">The counting as CP available at http://www.ontologydesignpatterns.org/cp/owl/naryclassification.owl allows to represent temporariness of concepts that classify objects. By specializing naryclassification, it is possible to create a temporally-indexed version of taskexecution.
+Its imported component taskrole.owl allows to express also the dependence between tasks and roles.</cpannotationschema:relatedCPs>
+        <cpannotationschema:hasConsequences rdf:datatype="&rdf;PlainLiteral">This CP allows designers to make assertions on roles played by agents without involving the agents that play that roles, and vice versa. It allows to express neither the context type in which tasks are defined, not the particular context in which the action is carried out. Moreover, it does not allow to express the time at which the task is executed through the action (for actions that do not solely executed that certain task).</cpannotationschema:hasConsequences>
+        <cpannotationschema:hasIntent rdf:datatype="&rdf;PlainLiteral">To represent actions through which tasks are executed.</cpannotationschema:hasIntent>
+        <cpannotationschema:hasComponent rdf:datatype="&rdf;PlainLiteral">http://www.ontologydesignpatterns.org/cp/owl/agentrole.owl</cpannotationschema:hasComponent>
+        <cpannotationschema:hasComponent rdf:datatype="&rdf;PlainLiteral">http://www.ontologydesignpatterns.org/cp/owl/participation.owl</cpannotationschema:hasComponent>
+        <cpannotationschema:hasComponent rdf:datatype="&rdf;PlainLiteral">http://www.ontologydesignpatterns.org/cp/owl/taskrole.owl</cpannotationschema:hasComponent>
+        <cpannotationschema:extractedFrom rdf:datatype="&rdf;PlainLiteral">http://www.ontologydesignpatterns.org/ont/dul/DUL.owl</cpannotationschema:extractedFrom>
+        <cpannotationschema:coversRequirements rdf:datatype="&rdf;PlainLiteral">which task is executed through this action? 
+what actions can done in order to execute that task?</cpannotationschema:coversRequirements>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/agentrole.owl"/>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/participation.owl"/>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/taskrole.owl"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:AnnotationProperty rdf:about="&owl;versionInfo"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;hasConsequences"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;scenarios"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;extractedFrom"/>
+    <owl:AnnotationProperty rdf:about="&rdfs;isDefinedBy"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;hasComponent"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;coversRequirements"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;hasIntent"/>
+    <owl:AnnotationProperty rdf:about="&rdfs;label"/>
+    <owl:AnnotationProperty rdf:about="&rdfs;comment"/>
+    <owl:AnnotationProperty rdf:about="&cpannotationschema;relatedCPs"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/classification.owl#classifies -->
+
+    <owl:ObjectProperty rdf:about="&classification;classifies"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/classification.owl#isClassifiedBy -->
+
+    <owl:ObjectProperty rdf:about="&classification;isClassifiedBy"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/participation.owl#hasParticipant -->
+
+    <owl:ObjectProperty rdf:about="&participation;hasParticipant"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/taskexecution.owl#executesTask -->
+
+    <owl:ObjectProperty rdf:about="&taskexecution;executesTask">
+        <rdfs:label xml:lang="en">executes task</rdfs:label>
+        <rdfs:label xml:lang="it">esegue il task</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">A relation between an action and a task, e.g. &#39;putting some water in a pot and putting the pot on a fire until the water starts bubbling&#39; executes the task &#39;boiling&#39;.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/taskexecution.owl"/>
+        <rdfs:subPropertyOf rdf:resource="&classification;isClassifiedBy"/>
+        <rdfs:domain rdf:resource="&taskexecution;Action"/>
+        <owl:inverseOf rdf:resource="&taskexecution;isExecutedIn"/>
+        <rdfs:range rdf:resource="&taskrole;Task"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/taskexecution.owl#isExecutedIn -->
+
+    <owl:ObjectProperty rdf:about="&taskexecution;isExecutedIn">
+        <rdfs:label xml:lang="en">is executed in</rdfs:label>
+        <rdfs:label xml:lang="it">è eseguito mediante</rdfs:label>
+        <rdfs:comment>A relation between an action and a task, e.g. &#39;putting some water in a pot and putting the pot on a fire until the water starts bubbling&#39; executes the task &#39;boiling&#39;.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/taskexecution.owl"/>
+        <rdfs:subPropertyOf rdf:resource="&classification;classifies"/>
+        <rdfs:range rdf:resource="&taskexecution;Action"/>
+        <rdfs:domain rdf:resource="&taskrole;Task"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/agentrole.owl#Agent -->
+
+    <owl:Class rdf:about="&agentrole;Agent"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/objectrole.owl#Object -->
+
+    <owl:Class rdf:about="&objectrole;Object">
+        <owl:equivalentClass rdf:resource="&participation;Object"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/objectrole.owl#Role -->
+
+    <owl:Class rdf:about="&objectrole;Role">
+        <owl:equivalentClass rdf:resource="&taskrole;Role"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/participation.owl#Event -->
+
+    <owl:Class rdf:about="&participation;Event"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/participation.owl#Object -->
+
+    <owl:Class rdf:about="&participation;Object"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/taskexecution.owl#Action -->
+
+    <owl:Class rdf:about="&taskexecution;Action">
+        <rdfs:label xml:lang="en">Action</rdfs:label>
+        <rdfs:label xml:lang="it">Azione</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&participation;Event"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&participation;hasParticipant"/>
+                <owl:someValuesFrom rdf:resource="&agentrole;Agent"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&taskexecution;executesTask"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment rdf:datatype="&xsd;string">An Event with at least one Agent that isParticipantIn it, and that executes a Task that typically isDefinedIn a Plan, Workflow, Project, etc.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/taskexecution.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/taskrole.owl#Role -->
+
+    <owl:Class rdf:about="&taskrole;Role"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/taskrole.owl#Task -->
+
+    <owl:Class rdf:about="&taskrole;Task"/>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.1.0.1602) http://owlapi.sourceforge.net -->
+

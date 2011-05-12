@@ -1,6 +1,6 @@
 package org.apache.stanbol.rules.refactor;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.InputStream;
 import java.util.Dictionary;

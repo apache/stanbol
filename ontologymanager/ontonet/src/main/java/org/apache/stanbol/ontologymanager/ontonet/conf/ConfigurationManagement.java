@@ -1,4 +1,4 @@
-package org.apache.stanbol.ontologymanager.ontonet.impl;
+package org.apache.stanbol.ontologymanager.ontonet.conf;
 
 import static org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyConstants.*;
 
