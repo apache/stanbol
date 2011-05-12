@@ -202,11 +202,6 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
      * a value for {@link #UNINITIALISED_INDEX_ARCHIVE_NAME_KEY}.
      */
     private ArchiveInputStream lookupIndexArchive(ComponentContext context, String solrIndexName,java.util.Properties properties) throws IOException, IllegalStateException {
-        String archiveName = properties.getProperty(UNINITIALISED_INDEX_ARCHIVE_NAME_KEY);
-        if(archiveName == null){
-            throw new IllegalStateException("Found uninitialised index config that does not contain the required "+
-                UNINITIALISED_INDEX_ARCHIVE_NAME_KEY+" property!");
-        }
         //we need to copy the properties to a map
         Map<String,String> propMap;
         if(properties == null){
@@ -217,6 +212,11 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
             for(Entry<Object,Object> entry : properties.entrySet()){
                 propMap.put(entry.getKey().toString(), entry.getValue()!=null?entry.getValue().toString():null);
             }
+        }
+        String archiveName = properties.getProperty(UNINITIALISED_INDEX_ARCHIVE_NAME_KEY);
+        if(archiveName == null){
+            throw new IllegalStateException("Found uninitialised index config that does not contain the required "+
+                UNINITIALISED_INDEX_ARCHIVE_NAME_KEY+" property!");
         }
         propMap.remove(UNINITIALISED_INDEX_ARCHIVE_NAME_KEY);//do not parse this internal property
         InputStream is = dataFileProvider.getInputStream(context.getBundleContext().getBundle().getSymbolicName(), archiveName, propMap);
@@ -285,9 +285,6 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
             throw new IllegalArgumentException("The parsed name of the Solr index MUST NOT be empty");
         }
         File managedCoreContainerDirectory = lookupManagedSolrDir(context);
-        if(solrIndexName == null){ //if the indexName is null
-            return managedCoreContainerDirectory; //return the root directory
-        }
         File coreDir = new File(managedCoreContainerDirectory,solrIndexName);
         if(!coreDir.exists()){
             //first add the index to the list of currently init cores
@@ -467,7 +464,6 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
     protected void activate(ComponentContext context) throws IOException {
         componentContext = context;
         withinOSGI = true;
-        Map<String,java.util.Properties> uninitIndexes;
         synchronized (uninitialisedCores) {
             uninitialisedCores.putAll(loadUninitialisedIndexConfigs(componentContext));
         }
