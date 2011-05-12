@@ -354,15 +354,12 @@ public class ClerezzaYard extends AbstractYard implements Yard {
         return added;
     }
     protected final Representation store(Representation representation,boolean allowCreate,boolean canNotCreateIsError) throws IllegalArgumentException, YardException{
-        log.info("store Representation "+representation.getId());
-//        log.info("  > entityhub size: "+graph.size());
         if(representation == null) {
             return null;
         }
+        log.info("store Representation " + representation.getId());
         if(isRepresentation(representation.getId())){
-//            log.info("  > remove previous version");
             remove(representation.getId());
-//            log.info("  > entityhub size: "+graph.size());
         } else if(!allowCreate){
             if(canNotCreateIsError) {
                 throw new IllegalArgumentException("Parsed Representation "+representation.getId()+" in not managed by this Yard "+getName()+"(id="+getId()+")");
