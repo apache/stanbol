@@ -26,7 +26,7 @@ Within this folder all the
  - distribution files (indexing/distribution)
 will be located.
 
-The indexing itself can be started by 
+The indexing itself can be started by
 java -jar org.apache.stanbol.entityhub.indexing.dbpedia-*-jar-with-dependencies.jar index
 but before doing this please note the points (2), (3) and (4)
 
@@ -36,13 +36,13 @@ All RDF dumps need to be copied to the directory
   indexing/resources/rdfData
 
 The RDF dump of DBpedia.org is splited up in a number of different files.
-The actual files needed depend on the configuration of the mappings 
+The actual files needed depend on the configuration of the mappings
 (indexing/config/mappings.txt). Generally one need to make sure that all the
 RDF dumps with the source data for the specified mappings are available.
 A best is to use the previews of the dumps to check if the data of a dump is
 required or not.
 
-During the initialisation of the Indeing all the RDF files within the 
+During the initialisation of the Indeing all the RDF files within the
 "indexing/resources/rdfData" directory will be imported to an Jena TDB RDF
 triple store. The imported data are stored under
   indexing/resources/tdb
@@ -52,8 +52,8 @@ To avoid (re)importing of already imported resources one need to remove such
 RDF files from the "indexing/resources/rdfData" or - typically the better
 option - rename the "rdfData" folder after the initial run.
 
-It is also save to 
-  - cancel the indexing process after the initialisation has competed 
+It is also save to
+  - cancel the indexing process after the initialisation has competed
     (as soon as the loging says that the indexing has started).
   - load additinal RDF dumps by putting additional RDF files to the "rdfData"
     directory. This files will be added to the others on the next start of the
@@ -63,43 +63,42 @@ It is also save to
 
 The DBpedia.org indexer uses the incomming links from other wikipages to
 calculate the rank of entities. Entities with more incomming links get an
-higher rank.
-A RDF dump containing all outgoing wiki links is available on DBpedia 
-(TODO: add link). This file need to be processed with the following command
-to get an file containing an ordered list of incomming count and the local
-name of the entity.
+higher rank. A RDF dump containing all outgoing wiki links is available
+on DBpedia (page_links_en.nt.bz2). This file need to be processed with the
+following command to get an file containing an ordered list of incomming
+count and the local name of the entity.
 
-time curl http://downloads.dbpedia.org/{version}/en/page_links_en.nt.bz2 \
+curl http://downloads.dbpedia.org/{version}/en/page_links_en.nt.bz2 \
   | bzcat \
-  | sed -e 's/.*<http\:\/\/dbpedia\.org\/resource\/\([^>]*\)> ./\1/'
+  | sed -e 's/.*<http\:\/\/dbpedia\.org\/resource\/\([^>]*\)> ./\1/' \
   | sort \
   | uniq -c  \
   | sort -nr > incoming_links.txt
 
-Depending on the machine and the download speed for the source file the 
-execution of this command will take several hours. 
+Depending on the machine and the download speed for the source file the
+execution of this command will take several hours.
 
-Importnat NOTES:
- - Links to Categories use wrong URLs in the current version (3.6) of the 
+Important NOTES:
+ - Links to Categories use wrong URLs in the current version (3.6) of the
    page_links_en.nt.bz2 dump.
    All categories start with "CAT:{categoryName}" but the correct local name
    would be "Category:{categoryName}". because of this categories would not be
    indexed.
    It is strongly suggested to
     - first check if still Category: is used as prefix (e.g. by checking if
-      http://dbpedia.org/page/Category:Political_culture is still valid) and 
-    - second if that is the case replace all appearances of "CAT:" to "Category:"   
-    
+      http://dbpedia.org/page/Category:Political_culture is still valid) and
+    - second if that is the case replace all appearances of "CAT:" to "Category:"
+
 The resulting file MUST BE copied to
   indexing/resources/incoming_links.txt
-  
+
 There is also the possibility do download a precomputed file form
   TODO: add download loaction
 
 (4) Configuration of the Index
 
  The configurations are contained within the "indexing/config" folder:
-  - indexing.properties: Main configuration for the indexing process. It 
+  - indexing.properties: Main configuration for the indexing process. It
       defines the used components and there configurations. Usually no need to
       make any changes.
   - mapping.txt: Define the fields, data type requirements and languages to be
@@ -115,7 +114,7 @@ There is also the possibility do download a precomputed file form
       value of 0 will result in all entities to be indexed.
   - scoreRange.properties: Can be use to set the upper bound for entities score.
       The entities with the most incomming links will get this score. Entities
-      with no incomming links would get a score of zero.  
+      with no incomming links would get a score of zero.
 
 
 Default configuration:
@@ -126,7 +125,7 @@ of the indexing tool.
 
 The default configuration stores creates an index with the following features:
 
-Languages: 
+Languages:
 By default English, German, France and Italien and all literals without any
 language information are indexed. Pleas note also that one needs to provide
 also the RDF dumps for this languages.
@@ -155,8 +154,8 @@ values defined by "dcterms:subject" are copied to "skos:subject".
 Categories itself are hierarchical. Parent categories can be used by following
 "skos:broader" relations.
 e.g.
-   Berlin -> skos:subject 
-      -> Category:City-states -> skos:broader 
+   Berlin -> skos:subject
+      -> Category:City-states -> skos:broader
            -> Category:Cities -> skos:broader
                -> Category:Populated_places -> skos:broader
                    -> Category:Human_habitats ...
