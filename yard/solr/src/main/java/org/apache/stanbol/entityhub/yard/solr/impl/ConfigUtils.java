@@ -197,9 +197,11 @@ public final class ConfigUtils {
             log.info(String.format("Copy Default Config from jar-file %s to %s (override=%s)",
                 sourceRoot.getName(),rootDir.getAbsolutePath(),override));
             try {
-                for(Enumeration<ZipArchiveEntry> entries = (Enumeration<ZipArchiveEntry>)archive.getEntries();entries.hasMoreElements();){
+                for (@SuppressWarnings("unchecked")
+                Enumeration<ZipArchiveEntry> entries = (Enumeration<ZipArchiveEntry>) archive.getEntries(); entries
+                        .hasMoreElements();) {
                     ZipArchiveEntry entry = entries.nextElement();
-                    if(entry.getName().startsWith(CONFIG_DIR)){
+                    if (entry.getName().startsWith(CONFIG_DIR)) {
                         copyResource(rootDir, archive, entry, CONFIG_DIR, override);
                     }
                 }
@@ -498,9 +500,11 @@ public final class ConfigUtils {
             log.info(String.format("Copy core %s config from jar-file %s to %s (override=%s)",
                 (coreName == null?"":coreName),sourceRoot.getName(),coreDir.getAbsolutePath(),override));
             try {
-                for(Enumeration<ZipArchiveEntry> entries = (Enumeration<ZipArchiveEntry>)archive.getEntries();entries.hasMoreElements();){
+                for (@SuppressWarnings("unchecked")
+                Enumeration<ZipArchiveEntry> entries = (Enumeration<ZipArchiveEntry>) archive.getEntries(); entries
+                        .hasMoreElements();) {
                     ZipArchiveEntry entry = entries.nextElement();
-                    if(entry.getName().startsWith(context)){
+                    if (entry.getName().startsWith(context)) {
                         copyResource(coreDir, archive, entry, context, override);
                     }
                 }

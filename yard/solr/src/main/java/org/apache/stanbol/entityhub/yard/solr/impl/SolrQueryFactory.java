@@ -537,7 +537,6 @@ public class SolrQueryFactory {
                 for(Set<String> andParts : orParts){
                     i++;
                     //add the and constraints to all or
-                    List<StringBuilder> andConstaints;
                     if(i == orParts.size()){
                         //for the last iteration, append the part to the existing constraints
                         for(int j=0;j<constraintsSize;j++){
@@ -549,7 +548,6 @@ public class SolrQueryFactory {
                         for(int j=0;j<constraintsSize;j++){
                             List<StringBuilder> additional = new ArrayList<StringBuilder>(constraints.get(j));
                             encodeAndParts(andParts, additional);
-//                            additional.append(part);
                             constraints.add(additional);
                         }
                     }
