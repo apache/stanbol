@@ -111,17 +111,20 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
      */
     @Reference
     protected ReferencedSiteManager siteManager;
+
     /**
      * This is the configured name of the referenced Site used to find entities. The
      * {@link ReferencedSiteManager} service of the RICK is used to get the actual {@link ReferencedSite}
      * instance for each request to this Engine.
      */
     protected String referencedSiteID;
+
     /**
      * The default value for the Execution of this Engine. Currently set to
      * {@link EnhancementJobManager#DEFAULT_ORDER}
      */
     public static final Integer defaultOrder = ORDERING_EXTRACTION_ENHANCEMENT;
+
     /**
      * State if text annotations of type {@link OntologicalClasses#DBPEDIA_PERSON} are enhanced by this engine
      */
@@ -137,6 +140,7 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
      * State if text annotations of type {@link OntologicalClasses#DBPEDIA_PLACE} are enhanced by this engine
      */
     protected boolean placeState;
+
     /**
      * The rdf:type constraint used to search for persons or <code>null</code> if no type constraint should be
      * used
@@ -154,14 +158,17 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
      * used
      */
     protected String placeType;
+
     /**
      * The field used to search for the selected text of the TextAnnotation.
      */
     private String nameField;
+
     /**
      * The number of Suggestions to be added
      */
     public Integer numSuggestions = 3;
+
     /**
      * The {@link OfflineMode} is used by Stanbol to indicate that no external service should be referenced.
      * For this engine that means it is necessary to check if the used {@link ReferencedSite} can operate
@@ -325,24 +332,30 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
             if (personState) {
                 if (personType != null) {
                     query.setConstraint(RDF_TYPE.getUnicodeString(), new ReferenceConstraint(personType));
-                } // else no type constraint
-            } else { // ignore people
+                }
+                // else no type constraint
+            } else {
+                // ignore people
                 return Collections.emptyList();
             }
         } else if (DBPEDIA_ORGANISATION.equals(type)) {
             if (orgState) {
                 if (orgType != null) {
                     query.setConstraint(RDF_TYPE.getUnicodeString(), new ReferenceConstraint(orgType));
-                } // else no type constraint
-            } else { // ignore people
+                }
+                // else no type constraint
+            } else {
+                // ignore people
                 return Collections.emptyList();
             }
         } else if (OntologicalClasses.DBPEDIA_PLACE.equals(type)) {
             if (this.placeState) {
                 if (this.placeType != null) {
                     query.setConstraint(RDF_TYPE.getUnicodeString(), new ReferenceConstraint(placeType));
-                } // else no type constraint
-            } else { // ignore people
+                }
+                // else no type constraint
+            } else {
+                // ignore people
                 return Collections.emptyList();
             }
         }
@@ -378,9 +391,6 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
 
     /**
      * Removes punctuations form a parsed string
-     * 
-     * @param keywords
-     * @return
      */
     private static String cleanupKeywords(String keywords) {
         return keywords.replaceAll("\\p{P}", " ").trim();
