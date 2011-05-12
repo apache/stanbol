@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
@@ -61,14 +62,16 @@ public class IndexerTest {
     private static final float EXPECTED_MAX_RANK = 100;
     private static final float MAX_INCOMMING = 10000;
 
-    private static final String CONFIG_ROOT = "indexerTests/";
+    private static final String CONFIG_ROOT = 
+        FilenameUtils.separatorsToSystem("indexerTests/");
     /**
      * mvn copies the resources in "src/test/resources" to target/test-classes.
      * This folder is than used as classpath.<p>
      * "/target/test-files/" does not exist, but is created by the
      * {@link IndexingConfig}.
      */
-    private static final String TEST_ROOT = "/target/test-files";
+    private static final String TEST_ROOT = 
+        FilenameUtils.separatorsToSystem("/target/test-files");
     private static String  userDir;
     private static String testRoot;
     /**

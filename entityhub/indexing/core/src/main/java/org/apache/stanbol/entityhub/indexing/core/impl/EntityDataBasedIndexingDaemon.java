@@ -17,6 +17,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 public class EntityDataBasedIndexingDaemon extends AbstractEntityIndexingDaemon {
     private final EntityDataIterable dataIterable;
     private final EntityScoreProvider scoreProvider;
+    private final ScoreNormaliser normaliser;
     private final boolean indexAllEntitiesState;
     public EntityDataBasedIndexingDaemon(String name,
                                          BlockingQueue<QueueItem<Representation>> produce,
@@ -25,7 +26,7 @@ public class EntityDataBasedIndexingDaemon extends AbstractEntityIndexingDaemon 
                                          EntityScoreProvider scoreProvider,
                                          ScoreNormaliser normaliser,
                                          boolean indexAllEntitiesState) {
-        super(name, normaliser,produce, error);
+        super(name,produce, error);
         if(dataIterable == null){
             throw new IllegalArgumentException("The parsed EntityDataIterator MUST NOT be NULL");
         }
@@ -34,6 +35,7 @@ public class EntityDataBasedIndexingDaemon extends AbstractEntityIndexingDaemon 
         }
         this.dataIterable = dataIterable;
         this.scoreProvider = scoreProvider;
+        this.normaliser = normaliser;
         this.indexAllEntitiesState = indexAllEntitiesState;
     }
 
@@ -51,6 +53,10 @@ public class EntityDataBasedIndexingDaemon extends AbstractEntityIndexingDaemon 
             } else {
                 rep = dataIterator.getRepresentation();
                 score = scoreProvider.process(rep);
+            }
+            //normalise the score
+            if(normaliser != null){
+                score = normaliser.normalise(score);
             }
             if(indexAllEntitiesState || //all entities are indexed anyway
                     score == null || //no score available

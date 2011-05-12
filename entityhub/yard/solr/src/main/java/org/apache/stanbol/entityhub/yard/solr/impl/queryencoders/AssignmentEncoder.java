@@ -61,7 +61,7 @@ public class AssignmentEncoder implements IndexConstraintTypeEncoder<Object>{
             indexValue = indexValueFactory.createIndexValue(value);
         }
         //encode the value based on the type
-        String[] queryConstraints = SolrUtil.encodeQueryValue(indexValue);
+        String[] queryConstraints = SolrUtil.encodeQueryValue(indexValue,true);
         String[] eqConstraints;
         if(queryConstraints != null){
             eqConstraints = new String[queryConstraints.length];

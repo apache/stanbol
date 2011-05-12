@@ -54,7 +54,7 @@ public class WildcardEncoder implements IndexConstraintTypeEncoder<IndexValue>{
             throw new IllegalArgumentException(String.format("This encoder does not support the IndexDataType %s (supported: %s)",
                 value.getType(),SUPPORTED_TYPES));
         } else {
-            constraint.addEncoded(POS, SolrUtil.encodeQueryValue(value));
+            constraint.addEncoded(POS, SolrUtil.encodeQueryValue(value,false));
         }
     }
 

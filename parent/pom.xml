@@ -36,7 +36,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <stanbol-version>0.9-SNAPSHOT</stanbol-version>
-    <jersey-version>1.1.5.1</jersey-version>
+    <jersey-version>1.6</jersey-version>
     <pax-exam-version>1.2.0</pax-exam-version>
   </properties>
 
@@ -637,7 +637,14 @@
           </exclusion>
         </exclusions>
       </dependency>
-
+      <!--  java mail might be usefull for "multipart/form-data" requests/responses -->
+      <dependency>
+          <groupId>javax.mail</groupId>
+          <artifactId>mail</artifactId>
+          <version>1.4</version>
+          <scope>provided</scope>
+      </dependency>
+        
       <!-- JAX-RS JSR311 -->
       <dependency>
         <groupId>javax.ws.rs</groupId>

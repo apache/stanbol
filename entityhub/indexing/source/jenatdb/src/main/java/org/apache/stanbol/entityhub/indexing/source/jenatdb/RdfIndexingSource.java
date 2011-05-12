@@ -2,12 +2,10 @@ package org.apache.stanbol.entityhub.indexing.source.jenatdb;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataIterable;
@@ -287,11 +285,17 @@ public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider 
                     if(literalValue instanceof BaseDatatype.TypedValue){
                         //used for unknown data types
                         // -> in such cases yust use the lecial type
-                        source.add(field, ((BaseDatatype.TypedValue)literalValue).lexicalValue);
+                        String lexicalValue = ((BaseDatatype.TypedValue)literalValue).lexicalValue;
+                        if(lexicalValue != null && !lexicalValue.isEmpty()){
+                            source.add(field,lexicalValue);
+                        }
                     } else if(literalValue instanceof XSDDateTime) {
                         source.add(field, ((XSDDateTime)literalValue).asCalendar().getTime()); //Entityhub uses the time
                     } else if(literalValue instanceof XSDDuration) {
-                        source.add(field, literalValue.toString());
+                        String duration = literalValue.toString();
+                        if(duration != null && !duration.isEmpty()) {
+                            source.add(field, literalValue.toString());
+                        }
                     } else {
                         source.add(field, literalValue);
                     }
@@ -301,11 +305,14 @@ public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider 
                     literalValue = ll.getLexicalForm();
                 }
             } else { //add a text
-                String language = ll.language();
-                if(language!=null && language.length()<1){
-                    language = null;
-                }
-                source.addNaturalText(field, ll.getLexicalForm(), language);
+                String lexicalForm = ll.getLexicalForm();
+                if(lexicalForm != null && !lexicalForm.isEmpty()){
+                    String language = ll.language();
+                    if(language!=null && language.length()<1){
+                        language = null;
+                    }
+                    source.addNaturalText(field, lexicalForm, language);
+                } //else ignore empty literals
             }
             // "" is parsed if there is no language
         } else {

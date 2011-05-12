@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -234,7 +235,7 @@ public final class ConfigUtils {
             //URLs with jar:file:/{jarPath}!{classPath} can cause problems
             //so try to parse manually by using the substring from the first
             //'/' to (including '!')
-            String urlString = classLocation.toString();
+            String urlString = URLDecoder.decode(classLocation.toString(),"UTF-8");
             int slashIndex =  urlString.indexOf('/');
             int exclamationIndex = urlString.indexOf('!');
             if(slashIndex >=0 && exclamationIndex > 0){

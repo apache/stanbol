@@ -1,7 +1,6 @@
 Indexer for the DBpedia dataset (see http://dbpedia.org/)
 
-This Tool creates a full cache for DBPedia based on the RDF Dump available via
-the download section of the dbpedia.org web page.
+This Tool creates local indexes of DBpedia to be used with the Stanbol Entityhub.
 
 Building:
 ========
@@ -9,51 +8,180 @@ If not yet build by the built process of the entityhub call
    mvn install
 in this directory.
 
-To create the runable jar that contains all the dependencies call
-   mvn assembly:assembly
+If the build succeeds go to the /target directory and copy the
+   org.apache.stanbol.entityhub.indexing.dbpedia-*-jar-with-dependencies.jar
+to the directory you would like to start the indexing.
 
-If everything completes successfully, than there should be two jar files within
-the target directory.
-The one called
-   org.apache.stanbol.entityhub.indexing.dbpedia-0.1*-jar-with-dependencies.jar
-is the one to be used for indexing.
-
-Creating the index:
+Index:
 ==================
 
-(1) download the all the RDF files you need from the download section of the
-    dbpedia.org web page. Make sure you download all the files needed to have
-    all data available used by the configured mappings. All files need to be
-    in the directory parsed as second parameter to the tool.
-(2) To enable ranking for DBpedia resources you need to also to calculate the
-    incoming links for wikipedia sites using [1]. The generated file needs to
-    be parsed to the tool by using the -i parameter.
-    In case you use this feature also note the -ri parameter that can be used to
-    define the minimum required number of incomming links so that an entity gets
-    included in the index. (setting it to 2 will result in about 50% of all the
-    entities to be indexed)
-(3) The Indexer will need a SolrServer. So you need to prepare the Solr Index
-    to store the data.
-    A default configuration is provided within the "/solrConf" directory. This
-    can be used to configure a SorlServer or a new Core to an existing SolrServer.
-    You can parse the absolute path. In that case an EmbeddedSolrServer will be
-    used for indexing.
-    NOTE that the "/solrConf" directory only represents a Core and not a full
-    SolrServer configuration. You need to have a valid "solr.xml" in the parent
-    Directory of dbpedia. See the Solr documentation for details how to
-    configure Cores
-(4) call the tool with the -h option to print the help screen
-    java -jar ./target/org.apache.stanbol.entityhub.indexing.dblp-*-jar-with-dependencies.jar -h
-    The help screen should provide you with all the information needed for indexing
+(1) Initialise the configuration by calling
+java -jar org.apache.stanbol.entityhub.indexing.dbpedia-*-jar-with-dependencies.jar init
 
-Indexing will take a lot of time. Indexing time heavily depends on the IO
-operations/sec of the used hard disc.
+This will create a sub-folder with the name indexing in the current directory.
+Within this folder all the
+ - configurations (indexing/config)
+ - source files (indexing/resources)
+ - created files (indexing/destination)
+ - distribution files (indexing/distribution)
+will be located.
 
-[1] https://gist.github.com/360315:
-    NOTE: There are two "head". The first restricts to 10e6 lines and the
-    second prints only the first ten lines. When calculating the page rank for
-    all entities one need to change this and pipe the results into a file.
-    Also NOTE  that the Link to download the file with the incomming links
-    should be adopted to the version of the dumps you use for indexing.
-    e.g. http://downloads.dbpedia.org/3.6/en/page_links_en.nt.bz2 for
-    Version 3.6 of the dump
+The indexing itself can be started by 
+java -jar org.apache.stanbol.entityhub.indexing.dbpedia-*-jar-with-dependencies.jar index
+but before doing this please note the points (2), (3) and (4)
+
+(2) Download the dbPedia Dump Files:
+
+All RDF dumps need to be copied to the directory
+  indexing/resources/rdfData
+
+The RDF dump of DBpedia.org is splited up in a number of different files.
+The actual files needed depend on the configuration of the mappings 
+(indexing/config/mappings.txt). Generally one need to make sure that all the
+RDF dumps with the source data for the specified mappings are available.
+A best is to use the previews of the dumps to check if the data of a dump is
+required or not.
+
+During the initialisation of the Indeing all the RDF files within the 
+"indexing/resources/rdfData" directory will be imported to an Jena TDB RDF
+triple store. The imported data are stored under
+  indexing/resources/tdb
+and can be reused for subsequent indexing processes.
+
+To avoid (re)importing of already imported resources one need to remove such
+RDF files from the "indexing/resources/rdfData" or - typically the better
+option - rename the "rdfData" folder after the initial run.
+
+It is also save to 
+  - cancel the indexing process after the initialisation has competed 
+    (as soon as the loging says that the indexing has started).
+  - load additinal RDF dumps by putting additional RDF files to the "rdfData"
+    directory. This files will be added to the others on the next start of the
+    indexing tool.
+
+(3) Entity Scores
+
+The DBpedia.org indexer uses the incomming links from other wikipages to
+calculate the rank of entities. Entities with more incomming links get an
+higher rank.
+A RDF dump containing all outgoing wiki links is available on DBpedia 
+(TODO: add link). This file need to be processed with the following command
+to get an file containing an ordered list of incomming count and the local
+name of the entity.
+
+time curl http://downloads.dbpedia.org/{version}/en/page_links_en.nt.bz2 \
+  | bzcat \
+  | sed -e 's/.*<http\:\/\/dbpedia\.org\/resource\/\([^>]*\)> ./\1/'
+  | sort \
+  | uniq -c  \
+  | sort -nr > incoming_links.txt
+
+Depending on the machine and the download speed for the source file the 
+execution of this command will take several hours. 
+
+Importnat NOTES:
+ - Links to Categories use wrong URLs in the current version (3.6) of the 
+   page_links_en.nt.bz2 dump.
+   All categories start with "CAT:{categoryName}" but the correct local name
+   would be "Category:{categoryName}". because of this categories would not be
+   indexed.
+   It is strongly suggested to
+    - first check if still Category: is used as prefix (e.g. by checking if
+      http://dbpedia.org/page/Category:Political_culture is still valid) and 
+    - second if that is the case replace all appearances of "CAT:" to "Category:"   
+    
+The resulting file MUST BE copied to
+  indexing/resources/incoming_links.txt
+  
+There is also the possibility do download a precomputed file form
+  TODO: add download loaction
+
+(4) Configuration of the Index
+
+ The configurations are contained within the "indexing/config" folder:
+  - indexing.properties: Main configuration for the indexing process. It 
+      defines the used components and there configurations. Usually no need to
+      make any changes.
+  - mapping.txt: Define the fields, data type requirements and languages to be
+      indexed. Note: It is also important that the dumps containing the RDF
+      data are available.
+  - dbpedia/conf/schema.xml: Defines the schema used by Solr to store the data.
+      This can be used to configure e.g. if values are stored (available for
+      retrieval) or only indexed. See the comments within the file for details
+  - fieldBoosts.properties: Can be used to set boost factors for fields.
+  - minIncomming.properties: Can be used to define the minimum number of
+      incommings links (to an Wiki page from other Wili pages) so that an entity
+      is indexed. Higher values will cause less entities to be indexed. A
+      value of 0 will result in all entities to be indexed.
+  - scoreRange.properties: Can be use to set the upper bound for entities score.
+      The entities with the most incomming links will get this score. Entities
+      with no incomming links would get a score of zero.  
+
+
+Default configuration:
+======================
+
+This describes the default configuration as initialised during the first start
+of the indexing tool.
+
+The default configuration stores creates an index with the following features:
+
+Languages: 
+By default English, German, France and Italien and all literals without any
+language information are indexed. Pleas note also that one needs to provide
+also the RDF dumps for this languages.
+
+Labels and Descriptions:
+DBpedia.org uses "rdfs:label" for labels. Short description are stored within
+"rdfs:comment" and a longer version in "dbp-ont:abstract".
+For both labels and descriptions generic language analyzer are used for indexing.
+Also Term Vectors are stored so that "More Like This" queries can be used on
+such fields.
+Abstracts are only indexed and not stored in the index. This means that values
+can be searched but not retrieved.
+
+Entity types:
+The types of the entities (Person, Organisation, Places, ...) are stored in
+"rdf:type". Values are URLs as defined mainly by the DBpedia.org ontology.
+
+Spatial Information:
+The geo locations are indexed within "geo:lat", "geo:long" and "geo:alt". The
+mappings ensure that lat/long values are doubles and the altitude are integers.
+
+Categories:
+DBpedia contains also categories. Entities are linked to categories by the
+"skos:subject" and/or the "dcterms:subject" property. During the import all
+values defined by "dcterms:subject" are copied to "skos:subject".
+Categories itself are hierarchical. Parent categories can be used by following
+"skos:broader" relations.
+e.g.
+   Berlin -> skos:subject 
+      -> Category:City-states -> skos:broader 
+           -> Category:Cities -> skos:broader
+               -> Category:Populated_places -> skos:broader
+                   -> Category:Human_habitats ...
+
+All properties defined by SKOS (http://www.w3.org/TR/skos-reference/) are
+indexed and stored.
+
+DBpedia Ontology:
+All properties of the DBpedia.org Ontology are indexed and stored in the index.
+see http://wiki.dbpedia.org/Ontology
+
+DBpedia Properties:
+Properties are field/values directly taken from the information boxes on the
+right side of Wikipedia pages. Fieldnames may depend on the language and also
+the data type of the values may be different from entity to entity.
+Because of this such entities are not indexed by the default configuration.
+It is possible to include some/all such properties by changing the mappings.txt.
+Note that in such cases it is also required do include the RDF dump containing
+this data.
+
+Person related Properties:
+DBpedia uses FOAF (http://www.foaf-project.org/) to provide additional information
+for persons. Some properties such as foaf:homepage are also used for entities of
+other types. All properties defined by FOAF are indexed and stored.
+
+Dublin Core (DC) Metadata:
+DC Elements and DC Terms metadata are indexed and stored.
+All DC Element properties are mapped to there DC Terms counterpart.
