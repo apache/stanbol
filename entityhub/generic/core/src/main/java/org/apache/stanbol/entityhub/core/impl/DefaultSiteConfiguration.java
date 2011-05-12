@@ -33,6 +33,7 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
     /**
      * The logger
      */
+    @SuppressWarnings("unused")
     private final static Logger log = LoggerFactory.getLogger(DefaultSiteConfiguration.class);
 
     /**
