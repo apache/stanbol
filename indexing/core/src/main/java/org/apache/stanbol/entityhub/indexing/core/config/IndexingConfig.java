@@ -201,9 +201,9 @@ public class IndexingConfig {
         log.info("Indexing directory: {}",root.getAbsoluteFile());
         this.rootDir = root;
         this.configDir = new File(root,CONFIG_PATH);
-        if(!configDir.isDirectory()){
+        if(!configDir.getAbsoluteFile().isDirectory()){
             log.info(" > config directory {} does not exist",configDir);
-            if(!configDir.mkdirs()){
+            if(!configDir.getAbsoluteFile().mkdirs()){
                 throw new IllegalStateException(
                     "Unable to create configuration folder '"+
                     configDir.getAbsolutePath()+"'!");
@@ -212,9 +212,9 @@ public class IndexingConfig {
             }
         }
         this.sourceDir = new File(root,SOURCE_PATH);
-        if(!sourceDir.exists()){
+        if(!sourceDir.getAbsoluteFile().exists()){
             log.info(" > resource folder '{} does not exist ",sourceDir);
-            if(!sourceDir.mkdirs()){
+            if(!sourceDir.getAbsoluteFile().mkdirs()){
                 throw new IllegalStateException(
                     "Unable to create resource folder '"+
                     sourceDir.getAbsolutePath()+"'!");
@@ -223,9 +223,9 @@ public class IndexingConfig {
             }
         }
         this.destinationDir = new File(root,DESTINATION_PATH);
-        if(!destinationDir.exists()){
+        if(!destinationDir.getAbsoluteFile().exists()){
             log.debug(" > destination folder '{} does not exist ",destinationDir);
-            if(!destinationDir.mkdirs()){
+            if(!destinationDir.getAbsoluteFile().mkdirs()){
                 throw new IllegalStateException(
                     "Unable to create target folder '"+
                     destinationDir.getAbsolutePath()+"'!");
@@ -234,9 +234,9 @@ public class IndexingConfig {
             }
         }
         this.distributionDir = new File(root,DISTRIBUTION_PATH);
-        if(!distributionDir.exists()){
+        if(!distributionDir.getAbsoluteFile().exists()){
             log.debug(" > distribution folder '{} does not exist ",distributionDir);
-            if(!distributionDir.mkdirs()){
+            if(!distributionDir.getAbsoluteFile().mkdirs()){
                 throw new IllegalStateException(
                     "Unable to create distribution '"+
                     destinationDir.getAbsolutePath()+"'!");

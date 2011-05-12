@@ -47,7 +47,9 @@ public class EntityPersisterRunnable extends IndexingDaemon<Representation,Repre
             }
         }
         //process the remaining
-        process(toStore);
+        if(!toStore.isEmpty()){
+            process(toStore);
+        }
         setFinished();
     }
     /**

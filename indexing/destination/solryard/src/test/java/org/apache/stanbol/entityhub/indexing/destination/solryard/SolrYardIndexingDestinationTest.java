@@ -8,6 +8,7 @@ import java.util.Properties;
 
 import javax.naming.NameParser;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.stanbol.entityhub.indexing.core.IndexingDestination;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
@@ -43,14 +44,16 @@ import static org.junit.Assert.*;
 public class SolrYardIndexingDestinationTest {
 
     private static final Logger log = LoggerFactory.getLogger(SolrYardIndexingDestinationTest.class);
-    private static final String CONFIG_ROOT = "testConfigs/";
+    private static final String CONFIG_ROOT = 
+        FilenameUtils.separatorsToSystem("testConfigs/");
     /**
      * mvn copies the resources in "src/test/resources" to target/test-classes.
      * This folder is than used as classpath.<p>
      * "/target/test-files/" does not exist, but is created by the
      * {@link IndexingConfig}.
      */
-    private static final String TEST_ROOT = "/target/test-files";
+    private static final String TEST_ROOT = 
+        FilenameUtils.separatorsToSystem("/target/test-files");
     private static String  userDir;
     private static String testRoot;
     /**
@@ -139,7 +142,7 @@ public class SolrYardIndexingDestinationTest {
         Yard yard = destination.getYard();
         assertNotNull(yard);
         assertEquals(yard.getClass(), SolrYard.class);
-        Representation rep = yard.create("http://www.example.com/entity#123");
+        Representation rep = yard.getValueFactory().createRepresentation("http://www.example.com/entity#123");
         rep.add(NamespaceEnum.rdfs+"label", "test");
         rep.add(NamespaceEnum.rdfs+"description", "Representation to test storage while indexing");
         rep.add(RdfResourceEnum.signRank.getUri(), Float.valueOf(0.8f));

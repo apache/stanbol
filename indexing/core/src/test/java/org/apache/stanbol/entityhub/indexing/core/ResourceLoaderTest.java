@@ -22,8 +22,10 @@ public class ResourceLoaderTest {
     /**
      * mvn copies the resources in "src/test/resources" to target/test-classes
      */
-    private static final String TEST_CONFIGS_ROOT = "/target/test-classes/resourceLoaderTest/";
-    private static final String TEST_FOLDER_NAME = "testFolder/";
+    private static final String TEST_CONFIGS_ROOT = 
+        FilenameUtils.separatorsToSystem("/target/test-classes/resourceLoaderTest/");
+    private static final String TEST_FOLDER_NAME = 
+        FilenameUtils.separatorsToSystem("testFolder/");
     protected static Logger log = LoggerFactory.getLogger(ResourceLoaderTest.class);
     private static String rootDir;
 

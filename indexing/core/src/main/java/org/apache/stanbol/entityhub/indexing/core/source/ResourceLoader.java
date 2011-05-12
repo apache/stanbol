@@ -187,8 +187,13 @@ public class ResourceLoader {
                 //during init it is checked that files exists and are files 
                 //and there is read access so this can only happen if
                 //someone deletes the file in between
+                log.error("Unable to load resource "+file+"!",e);
                 setResourceState(file, ResourceState.ERROR, e);
             } catch (IOException e) {
+                log.error("Unable to load resource "+file+"!",e);
+                setResourceState(file, ResourceState.ERROR, e);
+            } catch (Exception e) {
+                log.error("Unable to load resource "+file+"!",e);
                 setResourceState(file, ResourceState.ERROR, e);
             }
         }

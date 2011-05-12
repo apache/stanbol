@@ -52,20 +52,25 @@ public final class SolrUtil {
      * @param value the index value
      * @return the (possible multiple) values that need to be connected with AND
      */
-    public static String[] encodeQueryValue(IndexValue indexValue){
+    public static String[] encodeQueryValue(IndexValue indexValue,boolean escape){
         if(indexValue == null){
             return null;
         }
         String[] queryConstraints;
-        String escapedValue = SolrUtil.escapeSolrSpecialChars(indexValue.getValue());
-        if(IndexDataTypeEnum.TXT.getIndexType().equals(indexValue.getType())){
-            escapedValue = escapedValue.toLowerCase();
-            queryConstraints = escapedValue.split(" ");
-        } else if(IndexDataTypeEnum.STR.equals(indexValue.getType())){
-            escapedValue = escapedValue.toLowerCase();
-            queryConstraints = new String[]{escapedValue.replace(' ', '+')};
+        String value;
+        if(escape){
+            value = SolrUtil.escapeSolrSpecialChars(indexValue.getValue());
         } else {
-            queryConstraints = new String[]{escapedValue};
+            value = indexValue.getValue();
+        }
+        if(IndexDataTypeEnum.TXT.getIndexType().equals(indexValue.getType())){
+            value = value.toLowerCase();
+            queryConstraints = value.split(" ");
+        } else if(IndexDataTypeEnum.STR.equals(indexValue.getType())){
+            value = value.toLowerCase();
+            queryConstraints = new String[]{value.replace(' ', '+')};
+        } else {
+            queryConstraints = new String[]{value};
         }
         return queryConstraints;
     }

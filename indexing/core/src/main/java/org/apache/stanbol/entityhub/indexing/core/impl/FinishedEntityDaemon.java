@@ -148,8 +148,8 @@ public class FinishedEntityDaemon extends IndexingDaemon<Representation,Object> 
         double itemDurationMinor = countedMinor>0?durationMinor/countedMinor:-1;
 //        double itemTimeAll = countedAll>0?timeAll/countedAll:-1;
         double itemTimeMinor = countedMinor>0?timeMinor/countedMinor:-1;
-        out.info(String.format("    - %d items in %fsec (last %d in %7.3fsec | %7.3fms/item | %7.3fms in queue)",
-            count,(float)interval/1000f,minor,(float)intervalMinor/1000f,itemDurationMinor,itemTimeMinor));
+        out.info(String.format("    - %d items in %dsec (last %d in %dsec | %7.3fms/item | %7.3fms in queue)",
+            count,(int)interval/1000,minor,(int)intervalMinor/1000,itemDurationMinor,itemTimeMinor));
     }
 
     private void printMajor(long current) {
@@ -167,10 +167,10 @@ public class FinishedEntityDaemon extends IndexingDaemon<Representation,Object> 
         double itemSourceDurationMajor = countedMajor>0? sourceDurationMajor/countedMajor:-1;
         double itemProcessingDurationMajor = countedMajor>0? processDurationMajor/countedMajor:-1;
         double itemStoreDurationMajor = countedMajor>0? storeDurationMajor/countedMajor:-1;
-        out.info(String.format("+ %d items in %fsec | %7.3fms/item | %7.3fms in queue",
-            count,(float)interval/1000f,itemDurationAll,itemTimeAll));
-        out.info(String.format("  last %d items in %fsec | %7.3fms/item | %7.3fms in queue",
-            major,(float)intervalMajor/1000f,itemDurationMajor,itemTimeMajor));
+        out.info(String.format("+ %d items in %dsec (%7.3fms/item): processing: %7.3fms/item | queue: %7.3fms",
+            count,(int)interval/1000,(float)interval/count,itemDurationAll,itemTimeAll));
+        out.info(String.format("  last %d items in %dsec (%7.3fms/item): processing %7.3fms/item | queue: %7.3fms",
+            major,(int)intervalMajor/1000,(float)intervalMajor/major,itemDurationMajor,itemTimeMajor));
         out.info(String.format("  - source   : all: %7.3fms/item | current: %7.3fms/item",
             itemSourceDurationAll,itemSourceDurationMajor));
         out.info(String.format("  - processing: all: %7.3fms | current: %7.3fms/item",
@@ -185,8 +185,8 @@ public class FinishedEntityDaemon extends IndexingDaemon<Representation,Object> 
         double itemSourceDurationAll = countedAll>0? sourceDurationAll/countedAll:-1;
         double itemProcessingDurationAll = countedAll>0? processDurationAll/countedAll:-1;
         double itemStoreDurationAll = countedAll>0? sourceDurationAll/countedAll:-1;
-        out.info(String.format("Indexed %d items in %fsec | %7.3fms/item | %7.3fdms in queue",
-            count,(float)interval/1000f,itemDurationAll,itemTimeAll));
+        out.info(String.format("Indexed %d items in %dsec (%7.3fms/item): processing: %7.3fms/item | queue: %7.3fms",
+            count,(int)interval/1000,(float)interval/count,itemDurationAll,itemTimeAll));
         out.info(String.format("  - source   : %7.3fms/item",
             itemSourceDurationAll));
         out.info(String.format("  - processing: %7.3fms/item",

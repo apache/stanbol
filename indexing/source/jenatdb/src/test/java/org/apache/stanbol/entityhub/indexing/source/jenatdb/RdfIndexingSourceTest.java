@@ -2,6 +2,7 @@ package org.apache.stanbol.entityhub.indexing.source.jenatdb;
 
 import java.util.Iterator;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataIterable;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataIterator;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataProvider;
@@ -29,14 +30,16 @@ public class RdfIndexingSourceTest {
     
     private static final long NUMBER_OF_ENTITIES_EXPECTED = 3;
     
-    private static final String CONFIG_ROOT = "testConfigs/";
+    private static final String CONFIG_ROOT = 
+        FilenameUtils.separatorsToSystem("testConfigs/");
     /**
      * mvn copies the resources in "src/test/resources" to target/test-classes.
      * This folder is than used as classpath.<p>
      * "/target/test-files/" does not exist, but is created by the
      * {@link IndexingConfig}.
      */
-    private static final String TEST_ROOT = "/target/test-files";
+    private static final String TEST_ROOT = 
+        FilenameUtils.separatorsToSystem("/target/test-files");
     private static String  userDir;
     private static String testRoot;
     /**
@@ -91,6 +94,9 @@ public class RdfIndexingSourceTest {
         IndexingConfig config = new IndexingConfig(CONFIG_ROOT+"provider");
         EntityIterator entityIdIterator = config.getEntityIdIterator();
         assertNotNull("Unable to perform test whithout EntityIterator",entityIdIterator);
+        if(entityIdIterator.needsInitialisation()){
+            entityIdIterator.initialise();
+        }
         EntityDataProvider dataProvider = config.getEntityDataProvider();
         assertNotNull(dataProvider);
         assertTrue(dataProvider.needsInitialisation());//there are test data to load

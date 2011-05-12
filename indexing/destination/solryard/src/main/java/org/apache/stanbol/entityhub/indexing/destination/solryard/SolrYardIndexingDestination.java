@@ -2,39 +2,30 @@ package org.apache.stanbol.entityhub.indexing.destination.solryard;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-import java.util.ServiceLoader;
 import java.util.Map.Entry;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.core.site.CacheUtils;
-import org.apache.stanbol.entityhub.indexing.core.Indexer;
 import org.apache.stanbol.entityhub.indexing.core.IndexingDestination;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
-import org.apache.stanbol.entityhub.indexing.core.impl.IndexerConstants;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.apache.stanbol.entityhub.yard.solr.SolrDirectoryManager;
-import org.apache.stanbol.entityhub.yard.solr.defaults.SolrConst;
-import org.apache.stanbol.entityhub.yard.solr.impl.EmbeddedSolrPorovider;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYard;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig;
-import org.apache.stanbol.entityhub.yard.solr.impl.install.SolrIndexInstaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -479,17 +470,18 @@ public class SolrYardIndexingDestination implements IndexingDestination {
                 parentPathLength++; //add the missing '/'
             }
             try {
-                ZipArchiveOutputStream out = new ZipArchiveOutputStream(solrArchive);
+                //Moved over to use java.util.zip because Apache commons compression
+                //seams not support files > 2Gb
+                ZipOutputStream out = new ZipOutputStream(new FileOutputStream(solrArchive));
                 for(File file : (Collection<File>)FileUtils.listFiles(solrIndexLocation, null, true)){
                     if(!file.isHidden()){
                         String name = file.getAbsolutePath().substring(parentPathLength);
                         log.info("add "+name);
-                        ZipArchiveEntry entry = new ZipArchiveEntry(file, name);
-                        out.putArchiveEntry(entry);
-                        if(!entry.isDirectory()){
+                        out.putNextEntry(new ZipEntry(name));
+                        if(!file.isDirectory()){
                             FileInputStream fileIn = new FileInputStream(file);
-                            IOUtils.copy(fileIn,out);
-                            out.closeArchiveEntry();
+                            IOUtils.copyLarge(fileIn,out);
+                            out.closeEntry();
                             IOUtils.closeQuietly(fileIn);
                         }
                     }

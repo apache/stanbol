@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
 import org.apache.stanbol.entityhub.indexing.core.normaliser.MinScoreNormalizer;
 import org.apache.stanbol.entityhub.indexing.core.normaliser.NaturalLogNormaliser;
@@ -22,14 +23,16 @@ import org.slf4j.LoggerFactory;
 
 public class ConfigTest {
     private static final Logger log = LoggerFactory.getLogger(ConfigTest.class);
-    private static final String CONFIG_ROOT = "testConfigs/";
+    private static final String CONFIG_ROOT = 
+        FilenameUtils.separatorsToSystem("testConfigs/");
     /**
      * mvn copies the resources in "src/test/resources" to target/test-classes.
      * This folder is than used as classpath.<p>
      * "/target/test-files/" does not exist, but is created by the
      * {@link IndexingConfig}.
      */
-    private static final String TEST_ROOT = "/target/test-files";
+    private static final String TEST_ROOT = 
+        FilenameUtils.separatorsToSystem("/target/test-files");
     private static String  userDir;
     private static String testRoot;
     /**
@@ -125,6 +128,9 @@ public class ConfigTest {
         EntityIterator entityIterator = config.getEntityIdIterator();
         assertNotNull(entityIterator);
         assertEquals(entityIterator.getClass(), LineBasedEntityIterator.class);
+        if(entityIterator.needsInitialisation()){
+            entityIterator.initialise();
+        }
         Map<String,Float> entityIds = new HashMap<String,Float>();
         //the values test if the normaliser configuration was readed correctly
         //the keys if the configured entiyScore file was configured correctly
