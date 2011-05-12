@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping.MappingState;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 /**
  * A Sign links three things together

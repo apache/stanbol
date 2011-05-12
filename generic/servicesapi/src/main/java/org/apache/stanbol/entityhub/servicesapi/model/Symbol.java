@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping.MappingState;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 
 public interface Symbol extends Sign{
