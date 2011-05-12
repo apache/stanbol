@@ -26,11 +26,10 @@ import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexDataType;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition;
+import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition.PositionType;
 import org.apache.stanbol.entityhub.yard.solr.query.EncodedConstraintParts;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
-import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition.PositionType;
-import org.apache.stanbol.entityhub.yard.solr.utils.SolrUtil;
 
 
 /**

@@ -46,10 +46,8 @@ public class IndexRemoveTask extends InstallTask {
      */
     private static final String CONFIG_INSTALL_ORDER = "11-";
 
-    private final SolrDirectoryManager solrDirectoryManager;
     public IndexRemoveTask(TaskResourceGroup trg,SolrDirectoryManager solrDirectoryManager){
         super(trg);
-        this.solrDirectoryManager = solrDirectoryManager;
     }
     @Override
     public void execute(InstallationContext ctx) {
