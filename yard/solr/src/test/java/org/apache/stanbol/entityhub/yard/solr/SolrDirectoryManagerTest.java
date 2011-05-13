@@ -46,11 +46,13 @@ public class SolrDirectoryManagerTest {
     @BeforeClass
     public static void init() {
         // set to "${basedir}/some/rel/path" to test if property substitution works!
-        String solrServerDir = "${basedir}" + SolrYardTest.TEST_INDEX_REL_PATH;
+        String prefix = System.getProperty("basedir") == null ? "." : "${basedir}";
+        String resolvedPrefix = System.getProperty("basedir") == null ? "." : System.getProperty("basedir");
+        String solrServerDir = prefix + SolrYardTest.TEST_INDEX_REL_PATH;
         log.info("configured directory: " + solrServerDir);
         System.setProperty(SolrDirectoryManager.MANAGED_SOLR_DIR_PROPERTY, solrServerDir);
         // store the expected managed directory for later testing
-        expectedManagedDirectory = new File(System.getProperty("basedir"), SolrYardTest.TEST_INDEX_REL_PATH);
+        expectedManagedDirectory = new File(resolvedPrefix, SolrYardTest.TEST_INDEX_REL_PATH);
         log.info("expected managed directory: " + expectedManagedDirectory);
         // create the SolrDirectoryManager used for the tests
         Iterator<SolrDirectoryManager> providerIt = ServiceLoader.load(SolrDirectoryManager.class,

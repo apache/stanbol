@@ -56,7 +56,8 @@ public class SolrYardTest extends YardTest {
     public static final void initYard() throws YardException {
         // get the working directory
         // use property substitution to test this feature!
-        String solrServerDir = "${basedir}" + TEST_INDEX_REL_PATH;
+        String prefix = System.getProperty("basedir") == null ? "." : "${basedir}";
+        String solrServerDir = prefix + TEST_INDEX_REL_PATH;
         log.info("Test Solr Server Directory: " + solrServerDir);
         System.setProperty(SolrDirectoryManager.MANAGED_SOLR_DIR_PROPERTY, solrServerDir);
         SolrYardConfig config = new SolrYardConfig(TEST_YARD_ID, TEST_SOLR_CORE_NAME);
