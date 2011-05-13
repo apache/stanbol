@@ -252,7 +252,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
 
 //    private String entitySearcherComponentName;
     private EntitySearcher entitySearcher;
-    private ComponentInstance entitySearcherComponentInstace;
+    private ComponentInstance entitySearcherComponentInstance;
 
     private ServiceTracker cacheTracker;
     
@@ -710,16 +710,16 @@ public class ReferencedSiteImpl implements ReferencedSite {
      * and the {@link #accessUri} also equals the {@link #queryUri}, than the
      * component created for the entity searcher is also used as dereferencer.
      * @param factory The component factory used to create the
-     * {@link #entitySearcherComponentInstace}
+     * {@link #entitySearcherComponentInstance}
      */
     @SuppressWarnings("unchecked")
     protected void createEntitySearcherComponent(ComponentFactory factory){
         //both create*** methods sync on the searcherAndDereferencerLock to avoid
         //multiple component instances because of concurrent calls
         synchronized (this.searcherAndDereferencerLock ) {
-            if(entitySearcherComponentInstace == null){
-                this.entitySearcherComponentInstace = factory.newInstance(OsgiUtils.copyConfig(context.getProperties()));
-                this.entitySearcher = (EntitySearcher)entitySearcherComponentInstace.getInstance();
+            if(entitySearcherComponentInstance == null){
+                this.entitySearcherComponentInstance = factory.newInstance(OsgiUtils.copyConfig(context.getProperties()));
+                this.entitySearcher = (EntitySearcher)entitySearcherComponentInstance.getInstance();
             }
             if(dereferencerEqualsEntitySearcherComponent){
                 this.dereferencer = (EntityDereferencer) entitySearcher;
@@ -793,9 +793,9 @@ public class ReferencedSiteImpl implements ReferencedSite {
             this.dereferencerComponentInstance = null;
         }
         this.entitySearcher = null;
-        if(this.entitySearcherComponentInstace != null){
-            this.entitySearcherComponentInstace.dispose();
-            this.entitySearcherComponentInstace = null;
+        if(this.entitySearcherComponentInstance != null){
+            this.entitySearcherComponentInstance.dispose();
+            this.entitySearcherComponentInstance = null;
         }
         if(searcherComponentFactoryListener != null){
             context.getBundleContext().removeServiceListener(searcherComponentFactoryListener);
