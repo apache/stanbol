@@ -20,6 +20,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 public class ReengineerManagerTest {
 
 	public static Reengineer semionReengineer;
+
 	
 	@BeforeClass
 	public static void setup(){

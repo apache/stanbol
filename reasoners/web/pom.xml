@@ -288,6 +288,10 @@
       <name>apache repository</name>
       <url>https://repository.apache.org/content/repositories/snapshots</url>
     </repository>
+    <repository>
+    	<id>stlab-cnr-repo</id>
+        <url>http://stlab.istc.cnr.it/software/maven/repo</url>
+    </repository>
   </repositories>
 
   <build>
