@@ -107,7 +107,7 @@ public class FieldQueryImpl implements Cloneable, FieldQuery{
     /* (non-Javadoc)
      * @see org.apache.stanbol.entityhub.core.query.FieldQuery#isConstraint(java.lang.String)
      */
-    public final boolean isConstraint(String field){
+    public final boolean isConstrained(String field){
         return queryConstraint.containsKey(field);
     }
     /* (non-Javadoc)

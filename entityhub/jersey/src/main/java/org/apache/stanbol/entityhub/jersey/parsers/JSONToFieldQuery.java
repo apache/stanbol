@@ -63,7 +63,7 @@ public final class JSONToFieldQuery {
                 if(field == null || field.isEmpty()){
                     log.warn("The value of the key \"field\" MUST NOT be NULL nor emtpy!");
                     log.warn(String.format("Constraint:\n %s",jConstraint.toString(4)));
-                } else if(query.isConstraint(field)){
+                } else if(query.isConstrained(field)){
                     log.warn(String.format("Multiple constraints for field %s in parsed FieldQuery!",field));
                     log.warn(String.format(" - all Constraints:\n", constraints.toString(4)));
                     log.warn(String.format(" - ignore Constraint:\n %s",jConstraint.toString(4)));
