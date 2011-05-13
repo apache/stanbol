@@ -37,76 +37,77 @@ import org.slf4j.LoggerFactory;
 public class SolrDirectoryManagerTest {
 
     private static final Logger log = LoggerFactory.getLogger(SolrDirectoryManagerTest.class);
-    
+
     private static SolrDirectoryManager solrDirectoryManager;
-    
+
     private static File expectedManagedDirectory;
-    private static Collection<String> expectedIndexNames = Arrays.asList("entityhub","cache");
-    
+    private static Collection<String> expectedIndexNames = Arrays.asList("entityhub", "cache");
+
     @BeforeClass
-    public static void init(){
-        //set to "${basedir}/some/rel/path" to test if property substitution works!
-        String solrServerDir = "${basedir}"+SolrYardTest.TEST_INDEX_REL_PATH;
-        log.info("configured directory: "+solrServerDir);
+    public static void init() {
+        // set to "${basedir}/some/rel/path" to test if property substitution works!
+        String solrServerDir = "${basedir}" + SolrYardTest.TEST_INDEX_REL_PATH;
+        log.info("configured directory: " + solrServerDir);
         System.setProperty(SolrDirectoryManager.MANAGED_SOLR_DIR_PROPERTY, solrServerDir);
-        //store the expected managed directory for later testing
-        expectedManagedDirectory = new File(System.getProperty("basedir"),SolrYardTest.TEST_INDEX_REL_PATH);
-        log.info("expected managed directory: "+expectedManagedDirectory);
-        //create the SolrDirectoryManager used for the tests
-        Iterator<SolrDirectoryManager> providerIt = 
-            ServiceLoader.load(SolrDirectoryManager.class,SolrDirectoryManager.class.getClassLoader()).iterator();
-        if(providerIt.hasNext()){
+        // store the expected managed directory for later testing
+        expectedManagedDirectory = new File(System.getProperty("basedir"), SolrYardTest.TEST_INDEX_REL_PATH);
+        log.info("expected managed directory: " + expectedManagedDirectory);
+        // create the SolrDirectoryManager used for the tests
+        Iterator<SolrDirectoryManager> providerIt = ServiceLoader.load(SolrDirectoryManager.class,
+            SolrDirectoryManager.class.getClassLoader()).iterator();
+        if (providerIt.hasNext()) {
             solrDirectoryManager = providerIt.next();
         } else {
-            throw new IllegalStateException("Unable to instantiate "+SolrDirectoryManager.class.getSimpleName()+" service by using "+ServiceLoader.class.getName()+"!");
+            throw new IllegalStateException("Unable to instantiate "
+                                            + SolrDirectoryManager.class.getSimpleName()
+                                            + " service by using " + ServiceLoader.class.getName() + "!");
         }
     }
-    
-    @Test
-    public void testManagedDirectoryInitialisation(){
-        //the managed directory must be set based on the 
-        expectedManagedDirectory.equals(
-            solrDirectoryManager.getManagedDirectory());
-    }
-    
-    @Test(expected=IllegalArgumentException.class)
-    public void testNullIndexName(){
-        solrDirectoryManager.getSolrIndexDirectory(null,true);
-    }
-
-    @Test(expected=IllegalArgumentException.class)
-    public void testEmptyIndexName(){
-        solrDirectoryManager.getSolrIndexDirectory("",true);
-    }
 
     @Test
-    public void testGetManagedIndexes(){
+    public void testManagedDirectoryInitialisation() {
+        // the managed directory must be set based on the
+        expectedManagedDirectory.equals(solrDirectoryManager.getManagedDirectory());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullIndexName() {
+        solrDirectoryManager.getSolrIndexDirectory(null, true);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testEmptyIndexName() {
+        solrDirectoryManager.getSolrIndexDirectory("", true);
+    }
+
+    @Test
+    public void testGetManagedIndexes() {
         Set<String> expected = new HashSet<String>(expectedIndexNames);
-        for(Entry<String,File> index : solrDirectoryManager.getManagedIndices().entrySet()){
+        for (Entry<String,File> index : solrDirectoryManager.getManagedIndices().entrySet()) {
             expected.remove(index.getKey());
-            //test that the index dir is the expected location
-            File expectedLocation = new File(expectedManagedDirectory,index.getKey());
+            // test that the index dir is the expected location
+            File expectedLocation = new File(expectedManagedDirectory, index.getKey());
             assertEquals(expectedLocation, index.getValue());
         }
-        //test that the expected indexes where returned
+        // test that the expected indexes where returned
         assertTrue(expected.isEmpty());
     }
-    
+
     @Test
-    public void testIsManagedIndex(){
-        for(String name : expectedIndexNames){
+    public void testIsManagedIndex() {
+        for (String name : expectedIndexNames) {
             assertTrue(solrDirectoryManager.isManagedIndex(name));
         }
-        assertFalse(solrDirectoryManager.isManagedIndex("notAnIndex"+System.currentTimeMillis()));
+        assertFalse(solrDirectoryManager.isManagedIndex("notAnIndex" + System.currentTimeMillis()));
     }
-    
+
     @Test
-    public void testDefaultIndexInitialisation(){
-        //this is actually tested already by the initialisation of the
-        //SolrYardTest ...
-        String indexName = "testIndexInitialisation_"+System.currentTimeMillis();
-        File indexDir = solrDirectoryManager.getSolrIndexDirectory(indexName,true);
-        assertEquals(new File(expectedManagedDirectory,indexName), indexDir);
+    public void testDefaultIndexInitialisation() {
+        // this is actually tested already by the initialisation of the
+        // SolrYardTest ...
+        String indexName = "testIndexInitialisation_" + System.currentTimeMillis();
+        File indexDir = solrDirectoryManager.getSolrIndexDirectory(indexName, true);
+        assertEquals(new File(expectedManagedDirectory, indexName), indexDir);
         assertTrue(indexDir.isDirectory());
     }
 }

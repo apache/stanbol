@@ -31,15 +31,15 @@ import org.apache.stanbol.entityhub.yard.solr.query.EncodedConstraintParts;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
 
-
 /**
- * TODO: This encoder is not functional! It would need to convert the REGEX
- * Pattern to the according WildCard search!
- * Need to look at http://lucene.apache.org/java/2_4_0/api/org/apache/lucene/search/regex/RegexQuery.html
+ * TODO: This encoder is not functional! It would need to convert the REGEX Pattern to the according WildCard
+ * search! Need to look at
+ * http://lucene.apache.org/java/2_4_0/api/org/apache/lucene/search/regex/RegexQuery.html
+ * 
  * @author Rupert Westenthaler
- *
+ * 
  */
-public class RegexEncoder implements IndexConstraintTypeEncoder<IndexValue>{
+public class RegexEncoder implements IndexConstraintTypeEncoder<IndexValue> {
 
     private static final ConstraintTypePosition POS = new ConstraintTypePosition(PositionType.value);
 
@@ -53,13 +53,14 @@ public class RegexEncoder implements IndexConstraintTypeEncoder<IndexValue>{
 
     @Override
     public void encode(EncodedConstraintParts constraint, IndexValue value) {
-        if(value == null){
+        if (value == null) {
             throw new IllegalArgumentException("This encoder does not support the NULL IndexValue!");
-        } else if(!SUPPORTED_TYPES.contains(value.getType())){
-            throw new IllegalArgumentException(String.format("This encoder does not support the IndexDataType %s (supported: %s)",
-                value.getType(),SUPPORTED_TYPES));
+        } else if (!SUPPORTED_TYPES.contains(value.getType())) {
+            throw new IllegalArgumentException(String.format(
+                "This encoder does not support the IndexDataType %s (supported: %s)", value.getType(),
+                SUPPORTED_TYPES));
         } else {
-            //TODO: Implement some REGEX to WILDCard conversion for Solr
+            // TODO: Implement some REGEX to WILDCard conversion for Solr
             constraint.addEncoded(POS, value.getValue().toLowerCase());
         }
     }

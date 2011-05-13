@@ -18,16 +18,17 @@ package org.apache.stanbol.entityhub.yard.solr.query;
 
 import org.apache.stanbol.entityhub.yard.solr.model.IndexDataType;
 
-
 /**
- * Constraint Types defined for IndexFields<p>
- * This could be replaced by a more flexible way to register supported
- * constraint types in future versions
+ * Constraint Types defined for IndexFields
+ * <p>
+ * This could be replaced by a more flexible way to register supported constraint types in future versions
+ * 
  * @author Rupert Westenthaler
  */
-public enum IndexConstraintTypeEnum{
+public enum IndexConstraintTypeEnum {
     /**
      * constraints the DataType of values
+     * 
      * @see IndexDataType
      */
     DATATYPE,

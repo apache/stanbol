@@ -27,32 +27,32 @@ import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition.PositionType;
 
-
-
-public class LeEncoder implements IndexConstraintTypeEncoder<Object>{
-    private static final ConstraintTypePosition POS = new ConstraintTypePosition(PositionType.value,2);
+public class LeEncoder implements IndexConstraintTypeEncoder<Object> {
+    private static final ConstraintTypePosition POS = new ConstraintTypePosition(PositionType.value, 2);
     private static final String DEFAULT = "*";
 
     private IndexValueFactory indexValueFactory;
+
     public LeEncoder(IndexValueFactory indexValueFactory) {
-        if(indexValueFactory == null){
+        if (indexValueFactory == null) {
             throw new IllegalArgumentException("The parsed IndexValueFactory MUST NOT be NULL!");
         }
         this.indexValueFactory = indexValueFactory;
     }
+
     @Override
     public void encode(EncodedConstraintParts constraint, Object value) {
         IndexValue indexValue;
-        if(value == null){
-            indexValue = null; //default value
-        } else if(value instanceof IndexValue){
-            indexValue = (IndexValue)value;
+        if (value == null) {
+            indexValue = null; // default value
+        } else if (value instanceof IndexValue) {
+            indexValue = (IndexValue) value;
         } else {
             indexValue = indexValueFactory.createIndexValue(value);
         }
-        String geConstraint = String.format("TO %s]",
-                indexValue !=null && indexValue.getValue() != null && !indexValue.getValue().isEmpty() ?
-                        indexValue.getValue() : DEFAULT);
+        String geConstraint = String
+                .format("TO %s]", indexValue != null && indexValue.getValue() != null
+                                  && !indexValue.getValue().isEmpty() ? indexValue.getValue() : DEFAULT);
         constraint.addEncoded(POS, geConstraint);
     }
 
@@ -70,6 +70,7 @@ public class LeEncoder implements IndexConstraintTypeEncoder<Object>{
     public IndexConstraintTypeEnum encodes() {
         return IndexConstraintTypeEnum.LE;
     }
+
     @Override
     public Class<Object> acceptsValueType() {
         return Object.class;

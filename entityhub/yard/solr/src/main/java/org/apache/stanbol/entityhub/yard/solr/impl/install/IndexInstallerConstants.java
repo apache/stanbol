@@ -16,34 +16,34 @@
  */
 package org.apache.stanbol.entityhub.yard.solr.impl.install;
 
-
 /**
  * Constants and static configuration used by the {@link SolrIndexInstaller}
+ * 
  * @author Rupert Westenthaler
- *
+ * 
  */
 public final class IndexInstallerConstants {
-    private IndexInstallerConstants(){ /* do not create instances*/ }
-    
+    private IndexInstallerConstants() { /* do not create instances */}
+
     /**
      * The schema used for transformed resources.
      */
     public static final String SOLR_INDEX_ARCHIVE_RESOURCE_TYPE = "solrarchive";
-    
+
     private static final String PROPERTY_PREFIX = "org.apache.stanbol.yard.solr.installer.";
     /**
-     * The key used to configure the name of the Index-Archive
-     * The default name is \"&lt;indexName&gt;.solrarchive\".
+     * The key used to configure the name of the Index-Archive The default name is
+     * \"&lt;indexName&gt;.solrarchive\".
      */
     public static final String PROPERTY_INDEX_ARCHIVE = "Index-Archive";
-    
+
     /**
      * The key used for the name of the index
      */
-    public static final String PROPERTY_INDEX_NAME = PROPERTY_PREFIX+"index.name";
+    public static final String PROPERTY_INDEX_NAME = PROPERTY_PREFIX + "index.name";
     /**
      * The key used for the type of the archive
      */
-    public static final String PROPERTY_ARCHIVE_FORMAT = PROPERTY_PREFIX+"archive.format";
+    public static final String PROPERTY_ARCHIVE_FORMAT = PROPERTY_PREFIX + "archive.format";
 
 }

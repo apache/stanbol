@@ -27,58 +27,65 @@ public final class IndexValue {
      */
     private final int hash;
 
-    public IndexValue(String value,IndexDataType type){
-        this(value,type,null,false);
+    public IndexValue(String value, IndexDataType type) {
+        this(value, type, null, false);
     }
 
-    public IndexValue(String value,IndexDataType type,String language){
-        this(value,type,language,true);
+    public IndexValue(String value, IndexDataType type, String language) {
+        this(value, type, language, true);
     }
-    private IndexValue(String value,IndexDataType type,String language,boolean hasLanguage){
-        if(value == null || value.isEmpty()){
+
+    private IndexValue(String value, IndexDataType type, String language, boolean hasLanguage) {
+        if (value == null || value.isEmpty()) {
             throw new IllegalArgumentException("The value MUST NOT be NULL nor empty!");
         }
         this.value = value;
-        if(type == null){
+        if (type == null) {
             throw new IllegalArgumentException("The IndexType MUST NOT be NULL nor empty!");
         }
         this.type = type;
         this.hasLanguage = hasLanguage;
-        if(this.hasLanguage){
+        if (this.hasLanguage) {
             this.language = language;
         } else {
             this.language = null;
         }
-        this.hash = type.hashCode()+value.hashCode()+(language!=null?language.hashCode():0);
+        this.hash = type.hashCode() + value.hashCode() + (language != null ? language.hashCode() : 0);
     }
-    public final String getValue(){
+
+    public final String getValue() {
         return value;
     }
-    public final IndexDataType getType(){
+
+    public final IndexDataType getType() {
         return type;
     }
-    public final String getLanguage(){
+
+    public final String getLanguage() {
         return language;
     }
-    public final boolean hasLanguage(){
+
+    public final boolean hasLanguage() {
         return hasLanguage;
     }
+
     @Override
     public int hashCode() {
         return hash;
     }
+
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof IndexValue &&
-            ((IndexValue)obj).value.equals(value) &&
-            ((IndexValue)obj).type.equals(type) &&
-            ((IndexValue)obj).hasLanguage == hasLanguage && (
-                    (language == null && ((IndexValue)obj).language == null) ||
-                    (language!=null &&language.equals(((IndexValue)obj).language))
-            );
+        return obj instanceof IndexValue
+               && ((IndexValue) obj).value.equals(value)
+               && ((IndexValue) obj).type.equals(type)
+               && ((IndexValue) obj).hasLanguage == hasLanguage
+               && ((language == null && ((IndexValue) obj).language == null) || (language != null && language
+                       .equals(((IndexValue) obj).language)));
     }
+
     @Override
     public String toString() {
-        return value+(language!=null?("@"+language):"")+"^^"+type;
+        return value + (language != null ? ("@" + language) : "") + "^^" + type;
     }
 }

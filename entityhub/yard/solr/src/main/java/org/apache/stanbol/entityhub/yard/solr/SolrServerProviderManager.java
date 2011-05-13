@@ -41,118 +41,111 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Manager for different {@link SolrServerProvider} present in the current
- * environment.
- * This manager works both within an OSGI Environment by defining an Reference
- * and outside by using {@link #getInstance()}.
+ * Manager for different {@link SolrServerProvider} present in the current environment. This manager works
+ * both within an OSGI Environment by defining an Reference and outside by using {@link #getInstance()}.
  * <p>
- * <b>TODO:</b> Race Condition (Rupert Westenthaler, 2011-03-21)
- *   There are cases where the SolrYard requests a provider {@link Type} before
- *   the actual {@link SolrServerProvider} instance that supports this type has
- *   initialised. In such cases the {@link #getSolrServer(Type, String, String...)}
- *   would return an {@link IllegalArgumentException} what causes the
- *   initialisation of the SolrYard to fail.<br>
- *   For now this problem is solved by declaring a dependency of this manager
- *   implementation to both the {@link EmbeddedSolrPorovider} and the
- *   {@link DefaultSolrServerProvider}. This ensures that this manager is only
- *   activated after this two implementations are available. <br>
- *   A different solution that could ensure that the SolrYard does not request
- *   an SolrServer before all the internal {@link SolrServerProvider}
- *   implementations are initialised would be favourable.
- *   
- *   
+ * <b>TODO:</b> Race Condition (Rupert Westenthaler, 2011-03-21) There are cases where the SolrYard requests a
+ * provider {@link Type} before the actual {@link SolrServerProvider} instance that supports this type has
+ * initialised. In such cases the {@link #getSolrServer(Type, String, String...)} would return an
+ * {@link IllegalArgumentException} what causes the initialisation of the SolrYard to fail.<br>
+ * For now this problem is solved by declaring a dependency of this manager implementation to both the
+ * {@link EmbeddedSolrPorovider} and the {@link DefaultSolrServerProvider}. This ensures that this manager is
+ * only activated after this two implementations are available. <br>
+ * A different solution that could ensure that the SolrYard does not request an SolrServer before all the
+ * internal {@link SolrServerProvider} implementations are initialised would be favourable.
+ * 
+ * 
  * @author Rupert Westenthaler
- *
+ * 
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service(SolrServerProviderManager.class)
 public final class SolrServerProviderManager {
 
     /**
-     * Used for the singleton pattern, but also init within the OSGI environment
-     * when {@link #activate(ComponentContext)} is called.
+     * Used for the singleton pattern, but also init within the OSGI environment when
+     * {@link #activate(ComponentContext)} is called.
      */
     private static SolrServerProviderManager solrServerProviderManager;
-    
-//    //TODO See Race Condition in class doc
-//    @Reference
-//    private EmbeddedSolrPorovider embeddedProvider;
-//    
-//    //TODO See Race Condition in class doc
-//    @Reference
-//    private DefaultSolrServerProvider defaultProvider;
-    
-    private static final Logger log = LoggerFactory.getLogger(SolrServerProviderManager.class);
-    @Reference(
-        referenceInterface=SolrServerProvider.class,
-        strategy=ReferenceStrategy.EVENT,
-        policy=ReferencePolicy.DYNAMIC,
-        cardinality=ReferenceCardinality.MANDATORY_MULTIPLE,
-        bind="addSolrProvider",unbind="removeSolrProvider")
-    private Map<Type,List<SolrServerProvider>> solrServerProviders = Collections.synchronizedMap(new EnumMap<Type,List<SolrServerProvider>>(Type.class));
 
-    public static SolrServerProviderManager getInstance(){
-        if(solrServerProviderManager == null){
+    // //TODO See Race Condition in class doc
+    // @Reference
+    // private EmbeddedSolrPorovider embeddedProvider;
+    //
+    // //TODO See Race Condition in class doc
+    // @Reference
+    // private DefaultSolrServerProvider defaultProvider;
+
+    private static final Logger log = LoggerFactory.getLogger(SolrServerProviderManager.class);
+    @Reference(referenceInterface = SolrServerProvider.class, strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, bind = "addSolrProvider", unbind = "removeSolrProvider")
+    private Map<Type,List<SolrServerProvider>> solrServerProviders = Collections
+            .synchronizedMap(new EnumMap<Type,List<SolrServerProvider>>(Type.class));
+
+    public static SolrServerProviderManager getInstance() {
+        if (solrServerProviderManager == null) {
             SolrServerProviderManager manager = new SolrServerProviderManager();
-            Iterator<SolrServerProvider> providerIt = ServiceLoader.load(SolrServerProvider.class,SolrServerProviderManager.class.getClassLoader()).iterator();
-            while(providerIt.hasNext()){
+            Iterator<SolrServerProvider> providerIt = ServiceLoader.load(SolrServerProvider.class,
+                SolrServerProviderManager.class.getClassLoader()).iterator();
+            while (providerIt.hasNext()) {
                 SolrServerProvider provider = providerIt.next();
-                log.info("load provider "+provider.getClass()+" supporting "+provider.supportedTypes());
+                log.info("load provider " + provider.getClass() + " supporting " + provider.supportedTypes());
                 manager.addSolrProvider(provider);
             }
             solrServerProviderManager = manager;
         }
         return solrServerProviderManager;
     }
-        
+
     @Activate
     protected void activate(ComponentContext context) {
         log.debug("Activate SolrServerProviderManager");
-        if(solrServerProviderManager == null){
+        if (solrServerProviderManager == null) {
             solrServerProviderManager = this;
         }
     }
+
     @Deactivate
     protected void deactivate(ComponentContext context) {
         log.debug("Activate SolrServerProviderManager");
         solrServerProviderManager = null;
     }
-    public SolrServer getSolrServer(Type type, String uriOrPath, String...additionalServerLocations){
+
+    public SolrServer getSolrServer(Type type, String uriOrPath, String... additionalServerLocations) {
         List<SolrServerProvider> providers = solrServerProviders.get(type);
-        if(providers == null){
-            throw new IllegalArgumentException("No Provider for type "+type+" available");
+        if (providers == null) {
+            throw new IllegalArgumentException("No Provider for type " + type + " available");
         }
-        for(SolrServerProvider provider : providers){
+        for (SolrServerProvider provider : providers) {
             try {
                 return provider.getSolrServer(type, uriOrPath, additionalServerLocations);
             } catch (RuntimeException e) {
-                log.warn("Unable to create SolrServer by using Provider "+provider,e);
+                log.warn("Unable to create SolrServer by using Provider " + provider, e);
             }
         }
-        throw new IllegalArgumentException(String.format("Unable to create SolrServer for type %s and service location %s",
-            type,uriOrPath));
+        throw new IllegalArgumentException(String.format(
+            "Unable to create SolrServer for type %s and service location %s", type, uriOrPath));
     }
-    
-    protected void addSolrProvider(SolrServerProvider provider){
-        log.info("add SolrProvider "+provider+" types "+provider.supportedTypes());
-        for(Type type : provider.supportedTypes()){
+
+    protected void addSolrProvider(SolrServerProvider provider) {
+        log.info("add SolrProvider " + provider + " types " + provider.supportedTypes());
+        for (Type type : provider.supportedTypes()) {
             List<SolrServerProvider> providers = solrServerProviders.get(type);
-            if(providers == null){
+            if (providers == null) {
                 providers = new CopyOnWriteArrayList<SolrServerProvider>();
                 solrServerProviders.put(type, providers);
             }
             providers.add(provider);
         }
     }
-    
-    protected void removeSolrProvider(SolrServerProvider provider){
-        log.info("remove SolrProvider "+provider+" types "+provider.supportedTypes());
-        for(Type type : provider.supportedTypes()){
+
+    protected void removeSolrProvider(SolrServerProvider provider) {
+        log.info("remove SolrProvider " + provider + " types " + provider.supportedTypes());
+        for (Type type : provider.supportedTypes()) {
             List<SolrServerProvider> providers = solrServerProviders.get(type);
-            if(providers != null){
-                if(providers.remove(provider) && providers.isEmpty()){
-                    //last element removed -> remove the mapping
-                    solrServerProviders.remove(type); 
+            if (providers != null) {
+                if (providers.remove(provider) && providers.isEmpty()) {
+                    // last element removed -> remove the mapping
+                    solrServerProviders.remove(type);
                 }
             }
         }

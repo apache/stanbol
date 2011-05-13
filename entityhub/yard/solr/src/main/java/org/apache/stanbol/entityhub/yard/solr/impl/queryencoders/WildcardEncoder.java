@@ -32,11 +32,10 @@ import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.utils.SolrUtil;
 
-
-public class WildcardEncoder implements IndexConstraintTypeEncoder<IndexValue>{
+public class WildcardEncoder implements IndexConstraintTypeEncoder<IndexValue> {
 
     private static final ConstraintTypePosition POS = new ConstraintTypePosition(PositionType.value);
-    
+
     private static final Set<IndexDataType> SUPPORTED_TYPES;
     static {
         Set<IndexDataType> types = new HashSet<IndexDataType>();
@@ -47,13 +46,14 @@ public class WildcardEncoder implements IndexConstraintTypeEncoder<IndexValue>{
 
     @Override
     public void encode(EncodedConstraintParts constraint, IndexValue value) {
-        if(value == null){
+        if (value == null) {
             throw new IllegalArgumentException("This encoder does not support the NULL IndexValue!");
-        } else if(!SUPPORTED_TYPES.contains(value.getType())){
-            throw new IllegalArgumentException(String.format("This encoder does not support the IndexDataType %s (supported: %s)",
-                value.getType(),SUPPORTED_TYPES));
+        } else if (!SUPPORTED_TYPES.contains(value.getType())) {
+            throw new IllegalArgumentException(String.format(
+                "This encoder does not support the IndexDataType %s (supported: %s)", value.getType(),
+                SUPPORTED_TYPES));
         } else {
-            constraint.addEncoded(POS, SolrUtil.encodeQueryValue(value,false));
+            constraint.addEncoded(POS, SolrUtil.encodeQueryValue(value, false));
         }
     }
 

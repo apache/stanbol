@@ -24,31 +24,31 @@ import org.apache.solr.core.CoreContainer;
 import org.apache.stanbol.entityhub.yard.solr.SolrDirectoryManager;
 
 /**
- * TODO:
- * To remove a SolrIndex one would need first to close the SolrCore or
- * shutdown the SolrContainer. This is currently not possible be cause the current
- * architecture was not intended to support that.<p>
- * To implement this one would need access to the CoreContainer with the core
- * running on top of the Core to remove. Than one would need to call
- * {@link CoreContainer#remove(String)} with the core and 
- * {@link CoreContainer#persist()} to remove the core also from the solr.xml.
- * After that one can remove the files from the disk.<p>
- * This would still have the problem that other components using an 
- * {@link EmbeddedSolrServer} that is based on this core would not be notified
- * about such a change.
+ * TODO: To remove a SolrIndex one would need first to close the SolrCore or shutdown the SolrContainer. This
+ * is currently not possible be cause the current architecture was not intended to support that.
+ * <p>
+ * To implement this one would need access to the CoreContainer with the core running on top of the Core to
+ * remove. Than one would need to call {@link CoreContainer#remove(String)} with the core and
+ * {@link CoreContainer#persist()} to remove the core also from the solr.xml. After that one can remove the
+ * files from the disk.
+ * <p>
+ * This would still have the problem that other components using an {@link EmbeddedSolrServer} that is based
+ * on this core would not be notified about such a change.
+ * 
  * @author Rupert Westenthaler
- *
+ * 
  */
 public class IndexRemoveTask extends InstallTask {
     /**
-     * Use 11 because the RemoveConfiguration uses 10 and we need to ensure that
-     * the files are removed after the services are shut down.
+     * Use 11 because the RemoveConfiguration uses 10 and we need to ensure that the files are removed after
+     * the services are shut down.
      */
     private static final String CONFIG_INSTALL_ORDER = "11-";
 
-    public IndexRemoveTask(TaskResourceGroup trg,SolrDirectoryManager solrDirectoryManager){
+    public IndexRemoveTask(TaskResourceGroup trg, SolrDirectoryManager solrDirectoryManager) {
         super(trg);
     }
+
     @Override
     public void execute(InstallationContext ctx) {
         throw new UnsupportedOperationException("TODO: Not yet implemented :(");
@@ -56,7 +56,7 @@ public class IndexRemoveTask extends InstallTask {
 
     @Override
     public String getSortKey() {
-        return CONFIG_INSTALL_ORDER+getResource().getEntityId();
+        return CONFIG_INSTALL_ORDER + getResource().getEntityId();
     }
 
 }
