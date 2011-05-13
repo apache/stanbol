@@ -92,7 +92,7 @@ public interface FieldQuery extends Query,Iterable<Entry<String, Constraint>>{
      * @param field the field
      * @return the state
      */
-    boolean isConstraint(String field);
+    boolean isConstrained(String field);
 
     /**
      * Getter for the Constraint of a field

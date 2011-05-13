@@ -146,7 +146,7 @@ public class SolrQueryFactory {
         StringBuilder queryString = new StringBuilder();
         for (Entry<String,Constraint> fieldConstraint : fieldQuery) {
             IndexConstraint indexConstraint = createIndexConstraint(fieldConstraint);
-            if (indexConstraint.isInvalied()) {
+            if (indexConstraint.isInvalid()) {
                 log.warn(String
                         .format(
                             "Unable to create IndexConstraint for Constraint %s (type: %s) and Field %s (Reosens: %s)",
@@ -219,7 +219,7 @@ public class SolrQueryFactory {
                 initIndexConstraint(indexConstraint, (RangeConstraint) fieldConstraint.getValue());
                 break;
             default:
-                indexConstraint.setInvalied(String.format("ConstraintType %s not supported by!",
+                indexConstraint.setInvalid(String.format("ConstraintType %s not supported by!",
                     fieldConstraint.getValue().getType()));
 
         }
@@ -244,7 +244,7 @@ public class SolrQueryFactory {
             } else {
                 if (!dataType.equals(upperDataType)) {
                     indexConstraint
-                            .setInvalied(String
+                            .setInvalid(String
                                     .format(
                                         "A Range Query MUST use the same data type for the upper and lover Bound! (lower:[value=%s|datatype=%s] | upper:[value=%s|datatype=%s])",
                                         rangeConstraint.getLowerBound(), dataType,
@@ -253,7 +253,7 @@ public class SolrQueryFactory {
             }
         }
         if (dataType == null) {
-            indexConstraint.setInvalied("A Range Constraint MUST define at least a lower or an upper bound!");
+            indexConstraint.setInvalid("A Range Constraint MUST define at least a lower or an upper bound!");
         } else {
             indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.DATATYPE, dataType);
         }
@@ -286,7 +286,7 @@ public class SolrQueryFactory {
                 indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.REGEX, textValue);
                 break;
             default:
-                indexConstraint.setInvalied(String.format(
+                indexConstraint.setInvalid(String.format(
                     "PatterType %s not supported for Solr Index Queries!", textConstraint.getPatternType()));
         }
     }
@@ -298,7 +298,7 @@ public class SolrQueryFactory {
     private void initIndexConstraint(IndexConstraint indexConstraint, ValueConstraint valueConstraint) {
         if (valueConstraint.getValue() == null) {
             indexConstraint
-                    .setInvalied(String
+                    .setInvalid(String
                             .format(
                                 "ValueConstraint without a value - that check only any value for the parsed datatypes %s is present - can not be supported by a Solr query!",
                                 valueConstraint.getDataTypes()));
@@ -326,7 +326,7 @@ public class SolrQueryFactory {
                     indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.EQ, indexValue);
                     indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.DATATYPE, indexValue);
                 } catch (NoConverterException e) {
-                    indexConstraint.setInvalied(e.getMessage());
+                    indexConstraint.setInvalid(e.getMessage());
                 }
             } else { // one or more supported dataTypes are present
                 for (IndexDataType indexDataType : indexDataTypes) {
@@ -472,7 +472,7 @@ public class SolrQueryFactory {
     private class IndexConstraint {
         private final Map<IndexConstraintTypeEnum,Object> fieldConstraints = new EnumMap<IndexConstraintTypeEnum,Object>(
                 IndexConstraintTypeEnum.class);
-        private List<String> invaliedMessages = new ArrayList<String>();
+        private List<String> invalidMessages = new ArrayList<String>();
 
         /**
          * Creates a Field Term for the parsed path
@@ -490,15 +490,14 @@ public class SolrQueryFactory {
         }
 
         /**
-         * Set to <code>true</code> to indicate, that this IndexConstraint can not be used. e.g. if the
-         * conversion of a {@link Constraint } to an {@link IndexConstraint} was unsuccessful!
+         * Set an explanatory error message to tell that this IndexConstraint cannot be used. e.g. if the
+         * conversion of a {@link Constraint} to an {@link IndexConstraint} was unsuccessful.
          * 
-         * @param state
-         *            the state
+         * @param message
+         *            an message to explain why the constraint is not valid
          */
-        public void setInvalied(String message) {
-            this.invaliedMessages.add(message);
-
+        public void setInvalid(String message) {
+            this.invalidMessages.add(message);
         }
 
         /**
@@ -508,17 +507,17 @@ public class SolrQueryFactory {
          * 
          * @return the state
          */
-        public boolean isInvalied() {
-            return !invaliedMessages.isEmpty();
+        public boolean isInvalid() {
+            return !invalidMessages.isEmpty();
         }
 
         /**
          * Getter for the Messages why this index constraint is not valid
          * 
-         * @return the messages. An empty List if {@link #isInvalied()} returns <code>false</code>
+         * @return the messages. An empty List if {@link #isInvalid()} returns <code>false</code>
          */
         public List<String> getInvalidMessages() {
-            return invaliedMessages;
+            return invalidMessages;
         }
 
         /**
@@ -565,7 +564,7 @@ public class SolrQueryFactory {
 
         @SuppressWarnings("unchecked")
         public void encode(StringBuilder queryString) {
-            if (isInvalied()) {
+            if (isInvalid()) {
                 throw new IllegalStateException(String.format(
                     "Unable to encode an invalid IndexConstraint (invalid messages: %s)",
                     getInvalidMessages()));
