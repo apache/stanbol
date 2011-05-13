@@ -634,7 +634,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
         //init the fieldMapper based on the configuration
         fieldMappings = new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
         if(siteConfiguration.getFieldMappings() != null){
-            log.debug(" > Initialise configured FieldMappungs");
+            log.debug(" > Initialise configured field mappings");
             for(String configuredMapping : siteConfiguration.getFieldMappings()){
                 FieldMapping mapping = FieldMappingUtils.parseFieldMapping(configuredMapping);
                 if(mapping != null){
