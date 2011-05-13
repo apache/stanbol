@@ -38,78 +38,86 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IndexInstallTask extends InstallTask {
-    
+
     private static final Logger log = LoggerFactory.getLogger(IndexInstallTask.class);
     /**
-     * use 19 because the config install uses 20 and the files MUST be installed
-     * before the config triggering the initialisation of the services. 
+     * use 19 because the config install uses 20 and the files MUST be installed before the config triggering
+     * the initialisation of the services.
      */
     private static final String CONFIG_INSTALL_ORDER = "19-";
 
     private final SolrDirectoryManager solrDirectoryManager;
-    public IndexInstallTask(TaskResourceGroup trg, SolrDirectoryManager solrDirectoryManager){
+
+    public IndexInstallTask(TaskResourceGroup trg, SolrDirectoryManager solrDirectoryManager) {
         super(trg);
         this.solrDirectoryManager = solrDirectoryManager;
     }
+
     @Override
     public void execute(InstallationContext ctx) {
-        String indexName = (String)getResource().getAttribute(PROPERTY_INDEX_NAME);
+        String indexName = (String) getResource().getAttribute(PROPERTY_INDEX_NAME);
         Map<String,File> existingIndexes = solrDirectoryManager.getManagedIndices();
-        if(existingIndexes.containsKey(indexName)){
-            //an Index with that name already exists -> ignore
-            ctx.log("Unable to install the Index with the name \"%s\" becuase an index with that name is already managed by the the SolrYard " +
-            		"(resource %s | location of the existing index %s)!",
-                indexName,getResource().getURL(),existingIndexes.get(indexName));
+        if (existingIndexes.containsKey(indexName)) {
+            // an Index with that name already exists -> ignore
+            ctx.log(
+                "Unable to install the Index with the name \"%s\" becuase an index with that name is already managed by the the SolrYard "
+                        + "(resource %s | location of the existing index %s)!", indexName, getResource()
+                        .getURL(), existingIndexes.get(indexName));
             setFinishedState(ResourceState.IGNORED);
-        } else { //this index does not exist
-            String archiveFormat = (String)getResource().getAttribute(PROPERTY_ARCHIVE_FORMAT);
+        } else { // this index does not exist
+            String archiveFormat = (String) getResource().getAttribute(PROPERTY_ARCHIVE_FORMAT);
             InputStream is = null;
             try {
                 is = getResource().getInputStream();
-                if("properties".equals(archiveFormat)){
-                    InputStreamReader reader = new InputStreamReader(is,"UTF-8");
+                if ("properties".equals(archiveFormat)) {
+                    InputStreamReader reader = new InputStreamReader(is, "UTF-8");
                     Properties props = new Properties();
                     try {
                         props.load(reader);
                     } finally {
-                       IOUtils.closeQuietly(reader);
+                        IOUtils.closeQuietly(reader);
                     }
                     String indexPath = props.getProperty(PROPERTY_INDEX_ARCHIVE);
-                    if(indexPath == null){
-                        indexPath = indexName+'.'+ConfigUtils.SOLR_INDEX_ARCHIVE_EXTENSION;
-                        log.info("Property \""+PROPERTY_INDEX_ARCHIVE+"\" not present within the SolrIndex references file. Will use the default name \""+indexPath+"\"");
+                    if (indexPath == null) {
+                        indexPath = indexName + '.' + ConfigUtils.SOLR_INDEX_ARCHIVE_EXTENSION;
+                        log.info("Property \""
+                                 + PROPERTY_INDEX_ARCHIVE
+                                 + "\" not present within the SolrIndex references file. Will use the default name \""
+                                 + indexPath + "\"");
                     }
-                    solrDirectoryManager.createSolrDirectory(indexName,indexPath,props);
+                    solrDirectoryManager.createSolrDirectory(indexName, indexPath, props);
                     setFinishedState(ResourceState.INSTALLED);
                 } else {
                     ArchiveInputStream ais = null;
                     try {
                         ais = ConfigUtils.getArchiveInputStream(archiveFormat, is);
                         solrDirectoryManager.createSolrIndex(indexName, ais);
-                        //we are done ... set the state to installed!
+                        // we are done ... set the state to installed!
                         setFinishedState(ResourceState.INSTALLED);
                     } finally {
                         IOUtils.closeQuietly(ais);
                     }
                 }
-                //now we can copy the core!
-            }catch (Exception e) {
-                String message = String.format("Unable to install SolrIndexArchive for index name \"%s\"! (resource=%s, arviceFormat=%s)", 
-                    indexName,getResource().getURL(),archiveFormat);
-                log.error(message,e);
-                ctx.log("%s! Reason: %s",message,e.getMessage());
+                // now we can copy the core!
+            } catch (Exception e) {
+                String message = String
+                        .format(
+                            "Unable to install SolrIndexArchive for index name \"%s\"! (resource=%s, arviceFormat=%s)",
+                            indexName, getResource().getURL(), archiveFormat);
+                log.error(message, e);
+                ctx.log("%s! Reason: %s", message, e.getMessage());
                 setFinishedState(ResourceState.IGNORED);
             } finally {
                 IOUtils.closeQuietly(is);
             }
-            
+
         }
-        
+
     }
 
     @Override
     public String getSortKey() {
-        return CONFIG_INSTALL_ORDER+getResource().getPriority()+"-"+getResource().getEntityId();
+        return CONFIG_INSTALL_ORDER + getResource().getPriority() + "-" + getResource().getEntityId();
     }
 
 }

@@ -33,7 +33,7 @@ import org.apache.stanbol.entityhub.yard.solr.utils.SolrUtil;
 
 /**
  * Encodes the DataType to the field name.
- *
+ * 
  * @author Rupert Westenthaler
  */
 public class DataTypeEncoder implements IndexConstraintTypeEncoder<Object> {
@@ -45,10 +45,10 @@ public class DataTypeEncoder implements IndexConstraintTypeEncoder<Object> {
     private final IndexValueFactory indexValueFactory;
 
     public DataTypeEncoder(IndexValueFactory indexValueFactory, FieldMapper fieldMapper) {
-        if(fieldMapper == null){
+        if (fieldMapper == null) {
             throw new IllegalArgumentException("The FieldMapper MUST NOT be NULL!");
         }
-        if(indexValueFactory == null){
+        if (indexValueFactory == null) {
             throw new IllegalArgumentException("The IndexValueFactory MUST NOT be NULL!");
         }
         this.fieldMapper = fieldMapper;
@@ -56,26 +56,26 @@ public class DataTypeEncoder implements IndexConstraintTypeEncoder<Object> {
     }
 
     @Override
-    public void encode(EncodedConstraintParts constraint,Object value) throws IllegalArgumentException {
+    public void encode(EncodedConstraintParts constraint, Object value) throws IllegalArgumentException {
         IndexDataType indexDataType;
-        if(value == null){
+        if (value == null) {
             indexDataType = null;
-        } else if(value instanceof IndexDataType){
-            indexDataType = (IndexDataType)value;
+        } else if (value instanceof IndexDataType) {
+            indexDataType = (IndexDataType) value;
         } else if (value instanceof IndexField) {
-            indexDataType = ((IndexField)value).getDataType();
+            indexDataType = ((IndexField) value).getDataType();
         } else if (value instanceof IndexValue) {
-            indexDataType = ((IndexValue)value).getType();
+            indexDataType = ((IndexValue) value).getType();
         } else {
             indexDataType = indexValueFactory.createIndexValue(value).getType();
         }
-        if(indexDataType != null) {
+        if (indexDataType != null) {
             String[] prefixSuffix = fieldMapper.encodeDataType(indexDataType);
 
-            if(prefixSuffix[0] != null){
+            if (prefixSuffix[0] != null) {
                 constraint.addEncoded(PREFIX, SolrUtil.escapeSolrSpecialChars(prefixSuffix[0]));
             }
-            if(prefixSuffix[1] != null){
+            if (prefixSuffix[1] != null) {
                 constraint.addEncoded(SUFFIX, SolrUtil.escapeSolrSpecialChars(prefixSuffix[1]));
             }
         } // else nothing todo!

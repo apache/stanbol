@@ -59,8 +59,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of the FieldMapper for a Solr Index.
+ * 
  * @author Rupert Westenthaler
- *
+ * 
  */
 public class SolrFieldMapper implements FieldMapper {
 
@@ -69,12 +70,13 @@ public class SolrFieldMapper implements FieldMapper {
      * Char used to separate the prefix from the local name of uri's
      */
     private static final char NAMESPACE_PREFIX_SEPERATOR_CHAR = ':';
-    private static final String LANG_MERGER_PREFIX = ""+SolrConst.SPECIAL_FIELD_PREFIX+SolrConst.MERGER_INDICATOR+SolrConst.LANG_INDICATOR;
+    private static final String LANG_MERGER_PREFIX = "" + SolrConst.SPECIAL_FIELD_PREFIX
+                                                     + SolrConst.MERGER_INDICATOR + SolrConst.LANG_INDICATOR;
     /**
-     * The size of the LRU cache for FieldName to IndexField as well as
-     * IndexField to collection of FieldNames mappings.<p>
-     * Note that both caches may have a maximum of elements as configured by this
-     * property.
+     * The size of the LRU cache for FieldName to IndexField as well as IndexField to collection of FieldNames
+     * mappings.
+     * <p>
+     * Note that both caches may have a maximum of elements as configured by this property.
      */
     private static final int LRU_MAPPINGS_CACHE_SIZE = 1024;
     /**
@@ -88,22 +90,25 @@ public class SolrFieldMapper implements FieldMapper {
      * The Solr Server of this FieldMapper
      */
     protected final SolrServer server;
+
     /**
-     * Internally used as LRU Cache with {@link SolrFieldMapper#LRU_MAPPINGS_CACHE_SIZE}
-     * elements. This subclass of {@link LinkedHashMap} overrides the
-     * {@link LinkedHashMap#removeEldestEntry(Entry)} as suggested by the java
-     * doc. It also uses the constructor that activates the ordering based on
-     * access time rather tan insertion time.
-     *
+     * Internally used as LRU Cache with {@link SolrFieldMapper#LRU_MAPPINGS_CACHE_SIZE} elements. This
+     * subclass of {@link LinkedHashMap} overrides the {@link LinkedHashMap#removeEldestEntry(Entry)} as
+     * suggested by the java doc. It also uses the constructor that activates the ordering based on access
+     * time rather tan insertion time.
+     * 
      * @author Rupert Westenthaler
-     *
-     * @param <K> generic type of the key
-     * @param <V> generic type of the value
+     * 
+     * @param <K>
+     *            generic type of the key
+     * @param <V>
+     *            generic type of the value
      */
-    private static final class LRU<K,V> extends LinkedHashMap<K, V>{
+    private static final class LRU<K,V> extends LinkedHashMap<K,V> {
         public LRU() {
-            super(16,0.75f,true); //access order!
+            super(16, 0.75f, true); // access order!
         }
+
         private static final long serialVersionUID = 1L;
 
         @Override
@@ -111,77 +116,75 @@ public class SolrFieldMapper implements FieldMapper {
             return size() > LRU_MAPPINGS_CACHE_SIZE;
         }
     }
+
     /**
-     * The assumption is, that only a handful of {@link IndexField}s are used
-     * very often.<p>
-     * So it makes sense to keep some mappings within a cache rather than calculating
-     * them again and again.
+     * The assumption is, that only a handful of {@link IndexField}s are used very often.
+     * <p>
+     * So it makes sense to keep some mappings within a cache rather than calculating them again and again.
+     * 
      * @see LinkedHashMap#
      */
-    private final LRU<IndexField, Collection<String>> indexFieldMappings =
-        new LRU<IndexField, Collection<String>>();
+    private final LRU<IndexField,Collection<String>> indexFieldMappings = new LRU<IndexField,Collection<String>>();
     /**
-     * The assumption is, that only a handful of fields appear in index documents.
-     * So it makes sense to keep some mappings within a cache rather than calculating
-     * them again and again.
+     * The assumption is, that only a handful of fields appear in index documents. So it makes sense to keep
+     * some mappings within a cache rather than calculating them again and again.
      */
-    private final LRU<String, IndexField> fieldMappings =
-        new LRU<String, IndexField>();
+    private final LRU<String,IndexField> fieldMappings = new LRU<String,IndexField>();
 
-    public SolrFieldMapper(SolrServer server){
-        if(server == null){
+    public SolrFieldMapper(SolrServer server) {
+        if (server == null) {
             throw new IllegalArgumentException("The parsed SolrServer MUST NOT be NULL");
         }
         this.server = server;
     }
+
     @Override
     public IndexField getField(String fieldName) {
-        if(fieldName == null || fieldName.isEmpty()){
+        if (fieldName == null || fieldName.isEmpty()) {
             throw new IllegalArgumentException("The parsed field name MUST NOT be NULL!");
         }
         IndexField field = fieldMappings.get(fieldName);
-        if(field == null){
-            if(getDocumentIdField().equals(fieldName) ||
-                    fieldName.charAt(0) == SolrConst.SPECIAL_FIELD_PREFIX){
-                //in case of special field or the document ID, return null ->
-                //   meaning, that this index document field does not represent
-                //   an logical IndexField and should be ignored
+        if (field == null) {
+            if (getDocumentIdField().equals(fieldName)
+                || fieldName.charAt(0) == SolrConst.SPECIAL_FIELD_PREFIX) {
+                // in case of special field or the document ID, return null ->
+                // meaning, that this index document field does not represent
+                // an logical IndexField and should be ignored
                 return null;
-            } else if (SolrConst.SCORE_FIELD.equals(fieldName)){
+            } else if (SolrConst.SCORE_FIELD.equals(fieldName)) {
                 return scoreField;
             }
-            //parse the prefix and suffix
+            // parse the prefix and suffix
             String[] tokens = fieldName.split(Character.toString(SolrConst.PATH_SEPERATOR));
             int numTokens = tokens.length;
             int pathElements = numTokens;
             String prefix = null;
             String suffix = null;
-            if (tokens.length >= 2){
+            if (tokens.length >= 2) {
                 prefix = tokens[0];
                 pathElements--;
             }
-            if(tokens.length >= 3){
-                suffix = tokens[numTokens-1].substring(1);
+            if (tokens.length >= 3) {
+                suffix = tokens[numTokens - 1].substring(1);
                 pathElements--;
             }
 
-            //parse the path
+            // parse the path
             String[] path = new String[pathElements];
-            System.arraycopy(tokens, prefix==null?0:1, path, 0, pathElements);
+            System.arraycopy(tokens, prefix == null ? 0 : 1, path, 0, pathElements);
             tokens = null;
-            //process the parsed data
-            field = parseIndexField(prefix,suffix,path);
-            if(field != null){
+            // process the parsed data
+            field = parseIndexField(prefix, suffix, path);
+            if (field != null) {
                 fieldMappings.put(fieldName, field);
             }
         }
         return field;
     }
+
     /**
-     * This method does the dirty work of parsing the different parts of the
-     * field in the SolrDocument to the logical field as used by the semantic
-     * indexing API.
-     * This method assumes the following encoding
+     * This method does the dirty work of parsing the different parts of the field in the SolrDocument to the
+     * logical field as used by the semantic indexing API. This method assumes the following encoding
      * <code><pre>
      *   .        ... path separator
      *   _        ... special field indicator
@@ -199,7 +202,7 @@ public class SolrFieldMapper implements FieldMapper {
      *     _str.&lt;field&gt;: A string field (containing no language)
      *     _ref.&lt;field&gt;: A reference (similar to xsd:anyURI)
      *     _bool.&lt;field&gt;: A boolean value
-     *
+     * 
      * NOTE: Prefixes/Suffixes can be used to define a hierarchy of data types
      * e.g. use Prefixes for dataTypes:
      *   _n   ... any kind of numeric value
@@ -217,15 +220,16 @@ public class SolrFieldMapper implements FieldMapper {
      *   ._ct ... a tag
      *   ._cr ... a category using a reference to an entity ID (xsd:anyURI)
      *   ._ci ... a categorisation using an local id (e.g 2 letter country codes)
-     *
+     * 
      *  one can now create Solr copyField commands to support searches spanning
      *  over multiple types
      *  _!n  ... search for any kind of numbers
      *  _!ni ... search for any kind of integers
      *  _!s  ... search in all kind of string values
      *  _!sc ... search for all categories of this document
-     *
+     * 
      * </pre><code>
+     * 
      * @param prefix
      * @param suffix
      * @param pathElements
@@ -235,57 +239,62 @@ public class SolrFieldMapper implements FieldMapper {
         final String language;
         boolean isLanguage = false;
         final String dataTypePrefix;
-        //first use the prefix to parse the language
+        // first use the prefix to parse the language
         // -> note that the prefix might also be used for the data type!
-        if(prefix != null && !prefix.isEmpty()){
-            if(prefix.charAt(0) == SolrConst.LANG_INDICATOR){
+        if (prefix != null && !prefix.isEmpty()) {
+            if (prefix.charAt(0) == SolrConst.LANG_INDICATOR) {
                 isLanguage = true;
-                //it is a language prefix!
-                //set dataTypePrefix to null
+                // it is a language prefix!
+                // set dataTypePrefix to null
                 dataTypePrefix = null;
-                if(prefix.length()>1){
+                if (prefix.length() > 1) {
                     language = prefix.substring(1);
-                } else { //it is a language prefix, but for the default language!
+                } else { // it is a language prefix, but for the default language!
                     language = null;
                 }
-            } else { //it is no language prefix
+            } else { // it is no language prefix
                 language = null;
                 isLanguage = false;
                 dataTypePrefix = prefix;
             }
-        } else { //no prefix at all
-            //set no-language and the dataType prefix to null;
+        } else { // no prefix at all
+            // set no-language and the dataType prefix to null;
             isLanguage = false;
             language = null;
             dataTypePrefix = null;
         }
-        //now parse the indexDataType!
+        // now parse the indexDataType!
         IndexDataTypeEnum dataTypeEnumEntry = IndexDataTypeEnum.forPrefixSuffix(dataTypePrefix, suffix);
-        if(dataTypeEnumEntry == null){
-            log.warn(String.format("No IndexDataType registered for prefix: %s and suffix: %s -> unable to process path %s",
-                    dataTypePrefix,suffix,Arrays.toString(pathElements)));
+        if (dataTypeEnumEntry == null) {
+            log.warn(String.format(
+                "No IndexDataType registered for prefix: %s and suffix: %s -> unable to process path %s",
+                dataTypePrefix, suffix, Arrays.toString(pathElements)));
             return null; // we might also throw an exception at this point
         }
-        //parse the path
+        // parse the path
         List<String> path = new ArrayList<String>(pathElements.length);
-        for(String pathElement : pathElements){
-            if(pathElement.charAt(0) == SolrConst.SPECIAL_FIELD_PREFIX){
-                if(pathElement.charAt(1)== SolrConst.SPECIAL_FIELD_PREFIX){
+        for (String pathElement : pathElements) {
+            if (pathElement.charAt(0) == SolrConst.SPECIAL_FIELD_PREFIX) {
+                if (pathElement.charAt(1) == SolrConst.SPECIAL_FIELD_PREFIX) {
                     path.add(getFullFieldName(pathElement.substring(1)));
                 } else {
-                    throw new IllegalStateException(String.format("Found special field \"%s\" within the path \"%s\" -> Special fields are only allowed as prefix and suffix!",
-                            pathElement,Arrays.toString(pathElements)));
+                    throw new IllegalStateException(
+                            String.format(
+                                "Found special field \"%s\" within the path \"%s\" -> Special fields are only allowed as prefix and suffix!",
+                                pathElement, Arrays.toString(pathElements)));
                 }
             } else {
                 String fullName = getFullFieldName(pathElement);
-                if(fullName == null){
-                    throw new IllegalStateException(String.format("Unable to map PathElement %s to it's full Name (path=%s)!",pathElement,Arrays.toString(pathElements)));
+                if (fullName == null) {
+                    throw new IllegalStateException(String.format(
+                        "Unable to map PathElement %s to it's full Name (path=%s)!", pathElement,
+                        Arrays.toString(pathElements)));
                 } else {
                     path.add(fullName);
                 }
             }
         }
-        if(isLanguage){
+        if (isLanguage) {
             return new IndexField(path, dataTypeEnumEntry.getIndexType(), language);
         } else {
             return new IndexField(path, dataTypeEnumEntry.getIndexType());
@@ -295,8 +304,8 @@ public class SolrFieldMapper implements FieldMapper {
     @Override
     public Collection<String> getFieldNames(List<String> path, IndexValue indexValue) throws IllegalArgumentException {
         IndexField field;
-        if(indexValue.hasLanguage()){
-            field = new IndexField(path, indexValue.getType(),indexValue.getLanguage());
+        if (indexValue.hasLanguage()) {
+            field = new IndexField(path, indexValue.getType(), indexValue.getLanguage());
         } else {
             field = new IndexField(path, indexValue.getType());
         }
@@ -305,178 +314,198 @@ public class SolrFieldMapper implements FieldMapper {
 
     @Override
     public Collection<String> getFieldNames(IndexField indexField) throws IllegalArgumentException {
-        if(indexField == null){
+        if (indexField == null) {
             throw new IllegalArgumentException("The parsed IndexField name MUST NOT be NULL!");
         }
         Collection<String> fieldNames = indexFieldMappings.get(indexField);
-        if(fieldNames == null){
+        if (fieldNames == null) {
             IndexDataTypeEnum dataTypeConfig = IndexDataTypeEnum.forIndexType(indexField.getDataType());
-            if(dataTypeConfig == null){
-                throw new IllegalStateException(String.format("No Config found for the parsed IndexDataType %s",indexField.getDataType()));
+            if (dataTypeConfig == null) {
+                throw new IllegalStateException(String.format(
+                    "No Config found for the parsed IndexDataType %s", indexField.getDataType()));
             }
             fieldNames = new HashSet<String>();
-            //Three things need to be done
-            //1) Encode the Path
+            // Three things need to be done
+            // 1) Encode the Path
             String pathName = encodePathName(indexField.getPath());
-            //2) Encode the DataType
-            fieldNames.addAll(encodeDataType(pathName,dataTypeConfig));
-            //3) Encode the Languages
-            if(indexField.hasLanguage()){
-                fieldNames.addAll(encodeLanguages(pathName,indexField.getLanguages()));
+            // 2) Encode the DataType
+            fieldNames.addAll(encodeDataType(pathName, dataTypeConfig));
+            // 3) Encode the Languages
+            if (indexField.hasLanguage()) {
+                fieldNames.addAll(encodeLanguages(pathName, indexField.getLanguages()));
             }
-            //4) add the language merger field (in case the dataType represent natural
-            //   language texts)
-            if(dataTypeConfig.isLanguageType()){
-                fieldNames.add(SolrConst.LANG_MERGER_FIELD+pathName);
+            // 4) add the language merger field (in case the dataType represent natural
+            // language texts)
+            if (dataTypeConfig.isLanguageType()) {
+                fieldNames.add(SolrConst.LANG_MERGER_FIELD + pathName);
             }
-            //cache the mappings
+            // cache the mappings
             indexFieldMappings.put(indexField, fieldNames);
         }
         return fieldNames;
     }
+
     /**
-     * Getter for the string used to index a the parsed path. This method
-     * replaces the URI's of all elements within the path with
-     * <code>prefix+NAMESPACE_PREFIX_SEPERATOR_CHAR+localName</code>. In addition
-     * it places the <code>PATH_SEPERATOR</code> char between the elements.<p>
-     * NOTE: This Method assumes that both Parameters are not NULL and that
-     * the Path is not empty and contains no NULL nor emtpy element!
-     * @param path the path to encode
+     * Getter for the string used to index a the parsed path. This method replaces the URI's of all elements
+     * within the path with <code>prefix+NAMESPACE_PREFIX_SEPERATOR_CHAR+localName</code>. In addition it
+     * places the <code>PATH_SEPERATOR</code> char between the elements.
+     * <p>
+     * NOTE: This Method assumes that both Parameters are not NULL and that the Path is not empty and contains
+     * no NULL nor emtpy element!
+     * 
+     * @param path
+     *            the path to encode
      * @return the path name
      */
-    private String encodePathName(List<String> path){
+    private String encodePathName(List<String> path) {
         StringBuilder pathName = new StringBuilder();
-        //Now Iterate over the Path
-        pathName.append(PATH_SEPERATOR); //add the leading PathSeperator
+        // Now Iterate over the Path
+        pathName.append(PATH_SEPERATOR); // add the leading PathSeperator
         Iterator<String> fields = path.iterator();
-        while(fields.hasNext()){
+        while (fields.hasNext()) {
             String field = fields.next();
-            //PathElement element = it.next();
-            String [] namespaceLocalName = ModelUtils.getNamespaceLocalName(field);
-            //QName qName = getQName(field);
-            if(namespaceLocalName[0]!=null && !namespaceLocalName[0].isEmpty()){
+            // PathElement element = it.next();
+            String[] namespaceLocalName = ModelUtils.getNamespaceLocalName(field);
+            // QName qName = getQName(field);
+            if (namespaceLocalName[0] != null && !namespaceLocalName[0].isEmpty()) {
                 pathName.append(getPrefix(namespaceLocalName[0], true));
-                //second the local name
+                // second the local name
                 pathName.append(NAMESPACE_PREFIX_SEPERATOR_CHAR);
             }
             pathName.append(namespaceLocalName[1]);
-            //third add Path Separator if there are additional Elements
-            if(fields.hasNext()){
+            // third add Path Separator if there are additional Elements
+            if (fields.hasNext()) {
                 pathName.append(PATH_SEPERATOR);
             }
         }
-        pathName.append(PATH_SEPERATOR); //add the tailing PathSeperator
+        pathName.append(PATH_SEPERATOR); // add the tailing PathSeperator
         return pathName.toString();
     }
+
     @Override
     public String encodePath(List<String> path) throws IllegalArgumentException {
         IndexField.validatePath(path);
         return encodePathName(path);
     }
+
     /**
-     * Encodes the datatype by adding the prefix and the suffix to the parsed
-     * path name. If no prefix nor suffix is defined for the parsed data type,
-     * than this method returns an empty collection 
-     * (indicating that no encoding is necessary)
-     * @param pathName the path name to add the prefix and the suffix.
-     * @param dataType the dataType to encode.
+     * Encodes the datatype by adding the prefix and the suffix to the parsed path name. If no prefix nor
+     * suffix is defined for the parsed data type, than this method returns an empty collection (indicating
+     * that no encoding is necessary)
+     * 
+     * @param pathName
+     *            the path name to add the prefix and the suffix.
+     * @param dataType
+     *            the dataType to encode.
      * @return The fields representing the encoded dataType for the parsed field.
      */
-    private Collection<String> encodeDataType(String pathName,IndexDataTypeEnum dataType){
+    private Collection<String> encodeDataType(String pathName, IndexDataTypeEnum dataType) {
         String[] prefixSuffix = encodeDataType(dataType);
-        if((prefixSuffix[0] == null || prefixSuffix[0].isEmpty()) &&
-                (prefixSuffix[1] == null || prefixSuffix[1].isEmpty())){
-            //no prefix nor suffix defined -> return empty collection
-            return Collections.emptyList(); 
-        } else { 
-            //return prefix+fieldName+suffix
-            return Collections.singleton(
-                (prefixSuffix[0] != null?prefixSuffix[0]:"")+
-                pathName +
-                (prefixSuffix[1] != null?prefixSuffix[1]:""));
+        if ((prefixSuffix[0] == null || prefixSuffix[0].isEmpty())
+            && (prefixSuffix[1] == null || prefixSuffix[1].isEmpty())) {
+            // no prefix nor suffix defined -> return empty collection
+            return Collections.emptyList();
+        } else {
+            // return prefix+fieldName+suffix
+            return Collections.singleton((prefixSuffix[0] != null ? prefixSuffix[0] : "") + pathName
+                                         + (prefixSuffix[1] != null ? prefixSuffix[1] : ""));
         }
     }
+
     @Override
     public String[] encodeDataType(IndexDataType dataType) throws IllegalArgumentException {
         IndexDataTypeEnum dataTypeConfig = IndexDataTypeEnum.forIndexType(dataType);
-        if(dataTypeConfig == null){
-            throw new IllegalStateException(String.format("No Config found for the parsed IndexDataType %s",dataType));
+        if (dataTypeConfig == null) {
+            throw new IllegalStateException(String.format("No Config found for the parsed IndexDataType %s",
+                dataType));
         }
         return encodeDataType(dataTypeConfig);
     }
-    private String[] encodeDataType(IndexDataTypeEnum dataType){
-        String[] prefixSuffix = new String[] {null,null};
-        if(dataType.getPrefix() != null && !dataType.getPrefix().isEmpty()){
+
+    private String[] encodeDataType(IndexDataTypeEnum dataType) {
+        String[] prefixSuffix = new String[] {null, null};
+        if (dataType.getPrefix() != null && !dataType.getPrefix().isEmpty()) {
             prefixSuffix[0] = dataType.getPrefix();
         }
-        if(dataType.getSuffix() != null && !dataType.getSuffix().isEmpty()){
+        if (dataType.getSuffix() != null && !dataType.getSuffix().isEmpty()) {
             prefixSuffix[1] = dataType.getSuffix();
         }
         return prefixSuffix;
     }
+
     /**
-     * Encodes the prefixes for the parsed languages and returns the according
-     * field names for the languages.<p>
-     * Languages are encoded using the {@link SolrConst#LANG_INDICATOR} and the
-     * parsed language as field prefix.<p>
-     * Note that this implementation adds dataTypes that are marked as natural
-     * language text values ( all dataTypes where 
-     * <code>{@link IndexDataTypeEnum#isLanguageType()} == true</code>) to the
-     * special {@link SolrConst#LANG_MERGER_FIELD}. This can be used to search
-     * for values of an field in any language.<p>
-     * In addition to that the default schema.xml also defines a copyField 
-     * command that puts natural language values of all fields into the default
-     * search field "_text".<p>
+     * Encodes the prefixes for the parsed languages and returns the according field names for the languages.
+     * <p>
+     * Languages are encoded using the {@link SolrConst#LANG_INDICATOR} and the parsed language as field
+     * prefix.
+     * <p>
+     * Note that this implementation adds dataTypes that are marked as natural language text values ( all
+     * dataTypes where <code>{@link IndexDataTypeEnum#isLanguageType()} == true</code>) to the special
+     * {@link SolrConst#LANG_MERGER_FIELD}. This can be used to search for values of an field in any language.
+     * <p>
+     * In addition to that the default schema.xml also defines a copyField command that puts natural language
+     * values of all fields into the default search field "_text".
+     * <p>
      * The collection returned by this method does not include
      * <code>"{@link SolrConst#LANG_MERGER_FIELD}"+feildName</code>!
-     * @param fieldName the string representing the field without encoded languages
-     * @param languages the languages.
+     * 
+     * @param fieldName
+     *            the string representing the field without encoded languages
+     * @param languages
+     *            the languages.
      * @return
      */
     private Collection<String> encodeLanguages(String fieldName, Collection<String> languages) {
-        if(languages == null || languages.isEmpty()){ //no language
-            return Collections.singleton(fieldName);//just return the field
+        if (languages == null || languages.isEmpty()) { // no language
+            return Collections.singleton(fieldName);// just return the field
         } else {
-            //I assume that this will be the case in most of the calls
-            Collection<String> fieldNames = new ArrayList<String>(languages.size()*2);
-            for(String prefix : encodeLanguages(languages)){
-                fieldNames.add(prefix+fieldName);
+            // I assume that this will be the case in most of the calls
+            Collection<String> fieldNames = new ArrayList<String>(languages.size() * 2);
+            for (String prefix : encodeLanguages(languages)) {
+                fieldNames.add(prefix + fieldName);
             }
             return fieldNames;
         }
     }
+
     /**
      * Internally used instead of {@link #encodeLanguages(String...)}
-     * @param languages the languages
+     * 
+     * @param languages
+     *            the languages
      * @return the prefixes
      * @see FieldMapper#encodeLanguages(String...)
      */
     public Collection<String> encodeLanguages(Collection<String> languages) {
-        if(languages == null || languages.isEmpty()){ //no language
-            return Collections.emptySet();//just return the field
-        } else if (languages.size()==1){
+        if (languages == null || languages.isEmpty()) { // no language
+            return Collections.emptySet();// just return the field
+        } else if (languages.size() == 1) {
             return Collections.singleton(encodeLanguage(languages.iterator().next()));
         } else {
             Set<String> langPrefixes = new HashSet<String>();
-            for(String lang : languages){
+            for (String lang : languages) {
                 langPrefixes.add(encodeLanguage(lang));
             }
             return langPrefixes;
         }
     }
+
     @Override
     public String getLanguageMergerField(String lang) {
-        return LANG_MERGER_PREFIX+(lang!=null?lang:"");
+        return LANG_MERGER_PREFIX + (lang != null ? lang : "");
     }
+
     /**
      * Encodes the language prefixes of for the parsed language
-     * @param lang the language
+     * 
+     * @param lang
+     *            the language
      * @return the field with the encoded language
      */
-    private String encodeLanguage(String lang){
+    private String encodeLanguage(String lang) {
         StringBuilder langField = new StringBuilder();
         langField.append(SolrConst.LANG_INDICATOR);
-        if(lang != null){
+        if (lang != null) {
             langField.append(lang);
         }
         return langField.toString();
@@ -491,10 +520,12 @@ public class SolrFieldMapper implements FieldMapper {
     public String getDocumentIdField() {
         return DOCUMENT_ID_FIELD;
     }
+
     @Override
     public String getReferredDocumentField() {
         return REFERRED_DOCUMENT_FIELD;
     }
+
     @Override
     public String getDependentDocumentField() {
         return DEPENDENT_DOCUMENT_FIELD;
@@ -507,135 +538,154 @@ public class SolrFieldMapper implements FieldMapper {
      */
     private int defaultNsPrefixNumber = 1;
     private static final String DEFAULT_NS_PREFIX_STRING = "ns";
-    //private static final char NAMESPACE_PREFIX_SEPERATOR_CHAR = ':';
+    // private static final char NAMESPACE_PREFIX_SEPERATOR_CHAR = ':';
     /**
      * Do never access this Map directly! Use {@link #getNamespaceMap()}!
      */
     private Map<String,String> __namespaceMap = null;
+
     /**
      * Getter for the namespace to prefix mapping
+     * 
      * @return the map holding the namespace to prefix mappings
      */
-    private Map<String, String> getNamespaceMap(){
-        if(__namespaceMap == null){
+    private Map<String,String> getNamespaceMap() {
+        if (__namespaceMap == null) {
             loadNamespaceConfig();
         }
         return __namespaceMap;
     }
+
     /**
      * Do never access this Map directly! Use {@link #getPrefixMap()}!
      */
     private Map<String,String> __prefixMap = null;
+
     /**
      * Getter for the prefix to namespace mappings
+     * 
      * @return the map holding the prefix to namespace mappings
      */
-    private Map<String,String> getPrefixMap(){
-        if(__prefixMap == null){
+    private Map<String,String> getPrefixMap() {
+        if (__prefixMap == null) {
             loadNamespaceConfig();
         }
         return __prefixMap;
     }
+
     /**
-     * Getter for the full name based on the short name. The short name is defined
-     * as the prefix followed by the {@link #NAMESPACE_PREFIX_SEPERATOR_CHAR} and
-     * the local name of the field. The returned field name is defined as the
-     * namespace followed by the local name.<p>
-     * If the parsed short field name does not contain the
-     * {@link #NAMESPACE_PREFIX_SEPERATOR_CHAR} this method returns the parsed
-     * String.<p>
+     * Getter for the full name based on the short name. The short name is defined as the prefix followed by
+     * the {@link #NAMESPACE_PREFIX_SEPERATOR_CHAR} and the local name of the field. The returned field name
+     * is defined as the namespace followed by the local name.
+     * <p>
+     * If the parsed short field name does not contain the {@link #NAMESPACE_PREFIX_SEPERATOR_CHAR} this
+     * method returns the parsed String.
+     * <p>
      * The local name may contain the {@link #NAMESPACE_PREFIX_SEPERATOR_CHAR}
-     * {@link #NAMESPACE_PREFIX_SEPERATOR_CHAR}'. The prefix MUST NOT contain
-     * this char, because {@link String#indexOf(int)} is used to split prefix
-     * and local name.
-     * @param shortFieldName the short name
+     * {@link #NAMESPACE_PREFIX_SEPERATOR_CHAR}'. The prefix MUST NOT contain this char, because
+     * {@link String#indexOf(int)} is used to split prefix and local name.
+     * 
+     * @param shortFieldName
+     *            the short name
      * @return the full name
-     * @throws IllegalArgumentException if <code>null</code> is parsed as shortFieldName
-     * @throws IllegalStateException if the found prefix is not contained in the configuration
+     * @throws IllegalArgumentException
+     *             if <code>null</code> is parsed as shortFieldName
+     * @throws IllegalStateException
+     *             if the found prefix is not contained in the configuration
      */
-    protected final String getFullFieldName(String shortFieldName) throws IllegalArgumentException, IllegalStateException {
-        if(shortFieldName == null){
+    protected final String getFullFieldName(String shortFieldName) throws IllegalArgumentException,
+                                                                  IllegalStateException {
+        if (shortFieldName == null) {
             throw new IllegalArgumentException("Parameter shortFieldName MUST NOT be NULL");
         }
         int seperatorIndex = shortFieldName.indexOf(NAMESPACE_PREFIX_SEPERATOR_CHAR);
-        if(seperatorIndex >= 0){
-            String prefix = shortFieldName.substring(0,seperatorIndex); //seperatorIndex does not include the separator char
+        if (seperatorIndex >= 0) {
+            String prefix = shortFieldName.substring(0, seperatorIndex); // seperatorIndex does not include
+                                                                         // the separator char
             String namespace = getNamespace(prefix);
-            if(namespace != null){
-                return namespace+shortFieldName.substring(seperatorIndex+1);
+            if (namespace != null) {
+                return namespace + shortFieldName.substring(seperatorIndex + 1);
             } else {
-                throw new IllegalStateException("Unknown prefix "+prefix+" (parsed from field "+shortFieldName+")!");
+                throw new IllegalStateException("Unknown prefix " + prefix + " (parsed from field "
+                                                + shortFieldName + ")!");
             }
         } else {
             return shortFieldName;
         }
     }
-    protected final String getNamespace(String prefix){
-        if(prefix.equals("urn")){
-            //than the parsed URI is something like "urn:my.test.uuid-123"
+
+    protected final String getNamespace(String prefix) {
+        if (prefix.equals("urn")) {
+            // than the parsed URI is something like "urn:my.test.uuid-123"
             // -> this is no real prefix, but an urn with only one ':'
-            //    we need to return "urn:" as namespace!
+            // we need to return "urn:" as namespace!
             return "urn:";
-        } else { //else we have an real namespace -> use the current mappings!
+        } else { // else we have an real namespace -> use the current mappings!
             return getPrefixMap().get(prefix);
         }
     }
-    protected final String addNamespace(String namespace){
+
+    protected final String addNamespace(String namespace) {
         return getPrefix(namespace, true);
     }
-    protected final String getPrefix(String namespace){
+
+    protected final String getPrefix(String namespace) {
         return getPrefix(namespace, false);
     }
-    protected final String getPrefix(String namespace, boolean create){
-        if(namespace == null){
+
+    protected final String getPrefix(String namespace, boolean create) {
+        if (namespace == null) {
             return null;
         }
         Map<String,String> prefixMap = getPrefixMap();
         String prefix = getNamespaceMap().get(namespace);
-        if(prefix != null){
+        if (prefix != null) {
             return prefix;
-        } else if(create){ //only if not present and prefix is true
+        } else if (create) { // only if not present and prefix is true
             NamespaceEnum defaultMapping = NamespaceEnum.forNamespace(namespace);
-            if(defaultMapping != null && !prefixMap.containsKey(defaultMapping.getPrefix())){
+            if (defaultMapping != null && !prefixMap.containsKey(defaultMapping.getPrefix())) {
                 /*
-                 * NOTE: we need to check here also if the default prefix is not
-                 * yet taken, because the Solr Index used to store the prefixes
-                 * might be older than the latest change within the NamespaceEnum.
-                 * Therefore there might be cases where a default prefix configured
-                 * by this Enum is already assigned to a different namespace within
-                 * the Solr index!
-                 * In such cases, we need to create a new prefix for this namespace
+                 * NOTE: we need to check here also if the default prefix is not yet taken, because the Solr
+                 * Index used to store the prefixes might be older than the latest change within the
+                 * NamespaceEnum. Therefore there might be cases where a default prefix configured by this
+                 * Enum is already assigned to a different namespace within the Solr index! In such cases, we
+                 * need to create a new prefix for this namespace
                  */
                 prefix = defaultMapping.getPrefix();
             } else {
-                //need to generate a default mapping
-                prefix =  createPrefix(prefixMap);
+                // need to generate a default mapping
+                prefix = createPrefix(prefixMap);
             }
-            addNamespaceMapping(prefix, namespace); //we need to add the new mapping
-            saveNamespaceConfig(); //save the configuration
-            // (TODO: we do not make a flush here ... so maybe we need to ensure that a flush is called sometimes)
+            addNamespaceMapping(prefix, namespace); // we need to add the new mapping
+            saveNamespaceConfig(); // save the configuration
+            // (TODO: we do not make a flush here ... so maybe we need to ensure that a flush is called
+            // sometimes)
         }
-        return prefix; //may return null if !create
+        return prefix; // may return null if !create
     }
-    private String createPrefix(Map<String,String> prefixMap){
+
+    private String createPrefix(Map<String,String> prefixMap) {
         String defaultPrefix;
-        do { //as long an prefix is not any of the default prefixes or one of the prefixes defined by NamespaceEnum
+        do { // as long an prefix is not any of the default prefixes or one of the prefixes defined by
+             // NamespaceEnum
             defaultNsPrefixNumber++;
-            defaultPrefix = DEFAULT_NS_PREFIX_STRING+defaultNsPrefixNumber;
-        } while(prefixMap.containsKey(defaultPrefix) || NamespaceEnum.forPrefix(defaultPrefix) != null);
+            defaultPrefix = DEFAULT_NS_PREFIX_STRING + defaultNsPrefixNumber;
+        } while (prefixMap.containsKey(defaultPrefix) || NamespaceEnum.forPrefix(defaultPrefix) != null);
         return defaultPrefix;
     }
-    private void addNamespaceMapping(String prefix, String namespace){
+
+    private void addNamespaceMapping(String prefix, String namespace) {
         getPrefixMap().put(prefix, namespace);
         getNamespaceMap().put(namespace, prefix);
     }
+
     /**
-     * Leads the prefix to namespace mappings from the configured Solr server
-     * and inits the two mapps holding the prefix &lt;-&gt; namespace mappings
+     * Leads the prefix to namespace mappings from the configured Solr server and inits the two mapps holding
+     * the prefix &lt;-&gt; namespace mappings
      */
     private void loadNamespaceConfig() {
-        __prefixMap = new HashMap<String, String>();
-        __namespaceMap = new HashMap<String, String>();
+        __prefixMap = new HashMap<String,String>();
+        __namespaceMap = new HashMap<String,String>();
         SolrDocument config = null;
         try {
             config = getSolrDocument(FieldMapper.URI);
@@ -644,87 +694,98 @@ public class SolrFieldMapper implements FieldMapper {
         } catch (SolrServerException e) {
             log.error("Unable to load PathField Config from Index. (may be OK for the first run!)");
         }
-        if(config == null){
+        if (config == null) {
             log.info("No PathFieldMapping Configuration present. Start with an empty mapping");
         } else {
-            for(String fieldName : config.getFieldNames()){
+            for (String fieldName : config.getFieldNames()) {
                 String[] configFieldElements = fieldName.split(Character.toString(SolrConst.PATH_SEPERATOR));
-                if(SPECIAL_CONFIG_FIELD.equals(configFieldElements[0])){
-                    if(SPECIAL_CONFIG_FIELD.length() > 1){
+                if (SPECIAL_CONFIG_FIELD.equals(configFieldElements[0])) {
+                    if (SPECIAL_CONFIG_FIELD.length() > 1) {
                         String prefix = configFieldElements[1];
                         Object value = config.getFieldValue(fieldName);
-                        if(value != null){
-                            if(__namespaceMap.containsKey(value.toString())){
-                                log.error("found two prefixes ("+__namespaceMap.get(value.toString())+" and "+prefix+") for Namespace "+ value.toString()+" keep the first one");
+                        if (value != null) {
+                            if (__namespaceMap.containsKey(value.toString())) {
+                                log.error("found two prefixes (" + __namespaceMap.get(value.toString())
+                                          + " and " + prefix + ") for Namespace " + value.toString()
+                                          + " keep the first one");
                             } else {
-                                log.debug(" > prefix: "+prefix+" value: "+value);
+                                log.debug(" > prefix: " + prefix + " value: " + value);
                                 __prefixMap.put(prefix, value.toString());
                                 __namespaceMap.put(value.toString(), prefix);
-                                //check for default NS
-                                if(prefix.startsWith(DEFAULT_NS_PREFIX_STRING)){
+                                // check for default NS
+                                if (prefix.startsWith(DEFAULT_NS_PREFIX_STRING)) {
                                     String prefixNumber = prefix.substring(DEFAULT_NS_PREFIX_STRING.length());
-                                    try{
+                                    try {
                                         int num = Integer.parseInt(prefixNumber);
-                                        if(num>defaultNsPrefixNumber){
+                                        if (num > defaultNsPrefixNumber) {
                                             defaultNsPrefixNumber = num;
                                         }
                                     } catch (NumberFormatException e) {
-                                        log.warn("Unable to parse Integer for Number part of default prefix "+prefix+" (this is OK if by accident an other Namespace prefix starts with '"+DEFAULT_NS_PREFIX_STRING+"')");
+                                        log.warn("Unable to parse Integer for Number part of default prefix "
+                                                 + prefix
+                                                 + " (this is OK if by accident an other Namespace prefix starts with '"
+                                                 + DEFAULT_NS_PREFIX_STRING + "')");
                                     }
                                 }
                             }
                         } else {
-                            log.warn("No value for prefix "+prefix+" found in the Configuration (Field Name: "+fieldName+")");
+                            log.warn("No value for prefix " + prefix
+                                     + " found in the Configuration (Field Name: " + fieldName + ")");
                         }
                     } else {
-                        log.warn("encountered wrong Formatted Config field "+fieldName);
+                        log.warn("encountered wrong Formatted Config field " + fieldName);
                     }
                 }
             }
         }
     }
-    private String getConfigFieldName(String configName){
-        return SPECIAL_CONFIG_FIELD+PATH_SEPERATOR+configName;
+
+    private String getConfigFieldName(String configName) {
+        return SPECIAL_CONFIG_FIELD + PATH_SEPERATOR + configName;
     }
+
     /**
      * Saves the current configuration to the index!
      */
-    private void saveNamespaceConfig(){
+    private void saveNamespaceConfig() {
         Map<String,String> prefixMap = getPrefixMap();
         SolrInputDocument inputDoc = new SolrInputDocument();
         inputDoc.addField(getDocumentIdField(), FieldMapper.URI);
-        for(Entry<String, String> entry : prefixMap.entrySet()){
+        for (Entry<String,String> entry : prefixMap.entrySet()) {
             inputDoc.addField(getConfigFieldName(entry.getKey()), entry.getValue());
         }
         try {
             server.add(inputDoc);
         } catch (IOException e) {
-            log.error("Unable save Configuration to SolrProvider",e);
+            log.error("Unable save Configuration to SolrProvider", e);
         } catch (SolrServerException e) {
-            log.error("Unable save Configuration to SolrProvider",e);
-        } catch (SolrException e){
-            log.error("Unable save Configuration to SolrProvider",e);
+            log.error("Unable save Configuration to SolrProvider", e);
+        } catch (SolrException e) {
+            log.error("Unable save Configuration to SolrProvider", e);
         }
     }
+
     /**
-     * Getter for a SolrDocument based on the ID. Used to load the config from
-     * the index.
-     * @param inputDoc the document to store
+     * Getter for a SolrDocument based on the ID. Used to load the config from the index.
+     * 
+     * @param inputDoc
+     *            the document to store
      */
     protected SolrDocument getSolrDocument(String uri) throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery();
-        solrQuery.addField("*"); //select all fields
-        solrQuery.setRows(1); //we query for the id, there is only one result
-        String queryString = String.format("%s:%s",
-                this.getDocumentIdField(),SolrUtil.escapeSolrSpecialChars(uri));
+        solrQuery.addField("*"); // select all fields
+        solrQuery.setRows(1); // we query for the id, there is only one result
+        String queryString = String.format("%s:%s", this.getDocumentIdField(),
+            SolrUtil.escapeSolrSpecialChars(uri));
         solrQuery.setQuery(queryString);
         QueryResponse queryResponse = server.query(solrQuery);
-        if(queryResponse.getResults().isEmpty()){
+        if (queryResponse.getResults().isEmpty()) {
             return null;
         } else {
             return queryResponse.getResults().get(0);
         }
     }
+
     @Override
     public String getDocumentDomainField() {
         return DOMAIN_FIELD;
