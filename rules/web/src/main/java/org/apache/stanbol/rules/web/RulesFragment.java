@@ -91,12 +91,16 @@ public class RulesFragment implements WebFragment{
 
 	@Override
 	public List<LinkResource> getLinkResources() {
-		return Collections.emptyList();
+		List<LinkResource> resources = new ArrayList<LinkResource>();
+		resources.add(new LinkResource("stylesheet", "css/rules.css", this, 10));
+        return resources;
 	}
 
 	@Override
 	public List<ScriptResource> getScriptResources() {
-		return Collections.emptyList();
+		List<ScriptResource> resources = new ArrayList<ScriptResource>();
+		resources.add(new ScriptResource("text/javascript", "actions/actions.js", this, 10));
+        return resources;
 	}
 
 	@Override
