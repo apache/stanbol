@@ -16,8 +16,16 @@
  */
 package org.apache.stanbol.entityhub.yard.solr;
 
-import java.io.File;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 
+import java.io.File;
+import java.util.Arrays;
+
+import org.apache.stanbol.entityhub.servicesapi.model.Representation;
+import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
+import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
+import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.apache.stanbol.entityhub.test.yard.YardTest;
@@ -89,6 +97,46 @@ public class SolrYardTest extends YardTest {
     @Test(expected = IllegalArgumentException.class)
     public void testSolrYardConfigInitWithNullID() {
         new SolrYardConfig(null, TEST_SOLR_CORE_NAME);
+    }
+    
+    @Test
+    public void testFieldQuery() throws YardException {
+        // NOTE: this does not test if the updated view of the representation is
+        // stored, but only that the update method works correctly
+        Yard yard = getYard();
+        
+        String id1 = "urn:yard.test.testFieldQuery:representation.id1";
+        String id2 = "urn:yard.test.testFieldQuery:representation.id2";
+        String field = "urn:the.field:used.for.this.Test";
+        Representation test1 = create(id1, true);
+        Representation test2 = create(id2, true);
+        // change the representations to be sure to force an update even if the
+        // implementation checks for changes before updating a representation
+        test1.add(field, "This is the text content of a field with value1.");
+        test2.add(field, "This is the text content of a field with value2.");
+        Iterable<Representation> updatedIterable = yard.update(Arrays.asList(test1, test2));
+        assertNotNull(updatedIterable);
+
+        FieldQuery query = yard.getQueryFactory().createFieldQuery();
+        query.setConstraint(field, new TextConstraint("text content"));
+        QueryResultList<Representation> results = yard.find(query);
+        assertEquals(2, results.size());
+
+        // fetch the light / minimal representation
+        query = yard.getQueryFactory().createFieldQuery();
+        query.setConstraint(field, new TextConstraint("value2"));
+        results = yard.find(query);
+        assertEquals(1, results.size());
+        Representation result = results.iterator().next();
+        assertEquals("urn:yard.test.testFieldQuery:representation.id2", result.getId());
+        assertEquals(null, result.getFirst(field));
+
+        // fetch the full representation
+        results = yard.findRepresentation(query);
+        assertEquals(1, results.size());
+        result = results.iterator().next();
+        assertEquals("urn:yard.test.testFieldQuery:representation.id2", result.getId());
+        assertEquals("This is the text content of a field with value2.", result.getFirst(field));
     }
 
     /**
