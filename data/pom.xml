@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<project>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.data.reactor</artifactId>
+    <version>0.9-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    
+    <name>Apache Stanbol Data Reactor</name>
+    <scm>
+        <connection>
+            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/data
+        </connection>
+        <developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/data
+        </developerConnection>
+        <url>http://incubator.apache.org/stanbol/</url>
+    </scm>
+
+    <modules>
+        <module>sites</module>
+    </modules>
+</project>

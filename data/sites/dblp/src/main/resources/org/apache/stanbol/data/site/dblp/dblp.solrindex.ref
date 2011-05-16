@@ -1,0 +1,5 @@
+Name=DBLP Computer Science Bibliography
+Description=DBLP provides bibliographic information on major computer science journals and proceedings. DBLP indexes more than one million articles and contains more than 10000 links to home pages of computer scientists.
+License=No License Information available
+Homepage=http://dblp.uni-trier.de/
+Index-Archive=dblp.solrindex.zip
