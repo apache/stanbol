@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<project>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.data.sites.reactor</artifactId>
+    <version>0.9-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    
+    <name>Apache Stanbol Data: Stites Reactor</name>
+    <description>
+      This includes configurations for ReferencedSites of the Entityhub.
+      Typically such configurations will also include the possibility to provide
+      a local index for the data.
+      See the documentation of the sub modules for details.
+    </description>
+    
+    <scm>
+        <connection>
+            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/sites
+        </connection>
+        <developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/sites
+        </developerConnection>
+        <url>http://incubator.apache.org/stanbol/</url>
+    </scm>
+
+    <modules>
+        <module>dblp</module>
+        <module>dbpedia</module>
+        <module>geonames</module>
+    </modules>
+</project>
