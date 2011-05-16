@@ -141,6 +141,9 @@
       <groupId>org.apache.clerezza</groupId>
       <artifactId>org.apache.clerezza.rdf.core</artifactId>
     </dependency>
+    
   </dependencies>
+  
+  
 
 </project>

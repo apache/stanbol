@@ -3,6 +3,23 @@
 	display: none; 
 }
 
-input#hide-sytanx-button{
+input.hide-button{
 	display: none;
+}
+
+span.red{
+	color: red;
+}
+
+p.active{
+	display: block;
+}
+
+p.inactive{
+	display: none;
+}
+
+div.arrows{
+	text-align: center;
+	display: block;
 }
