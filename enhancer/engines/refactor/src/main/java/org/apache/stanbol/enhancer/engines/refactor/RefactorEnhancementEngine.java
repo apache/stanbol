@@ -113,9 +113,6 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
 	RuleStore ruleStore;
 
 	@Reference
-	Reasoner reasoner;
-
-	@Reference
 	Refactorer refactorer;
 
 	private OntologyScope scope;
