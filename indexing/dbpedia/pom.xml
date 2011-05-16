@@ -29,7 +29,7 @@
   <artifactId>org.apache.stanbol.entityhub.indexing.dbpedia</artifactId>
   <version>0.9-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>Apache Stanbol Entityhub Indexing for geonames.org</name>
+  <name>Apache Stanbol Entityhub Indexing for DBpedia.org</name>
   <description>This uses the RDF dump of dbpedia.org to create a Full Yard for dbpedia.org</description>
   <scm>
     <connection>
