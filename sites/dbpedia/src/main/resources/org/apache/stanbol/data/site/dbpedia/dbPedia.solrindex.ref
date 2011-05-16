@@ -1,0 +1,6 @@
+Name=DBpedia
+Description=DBpedia is a community effort to extract structured information from Wikipedia and to make this information available on the Web. DBpedia allows you to ask sophisticated queries against Wikipedia, and to link other data sets on the Web to Wikipedia data. We hope this will make it easier for the amazing amount of information in Wikipedia to be used in new and interesting ways, and that it might inspire new mechanisms for navigating, linking and improving the encyclopaedia itself.
+License=Creative Commons Attribution-ShareAlike 3.0
+License-Url=http://en.wikipedia.org/wiki/Wikipedia:Text_of_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License
+Homepage=http://dbpedia.org/
+Index-Archive=dbPedia.solrindex.zip
