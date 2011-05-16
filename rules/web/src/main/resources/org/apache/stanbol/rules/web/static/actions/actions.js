@@ -48,8 +48,8 @@ Interaction.prototype.previousTutorial = function(){
 Interaction.prototype.nextTutorial = function(){
 
 	//set the current page as inactive
-	$("#tutorial" + tutorialPage).removeClass("active");
-	$("#tutorial" + tutorialPage).addClass("inactive");
+	$("#tutorial0").removeClass("active");
+	$("#tutorial0").addClass("inactive");
 
 
 	alert("tutorial" + tutorialPage);

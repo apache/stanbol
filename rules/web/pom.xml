@@ -47,6 +47,7 @@
             <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>
             !org.apache.felix.http.jetty, 
+            !org.mortbay.jetty.*,
             *
             </Import-Package>
           </instructions>
