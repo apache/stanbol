@@ -48,6 +48,7 @@
     <module>owl</module>
     <module>entityhub</module>
     <module>enhancer</module>
+    <module>data</module>
     <module>contenthub/web</module>
     <module>launchers/stateless</module>
     <module>launchers/full</module>

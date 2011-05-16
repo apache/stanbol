@@ -56,7 +56,6 @@
     <module>destination/solryard</module>
     <!-- Utils for createing local caches (indexing utils) -->
     <module>geonames</module>
-    <module>genericrdf</module>
     <module>dbpedia</module>
     <module>dblp</module>
   </modules>
