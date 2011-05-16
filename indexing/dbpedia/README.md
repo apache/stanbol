@@ -138,15 +138,16 @@ with no incomming links would get a score of zero.
 
 After the indexing completes the distribution folder will contain two files
 
-1. dbpedia.solrindex.ref: This contains the configuration for the SolrIndex. It does
-not contain the data and is intended to be used to provide configurations without
-the need to also include the precomputed index. When loading this file to
-Apache Stanbol (typically via the Apache Sling Installer Framework) the 
-Stanbol DataFileProvder service will ask for the binary data.
+1. dbpedia.solrindex.ref: This contains the configuration for the
+SolrIndex. It does not contain the data and is intended to provide
+configurations without the need to also include the precomputed
+index. When loading this file to Apache Stanbol (typically via the
+Apache Sling Installer Framework) the Stanbol DataFileProvider service
+will ask for the binary data.
 
-2. dbpedia.solrindex.zip: This is the ZIP archive with the precomputed data.
-Typically you will need to copy this file to the data directory of the
-Apache Stanbol DataFileProvider (defaults to "sling/datafiles").
+2. dbpedia.solrindex.zip: This is the ZIP archive with the precomputed
+data.  Typically you will need to copy this file to the data directory
+of the Apache Stanbol DataFileProvider (defaults to "sling/datafiles").
 
 ## Using DBPedia.org as Referenced Site of the Entityhub
 
