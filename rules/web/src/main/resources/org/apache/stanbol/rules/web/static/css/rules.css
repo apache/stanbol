@@ -1,4 +1,4 @@
-.title-point div{
+div.indent {
 	margin-left: 20px;
 	display: none; 
 }
@@ -11,15 +11,19 @@ span.red{
 	color: red;
 }
 
-p.active{
+div.active{
 	display: block;
 }
 
-p.inactive{
+div.inactive{
 	display: none;
 }
 
 div.arrows{
 	text-align: center;
 	display: block;
+}
+
+a#previous{
+	display: none;
 }

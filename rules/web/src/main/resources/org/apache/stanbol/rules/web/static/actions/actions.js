@@ -1,5 +1,5 @@
 var tutorialPage = 0;
-var totalPages = 2;
+var totalPages = 5;
 
 function Interaction() {
 	
@@ -48,11 +48,10 @@ Interaction.prototype.previousTutorial = function(){
 Interaction.prototype.nextTutorial = function(){
 
 	//set the current page as inactive
-	$("#tutorial0").removeClass("active");
-	$("#tutorial0").addClass("inactive");
+	$("#tutorial" + tutorialPage).removeClass("active");
+	$("#tutorial" + tutorialPage).addClass("inactive");
 
 
-	alert("tutorial" + tutorialPage);
 
 	//set the next page as active
 	tutorialPage = tutorialPage + 1;
@@ -67,4 +66,31 @@ Interaction.prototype.nextTutorial = function(){
 	if(tutorialPage == (totalPages-1)){
 		$("#next").hide();
 	}
+}
+
+Interaction.prototype.getTutorial = function(page){
+
+	
+	//set all the pages as inactive
+	
+	for(var i=0; i<totalPages; i++){
+		$("#tutorial" + i).removeClass("active");
+		$("#tutorial" + i).addClass("inactive");
+	}
+	
+	//set the wanted page as active
+	
+	$("#tutorial" + page).removeClass("inactive");
+	$("#tutorial" + page).addClass("active");
+	
+	if(page > 0){
+		$("#previous").show();
+	}
+	
+	if(page == (totalPages-1)){
+		$("#next").hide();
+	}
+	
+	tutorialPage = page;
+
 }

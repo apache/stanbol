@@ -19,6 +19,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
@@ -53,15 +54,14 @@ public class RefactorResource extends BaseStanbolResource {
     private Logger log = LoggerFactory.getLogger(getClass());
 
     protected ONManager onManager;
-    protected Refactorer semionRefactorer;
-    // protected SemionManager semionManager;
+    protected Refactorer refactorer;
     protected TcManager tcManager;
 
     public RefactorResource(@Context ServletContext servletContext) {
-        semionRefactorer = (Refactorer) (servletContext.getAttribute(Refactorer.class.getName()));
-        onManager = (ONManager) (servletContext.getAttribute(ONManager.class.getName()));
-        tcManager = (TcManager) (servletContext.getAttribute(TcManager.class.getName()));
-        if (semionRefactorer == null) {
+    	refactorer = (Refactorer) ContextHelper.getServiceFromContext(Refactorer.class, servletContext);
+    	onManager = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
+        tcManager = (TcManager) ContextHelper.getServiceFromContext(TcManager.class, servletContext);
+        if (refactorer == null) {
             throw new IllegalStateException("SemionRefactorer missing in ServletContext");
         }
 
@@ -100,7 +100,7 @@ public class RefactorResource extends BaseStanbolResource {
             inputOntology = manager.loadOntologyFromOntologyDocument(input);
             OWLOntology outputOntology;
             try {
-                outputOntology = semionRefactorer.ontologyRefactoring(inputOntology, actualRecipe);
+                outputOntology = refactorer.ontologyRefactoring(inputOntology, actualRecipe);
             } catch (RefactoringException e) {
                 // refactoring exceptions are re-thrown
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
@@ -137,7 +137,7 @@ public class RefactorResource extends BaseStanbolResource {
 
             OWLOntology outputOntology;
             try {
-                outputOntology = semionRefactorer.ontologyRefactoring(inputOntology, recipeIRI);
+                outputOntology = refactorer.ontologyRefactoring(inputOntology, recipeIRI);
             } catch (RefactoringException e) {
                 // refactoring exceptions are re-thrown
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
@@ -167,7 +167,7 @@ public class RefactorResource extends BaseStanbolResource {
         // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
 
         try {
-            semionRefactorer.ontologyRefactoring(outputGraphIRI, inputGraphIRI, recipeIRI);
+            refactorer.ontologyRefactoring(outputGraphIRI, inputGraphIRI, recipeIRI);
             return Response.ok().build();
         } catch (RefactoringException e) {
             // refactoring exceptions are re-thrown
