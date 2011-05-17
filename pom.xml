@@ -69,7 +69,7 @@
         <module>rules</module>
         <module>reengineer</module>
         <module>reasoners</module>
-        <module>kres/launchers/full</module>
+        <module>launchers/kres</module>
       </modules>
     </profile>
   </profiles>
