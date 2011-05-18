@@ -21,17 +21,19 @@ import static junit.framework.Assert.assertNotNull;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
+import org.apache.stanbol.entityhub.servicesapi.query.SimilarityConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.apache.stanbol.entityhub.test.yard.YardTest;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYard;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -98,16 +100,16 @@ public class SolrYardTest extends YardTest {
     public void testSolrYardConfigInitWithNullID() {
         new SolrYardConfig(null, TEST_SOLR_CORE_NAME);
     }
-    
+
     @Test
     public void testFieldQuery() throws YardException {
         // NOTE: this does not test if the updated view of the representation is
         // stored, but only that the update method works correctly
         Yard yard = getYard();
-        
+
         String id1 = "urn:yard.test.testFieldQuery:representation.id1";
         String id2 = "urn:yard.test.testFieldQuery:representation.id2";
-        String field = "urn:the.field:used.for.this.Test";
+        String field = "urn:the.field:used.for.testFieldQuery";
         Representation test1 = create(id1, true);
         Representation test2 = create(id2, true);
         // change the representations to be sure to force an update even if the
@@ -139,14 +141,69 @@ public class SolrYardTest extends YardTest {
         assertEquals("This is the text content of a field with value2.", result.getFirst(field));
     }
 
+    @Test
+    public void testFieldQueryWithSimilarityConstraint() throws YardException {
+        // NOTE: this does not test if the updated view of the representation is
+        // stored, but only that the update method works correctly
+        Yard yard = getYard();
+        String id1 = "urn:yard.test.testFieldQueryWithSimilarityConstraint:representation.id1";
+        String id2 = "urn:yard.test.testFieldQueryWithSimilarityConstraint:representation.id2";
+        String id3 = "urn:yard.test.testFieldQueryWithSimilarityConstraint:representation.id3";
+        String similarityfield = "urn:the.field:used.for.testFieldQueryWithSimilarityConstraint.similarity";
+        String filterfield = "urn:the.field:used.for.testFieldQueryWithSimilarityConstraint.filter";
+        Representation test1 = create(id1, true);
+        Representation test2 = create(id2, true);
+        Representation test3 = create(id3, true);
+        // change the representations to be sure to force an update even if the
+        // implementation checks for changes before updating a representation
+        test1.add(similarityfield, "aaaa aaaa aaaa bbbb bbbb cccc cccc dddd dddd");
+        test1.add(filterfield, "Some text content");
+
+        test2.add(similarityfield, "aaaa bbbb bbbb bbbb bbbb eeee");
+        test2.add(filterfield, "Some other content");
+
+        test3.add(similarityfield, "eeee eeee ffff gggg");
+        test3.add(filterfield, "Different content");
+
+        Iterable<Representation> updatedIterable = yard.update(Arrays.asList(test1, test2, test3));
+        assertNotNull(updatedIterable);
+
+        // Perform a first similarity query that looks a lot like the first document
+        FieldQuery query = yard.getQueryFactory().createFieldQuery();
+        query.setConstraint(similarityfield, new SimilarityConstraint("aaaa aaaa aaaa aaaa zzzz yyyy"));
+        QueryResultList<Representation> results = yard.find(query);
+        assertEquals(2, results.size());
+        Iterator<Representation> it = results.iterator();
+        Representation first = it.next();
+        assertEquals("urn:yard.test.testFieldQueryWithSimilarityConstraint:representation.id1", first.getId());
+        // assertEquals(0.99, first.getFirst("http://www.iks-project.eu/ontology/rick/query/score"));
+
+        Representation second = it.next();
+        assertEquals("urn:yard.test.testFieldQueryWithSimilarityConstraint:representation.id2",
+            second.getId());
+        // assertEquals(0.80, first.getFirst("http://www.iks-project.eu/ontology/rick/query/score"));
+
+        // combine similarity with traditional filtering
+        query = yard.getQueryFactory().createFieldQuery();
+        query.setConstraint(similarityfield, new SimilarityConstraint("aaaa aaaa aaaa aaaa zzzz yyyy"));
+        query.setConstraint(filterfield, new TextConstraint("other"));
+        results = yard.find(query);
+        assertEquals(1, results.size());
+        it = results.iterator();
+        first = it.next();
+        assertEquals("urn:yard.test.testFieldQueryWithSimilarityConstraint:representation.id2", first.getId());
+    }
+
     /**
      * This Method removes all Representations create via {@link #create()} or
      * {@link #create(String, boolean)} from the tested {@link Yard}. It also removes all Representations
      * there ID was manually added to the {@link #representationIds} list.
      */
-    @AfterClass
-    public static final void clearUpRepresentations() throws YardException {
-        yard.remove(representationIds);
+    @After
+    public final void clearUpRepresentations() throws YardException {
+        if (!representationIds.isEmpty()) {
+            yard.remove(representationIds);
+        }
     }
 
 }

@@ -609,6 +609,8 @@
     </lst>
   </requestHandler>
 
+  <!-- Request Handler for similarity queries and topic classification -->
+  <requestHandler name="/mlt" class="solr.MoreLikeThisHandler" startup="lazy" />
 
   <!--
    Search components are registered to SolrCore and used by Search Handlers

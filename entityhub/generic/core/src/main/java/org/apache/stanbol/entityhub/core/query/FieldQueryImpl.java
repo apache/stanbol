@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
@@ -209,4 +209,5 @@ public class FieldQueryImpl implements Cloneable, FieldQuery{
             return false;
         }
     }
+
 }

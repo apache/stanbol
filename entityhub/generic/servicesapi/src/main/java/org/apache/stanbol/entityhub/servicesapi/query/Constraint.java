@@ -48,8 +48,12 @@ public abstract class Constraint {
         /**
          * Constraints a field to have a lexical value
          */
-        text
-        //TODO: value Type for checking non lexical values
+        text,
+        /**
+         * Constraints a field to have a lexical value along with statistics to be able to compute a
+         * similarity metric (e.g. using the MoreLikeThis Solr handler)
+         */
+        similarity
     }
     private final ConstraintType type;
     protected Constraint(ConstraintType type){
