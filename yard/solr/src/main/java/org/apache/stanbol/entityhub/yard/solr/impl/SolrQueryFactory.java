@@ -24,18 +24,22 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.params.CommonParams;
+import org.apache.solr.common.params.MoreLikeThisParams;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
+import org.apache.stanbol.entityhub.servicesapi.query.Constraint.ConstraintType;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.Query;
 import org.apache.stanbol.entityhub.servicesapi.query.RangeConstraint;
+import org.apache.stanbol.entityhub.servicesapi.query.SimilarityConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint;
 import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
@@ -86,6 +90,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SolrQueryFactory {
 
+    public static final String MLT_QUERY_TYPE = "/" + MoreLikeThisParams.MLT;
     /**
      * Allows to limit the maximum Numbers of Query Results for any kind of Query. For now it is set to 1024.
      */
@@ -145,22 +150,49 @@ public class SolrQueryFactory {
         setSelected(query, fieldQuery.getSelectedFields(), select);
         StringBuilder queryString = new StringBuilder();
         for (Entry<String,Constraint> fieldConstraint : fieldQuery) {
-            IndexConstraint indexConstraint = createIndexConstraint(fieldConstraint);
-            if (indexConstraint.isInvalid()) {
-                log.warn(String
-                        .format(
-                            "Unable to create IndexConstraint for Constraint %s (type: %s) and Field %s (Reosens: %s)",
-                            fieldConstraint.getValue(), fieldConstraint.getValue().getType(),
-                            fieldConstraint.getKey(), indexConstraint.getInvalidMessages()));
+            if (fieldConstraint.getValue().getType() == ConstraintType.similarity) {
+                // TODO: log make the FieldQuery ensure that there is no more than one instead of similarity
+                // constraint per query
+                List<String> fields = Arrays.asList(fieldConstraint.getKey());
+                SimilarityConstraint simConstraint = (SimilarityConstraint) fieldConstraint.getValue();
+                IndexValue indexValue = indexValueFactory.createIndexValue(simConstraint.getContext());
+                fields.addAll(simConstraint.getAdditionalFields());
+                query.setQueryType(MLT_QUERY_TYPE);
+                query.set(MoreLikeThisParams.MATCH_INCLUDE, false);
+                query.set(MoreLikeThisParams.MIN_DOC_FREQ, 1);
+                query.set(MoreLikeThisParams.MIN_TERM_FREQ, 1);
+                query.set(MoreLikeThisParams.INTERESTING_TERMS, "details");
+
+                // TODO: right now we ignore the fields and fallback to the hardcoded "_text" field
+                //Collection<String> mappedFields = fieldMapper.getFieldNames(fields, indexValue);
+                //query.set(MoreLikeThisParams.SIMILARITY_FIELDS, StringUtils.join(mappedFields, ","));
+                query.set(MoreLikeThisParams.SIMILARITY_FIELDS, "_text");
+                query.set(CommonParams.STREAM_BODY, indexValue.getValue());
             } else {
-                if (queryString.length() > 0) {
-                    queryString.append(" AND ");
+                IndexConstraint indexConstraint = createIndexConstraint(fieldConstraint);
+                if (indexConstraint.isInvalid()) {
+                    log.warn(String
+                            .format(
+                                "Unable to create IndexConstraint for Constraint %s (type: %s) and Field %s (Reosens: %s)",
+                                fieldConstraint.getValue(), fieldConstraint.getValue().getType(),
+                                fieldConstraint.getKey(), indexConstraint.getInvalidMessages()));
+                } else {
+                    if (queryString.length() > 0) {
+                        queryString.append(" AND ");
+                    }
+                    indexConstraint.encode(queryString);
                 }
-                indexConstraint.encode(queryString);
             }
         }
-        log.info("QueryStirng: " + queryString.toString());
-        query.setQuery(queryString.toString());
+        if (queryString.length() > 0) {
+            String qs = queryString.toString();
+            log.info("QueryString: " + qs);
+            if (MLT_QUERY_TYPE.equals(query.getQueryType())) {
+                query.set(CommonParams.FQ, qs);
+            } else {
+                query.setQuery(qs);
+            }
+        }
         return query;
     }
 
@@ -217,6 +249,9 @@ public class SolrQueryFactory {
                 break;
             case range:
                 initIndexConstraint(indexConstraint, (RangeConstraint) fieldConstraint.getValue());
+                break;
+            case similarity:
+                // handled by the caller directly pass
                 break;
             default:
                 indexConstraint.setInvalid(String.format("ConstraintType %s not supported by!",

@@ -100,7 +100,7 @@ public interface FieldQuery extends Query,Iterable<Entry<String, Constraint>>{
      * @return the constraint or <code>null</code> if none is defined.
      */
     Constraint getConstraint(String field);
-
+    
     /**
      * Getter for the unmodifiable list of query elements for the given Path. Use
      * the add/remove constraint methods to change query elements for an path

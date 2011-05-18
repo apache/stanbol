@@ -114,9 +114,9 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @Component(metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE, // the ID and
-                                                                                               // SOLR_SERVER_LOCATION
-                                                                                               // are
-                                                                                               // required!
+// SOLR_SERVER_LOCATION
+// are
+// required!
 specVersion = "1.1")
 @Service
 @Properties(value = {
@@ -479,8 +479,6 @@ public class SolrYard extends AbstractYard implements Yard {
     private QueryResultList<Representation> find(final FieldQuery parsedQuery, SELECT select) throws YardException {
         log.debug("find " + parsedQuery);
         long start = System.currentTimeMillis();
-        SolrQuery query = solrQueryFactoy.parseFieldQuery(parsedQuery, select);
-        long queryGeneration = System.currentTimeMillis();
         final Set<String> selected;
         if (select == SELECT.QUERY) {
             // if query set the fields to add to the result Representations
@@ -491,17 +489,27 @@ public class SolrYard extends AbstractYard implements Yard {
             // otherwise add all fields
             selected = null;
         }
-        QueryResponse respone;
+
+        SolrQuery query = solrQueryFactoy.parseFieldQuery(parsedQuery, select);
+        long queryGeneration = System.currentTimeMillis();
+
+        QueryResponse response;
         try {
-            respone = server.query(query, METHOD.POST);
+            StreamQueryRequest request = new StreamQueryRequest(query);
+            response = request.process(server);
         } catch (SolrServerException e) {
-            throw new YardException("Error while performing Query on SolrServer!", e);
+            if ("unknown handler: /mlt".equals(e.getCause().getMessage())) {
+                throw new YardException("Solr is missing '<requestHandler name=\"/mlt\""
+                                        + " class=\"solr.MoreLikeThisHandler\" startup=\"lazy\" />'"
+                                        + " in 'solrconfig.xml'", e);
+            }
+            throw new YardException("Error while performing Query on SolrServer: " + query.getQuery(), e);
         }
         long queryTime = System.currentTimeMillis();
         // return a queryResultList
         QueryResultListImpl<Representation> resultList = new QueryResultListImpl<Representation>(parsedQuery,
         // by adapting SolrDocuments to Representations
-                new AdaptingIterator<SolrDocument,Representation>(respone.getResults().iterator(),
+                new AdaptingIterator<SolrDocument,Representation>(response.getResults().iterator(),
                 // inline Adapter Implementation
                         new AdaptingIterator.Adapter<SolrDocument,Representation>() {
                             @Override

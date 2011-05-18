@@ -267,7 +267,8 @@
     (via copyField). This is used as default search field.
     The type may be changed.
      -->
-   <field name="_text" type="textgen" indexed="true" stored="false" multiValued="true"/>
+   <field name="_text" type="textgen" indexed="true" stored="false"
+     multiValued="true" termVectors="true"/>
    <!-- 
      used to store all references of the document (via copyField).
      This field may be used to search for related entities.
@@ -400,7 +401,8 @@
      This field need not to be stored. The type can be changed to alternatives
      as described in the types section of this configuration.
    -->
-   <dynamicField name="_!@*"  type="textgen"  indexed="true"  stored="false" multiValued="true"/>
+   <dynamicField name="_!@*"  type="textgen"  indexed="true"  stored="false"
+     multiValued="true" />
    <!-- 
      fields starting with "_config/" are used to store configurations about how the
      index was created within the index (e.g. used namespace prefixes).
