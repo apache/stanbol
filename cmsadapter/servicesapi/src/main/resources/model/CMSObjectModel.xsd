@@ -62,7 +62,7 @@
 						maxOccurs="unbounded" />
 				</xsd:sequence>
 				<xsd:sequence>
-					<xsd:element ref="iksps:childObjectDefinition"
+					<xsd:element ref="iksps:objectTypeDefinition"
 						minOccurs="0" maxOccurs="unbounded" />
 				</xsd:sequence>
 			</xsd:sequence>
@@ -86,14 +86,6 @@
 			</xsd:sequence>
 		</xsd:complexType>
 	</xsd:element>
-	<xsd:element name="childObjectDefinition">
-		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:element ref="iksps:allowedObjectTypeDefRef" />
-				<xsd:element ref="iksps:required" minOccurs="0" />
-			</xsd:sequence>
-		</xsd:complexType>
-	</xsd:element>
 	<xsd:complexType name="CMSObject">
 		<xsd:sequence>
 			<xsd:element ref="iksps:uniqueRef" />
@@ -112,6 +104,16 @@
 			</xsd:sequence>
 		</xsd:sequence>
 	</xsd:complexType>
+	<xsd:complexType name="ClassificationObject">
+		<xsd:complexContent>
+			<xsd:extension base="iksps:CMSObject"></xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="ContentObject">
+		<xsd:complexContent>
+			<xsd:extension base="iksps:CMSObject"></xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
 	<xsd:element name="property">
 		<xsd:complexType>
 			<xsd:sequence>
@@ -121,7 +123,6 @@
 				<xsd:element ref="iksps:value" maxOccurs="unbounded" />
 				<xsd:element ref="iksps:propertyDefinition" minOccurs="0" />
 			</xsd:sequence>
-			<xsd:attribute ref="iksps:type" />
 		</xsd:complexType>
 	</xsd:element>
 
@@ -135,7 +136,6 @@
 	<xsd:element name="propertyAnnotation">
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element ref="iksps:uniqueRef" />
 				<xsd:element ref="iksps:annotation" />
 			</xsd:sequence>
 		</xsd:complexType>
@@ -149,20 +149,6 @@
 			</xsd:sequence>
 		</xsd:complexType>
 	</xsd:element>
-	<xsd:element name="classificationObjects">
-		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:element ref="iksps:classificationObject" maxOccurs="unbounded" />
-			</xsd:sequence>
-		</xsd:complexType>
-	</xsd:element>
-	<xsd:element name="contentObjects">
-		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:element ref="iksps:contentObject" maxOccurs="unbounded" />
-			</xsd:sequence>
-		</xsd:complexType>
-	</xsd:element>
 
 	<xsd:element name="CMSObjects">
 		<xsd:annotation>
@@ -173,8 +159,10 @@
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element name="CMSObject" type="iksps:CMSObject"
-					maxOccurs="unbounded" />
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element ref="iksps:classificationObject" />
+					<xsd:element ref="iksps:contentObject" />
+				</xsd:choice>
 			</xsd:sequence>
 		</xsd:complexType>
 	</xsd:element>
@@ -202,10 +190,9 @@
 	<xsd:element name="path" type="xsd:string" />
 
 	<xsd:element name="annotation" type="iksps:annotationType" />
-	<xsd:element name="contentObject" type="iksps:CMSObject" />
-	<xsd:element name="classificationObject" type="iksps:CMSObject" />
+	<xsd:element name="contentObject" type="iksps:ContentObject" />
+	<xsd:element name="classificationObject" type="iksps:ClassificationObject" />
 	<xsd:element name="objectTypeRef" type="xsd:string" />
-	<xsd:element name="allowedObjectTypeDefRef" type="xsd:string" />
 
 	<xsd:element name="containerObjectRef" type="xsd:string" />
 	<xsd:element name="sourceObjectTypeRef" type="xsd:string" />
