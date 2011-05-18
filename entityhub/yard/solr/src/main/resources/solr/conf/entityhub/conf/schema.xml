@@ -267,7 +267,8 @@
     (via copyField). This is used as default search field.
     The type may be changed.
      -->
-   <field name="_text" type="textgen" indexed="true" stored="false" multiValued="true"/>
+   <field name="_text" type="textgen" indexed="true" stored="false"
+     multiValued="true" termVectors="true"/>
    <!-- 
      used to store all references of the document (via copyField).
      This field may be used to search for related entities.
