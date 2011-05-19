@@ -13,8 +13,6 @@ import javax.jcr.nodetype.NodeDefinition;
 import javax.jcr.nodetype.NodeType;
 import javax.jcr.nodetype.PropertyDefinition;
 
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.ChildObjectDefinition;
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectFactory;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.CMSObject;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectTypeDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropType;
@@ -65,7 +63,6 @@ public class JCRModelMapper {
             objectTypeDefinition.getParentRef().add(superType.getName());
         }
 
-        // TODO child and parent settings
         return objectTypeDefinition;
     }
 
@@ -82,9 +79,10 @@ public class JCRModelMapper {
         org.apache.stanbol.cmsadapter.servicesapi.model.web.Property property = new org.apache.stanbol.cmsadapter.servicesapi.model.web.Property();
         String sourceObjectType = jcrProperty.getDefinition().getDeclaringNodeType().getName();
         String localName = jcrProperty.getName();
-        property.setType(mapPropertyType(jcrProperty.getType()));
         property.setSourceObjectTypeRef(sourceObjectType);
         property.setLocalname(localName);
+        property.setPropertyDefinition(getPropertyDefinition(jcrProperty.getDefinition()));
+        property.setContainerObjectRef(jcrProperty.getParent().getIdentifier());
 
         // TODO Consider value types
         if (jcrProperty.isMultiple()) {
@@ -120,13 +118,6 @@ public class JCRModelMapper {
         return propertyDefinition;
     }
 
-    // TODO ChildObjectDefinition's allowedObjectTypes are problematic.
-    public static ChildObjectDefinition getChildObjectDefinition(NodeDefinition jcrNodeDefinition) {
-        ChildObjectDefinition childObjectDef = new ObjectFactory().createChildObjectDefinition();
-        childObjectDef.setRequired(jcrNodeDefinition.isMandatory());
-        return childObjectDef;
-    }
-
     /**
      * Gets a JCR property type as integer value and transforms it to {@link PropType}
      * 
@@ -141,7 +132,7 @@ public class JCRModelMapper {
     }
 
     private static String getPropertyName(String declaringNodeTypeRef, String localName) {
-        return declaringNodeTypeRef + "_" + localName;
+        return declaringNodeTypeRef + "/" + localName;
     }
 
     private static String getPropertyName(PropertyDefinition jcrPropertyDefinition) {
@@ -170,9 +161,9 @@ public class JCRModelMapper {
     public static void fillChildObjectDefinitions(ObjectTypeDefinition instance, NodeType nodeType) {
         NodeDefinition[] childNodeDefinitions = nodeType.getChildNodeDefinitions();
         for (NodeDefinition childNodeDefinition : childNodeDefinitions) {
-            instance.getChildObjectDefinition().add(getChildObjectDefinition(childNodeDefinition));
+            instance.getObjectTypeDefinition().add(
+                getObjectTypeDefinition(childNodeDefinition.getDeclaringNodeType()));
         }
-
     }
 
     public static void fillPropertyDefinition(org.apache.stanbol.cmsadapter.servicesapi.model.web.Property instance,

@@ -4,6 +4,13 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 
+/**
+ * This class contains necessary {@link Resource}s and {@link Property}ies that are used in the scope of CMS
+ * Adapter component.
+ * 
+ * @author srdc
+ * 
+ */
 public class CMSAdapterVocabulary {
     private static final String RESOURCE_DELIMITER = "#";
     private static final String PATH_DELIMITER = "/";
@@ -29,6 +36,13 @@ public class CMSAdapterVocabulary {
         CMSAD_RESOURCE_REF_PROP_NAME);
 
     /*
+     * Property to keep source object type definition of a datatype property or object property
+     */
+    private static final String CMSAD_PROPERTY_SOURCE_OBJECT_PROP_NAME = "sourceObject";
+    public static final Property CMSAD_PROPERTY_SOURCE_OBJECT_PROP = property(CMS_ADAPTER_VOCABULARY_URI,
+        CMSAD_PROPERTY_SOURCE_OBJECT_PROP_NAME);
+
+    /*
      * Properties to store connection info in the ontology
      */
     // connection info resource
@@ -38,15 +52,18 @@ public class CMSAdapterVocabulary {
 
     // workspace property
     private static final String CONNECTION_WORKSPACE_PROP_NAME = "workspace";
-    public static final Property CONNECTION_WORKSPACE_PROP = property(CMS_ADAPTER_VOCABULARY_URI, CONNECTION_WORKSPACE_PROP_NAME);
+    public static final Property CONNECTION_WORKSPACE_PROP = property(CMS_ADAPTER_VOCABULARY_URI,
+        CONNECTION_WORKSPACE_PROP_NAME);
 
     // username property
     private static final String CONNECTION_USERNAME_PROP_NAME = "username";
-    public static final Property CONNECTION_USERNAME_PROP = property(CMS_ADAPTER_VOCABULARY_URI, CONNECTION_USERNAME_PROP_NAME);
+    public static final Property CONNECTION_USERNAME_PROP = property(CMS_ADAPTER_VOCABULARY_URI,
+        CONNECTION_USERNAME_PROP_NAME);
 
     // password property
     private static final String CONNECTION_PASSWORD_PROP_NAME = "password";
-    public static final Property CONNECTION_PASSWORD_PROP = property(CMS_ADAPTER_VOCABULARY_URI, CONNECTION_PASSWORD_PROP_NAME);
+    public static final Property CONNECTION_PASSWORD_PROP = property(CMS_ADAPTER_VOCABULARY_URI,
+        CONNECTION_PASSWORD_PROP_NAME);
 
     // workspace url property
     private static final String CONNECTION_WORKSPACE_URL_PROP_NAME = "workspaceURL";

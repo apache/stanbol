@@ -10,6 +10,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.cmsadapter.web.resources.BridgeDefinitionsResource;
 import org.apache.stanbol.cmsadapter.web.resources.NotifyResource;
+import org.apache.stanbol.cmsadapter.web.resources.ObjectTypesResource;
 import org.apache.stanbol.cmsadapter.web.resources.RootResource;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
@@ -56,6 +57,7 @@ public class CMSAdapterWebFragment implements WebFragment {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         classes.add(BridgeDefinitionsResource.class);
         classes.add(NotifyResource.class);
+        classes.add(ObjectTypesResource.class);
         classes.add(RootResource.class);
         return classes;
     }
@@ -89,8 +91,7 @@ public class CMSAdapterWebFragment implements WebFragment {
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
-        links.add(new NavigationLink("cmsadapter", "/cmsadapter", "/imports/cmsadapterDescription.ftl",
-                80));
+        links.add(new NavigationLink("cmsadapter", "/cmsadapter", "/imports/cmsadapterDescription.ftl", 80));
         return links;
     }
 

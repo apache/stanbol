@@ -3,10 +3,8 @@ package org.apache.stanbol.cmsadapter.core.decorated;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.ChildObjectDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectTypeDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropertyDefinition;
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DChildObjectType;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DObjectAdapter;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DObjectType;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DPropertyDefinition;
@@ -23,7 +21,7 @@ public class DObjectTypeImp implements DObjectType {
     private RepositoryAccess access;
     private List<DPropertyDefinition> propertyDefinitions;
     private List<DObjectType> parentDefinitions;
-    private List<DChildObjectType> childDefinitions;
+    private List<DObjectType> childDefinitions;
 
     public DObjectTypeImp(ObjectTypeDefinition instance, DObjectAdapter factory, RepositoryAccess access) {
         this.instance = instance;
@@ -80,8 +78,8 @@ public class DObjectTypeImp implements DObjectType {
     }
 
     @Override
-    public List<DChildObjectType> getChildDefinitions() throws RepositoryAccessException {
-        if (childDefinitions != null) {
+    public List<DObjectType> getChildDefinitions() throws RepositoryAccessException {
+        if (childDefinitions == null) {
             switch (factory.getMode()) {
                 case ONLINE:
                     childDefinitions = getChildDefinitionsOnline();
@@ -104,20 +102,20 @@ public class DObjectTypeImp implements DObjectType {
         return childDefinitions;
     }
 
-    private List<DChildObjectType> getChildDefinitionsOnline() throws RepositoryAccessException {
-        List<ChildObjectDefinition> childDefs = access.getChildObjectTypeDefinitions(instance,
+    private List<DObjectType> getChildDefinitionsOnline() throws RepositoryAccessException {
+        List<ObjectTypeDefinition> childDefs = access.getChildObjectTypeDefinitions(instance,
             factory.getSession());
         return wrapChildObjectDefinitions(childDefs);
     }
 
-    private List<DChildObjectType> getChildDefinitionsOffline() {
-        return wrapChildObjectDefinitions(instance.getChildObjectDefinition());
+    private List<DObjectType> getChildDefinitionsOffline() {
+        return wrapChildObjectDefinitions(instance.getObjectTypeDefinition());
     }
 
-    private List<DChildObjectType> wrapChildObjectDefinitions(List<ChildObjectDefinition> childDefs) {
-        List<DChildObjectType> childDefinitions = new ArrayList<DChildObjectType>(childDefs.size());
-        for (ChildObjectDefinition childDef : childDefs) {
-            childDefinitions.add(factory.wrapAsDChildObjectType(childDef));
+    private List<DObjectType> wrapChildObjectDefinitions(List<ObjectTypeDefinition> childDefs) {
+        List<DObjectType> childDefinitions = new ArrayList<DObjectType>(childDefs.size());
+        for (ObjectTypeDefinition childDef : childDefs) {
+            childDefinitions.add(factory.wrapAsDObjectType(childDef));
         }
         return childDefinitions;
     }

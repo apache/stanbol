@@ -3,7 +3,6 @@ package org.apache.stanbol.cmsadapter.servicesapi.repository;
 import java.util.List;
 
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.CMSObject;
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.ChildObjectDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ConnectionInfo;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectTypeDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.Property;
@@ -144,9 +143,7 @@ public interface RepositoryAccess {
 
     List<ObjectTypeDefinition> getParentTypeDefinitions(ObjectTypeDefinition instance, Object session) throws RepositoryAccessException;
 
-    List<ChildObjectDefinition> getChildObjectTypeDefinitions(ObjectTypeDefinition instance, Object session) throws RepositoryAccessException;
-
-    ObjectTypeDefinition getAllowableTypeDef(ChildObjectDefinition instance, Object session) throws RepositoryAccessException;
+    List<ObjectTypeDefinition> getChildObjectTypeDefinitions(ObjectTypeDefinition instance, Object session) throws RepositoryAccessException;
 
     CMSObject getContainerObject(Property instance, Object session) throws RepositoryAccessException;
 

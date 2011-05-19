@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.CMSObject;
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.ChildObjectDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ConnectionInfo;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectTypeDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.Property;
@@ -54,7 +53,7 @@ public class OfflineAccess implements RepositoryAccess {
 
     private void processCMSOBject(CMSObject cmsObject) {
         cmsObjectMap.put(cmsObject.getUniqueRef(), cmsObject);
-        if(!nameMap.containsValue(cmsObject.getLocalname(), cmsObject)){
+        if (!nameMap.containsValue(cmsObject.getLocalname(), cmsObject)) {
             nameMap.put(cmsObject.getLocalname(), cmsObject);
         }
 
@@ -242,22 +241,10 @@ public class OfflineAccess implements RepositoryAccess {
     }
 
     @Override
-    public List<ChildObjectDefinition> getChildObjectTypeDefinitions(ObjectTypeDefinition instance,
-                                                                     Object session) throws RepositoryAccessException {
+    public List<ObjectTypeDefinition> getChildObjectTypeDefinitions(ObjectTypeDefinition instance,
+                                                                    Object session) throws RepositoryAccessException {
         checkNullArgument(session);
-        return instance.getChildObjectDefinition();
-    }
-
-    @Override
-    public ObjectTypeDefinition getAllowableTypeDef(ChildObjectDefinition instance, Object session) throws RepositoryAccessException {
-        checkNullArgument(session);
-        String typeDefRef = instance.getAllowedObjectTypeDefRef();
-        if (typeDefinitionMap.containsKey(typeDefRef)) {
-            return typeDefinitionMap.get(typeDefRef);
-        } else {
-            throw new RepositoryAccessException("No type definition with id " + typeDefRef);
-        }
-
+        return instance.getObjectTypeDefinition();
     }
 
     @Override
@@ -278,8 +265,9 @@ public class OfflineAccess implements RepositoryAccess {
     @Override
     public String getNamespaceURI(String prefix, Object session) throws RepositoryAccessException {
         // TODO find a good solution here.
-        throw new UnsupportedOperationException(
-                "Offline Repository Access does not handle connections, thus prefixes can not be accessible");
+        // throw new UnsupportedOperationException(
+        // "Offline Repository Access does not handle connections, thus prefixes can not be accessible");
+        return null;
     }
 
     @Override

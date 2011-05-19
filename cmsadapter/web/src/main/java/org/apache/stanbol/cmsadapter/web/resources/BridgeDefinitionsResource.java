@@ -15,7 +15,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.stanbol.cmsadapter.core.mapping.MappingConfigurationImpl;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.OntologyResourceHelper;
+import org.apache.stanbol.cmsadapter.servicesapi.mapping.MappingConfiguration;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.MappingEngine;
 import org.apache.stanbol.cmsadapter.servicesapi.model.mapping.BridgeDefinitions;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ConnectionInfo;
@@ -78,9 +80,21 @@ public class BridgeDefinitionsResource extends BaseStanbolResource {
     public Response registeBridgeDefinitions(@FormParam("connectionInfo") ConnectionInfo connectionInfo,
                                              @FormParam("bridgeDefinitions") BridgeDefinitions bridgeDefinitions) {
 
+        if(connectionInfo == null) {
+            logger.warn("No specified connection info");
+            throw new IllegalArgumentException("No specified connection info");
+        }
+        if(bridgeDefinitions == null) {
+            logger.warn("No specified bridge definitions");
+            throw new IllegalArgumentException("No specified bridge definitions");
+        }
         String ontologyURI = connectionInfo.getOntologyURI();
         try {
-            engine.mapCR(bridgeDefinitions, connectionInfo, ontologyURI);
+            MappingConfiguration conf = new MappingConfigurationImpl();
+            conf.setBridgeDefinitions(bridgeDefinitions);
+            conf.setConnectionInfo(connectionInfo);
+            conf.setOntologyURI(ontologyURI);
+            engine.mapCR(conf);
             return Response.status(Status.OK).build();
 
         } catch (RepositoryAccessException e) {
@@ -109,7 +123,11 @@ public class BridgeDefinitionsResource extends BaseStanbolResource {
                 RestURIHelper.getOntologyHref(ontologyURI));
 
             ConnectionInfo connectionInfo = OntologyResourceHelper.getConnectionInfo(model);
-            engine.mapCR(bridgeDefinitions, connectionInfo, ontologyURI);
+            MappingConfiguration conf = new MappingConfigurationImpl();
+            conf.setBridgeDefinitions(bridgeDefinitions);
+            conf.setConnectionInfo(connectionInfo);
+            conf.setOntologyURI(ontologyURI);
+            engine.mapCR(conf);
             return Response.status(Status.OK).build();
 
         } catch (UnsupportedEncodingException e) {

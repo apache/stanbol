@@ -3,7 +3,6 @@ package org.apache.stanbol.cmsadapter.core.decorated;
 import java.util.List;
 
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.CMSObject;
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropType;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.Property;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropertyDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DObject;
@@ -29,12 +28,7 @@ public class DPropertyImp implements DProperty {
         this.factory = adapter;
         this.access = access;
     }
-
-    @Override
-    public PropType getType() {
-        return instance.getType();
-    }
-
+    
     @Override
     public DPropertyDefinition getDefinition() throws RepositoryAccessException {
         if (propertyDefinition == null) {
@@ -48,10 +42,12 @@ public class DPropertyImp implements DProperty {
                     } catch (RepositoryAccessException e) {
                         log.debug("Can not access repository at fetching source object of property {}",
                             instance.getLocalname());
+                        propertyDefinition = factory.wrapAsDPropertyDefinition(instance
+                                .getPropertyDefinition());
                     }
                     break;
                 case STRICT_OFFLINE:
-                    break;
+                    propertyDefinition = factory.wrapAsDPropertyDefinition(instance.getPropertyDefinition());
             }
 
         }
@@ -103,7 +99,7 @@ public class DPropertyImp implements DProperty {
 
     @Override
     public String getName() {
-        return this.getName();
+        return instance.getLocalname();
     }
 
 }

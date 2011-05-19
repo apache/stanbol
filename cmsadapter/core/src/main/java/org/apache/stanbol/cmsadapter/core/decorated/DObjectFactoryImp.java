@@ -1,13 +1,11 @@
 package org.apache.stanbol.cmsadapter.core.decorated;
 
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.CMSObject;
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.ChildObjectDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ConnectionInfo;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectTypeDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.Property;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropertyDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.AdapterMode;
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DChildObjectType;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DObject;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DObjectAdapter;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DObjectType;
@@ -19,6 +17,7 @@ import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessExce
 public class DObjectFactoryImp implements DObjectAdapter {
 
     private RepositoryAccess access;
+    private RepositoryAccess offlineAccess;
     private Object session;
     private AdapterMode mode;
 
@@ -46,9 +45,19 @@ public class DObjectFactoryImp implements DObjectAdapter {
         this.mode = mode;
     }
 
+    public DObjectFactoryImp(RepositoryAccess access,
+                             RepositoryAccess offlineAccess,
+                             Object onlineSession,
+                             AdapterMode mode) {
+        this.access = access;
+        this.offlineAccess = offlineAccess;
+        this.session = onlineSession;
+        this.mode = mode;
+    }
+
     @Override
     public DObject wrapAsDObject(CMSObject node) {
-        return new DObjectImp(node, this, access);
+        return new DObjectImp(node, this, access, offlineAccess);
     }
 
     @Override
@@ -59,11 +68,6 @@ public class DObjectFactoryImp implements DObjectAdapter {
     @Override
     public DPropertyDefinition wrapAsDPropertyDefinition(PropertyDefinition propertyDefinition) {
         return new DPropertyDefinitionImp(propertyDefinition);
-    }
-
-    @Override
-    public DChildObjectType wrapAsDChildObjectType(ChildObjectDefinition childObjectDefinition) {
-        return new DChildObjectTypeImp(childObjectDefinition, this, access);
     }
 
     @Override

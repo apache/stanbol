@@ -237,8 +237,8 @@ public class OfflineAccessTest {
 
     @Test
     public void testGetNamespaceURI() throws RepositoryAccessException {
-        expectedException.expect(UnsupportedOperationException.class);
-        offlineAccess.getNamespaceURI(null, null);
+        String nsURI = offlineAccess.getNamespaceURI(null, null);
+        assertTrue(nsURI == null);
     }
 
     @Test

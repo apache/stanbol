@@ -21,15 +21,20 @@ public class DObjectImp implements DObject {
     private CMSObject instance;
     private DObjectAdapter factory;
     private RepositoryAccess access;
+    private RepositoryAccess offlineAccess;
     private List<DObject> children = null;
     private List<DProperty> properties = null;
     private DObject parent = null;
     private DObjectType objectType = null;
 
-    public DObjectImp(CMSObject instance, DObjectAdapter factory, RepositoryAccess access) {
+    public DObjectImp(CMSObject instance,
+                      DObjectAdapter factory,
+                      RepositoryAccess access,
+                      RepositoryAccess offlineAccess) {
         this.instance = instance;
         this.factory = factory;
         this.access = access;
+        this.offlineAccess = offlineAccess;
     }
 
     @Override
@@ -104,9 +109,11 @@ public class DObjectImp implements DObject {
                                 .wrapAsDObject(access.getParentByNode(instance, factory.getSession()));
                     } catch (RepositoryAccessException e) {
                         log.debug("Can not access repository at fetching parent of {}.", instance.getPath());
+                        parent = factory.wrapAsDObject(offlineAccess.getParentByNode(instance, null));
                     }
                     break;
                 case STRICT_OFFLINE:
+                    parent = factory.wrapAsDObject(access.getParentByNode(instance, null));
                     break;
             }
         }
@@ -168,12 +175,11 @@ public class DObjectImp implements DObject {
     public CMSObject getInstance() {
         return this.instance;
     }
-    
+
     private List<DProperty> getPropertiesOnline() throws RepositoryAccessException {
         List<Property> props = access.getProperties(instance, factory.getSession());
         return wrapAsDProperty(props);
     }
-
 
     private List<DObject> wrapAsDObject(List<CMSObject> cmsObjects) {
         List<DObject> wrappeds = new ArrayList<DObject>(cmsObjects.size());

@@ -21,9 +21,8 @@ import javax.jcr.query.QueryResult;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.rmi.repository.RMIRemoteRepository;
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.ChildObjectDefinition;
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.ConnectionInfo;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.CMSObject;
+import org.apache.stanbol.cmsadapter.servicesapi.model.web.ConnectionInfo;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectTypeDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.Property;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropertyDefinition;
@@ -299,28 +298,18 @@ public class JCRRepositoryAccess implements RepositoryAccess {
     }
 
     @Override
-    public List<ChildObjectDefinition> getChildObjectTypeDefinitions(ObjectTypeDefinition instance,
+    public List<ObjectTypeDefinition> getChildObjectTypeDefinitions(ObjectTypeDefinition instance,
                                                                      Object session) throws RepositoryAccessException {
         try {
             NodeType nodeType = ((Session) session).getWorkspace().getNodeTypeManager()
                     .getNodeType(instance.getUniqueRef());
+            
             JCRModelMapper.fillChildObjectDefinitions(instance, nodeType);
-            return instance.getChildObjectDefinition();
+            return instance.getObjectTypeDefinition();
         } catch (RepositoryException e) {
             throw new RepositoryAccessException(e.getMessage(), e);
         }
 
-    }
-
-    @Override
-    public ObjectTypeDefinition getAllowableTypeDef(ChildObjectDefinition instance, Object session) throws RepositoryAccessException {
-        try {
-            NodeType nodeType = ((Session) session).getWorkspace().getNodeTypeManager()
-                    .getNodeType(instance.getAllowedObjectTypeDefRef());
-            return JCRModelMapper.getObjectTypeDefinition(nodeType);
-        } catch (RepositoryException e) {
-            throw new RepositoryAccessException(e.getMessage(), e);
-        }
     }
 
     @Override

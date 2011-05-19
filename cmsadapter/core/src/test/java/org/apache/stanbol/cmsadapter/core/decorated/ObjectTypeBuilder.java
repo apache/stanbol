@@ -4,7 +4,6 @@ import static org.apache.stanbol.cmsadapter.core.decorated.NamingHelper.LOCAL_NA
 import static org.apache.stanbol.cmsadapter.core.decorated.NamingHelper.NAMESPACE;
 import static org.apache.stanbol.cmsadapter.core.decorated.NamingHelper.UNIQUE_REF;
 
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.ChildObjectDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectFactory;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectTypeDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropertyDefinition;
@@ -29,8 +28,8 @@ public class ObjectTypeBuilder {
         return this;
     }
 
-    public ObjectTypeBuilder childObjectDefinition(ChildObjectDefinition childDef) {
-        instance.getChildObjectDefinition().add(childDef);
+    public ObjectTypeBuilder childObjectDefinition(ObjectTypeDefinition childDef) {
+        instance.getObjectTypeDefinition().add(childDef);
         return this;
     }
 

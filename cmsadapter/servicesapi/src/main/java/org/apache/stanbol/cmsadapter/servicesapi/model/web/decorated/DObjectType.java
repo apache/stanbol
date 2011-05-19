@@ -17,7 +17,7 @@ public interface DObjectType {
 	
 	List<DObjectType> getParentDefinitions() throws RepositoryAccessException;
 	
-	List<DChildObjectType> getChildDefinitions() throws RepositoryAccessException;
+	List<DObjectType> getChildDefinitions() throws RepositoryAccessException;
 	
 	ObjectTypeDefinition getInstance();
 	

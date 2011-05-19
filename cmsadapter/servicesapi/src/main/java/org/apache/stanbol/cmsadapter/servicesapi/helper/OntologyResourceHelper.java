@@ -8,19 +8,21 @@ import java.util.List;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.MappingEngine;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.NamingStrategy;
 import org.apache.stanbol.cmsadapter.servicesapi.model.mapping.BridgeDefinitions;
+import org.apache.stanbol.cmsadapter.servicesapi.model.web.CMSObject;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ConnectionInfo;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectFactory;
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.CMSObject;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectTypeDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropType;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropertyDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
+import org.apache.stanbol.ontologymanager.store.model.OntologyMetaInformation;
 import org.apache.stanbol.ontologymanager.store.rest.client.RestClient;
 import org.apache.stanbol.ontologymanager.store.rest.client.RestClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.enhanced.UnsupportedPolymorphismException;
+import com.hp.hpl.jena.ontology.ConversionException;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.ObjectProperty;
@@ -30,10 +32,22 @@ import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFList;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.XSD;
 
+/**
+ * Helper class that contains methods for updating the context ontology model. This class should be
+ * initialized by specifying an {@link OntModel} , an <b>ontologyURI</b> and a {@link NamingStrategy}
+ * separately or simply specifying a {@link MappingEngine} instance in its constructors.
+ * 
+ * Non-static methods of this class work on specified ontology model. And static methods take the ontology
+ * model as a parameter. Because it is not always possible or necessary to create a MappingEngine or the
+ * others parameters to initialize the this class.
+ * 
+ */
 public class OntologyResourceHelper {
     private static final Logger log = LoggerFactory.getLogger(OntologyResourceHelper.class);
     private OntModel ontModel;
@@ -56,33 +70,21 @@ public class OntologyResourceHelper {
 
     /**
      * @param reference
-     *            Unique reference of object for which the {@link OntClass} is requested
+     *            Unique reference for which the {@link OntClass} is requested
      * @return {@link OntClass} if there is an already created class for cms object whose identifier got as a
      *         reference, otherwise <code>null</code>.
      */
-    public OntClass getOntClassByReference(String reference) {
+    public OntClass getOntClassByReference(String reference) throws UnsupportedPolymorphismException,
+                                                            ConversionException {
         ResIterator it = ontModel.listResourcesWithProperty(CMSAdapterVocabulary.CMSAD_RESOURCE_REF_PROP,
             reference);
         Resource resource;
         if (it.hasNext()) {
             resource = it.next();
-            try {
-                return resource.as(OntClass.class);
-            } catch (UnsupportedPolymorphismException e) {
+            return resource.as(OntClass.class);
 
-            }
         }
         return null;
-    }
-
-    /**
-     * @param cmsObject
-     *            {@link CMSObject} object for which the {@link OntClass} is requested
-     * @return {@link OntClass} if there is an already created class for the cms object, otherwise
-     *         <code>null</code>.
-     */
-    public OntClass getOntClassByCMSObject(CMSObject cmsObject) {
-        return getOntClassByReference(cmsObject.getUniqueRef());
     }
 
     /**
@@ -94,7 +96,18 @@ public class OntologyResourceHelper {
      */
     public OntClass createOntClassByReference(String reference) {
         log.debug("Creating OWL Class for reference {}", reference);
-        OntClass klass = getOntClassByReference(reference);
+        OntClass klass = null;
+
+        try {
+            klass = getOntClassByReference(reference);
+        } catch (UnsupportedPolymorphismException e) {
+            log.warn("Another type of resource has been created for the reference: {}", reference);
+            return null;
+        } catch (ConversionException e) {
+            log.warn("Another type of resource has been created for the reference: {}", reference);
+            return null;
+        }
+
         if (klass == null) {
             String classURI = namingStrategy.getClassName(ontologyURI, reference);
             klass = ontModel.createClass(classURI);
@@ -114,7 +127,19 @@ public class OntologyResourceHelper {
      */
     public OntClass createOntClassByCMSObject(CMSObject cmsObject) {
         log.debug("Getting OWL Class for cms object = {}", cmsObject);
-        OntClass klass = getOntClassByCMSObject(cmsObject);
+        OntClass klass = null;
+        try {
+            klass = getOntClassByReference(cmsObject.getUniqueRef());
+        } catch (UnsupportedPolymorphismException e) {
+            log.warn("Another type of resource has been created for the CMS object: {}",
+                cmsObject.getLocalname());
+            return null;
+        } catch (ConversionException e) {
+            log.warn("Another type of resource has been created for the CMS object: {}",
+                cmsObject.getLocalname());
+            return null;
+        }
+
         if (klass == null) {
             String classURI = namingStrategy.getClassName(ontologyURI, cmsObject);
             klass = ontModel.createClass(classURI);
@@ -134,7 +159,20 @@ public class OntologyResourceHelper {
      */
     public OntClass createOntClassByObjectTypeDefinition(ObjectTypeDefinition objectTypeDefinition) {
         log.debug("Getting OWL Class for node type {}", objectTypeDefinition);
-        OntClass klass = getOntClassByReference(objectTypeDefinition.getUniqueRef());
+        OntClass klass = null;
+
+        try {
+            klass = getOntClassByReference(objectTypeDefinition.getUniqueRef());
+        } catch (UnsupportedPolymorphismException e) {
+            log.warn("Another type of resource has been created for the object type definition: {}",
+                objectTypeDefinition.getLocalname());
+            return null;
+        } catch (ConversionException e) {
+            log.warn("Another type of resource has been created for the object type definition: {}",
+                objectTypeDefinition.getLocalname());
+            return null;
+        }
+
         if (klass == null) {
             String classURI = namingStrategy.getClassName(ontologyURI, objectTypeDefinition);
             klass = ontModel.createClass(classURI);
@@ -146,82 +184,98 @@ public class OntologyResourceHelper {
         return klass;
     }
 
-    public OntProperty getPropertyByReference(String reference) {
+    /**
+     * Gets an {@link OntProperty} for the unique reference specified.
+     * 
+     * @param reference
+     *            Unique reference for which the {@link OntProperty} is requested.
+     * @return {@link OntProperty} instance if there is a valid one, otherwise <code>null</code>.
+     */
+    public OntProperty getPropertyByReference(String reference) throws UnsupportedPolymorphismException,
+                                                               ConversionException {
         ResIterator it = ontModel.listResourcesWithProperty(CMSAdapterVocabulary.CMSAD_RESOURCE_REF_PROP,
             reference);
         Resource resource;
         if (it.hasNext()) {
             resource = it.next();
-            try {
-                return resource.as(OntProperty.class);
-            } catch (UnsupportedPolymorphismException e) {
-
-            }
+            return resource.as(OntProperty.class);
         }
         return null;
     }
 
-    public ObjectProperty getObjectPropertyByReference(String reference) {
+    /**
+     * Gets an {@link ObjectProperty} for the unique reference specified.
+     * 
+     * @param reference
+     *            Unique reference for which the {@link ObjectProperty} is requested.
+     * @return {@link ObjectProperty} instance if there is a valid one, otherwise <code>null</code>.
+     */
+    public ObjectProperty getObjectPropertyByReference(String reference) throws UnsupportedPolymorphismException,
+                                                                        ConversionException {
         ResIterator it = ontModel.listResourcesWithProperty(CMSAdapterVocabulary.CMSAD_RESOURCE_REF_PROP,
             reference);
         Resource resource;
         if (it.hasNext()) {
             resource = it.next();
-            try {
-                return resource.as(ObjectProperty.class);
-            } catch (UnsupportedPolymorphismException e) {
-
-            }
+            return resource.as(ObjectProperty.class);
         }
         return null;
     }
 
-    public DatatypeProperty getDatatypePropertyByReference(String reference) {
+    /**
+     * Gets an {@link DatatypeProperty} for the unique reference specified.
+     * 
+     * @param reference
+     *            Unique reference for which the {@link DatatypeProperty} is requested.
+     * @return {@link DatatypeProperty} instance if there is a valid one, otherwise <code>null</code>.
+     */
+    public DatatypeProperty getDatatypePropertyByReference(String reference) throws UnsupportedPolymorphismException,
+                                                                            ConversionException {
         ResIterator it = ontModel.listResourcesWithProperty(CMSAdapterVocabulary.CMSAD_RESOURCE_REF_PROP,
             reference);
         Resource resource;
         if (it.hasNext()) {
             resource = it.next();
-            try {
-                return resource.as(DatatypeProperty.class);
-            } catch (UnsupportedPolymorphismException e) {
-
-            }
+            return resource.as(DatatypeProperty.class);
         }
         return null;
     }
 
-    public ObjectProperty createObjectPropertyByReference(String reference,
-                                                          List<Resource> domains,
-                                                          List<Resource> ranges) {
-        log.debug("Creating Object property for reference {}", reference);
-        ObjectProperty objectProperty = getObjectPropertyByReference(reference);
-        if (objectProperty == null) {
-            String propertyURI = namingStrategy.getObjectPropertyName(ontologyURI, reference);
-            objectProperty = ontModel.createObjectProperty(propertyURI);
-            objectProperty.addProperty(CMSAdapterVocabulary.CMSAD_RESOURCE_REF_PROP, reference);
-
-            for (Resource domain : domains) {
-                objectProperty.addDomain(domain);
-            }
-            for (Resource range : ranges) {
-                objectProperty.addRange(range);
-            }
-            log.debug("ObjectProperty {} not found, creating new one...", propertyURI);
-        }
-        return objectProperty;
-    }
-
+    /**
+     * Creates an {@link ObjectProperty} for a {@link PropertyDefinition} object or returns the existing one.
+     * 
+     * @param propertyDefinition
+     *            source property definition
+     * @param domains
+     *            {@link Resource}s that will be set as domains of the resultant property
+     * @param ranges
+     *            {@link Resource}s that will be set as ranges of the resultant property
+     * @return {@link ObjectProperty} instance.
+     */
     public ObjectProperty createObjectPropertyByPropertyDefinition(PropertyDefinition propertyDefinition,
                                                                    List<Resource> domains,
                                                                    List<Resource> ranges) {
         log.debug("Creating Object property for property {}", propertyDefinition);
-        ObjectProperty objectProperty = getObjectPropertyByReference(propertyDefinition.getUniqueRef());
+        ObjectProperty objectProperty = null;
+        try {
+            objectProperty = getObjectPropertyByReference(propertyDefinition.getUniqueRef());
+        } catch (UnsupportedPolymorphismException e) {
+            log.warn("Another type of resource has been created for the property definition: {}",
+                propertyDefinition.getLocalname());
+            return null;
+        } catch (ConversionException e) {
+            log.warn("Another type of resource has been created for the property definition: {}",
+                propertyDefinition.getLocalname());
+            return null;
+        }
+
         if (objectProperty == null) {
             String propertyURI = namingStrategy.getObjectPropertyName(ontologyURI, propertyDefinition);
             objectProperty = ontModel.createObjectProperty(propertyURI);
             objectProperty.addProperty(CMSAdapterVocabulary.CMSAD_RESOURCE_REF_PROP,
                 propertyDefinition.getUniqueRef());
+            objectProperty.addProperty(CMSAdapterVocabulary.CMSAD_PROPERTY_SOURCE_OBJECT_PROP,
+                propertyDefinition.getSourceObjectTypeRef());
 
             for (Resource domain : domains) {
                 objectProperty.addDomain(domain);
@@ -234,35 +288,40 @@ public class OntologyResourceHelper {
         return objectProperty;
     }
 
-    public DatatypeProperty createDatatypePropertyByReference(String reference,
-                                                              List<Resource> domains,
-                                                              PropType propType) {
-        log.debug("Creating Datatype property for reference {}", reference);
-        DatatypeProperty datatypeProperty = getDatatypePropertyByReference(reference);
-        if (datatypeProperty == null) {
-            String propertyURI = namingStrategy.getDataPropertyName(ontologyURI, reference);
-            Resource range = getDatatypePropertyRange(propType);
-            datatypeProperty = ontModel.createDatatypeProperty(propertyURI);
-            datatypeProperty.addProperty(CMSAdapterVocabulary.CMSAD_RESOURCE_REF_PROP, reference);
-
-            for (Resource domain : domains) {
-                datatypeProperty.addDomain(domain);
-            }
-            datatypeProperty.addRange(range);
-            log.debug("Datatype property {} not found, creating new one...", propertyURI);
-        }
-        return datatypeProperty;
-    }
-
+    /**
+     * Creates an {@link DatatypeProperty} for a {@link PropertyDefinition} object or returns the existing
+     * one.
+     * 
+     * @param propertyDefinition
+     *            source property definition
+     * @param domains
+     *            {@link Resource}s that will be set as domains of the resultant property
+     * @return {@link DatatypeProperty} instance.
+     */
     public DatatypeProperty createDatatypePropertyByPropertyDefinition(PropertyDefinition propertyDefinition,
                                                                        List<Resource> domains) {
-        DatatypeProperty datatypeProperty = getDatatypePropertyByReference(propertyDefinition.getUniqueRef());
+        DatatypeProperty datatypeProperty = null;
+
+        try {
+            datatypeProperty = getDatatypePropertyByReference(propertyDefinition.getUniqueRef());
+        } catch (UnsupportedPolymorphismException e) {
+            log.warn("Another type of resource has been created for the property definition: {}",
+                propertyDefinition.getLocalname());
+            return null;
+        } catch (ConversionException e) {
+            log.warn("Another type of resource has been created for the property definition: {}",
+                propertyDefinition.getLocalname());
+            return null;
+        }
+
         if (datatypeProperty == null) {
             String propertyURI = namingStrategy.getDataPropertyName(ontologyURI, propertyDefinition);
             Resource range = getDatatypePropertyRange(propertyDefinition.getPropertyType());
             datatypeProperty = ontModel.createDatatypeProperty(propertyURI);
             datatypeProperty.addProperty(CMSAdapterVocabulary.CMSAD_RESOURCE_REF_PROP,
                 propertyDefinition.getUniqueRef());
+            datatypeProperty.addProperty(CMSAdapterVocabulary.CMSAD_PROPERTY_SOURCE_OBJECT_PROP,
+                propertyDefinition.getSourceObjectTypeRef());
 
             for (Resource domain : domains) {
                 datatypeProperty.addDomain(domain);
@@ -272,6 +331,14 @@ public class OntologyResourceHelper {
         return datatypeProperty;
     }
 
+    /**
+     * Creates a union {@link OntClass} from specified classes. First makes an {@link RDFList} and gives it to
+     * {@link OntologyResourceHelper#createUnionClass(RDFList)} as a parameter.
+     * 
+     * @param classes
+     *            {@link OntClass}es from which union class will be created
+     * @return {@link OntClass} instance.
+     */
     public OntClass createUnionClass(List<OntClass> classes) {
         RDFList list = ontModel.createList();
         for (OntClass klass : classes) {
@@ -280,12 +347,25 @@ public class OntologyResourceHelper {
         return createUnionClass(list);
     }
 
+    /**
+     * Creates a union {@link OntClass} from specified {@link RDFList}.
+     * 
+     * @param list
+     *            for which the union class is requested
+     * @return {@link OntClass} instance.
+     */
     public OntClass createUnionClass(RDFList list) {
         String unionClassURI = namingStrategy.getUnionClassURI(ontologyURI, list);
         OntClass unionClass = ontModel.createUnionClass(unionClassURI, list);
         return unionClass;
     }
 
+    /**
+     * Gets a {@link PropType} and returns related range for datatype properties.
+     * 
+     * @param propType
+     * @return
+     */
     private Resource getDatatypePropertyRange(PropType propType) {
         Resource range;
         if (propType == PropType.STRING) {
@@ -308,45 +388,88 @@ public class OntologyResourceHelper {
         return range;
     }
 
+    /**
+     * Gets an {@link Individual} for the unique reference specified. It first tries to fetch individual with
+     * {@link OntologyResourceHelper#getLooseIndividualByReference(String)}. If result is not
+     * <code>null</code> it checks the resultant result is really {@link Individual}. Because it is possible
+     * for an {@link OntClass} resource to act as an {@link Individual} after {@link Resource#as(Individual)}.
+     * 
+     * @param reference
+     *            Unique reference for which the {@link Individual} is requested
+     * @return {@link Individual} if there is a valid already created individual for <i>reference</i>,
+     *         otherwise <code>null</code>.
+     */
     public Individual getIndividualByReference(String reference) {
-        Individual ind = getLooseIndividualByReference(reference);
-        if (ind.isClass()) {
-            log.debug("Resource {} is already a class", ind.getURI());
+        Individual ind = null;
+        try {
+            ind = getLooseIndividualByReference(reference);
+        } catch (UnsupportedPolymorphismException e) {
+            log.warn("Another type of resource has been created for the reference: {}", reference);
             return null;
-        } else if (ind.isIndividual()) {
-            return ind;
-        } else {
+        } catch (ConversionException e) {
+            log.warn("Another type of resource has been created for the reference: {}", reference);
             return null;
         }
-    }
-
-    public Individual getLooseIndividualByReference(String reference) {
-        ResIterator it = ontModel.listResourcesWithProperty(CMSAdapterVocabulary.CMSAD_RESOURCE_REF_PROP,
-            reference);
-        Resource resource;
-        if (it.hasNext()) {
-            resource = it.next();
-            try {
-                return resource.as(Individual.class);
-            } catch (UnsupportedPolymorphismException e) {
-                log.debug("Can not cast resource {} to individual", resource.getURI());
+        if (ind != null) {
+            if (ind.isClass()) {
+                log.debug("Resource {} is already a class", ind.getURI());
+                return null;
+            } else if (ind.isIndividual()) {
+                return ind;
             }
         }
         return null;
     }
 
-    public Individual createIndividualByReference(String reference) {
-        throw new UnsupportedOperationException();
+    /**
+     * Gets an {@link Individual} for the unique reference specified.
+     * 
+     * @param reference
+     *            Unique reference for which {@link Individual} is requested.
+     * @return {@link Individual} instance if there is a valid one, otherwise <code>null</code>
+     */
+    public Individual getLooseIndividualByReference(String reference) throws UnsupportedPolymorphismException,
+                                                                     ConversionException {
+        ResIterator it = ontModel.listResourcesWithProperty(CMSAdapterVocabulary.CMSAD_RESOURCE_REF_PROP,
+            reference);
+        Resource resource;
+        if (it.hasNext()) {
+            resource = it.next();
+            return resource.as(Individual.class);
+        }
+        return null;
     }
 
     /**
+     * Creates an {@link Individual} for the specified {@link CMSObject}. It first tries to fetch individual
+     * with {@link OntologyResourceHelper#getLooseIndividualByReference(String)} by giving the reference of
+     * CMSObject. If result is not <code>null</code> it checks the resultant result is really
+     * {@link Individual}. Because it is possible for an {@link OntClass} resource to act as an
+     * {@link Individual} after {@link Resource#as(Individual)}.
      * 
      * @param cmsObject
+     *            {@link CMSObject} instance for which the {@link Individual} is requested
      * @param klass
-     * @return
+     *            This {@link Resource} represents the ontology class which will be specified as type of the
+     *            resultant individual
+     * @return {@link Individual} instance if there is a real already created one or there is no resources
+     *         created for the specified CMSObject. If there is an ontology class created for the CMSObject,
+     *         it returns <code>null</code>.
      */
     public Individual createIndividualByCMSObject(CMSObject cmsObject, Resource klass) {
-        Individual ind = getLooseIndividualByReference(cmsObject.getUniqueRef());
+        Individual ind = null;
+        try {
+            ind = getLooseIndividualByReference(cmsObject.getUniqueRef());
+        } catch (UnsupportedPolymorphismException e) {
+            log.warn("Another type of resource has been created for the CMS Object: {}",
+                cmsObject.getLocalname());
+            return null;
+        } catch (ConversionException e) {
+            log.warn("Another type of resource has been created for the CMS Object: {}",
+                cmsObject.getLocalname());
+            return null;
+        }
+
         if (ind == null) {
             String indURI = namingStrategy.getIndividualName(ontologyURI, cmsObject);
             ind = ontModel.createIndividual(indURI, klass);
@@ -361,6 +484,110 @@ public class OntologyResourceHelper {
 
     }
 
+    /**
+     * First find the URI of actual resource represented with <i>reference</i> parameter. Then deletes all
+     * statements where it is a subject or object
+     * 
+     * @param reference
+     */
+    public void deleteStatementsByReference(String reference) {
+        List<Statement> refStatement = ontModel.listStatements(null,
+            CMSAdapterVocabulary.CMSAD_RESOURCE_REF_PROP, reference).toList();
+
+        if (refStatement.size() == 0) {
+            log.warn("There is no resource having CMSAdapterVocabulary.CMSAD_RESOURCE_REF_PROP {}", reference);
+            return;
+        }
+
+        Resource subject = refStatement.get(0).getSubject();
+        deleteStatementsByResource(subject);
+    }
+
+    public void deleteObjectTypeProperties(String objectTypeRef) {
+        List<Statement> props = ontModel.listStatements(null,
+            CMSAdapterVocabulary.CMSAD_PROPERTY_SOURCE_OBJECT_PROP, objectTypeRef).toList();
+        for(Statement s : props) {
+            deleteStatementsByResource(s.getSubject());
+        }
+    }
+
+    private void deleteStatementsByResource(Resource res) {
+        ontModel.remove(ontModel.listStatements(res, null, (RDFNode) null));
+        ontModel.remove(ontModel.listStatements(null, null, res));
+    }
+
+    /**
+     * Adds subsumption assertions to given two {@link OntClass}es mutually.
+     * 
+     * @param parentClass
+     * @param childClass
+     */
+    public void addSubsumptionAssertion(OntClass parentClass, OntClass childClass) {
+        parentClass.addSubClass(childClass);
+        childClass.addSuperClass(parentClass);
+    }
+
+    /**
+     * Removes subsumption assertions from given two {@link OntClass}es mutually.
+     * 
+     * @param parentClass
+     * @param childClass
+     */
+    public void removeSubsumptionAssertion(OntClass parentClass, OntClass childClass) {
+        parentClass.removeSubClass(childClass);
+        childClass.removeSuperClass(parentClass);
+    }
+
+    /**
+     * Adds equivalent class assertions to given two {@link OntClass}es mutually.
+     * 
+     * @param parentClass
+     * @param childClass
+     */
+    public void addEquivalentClassAssertion(OntClass class1, OntClass class2) {
+        class1.addEquivalentClass(class2);
+        class2.addEquivalentClass(class1);
+    }
+
+    /**
+     * Removes equivalent class assertions from given two {@link OntClass}es mutually.
+     * 
+     * @param parentClass
+     * @param childClass
+     */
+    public void removeEquivalentClassAssertion(OntClass class1, OntClass class2) {
+        class1.removeEquivalentClass(class2);
+        class2.removeEquivalentClass(class1);
+    }
+
+    /**
+     * Adds disjoint with assertions to given two {@link OntClass}es mutually.
+     * 
+     * @param parentClass
+     * @param childClass
+     */
+    public void addDisjointWithAssertion(OntClass class1, OntClass class2) {
+        class1.addDisjointWith(class2);
+        class2.addDisjointWith(class1);
+    }
+
+    /**
+     * Removes disjoint with assertions from given two {@link OntClass}es mutually.
+     * 
+     * @param parentClass
+     * @param childClass
+     */
+    public void removeDisjointWithAssertion(OntClass class1, OntClass class2) {
+        class1.removeDisjointWith(class2);
+        class2.removeDisjointWith(class1);
+    }
+
+    /**
+     * Saves the specified {@link ConnectionInfo} instance to the specified {@link OntModel}.
+     * 
+     * @param connectionInfo
+     * @param ontModel
+     */
     public static void saveConnectionInfo(ConnectionInfo connectionInfo, OntModel ontModel) {
         Resource r = CMSAdapterVocabulary.CONNECTION_INFO_RES;
         ontModel.add(r, CMSAdapterVocabulary.CONNECTION_TYPE_PROP, connectionInfo.getConnectionType());
@@ -370,37 +597,79 @@ public class OntologyResourceHelper {
         ontModel.add(r, CMSAdapterVocabulary.CONNECTION_WORKSPACE_URL_PROP, connectionInfo.getRepositoryURL());
     }
 
+    /**
+     * Gets {@link BridgeDefinitions} instance from specified {@link OntModel}.
+     * 
+     * @param ontModel
+     * @return
+     */
     public static ConnectionInfo getConnectionInfo(OntModel ontModel) {
         ObjectFactory of = new ObjectFactory();
-        ConnectionInfo ci = of.createConnectionInfo();
+        ConnectionInfo ci = null;
         Resource ciResource = ontModel.getResource(CMSAdapterVocabulary.CONNECTION_INFO_RES.getURI());
-        ci.setConnectionType(ciResource.getProperty(CMSAdapterVocabulary.CONNECTION_TYPE_PROP).getString());
-        ci.setPassword(ciResource.getProperty(CMSAdapterVocabulary.CONNECTION_PASSWORD_PROP).getString());
-        ci.setUsername(ciResource.getProperty(CMSAdapterVocabulary.CONNECTION_USERNAME_PROP).getString());
-        ci.setWorkspaceName(ciResource.getProperty(CMSAdapterVocabulary.CONNECTION_WORKSPACE_PROP)
-                .getString());
-        ci.setRepositoryURL(ciResource.getProperty(CMSAdapterVocabulary.CONNECTION_WORKSPACE_URL_PROP)
-                .getString());
+
+        try {
+            ci = of.createConnectionInfo();
+            ci.setConnectionType(ciResource.getProperty(CMSAdapterVocabulary.CONNECTION_TYPE_PROP)
+                    .getString());
+            ci.setPassword(ciResource.getProperty(CMSAdapterVocabulary.CONNECTION_PASSWORD_PROP).getString());
+            ci.setUsername(ciResource.getProperty(CMSAdapterVocabulary.CONNECTION_USERNAME_PROP).getString());
+            ci.setWorkspaceName(ciResource.getProperty(CMSAdapterVocabulary.CONNECTION_WORKSPACE_PROP)
+                    .getString());
+            ci.setRepositoryURL(ciResource.getProperty(CMSAdapterVocabulary.CONNECTION_WORKSPACE_URL_PROP)
+                    .getString());
+        } catch (Exception e) {
+            log.warn("Failed to get connection info from ont model");
+            return null;
+        }
         return ci;
 
     }
 
+    /**
+     * Saves the specified {@link BridgeDefinitions} instance to the specified {@link OntModel}.
+     * 
+     * @param bridgeDefinitions
+     * @param ontModel
+     */
     public static void saveBridgeDefinitions(BridgeDefinitions bridgeDefinitions, OntModel ontModel) {
         Resource r = CMSAdapterVocabulary.BRIDGE_DEFINITIONS_RES;
         String bridges = MappingModelParser.serializeObject(bridgeDefinitions);
         ontModel.add(r, CMSAdapterVocabulary.BRIDGE_DEFINITIONS_CONTENT_PROP, bridges);
     }
 
+    /**
+     * Gets {@link BridgeDefinitions} instance from specified {@link OntModel}.
+     * 
+     * @param ontModel
+     *            ontology model from which the bridge definitions will be extracted
+     * @return
+     */
     public static BridgeDefinitions getBridgeDefinitions(OntModel ontModel) {
         Resource r = ontModel.getResource(CMSAdapterVocabulary.BRIDGE_DEFINITIONS_RES.getURI());
-        String bridgeStr = r.getProperty(CMSAdapterVocabulary.BRIDGE_DEFINITIONS_CONTENT_PROP).getString();
-        return MappingModelParser.deserializeObject(bridgeStr);
+        try {
+            String bridgeStr = r.getProperty(CMSAdapterVocabulary.BRIDGE_DEFINITIONS_CONTENT_PROP)
+                    .getString();
+            return MappingModelParser.deserializeObject(bridgeStr);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
-    public static OntModel createOntModel() {
-        return ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
-    }
-
+    /**
+     * Creates an OWL_DL compatible {@link OntModel}. Retrieves the ontology through {@link RestClient} of
+     * <b>Store</b> and reads its content from the created OntModel.
+     * 
+     * @param storeClient
+     *            REST client of Store component
+     * @param ontologyURI
+     *            URI of the ontology
+     * @param ontologyHref
+     *            corresponding path of ontology in Store component
+     * @return {@link OntModel} of retrieved ontology
+     * @throws RestClientException
+     * @throws UnsupportedEncodingException
+     */
     public static OntModel getOntModel(RestClient storeClient, String ontologyURI, String ontologyHref) throws RestClientException,
                                                                                                        UnsupportedEncodingException {
         OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
@@ -410,6 +679,24 @@ public class OntologyResourceHelper {
         return ontModel;
     }
 
+    public static OntModel createOntModel(RestClient storeClient, String ontologyURI, String ontologyHref) throws UnsupportedEncodingException,
+                                                                                                          RestClientException {
+        OntologyMetaInformation omi = null;
+        try {
+            omi = storeClient.retrieveOntologyMetaInformation(ontologyHref);
+        } catch (RestClientException e) {
+            log.warn(e.getMessage());
+        }
+        if (omi == null) {
+            return ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
+        } else {
+            return getOntModel(storeClient, ontologyURI, ontologyHref);
+        }
+    }
+
+    /**
+     * Adds '#' character to at the end of the specified URI if there is not any.
+     */
     public static final String addResourceDelimiter(String URI) {
         if (!URI.endsWith("#")) {
             URI += "#";

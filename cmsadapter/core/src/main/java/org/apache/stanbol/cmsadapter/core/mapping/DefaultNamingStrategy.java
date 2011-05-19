@@ -24,7 +24,7 @@ public class DefaultNamingStrategy implements NamingStrategy {
     /**
      * Used to separate any path segment
      */
-    private static final String PATH_DELIMITER = "/";
+    public static final Character PATH_DELIMITER = '/';
 
     private static final String TYPE_SEPARATOR = "-";
     private static final String CLASS_DELIMITER = "class";
@@ -44,15 +44,10 @@ public class DefaultNamingStrategy implements NamingStrategy {
         this.processedModel = processedModel;
     }
 
-    public DefaultNamingStrategy(RepositoryAccess repositoryAccess, OntModel processedModel) {
-        this.repositoryAccess = repositoryAccess;
-        this.session = null;
-        this.processedModel = processedModel;
-    }
-
     @Override
     public String getClassName(String ontologyURI, CMSObject cmsObject) {
-        List<String> candidateNames = Arrays.asList(new String[] {cmsObject.getLocalname(), cmsObject.getPath(),
+        List<String> candidateNames = Arrays.asList(new String[] {cmsObject.getLocalname(),
+                                                                  cmsObject.getPath(),
                                                                   cmsObject.getUniqueRef()});
         return getAvailableResourceName(ontologyURI, candidateNames, CLASS_DELIMITER);
     }
@@ -71,7 +66,8 @@ public class DefaultNamingStrategy implements NamingStrategy {
 
     @Override
     public String getIndividualName(String ontologyURI, CMSObject cmsObject) {
-        List<String> candidateNames = Arrays.asList(new String[] {cmsObject.getLocalname(), cmsObject.getPath(),
+        List<String> candidateNames = Arrays.asList(new String[] {cmsObject.getLocalname(),
+                                                                  cmsObject.getPath(),
                                                                   cmsObject.getUniqueRef()});
         return getAvailableResourceName(ontologyURI, candidateNames, INDIVIDUAL_DELIMITER);
     }
@@ -205,7 +201,7 @@ public class DefaultNamingStrategy implements NamingStrategy {
     private String detectPrefix(String resourceName) {
         int colonIndex = resourceName.lastIndexOf(":");
         String prefix = "";
-        for (int i = colonIndex - 1; i >= 0 && resourceName.charAt(i) != '_'; i--) {
+        for (int i = colonIndex - 1; i >= 0 && resourceName.charAt(i) != PATH_DELIMITER; i--) {
             prefix = resourceName.charAt(i) + prefix;
         }
         return prefix;

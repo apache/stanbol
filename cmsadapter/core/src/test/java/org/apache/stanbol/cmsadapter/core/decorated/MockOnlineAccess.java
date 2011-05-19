@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.CMSObject;
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.ChildObjectDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ConnectionInfo;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectFactory;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectTypeDefinition;
@@ -141,14 +140,8 @@ public class MockOnlineAccess implements RepositoryAccess {
     }
 
     @Override
-    public List<ChildObjectDefinition> getChildObjectTypeDefinitions(ObjectTypeDefinition instance,
-                                                                     Object session) throws RepositoryAccessException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public ObjectTypeDefinition getAllowableTypeDef(ChildObjectDefinition instance, Object session) throws RepositoryAccessException {
+    public List<ObjectTypeDefinition> getChildObjectTypeDefinitions(ObjectTypeDefinition instance,
+                                                                    Object session) throws RepositoryAccessException {
         // TODO Auto-generated method stub
         return null;
     }

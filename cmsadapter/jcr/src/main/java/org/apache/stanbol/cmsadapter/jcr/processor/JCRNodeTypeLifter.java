@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import javax.jcr.nodetype.NodeType;
 import javax.jcr.nodetype.NodeTypeIterator;
 import javax.jcr.nodetype.NodeTypeManager;
@@ -12,41 +13,69 @@ import javax.jcr.nodetype.PropertyDefinition;
 
 import org.apache.stanbol.cmsadapter.jcr.repository.JCRModelMapper;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.CMSAdapterVocabulary;
+import org.apache.stanbol.cmsadapter.servicesapi.helper.OntologyResourceHelper;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.MappingEngine;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.CMSObject;
+import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectTypeDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropType;
+import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccess;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.ontology.DatatypeProperty;
+import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntClass;
+import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.OWL;
 
-public class JCRNodeTypeLifter extends JCRProcessor {
+public class JCRNodeTypeLifter {
     private static final Logger logger = LoggerFactory.getLogger(JCRNodeTypeLifter.class);
 
+    private MappingEngine engine;
+    private Session session;
+    private RepositoryAccess accessor;
+    private OntologyResourceHelper ontologyResourceHelper;
+    private OntModel jcrOntModel;
+    
     public JCRNodeTypeLifter(MappingEngine mappingEngine) {
-        super(mappingEngine);
+        this.engine = mappingEngine;
+        this.session = (Session) engine.getSession();
+        this.ontologyResourceHelper = this.engine.getOntologyResourceHelper();
+        this.jcrOntModel = this.engine.getOntModel();
+        this.accessor = this.engine.getRepositoryAccessManager()
+                .getRepositoryAccess(this.engine.getSession());
+        if (this.accessor == null) {
+            throw new IllegalArgumentException("Can not find suitable accessor");
+        }
     }
 
     public void lift() throws RepositoryException {
-        //initializeDefaultResources();
+        // initializeDefaultResources();
 
         NodeTypeManager nodeTypeManager = session.getWorkspace().getNodeTypeManager();
         NodeTypeIterator nodeTypesItr = nodeTypeManager.getAllNodeTypes();
         while (nodeTypesItr.hasNext()) {
             NodeType curNodeType = nodeTypesItr.nextNodeType();
             // create the class
-            OntClass nodeTypeClass = ontologyResourceHelper
-                    .createOntClassByObjectTypeDefinition(JCRModelMapper.getObjectTypeDefinition(curNodeType));
+            ObjectTypeDefinition otd = JCRModelMapper.getObjectTypeDefinition(curNodeType);
+            OntClass nodeTypeClass = ontologyResourceHelper.createOntClassByObjectTypeDefinition(otd);
+            if (nodeTypeClass == null) {
+                logger.warn("Failed to create OntClass for object type definition {}", otd.getLocalname());
+                continue;
+            }
 
             // create subsumption relationships
             NodeType[] supertypes = curNodeType.getDeclaredSupertypes();
             for (NodeType supertype : supertypes) {
-                OntClass s = ontologyResourceHelper.createOntClassByObjectTypeDefinition(JCRModelMapper
-                        .getObjectTypeDefinition(supertype));
+                otd = JCRModelMapper.getObjectTypeDefinition(supertype);
+                OntClass s = ontologyResourceHelper.createOntClassByObjectTypeDefinition(otd);
+                if (s == null) {
+                    logger.warn("Failed to create OntClass for object type definition {}", otd.getLocalname());
+                    continue;
+                }
                 nodeTypeClass.addSuperClass(s);
             }
 
@@ -100,8 +129,13 @@ public class JCRNodeTypeLifter extends JCRProcessor {
                             rangeClass = OWL.Thing;
 
                         } else if (referencedObjects.size() == 1) {
-                            rangeClass = ontologyResourceHelper
-                                    .createOntClassByCMSObject(referencedObjects.get(0));
+                            rangeClass = ontologyResourceHelper.createOntClassByCMSObject(referencedObjects
+                                    .get(0));
+
+                            if (rangeClass == null) {
+                                logger.warn("Failed create class for range value {}", referencedObjects
+                                        .get(0).getLocalname());
+                            }
 
                         } else {
                             RDFList rdfList = jcrOntModel.createList();
@@ -111,13 +145,24 @@ public class JCRNodeTypeLifter extends JCRProcessor {
                             }
                             rangeClass = ontologyResourceHelper.createUnionClass(rdfList);
                         }
-                        ontologyResourceHelper.createObjectPropertyByPropertyDefinition(propDef,
-                            Arrays.asList(new Resource[] {nodeTypeClass}),
+                        ObjectProperty op = ontologyResourceHelper.createObjectPropertyByPropertyDefinition(
+                            propDef, Arrays.asList(new Resource[] {nodeTypeClass}),
                             Arrays.asList(new Resource[] {rangeClass}));
 
+                        if (op == null) {
+                            logger.warn("Failed to create ObjectProperty for property definition {}",
+                                propDef.getLocalname());
+                        }
+
                     } else {
-                        ontologyResourceHelper.createDatatypePropertyByPropertyDefinition(propDef,
-                            Arrays.asList(new Resource[] {nodeTypeClass}));
+                        DatatypeProperty dtp = ontologyResourceHelper
+                                .createDatatypePropertyByPropertyDefinition(propDef,
+                                    Arrays.asList(new Resource[] {nodeTypeClass}));
+
+                        if (dtp == null) {
+                            logger.warn("Failed to create DatatypeProperty for property definition {}",
+                                propDef.getLocalname());
+                        }
                     }
                 }
             }

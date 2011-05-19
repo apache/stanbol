@@ -1,35 +1,31 @@
 package org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated;
 
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.CMSObject;
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.ChildObjectDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectTypeDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.Property;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropertyDefinition;
 
 public interface DObjectAdapter {
 
-	DObject wrapAsDObject(CMSObject node);
+    DObject wrapAsDObject(CMSObject node);
 
-	DObjectType wrapAsDObjectType(ObjectTypeDefinition definition);
+    DObjectType wrapAsDObjectType(ObjectTypeDefinition definition);
 
-	DPropertyDefinition wrapAsDPropertyDefinition(
-			PropertyDefinition propertyDefinition);
+    DPropertyDefinition wrapAsDPropertyDefinition(PropertyDefinition propertyDefinition);
 
-	DChildObjectType wrapAsDChildObjectType(
-			ChildObjectDefinition childObjectDefinition);
+    DProperty wrapAsDProperty(Property property);
 
-	DProperty wrapAsDProperty(Property property);
+    Object getSession();
 
-	Object getSession();
+    /**
+     * Mode must be set before fetching an object from CMS. Otherwise inconsistent/erroneous behavior can be
+     * faced.
+     * 
+     * @param mode
+     * @return
+     */
+    void setMode(AdapterMode mode);
 
-	/**
-	 * Mode must be set before fetching an object from CMS.
-	 * Otherwise inconsistent/erroneous behavior can be faced. 
-	 * @param mode
-	 * @return
-	 */
-	void setMode(AdapterMode mode);
-
-	AdapterMode getMode();
+    AdapterMode getMode();
 
 }

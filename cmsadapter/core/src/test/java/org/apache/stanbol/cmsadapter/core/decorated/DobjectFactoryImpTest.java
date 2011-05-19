@@ -83,7 +83,8 @@ public class DobjectFactoryImpTest {
     @Test
     public void testDObjectParentOffline() throws RepositoryAccessException {
         DObject root = sOfflineAdapter.wrapAsDObject(rootStripped);
-        assertNull(root.getParent());
+        expectedException.expect(RepositoryAccessException.class);
+        root.getParent();
     }
 
     @Test
