@@ -11,7 +11,7 @@
 
 	<name>Apache Stanbol CMS Adapter parent POM</name>
 	<description>
-    Parent POM for the IKS Ontology Generator
+    Parent POM for the Apache Stanbol CMS Adapter
   </description>
 
 	<inceptionYear>2010</inceptionYear>
