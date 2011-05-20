@@ -18,13 +18,13 @@ First build the bundle by calling
     mvn install
 
 It the command succeeds the bundle is available in the target folder
-    
+
     target/org.apache.stanbol.data.sites.dbpedia-.*.jar
 
 This bundle can now be installed to a running Stanbol instance e.g. by using
 the Apache Felix Webconsole.
 
-NOTE: This steps requires the Sling Installer Framework as well as the 
+NOTE: This steps requires the Sling Installer Framework as well as the
 Stanbol BundleInstaller extension to be active. Both are typically included
 within the Stanbol Launcher.
 
@@ -36,12 +36,12 @@ To finalise the installation you need to copy the requested file to the
 directory used by the Stanbol Data File Provider
 
     sling/datafiles/
-    
+
 and that restart the SolrYard instance with the name
-    
+
     DBpediaIndex
-    
- 
+
+
 ## Building the DBpedia.org index
 
 To build a local Index for DBPedia the Apache Entityhub provides an own utility
