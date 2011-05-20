@@ -82,12 +82,15 @@ on DBpedia (page_links_en.nt.bz2). This file need to be processed with the
 following command to get an file containing an ordered list of incomming
 count and the local name of the entity.
 
-    curl http://downloads.dbpedia.org/{version}/en/page_links_en.nt.bz2 \
+    curl http://downloads.dbpedia.org/3.6/en/page_links_en.nt.bz2 \
         | bzcat \
         | sed -e 's/.*<http\:\/\/dbpedia\.org\/resource\/\([^>]*\)> ./\1/' \
         | sort \
         | uniq -c  \
         | sort -nr > incoming_links.txt
+
+Note: replace "3.6" by the latest release version of DBpedia in the above
+command line to get up to date data.
 
 Depending on the machine and the download speed for the source file the
 execution of this command will take several hours.
