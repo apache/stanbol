@@ -38,12 +38,12 @@ will be located.
 ### (2) Download the Source File:
 
 Download the DBLP RDF dump from http://dblp.l3s.de/dblp.rdf.gz to
-"indexing/resources/rdfData" and rename it to "dblp.nt.gz" (because this file
+"indexing/resources/rdfdata" and rename it to "dblp.nt.gz" (because this file
 does not use rdf/xml but N-Triples).
 You can use the following two commands to accomplish this step
 
     curl -C - -O http://dblp.l3s.de/dblp.rdf.gz
-    mv dblp.rdf.gz indexing/resources/rdfData/dblp.rdf.gz
+    mv dblp.rdf.gz indexing/resources/rdfdata/dblp.rdf.gz
 
 ### (3) Start the indexing by calling
 
