@@ -46,16 +46,33 @@ All RDF dumps need to be copied to the directory
 
     indexing/resources/rdfData
 
-The RDF dump of DBpedia.org is splited up in a number of different files.
+The RDF dump of DBpedia.org is splitted up in a number of different files.
 The actual files needed depend on the configuration of the mappings
-(indexing/config/mappings.txt). Generally one need to make sure that all the
-RDF dumps with the source data for the specified mappings are available.
-A best is to use the previews of the dumps to check if the data of a dump is
-required or not.
+(indexing/config/mappings.txt). Generally one need to make sure that
+all the RDF dumps with the source data for the specified mappings
+are available.  A best is to use the previews of the dumps to check if
+the data of a dump is required or not. Here is the list of typically
+interesting dump files:
+
+* <http://downloads.dbpedia.org/3.6/dbpedia_3.6.owl.bz2>
+* <http://downloads.dbpedia.org/3.6/en/instance_types_en.nt.bz2>
+* <http://downloads.dbpedia.org/3.6/en/labels_en.nt.bz2>
+* <http://downloads.dbpedia.org/3.6/en/short_abstracts_en.nt.bz2>
+* <http://downloads.dbpedia.org/3.6/en/long_abstracts_en.nt.bz2>
+* <http://downloads.dbpedia.org/3.6/en/geo_coordinates_en.nt.bz2>
+* <http://downloads.dbpedia.org/3.6/en/persondata_en.nt.bz2>
+* <http://downloads.dbpedia.org/3.6/en/article_categories_en.nt.bz2>
+* <http://downloads.dbpedia.org/3.6/en/category_labels_en.nt.bz2>
+* <http://downloads.dbpedia.org/3.6/en/skos_categories_en.nt.bz2>
+
+At the time of writing, version 3.6 is the latest release. All available
+dumps are hence referenced on this page:
+
+<http://wiki.dbpedia.org/Downloads36>
 
 During the initialisation of the Indeing all the RDF files within the
-"indexing/resources/rdfData" directory will be imported to an Jena TDB RDF
-triple store. The imported data are stored under
+"indexing/resources/rdfData" directory will be imported to an Jena TDB
+RDF triple store. The imported data are stored under:
 
     indexing/resources/tdb
 
@@ -65,13 +82,14 @@ To avoid (re)importing of already imported resources one need to remove such
 RDF files from the "indexing/resources/rdfData" or - typically the better
 option - rename the "rdfData" folder after the initial run.
 
-It is also safe to
+It is also safe to:
 
-* cancel the indexing process after the initialisation has competed
-(as soon as the log says that the indexing has started).
-* load additional RDF dumps by putting additional RDF files to the "rdfData"
-directory. This files will be added to the others on the next start of the
-indexing tool.
+* cancel the indexing process after the initialization has completed
+  (as soon as the log says that the indexing has started).
+
+* load additional RDF dumps by putting additional RDF files to the
+  "rdfData" directory. This files will be added to the others on the next
+  start of the indexing tool.
 
 ### (3) Entity Scores
 
@@ -102,10 +120,16 @@ page_links_en.nt.bz2 dump.
 All categories start with "CAT:{categoryName}" but the correct local name
 would be "Category:{categoryName}". because of this categories would not be
 indexed.
-It is strongly suggested to
-** first check if still Category: is used as prefix (e.g. by checking if
-http://dbpedia.org/page/Category:Political_culture is still valid) and
-** second if that is the case replace all occurrences of "CAT:" to "Category:"
+
+It is strongly suggested to:
+
+ * first check if still Category: is used as prefix (e.g. by checking if
+   <http://dbpedia.org/page/Category:Political_culture> is still valid)
+
+ * second if that is the case replace all occurrences of "CAT:" to
+   "Category:"
+
+    sed -i 's/CAT:/Category:/g' incoming_links.txt
 
 The resulting file MUST BE copied to
 
