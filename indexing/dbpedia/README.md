@@ -56,7 +56,7 @@ required or not.
 During the initialisation of the Indeing all the RDF files within the
 "indexing/resources/rdfData" directory will be imported to an Jena TDB RDF
 triple store. The imported data are stored under
-  
+
     indexing/resources/tdb
 
 and can be reused for subsequent indexing processes.
@@ -109,7 +109,7 @@ The resulting file MUST BE copied to
     indexing/resources/incoming_links.txt
 
 There is also the possibility do download a precomputed file from:
-  
+
 TODO: add download loaction
 
 ### (4) Configuration of the Index
