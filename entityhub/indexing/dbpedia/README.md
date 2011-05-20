@@ -72,6 +72,7 @@ interesting dump files:
 * <http://downloads.dbpedia.org/3.6/en/article_categories_en.nt.bz2>
 * <http://downloads.dbpedia.org/3.6/en/category_labels_en.nt.bz2>
 * <http://downloads.dbpedia.org/3.6/en/skos_categories_en.nt.bz2>
+* <http://downloads.dbpedia.org/3.6/en/redirects_en.nt.bz2>
 
 During the first part of the indexing (a.k.a. the initialisation step)
 all the RDF files within the "indexing/resources/rdfdata" directory
