@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-  <!--
+<!--
     Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the
     NOTICE file distributed with this work for additional information regarding copyright ownership. The ASF
     licenses this file to You under the Apache License, Version 2.0 (the "License"); you may not use this file
@@ -27,9 +27,9 @@
 
   <name>Apache Stanbol OWL libraries</name>
   <description>
-		Includes the libraries and utilities for managing 
-		constructs of the OWL and OWL 2 languages.
-	</description>
+    Includes the libraries and utilities for managing 
+    constructs of the OWL and OWL 2 languages.
+  </description>
 
   <inceptionYear>2010</inceptionYear>
 
@@ -53,7 +53,7 @@
               com.clarkparsia.owlapi.*,
               org.slf4j.*,
               *
-						</Import-Package>
+            </Import-Package>
             <Export-Package>
               de.uulm.ecs.ai.*,
               org.semanticweb.owlapi.*,
@@ -61,128 +61,128 @@
               uk.ac.manchester.cs.*,
               com.clarkparsia.owlapi.*,
               org.apache.stanbol.owl.*;version=${stanbol-version}
-						</Export-Package>
+            </Export-Package>
             <Private-Package />
             <_nouses>true</_nouses>
-          </instructions>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
+        </instructions>
+      </configuration>
+    </plugin>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-compiler-plugin</artifactId>
+      <configuration>
+        <source>1.6</source>
+        <target>1.6</target>
+      </configuration>
+    </plugin>
+    <plugin>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>maven-scr-plugin</artifactId>
+    </plugin>
+  </plugins>
+</build>
 
 
-  <dependencies>
+<dependencies>
 
-    <!-- OSGi deps -->
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-    </dependency>
+  <!-- OSGi deps -->
+  <dependency>
+    <groupId>org.osgi</groupId>
+    <artifactId>org.osgi.core</artifactId>
+  </dependency>
 
-    <!-- Stanbol deps -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-    </dependency>
+  <!-- Stanbol deps -->
+  <dependency>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+  </dependency>
 
-    <!-- Freemarker -->
-    <dependency>
-      <groupId>org.freemarker</groupId>
-      <artifactId>freemarker</artifactId>
-    </dependency>
-    <!-- indirect dependency for freemarker -->
-    <dependency>
-      <groupId>org.codehaus.jettison</groupId>
-      <artifactId>jettison</artifactId>
-    </dependency>
-
-
-    <!-- OWL deps -->
-    <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>jena</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>arq</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>owlapi</groupId>
-      <artifactId>owlapi</artifactId>
-      <version>3.0.0</version>
-    </dependency>
-
-    <!-- Persistence deps -->
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.core</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.parser</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.rdfjson</artifactId>
-    </dependency>
-
-    <!-- Web Service deps -->
-    <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>jsr311-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-    </dependency>
-
-    <!-- Diagnostics deps -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-    </dependency>
-    <dependency> <!-- see also the log4j.properties in src/main/resources -->
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-    </dependency>
-
-    <!-- Testing deps -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-  </dependencies>
+  <!-- Freemarker -->
+  <dependency>
+    <groupId>org.freemarker</groupId>
+    <artifactId>freemarker</artifactId>
+  </dependency>
+  <!-- indirect dependency for freemarker -->
+  <dependency>
+    <groupId>org.codehaus.jettison</groupId>
+    <artifactId>jettison</artifactId>
+  </dependency>
 
 
-  <repositories>
-    <repository>
-      <id>stlab-cnr-repo</id>
-      <url>http://stlab.istc.cnr.it/software/maven/repo</url>
-    </repository>
-  </repositories>
+  <!-- OWL deps -->
+  <dependency>
+    <groupId>com.hp.hpl.jena</groupId>
+    <artifactId>jena</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>com.hp.hpl.jena</groupId>
+    <artifactId>arq</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>owlapi</groupId>
+    <artifactId>owlapi</artifactId>
+    <version>3.0.0</version>
+  </dependency>
+
+  <!-- Persistence deps -->
+  <dependency>
+    <groupId>org.apache.clerezza</groupId>
+    <artifactId>org.apache.clerezza.rdf.core</artifactId>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.clerezza</groupId>
+    <artifactId>org.apache.clerezza.rdf.jena.parser</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.clerezza</groupId>
+    <artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.clerezza</groupId>
+    <artifactId>org.apache.clerezza.rdf.rdfjson</artifactId>
+  </dependency>
+
+  <!-- Web Service deps -->
+  <dependency>
+    <groupId>javax.ws.rs</groupId>
+    <artifactId>jsr311-api</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>javax.servlet</groupId>
+    <artifactId>servlet-api</artifactId>
+  </dependency>
+
+  <!-- Diagnostics deps -->
+  <dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-log4j12</artifactId>
+  </dependency>
+  <dependency> <!-- see also the log4j.properties in src/main/resources -->
+    <groupId>log4j</groupId>
+    <artifactId>log4j</artifactId>
+  </dependency>
+
+  <!-- Testing deps -->
+  <dependency>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-log4j12</artifactId>
+    <scope>test</scope>
+  </dependency>
+
+</dependencies>
+
+
+<repositories>
+  <repository>
+    <id>stlab-cnr-repo</id>
+    <url>http://stlab.istc.cnr.it/software/maven/repo</url>
+  </repository>
+</repositories>
 
 </project>
