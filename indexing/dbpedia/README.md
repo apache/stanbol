@@ -42,9 +42,17 @@ but before doing this please note the points (2), (3) and (4)
 
 ### (2) Download the dbPedia Dump Files:
 
-All RDF dumps need to be copied to the directory
+All RDF dumps need to be copied to the directory:
 
     indexing/resources/rdfdata
+
+The files do not need to be decompressed. The raw ".nt.bz2" files from
+DBpedia can downloaded to that folder directly.
+
+At the time of writing, version 3.6 is the latest release. All available
+archives are referenced on this page:
+
+<http://wiki.dbpedia.org/Downloads36>
 
 The RDF dump of DBpedia.org is splitted up in a number of different files.
 The actual files needed depend on the configuration of the mappings
@@ -65,14 +73,10 @@ interesting dump files:
 * <http://downloads.dbpedia.org/3.6/en/category_labels_en.nt.bz2>
 * <http://downloads.dbpedia.org/3.6/en/skos_categories_en.nt.bz2>
 
-At the time of writing, version 3.6 is the latest release. All available
-dumps are hence referenced on this page:
-
-<http://wiki.dbpedia.org/Downloads36>
-
-During the initialisation of the Indeing all the RDF files within the
-"indexing/resources/rdfdata" directory will be imported to an Jena TDB
-RDF triple store. The imported data are stored under:
+During the first part of the indexing (a.k.a. the initialisation step)
+all the RDF files within the "indexing/resources/rdfdata" directory
+will be imported to an Jena TDB RDF triple store. The imported data are
+stored under:
 
     indexing/resources/tdb
 
