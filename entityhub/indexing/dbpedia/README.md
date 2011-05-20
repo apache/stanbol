@@ -44,7 +44,7 @@ but before doing this please note the points (2), (3) and (4)
 
 All RDF dumps need to be copied to the directory
 
-    indexing/resources/rdfData
+    indexing/resources/rdfdata
 
 The RDF dump of DBpedia.org is splitted up in a number of different files.
 The actual files needed depend on the configuration of the mappings
@@ -71,7 +71,7 @@ dumps are hence referenced on this page:
 <http://wiki.dbpedia.org/Downloads36>
 
 During the initialisation of the Indeing all the RDF files within the
-"indexing/resources/rdfData" directory will be imported to an Jena TDB
+"indexing/resources/rdfdata" directory will be imported to an Jena TDB
 RDF triple store. The imported data are stored under:
 
     indexing/resources/tdb
@@ -79,8 +79,8 @@ RDF triple store. The imported data are stored under:
 and can be reused for subsequent indexing processes.
 
 To avoid (re)importing of already imported resources one need to remove such
-RDF files from the "indexing/resources/rdfData" or - typically the better
-option - rename the "rdfData" folder after the initial run.
+RDF files from the "indexing/resources/rdfdata" or - typically the better
+option - rename the "rdfdata" folder after the initial run.
 
 It is also safe to:
 
@@ -88,7 +88,7 @@ It is also safe to:
   (as soon as the log says that the indexing has started).
 
 * load additional RDF dumps by putting additional RDF files to the
-  "rdfData" directory. This files will be added to the others on the next
+  "rdfdata" directory. This files will be added to the others on the next
   start of the indexing tool.
 
 ### (3) Entity Scores
