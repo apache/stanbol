@@ -17,9 +17,7 @@
 package org.apache.stanbol.entityhub.servicesapi.yard;
 
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
-import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Symbol;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;

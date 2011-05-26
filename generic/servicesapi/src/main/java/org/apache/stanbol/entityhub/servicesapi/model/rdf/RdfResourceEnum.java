@@ -24,17 +24,13 @@ public enum RdfResourceEnum {
      */
     Representation,
     /**
-     * The Sign concept
+     * The Entity concept
      */
-    Sign,
+    Entity,
     /**
-     * The field used to store the type of the representation
+     * The site that defines/manages an {@link RdfResourceEnum#Entity}
      */
-    signType,
-    /**
-     * The site that defines/manages a sign
-     */
-    signSite,
+    site,
     /**
      * The ranking of the entity by this site in the value range of [0..1]
      * A sign with the rank 1 would be (one of) the most important entities
@@ -42,71 +38,84 @@ public enum RdfResourceEnum {
      * is still within the value range one could wonder why this site does
      * even manage a representation about that entity.
      */
-    signRank,
+    entityRank,
     /**
-     * The representation of the Sign (domain=Sign, range=Representation).
+     * The rdf:type used for Metadata. Note that foaf:Document is used as Type 
+     * for the Metadata
      */
-    signRepresentation,
+    Metadata(NamespaceEnum.foaf,"Document"),
     /**
-     * The Symbol concept
+     * relation used to link from the 
+     * {@link org.apache.stanbol.entityhub.servicesapi.model.Entity#getMetadata() metadata}
+     * to the {@link org.apache.stanbol.entityhub.servicesapi.model.Entity#getRepresentation() representation}
+     * of an {@link org.apache.stanbol.entityhub.servicesapi.model.Entity}.<p>
+     * Note that the foaf:primaryTopic relation is currently used for this
+     * purpose.
      */
-    Symbol,
+    aboutRepresentation(NamespaceEnum.dcTerms,"subject"),
+//    /**
+//     * The representation about an Entity (domain=Entity, range=Representation).
+//     */
+//    representation,
     /**
-     * The label of a Symbol
+     * The label of an Entity
      */
     label,
     /**
-     * The description of a Symbol
+     * The description of an Entity
      */
     description,
     /**
-     * Predecessors of a Symbol
+     * Predecessors of an Entity
      */
     predecessor,
     /**
-     * Successors of a Symbol
+     * Successors of an Entity
      */
     successor,
     /**
-     * The property used for the state of the symbol
+     * The property used for the state of locally managed Entities
      */
-    hasSymbolState,
+    hasState,
     /**
-     * The Concept used to type instances of SymbolStates
+     * The Concept used to type instances of EntityStates
      */
-    SymbolState,
+    EntityState,
     /**
-     * The Individual representing the active state of a Symbol
+     * The Individual representing the active state of a locally managed Entity
      */
-    symbolStateActive(null,"symbolState-active"),
+    entityStateActive(null,"entityState-active"),
     /**
-     * The Individual representing the depreciated state of a Symbol
+     * The Individual representing the depreciated state of a locally managed Entity
      */
-    symbolStateDepreciated(null,"symbolState-depreciated"),
+    entityStateDepreciated(null,"entityState-depreciated"),
     /**
-     * The Individual representing the proposed state of a Symbol
+     * The Individual representing the proposed state of a locally managed Entity
      */
-    symbolStateProposed(null,"symbolState-proposed"),
+    entityStateProposed(null,"entityState-proposed"),
     /**
-     * The Individual representing the removed state of a Symbol
+     * The Individual representing the removed state of a locally managed Entity
      */
-    symbolStateRemoved(null,"symbolState-removed"),
+    entityStateRemoved(null,"entityState-removed"),
     /**
-     * Property used to reference MappedEntites mapped to a Symbol
+     * Property used to refer to mapped entities. This directly links the 
+     * mapped entity. To get the mapping information one needs to lookup the
+     * Entity mapping for the source and target of this relation.<p>
      */
-    hasMapping,
+    mappedTo,
     /**
-     * A EntityMapping that links an Entity to a Symbol
+     * A directed mapping between two entities that holds additional 
+     * information about the mapping
      */
     EntityMapping,
     /**
-     * Property used to reference the mapped entity.
+     * Property used to reference the source of the mapping 
      */
-    mappedEntity,
+    mappingSource,
     /**
-     * Property used to reference the mapped symbol
+     * Property used to refer to the target of the mapping
      */
-    mappedSymbol,
+    mappingTarget,
     /**
      * The property used for the state of the MappedEntity
      */
@@ -162,6 +171,13 @@ public enum RdfResourceEnum {
      * interface. Uses entityhub-model:text
      */
     TextDataType(null,"text"),
+    /*
+     * Metadata for Entities
+     */
+    /**
+     * Tells if an returned Entity represents an locally cached version
+     */
+    isChached,
     ;
     private String uri;
     /**

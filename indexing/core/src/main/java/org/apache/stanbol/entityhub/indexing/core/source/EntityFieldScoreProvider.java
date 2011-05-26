@@ -10,24 +10,24 @@ public class EntityFieldScoreProvider implements EntityScoreProvider {
     
     public static final String PRAM_FIELD_NAME = "field";
     
-    public static final String DEFAULT_FIELD_NAME = RdfResourceEnum.signRank.getUri();
+    public static final String DEFAULT_FIELD_NAME = RdfResourceEnum.entityRank.getUri();
     
     private String fieldName;
     
     /**
      * Creates an instance that uses the field as specified by
-     * {@link RdfResourceEnum#signRank} to retrieve the score for an entity
+     * {@link RdfResourceEnum#entityRank} to retrieve the score for an entity
      */
     public EntityFieldScoreProvider(){
         this(null);
     }
     /**
      * Creates an instance that uses the parsed field to retrieve the score for 
-     * an entity or {@link RdfResourceEnum#signRank} in case <code>null</code>
+     * an entity or {@link RdfResourceEnum#entityRank} in case <code>null</code>
      * is parsed.
      * @param fieldName the field used to retrieve the score from parsed
      * {@link Representation}s or <code>null</code> to use the
-     * {@link RdfResourceEnum#signRank} field.
+     * {@link RdfResourceEnum#entityRank} field.
      */
     public EntityFieldScoreProvider(String fieldName){
         if(fieldName == null){

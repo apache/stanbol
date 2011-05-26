@@ -484,12 +484,11 @@ public class ClerezzaYard extends AbstractYard implements Yard {
         final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
         int limit = QueryUtils.getLimit(query, getConfig().getDefaultQueryResultNumber(), getConfig().getMaxQueryResultNumber());
         Query sparqlQuery;
-        //NOTE(s):
-        // - parse RdfResourceEnum.representationType as additional field, because
-        //   this info is needed to correctly init the Representations
+        //NOTE:
         // - use the endpoint type standard, because we do not know what type of
         //   SPARQL implementation is configured for Clerezza via OSGI
-        String sparqlQueryString = SparqlQueryUtils.createSparqlConstructQuery(query, limit,EndpointTypeEnum.Standard,RdfResourceEnum.signType.getUri());
+        String sparqlQueryString = SparqlQueryUtils.createSparqlConstructQuery(
+            query, limit,EndpointTypeEnum.Standard);
         try {
             sparqlQuery = QueryParser.getInstance().parse(sparqlQueryString);
         } catch (ParseException e) {

@@ -27,10 +27,8 @@ import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.entityhub.core.utils.OsgiUtils;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubConfiguration;
-import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping;
-import org.apache.stanbol.entityhub.servicesapi.model.Symbol;
-import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping.MappingState;
-import org.apache.stanbol.entityhub.servicesapi.model.Symbol.SymbolState;
+import org.apache.stanbol.entityhub.servicesapi.model.ManagedEntityState;
+import org.apache.stanbol.entityhub.servicesapi.model.MappingState;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -146,7 +144,7 @@ public class EntityhubConfigurationImpl implements EntityhubConfiguration {
         this.entityhubYardId = OsgiUtils.checkProperty(properties, EntityhubConfiguration.ENTITYHUB_YARD_ID).toString();
         Object defaultSymbolState = properties.get(EntityhubConfiguration.DEFAULT_SYMBOL_STATE);
         if(defaultSymbolState == null){
-            this.defaultSymblStateString = Symbol.DEFAULT_SYMBOL_STATE.name();
+            this.defaultSymblStateString = ManagedEntity.DEFAULT_SYMBOL_STATE.name();
         } else {
             this.defaultSymblStateString = defaultSymbolState.toString();
         }
@@ -199,19 +197,19 @@ public class EntityhubConfigurationImpl implements EntityhubConfiguration {
             return MappingState.valueOf(defaultMappingStateString);
         } catch (IllegalArgumentException e) {
             log.warn("The value \""+defaultMappingStateString+"\" configured as default MappingState does not match any value of the Enumeration! " +
-                    "Return the default state as defined by the "+EntityMapping.class+" interface (value="+EntityMapping.DEFAULT_MAPPING_STATE+")");
+                    "Return the default state as defined by the "+EntityMapping.class+".");
             return EntityMapping.DEFAULT_MAPPING_STATE;
         }
     }
 
     @Override
-    public SymbolState getDefaultSymbolState() {
+    public ManagedEntityState getDefaultManagedEntityState() {
         try {
-            return SymbolState.valueOf(defaultSymblStateString);
+            return ManagedEntityState.valueOf(defaultSymblStateString);
         } catch (IllegalArgumentException e) {
             log.warn("The value \""+defaultSymblStateString+"\" configured as default SymbolState does not match any value of the Enumeration! " +
-                    "Return the default state as defined by the "+Symbol.class+" interface (value="+Symbol.DEFAULT_SYMBOL_STATE+")");
-            return Symbol.DEFAULT_SYMBOL_STATE;
+                    "Return the default state as defined by the "+ManagedEntity.class+".");
+            return ManagedEntity.DEFAULT_SYMBOL_STATE;
         }
     }
 }

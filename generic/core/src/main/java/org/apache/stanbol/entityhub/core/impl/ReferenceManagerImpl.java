@@ -40,7 +40,7 @@ import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
@@ -88,7 +88,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
         Collections.synchronizedMap(new TreeMap<String, Collection<ReferencedSite>>());
     /**
      * This List is used for binary searches within the prefixes to find the
-     * {@link ReferencedSite} to search for a {@link #getSign(String)}
+     * {@link ReferencedSite} to search for a {@link #getEntity(String)}
      * request.<b>
      * NOTE: Every access to this list MUST BE synchronised to {@link #prefixMap}
      * TODO: I am quite sure, that there is some ioUtils class that provides
@@ -275,14 +275,14 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
         return new QueryResultListImpl<Representation>(query, representations,Representation.class);
     }
     @Override
-    public QueryResultList<Sign> findEntities(FieldQuery query) {
+    public QueryResultList<Entity> findEntities(FieldQuery query) {
         log.debug("findEntities for query{}", query);
-        Set<Sign> entities = new HashSet<Sign>();
+        Set<Entity> entities = new HashSet<Entity>();
         for(ReferencedSite site : referencedSites){
             if(site.supportsSearch()){ //do not search on sites that do not support it
                 log.debug(" > query site {}",site.getId());
                 try {
-                    for(Sign rep : site.findSigns(query)){
+                    for(Entity rep : site.findEntities(query)){
                         if(!entities.contains(rep)){ //do not override
                             entities.add(rep);
                         } else {
@@ -301,7 +301,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
                 log.debug(" > Site {} does not support queries",site.getId());
             }
         }
-        return new QueryResultListImpl<Sign>(query, entities,Sign.class);
+        return new QueryResultListImpl<Entity>(query, entities,Entity.class);
     }
     @Override
     public InputStream getContent(String entityId, String contentType) {
@@ -330,7 +330,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
         return null;
     }
     @Override
-    public Sign getSign(String entityId) {
+    public Entity getEntity(String entityId) {
         Collection<ReferencedSite> sites = getReferencedSitesByEntityPrefix(entityId);
         if(sites.isEmpty()){
             log.info("No Referenced Site registered for Entity {}",entityId);
@@ -338,9 +338,9 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
             return null;
         }
         for(ReferencedSite site : sites){
-            Sign entity;
+            Entity entity;
             try {
-                entity = site.getSign(entityId);
+                entity = site.getEntity(entityId);
                 if(entity != null){
                     log.debug("Return Representation of Site {} for Entity {}",
                         site.getConfiguration().getName(),entityId);

@@ -7,8 +7,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping.MappingState;
-import org.apache.stanbol.entityhub.servicesapi.model.Symbol.SymbolState;
+import org.apache.stanbol.entityhub.servicesapi.model.ManagedEntityState;
+import org.apache.stanbol.entityhub.servicesapi.model.MappingState;
 import org.apache.stanbol.entityhub.servicesapi.site.License;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
@@ -124,12 +124,12 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
                         Arrays.toString(MappingState.values())),e);
         }
         try {
-            setDefaultSymbolState(getDefaultSymbolState());
+            setDefaultSymbolState(getDefaultManagedEntityState());
         } catch (IllegalArgumentException e) {
             throw new ConfigurationException(DEFAULT_SYMBOL_STATE, 
                 String.format("Unknown default SymbolState (%s=%s) for Site %s! Valid values are %s ",
                     DEFAULT_SYMBOL_STATE,config.get(DEFAULT_SYMBOL_STATE),getId(),
-                        Arrays.toString(SymbolState.values()),e));
+                        Arrays.toString(ManagedEntityState.values()),e));
         }
         try {
             setCacheStrategy(getCacheStrategy());
@@ -345,23 +345,23 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
     }
 
     @Override
-    public final SymbolState getDefaultSymbolState() {
+    public final ManagedEntityState getDefaultManagedEntityState() {
         Object defaultSymbolState = config.get(DEFAULT_SYMBOL_STATE);
         if(defaultSymbolState == null){
             return null;
-        } else if(defaultSymbolState instanceof SymbolState){
-            return (SymbolState)defaultSymbolState;
+        } else if(defaultSymbolState instanceof ManagedEntityState){
+            return (ManagedEntityState)defaultSymbolState;
         } else {
-            return SymbolState.valueOf(defaultSymbolState.toString());
+            return ManagedEntityState.valueOf(defaultSymbolState.toString());
         }
     }
     /**
      * 
      * @param state
      * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
-     * @see #getDefaultSymbolState()
+     * @see #getDefaultManagedEntityState()
      */
-    public final void setDefaultSymbolState(SymbolState state) throws UnsupportedOperationException {
+    public final void setDefaultSymbolState(ManagedEntityState state) throws UnsupportedOperationException {
         if(state == null){
             config.remove(DEFAULT_SYMBOL_STATE);
         } else {

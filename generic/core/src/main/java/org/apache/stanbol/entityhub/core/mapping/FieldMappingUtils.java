@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.stanbol.entityhub.core.utils.ModelUtils;
 import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
@@ -35,6 +34,7 @@ import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint.ConstraintType;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint.PatternType;
+import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

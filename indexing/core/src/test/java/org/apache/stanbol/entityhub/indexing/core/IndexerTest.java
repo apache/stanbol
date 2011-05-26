@@ -56,7 +56,7 @@ public class IndexerTest {
     private static final String DC_CREATED = NamespaceEnum.dcTerms+"created";
     private static final String DC_CREATOR = NamespaceEnum.dcTerms+"creator";
     private static final String RDF_TYPE = NamespaceEnum.rdf+"type";
-    private static final String ENTITY_RANK = RdfResourceEnum.signRank.getUri();
+    private static final String ENTITY_RANK = RdfResourceEnum.entityRank.getUri();
     private static final Set<String> EXPECTED_LANGUAGES = Collections.unmodifiableSet(
         new HashSet<String>(Arrays.asList("en","de")));
     private static final float EXPECTED_MAX_RANK = 100;
@@ -229,7 +229,7 @@ public class IndexerTest {
             rep.add(NamespaceEnum.dcElements+"creator", IndexerTest.class.getSimpleName());
             //use a random between [0..{MAX_INCOMMING}] as score
             Integer incomming = Integer.valueOf((int)Math.round((Math.random()*MAX_INCOMMING)));
-            rep.add(RdfResourceEnum.signRank.getUri(), incomming);
+            rep.add(RdfResourceEnum.entityRank.getUri(), incomming);
             testData.put(rep.getId(), rep);
         }
     }

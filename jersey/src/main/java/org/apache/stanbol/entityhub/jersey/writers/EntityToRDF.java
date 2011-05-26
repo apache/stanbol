@@ -23,23 +23,34 @@ import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.rdf.ontologies.FOAF;
 import org.apache.clerezza.rdf.ontologies.RDF;
+import org.apache.stanbol.entityhub.core.impl.EntityMapping;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
-import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign;
-import org.apache.stanbol.entityhub.servicesapi.model.Symbol;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 
+/**
+ * Encodes an Entity into an single RDF graph by<ul>
+ * <li> adding the {@link Entity#getRepresentation()}
+ * <li> adding the {@link Entity#getMetadata()}
+ * <li> creating a foaf:primaryTopic link between the metadata and the representation
+ * <li> creating a foaf:isPromaryTopic link between the representation and the metadata
+ * <li> adding the foaf:Document type to the metadata.
+ * </ul>
+ * @author Rupert Westenthaler
+ *
+ */
+final class EntityToRDF {
+    private EntityToRDF() { /* do not create instances of utility classes */}
 
-final class SignToRDF {
-    private SignToRDF() { /* do not create instances of utility classes */}
-
-    private static UriRef signRepresentation = new UriRef(RdfResourceEnum.signRepresentation.getUri());
-    private static UriRef signSite = new UriRef(RdfResourceEnum.signSite.getUri());
-    private static UriRef sign = new UriRef(RdfResourceEnum.Sign.getUri());
-    private static UriRef entityMapping = new UriRef(RdfResourceEnum.EntityMapping.getUri());
-    private static UriRef symbol = new UriRef(RdfResourceEnum.Symbol.getUri());
+    private static UriRef FOAF_DOCUMENT = FOAF.Document;
+    private static UriRef FOAF_PRIMARY_TOPIC = FOAF.primaryTopic;
+    private static UriRef FOAF_PRIMARY_TOPIC_OF = FOAF.isPrimaryTopicOf;
+    private static UriRef signSite = new UriRef(RdfResourceEnum.site.getUri());
+    private static UriRef ENTITY_TYPE = new UriRef(RdfResourceEnum.Entity.getUri());
     private static RdfValueFactory valueFactory = RdfValueFactory.getInstance();
     private static LiteralFactory literalFactory = LiteralFactory.getInstance();
 
@@ -53,17 +64,19 @@ final class SignToRDF {
         graph.addAll(valueFactory.toRdfRepresentation(representation).getRdfGraph());
     }
 
-    static TripleCollection toRDF(Sign sign) {
+    static TripleCollection toRDF(Entity entity) {
         MGraph graph = new SimpleMGraph();
-        addRDFTo(graph, sign);
+        addRDFTo(graph, entity);
         return graph;
     }
 
-    static void addRDFTo(MGraph graph, Sign sign) {
-        addRDFTo(graph, sign.getRepresentation());
+    static void addRDFTo(MGraph graph, Entity entity) {
+        addRDFTo(graph, entity.getRepresentation());
+        addRDFTo(graph, entity.getMetadata());
         //now add some triples that represent the Sign
-        addSignTriplesToGraph(graph, sign);
+        addEntityTriplesToGraph(graph, entity);
     }
+
 
     /**
      * Adds the Triples that represent the Sign to the parsed graph. Note that
@@ -73,27 +86,18 @@ final class SignToRDF {
      * @param graph the graph to add the triples
      * @param sign the sign
      */
-    static void addSignTriplesToGraph(MGraph graph, Sign sign) {
+    static void addEntityTriplesToGraph(MGraph graph, Entity sign) {
         UriRef id = new UriRef(sign.getId());
-        UriRef repId = new UriRef(sign.getRepresentation().getId());
-        /*
-         * TODO: change to URI as soon as the paths are defined
-         *  e.g:
-         *   - Sign: <URLofEntityhub>/site/<sing.getSignSite>
-         *   - Symbol: <URLofEntityhub>/symbol/<sing.getSignSite>
-         *   - EntityMapping: <URLofEntityhub>/mapping/<sing.getSignSite>
-         * For now write a Literal with the ID of the Site
-         */
-        TypedLiteral siteName = literalFactory.createTypedLiteral(sign.getSignSite());
-        graph.add(new TripleImpl(id, SignToRDF.signSite, siteName));
-        graph.add(new TripleImpl(id, SignToRDF.signRepresentation, repId));
-        if (sign instanceof Symbol) {
-            graph.add(new TripleImpl(id, RDF.type, SignToRDF.symbol));
-        } else if (sign instanceof EntityMapping) {
-            graph.add(new TripleImpl(id, RDF.type, SignToRDF.entityMapping));
-        } else {
-            graph.add(new TripleImpl(id, RDF.type, SignToRDF.sign));
-        }
+        UriRef metaId = new UriRef(sign.getMetadata().getId());
+        //add the FOAF triples between metadata and content
+        graph.add(new TripleImpl(id, FOAF_PRIMARY_TOPIC_OF, metaId));
+        graph.add(new TripleImpl(metaId, FOAF_PRIMARY_TOPIC, metaId));
+        graph.add(new TripleImpl(metaId, RDF.type, FOAF_DOCUMENT));
+        //add the site to the metadata
+        //TODO: this should be the HTTP URI and not the id of the referenced site
+        TypedLiteral siteName = literalFactory.createTypedLiteral(sign.getSite());
+        graph.add(new TripleImpl(metaId, EntityToRDF.signSite, siteName));
+        
     }
 
 }

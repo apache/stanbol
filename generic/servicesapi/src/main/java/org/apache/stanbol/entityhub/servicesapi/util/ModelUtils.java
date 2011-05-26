@@ -14,19 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.entityhub.core.utils;
+package org.apache.stanbol.entityhub.servicesapi.util;
 
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.xml.namespace.QName;
@@ -34,10 +33,8 @@ import javax.xml.namespace.QName;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign;
+import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign.SignTypeEnum;
-import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,35 +48,6 @@ public final class ModelUtils {
 
     private static final Logger log = LoggerFactory.getLogger(ModelUtils.class);
 
-    /**
-     * Holds the uri->RepresentationTypeEnum mappings
-     */
-    public static final Map<String,SignTypeEnum> REPRESENTATION_TYPE_MAPPING;
-    static {
-        Map<String,SignTypeEnum> repTypeMapping = new HashMap<String, SignTypeEnum>();
-        for(SignTypeEnum type : SignTypeEnum.values()){
-            repTypeMapping.put(type.getUri(), type);
-        }
-        REPRESENTATION_TYPE_MAPPING = Collections.unmodifiableMap(repTypeMapping);
-    }
-    /**
-     * Getter for the {@link SignTypeEnum} based on the reference
-     * @param referece The reference as defined by {@link SignTypeEnum#getUri()}
-     * @return the type or <code>null</code> if no mapping is present for the parsed
-     * reference.
-     */
-    public static SignTypeEnum getSignType(Reference reference){
-        return reference == null?null:getSignType(reference.getReference());
-    }
-    /**
-     * Getter for the {@link SignTypeEnum} based on the uri
-     * @param uri The uri as defined by {@link SignTypeEnum#getUri()}
-     * @return the type or <code>null</code> if no mapping is present for the parsed
-     * uri.
-     */
-    public static SignTypeEnum getSignType(String uri){
-        return REPRESENTATION_TYPE_MAPPING.get(uri);
-    }
     /**
      * Random UUID generator with re-seedable RNG for the tests.
      *
@@ -179,6 +147,13 @@ public final class ModelUtils {
         }
         return c;
     }
+    public static <T> Set<T> asSet(Iterator<T> it){
+        Set<T> c = new HashSet<T>();
+        while(it.hasNext()){
+            c.add(it.next());
+        }
+        return c;
+    }
 
     /**
      * Splits up a URI in local name and namespace based on the following rules
@@ -238,72 +213,4 @@ public final class ModelUtils {
             return new QName(nsln[1]);
         }
     }
-    /**
-     * Getter for the SignType for a Representation. If the Representation does
-     * not define a value part of the {@link SignTypeEnum} for the field
-     * {@link RdfResourceEnum#signType} ({@value RdfResourceEnum#signType}), that
-     * the default sign type {@link Sign#DEFAULT_SIGN_TYPE} is returned.
-     * @param representation The representation
-     * @return the sign type
-     * @throws IllegalArgumentException if <code>null</code> is parsed as representation!
-     */
-    public static SignTypeEnum getSignType(Representation representation) throws IllegalArgumentException {
-        if(representation == null){
-            throw new IllegalArgumentException("Parameter represetnation MUST NOT be NULL!");
-        }
-        Reference ref = representation.getFirstReference(RdfResourceEnum.signType.getUri());
-        if(ref == null){
-            return Sign.DEFAULT_SIGN_TYPE;
-        } else {
-            SignTypeEnum type = ModelUtils.getSignType(ref.getReference());
-            if(type == null){
-                log.warn("Sign "+representation.getId()+" is set to an unknown SignType "+ref.getReference()+"! -> return default type (value is not reseted)");
-                return Sign.DEFAULT_SIGN_TYPE;
-            } else {
-                return type;
-            }
-        }
-    }
-    //No longer needed after the introduction of the DefaultSignFactory!
-//    /**
-//     * Creates a Sign for the parsed Representation and the signSite id
-//     * @param rep the Represetnation
-//     * @param signSite the id of the site for the sign
-//     * @return the sign
-//     * @throws IllegalArgumentException if any of the two parameter is <code>null</code>.
-//     */
-//    public static Sign createSign(Representation rep,String signSite) throws IllegalArgumentException {
-//        if(rep == null){
-//            throw new IllegalArgumentException("The parsed Representation MUST NOT be NULL!");
-//        }
-//        if(signSite == null){
-//            throw new IllegalArgumentException("The parsed ID of the SignSite MUST NOT be NULL!");
-//        }
-//        rep.setReference(Sign.SIGN_SITE, signSite);
-//        SignTypeEnum signType = ModelUtils.getSignType(rep);
-//        //instantiate the correct Sign Implementation
-//        Sign sign;
-//        /*
-//         * TODO: change this part to separate the implementation of the
-//         * ReferencedSite with the instantiation of Sign Type Implementations
-//         * Maybe introduce an SignFactory or add such Methods to the
-//         * existing ValueFactory
-//         */
-//        switch (signType) {
-//        case Symbol:
-//            sign = new DefaultSymbolImpl(signSite,rep);
-//            break;
-//        case EntityMapping:
-//            sign = new DefaultEntityMappingImpl(signSite,rep);
-//            break;
-//        case Sign:
-//            sign = new DefaultSignImpl(signSite,rep);
-//            break;
-//        default:
-//            log.warn("Unsupported SignType "+signType.getUri()+" (create Sign instance). Please adapt this implementation!");
-//            sign = new DefaultSignImpl(signSite,rep);
-//            break;
-//        }
-//        return sign;
-//    }
 }

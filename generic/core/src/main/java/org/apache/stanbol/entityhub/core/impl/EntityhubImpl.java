@@ -33,21 +33,19 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.entityhub.core.mapping.DefaultFieldMapperImpl;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
-import org.apache.stanbol.entityhub.core.model.DefaultSignFactory;
+import org.apache.stanbol.entityhub.core.model.EntityImpl;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
-import org.apache.stanbol.entityhub.core.utils.ModelUtils;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
-import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping;
+import org.apache.stanbol.entityhub.servicesapi.model.ManagedEntityState;
+import org.apache.stanbol.entityhub.servicesapi.model.MappingState;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign;
-import org.apache.stanbol.entityhub.servicesapi.model.Symbol;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign.SignTypeEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
@@ -55,12 +53,11 @@ import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
+import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -74,7 +71,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(immediate=true)
 @Service
-public final class EntityhubImpl implements Entityhub, ServiceListener {
+public final class EntityhubImpl implements Entityhub {//, ServiceListener {
 
     private final Logger log = LoggerFactory.getLogger(EntityhubImpl.class);
 
@@ -90,17 +87,11 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
     private FieldMapper fieldMapper;
 
     /**
-     * Used to create Sign instances
-     */
-    private DefaultSignFactory signFactory = DefaultSignFactory.getInstance();
-    /**
      * Tracks the availability of the Yard used by the Entityhub.
      */
     private ServiceTracker entityhubYardTracker; //reference initialised in the activate method
     /**
      * The Configuration of the Entityhub
-     * TODO: Maybe refactor this implementation to implement this interface or
-     * to extend the {@link EntityhubConfigurationImpl}.
      */
     @Reference // 1..1, static
     private EntityhubConfiguration config;
@@ -110,7 +101,7 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
     @Reference // 1..1, static
     private ReferencedSiteManager siteManager;
 
-    private static final String DEFAULT_SYMBOL_PREFIX = "symbol";
+    private static final String DEFAULT_MANAGED_ENTITY_PREFIX = "entity";
     private static final String DEFAULT_MAPPING_PREFIX = "mapping";
     /**
      * Activates the Entityhub (OSGI Lifecycle method)
@@ -181,17 +172,6 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
             }
         }
     }
-    /**
-     * TODO: currently only for debugging. Intended to be used for tracking
-     * the state of dependencies
-     */
-    @Override
-    public void serviceChanged(ServiceEvent event) {
-        log.info("Print Service Event for "+event.getSource());
-        for(String key : event.getServiceReference().getPropertyKeys()){
-            log.info("  > "+key+"="+event.getServiceReference().getProperty(key));
-        }
-    }
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
@@ -227,34 +207,35 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
     }
 
     @Override
-    public Symbol lookupSymbol(String entity) throws YardException{
-        return lookupSymbol(entity,false);
+    public Entity lookupLocalEntity(String entity) throws YardException{
+        return lookupLocalEntity(entity,false);
     }
 
     @Override
-    public Symbol lookupSymbol(String entity, boolean create) throws YardException {
-        Symbol symbol = getSymbol(entity);
-        if(symbol != null){
-            return symbol;
+    public Entity lookupLocalEntity(String entityId, boolean create) throws YardException {
+        Entity entity = getEntity(entityId);
+        if(entity != null){
+            return entity;
         } else {
-            //parsed reference was not a symbol. search for an mapped Entity
-            EntityMapping entityMapping = getMappingByEntity(entity);
+            //parsed reference was not a locally managed entity ->
+            //search for an mapped Entity
+            Entity entityMapping = getMappingBySource(entityId);
             if(entityMapping != null){
-                symbol = getSymbol(entityMapping.getSymbolId());
-                if(symbol != null){
-                    return symbol;
+                entity = getEntity(EntityMapping.getTargetId(entityMapping));
+                if(entity != null){
+                    return entity;
                 } else {
-                    log.warn("Unable to find Symbol for Entity Mapping "+entityMapping+"!");
-                    return recoverSymbol(entityMapping.getSymbolId());
+                    log.warn("Unable to find Entity for Entity Mapping "+entityMapping+"!");
+                    return recoverEntity(EntityMapping.getTargetId(entityMapping));
                 }
             } else if(create){
                 //search if the parsed reference is known by any referenced site
                 // and if YES, create a new Symbol
-                Sign sign = siteManager.getSign(entity);
-                 if(sign == null){ //id not found by any referred site
+                Entity remoteEntity = siteManager.getEntity(entityId);
+                 if(remoteEntity == null){ //id not found by any referred site
                      return null;
                  } else {
-                     return createSymbol(sign);
+                     return importEntity(remoteEntity);
                  }
             } else {
                 return null;
@@ -262,30 +243,36 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
         }
     }
     @Override
-    public Symbol createSymbol(String reference) throws IllegalStateException, IllegalArgumentException, YardException {
-        Symbol symbol = getSymbol(reference);
-        if(symbol == null){
-            EntityMapping entityMapping = getMappingByEntity(reference);
+    public Entity importEntity(String reference) throws IllegalStateException, IllegalArgumentException, YardException {
+        Entity entity = getEntity(reference);
+        if(entity == null){
+            Entity entityMapping = getMappingBySource(reference);
             if(entityMapping == null){
-                Sign sign = siteManager.getSign(reference);
-                if(sign == null){
+                Entity remoteEntity = siteManager.getEntity(reference);
+                if(remoteEntity == null){
                     return null;
                 } else {
-                    return createSymbol(sign);
+                    return importEntity(remoteEntity);
                 }
             } else {
-                throw new IllegalStateException("There exists already an EntityMappting for the parsed reference (mapping="+entityMapping+")");
+                throw new IllegalStateException(String.format(
+                    "The reference %s is already imported to the Entityhub " +
+                    "(local Entity %s)",reference,
+                    EntityMapping.getTargetId(entityMapping)));
             }
         } else {
-            throw new IllegalStateException("The parsed reference is an Symbol (symbol="+symbol+")!");
+            throw new IllegalStateException("The parsed id "+reference+" refers " +
+            		"to an Entity managed by the Entityhub (entity="+entity+")!");
         }
     }
     /**
-     * Recovers an symbol based on the available {@link EntityMapping}s
-     * @param symbolId the id of the Symbol
-     * @return the Symbol or <code>null</code> if the recovering is unsucessfull.
+     * Recovers a missing locally managed entity based on the available 
+     * {@link EntityMapping}s and the data available through referenced sites.
+     * @param entityId the id of the missing locally managed entity
+     * @return the recovered Entity or <code>null</code> if the recovering is 
+     * not possible
      */
-    private Symbol recoverSymbol(String symbolId) {
+    private Entity recoverEntity(String entityId) {
         /*
          * TODO: recover the Symbol by recreating it based on the available
          *       mapped Entities
@@ -302,116 +289,127 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
      *  {@link #entityhubYard}, but the representation can not be wrapped by an {@link Symbol}.
      */
     @Override
-    public Symbol getSymbol(String symbolId) throws IllegalArgumentException,IllegalStateException, YardException {
-        if(symbolId == null || symbolId.isEmpty()){
-            throw new IllegalArgumentException("The parsed symbolID MUST NOT be NULL nor empty!");
+    public Entity getEntity(String entityId) throws IllegalArgumentException,IllegalStateException, YardException {
+        if(entityId == null || entityId.isEmpty()){
+            throw new IllegalArgumentException("The parsed id MUST NOT be NULL nor empty!");
         }
-        Sign symbol = getSignFormYard(symbolId);
-        if(symbol == null || symbol instanceof Symbol){
-            return (Symbol)symbol;
+        Yard entityhubYard = lookupYard();
+        Entity entity = loadEntity(entityhubYard, entityId);
+        if(entity == null){
+            return null;
+        } else if (ManagedEntity.canWrap(entity)){
+            return entity;
         } else {
-            log.info("The parsed id does not represent a Symbol, but a {} (uri={})! -> return null",
-                symbol.getType(),symbol.getType().getUri());
+            log.info("The parsed id does not represent a locally managed Entity {}", entity);
             return null;
         }
     }
     /**
-     * Creates a new Symbol (internal Entity) by importing the parsed sign
-     * @param sign the sign to import
-     * @return the imported and stored symbol. 
+     * Imports the Entity
+     * @param remoteEntity the Entity to import
+     * @return the Entity created and stored within the Entityhub
      * @throws YardException
      */
-    protected Symbol createSymbol(Sign sign) throws YardException{
-        if(sign == null){
+    protected Entity importEntity(Entity remoteEntity) throws YardException{
+        if(remoteEntity == null){
             return null;
         }
-        ReferencedSite signSite = siteManager.getReferencedSite(sign.getSignSite());
-        if(signSite == null){
-            log.warn("Unable to create Symbol because the ReferencedSite "+sign.getSignSite()+" for sign "+sign.getId()+" is currently not active -> return null");
+        ReferencedSite site = siteManager.getReferencedSite(remoteEntity.getSite());
+        if(site == null){
+            log.warn("Unable to import Entity {} because the ReferencedSite {} is currently not active -> return null",
+                remoteEntity.getId(),remoteEntity.getSite());
             return null;
         }
         Yard entityhubYard = lookupYard();
         ValueFactory valueFactory = entityhubYard.getValueFactory();
-        //Create the Symbol
-        Representation symbolRep = entityhubYard.create(constructResourceId(DEFAULT_SYMBOL_PREFIX));
-        Symbol symbol = importSign(sign, signSite, symbolRep, valueFactory);
+        //Create the locally managed Entity
+        Representation localRep = entityhubYard.create(constructResourceId(DEFAULT_MANAGED_ENTITY_PREFIX));
+        Entity localEntity = loadEntity(entityhubYard, localRep);
+        importEntity(remoteEntity, site, localEntity, valueFactory);
 
         //Second create and init the Mapping
         Representation entityMappingRepresentation = entityhubYard.create(
             constructResourceId(DEFAULT_MAPPING_PREFIX));
-        EntityMapping entityMapping = establishMapping(symbol, sign, signSite, entityMappingRepresentation);
+        Entity entityMappingEntity = loadEntity(entityhubYard, entityMappingRepresentation);
+        establishMapping(localEntity, remoteEntity, site, entityMappingEntity);
         
-        //Store the symbol and the mappedEntity in the entityhubYard
-        entityhubYard.store(symbol.getRepresentation());
-        entityhubYard.store(entityMapping.getRepresentation());
-        return symbol;
+        //Store the entity and the mappedEntity in the entityhubYard
+        storeEntity(entityhubYard, localEntity);
+        storeEntity(entityhubYard,entityMappingEntity);
+        return localEntity;
     }
     /**
-     * Imports a {@link Sign} from a {@link ReferencedSite}. This Method imports
+     * Imports a {@link Entity} from a {@link ReferencedSite}. This Method imports
      * the {@link Representation} by applying all configured mappings. It also
-     * sets the SymbolState to the configured default value by the referenced
-     * site of the Sign or the default for the Entityhub if the site does not
-     * define this configuration.<p>
-     * @param sign The sign (external entity) to import
-     * @param signSite the referenced site of the sign (external entity)
-     * @param symbolRep the Representation used to store the imported information
+     * sets the {@link ManagedEntityState} to the configured default value by the 
+     * referenced site of the imported entity or the default for the Entityhub 
+     * if the site does not define this configuration.<p>
+     * @param remoteEntity The entity to import
+     * @param site the referenced site of the entity to import
+     * @param localEntity the target entity for the import
      * @param valueFactory the valusFactory used to create instance while importing
-     * @return the symbol (internal Entity)
      */
-    private Symbol importSign(Sign sign,
-                              ReferencedSite signSite,
-                              Representation symbolRep,
+    private void importEntity(Entity remoteEntity,
+                              ReferencedSite site,
+                              Entity localEntity,
                               ValueFactory valueFactory) {
-        Symbol symbol = signFactory.createSign(config.getID(),Symbol.class, symbolRep);
-        Symbol.SymbolState state = signSite.getConfiguration().getDefaultSymbolState();
+        
+        ManagedEntityState state = site.getConfiguration().getDefaultManagedEntityState();
         if(state == null){
-            state =  config.getDefaultSymbolState();
+            state =  config.getDefaultManagedEntityState();
         }
-        symbol.setState(state);
-        //and set the initial state
-        symbolRep.addReference(Symbol.STATE, config.getDefaultSymbolState().getUri());
-        //create a FieldMapper containing the Entityhub Mappings and the Site specific mappings
-        FieldMapper siteMapper = signSite.getFieldMapper();
+        //this wrapper allows to use an API to write metadata
+        ManagedEntity managedEntity = ManagedEntity.init(localEntity, state);
+        FieldMapper siteMapper = site.getFieldMapper();
         FieldMapper mapper = this.fieldMapper.clone();
         for(FieldMapping siteMapping : siteMapper.getMappings()){
             mapper.addMapping(siteMapping);
         }
-        Representation signRep = sign.getRepresentation();
         //TODO: As soon as MappingActivities are implemented we need to add such
         //      information to the EntityMapping instance!
-        mapper.applyMappings(signRep, symbolRep,valueFactory);
-        return symbol;
+        mapper.applyMappings(remoteEntity.getRepresentation(), 
+            localEntity.getRepresentation(),valueFactory);
+        //set general metadata
+        managedEntity.setCreated(new Date());
+        //set the metadata required by the referenced site
+        managedEntity.addAttributionLink(site.getConfiguration().getAttributionUrl());
+        managedEntity.addAttributionText(site.getConfiguration().getAttribution(), null);
+        //TODO: maybe replace with the URL of the site
+        managedEntity.addContributorName(site.getConfiguration().getName());
     }
     /**
-     * Creates a new {@link EntityMapping} for the parsed Sign and Symbol. This
-     * also sets the State and the expire date based on the configurations of the
-     * ReferencesSite of the Sign and the defaults of the Entityhub 
-     * @param symbol the Symbol (internal Entity) to link
-     * @param sign the Sign (external Entity)  to link
-     * @param signSite the referenced site of the Sign (external Entity)
-     * @param entityMappingRepresentation the Representation used to store the data
+     * Creates a new {@link EntityMapping} for the parsed source and target 
+     * {@link Entity}. This also sets the State and the expire date based on the 
+     * configurations of the ReferencesSite of the source entity and the defaults of the 
+     * Entityhub 
+     * @param localEntity the locally managed entity (target for the mapping)
+     * @param remoteEntity the remote Entity (source for the mapping)
+     * @param site the referenced site managing the source Entity
+     * @param entityMappingRepresentation the Entity for the mapping
      * @return the EntityMapping
      */
-    private EntityMapping establishMapping(Symbol symbol,
-                                           Sign sign,
-                                           ReferencedSite signSite,
-                                           Representation entityMappingRepresentation) {
-        EntityMapping entityMapping = signFactory.createSign(config.getID(),
-            EntityMapping.class, entityMappingRepresentation);
+    private EntityMapping establishMapping(Entity localEntity,
+                                           Entity remoteEntity,
+                                           ReferencedSite site,
+                                           Entity entityMappingEntity) {
+        EntityMapping entityMapping = EntityMapping.init(entityMappingEntity);
         //now init the mappingState and the expireDate based on the config of the
-        //ReferencedSite of the sign (considering also the defaults of the entityhub)
-        EntityMapping.MappingState mappingState = signSite.getConfiguration().getDefaultMappedEntityState();
+        //ReferencedSite of the source entity (considering also the defaults of the entityhub)
+        MappingState mappingState = site.getConfiguration().getDefaultMappedEntityState();
         if(mappingState == null){
             mappingState = config.getDefaultMappingState();
         }
         entityMapping.setState(mappingState);
-        long expireDuration = signSite.getConfiguration().getDefaultExpireDuration();
+        long expireDuration = site.getConfiguration().getDefaultExpireDuration();
         if(expireDuration < 0){
             Date expireDate = new Date(System.currentTimeMillis()+expireDuration);
             entityMapping.setExpires(expireDate);
         }
-        entityMapping.getRepresentation().setReference(EntityMapping.ENTITY_ID, sign.getId());
-        entityMapping.getRepresentation().setReference(EntityMapping.SYMBOL_ID, symbol.getId());
+        entityMapping.setSourceId(remoteEntity.getId());
+        entityMapping.setTargetId(localEntity.getId());
+        //initialise additional metadata
+        entityMapping.setCreated(new Date());
+        
         return entityMapping;
     }
     /**
@@ -452,28 +450,19 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
 
 
     @Override
-    public EntityMapping getMappingByEntity(String reference) throws YardException{
+    public Entity getMappingBySource(String reference) throws YardException{
         if(reference == null){
             log.warn("NULL parsed as Reference -> call to getMappingByEntity ignored (return null)");
             return null;
         }
         FieldQuery fieldQuery = getQueryFavtory().createFieldQuery();
-        fieldQuery.setConstraint(RdfResourceEnum.mappedEntity.getUri(), new ReferenceConstraint(reference));
-        QueryResultList<Representation> resultList = lookupYard().findRepresentation(fieldQuery);
+        fieldQuery.setConstraint(RdfResourceEnum.mappingSource.getUri(), new ReferenceConstraint(reference));
+        Yard entityhubYard = lookupYard();
+        QueryResultList<Representation> resultList = entityhubYard.findRepresentation(fieldQuery);
         if(!resultList.isEmpty()){
             Iterator<Representation> resultIterator = resultList.iterator();
-            Sign mapping = signFactory.getSign(config.getID(), resultIterator.next());
-            if(!(mapping.getType() == SignTypeEnum.EntityMapping)){
-                // This query should only return EntityMappings 
-                //  ... something very bad happens :(
-                log.error("Unable to create EntityMapping {} for Entity {} because SignType != EntityMapping but {}!",
-                    new Object[]{
-                                 mapping.getId(),
-                                 reference,
-                                 mapping.getType()
-                    });
-            }
-          //print warnings in case of multiple mappings
+            Entity mapping = loadEntity(entityhubYard, resultIterator.next());
+           //print warnings in case of multiple mappings
             if(resultIterator.hasNext()){ 
                 log.warn("Multiple Mappings found for Entity {}!",reference);
                 log.warn("  > {} -> returned instance",mapping.getId());
@@ -481,61 +470,93 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
                     log.warn("  > {} -> ignored",resultIterator.next());
                 }
             }
-            return (EntityMapping)mapping;
+            if(!EntityMapping.isValid(mapping)){
+                log.warn("Entity {} is not a valid EntityMapping. -> return null",mapping);
+                mapping = null;
+            }
+            return mapping;
         } else {
             log.debug("No Mapping found for Entity {}",reference);
             return null;
         }
     }
     @Override
-    public Collection<EntityMapping> getMappingsBySymbol(String symbol) throws YardException{
-        if(symbol == null){
+    public Collection<Entity> getMappingsByTarget(String targetId) throws YardException{
+        if(targetId == null){
             log.warn("NULL parsed as Reference -> call to getMappingsBySymbol ignored (return null)");
             return null;
         }
         FieldQuery fieldQuery = getQueryFavtory().createFieldQuery();
-        fieldQuery.setConstraint(RdfResourceEnum.mappedSymbol.getUri(), new ReferenceConstraint(symbol));
-        QueryResultList<Representation> resultList = lookupYard().findRepresentation(fieldQuery);
-        Collection<EntityMapping> mappings = new HashSet<EntityMapping>();
+        fieldQuery.setConstraint(RdfResourceEnum.mappingTarget.getUri(), new ReferenceConstraint(targetId));
+        Yard enttiyhubYard = lookupYard();
+        QueryResultList<Representation> resultList = enttiyhubYard.findRepresentation(fieldQuery);
+        Collection<Entity> mappings = new HashSet<Entity>();
         for(Representation rep : resultList){
-            Sign entityMapping = signFactory.getSign(config.getID(), rep);
-            if(entityMapping.getType() == SignTypeEnum.EntityMapping){
-                mappings.add((EntityMapping)entityMapping);
-            } else {
-                // This query should only return EntityMappings 
-                //  ... something very bad happens :(
-                log.error("Unable to create EntityMapping {} for Symbol {} because SignType != EntityMapping but {}!",
-                    new Object[]{
-                                 entityMapping.getId(),
-                                 symbol,
-                                 entityMapping.getType()
-                    });
-            }
+            mappings.add(loadEntity(enttiyhubYard, rep));
         }
         return mappings;
     }
 
-    protected Sign getSignFormYard(String id) throws YardException {
-        Representation rep = lookupYard().getRepresentation(id);
-        if(rep != null){
-            return signFactory.getSign(config.getID(), rep);
+    /**
+     * Loads an Entity (Representation and Metadata) form the parsed Yard
+     * @param entityhubYard the yard used by the Entityhub
+     * @param id the ID of the Entity to load
+     * @return the Entity or <code>null</code> if not found
+     * @throws YardException On any error with the parsed Yard.
+     */
+    private Entity loadEntity(Yard entityhubYard,String id) throws YardException {
+        return id == null || id.isEmpty() ? null :
+            loadEntity(entityhubYard,entityhubYard.getRepresentation(id));
+    }
+    /**
+     * Loads the metadata for the parsed representation form the parsed Yard
+     * and creates the Entity. If no metadata are found a new Representation
+     * is created.
+     * @param entityhubYard the yard used by the Entityhub
+     * @param representation the representation of the entity
+     * @return the created Entity including the loaded/created metadata
+     * @throws YardException On any error with the parsed Yard.
+     */
+    private Entity loadEntity(Yard entityhubYard, Representation representation) throws YardException {
+        if(representation != null){
+            String metaID = representation.getId()+".meta";
+            Representation metadata = entityhubYard.getRepresentation(metaID);
+            if(metadata == null){
+                metadata = entityhubYard.create(metaID);
+            }
+            return new EntityImpl(config.getID(), representation,metadata);
         } else {
             return null;
         }
     }
-    
+    /**
+     * Stores both the Representation and the Metadata of the parsed Entity to the
+     * parsed yard.
+     * @param entityhubYard the Yard used to store the Entity
+     * @param entity the stored entity
+     * @throws YardException
+     */
+    private void storeEntity(Yard entityhubYard, Entity entity) throws YardException{
+        if(entity != null){
+            entityhubYard.store(entity.getRepresentation());
+            entityhubYard.store(entity.getMetadata());
+        }
+    }
 
     @Override
-    public EntityMapping getMappingById(String id) throws IllegalArgumentException, EntityhubException{
+    public Entity getMappingById(String id) throws IllegalArgumentException, EntityhubException{
         if(id == null || id.isEmpty()){
             throw new IllegalArgumentException("The parsed id MUST NOT be NULL nor empty");
         }
-        Sign mapping = getSignFormYard(id);
-        if(mapping == null || mapping instanceof EntityMapping){
-            return (EntityMapping)mapping;
+        Yard entityhubYard = lookupYard();
+        Entity mapping = loadEntity(entityhubYard, id);
+        if(mapping == null){
+            return null;
+        } else if(mapping != null && EntityMapping.isValid(mapping)){
+            return mapping;
         } else {
-            log.info("The parsed id does not represent an Mapping, but a {} (uri={}) -> return null!",
-                mapping.getType(),mapping.getType().getUri());
+            log.info("The Entity {} for the parsed id does not represent an EntityMapping -> return null!",
+                mapping);
             return null;
         }
     }
@@ -555,22 +576,24 @@ public final class EntityhubImpl implements Entityhub, ServiceListener {
         return lookupYard().find(query);
     }
     @Override
-    public QueryResultList<String> findSymbolReferences(FieldQuery query) throws YardException{
+    public QueryResultList<String> findEntityReferences(FieldQuery query) throws YardException{
         return lookupYard().findReferences(query);
     }
     @Override
-    public QueryResultList<Symbol> findSymbols(FieldQuery query) throws YardException{
+    public QueryResultList<Entity> findEntities(FieldQuery query) throws YardException{
         QueryResultList<String> references = lookupYard().findReferences(query);
-        List<Symbol> symbols = new ArrayList<Symbol>(references.size());
+        List<Entity> entities = new ArrayList<Entity>(references.size());
         for(String reference : references){
-            Symbol symbol = lookupSymbol(reference);
-            if(symbol != null){
-                symbols.add(symbol);
+            Entity entity = lookupLocalEntity(reference);
+            if(entity != null){
+                entities.add(entity);
             } else {
-                log.warn("Unable to create Symbol for Reference "+reference+" in the Yard usd by the entity hub [id="+config.getEntityhubYardId()+"] -> ignore reference");
+                log.warn("Unable to create Entity for Reference {} in the Yard " +
+                		"usd by the entity hub [id={}] -> ignore reference",
+                		reference,config.getEntityhubYardId());
             }
         }
-        return new QueryResultListImpl<Symbol>(references.getQuery(), symbols, Symbol.class);
+        return new QueryResultListImpl<Entity>(references.getQuery(), entities, Entity.class);
     }
 
 }

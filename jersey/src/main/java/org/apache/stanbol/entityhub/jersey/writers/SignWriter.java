@@ -38,7 +38,7 @@ import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.codehaus.jettison.json.JSONException;
 
 
@@ -52,7 +52,7 @@ import org.codehaus.jettison.json.JSONException;
 @Produces( {MediaType.APPLICATION_JSON, SupportedFormat.N3, SupportedFormat.N_TRIPLE,
             SupportedFormat.RDF_XML, SupportedFormat.TURTLE, SupportedFormat.X_TURTLE,
             SupportedFormat.RDF_JSON})
-public class SignWriter implements MessageBodyWriter<Sign> {
+public class SignWriter implements MessageBodyWriter<Entity> {
     
     public static final Set<String> supportedMediaTypes;
     static {
@@ -75,7 +75,7 @@ public class SignWriter implements MessageBodyWriter<Sign> {
     }
     
     @Override
-    public long getSize(Sign sign,
+    public long getSize(Entity sign,
                         Class<?> type,
                         Type genericType,
                         Annotation[] annotations,
@@ -85,11 +85,11 @@ public class SignWriter implements MessageBodyWriter<Sign> {
     
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return Sign.class.isAssignableFrom(type) && supportedMediaTypes.contains(mediaType.toString());
+        return Entity.class.isAssignableFrom(type) && supportedMediaTypes.contains(mediaType.toString());
     }
     
     @Override
-    public void writeTo(Sign sign,
+    public void writeTo(Entity sign,
                         Class<?> type,
                         Type genericType,
                         Annotation[] annotations,
@@ -98,12 +98,12 @@ public class SignWriter implements MessageBodyWriter<Sign> {
                         OutputStream entityStream) throws IOException, WebApplicationException {
         if (mediaType == null || MediaType.APPLICATION_JSON.equals(mediaType.toString())) {
             try {
-                IOUtils.write(SignToJSON.toJSON(sign).toString(4), entityStream);
+                IOUtils.write(EntityToJSON.toJSON(sign).toString(4), entityStream);
             } catch (JSONException e) {
                 throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
             }
         } else { // RDF
-            getSerializer().serialize(entityStream, SignToRDF.toRDF(sign), mediaType.toString());
+            getSerializer().serialize(entityStream, EntityToRDF.toRDF(sign), mediaType.toString());
         }
     }
     

@@ -22,11 +22,11 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.stanbol.entityhub.core.utils.ModelUtils;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
+import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 
 
 public class RdfQueryResultList implements QueryResultList<Representation> {

@@ -145,7 +145,7 @@ public class SolrYardIndexingDestinationTest {
         Representation rep = yard.getValueFactory().createRepresentation("http://www.example.com/entity#123");
         rep.add(NamespaceEnum.rdfs+"label", "test");
         rep.add(NamespaceEnum.rdfs+"description", "Representation to test storage while indexing");
-        rep.add(RdfResourceEnum.signRank.getUri(), Float.valueOf(0.8f));
+        rep.add(RdfResourceEnum.entityRank.getUri(), Float.valueOf(0.8f));
         yard.store(rep);
         //finalise
         destination.finalise();

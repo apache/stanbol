@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 
 /**
  * This interface defines the Java API for searching Entities.
@@ -70,7 +70,7 @@ public interface QueryService {
      * {@link Query#getQueryType()} is not part of the collections returned by
      * {@link QueryService#getSupportedQueryTypes()}.
      */
-    QueryResultList<? extends Sign> findSigns(Query query) throws IOException, UnsupportedQueryTypeException;
+    QueryResultList<? extends Entity> findSigns(Query query) throws IOException, UnsupportedQueryTypeException;
     /**
      * Getter for the types of queries supported by this implementation.
      * {@link Query#getQueryType()} is used to check if a query is supported.

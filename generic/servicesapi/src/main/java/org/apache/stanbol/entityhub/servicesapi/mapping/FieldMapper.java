@@ -18,7 +18,6 @@ package org.apache.stanbol.entityhub.servicesapi.mapping;
 
 import java.util.Collection;
 
-import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 

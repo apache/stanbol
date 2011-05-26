@@ -20,7 +20,10 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 
 import java.io.File;
+import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -30,6 +33,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -45,12 +49,13 @@ import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.entityhub.jersey.parsers.FieldQueryReader;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.site.License;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
@@ -181,10 +186,6 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     /**
      * Cool URI handler for Signs.
      * 
-     * @param siteId
-     *            A specific {@link ReferencedSite} to search the parsed id or <code>null</code> to search all
-     *            referenced sites for the requested entity id. The {@link ReferencedSite#getId()} property is
-     *            used to map the path to the site!
      * @param id
      *            The id of the entity (required)
      * @param headers
@@ -199,7 +200,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         log.info("  > accept   : " + headers.getAcceptableMediaTypes());
         log.info("  > mediaType: " + headers.getMediaType());
         final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers,
-            JerseyUtils.SIGN_SUPPORTED_MEDIA_TYPES, MediaType.APPLICATION_JSON_TYPE);
+            JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES, MediaType.APPLICATION_JSON_TYPE);
         if (id == null || id.isEmpty()) {
             log.error("No or emptpy ID was parsd as query parameter (id={})", id);
             return Response.status(Status.BAD_REQUEST).
@@ -207,16 +208,16 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
             .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
         }
         log.info("handle Request for Entity {} of Site {}", id, site.getId());
-        Sign sign;
+        Entity entity;
         try {
-            sign = site.getSign(id);
+            entity = site.getEntity(id);
         } catch (ReferencedSiteException e) {
             log.error("ReferencedSiteException while accessing Site " + site.getConfiguration().getName() + 
                 " (id=" + site.getId() + ")", e);
             throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
         }
-        if (sign != null) {
-            return Response.ok(sign, acceptedMediaType).build();
+        if (entity != null) {
+            return Response.ok(entity, acceptedMediaType).build();
         } else {
             // TODO: How to parse an ErrorMessage?
             // create an Response with the the Error?
@@ -225,6 +226,62 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
             return Response.status(Status.NOT_FOUND).
             entity("Entity '"+id+"' not found on referenced site '"+site.getId()+"'\n")
             .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
+        }
+    }
+    @POST
+    @Path("/entity")
+    @Consumes(MediaType.WILDCARD)
+    public Response createEntity(@QueryParam(value = "id") String id, 
+                               Set<Representation> parsed,
+                               @Context HttpHeaders headers){
+        //Set<Representation> representations = Collections.emptySet();
+        //log.info("Test: "+test);
+        log.info("Headers: "+headers.getRequestHeaders());
+        log.info("Entity: "+id);
+        log.info("Representations : "+parsed);
+        return updateOrCreateEntity(id, parsed, true, 
+            JerseyUtils.getAcceptableMediaType(headers,
+                JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES, 
+                MediaType.APPLICATION_JSON_TYPE));
+    }
+    @PUT
+    @Path("/entity")
+    @Consumes(MediaType.WILDCARD)
+    public Response updateEntity(@QueryParam(value = "id") String id, 
+                               Set<Representation> parsed,
+                               @Context HttpHeaders headers){
+        //Set<Representation> representations = Collections.emptySet();
+        //log.info("Test: "+test);
+        log.info("Headers: "+headers.getRequestHeaders());
+        log.info("Entity: "+id);
+        log.info("Representations : "+parsed);
+        return updateOrCreateEntity(id, parsed, false, 
+            JerseyUtils.getAcceptableMediaType(headers,
+                JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES, 
+                MediaType.APPLICATION_JSON_TYPE));
+    }
+    private Response updateOrCreateEntity(String id, Set<Representation> parsed, 
+                                          boolean createState, MediaType accepted){
+        Set<Representation> create = null;
+        if(id != null && !id.isEmpty()){
+            for(Representation rep : parsed){
+                if(id.equals(rep.getId())){
+                    create = Collections.singleton(rep);
+                    parsed.clear(); //allow gc to remove the others
+                    break;
+                }
+            }
+        } else {
+            create = parsed;
+        }
+        if(create == null || create.isEmpty()){
+            return Response.status(Status.BAD_REQUEST).entity(String.format(
+                "No Representation %s found in the Request.",
+                id != null && !id.isEmpty()? "for "+id:""))
+                .header(HttpHeaders.ACCEPT, accepted).build();
+        } else {
+            log.info("TODO: {} Representations {}",createState?"create":"update",create);
+            return Response.seeOther(uriInfo.getAbsolutePath()).build();
         }
     }
     
@@ -264,31 +321,22 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     }
     
     /**
-     * Allows to parse any kind of {@link FieldQuery} in its JSON Representation. Note that the maximum number
-     * of results (limit) and the offset of the first result (offset) are parsed as seperate parameters and
-     * are not part of the field query as in the java API.
+     * Allows to parse any kind of {@link FieldQuery} in its JSON Representation. 
+     * Note that the maximum number of results (limit) and the offset of the 
      * <p>
      * TODO: as soon as the entityhub supports multiple query types this need to be refactored. The idea is
      * that this dynamically detects query types and than redirects them to the referenced site
      * implementation.
-     * 
-     * @param query
-     *            The field query in JSON format
-     * @param limit
-     *            the maximum number of results starting at offset
-     * @param offset
-     *            the offset of the first result
-     * @param headers
-     *            the header information of the request
+     * @param query The field query as parsed by {@link FieldQueryReader}
+     * @param headers the header information of the request
      * @return the results of the query
      */
     @POST
     @Path("/query")
     @Consumes( {APPLICATION_FORM_URLENCODED + ";qs=1.0", MULTIPART_FORM_DATA + ";qs=0.9"})
-    public Response queryEntities(@FormParam("query") String query,
-                                  @FormParam("query") File file,
+    public Response queryEntities(@FormParam("query") FieldQuery query,
                                   @Context HttpHeaders headers) {
-        return executeQuery(JerseyUtils.parseFieldQuery(query, file), headers);
+        return executeQuery(query,headers);
     }
     
     /**

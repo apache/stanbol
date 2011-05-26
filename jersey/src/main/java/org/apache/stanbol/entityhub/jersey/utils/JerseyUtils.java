@@ -24,40 +24,38 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XM
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
+import java.net.URLDecoder;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.MessageBodyReader;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
-import org.apache.stanbol.entityhub.jersey.parsers.JSONToFieldQuery;
-import org.apache.stanbol.entityhub.jersey.resource.ReferencedSiteRootResource;
-import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
-import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
+import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint.PatternType;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
-import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
-import org.apache.stanbol.entityhub.servicesapi.yard.CacheStrategy;
-import org.codehaus.jettison.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -76,11 +74,16 @@ public final class JerseyUtils {
         Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
             APPLICATION_JSON,RDF_XML,N3,TURTLE,X_TURTLE,RDF_JSON,N_TRIPLE)));
     /**
-     * Unmodifiable Set with the Media Types supported for {@link Sign}
+     * Unmodifiable Set with the Media Types supported for {@link Entity}
      */
-    public static final Set<String> SIGN_SUPPORTED_MEDIA_TYPES = 
+    public static final Set<String> ENTITY_SUPPORTED_MEDIA_TYPES = 
         REPRESENTATION_SUPPORTED_MEDIA_TYPES;
     
+    /**
+     * Unmodifiable Set with the Media Types supported for {@link QueryResultList}
+     */
+    public static final Set<String> QUERY_RESULT_SUPPORTED_MEDIA_TYPES =
+        REPRESENTATION_SUPPORTED_MEDIA_TYPES;
     /**
      * This utility class used the {@link DefaultQueryFactory} as
      * {@link FieldQueryFactory} instance. 
@@ -139,52 +142,52 @@ public final class JerseyUtils {
         }
         return acceptedMediaType;
     }
-    /**
-     * Returns the {@link FieldQuery} based on the JSON formatted String (in case
-     * of "application/x-www-form-urlencoded" requests) or file (in case of
-     * "multipart/form-data" requests).<p>
-     * @param query the string containing the JSON serialised FieldQuery or
-     * <code>null</code> in case of a "multipart/form-data" request
-     * @param file the temporary file holding the data parsed by the request to
-     * the web server in case of a "multipart/form-data" request or <code>null</code>
-     * in case of the "application/x-www-form-urlencoded" request.
-     * @return the FieldQuery parsed from the string provided by one of the two
-     * parameters
-     * @throws WebApplicationException if both parameter are <code>null</code> or
-     * if the string provided by both parameters could not be used to parse a
-     * {@link FieldQuery} instance.
-     */
-    public static FieldQuery parseFieldQuery(String query, File file) throws WebApplicationException {
-        if(query == null && file == null) {
-            throw new WebApplicationException(new IllegalArgumentException("Query Requests MUST define the \"query\" parameter"), Response.Status.BAD_REQUEST);
-        }
-        FieldQuery fieldQuery = null;
-        JSONException exception = null;
-        if(query != null){
-            try {
-                fieldQuery = JSONToFieldQuery.fromJSON(queryFactory,query);
-            } catch (JSONException e) {
-                log.warn("unable to parse FieldQuery from \"application/x-www-form-urlencoded\" encoded query string "+query,e);
-                fieldQuery = null;
-                exception = e;
-            }
-        } //else no query via application/x-www-form-urlencoded parsed
-        if(fieldQuery == null && file != null){
-            try {
-                query = FileUtils.readFileToString(file);
-                fieldQuery = JSONToFieldQuery.fromJSON(queryFactory,query);
-            } catch (IOException e) {
-                throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-            } catch (JSONException e) {
-                log.warn("unable to parse FieldQuery from \"multipart/form-data\" encoded query string "+query,e);
-                exception = e;
-            }
-        }//fieldquery already initialised or no query via multipart/form-data parsed
-        if(fieldQuery == null){
-            throw new WebApplicationException(new IllegalArgumentException("Unable to parse FieldQuery form the parsed query String:"+query, exception),Response.Status.BAD_REQUEST);
-        }
-        return fieldQuery;
-    }
+//    /**
+//     * Returns the {@link FieldQuery} based on the JSON formatted String (in case
+//     * of "application/x-www-form-urlencoded" requests) or file (in case of
+//     * "multipart/form-data" requests).<p>
+//     * @param query the string containing the JSON serialised FieldQuery or
+//     * <code>null</code> in case of a "multipart/form-data" request
+//     * @param file the temporary file holding the data parsed by the request to
+//     * the web server in case of a "multipart/form-data" request or <code>null</code>
+//     * in case of the "application/x-www-form-urlencoded" request.
+//     * @return the FieldQuery parsed from the string provided by one of the two
+//     * parameters
+//     * @throws WebApplicationException if both parameter are <code>null</code> or
+//     * if the string provided by both parameters could not be used to parse a
+//     * {@link FieldQuery} instance.
+//     */
+//    public static FieldQuery parseFieldQuery(String query, File file) throws WebApplicationException {
+//        if(query == null && file == null) {
+//            throw new WebApplicationException(new IllegalArgumentException("Query Requests MUST define the \"query\" parameter"), Response.Status.BAD_REQUEST);
+//        }
+//        FieldQuery fieldQuery = null;
+//        JSONException exception = null;
+//        if(query != null){
+//            try {
+//                fieldQuery = JSONToFieldQuery.fromJSON(queryFactory,query);
+//            } catch (JSONException e) {
+//                log.warn("unable to parse FieldQuery from \"application/x-www-form-urlencoded\" encoded query string "+query,e);
+//                fieldQuery = null;
+//                exception = e;
+//            }
+//        } //else no query via application/x-www-form-urlencoded parsed
+//        if(fieldQuery == null && file != null){
+//            try {
+//                query = FileUtils.readFileToString(file);
+//                fieldQuery = JSONToFieldQuery.fromJSON(queryFactory,query);
+//            } catch (IOException e) {
+//                throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+//            } catch (JSONException e) {
+//                log.warn("unable to parse FieldQuery from \"multipart/form-data\" encoded query string "+query,e);
+//                exception = e;
+//            }
+//        }//fieldquery already initialised or no query via multipart/form-data parsed
+//        if(fieldQuery == null){
+//            throw new WebApplicationException(new IllegalArgumentException("Unable to parse FieldQuery form the parsed query String:"+query, exception),Response.Status.BAD_REQUEST);
+//        }
+//        return fieldQuery;
+//    }
     /**
      * Creates an {@link FieldQuery} for parameters parsed by the /find requests
      * supported by the /symbol, /sites and {siteId} RESTful endpoints.
@@ -278,5 +281,124 @@ public final class JerseyUtils {
 //        }
 //        return serviceInstance;
 //    }
-
+    /**
+     * Tests if a generic type (may be &lt;?&gt;, &lt;? extends {required}&gt; 
+     * or &lt;? super {required}&gt;) is compatible with the required one.
+     * TODO: Should be moved to an utility class
+     * @param required the required class the generic type MUST BE compatible with
+     * @param genericType the required class
+     * @return if the generic type is compatible with the required class
+     */
+    public static boolean testType(Class<?> required, Type genericType) {
+        //for the examples let assume that a Set is the raw type and the
+        //requested generic type is a Representation with the following class
+        //hierarchy:
+        // Object
+        //     -> Representation
+        //         -> RdfRepresentation
+        //         -> InMemoryRepresentation
+        //     -> InputStream
+        //     -> Collection<T>
+        boolean typeOK;
+        if(genericType instanceof Class<?>){
+            //OK
+            //  Set<Representation>
+            //  Set<Object>
+            //NOT OK
+            //  Set<RdfRepresentation>
+            //  Set<InputStream>
+            typeOK = ((Class<?>)genericType).isAssignableFrom(required);
+        } else if(genericType instanceof WildcardType){
+            //In cases <? super {class}>, <? extends {class}, <?>
+            WildcardType wildcardSetType = (WildcardType) genericType;
+            if(wildcardSetType.getLowerBounds().length > 0){
+                Type lowerBound = wildcardSetType.getLowerBounds()[0];
+                //OK
+                //  Set<? super RdfRepresentation>
+                //  Set<? super Representation>
+                //NOT OK
+                //  Set<? super InputStream>
+                //  Set<? super Collection<Representation>>
+                typeOK = lowerBound instanceof Class<?> &&
+                    required.isAssignableFrom((Class<?>)lowerBound);
+            } else if (wildcardSetType.getUpperBounds().length > 0){
+                Type upperBound = wildcardSetType.getUpperBounds()[0];
+                //OK
+                //  Set<? extends Representation>
+                //  Set<? extends Object>
+                //NOT OK
+                //  Set<? extends RdfRepresentation>
+                //  Set<? extends InputStream>
+                //  Set<? extends Collection<Representation>
+                typeOK = upperBound instanceof Class<?> &&
+                    ((Class<?>)upperBound).isAssignableFrom(required); 
+            } else { //no upper nor lower bound
+                // Set<?>
+                typeOK = true;
+            }
+        } else if(required.isArray() && genericType instanceof GenericArrayType){
+            //In case the required type is an array we need also to support 
+            //possible generic Array specifications
+            GenericArrayType arrayType = (GenericArrayType)genericType;
+            typeOK = testType(required.getComponentType(), arrayType.getGenericComponentType());
+        } else {
+            //GenericArrayType but !required.isArray() -> incompatible
+            //TypeVariable -> no variables define -> incompatible
+            typeOK = false;
+        }
+        return typeOK;
+    }
+    
+    /**
+     * This Method is intended to parse form data from 
+     * {@link MediaType#APPLICATION_FORM_URLENCODED} requests. This functionality
+     * us usually needed when writing a {@link MessageBodyReader} to get the
+     * data from the "{@link InputStream} entityStream" parameter of the 
+     * {@link MessageBodyReader#readFrom(Class, Type, java.lang.annotation.Annotation[], MediaType, javax.ws.rs.core.MultivaluedMap, InputStream)}
+     * method.
+     * @param entityStream the stream with the form data
+     * @param charset The charset used for the request (if <code>null</code> or
+     * empty UTF-8 is used as default.
+     * @return the parsed form data as key value map
+     * @throws IOException on any exception while reading the data form the stream
+     */
+    public static Map<String,String> parseForm(InputStream entityStream,String charset) throws IOException {
+        /* TODO: Question: 
+         * If I get an Post Request with "application/x-www-form-urlencoded" 
+         * and a charset (lets assume "iso-2022-kr") do I need to use the 
+         * charset to read the String from the Stream, or to URL decode the 
+         * String or both?
+         * 
+         * This code assumes that it needs to be used for both, but this needs
+         * validation!
+         */
+        if(charset == null || charset.isEmpty()){
+            charset = "UTF-8";
+        }
+        String data;
+        try {
+             data = IOUtils.toString(entityStream,charset);
+        } catch (UnsupportedCharsetException e) {
+            throw new IOException(e.getMessage(),e);
+        }
+        Map<String, String> form = new HashMap<String, String>();
+        StringTokenizer tokenizer = new StringTokenizer(data, "&");
+        String token;
+        try {
+            while (tokenizer.hasMoreTokens()) {
+                token = tokenizer.nextToken();
+                int index = token.indexOf('=');
+                if (index < 0) {
+                    form.put(URLDecoder.decode(token,charset), null);
+                } else if (index > 0) {
+                    form.put(URLDecoder.decode(token.substring(0, index),charset), 
+                        URLDecoder.decode(token.substring(index+1),charset));
+                }
+            }
+        } catch (UnsupportedCharsetException e) {
+            throw new IOException(e.getMessage(),e);
+        }
+        return form;
+    }
+    
 }

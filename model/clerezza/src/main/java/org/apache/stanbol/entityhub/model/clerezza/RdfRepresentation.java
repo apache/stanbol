@@ -30,7 +30,6 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.stanbol.entityhub.core.utils.AdaptingIterator;
 import org.apache.stanbol.entityhub.core.utils.FilteringIterator;
-import org.apache.stanbol.entityhub.core.utils.ModelUtils;
 import org.apache.stanbol.entityhub.core.utils.TypeSaveIterator;
 import org.apache.stanbol.entityhub.model.clerezza.impl.Literal2TextAdapter;
 import org.apache.stanbol.entityhub.model.clerezza.impl.LiteralAdapter;
@@ -44,6 +43,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.UnsupportedTypeException;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
+import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +51,6 @@ import org.slf4j.LoggerFactory;
 public class RdfRepresentation implements Representation{
 
     private static final Logger log = LoggerFactory.getLogger(RdfRepresentation.class);
-
-    private static final UriRef REPRESENTATION_TYPE_PROPERTY = new UriRef(RdfResourceEnum.signType.getUri());
 
     private final RdfValueFactory valueFactory = RdfValueFactory.getInstance();
 
@@ -75,10 +73,10 @@ public class RdfRepresentation implements Representation{
         return graphNode.getGraph();
     }
 
-    protected UriRef getRepresentationType(){
-        Iterator<UriRef> it = this.graphNode.getUriRefObjects(REPRESENTATION_TYPE_PROPERTY);
-        return it.hasNext()?it.next():null;
-    }
+//    protected UriRef getRepresentationType(){
+//        Iterator<UriRef> it = this.graphNode.getUriRefObjects(REPRESENTATION_TYPE_PROPERTY);
+//        return it.hasNext()?it.next():null;
+//    }
     @Override
     public void add(String field, Object value) {
         if(field == null){
