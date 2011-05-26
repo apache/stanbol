@@ -38,12 +38,12 @@ import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 
 /**
- * Utility taken form the engine.autotagging bundle and adapted from using TagInfo to {@link Sign}.
+ * Utility taken form the engine.autotagging bundle and adapted from using TagInfo to {@link Entity}.
  * 
  * @author Rupert Westenthaler
  * @author ogrisel (original utility)
@@ -67,7 +67,7 @@ public class EnhancementRDFUtils {
                                                MGraph graph,
                                                UriRef contentItemId,
                                                Collection<NonLiteral> relatedEnhancements,
-                                               Sign entity) {
+                                               Entity entity) {
         // 1. check if the returned Entity does has a label -> if not return null
         // add labels (set only a single label. Use "en" if available!
         Text label = null;
