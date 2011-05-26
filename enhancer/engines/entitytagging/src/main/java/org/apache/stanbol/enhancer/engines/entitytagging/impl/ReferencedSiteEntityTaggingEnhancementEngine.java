@@ -55,7 +55,7 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
@@ -300,7 +300,7 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
         }
     }
 
-    protected final Iterable<Sign> computeEntityRecommentations(ReferencedSite site,
+    protected final Iterable<Entity> computeEntityRecommentations(ReferencedSite site,
                                                                 LiteralFactory literalFactory,
                                                                 MGraph graph,
                                                                 UriRef contentItemId,
@@ -360,14 +360,14 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
             }
         }
         query.setLimit(this.numSuggestions);
-        QueryResultList<Sign> results = site.findSigns(query);
+        QueryResultList<Entity> results = site.findEntities(query);
         log.debug("{} results returned by query {}", results.size(), query);
 
         List<NonLiteral> annotationsToRelate = new ArrayList<NonLiteral>();
         annotationsToRelate.add(textAnnotation);
         annotationsToRelate.addAll(subsumedAnnotations);
 
-        for (Sign guess : results) {
+        for (Entity guess : results) {
             log.debug("Adding {} to ContentItem {}", guess, contentItemId);
             EnhancementRDFUtils.writeEntityAnnotation(this, literalFactory, graph, contentItemId,
                 annotationsToRelate, guess);

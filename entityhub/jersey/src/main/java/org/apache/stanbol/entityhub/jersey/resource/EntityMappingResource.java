@@ -47,11 +47,12 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.entityhub.core.impl.EntityMapping;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
-import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,7 +114,7 @@ public class EntityMappingResource extends BaseStanbolResource {
             }
         }
         Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
-        EntityMapping mapping;
+        Entity mapping;
         try {
             mapping = entityhub.getMappingById(reference);
         } catch (EntityhubException e) {
@@ -159,9 +160,9 @@ public class EntityMappingResource extends BaseStanbolResource {
         }
         
         Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
-        EntityMapping mapping;
+        Entity mapping;
         try {
-            mapping = entityhub.getMappingByEntity(entity);
+            mapping = entityhub.getMappingBySource(entity);
         } catch (EntityhubException e) {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
@@ -203,9 +204,9 @@ public class EntityMappingResource extends BaseStanbolResource {
             }
         }
         Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
-        Collection<EntityMapping> mappings;
+        Collection<Entity> mappings;
         try {
-            mappings = entityhub.getMappingsBySymbol(symbol);
+            mappings = entityhub.getMappingsByTarget(symbol);
         } catch (EntityhubException e) {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
@@ -215,8 +216,8 @@ public class EntityMappingResource extends BaseStanbolResource {
         } else {
             // TODO: Implement Support for list of Signs, Representations and Strings
             // For now use a pseudo QueryResultList
-            QueryResultList<EntityMapping> mappingResultList = new QueryResultListImpl<EntityMapping>(null,
-                    mappings, EntityMapping.class);
+            QueryResultList<Entity> mappingResultList = new QueryResultListImpl<Entity>(null,
+                    mappings, Entity.class);
             return Response.ok(mappingResultList, acceptedMediaType).build();
         }
     }

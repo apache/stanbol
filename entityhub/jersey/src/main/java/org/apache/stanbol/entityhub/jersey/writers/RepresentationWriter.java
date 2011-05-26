@@ -70,13 +70,13 @@ public class RepresentationWriter implements MessageBodyWriter<Representation> {
                         OutputStream entityStream) throws IOException, WebApplicationException {
         if (mediaType == null || MediaType.APPLICATION_JSON.equals(mediaType.toString())) {
             try {
-                IOUtils.write(SignToJSON.toJSON(rep).toString(4), entityStream);
+                IOUtils.write(EntityToJSON.toJSON(rep).toString(4), entityStream);
             } catch (JSONException e) {
                 throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
             }
         } else { // RDF
             Serializer ser = ContextHelper.getServiceFromContext(Serializer.class, servletContext);
-            ser.serialize(entityStream, SignToRDF.toRDF(rep), mediaType.toString());
+            ser.serialize(entityStream, EntityToRDF.toRDF(rep), mediaType.toString());
         }
         
     }

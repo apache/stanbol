@@ -30,7 +30,7 @@ public class DummyEntityScoreSource implements EntityScoreProvider {
 
     @Override
     public Float process(Representation entity) throws UnsupportedOperationException {
-        return entity.getFirst(RdfResourceEnum.signRank.getUri(), Float.class);
+        return entity.getFirst(RdfResourceEnum.entityRank.getUri(), Float.class);
     }
 
     @Override

@@ -21,7 +21,7 @@ import java.io.InputStream;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
@@ -66,8 +66,8 @@ public interface ReferencedSite {
      */
     QueryResultList<Representation> find(FieldQuery query) throws ReferencedSiteException;
     /**
-     * Searches for Signs based on the parsed {@link FieldQuery} and returns
-     * the selected Signs including the whole representation. Note that selected
+     * Searches for Entities based on the parsed {@link FieldQuery} and returns
+     * the selected Entities including the whole representation. Note that selected
      * fields of the query are ignored.
      * @param query the query
      * @return All Entities selected by the Query.
@@ -77,10 +77,10 @@ public interface ReferencedSite {
      * remote site the cause will always be a Yard Exceptions. Errors for remote
      * Sites are usually IOExceptions.
      */
-    QueryResultList<Sign> findSigns(FieldQuery query) throws ReferencedSiteException;
+    QueryResultList<Entity> findEntities(FieldQuery query) throws ReferencedSiteException;
 
     /**
-     * Getter for the Sign by the id
+     * Getter for the Entity by the id
      * @param id the id of the entity
      * @return the entity or <code>null</code> if not found
      * @throws ReferencedSiteException If the request can not be executed both on
@@ -89,7 +89,7 @@ public interface ReferencedSite {
      * remote site the cause will always be a Yard Exceptions. Errors for remote
      * Sites are usually IOExceptions.
      */
-    Sign getSign(String id) throws ReferencedSiteException;
+    Entity getEntity(String id) throws ReferencedSiteException;
     /**
      * Getter for the Content of the Entity
      * @param id the id of the Entity

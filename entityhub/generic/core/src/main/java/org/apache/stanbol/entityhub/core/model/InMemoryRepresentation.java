@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import org.apache.stanbol.entityhub.core.utils.ModelUtils;
 import org.apache.stanbol.entityhub.core.utils.TextIterator;
 import org.apache.stanbol.entityhub.core.utils.TypeSaveIterator;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
@@ -37,6 +36,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.UnsupportedTypeException;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
+import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 
 
 public class InMemoryRepresentation implements Representation,Cloneable {

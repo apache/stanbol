@@ -19,9 +19,8 @@ package org.apache.stanbol.entityhub.servicesapi;
 import java.util.Collection;
 
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
-import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping;
-import org.apache.stanbol.entityhub.servicesapi.model.Symbol;
-import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping.MappingState;
+import org.apache.stanbol.entityhub.servicesapi.model.ManagedEntityState;
+import org.apache.stanbol.entityhub.servicesapi.model.MappingState;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 
@@ -117,6 +116,6 @@ public interface EntityhubConfiguration {
      * The initial (default) state for new {@link Symbol}s
      * @return the default state for new {@link Symbol}s
      */
-    Symbol.SymbolState getDefaultSymbolState();
+    ManagedEntityState getDefaultManagedEntityState();
 
 }

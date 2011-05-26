@@ -19,9 +19,8 @@ package org.apache.stanbol.entityhub.servicesapi.site;
 
 import org.apache.stanbol.entityhub.servicesapi.EntityhubConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
-import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping;
-import org.apache.stanbol.entityhub.servicesapi.model.Symbol;
-import org.apache.stanbol.entityhub.servicesapi.model.Symbol.SymbolState;
+import org.apache.stanbol.entityhub.servicesapi.model.ManagedEntityState;
+import org.apache.stanbol.entityhub.servicesapi.model.MappingState;
 import org.apache.stanbol.entityhub.servicesapi.yard.CacheStrategy;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 
@@ -115,7 +114,7 @@ public interface SiteConfiguration {
      */
     String getEntitySearcherType();
     /**
-     * Key used for the configuration of the default {@link SymbolState} for a site
+     * Key used for the configuration of the default {@link ManagedEntityState} for a site
      */
     String DEFAULT_SYMBOL_STATE = "org.apache.stanbol.entityhub.site.defaultSymbolState";
     /**
@@ -123,17 +122,17 @@ public interface SiteConfiguration {
      * by this site
      * @return the default state for new symbols
      */
-    Symbol.SymbolState getDefaultSymbolState();
+    ManagedEntityState getDefaultManagedEntityState();
     /**
      * Key used for the configuration of the default {@link EntityMapping} state
-     * ({@link EntityMapping.MappingState} for a site
+     * ({@link MappingState} for a site
      */
     String DEFAULT_MAPPING_STATE = "org.apache.stanbol.entityhub.site.defaultMappedEntityState";
     /**
      * The initial state for mappings of entities managed by this site
      * @return the default state for mappings to entities of this site
      */
-    EntityMapping.MappingState getDefaultMappedEntityState();
+    MappingState getDefaultMappedEntityState();
 
     /**
      * Key used for the configuration of the default expiration duration for entities and

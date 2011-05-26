@@ -83,9 +83,9 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         SolrDirectoryManager.DEFAULT_SOLR_DATA_DIR;
     /**
      * The field used to boost documents while indexing. This is set to
-     * {@link RdfResourceEnum#signRank}
+     * {@link RdfResourceEnum#entityRank}
      */
-    public static final String DOCUMENT_BOOST_FIELD = RdfResourceEnum.signRank.getUri();
+    public static final String DOCUMENT_BOOST_FIELD = RdfResourceEnum.entityRank.getUri();
     /**
      * The extension of the distribution file
      */

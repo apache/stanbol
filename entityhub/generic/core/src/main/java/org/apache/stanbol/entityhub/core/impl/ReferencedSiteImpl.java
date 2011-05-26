@@ -41,14 +41,14 @@ import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.entityhub.core.mapping.DefaultFieldMapperImpl;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
-import org.apache.stanbol.entityhub.core.model.DefaultSignFactory;
+import org.apache.stanbol.entityhub.core.model.EntityImpl;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.core.utils.OsgiUtils;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
@@ -137,11 +137,8 @@ import org.slf4j.LoggerFactory;
         @Property(name=SiteConfiguration.ID,value="dbpedia"),
         @Property(name=SiteConfiguration.NAME,value="DB Pedia"),
         @Property(name=SiteConfiguration.DESCRIPTION, value="The OLD Endpoint for Wikipedia"),
-        /*
-         * TODO: can't use Integer.MAX_VALUE here, because I get a NumberFormatException
-         * in den maven scr plugin. For now use a big number instead
-         */
-        @Property(name=SiteConfiguration.ENTITY_PREFIX, cardinality=10000, value={
+        @Property(name=SiteConfiguration.ENTITY_PREFIX, cardinality=1000,
+            value={
                 "http://dbpedia.org/resource/","http://dbpedia.org/ontology/"
         }),
         @Property(name=SiteConfiguration.ACCESS_URI, value="http://dbpedia.org/sparql/"),
@@ -221,7 +218,7 @@ import org.slf4j.LoggerFactory;
                         name="all")
             }, value="none"),
         @Property(name=SiteConfiguration.CACHE_ID),
-        @Property(name=SiteConfiguration.SITE_FIELD_MAPPINGS,cardinality=1000, //positive number to use an Array
+        @Property(name=SiteConfiguration.SITE_FIELD_MAPPINGS,cardinality=1000,
             value={
                 "dbp-ont:*",
                 "dbp-ont:thumbnail | d=xsd:anyURI > foaf:depiction",
@@ -236,10 +233,6 @@ public class ReferencedSiteImpl implements ReferencedSite {
     private final Logger log;
     private ComponentContext context;
     private FieldMapper fieldMappings;
-    /**
-     * Used to create Sign instances
-     */
-    private DefaultSignFactory signFactory = DefaultSignFactory.getInstance();
 
     private final Object searcherAndDereferencerLock = new Object();
     private Boolean dereferencerEqualsEntitySearcherComponent;
@@ -289,8 +282,8 @@ public class ReferencedSiteImpl implements ReferencedSite {
         return siteConfiguration.getId();
     }
     @Override
-    public QueryResultList<Sign> findSigns(FieldQuery query) throws ReferencedSiteException {
-        List<Sign> results;
+    public QueryResultList<Entity> findEntities(FieldQuery query) throws ReferencedSiteException {
+        List<Entity> results;
         if(siteConfiguration.getCacheStrategy() == CacheStrategy.all){
             //TODO: check if query can be executed based on the base configuration of the Cache
             Cache cache = getCache();
@@ -298,11 +291,13 @@ public class ReferencedSiteImpl implements ReferencedSite {
                 try {
                     //When using the Cache, directly get the representations!
                     QueryResultList<Representation> representations = cache.findRepresentation((query));
-                    results = new ArrayList<Sign>(representations.size());
+                    results = new ArrayList<Entity>(representations.size());
                     for(Representation result : representations){
-                        results.add(signFactory.getSign(getId(),result));
+                        Entity entity = new EntityImpl(getId(),result,null);
+                        results.add(entity);
+                        entity.getMetadata().set(RdfResourceEnum.isChached.getUri(), Boolean.TRUE);
                     }
-                    return new QueryResultListImpl<Sign>(query, results, Sign.class);
+                    return new QueryResultListImpl<Entity>(query, results, Entity.class);
                 } catch (YardException e) {
                     if(siteConfiguration.getEntitySearcherType()==null || isOfflineMode()){
                         throw new ReferencedSiteException("Unable to execute query on Cache "+siteConfiguration.getCacheId(),e);
@@ -335,13 +330,13 @@ public class ReferencedSiteImpl implements ReferencedSite {
                     siteConfiguration.getQueryUri(),siteConfiguration.getEntitySearcherType()), e);
         }
         int numResults = entityIds.size();
-        List<Sign> entities = new ArrayList<Sign>(numResults);
+        List<Entity> entities = new ArrayList<Entity>(numResults);
         int errors = 0;
         ReferencedSiteException lastError = null;
         for(String id : entityIds){
-            Sign entity;
+            Entity entity;
             try {
-                entity = getSign(id);
+                entity = getEntity(id);
                 if(entity == null){
                     log.warn("Unable to create Entity for ID that was selected by an FieldQuery (id="+id+")");
                 }
@@ -365,7 +360,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
                 log.warn("Stack trace of the last Exception:",lastError);
             }
         }
-        return new QueryResultListImpl<Sign>(query, entities,Sign.class);
+        return new QueryResultListImpl<Entity>(query, entities,Entity.class);
     }
     @Override
     public QueryResultList<Representation> find(FieldQuery query) throws ReferencedSiteException{
@@ -468,13 +463,17 @@ public class ReferencedSiteImpl implements ReferencedSite {
         }
     }
     @Override
-    public Sign getSign(String id) throws ReferencedSiteException {
+    public Entity getEntity(String id) throws ReferencedSiteException {
         Cache cache = getCache();
-        Representation rep = null;
+        Entity entity = null;
         long start = System.currentTimeMillis();
         if (cache != null) {
             try {
-                rep = cache.getRepresentation(id);
+                Representation rep = cache.getRepresentation(id);
+                if(rep != null){
+                   entity = new EntityImpl(getId(), rep, null);
+                   entity.getMetadata().set(RdfResourceEnum.isChached.getUri(), Boolean.TRUE);
+                }
             } catch (YardException e) {
                 if (siteConfiguration.getEntityDereferencerType() == null || isOfflineMode()) {
                     throw new ReferencedSiteException(String.format("Unable to get Represetnation %s form Cache %s",
@@ -493,12 +492,13 @@ public class ReferencedSiteImpl implements ReferencedSite {
                         siteConfiguration.getCacheId(), siteConfiguration.getEntityDereferencerType(), id));
             }
         }
-        if (rep == null) { // no cache or not found in cache
+        if (entity == null) { // no cache or not found in cache
             if(dereferencer == null){
                 throw new ReferencedSiteException(String.format("Entity Dereferencer %s for accessing remote site %s is not available",
                     siteConfiguration.getEntityDereferencerType(),siteConfiguration.getAccessUri()));
             }
             ensureOnline(siteConfiguration.getAccessUri(), dereferencer.getClass());
+            Representation rep = null;
             try {
                 rep = dereferencer.dereference(id);
             } catch (IOException e) {
@@ -507,24 +507,28 @@ public class ReferencedSiteImpl implements ReferencedSite {
                         id, siteConfiguration.getAccessUri(), siteConfiguration.getEntityDereferencerType()), e);
             }
             //representation loaded from remote site and cache is available
-            if (rep != null && cache != null) {// -> cache the representation
-                try {
-                    start = System.currentTimeMillis();
-                    // reassigning the Representation here will remove all
-                    // values not stored in the cache.
-                    // TODO: I am not sure if that is a good or bad thing to do.
-                    rep = cache.store(rep);
-                    log.info(String.format("  - cached Representation %s in %d ms",    id, (System.currentTimeMillis() - start)));
-                } catch (YardException e) {
-                    log.warn(String.format("Unable to cache Represetnation %s in Cache %s! Representation not cached!",
-                        id, siteConfiguration.getCacheId()), e);
+            if (rep != null){
+                Boolean cachedVersion = Boolean.FALSE;
+                if(cache != null) {// -> cache the representation
+                    try {
+                        start = System.currentTimeMillis();
+                        //return the the cached version
+                        rep = cache.store(rep);
+                        cachedVersion = Boolean.TRUE;
+                        log.info(String.format("  - cached Representation %s in %d ms",    id, (System.currentTimeMillis() - start)));
+                    } catch (YardException e) {
+                        log.warn(String.format("Unable to cache Represetnation %s in Cache %s! Representation not cached!",
+                            id, siteConfiguration.getCacheId()), e);
+                    }
                 }
+                entity = new EntityImpl(getId(), rep, null);
+                entity.getMetadata().set(RdfResourceEnum.isChached.getUri(), cachedVersion);
             }
         } else {
             log.info(String.format("  - loaded Representation %s from Cache in %d ms",
                     id, (System.currentTimeMillis() - start)));
         }
-        return rep != null ? signFactory.getSign(getId(),rep) : null;
+        return entity;
     }
     @Override
     public SiteConfiguration getConfiguration() {

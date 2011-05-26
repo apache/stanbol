@@ -23,6 +23,8 @@ public class ContextHelper {
     public static <T> T getServiceFromContext(Class<T> clazz, ServletContext context) {
         BundleContext bundleContext = (BundleContext) context.getAttribute(BundleContext.class.getName());
         ServiceReference reference = bundleContext.getServiceReference(clazz.getName());
+        //TODO: returning the service will cause the service reference not to be
+        //  released bundleContext.ungetService(reference) will not be called!
         return (T) bundleContext.getService(reference);
     }
 

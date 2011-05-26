@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Dictionary;
 
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 
@@ -67,18 +67,19 @@ public interface ReferencedSiteManager {
     Collection<ReferencedSite> getReferencedSitesByEntityPrefix(String entityUri);
 
     /**
-     * Getter for the the Sign referenced by the parsed ID
+     * Getter for the Entity referenced by the parsed ID. This method will search
+     * all referenced sites
      * @param id the id of the entity
      * @return the Sign or <code>null</code> if not found
      */
-    Sign getSign(String reference);
+    Entity getEntity(String reference);
 
     /**
      * Returns the Entities that confirm to the parsed Query
      * @param query the query
      * @return the id's of Entities
      */
-    QueryResultList<Sign> findEntities(FieldQuery query);
+    QueryResultList<Entity> findEntities(FieldQuery query);
     /**
      * Searches for Entities based on the parsed query and returns representations
      * including the selected fields and filtered values

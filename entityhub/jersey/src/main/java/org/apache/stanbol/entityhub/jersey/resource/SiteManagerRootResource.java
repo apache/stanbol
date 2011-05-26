@@ -51,7 +51,7 @@ import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
 import org.codehaus.jettison.json.JSONArray;
@@ -147,7 +147,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         log.debug("getSignById() request\n\t> id       : {}\n\t> accept   : {}\n\t> mediaType: {}",
             new Object[] {id, headers.getAcceptableMediaTypes(), headers.getMediaType()});
 
-        Collection<String> supported = new HashSet<String>(JerseyUtils.SIGN_SUPPORTED_MEDIA_TYPES);
+        Collection<String> supported = new HashSet<String>(JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES);
         supported.add(TEXT_HTML);
         final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(
             headers, supported, MediaType.APPLICATION_JSON_TYPE);
@@ -162,9 +162,9 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         }
         ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
             ReferencedSiteManager.class, context);
-        Sign sign;
+        Entity sign;
         // try {
-        sign = referencedSiteManager.getSign(id);
+        sign = referencedSiteManager.getEntity(id);
         // } catch (IOException e) {
         // log.error("IOException while accessing ReferencedSiteManager",e);
         // throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
@@ -210,7 +210,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
                                @FormParam(value = "offset") Integer offset,
                                @Context HttpHeaders headers) {
         log.debug("findEntity() Request");
-        Collection<String> supported = new HashSet<String>(JerseyUtils.SIGN_SUPPORTED_MEDIA_TYPES);
+        Collection<String> supported = new HashSet<String>(JerseyUtils.QUERY_RESULT_SUPPORTED_MEDIA_TYPES);
         supported.add(TEXT_HTML);
         final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(
             headers, supported, MediaType.APPLICATION_JSON_TYPE);
@@ -238,17 +238,8 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         return Response.ok(referencedSiteManager.find(query), acceptedMediaType).build();
     }
 
-//    @GET
-//    @Path("/query")
-//    @Produces(MediaType.TEXT_HTML)
-//    public Response getQueryPage() {
-//        return Response.ok(new Viewable("query", this), TEXT_HTML).build();
-//    }
-    
     /**
-     * Allows to parse any kind of {@link FieldQuery} in its JSON Representation. Note that the maximum number
-     * of results (limit) and the offset of the first result (offset) are parsed as seperate parameters and
-     * are not part of the field query as in the java API.
+     * Allows to parse any kind of {@link FieldQuery} in its JSON Representation.
      * <p>
      * TODO: as soon as the entityhub supports multiple query types this need to be refactored. The idea is
      * that this dynamically detects query types and than redirects them to the referenced site
@@ -256,10 +247,6 @@ public class SiteManagerRootResource extends BaseStanbolResource {
      * 
      * @param query
      *            The field query in JSON format
-     * @param limit
-     *            the maximum number of results starting at offset
-     * @param offset
-     *            the offset of the first result
      * @param headers
      *            the header information of the request
      * @return the results of the query
@@ -267,16 +254,17 @@ public class SiteManagerRootResource extends BaseStanbolResource {
     @POST
     @Path("/query")
     @Consumes( {MediaType.APPLICATION_FORM_URLENCODED + ";qs=1.0", MediaType.MULTIPART_FORM_DATA + ";qs=0.9"})
-    public Response queryEntities(@FormParam("query") String queryString,
-                                  @FormParam("query") File file,
+    public Response queryEntities(@FormParam("query") FieldQuery query,
                                   @Context HttpHeaders headers) {
         ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
             ReferencedSiteManager.class, context);
-        Collection<String> supported = new HashSet<String>(JerseyUtils.SIGN_SUPPORTED_MEDIA_TYPES);
+        Collection<String> supported = new HashSet<String>(JerseyUtils.QUERY_RESULT_SUPPORTED_MEDIA_TYPES);
         supported.add(TEXT_HTML);
         final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(
             headers, supported, MediaType.APPLICATION_JSON_TYPE);
-        if(queryString == null || queryString.isEmpty()){
+        if(query == null){
+            //if query is null nd the mediaType is HTML we need to print the
+            //Documentation of the RESTful API
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
                 return Response.ok(new Viewable("query", this), TEXT_HTML).build();        
             } else {
@@ -284,9 +272,9 @@ public class SiteManagerRootResource extends BaseStanbolResource {
                     .entity("The query must not be null nor empty for query requests. Missing parameter query.\n")
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
+        } else {
+            return Response.ok(referencedSiteManager.find(query), acceptedMediaType).build();
         }
-        FieldQuery query = JerseyUtils.parseFieldQuery(queryString, file);
-        return Response.ok(referencedSiteManager.find(query), acceptedMediaType).build();
     }
 
 }

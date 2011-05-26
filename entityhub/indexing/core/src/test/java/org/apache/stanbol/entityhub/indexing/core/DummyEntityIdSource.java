@@ -42,7 +42,7 @@ public class DummyEntityIdSource implements EntityIterator {
     @Override
     public EntityScore next() {
         Representation next = entiyIterator.next();
-        Number score = next.getFirst(RdfResourceEnum.signRank.getUri(), Number.class);
+        Number score = next.getFirst(RdfResourceEnum.entityRank.getUri(), Number.class);
         return new EntityScore(next.getId(), score == null?0:score.floatValue());
     }
 

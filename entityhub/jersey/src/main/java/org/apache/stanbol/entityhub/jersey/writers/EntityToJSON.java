@@ -16,79 +16,76 @@
  */
 package org.apache.stanbol.entityhub.jersey.writers;
 
-import java.util.Collection;
 import java.util.Iterator;
 
-import org.apache.stanbol.entityhub.core.utils.ModelUtils;
-import org.apache.stanbol.entityhub.servicesapi.model.EntityMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign;
-import org.apache.stanbol.entityhub.servicesapi.model.Symbol;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 
-final class SignToJSON {
+final class EntityToJSON {
 
-    private SignToJSON() { /* do not create instances of utility classes */}
+    private EntityToJSON() { /* do not create instances of utility classes */}
 
-    static JSONObject toJSON(Sign sign) throws JSONException {
+    static JSONObject toJSON(Entity entity) throws JSONException {
         JSONObject jSign;
-        if (sign instanceof Symbol) {
-            jSign = writeSymbolAsJSON((Symbol) sign);
-        } else if (sign instanceof EntityMapping) {
-            jSign = writeEntityMappingAsJSON((EntityMapping) sign);
-        } else {
-            jSign = convertSignToJSON(sign);
-        }
+//        if (entity instanceof Symbol) {
+//            jSign = writeSymbolAsJSON((Symbol) entity);
+//        } else if (entity instanceof EntityMapping) {
+//            jSign = writeEntityMappingAsJSON((EntityMapping) entity);
+//        } else {
+            jSign = convertEntityToJSON(entity);
+//        }
         return jSign;
     }
 
-    private static JSONObject writeSymbolAsJSON(Symbol symbol) throws JSONException {
-        JSONObject jSymbol = convertSignToJSON(symbol);
-        jSymbol.put("label", symbol.getLabel());
-        Iterator<Text> descriptions = symbol.getDescriptions();
-        if (descriptions.hasNext()) {
-            jSymbol.put("description", convertFieldValuesToJSON(descriptions));
-        }
-        Collection<String> value = ModelUtils.asCollection(symbol.getPredecessors());
-        if (!value.isEmpty()) {
-            jSymbol.put("predecessors", value);
-        }
-        value = ModelUtils.asCollection(symbol.getSuccessors());
-        if (!value.isEmpty()) {
-            jSymbol.put("successors", new JSONArray());
-        }
-        jSymbol.put("stateUri", symbol.getState().getUri());
-        jSymbol.put("state", symbol.getState().name());
-        return jSymbol;
-    }
+//    private static JSONObject writeSymbolAsJSON(Symbol symbol) throws JSONException {
+//        JSONObject jSymbol = convertSignToJSON(symbol);
+//        jSymbol.put("label", symbol.getLabel());
+//        Iterator<Text> descriptions = symbol.getDescriptions();
+//        if (descriptions.hasNext()) {
+//            jSymbol.put("description", convertFieldValuesToJSON(descriptions));
+//        }
+//        Collection<String> value = ModelUtils.asCollection(symbol.getPredecessors());
+//        if (!value.isEmpty()) {
+//            jSymbol.put("predecessors", value);
+//        }
+//        value = ModelUtils.asCollection(symbol.getSuccessors());
+//        if (!value.isEmpty()) {
+//            jSymbol.put("successors", new JSONArray());
+//        }
+//        jSymbol.put("stateUri", symbol.getState().getUri());
+//        jSymbol.put("state", symbol.getState().name());
+//        return jSymbol;
+//    }
 
-    private static JSONObject writeEntityMappingAsJSON(EntityMapping entityMapping) throws JSONException {
-        JSONObject jEntityMapping = convertSignToJSON(entityMapping);
-        jEntityMapping.put("symbol", entityMapping.getSymbolId());
-        jEntityMapping.put("entity", entityMapping.getEntityId());
-        jEntityMapping.put("stateUri", entityMapping.getState().getUri());
-        jEntityMapping.put("state", entityMapping.getState().name());
-        return jEntityMapping;
-    }
+//    private static JSONObject writeEntityMappingAsJSON(EntityMapping entityMapping) throws JSONException {
+//        JSONObject jEntityMapping = convertSignToJSON(entityMapping);
+//        jEntityMapping.put("symbol", entityMapping.getTargetId());
+//        jEntityMapping.put("entity", entityMapping.getSourceId());
+//        jEntityMapping.put("stateUri", entityMapping.getState().getUri());
+//        jEntityMapping.put("state", entityMapping.getState().name());
+//        return jEntityMapping;
+//    }
 
 
     /**
-     * @param sign
+     * @param entity
      * @return
      * @throws JSONException
      */
-    private static JSONObject convertSignToJSON(Sign sign) throws JSONException {
+    private static JSONObject convertEntityToJSON(Entity entity) throws JSONException {
         JSONObject jSign;
         jSign = new JSONObject();
-        jSign.put("id", sign.getId());
-        jSign.put("site", sign.getSignSite());
-        Representation rep = sign.getRepresentation();
-        jSign.put("representation", toJSON(rep));
+        jSign.put("id", entity.getId());
+        jSign.put("site", entity.getSite());
+//        Representation rep = sign.getRepresentation();
+        jSign.put("representation", toJSON(entity.getRepresentation()));
+        jSign.put("metadata", toJSON(entity.getMetadata()));
         return jSign;
     }
 

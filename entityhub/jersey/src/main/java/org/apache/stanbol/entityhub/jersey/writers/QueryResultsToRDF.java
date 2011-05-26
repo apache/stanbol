@@ -25,7 +25,7 @@ import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.stanbol.entityhub.query.clerezza.RdfQueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 
@@ -70,8 +70,8 @@ final class QueryResultsToRDF {
                     //now add the Sign specific triples and add result triples
                     //to the Sign IDs
                     for (Object result : resultList) {
-                        UriRef signId = new UriRef(((Sign) result).getId());
-                        SignToRDF.addSignTriplesToGraph(resultGraph, (Sign) result);
+                        UriRef signId = new UriRef(((Entity) result).getId());
+                        EntityToRDF.addEntityTriplesToGraph(resultGraph, (Entity) result);
                         resultGraph.add(new TripleImpl(queryResultList, queryResult, signId));
                     }
                 }
@@ -81,11 +81,11 @@ final class QueryResultsToRDF {
                     for (Object result : resultList) {
                         UriRef resultId;
                         if (!isSignType) {
-                            SignToRDF.addRDFTo(resultGraph, (Representation) result);
+                            EntityToRDF.addRDFTo(resultGraph, (Representation) result);
                             resultId = new UriRef(((Representation) result).getId());
                         } else {
-                            SignToRDF.addRDFTo(resultGraph, (Sign) result);
-                            resultId = new UriRef(((Sign) result).getId());
+                            EntityToRDF.addRDFTo(resultGraph, (Entity) result);
+                            resultId = new UriRef(((Entity) result).getId());
                         }
                         //Note: In case of Representation this Triple points to
                         //      the representation. In case of Signs it points to

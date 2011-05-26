@@ -19,8 +19,6 @@ package org.apache.stanbol.entityhub.servicesapi.model;
 import java.net.URI;
 import java.net.URL;
 
-import org.apache.stanbol.entityhub.servicesapi.model.Sign.SignTypeEnum;
-
 /**
  * FactoryInterface for {@link Text} and {@link Reference} instances
  * TODO: Still not sure if we need that

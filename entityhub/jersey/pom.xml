@@ -116,7 +116,12 @@
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
     </dependency>
-    
+    <!-- to read "multipart/form-data" requests/responses -->    
+      <dependency>
+          <groupId>javax.mail</groupId>
+          <artifactId>mail</artifactId>
+      </dependency>
+
     <!-- Servlet API for handling ServletContext -->
     <dependency>
       <groupId>javax.servlet</groupId>

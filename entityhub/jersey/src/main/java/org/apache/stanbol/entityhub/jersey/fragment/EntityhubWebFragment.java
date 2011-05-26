@@ -13,6 +13,8 @@ import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
+import org.apache.stanbol.entityhub.jersey.parsers.FieldQueryReader;
+import org.apache.stanbol.entityhub.jersey.parsers.RepresentationReader;
 import org.apache.stanbol.entityhub.jersey.resource.EntityMappingResource;
 import org.apache.stanbol.entityhub.jersey.resource.EntityhubRootResource;
 import org.apache.stanbol.entityhub.jersey.resource.ReferencedSiteRootResource;
@@ -59,10 +61,13 @@ public class EntityhubWebFragment implements WebFragment {
         classes.add(ReferencedSiteRootResource.class);
         classes.add(SiteManagerRootResource.class);
         classes.add(SymbolResource.class);
-        // message body writers
+        // message body readers and writers
+        classes.add(FieldQueryReader.class);
         classes.add(QueryResultListWriter.class);
         classes.add(SignWriter.class);
         classes.add(RepresentationWriter.class);
+        classes.add(FieldQueryReader.class);
+        classes.add(RepresentationReader.class);
         //TODO: somehow writing of Json has not worked because of
         //      A message body writer for Java class org.codehaus.jettison.json.JSONArray,
         //     and Java type class org.codehaus.jettison.json.JSONArray, and MIME media

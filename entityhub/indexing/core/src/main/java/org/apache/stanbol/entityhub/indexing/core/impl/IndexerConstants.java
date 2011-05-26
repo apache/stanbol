@@ -15,7 +15,7 @@ public interface IndexerConstants {
      * The field used to store the score of an entity if not <code>null</code>
      * and &gt;= 0.
      */
-    String SCORE_FIELD = RdfResourceEnum.signRank.getUri();
+    String SCORE_FIELD = RdfResourceEnum.entityRank.getUri();
     
     /**
      * Key used to store the time when the reading from the source started
