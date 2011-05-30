@@ -511,7 +511,7 @@ public class OntologyResourceHelper {
         }
     }
 
-    private void deleteStatementsByResource(Resource res) {
+    public void deleteStatementsByResource(Resource res) {
         ontModel.remove(ontModel.listStatements(res, null, (RDFNode) null));
         ontModel.remove(ontModel.listStatements(null, null, res));
     }

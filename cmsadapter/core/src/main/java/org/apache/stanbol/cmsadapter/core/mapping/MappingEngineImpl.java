@@ -67,20 +67,20 @@ public class MappingEngineImpl implements MappingEngine {
         Iterator<Processor> processorIterator;
         synchronized (processors) {
             processorIterator = processors.iterator();
-        }
 
-        while (processorIterator.hasNext()) {
-            Processor processor = processorIterator.next();
-            long t1 = System.currentTimeMillis();
-            try {
-                if (mode.contentEquals("create")) {
-                    processor.createObjects(cmsObjects, this);
-                } else if (mode.contentEquals("delete")) {
-                    processor.deleteObjects(cmsObjects, this);
+            while (processorIterator.hasNext()) {
+                Processor processor = processorIterator.next();
+                long t1 = System.currentTimeMillis();
+                try {
+                    if (mode.contentEquals("create")) {
+                        processor.createObjects(cmsObjects, this);
+                    } else if (mode.contentEquals("delete")) {
+                        processor.deleteObjects(cmsObjects, this);
+                    }
+                } finally {
+                    logger.debug("{} processor completed execution in {} miliseconds", processor.toString(),
+                        System.currentTimeMillis() - t1);
                 }
-            } finally {
-                logger.debug("{} processor completed execution in {} miliseconds", processor.toString(),
-                    System.currentTimeMillis() - t1);
             }
         }
     }
@@ -187,12 +187,12 @@ public class MappingEngineImpl implements MappingEngine {
     public DObjectAdapter getDObjectAdapter() {
         return adapter;
     }
-    
+
     @Override
     public Object getSession() {
         return session;
     }
-    
+
     @Override
     public OntModel getOntModel() {
         return ontModel;
@@ -217,36 +217,35 @@ public class MappingEngineImpl implements MappingEngine {
     public NamingStrategy getNamingStrategy() {
         return namingStrategy;
     }
-    
+
     @Override
     public RepositoryAccess getRepositoryAccess() {
         return accessor;
     }
-    
+
     private void initializeEngine(MappingConfiguration conf) throws RepositoryAccessException {
-        if(conf.getOntModel() != null) {
+        if (conf.getOntModel() != null) {
             this.ontModel = conf.getOntModel();
         } else {
             this.ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
         }
-        
+
         AdapterMode adapterMode = conf.getAdapterMode();
-        if(adapterMode == null) {
+        if (adapterMode == null) {
             adapterMode = AdapterMode.ONLINE;
         }
-        
+
         ConnectionInfo connectionInfo = conf.getConnectionInfo();
-        if(connectionInfo == null) {
-            if(!adapterMode.equals(AdapterMode.STRICT_OFFLINE)) {
+        if (connectionInfo == null) {
+            if (!adapterMode.equals(AdapterMode.STRICT_OFFLINE)) {
                 connectionInfo = OntologyResourceHelper.getConnectionInfo(this.ontModel);
-                if(connectionInfo == null) {
+                if (connectionInfo == null) {
                     logger.warn("Failed to retrieve connection info from ontmodel");
                     return;
                 }
             }
-        } 
-        
-        
+        }
+
         List<Object> offlineObjects = conf.getObjects();
         if (adapterMode.equals(AdapterMode.ONLINE)) {
             accessor = accessManager.getRepositoryAccessor(connectionInfo);
@@ -269,7 +268,7 @@ public class MappingEngineImpl implements MappingEngine {
             accessor = accessManager.getRepositoryAccess(offlineObjects);
             this.adapter = new DObjectFactoryImp(accessor, session, adapterMode);
         }
-        
+
         this.bridgeDefinitions = conf.getBridgeDefinitions();
         this.ontologyURI = conf.getOntologyURI();
         this.namingStrategy = new DefaultNamingStrategy(accessor, session, this.ontModel);

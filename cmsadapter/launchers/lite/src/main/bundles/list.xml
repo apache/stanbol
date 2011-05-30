@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
- <!-- List of initial bundles for the Ontogen Sling-based standalone launcher -->
+<!-- List of initial bundles for the CMS Adapter Sling-based standalone launcher -->
 <bundles>
 
 	<!-- OSGi infrastructure -->
@@ -66,6 +66,16 @@
 	<!-- General-purpose libraries -->
 	<startLevel level="10">
 		<bundle>
+			<groupId>commons-cli</groupId>
+			<artifactId>commons-cli</artifactId>
+			<version>1.2</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.0</version>
+		</bundle>
+		<bundle>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>1.4</version>
@@ -95,6 +105,12 @@
 			<artifactId>derby</artifactId>
 			<version>10.6.2.1</version>
 		</bundle>
+    <bundle>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>1.6.2</version>
+    </bundle>
+
 	</startLevel>
 
 	<!-- Clerezza storage and sparql infrastructure -->
@@ -226,6 +242,14 @@
 		</bundle>
 	</startLevel>
 
+	<!-- Serializers -->
+	<startLevel level="17">
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
+			<version>0.9-incubating-SNAPSHOT</version>
+		</bundle>
+	</startLevel>
 
 	<!-- Stanbol Bundles -->
 	<startLevel level="20">
@@ -244,10 +268,50 @@
 		</bundle>
 
 		<!-- Enhancer -->
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.jobmanager</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.standalone</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+
+		<!-- Entityhub -->
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+
 		<!-- Generic -->
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.jsonld
+			</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.defaultdata</artifactId>
+			<version>0.0.1</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.stanboltools.offline
+			</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider
 			</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
@@ -330,7 +394,80 @@
 			</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
+
+		<!-- Content hub -->
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.contenthub.web</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
 	</startLevel>
+
+	<!-- Entity hub infrastructure -->
+	<startLevel level="16">
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.core</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+	</startLevel>
+
+	<!-- Stanbol Enhancer plug-ins -->
+	<startLevel level="20">
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+	</startLevel>
+
+	<!-- Stanbol Enhancer Enhancement Engines -->
+	<startLevel level="30">
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.engines.langid</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.engines.opencalais
+			</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.engines.autotagging
+			</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.defaultdata</artifactId>
+			<version>0.0.1</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner
+			</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<!-- The geonames.org LocationEnhancement Engines needs two additional 
+			bundles 1) jettyjson 2) commons-io. Both of them are already present in the 
+			bundle list. -->
+		<!--  <bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle> -->
+		<!-- Entity Tagging Engine based on RICK -->
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.engine.entitytagging
+			</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+	</startLevel>
+
 
 	<!-- JCR/CMIS Bundles -->
 	<startLevel level="30">

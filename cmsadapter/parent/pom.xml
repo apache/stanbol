@@ -242,6 +242,22 @@
 				<version>0.9-SNAPSHOT</version>
 				<scope>provided</scope>
 			</dependency>
+			
+			<!-- Enhancer -->
+			<dependency>
+				<groupId>org.apache.stanbol</groupId>
+				<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+				<version>0.9-SNAPSHOT</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<!-- Apache Clerezza -->
+			<dependency>
+				<groupId>org.apache.clerezza</groupId>
+				<artifactId>org.apache.clerezza.rdf.core</artifactId>
+				<version>0.12-incubating-SNAPSHOT</version>
+				<scope>provided</scope>
+			</dependency>
 
 			<dependency>
 				<groupId>org.osgi</groupId>
@@ -375,7 +391,7 @@
 				<version>2.4</version>
 				<scope>provided</scope>
 			</dependency>
-			
+
 
 			<dependency>
 				<groupId>commons-collections</groupId>
