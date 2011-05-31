@@ -11,11 +11,15 @@ import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManagerConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
@@ -68,11 +72,18 @@ import org.slf4j.LoggerFactory;
 // @Property(name="service.ranking",intValue=5)
 public class ONManagerImpl implements ONManager {
 
-    public class Helper {
-        private Helper() {}
+    /**
+     * Utility class to speed up ontology network startup. <br>
+     * TODO: it's most likely useless, remove it.
+     * 
+     * @author enrico
+     * 
+     */
+    private class Helper {
 
         /**
-         * Adds the ontology from the given iri to the core space of the given scope
+         * Adds the ontology from the given iri to the core space of the given scope.
+         * 
          * 
          * @param scopeID
          * @param locationIri
@@ -164,44 +175,27 @@ public class ONManagerImpl implements ONManager {
         }
     }
 
-    public static final String _ALIAS_DEFAULT = "/ontology";
-    public static final String _CONFIG_FILE_PATH_DEFAULT = "";
-
-    public static final String _KRES_NAMESPACE_DEFAULT = "http://kres.iksproject.eu/";
-
-    // @Property(value = _ALIAS_DEFAULT)
-    public static final String ALIAS = "org.apache.stanbol.ontologyNetworkManager.alias";
-
-    @Property(value = _CONFIG_FILE_PATH_DEFAULT)
-    public static String CONFIG_FILE_PATH = "org.apache.stanbol.ontologyNetworkManager.config_ont";
-
-    @Property(value = _KRES_NAMESPACE_DEFAULT)
-    public static String KRES_NAMESPACE = "kres.namespace";
-    @SuppressWarnings("unused")
-    private String alias = _ALIAS_DEFAULT;
-    private String configPath = _CONFIG_FILE_PATH_DEFAULT;
-
-    // private static ONManagerImpl me = new ONManagerImpl();
-    //
-    // public static ONManagerImpl get() {
-    // return me;
-    // }
-
-    // private ComponentContext ce;
+    @Reference
+    private ONManagerConfiguration config;
 
     private Helper helper = null;
 
-    private String kresNs = _KRES_NAMESPACE_DEFAULT;
-
     private final Logger log = LoggerFactory.getLogger(getClass());
+
+    /**
+     * The {@link OfflineMode} is used by Stanbol to indicate that no external service should be referenced.
+     * For this engine that means it is necessary to check if the used {@link ReferencedSite} can operate
+     * offline or not.
+     * 
+     * @see #enableOfflineMode(OfflineMode)
+     * @see #disableOfflineMode(OfflineMode)
+     */
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC, bind = "enableOfflineMode", unbind = "disableOfflineMode", strategy = ReferenceStrategy.EVENT)
+    private OfflineMode offlineMode;
 
     private OntologyIndex oIndex;
 
     private OntologyManagerFactory omgrFactory;
-
-    public OntologyManagerFactory getOntologyManagerFactory() {
-        return omgrFactory;
-    }
 
     private OntologyScopeFactory ontologyScopeFactory;
 
@@ -236,8 +230,10 @@ public class ONManagerImpl implements ONManager {
      * Component Runtime support.
      * <p>
      * DO NOT USE to manually create instances - the ReengineerManagerImpl instances do need to be configured!
-     * YOU NEED TO USE {@link #ONManagerImpl(TcManager, WeightedTcProvider, Dictionary)} or its overloads, to
-     * parse the configuration and then initialise the rule store if running outside an OSGI environment.
+     * YOU NEED TO USE
+     * {@link #ONManagerImpl(TcManager, WeightedTcProvider, ONManagerConfiguration, Dictionary)} or its
+     * overloads, to parse the configuration and then initialise the rule store if running outside an OSGI
+     * environment.
      */
     public ONManagerImpl() {
         super();
@@ -262,17 +258,36 @@ public class ONManagerImpl implements ONManager {
     }
 
     /**
+     * @deprecated use
+     *             {@link #ONManagerImpl(TcManager, WeightedTcProvider, ONManagerConfiguration, Dictionary)}
+     *             instead. Note that if the deprecated method is used instead, it will copy the Dictionary
+     *             context to a new {@link ONManagerConfiguration} object.
+     * @param tcm
+     * @param wtcp
+     * @param configuration
+     */
+    @Deprecated
+    public ONManagerImpl(TcManager tcm, WeightedTcProvider wtcp, Dictionary<String,Object> configuration) {
+        // Copy the same configuration to the ONManagerConfigurationImpl.
+        this(tcm, wtcp, new ONManagerConfigurationImpl(configuration), configuration);
+    }
+
+    /**
      * To be invoked by non-OSGi environments.
      * 
      * @param tcm
      * @param wtcp
      * @param configuration
      */
-    public ONManagerImpl(TcManager tcm, WeightedTcProvider wtcp, Dictionary<String,Object> configuration) {
+    public ONManagerImpl(TcManager tcm,
+                         WeightedTcProvider wtcp,
+                         ONManagerConfiguration onmconfig,
+                         Dictionary<String,Object> configuration) {
         this();
         // Assume this.tcm and this.wtcp were not filled in by OSGi-DS.
         this.tcm = tcm;
         this.wtcp = wtcp;
+        this.config = onmconfig;
         try {
             activate(configuration);
         } catch (IOException e) {
@@ -303,30 +318,49 @@ public class ONManagerImpl implements ONManager {
      */
     protected void activate(Dictionary<String,Object> configuration) throws IOException {
 
-        // Local directories first
-        // try {
-        // URI uri = ONManagerImpl.this.getClass().getResource("/ontologies").toURI();
-        // OfflineConfiguration.localDirs.add(new File(uri));
-        // } catch (URISyntaxException e3) {
-        // log.warn("Could not add ontology resource.", e3);
-        // } catch (NullPointerException e3) {
-        // log.warn("Could not add ontology resource.", e3);
-        // }
+        // Parse configuration
+        if (config.getID() == null || config.getID().isEmpty()) {
+            log.warn("The Ontology Network Manager configuration does not define a ID for the Ontology Network Manager");
+        } else {
+            log.info("id: {}", config.getID());
+        }
 
-        // if (storage == null) storage = new OntologyStorage(this.tcm, this.wtcp);
+        // if (config.getOntologySourceDirectories() != null) {
+        // for (String s : config.getOntologySourceDirectories()) {
+        // if (new File(s).exists()) System.out.println(s + " EXISTS");
+        // else System.out.println(s + " DOES NOT EXIST");
+        // }
+        // }
+        //
+        // // Local directories first
+        // // try {
+        // // URI uri = ONManagerImpl.this.getClass().getResource("/ontologies").toURI();
+        // // OfflineConfiguration.localDirs.add(new File(uri));
+        // // } catch (URISyntaxException e3) {
+        // // log.warn("Could not add ontology resource.", e3);
+        // // } catch (NullPointerException e3) {
+        // // log.warn("Could not add ontology resource.", e3);
+        // // }
+        //
+        // // if (storage == null) storage = new OntologyStorage(this.tcm, this.wtcp);
+        //
+        // if (isOfflineMode()) System.out.println("DIOCANE!");
 
         bindResources(this.tcm, this.wtcp);
 
-        String tfile = (String) configuration.get(CONFIG_FILE_PATH);
-        if (tfile != null) this.configPath = tfile;
-        String tns = (String) configuration.get(KRES_NAMESPACE);
-        if (tns != null) this.kresNs = tns;
+        // String tfile = (String) configuration.get(CONFIG_FILE_PATH);
+        // if (tfile != null) this.configPath = tfile;
+        // String tns = (String) configuration.get(KRES_NAMESPACE);
+        // if (tns != null) this.kresNs = tns;
 
         // configPath = (String) configuration.get(CONFIG_FILE_PATH);
 
         /*
          * If there is no configuration file, just start with an empty scope set
          */
+
+        String configPath = config.getOntologyNetworkConfigurationPath();
+
         if (configPath != null && !configPath.trim().isEmpty()) {
             OWLOntology oConf = null;
             OWLOntologyManager tempMgr = omgrFactory.createOntologyManager(true);
@@ -494,13 +528,35 @@ public class ONManagerImpl implements ONManager {
         log.info("in " + ONManagerImpl.class + " deactivate with context " + context);
     }
 
+    /**
+     * Called by the ConfigurationAdmin to unbind the {@link #offlineMode} if the service becomes unavailable
+     * 
+     * @param mode
+     */
+    protected final void disableOfflineMode(OfflineMode mode) {
+        this.offlineMode = null;
+    }
+
+    /**
+     * Called by the ConfigurationAdmin to bind the {@link #offlineMode} if the service becomes available
+     * 
+     * @param mode
+     */
+    protected final void enableOfflineMode(OfflineMode mode) {
+        this.offlineMode = mode;
+    }
+
     @Override
     public String getKReSNamespace() {
-        return kresNs;
+        return config.getOntologyNetworkNamespace();
     }
 
     public OntologyIndex getOntologyIndex() {
         return oIndex;
+    }
+
+    public OntologyManagerFactory getOntologyManagerFactory() {
+        return omgrFactory;
     }
 
     /**
@@ -570,5 +626,14 @@ public class ONManagerImpl implements ONManager {
 
     public String[] getUrisToActivate() {
         return toActivate;
+    }
+
+    /**
+     * Returns <code>true</code> only if Stanbol operates in {@link OfflineMode}.
+     * 
+     * @return the offline state
+     */
+    protected final boolean isOfflineMode() {
+        return offlineMode != null;
     }
 }
