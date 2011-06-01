@@ -18,9 +18,9 @@ to the directory you would like to start the indexing.
 
 ## Index:
 
-### (1) Initialise the configuration
+### (1) Initialize the configuration
 
-The configuration can be initialised with the defaults by calling
+The configuration can be initialized with the defaults by calling
 
     java -jar org.apache.stanbol.entityhub.indexing.dbpedia-*-jar-with-dependencies.jar init
 
@@ -98,11 +98,11 @@ It is also safe to:
 
 ### (3) Entity Scores
 
-The DBpedia.org indexer uses the incomming links from other wikipages to
-calculate the rank of entities. Entities with more incomming links get an
+The DBpedia.org indexer uses the incoming links from other wikipages to
+calculate the rank of entities. Entities with more incoming links get an
 higher rank. A RDF dump containing all outgoing wiki links is available
 on DBpedia (page_links_en.nt.bz2). This file need to be processed with the
-following command to get an file containing an ordered list of incomming
+following command to get an file containing an ordered list of incoming
 count and the local name of the entity.
 
     curl http://downloads.dbpedia.org/3.6/en/page_links_en.nt.bz2 \
@@ -158,13 +158,13 @@ data are available.
 This can be used to configure e.g. if values are stored (available for
 retrieval) or only indexed. See the comments within the file for details
 * fieldBoosts.properties: Can be used to set boost factors for fields.
-* minIncomming.properties: Can be used to define the minimum number of
-incommings links (to an Wiki page from other Wili pages) so that an entity
+* minIncoming.properties: Can be used to define the minimum number of
+incoming links (to an Wiki page from other Wiki pages) so that an entity
 is indexed. Higher values will cause less entities to be indexed. A
 value of 0 will result in all entities to be indexed.
 * scoreRange.properties: Can be use to set the upper bound for entities score.
-The entities with the most incomming links will get this score. Entities
-with no incomming links would get a score of zero.
+The entities with the most incoming links will get this score. Entities
+with no incoming links would get a score of zero.
 
 ### (5) Using the precomputed Index:
 
@@ -178,7 +178,7 @@ Apache Sling Installer Framework) the Stanbol DataFileProvider service
 will ask for the binary data.
 
 2. dbpedia.solrindex.zip: This is the ZIP archive with the precomputed
-data.  Typically you will need to copy this file to the data directory
+data. Typically you will need to copy this file to the data directory
 of the Apache Stanbol DataFileProvider (defaults to "sling/datafiles").
 
 ## Using DBPedia.org as Referenced Site of the Entityhub
@@ -196,7 +196,7 @@ needed.
 
 ## The used Default configuration:
 
-This describes the default configuration as initialised during the first start
+This describes the default configuration as initialized during the first start
 of the indexing tool.
 
 The default configuration stores creates an index with the following features:
