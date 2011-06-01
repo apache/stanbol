@@ -325,26 +325,17 @@ public class ONManagerImpl implements ONManager {
             log.info("id: {}", config.getID());
         }
 
-        // if (config.getOntologySourceDirectories() != null) {
-        // for (String s : config.getOntologySourceDirectories()) {
-        // if (new File(s).exists()) System.out.println(s + " EXISTS");
-        // else System.out.println(s + " DOES NOT EXIST");
-        // }
-        // }
-        //
-        // // Local directories first
-        // // try {
-        // // URI uri = ONManagerImpl.this.getClass().getResource("/ontologies").toURI();
-        // // OfflineConfiguration.localDirs.add(new File(uri));
-        // // } catch (URISyntaxException e3) {
-        // // log.warn("Could not add ontology resource.", e3);
-        // // } catch (NullPointerException e3) {
-        // // log.warn("Could not add ontology resource.", e3);
-        // // }
-        //
+         // Local directories first
+//          try {
+//          URI uri = ONManagerImpl.this.getClass().getResource("/ontologies").toURI();
+//          OfflineConfiguration.add(new File(uri));
+//          } catch (URISyntaxException e3) {
+//          log.warn("Could not add ontology resource.", e3);
+//          } catch (NullPointerException e3) {
+//          log.warn("Could not add ontology resource.", e3);
+//          }
+        
         // // if (storage == null) storage = new OntologyStorage(this.tcm, this.wtcp);
-        //
-        // if (isOfflineMode()) System.out.println("DIOCANE!");
 
         bindResources(this.tcm, this.wtcp);
 
