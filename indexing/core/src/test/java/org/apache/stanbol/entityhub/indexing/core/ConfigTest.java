@@ -114,7 +114,7 @@ public class ConfigTest {
         assertTrue("Config File for the RangeNormaliser not copied",
             new File(config.getConfigFolder(),"range.properties").isFile());
         assertTrue("Config File for the MinScoreNormalizer not copied",
-            new File(config.getConfigFolder(),"minIncomming.properties").isFile());
+            new File(config.getConfigFolder(),"minincoming.properties").isFile());
         //now test if the configuration was parsed correctly
         ScoreNormaliser testNormaliser = normaliser;
         assertNotNull(testNormaliser);
