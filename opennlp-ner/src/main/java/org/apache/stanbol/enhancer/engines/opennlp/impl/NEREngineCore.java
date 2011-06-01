@@ -23,6 +23,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_EN
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTION_CONTEXT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,6 +31,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +47,7 @@ import opennlp.tools.util.Span;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.commons.io.IOUtils;
@@ -103,11 +106,19 @@ public class NEREngineCore implements EnhancementEngine {
     }
 
     public void computeEnhancements(ContentItem ci) throws EngineException {
-        String text;
-        try {
-            text = IOUtils.toString(ci.getStream(), "UTF-8");
-        } catch (IOException e) {
-            throw new InvalidContentException(this, ci, e);
+        String mimeType = ci.getMimeType().split(";", 2)[0];
+        String text = "";
+        if (TEXT_PLAIN_MIMETYPE.equals(mimeType)) {
+            try {
+                text = IOUtils.toString(ci.getStream(),"UTF-8");
+            } catch (IOException e) {
+                throw new InvalidContentException(this, ci, e);
+            }
+        } else {
+            Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getId()), NIE_PLAINTEXTCONTENT, null);
+            while (it.hasNext()) {
+                text += it.next().getObject();
+            }
         }
         if (text.trim().length() == 0) {
             // TODO: make the length of the data a field of the ContentItem
@@ -311,6 +322,12 @@ public class NEREngineCore implements EnhancementEngine {
         // in case text/pain;charSet=UTF8 is parsed
         String mimeType = ci.getMimeType().split(";", 2)[0];
         if (TEXT_PLAIN_MIMETYPE.equalsIgnoreCase(mimeType)) {
+            return ENHANCE_SYNCHRONOUS;
+        }
+        // check for existence of textual content in metadata
+        UriRef subj = new UriRef(ci.getId());
+        Iterator<Triple> it = ci.getMetadata().filter(subj, NIE_PLAINTEXTCONTENT, null);
+        if (it.hasNext()) {
             return ENHANCE_SYNCHRONOUS;
         }
         return CANNOT_ENHANCE;
