@@ -55,6 +55,8 @@
 		<xsl:param name="str"/>
 		<xsl:value-of select="normalize-space(translate($str,'&#160;',' '))"/>	
 	</xsl:template>
+	
+	<xsl:template match="text()" />
 
 </xsl:stylesheet>
 
