@@ -21,8 +21,7 @@ public class VariableAtom implements URIResource {
 
 	@Override
 	public URI getURI() {
-		// TODO Auto-generated method stub
-		return null;
+		return uri;
 	}
 
 		@Override
