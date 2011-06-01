@@ -142,7 +142,7 @@ The resulting file MUST BE copied to
 
 There is also the possibility do download a precomputed file from:
 
-TODO: add download loaction
+TODO: add download location
 
 ### (4) Configuration of the Index
 
@@ -158,7 +158,7 @@ data are available.
 This can be used to configure e.g. if values are stored (available for
 retrieval) or only indexed. See the comments within the file for details
 * fieldBoosts.properties: Can be used to set boost factors for fields.
-* minIncoming.properties: Can be used to define the minimum number of
+* minincoming.properties: Can be used to define the minimum number of
 incoming links (to an Wiki page from other Wiki pages) so that an entity
 is indexed. Higher values will cause less entities to be indexed. A
 value of 0 will result in all entities to be indexed.
