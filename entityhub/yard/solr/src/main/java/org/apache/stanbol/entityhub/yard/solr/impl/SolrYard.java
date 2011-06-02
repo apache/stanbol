@@ -43,6 +43,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.impl.StreamingUpdateSolrServer;
 import org.apache.solr.client.solrj.request.UpdateRequest;
@@ -170,10 +171,36 @@ public class SolrYard extends AbstractYard implements Yard {
      */
     public static final String SOLR_SERVER_TYPE = "org.apache.stanbol.entityhub.yard.solr.solrServerType";
     /**
-     * Key used to to enable/disable the use of the default configuration when initialising the SolrYard. The
-     * default value MUST BE <code>true</code>
+     * Key used to to enable/disable the default configuration. If this is enabled,
+     * that the index will get initialised with the Default configuration.<p>
+     * Notes:<ul>
+     * <li> Configuration is only supported for EmbeddedSolrServers that use a
+     * relative path
+     * <li> If this property is enabled the value of the 
+     * {@link #SOLR_INDEX_CONFIGURATION_NAME} will be ignored.
+     * </ul>
+     * Only applies in case a {@link EmbeddedSolrServer} is used.
+     * @see SolrYardConfig#isDefaultInitialisation()
+     * @see SolrYardConfig#setDefaultInitialisation(Boolean)
      */
-    public static final String SOLR_INDEX_DEFAULT_CONFIG = "org.apache.stanbol.entityhub.yard.solr.allowDefaultConfig";
+    public static final String SOLR_INDEX_DEFAULT_CONFIG = "org.apache.stanbol.entityhub.yard.solr.useDefaultConfig";
+    /**
+     * By default the use of an default configuration is disabled!
+     */
+    public static final boolean DEFAULT_SOLR_INDEX_DEFAULT_CONFIG_STATE = false;
+    /**
+     * The name of the configuration use as default. 
+     */
+    public static final String DEFAULT_SOLR_INDEX_CONFIGURATION_NAME = "default";
+    /**
+     * Allows to configure the name of the index used for the configuration of the Solr Core.
+     * Only applies in case of using an {@link EmbeddedSolrServer} and
+     * {@link #SOLR_INDEX_DEFAULT_CONFIG} is disabled.
+     * As default the value of the {@link #SOLR_SERVER_LOCATION} is used.
+     * @see SolrYardConfig#getIndexConfigurationName()
+     * @see SolrYardConfig#setIndexConfigurationName(String)
+     */
+    public static final String SOLR_INDEX_CONFIGURATION_NAME = "org.apache.stanbol.entityhub.yard.solr.configName";
     /**
      * The default value for the maxBooleanClauses of SolrQueries. Set to {@value #defaultMaxBooleanClauses}
      * the default of Slor 1.4
@@ -376,8 +403,18 @@ public class SolrYard extends AbstractYard implements Yard {
             File indexDirectory = ConfigUtils.toFile(config.getSolrServerLocation());
             if (!indexDirectory.isAbsolute()) { // relative paths
                 // need to be resolved based on the internally managed Solr directory
-                indexDirectory = solrDirectoryManager.getSolrIndexDirectory(indexDirectory.toString(),
-                    config.isDefaultInitialisation());
+                String indexName = indexDirectory.toString();
+                indexDirectory = solrDirectoryManager.getSolrIndexDirectory(indexName);
+                if (indexDirectory == null) {
+                    String configName;
+                    if(config.isDefaultInitialisation()){
+                        configName = SolrYard.DEFAULT_SOLR_INDEX_CONFIGURATION_NAME;
+                    } else {
+                        configName = config.getIndexConfigurationName();
+                    }
+                    indexDirectory = solrDirectoryManager.createSolrDirectory(
+                        indexName,configName,null);
+                }
                 if (indexDirectory == null) {
                     throw new ConfigurationException(SolrYard.SOLR_SERVER_LOCATION,
                             "SolrIndex "

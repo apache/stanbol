@@ -165,7 +165,13 @@ public final class FieldMappingUtils {
             log.warn("Filters are not supported for '!<fieldPatter>' type field mappings! Filter {} ignored",filter);
             filter = null;
         }
-        return new FieldMapping(fieldPattern, filter, mappedTo.toArray(new String[mappedTo.size()]));
+        try {
+            return new FieldMapping(fieldPattern, filter, mappedTo.toArray(new String[mappedTo.size()]));
+        }catch (RuntimeException e) {
+            log.warn(String.format("Unable to parse FieldMapping from Line '%s'",
+                mapping),e);
+            return null;
+        }
     }
     /**
      * Parses FieldMappings from the parsed strings

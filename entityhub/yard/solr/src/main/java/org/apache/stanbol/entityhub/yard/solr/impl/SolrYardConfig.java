@@ -200,7 +200,7 @@ public final class SolrYardConfig extends YardConfig {
                 return Boolean.parseBoolean(value.toString());
             }
         } else {
-            return true;
+            return SolrYard.DEFAULT_SOLR_INDEX_DEFAULT_CONFIG_STATE;
         }
     }
 
@@ -220,6 +220,43 @@ public final class SolrYardConfig extends YardConfig {
             config.put(SolrYard.SOLR_INDEX_DEFAULT_CONFIG, defaultInitialisationState);
         } else {
             config.remove(SolrYard.SOLR_INDEX_DEFAULT_CONFIG);
+        }
+    }
+
+    /**
+     * Getter for the name of the configuration used to initialise the SolrServer. <p>
+     * In case this property is not set the value of {@link #getSolrServerLocation()} 
+     * is used as default.<p>
+     * Please NOTE that in case <code>{@link #isDefaultInitialisation()} == true</code> 
+     * the value of {@link SolrYard#DEFAULT_SOLR_INDEX_CONFIGURATION_NAME} MUST
+     * BE used to initialise the SolrIndex instead of the value returned by this
+     * Method!
+     * @return the name of the configuration of the SolrIndex
+     * @see SolrYard#SOLR_INDEX_CONFIGURATION_NAME
+     * @see SolrYard#SOLR_INDEX_DEFAULT_CONFIG
+     */
+    public String getIndexConfigurationName() {
+        Object value = config.get(SolrYard.SOLR_INDEX_CONFIGURATION_NAME);
+        if (value != null) {
+            return value.toString();
+        } else {
+            return getSolrServerLocation();
+        }
+    }
+
+    /**
+     * Setter for the name of the configuration used to initialise this SolrYard. Parsing <code>null</code>,
+     * empty or equals to the {@link #getSolrServerLocation() Solr serve location} as 
+     * name will remove this configuration.
+     * 
+     * @param name
+     *            the name of the configuration.
+     */
+    public void setIndexConfigurationName(String name) {
+        if (name == null || name.isEmpty()) {
+            config.remove(SolrYard.SOLR_INDEX_CONFIGURATION_NAME);
+        } else {
+            config.put(SolrYard.SOLR_INDEX_CONFIGURATION_NAME, name);
         }
     }
 

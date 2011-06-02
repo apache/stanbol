@@ -22,6 +22,7 @@ import org.apache.stanbol.entityhub.indexing.core.EntityScoreProvider;
 import org.apache.stanbol.entityhub.indexing.core.Indexer;
 import org.apache.stanbol.entityhub.indexing.core.IndexingComponent;
 import org.apache.stanbol.entityhub.indexing.core.IndexingDestination;
+import org.apache.stanbol.entityhub.indexing.core.destination.OsgiConfigurationUtil;
 import org.apache.stanbol.entityhub.indexing.core.event.IndexingEvent;
 import org.apache.stanbol.entityhub.indexing.core.event.IndexingListener;
 import org.apache.stanbol.entityhub.indexing.core.impl.IndexingDaemon.IndexingDaemonEventObject;

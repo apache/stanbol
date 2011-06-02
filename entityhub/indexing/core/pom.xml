@@ -88,6 +88,17 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
+    
+    <dependency> <!-- for writing OSGI configuration files -->
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.configadmin</artifactId>
+      <version>1.2.8</version>
+    </dependency>
+    <dependency>
+      <groupId>biz.aQute</groupId> <!-- used to generate bundles -->
+      <artifactId>bndlib</artifactId>
+      <version>1.43.0</version>
+    </dependency>    
     <!-- For Testing -->
     <dependency>
       <groupId>junit</groupId>

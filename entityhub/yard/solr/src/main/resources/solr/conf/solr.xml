@@ -17,43 +17,13 @@
 -->
 
 <!--
- SolrYard Configuration Notes:
+ SolrYard Configuration for the internally managed Embedded SolrServer:
 
- The default Solr multi-core configuration as used by the SolrYard.
-
- By default it defines three cores:
-  - entityhub: this is the core used for the EntityhubYard: entities in this
-    yard can be created, edited and deleted by the stanbol clients.
-
-  - cache: this yard is intended for caches with CacheStrategy "used".
-           Multiple SolrYards can use this cache if "Multiple Yard Layout"
-           is set to true. Entities in this yard come from referenced sites
-           without modification besides a fixed field mapping configuration.
-
-  To add additional Cores
-    - Create a sub directory with the value configured by instanceDir.
-    - Copy the "conf" Directory of an other core.
-    - You can change/optimise the configuration.
-
-  NOTE: This configuration is also used for the EmbeddedSolrServer managed by
-        the SolrYard.
-        The index data and configurations of this EmbeddedSolrServer can be found
-        in the "/data" directory of the SolrYard bundle.
-        Note also that the SolrYard dynamically creates and registers Cores based
-        on SolrYard instances created via the OSGI ConfigAdmin service.
+ By default no cores are defined by this configuration because they are added
+ at runtime via the Java API
 -->
 <solr persistent="true">
   <cores adminPath="/admin/cores">
-    <!-- RickYard Core: This core is reservated for the rickYard
-         Please do not use for Caches! -->
-    <core name="entityhub" instanceDir="entityhub" />
-    <!-- Core that is used by multiple Yards typically used for
-         Referenced Sites with CacheStrategy "used"
-    -->
-    <core name="cache" instanceDir="cache" />
-    <!-- Full Caches of Site typically use their own index.
-         Often they are preprocessed/downloaded and than copied
-         to the SolrServer
-    -->
+    <!-- Cores are added dynamically at runtime -->
   </cores>
 </solr>

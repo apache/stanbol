@@ -86,7 +86,29 @@ public final class ConfigUtils {
         cfm.put("properties", "properties"); // also accept properties as references
         SUPPORTED_SOLR_ARCHIVE_FORMAT = Collections.unmodifiableMap(cfm);
     }
-
+    public static final String DEFAULT_ARCHIVE_FORMAT = "zip";
+    /**
+     * The default extension for Solr Index Archives. This is typically added
+     * to configuration names that are missing the extension.
+     */
+    public static final String DEFAULT_SOLR_INDEX_ARCHIVE_EXTENSION =
+        '.'+SOLR_INDEX_ARCHIVE_EXTENSION + '.' + DEFAULT_ARCHIVE_FORMAT;
+    
+    public static boolean isValidSolrIndexFileName(String name){
+        return name.indexOf('.'+SOLR_INDEX_ARCHIVE_EXTENSION) >= 0 &&
+            SUPPORTED_SOLR_ARCHIVE_FORMAT.containsKey(FilenameUtils.getExtension(name));
+    }
+    
+    public static String appandSolrIndexFileExtension(String name,String format){
+        String extension;
+        if(SUPPORTED_SOLR_ARCHIVE_FORMAT.containsKey(format)){
+            extension = format;
+        } else {
+            extension = DEFAULT_ARCHIVE_FORMAT;
+        }
+        return name+'.'+SOLR_INDEX_ARCHIVE_EXTENSION+'.'+extension;
+    }
+    
     public static ArchiveInputStream getArchiveInputStream(String solrArchiveName, InputStream is) throws IOException {
         String archiveFormat;
         String solrArchiveExtension = FilenameUtils.getExtension(solrArchiveName);
@@ -208,16 +230,17 @@ public final class ConfigUtils {
                                             + " extists but is not a directory!");
         }
         File sourceRoot = getSource(clazzInArchive != null ? clazzInArchive : ConfigUtils.class);
+        log.info("Init Solr Managed Directory form {} to {} (override={})",
+            new Object[]{sourceRoot,rootDir,override});
         if (sourceRoot.isFile()) {
             ZipFile archive = new ZipFile(sourceRoot);
-            log.info(String.format("Copy Default Config from jar-file %s to %s (override=%s)",
-                sourceRoot.getName(), rootDir.getAbsolutePath(), override));
+            log.info("  - read from jar-file");
             try {
                 for (@SuppressWarnings("unchecked")
                 Enumeration<ZipArchiveEntry> entries = (Enumeration<ZipArchiveEntry>) archive.getEntries(); entries
                         .hasMoreElements();) {
                     ZipArchiveEntry entry = entries.nextElement();
-                    if (entry.getName().startsWith(CONFIG_DIR)) {
+                    if (!entry.isDirectory() && entry.getName().startsWith(CONFIG_DIR)) {
                         copyResource(rootDir, archive, entry, CONFIG_DIR, override);
                     }
                 }
@@ -226,6 +249,7 @@ public final class ConfigUtils {
                 ZipFile.closeQuietly(archive);
             }
         } else { // load from file
+            log.info("  - read from directory");
             File source = new File(sourceRoot, CONFIG_DIR);
             if (source.exists() && source.isDirectory()) {
                 FileUtils.copyDirectory(source, rootDir);
@@ -621,120 +645,4 @@ public final class ConfigUtils {
         return file;
     }
 
-    /*
-     * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Methods for storing and
-     * loading configurations for uninitialised indexes - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     * - - - - - - - - - -
-     */
-
-    /**
-     * The path to the directory used to store properties of uninitialised referenced sites.
-     * <p>
-     * Such sites are one that are created by using {@link #createSolrDirectory(String, String, Map)} but the
-     * {@link DataFileProvider} does not yet provide the necessary data to initialise the index.
-     * <p>
-     * This directory will store properties files with the indexName as name, properties as extension and the
-     * properties as value
-     */
-    private static final String UNINITIALISED_INDEX_DIRECTORY = "config/uninitialised-index";
-
-    /**
-     * Saves the configuration of an uninitialised index
-     * 
-     * @param context
-     *            the context used to get the data storage
-     * @param indexName
-     *            the name of the uninitialised index
-     * @param properties
-     *            the properties of the uninitialised index
-     * @throws IOException
-     *             on any error while saving the configuration
-     */
-    public static void saveUninitialisedIndexConfig(ComponentContext context,
-                                                    String indexName,
-                                                    java.util.Properties properties) throws IOException {
-        File uninstalledConfigDir = getUninitialisedSiteDirectory(context, true);
-        File config = new File(uninstalledConfigDir, indexName + '.'
-                                                     + ConfigUtils.SOLR_INDEX_ARCHIVE_EXTENSION + ".ref");
-        FileOutputStream out = null;
-        if (properties == null) { // if no config is provided
-            properties = new java.util.Properties();// save an empty one
-        }
-        try {
-            out = new FileOutputStream(config);
-            properties.store(out, null);
-        } finally {
-            IOUtils.closeQuietly(out);
-        }
-    }
-
-    /**
-     * Returns the directory used to store the configurations of uninitialised Solr Indexes
-     * 
-     * @param init
-     *            if <code>true</code> the directory is created if needed
-     * @return the directory
-     */
-    public static File getUninitialisedSiteDirectory(ComponentContext context, boolean init) {
-        if (context == null) {
-            throw new IllegalStateException(
-                    "This functionality only works when running within an OSGI Environment");
-        }
-        File uninstalledConfigDir = context.getBundleContext().getDataFile(UNINITIALISED_INDEX_DIRECTORY);
-        if (!uninstalledConfigDir.exists()) {
-            if (init) {
-                if (!uninstalledConfigDir.mkdirs()) {
-                    throw new IllegalStateException("Unable to create Directory "
-                                                    + UNINITIALISED_INDEX_DIRECTORY
-                                                    + "for storing information of uninitialised Solr Indexes");
-                }
-            }
-        } else if (!uninstalledConfigDir.isDirectory()) {
-            throw new IllegalStateException("The directory " + UNINITIALISED_INDEX_DIRECTORY
-                                            + "for storing uninitialised Solr Indexes Information exists"
-                                            + "but is not a directory!");
-        } // else -> it exists and is a dir -> nothing todo
-        return uninstalledConfigDir;
-    }
-
-    /**
-     * Loads the configurations of uninitialised Solr Indexes
-     * 
-     * @return the map with the index name as key and the properties as values
-     * @throws IOException
-     *             on any error while loading the configurations
-     */
-    public static Map<String,java.util.Properties> loadUninitialisedIndexConfigs(ComponentContext context) throws IOException {
-        File uninstalledConfigDir = getUninitialisedSiteDirectory(context, false);
-        Map<String,java.util.Properties> configs = new HashMap<String,java.util.Properties>();
-        if (uninstalledConfigDir.exists()) {
-            for (String file : uninstalledConfigDir.list(new SuffixFileFilter(
-                    ConfigUtils.SOLR_INDEX_ARCHIVE_EXTENSION + ".ref"))) {
-                String indexName = file.substring(0, file.indexOf('.'));
-                java.util.Properties props = new java.util.Properties();
-                InputStream is = null;
-                try {
-                    is = new FileInputStream(new File(uninstalledConfigDir, file));
-                    props.load(is);
-                    configs.put(indexName, props);
-                } finally {
-                    IOUtils.closeQuietly(is);
-                }
-            }
-        }
-        return configs;
-    }
-
-    /**
-     * Removes the configuration for the index with the parsed name form the list if uninitialised indexes
-     * 
-     * @param indexName
-     *            the name of the index
-     * @return if the file was deleted.
-     */
-    public static boolean removeUninitialisedIndexConfig(ComponentContext context, String indexName) {
-        File configFile = new File(getUninitialisedSiteDirectory(context, false),
-                indexName + '.' + ConfigUtils.SOLR_INDEX_ARCHIVE_EXTENSION + ".ref");
-        return configFile.delete();
-    }
 }

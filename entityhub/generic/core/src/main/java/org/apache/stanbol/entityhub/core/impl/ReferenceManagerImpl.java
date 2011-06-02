@@ -95,6 +95,8 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
      * both a Map and an sorted List over the keys!
      */
     private final List<String> prefixList = new ArrayList<String>();
+    private final Set<ReferencedSite> noPrefixSites = Collections.synchronizedSet(
+        new HashSet<ReferencedSite>());
 
     @Activate
     protected void activate(ComponentContext context) {
@@ -106,6 +108,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
         synchronized (prefixMap) {
             this.prefixList.clear();
             this.prefixMap.clear();
+            this.noPrefixSites.clear();
         }
         this.idMap.clear();
     }
@@ -133,21 +136,28 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
      * @param referencedSite
      */
     private void addEntityPrefixes(ReferencedSite referencedSite) {
-        for(String prefix : referencedSite.getConfiguration().getEntityPrefixes()){
+        String[] prefixes = referencedSite.getConfiguration().getEntityPrefixes();
+        if(prefixes == null || prefixes.length < 1){
             synchronized (prefixMap) {
-                Collection<ReferencedSite> sites = prefixMap.get(prefix);
-                if(sites == null){
-                    sites = new CopyOnWriteArrayList<ReferencedSite>();
-                    prefixMap.put(prefix, sites);
-                    //this also means that the prefix is not part of the prefixList
-                    int pos = Collections.binarySearch(prefixList, prefix);
-                    if(pos<0){
-                        prefixList.add(Math.abs(pos)-1,prefix);
+                noPrefixSites.add(referencedSite);
+            }
+        } else {
+            for(String prefix : prefixes){
+                synchronized (prefixMap) {
+                    Collection<ReferencedSite> sites = prefixMap.get(prefix);
+                    if(sites == null){
+                        sites = new CopyOnWriteArrayList<ReferencedSite>();
+                        prefixMap.put(prefix, sites);
+                        //this also means that the prefix is not part of the prefixList
+                        int pos = Collections.binarySearch(prefixList, prefix);
+                        if(pos<0){
+                            prefixList.add(Math.abs(pos)-1,prefix);
+                        }
+                        prefixList.add(Collections.binarySearch(prefixList, prefix)+1,prefix);
                     }
-                    prefixList.add(Collections.binarySearch(prefixList, prefix)+1,prefix);
+                    //TODO: Sort the referencedSites based on the ServiceRanking!
+                    sites.add(referencedSite);
                 }
-                //TODO: Sort the referencedSites based on the ServiceRanking!
-                sites.add(referencedSite);
             }
         }
     }
@@ -156,16 +166,23 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
      * @param referencedSite
      */
     private void removeEntityPrefixes(ReferencedSite referencedSite) {
-        for(String prefix : referencedSite.getConfiguration().getEntityPrefixes()){
+        String[] prefixes = referencedSite.getConfiguration().getEntityPrefixes();
+        if(prefixes == null || prefixes.length < 1){
             synchronized (prefixMap) {
-                Collection<ReferencedSite> sites = prefixMap.get(prefix);
-                if(sites != null){
-                    sites.remove(referencedSite);
-                    if(sites.isEmpty()){
-                        //remove key from the Map
-                        prefixMap.remove(prefix);
-                        //remove also the prefix from the List
-                        prefixList.remove(prefix);
+                noPrefixSites.remove(referencedSite);
+            }
+        } else {
+            for(String prefix : prefixes){
+                synchronized (prefixMap) {
+                    Collection<ReferencedSite> sites = prefixMap.get(prefix);
+                    if(sites != null){
+                        sites.remove(referencedSite);
+                        if(sites.isEmpty()){
+                            //remove key from the Map
+                            prefixMap.remove(prefix);
+                            //remove also the prefix from the List
+                            prefixList.remove(prefix);
+                        }
                     }
                 }
             }
@@ -212,18 +229,24 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
                 prefixPos = pos; //entityUri found in list
             }
             if(prefixPos<0){
-                return Collections.emptySet();
+                return Collections.unmodifiableCollection(noPrefixSites);
             } else {
                 String prefix = prefixList.get(prefixPos);
                 if(entityUri.startsWith(prefix)){
                     log.debug("Found prefix {} for Entity {}",prefix,entityUri);
-                    return prefixMap.get(prefix);
+                    Collection<ReferencedSite> prefixSites = prefixMap.get(prefix);
+                    Collection<ReferencedSite> sites = 
+                        new ArrayList<ReferencedSite>(noPrefixSites.size()+prefixSites.size());
+                    sites.addAll(prefixSites);
+                    sites.addAll(noPrefixSites);
+                    return Collections.unmodifiableCollection(sites);
                 } //else the parsed entityPrefix does not start with the found prefix
                 // this may only happen, when the prefixPos == prefixList.size()
             }
         }
-        log.info("No registered prefix for entity {}",entityUri);
-        return Collections.emptySet();
+        log.debug("No registered prefix found for entity {} " +
+        		"-> return sites that accept all entities",entityUri);
+        return Collections.unmodifiableCollection(noPrefixSites);
     }
     @Override
     public QueryResultList<String> findIds(FieldQuery query) {

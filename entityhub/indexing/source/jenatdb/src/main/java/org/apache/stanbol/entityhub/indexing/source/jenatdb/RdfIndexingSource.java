@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataIterable;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataIterator;
@@ -77,7 +78,7 @@ public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider 
     /**
      * The default directory name used to search for RDF files to be imported
      */
-    public static final String DEFAULT_SOURCE_FOLDER_NAME = "rdf";
+    public static final String DEFAULT_SOURCE_FOLDER_NAME = "rdfdata";
     /**
      * The default name of the folder used to initialise the 
      * {@link DatasetGraphTDB Jena TDB dataset}.
@@ -171,7 +172,25 @@ public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider 
                     //register the configured source with the ResourceLoader
                     this.loader.addResource(sourceFileOrDirectory);
                 } else {
-                    log.warn("Unable to find RDF source {} within the indexing Source folder ",source,indexingConfig.getSourceFolder());
+                    if(FilenameUtils.getExtension(source).isEmpty()){
+                        //non existent directory -> create
+                        //This is typically the case if this method is called to
+                        //initialise the default configuration. So we will try
+                        //to create the directory users need to copy the source
+                        //RDF files.
+                        if(!sourceFileOrDirectory.mkdirs()){
+                            log.warn("Unable to create directory {} configured to improt RDF data from. " +
+                            		"You will need to create this directory manually before copying the" +
+                            		"RDF files into it.",sourceFileOrDirectory);
+                            //this would not be necessary because the directory will
+                            //be empty - however I like to be consistent and have
+                            //all configured and existent files & dirs added the the
+                            //resource loader
+                            this.loader.addResource(sourceFileOrDirectory);
+                        }
+                    } else {
+                        log.warn("Unable to find RDF source {} within the indexing Source folder ",source,indexingConfig.getSourceFolder());
+                    }
                 }
             }
             if(log.isInfoEnabled()){
