@@ -72,7 +72,7 @@ public class ConfigTest {
             assertNotNull(normalisedScore);
             float nScore = normalisedScore.floatValue();
             assertTrue(nScore <= lastNormalisedScore);
-            if(score < 2){ //the value of "min-score" in minIncomming
+            if(score < 2){ //the value of "min-score" in minincoming
                 log.info("score="+score+" nScore="+nScore);
                 assertTrue(nScore < 0);
                 return;

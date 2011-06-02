@@ -50,7 +50,7 @@ public class EntityIdBasedIndexingDaemon extends AbstractEntityIndexingDaemon {
                     score.compareTo(ScoreNormaliser.ZERO) >= 0){ //score >= 0
                 Representation rep = dataProvider.getEntityData(entityScore.id);
                 if(rep == null){
-                    log.info("unable to get Data for Entity {} (score=norm:{}|orig:{})",
+                    log.debug("unable to get Data for Entity {} (score=norm:{}|orig:{})",
                         new Object[]{entityScore.id,score,entityScore.score});
                 }
                 produce(rep,score,start);

@@ -27,6 +27,7 @@ import org.apache.solr.core.CoreContainer;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.apache.stanbol.entityhub.yard.solr.SolrServerProvider.Type;
 import org.apache.stanbol.entityhub.yard.solr.impl.ConfigUtils;
+import org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -129,24 +130,17 @@ public interface SolrDirectoryManager {
      * {@link SolrServerProvider#getSolrServer(Type, String, String...)} to create an {@link SolrServer}
      * instance.
      * <p>
-     * This method may trigger the initialisation of the SolrIndex if not already done.
-     * <p>
-     * This method needs to wait until the initialisation of the index i completed (even in multi threaded
-     * environments)
-     * <p>
+     * If the requested Index is currently initialising, than this method MUST
+     * wait until the initialisation is finished before returning. 
      * 
-     * @param solrPathOrUri
-     *            the name of the requested solr index. If no index with that name does exist a new one will
-     *            be initialised base on the default core configuration part of this bundle.
-     * @param allowDefaultInit
-     *            If <code>true</code> the Solr Index can be initialised with the default configuration if not
-     *            already present.
-     * @return the directory (instanceDir) of the index or <code>null</code> if <code>false</code> was parsed
-     *         as allowDefaultInit and the data for the index are not yet available.
+     * @param solrIndexName
+     *            the name of the requested solr index. 
+     * @return the directory (instanceDir) of the index or <code>null</code> a
+     *         SolrIndex with that name is not managed.
      * @throws IllegalArgumentException
      *             if the parsed solrIndexName is <code>null</code> or empty
      */
-    File getSolrIndexDirectory(final String solrIndexName, boolean allowDefaultInit) throws IllegalArgumentException;
+    File getSolrIndexDirectory(final String solrIndexName) throws IllegalArgumentException;
 
     /**
      * Creates a new Solr Index based on the data in the provided {@link ArchiveInputStream}
@@ -171,13 +165,13 @@ public interface SolrDirectoryManager {
      *            The name of the solrIndex to create
      * @param indexPath
      *            the name of the dataFile looked up via the {@link DataFileProvider}
-     * @param propergies
+     * @param properties
      *            Additional properties describing the index
      * @return the directory (instanceDir) of the index or null if the index data could not be found
      * @throws IllegalArgumentException
      * @throws IOException
      */
-    File createSolrDirectory(final String solrIndexName, String indexPath, Properties propergies) throws IllegalArgumentException,
+    File createSolrDirectory(final String solrIndexName, String indexPath, Properties properties) throws IllegalArgumentException,
                                                                                                  IOException;
 
     /**

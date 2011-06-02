@@ -1,16 +1,25 @@
 package org.apache.stanbol.entityhub.indexing.destination.solryard;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Properties;
-
-import javax.naming.NameParser;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.stanbol.entityhub.indexing.core.IndexingDestination;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
+import org.apache.stanbol.entityhub.indexing.core.destination.OsgiConfigurationUtil;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
@@ -22,8 +31,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.junit.Assert.*;
 
 /**
  * What to test:
@@ -43,6 +50,12 @@ import static org.junit.Assert.*;
  */
 public class SolrYardIndexingDestinationTest {
 
+    public static final Collection<String> EXPECTED_INDEX_ARCHIVE_FILE_NAMES = 
+        Arrays.asList(
+            "schema.xml",
+            "solrconfig.xml",
+            "segments.gen");
+    
     private static final Logger log = LoggerFactory.getLogger(SolrYardIndexingDestinationTest.class);
     private static final String CONFIG_ROOT = 
         FilenameUtils.separatorsToSystem("testConfigs/");
@@ -153,16 +166,26 @@ public class SolrYardIndexingDestinationTest {
         File expectedSolrArchiveFile = 
             new File(config.getDistributionFolder(),config.getName()+".solrindex.zip");
         assertTrue(expectedSolrArchiveFile.isFile());
-        //TODO: validate the archive
+        // validate the archive
+        ZipFile archive = new ZipFile(expectedSolrArchiveFile);
+        Set<String> expected = new HashSet<String>(EXPECTED_INDEX_ARCHIVE_FILE_NAMES);
+        for(Enumeration<? extends ZipEntry> entries = archive.entries();entries.hasMoreElements();){
+            ZipEntry entry = entries.nextElement();
+            //the name of the index MUST be the root folder within the Archive!
+            assertTrue(entry.getName().startsWith(config.getName()));
+            expected.remove(FilenameUtils.getName(entry.getName()));
+        }
+        assertTrue("missing Files in index archive: "+expected,expected.isEmpty());
         
-        //check for the solrArchive reference file and validate required properties
-        File expectedSolrArchiveReferenceFile = 
-            new File(config.getDistributionFolder(),config.getName()+".solrindex.ref");
-        assertTrue(expectedSolrArchiveReferenceFile.isFile());
-        Properties solrRefProperties = new Properties();
-        solrRefProperties.load(new FileInputStream(expectedSolrArchiveReferenceFile));
-        assertTrue(solrRefProperties.getProperty("Index-Archive").equals(expectedSolrArchiveFile.getName()));
-        assertTrue(solrRefProperties.getProperty("Name") != null);
+        //TODO: reimplement to validate the created bundle!
+//        //check for the solrArchive reference file and validate required properties
+//        File expectedSolrArchiveReferenceFile = 
+//            new File(,config.getName()+".solrindex.ref");
+//        assertTrue(expectedSolrArchiveReferenceFile.isFile());
+//        Properties solrRefProperties = new Properties();
+//        solrRefProperties.load(new FileInputStream(expectedSolrArchiveReferenceFile));
+//        assertTrue(solrRefProperties.getProperty("Index-Archive").equals(expectedSolrArchiveFile.getName()));
+//        assertTrue(solrRefProperties.getProperty("Name") != null);
     }
     
 }

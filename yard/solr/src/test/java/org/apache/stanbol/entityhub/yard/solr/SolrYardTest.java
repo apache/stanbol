@@ -73,6 +73,8 @@ public class SolrYardTest extends YardTest {
         SolrYardConfig config = new SolrYardConfig(TEST_YARD_ID, TEST_SOLR_CORE_NAME);
         config.setName("Solr Yard Test");
         config.setDescription("The Solr Yard instance used to execute the Unit Tests defined for the Yard Interface");
+        //use the default Solr Index configuration for this tests
+        config.setDefaultInitialisation(true);
         // create the Yard used for the tests
         yard = new SolrYard(config);
     }

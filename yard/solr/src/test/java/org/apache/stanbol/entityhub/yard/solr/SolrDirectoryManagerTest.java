@@ -21,6 +21,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import org.apache.stanbol.entityhub.yard.solr.impl.SolrYard;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -44,7 +46,7 @@ public class SolrDirectoryManagerTest {
     private static Collection<String> expectedIndexNames = Arrays.asList("entityhub", "cache");
 
     @BeforeClass
-    public static void init() {
+    public static void init() throws IOException {
         // set to "${basedir}/some/rel/path" to test if property substitution works!
         String prefix = System.getProperty("basedir") == null ? "." : "${basedir}";
         String resolvedPrefix = System.getProperty("basedir") == null ? "." : System.getProperty("basedir");
@@ -64,6 +66,11 @@ public class SolrDirectoryManagerTest {
                                             + SolrDirectoryManager.class.getSimpleName()
                                             + " service by using " + ServiceLoader.class.getName() + "!");
         }
+        //setup the entityhub and the cache index (as it would be done by the Entityhub)
+        //to test this initialisation
+        solrDirectoryManager.createSolrDirectory("entityhub", "entityhub", null);
+        //for the cahce we use the default configuration
+        solrDirectoryManager.createSolrDirectory("cache", SolrYard.DEFAULT_SOLR_INDEX_CONFIGURATION_NAME, null);
     }
 
     @Test
@@ -74,12 +81,12 @@ public class SolrDirectoryManagerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testNullIndexName() {
-        solrDirectoryManager.getSolrIndexDirectory(null, true);
+        solrDirectoryManager.getSolrIndexDirectory(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testEmptyIndexName() {
-        solrDirectoryManager.getSolrIndexDirectory("", true);
+        solrDirectoryManager.getSolrIndexDirectory("");
     }
 
     @Test
@@ -104,11 +111,12 @@ public class SolrDirectoryManagerTest {
     }
 
     @Test
-    public void testDefaultIndexInitialisation() {
+    public void testDefaultIndexInitialisation() throws IOException {
         // this is actually tested already by the initialisation of the
         // SolrYardTest ...
         String indexName = "testIndexInitialisation_" + System.currentTimeMillis();
-        File indexDir = solrDirectoryManager.getSolrIndexDirectory(indexName, true);
+        File indexDir = solrDirectoryManager.createSolrDirectory(indexName, 
+            SolrYard.DEFAULT_SOLR_INDEX_CONFIGURATION_NAME, null);
         assertEquals(new File(expectedManagedDirectory, indexName), indexDir);
         assertTrue(indexDir.isDirectory());
     }

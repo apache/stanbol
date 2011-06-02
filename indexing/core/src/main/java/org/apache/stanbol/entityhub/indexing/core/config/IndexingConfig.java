@@ -43,6 +43,7 @@ import org.apache.stanbol.entityhub.indexing.core.normaliser.DefaultNormaliser;
 import org.apache.stanbol.entityhub.indexing.core.normaliser.ScoreNormaliser;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
+import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -360,7 +361,7 @@ public class IndexingConfig {
      */
     private File getResource(File root, String fileName) {
         File resource = new File(root,fileName);
-        log.info("reauest for Resource {} (folder: {})",fileName,root);
+        log.info("request for Resource {} (folder: {})",fileName,root);
         if(resource.getAbsoluteFile().exists()){
             log.info(" > rquested Resource present");
         } else if(copyFromClasspath(resource)){
@@ -960,5 +961,16 @@ public class IndexingConfig {
      */
     public Map<String,Object> getConfig(String name,boolean required) throws IllegalArgumentException {
         return loadConfig(name, configDir, required);
+    }
+    /**
+     * Getter for configured properties directly by the key. Typically used
+     * to get Properties as defined by the {@link SiteConfiguration} interface
+     * @param key the key of the property
+     * @return the value or <code>null</code> if not present. Might also return
+     * <code>null</code> in case the value <code>null</code> is set for the
+     * requested property.
+     */
+    public Object getProperty(String key){
+        return configuration.get(key);
     }
 }

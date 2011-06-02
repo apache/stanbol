@@ -24,11 +24,8 @@ public class RdfIndexingSourceTest {
     
     private static final Logger log = LoggerFactory.getLogger(RdfIndexingSourceTest.class);
 
-    private static final String TEXT_TEST_FIELD = "http://www.geonames.org/ontology#alternateName";
-    private static final String VALUE_TEST_FIELD = "http://www.w3.org/2003/01/geo/wgs84_pos#lat";
-    private static final String REFERENCE_TEST_FIELD = "http://www.w3.org/2002/07/owl#sameAs";
     
-    private static final long NUMBER_OF_ENTITIES_EXPECTED = 3;
+    private static final long NUMBER_OF_ENTITIES_EXPECTED = 5;
     
     private static final String CONFIG_ROOT = 
         FilenameUtils.separatorsToSystem("testConfigs/");
@@ -84,10 +81,12 @@ public class RdfIndexingSourceTest {
             validateRepresentation(it.getRepresentation(), entity);
             count++;
         }
-        //check if all entities where found
-        assertEquals(String.format("%s Entities expected but %s processed!",
+        //check if all entities where indexed
+        //this checks if more entities are indexed as listed by the
+        //textEntityIDs.txt file
+        assertTrue(String.format("> %s Entities expected but only %s processed!",
             NUMBER_OF_ENTITIES_EXPECTED,count), 
-            NUMBER_OF_ENTITIES_EXPECTED, count);
+            NUMBER_OF_ENTITIES_EXPECTED <= count);
     }
     @Test
     public void testEntityDataProvider(){
@@ -131,33 +130,42 @@ public class RdfIndexingSourceTest {
         testReference(rep);
     }
     private void testText(Representation rep){
-        Iterator<Text> values = rep.getText(TEXT_TEST_FIELD);
-        assertTrue(values.hasNext());
-        while(values.hasNext()){
-            Text text = values.next();
-            assertNotNull(text);
-            String lang = text.getLanguage();
-            //log.info(text.getText()+" | "+text.getLanguage()+" | "+text.getText().endsWith("@"+lang));
-            //this texts that the text does not contain the @{lang} as added by
-            //the toString method of the RDF Literal java class
-            assertFalse("Labels MUST NOT end with the Language! value="+text.getText(),
-                text.getText().endsWith("@"+lang));
+        for(Iterator<String> fields = rep.getFieldNames();fields.hasNext();){
+            String field = fields.next();
+            Iterator<Text> values = rep.getText(field);
+//            assertTrue(values.hasNext());
+            while(values.hasNext()){
+                Text text = values.next();
+                assertNotNull(text);
+                String lang = text.getLanguage();
+                //log.info(text.getText()+" | "+text.getLanguage()+" | "+text.getText().endsWith("@"+lang));
+                //this texts that the text does not contain the @{lang} as added by
+                //the toString method of the RDF Literal java class
+                assertFalse("Labels MUST NOT end with the Language! value="+text.getText(),
+                    text.getText().endsWith("@"+lang));
+            }
         }
     }
     private <T> void testValue(Representation rep, Class<T> type){
-        Iterator<T> values = rep.get(VALUE_TEST_FIELD,type);
-        assertTrue(values.hasNext());
-        while(values.hasNext()){
-            T value = values.next();
-            assertNotNull(value);
+        for(Iterator<String> fields = rep.getFieldNames();fields.hasNext();){
+            String field = fields.next();
+            Iterator<T> values = rep.get(field,type);
+            assertTrue(values.hasNext());
+            while(values.hasNext()){
+                T value = values.next();
+                assertNotNull(value);
+            }
         }
     }
     private void testReference(Representation rep){
-        Iterator<Reference> values = rep.getReferences(REFERENCE_TEST_FIELD);
-        assertTrue(values.hasNext());
-        while(values.hasNext()){
-            Reference ref = values.next();
-            assertNotNull(ref);
+        for(Iterator<String> fields = rep.getFieldNames();fields.hasNext();){
+            String field = fields.next();
+            Iterator<Reference> values = rep.getReferences(field);
+//            assertTrue(values.hasNext());
+            while(values.hasNext()){
+                Reference ref = values.next();
+                assertNotNull(ref);
+            }
         }
     }
 }

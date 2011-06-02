@@ -498,7 +498,7 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
         return licenseList.isEmpty()?null:licenseList.toArray(new License[licenseList.size()]);
     }
     public final void setLicenses(License[] licenses){
-        
+        //TODO: implement
     }
     
     

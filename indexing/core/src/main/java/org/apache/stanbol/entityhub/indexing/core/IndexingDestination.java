@@ -1,5 +1,7 @@
 package org.apache.stanbol.entityhub.indexing.core;
 
+import java.util.Dictionary;
+
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 
 
@@ -18,7 +20,8 @@ public interface IndexingDestination extends IndexingComponent {
     
     /**
      * Called after the indexing is completed to allow some post processing and
-     * packaging of the stored data.
+     * packaging the stored data and writing of the OSGI configuration used to
+     * initialise the Yard.
      */
     void finalise();
 }

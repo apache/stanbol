@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -18,6 +19,7 @@ import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.core.site.CacheUtils;
 import org.apache.stanbol.entityhub.indexing.core.IndexingDestination;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
+import org.apache.stanbol.entityhub.indexing.core.destination.OsgiConfigurationUtil;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
@@ -94,6 +96,10 @@ public class SolrYardIndexingDestination implements IndexingDestination {
      * The extension of the solrIndex reference file
      */
     public static final String SOLR_INDEX_ARCHIVE_REF_EXTENSION = ".solrindex.ref";
+    /**
+     * The ID of the OSGI component used by the SolrYard implementation
+     */
+    public static final String SOLR_YARD_COMPONENT_ID = "org.apache.stanbol.entityhub.yard.solr.impl.SolrYard";
     
     /**
      * The location of the SolrIndex. This MUST BE an absolute Path in case it 
@@ -103,12 +109,6 @@ public class SolrYardIndexingDestination implements IndexingDestination {
      * {@link SolrYardConfig#getSolrServerLocation()} on {@link #solrIndexConfig}
      */
     private File solrIndexLocation;
-    /**
-     * The directory used in case an embedded Solr server is used. This value
-     * is also available by the System property with the name
-     * {@link SolrDirectoryManager#MANAGED_SOLR_DIR_PROPERTY}
-     */
-    private File managedSolrDir;
 
     /**
      * Directory holding the specialised Solr configuration or <code>null</code>
@@ -139,6 +139,8 @@ public class SolrYardIndexingDestination implements IndexingDestination {
      * created SolrIndex.
      */
     private Collection<FieldMapping> indexFieldConfiguration;
+
+    private IndexingConfig indexingConfig;
     
     /**
      * This Constructor relays on a subsequent call to 
@@ -293,10 +295,8 @@ public class SolrYardIndexingDestination implements IndexingDestination {
                         "Directory"+distDirectory.getAbsolutePath());
                 }
             }
-            solrIndexArchive = new File(distDirectory,
-                solrIndexLocation.getName()+SOLR_INDEX_ARCHIVE_EXTENSION);
-            solrIndexArchiveRef = new File(distDirectory,
-                solrIndexLocation.getName()+SOLR_INDEX_ARCHIVE_REF_EXTENSION);
+            solrIndexArchive = new File(solrIndexLocation.getName()+SOLR_INDEX_ARCHIVE_EXTENSION);
+            solrIndexArchiveRef = new File(solrIndexLocation.getName()+SOLR_INDEX_ARCHIVE_REF_EXTENSION);
         }
         return new File[]{solrIndexLocation,solrConfigLocation,
                           solrIndexArchive,solrIndexArchiveRef};
@@ -304,7 +304,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
 
     @Override
     public void setConfiguration(Map<String,Object> config) {
-        IndexingConfig indexingConfig = (IndexingConfig)config.get(IndexingConfig.KEY_INDEXING_CONFIG);
+        indexingConfig = (IndexingConfig)config.get(IndexingConfig.KEY_INDEXING_CONFIG);
         String yardName;
         //read the Yard name configuration
         Object value = config.get(PARAM_YARD_NAME);
@@ -334,7 +334,8 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         }
         //get the directors holding the solr configuration
         String solrConfig;
-        if(!config.containsKey(PARAM_SOLR_CONFIG)){ //not present -> allow default
+        if(!config.containsKey(PARAM_SOLR_CONFIG)){ //not present
+            // -> use the default config
             File configDir = indexingConfig.getConfigFile(indexName);
             if(!configDir.isDirectory()){
                 log.info("use default Solr index configuration for index "+indexName);
@@ -415,6 +416,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
 
     @Override
     public void initialise() {
+        log.info("initialise {}",getClass().getSimpleName());
         //The constructors and the setConfiguration(..) only validate the parsed
         //parameters and initialise the member variables. This method performs 
         //the the actual initialisation of the SolrYard!
@@ -422,6 +424,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         if(solrIndexConfig != null){ //can only be != null if also solrIndexLocation
             //copy the configuration
             try {
+                log.info(" ... copy Solr Configuration form {} to {}",solrIndexConfig,solrIndexLocation);
                 FileUtils.copyDirectory(solrIndexConfig, solrIndexLocation);
             } catch (IOException e) {
                 throw new IllegalStateException(String.format(
@@ -432,9 +435,11 @@ public class SolrYardIndexingDestination implements IndexingDestination {
             solrYardConfig.setDefaultInitialisation(Boolean.FALSE);
         } else {
             //allow the default initialisation
+            log.info("   ... use default Solr Configuration");
             solrYardConfig.setDefaultInitialisation(Boolean.TRUE);
         }
         try {
+            log.info("   ... create SolrYard");
             this.solrYard = new SolrYard(solrYardConfig);
         } catch (YardException e) {
             throw new IllegalStateException("Unable to initialise SolrYard "+
@@ -463,56 +468,126 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         solrYard.close();
         //zip the index and copy it over to distribution
         if(solrArchive != null){
-            //we need to get the length of the parent to calc the entry names for
-            //the archvie
-            int parentPathLength = solrIndexLocation.getAbsolutePath().length();
-            if(solrIndexLocation.getAbsolutePath().charAt(parentPathLength-1) != File.separatorChar){
-                parentPathLength++; //add the missing '/'
-            }
             try {
-                //Moved over to use java.util.zip because Apache commons compression
-                //seams not support files > 2Gb
-                ZipOutputStream out = new ZipOutputStream(new FileOutputStream(solrArchive));
-                for(File file : (Collection<File>)FileUtils.listFiles(solrIndexLocation, null, true)){
-                    if(!file.isHidden()){
-                        String name = file.getAbsolutePath().substring(parentPathLength);
-                        log.info("add "+name);
-                        out.putNextEntry(new ZipEntry(name));
-                        if(!file.isDirectory()){
-                            FileInputStream fileIn = new FileInputStream(file);
-                            IOUtils.copyLarge(fileIn,out);
-                            out.closeEntry();
-                            IOUtils.closeQuietly(fileIn);
-                        }
-                    }
-                }
-                out.finish();
-                IOUtils.closeQuietly(out);
+                writeSolrIndexArchive();
             }catch (IOException e) {
                 log.error("Error while creating Solr Archive "+solrArchive.getAbsolutePath()+
                     "! The archive will not be created!",e);
                 log.error("As a Workaround you can manually create the Solr Archive " +
-                		"by creating a ZIP archive with the contents of the Folder " +
-                		solrIndexLocation+"!");
+                        "by creating a ZIP archive with the contents of the Folder " +
+                        solrIndexLocation+"!");
             }
         }
         if(solrArchiveRef != null){
-            Properties properties = new Properties();
-            properties.setProperty("Index-Archive", solrArchive.getName());
-            properties.setProperty("Name", solrYardConfig.getName());
-            if(solrYardConfig.getDescription() != null){
-                properties.setProperty("Description", solrYardConfig.getDescription());
-            }
             try {
-                properties.store(new FileOutputStream(solrArchiveRef), null);
+                writeSolrIndexReference();
             } catch (IOException e) {
                 log.error("Error while creating Solr Archive Reference "+
                     solrArchiveRef.getAbsolutePath()+
                     "! The file will not be created!",e);
-                log.error("As a Workaround you can manually create this text file " +
-                		"and adding \"Index-Archive="+solrArchive.getName()+"\"!");
             }
         }
+        //finally create the Osgi Configuration
+        try {
+            OsgiConfigurationUtil.writeSiteConfiguration(indexingConfig);
+        } catch (IOException e) {
+            log.error("Unable to write OSGI configuration file for the referenced site",e);
+        }
+        try {
+            OsgiConfigurationUtil.writeCacheConfiguration(indexingConfig);
+        } catch (IOException e) {
+            log.error("Unable to write OSGI configuration file for the Cache",e);
+        }
+        //create the SolrYard configuration
+        try {
+            writeSolrYardConfiguration();
+        } catch (IOException e) {
+            log.error("Unable to write OSGI configuration file for the SolrYard",e);
+        }
+        //create the bundle
+        OsgiConfigurationUtil.createBundle(indexingConfig);
+    }
+    /**
+     * 
+     */
+    private void writeSolrIndexReference() throws IOException {
+        Properties properties = new Properties();
+        properties.setProperty("Index-Archive", solrArchive.getName());
+        properties.setProperty("Name", solrYardConfig.getName());
+        if(solrYardConfig.getDescription() != null){
+            properties.setProperty("Description", solrYardConfig.getDescription());
+        }
+        File solrArchiveFile = new File(
+            OsgiConfigurationUtil.getConfigDirectory(indexingConfig),solrArchiveRef.getName());
+        properties.store(new FileOutputStream(solrArchiveFile), null);
+    }
+    /**
+     * 
+     */
+    private void writeSolrIndexArchive() throws IOException{
+        //we need to get the length of the parent to calc the entry names for
+        //the archvie
+        //Note that the Archive need to include the name of the index,
+        //therefore we need use the parent dir as context
+        int parentPathLength = solrIndexLocation.getParentFile().getAbsolutePath().length();
+        if(solrIndexLocation.getAbsolutePath().charAt(parentPathLength-1) != File.separatorChar){
+            parentPathLength++; //add the missing '/'
+        }
+        //Moved over to use java.util.zip because Apache commons compression
+        //seams not support files > 2Gb
+        File solrArchiveFile = new File(indexingConfig.getDistributionFolder(),solrArchive.getName());
+        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(solrArchiveFile));
+        for(File file : (Collection<File>)FileUtils.listFiles(solrIndexLocation, null, true)){
+            if(!file.isHidden()){
+                String name = file.getAbsolutePath().substring(parentPathLength);
+                log.info("add "+name);
+                out.putNextEntry(new ZipEntry(name));
+                if(!file.isDirectory()){
+                    FileInputStream fileIn = new FileInputStream(file);
+                    IOUtils.copyLarge(fileIn,out);
+                    out.closeEntry();
+                    IOUtils.closeQuietly(fileIn);
+                }
+            }
+        }
+        out.finish();
+        IOUtils.closeQuietly(out);
+    }
+    /**
+     * @throws IOException 
+     * 
+     */
+    private void writeSolrYardConfiguration() throws IOException {
+        Dictionary<String,Object> yardConfig = OsgiConfigurationUtil.createYardConfig(indexingConfig);
+        //we need now add the solrYard specific parameters
+        String fieldBoostName = solrYardConfig.getDocumentBoostFieldName();
+        if(fieldBoostName != null){
+            yardConfig.put(SolrYard.DOCUMENT_BOOST_FIELD, fieldBoostName);
+        }
+        //TODO: fieldBoosts are currently not supported by the SolrYard Config
+        //solrYardConfig.getFieldBoosts();
+        
+        //The default values for the following parameters are OK 
+        //solrYardConfig.getMaxBooleanClauses();
+        //solrYardConfig.getMaxQueryResultNumber();
+        
+        yardConfig.put(SolrYard.SOLR_SERVER_LOCATION, solrYardConfig.getSolrServerLocation());
+        //the server type needs not to be set. It is automatically detected by
+        //the value of the server location
+        //solrYardConfig.getSolrServerType();
+        
+        //deactivate default initialisation!
+        yardConfig.put(SolrYard.SOLR_INDEX_DEFAULT_CONFIG, Boolean.FALSE);
+        
+        //for immediate commit use the default value (optionally one could also
+        //fore TRUE)
+        //yardConfig.put(SolrYard.IMMEDIATE_COMMIT, Boolean.TRUE);
+        
+        //deactivate multi yard layout!
+        yardConfig.put(SolrYard.MULTI_YARD_INDEX_LAYOUT, Boolean.FALSE);
+        
+        String solrYardConfigFileName = SOLR_YARD_COMPONENT_ID+'-'+indexingConfig.getName()+".config";
+        OsgiConfigurationUtil.writeOsgiConfig(indexingConfig,solrYardConfigFileName, yardConfig);
     }
 
     @Override
