@@ -58,6 +58,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
                 DefaultQueryFactory.getInstance(), 
                 queryString);
         } catch (JSONException e) {
+            log.error("Unable to parse Request ",e);
             String acceptedMediaType = httpHeaders.getFirst("Accept");
             throw new WebApplicationException(
                 Response.status(Status.BAD_REQUEST).

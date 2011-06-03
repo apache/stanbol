@@ -18,6 +18,8 @@ package org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 
 import org.apache.stanbol.entityhub.yard.solr.model.FieldMapper;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition;
@@ -42,7 +44,20 @@ public class LangEncoder implements IndexConstraintTypeEncoder<Collection<String
 
     @Override
     public void encode(EncodedConstraintParts constraint, Collection<String> value) {
-        if (value != null && !value.isEmpty()) { // null indicates the default language!
+        //We need to process languages, because one may parse null, or
+        //an empty list or a list that contains a single element "null"
+        Collection<String> languages;
+        if(value == null || value.isEmpty()){
+            languages = Collections.emptyList();
+        } else {
+            languages = new HashSet<String>();
+            for(String lang : value){
+                if(lang != null){
+                    languages.add(lang);
+                }
+            }
+        }
+        if (!languages.isEmpty()) {
             for (String prefix : fieldMapper.encodeLanguages(value)) {
                 constraint.addEncoded(PREFIX, SolrUtil.escapeSolrSpecialChars(prefix));
             }
@@ -50,13 +65,6 @@ public class LangEncoder implements IndexConstraintTypeEncoder<Collection<String
             // search in the language merger field of the default language
             constraint.addEncoded(PREFIX,
                 SolrUtil.escapeSolrSpecialChars(fieldMapper.getLanguageMergerField(null)));
-            // String[] prefixSuffix = fieldMapper.encodeDataType(STRING_DATATYPE);
-            // if(prefixSuffix[0] != null && !prefixSuffix[0].isEmpty()){
-            // constraint.addEncoded(PREFIX, prefixSuffix[0]);
-            // }
-            // if(prefixSuffix[1] != null && !prefixSuffix[1].isEmpty()){
-            // constraint.addEncoded(SUFFIX, prefixSuffix[1]);
-            // }
         }
     }
 
