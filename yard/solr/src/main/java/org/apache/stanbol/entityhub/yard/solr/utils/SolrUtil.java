@@ -67,7 +67,7 @@ public final class SolrUtil {
         if (IndexDataTypeEnum.TXT.getIndexType().equals(indexValue.getType())) {
             value = value.toLowerCase();
             queryConstraints = value.split(" ");
-        } else if (IndexDataTypeEnum.STR.equals(indexValue.getType())) {
+        } else if (IndexDataTypeEnum.STR.getIndexType().equals(indexValue.getType())) {
             value = value.toLowerCase();
             queryConstraints = new String[] {value.replace(' ', '+')};
         } else {
