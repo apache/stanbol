@@ -62,7 +62,13 @@
             </Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>
-              !com.jacob.test.*,
+              !com.jacob.*,
+              !jcifs.*,
+              !org.bibsonomy.*,
+              !ronaldhttpclient.*,
+              !org.htmlparser.*,
+              !org.jaudiotagger.*,
+              !org.textmining.*,
               !com.sun.image.codec.jpeg.*,
               !com.sun.javadoc,
               !com.sun.msv.*,
@@ -134,6 +140,11 @@
       <groupId>net.sourceforge</groupId>
       <artifactId>htmlcleaner</artifactId>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+    	<groupId>mp3agic</groupId>
+    	<artifactId>mp3agic</artifactId>
+    	<version>0.6</version>
     </dependency>
     <dependency>
       <groupId>com.ibm.icu</groupId>
