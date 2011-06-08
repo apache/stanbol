@@ -16,14 +16,18 @@
  */
 package org.apache.stanbol.enhancer.engines.autotagging.impl;
 
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
+import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -74,11 +78,19 @@ public class RelatedTopicEnhancementEngine implements EnhancementEngine {
                     + ci.getId());
             return;
         }
-        String text;
-        try {
-            text = IOUtils.toString(ci.getStream(),"UTF-8");
-        } catch (IOException e) {
-            throw new InvalidContentException(this, ci, e);
+        String mimeType = ci.getMimeType().split(";", 2)[0];
+        String text = "";
+        if (TEXT_PLAIN_MIMETYPE.equals(mimeType)) {
+            try {
+                text = IOUtils.toString(ci.getStream(),"UTF-8");
+            } catch (IOException e) {
+                throw new InvalidContentException(this, ci, e);
+            }
+        } else {
+            Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getId()), NIE_PLAINTEXTCONTENT, null);
+            while (it.hasNext()) {
+                text += it.next().getObject();
+            }
         }
         if (text.trim().length() == 0) {
             // TODO: make the length of the data a field of the ContentItem
@@ -107,6 +119,12 @@ public class RelatedTopicEnhancementEngine implements EnhancementEngine {
     public int canEnhance(ContentItem ci) {
            String mimeType = ci.getMimeType().split(";",2)[0];
         if (TEXT_PLAIN_MIMETYPE.equalsIgnoreCase(mimeType)) {
+            return ENHANCE_SYNCHRONOUS;
+        }
+        // check for existence of textual content in metadata
+        UriRef subj = new UriRef(ci.getId());
+        Iterator<Triple> it = ci.getMetadata().filter(subj, NIE_PLAINTEXTCONTENT, null);
+        if (it.hasNext()) {
             return ENHANCE_SYNCHRONOUS;
         }
         return CANNOT_ENHANCE;
