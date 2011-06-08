@@ -886,6 +886,39 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
           </exclusion>
+		  <!-- exclude LGPL libs -->
+		  <exclusion>
+			<groupId>ronaldhttpclient</groupId>
+			<artifactId>uncompressinputstream</artifactId>
+		  </exclusion>
+		  <exclusion>
+      		<groupId>org.htmlparser</groupId>
+      		<artifactId>htmlparser</artifactId>
+      	  </exclusion>
+      	  <exclusion>
+      		<groupId>net.sf.jacob-project</groupId>
+      		<artifactId>jacob</artifactId>
+      	  </exclusion>
+      	  <exclusion>
+      		<groupId>net.sf.jacob-project</groupId>
+      		<artifactId>jacob</artifactId>
+      	  </exclusion>
+      	  <exclusion>
+      		<groupId>org.bibsonomy</groupId>
+      		<artifactId>bibsonomy-rest-client</artifactId>
+      	  </exclusion>
+      	  <exclusion>
+      		<groupId>org.samba.jcifs</groupId>
+      		<artifactId>jcifs</artifactId>
+      	  </exclusion>
+      	  <exclusion>
+      		<groupId>org.jaudiotagger</groupId>
+      		<artifactId>jaudiotagger</artifactId>
+      	  </exclusion>
+		  <exclusion>
+		    <groupId>org.textmining</groupId>
+      		<artifactId>tm-extractors</artifactId>
+		  </exclusion>
         </exclusions>
       </dependency>
       <dependency>
