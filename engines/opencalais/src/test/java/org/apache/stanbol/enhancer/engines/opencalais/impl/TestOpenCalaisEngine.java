@@ -19,6 +19,7 @@ package org.apache.stanbol.enhancer.engines.opencalais.impl;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.HashMap;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
@@ -58,6 +59,7 @@ public class TestOpenCalaisEngine {
   @BeforeClass
   public static void oneTimeSetup() {
     calaisExtractor = new OpenCalaisEngine();
+    calaisExtractor.setCalaisTypeMap(new HashMap<UriRef,UriRef>());
     calaisExtractor.tcManager = TcManager.getInstance();
     if (TEST_LICENSE_KEY != null && TEST_LICENSE_KEY.matches("\\w+")) {
       calaisExtractor.setLicenseKey(TEST_LICENSE_KEY);
