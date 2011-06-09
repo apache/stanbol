@@ -110,7 +110,7 @@ public class TestOpenCalaisEngine {
   	try {
   	  ContentItem ci = wrapAsContentItem(TEST_TEXT);
   	  ci.getMetadata().add(new TripleImpl(new UriRef(ci.getId()), Properties.DC_LANGUAGE, LiteralFactory.getInstance().createTypedLiteral("en")));
-  		MGraph model = calaisExtractor.getCalaisAnalysis(TEST_TEXT,ci);
+  		MGraph model = calaisExtractor.getCalaisAnalysis(TEST_TEXT,"text/plain");
   		Assert.assertNotNull("No model", model);
   		Collection<CalaisEntityOccurrence> entities = calaisExtractor.queryModel(model);
   		LOG.info("Found entities: {}",entities.size());
