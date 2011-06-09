@@ -27,10 +27,10 @@ public class CalaisEntityOccurrence {
 
     public Resource id;
     public Resource type;
-    public Resource name;
+    public String name;
     public Integer offset;
     public Integer length;
-    public Resource exact;
+    public String exact;
     public String context;
     public Double relevance = -1.0;
 

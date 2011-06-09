@@ -16,9 +16,22 @@
  */
 package org.apache.stanbol.enhancer.engines.opencalais.impl;
 
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_END;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTION_CONTEXT;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
+
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -47,6 +60,7 @@ import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
 import org.apache.clerezza.rdf.core.sparql.QueryParser;
 import org.apache.clerezza.rdf.core.sparql.ResultSet;
@@ -63,14 +77,10 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
-import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.stanbol.enhancer.servicesapi.ServiceProperties.ENHANCEMENT_ENGINE_ORDERING;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.*;
 
 
 /**
@@ -112,6 +122,12 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
 
     @Property(value = "http://api.opencalais.com/enlighten/rest/")
     public static final String CALAIS_URL_KEY = "org.apache.stanbol.enhancer.engines.opencalais.url";
+    
+    @Property
+    public static final String CALAIS_TYPE_MAP_KEY = "org.apache.stanbol.enhancer.engines.opencalais.typeMap";
+    
+    @Property(value="true")
+    public static final String CALAIS_NER_ONLY_MODE_KEY = "org.apache.stanbol.enhancer.engines.opencalais.NERonly";
 
     /**
      * the URL for the Calais REST Service
@@ -122,11 +138,28 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
      * the license key from OpenCalais for using the service
      */
     private String licenseKey = null;
+    
+    private String calaisTypeMapFile = null;
+
+    /**
+     * specify whether only the NER results from OpenCalais should be used. Entity references from OpenCalais will be omitted. This mode is intended to be used with another entity tagging engine.
+     */
+    private boolean onlyNERMode;
 
     @Reference
     TcManager tcManager;
 
     BundleContext bundleContext;
+
+    /**
+     * a map for mapping Calais classes to other classes (e.g. from dbpedia)
+     */
+    private Map<UriRef,UriRef> calaisTypeMap;
+    
+    /**
+     * the default file containing type mappings. Key and value are separated by the regular expression ' ?= ?'.
+     */
+    private static final String CALAIS_TYPE_MAP_DEFAULT ="calaisTypeMap.txt";
 
     public String getLicenseKey() {
         return licenseKey;
@@ -144,11 +177,47 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
         this.calaisUrl = calaisUrl;
     }
 
+    public Map<UriRef,UriRef> getCalaisTypeMap() {
+      return calaisTypeMap;
+    }
+
+    public void setCalaisTypeMap(Map<UriRef,UriRef> calaisTypeMap) {
+      this.calaisTypeMap = calaisTypeMap;
+    }
+
     public Map<String, Object> getServiceProperties() {
         // TODO Auto-generated method stub
         return Collections.unmodifiableMap(Collections.singletonMap(
                 ENHANCEMENT_ENGINE_ORDERING,
                 (Object) defaultOrder));
+    }
+    
+    protected void loadTypeMap(String resource) {
+      InputStream in = null;
+      BufferedReader reader = null;
+      try {
+      if (resource == null || resource.trim().length()>0) {
+        in = new FileInputStream(resource);
+      }
+      else {
+        in = getClass().getClassLoader().getResourceAsStream(CALAIS_TYPE_MAP_DEFAULT);
+      }
+      reader = new BufferedReader(new InputStreamReader(in));
+      String line;
+        while ((line = (reader.readLine())) != null) {
+          if (line.startsWith("#"))
+            continue;
+          String[] entry = line.split("\\s*=\\s*");
+          if (entry.length == 2) {
+            calaisTypeMap.put(new UriRef(entry[0]), new UriRef(entry[1]));
+          }
+        }
+        reader.close();
+        in.close();
+      }
+      catch (IOException e) {
+        log.error("Error in reading type map file: {}", e.getMessage());
+      }
     }
 
     public int canEnhance(ContentItem ci) throws EngineException {
@@ -178,14 +247,16 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
     }
 
     public void computeEnhancements(ContentItem ci) throws EngineException {
+        String mimeType = ci.getMimeType().split(";", 2)[0].toLowerCase();
         String text = "";
-        if (SUPPORTED_MIMETYPES.contains(ci.getMimeType().split(";", 2)[0].toLowerCase())) {
+        if (SUPPORTED_MIMETYPES.contains(mimeType)) {
             try {
                 text = IOUtils.toString(ci.getStream(),"UTF-8");
             } catch (IOException e) {
                 throw new InvalidContentException(this, ci, e);
             }
         } else {
+            mimeType = "text/plain";
             text = getMetadataText(ci.getMetadata(), new UriRef(ci.getId()));
         }
         if (text == null) {
@@ -193,9 +264,19 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
             return;
         }
 
-        MGraph calaisModel = getCalaisAnalysis(text, ci);
+        MGraph calaisModel = getCalaisAnalysis(text, mimeType);
         if (calaisModel != null) {
             createEnhancements(queryModel(calaisModel), ci);
+            if (log.isDebugEnabled()) {
+              Serializer serializer = Serializer.getInstance();
+              ByteArrayOutputStream debugStream = new ByteArrayOutputStream();
+              serializer.serialize(debugStream, ci.getMetadata(), "application/rdf+xml");
+              try {
+                log.debug("Calais Enhancements:\n{}",debugStream.toString("UTF-8"));
+              } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+              }
+            }
         }
 
     }
@@ -218,21 +299,33 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
                     ci, this);
             MGraph model = ci.getMetadata();
             model.add(new TripleImpl(textAnnotation, DC_TYPE, occ.type));
-            model.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, occ.exact));
+            // for autotagger use the name instead of the matched term (that might be a pronoun!)
+            if (onlyNERMode) {
+                model.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT,literalFactory.createTypedLiteral(occ.name)));
+            }
+            else {
+                model.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, literalFactory.createTypedLiteral(occ.exact)));
+            }
             model.add(new TripleImpl(textAnnotation, ENHANCER_START, literalFactory.createTypedLiteral(occ.offset)));
             model.add(new TripleImpl(textAnnotation, ENHANCER_END, literalFactory.createTypedLiteral(occ.offset + occ.length)));
-            model.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, occ.exact));
             model.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_CONTEXT, literalFactory.createTypedLiteral(occ.context)));
             //create EntityAnnotation only once but add a reference to the textAnnotation
             if (entityAnnotationMap.containsKey(occ.id)) {
                 model.add(new TripleImpl(entityAnnotationMap.get(occ.id), DC_RELATION, textAnnotation));
             } else {
-                UriRef entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(ci, this);
-                entityAnnotationMap.put(occ.id, entityAnnotation);
-                model.add(new TripleImpl(entityAnnotation, DC_RELATION, textAnnotation));
-                model.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_LABEL, occ.name));
-                model.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_TYPE, occ.type));
-                model.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_REFERENCE, occ.id));
+                if (onlyNERMode) {
+              // don't create Calais specific entity annotations; let the autotagger do its's own
+              // but add a pointer to the first text annotation with that name
+                entityAnnotationMap.put(occ.id,textAnnotation);
+                }
+                else {
+//                UriRef entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(ci, this);
+//                entityAnnotationMap.put(occ.id, entityAnnotation);
+//                model.add(new TripleImpl(entityAnnotation, DC_RELATION, textAnnotation));
+//                model.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_LABEL, occ.name));
+//                model.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_TYPE, occ.type));
+//                model.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_REFERENCE, occ.id));
+                }
             }
         }
     }
@@ -246,8 +339,7 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
      *
      * @throws EngineException
      */
-    public MGraph getCalaisAnalysis(String text, ContentItem ci) throws EngineException {
-        String mimeType = ci.getMimeType().split(";", 2)[0].toLowerCase();
+    public MGraph getCalaisAnalysis(String text, String mimeType) throws EngineException {
         if (mimeType.equals("text/plain")) {
             mimeType = "text/raw";
         }
@@ -272,10 +364,13 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
                     .append("&paramsXML=")
                     .append(URLEncoder.encode(calaisParams, "UTF-8"));
             // get annotations from Calais
+            log.info("Calais request sent");
             String calaisResult =
                     doPostRequest(
                             this.getCalaisUrl(), null, postParams.toString(),
                             "application/x-www-form-urlencoded", "UTF-8");
+            log.info("Calais response received: {}",calaisResult.length());
+            log.info("Calais response:\n {}",calaisResult);
             log.debug("Calais data:\n{}", calaisResult);
             // build model from Calais result
             InputStream in = new ByteArrayInputStream(calaisResult.getBytes("utf-8"));
@@ -356,9 +451,20 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
                 CalaisEntityOccurrence occ = new CalaisEntityOccurrence();
                 Resource disambiguated = row.get("did");
                 occ.id = (disambiguated == null ? row.get("id") : disambiguated);
-                occ.type = (disambiguated == null ? row.get("type") : row.get("dtype"));
-                occ.name = row.get("name");
-                occ.exact = row.get("exact");
+                if (onlyNERMode) {
+                    occ.type = row.get("type");
+                }
+                else {
+                    occ.type = (disambiguated == null ? row.get("type") : row.get("dtype"));
+                }
+                if (calaisTypeMap != null) {
+                    UriRef mappedType = calaisTypeMap.get(occ.type);
+                    if (mappedType != null) {
+                        occ.type = mappedType;
+                    }
+                }
+                occ.name = ((Literal)row.get("name")).getLexicalForm();
+                occ.exact = ((Literal)row.get("exact")).getLexicalForm();
                 //TODO for html the offsets might not be those of the original document but refer to a cleaned up version?
                 occ.offset = Integer.valueOf(((Literal) row.get("offset")).getLexicalForm());
                 // remove brackets
@@ -373,6 +479,7 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        log.info("Found {} occurences", result.size());
         return result;
     }
 
@@ -494,8 +601,13 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
             Dictionary<String, String> properties = ce.getProperties();
             String license = properties.get(LICENSE_KEY);
             String url = properties.get(CALAIS_URL_KEY);
+            calaisTypeMapFile = properties.get(CALAIS_TYPE_MAP_KEY);
+            String standAlone = properties.get(CALAIS_NER_ONLY_MODE_KEY);
             setLicenseKey(license);
             setCalaisUrl(url);
+            calaisTypeMap = new HashMap<UriRef,UriRef>();
+            loadTypeMap(calaisTypeMapFile);
+            onlyNERMode = Boolean.parseBoolean(standAlone);
             //      this.tcManager = TcManager.getInstance();
         }
     }
