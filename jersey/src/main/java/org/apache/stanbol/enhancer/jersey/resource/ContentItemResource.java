@@ -6,6 +6,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBP
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PLACE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.GEO_LAT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.GEO_LONG;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -117,6 +118,12 @@ public class ContentItemResource extends BaseStanbolResource {
                 this.textContent = IOUtils.toString(ci.getStream(), "UTF-8");
             } else if (ci.getMimeType().startsWith("image/")) {
                 this.imageSrc = rawURI;
+            }
+            else {
+              Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getId()), NIE_PLAINTEXTCONTENT, null);
+              if (it.hasNext()) {
+                this.textContent = ((Literal)it.next().getObject()).getLexicalForm();
+              }
             }
             this.downloadHref = rawURI;
             this.metadataHref = uriInfo.getBaseUriBuilder().path("/store/metadata").path(localId).build();
