@@ -22,6 +22,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -74,6 +75,8 @@ import org.slf4j.LoggerFactory;
 import com.sun.jersey.api.view.Viewable;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 
+import eu.medsea.mimeutil.MimeUtil2;
+
 /**
  * Resource to provide a CRU[D] REST API for content items and there related
  * enhancements.
@@ -114,6 +117,8 @@ public class ContentHubRootResource extends BaseStanbolResource {
     protected List<RecentlyEnhanced> recentlyEnhanced;
 
     protected TripleCollection entityCache;
+    
+    protected MimeUtil2 mimeIdentifier;
 
     public static class RecentlyEnhanced {
 
@@ -168,6 +173,10 @@ public class ContentHubRootResource extends BaseStanbolResource {
             log.error("Missing either store={} or tcManager={}", store, tcManager);
             throw new WebApplicationException(404);
         }
+        mimeIdentifier = new MimeUtil2();
+        mimeIdentifier.registerMimeDetector("eu.medsea.mimeutil.detector.ExtensionMimeDetector");
+        mimeIdentifier.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
+        
         this.uriInfo = uriInfo;
         this.offset = offset;
         this.pageSize = pageSize;
@@ -359,12 +368,8 @@ public class ContentHubRootResource extends BaseStanbolResource {
         } else if (file != null) {
             data = FileUtils.readFileToByteArray(file);
             String lowerFilename = disposition.getFileName().toLowerCase();
-            // TODO: use a mimetype sniffer lib instead
-            if (lowerFilename.matches(".*\\.jpe?g")) {
-                mt = MediaType.valueOf("image/jpeg");
-            } else {
-                mt = APPLICATION_OCTET_STREAM_TYPE;
-            }
+            Collection<?> mimeTypes = mimeIdentifier.getMimeTypes(file);
+            mt = MediaType.valueOf(MimeUtil2.getMostSpecificMimeType(mimeTypes).toString());
         }
         if (data != null && mt != null) {
             String uri = makeContentItemUri(data).getUnicodeString();
