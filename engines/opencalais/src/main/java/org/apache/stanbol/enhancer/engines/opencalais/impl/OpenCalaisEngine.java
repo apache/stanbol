@@ -196,7 +196,7 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
       InputStream in = null;
       BufferedReader reader = null;
       try {
-      if (resource == null || resource.trim().length()>0) {
+      if (resource != null && resource.trim().length()>0) {
         in = new FileInputStream(resource);
       }
       else {
