@@ -114,6 +114,11 @@
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
     </dependency>
+    <dependency>
+			<groupId>eu.medsea.mimeutil</groupId>
+			<artifactId>mime-util</artifactId>
+	  </dependency>
+    
 
     <!-- OSGi tax -->
     <dependency>

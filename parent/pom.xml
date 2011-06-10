@@ -563,6 +563,14 @@
         <scope>provided</scope>
       </dependency>
 
+	  <!-- MimeUtil -->
+	  <dependency>
+		<groupId>eu.medsea.mimeutil</groupId>
+		<artifactId>mime-util</artifactId>
+		<version>2.1.3</version>
+		<scope>provided</scope>
+	  </dependency>
+	  
       <!-- SLF4J -->
       <dependency>
         <groupId>org.slf4j</groupId>
