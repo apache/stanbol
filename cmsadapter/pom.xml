@@ -20,6 +20,7 @@
 		<module>servicesapi</module>
 		<module>core</module>
 		<module>jcr</module>
+		<module>cmis</module>
 		<module>web</module>
 		<module>rest-client</module>
 		<module>crx-rmi</module>

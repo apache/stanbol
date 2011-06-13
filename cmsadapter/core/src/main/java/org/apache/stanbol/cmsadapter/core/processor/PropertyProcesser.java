@@ -47,7 +47,9 @@ public class PropertyProcesser {
             }
 
             String propName = propDef.getName();
-            if (propName.equals(predicateName) || propName.contains(predicateName)) {
+            String propFullName = propDef.getNamespace() + ":" + propDef.getName();
+            if (propName.equals(predicateName) || propName.contains(predicateName)
+                || propFullName.equals(predicateName)) {
                 if (annotation != null) {
                     List<CMSObject> referencedNodes = resolveReferenceNodes(prop, engine);
                     processPropertyAnnotation(annotation, subjectClass, referencedNodes, engine);
@@ -164,7 +166,8 @@ public class PropertyProcesser {
                 continue;
             }
             String propName = propDef.getName();
-            if (propName.equals(predicateName) || propName.contains(predicateName)) {
+            String propFullName = propDef.getNamespace() + ":" + propDef.getName();
+            if (propName.equals(predicateName) || propName.contains(predicateName) || propFullName.equals(predicateName)) {
                 AnnotationType annotation = getAnnotation(propertyBridge.getPropertyAnnotation());
                 processContentObjectProperty(property, propDef, contentObject, individual, annotation, engine);
                 // property found break the loop

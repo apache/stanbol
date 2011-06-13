@@ -3,6 +3,7 @@ package org.apache.stanbol.cmsadapter.servicesapi.helper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.MappingEngine;
@@ -30,6 +31,8 @@ import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.ontology.OntProperty;
+import com.hp.hpl.jena.ontology.OntResource;
+import com.hp.hpl.jena.ontology.UnionClass;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -274,8 +277,13 @@ public class OntologyResourceHelper {
             objectProperty = ontModel.createObjectProperty(propertyURI);
             objectProperty.addProperty(CMSAdapterVocabulary.CMSAD_RESOURCE_REF_PROP,
                 propertyDefinition.getUniqueRef());
-            objectProperty.addProperty(CMSAdapterVocabulary.CMSAD_PROPERTY_SOURCE_OBJECT_PROP,
-                propertyDefinition.getSourceObjectTypeRef());
+            if (propertyDefinition.getSourceObjectTypeRef() != null) {
+                objectProperty.addProperty(CMSAdapterVocabulary.CMSAD_PROPERTY_SOURCE_OBJECT_PROP,
+                    propertyDefinition.getSourceObjectTypeRef());
+            } else {
+                log.warn("Source object type reference not found on property definition {}",
+                    propertyDefinition.getLocalname());
+            }
 
             for (Resource domain : domains) {
                 objectProperty.addDomain(domain);
@@ -284,6 +292,37 @@ public class OntologyResourceHelper {
                 objectProperty.addRange(range);
             }
             log.debug("ObjectProperty {} not found, creating new one...", propertyURI);
+        } else {
+            // Add domains to union class
+            OntResource domain = objectProperty.getDomain();
+            if (domain != null) {
+                if (domain.isClass() && domain.asClass().isUnionClass()) {
+                    UnionClass unclass = domain.asClass().asUnionClass();
+                    for (Resource newDomain : domains) {
+                        unclass.addOperand(newDomain);
+                    }
+                } else {
+                    List<Resource> resources = new ArrayList<Resource>(domains);
+                    resources.add(domain);
+                    objectProperty.setDomain(createUnionClass(resources));
+                }
+            }
+
+            // Add ranges to union class
+
+            OntResource range = objectProperty.getRange();
+            if (range != null) {
+                if (range.isClass() && range.asClass().isUnionClass()) {
+                    UnionClass unclass = range.asClass().asUnionClass();
+                    for (Resource newRange : ranges) {
+                        unclass.addOperand(newRange);
+                    }
+                } else {
+                    List<Resource> resources = new ArrayList<Resource>(ranges);
+                    resources.add(range);
+                    objectProperty.setDomain(createUnionClass(resources));
+                }
+            }
         }
         return objectProperty;
     }
@@ -320,13 +359,33 @@ public class OntologyResourceHelper {
             datatypeProperty = ontModel.createDatatypeProperty(propertyURI);
             datatypeProperty.addProperty(CMSAdapterVocabulary.CMSAD_RESOURCE_REF_PROP,
                 propertyDefinition.getUniqueRef());
-            datatypeProperty.addProperty(CMSAdapterVocabulary.CMSAD_PROPERTY_SOURCE_OBJECT_PROP,
-                propertyDefinition.getSourceObjectTypeRef());
+            if (propertyDefinition.getSourceObjectTypeRef() != null) {
+                datatypeProperty.addProperty(CMSAdapterVocabulary.CMSAD_PROPERTY_SOURCE_OBJECT_PROP,
+                    propertyDefinition.getSourceObjectTypeRef());
+            } else {
+                log.info("Source object type reference not found on property definition {}",
+                    propertyDefinition.getLocalname());
+            }
 
             for (Resource domain : domains) {
                 datatypeProperty.addDomain(domain);
             }
             datatypeProperty.addRange(range);
+        } else {
+            // Add domains to union class
+            OntResource domain = datatypeProperty.getDomain();
+            if (domain != null) {
+                if (domain.isClass() && domain.asClass().isUnionClass()) {
+                    UnionClass unclass = domain.asClass().asUnionClass();
+                    for (Resource newDomain : domains) {
+                        unclass.addOperand(newDomain);
+                    }
+                } else {
+                    List<Resource> resources = new ArrayList<Resource>(domains);
+                    resources.add(domain);
+                    datatypeProperty.setDomain(createUnionClass(resources));
+                }
+            }
         }
         return datatypeProperty;
     }
@@ -339,9 +398,9 @@ public class OntologyResourceHelper {
      *            {@link OntClass}es from which union class will be created
      * @return {@link OntClass} instance.
      */
-    public OntClass createUnionClass(List<OntClass> classes) {
+    public OntClass createUnionClass(List<Resource> classes) {
         RDFList list = ontModel.createList();
-        for (OntClass klass : classes) {
+        for (Resource klass : classes) {
             list.cons(klass);
         }
         return createUnionClass(list);
@@ -380,6 +439,8 @@ public class OntologyResourceHelper {
             range = XSD.unsignedLong;
         } else if (propType == PropType.LONG) {
             range = XSD.unsignedLong;
+        } else if (propType == PropType.INTEGER) {
+            range = XSD.integer;
         } else {
             range = XSD.normalizedString;
             log.warn("{} property type is not supported yet. XSD.normalizedString is set as default range",
@@ -506,7 +567,7 @@ public class OntologyResourceHelper {
     public void deleteObjectTypeProperties(String objectTypeRef) {
         List<Statement> props = ontModel.listStatements(null,
             CMSAdapterVocabulary.CMSAD_PROPERTY_SOURCE_OBJECT_PROP, objectTypeRef).toList();
-        for(Statement s : props) {
+        for (Statement s : props) {
             deleteStatementsByResource(s.getSubject());
         }
     }

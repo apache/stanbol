@@ -14,6 +14,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.cmsadapter.cmis.processor.CMISNodeTypeLifter;
 import org.apache.stanbol.cmsadapter.core.decorated.DObjectFactoryImp;
 import org.apache.stanbol.cmsadapter.jcr.processor.JCRNodeTypeLifter;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.OntologyResourceHelper;
@@ -95,7 +96,7 @@ public class MappingEngineImpl implements MappingEngine {
             if (connectionType.contentEquals("JCR")) {
                 new JCRNodeTypeLifter(this).lift();
             } else if (connectionType.contentEquals("CMIS")) {
-                logger.warn("Currently there is no lifter for CMIS protocol");
+                new CMISNodeTypeLifter(this).liftNodes();
             }
         } catch (RepositoryException e) {
             logger.warn("Lifting error", e);

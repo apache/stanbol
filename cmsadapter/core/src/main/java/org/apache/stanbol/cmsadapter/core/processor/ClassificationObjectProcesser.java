@@ -77,6 +77,7 @@ public class ClassificationObjectProcesser extends BaseProcessor implements Proc
                             cmsObjects.add(adapter.wrapAsDObject(o));
                         }
                     } catch (RepositoryAccessException e) {
+                        logger.warn("Error at processor", e);
                         logger.warn("Failed to obtain CMS Objects for query {}", cb.getQuery());
                         continue;
                     }
