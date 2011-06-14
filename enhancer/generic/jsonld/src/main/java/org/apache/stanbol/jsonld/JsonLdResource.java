@@ -12,6 +12,7 @@ import java.util.Map;
 public class JsonLdResource {
 
     private String subject;
+    private String profile;
     private List<String> types = new ArrayList<String>();
     private Map<String, String> coercionMap = new HashMap<String, String>();
     private Map<String, Object> propertyMap = new HashMap<String, Object>();
@@ -22,6 +23,14 @@ public class JsonLdResource {
 
     public void setSubject(String subject) {
         this.subject = subject;
+    }
+
+    public String getProfile() {
+        return profile;
+    }
+
+    public void setProfile(String profile) {
+        this.profile = profile;
     }
 
     public void addType(String type) {
