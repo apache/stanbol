@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Licensed to the Apache Software Foundation (ASF) under one or more
-    contributor license agreements. See the NOTICE file distributed with
-    this work for additional information regarding copyright ownership.
-    The ASF licenses this file to You under the Apache License, Version
-    2.0 (the "License"); you may not use this file except in compliance
-    with the License. You may obtain a copy of the License at
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0 Unless required by
-    applicable law or agreed to in writing, software distributed under the
-    License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-    CONDITIONS OF ANY KIND, either express or implied. See the License for
-    the specific language governing permissions and limitations under the
-    License.
-  -->
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -30,38 +30,112 @@
   <artifactId>org.apache.stanbol.reengineer.web</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Reengineer Web</name>
+  <name>Apache Stanbol Reengineer Web Home</name>
   <description>Set of rest services to deal with reengineer tasks</description>
+  
+  <build>
+    <!-- make it an OSGi bundle -->
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>
+              org.apache.stanbol.reengineer.web.*
+            </Export-Package>
+            <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl
+            </Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>
+            <Import-Package>
+              org.semanticweb.owlapi.*,
+              *
+            </Import-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  
+  <!-- make it an OSGi bundle -->
+  <!-- <build>
+    
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>
+              org.apache.stanbol.reengineer.web.*;version=${stanbol-version}
+            </Export-Package>
+            <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl
+            </Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>
+            <Import-Package>
+              org.semanticweb.owlapi.*,
+              !javax.servlet.jsp.*,
+              !org.apache.tools.*,
+              !org.mortbay.*,
+              !org.apache.xpath.*,
+              !org.jdom.*,
+              !org.jaxen.*,
+              !org.apache.xml.*,
+              !org.mozilla.javascript.*,
+              !org.python.*,
+              !org.dom4j.*,
+              !org.apache.log.*,
+              *
+            </Import-Package>
+            <Embed-Dependency>freemarker</Embed-Dependency>
+            <_nouses>true</_nouses>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.0.2</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>-->
 
   <dependencies>
 
-    <!-- dependencies on other IKS modules -->
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.core</artifactId>
-      <version>0.12-incubating-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.rdfjson</artifactId>
-      <version>0.3-incubating-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.jaxrs.rdf.providers</artifactId>
-      <version>0.13-incubating-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
-      <version>0.9-incubating-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
+    <!-- Clerezza dependencies -->
+    	<dependency>
+    	  <groupId>org.apache.clerezza</groupId>
+    	  <artifactId>org.apache.clerezza.rdf.core</artifactId>
+    	</dependency>
+    	<dependency>
+    	  <groupId>org.apache.clerezza</groupId>
+    	  <artifactId>org.apache.clerezza.jaxrs.rdf.providers</artifactId>
+    	</dependency>
+    	<dependency>
+    	  <groupId>org.apache.clerezza</groupId>
+    	  <artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
+    	</dependency>
+    	<dependency>
+    	  <groupId>org.apache.clerezza</groupId>
+    	  <artifactId>org.apache.clerezza.rdf.jena.parser</artifactId>
+    	</dependency>
 
     <!-- specific deps for this project -->
+	<!-- Jersey, servlet and freemarker -->
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
@@ -76,33 +150,15 @@
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-json</artifactId>
       <version>${jersey-version}</version>
-      <exclusions>
-        <!-- jaxb is now part of java 6 -->
-        <exclusion>
-          <groupId>com.sun.xml.bind</groupId>
-          <artifactId>jaxb-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.sun.xml.bind</groupId>
-          <artifactId>jaxb-impl</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
-    <!--
-       <dependency> <groupId>com.sun.jersey.contribs</groupId>
-       <artifactId>jersey-multipart</artifactId> <version>1.4</version>
-       </dependency>
-     -->
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
-      <version>2.4</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>freemarker</groupId>
       <artifactId>freemarker</artifactId>
-      <version>2.3.9</version>
+	  <version>2.3.9</version>
     </dependency>
     <!-- indirect dependency for freemarker -->
     <dependency>
@@ -137,20 +193,14 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>4.1.0</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
-      <version>4.1.0</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
-      <version>1.2.0</version>
-      <scope>provided</scope>
     </dependency>
 
     <!-- for tests -->
@@ -189,7 +239,6 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>${stanbol-version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -205,19 +254,6 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- OWL deps -->
-    <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>jena</artifactId>
-      <version>2.6.2</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>owlapi</groupId>
-      <artifactId>owlapi</artifactId>
-      <version>3.0.0</version>
-      <scope>provided</scope>
-    </dependency>
     
     		<!-- Diagnostics deps -->
 		<dependency> <!-- we use log4j 1.2 -->
@@ -269,56 +305,5 @@
         <url>http://stlab.istc.cnr.it/software/maven/repo</url>
     </repository>
   </repositories>
-
-  <build>
-    <!-- make it an OSGi bundle -->
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Export-Package>
-              >org.apache.stanbol.reengineer.web.*;version=${stanbol-version}
-            </Export-Package>
-            <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl
-            </Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
-            <Import-Package>
-              org.semanticweb.owlapi.*,
-              !javax.servlet.jsp.*,
-              !org.apache.tools.*,
-              !org.mortbay.*,
-              !org.apache.xpath.*,
-              !org.jdom.*,
-              !org.jaxen.*,
-              !org.apache.xml.*,
-              !org.mozilla.javascript.*,
-              !org.python.*,
-              !org.dom4j.*,
-              !org.apache.log.*,
-              *
-            </Import-Package>
-            <Embed-Dependency>freemarker</Embed-Dependency>
-            <_nouses>true</_nouses>
-          </instructions>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.0.2</version>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 
 </project>

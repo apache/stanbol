@@ -3,11 +3,13 @@ package org.apache.stanbol.ontologymanager.web.resource;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+
 import com.sun.jersey.api.view.ImplicitProduces;
 
-@Path("/documentation/restful")
+@Path("/ontonet/documentation/restful")
 @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
-public class RESTfulResource extends NavigationMixin {
+public class RESTfulResource extends BaseStanbolResource {
 
 }
 

@@ -17,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.stanbol.commons.web.base.format.KRFormat;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.reasoners.base.api.ConsistentRefactorer;
 import org.apache.stanbol.reasoners.base.api.InconcistencyException;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
@@ -33,8 +34,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * @author alessandro
  * 
  */
-@Path("/refactor")
-public class ConsistentRefactoring {
+@Path("/reasoners/refactor")
+public class ConsistentRefactoring extends BaseStanbolResource{
 
     protected ConsistentRefactorer refactorer;
 

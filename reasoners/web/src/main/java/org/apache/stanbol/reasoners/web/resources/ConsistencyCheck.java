@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OWLDuplicateSafeLoader;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
@@ -70,8 +71,8 @@ import com.hp.hpl.jena.rdf.model.Resource;
  * 
  * @author elvio
  */
-@Path("/check-consistency")
-public class ConsistencyCheck {
+@Path("/reasoners/check-consistency")
+public class ConsistencyCheck extends BaseStanbolResource{
 
 	private RuleStore kresRuleStore;
 	private OWLOntology inputowl;

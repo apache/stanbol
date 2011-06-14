@@ -3,23 +3,28 @@ package org.apache.stanbol.ontologymanager.web;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.util.Properties;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.apache.stanbol.commons.testing.jarexec.JarExecutor;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.representation.Form;
 
 
+
 public class JettyServerTest {
 
     public static final int __PORT = 9999;
+    
+    public static final String __JAR_FOLDER = "../ontonet/target";
+    
+    public static final String __PROP_JAR_NAME_REGEXP = "org.apache.stanbol.*ontologymanager.*jar$";
 
     public static final String __TEST_URI = "http://localhost:" + __PORT + "/";
 
@@ -43,17 +48,17 @@ public class JettyServerTest {
 
     public static final String SCOPE2_URI = _ROOT_URI + "/" + "TestScope2";
 
-    private static JettyServer server;
+    private static JarExecutor server;
 
     @BeforeClass
     public static void startServer() throws Exception {
-        server = new JettyServer();
-        server.start(__TEST_URI);
-    }
-
-    @AfterClass
-    public static void stopServer() throws Exception {
-        server.stop();
+        Properties properties = new Properties();
+        properties.put(JarExecutor.PROP_SERVER_PORT, String.valueOf(__PORT));
+        properties.put(JarExecutor.PROP_JAR_FOLDER, __JAR_FOLDER);
+        properties.put(JarExecutor.PROP_JAR_NAME_REGEXP, __PROP_JAR_NAME_REGEXP);
+        
+        server = JarExecutor.getInstance(properties);
+        server.start();
     }
 
     private Client client;
@@ -62,10 +67,6 @@ public class JettyServerTest {
 
     @Before
     public void setUp() throws Exception {
-
-        // simulate OSGi runtime by registering the components to test manually
-
-        server.setAttribute("", null);
 
         // Serializer serializer = new Serializer();
         // serializer.bindSerializingProvider(new JenaSerializerProvider());

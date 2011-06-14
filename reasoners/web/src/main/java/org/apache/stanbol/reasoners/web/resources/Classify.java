@@ -65,13 +65,14 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import org.apache.stanbol.commons.web.base.format.KRFormat;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
 /**
  *
  * @author elvio
  */
-@Path("/classify")
-public class Classify {
+@Path("/reasoners/classify")
+public class Classify extends BaseStanbolResource{
 
      private RuleStore kresRuleStore;
      private OWLOntology inputowl;

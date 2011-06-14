@@ -26,6 +26,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
@@ -69,8 +70,8 @@ import com.hp.hpl.jena.rdf.model.Resource;
  *
  * 
  */
-@Path("/enrichment")
-public class Enrichment {
+@Path("/reasoners/enrichment")
+public class Enrichment extends BaseStanbolResource{
 
     private RuleStore kresRuleStore;
     private OWLOntology inputowl;

@@ -39,9 +39,10 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import org.apache.stanbol.commons.web.base.format.KRFormat;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
-@Path("/session")
-public class SessionResource extends NavigationMixin {
+@Path("/ontonet/session")
+public class SessionResource extends BaseStanbolResource {
 
     /*
      * Placeholder for the ONManager to be fetched from the servlet context.

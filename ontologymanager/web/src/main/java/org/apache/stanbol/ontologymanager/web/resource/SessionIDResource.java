@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
@@ -18,8 +19,8 @@ import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.renderers.SessionRenderer;
 import org.semanticweb.owlapi.model.IRI;
 
-@Path("/session/{id:.+}")
-public class SessionIDResource extends NavigationMixin {
+@Path("/ontonet/session/{id:.+}")
+public class SessionIDResource extends BaseStanbolResource {
 
 	/*
 	 * Placeholder for the ONManager to be fetched from the servlet context.

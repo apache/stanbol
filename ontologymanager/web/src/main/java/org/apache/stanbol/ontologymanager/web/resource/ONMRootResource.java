@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.stanbol.commons.web.base.format.KRFormat;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
 /**
  * The main Web resource of the KReS ontology manager. All the scopes, sessions and ontologies are accessible
@@ -38,8 +39,8 @@ import org.apache.stanbol.commons.web.base.format.KRFormat;
  * @author alessandro
  * 
  */
-@Path("/ontology")
-public class ONMRootResource extends NavigationMixin {
+@Path("/ontonet/ontology")
+public class ONMRootResource extends BaseStanbolResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 

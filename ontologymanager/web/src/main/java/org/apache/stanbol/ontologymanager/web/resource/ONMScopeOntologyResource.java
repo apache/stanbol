@@ -22,6 +22,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
@@ -53,8 +54,8 @@ import org.slf4j.LoggerFactory;
  * @author alessandro
  * 
  */
-@Path("/ontology/{scopeid}/{uri:.+}")
-public class ONMScopeOntologyResource extends NavigationMixin {
+@Path("/ontonet/ontology/{scopeid}/{uri:.+}")
+public class ONMScopeOntologyResource extends BaseStanbolResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 

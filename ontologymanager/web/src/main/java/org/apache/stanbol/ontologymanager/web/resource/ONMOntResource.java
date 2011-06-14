@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
@@ -27,8 +28,8 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Path("/ontology/get")
-public class ONMOntResource extends NavigationMixin {
+@Path("/ontonet/ontology/get")
+public class ONMOntResource extends BaseStanbolResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 

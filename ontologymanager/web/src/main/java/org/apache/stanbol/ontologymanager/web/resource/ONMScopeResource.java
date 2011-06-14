@@ -27,6 +27,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
@@ -45,8 +46,8 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Path("/ontology/{scopeid}")
-public class ONMScopeResource extends NavigationMixin {
+@Path("/ontonet/ontology/{scopeid}")
+public class ONMScopeResource extends BaseStanbolResource {
 
 	private Logger log = LoggerFactory.getLogger(getClass());
 

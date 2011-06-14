@@ -21,6 +21,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.NoSuchStoreException;
@@ -39,9 +40,9 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.ImplicitProduces;
 
-@Path("/graphs")
+@Path("/ontonet/graphs")
 @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
-public class GraphsResource extends NavigationMixin {
+public class GraphsResource extends BaseStanbolResource {
 
     protected TcManager tcManager;
     protected ONManager onManager;
