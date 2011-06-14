@@ -9,11 +9,21 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * JSON-LD serialization API.
+ * The JsonLd class provides an API to create a JSON-LD object structure and to serialize this structure.
  * 
- * @author fabianc
+ * <p>
+ * This implementation is based on the JSON-LD specification version 20110201. Available online at <a
+ * href="http://www.json-ld.org/spec/ED/20110201/">http://www.json-ld.org/spec/ED/20110201/</a>.
+ * 
+ * @author Fabian Christ
  */
 public class JsonLd {
+
+    public static final String CONTEXT = "@context";
+    public static final String TYPES = "#types";
+    public static final String PROFILE = "@profile";
+    public static final String SUBJECT = "@";
+    public static final String IRI = "@iri";
 
     // Map Namespace -> Prefix
     private Map<String,String> namespacePrefixMap = new HashMap<String,String>();
@@ -22,11 +32,8 @@ public class JsonLd {
     private Map<String,JsonLdResource> resourceMap = new TreeMap<String,JsonLdResource>(new JsonComparator());
 
     /**
-     * Flag to control whether the namespace prefix map should be used to shorten IRIs to prefix notation
-     * during serialization. Default value is <code>true</code>.<br />
-     * <br />
-     * <b>Note:</b> If you already put values into this JSON-LD instance with prefix notation, you should set
-     * this to <code>false</code> before starting the serialization.
+     * Flag to control whether the namespace prefix map should be used to shorten URIs to CURIEs during
+     * serialization. Default value is <code>true</code>.
      */
     private boolean applyNamespaces = true;
 
@@ -37,9 +44,42 @@ public class JsonLd {
     private boolean useJointGraphs = true;
 
     /**
-     * Flag to control whether type coercion should be applied. Default value is <code>true</code>.
+     * Flag to control whether type coercion should be applied on serialization. Default value is
+     * <code>false</code>.
      */
     private boolean useTypeCoercion = false;
+
+    /**
+     * Flag that indicates whether this JSON-LD object represents a JSON-LD profile.
+     */
+    private final boolean representsProfile;
+
+    public JsonLd() {
+        this.representsProfile = false;
+    }
+
+    public JsonLd(boolean representsProfile) {
+        this.representsProfile = representsProfile;
+    }
+
+    /**
+     * Adds the given resource to this JsonLd object using the resource's subject as key. If the key is NULL
+     * and there does not exist a resource with an empty String as key the resource will be added using
+     * an empty String ("") as key. Otherwise an @IllegalArgumentException is thrown.
+     * 
+     * @param resource
+     */
+    public void put(JsonLdResource resource) {
+        if (resource.getSubject() != null) {
+            this.resourceMap.put(resource.getSubject(), resource);
+        }
+        else if (!this.resourceMap.containsKey("")) {
+            this.resourceMap.put("", resource);
+        }
+        else {
+            throw new IllegalArgumentException();
+        }
+    }
 
     /**
      * Add the given resource to this JsonLd object using the resourceId as key.
@@ -51,6 +91,14 @@ public class JsonLd {
         this.resourceMap.put(resourceId, resource);
     }
 
+    /**
+     * Serializes the JSON-LD object structures to a String.
+     * 
+     * <p>
+     * If you want to have a formatted output with indentation, use the toString(int indent) variant.
+     * 
+     * @return JSON-LD as unformatted String.
+     */
     @Override
     public String toString() {
         if (useJointGraphs) {
@@ -64,6 +112,14 @@ public class JsonLd {
         }
     }
 
+    /**
+     * Serializes the JSON-LD object structure to a beautified String using indentation. The output is
+     * formatted using the specified indentation size.
+     * 
+     * @param indent
+     *            Number of whitespace chars used for indentation.
+     * @return JSON-LD as formatted String.
+     */
     public String toString(int indent) {
         if (useJointGraphs) {
             Map<String,Object> json = createJointGraph();
@@ -97,8 +153,13 @@ public class JsonLd {
                 }
 
                 // put subject
-                if (resource.getSubject() != null) {
-                    subjectObject.put("@", resource.getSubject());
+                if (resource.getSubject() != null && !resource.getSubject().isEmpty()) {
+                    subjectObject.put(SUBJECT, handleCURIEs(resource.getSubject()));
+                }
+
+                // put profile
+                if (resource.getProfile() != null && !resource.getProfile().isEmpty()) {
+                    subjectObject.put(PROFILE, handleCURIEs(resource.getProfile()));
                 }
 
                 // put types
@@ -130,9 +191,16 @@ public class JsonLd {
 
                 JsonLdResource resource = resourceMap.get(subject);
 
-                // put subject
-                if (resource.getSubject() != null) {
-                    subjectObject.put("@", resource.getSubject());
+                // put subject if this is not a profile
+                if (!this.representsProfile) {
+                    if (resource.getSubject() != null && !resource.getSubject().isEmpty()) {
+                        subjectObject.put(SUBJECT, handleCURIEs(resource.getSubject()));
+                    }
+                }
+
+                // put profile
+                if (resource.getProfile() != null && !resource.getProfile().isEmpty()) {
+                    subjectObject.put(PROFILE, handleCURIEs(resource.getProfile()));
                 }
 
                 // put types
@@ -180,7 +248,7 @@ public class JsonLd {
         if (!resource.getTypes().isEmpty()) {
             List<String> types = new ArrayList<String>();
             for (String type : resource.getTypes()) {
-                types.add(applyNamespace(type));
+                types.add(handleCURIEs(type));
             }
             if (types.size() == 1) {
                 subjectObject.put("a", types.get(0));
@@ -197,84 +265,207 @@ public class JsonLd {
             }
         }
     }
-    
+
     private void putCoercionTypes(Map<String,Object> jsonObject, Map<String,String> coercionMap) {
         if (!coercionMap.isEmpty()) {
-            if (this.applyNamespaces) {
-                Map<String,String> nsCoercionMap = new TreeMap<String,String>(new JsonComparator()); 
-                for (String property : coercionMap.keySet()) {
-                    nsCoercionMap.put(property, applyNamespace(coercionMap.get(property)));
-                }
-                jsonObject.put("#types", nsCoercionMap);
+            Map<String,String> nsCoercionMap = new TreeMap<String,String>(new JsonComparator());
+            for (String property : coercionMap.keySet()) {
+                nsCoercionMap.put(handleCURIEs(property), handleCURIEs(coercionMap.get(property)));
             }
-            else {
-                jsonObject.put("#types", coercionMap);
-            }
+            jsonObject.put("#types", nsCoercionMap);
         }
     }
 
     private void putProperties(Map<String,Object> jsonObject, JsonLdResource resource) {
-        for (String property : resource.getPropertyMap().keySet()) {
-            Object value = resource.getPropertyMap().get(property);
+        putProperties(jsonObject, resource.getPropertyMap(), resource.getCoercionMap());
+    }
+
+    private void putProperties(Map<String,Object> outputObject,
+                               Map<String,Object> inputMap,
+                               Map<String,String> coercionMap) {
+        for (String property : inputMap.keySet()) {
+            Object value = inputMap.get(property);
             if (value instanceof String) {
                 String strValue = (String) value;
-                if (!this.useTypeCoercion) {
-                    String type = resource.getCoercionTypeOf(property);
+                if (coercionMap != null) {
+                    String type = coercionMap.get(property);
                     if (type != null) {
-                        strValue = formatWithType(strValue, type);
+                        if (this.useTypeCoercion) {
+                            strValue = (String)doCoerce(strValue, type);
+                        } else {
+                            strValue = unCoerce(strValue, type);
+                        }
                     }
                 }
-                value = applyNamespace(strValue);
-                jsonObject.put(applyNamespace(property), value);
-            } else if (value instanceof String[]) {
-                String[] stringArray = (String[]) value;
-                List<String> valueList = new ArrayList<String>();
-                for (String uri : stringArray) {
-                    valueList.add(applyNamespace(uri));
-                }
-                List<Object> jsonArray = new ArrayList<Object>(valueList);
-                jsonObject.put(applyNamespace(property), jsonArray);
+                value = handleCURIEs(strValue);
+                outputObject.put(handleCURIEs(property), value);
             } else if (value instanceof Object[]) {
-                Object[] objectArray = (Object[]) value;
-                List<Object> jsonArray = new ArrayList<Object>();
-                for (Object object : objectArray) {
-                    jsonArray.add(object);
-                }
-                jsonObject.put(applyNamespace(property), jsonArray);
+                Object[] arrayValue = (Object[]) value;
+                putProperties(outputObject, property, arrayValue, coercionMap);
+            } else if (value instanceof Map<?,?>) {
+                Map<String,Object> valueMap = (Map<String,Object>) value;
+                Map<String,Object> subOutputObject = new HashMap<String,Object>();
+                outputObject.put(handleCURIEs(property), subOutputObject);
+                putProperties(subOutputObject, valueMap, coercionMap);
+            } else if (value instanceof JsonLdIRI) {
+                JsonLdIRI iriValue = (JsonLdIRI) value;
+                Map<String,Object> iriObject = new HashMap<String,Object>();
+                iriObject.put("@iri", handleCURIEs(iriValue.getIRI()));
+                outputObject.put(handleCURIEs(property), iriObject);
             } else {
-                if (!this.useTypeCoercion) {
-                    String type = resource.getCoercionTypeOf(property);
+                if (coercionMap != null) {
+                    String type = coercionMap.get(property);
                     if (type != null) {
-                        String strValue = formatWithType(value.toString(), type);
-                        jsonObject.put(applyNamespace(property), applyNamespace(strValue));
-                    }
-                    else {
-                        jsonObject.put(applyNamespace(property), value);
+                        Object objValue = null;
+                        if (this.useTypeCoercion) {
+                            objValue = doCoerce(value.toString(), type);
+                        } else {
+                            objValue = unCoerce(value.toString(), type);
+                        }
+                        
+                        if (objValue instanceof String) {
+                            String strValue = (String) objValue;
+                            outputObject.put(handleCURIEs(property), handleCURIEs(strValue));
+                        }
+                        else {
+                            outputObject.put(handleCURIEs(property), objValue);
+                        }
+                    } else {
+                        outputObject.put(handleCURIEs(property), value);
                     }
                 } else {
-                    jsonObject.put(applyNamespace(property), value);
+                    outputObject.put(handleCURIEs(property), value);
                 }
             }
         }
     }
 
-    private String formatWithType(String strValue, String type) {
-        strValue = "\"" + strValue + "\"^^<" + type + ">";
+    private void putProperties(Map<String,Object> outputObject,
+                               String property,
+                               Object[] arrayValue,
+                               Map<String,String> coercionMap) {
+        if (arrayValue instanceof String[]) {
+            String[] stringArray = (String[]) arrayValue;
+            List<String> valueList = new ArrayList<String>();
+            for (String uri : stringArray) {
+                valueList.add(handleCURIEs(uri));
+            }
+            outputObject.put(handleCURIEs(property), valueList);
+        } else {
+            List<Object> valueList = new ArrayList<Object>();
+            for (Object object : arrayValue) {
+                if (object instanceof Map<?,?>) {
+                    // The value of an array element is a Map. Handle maps recursively.
+                    Map<String,Object> inputMap = (Map<String,Object>) object;
+                    Map<String,Object> subOutputObject = new HashMap<String,Object>();
+                    valueList.add(subOutputObject);
+                    putProperties(subOutputObject, inputMap, coercionMap);
+                } else if (object instanceof JsonLdIRI) {
+                    JsonLdIRI iriValue = (JsonLdIRI) object;
+                    Map<String,Object> iriObject = new HashMap<String,Object>();
+                    iriObject.put("@iri", handleCURIEs(iriValue.getIRI()));
+                    valueList.add(iriObject);
+                } else {
+                    // Don't know what it is - just add it
+                    valueList.add(object);
+                }
+            }
+
+            // Add the converted values
+            outputObject.put(handleCURIEs(property), valueList);
+        }
+    }
+
+    /**
+     * Appends the type to the Value if not present.
+     * 
+     * @param strValue
+     * @param type
+     * @return
+     */
+    private String unCoerce(String strValue, String type) {
+        String typeSuffix = "^^" + unCURIE((type));
+        if (!strValue.endsWith(typeSuffix)) {
+            strValue = "\"" + strValue + "\"^^<" + type + ">";
+        }
         return strValue;
     }
 
-    private String applyNamespace(String uri) {
-        if (applyNamespaces) {
-            for (String namespace : namespacePrefixMap.keySet()) {
-                String prefix = namespacePrefixMap.get(namespace) + ":";
-                uri = uri.replaceAll(namespace, prefix);
+    /**
+     * Removes the type from the value and handles conversion to Integer and Boolean.
+     * 
+     * @param strValue
+     * @param type
+     * @return
+     */
+    private Object doCoerce(String strValue, String type) {
+        String typeSuffix = "^^" + unCURIE((type));
+        strValue = strValue.replace(typeSuffix, "");
+        strValue = strValue.replaceAll("\"", "");
+        return convertValueType(strValue);
+    }
+
+    /**
+     * Converts a given object to Integer or Boolean if the object is instance of one of those types.
+     * 
+     * @param strValue
+     * @return
+     */
+    private Object convertValueType(String strValue) {
+        // check if value can be interpreted as integer
+        try {
+            return Integer.valueOf(strValue);
+        }
+        catch (Throwable t) {};
+        
+        // check if value can be interpreted as boolean
+        if (strValue.equalsIgnoreCase("true") || strValue.equalsIgnoreCase("false")) {
+            return Boolean.valueOf(strValue);
+        }
+        
+        return strValue;
+    }
+    
+    /**
+     * Convert URI to CURIE if namespaces should be applied and CURIEs to URIs if namespaces should not be
+     * applied.
+     * 
+     * @param uri
+     *            That may be in CURIE form.
+     * @return
+     */
+    private String handleCURIEs(String uri) {
+        if (this.applyNamespaces) {
+            uri = doCURIE(uri);
+        } else {
+            uri = unCURIE(uri);
+        }
+
+        return uri;
+    }
+
+    private String doCURIE(String uri) {
+        for (String namespace : namespacePrefixMap.keySet()) {
+            String prefix = namespacePrefixMap.get(namespace) + ":";
+            if (!uri.startsWith(prefix)) {
+                uri = uri.replace(namespace, prefix);
+            }
+        }
+        return uri;
+    }
+
+    private String unCURIE(String uri) {
+        for (String namespace : namespacePrefixMap.keySet()) {
+            String prefix = namespacePrefixMap.get(namespace) + ":";
+            if (uri.startsWith(prefix)) {
+                uri = uri.replace(prefix, namespace);
             }
         }
         return uri;
     }
 
     /**
-     * Return the JSON-LD Resource for the given subject.
+     * Return the JSON-LD resource for the given subject.
      */
     public JsonLdResource getResource(String subject) {
         return resourceMap.get(subject);
@@ -372,4 +563,12 @@ public class JsonLd {
         this.useTypeCoercion = useTypeCoercion;
     }
 
+    /**
+     * Check whether this JSON-LD object represents a JSON-LD profile.
+     * 
+     * @return <code>true</code> if this is a profile, <code>false</code> otherwise.
+     */
+    public boolean representsProfile() {
+        return this.representsProfile;
+    }
 }

@@ -3,16 +3,15 @@ package org.apache.stanbol.jsonld;
 import java.util.List;
 import java.util.Map;
 
-
 /**
- * Class to serialize a JSON object structure whereby the JSON structure is
- * defined by the basic data types Map and List.
- *
+ * Class to serialize a JSON object structure whereby the JSON structure is defined by the basic data types
+ * Map and List.
+ * 
  * @author Fabian Christ
  */
 public class JsonSerializer {
 
-    public static String toString(Map<String, Object> jsonMap) {
+    public static String toString(Map<String,Object> jsonMap) {
         StringBuffer sb = new StringBuffer();
 
         appendJsonMap(jsonMap, sb, 0, 0);
@@ -21,7 +20,7 @@ public class JsonSerializer {
         return sb.toString();
     }
 
-    public static String toString(Map<String, Object> jsonMap, int indent) {
+    public static String toString(Map<String,Object> jsonMap, int indent) {
         StringBuffer sb = new StringBuffer();
 
         appendJsonMap(jsonMap, sb, indent, 0);
@@ -45,8 +44,8 @@ public class JsonSerializer {
 
         return sb.toString();
     }
-    
-    private static void appendJsonMap(Map<String, Object> jsonMap, StringBuffer sb, int indent, int level) {
+
+    private static void appendJsonMap(Map<String,Object> jsonMap, StringBuffer sb, int indent, int level) {
         sb.append('{');
         level = increaseIndentationLevel(sb, indent, level);
         for (String key : jsonMap.keySet()) {
@@ -77,20 +76,18 @@ public class JsonSerializer {
             appendQuoted(strValue, sb);
             sb.append(',');
             appendLinefeed(sb, indent);
-        }
-        else if (object instanceof Map<?,?>) {
-            Map<String, Object> mapValue = (Map<String, Object>) object;
+        } else if (object instanceof Map<?,?>) {
+            Map<String,Object> mapValue = (Map<String,Object>) object;
             appendJsonMap(mapValue, sb, indent, level);
-        }
-        else if (object instanceof List<?>) {
+        } else if (object instanceof List<?>) {
             List<Object> lstValue = (List<Object>) object;
             appendList(lstValue, sb, indent, level);
             sb.append(',');
             appendLinefeed(sb, indent);
-        }
-        else {
+        } else {
             sb.append(object.toString());
             sb.append(',');
+            appendLinefeed(sb, indent);
         }
     }
 
@@ -112,44 +109,44 @@ public class JsonSerializer {
         for (int i = 0; i < string.length(); i++) {
             char ch = string.charAt(i);
             switch (ch) {
-            case '\\':
-            case '"':
-                sb.append('\\');
-                sb.append(ch);
-                break;
-            case '/':
-                sb.append('\\');
-                sb.append(ch);
-                break;
-            case '\b':
-                sb.append("\\b");
-                break;
-            case '\t':
-                sb.append("\\t");
-                break;
-            case '\n':
-                sb.append("\\n");
-                break;
-            case '\f':
-                sb.append("\\f");
-                break;
-            case '\r':
-                sb.append("\\r");
-                break;
-            default:
-                if (ch < ' ') {
-                    String str = "000" + Integer.toHexString(ch);
-                    sb.append("\\u" + str.substring(str.length() - 4));
-                } else {
+                case '\\':
+                case '"':
+                    sb.append('\\');
                     sb.append(ch);
-                }
+                    break;
+                case '/':
+                    sb.append('\\');
+                    sb.append(ch);
+                    break;
+                case '\b':
+                    sb.append("\\b");
+                    break;
+                case '\t':
+                    sb.append("\\t");
+                    break;
+                case '\n':
+                    sb.append("\\n");
+                    break;
+                case '\f':
+                    sb.append("\\f");
+                    break;
+                case '\r':
+                    sb.append("\\r");
+                    break;
+                default:
+                    if (ch < ' ') {
+                        String str = "000" + Integer.toHexString(ch);
+                        sb.append("\\u" + str.substring(str.length() - 4));
+                    } else {
+                        sb.append(ch);
+                    }
             }
         }
         sb.append('"');
     }
 
     private static void appendIndentation(StringBuffer sb, int indent, int level) {
-        for (int i=0; i<(indent*level); i++) {
+        for (int i = 0; i < (indent * level); i++) {
             sb.append(' ');
         }
     }
@@ -177,18 +174,17 @@ public class JsonSerializer {
     }
 
     /**
-     * During the serialization there are added ',' and line breaks '\n' by
-     * default that need to be deleted when not needed, e.g. at the end
-     * of a list.
+     * During the serialization there are added ',' and line breaks '\n' by default that need to be deleted
+     * when not needed, e.g. at the end of a list.
      * 
      * @param sb
      * @param indent
      */
     private static void removeOddChars(StringBuffer sb, int indent) {
         if (sb.length() > 2) {
-            sb.deleteCharAt(sb.length()-1);
+            sb.deleteCharAt(sb.length() - 1);
             if (indent > 0) {
-                sb.deleteCharAt(sb.length()-1);
+                sb.deleteCharAt(sb.length() - 1);
             }
         }
     }

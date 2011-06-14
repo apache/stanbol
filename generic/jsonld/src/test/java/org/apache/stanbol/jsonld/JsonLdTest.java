@@ -1,6 +1,9 @@
 package org.apache.stanbol.jsonld;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -39,7 +42,7 @@ public class JsonLdTest {
         assertEquals(expected, actual);
         
         String actualIndent = jsonLd.toString(4);
-        String expectedIndent = "{\n    \"#\": {\n        \"myvocab\": \"http:\\/\\/example.org\\/myvocab#\"\n    },\n    \"a\": \"foaf:Person\",\n    \"foaf:homepage\": \"<http:\\/\\/manu.sporny.org\\/>\",\n    \"foaf:name\": \"Manu Sporny\",\n    \"myvocab:credits\": 500,    \"sioc:avatar\": \"<http:\\/\\/twitter.com\\/account\\/profile_image\\/manusporny>\"\n}";
+        String expectedIndent = "{\n    \"#\": {\n        \"myvocab\": \"http:\\/\\/example.org\\/myvocab#\"\n    },\n    \"a\": \"foaf:Person\",\n    \"foaf:homepage\": \"<http:\\/\\/manu.sporny.org\\/>\",\n    \"foaf:name\": \"Manu Sporny\",\n    \"myvocab:credits\": 500,\n    \"sioc:avatar\": \"<http:\\/\\/twitter.com\\/account\\/profile_image\\/manusporny>\"\n}";
         assertEquals(expectedIndent, actualIndent);
     }
 
@@ -47,6 +50,7 @@ public class JsonLdTest {
     public void testSpecExample2_JointGraph() {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setUseTypeCoercion(false);
+        jsonLd.setUseJointGraphs(true);
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
 
         JsonLdResource r1 = new JsonLdResource();
@@ -223,6 +227,90 @@ public class JsonLdTest {
         String expectedIndent = "{\n    \"#\": {\n        \"dc\": \"http:\\/\\/purl.org\\/dc\\/terms\\/\",\n        \"xsd\": \"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"\n    },\n    \"dc:modified\": \"2010-05-29T14:17:39+02:00^^xsd:dateTime\"\n}";
         assertEquals(expectedIndent, actualIndent);
     }
+    
+    @Test
+    public void testSpecExample5TypedLiteralsCoercion() {
+        JsonLd jsonLd = new JsonLd();
+        jsonLd.setApplyNamespaces(false);
+        jsonLd.setUseTypeCoercion(true);
+        
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("<http://example.org/people#joebob>");
+        String nick = "\"stu\"^^http://www.w3.org/2001/XMLSchema#string";
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nick);
+        r1.getCoercionMap().put("http://xmlns.com/foaf/0.1/nick", "xsd:string");
+        jsonLd.put("r1", r1);
+
+        String actual = jsonLd.toString();
+        String expected = "{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\",\"#types\":{\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/nick\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string\"}},\"@\":\"<http:\\/\\/example.org\\/people#joebob>\",\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/nick\":\"stu\"}";
+        assertEquals(expected, actual);
+    }
+    
+    @Test
+    public void testSpecExample5TypedLiteralsNsCoercion() {
+        JsonLd jsonLd = new JsonLd();
+        jsonLd.setApplyNamespaces(true);
+        jsonLd.setUseTypeCoercion(true);
+        
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("<http://example.org/people#joebob>");
+        String nick = "\"stu\"^^http://www.w3.org/2001/XMLSchema#string";
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nick);
+        r1.getCoercionMap().put("http://xmlns.com/foaf/0.1/nick", "xsd:string");
+        jsonLd.put("r1", r1);
+
+        String actual = jsonLd.toString();
+        String expected = "{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\",\"#types\":{\"foaf:nick\":\"xsd:string\"}},\"@\":\"<http:\\/\\/example.org\\/people#joebob>\",\"foaf:nick\":\"stu\"}";
+        assertEquals(expected, actual);
+    }
+    
+    @Test
+    public void testSpecExample5TypedLiteralsNoCoercion() {
+        JsonLd jsonLd = new JsonLd();
+        jsonLd.setApplyNamespaces(false);
+        jsonLd.setUseTypeCoercion(false);
+        
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("<http://example.org/people#joebob>");
+        String nick = "\"stu\"^^http://www.w3.org/2001/XMLSchema#string";
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nick);
+        r1.getCoercionMap().put("http://xmlns.com/foaf/0.1/nick", "xsd:string");
+        jsonLd.put("r1", r1);
+
+        String actual = jsonLd.toString();
+        String expected = "{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"},\"@\":\"<http:\\/\\/example.org\\/people#joebob>\",\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/nick\":\"\\\"stu\\\"^^http:\\/\\/www.w3.org\\/2001\\/XMLSchema#string\"}";
+        assertEquals(expected, actual);
+    }
+    
+    @Test
+    public void testSpecExample5TypedLiteralsNsNoCoercion() {
+        JsonLd jsonLd = new JsonLd();
+        jsonLd.setApplyNamespaces(true);
+        jsonLd.setUseTypeCoercion(false);
+        
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("<http://example.org/people#joebob>");
+        String nick = "\"stu\"^^http://www.w3.org/2001/XMLSchema#string";
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nick);
+        r1.getCoercionMap().put("http://xmlns.com/foaf/0.1/nick", "xsd:string");
+        jsonLd.put("r1", r1);
+
+        String actual = jsonLd.toString();
+        String expected = "{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"},\"@\":\"<http:\\/\\/example.org\\/people#joebob>\",\"foaf:nick\":\"\\\"stu\\\"^^xsd:string\"}";
+        assertEquals(expected, actual);
+    }
 
     @Test
     public void testSpecExample6MultipleObjects() {
@@ -245,7 +333,7 @@ public class JsonLdTest {
         String expectedIndent = "{\n    \"#\": {\n        \"foaf\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\n        \"xsd\": \"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"\n    },\n    \"@\": \"<http:\\/\\/example.org\\/people#joebob>\",\n    \"foaf:nick\": [\n        \"\\\"stu\\\"^^xsd:string\",\n        \"\\\"groknar\\\"^^xsd:string\",\n        \"\\\"radface\\\"^^xsd:string\"\n    ]\n}";
         assertEquals(expectedIndent, actualIndent);
     }
-
+    
     @Test
     public void testSpecExample7NoNSApply() {
         JsonLd jsonLd = new JsonLd();
@@ -293,7 +381,144 @@ public class JsonLdTest {
         assertEquals(expectedIndent, actualIndent);
     }
 
+    @Test
+    public void testComplexArrays() {
+        JsonLd jsonLd = new JsonLd();
+        jsonLd.setUseTypeCoercion(true);
+        jsonLd.setApplyNamespaces(false);
 
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+        jsonLd.addNamespacePrefix("http://nickworld.com/nicks/", "nick");
+        
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("<http://example.org/people#joebob>");
+        
+        Map<String,Object> nick1 = new HashMap<String,Object>();
+        nick1.put("@iri", "nick:stu");
+        
+        Map<String,Object> nick2 = new HashMap<String,Object>();
+        nick2.put("@iri", "nick:pet");
+        
+        Map<String,Object> nick3 = new HashMap<String,Object>();
+        nick3.put("@iri", "nick:flo");
+        
+        Object [] nicks = new Object [] {nick1, nick2, nick3};
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nicks);
+        jsonLd.put("r1", r1);
+
+        String actual = jsonLd.toString();
+        String expected = "{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\"nick\":\"http:\\/\\/nickworld.com\\/nicks\\/\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"},\"@\":\"<http:\\/\\/example.org\\/people#joebob>\",\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/nick\":[{\"@iri\":\"http:\\/\\/nickworld.com\\/nicks\\/stu\"},{\"@iri\":\"http:\\/\\/nickworld.com\\/nicks\\/pet\"},{\"@iri\":\"http:\\/\\/nickworld.com\\/nicks\\/flo\"}]}";
+        assertEquals(expected, actual);
+
+        String actualIndent = jsonLd.toString(4);
+        String expectedIndent = "{\n    \"#\": {\n        \"foaf\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\n        \"nick\": \"http:\\/\\/nickworld.com\\/nicks\\/\",\n        \"xsd\": \"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"\n    },\n    \"@\": \"<http:\\/\\/example.org\\/people#joebob>\",\n    \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/nick\": [\n        {\n            \"@iri\": \"http:\\/\\/nickworld.com\\/nicks\\/stu\"\n        },\n        {\n            \"@iri\": \"http:\\/\\/nickworld.com\\/nicks\\/pet\"\n        },\n        {\n            \"@iri\": \"http:\\/\\/nickworld.com\\/nicks\\/flo\"\n        }\n    ]\n}";
+        assertEquals(expectedIndent, actualIndent);
+    }
+    
+    @Test
+    public void testComplexArraysWithIRIs() {
+        JsonLd jsonLd = new JsonLd();
+        jsonLd.setUseTypeCoercion(true);
+        jsonLd.setApplyNamespaces(false);
+
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+        jsonLd.addNamespacePrefix("http://nickworld.com/nicks/", "nick");
+        
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("<http://example.org/people#joebob>");
+        
+        JsonLdIRI nick1 = new JsonLdIRI("nick:stu");
+        JsonLdIRI nick2 = new JsonLdIRI("nick:pet");
+        JsonLdIRI nick3 = new JsonLdIRI("nick:flo");
+        
+        Object [] nicks = new Object [] {nick1, nick2, nick3};
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nicks);
+        jsonLd.put("r1", r1);
+
+        String actual = jsonLd.toString();
+        String expected = "{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\"nick\":\"http:\\/\\/nickworld.com\\/nicks\\/\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"},\"@\":\"<http:\\/\\/example.org\\/people#joebob>\",\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/nick\":[{\"@iri\":\"http:\\/\\/nickworld.com\\/nicks\\/stu\"},{\"@iri\":\"http:\\/\\/nickworld.com\\/nicks\\/pet\"},{\"@iri\":\"http:\\/\\/nickworld.com\\/nicks\\/flo\"}]}";
+        assertEquals(expected, actual);
+
+        String actualIndent = jsonLd.toString(4);
+        String expectedIndent = "{\n    \"#\": {\n        \"foaf\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\n        \"nick\": \"http:\\/\\/nickworld.com\\/nicks\\/\",\n        \"xsd\": \"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"\n    },\n    \"@\": \"<http:\\/\\/example.org\\/people#joebob>\",\n    \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/nick\": [\n        {\n            \"@iri\": \"http:\\/\\/nickworld.com\\/nicks\\/stu\"\n        },\n        {\n            \"@iri\": \"http:\\/\\/nickworld.com\\/nicks\\/pet\"\n        },\n        {\n            \"@iri\": \"http:\\/\\/nickworld.com\\/nicks\\/flo\"\n        }\n    ]\n}";
+        assertEquals(expectedIndent, actualIndent);
+    }
+    
+    @Test
+    public void testComplexArraysWithIRIsWithNS() {
+        JsonLd jsonLd = new JsonLd();
+        jsonLd.setUseTypeCoercion(true);
+        jsonLd.setApplyNamespaces(true);
+
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+        jsonLd.addNamespacePrefix("http://nickworld.com/nicks/", "nick");
+        
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("<http://example.org/people#joebob>");
+        
+        JsonLdIRI nick1 = new JsonLdIRI("nick:stu");
+        JsonLdIRI nick2 = new JsonLdIRI("nick:pet");
+        JsonLdIRI nick3 = new JsonLdIRI("nick:flo");
+        
+        Object [] nicks = new Object [] {nick1, nick2, nick3};
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nicks);
+        jsonLd.put("r1", r1);
+
+        String actual = jsonLd.toString();
+        String expected = "{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\"nick\":\"http:\\/\\/nickworld.com\\/nicks\\/\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"},\"@\":\"<http:\\/\\/example.org\\/people#joebob>\",\"foaf:nick\":[{\"@iri\":\"nick:stu\"},{\"@iri\":\"nick:pet\"},{\"@iri\":\"nick:flo\"}]}";
+        assertEquals(expected, actual);
+
+        String actualIndent = jsonLd.toString(4);
+        String expectedIndent = "{\n    \"#\": {\n        \"foaf\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\n        \"nick\": \"http:\\/\\/nickworld.com\\/nicks\\/\",\n        \"xsd\": \"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"\n    },\n    \"@\": \"<http:\\/\\/example.org\\/people#joebob>\",\n    \"foaf:nick\": [\n        {\n            \"@iri\": \"nick:stu\"\n        },\n        {\n            \"@iri\": \"nick:pet\"\n        },\n        {\n            \"@iri\": \"nick:flo\"\n        }\n    ]\n}";
+        assertEquals(expectedIndent, actualIndent);
+    }
+    
+    @Test
+    public void testProfile() {
+        JsonLd jsonLd = new JsonLd(true);
+        
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+        
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setProfile("testprofile");
+        r1.setSubject("_:bnode1");
+        jsonLd.put(r1);
+        
+        assertTrue(jsonLd.representsProfile());
+        
+        String actual = jsonLd.toString();
+        String expected = "{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"},\"@profile\":\"testprofile\"}";
+        assertEquals(expected, actual);
+    }
+    
+    @Test
+    public void testIntegerValue() {
+        JsonLd jsonLd = new JsonLd();
+        jsonLd.setApplyNamespaces(true);
+        jsonLd.setUseTypeCoercion(true);
+        
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+        
+        JsonLdResource r1 = new JsonLdResource();
+        r1.putCoercionType("foaf:age", "http:\\/\\/www.w3.org\\/2001\\/XMLSchema#int");
+        r1.setSubject("_:bnode1");
+        r1.putProperty("foaf:age", 31);
+        jsonLd.put(r1);
+        
+        String actual = jsonLd.toString();
+        String expected = "{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\",\"#types\":{\"foaf:age\":\"http:\\\\\\/\\\\\\/www.w3.org\\\\\\/2001\\\\\\/XMLSchema#int\"}},\"@\":\"_:bnode1\",\"foaf:age\":31}";
+        assertEquals(expected, actual);
+        
+        String actualIndented = jsonLd.toString(2);
+        String expectedIndented = "{\n  \"#\": {\n    \"foaf\": \"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\n    \"xsd\": \"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\",\n    \"#types\": {\n      \"foaf:age\": \"http:\\\\\\/\\\\\\/www.w3.org\\\\\\/2001\\\\\\/XMLSchema#int\"\n    }\n  },\n  \"@\": \"_:bnode1\",\n  \"foaf:age\": 31\n}";
+        assertEquals(expectedIndented, actualIndented);
+    }
+    
     @SuppressWarnings("unused")
     private void toConsole(String actual) {
         System.out.println(actual);
