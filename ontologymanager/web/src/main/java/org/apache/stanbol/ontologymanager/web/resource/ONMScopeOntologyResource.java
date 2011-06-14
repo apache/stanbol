@@ -4,6 +4,7 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.net.URI;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 
@@ -31,13 +32,17 @@ import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.web.util.OntologyRenderUtils;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLImportsDeclaration;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologySetProvider;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.util.OWLOntologyMerger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,75 +105,188 @@ if (storage == null) {
     public Response getScopeOntology(@PathParam("scopeid") String scopeid,
                                      @PathParam("uri") String ontologyid,
                                      @Context UriInfo uriInfo) {
+        
+        if(!ontologyid.equals("all")){
 
-        String absur = uriInfo.getAbsolutePath().toString();
-        URI uri = URI.create(absur.substring(0, absur.lastIndexOf(ontologyid) - 1));
+            String absur = uriInfo.getAbsolutePath().toString();
+            URI uri = URI.create(absur.substring(0, absur.lastIndexOf(ontologyid) - 1));
 
-        IRI sciri = IRI.create(uri);
-        IRI ontiri = IRI.create(ontologyid);
+            IRI sciri = IRI.create(uri);
+            IRI ontiri = IRI.create(ontologyid);
 
-        // TODO: hack (ma anche no)
-        if (!ontiri.isAbsolute()) ontiri = IRI.create(absur);
+            // TODO: hack (ma anche no)
+            if (!ontiri.isAbsolute()) ontiri = IRI.create(absur);
 
-        ScopeRegistry reg = onm.getScopeRegistry();
-        OntologyScope scope = reg.getScope(sciri);
-        if (scope == null) return Response.status(NOT_FOUND).build();
+            ScopeRegistry reg = onm.getScopeRegistry();
+            OntologyScope scope = reg.getScope(sciri);
+            if (scope == null) return Response.status(NOT_FOUND).build();
 
-        /* BEGIN debug code, uncomment only for local testing */
-        OWLOntology test = null, top = null;
-        test = scope.getCustomSpace().getOntology(ontiri);
-        System.out.println("Ontology " + ontiri);
-        for (OWLImportsDeclaration imp : test.getImportsDeclarations())
-            System.out.println("\timports " + imp.getIRI());
-        top = scope.getCoreSpace().getTopOntology();
-        System.out.println("Core root for scope " + scopeid);
-        for (OWLImportsDeclaration imp : top.getImportsDeclarations())
-            System.out.println("\timports " + imp.getIRI());
-        /* END debug code */
+            /* BEGIN debug code, uncomment only for local testing */
+            OWLOntology test = null, top = null;
+            test = scope.getCustomSpace().getOntology(ontiri);
+            System.out.println("Ontology " + ontiri);
+            for (OWLImportsDeclaration imp : test.getImportsDeclarations())
+                System.out.println("\timports " + imp.getIRI());
+            top = scope.getCoreSpace().getTopOntology();
+            System.out.println("Core root for scope " + scopeid);
+            for (OWLImportsDeclaration imp : top.getImportsDeclarations())
+                System.out.println("\timports " + imp.getIRI());
+            /* END debug code */
 
-        OWLOntology ont = null;
-        // By default, always try retrieving the ontology from the custom space
-        // first.
-        OntologySpace space = scope.getCustomSpace();
-        if (space == null) space = scope.getCoreSpace();
-        if (space != null) ont = space.getOntology(ontiri);
+            OWLOntology ont = null;
+            // By default, always try retrieving the ontology from the custom space
+            // first.
+            OntologySpace space = scope.getCustomSpace();
+            if (space == null) space = scope.getCoreSpace();
+            if (space != null) ont = space.getOntology(ontiri);
 
-        if (ont == null) {
-            OWLOntologyManager man = onm.getOntologyManagerFactory().createOntologyManager(true);
-            final Set<OWLOntology> ontologies = scope.getSessionSpace(ontiri).getOntologies();
+            if (ont == null) {
+                OWLOntologyManager man = onm.getOntologyManagerFactory().createOntologyManager(true);
+                final Set<OWLOntology> ontologies = scope.getSessionSpace(ontiri).getOntologies();
 
-            OWLOntologySetProvider provider = new OWLOntologySetProvider() {
+                OWLOntologySetProvider provider = new OWLOntologySetProvider() {
 
-                @Override
-                public Set<OWLOntology> getOntologies() {
-                    // System.out.println("ID SPACE : " + ontologies);
-                    return ontologies;
+                    @Override
+                    public Set<OWLOntology> getOntologies() {
+                        // System.out.println("ID SPACE : " + ontologies);
+                        return ontologies;
+                    }
+                };
+                OWLOntologyMerger merger = new OWLOntologyMerger(provider);
+
+                /*
+                 * Set<OntologySpace> spaces = scope.getSessionSpaces(); for(OntologySpace space : spaces){
+                 * System.out.println("ID SPACE : "+space.getID()); }
+                 */
+
+                try {
+                    ont = merger.createMergedOntology(man, ontiri);
+                } catch (OWLOntologyCreationException e) {
+                    throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
                 }
-            };
-            OWLOntologyMerger merger = new OWLOntologyMerger(provider);
 
-            /*
-             * Set<OntologySpace> spaces = scope.getSessionSpaces(); for(OntologySpace space : spaces){
-             * System.out.println("ID SPACE : "+space.getID()); }
-             */
-
+            }
+            if (ont == null) {
+                return Response.status(NOT_FOUND).build();
+            }
+            String res = null;
             try {
-                ont = merger.createMergedOntology(man, ontiri);
-            } catch (OWLOntologyCreationException e) {
+                res = OntologyRenderUtils.renderOntology(ont, new RDFXMLOntologyFormat(), sciri.toString(), onm);
+            } catch (OWLOntologyStorageException e) {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             }
+            return Response.ok(/* ont */res).build();
+        }else{
+            ScopeRegistry reg = onm.getScopeRegistry();
+             String scopeID = uriInfo.getAbsolutePath().toString(); 
+             scopeID = scopeID.substring(0,scopeID.lastIndexOf("/"));
+	       OntologyScope scope = reg.getScope(IRI.create(scopeID));
+             
+		if (scope == null)
+			return Response.status(404).build();
+                
+            final Set<OWLOntology> customOntologies = scope.getCustomSpace().getOntologies();
+            
+            final Set<OWLOntology> coreOntologies = scope.getCoreSpace().getOntologies();
+            
+            final Set<OntologySpace> sessionSpaces = scope.getSessionSpaces();
+            
+            //Creo un manager per gestire tutte le ontologie 
+    	     final OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+            OWLDataFactory factory = OWLManager.getOWLDataFactory();
+		
+            //Creo un set con tutte le ontologie dello scope 
+            OWLOntologySetProvider provider = new OWLOntologySetProvider() {			
+                @Override
+                public Set<OWLOntology> getOntologies() {
+                        Set<OWLOntology> ontologies = new HashSet<OWLOntology>();
 
-        }
-        if (ont == null) {
-            return Response.status(NOT_FOUND).build();
-        }
-        String res = null;
-        try {
-            res = OntologyRenderUtils.renderOntology(ont, new RDFXMLOntologyFormat(), sciri.toString(), onm);
-        } catch (OWLOntologyStorageException e) {
-            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
-        }
-        return Response.ok(/* ont */res).build();
+                   //Inserisco le core ontologies     
+                        for(OWLOntology ontology : coreOntologies){
+                                OWLOntology ont;
+                                try {
+                                        ont = man.createOntology();
+                                        Set<OWLAxiom> axioms = ontology.getAxioms();
+                                        for(OWLAxiom axiom : axioms){
+
+                                                if(!axiom.isOfType(AxiomType.DATA_PROPERTY_ASSERTION) && 
+                                                        !axiom.isOfType(AxiomType.DATATYPE_DEFINITION) &&
+                                                        !axiom.isOfType(AxiomType.DATA_PROPERTY_DOMAIN) &&
+                                                        !axiom.isOfType(AxiomType.DATA_PROPERTY_RANGE)){
+                                                        man.addAxiom(ont, axiom);
+                                                }
+                                        }
+                                        ontologies.add(ont);
+                                } catch (OWLOntologyCreationException e) {
+                                        // TODO Auto-generated catch block
+                                        e.printStackTrace();
+                                }
+                        }
+
+                   //Inserisco le custom ontology     
+                        for(OWLOntology ontology : customOntologies){
+
+                                OWLOntology ont;
+                                try {
+                                        ont = man.createOntology();
+                                        Set<OWLAxiom> axioms = ontology.getAxioms();
+                                        for(OWLAxiom axiom : axioms){
+
+                                                if(!axiom.isOfType(AxiomType.DATA_PROPERTY_ASSERTION) && 
+                                                        !axiom.isOfType(AxiomType.DATATYPE_DEFINITION) &&
+                                                        !axiom.isOfType(AxiomType.DATA_PROPERTY_DOMAIN) &&
+                                                        !axiom.isOfType(AxiomType.DATA_PROPERTY_RANGE)){
+                                                        man.addAxiom(ont, axiom);
+                                                }
+                                        }
+                                        ontologies.add(ont);
+                                } catch (OWLOntologyCreationException e) {
+                                        // TODO Auto-generated catch block
+                                        e.printStackTrace();
+                                }
+
+                        }
+
+                        //Inserisco le session ontologies;     
+                        for(OntologySpace ontologySpace : sessionSpaces){
+                                Set<OWLOntology> sessionOntologies = ontologySpace.getOntologies();
+                                for(OWLOntology ontology : sessionOntologies){
+
+                                        OWLOntology ont;
+                                        try {
+                                                ont = man.createOntology();
+                                                Set<OWLAxiom> axioms = ontology.getAxioms();
+                                                for(OWLAxiom axiom : axioms){
+
+                                                        if(!axiom.isOfType(AxiomType.DATA_PROPERTY_ASSERTION)){
+                                                                man.addAxiom(ont, axiom);
+                                                        }
+                                                }
+
+
+                                                ontologies.add(ont);
+                                        } catch (OWLOntologyCreationException e) {
+                                                // TODO Auto-generated catch block
+                                                e.printStackTrace();
+                                        }
+
+                                }
+                        }
+                        return ontologies;
+                }
+            };
+
+            //Faccio il merger delle ontolgoie 
+            OWLOntologyMerger merger = new OWLOntologyMerger(provider);
+            OWLOntology ontology;
+            try {
+                ontology = merger.createMergedOntology(man, IRI.create("http://kres.iks-project.eu/classify"));
+            } catch (OWLOntologyCreationException ex) {
+                throw new WebApplicationException(ex, INTERNAL_SERVER_ERROR);
+            }
+	
+            return Response.ok(ontology).build();
+        }    
 
     }
 

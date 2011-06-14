@@ -9,9 +9,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URL;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -107,7 +104,7 @@ public class RuleStoreImpl implements RuleStore {
     public RuleStoreImpl(ONManager onm, Dictionary<String,Object> configuration) {
         this();
         this.onManager = onm;
-        activate(configuration);
+        //activate(configuration);
     }
 
     /**
@@ -131,8 +128,8 @@ public class RuleStoreImpl implements RuleStore {
                 Properties configProps = System.getProperties();
                 String userdir = configProps.getProperty("user.dir");
                 
-                String respath = "src/main/resources/";
-                String filepath2 = "RuleOntology/rmi_config.owl";
+                String respath = "KReSConf/";//"src/main/resources/";
+                String filepath2 ="rmi_config.owl"; //"RuleOntology/rmi_config.owl";
 //                userdir = userdir.substring(0, userdir.lastIndexOf("kres.") + 5) + "rules/";
              
                 userdir += "/";
@@ -232,24 +229,32 @@ public class RuleStoreImpl implements RuleStore {
     }
 
     protected void activate(Dictionary<String,Object> configuration) {
-
+        
         this.file = (String) configuration.get(RULE_ONTOLOGY);
         this.ruleOntologyNS = (String) configuration.get(RULE_ONTOLOGY_NAMESPACE);
-
+        
         if (file == null || file.equals("")) {
-            // InputStream ontologyStream =
-            // this.getClass().getResourceAsStream("/META-INF/conf/KReSOntologyRules.owl");
-            IRI inputontology = IRI.create("http://ontologydesignpatterns.org/ont/iks/kres/rmi_config.owl");
-            // if (inputontology == null) {
-            // log.err("Input ontology is null");
-            // }
-            try {
-                owlmodel = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(
-                    inputontology);
-            } catch (OWLOntologyCreationException e) {
-                log.error("Cannot create the ontology " + inputontology.toString(), e);
-            } catch (Exception e) {
+            String sep = System.getProperty("file.separator");
+            String filedir = System.getProperty("user.dir")+sep+"KReSConf"+sep+"rmi_config.owl";
+            
+            if((new File(filedir)).exists()){
+                this.file = filedir;
+                try {
+                    owlmodel = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(new File(file));
+                } catch (OWLOntologyCreationException e) {
+                    log.error("Cannot create the ontology " + filedir.toString(), e);
+                } catch (Exception e) {
+                    log.error("1 Rule Store: no rule ontology available.");
+                }
+            }else{    
+                IRI inputontology = IRI.create("http://ontologydesignpatterns.org/ont/iks/kres/rmi_config.owl");
+                try {
+                    owlmodel = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(inputontology);
+                } catch (OWLOntologyCreationException e) {
+                    log.error("Cannot create the ontology " + inputontology.toString(), e);
+                } catch (Exception e) {
                 log.error("Rule Store: no rule ontology available.");
+                }
             }
 
             if (owlmodel != null) {
@@ -270,7 +275,7 @@ public class RuleStoreImpl implements RuleStore {
                 }
             }
         } else {
-            IRI pathIri = IRI.create(file);
+            File pathIri = new File(file);
             try {
                 owlmodel = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(pathIri);
             } catch (OWLOntologyCreationException e) {
@@ -387,7 +392,7 @@ public class RuleStoreImpl implements RuleStore {
                     ruleList = generateKnowledgeBase(kReSRulesInKReSSyntax);
                 }
 
-                recipe = new RecipeImpl(recipeIRI, recipeDescription, ruleList);
+                recipe = (Recipe) new RecipeImpl(recipeIRI, recipeDescription, ruleList);
 
             } else {
                 throw new NoSuchRecipeException(recipeIRI);
@@ -435,12 +440,11 @@ public class RuleStoreImpl implements RuleStore {
      */
     @Override
     public void saveOntology() {
-//        try {
+        try {
             FileOutputStream fos;
-//            if (this.file.isEmpty()) {
-                File dirs = new File("./KReSConf");
-                if (!dirs.exists()) dirs.mkdir();
-                file = "./KReSConf/rmi_config.owl";
+            if (this.file.isEmpty()) {
+                String sep = System.getProperty("file.separator");
+                this.file = System.getProperty("user.dir")+sep+"KReSConf"+sep+"rmi_config.owl";
                 try {
                     fos = new FileOutputStream(file);
                     OWLManager.createOWLOntologyManager().saveOntology(owlmodel,
@@ -450,16 +454,16 @@ public class RuleStoreImpl implements RuleStore {
                 } catch (OWLOntologyStorageException e) {
                     log.error("Cannot store the ontology ", e);
                 }
-//            } else {
-//                fos = new FileOutputStream(file);
-//                this.owlmodel.getOWLOntologyManager().saveOntology(owlmodel, fos);
-//            }
+            } else {
+                fos = new FileOutputStream(file);
+                this.owlmodel.getOWLOntologyManager().saveOntology(owlmodel, fos);
+            }
 
-//        } catch (OWLOntologyStorageException ex) {
-//            log.error("Cannot store the ontology ", ex);
-//        } catch (FileNotFoundException ex) {
-//            log.error("Cannot store the ontology ", ex);
-//        }
+        } catch (OWLOntologyStorageException ex) {
+            log.error("Cannot store the ontology ", ex);
+        } catch (FileNotFoundException ex) {
+            log.error("Cannot store the ontology ", ex);
+        }
 
     }
 

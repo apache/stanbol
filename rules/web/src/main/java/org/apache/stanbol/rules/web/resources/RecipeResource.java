@@ -35,7 +35,6 @@ import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
-import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.manager.changes.AddRecipe;
 import org.apache.stanbol.rules.manager.changes.GetRecipe;
 import org.apache.stanbol.rules.manager.changes.RemoveRecipe;
@@ -50,6 +49,7 @@ import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +66,7 @@ public class RecipeResource extends BaseStanbolResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    private RuleStore kresRuleStore;
+    private RuleStoreImpl kresRuleStore;
     private ClerezzaOntologyStorage storage;
 
     /**
@@ -76,7 +76,7 @@ public class RecipeResource extends BaseStanbolResource {
      *            {To get the context where the REST service is running.}
      */
     public RecipeResource(@Context ServletContext servletContext) {
-        this.kresRuleStore = (RuleStore) servletContext.getAttribute(RuleStore.class.getName());
+        this.kresRuleStore = (RuleStoreImpl) servletContext.getAttribute(RuleStoreImpl.class.getName());
         this.onm = (ONManager) servletContext.getAttribute(ONManager.class.getName());
         //      this.storage = (OntologyStorage) servletContext
         //      .getAttribute(OntologyStorage.class.getName());
@@ -118,20 +118,16 @@ public class RecipeResource extends BaseStanbolResource {
      */
     @GET
     @Path("/{uri:.+}")
-    @Produces(value = {KRFormat.RDF_XML, KRFormat.TURTLE, KRFormat.OWL_XML, KRFormat.FUNCTIONAL_OWL,
-                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
-    public Response getRecipe(@PathParam("uri") String uri) {
+    @Produces(value = {KRFormat.RDF_XML, KRFormat.RDF_JSON, KRFormat.OWL_XML, KRFormat.FUNCTIONAL_OWL,KRFormat.MANCHESTER_OWL, KRFormat.TURTLE})
+    public Response getRecipe(@PathParam("uri") String uri) throws OWLOntologyCreationException {
         try {
-
-            GetRecipe rule = new GetRecipe(kresRuleStore);
-
+        
+            GetRecipe rule = new GetRecipe(kresRuleStore);;    
             // String ID =
             // kresRuleStore.getOntology().getOntologyID().toString().replace(">","").replace("<","")+"#";
 
             if (uri.equals("all")) {
-
                 Vector<IRI> recipe = rule.getGeneralRecipes();
-
                 if (recipe == null) {
                     // The recipe does not exists in the manager
                     return Response.status(Status.NOT_FOUND).build();
@@ -173,7 +169,6 @@ public class RecipeResource extends BaseStanbolResource {
                     // // TODO Auto-generated catch block
                     // e.printStackTrace();
                     // }
-
                     return Response.ok(newmodel).build();
                 }
 
@@ -257,11 +252,9 @@ public class RecipeResource extends BaseStanbolResource {
      *         500 Some error occurred
      */
     @POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(value = {KRFormat.RDF_XML, KRFormat.TURTLE, KRFormat.OWL_XML, KRFormat.FUNCTIONAL_OWL,
-                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
-    public Response addRecipe(@FormParam(value = "recipe") String recipe,
-                              @FormParam(value = "description") String description) {
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(value = {KRFormat.RDF_XML, KRFormat.TURTLE, KRFormat.OWL_XML, KRFormat.FUNCTIONAL_OWL,KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
+    public Response addRecipe(@FormParam(value = "recipe") String recipe, @FormParam(value = "description") String description) {
 
         try {
 

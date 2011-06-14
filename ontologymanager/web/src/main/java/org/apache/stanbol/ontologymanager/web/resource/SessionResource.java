@@ -59,7 +59,7 @@ public class SessionResource extends NavigationMixin {
             onm = new ONManagerImpl();
         }
     }
-
+    
     @PUT
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response addOntology(@QueryParam("scope") String scope,
@@ -153,7 +153,7 @@ public class SessionResource extends NavigationMixin {
         SessionOntologySpace sessionOntologySpace = ontologySpaceFactory.createSessionOntologySpace(scopeIRI);
         ontologyScope.addSessionSpace(sessionOntologySpace, ses.getID());
 
-        return Response.ok(SessionRenderer.getSessionMetadataRDF(ses)).build();
+        return Response.ok(SessionRenderer.getSessionMetadataRDFasOntology(ses)).build();
 
     }
 

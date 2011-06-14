@@ -12,8 +12,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -29,7 +27,9 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.util.OWLEntityRemover;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class will remove a rule from the KReSRuleStore used as input.<br/>
@@ -95,7 +95,7 @@ public class RemoveRule {
             if(additions.size()>0)
                 owlmanager.applyChanges(additions);
         } catch (OWLOntologyCreationException ex) {
-            ex.printStackTrace();
+            LoggerFactory.getLogger(RemoveRule.class).error("Problem to clone ontology",ex);
         }
 
     }
@@ -159,14 +159,14 @@ public class RemoveRule {
                         owlmanager.applyChanges(remover.getChanges());
                         remover.reset();
                     }else{
-                         System.err.println("The rule cannot be deleted because is used by some recipes. Pleas check the following recipes:");
-                         System.err.println(usage.toString());
+                         LoggerFactory.getLogger(RemoveRule.class).error("The rule cannot be deleted because is used by some recipes. Pleas check the following recipes:\n"+usage.toString());
                          ok = false;
                          return(ok);
                  }
 
            if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind))){
-               System.err.println("Some error occurs during deletion.");
+               LoggerFactory.getLogger(RemoveRule.class).error("Some error occurs during deletion.");
+               
                ok = false;
                return(ok);
            }else{
@@ -174,13 +174,14 @@ public class RemoveRule {
            }
 
        }else{
-           System.err.println("The rule with name "+ruleName+" is not inside the ontology. Pleas check the name.");
+           LoggerFactory.getLogger(RemoveRule.class).error("The rule with name "+ruleName+" is not inside the ontology. Pleas check the name.");
            ok =false;
            return(ok);
        }
 
-       if(ok)
-           this.storeaux.setStore(owlmodel);
+       if(ok){
+            this.storeaux.setStore(owlmodel);
+       }
 
        return ok;
    }
@@ -218,14 +219,13 @@ public class RemoveRule {
                         owlmanager.applyChanges(remover.getChanges());
                         remover.reset();
                     }else{
-                         System.err.println("The rule cannot be deleted because is used by some recipes. Pleas check the following recipes:");
-                         System.err.println(usage.toString());
+                         LoggerFactory.getLogger(RemoveRule.class).error("The rule cannot be deleted because is used by some recipes. Pleas check the following recipes:\n"+usage.toString());
                          ok = false;
                          return(ok);
                  }
 
            if(owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontocls, ontoind))){
-               System.err.println("Some error occurs during deletion.");
+               LoggerFactory.getLogger(RemoveRule.class).error("Some error occurs during deletion.");
                ok = false;
                return(ok);
            }else{
@@ -233,13 +233,14 @@ public class RemoveRule {
            }
 
        }else{
-           System.err.println("The rule with name "+ruleName+" is not inside the ontology. Pleas check the name.");
+           LoggerFactory.getLogger(RemoveRule.class).error("The rule with name "+ruleName+" is not inside the ontology. Pleas check the name.");
            ok =false;
            return(ok);
        }
 
-       if(ok)
-           this.storeaux.setStore(owlmodel);
+       if(ok){
+            this.storeaux.setStore(owlmodel);
+       }
 
        return ok;
 
@@ -268,9 +269,9 @@ public class RemoveRule {
          OWLNamedIndividual recipe = factory.getOWLNamedIndividual(recipeName);
 
          if(!owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontoclsrule, rule))){
-              System.err.println("The rule with name "+ruleName+" is not inside the ontology. Pleas check the name.");
+              LoggerFactory.getLogger(RemoveRule.class).error("The rule with name "+ruleName+" is not inside the ontology. Pleas check the name.");
               if(!owlmodel.containsAxiom(factory.getOWLClassAssertionAxiom(ontoclsrecipe, recipe))){
-                System.err.println("The rule with name "+recipeName+" is not inside the ontology. Pleas check the name.");
+                LoggerFactory.getLogger(RemoveRule.class).error("The rule with name "+recipeName+" is not inside the ontology. Pleas check the name.");
                 return false;
               }
               return false;
@@ -287,28 +288,28 @@ public class RemoveRule {
 
         String desc = getrecipe.getDescription(recipeName);
         if(desc.isEmpty()){
-            System.err.println("Description for "+recipeName+" not found");
+            LoggerFactory.getLogger(RemoveRule.class).error("Description for "+recipeName+" not found");
                 return false;
         }
 
         if(ruleseq.contains(ruleName))
             ruleseq.remove(ruleseq.indexOf(ruleName));
         else{
-            System.err.println("The rule with name "+ruleName+" is not inside the ontology. Pleas check the name.");
+            LoggerFactory.getLogger(RemoveRule.class).error("The rule with name "+ruleName+" is not inside the ontology. Pleas check the name.");
             return false;
         }
 
             //Remove the old recipe
             RemoveRecipe remove;
             try {
-            remove = new RemoveRecipe(storeaux);
+                remove = new RemoveRecipe(storeaux);
                 ok = remove.removeRecipe(recipeName);
             } catch (Exception ex) {
-                Logger.getLogger(RemoveRule.class.getName()).log(Level.SEVERE, null, ex);
+                LoggerFactory.getLogger(RemoveRule.class).error(null,ex);
             }
             
             if(!ok){
-                System.err.println("Some errors occured when delete "+ruleName+" in recipe "+recipeName);
+                LoggerFactory.getLogger(RemoveRule.class).error("Some errors occured when delete "+ruleName+" in recipe "+recipeName);
                 return false;
             }
 

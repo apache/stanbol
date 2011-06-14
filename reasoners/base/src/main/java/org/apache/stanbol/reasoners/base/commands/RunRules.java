@@ -7,19 +7,11 @@ package org.apache.stanbol.reasoners.base.commands;
 
 import java.net.URL;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
@@ -28,8 +20,12 @@ import org.semanticweb.owlapi.util.InferredOntologyGenerator;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import java.util.HashSet;
 
 import org.apache.stanbol.owl.transformation.JenaToOwlConvert;
+import org.semanticweb.owlapi.model.OWLOntologySetProvider;
+import org.semanticweb.owlapi.util.OWLOntologyMerger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -38,65 +34,11 @@ import org.apache.stanbol.owl.transformation.JenaToOwlConvert;
 public final class RunRules {
 
 
+    private OWLOntology swrlontology;
     private OWLOntology targetontology;
+    private OWLOntology workontology;
     private OWLReasoner reasoner;
     private OWLOntologyManager owlmanager;
-    private OWLOntology originalowl;
-
-    /**
-     * To create a list of imported ontlogy to be added as import declarations
-     *
-     * @param inowl {Input ontology where to get the import declarations}
-     * @return {A list of declarations}
-     */
-    private List<OWLOntologyChange> createImportList(OWLOntology inowl,OWLOntology toadd){
-
-        Iterator<OWLOntology> importedonto = inowl.getDirectImports().iterator();
-        List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
-        OWLDataFactory auxfactory = inowl.getOWLOntologyManager().getOWLDataFactory();
-
-        while(importedonto.hasNext()){
-            OWLOntology auxonto = importedonto.next();
-            additions.add(new AddImport(toadd,auxfactory.getOWLImportsDeclaration(auxonto.getOWLOntologyManager().getOntologyDocumentIRI(auxonto))));
-        }
-
-        if(additions.size()==0){
-            Iterator<OWLImportsDeclaration> importedontob = inowl.getImportsDeclarations().iterator();
-            additions = new LinkedList<OWLOntologyChange>();
-            auxfactory = inowl.getOWLOntologyManager().getOWLDataFactory();
-
-            while(importedontob.hasNext()){
-                OWLImportsDeclaration  auxontob = importedontob.next();
-                additions.add(new AddImport(toadd,auxontob));
-            }
-        }
-
-        return additions;
-    }
-
-   /**
-     * To clone ontology with all its axioms and imports declaration
-     *
-     * @param inowl {The onotlogy to be cloned}
-     * @return {An ontology with the same characteristics}
-     */
-    private void cloneOntology(OWLOntology inowl){
-
-        //Clone the targetontology
-        try {
-            this.originalowl = OWLManager.createOWLOntologyManager().createOntology(inowl.getOntologyID().getOntologyIRI());
-            OWLOntologyManager manager = this.originalowl.getOWLOntologyManager();
-            //Add axioms
-            manager.addAxioms(this.originalowl,inowl.getAxioms());
-            //Add import declaration
-            List<OWLOntologyChange> additions = createImportList(inowl,originalowl);
-            if(additions.size()>0)
-                manager.applyChanges(additions);
-        } catch (OWLOntologyCreationException ex) {
-            Logger.getLogger(RunRules.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
 
    /**
      * Constructor where inputs are the OWLOntology models contains the rules and the target ontology where to perform the reasoning (HermiT).
@@ -106,21 +48,39 @@ public final class RunRules {
      */
     public RunRules(OWLOntology SWRLruleOntology, OWLOntology targetOntology){
 
-        cloneOntology(targetOntology);
+//        cloneOntology(targetOntology);
+        this.swrlontology = SWRLruleOntology;
         this.targetontology = targetOntology;
-        this.owlmanager = originalowl.getOWLOntologyManager();
+        this.owlmanager = OWLManager.createOWLOntologyManager();
+        
+        final Set<OWLOntology> ontologies = new HashSet();
 
-        //Add SWRL to the model
-        owlmanager.addAxioms(originalowl,SWRLruleOntology.getAxioms());
-        List<OWLOntologyChange> additions = createImportList(SWRLruleOntology,originalowl);
-        if(!additions.isEmpty())
-            owlmanager.applyChanges(additions);
+        OWLOntologySetProvider provider = new OWLOntologySetProvider() {
+
+            @Override
+            public Set<OWLOntology> getOntologies() {
+                ontologies.add(targetontology);
+                ontologies.add(swrlontology);
+                return ontologies;
+            }
+            
+        };
+       
+        OWLOntologyMerger merger = new OWLOntologyMerger(provider);
+        
+        try {
+            this.workontology = merger.createMergedOntology(owlmanager, targetOntology.getOntologyID().getOntologyIRI());
+    
+        } catch (OWLOntologyCreationException ex) {
+            LoggerFactory.getLogger(RunRules.class).error("Problem to create mergedontology",ex);
+        }
 
         //Create the reasoner
-        this.reasoner = (new CreateReasoner(originalowl)).getReasoner();
+        this.reasoner = (new CreateReasoner(workontology)).getReasoner();
 
         //Prepare the reasoner
         this.reasoner.prepareReasoner();
+  
 
     }
 
@@ -133,18 +93,31 @@ public final class RunRules {
      */
     public RunRules(OWLOntology SWRLruleOntology, OWLOntology targetOntology, URL reasonerurl){
 
-        cloneOntology(targetOntology);
         this.targetontology = targetOntology;
-        this.owlmanager = originalowl.getOWLOntologyManager();
+        this.swrlontology = SWRLruleOntology;
+        
+        final Set<OWLOntology> ontologies = new HashSet();
 
-        //Add SWRL to the model
-        owlmanager.addAxioms(originalowl,SWRLruleOntology.getAxioms());
-        List<OWLOntologyChange> additions = createImportList(SWRLruleOntology,originalowl);
-        if(!additions.isEmpty())
-            owlmanager.applyChanges(additions);
+        OWLOntologySetProvider provider = new OWLOntologySetProvider() {
+
+            @Override
+            public Set<OWLOntology> getOntologies() {
+                ontologies.add(targetontology);
+                ontologies.add(swrlontology);
+                return ontologies;
+            }
+            
+        };
+        
+        OWLOntologyMerger merger = new OWLOntologyMerger(provider);
+        try {
+            this.workontology = merger.createMergedOntology(owlmanager, targetOntology.getOntologyID().getOntologyIRI());
+        } catch (OWLOntologyCreationException ex) {
+            LoggerFactory.getLogger(RunRules.class).error("Problem to create mergedontology",ex);
+        }
 
         //Create the reasoner
-        this.reasoner = (new CreateReasoner(originalowl,reasonerurl)).getReasoner();
+        this.reasoner = (new CreateReasoner(workontology,reasonerurl)).getReasoner();
 
         //Prepare the reasoner
         this.reasoner.prepareReasoner();
@@ -162,18 +135,34 @@ public final class RunRules {
         OntModel jenamodel = ModelFactory.createOntologyModel();
         jenamodel.add(SWRLruleOntology);
         OWLOntology swrlowlmodel = j2o.ModelJenaToOwlConvert(jenamodel, "RDF/XML");
-        cloneOntology(targetOntology);
+        
         this.targetontology = targetOntology;
-        this.owlmanager = originalowl.getOWLOntologyManager();
+        this.swrlontology = swrlowlmodel;
+        this.targetontology = targetOntology;
+        this.owlmanager = OWLManager.createOWLOntologyManager();
+        
+        final Set<OWLOntology> ontologies = new HashSet();
 
-        //Add SWRL to the model
-        owlmanager.addAxioms(originalowl,swrlowlmodel.getAxioms());
-        List<OWLOntologyChange> additions = createImportList(swrlowlmodel,originalowl);
-        if(!additions.isEmpty())
-            owlmanager.applyChanges(additions);
+        OWLOntologySetProvider provider = new OWLOntologySetProvider() {
+
+            @Override
+            public Set<OWLOntology> getOntologies() {
+                ontologies.add(targetontology);
+                ontologies.add(swrlontology);
+                return ontologies;
+            }
+            
+        };
+        
+        OWLOntologyMerger merger = new OWLOntologyMerger(provider);
+        try {
+            this.workontology = merger.createMergedOntology(owlmanager, targetOntology.getOntologyID().getOntologyIRI());
+        } catch (OWLOntologyCreationException ex) {
+            LoggerFactory.getLogger(RunRules.class).error("Problem to create mergedontology",ex);
+        }
 
         //Create the reasoner
-        this.reasoner = (new CreateReasoner(originalowl)).getReasoner();
+        this.reasoner = (new CreateReasoner(workontology)).getReasoner();
 
         //Prepare the reasoner
         this.reasoner.prepareReasoner();
@@ -188,23 +177,38 @@ public final class RunRules {
      * @param reasonerurl {The url of the the reasoner server end-point.}
      */
     public RunRules(Model SWRLruleOntology, OWLOntology targetOntology, URL reasonerurl){
+        
         JenaToOwlConvert j2o = new JenaToOwlConvert();
         OntModel jenamodel = ModelFactory.createOntologyModel();
         jenamodel.add(SWRLruleOntology);
         OWLOntology swrlowlmodel = j2o.ModelJenaToOwlConvert(jenamodel, "RDF/XML");
-
-        cloneOntology(targetOntology);
+        
         this.targetontology = targetOntology;
-        this.owlmanager = originalowl.getOWLOntologyManager();
+        this.swrlontology = swrlowlmodel;
+        this.targetontology = targetOntology;
+        
+        final Set<OWLOntology> ontologies = new HashSet();
 
-        //Add SWRL to the model
-        owlmanager.addAxioms(originalowl,swrlowlmodel.getAxioms());
-        List<OWLOntologyChange> additions = createImportList(swrlowlmodel,originalowl);
-        if(!additions.isEmpty())
-            owlmanager.applyChanges(additions);
+        OWLOntologySetProvider provider = new OWLOntologySetProvider() {
+
+            @Override
+            public Set<OWLOntology> getOntologies() {
+                ontologies.add(targetontology);
+                ontologies.add(swrlontology);
+                return ontologies;
+            }
+            
+        };
+        
+        OWLOntologyMerger merger = new OWLOntologyMerger(provider);
+        try {
+            this.workontology = merger.createMergedOntology(owlmanager, targetOntology.getOntologyID().getOntologyIRI());
+        } catch (OWLOntologyCreationException ex) {
+            LoggerFactory.getLogger(RunRules.class).error("Problem to create mergedontology",ex);
+        }
         
         //Create the reasoner
-        this.reasoner = (new CreateReasoner(originalowl,reasonerurl)).getReasoner();
+        this.reasoner = (new CreateReasoner(workontology,reasonerurl)).getReasoner();
         //Prepare the reasoner
         this.reasoner.prepareReasoner();
 
@@ -217,11 +221,11 @@ public final class RunRules {
      * @param newmodel {The OWLOntology model where to save the inference.}
      * @return {An OWLOntology object contains the ontology and the inferred axioms.}
      */
-    public OWLOntology runRulesReasoner(OWLOntology newmodel){
+    public OWLOntology runRulesReasoner(final OWLOntology newmodel){
 
+        try {
             InferredOntologyGenerator iogpellet  =new InferredOntologyGenerator(reasoner);
-            iogpellet.fillOntology(owlmanager, newmodel);
-            List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
+            iogpellet.fillOntology(newmodel.getOWLOntologyManager(), newmodel);
 
             Set<OWLAxiom> setx = newmodel.getAxioms();
             Iterator<OWLAxiom> iter = setx.iterator();
@@ -231,12 +235,29 @@ public final class RunRules {
                  newmodel.getOWLOntologyManager().removeAxiom(newmodel,axiom);
                  }
             }
+            
+            final Set<OWLOntology> ontologies = new HashSet();
 
-            additions = createImportList(targetontology,newmodel);
-            if(!additions.isEmpty())
-                newmodel.getOWLOntologyManager().applyChanges(additions);
+            OWLOntologySetProvider provider = new OWLOntologySetProvider() {
 
-            return newmodel;
+                @Override
+                public Set<OWLOntology> getOntologies() {
+                    ontologies.add(targetontology);
+                    ontologies.add(newmodel);
+                    return ontologies;
+                }
+
+            };
+
+            OWLOntologyMerger merger = new OWLOntologyMerger(provider);
+            OWLOntology ontologyout = merger.createMergedOntology(OWLManager.createOWLOntologyManager(), targetontology.getOntologyID().getOntologyIRI());
+            return ontologyout;
+            
+        } catch (OWLOntologyCreationException ex) {
+                LoggerFactory.getLogger(RunRules.class).error("Problem to create out ontology",ex);
+                return null;
+            }
+        
     }
 
    /**
@@ -248,7 +269,8 @@ public final class RunRules {
 
             //Create inferred axiom
             InferredOntologyGenerator ioghermit  =new InferredOntologyGenerator(reasoner);
-            ioghermit.fillOntology(owlmanager, targetontology);
+            ioghermit.fillOntology(targetontology.getOWLOntologyManager(), targetontology);
+            
             Set<OWLAxiom> setx = targetontology.getAxioms();
             Iterator<OWLAxiom> iter = setx.iterator();
             while(iter.hasNext()){
@@ -256,11 +278,7 @@ public final class RunRules {
                 if(axiom.toString().contains("Equivalent")){
                  targetontology.getOWLOntologyManager().removeAxiom(targetontology,axiom);
                  }
-            }
-
-//            OWLDataProperty noprop = newmodel.getOWLOntologyManager().getOWLDataFactory().getOWLDataProperty(IRI.create("http://www.w3.org/2002/07/owl#topDataProperty"));
-//            OWLEquivalentDataPropertiesAxiom nopropax = newmodel.getOWLOntologyManager().getOWLDataFactory().getOWLEquivalentDataPropertiesAxiom(noprop);
-//            newmodel.getOWLOntologyManager().removeAxiom(newmodel, nopropax);          
+            }         
             
             return targetontology;
      

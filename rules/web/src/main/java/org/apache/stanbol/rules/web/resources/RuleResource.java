@@ -92,25 +92,19 @@ public class RuleResource extends BaseStanbolResource{
 		 * be removed and the test should work without this code.
 		 */
         if (onm == null) {
-            log
-                    .warn("No KReSONManager in servlet context. Instantiating manually...");
-            onm = new ONManagerImpl(new TcManager(), null,
-                    new Hashtable<String, Object>());
+            log.warn("No KReSONManager in servlet context. Instantiating manually...");
+            onm = new ONManagerImpl(new TcManager(), null,new Hashtable<String, Object>());
         }
         this.storage = onm.getOntologyStore();
-		if (storage == null) {
+            if (storage == null) {
             log.warn("No OntologyStorage in servlet context. Instantiating manually...");
             storage = new ClerezzaOntologyStorage(new TcManager(),null);
 		}
 
        if (kresRuleStore == null) {
-			log
-					.warn("No KReSRuleStore with stored rules and recipes found in servlet context. Instantiating manually with default values...");
-			this.kresRuleStore = new RuleStoreImpl(onm,
-					new Hashtable<String, Object>(), "");
-			log
-					.debug("PATH TO OWL FILE LOADED: "
-							+ kresRuleStore.getFilePath());
+			log.warn("No KReSRuleStore with stored rules and recipes found in servlet context. Instantiating manually with default values...");
+			this.kresRuleStore = new RuleStoreImpl(onm, new Hashtable<String, Object>(), "");
+			log.debug("PATH TO OWL FILE LOADED: "+ kresRuleStore.getFilePath());
         }
     }
 
@@ -131,8 +125,7 @@ public class RuleResource extends BaseStanbolResource{
      */
     @GET
     @Path("/{uri:.+}")
-	@Produces(value = { KRFormat.RDF_XML, KRFormat.TURTLE,
-			KRFormat.OWL_XML })
+    @Produces(value = { KRFormat.RDF_XML, KRFormat.TURTLE, KRFormat.OWL_XML, KRFormat.RDF_JSON, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL})
     public Response getRule(@PathParam("uri") String uri){
  
       try{
@@ -255,7 +248,7 @@ public class RuleResource extends BaseStanbolResource{
     
     @GET
     @Path("/of-recipe/{uri:.+}")
-	@Produces(value = { KRFormat.RDF_XML, KRFormat.RDF_JSON })
+    @Produces(value = {KRFormat.RDF_XML, KRFormat.TURTLE, KRFormat.OWL_XML, KRFormat.FUNCTIONAL_OWL,KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
     public Response getRulesOfRecipe(@PathParam("uri") String recipeURI){
     	
     	GetRule kReSGetRule = new GetRule(kresRuleStore);
@@ -307,7 +300,8 @@ public class RuleResource extends BaseStanbolResource{
      *      500 Some error occurred
      */
     @POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(value = {KRFormat.RDF_XML, KRFormat.TURTLE, KRFormat.OWL_XML, KRFormat.FUNCTIONAL_OWL,KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
 	public Response addRuleToRecipe(@FormParam(value = "recipe") String recipe,
 			@FormParam(value = "rule") String rule,
 			@FormParam(value = "kres-syntax") String kres_syntax,
@@ -381,8 +375,7 @@ public class RuleResource extends BaseStanbolResource{
          if((kres_syntax!=null)&(description!=null)){
             //Get the rule
             AddRule inrule = new AddRule(kresRuleStore);
-				boolean ok = inrule.addRule(IRI.create(rule), kres_syntax,
-						description);
+            boolean ok = inrule.addRule(IRI.create(rule), kres_syntax, description);
             if(!ok){
                 System.err.println("PROBLEM TO ADD: "+rule);
                 return Response.status(Status.CONFLICT).build();
@@ -486,9 +479,10 @@ public class RuleResource extends BaseStanbolResource{
                 return Response.status(Status.NOT_FOUND).build();
             }
             
+            //Remove rule from recipe
             RemoveRule remove = new RemoveRule(kresRuleStore);
-				ok = remove.removeRuleFromRecipe(IRI.create(rule), IRI
-						.create(recipe));
+            ok = remove.removeRuleFromRecipe(IRI.create(rule), IRI.create(recipe));
+                                                   
             if(ok){
                 kresRuleStore.saveOntology();
                 return Response.status(Status.OK).build();
@@ -507,13 +501,12 @@ public class RuleResource extends BaseStanbolResource{
                 return Response.status(Status.NOT_FOUND).build();
             }
 
-            //Remove the old recipe
+            //Remove the old rule
             RemoveRule remove = new RemoveRule(kresRuleStore);
             ok = remove.removeRule(IRI.create(rule));
-
             if(ok){
                 kresRuleStore.saveOntology();
-                return Response.ok().build();
+                return Response.status(Status.OK).build();
             }else{
                 return Response.status(Status.NO_CONTENT).build();
             }

@@ -80,5 +80,46 @@ public class SessionRenderer {
 		return tgt.toString();
 
 	}
+        
+        
+       public static OWLOntology getSessionMetadataRDFasOntology(Session session) {
+		OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
+		OWLOntology ont = null;
+		try {
+			ont = mgr.createOntology(IRI.create(session.getID() + "/meta.owl"));
+		} catch (OWLOntologyCreationException e) {
+			LoggerFactory
+					.getLogger(ScopeSetRenderer.class)
+					.error(
+							"KReS :: could not create empty ontology for rendering sesion metadata.",
+							e);
+			return null;
+		}
+
+		List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
+
+		OWLNamedIndividual iSes = __factory.getOWLNamedIndividual(session
+				.getID());
+		additions.add(new AddAxiom(ont, __factory.getOWLClassAssertionAxiom(
+				cSession, iSes)));
+		OWLDatatype anyURI = __factory.getOWLDatatype(IRI
+				.create("http://www.w3.org/2001/XMLSchema#anyURI"));
+		OWLTypedLiteral hasIdValue = __factory.getOWLTypedLiteral(session
+				.getID().toString(), anyURI);
+		additions.add(new AddAxiom(ont, __factory
+				.getOWLDataPropertyAssertionAxiom(hasId, iSes, hasIdValue)));
+		mgr.applyChanges(additions);
+
+		StringDocumentTarget tgt = new StringDocumentTarget();
+		try {
+			mgr.saveOntology(ont, new RDFXMLOntologyFormat(), tgt);
+                    return ont;
+		} catch (OWLOntologyStorageException e) {
+			LoggerFactory.getLogger(ScopeSetRenderer.class).error("KReS :: could not save session metadata ontology.", e);
+                    return null;    
+		}
+		
+
+	} 
 
 }
