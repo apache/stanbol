@@ -18,8 +18,8 @@ import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
-import org.apache.stanbol.jsonld.JsonLd;
-import org.apache.stanbol.jsonld.JsonLdResource;
+import org.apache.stanbol.commons.jsonld.JsonLd;
+import org.apache.stanbol.commons.jsonld.JsonLdResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
