@@ -25,6 +25,7 @@
   </scm>
 
   <modules>
+    <module>jsonld</module>
     <module>web/base</module>
     <module>web/home</module>
     <module>web/sparql</module>
