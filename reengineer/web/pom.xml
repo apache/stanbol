@@ -62,58 +62,6 @@
     </plugins>
   </build>
   
-  <!-- make it an OSGi bundle -->
-  <!-- <build>
-    
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Export-Package>
-              org.apache.stanbol.reengineer.web.*;version=${stanbol-version}
-            </Export-Package>
-            <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl
-            </Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
-            <Import-Package>
-              org.semanticweb.owlapi.*,
-              !javax.servlet.jsp.*,
-              !org.apache.tools.*,
-              !org.mortbay.*,
-              !org.apache.xpath.*,
-              !org.jdom.*,
-              !org.jaxen.*,
-              !org.apache.xml.*,
-              !org.mozilla.javascript.*,
-              !org.python.*,
-              !org.dom4j.*,
-              !org.apache.log.*,
-              *
-            </Import-Package>
-            <Embed-Dependency>freemarker</Embed-Dependency>
-            <_nouses>true</_nouses>
-          </instructions>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.0.2</version>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>-->
-
   <dependencies>
 
     <!-- Clerezza dependencies -->
@@ -176,6 +124,10 @@
     </dependency>
 
     <!-- generic tax -->
+	 <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -253,29 +205,11 @@
       <version>${stanbol-version}</version>
       <scope>provided</scope>
     </dependency>
-
-    
-    		<!-- Diagnostics deps -->
-		<dependency> <!-- we use log4j 1.2 -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency> <!-- see also the log4j.properties in src/main/resources -->
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
+		
 		<!-- Testing deps -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
 			<scope>test</scope>
 		</dependency>
 

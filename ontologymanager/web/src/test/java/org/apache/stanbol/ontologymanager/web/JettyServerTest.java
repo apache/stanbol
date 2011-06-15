@@ -8,6 +8,7 @@ import java.util.Properties;
 import javax.ws.rs.WebApplicationException;
 
 import org.apache.stanbol.commons.testing.jarexec.JarExecutor;
+import org.apache.stanbol.commons.testing.stanbol.StanbolTestBase;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -18,7 +19,7 @@ import com.sun.jersey.api.representation.Form;
 
 
 
-public class JettyServerTest {
+public class JettyServerTest extends StanbolTestBase{
 
     public static final int __PORT = 9999;
     

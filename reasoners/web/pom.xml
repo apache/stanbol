@@ -32,9 +32,114 @@
 
   <name>Apache Stanbol Reasoner Web</name>
   <description>Set of rest services to deal with reasoners</description>
+  
+ <properties>
+   <!-- Set this to run the server on a specific port -->
+   <http.port></http.port>
+ 
+   <!-- Set this to run tests against an existing server instance -->
+   <test.server.url></test.server.url>
+
+   <!-- Options for the VM that executes our runnable jar -->
+   <jar.executor.vm.options>-Xmx512m -Dorg.apache.stanbol.offline.mode=true</jar.executor.vm.options>
+
+   <!-- Set this to true to keep the runnable jar running - useful to debug tests -->
+   <keepJarRunning>false</keepJarRunning>
+ </properties>
+ 
+ <build>
+   <!-- make it an OSGi bundle -->
+	<plugins>
+     <plugin>
+       <groupId>org.apache.felix</groupId>
+       <artifactId>maven-scr-plugin</artifactId>
+     </plugin>
+     <plugin>
+       <groupId>org.apache.felix</groupId>
+       <artifactId>maven-bundle-plugin</artifactId>
+       <extensions>true</extensions>
+       <configuration>
+         <instructions>
+           <Export-Package>
+              org.apache.stanbol.reasoners.web.*
+           </Export-Package>
+           <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl
+           </Embed-Dependency>
+           <Embed-Transitive>true</Embed-Transitive>
+           <Import-Package>
+           !org.apache.felix.http.jetty, 
+           !org.mortbay.jetty.*,
+           *
+           </Import-Package>
+         </instructions>
+       </configuration>
+     </plugin>
+	  <plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-dependency-plugin</artifactId>
+       <executions>
+         <execution>
+           <id>copy-runnable-jar</id>
+           <goals>
+             <goal>copy-dependencies</goal>
+           </goals>
+           <phase>process-resources</phase>
+           <configuration>
+             <includeArtifactIds>org.apache.stanbol.launchers.full</includeArtifactIds>
+             <excludeTransitive>true</excludeTransitive>
+             <overWriteReleases>false</overWriteReleases>
+             <overWriteSnapshots>false</overWriteSnapshots>
+           </configuration>
+         </execution>
+       </executions>
+     </plugin>
+     <plugin>
+       <!-- Find free ports to run our server -->
+       <groupId>org.codehaus.mojo</groupId>
+       <artifactId>build-helper-maven-plugin</artifactId>
+       <executions>
+         <execution>
+           <id>reserve-server-port</id>
+           <goals>
+             <goal>reserve-network-port</goal>
+           </goals>
+           <phase>process-resources</phase>
+           <configuration>
+             <portNames>
+               <portName>http.port</portName>
+             </portNames>
+           </configuration>
+         </execution>
+       </executions>
+     </plugin>
+     <plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-surefire-plugin</artifactId>
+       <configuration>
+         <systemPropertyVariables>
+           <test.server.url>${test.server.url}</test.server.url>
+           <jar.executor.server.port>${http.port}</jar.executor.server.port>
+           <jar.executor.vm.options>${jar.executor.vm.options}</jar.executor.vm.options>
+           <jar.executor.jar.folder>${project.basedir}/target/dependency</jar.executor.jar.folder>
+           <jar.executor.jar.name.regexp>org.apache.stanbol.*full.*jar$</jar.executor.jar.name.regexp>
+           <keepJarRunning>${keepJarRunning}</keepJarRunning>
+           <server.ready.timeout.seconds>180</server.ready.timeout.seconds>
+           <server.ready.path.1>/:stanbol.css</server.ready.path.1>
+           <server.ready.path.2>/engines:There are currently</server.ready.path.2>
+           <server.ready.path.3>/contenthub:Recently uploaded Content Items</server.ready.path.3>
+         </systemPropertyVariables>
+       </configuration>
+     </plugin>
+   </plugins>
+ </build>
 
   <dependencies>
-
+	<dependency>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>org.apache.stanbol.launchers.full</artifactId>
+		<version>0.9-SNAPSHOT</version>
+    	<scope>provided</scope>
+   	</dependency>
     <!-- dependencies on other IKS modules -->
     <dependency>
       <groupId>org.apache.clerezza</groupId>
@@ -120,17 +225,17 @@
     </dependency>
 
     <!-- generic tax -->
+	<dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>1.4</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
-      <version>2.4</version>
-      <scope>provided</scope>
     </dependency>
 
     <!-- OSGi tax -->
@@ -241,18 +346,6 @@
       <version>3.0.0</version>
       <scope>provided</scope>
     </dependency>
-    
- 		<!-- Diagnostics deps -->
-		<dependency> <!-- we use log4j 1.2 -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency> <!-- see also the log4j.properties in src/main/resources -->
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<scope>runtime</scope>
-		</dependency>
 
 		<!-- Testing deps -->
 		<dependency>
@@ -261,16 +354,17 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.testing.jarexec</artifactId>
 			<version>${stanbol-version}</version>
 			<scope>test</scope>
 		</dependency>
+	<dependency>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
+		<version>${stanbol-version}</version>
+		<scope>test</scope>
+	</dependency>
   </dependencies>
 
 
@@ -298,81 +392,5 @@
         <url>http://stlab.istc.cnr.it/software/maven/repo</url>
     </repository>
   </repositories>
-
-  <build>
-    <!-- make it an OSGi bundle -->
-   <!-- <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Export-Package>
-              org.apache.stanbol.reasoners.web.*;version=${stanbol-version}
-            </Export-Package>
-            <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl
-            </Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
-            <Import-Package>
-              org.semanticweb.owlapi.*,
-              !javax.servlet.jsp.*,
-              !org.apache.tools.*,
-              !org.apache.xpath.*,
-              !org.jdom.*,
-              !org.jaxen.*,
-              !org.apache.xml.*,
-              !org.mozilla.javascript.*,
-              !org.python.*,
-              !org.dom4j.*,
-              !org.apache.log.*,
-              *
-            </Import-Package>
-            <Embed-Dependency>freemarker</Embed-Dependency>
-            <_nouses>true</_nouses>
-          </instructions>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.0.2</version>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
-      </plugin>
-    </plugins> -->
-	<plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Export-Package>
-               org.apache.stanbol.reasoners.web.*;version=${stanbol-version}
-            </Export-Package>
-            <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl
-            </Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
-            <Import-Package>
-            !org.apache.felix.http.jetty, 
-            !org.mortbay.jetty.*,
-            *
-            </Import-Package>
-          </instructions>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 
 </project>

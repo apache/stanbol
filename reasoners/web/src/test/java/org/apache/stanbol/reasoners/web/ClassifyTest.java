@@ -5,59 +5,39 @@
 
 package org.apache.stanbol.reasoners.web;
 
-import java.util.Properties;
+import static org.junit.Assert.fail;
 
-import org.apache.stanbol.commons.testing.jarexec.JarExecutor;
+import org.apache.stanbol.commons.testing.stanbol.StanbolTestBase;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author elvio
+ * @author elvio, alberto musetti
  */
-public class ClassifyTest {
+public class ClassifyTest extends StanbolTestBase {
 
-    public ClassifyTest() {
-    }
+    static boolean enginesReady;
+    static boolean timedOut;
 
-    public static final int __PORT = 9999;
-
-    public static final String __JAR_FOLDER = "target";
-
-    public static final String __PROP_JAR_NAME_REGEXP = "org.apache.stanbol.reasoner.*jar$";
-
-    public static final String __TEST_URI = "http://localhost:" + __PORT + "/";
-    public static final String __ROOT_URI = __TEST_URI + "classify";
-    private static JarExecutor server;
-    private Client client;
-    private WebResource webres;
-
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-        Properties properties = new Properties();
-        properties.put(JarExecutor.PROP_SERVER_PORT, String.valueOf(__PORT));
-        properties.put(JarExecutor.PROP_JAR_FOLDER, __JAR_FOLDER);
-        properties.put(JarExecutor.PROP_JAR_NAME_REGEXP, __PROP_JAR_NAME_REGEXP);
-
-        server = JarExecutor.getInstance(properties);
-        server.start();
-    }
-
+    private static final Logger log = LoggerFactory.getLogger(ClassifyTest.class);
 
     @Before
-    public void setUp() {
-        //RuleStore store = new KReSRuleStore();
-        //server.setAttribute("kresRuleStore", store);
+    public void checkEnginesReady() throws Exception {
 
-        client = Client.create();
-        webres = client.resource(__ROOT_URI);
+        // Check only once per test run
+        if(enginesReady) {
+            return;
+        }
 
+        // If we timed out previously, don't waste time checking again
+        if(timedOut) {
+            fail("Timeout in previous check of enhancement engines, cannot run tests");
+        }
     }
 
     @After

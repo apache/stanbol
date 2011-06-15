@@ -154,7 +154,7 @@ public class SessionResource extends BaseStanbolResource {
         SessionOntologySpace sessionOntologySpace = ontologySpaceFactory.createSessionOntologySpace(scopeIRI);
         ontologyScope.addSessionSpace(sessionOntologySpace, ses.getID());
 
-        return Response.ok(SessionRenderer.getSessionMetadataRDFasOntology(ses)).build();
+        return Response.ok(SessionRenderer.getSessionMetadataRDF(ses)).build();
 
     }
 

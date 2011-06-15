@@ -52,7 +52,7 @@ public class SessionIDResource extends BaseStanbolResource {
 		if (ses == null)
 			return Response.status(Status.NO_CONTENT).build();
 
-		return Response.ok(SessionRenderer.getSessionMetadataRDFasOntology(ses)).build();
+		return Response.ok(SessionRenderer.getSessionMetadataRDF(ses)).build();
 
 	}
 
