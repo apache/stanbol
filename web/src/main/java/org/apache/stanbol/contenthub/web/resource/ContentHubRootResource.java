@@ -74,6 +74,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.Viewable;
 import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataParam;
 
 import eu.medsea.mimeutil.MimeUtil2;
 
@@ -341,13 +342,34 @@ public class ContentHubRootResource extends BaseStanbolResource {
         return createEnhanceAndRedirect(data, headers.getMediaType(), uri);
     }
 
+
     @POST
-    @Consumes( { APPLICATION_FORM_URLENCODED + ";qs=1.0",
-            MULTIPART_FORM_DATA + ";qs=0.9" })
+    @Consumes(APPLICATION_FORM_URLENCODED)
     public Response createContentItemFromForm(
             @FormParam("content") String content, @FormParam("url") String url,
-            @FormParam("file") File file,
-            @FormParam("file") FormDataContentDisposition disposition,
+            @Context HttpHeaders headers) throws URISyntaxException,
+            EngineException, MalformedURLException, IOException {
+        return createContentItemFromForm(content,url,null,null,headers);
+    }
+    @POST
+    @Consumes(MULTIPART_FORM_DATA)
+    public Response createContentItemFromFomr(
+           @FormDataParam("file") File file,
+           @FormDataParam("file") FormDataContentDisposition disposition,
+           @Context HttpHeaders headers) throws URISyntaxException,
+           EngineException, MalformedURLException, IOException{
+        return createContentItemFromForm(null,null,file,disposition,headers);
+    }
+// Consuming both APPLICATION_FORM_URLENCODED and MULTIPART_FORM_DATA does no
+// longer work with jersey (version > 1.2). See the public variants that are
+// calling this (now private) method
+//    @POST
+//    @Consumes( { APPLICATION_FORM_URLENCODED + ";qs=1.0",
+//            MULTIPART_FORM_DATA + ";qs=0.9" })
+    private Response createContentItemFromForm(
+            @FormParam("content") String content, @FormParam("url") String url,
+            @FormDataParam("file") File file,
+            @FormDataParam("file") FormDataContentDisposition disposition,
             @Context HttpHeaders headers) throws URISyntaxException,
             EngineException, MalformedURLException, IOException {
         byte[] data = null; // TODO: rewrite me in a streamable way to avoid
@@ -367,7 +389,7 @@ public class ContentHubRootResource extends BaseStanbolResource {
             }
         } else if (file != null) {
             data = FileUtils.readFileToByteArray(file);
-            String lowerFilename = disposition.getFileName().toLowerCase();
+            //String lowerFilename = disposition.getFileName().toLowerCase();
             Collection<?> mimeTypes = mimeIdentifier.getMimeTypes(file);
             mt = MediaType.valueOf(MimeUtil2.getMostSpecificMimeType(mimeTypes).toString());
         }
@@ -376,7 +398,7 @@ public class ContentHubRootResource extends BaseStanbolResource {
             return createEnhanceAndRedirect(data, mt, uri, true);
         } else {
             // TODO: add user-friendly feedback on empty requests from a form
-            return Response.seeOther(new URI("/store")).build();
+            return Response.seeOther(new URI("/contenthub")).build();
         }
     }
 
