@@ -1,4 +1,4 @@
-<#import "mapping_common.ftl" as common>
+<#import "site_common.ftl" as common>
 <#escape x as x?html>
 <@common.page> 
 

@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
+import org.apache.stanbol.entityhub.servicesapi.model.ManagedEntityState;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
@@ -199,4 +200,57 @@ public interface Entityhub {
      */
     QueryResultList<Entity> findEntities(FieldQuery query) throws EntityhubException;
 
+    /**
+     * Checks if an Entity with the parsed id is managed by the Entityhub.
+     * @param id the id of the entity
+     * @return If an Entity with the given id is managed by the Entityhub
+     * @throws EntityhubException On any error while performing the operation
+     * @throws IllegalArgumentException if <code>null</code> or an empty String
+     * is parsed as id
+     */
+    boolean isRepresentation(String id) throws EntityhubException, IllegalArgumentException;
+    /**
+     * Stores (create or updates) the parsed representation within the Entityhub. 
+     * The representation can be both data or metadata of an entity.<p>
+     * To only allow create or update operations check first with 
+     * {@link #isRepresentation(String)}. 
+     * @param representation the representation to be updated
+     * @return The updated entity.
+     * @throws EntityhubException On any error while performing the operation
+     * @throws IllegalArgumentException if <code>null</code> is parsed as
+     * Representation or if no {@link Representation} with the parsed id is
+     * managed by the Entityhub.
+     */
+    Entity store(Representation representation) throws EntityhubException, IllegalArgumentException;
+    /**
+     * Deletes the Entity with the parsed id. This will delete the entity
+     * and all its information including metadata and mappings to other entities
+     * form the Entityhub. To mark the Entity as removed use 
+     * {@link #setState(String, ManagedEntityState)} with 
+     * {@link ManagedEntityState#removed} as second parameter.
+     * @param id The id of the Entity to delete
+     * @return The deleted Entity
+     * @throws EntityhubException On any error while performing the operation
+     * @throws IllegalArgumentException if <code>null</code> or an empty String
+     * is parsed as id
+     */
+    Entity delete(String id) throws EntityhubException, IllegalArgumentException;
+    /**
+     * Setter for the state of an Entity. This can be used to directly set the
+     * {@link ManagedEntityState} as stored with the 
+     * {@link Entity#getMetadata() metadata} of an entity.
+     * @param id The id of the Entity (or the metadata of the entity)
+     * @param state the new state
+     * @return the entity with the new state or <code>null</code> if no entity
+     * for the parsed id was found.
+     * @throws EntityhubException On any error while performing the operation
+     * @throws IllegalArgumentException if <code>null</code> is parsed as any of
+     * the two parameter or if the parsed id is an empty string
+     */
+    Entity setState(String id, ManagedEntityState state) throws EntityhubException, IllegalArgumentException;
+    /**
+     * Getter for the Configuration of the Entityhub
+     * @return the configuration
+     */
+    EntityhubConfiguration getConfig();
 }

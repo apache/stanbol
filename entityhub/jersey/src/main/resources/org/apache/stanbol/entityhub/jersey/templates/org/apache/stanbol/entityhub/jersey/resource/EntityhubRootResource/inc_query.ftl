@@ -4,28 +4,28 @@
 <tbody>
 	<tr>
 		<th>Description</th>
-		<td>Allows to parse JSON serialized field queries to the sites endpoint.</td>
+		<td>Allows to parse JSON serialized field queries to the Entityhub.
+		Only Entities managed by the Emtityhub are searched</td>
 	</tr>
 	<tr>
 		<th>Request</th>
-        <td><code>-X POST -H "Content-Type:application/json" --data "@fieldQuery.json" /entityhub/sites/query<code></td>
+		<td><code>-X POST -H "Content-Type:application/json" --data "@fieldQuery.json" /entityhub/query<code></td>
 	</tr>
 	<tr>
 		<th>Parameter</th>
-		<td>query: the JSON serialised FieldQuery (see section "FieldQuery JSON format" 
-           below)</td>
+		<td>The JSON serialised FieldQuery</td>
 	</tr>
 	<tr>
 		<th>Produces</th>
-        <td>The results of the query serialised in the format as specified by the
-        Accept header</td>
+		<td>The results of the query serialised in the format as specified by the
+		Accept header</td>
 	</tr>
 </tbody>
 </table>
 
 <h5>Example</h5>
 
-<pre>curl -X POST -H "Content-Type:application/json" --data "@fieldQuery.json" ${it.publicBaseUri}entityhub/sites/query</pre>
+<pre>curl -X POST -H "Content-Type:application/json" --data "@fieldQuery.json" ${it.publicBaseUri}entityhub/query</pre>
 
 <p><em>Note</em>: "@fieldQuery.json" links to a local file that contains the parsed
     Fieldquery (see ection "FieldQuery JSON format" for examples).</p>

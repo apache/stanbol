@@ -16,14 +16,24 @@
  */
 package org.apache.stanbol.entityhub.jersey.resource;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
-import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N3;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N_TRIPLE;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JSON;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
+import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES;
+import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.REPRESENTATION_SUPPORTED_MEDIA_TYPES;
+import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.createFieldQueryForFindRequest;
+import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.getAcceptableMediaType;
 
 import java.io.File;
-import java.net.URI;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -33,9 +43,9 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -54,8 +64,8 @@ import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
-import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
+import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.site.License;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
@@ -64,6 +74,8 @@ import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sun.jersey.api.view.Viewable;
 
 /**
  * Resource to provide a REST API for the {@link ReferencedSiteManager}
@@ -129,12 +141,9 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     }
     
     @GET
-    @Path(value = "/")
-    @Consumes(value=MediaType.TEXT_HTML)
-    public String getHtmlInfo(){
-        return "<html><head>" + site.getConfiguration().getName() + "</head><body>" + 
-            "<h1>Referenced Site " + site.getConfiguration().getName()+ 
-            ":</h1></body></html>";
+    @Produces(value=MediaType.TEXT_HTML)
+    public Response getHtmlInfo(){
+        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
     }
     /**
      * Provides metadata about this referenced site as representation
@@ -143,10 +152,10 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
      * @return the response
      */
     @GET
-    @Path(value = "/")
+    @Produces({APPLICATION_JSON,RDF_XML,N3,TURTLE,X_TURTLE,RDF_JSON,N_TRIPLE})
     public Response getInfo(@Context HttpHeaders headers,
                             @Context UriInfo uriInfo) {
-        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, MediaType.APPLICATION_JSON_TYPE);
+        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, REPRESENTATION_SUPPORTED_MEDIA_TYPES,MediaType.APPLICATION_JSON_TYPE);
         return Response.ok(site2Representation(uriInfo.getAbsolutePath().toString()), acceptedMediaType).build();
     }
     @GET
@@ -194,18 +203,23 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
      */
     @GET
     @Path("/entity")
-    public Response getSignById(@QueryParam(value = "id") String id, @Context HttpHeaders headers) {
+    public Response getEntityById(@QueryParam(value = "id") String id, @Context HttpHeaders headers) {
         log.info("site/{}/entity Request",site.getId());
         log.info("  > id       : " + id);
         log.info("  > accept   : " + headers.getAcceptableMediaTypes());
         log.info("  > mediaType: " + headers.getMediaType());
+        Collection<String> supported = new HashSet<String>(JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES);
+        supported.add(TEXT_HTML);
         final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers,
-            JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES, MediaType.APPLICATION_JSON_TYPE);
+            supported, MediaType.APPLICATION_JSON_TYPE);
         if (id == null || id.isEmpty()) {
-            log.error("No or emptpy ID was parsd as query parameter (id={})", id);
-            return Response.status(Status.BAD_REQUEST).
-            entity("No or empty Entity ID parsed. Missing parameter id={entityID}.\n")
-            .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
+            if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
+                return Response.ok(new Viewable("entity", this), TEXT_HTML).build();        
+            } else {
+                return Response.status(Status.BAD_REQUEST)
+                    .entity("No or empty ID was parsed. Missing parameter id.\n")
+                    .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
+            }
         }
         log.info("handle Request for Entity {} of Site {}", id, site.getId());
         Entity entity;
@@ -228,62 +242,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
             .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
         }
     }
-    @POST
-    @Path("/entity")
-    @Consumes(MediaType.WILDCARD)
-    public Response createEntity(@QueryParam(value = "id") String id, 
-                               Set<Representation> parsed,
-                               @Context HttpHeaders headers){
-        //Set<Representation> representations = Collections.emptySet();
-        //log.info("Test: "+test);
-        log.info("Headers: "+headers.getRequestHeaders());
-        log.info("Entity: "+id);
-        log.info("Representations : "+parsed);
-        return updateOrCreateEntity(id, parsed, true, 
-            JerseyUtils.getAcceptableMediaType(headers,
-                JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES, 
-                MediaType.APPLICATION_JSON_TYPE));
-    }
-    @PUT
-    @Path("/entity")
-    @Consumes(MediaType.WILDCARD)
-    public Response updateEntity(@QueryParam(value = "id") String id, 
-                               Set<Representation> parsed,
-                               @Context HttpHeaders headers){
-        //Set<Representation> representations = Collections.emptySet();
-        //log.info("Test: "+test);
-        log.info("Headers: "+headers.getRequestHeaders());
-        log.info("Entity: "+id);
-        log.info("Representations : "+parsed);
-        return updateOrCreateEntity(id, parsed, false, 
-            JerseyUtils.getAcceptableMediaType(headers,
-                JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES, 
-                MediaType.APPLICATION_JSON_TYPE));
-    }
-    private Response updateOrCreateEntity(String id, Set<Representation> parsed, 
-                                          boolean createState, MediaType accepted){
-        Set<Representation> create = null;
-        if(id != null && !id.isEmpty()){
-            for(Representation rep : parsed){
-                if(id.equals(rep.getId())){
-                    create = Collections.singleton(rep);
-                    parsed.clear(); //allow gc to remove the others
-                    break;
-                }
-            }
-        } else {
-            create = parsed;
-        }
-        if(create == null || create.isEmpty()){
-            return Response.status(Status.BAD_REQUEST).entity(String.format(
-                "No Representation %s found in the Request.",
-                id != null && !id.isEmpty()? "for "+id:""))
-                .header(HttpHeaders.ACCEPT, accepted).build();
-        } else {
-            log.info("TODO: {} Representations {}",createState?"create":"update",create);
-            return Response.seeOther(uriInfo.getAbsolutePath()).build();
-        }
-    }
+
     
     @GET
     @Path("/find")
@@ -307,6 +266,19 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                                @FormParam(value = "offset") Integer offset,
                                @Context HttpHeaders headers) {
         log.debug("site/{}/find Request",site.getId());
+        Collection<String> supported = new HashSet<String>(JerseyUtils.QUERY_RESULT_SUPPORTED_MEDIA_TYPES);
+        supported.add(TEXT_HTML);
+        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(
+            headers, supported, MediaType.APPLICATION_JSON_TYPE);
+        if(name == null || name.isEmpty()){
+            if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
+                return Response.ok(new Viewable("find", this), TEXT_HTML).build();        
+            } else {
+                return Response.status(Status.BAD_REQUEST)
+                    .entity("The name must not be null nor empty for find requests. Missing parameter name.\n")
+                    .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
+            }
+        }
         // process the optional search field parameter
         if (field == null) {
             field = DEFAULT_FIND_FIELD;
@@ -316,8 +288,10 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                 field = DEFAULT_FIND_FIELD;
             }
         }
-        return executeQuery(JerseyUtils.createFieldQueryForFindRequest(name, field, language,
-            limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, offset), headers);
+        return executeQuery(createFieldQueryForFindRequest(name, field, language,
+            limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, offset),
+            getAcceptableMediaType(headers, ENTITY_SUPPORTED_MEDIA_TYPES, 
+                APPLICATION_JSON_TYPE));
     }
     
     /**
@@ -333,10 +307,17 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
      */
     @POST
     @Path("/query")
-    @Consumes( {APPLICATION_FORM_URLENCODED + ";qs=1.0", MULTIPART_FORM_DATA + ";qs=0.9"})
-    public Response queryEntities(@FormParam("query") FieldQuery query,
+    @Consumes( {APPLICATION_JSON})
+    public Response queryEntities(FieldQuery query,
                                   @Context HttpHeaders headers) {
-        return executeQuery(query,headers);
+        return executeQuery(query,getAcceptableMediaType(headers,
+            JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES, APPLICATION_JSON_TYPE));
+    }
+    @GET
+    @Path("/query")
+    @Produces(TEXT_HTML)
+    public Response getQueryDocumentation(){
+        return Response.ok(new Viewable("query", this), TEXT_HTML).build();        
     }
     
     /**
@@ -349,11 +330,9 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
      *            The headers used to determine the media types
      * @return the response (results of error)
      */
-    private Response executeQuery(FieldQuery query, HttpHeaders headers) throws WebApplicationException {
-        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers,
-            MediaType.APPLICATION_JSON_TYPE);
+    private Response executeQuery(FieldQuery query, MediaType mediaType) throws WebApplicationException {
         try {
-            return Response.ok(site.find(query), acceptedMediaType).build();
+            return Response.ok(site.find(query), mediaType).build();
         } catch (ReferencedSiteException e) {
             log.error("ReferencedSiteException while accessing Site " +
                 site.getConfiguration().getName() + " (id="
@@ -367,7 +346,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
      * @param context
      * @return
      */
-    public Representation site2Representation(String id){
+    private Representation site2Representation(String id){
         RdfValueFactory valueFactory = RdfValueFactory.getInstance();
         RdfRepresentation rep = valueFactory.createRepresentation(id);
         String namespace = NamespaceEnum.entityhubModel.getNamespace();
@@ -382,13 +361,13 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         if(config.getCacheStrategy() != null){
             rep.add(namespace+"cacheStrategy", valueFactory.createReference(namespace+"cacheStrategy-"+config.getCacheStrategy().name()));
         }
-        //keep accessUri and queryUri private for now
-//        if(config.getAccessUri() != null){
-//            rep.add(namespace+"accessUri", valueFactory.createReference(config.getAccessUri()));
-//        }
-//        if(config.getQueryUri() != null){
-//            rep.add(namespace+"queryUri", valueFactory.createReference(config.getQueryUri()));
-//        }
+        //add the accessUri and queryUri
+        if(config.getAccessUri() != null){
+            rep.add(namespace+"accessUri", valueFactory.createReference(config.getAccessUri()));
+        }
+        if(config.getQueryUri() != null){
+            rep.add(namespace+"queryUri", valueFactory.createReference(config.getQueryUri()));
+        }
         if(config.getAttribution() != null){
             rep.add(NamespaceEnum.cc.getNamespace()+"attributionName", config.getAttribution());
         }

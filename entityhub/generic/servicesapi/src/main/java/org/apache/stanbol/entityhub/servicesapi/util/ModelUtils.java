@@ -35,6 +35,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
+import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -213,4 +214,31 @@ public final class ModelUtils {
             return new QName(nsln[1]);
         }
     }
+    /**
+     * Getter for the id of the Entity the parsed {@link Representation metadata}
+     * are {@link RdfResourceEnum#aboutRepresentation about}.
+     * @param metadata the metadata
+     * @return the id of the entity or <code>null</code> if the parsed {@link Representation}
+     * is <code>null</code> or does not define a value for 
+     * {@link RdfResourceEnum#aboutRepresentation}
+     */
+    public static String getAboutRepresentation(Representation metadata) throws IllegalStateException{
+        if(metadata == null){
+            return null;
+        }
+        Iterator<Reference> refs = metadata.getReferences(RdfResourceEnum.aboutRepresentation.getUri());
+        if(refs.hasNext()){
+            Reference about = refs.next();
+            if(refs.hasNext()){
+                log.warn("The parsed Representation {} claims to be the metadata of" +
+                    "multiple Entities (entities: {})", 
+                    metadata.getId(),
+                    asCollection(metadata.getReferences(RdfResourceEnum.aboutRepresentation.getUri())));
+            }
+            return about.getReference();
+        } else {
+            return null;
+        }
+    }
+    
 }

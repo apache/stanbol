@@ -134,14 +134,11 @@ import org.slf4j.LoggerFactory;
         )
 @Service(value=ReferencedSite.class)
 @Properties(value={
-        @Property(name=SiteConfiguration.ID,value="dbpedia"),
-        @Property(name=SiteConfiguration.NAME,value="DB Pedia"),
-        @Property(name=SiteConfiguration.DESCRIPTION, value="The OLD Endpoint for Wikipedia"),
-        @Property(name=SiteConfiguration.ENTITY_PREFIX, cardinality=1000,
-            value={
-                "http://dbpedia.org/resource/","http://dbpedia.org/ontology/"
-        }),
-        @Property(name=SiteConfiguration.ACCESS_URI, value="http://dbpedia.org/sparql/"),
+        @Property(name=SiteConfiguration.ID),
+        @Property(name=SiteConfiguration.NAME),
+        @Property(name=SiteConfiguration.DESCRIPTION),
+        @Property(name=SiteConfiguration.ENTITY_PREFIX, cardinality=1000),
+        @Property(name=SiteConfiguration.ACCESS_URI),
         @Property(name=SiteConfiguration.ENTITY_DEREFERENCER_TYPE,
             options={
                 @PropertyOption(
@@ -154,7 +151,7 @@ import org.slf4j.LoggerFactory;
                         value='%'+SiteConfiguration.ENTITY_DEREFERENCER_TYPE+".option.coolUri",
                         name="org.apache.stanbol.entityhub.dereferencer.CoolUriDereferencer")
             },value="org.apache.stanbol.entityhub.dereferencer.SparqlDereferencer"),
-        @Property(name=SiteConfiguration.QUERY_URI, value="http://dbpedia.org/sparql"), //the deri server has better performance
+        @Property(name=SiteConfiguration.QUERY_URI), //the deri server has better performance
         @Property(name=SiteConfiguration.ENTITY_SEARCHER_TYPE,
             options={
                 @PropertyOption(
@@ -169,7 +166,7 @@ import org.slf4j.LoggerFactory;
                 @PropertyOption(
                         value='%'+SiteConfiguration.ENTITY_SEARCHER_TYPE+".option.sparql-larq",
                         name="org.apache.stanbol.entityhub.searcher.LarqSearcher")
-            },value="org.apache.stanbol.entityhub.searcher.VirtuosoSearcher"),
+            },value="org.apache.stanbol.entityhub.searcher.SparqlSearcher"),
         @Property(name=SiteConfiguration.DEFAULT_SYMBOL_STATE,
             options={
                 @PropertyOption( //seems, that name and value are exchanged ...
@@ -218,15 +215,7 @@ import org.slf4j.LoggerFactory;
                         name="all")
             }, value="none"),
         @Property(name=SiteConfiguration.CACHE_ID),
-        @Property(name=SiteConfiguration.SITE_FIELD_MAPPINGS,cardinality=1000,
-            value={
-                "dbp-ont:*",
-                "dbp-ont:thumbnail | d=xsd:anyURI > foaf:depiction",
-                "dbp-prop:latitude | d=xsd:decimal > geo:lat",
-                "dbp-prop:longitude | d=xsd:decimal > geo:long",
-                "dbp-prop:population | d=xsd:integer",
-                "dbp-prop:website | d=xsd:anyURI > foaf:homepage"
-            })
+        @Property(name=SiteConfiguration.SITE_FIELD_MAPPINGS,cardinality=1000)
         })
 public class ReferencedSiteImpl implements ReferencedSite {
     static final int maxInt = Integer.MAX_VALUE;
@@ -676,7 +665,9 @@ public class ReferencedSiteImpl implements ReferencedSite {
      * that can not be used to parse a {@link Filter}.
      */
     private void initDereferencerAndEntitySearcher() throws InvalidSyntaxException {
-        if(siteConfiguration.getEntitySearcherType() != null) {
+        if(siteConfiguration.getAccessUri() != null && //initialise only if a accessUri
+                !siteConfiguration.getAccessUri().isEmpty() && // is configured
+                siteConfiguration.getEntitySearcherType() != null) {
             String componentNameFilterString = String.format("(%s=%s)",
                     "component.name",siteConfiguration.getEntitySearcherType());
             String filterString = String.format("(&(%s=%s)%s)",
@@ -692,7 +683,10 @@ public class ReferencedSiteImpl implements ReferencedSite {
             //context.getComponentInstance().dispose();
             //throw an exception to avoid an successful activation
         }
-        if(siteConfiguration.getEntityDereferencerType() != null && !this.dereferencerEqualsEntitySearcherComponent){
+        if(siteConfiguration.getQueryUri() != null && //initialise only if a query URI
+                !siteConfiguration.getQueryUri().isEmpty() && // is configured
+                siteConfiguration.getEntityDereferencerType() != null && 
+                !this.dereferencerEqualsEntitySearcherComponent){
             String componentNameFilterString = String.format("(%s=%s)",
                     "component.name",siteConfiguration.getEntityDereferencerType());
             String filterString = String.format("(&(%s=%s)%s)",

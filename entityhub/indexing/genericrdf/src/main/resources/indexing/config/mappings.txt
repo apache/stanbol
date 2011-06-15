@@ -41,8 +41,8 @@ owl:sameAs | d=entityhub:ref
 #mapping for all dc-terms properties
 dc:*
 
-# copy dc:titel to rdfs:label
-dc:titel > rdfs:label
+# copy dc:title to rdfs:label
+dc:title > rdfs:label
 
 # deactivated by default, because such mappings are mapped to dc-terms
 #dc-elements:*
@@ -63,6 +63,8 @@ dc-elements:source > dc:source
 dc-elements:subject > dc:subject
 dc-elements:title > dc:title
 dc-elements:type > dc:type
+#also use ec-elements:title as label
+dc-elements:title > rdfs:label
 
 # --- Social Networks (via foaf) ---
 #The Friend of a Friend schema often used to describe social relations between people

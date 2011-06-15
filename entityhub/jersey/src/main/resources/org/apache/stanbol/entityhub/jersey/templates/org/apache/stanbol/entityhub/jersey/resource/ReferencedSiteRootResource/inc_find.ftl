@@ -4,20 +4,21 @@
 <tbody>
 	<tr>
 		<th>Description</th>
-		<td>This service can be used to search all referenced sites for 
+		<td>This service can be used to search for 
     entities with the parsed name. Both a POST and a GET version are available.</td>
 	</tr>
 	<tr>
 		<th>Requests</th>
 		<td><ul>
-			<li>GET /entityhub/sites/find?name={query}&field={field}&lang={lang}&limit={limit}&offset={offset}</li>
-            <li>POST -d "name={query}&field={field}&lang={lang}&limit={limit}&offset={offset}" /entityhub/sites/find</li>
+			<li>GET /entityhub/site/{siteId}/find?name={query}&field={field}&lang={lang}&limit={limit}&offset={offset}</li>
+            <li>POST -d "name={query}&field={field}&lang={lang}&limit={limit}&offset={offset}" /entityhub/site/{siteId}/find</li>
             </ul>
         </td>
 	</tr>
 	<tr>
 		<th>Parameters</th>
 		<td><ul>
+            <li>siteId: the id of the referenced Site</li>
 			<li>name: the name of the entity (supports wildcards e.g. "Frankf*")</li>
             <li>field: the name of the field used for the query. One MUST parse the full
                 name. Namespace prefixes are not supported yet. (default is rdfs:label)</li>
@@ -36,7 +37,7 @@
 
 <h5>Example</h5>
 
-<pre>curl -X POST -d "name=Bishofsh*&limit=10&offset=0" ${it.publicBaseUri}entityhub/sites/find</pre>
+<pre>curl -X POST -d "name=Bishofsh*&limit=10&offset=0" ${it.publicBaseUri}entityhub/site/dbpedia/find</pre>
 
 <h5>Test</h5>
 
@@ -53,7 +54,7 @@ function startTestSearch() {
  var data = "name=" + $("#testSearchValue").val() + "&limit=10&offset=0";
  $.ajax({
    type: "POST",
-   url: "${it.publicBaseUri}entityhub/sites/find",
+   url: "find",
    data: data,
    dataType: "text/plain",
    cache: false,

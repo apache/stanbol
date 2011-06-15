@@ -116,10 +116,10 @@
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
     </dependency>
-    <dependency>
+    <!--  <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-json</artifactId>
-    </dependency>
+    </dependency>  -->
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
@@ -209,11 +209,11 @@
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-client</artifactId>
       <scope>test</scope>
-    </dependency>
+    </dependency>  -->
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
       <artifactId>pax-exam</artifactId>

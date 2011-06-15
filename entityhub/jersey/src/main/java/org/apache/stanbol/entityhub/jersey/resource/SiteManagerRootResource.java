@@ -24,7 +24,6 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XM
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -143,7 +142,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
      */
     @GET
     @Path("/entity")
-    public Response getSignById(@QueryParam(value = "id") String id, @Context HttpHeaders headers) {
+    public Response getEntityById(@QueryParam(value = "id") String id, @Context HttpHeaders headers) {
         log.debug("getSignById() request\n\t> id       : {}\n\t> accept   : {}\n\t> mediaType: {}",
             new Object[] {id, headers.getAcceptableMediaTypes(), headers.getMediaType()});
 
@@ -191,9 +190,9 @@ public class SiteManagerRootResource extends BaseStanbolResource {
     @GET
     @Path("/find")
     public Response findEntityfromGet(@QueryParam(value = "name") String name,
-                                      @FormParam(value = "field") String field,
+                                      @QueryParam(value = "field") String field,
                                       @QueryParam(value = "lang") String language,
-                                      // @FormParam(value="select") String select,
+                                      // @QueryParam(value="select") String select,
                                       @QueryParam(value = "limit") @DefaultValue(value = "-1") int limit,
                                       @QueryParam(value = "offset") @DefaultValue(value = "0") int offset,
                                       @Context HttpHeaders headers) {
@@ -237,7 +236,11 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, offset);
         return Response.ok(referencedSiteManager.find(query), acceptedMediaType).build();
     }
-
+    @GET
+    @Path("/query")
+    public Response getQueryDocumentation(){
+        return Response.ok(new Viewable("query", this), TEXT_HTML).build();        
+    }
     /**
      * Allows to parse any kind of {@link FieldQuery} in its JSON Representation.
      * <p>
@@ -253,8 +256,8 @@ public class SiteManagerRootResource extends BaseStanbolResource {
      */
     @POST
     @Path("/query")
-    @Consumes( {MediaType.APPLICATION_FORM_URLENCODED + ";qs=1.0", MediaType.MULTIPART_FORM_DATA + ";qs=0.9"})
-    public Response queryEntities(@FormParam("query") FieldQuery query,
+    @Consumes( {MediaType.APPLICATION_JSON})
+    public Response queryEntities(FieldQuery query,
                                   @Context HttpHeaders headers) {
         ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
             ReferencedSiteManager.class, context);
@@ -266,7 +269,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             //if query is null nd the mediaType is HTML we need to print the
             //Documentation of the RESTful API
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
-                return Response.ok(new Viewable("query", this), TEXT_HTML).build();        
+                return getQueryDocumentation();        
             } else {
                 return Response.status(Status.BAD_REQUEST)
                     .entity("The query must not be null nor empty for query requests. Missing parameter query.\n")

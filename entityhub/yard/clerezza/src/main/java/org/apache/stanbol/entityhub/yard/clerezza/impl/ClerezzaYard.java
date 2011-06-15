@@ -85,19 +85,12 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Component(
-        //name="org.apache.stanbol.entityhub.yard.clerezzaYard",
-        //factory="org.apache.stanbol.entityhub.yard.clerezzaYardFactory",
         configurationFactory=true,
         policy=ConfigurationPolicy.REQUIRE, //the ID is required!
         specVersion="1.1",
         metatype = true
         )
 @Service
-//@Properties(value={
-//        @Property(name=Yard.ID,value="entityhubYard"),
-//        @Property(name=Yard.NAME,value="Entityhub Yard"),
-//        @Property(name=Yard.DESCRIPTION,value="Default values for configuring the Entityhub Yard without editing")
-//})
 public class ClerezzaYard extends AbstractYard implements Yard {
     private static Logger log = LoggerFactory.getLogger(ClerezzaYard.class);
     /**

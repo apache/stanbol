@@ -59,11 +59,29 @@ public final class SparqlQueryUtils {
     
     private static final Logger log = LoggerFactory.getLogger(SparqlQueryUtils.class);
     
-    public enum EndpointTypeEnum {
+    public static enum EndpointTypeEnum {
         Standard,
-        Virtuoso,
+        Virtuoso(true),
         LARQ,
-        ARQ
+        ARQ;
+        boolean supportsSparql11SubSelect;
+        /**
+         * Default feature set (SPARQL 1.0)
+         */
+        EndpointTypeEnum(){
+            this(false);
+        }
+        /**
+         * Allows to enable SPARQL 1.1 features
+         * @param supportsSparql11SubSelect
+         */
+        EndpointTypeEnum(boolean supportsSparql11SubSelect){
+            this.supportsSparql11SubSelect = supportsSparql11SubSelect;
+        }
+        
+        public final boolean supportsSubSelect() {
+            return supportsSparql11SubSelect;
+        }
     }
 
     private static final String XSD_DATE_TIME = "http://www.w3.org/2001/XMLSchema#dateTime";
@@ -117,40 +135,57 @@ public final class SparqlQueryUtils {
     public static String createSparqlConstructQuery(SparqlFieldQuery query,int limit,EndpointTypeEnum endpointType,String...additionalFields){
         //1)INIT
         final StringBuilder queryString = new StringBuilder();
-        //We need a copy to delete all fields that are already covered by some added
-        //graph pattern.
-        if(additionalFields!=null && additionalFields.length>0){
-            query = query.clone();
-            query.addSelectedFields(Arrays.asList(additionalFields));
-        }
-        final Map<String,String> selectedFields = new HashMap<String, String>();
-        selectedFields.putAll(query.getFieldVariableMappings());
-        //also add the root variable
-        selectedFields.put(null, query.getRootVariableName());
+        //clone the query and reconfigure the clone 
+        query = initLocalQuery(query, limit, additionalFields);
+        final Map<String,String> selectedFields = initSelectedFieldsMap(query);
         //2)CONSTRUCT
         createConstruct(queryString, selectedFields);
         //3)WHERE
         queryString.append("WHERE { \n");
         addFieldConstraint(queryString, query, selectedFields,endpointType);
-        //4)add Entity Ranking (if needed)
-        if(query.getLimit() != null){
-            //we need also to add the sorting stuff to get the top rated entities
-            //within the resulting graph
-            addRankingConstraints(endpointType, queryString, selectedFields.get(null));
-            queryString.append("} \n");
-            addRankingOrder(endpointType, queryString,selectedFields.get(null));
-        } else {//if no limit is given, than we do not need that stuff
-            //so just close the where
-            queryString.append("} \n");
-        }
+        queryString.append("} \n");
         //5) Limit and Offset
-        if(limit > 0){
-            addLimit(limit,queryString);
-        } else {
+        if(!isSubSelectState(endpointType,selectedFields)){
+            //4)add Entity Ranking (if needed)
+            addRankingOrder(endpointType, queryString,selectedFields.get(null),"");
             addLimit(query.getLimit()!=null?query.getLimit():0, queryString);
+            addOffset(query, queryString);
         }
-        addOffset(query, queryString);
         return queryString.toString();
+    }
+    /**
+     * Determines if the current query uses sub selects. Activated if the
+     * SPARQL endpoint supports the SPARQL 1.1 sub select feature and the query
+     * selects more than the enttiy id.
+     * @param endpoint the used endpoint type
+     * @param selectedFields the map with the selected fields
+     * @return the state
+     */
+    private static boolean isSubSelectState(EndpointTypeEnum endpoint, Map<String,String> selectedFields){
+        return endpoint.supportsSubSelect() && selectedFields.size() > 1;
+    }
+
+    /**
+     * Creates a clone of the parsed query and applies the parsed limit and
+     * additional fields
+     * @param query the query
+     * @param limit the limit (if &gt; 0)
+     * @param additionalFields additional fields to select
+     * @return a clone of the parsed query with the set limit and added fields
+     */
+    private static SparqlFieldQuery initLocalQuery(SparqlFieldQuery query,
+                                                   int limit,
+                                                   String... additionalFields) {
+        query = query.clone();
+        if(limit > 0){
+            query.setLimit(limit);
+        }
+        //We need a copy to delete all fields that are already covered by some added
+        //graph pattern.
+        if(additionalFields!=null && additionalFields.length>0){
+            query.addSelectedFields(Arrays.asList(additionalFields));
+        }
+        return query;
     }
 
     /**
@@ -167,18 +202,18 @@ public final class SparqlQueryUtils {
         String rootVar = selectedFields.get(null);//the null element has the root variable mapping
         for(Entry<String,String> mapping :selectedFields.entrySet()){
             if(mapping.getKey() != null){
-                queryString.append("    ?").append(rootVar).append(" <");
+                queryString.append("  ?").append(rootVar).append(" <");
                 queryString.append(mapping.getKey()).append("> ?");
                 queryString.append(mapping.getValue()).append(" .\n");
             }
         }
         //add the triples for the Representation type
         //add the triples that form the result set
-        queryString.append("    <").append(RdfResourceEnum.QueryResultSet).append("> <");
+        queryString.append("  <").append(RdfResourceEnum.QueryResultSet).append("> <");
         queryString.append(RdfResourceEnum.queryResult).append("> ?");
         queryString.append(rootVar).append(" . \n");
 
-        queryString.append("} \n");
+        queryString.append("} ");
     }
     /**
      * Creates the SPARQL representation of the parse field query.
@@ -230,35 +265,49 @@ public final class SparqlQueryUtils {
     public static String createSparqlSelectQuery(SparqlFieldQuery query,boolean includeFields,int limit, EndpointTypeEnum endpointType) {
         //1) INIT
         final StringBuilder queryString = new StringBuilder();
+        query = initLocalQuery(query, limit);
+        final Map<String,String> selectedFields = initSelectedFieldsMap(query);
+        //2) SELECT
+        createSelect(queryString, includeFields, selectedFields);
+        //3) WHERE
+        queryString.append("WHERE { \n");
+        addFieldConstraint(queryString, query, selectedFields,endpointType);
+        queryString.append("} \n");
+        if(!isSubSelectState(endpointType, selectedFields)){
+            //4) Add Stuff to rank results based on the "page rank" of entities
+            addRankingOrder(endpointType, queryString,selectedFields.get(null),"");
+            //5) Limit and Offset
+            addLimit(query.getLimit()!=null?query.getLimit():0, queryString);
+            addOffset(query, queryString);
+        }
+        return queryString.toString();
+    }
+
+    /**
+     * Initialise the field -&gt; variable name mappings including the root
+     * variable name by adding <code>null</code> as key
+     * @param query the query
+     * @return the mappings
+     */
+    private static Map<String,String> initSelectedFieldsMap(SparqlFieldQuery query) {
         //We need a copy to delete all fields that are already covered by some added
         //graph pattern.
         final Map<String,String> selectedFields = new HashMap<String, String>();
         selectedFields.putAll(query.getFieldVariableMappings());
         //also add the root variable
         selectedFields.put(null, query.getRootVariableName());
-        //2) SELECT
-        createSelect(queryString, query, includeFields, selectedFields);
-        //3) WHERE
-        queryString.append("WHERE { \n");
-        addFieldConstraint(queryString, query, selectedFields,endpointType);
-        //4) Add Stuff to rank results based on the "page rank" of entities
-        addRankingConstraints(endpointType, queryString, selectedFields.get(null));
-        queryString.append("} \n");
-        addRankingOrder(endpointType, queryString,selectedFields.get(null));
-        //5) Limit and Offset
-        if(limit > 0){
-            addLimit(limit,queryString);
-        } else {
-            addLimit(query.getLimit()!=null?query.getLimit():0, queryString);
-        }
-        addOffset(query, queryString);
-        return queryString.toString();
+        return selectedFields;
     }
 
     /**
-     * @param endpointType
-     * @param queryString
-     * @param selectedFields
+     * For some {@link EndpointTypeEnum SPARQL endpoint types} we need to add
+     * an additional constraint to determine the ranking information based on
+     * incomming relations to the Entities.<p>
+     * Currently this done for {@link EndpointTypeEnum#ARQ ARQ} and
+     * {@link EndpointTypeEnum#LARQ LARQ}. 
+     * @param endpointType the endpoint type
+     * @param queryString the SPARQL query string to add the ranking constraint
+     * @param rootFieldName the variable name used to select entities
      */
     private static void addRankingConstraints(EndpointTypeEnum endpointType, final StringBuilder queryString, final String rootFieldName) {
         if(endpointType == EndpointTypeEnum.ARQ || endpointType == EndpointTypeEnum.LARQ){
@@ -271,14 +320,16 @@ public final class SparqlQueryUtils {
      * @param endpointType
      * @param queryString
      */
-    private static void addRankingOrder(EndpointTypeEnum endpointType, final StringBuilder queryString,String rootVarName) {
+    private static void addRankingOrder(EndpointTypeEnum endpointType, final StringBuilder queryString,String rootVarName,String intend) {
         if(endpointType == EndpointTypeEnum.Virtuoso){
             //is that still SPARQL ... wondering about the syntax ^
-            queryString.append(String.format("ORDER BY DESC ( <LONG::IRI_RANK> (?%s) ) \n",rootVarName));
-        } else     if(endpointType == EndpointTypeEnum.ARQ || endpointType == EndpointTypeEnum.LARQ){
+            queryString.append(String.format("%sORDER BY DESC ( <LONG::IRI_RANK> (?%s) ) \n",
+                intend!=null?intend:"",rootVarName));
+        } else if(endpointType == EndpointTypeEnum.ARQ || endpointType == EndpointTypeEnum.LARQ){
             //TODO: COUNT is not part of the SPARQL 1.0 specification!
             // see http://www.w3.org/2009/sparql/wiki/Feature:AggregateFunctions
-            queryString.append("ORDER BY DESC (COUNT (?incoming) ) \n");
+            queryString.append(String.format("%sORDER BY DESC (COUNT (?incoming) ) \n",
+                intend!=null?intend:""));
         } //else not supported ... add nothing
     }
 
@@ -303,56 +354,124 @@ public final class SparqlQueryUtils {
     }
 
     /**
+     * Adds the SELECT part to the SPARQL query
      * @param queryString
      * @param query
      * @param includeFields
      * @param selectedFields
      */
-    private static void createSelect(final StringBuilder queryString, SparqlFieldQuery query, boolean includeFields, final Map<String, String> selectedFields) {
+    private static void createSelect(final StringBuilder queryString, boolean includeFields, final Map<String, String> selectedFields) {
         queryString.append("SELECT DISTINCT");
-        queryString.append(" ?"+query.getRootVariableName()); //select the representation ID
+        // REMOVED: The root variable is already in the selected fields map!
+        // queryString.append(" ?"+query.getRootVariableName()); //select the representation ID
+
         //now the variables for the selected fields!
         if(includeFields){
             for(String varName : selectedFields.values()){
                 queryString.append(" ?");
                 queryString.append(varName);
             }
+        } else {
+            //else add only the root variable (stored under key null)
+            queryString.append(" ?");
+            queryString.append(selectedFields.get(null));
         }
         queryString.append(" \n");
     }
 
     /**
-     * @param queryString
-     * @param query
-     * @param selectedFields
-     * @param endpointType The type of the Endpoint (used to write optimized
+     * Adds the WHERE clause of the SPARQL query. <p>
+     * If the {@link EndpointTypeEnum SPARQL endpoint} supports SPARQL 1.1 
+     * subqueries, than this adds also the LIMIT and OFFSET to in inner SELECT 
+     * that only selects the id. 
+     * @param queryString the SPARQL query string to add the WHERE
+     * @param query the query
+     * @param selectedFields the selected fields
+     * @param endpointType The type of the endpoint (used to write optimised
      *    queries for endpoint type specific extensions
      */
-    private static void addFieldConstraint(final StringBuilder queryString, SparqlFieldQuery query, final Map<String, String> selectedFields,EndpointTypeEnum endpointType) {
+    private static void addFieldConstraint(final StringBuilder queryString, SparqlFieldQuery query, Map<String, String> selectedFields,EndpointTypeEnum endpointType) {
         //we need temporary variables with unique names
         String varPrefix = "tmp";
         int[] varNum = new int []{1};
+        //used to open brackets for the select part of the constraints
+        boolean first = true;
+        //determine if sub-selects are supported and if we need a sub-select
+        //(more than the id is selected)
+        boolean subSelectState = isSubSelectState(endpointType, selectedFields);
+        //if we uses a sub query to select the ids, we need to add the graph pattern
+        //of all selected fields outside of the sub query
+        Map<String,String> tmpSelectedFields = subSelectState ?
+                new HashMap<String,String>(selectedFields) :
+                    null;
+        String intend;
+        if(subSelectState){
+            intend = "      "; //additional intend because of sub query (3*2)
+        } else {
+            intend = "    "; //normal intend (2*2)
+        }
         for(Entry<String,Constraint> fieldConstraint : query){
+            if(first){
+                queryString.append("  { \n");
+                if(subSelectState){
+                    String rootVarName = selectedFields.get(null);
+                    queryString.append("    SELECT ?").append(rootVarName).append(" \n");
+                    queryString.append("    WHERE { \n");
+                }
+                first = false;
+            }
             String field = fieldConstraint.getKey();
             Constraint constraint = fieldConstraint.getValue();
-            queryString.append("   { ");
             switch (constraint.getType()) {
             case value:
-                addValueConstraint(queryString,field, (ValueConstraint)constraint,selectedFields, varPrefix,varNum);
+                addValueConstraint(queryString,field, (ValueConstraint)constraint,selectedFields, varPrefix,varNum,intend);
                 break;
             case text:
-                String var = addFieldGraphPattern(queryString, field, selectedFields, varPrefix, varNum);
-                addTextConstraint(queryString, var, (TextConstraint)constraint,endpointType);
+                String var = addFieldGraphPattern(queryString, field, selectedFields, varPrefix, varNum,intend);
+                addTextConstraint(queryString, var, (TextConstraint)constraint,endpointType,intend);
                 break;
             case range:
-                var = addFieldGraphPattern(queryString, field, selectedFields, varPrefix, varNum);
-                addRangeConstriant(queryString,var,(RangeConstraint)constraint);
+                var = addFieldGraphPattern(queryString, field, selectedFields, varPrefix, varNum,intend);
+                addRangeConstriant(queryString,var,(RangeConstraint)constraint,intend);
                 break;
             default:
                 log.warn("Please update this Implementation to support the Constraint Type "+fieldConstraint.getValue().getType());
                 break;
             }
+            queryString.append(" . \n");
+        }
+        //for some endpoints we need to add an additional constraints used for
+        //ranking. If sub-queries are used this need to be in the select part
+        //of the query (to rank results of the inner query)
+        //otherwise it is better to have it in outside if the select part to only
+        //rank the graph selected by the query
+        if(subSelectState){
+            addRankingConstraints(endpointType, queryString, selectedFields.get(null));
+        }
+        if(!first){
+            if(subSelectState){
+                queryString.append("    } \n");
+                //re-add all selected fields to be added as selects because in
+                //the sub-query we only select the ID!
+                selectedFields = tmpSelectedFields;
+                //ranking needs also to be added to the sub-query (to correctly
+                //process LIMIT and OFFSET
+                addRankingOrder(endpointType, queryString,selectedFields.get(null),"    ");
+                //add LIMIT and OFFSET to the sub-query!
+                //TODO: add link to the email
+                queryString.append("    ");
+                addLimit(query.getLimit(), queryString);
+                queryString.append("    ");
+                addOffset(query, queryString);
+                queryString.append("    ");
+            }
             queryString.append("} \n");
+        }
+        //All the followig Graphpattern are only processed for the parts selected
+        //by the above constraints
+        //if no subqueries are used we need now to add the ranking constraints
+        if(!subSelectState){
+            addRankingConstraints(endpointType, queryString, selectedFields.get(null));
         }
         //we need to add graph pattern for selected field that are not covered by
         //graph pattern written for the constraint.
@@ -364,14 +483,14 @@ public final class SparqlQueryUtils {
                 //the outer while ensures an non null value so we need not to use hasNext
                 actField = it.next();
             } while(actField == null);
-            queryString.append("   { OPTIONAL { ");
+            queryString.append("  OPTIONAL { ");
             // NOTE the following Method removes the written mapping from the Map
-            addFieldGraphPattern(queryString, actField, selectedFields, varPrefix, varNum);
-            queryString.append(". } }\n");
+            addFieldGraphPattern(queryString, actField, selectedFields, varPrefix, varNum,"");
+            queryString.append(". } \n");
         }
     }
 
-    private static void addValueConstraint(StringBuilder queryString,String field,ValueConstraint constraint,Map<String, String> selectedFields,String varPrefix,int[] varNum){
+    private static void addValueConstraint(StringBuilder queryString,String field,ValueConstraint constraint,Map<String, String> selectedFields,String varPrefix,int[] varNum,String intend){
         String rootVarName = selectedFields.get(null);
         Collection<String> dataTypes = constraint.getDataTypes();
         if(dataTypes == null){
@@ -381,30 +500,30 @@ public final class SparqlQueryUtils {
             dataTypes = Collections.emptySet();
         }
         if(constraint.getValue() != null){
-            if(dataTypes.size()<1){
+            if(dataTypes.size()<=1){
                 addDataTypeValueConstraint(queryString, rootVarName, field,
                         dataTypes.isEmpty()?null:dataTypes.iterator().next(),
-                                constraint.getValue());
+                                constraint.getValue(),intend);
             } else { //we have multiple dataTypes -> ned to use union!
                 boolean first = true;
                 for(Iterator<String> it = dataTypes.iterator();it.hasNext();){
                     String dataType = it.next();
                     if(first){
-                        queryString.append('{');
+                        queryString.append(intend);
                         first = false;
-                    } else{
-                        queryString.append("} UNION \n     {");
+                    } else {
+                        queryString.append(" UNION \n  ").append(intend);
                     }
-                    addDataTypeValueConstraint(queryString, rootVarName, field, dataType, constraint.getValue());
+                    addDataTypeValueConstraint(queryString, rootVarName, field, dataType, constraint.getValue(),"");
                 }
-                queryString.append('}');
+                //queryString.append('}');
             }
         } else { // no constraint for the value
             // filter all instances that define any value for the given dataTypes
             // see http://www.w3.org/TR/rdf-sparql-query/#func-datatype
             //first we need to select the Variable to filter
-            String var = addFieldGraphPattern(queryString, field, selectedFields, varPrefix, varNum);
-            queryString.append(". \n     ");
+            String var = addFieldGraphPattern(queryString, field, selectedFields, varPrefix, varNum,intend);
+            queryString.append(". \n").append(intend);
             //now we need to write the filter
             if(dataTypes.size()==1){
                 addDataTypeFilter(queryString, var, dataTypes.iterator().next());
@@ -413,14 +532,14 @@ public final class SparqlQueryUtils {
                 for(Iterator<String> it = dataTypes.iterator();it.hasNext();) {
                     String dataType = it.next();
                     if(first){
-                        queryString.append("( ");
+                        queryString.append("( \n  ").append(intend);
                         first = false;
                     } else{
-                        queryString.append(" || \n       ");
+                        queryString.append(" || \n  ").append(intend);
                     }
                     addDataTypeFilter(queryString, var, dataType);
                 }
-                queryString.append(')');
+                queryString.append(" \n").append(intend).append(")");
             }
         }
     }
@@ -432,7 +551,7 @@ public final class SparqlQueryUtils {
      * @param dataTypes the data type uri for the filter. MUST NOT be <code>null</code>
      */
     private static void addDataTypeFilter(StringBuilder queryString, String var, String dataType) {
-        queryString.append(String.format("(FILTER(datatype(?%s) = <%s>)",
+        queryString.append(String.format("FILTER(datatype(?%s) = <%s>)",
                 var,dataType));
     }
 
@@ -444,13 +563,14 @@ public final class SparqlQueryUtils {
      * @param dataType the dataType constraint or <code>null</code> if none
      * @param value the value. MUST NOT be <code>null</code>.
      */
-    private static void addDataTypeValueConstraint(StringBuilder queryString, String rootVarName, String field, String dataType, Object value) {
+    private static void addDataTypeValueConstraint(StringBuilder queryString, String rootVarName, String field, String dataType, Object value, String intend) {
         if(DataTypeEnum.Reference.getUri().equals(dataType) ||
                 value instanceof Reference){
-            queryString.append(String.format("?%s <%s> <%s> ", rootVarName,field,value));
+            queryString.append(String.format("%s?%s <%s> <%s>", 
+                intend,rootVarName,field,value));
         } else {
-            queryString.append(String.format("?%s <%s> \"%s\"%s ",
-                    rootVarName,field,value,
+            queryString.append(String.format("%s?%s <%s> \"%s\"%s",
+                    intend, rootVarName,field,value,
                     dataType!=null?String.format("^^<%s>",dataType):""));
         }
     }
@@ -462,31 +582,43 @@ public final class SparqlQueryUtils {
      * @param endpointType The type of the Endpoint (used to write optimized
      *    queries for endpoint type specific extensions
      */
-    private static void addTextConstraint(StringBuilder queryString,String var,TextConstraint constraint,EndpointTypeEnum endpointType){
+    private static void addTextConstraint(StringBuilder queryString,String var,TextConstraint constraint,EndpointTypeEnum endpointType,String intend){
         boolean filterAdded = false;
         boolean isTextValueConstraint = constraint.getText() != null && constraint.getText().length()>0;
         if(isTextValueConstraint){
             if(constraint.getPatternType() == PatternType.regex){
-                queryString.append(" \n     FILTER(");
+                queryString.append(" \n").append(intend).append("  FILTER(");
                 filterAdded = true;
                 addRegexFilter(queryString,var,constraint.getText(),constraint.isCaseSensitive());
             } else {
                 //TODO: This optimised versions for Virtuoso and LARQ might not
                 //      respect case sensitive queries. Need more testing!
                 if (EndpointTypeEnum.Virtuoso == endpointType) {
-                    queryString.append(". \n");
-                    queryString.append("     ");
-                    queryString.append(String.format("?%s bif:contains '\"%s\"' . ", var,constraint.getText().replace("'", " ") //escape search string to avoid breaking the SPARQL query!
-                        .replace(" ", " AND ")));
+                    queryString.append(". \n  ").append(intend);
+                    queryString.append(String.format("?%s bif:contains '",var));
+                    boolean firstWord = true;;
+                    //TODO: maybe we should use a better word tokenizer
+                    for(String word : constraint.getText().split(" ")){
+                        if(firstWord){
+                            firstWord = false;
+                        } else {
+                            queryString.append(" AND ");
+                        }
+                        queryString.append('"').append(word).append('"');
+                    }
+                    queryString.append('\'');
+//                    queryString.append(String.format("?%s bif:contains '\"%s\"'", var,constraint.getText()
+//                        .replace("'", " ") //escape search string to avoid breaking the SPARQL query!
+//                        //.replace(" ", " AND ") looks like AND operator is no longer supported by Virtuoso
+//                        ));
                     //q.append("ORDER BY DESC ( <LONG::IRI_RANK> (?uri) ) ");
                 } else if (EndpointTypeEnum.LARQ == endpointType) {
-                    queryString.append(". \n");
-                    queryString.append("     ");
-                    queryString.append(String.format("?%s <http://jena.hpl.hp.com/ARQ/property#textMatch> '+%s' . ", var, constraint.getText().replace("'", " ")));
+                    queryString.append(". \n  ").append(intend);
+                    queryString.append(String.format("?%s <http://jena.hpl.hp.com/ARQ/property#textMatch> '+%s'", var, constraint.getText().replace("'", " ")));
                     //q.append("?incoming ?p ?uri . } ");
                     //q.append("ORDER BY DESC (COUNT (?incoming) ) ");
                 } else {
-                    queryString.append(" \n     FILTER(");
+                    queryString.append(" \n").append(intend).append("  FILTER(");
                     filterAdded = true;
                     if(constraint.getPatternType() == PatternType.none){
                         if(constraint.isCaseSensitive()){
@@ -510,7 +642,7 @@ public final class SparqlQueryUtils {
         //TODO check if FILTER ( is already written!
         if(constraint.getLanguages() != null && !constraint.getLanguages().isEmpty()){
             if(!filterAdded){
-                queryString.append(" \n     FILTER(");
+                queryString.append(" . \n").append(intend).append("  FILTER(");
                 filterAdded = true;
                 writeLanguagesFilter(queryString, constraint.getLanguages(), var,null);
             } else {
@@ -539,8 +671,8 @@ public final class SparqlQueryUtils {
      * @param var the variable to constrain
      * @param constraint the constraint
      */
-    private static void addRangeConstriant(StringBuilder queryString, String var, RangeConstraint constraint) {
-        queryString.append("\n     FILTER "); //start the FILTER
+    private static void addRangeConstriant(StringBuilder queryString, String var, RangeConstraint constraint,String intend) {
+        queryString.append("\n").append(intend).append("FILTER "); //start the FILTER
         boolean closedRange = constraint.getLowerBound() != null && constraint.getUpperBound() != null;
         if(closedRange){
             queryString.append("(");
@@ -595,14 +727,15 @@ public final class SparqlQueryUtils {
      *    increased by one
      * @return The variable name used for the object of the pattern
      */
-    private static String addFieldGraphPattern(StringBuilder queryString, String field, Map<String, String> selectedFields, String varPrefix, int[] varNum) {
+    private static String addFieldGraphPattern(StringBuilder queryString, String field, Map<String, String> selectedFields, String varPrefix, int[] varNum,String intend) {
         String var = selectedFields.remove(field); //check if the field is selected
         if(var == null){ //this field is not selected
             //we need to generate a temp var
             var = varPrefix+varNum[0];
             varNum[0]++;
         }
-        queryString.append(String.format("?%s <%s> ?%s ", selectedFields.get(null),field,var));
+        queryString.append(String.format("%s?%s <%s> ?%s ", 
+            intend,selectedFields.get(null),field,var));
         return var;
     }
 
@@ -651,23 +784,26 @@ public final class SparqlQueryUtils {
     }
 
 
-/*    public static void main(String[] args) {
+    public static void main(String[] args) {
         SparqlFieldQuery query = SparqlFieldQueryFactory.getInstance().createFieldQuery();
-        query.setConstraint("urn:field1", new ReferenceConstraint("urn:testReference"));
-        query.setConstraint("urn:field1a", new ValueConstraint(null, Arrays.asList(
-                DataTypeEnum.Float.getUri())));
-        query.setConstraint("urn:field1b", new ValueConstraint(9, Arrays.asList(
-                DataTypeEnum.Float.getUri())));
-        query.setConstraint("urn:field1c", new ValueConstraint(null, Arrays.asList(
-                DataTypeEnum.Float.getUri(),DataTypeEnum.Double.getUri(),DataTypeEnum.Decimal.getUri())));
-        query.setConstraint("urn:field1d", new ValueConstraint(9, Arrays.asList(
-                DataTypeEnum.Float.getUri(),DataTypeEnum.Double.getUri(),DataTypeEnum.Decimal.getUri())));
+//        query.setConstraint("urn:field1", new ReferenceConstraint("urn:testReference"));
+//        query.setConstraint("urn:field1a", new ValueConstraint(null, Arrays.asList(
+//                DataTypeEnum.Float.getUri())));
+//        query.addSelectedField("urn:field1a");
+//        query.setConstraint("urn:field1b", new ValueConstraint(9, Arrays.asList(
+//                DataTypeEnum.Float.getUri())));
+//        query.setConstraint("urn:field1c", new ValueConstraint(null, Arrays.asList(
+//                DataTypeEnum.Float.getUri(),DataTypeEnum.Double.getUri(),DataTypeEnum.Decimal.getUri())));
+//        query.addSelectedField("urn:field1c");
+//        query.setConstraint("urn:field1d", new ValueConstraint(9, Arrays.asList(
+//                DataTypeEnum.Float.getUri(),DataTypeEnum.Double.getUri(),DataTypeEnum.Decimal.getUri())));
 //        query.setConstraint("urn:field2", new TextConstraint("test value"));
 //        query.setConstraint("urn:field3", new TextConstraint("text value",true));
 //        query.setConstraint("urn:field2a", new TextConstraint(":-]")); //tests escaping of REGEX
 //        query.setConstraint("urn:field3", new TextConstraint("language text","en"));
 //        query.setConstraint("urn:field4", new TextConstraint("multi language text","en","de",null));
-//        query.setConstraint("urn:field5", new TextConstraint("wildcar*",PatternType.wildcard,false,"en"));
+        query.setConstraint("urn:field5", new TextConstraint("wildcar*",PatternType.wildcard,false,"en","de"));
+        query.addSelectedField("urn:field5");
 //        query.setConstraint("urn:field6", new TextConstraint("^regex",PatternType.REGEX,true));
 //        query.setConstraint("urn:field7", new TextConstraint("par*",PatternType.WildCard,false,"en","de",null));
 //        query.setConstraint("urn:field8", new TextConstraint(null,"en","de",null));
@@ -676,8 +812,8 @@ public final class SparqlQueryUtils {
 //        query.setConstraint("urn:field11", new RangeConstraint(null, (int)10, true));
 //        query.setConstraint("urn:field12", new RangeConstraint((int)5, null, true));
 //        query.setConstraint("urn:field12", new RangeConstraint(new Date(), null, true));
-//        query.addSelectedField("urn:field2a");
-//        query.addSelectedField("urn:field3");
+        query.addSelectedField("urn:field2a");
+        query.addSelectedField("urn:field3");
         query.setLimit(5);
         query.setOffset(5);
         System.out.println(createSparqlSelectQuery(query,true,0,EndpointTypeEnum.LARQ));
@@ -687,7 +823,7 @@ public final class SparqlQueryUtils {
         System.out.println(createSparqlSelectQuery(query,true,0,EndpointTypeEnum.Standard));
         System.out.println();
         System.out.println(createSparqlConstructQuery(query,0,EndpointTypeEnum.Virtuoso));
-    }*/
+    }
 
     /**
      * @param query

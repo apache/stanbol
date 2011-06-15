@@ -27,9 +27,12 @@ public class EngineException extends Exception {
     }
 
     public EngineException(EnhancementEngine ee, ContentItem ci, Throwable cause) {
+        this(ee,ci,null,cause);
+    }
+    public EngineException(EnhancementEngine ee, ContentItem ci, String message, Throwable cause) {
         super(String.format(
                 "'%s' failed to process content item '%s' with type '%s': %s",
                 ee.getClass().getSimpleName(), ci.getId(), ci.getMimeType(),
-                cause), cause);
+                message == null ? cause : message), cause);
     }
 }

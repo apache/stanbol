@@ -4,16 +4,16 @@
 <tbody>
 	<tr>
 		<th>Description</th>
-		<td>Service to get a mapping by its ID which is encoded as an URI. You need to know the mapping URI
-		to use this service.</td>
+		<td>Service to get/add/update and remove Entities managed by the
+		Entityhub.</td>
 	</tr>
 	<tr>
 		<th>Request</th>
-		<td>GET /entityhub/mapping?id={uri}</td>
+		<td>GET /entityhub/entity?id={uri}</td>
 	</tr>
 	<tr>
 		<th>Parameter</th>
-		<td>id: the URI of the mapping</th>
+		<td>id: the URI of the Entity</th>
 	</tr>
 	<tr>
 		<th>Produces</th>

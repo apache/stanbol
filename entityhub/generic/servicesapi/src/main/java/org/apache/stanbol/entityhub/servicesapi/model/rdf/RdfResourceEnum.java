@@ -49,10 +49,10 @@ public enum RdfResourceEnum {
      * {@link org.apache.stanbol.entityhub.servicesapi.model.Entity#getMetadata() metadata}
      * to the {@link org.apache.stanbol.entityhub.servicesapi.model.Entity#getRepresentation() representation}
      * of an {@link org.apache.stanbol.entityhub.servicesapi.model.Entity}.<p>
-     * Note that the foaf:primaryTopic relation is currently used for this
-     * purpose.
+     * Note that this uses a property in the entityhub namespace to ensure that
+     * no other (external) Information does accidently use the same property.
      */
-    aboutRepresentation(NamespaceEnum.dcTerms,"subject"),
+    aboutRepresentation(null,"about"),
 //    /**
 //     * The representation about an Entity (domain=Entity, range=Representation).
 //     */

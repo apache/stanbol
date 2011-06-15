@@ -34,7 +34,9 @@ public abstract class EntityWrapper {
      * @param date the date
      */
     public final void setCreated(Date date) {
-        wrappedEntity.getMetadata().set(NamespaceEnum.dcTerms+"created", date);
+        if(date != null){
+            wrappedEntity.getMetadata().set(NamespaceEnum.dcTerms+"created", date);
+        }
     }
     /**
      * Getter for the creation date of this mapping
@@ -44,6 +46,23 @@ public abstract class EntityWrapper {
     public final Date getCreated() {
         return wrappedEntity.getMetadata().getFirst(NamespaceEnum.dcTerms+"created", Date.class);
     }
+    /**
+     * Setter for the modified date (replaces existing values)
+     * @param date the new date
+     */
+    public void setModified(Date date) {
+        if(date != null){
+            wrappedEntity.getMetadata().set(NamespaceEnum.dcTerms+"modified", date);
+        }
+    }
+    /**
+     * Getter for the last modified date
+     * @return the date of the last modification
+     */
+    public final Date getModified() {
+        return wrappedEntity.getMetadata().getFirst(NamespaceEnum.dcTerms+"modified", Date.class);
+    }
+
     /**
      * Adds a link to a contributor (e.g. a site where some information where
      * imported)

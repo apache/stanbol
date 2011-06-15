@@ -2,7 +2,7 @@
 <#escape x as x?html>
 <@common.page> 
 
-<#include "inc_symbol.ftl">
+<#include "inc_mapping_symbol.ftl">
 
 </@common.page>
 </#escape>

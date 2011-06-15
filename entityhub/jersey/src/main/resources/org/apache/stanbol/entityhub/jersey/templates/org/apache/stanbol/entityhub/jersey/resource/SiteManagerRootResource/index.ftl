@@ -10,9 +10,13 @@
 	<li><a href="${it.publicBaseUri}entityhub/sites/query">/entityhub/sites/query</a></li>
 </ul>
 
+<hr>
 <#include "inc_referenced.ftl">
+<hr>
 <#include "inc_entity.ftl">
+<hr>
 <#include "inc_find.ftl">
+<hr>
 <#include "inc_query.ftl">
 
 </@common.page>

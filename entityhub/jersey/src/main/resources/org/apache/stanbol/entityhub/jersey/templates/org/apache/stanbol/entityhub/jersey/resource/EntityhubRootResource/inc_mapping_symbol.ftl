@@ -4,10 +4,13 @@
 <tbody>
 	<tr>
 		<th>Description</th>
-		<td>This service allows to retrieve the mapping for a symbol. If no mapping for the parsed URI is
-		defined, the service returns a 404 "Not Found". You can retrieve such an URI by looking up the symbol
-		of the entity using the <a href="${it.publicBaseUri}entityhub/symbol/lookup">symbol/lookup</a>
-		endpoint.</td>
+		<td>This service allows to retrieve the mapping for a entity managed by
+		the Entityhub. If no mapping for the parsed URI is
+		defined, the service returns a 404 "Not Found". 
+		You can retrieve such an URI by 
+		<a href="${it.publicBaseUri}entityhub/find">searching</a> for Entities 
+		managed by the Entityhub.
+		</td>
 	</tr>
 	<tr>
 		<th>Request</th>

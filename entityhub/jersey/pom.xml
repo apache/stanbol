@@ -112,10 +112,11 @@
     </dependency>
 
     <!-- JAX-RS JSR311 -->
+    <!-- is now included and exported by jersey-core
     <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
-    </dependency>
+    </dependency> -->
     <!-- to read "multipart/form-data" requests/responses -->    
       <dependency>
           <groupId>javax.mail</groupId>

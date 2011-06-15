@@ -131,11 +131,12 @@
 			<artifactId>httpcore-osgi</artifactId>
 			<version>4.0.1</version>
 		</bundle>
+		<!-- not a bundle 
 		<bundle>
 	        <groupId>commons-httpclient</groupId>
 	        <artifactId>commons-httpclient</artifactId>
 	        <version>3.1</version>
-		</bundle>
+		</bundle> -->
 	<bundle>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
@@ -168,26 +169,43 @@
 		<bundle>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-core</artifactId>
-			<version>1.2</version>
+			<version>1.7</version>
 		</bundle>
 	</startLevel>
     
     <!-- Jersey -->
 	<startLevel level="15">
+<!-- is now included and exported by jersey-core
 		<bundle>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>jsr311-api</artifactId>
 			<version>1.1.1</version>
-		</bundle>
+		</bundle>  -->
 		<bundle>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-server</artifactId>
-			<version>1.2</version>
+			<version>1.7</version>
 		</bundle>
+		<!-- needed to read data from mime multipart requests -->
+ 		<bundle>
+            <groupId>com.sun.jersey.contribs</groupId>
+            <artifactId>jersey-multipart</artifactId>
+            <version>1.7</version>
+        </bundle>
+        <bundle> <!--  dependency of jersey-multipart -->
+            <groupId>org.jvnet</groupId>
+            <artifactId>mimepull</artifactId>
+            <version>1.4</version>
+        </bundle>
+<!--  <bundle>
+    <groupId>javax.mail</groupId>
+    <artifactId>mail</artifactId>
+    <version>1.4.1</version>
+</bundle> -->
 		<bundle>
 			<groupId>org.codehaus.jettison</groupId>
 			<artifactId>jettison</artifactId>
-			<version>1.2</version>
+			<version>1.3</version>
 		</bundle>
 	</startLevel>
     
@@ -365,8 +383,8 @@
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.engines.metaxa</artifactId>
+   	  	    <groupId>org.apache.stanbol</groupId>
+		    <artifactId>org.apache.stanbol.enhancer.engines.metaxa</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>
