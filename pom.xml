@@ -69,7 +69,7 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.jsonld</artifactId>
+      <artifactId>org.apache.stanbol.commons.jsonld</artifactId>
     </dependency>
 
     <!-- Clerezza dependencies -->
