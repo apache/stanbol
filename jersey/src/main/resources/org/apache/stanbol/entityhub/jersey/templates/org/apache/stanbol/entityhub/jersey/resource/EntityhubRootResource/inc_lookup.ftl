@@ -1,4 +1,4 @@
-<h4>Subresource /symbol/lookup?id={uri}&create={create}</h4>
+<h4>Subresource /lookup?id={uri}&create={create}</h4>
 
 <table>
 <tbody>
@@ -26,7 +26,7 @@
 	</tr>
 	<tr>
 		<th>Request</th>
-		<td>GET /symbol/lookup?id={uri}&create={create} </td>
+		<td>GET /lookup?id={uri}&create={create} </td>
 	</tr>
 	<tr>
 		<th>Parameter</th>
@@ -44,7 +44,7 @@
 
 <h5>Example</h5>
 
-<pre>curl "${it.publicBaseUri}entityhub/symbol/lookup/?id=http://dbpedia.org/resource/Paris&create=false"</pre>
+<pre>curl "${it.publicBaseUri}entityhub/lookup/?id=http://dbpedia.org/resource/Paris&create=false"</pre>
 
 <h5>Test</h5>
 
@@ -62,7 +62,7 @@ function lookupEntity(entity, create) {
  $("#lookupEntityResult").show();
  $.ajax({
    type: "GET",
-   url: "${it.publicBaseUri}entityhub/symbol/lookup",
+   url: "${it.publicBaseUri}entityhub/lookup",
    data: "id=" + entity + "&create=" + create,
    dataType: "text/plain",
    cache: false,

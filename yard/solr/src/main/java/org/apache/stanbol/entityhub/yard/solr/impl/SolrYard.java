@@ -120,19 +120,22 @@ import org.slf4j.LoggerFactory;
 // required!
 specVersion = "1.1")
 @Service
-@Properties(value = {
-                     // TODO: Added propertied from AbstractYard to fix ordering!
-                     @Property(name = Yard.ID, value = "entityhubYard"),
-                     @Property(name = Yard.NAME, value = "Entityhub Yard"),
-                     @Property(name = Yard.DESCRIPTION, value = "The Yard used by the Entityhub to store the data"),
-                     @Property(name = AbstractYard.DEFAULT_QUERY_RESULT_NUMBER, intValue = -1),
-                     @Property(name = AbstractYard.MAX_QUERY_RESULT_NUMBER, intValue = -1),
-                     // BEGIN SolrYard specific Properties
-                     @Property(name = SolrYard.SOLR_SERVER_LOCATION, value = "entityhub"),
-                     @Property(name = SolrYard.MULTI_YARD_INDEX_LAYOUT, options = {
-                                                                                   @PropertyOption(name = "true", value = "true"),
-                                                                                   @PropertyOption(name = "false", value = "false")}, value = "false"),
-                     @Property(name = SolrYard.MAX_BOOLEAN_CLAUSES, intValue = SolrYard.defaultMaxBooleanClauses)})
+@Properties(
+    value = {
+         // TODO: Added propertied from AbstractYard to fix ordering!
+         @Property(name = Yard.ID),
+         @Property(name = Yard.NAME),
+         @Property(name = Yard.DESCRIPTION),
+         @Property(name = AbstractYard.DEFAULT_QUERY_RESULT_NUMBER, intValue = -1),
+         @Property(name = AbstractYard.MAX_QUERY_RESULT_NUMBER, intValue = -1),
+         // BEGIN SolrYard specific Properties
+         @Property(name = SolrYard.SOLR_SERVER_LOCATION),
+         @Property(name = SolrYard.MULTI_YARD_INDEX_LAYOUT, 
+             options = {
+                   @PropertyOption(name = "true", value = "true"),
+                   @PropertyOption(name = "false", value = "false")}, 
+                   value = "false"),
+         @Property(name = SolrYard.MAX_BOOLEAN_CLAUSES, intValue = SolrYard.defaultMaxBooleanClauses)})
 public class SolrYard extends AbstractYard implements Yard {
     /**
      * The key used to configure the URL for the SolrServer

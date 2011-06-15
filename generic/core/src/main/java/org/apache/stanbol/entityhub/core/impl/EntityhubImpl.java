@@ -19,6 +19,7 @@ package org.apache.stanbol.entityhub.core.impl;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -27,6 +28,7 @@ import java.util.List;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -39,6 +41,7 @@ import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.ManagedEntityState;
@@ -207,6 +210,11 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
     }
 
     @Override
+    public EntityhubConfiguration getConfig() {
+        return config;
+    }
+    
+    @Override
     public Entity lookupLocalEntity(String entity) throws YardException{
         return lookupLocalEntity(entity,false);
     }
@@ -304,6 +312,121 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
             return null;
         }
     }
+    @Override
+    public boolean isRepresentation(String entityId) throws EntityhubException, IllegalArgumentException {
+        if(entityId == null || entityId.isEmpty()){
+            throw new IllegalArgumentException("The parsed id MUST NOT be NULL nor empty!");
+        }
+        return lookupYard().isRepresentation(entityId);
+    }
+    @Override
+    public Entity store(Representation representation) throws EntityhubException, IllegalArgumentException {
+        if(representation == null){
+            throw new IllegalArgumentException("The parsed Representation MUST NOT be NULL!");
+        }
+        Yard yard = lookupYard();
+        //parse only the id of the representation, because we need the current
+        //stored version of the entity!
+        Entity entity = loadEntity(yard, representation.getId());
+        //now we need to check if the parsed representation is the data or the
+        //metadata of the Entity
+        ManagedEntity updated;
+        if(entity == null || representation.getId().equals(entity.getRepresentation().getId())){
+            //update the data or create a new entity
+            updated = ManagedEntity.init(new EntityImpl(config.getID(), representation,
+                entity != null ? entity.getMetadata() : null),
+                config.getDefaultManagedEntityState());
+            if(entity == null){ //add creation date
+                updated.setCreated(new Date());
+            }
+        } else {
+            //update the metadata
+            entity = new EntityImpl(config.getID(), entity.getRepresentation(),
+                representation);
+            //we need to validate the metadata
+            updated = ManagedEntity.init(
+                entity, config.getDefaultManagedEntityState());
+        }
+        storeEntity(yard,updated.getWrappedEntity());
+        return updated.getWrappedEntity();
+    }
+    @Override
+    public Entity delete(String id) throws EntityhubException, IllegalArgumentException {
+        if(id == null || id.isEmpty()){
+            throw new IllegalArgumentException("The parsed id MUST NOT be NULL nor emtpty!");
+        }
+        Yard yard = lookupYard();
+        Entity entity = loadEntity(yard, id);
+        if(entity != null){
+            log.debug("delete Entity {} as requested by the parsed id {}",entity.getId(),id);
+            //we need to remove all mappings for this Entity
+            deleteMappingsbyTarget(yard,entity.getId());
+            deleteEntity(yard,entity);
+        } else {
+            log.debug("Unable to delete Entity for id {}, because no Entity for this id is" +
+            		"managed by the Entityhub",id);
+        }
+        return entity;
+    }
+    @Override
+    public Entity setState(String id, ManagedEntityState state) throws EntityhubException,
+                                                               IllegalArgumentException {
+        if(id == null || id.isEmpty()){
+            throw new IllegalStateException("The parsed id MUST NOT be NULL nor empty!");
+        }
+        if(state == null){
+            throw new IllegalStateException("The parsed state for the Entity MUST NOT ne NULL");
+        }
+        Yard yard = lookupYard();
+        Entity entity = loadEntity(yard, id);
+        if(entity != null){
+            ManagedEntity managed = new ManagedEntity(entity);
+            if(managed.getState() != state){
+                managed.setState(state);
+                storeEntity(yard, entity);
+            }
+        }
+        return entity;
+    }
+    /**
+     * Deleted both the representation and the metadata of an Entity
+     * @param yard the yard to delete the entity from
+     * @param entity the entity to delete
+     * @throws YardException an any Exception while deleting the Entity
+     */
+    private void deleteEntity(Yard yard,Entity entity) throws YardException {
+        if(entity != null){
+            yard.remove(Arrays.asList(
+                entity.getRepresentation().getId(),
+                entity.getMetadata().getId()));
+        }
+    }
+    private void deleteEntities(Yard yard, Collection<String> ids) throws YardException {
+        FieldQuery fieldQuery = getQueryFavtory().createFieldQuery();
+        Collection<String> toDelete = new HashSet<String>(ids);
+        for(String id : ids){
+            if(id != null && !id.isEmpty()){
+                fieldQuery.setConstraint(RdfResourceEnum.aboutRepresentation.getUri(), new ReferenceConstraint(id));
+                for(Iterator<String> it = yard.findReferences(fieldQuery).iterator();it.hasNext();){
+                    toDelete.add(it.next());
+                }
+            }
+        }
+        if(!toDelete.isEmpty()){
+            yard.remove(toDelete);
+        }
+        
+    }
+
+    private void deleteMappingsbyTarget(Yard yard,String id) throws YardException {
+        if(id != null && !id.isEmpty()){
+            FieldQuery fieldQuery = getQueryFavtory().createFieldQuery();
+            fieldQuery.setConstraint(RdfResourceEnum.mappingTarget.getUri(), new ReferenceConstraint(id));
+            deleteEntities(yard, ModelUtils.asCollection(
+                yard.findReferences(fieldQuery).iterator()));
+        }
+    }
+
     /**
      * Imports the Entity
      * @param remoteEntity the Entity to import
@@ -498,9 +621,11 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
     }
 
     /**
-     * Loads an Entity (Representation and Metadata) form the parsed Yard
+     * Loads an Entity (Representation and Metadata) for the parsed id. In case
+     * the parsed id represents metadata, than the id of the returned Entity will
+     * be different from the parsed id.
      * @param entityhubYard the yard used by the Entityhub
-     * @param id the ID of the Entity to load
+     * @param id the id of the data or the metadata of the Entity to load
      * @return the Entity or <code>null</code> if not found
      * @throws YardException On any error with the parsed Yard.
      */
@@ -509,29 +634,67 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
             loadEntity(entityhubYard,entityhubYard.getRepresentation(id));
     }
     /**
-     * Loads the metadata for the parsed representation form the parsed Yard
-     * and creates the Entity. If no metadata are found a new Representation
-     * is created.
+     * Loads the Entity based on the parsed representation. The parsed
+     * {@link Representation} can be both the data and the metadata. In case the
+     * parsed representation are metadat the id of the returned Entity will be
+     * not the same as the id of the parsed {@link Representation}.
      * @param entityhubYard the yard used by the Entityhub
-     * @param representation the representation of the entity
-     * @return the created Entity including the loaded/created metadata
+     * @param rep the representation or metadata of an entity
+     * @return the created Entity including both data and metadata or 
+     * <code>null</code> if the parsed Representation does not represent a 
+     * Representation managed by the Entityhub (this may be the case if an other
+     * thread has deleted that Entity in the meantime)
      * @throws YardException On any error with the parsed Yard.
      */
-    private Entity loadEntity(Yard entityhubYard, Representation representation) throws YardException {
-        if(representation != null){
-            String metaID = representation.getId()+".meta";
-            Representation metadata = entityhubYard.getRepresentation(metaID);
-            if(metadata == null){
-                metadata = entityhubYard.create(metaID);
+    private Entity loadEntity(Yard entityhubYard, Representation rep) throws YardException {
+        if(rep != null){
+            Representation data;
+            Representation metadata = null;
+            String entityId = ModelUtils.getAboutRepresentation(rep);
+            if(entityId != null){
+                data = entityhubYard.getRepresentation(entityId);
+                metadata = rep;
+            } else {
+                data = rep;
+                entityId = rep.getId(); //needed for logs
             }
-            return new EntityImpl(config.getID(), representation,metadata);
+            if(data != null){
+                metadata = lookupMetadata(entityhubYard, rep.getId(),true);
+                return new EntityImpl(config.getID(), data,metadata);
+            } else {
+                log.warn("Unable find representation for Entity {} (metadata: {}",
+                    entityId,metadata);
+                return null;
+            }
         } else {
             return null;
         }
     }
+
+    /**
+     * Lookups (or initialises) the metadata for the entity with the parsed id 
+     * @param entityhubYard the yard to search the metadata
+     * @param entityId The id of the entity
+     * @param init if the metadata should be initialised of not existing
+     * @return the metadata for that Entity or <code>null</code> if not existing
+     * and <code>init == false</code>
+     * @throws YardException
+     */
+    private Representation lookupMetadata(Yard entityhubYard, String entityId, boolean init) throws YardException {
+        Representation metadata;
+        //TODO: check the asumption that the Metadata always use the
+        //      extension ".meta"
+        String metaID = entityId+".meta";
+        metadata = entityhubYard.getRepresentation(metaID);
+        if(metadata == null){
+            metadata = entityhubYard.create(metaID);
+        }
+        return metadata;
+    }
     /**
      * Stores both the Representation and the Metadata of the parsed Entity to the
-     * parsed yard.
+     * parsed yard.<p>
+     * This Method also updated the modification date of the Metadata.
      * @param entityhubYard the Yard used to store the Entity
      * @param entity the stored entity
      * @throws YardException
@@ -539,6 +702,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
     private void storeEntity(Yard entityhubYard, Entity entity) throws YardException{
         if(entity != null){
             entityhubYard.store(entity.getRepresentation());
+            entity.getMetadata().set(NamespaceEnum.dcTerms+"modified", new Date());
             entityhubYard.store(entity.getMetadata());
         }
     }

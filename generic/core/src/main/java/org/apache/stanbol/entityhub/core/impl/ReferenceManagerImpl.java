@@ -18,6 +18,7 @@ package org.apache.stanbol.entityhub.core.impl;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -136,13 +137,14 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
      * @param referencedSite
      */
     private void addEntityPrefixes(ReferencedSite referencedSite) {
-        String[] prefixes = referencedSite.getConfiguration().getEntityPrefixes();
-        if(prefixes == null || prefixes.length < 1){
+        String[] prefixArray = referencedSite.getConfiguration().getEntityPrefixes();
+        if(prefixArray == null || prefixArray.length < 1){
             synchronized (prefixMap) {
                 noPrefixSites.add(referencedSite);
             }
         } else {
-            for(String prefix : prefixes){
+            //use a set to iterate to remove possible duplicates
+            for(String prefix : new HashSet<String>(Arrays.asList(prefixArray))){
                 synchronized (prefixMap) {
                     Collection<ReferencedSite> sites = prefixMap.get(prefix);
                     if(sites == null){
@@ -153,7 +155,7 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
                         if(pos<0){
                             prefixList.add(Math.abs(pos)-1,prefix);
                         }
-                        prefixList.add(Collections.binarySearch(prefixList, prefix)+1,prefix);
+                        //prefixList.add(Collections.binarySearch(prefixList, prefix)+1,prefix);
                     }
                     //TODO: Sort the referencedSites based on the ServiceRanking!
                     sites.add(referencedSite);

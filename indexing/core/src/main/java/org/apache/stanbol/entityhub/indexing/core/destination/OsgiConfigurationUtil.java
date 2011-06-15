@@ -75,7 +75,8 @@ public final class OsgiConfigurationUtil {
         //basic properties
         //we use the name as ID
         config.put(SiteConfiguration.ID, indexingConfig.getName());
-        //do not set a name, because the ID is used for the name if no name is defined
+        //also set the id as name
+        config.put(SiteConfiguration.NAME, indexingConfig.getName());
         //config.put(SiteConfiguration.NAME, indexingConfig.getName());
         if(indexingConfig.getDescription() != null && !indexingConfig.getDescription().isEmpty()){
             config.put(SiteConfiguration.DESCRIPTION, indexingConfig.getDescription());

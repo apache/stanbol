@@ -15,11 +15,9 @@ import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.entityhub.jersey.parsers.FieldQueryReader;
 import org.apache.stanbol.entityhub.jersey.parsers.RepresentationReader;
-import org.apache.stanbol.entityhub.jersey.resource.EntityMappingResource;
 import org.apache.stanbol.entityhub.jersey.resource.EntityhubRootResource;
 import org.apache.stanbol.entityhub.jersey.resource.ReferencedSiteRootResource;
 import org.apache.stanbol.entityhub.jersey.resource.SiteManagerRootResource;
-import org.apache.stanbol.entityhub.jersey.resource.SymbolResource;
 import org.apache.stanbol.entityhub.jersey.writers.JettisonWriter;
 import org.apache.stanbol.entityhub.jersey.writers.QueryResultListWriter;
 import org.apache.stanbol.entityhub.jersey.writers.RepresentationWriter;
@@ -57,10 +55,10 @@ public class EntityhubWebFragment implements WebFragment {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         // resources
         classes.add(EntityhubRootResource.class);
-        classes.add(EntityMappingResource.class);
+        //classes.add(EntityMappingResource.class);
         classes.add(ReferencedSiteRootResource.class);
         classes.add(SiteManagerRootResource.class);
-        classes.add(SymbolResource.class);
+        //classes.add(SymbolResource.class);
         // message body readers and writers
         classes.add(FieldQueryReader.class);
         classes.add(QueryResultListWriter.class);
@@ -74,6 +72,7 @@ public class EntityhubWebFragment implements WebFragment {
         //     type application/json was not found
         //     As a workaround I have implemented this small workaround!
         classes.add(JettisonWriter.class);
+        
         return classes;
     }
     

@@ -8,16 +8,67 @@
 </div>
 
 <div class="panel" id="restapi" style="display: none;">
-<h3>Service Endpoints</h3>
+  <h3>Service Endpoints</h3>
 
-<p>The Entityhub supports the following service endpoints:</p>
+  <p>The Entityhub provide two main service. First it allows to manage a network
+  of site used to consume Entity Information from and second it allows to manage
+  locally used Entities.</p>
+  <p>The RESTful API of the Entityhub ist structured as follows.</p>
 
-<ul>
-	<li>Site Manager @ <a href="${it.publicBaseUri}entityhub/sites">/entityhub/sites</a></li>
-	<li>Symbols @ <a href="${it.publicBaseUri}entityhub/symbol">/entityhub/symbol</a></li>
-	<li>Mappings @ <a href="${it.publicBaseUri}entityhub/mapping">/entityhub/mapping</a></li>
-</ul>
+  <h4>Entity Network (<code>"/entityhub/site*"</code>):</h4>
 
+  <ul>
+    <li>Referenced Site Manager @ <a href="${it.publicBaseUri}entityhub/sites">/entityhub/sites</a>:
+    Manages the network of Referenced Sites and allows to retrieve and search
+    Entities in all Sites of the Entity Network. </li>
+    <li>Referenced Site @ <code>/entityhub/site/{siteName}</code>: A single
+    Site of the Referenced Site Manager allows to retrieve all active Sites.
+    Referenced Sites provide the same Interface as the
+    Referenced Site Manager.<br>
+    Currently active Referenced Sites:<ul id="referencedSiteList">
+    </ul>
+    <script>
+        $.get("${it.publicBaseUri}entityhub/sites/referenced", function(data){
+            var res = "";
+            for(i=0; i<data.length; i++){
+                res += "<li><a href='" + data[i] + "'>" + data[i] + "</a></li>";
+            }
+            $("#referencedSiteList").html(res);
+        });      
+    </script>
+    </li>
+  </ul>
+
+  <h4>Entityhub (<code>"/entityhub"</code>):</h4>
+
+  <ul>
+    <li>Local Entities @<a href="${it.publicBaseUri}entityhub/entity">/entityhub/entity</a>:
+      Full CRUD operations on Entities managed by the Entityhub
+    </li>
+    <li>Entity Mappings @ <a href="${it.publicBaseUri}entityhub/mapping">/entityhub/mapping</a>:
+      Lookup mappings from local Entities to Entities managed by a
+      <a href="${it.publicBaseUri}entityhub/sites">Referenced Site</a>
+    </li>
+    <li>Local Search @<a href="${it.publicBaseUri}entityhub/find">/entityhub/find</a>:
+        Find locally managed Entities by label based search.
+    </li>
+    <li>Local Query @<a href="${it.publicBaseUri}entityhub/query">/entityhub/query</a>:
+        Find locally managed Entities by parsing queries
+    </li>
+    <li>Entity Lookup @<a href="${it.publicBaseUri}entityhub/lookup">/entityhub/lookup</a>:
+       Lookup Entities by id. This supports also to lookup Entities managed by
+       <a href="${it.publicBaseUri}entityhub/sites">Referenced Sites</a> and
+       the import of found Entities to the Entityhub.
+    </li>
+  </ul>
+  <hr>
+  <#include "inc_entity.ftl">
+  <hr>
+  <#include "inc_lookup.ftl">
+  <hr>
+  <#include "inc_find.ftl">
+  <hr>
+  <#include "inc_query.ftl">
 </div>
 
 </@common.page>

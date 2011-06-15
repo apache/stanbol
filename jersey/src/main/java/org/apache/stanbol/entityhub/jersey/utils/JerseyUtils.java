@@ -49,8 +49,8 @@ import javax.ws.rs.ext.MessageBodyReader;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
-import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
+import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;

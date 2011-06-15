@@ -25,11 +25,9 @@ import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.FOAF;
 import org.apache.clerezza.rdf.ontologies.RDF;
-import org.apache.stanbol.entityhub.core.impl.EntityMapping;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
-import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
+import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 
 /**

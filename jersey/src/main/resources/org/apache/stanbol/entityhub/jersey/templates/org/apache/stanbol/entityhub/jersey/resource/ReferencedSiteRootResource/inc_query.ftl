@@ -8,7 +8,7 @@
 	</tr>
 	<tr>
 		<th>Request</th>
-        <td><code>-X POST -H "Content-Type:application/json" --data "@fieldQuery.json" /entityhub/sites/query<code></td>
+        <td><code>-X POST -H "Content-Type:application/json" --data "@fieldQuery.json" /entityhub/site/{siteId}/query<code></td>
 	</tr>
 	<tr>
 		<th>Parameter</th>
@@ -25,7 +25,7 @@
 
 <h5>Example</h5>
 
-<pre>curl -X POST -H "Content-Type:application/json" --data "@fieldQuery.json" ${it.publicBaseUri}entityhub/sites/query</pre>
+<pre>curl -X POST -H "Content-Type:application/json" --data "@fieldQuery.json" ${it.publicBaseUri}entityhub/site/dbpedia/query</pre>
 
 <p><em>Note</em>: "@fieldQuery.json" links to a local file that contains the parsed
     Fieldquery (see ection "FieldQuery JSON format" for examples).</p>

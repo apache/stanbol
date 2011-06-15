@@ -1,8 +1,8 @@
-<#import "symbol_common.ftl" as common>
+<#import "site_common.ftl" as common>
 <#escape x as x?html>
 <@common.page> 
 
-<#include "inc_find.ftl">
+<#include "inc_query.ftl">
 
 </@common.page>
 </#escape>

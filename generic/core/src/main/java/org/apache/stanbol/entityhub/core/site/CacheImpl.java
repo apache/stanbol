@@ -72,10 +72,10 @@ import org.slf4j.LoggerFactory;
         metatype = true,
         immediate = true)
 @Service(value = Cache.class)
-@Properties(value = {@Property(name = Cache.CACHE_YARD), @Property(name = Cache.ADDITIONAL_MAPPINGS, cardinality = 1000, //positive number to use an Array
-        value = {"| @=null;en;de;fr;it;es", //restrict languages
-                "*" //cache all fields
-        })})
+@Properties(
+    value = {
+        @Property(name = Cache.CACHE_YARD), 
+        @Property(name = Cache.ADDITIONAL_MAPPINGS, cardinality = 1000)})
 public class CacheImpl implements Cache {
     private Logger log = LoggerFactory.getLogger(CacheImpl.class);
     public static final String CACHE_FACTORY_NAME = "org.apache.stanbol.entityhub.yard.CacheFactory";

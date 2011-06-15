@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -53,55 +52,121 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
                                InputStream entityStream) throws IOException, WebApplicationException {
         String queryString = IOUtils.toString(entityStream);
         log.info("Parsed QueryString: \n{}",queryString);
+        MediaType acceptedType = MediaType.valueOf(httpHeaders.getFirst("Accept"));
+        if(acceptedType.isWildcardType()){
+            acceptedType = MediaType.TEXT_PLAIN_TYPE;
+        }
         try {
             return fromJSON(
                 DefaultQueryFactory.getInstance(), 
-                queryString);
+                queryString,acceptedType);
         } catch (JSONException e) {
             log.error("Unable to parse Request ",e);
-            String acceptedMediaType = httpHeaders.getFirst("Accept");
+            StringBuilder message = new StringBuilder();
+            message.append("Parsed FieldQuery is not valid JSON\n");
+            message.append("Parsed String:\n");
+            message.append(queryString);
+            log.warn(message.toString());
+            //TODO: Jersey wraps Exceptions thrown by MessageBodyReader into
+            // other ones. Because of that the Response created by the
+            // WebApplicationException is "lost" and the user will get an
+            // 500 with no comment and HTML content type :(
+            // As a workaround one could use a wrapping object as generic type
+            // that parses the error and than throw the Exception within the
+            // Resource using this MessageBodyReader
             throw new WebApplicationException(
                 Response.status(Status.BAD_REQUEST).
-                entity(new IllegalStateException("Unable to parse FieldQuery from parsed Data.",e)).
-                header(HttpHeaders.ACCEPT, acceptedMediaType).build());
+                entity(message.toString()).
+                header(HttpHeaders.ACCEPT, acceptedType.toString()).build());
         }
     }
-    public static FieldQuery fromJSON(FieldQueryFactory queryFactory, String jsonQueryString) throws JSONException{
+    /**
+     * 
+     * @param queryFactory
+     * @param jsonQueryString
+     * @param acceptedMediaType used to add the accept header to Error responses
+     * @return
+     * @throws JSONException
+     * @throws WebApplicationException
+     */
+    public static FieldQuery fromJSON(FieldQueryFactory queryFactory, String jsonQueryString,MediaType acceptedMediaType) throws JSONException,WebApplicationException{
         if(jsonQueryString == null){
             throw new IllegalArgumentException("The parsed JSON object MUST NOT be NULL!");
         }
         JSONObject jQuery = new JSONObject(jsonQueryString);
         FieldQuery query = queryFactory.createFieldQuery();
         if(!jQuery.has("constraints")){
-            throw new IllegalArgumentException("The parsed JSON object MUST contain the required key \"constraints\"");
+            StringBuilder message = new StringBuilder();
+            message.append("The parsed Field Query MUST contain at least a single 'constraints'\n");
+            message.append("Parsed Query:\n");
+            message.append(jQuery.toString(4));
+            log.warn(message.toString());
+            throw new WebApplicationException(
+                Response.status(Status.BAD_REQUEST).entity(
+                    message.toString()).header(HttpHeaders.ACCEPT, acceptedMediaType.toString())
+                    .build());
         }
         JSONArray constraints = jQuery.getJSONArray("constraints");
+        //collect all parsing Errors to report a complete set of all errors
+        boolean parsingError = false;
+        StringBuilder parsingErrorMessages = new StringBuilder();
+        parsingErrorMessages.append("Constraint parsing Errors:\n");
         for(int i=0;i<constraints.length();i++){
             JSONObject jConstraint = constraints.getJSONObject(i);
             if(jConstraint.has("field")){
                 String field = jConstraint.getString("field");
                 //check if there is already a constraint for that field
                 if(field == null || field.isEmpty()){
-                    log.warn("The value of the key \"field\" MUST NOT be NULL nor emtpy!");
-                    log.warn(String.format("Constraint:\n %s",jConstraint.toString(4)));
+//                    log.warn("The value of the key \"field\" MUST NOT be NULL nor emtpy!");
+//                    log.warn("Constraint:\n {}",jConstraint.toString(4));
+                    parsingErrorMessages.append('\n');
+                    parsingErrorMessages.append(
+                        "Each Field Query Constraint MUST define a value for 'field'\n");
+                    parsingErrorMessages.append("Parsed Constraint:\n");
+                    parsingErrorMessages.append(jConstraint.toString(4));
+                    parsingErrorMessages.append('\n');
+                    parsingError = true;
+                    continue;
                 } else if(query.isConstrained(field)){
-                    log.warn(String.format("Multiple constraints for field %s in parsed FieldQuery!",field));
-                    log.warn(String.format(" - all Constraints:\n", constraints.toString(4)));
-                    log.warn(String.format(" - ignore Constraint:\n %s",jConstraint.toString(4)));
+ //                   log.warn("Multiple constraints for field {} in parsed FieldQuery!",field);
+                    parsingErrorMessages.append('\n');
+                    parsingErrorMessages.append(
+                        "The parsed Query defines multiple constraints fr the field '"
+                        +field+"'!\n");
+                    parsingErrorMessages.append("FieldQuery allows only a single Constraint for a field\n");
+                    parsingErrorMessages.append("Parsed Constraints:\n");
+                    parsingErrorMessages.append(constraints.toString(4));
+                    parsingErrorMessages.append('\n');
+                    parsingError = true;
+                    continue;
                 } else {
-                    Constraint constraint = parseConstraint(jConstraint);
-                    if(constraint != null){
+                    try {
                         query.setConstraint(field, parseConstraint(jConstraint));
-                    } else { 
-                        // log unparseable constraint (specific warning already
-                        // given by the parseConstraint method
-                        log.warn(String.format(" - ignore Constraint:\n %s",jConstraint.toString(4)));
+                    } catch (IllegalArgumentException e) {
+                        parsingErrorMessages.append('\n');
+                        parsingErrorMessages.append(e.getMessage());
+                        parsingErrorMessages.append('\n');
+                        parsingError = true;
+                        continue;
                     }
                 }
             } else { //no field defined -> ignroe and write warning!
-                log.warn("Earch Constraint of a FieldQuery MUST define the key \"field\"!");
-                log.warn(String.format("Constraint:\n %s",jConstraint.toString(4)));
+                parsingErrorMessages.append('\n');
+                parsingErrorMessages.append("Constraints MUST define a value for 'field'\n");
+                parsingErrorMessages.append("Parsed Constraint:\n");
+                parsingErrorMessages.append(jConstraint.toString(4));
+                parsingErrorMessages.append('\n');
+                parsingError = true;
+                continue;
             }
+        }
+        if(parsingError){
+            String message = parsingErrorMessages.toString();
+            log.warn(message);
+            throw new WebApplicationException(
+                Response.status(Status.BAD_REQUEST).entity(
+                    message).header(HttpHeaders.ACCEPT, acceptedMediaType.toString())
+                    .build());
         }
         //parse selected fields
         JSONArray selected = jQuery.optJSONArray("selected");
@@ -142,12 +207,26 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             } else {
                 log.warn(String.format("Unknown Constraint Type %s. Supported values are %s",               
                     Arrays.asList("reference",ConstraintType.values())));
-                return null;
+                StringBuilder message = new StringBuilder();
+                message.append("Parsed Constraint uses an unknown value for 'type'!\n");
+                message.append("Supported values: ");
+                message.append(ConstraintType.values());
+                message.append('\n');
+                message.append("Parsed Constraint: \n");
+                message.append(jConstraint.toString(4));
+                throw new IllegalArgumentException(message.toString());
             }
         } else {
             log.warn(String.format("Earch Constraint MUST HAVE the \"type\" key set to one of the values %s",
                 Arrays.asList("reference",ConstraintType.values())));
-            return null;
+            StringBuilder message = new StringBuilder();
+            message.append("Parsed Constraint does not define a value for the field 'type'!\n");
+            message.append("Supported values: ");
+            message.append(ConstraintType.values());
+            message.append('\n');
+            message.append("Parsed Constraint: \n");
+            message.append(jConstraint.toString(4));
+            throw new IllegalArgumentException(message.toString());
         }
     }
 
@@ -162,14 +241,20 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
         if(jConstraint.has("inclusive")){
             inclusive = jConstraint.getBoolean("inclusive");
         } else {
-            log.info("RangeConstraint does not define the field \"inclusive\". Use false as default!");
+            log.info("RangeConstraint does not define the field 'inclusive'. Use false as default!");
             inclusive = false;
         }
         Object upperBound = jConstraint.opt("upperBound");
         Object lowerBound = jConstraint.opt("lowerBound");
         if(upperBound == null && lowerBound == null){
-            log.warn("Range Constraint does not define an \"upperBound\" nor an \"lowerBound\"! At least MUST BE parsed for a valid RangeConstraint.");
-            constraint = null;
+            log.warn("Range Constraint does not define an 'upperBound' nor an 'lowerBound'! " +
+            		"At least one of the two MUST BE parsed for a valid RangeConstraint.");
+            StringBuilder message = new StringBuilder();
+            message.append("Range Constraint does not define an 'upperBound' nor an 'lowerBound'!");
+            message.append(" At least one of the two MUST BE parsed for a valid RangeConstraint.\n");
+            message.append("Parsed Constraint: \n");
+            message.append(jConstraint.toString(4));
+            throw new IllegalArgumentException(message.toString());
         } else {
             constraint = new RangeConstraint(lowerBound, upperBound, inclusive);
         }
@@ -193,9 +278,16 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             try {
                 patternType = PatternType.valueOf(jPatternType);
             } catch (IllegalArgumentException e) {
-                log.warn(String.format("Encountered unknown patternType for TextConstraint! Will use default value %s (allowed values are: %s)",
-                    jPatternType,PatternType.none,Arrays.toString(PatternType.values())));
+                log.warn("Encountered unknown patternType for TextConstraint!",e);
                 patternType = PatternType.none;
+                StringBuilder message = new StringBuilder();
+                message.append("Illegal value for field 'patternType'.\n");
+                message.append("Supported values are: ");
+                message.append(Arrays.toString(PatternType.values()));
+                message.append('\n');
+                message.append("Parsed Constraint: \n");
+                message.append(jConstraint.toString(4));
+                throw new IllegalArgumentException(message.toString());
             }
         }
         //parse languages
@@ -221,17 +313,11 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
                 patternType,caseSensitive,
                 languages == null?null:languages.toArray(new String[languages.size()]));
         } else {
-            log.warn("Parsed TextConstraint doese not define the required field \"text\"!");
-            constraint = null;
-        }
-        
-        TextConstraint textConstraint = (TextConstraint) constraint;
-        if (textConstraint.getLanguages() != null && !textConstraint.getLanguages().isEmpty()) {
-            jConstraint.put("languages", new JSONArray(textConstraint.getLanguages()));
-        }
-        jConstraint.put("patternType", textConstraint.getPatternType().name());
-        if (textConstraint.getText() != null && !textConstraint.getText().isEmpty()) {
-            jConstraint.put("text", textConstraint.getText());
+            StringBuilder message = new StringBuilder();
+            message.append("Parsed TextConstraint doese not define the required field 'text'!\n");
+            message.append("Parsed Constraint: \n");
+            message.append(jConstraint.toString(4));
+            throw new IllegalArgumentException(message.toString());
         }
         return constraint;
     }
@@ -262,8 +348,12 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
         if(jConstraint.has("value") && !jConstraint.isNull("value")){
             constraint = new ValueConstraint(jConstraint.get("value"), dataTypes);
         } else {
-            log.warn("Parsed ValueConstraint doese not define the required field \"value\"!");
-            constraint = null;
+            log.warn("Parsed ValueConstraint does not define the required field \"value\"!");
+            StringBuilder message = new StringBuilder();
+            message.append("Parsed ValueConstraint does not define the required field 'value'!\n");
+            message.append("Parsed Constraint: \n");
+            message.append(jConstraint.toString(4));
+            throw new IllegalArgumentException(message.toString());
         }
         return constraint;
     }
@@ -278,8 +368,12 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
         if(jConstraint.has("value") && !jConstraint.isNull("value")){
             constraint = new ReferenceConstraint(jConstraint.getString("value"));
         } else {
-            log.warn("Parsed ValueConstraint doese not define the required field \"value\"!");
-            constraint = null;
+            log.warn("Parsed ReferenceConstraint does not define the required field \"value\"!");
+            StringBuilder message = new StringBuilder();
+            message.append("Parsed ReferenceConstraint does not define the required field 'value'!\n");
+            message.append("Parsed Constraint: \n");
+            message.append(jConstraint.toString(4));
+            throw new IllegalArgumentException(message.toString());
         }
         return constraint;
     }

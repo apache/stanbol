@@ -297,9 +297,9 @@
 
    <!-- Do index, but not store abstracts -->
    <field name="@en/dbp-ont:abstract/"  type="text_en_Tight"  indexed="true" stored="false" multiValued="true" termVectors="true"/>
-   <field name="@de/dbp-ont:abstract/"  type="text_en_Tight"  indexed="true" stored="false" multiValued="true" termVectors="true"/>
-   <field name="@it/dbp-ont:abstract/"  type="text_en_Tight"  indexed="true" stored="false" multiValued="true" termVectors="true"/>
-   <field name="@fr/dbp-ont:abstract/"  type="text_en_Tight"  indexed="true" stored="false" multiValued="true" termVectors="true"/>
+   <field name="@de/dbp-ont:abstract/"  type="textgen"  indexed="true" stored="false" multiValued="true" termVectors="true"/>
+   <field name="@it/dbp-ont:abstract/"  type="textgen"  indexed="true" stored="false" multiValued="true" termVectors="true"/>
+   <field name="@fr/dbp-ont:abstract/"  type="textgen"  indexed="true" stored="false" multiValued="true" termVectors="true"/>
 
    <!-- 
      Dynamic field definitions (used if a field name is not found)

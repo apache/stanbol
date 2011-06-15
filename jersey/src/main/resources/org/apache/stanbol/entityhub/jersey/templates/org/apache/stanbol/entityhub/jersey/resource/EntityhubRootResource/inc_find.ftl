@@ -1,4 +1,4 @@
-<h4>Subresource /symbol/find</h4>
+<h4>Subresource /entity/find?name={name}</h4>
 
 <table>
 <tbody>
@@ -12,12 +12,12 @@
 	</tr>
 	<tr>
 		<th>Parameter</th>
-		<td><ul><li>name: </li>
-    			<li>field: </li>
-    			<li>language: </li>
-    			<li>limit: </li>
-    			<li>offset: </li>
-    			<li>select: </li>
+		<td><ul><li>name: The name of the Entity to search. Supports '*' and '?'</li>
+    			<li>field: The name of the field to search the name (optional)</li>
+    			<li>language: The language of the parsed name (default: any)</li>
+    			<li>limit: The maximum number of returned Entities (optional)</li>
+    			<li>offset: The offset of the first returned Entity (default: 0)</li>
+    			<li>select: A list of fields included for returned Entities (optional)</li>
     		</ul>
     	</td>
 	</tr>
@@ -30,7 +30,7 @@
 
 <h5>Example</h5>
 
-<pre>curl ${it.publicBaseUri}entityhub/symbol/find</pre>
+<pre>curl ${it.publicBaseUri}entityhub/find</pre>
 
 <h5>Test</h5>
 

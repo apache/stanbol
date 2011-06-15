@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.entityhub.core.impl;
 
+import java.util.Date;
 import java.util.Iterator;
 
 import org.apache.stanbol.entityhub.core.utils.ToStringIterator;
@@ -25,6 +26,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
+import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,7 +117,11 @@ public class ManagedEntity extends EntityWrapper {
                 !ManagedEntityState.isState(stateUri.getReference())){
             return false;
         }
-        //passed all tests
+        //check the about
+        String entityId = ModelUtils.getAboutRepresentation(entity.getMetadata());
+        if(entityId == null || !entityId.equals(entity.getRepresentation().getId())){
+            return false;
+        }
         return true;
     }
     /**
@@ -132,6 +138,19 @@ public class ManagedEntity extends EntityWrapper {
                 !ManagedEntityState.isState(stateUri.getReference())){
             entity.getMetadata().setReference(STATE, defaultState.getUri());
         }
+        String entityId = ModelUtils.getAboutRepresentation(entity.getMetadata());
+        if(entityId == null){
+            entity.getMetadata().setReference(
+                RdfResourceEnum.aboutRepresentation.getUri(), 
+                entity.getRepresentation().getId());
+        } else if(!entityId.equals(entity.getRepresentation().getId())){
+            //the metadata are about a different Entity ->
+            throw new IllegalArgumentException(String.format(
+                "The Metadata of the parsed Entity are not about the Entity ("+
+                "entity: %s | metadataId: %s | metadataAbout: %s)",
+                entity.getRepresentation().getId(),entity.getMetadata().getId(),
+                entityId));
+        }//else the ID value is OK
         return new ManagedEntity(entity,false);
     }
 

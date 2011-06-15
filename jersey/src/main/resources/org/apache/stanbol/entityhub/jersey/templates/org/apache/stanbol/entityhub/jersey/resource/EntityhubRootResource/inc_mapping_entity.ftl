@@ -4,8 +4,10 @@
 <tbody>
 	<tr>
 		<th>Description</th>
-		<td>This service allows to retrieve the mapping for an entity. If no mapping for the parsed URI is
-		defined, the service returns a 404 "Not Found".</td>
+		<td>This service allows to retrieve the mapping for an entity managed by
+		a <a href="${it.publicBaseUri}entityhub/sites">Referenced Site</a>.
+	    If no mapping for the parsed URI is defined, the service returns a 404 
+	    "Not Found".</td>
 	</tr>
 	<tr>
 		<th>Request</th>

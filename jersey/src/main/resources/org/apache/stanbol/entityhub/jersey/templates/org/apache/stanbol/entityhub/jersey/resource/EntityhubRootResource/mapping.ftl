@@ -1,6 +1,6 @@
-<#import "mapping_common.ftl" as common>
+<#import "/imports/common.ftl" as common>
 <#escape x as x?html>
-<@common.page> 
+<@common.page title="Entityhub Mappings" hasrestapi=false> 
 
 <p>List of subresources:</p>
 <ul>
@@ -9,6 +9,8 @@
 </ul>
 
 <#include "inc_mapping.ftl">
+<#include "inc_mapping_entity.ftl">
+<#include "inc_mapping_symbol.ftl">
 
 </@common.page>
 </#escape>
