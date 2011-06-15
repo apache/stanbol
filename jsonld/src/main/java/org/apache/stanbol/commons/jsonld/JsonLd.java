@@ -1,4 +1,4 @@
-package org.apache.stanbol.jsonld;
+package org.apache.stanbol.commons.jsonld;
 
 import java.util.ArrayList;
 import java.util.Collections;
