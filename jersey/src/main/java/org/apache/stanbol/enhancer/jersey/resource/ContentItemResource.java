@@ -194,13 +194,16 @@ public class ContentItemResource extends BaseStanbolResource {
         String q = "PREFIX enhancer: <http://fise.iks-project.eu/ontology/> "
                    + "PREFIX dc:   <http://purl.org/dc/terms/> "
                    + "SELECT ?textAnnotation ?text ?entity ?entity_label ?confidence WHERE { "
-                   + "  ?textAnnotation a enhancer:TextAnnotation ." + "  ?textAnnotation dc:type %s ."
-                   + "  ?textAnnotation enhancer:selected-text ?text ." + " OPTIONAL {"
+                   + "  ?textAnnotation a enhancer:TextAnnotation ." 
+                   + "  ?textAnnotation dc:type %s ."
+                   + "  ?textAnnotation enhancer:selected-text ?text ." 
+                   + " OPTIONAL {"
                    + "   ?entityAnnotation dc:relation ?textAnnotation ."
                    + "   ?entityAnnotation a enhancer:EntityAnnotation . "
                    + "   ?entityAnnotation enhancer:entity-reference ?entity ."
                    + "   ?entityAnnotation enhancer:entity-label ?entity_label ."
-                   + "   ?entityAnnotation enhancer:confidence ?confidence . }" + "} ORDER BY ?text ";
+                   + "   ?entityAnnotation enhancer:confidence ?confidence . }" 
+                   + "} ORDER BY ?text ";
         q = String.format(q, type);
 
         SelectQuery query = (SelectQuery) QueryParser.getInstance().parse(q);

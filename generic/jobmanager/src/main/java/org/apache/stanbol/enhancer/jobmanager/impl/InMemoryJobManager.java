@@ -100,11 +100,11 @@ public class InMemoryJobManager implements EnhancementJobManager {
         }
 
         public Integer getOrder(EnhancementEngine engine){
-            log.info("getOrder "+engine);
+            log.debug("getOrder "+engine);
             if (engine instanceof ServiceProperties){
-                log.info(" ... implements ServiceProperties");
+                log.debug(" ... implements ServiceProperties");
                 Object value = ((ServiceProperties)engine).getServiceProperties().get(ServiceProperties.ENHANCEMENT_ENGINE_ORDERING);
-                log.info("   > value = "+value +" "+value.getClass());
+                log.debug("   > value = "+value +" "+value.getClass());
                 if (value !=null && value instanceof Integer){
                     return (Integer)value;
                 }
