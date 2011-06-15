@@ -326,12 +326,11 @@
 			<artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
 			<version>0.9-incubating-SNAPSHOT</version>
 		</bundle>
-        <!-- Stanbol JSON-LD implementation -->
-        <bundle>
-            <groupId>org.apache.stanbol</groupId>
-            <artifactId>org.apache.stanbol.jsonld</artifactId>
-            <version>0.9-SNAPSHOT</version>
-        </bundle>
+    <bundle>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.commons.jsonld</artifactId>
+        <version>0.9-SNAPSHOT</version>
+    </bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.web.base</artifactId>
