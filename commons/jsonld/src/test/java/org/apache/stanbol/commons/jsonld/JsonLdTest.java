@@ -1,4 +1,4 @@
-package org.apache.stanbol.jsonld;
+package org.apache.stanbol.commons.jsonld;
 
 import static org.junit.Assert.*;
 

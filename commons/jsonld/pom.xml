@@ -41,7 +41,7 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.jsonld.*;version=${pom.version}
+              org.apache.stanbol.commons.jsonld.*;version=${pom.version}
             </Export-Package>
           </instructions>
         </configuration>
