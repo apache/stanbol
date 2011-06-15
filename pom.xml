@@ -48,7 +48,6 @@
     <module>generic/servicesapi</module>
     <module>generic/jobmanager</module>
     <module>generic/standalone</module>
-    <module>generic/jsonld</module>
 
     <module>engines/autotagging</module>
     <module>engines/opennlp-ner</module>
