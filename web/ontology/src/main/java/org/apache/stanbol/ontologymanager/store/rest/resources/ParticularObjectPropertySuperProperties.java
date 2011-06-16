@@ -62,7 +62,7 @@ public class ParticularObjectPropertySuperProperties extends BaseStanbolResource
     }
 
     @DELETE
-    @Path("/ontologymanager/store{superPropertyPath:.+}")
+    @Path("/{superPropertyPath:.+}")
     public Response deleteSuperProperty(@PathParam("ontologyPath") String ontologyPath,
                                         @PathParam("objectPropertyPath") String objectPropertyPath,
                                         @PathParam("superPropertyPath") String superPropertyPath) {

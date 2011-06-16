@@ -59,7 +59,7 @@ public class ParticularClassSuperClasses extends BaseStanbolResource{
     }
 
     @DELETE
-    @Path("/ontologymanager/store{superClassPath:.+}/")
+    @Path("/{superClassPath:.+}/")
     public Response removeSuperClass(@PathParam("ontologyPath") String ontologyPath,
                                      @PathParam("classPath") String classPath,
                                      @PathParam("superClassPath") String superClassPath) {

@@ -65,7 +65,7 @@ public class ParticularIndividualTypes extends BaseStanbolResource{
     }
 
     @DELETE
-    @Path("/ontologymanager/store{containerClassPath:.+}")
+    @Path("/{containerClassPath:.+}")
     public Response addType(@PathParam("ontologyPath") String ontologyPath,
                             @PathParam("individualPath") String individualPath,
                             @PathParam("containerClassPath") String containerClassPath) {

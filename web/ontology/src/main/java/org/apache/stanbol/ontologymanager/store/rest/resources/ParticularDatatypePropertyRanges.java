@@ -64,7 +64,7 @@ public class ParticularDatatypePropertyRanges extends BaseStanbolResource{
     }
 
     @DELETE
-    @Path("/ontologymanager/store{rangePath:.+}")
+    @Path("/{rangePath:.+}")
     public Response deleteRange(@PathParam("ontologyPath") String ontologyPath,
                                 @PathParam("datatypePropertyPath") String datatypePropertyPath,
                                 @PathParam("rangePath") String rangePath) {

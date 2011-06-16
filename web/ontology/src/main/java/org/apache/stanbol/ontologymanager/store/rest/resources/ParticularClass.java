@@ -1,13 +1,9 @@
 package org.apache.stanbol.ontologymanager.store.rest.resources;
 
-import java.util.List;
-
 import javax.servlet.ServletContext;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -16,7 +12,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -31,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import com.sun.jersey.api.view.Viewable;
 
 @Path("/ontology/{ontologyPath:.+}/classes/{classPath:.+}/")
-public class ParticularClass extends BaseStanbolResource{
+public class ParticularClass extends BaseStanbolResource {
     private static final Logger logger = LoggerFactory.getLogger(ParticularClass.class);
 
     private static final String VIEWABLE_PATH = "/org/apache/stanbol/ontologymanager/store/rest/resources/particularClass";
@@ -91,66 +86,13 @@ public class ParticularClass extends BaseStanbolResource{
         }
     }
 
-    @POST
-    @Path("/ontologymanager/store/unionClasses")
-    public Response addUnionClasses(@PathParam("ontologyPath") String ontologyPath,
-                                    @PathParam("classPath") String classPath,
-                                    @FormParam("unionClassURIs") List<String> unionClassURIs) {
-        LockManager lockManager = LockManagerImp.getInstance();
-        lockManager.obtainWriteLockFor(ontologyPath);
-        try {
-            ResourceManagerImp resourceManager = ResourceManagerImp.getInstance();
-            String classURI = resourceManager.getResourceURIForPath(ontologyPath, classPath);
-            if (classURI == null) {
-                throw new WebApplicationException(Status.NOT_FOUND);
-            } else {
-                for (String unionClassURI : unionClassURIs) {
-                    try {
-                        persistenceStore.addUnionClass(classURI, unionClassURI);
-                    } catch (Exception e) {
-                        throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
-                    }
-                }
-            }
-        } finally {
-            lockManager.releaseWriteLockFor(ontologyPath);
-        }
-        return Response.ok().build();
-    }
-
-    @DELETE
-    @Path("/ontologymanager/store/unionClasses/{unionClassPath:.+}")
-    public Response removeUnionClass(@PathParam("ontologyPath") String ontologyPath,
-                                     @PathParam("classPath") String classPath,
-                                     @PathParam("unionClassPath") String unionClassPath) {
-        LockManager lockManager = LockManagerImp.getInstance();
-        lockManager.obtainWriteLockFor(ontologyPath);
-        try {
-            ResourceManagerImp resourceManager = ResourceManagerImp.getInstance();
-            String classURI = resourceManager.getResourceURIForPath(ontologyPath, classPath);
-            String unionClassURI = resourceManager.convertEntityRelativePathToURI(unionClassPath);
-            if (classURI == null) {
-                throw new WebApplicationException(Status.NOT_FOUND);
-            } else {
-                try {
-                    persistenceStore.deleteUnionClass(classURI, unionClassURI);
-                } catch (Exception e) {
-                    throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
-                }
-            }
-        } finally {
-
-        }
-        return Response.ok().build();
-    }
-
     // HTML View Methods
     public ClassContext getMetadata() {
         return metadata;
     }
 
     @GET
-    @Produces(MediaType.TEXT_HTML+";qs=2")
+    @Produces(MediaType.TEXT_HTML + ";qs=2")
     public Viewable getViewable(@PathParam("ontologyPath") String ontologyPath,
                                 @PathParam("classPath") String classPath,
                                 @DefaultValue("false") @QueryParam("withInferredAxioms") boolean withInferredAxioms) {

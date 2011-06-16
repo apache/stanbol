@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 @Service
 public class ResourceManagerImp implements ResourceManager {
 
+    private static final String DELIMITER = "|";
+    
     private static final String DB_URL = "jdbc:derby:ps_db;create=true";
 
     private static String ontologyPathPrefix = "/ontology/";
@@ -141,10 +143,10 @@ public class ResourceManagerImp implements ResourceManager {
                 if (rSet3.next()) {
                     String ontologyURIForResource = rSet3.getString("ontologyURI");
                     String ontologyPathForResource = rSet3.getString("ontologyPath");
-                    resources.put(ontologyURIForResource + "#" + resourceURI, resourcePath);
-                    resourcesInverted.put(ontologyPathForResource + "#" + resourcePath, resourceURI);
+                    resources.put(ontologyURIForResource + DELIMITER + resourceURI, resourcePath);
+                    resourcesInverted.put(ontologyPathForResource + DELIMITER + resourcePath, resourceURI);
                     resourceToOntologyURIs.put(resourceURI, ontologyURIForResource);
-                    resourcesTypes.put(ontologyURIForResource + "#" + resourceURI, resourceType);
+                    resourcesTypes.put(ontologyURIForResource + DELIMITER + resourceURI, resourceType);
                 }
             }
             con.close();
@@ -231,12 +233,12 @@ public class ResourceManagerImp implements ResourceManager {
      */
     public void registerClass(String ontologyURI, String classURI) {
         try {
-            if (!resources.containsKey(ontologyURI + "#" + classURI)) {
+            if (!resources.containsKey(ontologyURI + DELIMITER + classURI)) {
                 String classPath = normalizeURI(classURI);
-                resources.put(ontologyURI + "#" + classURI, classPath);
-                resourcesInverted.put(ontologies.get(ontologyURI) + "#" + classPath, classURI);
+                resources.put(ontologyURI + DELIMITER + classURI, classPath);
+                resourcesInverted.put(ontologies.get(ontologyURI) + DELIMITER + classPath, classURI);
                 resourceToOntologyURIs.put(classURI, ontologyURI);
-                resourcesTypes.put(ontologyURI + "#" + classURI, CLASS_RESOURCE);
+                resourcesTypes.put(ontologyURI + DELIMITER + classURI, CLASS_RESOURCE);
                 Connection con = obtainConnection();
                 Statement statement = con.createStatement();
                 ResultSet rSet = statement.executeQuery("SELECT id from " + ontologiesTable
@@ -263,12 +265,12 @@ public class ResourceManagerImp implements ResourceManager {
      */
     public void registerDatatypeProperty(String ontologyURI, String dataPropertyURI) {
         try {
-            if (!resources.containsKey(ontologyURI + "#" + dataPropertyURI)) {
+            if (!resources.containsKey(ontologyURI + DELIMITER + dataPropertyURI)) {
                 String dataPropertyPath = normalizeURI(dataPropertyURI);
-                resources.put(ontologyURI + "#" + dataPropertyURI, dataPropertyPath);
-                resourcesInverted.put(ontologies.get(ontologyURI) + "#" + dataPropertyPath, dataPropertyURI);
+                resources.put(ontologyURI + DELIMITER + dataPropertyURI, dataPropertyPath);
+                resourcesInverted.put(ontologies.get(ontologyURI) + DELIMITER + dataPropertyPath, dataPropertyURI);
                 resourceToOntologyURIs.put(dataPropertyURI, ontologyURI);
-                resourcesTypes.put(ontologyURI + "#" + dataPropertyURI, DATA_PROPERTY_RESOURCE);
+                resourcesTypes.put(ontologyURI + DELIMITER + dataPropertyURI, DATA_PROPERTY_RESOURCE);
                 Connection con = obtainConnection();
                 Statement statement = con.createStatement();
                 ResultSet rSet = statement.executeQuery("SELECT id from " + ontologiesTable
@@ -295,13 +297,13 @@ public class ResourceManagerImp implements ResourceManager {
      */
     public void registerObjectProperty(String ontologyURI, String objectPropertyURI) {
         try {
-            if (!resources.containsKey(ontologyURI + "#" + objectPropertyURI)) {
+            if (!resources.containsKey(ontologyURI + DELIMITER + objectPropertyURI)) {
                 String objectPropertyPath = normalizeURI(objectPropertyURI);
-                resources.put(ontologyURI + "#" + objectPropertyURI, objectPropertyPath);
-                resourcesInverted.put(ontologies.get(ontologyURI) + "#" + objectPropertyPath,
+                resources.put(ontologyURI + DELIMITER + objectPropertyURI, objectPropertyPath);
+                resourcesInverted.put(ontologies.get(ontologyURI) + DELIMITER + objectPropertyPath,
                     objectPropertyURI);
                 resourceToOntologyURIs.put(objectPropertyURI, ontologyURI);
-                resourcesTypes.put(ontologyURI + "#" + objectPropertyURI, OBJECT_PROPERTY_RESOURCE);
+                resourcesTypes.put(ontologyURI + DELIMITER + objectPropertyURI, OBJECT_PROPERTY_RESOURCE);
                 Connection con = obtainConnection();
                 Statement statement = con.createStatement();
                 ResultSet rSet = statement.executeQuery("SELECT id from " + ontologiesTable
@@ -328,12 +330,12 @@ public class ResourceManagerImp implements ResourceManager {
      */
     public void registerIndividual(String ontologyURI, String individualURI) {
         try {
-            if (!resources.containsKey(ontologyURI + "#" + individualURI)) {
+            if (!resources.containsKey(ontologyURI + DELIMITER + individualURI)) {
                 String individualPath = normalizeURI(individualURI);
-                resources.put(ontologyURI + "#" + individualURI, individualPath);
-                resourcesInverted.put(ontologies.get(ontologyURI) + "#" + individualPath, individualURI);
+                resources.put(ontologyURI + DELIMITER + individualURI, individualPath);
+                resourcesInverted.put(ontologies.get(ontologyURI) + DELIMITER + individualPath, individualURI);
                 resourceToOntologyURIs.put(individualURI, ontologyURI);
-                resourcesTypes.put(ontologyURI + "#" + individualURI, INDIVIDUAL_RESOURCE);
+                resourcesTypes.put(ontologyURI + DELIMITER + individualURI, INDIVIDUAL_RESOURCE);
                 Connection con = obtainConnection();
                 Statement statement = con.createStatement();
                 ResultSet rSet = statement.executeQuery("SELECT id from " + ontologiesTable
@@ -401,8 +403,8 @@ public class ResourceManagerImp implements ResourceManager {
     public String getResourceFullPath(String resourceURI) {
         String result = null;
         String ontologyURI = resourceToOntologyURIs.get(resourceURI);
-        if (ontologies.containsKey(ontologyURI) && resources.containsKey(ontologyURI + "#" + resourceURI)) {
-            String resourceType = resourcesTypes.get(ontologyURI + "#" + resourceURI);
+        if (ontologies.containsKey(ontologyURI) && resources.containsKey(ontologyURI + DELIMITER + resourceURI)) {
+            String resourceType = resourcesTypes.get(ontologyURI + DELIMITER + resourceURI);
             String pathPrefix = null;
             if (resourceType.equalsIgnoreCase(CLASS_RESOURCE)) {
                 pathPrefix = classPathPrefix;
@@ -414,7 +416,7 @@ public class ResourceManagerImp implements ResourceManager {
                 pathPrefix = individualPathPrefix;
             }
             result = ontologyPathPrefix + ontologies.get(ontologyURI) + "/" + pathPrefix
-                     + resources.get(ontologyURI + "#" + resourceURI);
+                     + resources.get(ontologyURI + DELIMITER + resourceURI);
         }
         return result;
     }
@@ -441,8 +443,8 @@ public class ResourceManagerImp implements ResourceManager {
      */
     public String getResourceURIForPath(String ontologyPath, String resourcePath) {
         String result = null;
-        if (resourcesInverted.containsKey(ontologyPath + "#" + resourcePath)) {
-            result = resourcesInverted.get(ontologyPath + "#" + resourcePath);
+        if (resourcesInverted.containsKey(ontologyPath + DELIMITER + resourcePath)) {
+            result = resourcesInverted.get(ontologyPath + DELIMITER + resourcePath);
         }
         return result;
     }
@@ -478,7 +480,8 @@ public class ResourceManagerImp implements ResourceManager {
             Iterator<String> resources_keys_itr = resources_keys.iterator();
             while (resources_keys_itr.hasNext()) {
                 String key = resources_keys_itr.next();
-                if (key.startsWith(ontologyURI)) {
+                //FIXME were startswith
+                if (key.split("\\"+DELIMITER)[0].contentEquals(ontologyURI)) {
                     keysToRemove.add(key);
                 }
             }
@@ -492,7 +495,8 @@ public class ResourceManagerImp implements ResourceManager {
             Iterator<String> resourcesInverted_keys_itr = resourcesInverted_keys.iterator();
             while (resourcesInverted_keys_itr.hasNext()) {
                 String key = resourcesInverted_keys_itr.next();
-                if (key.startsWith(ontologyURI)) {
+                //FIXME were startswith
+                if (key.split("\\"+DELIMITER)[0].contentEquals(ontologyURI)) {
                     keysToRemove.add(key);
                 }
             }
@@ -506,7 +510,8 @@ public class ResourceManagerImp implements ResourceManager {
             Iterator<String> resourcesTypes_keys_itr = resourcesTypes_keys.iterator();
             while (resourcesTypes_keys_itr.hasNext()) {
                 String key = resourcesTypes_keys_itr.next();
-                if (key.startsWith(ontologyURI)) {
+                //FIXME were startswith
+                if (key.split("\\"+DELIMITER)[0].contentEquals(ontologyURI)) {
                     keysToRemove.add(key);
                 }
             }
@@ -571,9 +576,9 @@ public class ResourceManagerImp implements ResourceManager {
 
             String ontologyURI = resourceToOntologyURIs.get(resourceURI);
             String ontologyPath = ontologies.get(ontologyURI);
-            resources.remove(ontologyURI + "#" + resourceURI);
-            resourcesInverted.remove(ontologyPath + "#" + classPath);
-            resourcesTypes.remove(ontologyURI + "#" + resourceURI);
+            resources.remove(ontologyURI + DELIMITER + resourceURI);
+            resourcesInverted.remove(ontologyPath + DELIMITER + classPath);
+            resourcesTypes.remove(ontologyURI + DELIMITER + resourceURI);
             resourceToOntologyURIs.remove(resourceURI);
 
             // then clear database

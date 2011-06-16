@@ -61,7 +61,7 @@ public class ParticularObjectPropertyDomains extends BaseStanbolResource{
     }
 
     @DELETE
-    @Path("/ontologymanager/store{domainPath:.+}")
+    @Path("/{domainPath:.+}")
     public Response deleteDomain(@PathParam("ontologyPath") String ontologyPath,
                                  @PathParam("objectPropertyPath") String objectPropertyPath,
                                  @PathParam("domainPath") String domainPath) {

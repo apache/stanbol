@@ -60,7 +60,7 @@ public class ParticularClassDisjointClasses extends BaseStanbolResource{
     }
 
     @DELETE
-    @Path("/ontologymanager/store{disjointClassPath:.+}")
+    @Path("/{disjointClassPath:.+}")
     public Response removeDisjointClass(@PathParam("ontologyPath") String ontologyPath,
                                         @PathParam("classPath") String classPath,
                                         @PathParam("disjointClassPath") String disjointClassPath) {
