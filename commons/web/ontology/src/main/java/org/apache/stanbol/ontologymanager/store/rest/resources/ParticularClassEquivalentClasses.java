@@ -60,7 +60,7 @@ public class ParticularClassEquivalentClasses extends BaseStanbolResource{
     }
 
     @DELETE
-    @Path("/ontologymanager/store{equivalentClassPath:.+}")
+    @Path("/{equivalentClassPath:.+}")
     public Response removeEquivalentClass(@PathParam("ontologyPath") String ontologyPath,
                                           @PathParam("classPath") String classPath,
                                           @PathParam("equivalentClassPath") String equivalentClassPath) {

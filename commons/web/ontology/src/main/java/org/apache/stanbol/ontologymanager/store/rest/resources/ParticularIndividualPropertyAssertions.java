@@ -38,7 +38,7 @@ public class ParticularIndividualPropertyAssertions extends BaseStanbolResource{
     // FIXME Handle PS errors properly, correct return values
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Path("/ontologymanager/store{propertyPath:.+}")
+    @Path("/{propertyPath:.+}")
     public Response addPropertyAssertions(@PathParam("ontologyPath") String ontologyPath,
                                           @PathParam("individualPath") String individualPath,
                                           @PathParam("propertyPath") String propertyPath,
@@ -84,7 +84,7 @@ public class ParticularIndividualPropertyAssertions extends BaseStanbolResource{
 
     @DELETE
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Path("/ontologymanager/store{propertyPath:.+}/literals/")
+    @Path("/{propertyPath:.+}/literals/")
     public Response deleteDatatypePropertyAssertions(@PathParam("ontologyPath") String ontologyPath,
                                                      @PathParam("individualPath") String individualPath,
                                                      @PathParam("propertyPath") String propertyPath,
@@ -111,7 +111,7 @@ public class ParticularIndividualPropertyAssertions extends BaseStanbolResource{
     }
 
     @DELETE
-    @Path("/ontologymanager/store{propertyPath:.+}/objects/{value:.+}")
+    @Path("/{propertyPath:.+}/objects/{value:.+}")
     public Response deleteObjectPropertyAssertions(@PathParam("ontologyPath") String ontologyPath,
                                                    @PathParam("individualPath") String individualPath,
                                                    @PathParam("propertyPath") String propertyPath,
