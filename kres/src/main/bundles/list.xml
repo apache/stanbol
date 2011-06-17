@@ -153,38 +153,59 @@
     </bundle>
 	</startLevel>
 
-	<!-- JAX-RS -->
-	<startLevel level="5">
-		<!--
-			WARNING: jersey-core bug, must start before jersey-server to avoid
-			jersey spi class not found errors. Restart jersey-server manually if
-			getting those.
-		-->
-		<bundle>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-core</artifactId>
-			<version>1.2</version>
-		</bundle>
-	</startLevel>
+  <!-- JAX-RS -->
+  <startLevel level="5">
+    <!--
+      WARNING: jersey-core bug, must start before jersey-server to avoid jersey spi class not found errors.
+      Restart jersey-server manually if getting those.
+    -->
+    <bundle>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-core</artifactId>
+      <version>1.7</version>
+    </bundle>
+  </startLevel> 
     
-    <!-- Jersey -->
-	<startLevel level="15">
-		<bundle>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>jsr311-api</artifactId>
-			<version>1.1.1</version>
-		</bundle>
-		<bundle>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-server</artifactId>
-			<version>1.2</version>
-		</bundle>
-		<bundle>
-			<groupId>org.codehaus.jettison</groupId>
-			<artifactId>jettison</artifactId>
-			<version>1.2</version>
-		</bundle>
-	</startLevel>
+  <!-- Jersey -->
+  <startLevel level="15">
+    <!--
+      is now included and exported by jersey-core
+      <bundle>
+        <groupId>javax.ws.rs</groupId>
+        <artifactId>jsr311-api</artifactId>
+        <version>1.1.1</version>
+      </bundle>
+    -->
+    <bundle>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-server</artifactId>
+      <version>1.7</version>
+    </bundle>
+    <!-- needed to read data from mime multipart requests -->
+    <bundle>
+      <groupId>com.sun.jersey.contribs</groupId>
+      <artifactId>jersey-multipart</artifactId>
+      <version>1.7</version>
+    </bundle>
+    <!--  dependency of jersey-multipart -->
+    <bundle>
+      <groupId>org.jvnet</groupId>
+      <artifactId>mimepull</artifactId>
+      <version>1.4</version>
+    </bundle>
+    <!--
+    <bundle>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+      <version>1.4.1</version>
+    </bundle>
+    -->
+    <bundle>
+      <groupId>org.codehaus.jettison</groupId>
+      <artifactId>jettison</artifactId>
+      <version>1.3</version>
+    </bundle>
+  </startLevel>
     
 	<!-- Stanbol Enhancer infrastructure and required libraries-->
 	<startLevel level="15">
@@ -326,11 +347,11 @@
 			<artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
 			<version>0.9-incubating-SNAPSHOT</version>
 		</bundle>
-    <bundle>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.commons.jsonld</artifactId>
-        <version>0.9-SNAPSHOT</version>
-    </bundle>
+    	<bundle>
+    	    <groupId>org.apache.stanbol</groupId>
+    	    <artifactId>org.apache.stanbol.commons.jsonld</artifactId>
+    	    <version>0.9-SNAPSHOT</version>
+    	</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.web.base</artifactId>
