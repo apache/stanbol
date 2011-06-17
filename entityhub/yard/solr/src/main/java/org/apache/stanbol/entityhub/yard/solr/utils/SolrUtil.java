@@ -16,6 +16,11 @@
  */
 package org.apache.stanbol.entityhub.yard.solr.utils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
@@ -58,15 +63,16 @@ public final class SolrUtil {
             return null;
         }
         String[] queryConstraints;
-        String value;
+        String value = indexValue.getValue(); 
         if (escape) {
-            value = SolrUtil.escapeSolrSpecialChars(indexValue.getValue());
-        } else {
-            value = indexValue.getValue();
+            value = SolrUtil.escapeSolrSpecialChars(value);
         }
         if (IndexDataTypeEnum.TXT.getIndexType().equals(indexValue.getType())) {
-            value = value.toLowerCase();
-            queryConstraints = value.split(" ");
+        	value = value.toLowerCase();
+            Collection<String> tokens = new HashSet<String>(
+                    Arrays.asList(value.split(" ")));
+            tokens.remove("");
+            queryConstraints = tokens.toArray(new String[tokens.size()]);
         } else if (IndexDataTypeEnum.STR.getIndexType().equals(indexValue.getType())) {
             value = value.toLowerCase();
             queryConstraints = new String[] {value.replace(' ', '+')};
@@ -75,5 +81,4 @@ public final class SolrUtil {
         }
         return queryConstraints;
     }
-
 }

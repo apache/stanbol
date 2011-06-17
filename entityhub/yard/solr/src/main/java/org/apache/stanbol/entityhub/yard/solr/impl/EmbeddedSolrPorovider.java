@@ -108,8 +108,8 @@ public class EmbeddedSolrPorovider implements SolrServerProvider {
                 }
             }
             // now init the EmbeddedSolrServer
-            log.info(String.format("Create EmbeddedSolrServer for index %s and core %s",
-                index.getAbsolutePath(), coreName));
+            log.info("Create EmbeddedSolrServer for index {} and core {}",
+                index.getAbsolutePath(), coreName);
             CoreContainer coreContainer = getCoreContainer(index.getAbsolutePath(), solr);
             // if we have a multi core environment and the core is not yet registered
             if (!coreName.isEmpty() && !coreContainer.getCoreNames().contains(coreName)) {

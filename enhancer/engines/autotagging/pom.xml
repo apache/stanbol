@@ -74,7 +74,6 @@
               lucene-core,
               lucene-queries,
               lucene-analyzers,
-              json
             </Embed-Dependency>
           </instructions>
         </configuration>
@@ -92,11 +91,11 @@
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
+  <dependency>
+      <groupId>org.codehaus.jettison</groupId>
+      <artifactId>jettison</artifactId>
       <scope>compile</scope>
-    </dependency>
+  </dependency>
 
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -122,9 +121,9 @@
       <artifactId>org.apache.clerezza.rdf.core</artifactId>
     </dependency>
     <!-- The Lucene dependencies need to define the version 3.0.1 here
- because the parent POM uses 2.9.4 (compatible to Solr 1.4.1)
- TODO: Check this as soon as Solr 3.* gets released.
- (Rupert Westenthaler 2011-03-23) -->
+         because the parent POM uses 2.9.4 (compatible to Solr 1.4.1)
+         TODO: Check this as soon as Solr 3.* gets released.
+         (Rupert Westenthaler 2011-03-23) -->
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-core</artifactId>

@@ -48,6 +48,9 @@
             <Export-Package>
               org.apache.stanbol.entityhub.jersey.*
             </Export-Package>
+            <Embed-Dependency>
+                mail
+            </Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>
@@ -117,10 +120,12 @@
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
     </dependency> -->
-    <!-- to read "multipart/form-data" requests/responses -->    
-      <dependency>
+    <!-- jersey-multipart now uses an other lib to read multipart/mime 
+         however the MessagebodyReaderUtils still use this lib -->    
+     <dependency>
           <groupId>javax.mail</groupId>
           <artifactId>mail</artifactId>
+          <version>1.4</version>
       </dependency>
 
     <!-- Servlet API for handling ServletContext -->

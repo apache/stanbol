@@ -702,7 +702,7 @@ public class SolrFieldMapper implements FieldMapper {
                 if (SPECIAL_CONFIG_FIELD.equals(configFieldElements[0])) {
                     if (SPECIAL_CONFIG_FIELD.length() > 1) {
                         String prefix = configFieldElements[1];
-                        Object value = config.getFieldValue(fieldName);
+                        Object value = config.getFirstValue(fieldName);
                         if (value != null) {
                             if (__namespaceMap.containsKey(value.toString())) {
                                 log.error("found two prefixes (" + __namespaceMap.get(value.toString())

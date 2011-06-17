@@ -61,9 +61,9 @@
 			<artifactId>arq</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>jsr311-api</artifactId>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-core</artifactId>
 		</dependency>
 		
 		<dependency>

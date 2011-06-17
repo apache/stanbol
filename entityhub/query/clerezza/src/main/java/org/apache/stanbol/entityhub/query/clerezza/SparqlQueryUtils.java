@@ -784,7 +784,7 @@ public final class SparqlQueryUtils {
     }
 
 
-    public static void main(String[] args) {
+/*    public static void main(String[] args) {
         SparqlFieldQuery query = SparqlFieldQueryFactory.getInstance().createFieldQuery();
 //        query.setConstraint("urn:field1", new ReferenceConstraint("urn:testReference"));
 //        query.setConstraint("urn:field1a", new ValueConstraint(null, Arrays.asList(
@@ -798,9 +798,9 @@ public final class SparqlQueryUtils {
 //        query.setConstraint("urn:field1d", new ValueConstraint(9, Arrays.asList(
 //                DataTypeEnum.Float.getUri(),DataTypeEnum.Double.getUri(),DataTypeEnum.Decimal.getUri())));
 //        query.setConstraint("urn:field2", new TextConstraint("test value"));
-//        query.setConstraint("urn:field3", new TextConstraint("text value",true));
+        query.setConstraint("urn:field3", new TextConstraint("text value",true));
 //        query.setConstraint("urn:field2a", new TextConstraint(":-]")); //tests escaping of REGEX
-//        query.setConstraint("urn:field3", new TextConstraint("language text","en"));
+        query.setConstraint("urn:field3", new TextConstraint("language text","en"));
 //        query.setConstraint("urn:field4", new TextConstraint("multi language text","en","de",null));
         query.setConstraint("urn:field5", new TextConstraint("wildcar*",PatternType.wildcard,false,"en","de"));
         query.addSelectedField("urn:field5");
@@ -823,7 +823,7 @@ public final class SparqlQueryUtils {
         System.out.println(createSparqlSelectQuery(query,true,0,EndpointTypeEnum.Standard));
         System.out.println();
         System.out.println(createSparqlConstructQuery(query,0,EndpointTypeEnum.Virtuoso));
-    }
+    }*/
 
     /**
      * @param query

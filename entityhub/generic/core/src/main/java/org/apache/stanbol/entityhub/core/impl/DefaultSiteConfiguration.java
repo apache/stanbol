@@ -9,11 +9,14 @@ import java.util.Map;
 
 import org.apache.stanbol.entityhub.servicesapi.model.ManagedEntityState;
 import org.apache.stanbol.entityhub.servicesapi.model.MappingState;
+import org.apache.stanbol.entityhub.servicesapi.site.EntityDereferencer;
+import org.apache.stanbol.entityhub.servicesapi.site.EntitySearcher;
 import org.apache.stanbol.entityhub.servicesapi.site.License;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.yard.CacheStrategy;
 import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.component.ComponentFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,13 +39,6 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
     @SuppressWarnings("unused")
     private final static Logger log = LoggerFactory.getLogger(DefaultSiteConfiguration.class);
 
-    /**
-     * Key internally used to store the {@link License}s object parsed based on
-     * the configured values for {@link SiteConfiguration#SITE_LICENCE_NAME}, 
-     * {@link SiteConfiguration#SITE_LICENCE_TEXT} and 
-     * {@link SiteConfiguration#SITE_LICENCE_URL}.
-     */
-    public static final String LICENSES_KEY = "org.apache.stanbol.entityhub.site.defaultSiteConfig.licenses";
     /**
      * Internally used to store the configuration.
      */
@@ -331,8 +327,11 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
         }
     }
     /**
-     * 
-     * @param state
+     * Setter for the default state of Mappings created between Entities of this
+     * Site and Entities managed by the Entityhub. If this configuration is not
+     * present created mappings will have the default state as configured by the
+     * Entityhub.
+     * @param state the default state for new Entity mappings.
      * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
      * @see #getDefaultMappedEntityState()
      */
@@ -356,8 +355,10 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
         }
     }
     /**
-     * 
-     * @param state
+     * Setter for the default state of Entities after importing them into the
+     * Entityhub. If this configuration is not present Entities will have the
+     * default state set for the Entityhub.
+     * @param state the state or <code>null</code> to remove this configuration
      * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
      * @see #getDefaultManagedEntityState()
      */
@@ -375,8 +376,16 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
                 null : dereferencer.toString();
     }
     /**
-     * 
-     * @param entityDereferencerType
+     * Setter for the type of the {@link EntityDereferencer} to be used by
+     * this site or <code>null</code> to remove the current configuration. <p>
+     * Note that the {@link EntityDereferencer} is only initialised of a valid
+     * {@link #getAccessUri() access URI} is configured. If the dereferencer is
+     * set to <code>null</code> dereferencing Entities will not be supported by
+     * this site. Entities might still be available form a local
+     * {@link #getCacheId() cache}.
+     * @param entityDereferencerType the key (OSGI name) of the component used
+     * to dereference Entities. This component must have an {@link ComponentFactory}
+     * and provide the {@link EntityDereferencer} service-
      * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
      * @see #getEntityDereferencerType()
      */
@@ -395,13 +404,14 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
                 null : description.toString();
     }
     /**
-     * 
-     * @param description
+     * Setter for the description of the {@link ReferencedSite}. If set to
+     * <code>null</code> or an empty string this configuration will be removed.
+     * @param description the description
      * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
      * @see #getDescription()
      */
     public final void setDescription(String description) throws UnsupportedOperationException {
-        if(description == null){
+        if(description == null || description.isEmpty()){
             config.remove(DESCRIPTION);
         } else {
             config.put(DESCRIPTION, description);
@@ -411,8 +421,15 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
     public String[] getFieldMappings() {
         return getStringValues(SITE_FIELD_MAPPINGS);
     }
+    /**
+     * Setter for the mappings of a site. This mappings are used in case an 
+     * Entity of this site is imported to the Entityhub. Parsing <code>null</code>
+     * or an empty array will cause all existing mappings to be removed.
+     * @param mappings the mappings
+     * @throws UnsupportedOperationException
+     */
     public final void setFieldMappings(String[] mappings) throws UnsupportedOperationException {
-        if(mappings == null){
+        if(mappings == null || mappings.length < 1){
             config.remove(SITE_FIELD_MAPPINGS);
         } else {
             config.put(SITE_FIELD_MAPPINGS, mappings);
@@ -424,13 +441,18 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
         return getStringValues(ENTITY_PREFIX);
     }
     /**
-     * 
-     * @param prefixes
+     * Setter for the Entity prefixes (typically the namespace or the host name)
+     * of the entities provided by this site. Because Sites might provide Entities
+     * with different namespaces this site allows to parse an array. Setting the
+     * prefixes to <code>null</code> or an empty array will cause that this site
+     * is ask for all requested entities.
+     * @param prefixes The array with the prefixes or <code>null</code> to 
+     * remove any configured prefixes
      * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
      * @see #getEntityPrefixes()
      */
     public final void setEntityPrefixes(String[] prefixes) throws UnsupportedOperationException {
-        if(prefixes == null){
+        if(prefixes == null || prefixes.length < 1){
             config.remove(ENTITY_PREFIX);
         } else {
             config.put(ENTITY_PREFIX, prefixes);
@@ -443,10 +465,10 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
         return id == null ? null : id.toString();
     }
     /**
-     * 
-     * @param id
+     * Setter for the id of the referenced site
+     * @param id the id
      * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
-     * @throws IllegalArgumentException in case the parsed ID is NULL or an empty String
+     * @throws IllegalArgumentException in case the parsed ID is <code>null</code> or an empty String
      * @see #getId()
      */
     public final void setId(String id) throws UnsupportedOperationException, IllegalArgumentException {
@@ -460,11 +482,7 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
     }
     @Override
     public final License[] getLicenses() {
-        Object licenses = config.get(LICENSES_KEY);
-        if(licenses instanceof License[]){
-            return (License[])licenses;
-        }
-        // get based on related keys
+        //get Licenses based on related keys
         int elements = 0;
         String[] names = getLicenseName();
         if(names == null){
@@ -497,20 +515,61 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
         }
         return licenseList.isEmpty()?null:licenseList.toArray(new License[licenseList.size()]);
     }
-    public final void setLicenses(License[] licenses){
-        //TODO: implement
+    /**
+     * Setter for the {@link License} information. This method stores the name,
+     * text and url of the license as strings in the according fields of the
+     * configuration.
+     * @param licenses the licenses to store. <code>null</code> or an empty
+     * array to remove existing values
+     * @throws IllegalArgumentException if the parsed array contains a <code>null</code>
+     * element
+     * @throws UnsupportedOperationException if the configuration is read-only
+     */
+    public final void setLicenses(License[] licenses) throws IllegalArgumentException, UnsupportedOperationException {
+        if(licenses == null || licenses.length < 1){
+            config.remove(SITE_LICENCE_NAME);
+            config.remove(SITE_LICENCE_TEXT);
+            config.remove(SITE_LICENCE_URL);
+        } else {
+            String[] names = new String[licenses.length];
+            String[] texts = new String[licenses.length];
+            String[] urls = new String[licenses.length];
+            for(int i=0;i<licenses.length;i++){
+                if(licenses[i] != null){
+                    names[i] = licenses[i].getName();
+                    texts[i] = licenses[i].getText();
+                    urls[i] = licenses[i].getUrl();
+                } else {
+                    throw new IllegalArgumentException("The parsed License array" +
+                    		"MUST NOT contain a NULL element! (parsed: "+
+                    		Arrays.toString(licenses)+")");
+                }
+            }
+            config.put(SITE_LICENCE_NAME, names);
+            config.put(SITE_LICENCE_TEXT, texts);
+            config.put(SITE_LICENCE_URL, urls);
+        }
     }
     
-    
-    protected final String[] getLicenseName() {
+    /**
+     * Internally used to get the names of the licenses
+     * @return
+     */
+    private String[] getLicenseName() {
         return getStringValues(SITE_LICENCE_NAME);
     }
-
-    protected String[] getLicenseText() {
+    /**
+     * Internally used to get the texts of the licenes
+     * @return
+     */
+    private String[] getLicenseText() {
         return getStringValues(SITE_LICENCE_TEXT);
     }
-
-    protected String[] getLicenseUrl() {
+    /**
+     * Internally used to get the urls of the page describing the license
+     * @return
+     */
+    private String[] getLicenseUrl() {
         return getStringValues(SITE_LICENCE_URL);
     }
 
@@ -521,8 +580,10 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
         return name == null || name.toString().isEmpty() ? getId() : name.toString();
     }
     /**
-     * 
-     * @param name
+     * Setter for the name of the Referenced Site. Note that if the name is not
+     * present the {@link #getId() id} will be used as name.
+     * @param name the name of the site or <code>null</code> to remove it (and
+     * use the {@link #getId() id} also as name
      * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
      * @see #getName()
      */
@@ -540,8 +601,15 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
         return type == null || type.toString().isEmpty() ? null : type.toString();
     }
     /**
-     * 
-     * @param entitySearcherType
+     * Setter for the type of the {@link EntitySearcher} used to query for
+     * Entities by accessing a external service available at 
+     * {@link #getQueryUri()}. <p>
+     * Note that the {@link EntitySearcher} will only be initialised of the
+     * {@link #getQueryUri() Query URI} is defined.
+     * @param entitySearcherType The string representing the {@link EntitySearcher}
+     * (the name of the OSGI component) or <code>null</code> to remove this
+     * configuration. The referenced component MUST have an {@link ComponentFactory}
+     * and provide the {@link EntitySearcher} service.
      * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
      * @see #getEntitySearcherType()
      */
@@ -558,8 +626,11 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
         return uri == null || uri.toString().isEmpty() ? null : uri.toString();
     }
     /**
-     * 
-     * @param queryUri
+     * Setter for the uri of the remote service used to query for entities. If
+     * set to <code>null</code> this indicates that no such external service is
+     * available for this referenced site
+     * @param queryUri the uri of the external service used to query for entities
+     * or <code>null</code> if none.
      * @throws UnsupportedOperationException in case this configuration is {@link #readonly}
      * @see #getQueryUri()
      */

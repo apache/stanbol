@@ -144,9 +144,13 @@
   </dependency>
 
   <!-- Web Service deps -->
-  <dependency>
+  <!-- <dependency>
     <groupId>javax.ws.rs</groupId>
     <artifactId>jsr311-api</artifactId>
+  </dependency> -->
+  <dependency> <!-- jersey core now exports the API -->
+    <groupId>com.sun.jersey</groupId>
+    <artifactId>jersey-core</artifactId>
   </dependency>
   <dependency>
     <groupId>javax.servlet</groupId>
