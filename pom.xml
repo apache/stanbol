@@ -407,30 +407,6 @@
         <scope>provided</scope>
       </dependency>
 
-      <!-- Apache Lucene -->
-      <!-- This version is used by the autotagger but not compatible to 
-           Solr 1.4.1 used by the Entityhub. Therefore (until the new version
-           of Solr is released) move this directly to the autotagger 
-           (Rupert Westenthaler, 2011-02-23)-->
-      <!-- <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-core</artifactId>
-        <version>3.0.1</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-queries</artifactId>
-        <version>3.0.1</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-analyzers</artifactId>
-        <version>3.0.1</version>
-        <scope>provided</scope>
-      </dependency>  -->
-
       <!-- Apache Clerezza -->
       <dependency>
         <groupId>org.apache.clerezza</groupId>
@@ -505,7 +481,12 @@
         <version>1.4</version>
         <scope>provided</scope>
       </dependency>
-  	  <dependency>
+      <dependency>
+        <groupId>commons-beanutils</groupId>
+        <artifactId>commons-beanutils</artifactId>
+        <version>1.7.0</version>
+      </dependency>
+      <dependency>
 	    <groupId>commons-collections</groupId>
 	    <artifactId>commons-collections</artifactId>
 	    <version>3.2.1</version>
@@ -650,25 +631,31 @@
         <artifactId>jersey-multipart</artifactId>
         <version>${jersey-version}</version>
         <scope>provided</scope>
-      </dependency>      
-      <!--  java mail might be usefull for "multipart/form-data" requests/responses -->
-      <dependency>
+      </dependency>
+         
+<!--  jersey-multipart now uses a different library allowing streaming of
+      binary data (see http://mimepull.java.net/)
+     <dependency>
           <groupId>javax.mail</groupId>
           <artifactId>mail</artifactId>
           <version>1.4</version>
           <scope>provided</scope>
-      </dependency>
+      </dependency>  -->
         
       <!-- JAX-RS JSR311 -->
-<!-- NOTE that JAX-RS is included and exported by jersey-core version > 1.6 -->    
+      <!-- NOTE that JAX-RS is included and exported by jersey-core
+          using Jersey in combination with this one might cause 
+          incompatibilities
+        -->   
       <dependency>
         <groupId>javax.ws.rs</groupId>
         <artifactId>jsr311-api</artifactId>
         <version>1.1.1</version>
         <scope>provided</scope>
-      </dependency>
+      </dependency>  
 
       <!-- JSON -->
+      <!-- use jettison instead
       <dependency>
         <groupId>org.json</groupId>
         <artifactId>json</artifactId>
@@ -680,7 +667,7 @@
         <artifactId>json-simple</artifactId>
         <version>1.1</version>
         <scope>provided</scope>
-      </dependency>
+      </dependency> -->
 
       <!-- Freemarker -->
       <dependency>
@@ -757,80 +744,170 @@
         <scope>provided</scope>
       </dependency>
 
-      <!-- Solr and Lucene -->
+    <!-- Solr Bundles -->
     <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-solrj</artifactId>
-        <version>1.4.1</version>
+        <version>3.2.0</version>
         <scope>provided</scope>
     </dependency>       
     <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-core</artifactId>
-        <version>1.4.1</version>
+        <version>3.2.0</version>
         <scope>provided</scope>
     </dependency>
     <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-commons-csv</artifactId>
-        <version>1.4.1</version>
+        <version>3.2.0</version>
         <scope>provided</scope>
     </dependency>
     <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-noggit</artifactId>
+        <version>3.2.0</version>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-dataimporthandler</artifactId>
+        <version>3.2.0</version>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-dataimporthandler-extras</artifactId>
+        <version>3.2.0</version>
+        <scope>provided</scope>
+    </dependency>
+    <!-- other Solr bundles currently not used
+    <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-clustering</artifactId>
+        <version>3.2.0</version>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-cell</artifactId>
+        <version>3.2.0</version>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-carrot2-core</artifactId>
+        <version>3.2.0</version>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-analysis-extras</artifactId>
+        <version>3.2.0</version>
+        <scope>provided</scope>
+    </dependency>   -->
+    
+    <!--  Lucene Bundles -->
+    <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-core</artifactId>
-        <version>2.9.4</version>
+        <version>3.2.0</version>
         <scope>provided</scope>
     </dependency>
     <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-analyzers</artifactId>
-        <version>2.9.4</version>
+        <version>3.2.0</version>
         <scope>provided</scope>
     </dependency>
     <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-highlighter</artifactId>
-        <version>2.9.4</version>
+        <version>3.2.0</version>
         <scope>provided</scope>
     </dependency>
     <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-memory</artifactId>
-        <version>2.9.4</version>
+        <version>3.2.0</version>
         <scope>provided</scope>
     </dependency>
     <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-misc</artifactId>
-        <version>2.9.4</version>
+        <version>3.2.0</version>
         <scope>provided</scope>
     </dependency>
     <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-queries</artifactId>
-        <version>2.9.4</version>
+        <version>3.2.0</version>
         <scope>provided</scope>
     </dependency>
-    <dependency>
+    <!-- Snowball moved to analyzer in 3.1<dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-snowball</artifactId>
-        <version>2.9.4</version>
+        <version>3.2.0</version>
         <scope>provided</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-memory</artifactId>
-        <version>2.9.4</version>
-        <scope>provided</scope>
-    </dependency>
+    </dependency>  -->
     <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-spellchecker</artifactId>
-        <version>2.9.4</version>
+        <version>3.2.0</version>
         <scope>provided</scope>
     </dependency>
-    <!-- Woodstox StAX Parser (used by Solr/Lucene) -->
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-spatial</artifactId>
+        <version>3.2.0</version>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-icu</artifactId>
+        <version>3.2.0</version>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-icu4j</artifactId>
+        <version>3.2.0</version>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-xercesImpl</artifactId>
+        <version>3.2.0</version>
+        <scope>provided</scope>
+    </dependency>
+    <!-- other unused Lucene bundes 
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-grouping</artifactId>
+        <version>3.2.0</version>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-queryparser</artifactId>
+        <version>3.2.0</version>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-smartcn</artifactId>
+        <version>3.2.0</version>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-stempel</artifactId>
+        <version>3.2.0</version>
+        <scope>provided</scope>
+    </dependency>
+    -->
+    <!-- Other Solr/Lucene dependendies -->
+    <!-- StAX Parser (used by Solr/Lucene) -->
     <dependency>
         <groupId>stax</groupId>
         <artifactId>stax-api</artifactId>
@@ -842,15 +919,45 @@
         <artifactId>wstx-asl</artifactId>
         <version>3.2.7</version>
         <scope>provided</scope>
-    </dependency>    
-          
+    </dependency>
+    <dependency> <!-- required by Solr 3.2 -->
+        <groupId>jakarta-regexp</groupId>
+        <artifactId>jakarta-regexp</artifactId>
+        <version>1.4</version>
+    </dependency>
+    <dependency> <!--  required by Solr 3.2 -->
+        <groupId>xml-resolver</groupId>
+        <artifactId>xml-resolver</artifactId>
+        <version>1.2</version>
+    </dependency>
+      <dependency> <!--  required by Solr 3.2 -->
+        <groupId>javax.portlet</groupId>
+        <artifactId>portlet-api</artifactId>
+        <version>2.0</version>
+    </dependency>
+    <!-- END Solr/Lucene dependencies -->
+    
       <!-- JDom -->
-      <dependency>
+    <dependency>
         <groupId>org.jdom</groupId>
-        <artifactId>com.springsource.org.jdom</artifactId>
-        <version>1.1.0</version>
-        <scope>provided</scope>
-      </dependency>
+        <artifactId>jdom</artifactId>
+        <version>1.1</version>
+    </dependency>
+	<dependency>
+	    <groupId>org.jdom</groupId>
+	    <artifactId>jaxen-core</artifactId>
+	    <version>1.0-FCS</version>
+	</dependency>    
+	<dependency>
+	    <groupId>org.jdom</groupId>
+	    <artifactId>jaxen-jdom</artifactId>
+	    <version>1.0-FCS</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.jdom</groupId>
+	    <artifactId>saxpath</artifactId>
+	    <version>1.0-FCS</version>
+	</dependency>
 
       <!-- OpenNLP -->
       <dependency>
@@ -867,6 +974,7 @@
       </dependency>
 
       <!-- OWL -->
+      <!-- see also lucene-xercesImpl -->
       <dependency>
         <groupId>xerces</groupId>
         <artifactId>xercesImpl</artifactId>
@@ -1001,7 +1109,11 @@
         <version>1.6.1</version>
         <scope>test</scope>
       </dependency>
-
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-nop</artifactId>
+        <version>1.6.1</version>
+      </dependency>
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
