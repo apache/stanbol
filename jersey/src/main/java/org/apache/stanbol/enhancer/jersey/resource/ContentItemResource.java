@@ -409,7 +409,7 @@ public class ContentItemResource extends BaseStanbolResource {
                 Resource object = abstracts.next().getObject();
                 if (object instanceof PlainLiteral) {
                     PlainLiteral abstract_ = (PlainLiteral) object;
-                    if (abstract_.getLanguage().equals(new Language("en"))) {
+                    if (new Language("en").equals(abstract_.getLanguage())) {
                         return abstract_.getLexicalForm();
                     }
                 }
