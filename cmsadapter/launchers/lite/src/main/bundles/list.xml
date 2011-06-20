@@ -110,6 +110,11 @@
         <artifactId>joda-time</artifactId>
         <version>1.6.2</version>
     </bundle>
+    <bundle>
+		<groupId>eu.medsea.mimeutil</groupId>
+		<artifactId>mime-util</artifactId>
+		<version>2.1.3</version>
+	</bundle>
 
 	</startLevel>
 
@@ -210,30 +215,35 @@
 		<bundle>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-core</artifactId>
-			<version>1.2</version>
+			<version>1.7</version>
 		</bundle>
 	</startLevel>
 
 	<startLevel level="15">
 		<bundle>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>jsr311-api</artifactId>
-			<version>1.1.1</version>
-		</bundle>
-		<bundle>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-server</artifactId>
-			<version>1.2</version>
+			<version>1.7</version>
 		</bundle>
 		<bundle>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-client</artifactId>
-			<version>1.2</version>
+			<version>1.7</version>
+		</bundle>
+		<bundle>
+			<groupId>com.sun.jersey.contribs</groupId>
+			<artifactId>jersey-multipart</artifactId>
+			<version>1.7</version>
+		</bundle>
+		<bundle>
+			<groupId>org.jvnet</groupId>
+			<artifactId>mimepull</artifactId>
+			<version>1.4</version>
 		</bundle>
 		<bundle>
 			<groupId>org.codehaus.jettison</groupId>
 			<artifactId>jettison</artifactId>
-			<version>1.2</version>
+			<version>1.3</version>
 		</bundle>
 		<bundle>
 			<groupId>org.codehaus.jackson</groupId>
@@ -293,11 +303,10 @@
 
 		<!-- Generic -->
 		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.jsonld
-			</artifactId>
-			<version>0.9-SNAPSHOT</version>
-		</bundle>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.commons.jsonld</artifactId>
+            <version>0.9-SNAPSHOT</version>
+        </bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.defaultdata</artifactId>

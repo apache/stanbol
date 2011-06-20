@@ -6,9 +6,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.jcr.RepositoryException;
 
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -64,6 +66,12 @@ public class MappingEngineImpl implements MappingEngine {
     private DObjectAdapter adapter;
     private NamingStrategy namingStrategy;
 
+    @Activate
+    protected void activate(final Map<?,?> properties){
+        //TODO need to do something here?
+    }
+    
+    
     private void runProcessors(List<Object> cmsObjects, String mode) {
         Iterator<Processor> processorIterator;
         synchronized (processors) {
