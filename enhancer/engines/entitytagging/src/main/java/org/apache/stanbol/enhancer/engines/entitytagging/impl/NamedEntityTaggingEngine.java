@@ -22,12 +22,15 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SE
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
@@ -54,6 +57,8 @@ import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
+import org.apache.stanbol.entityhub.servicesapi.Entityhub;
+import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
@@ -77,45 +82,53 @@ import org.slf4j.LoggerFactory;
 @Component(configurationFactory = true, policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
 specVersion = "1.1", metatype = true, immediate = true)
 @Service
-public class ReferencedSiteEntityTaggingEnhancementEngine implements EnhancementEngine, ServiceProperties {
+public class NamedEntityTaggingEngine implements EnhancementEngine, ServiceProperties {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Property(value = "dbpedia")
+    @Property//(value = "dbpedia")
     public static final String REFERENCED_SITE_ID = "org.apache.stanbol.enhancer.engines.entitytagging.referencedSiteId";
 
-    @Property(boolValue = true)
+    @Property//(boolValue = true)
     public static final String PERSON_STATE = "org.apache.stanbol.enhancer.engines.entitytagging.personState";
 
-    @Property(value = "dbp-ont:Person")
+    @Property//(value = "dbp-ont:Person")
     public static final String PERSON_TYPE = "org.apache.stanbol.enhancer.engines.entitytagging.personType";
 
-    @Property(boolValue = true)
+    @Property//(boolValue = true)
     public static final String ORG_STATE = "org.apache.stanbol.enhancer.engines.entitytagging.organisationState";
 
-    @Property(value = "dbp-ont:Organisation")
+    @Property//(value = "dbp-ont:Organisation")
     public static final String ORG_TYPE = "org.apache.stanbol.enhancer.engines.entitytagging.organisationType";
 
-    @Property(boolValue = true)
+    @Property//(boolValue = true)
     public static final String PLACE_STATE = "org.apache.stanbol.enhancer.engines.entitytagging.placeState";
 
-    @Property(value = "dbp-ont:Place")
+    @Property//(value = "dbp-ont:Place")
     public static final String PLACE_TYPE = "org.apache.stanbol.enhancer.engines.entitytagging.placeType";
-
+    /**
+     * Use the RDFS label as default
+     */
     @Property(value = "rdfs:label")
     public static final String NAME_FIELD = "org.apache.stanbol.enhancer.engines.entitytagging.nameField";
 
     /**
-     * Service of the RICK that manages all the active referenced Site. This Service is used to lookup the
+     * Service of the Entityhub that manages all the active referenced Site. This Service is used to lookup the
      * configured Referenced Site when we need to enhance a content item.
      */
     @Reference
     protected ReferencedSiteManager siteManager;
 
     /**
-     * This is the configured name of the referenced Site used to find entities. The
-     * {@link ReferencedSiteManager} service of the RICK is used to get the actual {@link ReferencedSite}
-     * instance for each request to this Engine.
+     * Used to lookup Entities if the {@link #REFERENCED_SITE_ID} property is
+     * set to "entityhub" or "local"
+     */
+    @Reference
+    protected Entityhub entityhub;
+    
+    /**
+     * This holds the id of the {@link ReferencedSite} used to lookup Entities
+     * or <code>null</code> if the {@link Entityhub} is used. 
      */
     protected String referencedSiteID;
 
@@ -124,6 +137,7 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
      * {@link EnhancementJobManager#DEFAULT_ORDER}
      */
     public static final Integer defaultOrder = ORDERING_EXTRACTION_ENHANCEMENT;
+
 
     /**
      * State if text annotations of type {@link OntologicalClasses#DBPEDIA_PERSON} are enhanced by this engine
@@ -222,6 +236,10 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
             throw new ConfigurationException(REFERENCED_SITE_ID,
                     "The ID of the Referenced Site is a required Parameter and MUST NOT be an empty String!");
         }
+        if(Entityhub.ENTITYHUB_IDS.contains(this.referencedSiteID.toLowerCase())){
+            log.info("Init NamedEntityTaggingEngine instance for the Entityhub");
+            this.referencedSiteID = null;
+        }
         Object state = config.get(PERSON_STATE);
         personState = state == null ? true : Boolean.parseBoolean(state.toString());
         state = config.get(ORG_STATE);
@@ -252,21 +270,28 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
     }
 
     public void computeEnhancements(ContentItem ci) throws EngineException {
-        ReferencedSite site = siteManager.getReferencedSite(referencedSiteID);
-        if (site == null) {
-            String msg = String.format(
-                "Unable to enhance %s because Referenced Site %s is currently not active!", ci.getId(),
-                referencedSiteID);
-            log.warn(msg);
-            // TODO: throwing Exceptions is currently deactivated. We need a more clear
-            // policy what do to in such situations
-            // throw new EngineException(msg);
-            return;
-        }
-        if (isOfflineMode() && !site.supportsLocalMode()) {
-            log.warn("Unable to enhance ci {} because OfflineMode is not supported by ReferencedSite {}.",
-                ci.getId(), site.getId());
-            return;
+        final ReferencedSite site;
+        if(referencedSiteID != null) { //lookup the referenced site
+            site = siteManager.getReferencedSite(referencedSiteID);
+            //ensure that it is present
+            if (site == null) {
+                String msg = String.format(
+                    "Unable to enhance %s because Referenced Site %s is currently not active!", ci.getId(),
+                    referencedSiteID);
+                log.warn(msg);
+                // TODO: throwing Exceptions is currently deactivated. We need a more clear
+                // policy what do to in such situations
+                // throw new EngineException(msg);
+                return;
+            }
+            //and that it supports offline mode if required
+            if (isOfflineMode() && !site.supportsLocalMode()) {
+                log.warn("Unable to enhance ci {} because OfflineMode is not supported by ReferencedSite {}.",
+                    ci.getId(), site.getId());
+                return;
+            }
+        } else { // null indicates to use the Entityhub to lookup Entities
+            site = null;
         }
         UriRef contentItemId = new UriRef(ci.getId());
 
@@ -292,20 +317,33 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
 
         for (Map.Entry<UriRef,List<UriRef>> entry : textAnnotations.entrySet()) {
             try {
-                computeEntityRecommentations(site, literalFactory, graph, contentItemId, entry.getKey(),
+                computeEntityRecommentations(site,literalFactory, graph, contentItemId, entry.getKey(),
                     entry.getValue());
-            } catch (ReferencedSiteException e) {
+            } catch (EntityhubException e) {
                 throw new EngineException(this, ci, e);
             }
         }
     }
 
+    /**
+     * Computes the Enhancements
+     * @param site The {@link ReferencedSiteException} id or <code>null</code> to
+     * use the {@link Entityhub}
+     * @param literalFactory the {@link LiteralFactory} used to create RDF Literals
+     * @param graph the graph to write the lined entities
+     * @param contentItemId the id of the contentItem
+     * @param textAnnotation the text annotation to enhance
+     * @param subsumedAnnotations other text annotations for the same entity 
+     * @return the suggested {@link Entity entities}
+     * @throws EntityhubException On any Error while looking up Entities via
+     * the Entityhub
+     */
     protected final Iterable<Entity> computeEntityRecommentations(ReferencedSite site,
-                                                                LiteralFactory literalFactory,
-                                                                MGraph graph,
-                                                                UriRef contentItemId,
-                                                                UriRef textAnnotation,
-                                                                List<UriRef> subsumedAnnotations) throws ReferencedSiteException {
+            LiteralFactory literalFactory,
+            MGraph graph,
+            UriRef contentItemId,
+            UriRef textAnnotation,
+            List<UriRef> subsumedAnnotations) throws EntityhubException {
         // First get the required properties for the parsed textAnnotation
         // ... and check the values
         String name = EnhancementEngineHelper.getString(graph, textAnnotation, ENHANCER_SELECTED_TEXT);
@@ -325,7 +363,9 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
         name = cleanupKeywords(name);
 
         log.debug("Process TextAnnotation " + name + " type=" + type);
-        FieldQuery query = site.getQueryFactory().createFieldQuery();
+        FieldQuery query = site == null ? //if site is NULL use the Entityhub
+                entityhub.getQueryFactory().createFieldQuery() : 
+                    site.getQueryFactory().createFieldQuery();
         // replace spaces with plus to create an AND search for all words in the name!
         query.setConstraint(nameField, new TextConstraint(name));// name.replace(' ', '+')));
         if (OntologicalClasses.DBPEDIA_PERSON.equals(type)) {
@@ -360,7 +400,9 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
             }
         }
         query.setLimit(this.numSuggestions);
-        QueryResultList<Entity> results = site.findEntities(query);
+        QueryResultList<Entity> results = site == null? //if site is NULL
+                entityhub.findEntities(query) : //use the Entityhub
+                    site.findEntities(query); //else the referenced site
         log.debug("{} results returned by query {}", results.size(), query);
 
         List<NonLiteral> annotationsToRelate = new ArrayList<NonLiteral>();
@@ -370,7 +412,7 @@ public class ReferencedSiteEntityTaggingEnhancementEngine implements Enhancement
         for (Entity guess : results) {
             log.debug("Adding {} to ContentItem {}", guess, contentItemId);
             EnhancementRDFUtils.writeEntityAnnotation(this, literalFactory, graph, contentItemId,
-                annotationsToRelate, guess);
+                annotationsToRelate, guess, nameField);
         }
         return results;
     }

@@ -16,7 +16,11 @@
  */
 package org.apache.stanbol.entityhub.servicesapi;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
@@ -46,6 +50,18 @@ import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 public interface Entityhub {
 
     String DEFAUTL_ENTITYHUB_PREFIX = "urn:org.apache.stanbol:entityhub";
+    /**
+     * Protected keys to be used as name for the Entityhub. Such keys MUST NOT
+     * be used as {@link ReferencedSite#getId() id}s for 
+     * {@link ReferencedSite}s. (case insensitive)<p>
+     * The protected values are <ul>
+     * <li><code>"local"</code>
+     * <li><code>"entityhub"</code>
+     * </ul>
+     */
+    Set<String> ENTITYHUB_IDS = Collections.unmodifiableSet(
+        new HashSet<String>(Arrays.asList(
+            "local","entityhub")));
 
     /**
      * Getter for the Yard storing the Entities and Mappings managed by this
@@ -150,7 +166,7 @@ public interface Entityhub {
      * {@link Yard} used by the entity hub.
      * @return the query factory
      */
-    FieldQueryFactory getQueryFavtory();
+    FieldQueryFactory getQueryFactory();
     /**
      * Getter for the FieldMappings configured for this Site
      * @return The {@link FieldMapping} present for this Site.

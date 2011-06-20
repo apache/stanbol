@@ -402,7 +402,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
         }
     }
     private void deleteEntities(Yard yard, Collection<String> ids) throws YardException {
-        FieldQuery fieldQuery = getQueryFavtory().createFieldQuery();
+        FieldQuery fieldQuery = getQueryFactory().createFieldQuery();
         Collection<String> toDelete = new HashSet<String>(ids);
         for(String id : ids){
             if(id != null && !id.isEmpty()){
@@ -420,7 +420,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
 
     private void deleteMappingsbyTarget(Yard yard,String id) throws YardException {
         if(id != null && !id.isEmpty()){
-            FieldQuery fieldQuery = getQueryFavtory().createFieldQuery();
+            FieldQuery fieldQuery = getQueryFactory().createFieldQuery();
             fieldQuery.setConstraint(RdfResourceEnum.mappingTarget.getUri(), new ReferenceConstraint(id));
             deleteEntities(yard, ModelUtils.asCollection(
                 yard.findReferences(fieldQuery).iterator()));
@@ -578,7 +578,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
             log.warn("NULL parsed as Reference -> call to getMappingByEntity ignored (return null)");
             return null;
         }
-        FieldQuery fieldQuery = getQueryFavtory().createFieldQuery();
+        FieldQuery fieldQuery = getQueryFactory().createFieldQuery();
         fieldQuery.setConstraint(RdfResourceEnum.mappingSource.getUri(), new ReferenceConstraint(reference));
         Yard entityhubYard = lookupYard();
         QueryResultList<Representation> resultList = entityhubYard.findRepresentation(fieldQuery);
@@ -609,7 +609,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
             log.warn("NULL parsed as Reference -> call to getMappingsBySymbol ignored (return null)");
             return null;
         }
-        FieldQuery fieldQuery = getQueryFavtory().createFieldQuery();
+        FieldQuery fieldQuery = getQueryFactory().createFieldQuery();
         fieldQuery.setConstraint(RdfResourceEnum.mappingTarget.getUri(), new ReferenceConstraint(targetId));
         Yard enttiyhubYard = lookupYard();
         QueryResultList<Representation> resultList = enttiyhubYard.findRepresentation(fieldQuery);
@@ -725,7 +725,7 @@ public final class EntityhubImpl implements Entityhub {//, ServiceListener {
         }
     }
     @Override
-    public FieldQueryFactory getQueryFavtory() {
+    public FieldQueryFactory getQueryFactory() {
         Yard entityhubYard = getYard();
         return entityhubYard==null? //if no yard available
                 DefaultQueryFactory.getInstance(): //use the default

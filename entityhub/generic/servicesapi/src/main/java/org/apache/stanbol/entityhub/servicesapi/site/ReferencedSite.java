@@ -17,7 +17,9 @@
 package org.apache.stanbol.entityhub.servicesapi.site;
 
 import java.io.InputStream;
+import java.util.Set;
 
+import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -31,9 +33,15 @@ import org.apache.stanbol.entityhub.servicesapi.yard.Cache;
 public interface ReferencedSite {
 
     /**
+     * List of {@link #getId() ids} that are not allowed to be used (case
+     * insensitive) for referenced sites.
+     */
+    Set<String> PROHIBITED_SITE_IDS = Entityhub.ENTITYHUB_IDS;
+    /**
      * The Id of this site. This Method MUST return the same value as
-     * <code>{@link #getConfiguration()}.getId()</code>. It is only there to
-     * make it more easy to access the Id of the site
+     * <code>{@link #getConfiguration()}.getId()</code>.
+     * The configured ID MUST NOT be <code>null</code>, empty or one of the
+     * {@link #PROHIBITED_SITE_IDS}.
      * @return the ID of this site
      */
     String getId();

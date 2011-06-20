@@ -61,17 +61,19 @@ public class EnhancementRDFUtils {
      *            enhancements this textAnnotation is related to
      * @param entity
      *            the related entity
+     * @param nameField the field used to extract the name
      */
     public static UriRef writeEntityAnnotation(EnhancementEngine engine,
                                                LiteralFactory literalFactory,
                                                MGraph graph,
                                                UriRef contentItemId,
                                                Collection<NonLiteral> relatedEnhancements,
-                                               Entity entity) {
+                                               Entity entity,
+                                               String nameField) {
         // 1. check if the returned Entity does has a label -> if not return null
         // add labels (set only a single label. Use "en" if available!
         Text label = null;
-        Iterator<Text> labels = entity.getRepresentation().getText(RDFS_LABEL.getUnicodeString());
+        Iterator<Text> labels = entity.getRepresentation().getText(nameField);
         while (labels.hasNext()) {
             Text actLabel = labels.next();
             if (label == null) {
