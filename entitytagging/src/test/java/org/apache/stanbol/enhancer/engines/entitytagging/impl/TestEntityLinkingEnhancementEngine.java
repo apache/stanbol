@@ -63,8 +63,8 @@ public class TestEntityLinkingEnhancementEngine {
      */
     public static final String PLACE = "New Zealand";
 
-    static ReferencedSiteEntityTaggingEnhancementEngine entityLinkingEngine
-            = new ReferencedSiteEntityTaggingEnhancementEngine();
+    static NamedEntityTaggingEngine entityLinkingEngine
+            = new NamedEntityTaggingEngine();
 
     @BeforeClass
     public static void setUpServices() throws IOException {
