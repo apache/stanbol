@@ -19,6 +19,9 @@ package org.apache.stanbol.entityhub.servicesapi.defaults;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * Defines commonly used name spaces to prevent multiple definitions in several
  * classes
@@ -26,6 +29,7 @@ import java.util.Map;
  *
  */
 public enum NamespaceEnum {
+    
     //Namespaces defined by the entityhub
     entityhubModel("entityhub","http://www.iks-project.eu/ontology/rick/model/"),
     entityhubQuery("entityhub-query","http://www.iks-project.eu/ontology/rick/query/"),
@@ -69,18 +73,76 @@ public enum NamespaceEnum {
     geonames("http://www.geonames.org/ontology#"),
     //copyright and license
     cc("http://creativecommons.org/ns#"),
+    //Schema.org (see http://schema.org/docs/schemaorg.owl for the Ontology)
+    schema("http://schema.org/",true),
     ;
-    private String ns;
-    private String prefix;
+    /**
+     * The logger
+     */
+    private static final Logger log = LoggerFactory.getLogger(NamespaceEnum.class);
+
+    private final String ns;
+    private final String prefix;
+    private final boolean defaultPrefix;
+    /**
+     * Defines a namespace that used the {@link #name()} as prefix.
+     * @param ns the namespace. MUST NOT be NULL nor empty
+     */
     NamespaceEnum(String ns) {
-        if(ns == null){
-            throw new IllegalArgumentException("The namespace MUST NOT be NULL");
+        this(null,ns,false);
+    }
+    /**
+     * Defines a namespace by using the {@link #name()} as prefix. If
+     * <code>true</code> is parsed a second parameter this namespace is marked
+     * as the default<p>
+     * <b>NOTE: </b> Only a single namespace can be defined as default. In case
+     * multiple namespaces are marked as default the one with the lowest
+     * {@link #ordinal()} will be used as default. This will be the topmost entry
+     * in this enumeration.
+     * @param ns the namespace. MUST NOT be <code>null</code> nor empty
+     * @param defaultPrefix the default namespace indicator
+     */
+    NamespaceEnum(String ns,boolean defaultPrefix) {
+        this(null,ns,defaultPrefix);
+    }
+    /**
+     * Defines a namespace with a customised prefix. This should be used if the
+     * prefix needs to be different as the {@link #name()} of the enumeration
+     * entry.
+     * @param prefix the prefix. If <code>null</code> the {@link #name()} is
+     * used. MUST NOT be an empty string
+     * @param ns the namespace. MUST NOT be <code>null</code> nor empty
+     */
+    NamespaceEnum(String prefix, String ns) {
+        this(prefix,ns,false);
+    }
+    /**
+     * Defines a namespace with a customised prefix. This should be used if the
+     * prefix needs to be different as the {@link #name()} of the enumeration
+     * entry.<p>
+     * <b>NOTE: </b> Only a single namespace can be defined as default. In case
+     * multiple namespaces are marked as default the one with the lowest
+     * {@link #ordinal()} will be used as default. This will be the topmost entry
+     * in this enumeration.
+     * @param prefix the prefix. If <code>null</code> the {@link #name()} is
+     * used. MUST NOT be an empty string
+     * @param ns the namespace. MUST NOT be <code>null</code> nor empty
+     * @param defaultPrefix the default namespace indicator
+     */
+    NamespaceEnum(String prefix, String ns,boolean defaultPrefix) {
+        if(ns == null || ns.isEmpty()){
+            throw new IllegalArgumentException("The namespace MUST NOT be NULL nor empty");
         }
         this.ns = ns;
-    }
-    NamespaceEnum(String prefix, String ns) {
-        this(ns);
-        this.prefix = prefix;
+        if(prefix == null){
+            this.prefix = name();
+        } else if(prefix.isEmpty()){
+            throw new IllegalArgumentException("The prefix MUST NOT be emtpty." +
+            		"Use NULL to use the name or parse the prefix to use");
+        } else {
+            this.prefix = prefix;
+        }
+        this.defaultPrefix = defaultPrefix;
     }
     public String getNamespace(){
         return ns;
@@ -95,14 +157,27 @@ public enum NamespaceEnum {
     /*
      * ==== Code for Lookup Methods based on Prefix and Namespace ====
      */
-    private static Map<String, NamespaceEnum> prefix2Namespace;
-    private static Map<String, NamespaceEnum> namespace2Prefix;
+    private final static Map<String, NamespaceEnum> prefix2Namespace;
+    private final static Map<String, NamespaceEnum> namespace2Prefix;
+    private final static NamespaceEnum defaultNamespace;
     static {
         Map<String,NamespaceEnum> p2n = new HashMap<String, NamespaceEnum>();
         Map<String,NamespaceEnum> n2p = new HashMap<String, NamespaceEnum>();
         //The Exceptions are only thrown to check that this Enum is configured
         //correctly!
+        NamespaceEnum defaultNs = null;
         for(NamespaceEnum entry : NamespaceEnum.values()){
+            if(entry.isDefault()){
+                if(defaultNs == null){
+                    defaultNs = entry;
+                } else {
+                    log.warn("Found multiple default namespace definitions! Will use the one with the lowest ordinal value.");
+                    log.warn(" > used default: prefix:{}, namespace:{}, ordinal:{}",
+                        new Object[]{defaultNs.getPrefix(),defaultNs.getNamespace(),defaultNs.ordinal()});
+                    log.warn(" > this one    : prefix:{}, namespace:{}, ordinal:{}",
+                        new Object[]{entry.getPrefix(),entry.getNamespace(),entry.ordinal()});
+                }
+            }
             if(p2n.containsKey(entry.getPrefix())){
                 throw new IllegalStateException(
                         String.format("Prefix %s used for multiple namespaces: %s and %s",
@@ -110,6 +185,7 @@ public enum NamespaceEnum {
                                 p2n.get(entry.getPrefix()),
                                 entry.getNamespace()));
             } else {
+                log.debug("add {} -> {} mapping",entry.getPrefix(),entry.getNamespace());
                 p2n.put(entry.getPrefix(), entry);
             }
             if(n2p.containsKey(entry.getNamespace())){
@@ -119,11 +195,13 @@ public enum NamespaceEnum {
                                 p2n.get(entry.getNamespace()),
                                 entry.getNamespace()));
             } else {
+                log.debug("add {} -> {} mapping",entry.getNamespace(),entry.getPrefix());
                 n2p.put(entry.getNamespace(), entry);
             }
         }
         prefix2Namespace = Collections.unmodifiableMap(p2n);
         namespace2Prefix = Collections.unmodifiableMap(n2p);
+        defaultNamespace = defaultNs;
     }
     /**
      * Getter for the {@link NamespaceEnum} entry based on the string namespace
@@ -136,18 +214,18 @@ public enum NamespaceEnum {
     }
     /**
      * Getter for the {@link NamespaceEnum} entry based on the prefix
-     * @param prefix the prefix
+     * @param prefix the prefix or <code>null</code> to get the default namespace
      * @return the {@link NamespaceEnum} entry or <code>null</code> if the prased
      *    prefix is not present
      */
     public static NamespaceEnum forPrefix(String prefix){
-        return prefix2Namespace.get(prefix);
+        return prefix == null ? defaultNamespace : prefix2Namespace.get(prefix);
     }
     /**
-     * Lookup if the parsed URI uses one of the registered prefixes of this
-     * Enumeration. If this is the case, the prefix is replaced by the namespace
-     * and the full URI is returned. If no prefix is returned, the
-     * parsed URI is returned
+     * Lookup if the parsed short URI (e.g "rdfs:label") uses one of the 
+     * registered prefixes of this Enumeration of if the parsed short URI uses
+     * the default namespace (e.g. "name"). In case the prefix could not be found
+     * the parsed URI is returned unchanged
      * @param shortUri the short URI
      * @return the full URI if the parsed shortUri uses a prefix defined by this
      * Enumeration. Otherwise the parsed value.
@@ -162,7 +240,15 @@ public enum NamespaceEnum {
             if(namespace!= null){
                 shortUri = namespace.getNamespace()+shortUri.substring(index+1);
             }
+        } else if(defaultNamespace != null){
+            shortUri = defaultNamespace.getNamespace()+shortUri;
         }
         return shortUri;
+    }
+    /**
+     * @return the defaultPrefix
+     */
+    public boolean isDefault() {
+        return defaultPrefix;
     }
 }

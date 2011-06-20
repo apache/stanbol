@@ -612,6 +612,12 @@ public class ReferencedSiteImpl implements ReferencedSite {
         }
         //NOTE that the constructor also validation of the parsed configuration
         siteConfiguration = new DefaultSiteConfiguration(config);
+        if(PROHIBITED_SITE_IDS.contains(siteConfiguration.getId().toLowerCase())){
+            throw new ConfigurationException(SiteConfiguration.ID, String.format(
+                "The ID '%s' of this Referenced Site is one of the following " +
+                "prohibited IDs: {} (case insensitive)",siteConfiguration.getId(),
+                PROHIBITED_SITE_IDS));
+        }
         log.info(" > initialise Referenced Site {}",siteConfiguration.getName());
         //if the accessUri is the same as the queryUri and both the dereferencer and
         //the entitySearcher uses the same component, than we need only one component
