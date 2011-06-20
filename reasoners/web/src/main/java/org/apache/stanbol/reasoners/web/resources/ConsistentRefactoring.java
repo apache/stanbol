@@ -1,12 +1,12 @@
 package org.apache.stanbol.reasoners.web.resources;
 
-import static javax.ws.rs.core.Response.Status.*;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.io.InputStream;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -27,6 +27,8 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+
+import com.sun.jersey.multipart.FormDataParam;
 
 /**
  * Special refactoring services that employ a DL reasoner for ensuring/checking consistency.
@@ -78,8 +80,8 @@ public class ConsistentRefactoring extends BaseStanbolResource{
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces({KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
                KRFormat.OWL_XML, KRFormat.RDF_JSON})
-    public Response consistentRefactoringOfNewGraph(@FormParam("recipe") String recipe,
-                                                    @FormParam("input") InputStream input) {
+    public Response consistentRefactoringOfNewGraph(@FormDataParam("recipe") String recipe,
+                                                    @FormDataParam("input") InputStream input) {
 
         IRI recipeIRI = IRI.create(recipe);
 

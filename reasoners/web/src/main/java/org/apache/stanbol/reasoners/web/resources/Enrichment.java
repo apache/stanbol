@@ -15,7 +15,6 @@ import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -64,6 +63,8 @@ import org.slf4j.LoggerFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
+
+import com.sun.jersey.multipart.FormDataParam;
 
 
 /**
@@ -213,12 +214,12 @@ if (storage == null) {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces("application/rdf+xml")
 	public Response ontologyEnrichment(
-			@FormParam(value = "session") String session,
-			@FormParam(value = "scope") String scope,
-			@FormParam(value = "recipe") String recipe,
-			@FormParam(value = "input-graph") String input_graph,
-			@FormParam(value = "file") File file,
-			@FormParam(value = "owllink-endpoint") String owllink_endpoint) {
+			@FormDataParam(value = "session") String session,
+			@FormDataParam(value = "scope") String scope,
+			@FormDataParam(value = "recipe") String recipe,
+			@FormDataParam(value = "input-graph") String input_graph,
+			@FormDataParam(value = "file") File file,
+			@FormDataParam(value = "owllink-endpoint") String owllink_endpoint) {
 
       try{
 

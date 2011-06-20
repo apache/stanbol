@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.ImplicitProduces;
 import com.sun.jersey.api.view.Viewable;
+import com.sun.jersey.multipart.FormDataParam;
 
 
 @Path("/reengineer")
@@ -79,9 +80,9 @@ public class ReengineerResource extends BaseStanbolResource {
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response reengineering(
-                                  @FormParam("output-graph") String outputGraph,
-                                  @FormParam("input-type") String inputType, 
-                                  @FormParam("input") InputStream input,
+                                  @FormDataParam("output-graph") String outputGraph,
+                                  @FormDataParam("input-type") String inputType, 
+                                  @FormDataParam("input") InputStream input,
                                   @Context HttpHeaders headers, @Context HttpServletRequest httpServletRequest){
 
 
@@ -131,9 +132,9 @@ public class ReengineerResource extends BaseStanbolResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Path("/schema")
     public Response schemaReengineering(
-                                        @FormParam("output-graph") String outputGraph,
-                                        @FormParam("input-type") String inputType, 
-                                        @FormParam("input") InputStream input, 
+                                        @FormDataParam("output-graph") String outputGraph,
+                                        @FormDataParam("input-type") String inputType, 
+                                        @FormDataParam("input") InputStream input, 
                                         @Context HttpHeaders headers, 
                                         @Context HttpServletRequest httpServletRequest){
 

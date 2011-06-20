@@ -7,7 +7,6 @@ import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -39,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.ImplicitProduces;
+import com.sun.jersey.multipart.FormDataParam;
 
 @Path("/ontonet/graphs")
 @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
@@ -120,7 +120,7 @@ public class GraphsResource extends BaseStanbolResource {
 
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response storeGraph(@FormParam("graph") InputStream graph, @FormParam("id") String id) {
+    public Response storeGraph(@FormDataParam("graph") InputStream graph, @FormDataParam("id") String id) {
         try {
             OWLOntology ontology = onManager.getOntologyManagerFactory().createOntologyManager(true)
                     .loadOntologyFromOntologyDocument(graph);
