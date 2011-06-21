@@ -1,4 +1,4 @@
-package org.apache.stanbol.ontologymanager.web.resource;
+package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.CONFLICT;

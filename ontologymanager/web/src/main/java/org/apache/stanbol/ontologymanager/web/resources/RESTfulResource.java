@@ -1,4 +1,4 @@
-package org.apache.stanbol.ontologymanager.web.resource;
+package org.apache.stanbol.ontologymanager.web.resources;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;

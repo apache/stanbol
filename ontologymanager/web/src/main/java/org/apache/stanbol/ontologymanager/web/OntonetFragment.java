@@ -15,16 +15,16 @@ import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.web.resource.DocumentationResource;
-import org.apache.stanbol.ontologymanager.web.resource.GraphsResource;
-import org.apache.stanbol.ontologymanager.web.resource.ONMOntResource;
-import org.apache.stanbol.ontologymanager.web.resource.ONMRootResource;
-import org.apache.stanbol.ontologymanager.web.resource.ONMScopeOntologyResource;
-import org.apache.stanbol.ontologymanager.web.resource.ONMScopeResource;
-import org.apache.stanbol.ontologymanager.web.resource.RESTfulResource;
-import org.apache.stanbol.ontologymanager.web.resource.RootResource;
-import org.apache.stanbol.ontologymanager.web.resource.SessionIDResource;
-import org.apache.stanbol.ontologymanager.web.resource.SessionResource;
+import org.apache.stanbol.ontologymanager.web.resources.DocumentationResource;
+import org.apache.stanbol.ontologymanager.web.resources.GraphsResource;
+import org.apache.stanbol.ontologymanager.web.resources.ONMOntResource;
+import org.apache.stanbol.ontologymanager.web.resources.ONMRootResource;
+import org.apache.stanbol.ontologymanager.web.resources.ONMScopeOntologyResource;
+import org.apache.stanbol.ontologymanager.web.resources.ONMScopeResource;
+import org.apache.stanbol.ontologymanager.web.resources.RESTfulResource;
+import org.apache.stanbol.ontologymanager.web.resources.RootResource;
+import org.apache.stanbol.ontologymanager.web.resources.SessionIDResource;
+import org.apache.stanbol.ontologymanager.web.resources.SessionResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -45,9 +45,9 @@ public class OntonetFragment implements WebFragment{
 
     private static final String NAME = "ontonet";
 
-    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/ontonet/web/static";
+    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/ontologymanager/web/static";
 
-    private static final String TEMPLATE_PATH = "/org/apache/stanbol/ontonet/web/templates";
+    private static final String TEMPLATE_PATH = "/org/apache/stanbol/ontologymanager/web/templates";
 
     private BundleContext bundleContext;
 

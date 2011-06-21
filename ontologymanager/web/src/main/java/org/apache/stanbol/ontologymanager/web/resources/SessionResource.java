@@ -1,4 +1,4 @@
-package org.apache.stanbol.ontologymanager.web.resource;
+package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
@@ -41,6 +41,8 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
+import com.sun.jersey.multipart.FormDataParam;
+
 @Path("/ontonet/session")
 public class SessionResource extends BaseStanbolResource {
 
@@ -63,9 +65,9 @@ public class SessionResource extends BaseStanbolResource {
     
     @PUT
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response addOntology(@QueryParam("scope") String scope,
-                                @QueryParam("import") InputStream importOntology,
-                                @QueryParam("session") String session,
+    public Response addOntology(@FormDataParam("scope") String scope,
+                                @FormDataParam("import") InputStream importOntology,
+                                @FormDataParam("session") String session,
                                 @Context UriInfo uriInfo,
                                 @Context HttpHeaders headers,
                                 @Context ServletContext servletContext) {
@@ -95,9 +97,9 @@ public class SessionResource extends BaseStanbolResource {
 
     @PUT
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response addOntology(@QueryParam("scope") String scope,
-                                @QueryParam("session") String session,
-                                @QueryParam("location") String location,
+    public Response addOntology(@FormParam("scope") String scope,
+                                @FormParam("session") String session,
+                                @FormParam("location") String location,
                                 @Context UriInfo uriInfo,
                                 @Context HttpHeaders headers,
                                 @Context ServletContext servletContext) {
