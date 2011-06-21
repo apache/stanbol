@@ -40,6 +40,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.ImplicitProduces;
+import com.sun.jersey.multipart.FormDataParam;
+
 
 /**
  * 
@@ -82,7 +84,7 @@ public class RefactorResource extends BaseStanbolResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(value = {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
                        KRFormat.OWL_XML, KRFormat.RDF_JSON})
-    public Response applyRefactoring(@FormParam("recipe") String recipe, @FormParam("input") InputStream input) {
+    public Response applyRefactoring(@FormDataParam("recipe") String recipe, @FormDataParam("input") InputStream input) {
 
         // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
 
@@ -120,8 +122,8 @@ public class RefactorResource extends BaseStanbolResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(value = {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
                        KRFormat.OWL_XML, KRFormat.RDF_JSON})
-    public Response performRefactoring(@FormParam("recipe") String recipe,
-                                       @FormParam("input") InputStream input) {
+    public Response performRefactoring(@FormDataParam("recipe") String recipe,
+                                       @FormDataParam("input") InputStream input) {
 
         // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
 
