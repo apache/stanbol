@@ -63,12 +63,12 @@ public class RuleParserImpl implements RuleParserConstants {
 
   static KB kReSKB;
 
-  public static KB parse( String inString ) {
+  public static KB parse( String inString ) throws IllegalStateException{
   {
         kReSKB = new KB();
         Reader reader = new StringReader( inString ) ;
-    RuleParserImpl parser = new RuleParserImpl(reader);
-    StringBuffer buffer = new StringBuffer() ;
+        RuleParserImpl parser = new RuleParserImpl(reader);
+    
         try {
                 parser.start( ) ;
         } catch( TokenMgrError e ) {

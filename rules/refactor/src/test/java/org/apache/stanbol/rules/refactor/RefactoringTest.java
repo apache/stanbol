@@ -1,6 +1,7 @@
 package org.apache.stanbol.rules.refactor;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.InputStream;
 import java.util.Dictionary;
@@ -21,6 +22,7 @@ import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.base.api.util.RecipeList;
 import org.apache.stanbol.rules.base.api.util.RuleList;
+import org.apache.stanbol.rules.manager.KB;
 import org.apache.stanbol.rules.manager.changes.RecipeImpl;
 import org.apache.stanbol.rules.manager.parse.RuleParserImpl;
 import org.apache.stanbol.rules.refactor.api.Refactorer;
@@ -239,6 +241,66 @@ public class RefactoringTest {
         } catch (NoSuchRecipeException e) {
             fail("Error while refactoring: no such recipe");
         }
+    }
+    
+    
+    @Test
+    public void easyRefactoringTest() throws Exception {
+        Dictionary<String,Object> emptyConfig = new Hashtable<String,Object>();
+
+        class SpecialTcManager extends TcManager {
+            public SpecialTcManager(QueryEngine qe, WeightedTcProvider wtcp) {
+                super();
+                bindQueryEngine(qe);
+                bindWeightedTcProvider(wtcp);
+            }
+        }
+
+        QueryEngine qe = new JenaSparqlEngine();
+        WeightedTcProvider wtcp = new SimpleTcProvider();
+        TcManager tcm = new SpecialTcManager(qe, wtcp);
+
+        
+        String recipe = "rule[is(<http://kres.iks-project.eu/ontology.owl#Person>, ?x) -> is(<http://xmlns.com/foaf/0.1/Person>, ?x)]";
+        
+        KB kb = RuleParserImpl.parse(recipe);
+        RuleList ruleList = kb.getkReSRuleList();
+        Recipe actualRecipe = new RecipeImpl(null, null, ruleList);
+        	
+        ONManager onm = new ONManagerImpl(tcm, wtcp, emptyConfig);
+        Refactorer refactorer = new RefactorerImpl(null, new Serializer(), tcm, onm, ruleStore, emptyConfig);
+        try {
+            refactorer.ontologyRefactoring(ontology, actualRecipe);
+        } catch (RefactoringException e) {
+            fail("Error while refactoring.");
+        }
+    }
+    
+    @Test
+    public void brokenRecipeTest() throws Exception {
+        Dictionary<String,Object> emptyConfig = new Hashtable<String,Object>();
+
+        class SpecialTcManager extends TcManager {
+            public SpecialTcManager(QueryEngine qe, WeightedTcProvider wtcp) {
+                super();
+                bindQueryEngine(qe);
+                bindWeightedTcProvider(wtcp);
+            }
+        }
+
+        QueryEngine qe = new JenaSparqlEngine();
+        WeightedTcProvider wtcp = new SimpleTcProvider();
+        TcManager tcm = new SpecialTcManager(qe, wtcp);
+
+        // broken recipe
+        String recipe = "rule[is(<http://kres.iks-project.eu/ontology.owl#Person>) -> is(<http://xmlns.com/foaf/0.1/Person>, ?x)]";
+        
+        KB kb = null;
+        try{
+        	kb = RuleParserImpl.parse(recipe);
+        } catch (IllegalStateException e) {
+			assertTrue(true);
+		}
     }
 
 }

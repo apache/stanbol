@@ -63,6 +63,7 @@ import com.hp.hpl.jena.reasoner.Reasoner;
 import com.hp.hpl.jena.sparql.function.FunctionRegistry;
 import com.hp.hpl.jena.sparql.pfunction.PropertyFunctionRegistry;
 import com.hp.hpl.jena.update.UpdateAction;
+import com.hp.hpl.jena.util.FileManager;
 
 /**
  * The RefactorerImpl is the concrete implementation of the Refactorer interface defined in the KReS APIs. A
@@ -482,8 +483,8 @@ public class RefactorerImpl implements Refactorer {
         }
     }
     
-
-
+    
+    
     private Graph kReSCoreOperation(String query, MGraph mGraph) {
 
         /*
