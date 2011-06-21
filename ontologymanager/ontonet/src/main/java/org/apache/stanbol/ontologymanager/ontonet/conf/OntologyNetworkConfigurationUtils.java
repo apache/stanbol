@@ -54,7 +54,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
  * @author alessandro
  * @author enridaga
  */
-public class ConfigurationManagement {
+public class OntologyNetworkConfigurationUtils {
 
 	private static OWLDataFactory _df = OWLManager.getOWLDataFactory();
 

@@ -23,7 +23,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryCo
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryLibrary;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryOntology;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyManagerFactory;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OWLOntologyManagerFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.cache.ODPRegistryCacheException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.cache.ODPRegistryCacheManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.cache.URIUnresolvableException;
@@ -205,7 +205,7 @@ public class RegistryLoaderImpl implements RegistryLoader {
     }
 
     private OWLOntology getOntologyForRegistryLocationNoCached(URI location) {
-        OntologyManagerFactory factory = onm.getOntologyManagerFactory();
+        OWLOntologyManagerFactoryImpl factory = onm.getOntologyManagerFactory();
         IRI iri = IRI.create(location);
         try {
             if (factory != null) return factory.createOntologyManager(true).loadOntologyFromOntologyDocument(

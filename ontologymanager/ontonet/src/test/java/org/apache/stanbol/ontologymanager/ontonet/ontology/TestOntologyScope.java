@@ -18,7 +18,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.CoreOntologySpaceImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.CustomOntologySpaceImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyManagerFactory;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OWLOntologyManagerFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFactoryImpl;
 import org.junit.Before;
 import org.junit.BeforeClass;

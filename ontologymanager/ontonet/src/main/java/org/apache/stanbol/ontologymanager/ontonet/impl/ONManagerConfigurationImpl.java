@@ -38,7 +38,7 @@ public class ONManagerConfigurationImpl implements ONManagerConfiguration {
     /**
      * TODO how do you use array initializers in Property annotations without causing compile errors?
      */
-    @Property(name = ONManagerConfiguration.ONTOLOGY_PATHS, value = {".", "ontologies"})
+    @Property(name = ONManagerConfiguration.ONTOLOGY_PATHS, value = {".", "/ontologies"})
     private String[] ontologyDirs;
 
     @Property(name = ONManagerConfiguration.ID, value = _ID_DEFAULT)
@@ -51,7 +51,7 @@ public class ONManagerConfigurationImpl implements ONManagerConfiguration {
      * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
      * Component Runtime support.
      * <p>
-     * DO NOT USE to manually create instances - the ReengineerManagerImpl instances do need to be configured!
+     * DO NOT USE to manually create instances - the ONManagerConfigurationImpl instances do need to be configured!
      * YOU NEED TO USE {@link #ONManagerConfigurationImpl(Dictionary)} or its overloads, to parse the
      * configuration and then initialise the rule store if running outside an OSGI environment.
      */
@@ -82,7 +82,7 @@ public class ONManagerConfigurationImpl implements ONManagerConfiguration {
         ontonetID = (String) configuration.get(ONManagerConfiguration.ID);
         if (ontonetID == null) ontonetID = _ID_DEFAULT;
         ontologyDirs = (String[]) configuration.get(ONManagerConfiguration.ONTOLOGY_PATHS);
-        if (ontologyDirs == null) ontologyDirs = new String[] {".", "ontologies"};
+        if (ontologyDirs == null) ontologyDirs = new String[] {".", "/ontologies"};
         ontonetNS = (String) configuration.get(ONManagerConfiguration.ONTOLOGY_NETWORK_NS);
         if (ontonetNS == null) ontonetNS = _ONTOLOGY_NETWORK_NS_DEFAULT;
         configPath = (String) configuration.get(ONManagerConfiguration.CONFIG_ONTOLOGY_PATH);

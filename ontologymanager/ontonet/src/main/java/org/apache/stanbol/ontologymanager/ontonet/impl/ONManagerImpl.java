@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.List;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
@@ -34,12 +36,12 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
-import org.apache.stanbol.ontologymanager.ontonet.conf.ConfigurationManagement;
 import org.apache.stanbol.ontologymanager.ontonet.conf.OfflineConfiguration;
+import org.apache.stanbol.ontologymanager.ontonet.conf.OntologyNetworkConfigurationUtils;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.InMemoryOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyIndexImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyManagerFactory;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OWLOntologyManagerFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologySpaceFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.ScopeRegistryImpl;
@@ -195,7 +197,7 @@ public class ONManagerImpl implements ONManager {
 
     private OntologyIndex oIndex;
 
-    private OntologyManagerFactory omgrFactory;
+    private OWLOntologyManagerFactoryImpl omgrFactory;
 
     private OntologyScopeFactory ontologyScopeFactory;
 
@@ -238,30 +240,37 @@ public class ONManagerImpl implements ONManager {
     public ONManagerImpl() {
         super();
 
-        OfflineConfiguration conf = new OfflineConfiguration();
-        try {
-            URI uri = ONManagerImpl.this.getClass().getResource("/ontologies").toURI();
-            conf.addDirectory(new File(uri));
-        } catch (Exception e3) {
-            log.warn("Could not add ontology resource /ontologies.");
-        }
-        omgrFactory = new OntologyManagerFactory(conf);
-
-        owlFactory = OWLManager.getOWLDataFactory();
-        owlCacheManager = omgrFactory.createOntologyManager(true);
-
-        // These depend on one another
-        scopeRegistry = new ScopeRegistryImpl();
-        oIndex = new OntologyIndexImpl(this);
-
-        // Defer the call to the bindResources() method to the activator.
+//        OfflineConfiguration conf = new OfflineConfiguration();
+//        try {
+//            URI uri = ONManagerImpl.this.getClass().getResource("/ontologies").toURI();
+//            conf.addDirectory(new File(uri));
+//        } catch (Exception e3) {
+//            log.warn("Could not add ontology resource /ontologies.");
+//        }
+//        List<String> dirs = new ArrayList<String>();
+//        try {
+//            dirs = config.getOntologySourceDirectories();
+//        } catch (NullPointerException ex) {
+//            // Ok, go empty
+//        }
+        
+//        omgrFactory = new OntologyManagerFactory(dirs);
+//
+//        owlFactory = OWLManager.getOWLDataFactory();
+//        owlCacheManager = omgrFactory.createOntologyManager(true);
+//
+//        // These depend on one another
+//        scopeRegistry = new ScopeRegistryImpl();
+//        oIndex = new OntologyIndexImpl(this);
+//
+//        // Defer the call to the bindResources() method to the activator.
     }
 
     /**
      * @deprecated use
      *             {@link #ONManagerImpl(TcManager, WeightedTcProvider, ONManagerConfiguration, Dictionary)}
-     *             instead. Note that if the deprecated method is used instead, it will copy the Dictionary
-     *             context to a new {@link ONManagerConfiguration} object.
+     *             instead. Note that if the deprecated method is used instead, its effect will be to copy the
+     *             Dictionary context to a new {@link ONManagerConfiguration} object.
      * @param tcm
      * @param wtcp
      * @param configuration
@@ -273,7 +282,7 @@ public class ONManagerImpl implements ONManager {
     }
 
     /**
-     * To be invoked by non-OSGi environments.
+     * Constructor to be invoked by non-OSGi environments.
      * 
      * @param tcm
      * @param wtcp
@@ -324,17 +333,38 @@ public class ONManagerImpl implements ONManager {
         } else {
             log.info("id: {}", config.getID());
         }
-
-         // Local directories first
-//          try {
-//          URI uri = ONManagerImpl.this.getClass().getResource("/ontologies").toURI();
-//          OfflineConfiguration.add(new File(uri));
-//          } catch (URISyntaxException e3) {
-//          log.warn("Could not add ontology resource.", e3);
-//          } catch (NullPointerException e3) {
-//          log.warn("Could not add ontology resource.", e3);
-//          }
         
+        
+        List<String> dirs = new ArrayList<String>();
+        try {
+            dirs = config.getOntologySourceDirectories();
+        } catch (NullPointerException ex) {
+            // Ok, go empty
+        }
+        
+        omgrFactory = new OWLOntologyManagerFactoryImpl(dirs);
+
+        owlFactory = OWLManager.getOWLDataFactory();
+        owlCacheManager = omgrFactory.createOntologyManager(true);
+
+        // These depend on one another
+        scopeRegistry = new ScopeRegistryImpl();
+        oIndex = new OntologyIndexImpl(this);
+
+        // Defer the call to the bindResources() method to the activator.
+
+        // Get local directories
+        
+        // Local directories first
+        // try {
+        // URI uri = ONManagerImpl.this.getClass().getResource("/ontologies").toURI();
+        // OfflineConfiguration.add(new File(uri));
+        // } catch (URISyntaxException e3) {
+        // log.warn("Could not add ontology resource.", e3);
+        // } catch (NullPointerException e3) {
+        // log.warn("Could not add ontology resource.", e3);
+        // }
+
         // // if (storage == null) storage = new OntologyStorage(this.tcm, this.wtcp);
 
         bindResources(this.tcm, this.wtcp);
@@ -443,10 +473,10 @@ public class ONManagerImpl implements ONManager {
             /**
              * We create and register the scopes before activating
              */
-            for (String scopeIRI : ConfigurationManagement.getScopes(configOntology)) {
+            for (String scopeIRI : OntologyNetworkConfigurationUtils.getScopes(configOntology)) {
 
-                String[] cores = ConfigurationManagement.getCoreOntologies(configOntology, scopeIRI);
-                String[] customs = ConfigurationManagement.getCustomOntologies(configOntology, scopeIRI);
+                String[] cores = OntologyNetworkConfigurationUtils.getCoreOntologies(configOntology, scopeIRI);
+                String[] customs = OntologyNetworkConfigurationUtils.getCustomOntologies(configOntology, scopeIRI);
 
                 // "Be a man. Use printf"
                 log.debug("KReS :: Scope " + scopeIRI);
@@ -489,7 +519,7 @@ public class ONManagerImpl implements ONManager {
             /**
              * Try to get activation policies
              */
-            toActivate = ConfigurationManagement.getScopesToActivate(configOntology);
+            toActivate = OntologyNetworkConfigurationUtils.getScopesToActivate(configOntology);
 
             for (String scopeID : toActivate) {
                 try {
@@ -546,7 +576,7 @@ public class ONManagerImpl implements ONManager {
         return oIndex;
     }
 
-    public OntologyManagerFactory getOntologyManagerFactory() {
+    public OWLOntologyManagerFactoryImpl getOntologyManagerFactory() {
         return omgrFactory;
     }
 

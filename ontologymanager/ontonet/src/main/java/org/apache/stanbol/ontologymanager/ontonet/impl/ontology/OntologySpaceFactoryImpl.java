@@ -33,9 +33,9 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
      */
     protected ClerezzaOntologyStorage storage;
     
-    protected OntologyManagerFactory mgrFactory;
+    protected OWLOntologyManagerFactoryImpl mgrFactory;
 
-    public OntologySpaceFactoryImpl(ScopeRegistry registry, ClerezzaOntologyStorage storage, OntologyManagerFactory mgrFactory) {
+    public OntologySpaceFactoryImpl(ScopeRegistry registry, ClerezzaOntologyStorage storage, OWLOntologyManagerFactoryImpl mgrFactory) {
         this.registry = registry;
         this.storage = storage;
         this.mgrFactory = mgrFactory;

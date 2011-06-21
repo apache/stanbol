@@ -8,12 +8,14 @@ import java.util.Hashtable;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManagerConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.ParentPathInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.io.OntologyRegistryIRISource;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,13 +30,12 @@ public class TestIndexing {
 
     private static OWLOntologyManager mgr;
 
-    private static IRI semionXmlIri = IRI.create("http://www.ontologydesignpatterns.org/ont/iks/oxml.owl"),
-            communitiesCpIri = IRI.create("http://www.ontologydesignpatterns.org/cp/owl/communities.owl"),
-            topicCpIri = IRI.create("http://www.ontologydesignpatterns.org/cp/owl/topic.owl"), objrole = IRI
-                    .create("http://www.ontologydesignpatterns.org/cp/owl/objectrole.owl"), scopeIri = IRI
-                    .create("http://fise.iks-project.eu/TestIndexing"),
-            // submissionsIri = IRI
-            // .create("http://www.ontologydesignpatterns.org/registry/submissions.owl"),
+    private static IRI communitiesCpIri = IRI
+            .create("http://www.ontologydesignpatterns.org/cp/owl/communities.owl"), objrole = IRI
+            .create("http://www.ontologydesignpatterns.org/cp/owl/objectrole.owl"), scopeIri = IRI
+            .create("http://fise.iks-project.eu/TestIndexing"),
+    // submissionsIri = IRI
+    // .create("http://www.ontologydesignpatterns.org/registry/submissions.owl"),
             testRegistryIri = IRI.create("http://www.ontologydesignpatterns.org/registry/krestest.owl");
 
     private static OntologyScope scope = null;
@@ -42,13 +43,16 @@ public class TestIndexing {
     @BeforeClass
     public static void setup() {
         // An ONManagerImpl with no store and default settings
-        onm = new ONManagerImpl(null, null, new Hashtable<String,Object>());
+        ONManagerConfiguration conf = new ONManagerConfigurationImpl(new Hashtable<String,Object>());
+        onm = new ONManagerImpl(null, null, conf, new Hashtable<String,Object>());
         mgr = onm.getOntologyManagerFactory().createOntologyManager(true);
 
         // Since it is registered, this scope must be unique, or subsequent
         // tests will fail on duplicate ID exceptions!
         scopeIri = IRI.create("http://fise.iks-project.eu/TestIndexing");
         IRI coreroot = IRI.create(scopeIri + "/core/root.owl");
+        
+        @SuppressWarnings("unused")
         OWLOntology oParent = null;
         try {
             oParent = mgr.createOntology(coreroot);
@@ -63,12 +67,12 @@ public class TestIndexing {
                 scopeIri,
                 new OntologyRegistryIRISource(testRegistryIri, onm.getOwlCacheManager(), onm
                         .getRegistryLoader(), null
-//                 new RootOntologySource(oParent
+                // new RootOntologySource(oParent
                 ));
-            
+
             for (OWLOntology o : scope.getCustomSpace().getOntologies())
-                System.out.println("SCOPONE "+o.getOntologyID());
-            
+                System.out.println("SCOPONE " + o.getOntologyID());
+
             onm.getScopeRegistry().registerScope(scope);
         } catch (DuplicateIDException e) {
             // Uncomment if annotated with @BeforeClass instead of @Before ,
@@ -87,8 +91,8 @@ public class TestIndexing {
         File f = new File(url.toURI());
         assertNotNull(f);
         OntologyInputSource commSrc = new ParentPathInputSource(f);
-        
-        OntologySpace cust = scope.getCustomSpace();     
+
+        OntologySpace cust = scope.getCustomSpace();
         cust.addOntology(commSrc);
 
         assertTrue(index.isOntologyLoaded(communitiesCpIri));
@@ -108,11 +112,11 @@ public class TestIndexing {
         OWLOntology oObjRole = mgr.loadOntology(objrole);
         assertNotNull(oObjRole);
         // Compare it against the one indexed.
-        // FIXME reinstate these checks
-//        OntologyIndex index = onm.getOntologyIndex();
-//        assertNotNull(index.getOntology(objrole));
-//        // assertSame() would fail.
-//        assertEquals(index.getOntology(objrole), oObjRole);
+//         FIXME reinstate these checks
+        // OntologyIndex index = onm.getOntologyIndex();
+        // assertNotNull(index.getOntology(objrole));
+        // // assertSame() would fail.
+        // assertEquals(index.getOntology(objrole), oObjRole);
     }
 
     @Test
@@ -123,8 +127,8 @@ public class TestIndexing {
         IRI objrole = IRI.create("http://www.ontologydesignpatterns.org/cp/owl/objectrole.owl");
 
         // FIXME reinstate these checks
-//        assertTrue(index.isOntologyLoaded(coreroot));
-//        assertTrue(index.isOntologyLoaded(objrole));
+        // assertTrue(index.isOntologyLoaded(coreroot));
+        // assertTrue(index.isOntologyLoaded(objrole));
         // TODO : find a way to index anonymous ontologies
         assertTrue(!index.isOntologyLoaded(dne));
     }
