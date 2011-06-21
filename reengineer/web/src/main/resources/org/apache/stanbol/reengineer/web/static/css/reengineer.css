@@ -1,0 +1,29 @@
+div.indent {
+	margin-left: 20px;
+	display: none; 
+}
+
+input.hide-button{
+	display: none;
+}
+
+span.red{
+	color: red;
+}
+
+div.active{
+	display: block;
+}
+
+div.inactive{
+	display: none;
+}
+
+div.arrows{
+	text-align: center;
+	display: block;
+}
+
+a#previous{
+	display: none;
+}
