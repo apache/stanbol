@@ -3,7 +3,6 @@ package org.apache.stanbol.ontologymanager.ontonet.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
@@ -36,12 +35,11 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
-import org.apache.stanbol.ontologymanager.ontonet.conf.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.conf.OntologyNetworkConfigurationUtils;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.InMemoryOntologyStorage;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyIndexImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OWLOntologyManagerFactoryImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyIndexImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologySpaceFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.ScopeRegistryImpl;
@@ -239,31 +237,7 @@ public class ONManagerImpl implements ONManager {
      */
     public ONManagerImpl() {
         super();
-
-//        OfflineConfiguration conf = new OfflineConfiguration();
-//        try {
-//            URI uri = ONManagerImpl.this.getClass().getResource("/ontologies").toURI();
-//            conf.addDirectory(new File(uri));
-//        } catch (Exception e3) {
-//            log.warn("Could not add ontology resource /ontologies.");
-//        }
-//        List<String> dirs = new ArrayList<String>();
-//        try {
-//            dirs = config.getOntologySourceDirectories();
-//        } catch (NullPointerException ex) {
-//            // Ok, go empty
-//        }
-        
-//        omgrFactory = new OntologyManagerFactory(dirs);
-//
-//        owlFactory = OWLManager.getOWLDataFactory();
-//        owlCacheManager = omgrFactory.createOntologyManager(true);
-//
-//        // These depend on one another
-//        scopeRegistry = new ScopeRegistryImpl();
-//        oIndex = new OntologyIndexImpl(this);
-//
-//        // Defer the call to the bindResources() method to the activator.
+        // All bindings are deferred to the activator
     }
 
     /**
@@ -333,39 +307,22 @@ public class ONManagerImpl implements ONManager {
         } else {
             log.info("id: {}", config.getID());
         }
-        
-        
+
+        // Bind components, starting with the local directories.
         List<String> dirs = new ArrayList<String>();
         try {
             dirs = config.getOntologySourceDirectories();
         } catch (NullPointerException ex) {
             // Ok, go empty
         }
-        
-        omgrFactory = new OWLOntologyManagerFactoryImpl(dirs);
 
+        omgrFactory = new OWLOntologyManagerFactoryImpl(dirs);
         owlFactory = OWLManager.getOWLDataFactory();
         owlCacheManager = omgrFactory.createOntologyManager(true);
 
         // These depend on one another
         scopeRegistry = new ScopeRegistryImpl();
         oIndex = new OntologyIndexImpl(this);
-
-        // Defer the call to the bindResources() method to the activator.
-
-        // Get local directories
-        
-        // Local directories first
-        // try {
-        // URI uri = ONManagerImpl.this.getClass().getResource("/ontologies").toURI();
-        // OfflineConfiguration.add(new File(uri));
-        // } catch (URISyntaxException e3) {
-        // log.warn("Could not add ontology resource.", e3);
-        // } catch (NullPointerException e3) {
-        // log.warn("Could not add ontology resource.", e3);
-        // }
-
-        // // if (storage == null) storage = new OntologyStorage(this.tcm, this.wtcp);
 
         bindResources(this.tcm, this.wtcp);
 
@@ -475,8 +432,10 @@ public class ONManagerImpl implements ONManager {
              */
             for (String scopeIRI : OntologyNetworkConfigurationUtils.getScopes(configOntology)) {
 
-                String[] cores = OntologyNetworkConfigurationUtils.getCoreOntologies(configOntology, scopeIRI);
-                String[] customs = OntologyNetworkConfigurationUtils.getCustomOntologies(configOntology, scopeIRI);
+                String[] cores = OntologyNetworkConfigurationUtils
+                        .getCoreOntologies(configOntology, scopeIRI);
+                String[] customs = OntologyNetworkConfigurationUtils.getCustomOntologies(configOntology,
+                    scopeIRI);
 
                 // "Be a man. Use printf"
                 log.debug("KReS :: Scope " + scopeIRI);
