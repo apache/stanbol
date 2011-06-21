@@ -25,7 +25,11 @@ public class ContextHelper {
         ServiceReference reference = bundleContext.getServiceReference(clazz.getName());
         //TODO: returning the service will cause the service reference not to be
         //  released bundleContext.ungetService(reference) will not be called!
-        return (T) bundleContext.getService(reference);
+        if(reference != null){
+            return (T) bundleContext.getService(reference);
+        } else {
+            return null;
+        }
     }
 
 }
