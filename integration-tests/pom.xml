@@ -132,7 +132,6 @@
             <server.ready.path.1>/:stanbol.css</server.ready.path.1>
             <server.ready.path.2>/engines:There are currently</server.ready.path.2>
             <server.ready.path.3>/contenthub:Recently uploaded Content Items</server.ready.path.3>
-            <server.ready.path.4>/factstore:The FactStore implements a store</server.ready.path.4>
           </systemPropertyVariables>
         </configuration>
       </plugin>
