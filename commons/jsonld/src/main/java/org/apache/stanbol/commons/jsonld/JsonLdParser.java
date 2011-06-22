@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Fabian Christ
  */
-public class JsonLdParser {
+public class JsonLdParser extends JsonLdParserCommon {
 
     private static Logger logger = LoggerFactory.getLogger(JsonLdParser.class);
 
@@ -25,28 +25,18 @@ public class JsonLdParser {
      * @param jsonLdString A JSON-LD String.
      * @return JSON-LD data structure.
      */
-    public static JsonLd parse(String jsonLdString) {
+    public static JsonLd parse(String jsonLdString) throws Exception {
         JsonLd jld = null;
 
         JSONObject jo = parseJson(jsonLdString);
         if (jo != null) {
-            if (jo.has(JsonLd.CONTEXT)) {
-                try {
-                    JSONObject ctx = jo.getJSONObject(JsonLd.CONTEXT);
-                    if (ctx.has(JsonLd.TYPES)) {
-                        jld = new JsonLd(true);
-                    }
-                } catch (JSONException e) { /* ignore */}
-            }
-            if (jld == null) {
-                jld = new JsonLd();
-            }
+            jld = new JsonLd();
             parseSubject(jo, jld, 1, null);
         }
 
         return jld;
     }
-
+    
     /**
      * Parses a single subject.
      * 
@@ -63,11 +53,11 @@ public class JsonLdParser {
         JsonLdResource subject = new JsonLdResource();
 
         try {
-            if (jo.has(JsonLd.CONTEXT)) {
-                JSONObject context = jo.getJSONObject(JsonLd.CONTEXT);
+            if (jo.has(JsonLdCommon.CONTEXT)) {
+                JSONObject context = jo.getJSONObject(JsonLdCommon.CONTEXT);
                 for (int i = 0; i < context.names().length(); i++) {
                     String name = context.names().getString(i).toLowerCase();
-                    if (name.equals(JsonLd.TYPES)) {
+                    if (name.equals(JsonLdCommon.TYPES)) {
                         JSONObject typeObject = context.getJSONObject(name);
                         for (int j = 0; j < typeObject.names().length(); j++) {
                             String property = typeObject.names().getString(j);
@@ -79,21 +69,21 @@ public class JsonLdParser {
                     }
                 }
 
-                jo.remove(JsonLd.CONTEXT);
+                jo.remove(JsonLdCommon.CONTEXT);
             }
 
             // If there is a local profile specified for this subject, we
             // use that one. Otherwise we assign the profile given by the parameter.
-            if (jo.has(JsonLd.PROFILE)) {
-                String localProfile = unCURIE(jo.getString(JsonLd.PROFILE), jld.getNamespacePrefixMap());
+            if (jo.has(JsonLdCommon.PROFILE)) {
+                String localProfile = unCURIE(jo.getString(JsonLdCommon.PROFILE), jld.getNamespacePrefixMap());
                 profile = localProfile;
-                jo.remove(JsonLd.PROFILE);
+                jo.remove(JsonLdCommon.PROFILE);
             }
             subject.setProfile(profile);
 
-            if (jo.has(JsonLd.SUBJECT)) {
+            if (jo.has(JsonLdCommon.SUBJECT)) {
                 // Check for N subjects
-                Object subjectObject = jo.get(JsonLd.SUBJECT);
+                Object subjectObject = jo.get(JsonLdCommon.SUBJECT);
                 if (subjectObject instanceof JSONArray) {
                     // There is an array of subjects. We create all subjects
                     // in sequence.
@@ -102,10 +92,10 @@ public class JsonLdParser {
                         parseSubject(subjects.getJSONObject(i), jld, bnodeCount++, profile);
                     }
                 } else {
-                    String subjectName = unCURIE(jo.getString(JsonLd.SUBJECT), jld.getNamespacePrefixMap());
+                    String subjectName = unCURIE(jo.getString(JsonLdCommon.SUBJECT), jld.getNamespacePrefixMap());
                     subject.setSubject(subjectName);
                 }
-                jo.remove(JsonLd.SUBJECT);
+                jo.remove(JsonLdCommon.SUBJECT);
             } else {
                 // No subject specified. We create a dummy bnode
                 // and add this subject.
@@ -155,9 +145,9 @@ public class JsonLdParser {
             JSONObject jo = (JSONObject) input;
 
             // Handle IRIs
-            if (jo.has(JsonLd.IRI)) {
+            if (jo.has(JsonLdCommon.IRI)) {
                 try {
-                    return new JsonLdIRI(unCURIE(jo.getString(JsonLd.IRI), namespacePrefixMap));
+                    return new JsonLdIRI(unCURIE(jo.getString(JsonLdCommon.IRI), namespacePrefixMap));
                 } catch (JSONException e) {
                     return null;
                 }
@@ -192,24 +182,6 @@ public class JsonLdParser {
             }
         } catch (JSONException e) { /* ignored */}
         return jsonMap;
-    }
-
-    /**
-     * Uses the underlying Jettison to parse a JSON object.
-     * 
-     * @param jsonString
-     *            JSON String representation.
-     * @return
-     */
-    private static JSONObject parseJson(String jsonString) {
-        JSONObject jo = null;
-        try {
-            jo = new JSONObject(jsonString);
-        } catch (JSONException e) {
-            logger.debug("Could not parse JSON string: {}", jsonString, e);
-        }
-
-        return jo;
     }
 
     /**

@@ -7,21 +7,7 @@ import org.junit.Test;
 public class JsonLdParserTest {
 
     @Test
-    public void testParseProfile() {
-        String jsonldInput = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"#types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}";
-        
-        JsonLd jsonLd = JsonLdParser.parse(jsonldInput);
-        jsonLd.setUseTypeCoercion(true);
-        
-        String actual = jsonLd.toString();
-        String expected = "{\"#\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"#types\":{\"organization\":\"iks:organization\",\"person\":\"iks:person\"}}}";
-        assertEquals(expected, actual);
-        assertTrue(jsonLd.representsProfile());
-        assertNotNull(jsonLd);
-    }
-
-    @Test
-    public void testParseWithProfile() {
+    public void testParseWithProfile() throws Exception {
         String jsonldInput = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:employeeOf\",\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}}";
         
         JsonLd jsonLd = JsonLdParser.parse(jsonldInput);
@@ -30,12 +16,11 @@ public class JsonLdParserTest {
         String actual = jsonLd.toString();
         String expected = "{\"#\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"upb\":\"http:\\/\\/upb.de\\/persons\\/\"},\"@\":\"_:bnode1\",\"@profile\":\"iks:employeeOf\",\"organization\":{\"@iri\":\"http:\\/\\/uni-paderborn.de\"},\"person\":{\"@iri\":\"upb:bnagel\"}}";
         assertEquals(expected, actual);
-        assertFalse(jsonLd.representsProfile());
         assertNotNull(jsonLd);
     }
     
     @Test
-    public void testParse3() {
+    public void testParse3() throws Exception {
         String jsonldInput = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:employeeOf\",\"@\":[{\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}},{\"person\":{\"@iri\":\"upb:fchrist\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}}]}";
         
         JsonLd jsonLd = JsonLdParser.parse(jsonldInput);
@@ -45,12 +30,11 @@ public class JsonLdParserTest {
         String actual = jsonLd.toString();
         String expected = "{\"#\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"upb\":\"http:\\/\\/upb.de\\/persons\\/\"},\"@\":[{\"@\":\"_:bnode1\",\"@profile\":\"http:\\/\\/iks-project.eu\\/ont\\/employeeOf\",\"organization\":{\"@iri\":\"http:\\/\\/uni-paderborn.de\"},\"person\":{\"@iri\":\"http:\\/\\/upb.de\\/persons\\/bnagel\"}},{\"@\":\"_:bnode2\",\"@profile\":\"http:\\/\\/iks-project.eu\\/ont\\/employeeOf\",\"organization\":{\"@iri\":\"http:\\/\\/uni-paderborn.de\"},\"person\":{\"@iri\":\"http:\\/\\/upb.de\\/persons\\/fchrist\"}}]}";
         assertEquals(expected, actual);
-        assertFalse(jsonLd.representsProfile());
         assertNotNull(jsonLd);
     }
     
     @Test
-    public void testParse4() {
+    public void testParse4() throws Exception {
         String jsonldInput = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:employeeOf\",\"@\":[{\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}},{\"person\":{\"@iri\":\"upb:fchrist\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}}]}";
         
         JsonLd jsonLd = JsonLdParser.parse(jsonldInput);
@@ -60,12 +44,11 @@ public class JsonLdParserTest {
         String actual = jsonLd.toString();
         String expected = "{\"#\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"upb\":\"http:\\/\\/upb.de\\/persons\\/\"},\"@\":[{\"@\":\"_:bnode1\",\"@profile\":\"iks:employeeOf\",\"organization\":{\"@iri\":\"http:\\/\\/uni-paderborn.de\"},\"person\":{\"@iri\":\"upb:bnagel\"}},{\"@\":\"_:bnode2\",\"@profile\":\"iks:employeeOf\",\"organization\":{\"@iri\":\"http:\\/\\/uni-paderborn.de\"},\"person\":{\"@iri\":\"upb:fchrist\"}}]}";
         assertEquals(expected, actual);
-        assertFalse(jsonLd.representsProfile());
         assertNotNull(jsonLd);
     }
     
     @Test
-    public void testParse5() {
+    public void testParse5() throws Exception {
         String jsonldInput = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:employeeOf\",\"@\":[{\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}},{\"person\":{\"@iri\":\"upb:fchrist\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}}]}";
         
         JsonLd jsonLd = JsonLdParser.parse(jsonldInput);
@@ -76,12 +59,11 @@ public class JsonLdParserTest {
         String actual = jsonLd.toString();
         String expected = "[{\"#\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"upb\":\"http:\\/\\/upb.de\\/persons\\/\"},\"@\":\"_:bnode1\",\"@profile\":\"iks:employeeOf\",\"organization\":{\"@iri\":\"http:\\/\\/uni-paderborn.de\"},\"person\":{\"@iri\":\"upb:bnagel\"}},{\"#\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"upb\":\"http:\\/\\/upb.de\\/persons\\/\"},\"@\":\"_:bnode2\",\"@profile\":\"iks:employeeOf\",\"organization\":{\"@iri\":\"http:\\/\\/uni-paderborn.de\"},\"person\":{\"@iri\":\"upb:fchrist\"}}]";
         assertEquals(expected, actual);
-        assertFalse(jsonLd.representsProfile());
         assertNotNull(jsonLd);
     }
     
     @Test
-    public void testParse6() {
+    public void testParse6() throws Exception {
         String jsonldInput = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@\":[{\"@profile\":\"iks:employeeOf\",\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}},{\"@profile\":\"iks:friendOf\",\"person\":{\"@iri\":\"upb:bnagel\"},\"friend\":{\"@iri\":\"upb:fchrist\"}}]}";
         
         JsonLd jsonLd = JsonLdParser.parse(jsonldInput);
@@ -92,12 +74,11 @@ public class JsonLdParserTest {
         String actual = jsonLd.toString();
         String expected = "{\"#\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"upb\":\"http:\\/\\/upb.de\\/persons\\/\"},\"@\":[{\"@\":\"_:bnode1\",\"@profile\":\"iks:employeeOf\",\"organization\":{\"@iri\":\"http:\\/\\/uni-paderborn.de\"},\"person\":{\"@iri\":\"upb:bnagel\"}},{\"@\":\"_:bnode2\",\"@profile\":\"iks:friendOf\",\"friend\":{\"@iri\":\"upb:fchrist\"},\"person\":{\"@iri\":\"upb:bnagel\"}}]}";
         assertEquals(expected, actual);
-        assertFalse(jsonLd.representsProfile());
         assertNotNull(jsonLd);
     }
     
     @Test
-    public void testParse7() {
+    public void testParse7() throws Exception {
         String jsonldInput = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:employeeOf\",\"person\":\"Benjamin\",\"organization\":\"UniPaderborn\"}";
         
         JsonLd jsonLd = JsonLdParser.parse(jsonldInput);
@@ -108,7 +89,6 @@ public class JsonLdParserTest {
         String actual = jsonLd.toString();
         String expected = "{\"#\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"upb\":\"http:\\/\\/upb.de\\/persons\\/\"},\"@\":\"_:bnode1\",\"@profile\":\"iks:employeeOf\",\"organization\":\"UniPaderborn\",\"person\":\"Benjamin\"}";
         assertEquals(expected, actual);
-        assertFalse(jsonLd.representsProfile());
         assertNotNull(jsonLd);
     }
     
