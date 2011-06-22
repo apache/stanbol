@@ -44,17 +44,25 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.full</artifactId>
       <version>0.9-SNAPSHOT</version>
-      <scope>provided</scope>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.testing.http</artifactId>
       <version>0.9-SNAPSHOT</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
       <version>0.9-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>1.3.2</version>
+        <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -69,17 +77,6 @@
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
         <version>2.2</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>${basedir}</directory>
-              <includes>
-                <!-- sling folder is the workdir of the executable jar that we test -->
-                <include>sling</include>
-              </includes>
-            </fileset>
-          </filesets>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -129,11 +126,13 @@
             <jar.executor.vm.options>${jar.executor.vm.options}</jar.executor.vm.options>
             <jar.executor.jar.folder>${project.basedir}/target/dependency</jar.executor.jar.folder>
             <jar.executor.jar.name.regexp>org.apache.stanbol.*full.*jar$</jar.executor.jar.name.regexp>
+            <jar.executor.workingdirectory>${project.build.directory}/launchdir</jar.executor.workingdirectory>
             <keepJarRunning>${keepJarRunning}</keepJarRunning>
             <server.ready.timeout.seconds>180</server.ready.timeout.seconds>
             <server.ready.path.1>/:stanbol.css</server.ready.path.1>
             <server.ready.path.2>/engines:There are currently</server.ready.path.2>
             <server.ready.path.3>/contenthub:Recently uploaded Content Items</server.ready.path.3>
+            <server.ready.path.4>/factstore:The FactStore implements a store</server.ready.path.4>
           </systemPropertyVariables>
         </configuration>
       </plugin>
