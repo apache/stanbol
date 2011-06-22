@@ -1,1 +1,1 @@
-This is a the implementation of Stanbol Ontonet
+<#import "/imports/common.ftl" as common><#import "/imports/ontonetDescription.ftl" as ontonetDescription><#escape x as x?html><@common.page title="Apache Stanbol Ontonet" hasrestapi=false> <@ontonetDescription.view /> </@common.page></#escape>

@@ -1,1 +1,1 @@
-This is a the implementation of Stanbol Ontonet
+<#macro view>This is a the implementation of Stanbol Ontonet</#macro>
