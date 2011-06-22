@@ -51,6 +51,8 @@
     <module>enhancer</module>
     <module>data</module>
     <module>contenthub/web</module>
+    <module>ontologymanager/ontonet</module>
+    <module>ontologymanager/web</module>
     <module>launchers/stateless</module>
     <module>launchers/full</module>
     <module>integration-tests</module>
@@ -66,7 +68,7 @@
         <!--
         <module>owl</module>
         -->
-        <module>ontologymanager</module>
+        <module>ontologymanager/store</module>
         <module>rules</module>
         <module>reengineer</module>
         <module>reasoners</module>
