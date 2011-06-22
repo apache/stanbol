@@ -33,14 +33,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Start a runnable jar by forking a JVM process,
- * and terminate the process when this VM exits.
+ * Start a runnable jar by forking a JVM process, and terminate the process when this VM exits.
  */
 public class JarExecutor {
 
     private static JarExecutor instance;
     private final File jarToExecute;
     private final String javaExecutable;
+    private final File workingDirectory;
     private final int serverPort;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -52,6 +52,7 @@ public class JarExecutor {
     public static final String PROP_SERVER_PORT = PROP_PREFIX + "server.port";
     public static final String PROP_JAR_FOLDER = PROP_PREFIX + "jar.folder";
     public static final String PROP_JAR_NAME_REGEXP = PROP_PREFIX + "jar.name.regexp";
+    public static final String PROP_WORKING_DIRECTORY = PROP_PREFIX + "workingdirectory";
 
     @SuppressWarnings("serial")
     public static class ExecutorException extends Exception {
@@ -102,8 +103,8 @@ public class JarExecutor {
         // Find executable jar
         final String[] candidates = jarFolder.list();
         if (candidates == null) {
-            throw new ExecutorException("No files found in jar folder specified by "
-                    + PROP_JAR_FOLDER + " property: " + jarFolder.getAbsolutePath());
+            throw new ExecutorException("No files found in jar folder specified by " + PROP_JAR_FOLDER
+                                        + " property: " + jarFolder.getAbsolutePath());
         }
         File f = null;
         if (candidates != null) {
@@ -116,16 +117,36 @@ public class JarExecutor {
         }
 
         if (f == null) {
-            throw new ExecutorException("Executable jar matching '" + jarPattern
-                    + "' not found in " + jarFolder.getAbsolutePath()
-                    + ", candidates are " + Arrays.asList(candidates));
+            throw new ExecutorException("Executable jar matching '" + jarPattern + "' not found in "
+                                        + jarFolder.getAbsolutePath() + ", candidates are "
+                                        + Arrays.asList(candidates));
         }
         jarToExecute = f;
+
+        String workingDirectoryName = config.getProperty(PROP_WORKING_DIRECTORY);
+        if (workingDirectoryName != null) {
+            this.workingDirectory = new File(workingDirectoryName);
+            if (!this.workingDirectory.exists()) {
+                this.workingDirectory.mkdirs();
+            } else {
+                if (!this.workingDirectory.isDirectory()) {
+                    throw new ExecutorException("Specified working directory " + workingDirectoryName
+                                                + " is not a directory.");
+                }
+
+                if (!this.workingDirectory.canRead()) {
+                    throw new ExecutorException("Can't access specified working directory "
+                                                + workingDirectoryName);
+                }
+            }
+            log.info("Using " + this.workingDirectory.getAbsolutePath() + " as working directory");
+        } else {
+            this.workingDirectory = null;
+        }
     }
 
     /**
-     * Start the jar if not done yet, and setup runtime hook
-     * to stop it.
+     * Start the jar if not done yet, and setup runtime hook to stop it.
      */
     public void start() throws Exception {
         final ExecuteResultHandler h = new ExecuteResultHandler() {
@@ -142,6 +163,9 @@ public class JarExecutor {
 
         final String vmOptions = System.getProperty("jar.executor.vm.options");
         final Executor e = new DefaultExecutor();
+        if (this.workingDirectory != null) {
+            e.setWorkingDirectory(this.workingDirectory);
+        }
         final CommandLine cl = new CommandLine(javaExecutable);
         if (vmOptions != null && vmOptions.length() > 0) {
             // TODO: this will fail if one of the vm options as a quoted value with a space in it, but this is
