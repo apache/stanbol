@@ -70,9 +70,6 @@ public class TestIndexing {
                 // new RootOntologySource(oParent
                 ));
 
-            for (OWLOntology o : scope.getCustomSpace().getOntologies())
-                System.out.println("SCOPONE " + o.getOntologyID());
-
             onm.getScopeRegistry().registerScope(scope);
         } catch (DuplicateIDException e) {
             // Uncomment if annotated with @BeforeClass instead of @Before ,
