@@ -122,6 +122,7 @@
            <jar.executor.vm.options>${jar.executor.vm.options}</jar.executor.vm.options>
            <jar.executor.jar.folder>${project.basedir}/target/dependency</jar.executor.jar.folder>
            <jar.executor.jar.name.regexp>org.apache.stanbol.*full.*jar$</jar.executor.jar.name.regexp>
+           <jar.executor.workingdirectory>${project.build.directory}/launchdir</jar.executor.workingdirectory>
            <keepJarRunning>${keepJarRunning}</keepJarRunning>
            <server.ready.timeout.seconds>180</server.ready.timeout.seconds>
            <server.ready.path.1>/:stanbol.css</server.ready.path.1>
