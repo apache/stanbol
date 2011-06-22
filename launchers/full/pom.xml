@@ -37,6 +37,8 @@
               <directory>.</directory>
               <includes>
                 <include>sling/**</include>
+                <include>factstore/**</include>
+                <include>*.log</include>
               </includes>
             </fileset>
           </filesets>
