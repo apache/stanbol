@@ -1,1 +1,1 @@
-This is a the implementation of Stanbol Reengineer
+<#import "/imports/common.ftl" as common><#import "/imports/reengineerDescription.ftl" as reengineerDescription><#escape x as x?html><@common.page title="Apache Stanbol Reengineer" hasrestapi=false> <@reengineerDescription.view /> </@common.page></#escape>

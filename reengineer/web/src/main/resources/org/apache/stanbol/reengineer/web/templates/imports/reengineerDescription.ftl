@@ -1,1 +1,1 @@
-This is a the implementation of Stanbol Reengineer
+<#macro view>This is a the implementation of Stanbol Reengineer</#macro>
