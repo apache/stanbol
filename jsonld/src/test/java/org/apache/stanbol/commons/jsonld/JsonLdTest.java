@@ -241,7 +241,7 @@ public class JsonLdTest {
         r1.setSubject("<http://example.org/people#joebob>");
         String nick = "\"stu\"^^http://www.w3.org/2001/XMLSchema#string";
         r1.putProperty("http://xmlns.com/foaf/0.1/nick", nick);
-        r1.getCoercionMap().put("http://xmlns.com/foaf/0.1/nick", "xsd:string");
+        r1.putCoercionType("http://xmlns.com/foaf/0.1/nick", "xsd:string");
         jsonLd.put("r1", r1);
 
         String actual = jsonLd.toString();
@@ -262,7 +262,7 @@ public class JsonLdTest {
         r1.setSubject("<http://example.org/people#joebob>");
         String nick = "\"stu\"^^http://www.w3.org/2001/XMLSchema#string";
         r1.putProperty("http://xmlns.com/foaf/0.1/nick", nick);
-        r1.getCoercionMap().put("http://xmlns.com/foaf/0.1/nick", "xsd:string");
+        r1.putCoercionType("http://xmlns.com/foaf/0.1/nick", "xsd:string");
         jsonLd.put("r1", r1);
 
         String actual = jsonLd.toString();
@@ -283,7 +283,7 @@ public class JsonLdTest {
         r1.setSubject("<http://example.org/people#joebob>");
         String nick = "\"stu\"^^http://www.w3.org/2001/XMLSchema#string";
         r1.putProperty("http://xmlns.com/foaf/0.1/nick", nick);
-        r1.getCoercionMap().put("http://xmlns.com/foaf/0.1/nick", "xsd:string");
+        r1.putCoercionType("http://xmlns.com/foaf/0.1/nick", "xsd:string");
         jsonLd.put("r1", r1);
 
         String actual = jsonLd.toString();
@@ -304,7 +304,7 @@ public class JsonLdTest {
         r1.setSubject("<http://example.org/people#joebob>");
         String nick = "\"stu\"^^http://www.w3.org/2001/XMLSchema#string";
         r1.putProperty("http://xmlns.com/foaf/0.1/nick", nick);
-        r1.getCoercionMap().put("http://xmlns.com/foaf/0.1/nick", "xsd:string");
+        r1.putCoercionType("http://xmlns.com/foaf/0.1/nick", "xsd:string");
         jsonLd.put("r1", r1);
 
         String actual = jsonLd.toString();
@@ -477,8 +477,8 @@ public class JsonLdTest {
     }
     
     @Test
-    public void testProfile() {
-        JsonLd jsonLd = new JsonLd(true);
+    public void testUseProfile() {
+        JsonLd jsonLd = new JsonLd();
         
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
@@ -488,10 +488,8 @@ public class JsonLdTest {
         r1.setSubject("_:bnode1");
         jsonLd.put(r1);
         
-        assertTrue(jsonLd.representsProfile());
-        
         String actual = jsonLd.toString();
-        String expected = "{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"},\"@profile\":\"testprofile\"}";
+        String expected = "{\"#\":{\"foaf\":\"http:\\/\\/xmlns.com\\/foaf\\/0.1\\/\",\"xsd\":\"http:\\/\\/www.w3.org\\/2001\\/XMLSchema#\"},\"@\":\"_:bnode1\",\"@profile\":\"testprofile\"}";
         assertEquals(expected, actual);
     }
     

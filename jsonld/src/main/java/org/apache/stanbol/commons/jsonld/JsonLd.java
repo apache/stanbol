@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -17,25 +18,10 @@ import java.util.TreeMap;
  * 
  * @author Fabian Christ
  */
-public class JsonLd {
-
-    public static final String CONTEXT = "@context";
-    public static final String TYPES = "#types";
-    public static final String PROFILE = "@profile";
-    public static final String SUBJECT = "@";
-    public static final String IRI = "@iri";
-
-    // Map Namespace -> Prefix
-    private Map<String,String> namespacePrefixMap = new HashMap<String,String>();
+public class JsonLd extends JsonLdCommon {
 
     // Map Subject -> Resource
     private Map<String,JsonLdResource> resourceMap = new TreeMap<String,JsonLdResource>(new JsonComparator());
-
-    /**
-     * Flag to control whether the namespace prefix map should be used to shorten URIs to CURIEs during
-     * serialization. Default value is <code>true</code>.
-     */
-    private boolean applyNamespaces = true;
 
     /**
      * Flag to control whether the serialized JSON-LD output will use joint or disjoint graphs for subjects
@@ -48,19 +34,6 @@ public class JsonLd {
      * <code>false</code>.
      */
     private boolean useTypeCoercion = false;
-
-    /**
-     * Flag that indicates whether this JSON-LD object represents a JSON-LD profile.
-     */
-    private final boolean representsProfile;
-
-    public JsonLd() {
-        this.representsProfile = false;
-    }
-
-    public JsonLd(boolean representsProfile) {
-        this.representsProfile = representsProfile;
-    }
 
     /**
      * Adds the given resource to this JsonLd object using the resource's subject as key. If the key is NULL
@@ -191,13 +164,11 @@ public class JsonLd {
 
                 JsonLdResource resource = resourceMap.get(subject);
 
-                // put subject if this is not a profile
-                if (!this.representsProfile) {
-                    if (resource.getSubject() != null && !resource.getSubject().isEmpty()) {
-                        subjectObject.put(SUBJECT, handleCURIEs(resource.getSubject()));
-                    }
+                // put subject
+                if (resource.getSubject() != null && !resource.getSubject().isEmpty()) {
+                    subjectObject.put(SUBJECT, handleCURIEs(resource.getSubject()));
                 }
-
+                
                 // put profile
                 if (resource.getProfile() != null && !resource.getProfile().isEmpty()) {
                     subjectObject.put(PROFILE, handleCURIEs(resource.getProfile()));
@@ -228,14 +199,14 @@ public class JsonLd {
         }
 
         // put the namespaces
-        if (!this.namespacePrefixMap.isEmpty() || (this.useTypeCoercion && !coercionMap.isEmpty())) {
+        if (!this.namespacePrefixMap.isEmpty() || (!coercionMap.isEmpty() && this.useTypeCoercion)) {
 
             Map<String,Object> nsObject = new TreeMap<String,Object>(new JsonComparator());
             for (String ns : namespacePrefixMap.keySet()) {
                 nsObject.put(namespacePrefixMap.get(ns), ns);
             }
 
-            if (this.useTypeCoercion && !coercionMap.isEmpty()) {
+            if (!coercionMap.isEmpty() && this.useTypeCoercion) {
                 putCoercionTypes(nsObject, coercionMap);
             }
             json.put("#", nsObject);
@@ -427,79 +398,14 @@ public class JsonLd {
     }
     
     /**
-     * Convert URI to CURIE if namespaces should be applied and CURIEs to URIs if namespaces should not be
-     * applied.
-     * 
-     * @param uri
-     *            That may be in CURIE form.
-     * @return
-     */
-    private String handleCURIEs(String uri) {
-        if (this.applyNamespaces) {
-            uri = doCURIE(uri);
-        } else {
-            uri = unCURIE(uri);
-        }
-
-        return uri;
-    }
-
-    private String doCURIE(String uri) {
-        for (String namespace : namespacePrefixMap.keySet()) {
-            String prefix = namespacePrefixMap.get(namespace) + ":";
-            if (!uri.startsWith(prefix)) {
-                uri = uri.replace(namespace, prefix);
-            }
-        }
-        return uri;
-    }
-
-    private String unCURIE(String uri) {
-        for (String namespace : namespacePrefixMap.keySet()) {
-            String prefix = namespacePrefixMap.get(namespace) + ":";
-            if (uri.startsWith(prefix)) {
-                uri = uri.replace(prefix, namespace);
-            }
-        }
-        return uri;
-    }
-
-    /**
      * Return the JSON-LD resource for the given subject.
      */
     public JsonLdResource getResource(String subject) {
-        return resourceMap.get(subject);
+        return this.resourceMap.get(subject);
     }
-
-    /**
-     * Get the known namespace to prefix mapping.
-     * 
-     * @return A {@link Map} from namespace String to prefix String.
-     */
-    public Map<String,String> getNamespacePrefixMap() {
-        return namespacePrefixMap;
-    }
-
-    /**
-     * Sets the known namespaces for the serializer.
-     * 
-     * @param namespacePrefixMap
-     *            A {@link Map} from namespace String to prefix String.
-     */
-    public void setNamespacePrefixMap(Map<String,String> namespacePrefixMap) {
-        this.namespacePrefixMap = namespacePrefixMap;
-    }
-
-    /**
-     * Adds a new namespace and its prefix to the list of used namespaces for this JSON-LD instance.
-     * 
-     * @param namespace
-     *            A namespace IRI.
-     * @param prefix
-     *            A prefix to use and identify this namespace in serialized JSON-LD.
-     */
-    public void addNamespacePrefix(String namespace, String prefix) {
-        namespacePrefixMap.put(namespace, prefix);
+    
+    public Set<String> getResourceSubjects() {
+        return this.resourceMap.keySet();
     }
 
     /**
@@ -521,30 +427,6 @@ public class JsonLd {
     }
 
     /**
-     * Flag to control whether the namespace prefix map should be used to shorten IRIs to prefix notation
-     * during serialization. Default value is <code>true</code>.
-     * <p>
-     * If you already put values into this JSON-LD instance with prefix notation, you should set this to
-     * <code>false</code> before starting the serialization.
-     * 
-     * @return <code>True</code> if namespaces are applied during serialization, <code>false</code> otherwise.
-     */
-    public boolean isApplyNamespaces() {
-        return applyNamespaces;
-    }
-
-    /**
-     * Control whether namespaces from the namespace prefix map are applied to URLs during serialization.
-     * <p>
-     * Set this to <code>false</code> if you already have shortened IRIs with prefixes.
-     * 
-     * @param applyNamespaces
-     */
-    public void setApplyNamespaces(boolean applyNamespaces) {
-        this.applyNamespaces = applyNamespaces;
-    }
-
-    /**
      * Flag to control whether type coercion is applied or not.
      * 
      * @return <code>True</code> if type coercion is applied, <code>false</code> otherwise.
@@ -563,12 +445,4 @@ public class JsonLd {
         this.useTypeCoercion = useTypeCoercion;
     }
 
-    /**
-     * Check whether this JSON-LD object represents a JSON-LD profile.
-     * 
-     * @return <code>true</code> if this is a profile, <code>false</code> otherwise.
-     */
-    public boolean representsProfile() {
-        return this.representsProfile;
-    }
 }
