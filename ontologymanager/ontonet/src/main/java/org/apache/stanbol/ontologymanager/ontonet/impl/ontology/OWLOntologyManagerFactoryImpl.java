@@ -2,7 +2,6 @@ package org.apache.stanbol.ontologymanager.ontonet.impl.ontology;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +42,7 @@ public class OWLOntologyManagerFactoryImpl implements OWLOntologyManagerFactory 
                 if (path.startsWith("/")) {
                     try {
                         dir = new File(getClass().getResource(path).toURI());
-                    } catch (URISyntaxException e) {
+                    } catch (Exception e) {
                         // Don't give up. It could still an absolute path.
                     }
                 } else try {
