@@ -452,7 +452,7 @@
   </startLevel>
 
   <!-- Stanbol Enhancer Enhancement Engines -->
-  <startLevel level="30">
+  <startLevel level="25">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.langid</artifactId>
@@ -495,7 +495,21 @@
     </bundle>
   </startLevel>
 
-
+  <!-- FactStore -->
+  <startLevel level="25">
+    <bundle>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+      <version>10.7.1.1</version>
+    </bundle>
+  </startLevel>
+  <startLevel level="26">
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.factstore</artifactId>
+      <version>0.9-SNAPSHOT</version>
+    </bundle>
+  </startLevel>
 
   <!-- Persistence Store Bundles
   <startLevel level="25">
