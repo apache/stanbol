@@ -26,6 +26,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.reengineer.base.api.DataSource;
@@ -62,9 +63,9 @@ public class ReengineerResource extends BaseStanbolResource {
 
 
     public ReengineerResource(@Context ServletContext servletContext) {
-        tcManager = (TcManager) servletContext.getAttribute(TcManager.class.getName());
+        tcManager = (TcManager) ContextHelper.getServiceFromContext(TcManager.class, servletContext);
         storage = (ClerezzaOntologyStorage) servletContext.getAttribute(ClerezzaOntologyStorage.class.getName());
-        reengineeringManager  = (ReengineerManager) (servletContext.getAttribute(ReengineerManager.class.getName()));
+        reengineeringManager = (ReengineerManager) ContextHelper.getServiceFromContext(ReengineerManager.class, servletContext);
         if (reengineeringManager == null) {
             throw new IllegalStateException(
             "ReengineeringManager missing in ServletContext");

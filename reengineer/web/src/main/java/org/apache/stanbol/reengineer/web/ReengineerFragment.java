@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -14,6 +15,7 @@ import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.reengineer.base.api.ReengineerManager;
 import org.apache.stanbol.reengineer.web.resources.ReengineerResource;
 import org.osgi.framework.BundleContext;
@@ -43,9 +45,11 @@ public class ReengineerFragment implements WebFragment{
     private BundleContext bundleContext;
     
     @Reference
+    TcManager tcManager;
+    
+    @Reference
     ReengineerManager reengineeringManager;
-
-
+    
     @Override
     public BundleContext getBundleContext() {
         return bundleContext;
@@ -54,6 +58,7 @@ public class ReengineerFragment implements WebFragment{
     @Override
     public Set<Class<?>> getJaxrsResourceClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
+        
         // resources
         classes.add(ReengineerResource.class);
 
