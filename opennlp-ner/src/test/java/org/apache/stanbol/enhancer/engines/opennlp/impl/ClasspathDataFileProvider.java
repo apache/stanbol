@@ -40,8 +40,9 @@ public class ClasspathDataFileProvider implements DataFileProvider {
     public InputStream getInputStream(String bundleSymbolicName,
             String filename, Map<String, String> comments) 
     throws IOException {
-        
-        if(!symbolicName.equals(bundleSymbolicName)) {
+        //If the symbolic name is not null check that is equals to the symbolic
+        //name used to create this classpath data file provider
+        if(bundleSymbolicName != null && !symbolicName.equals(bundleSymbolicName)) {
             log.debug("Requested bundleSymbolicName {} does not match mine ({}), request ignored",
                     bundleSymbolicName, symbolicName);
             return null;
