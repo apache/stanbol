@@ -9,7 +9,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.stanbol.commons.testing.http.Request;
 import org.apache.stanbol.commons.testing.stanbol.StanbolTestBase;
-import org.junit.BeforeClass;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,13 +18,13 @@ public class FactStoreTest extends StanbolTestBase {
 
     private static final Logger log = LoggerFactory.getLogger(FactStoreTest.class);
 
-    @BeforeClass
+    @AfterClass
     public static void cleanDatabase() throws Exception {
         String workingDirName = System.getProperty("jar.executor.workingdirectory");
         if (workingDirName != null) {
             File workingDir = new File(workingDirName);
             File factstore = new File(workingDir, "factstore");
-            log.info("Preparing FactStore and deleting " + factstore.getAbsolutePath());
+            log.info("Deleting integration test FactStore " + factstore.getAbsolutePath());
             FileUtils.deleteDirectory(factstore);
         }
     }
