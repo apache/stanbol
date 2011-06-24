@@ -254,13 +254,23 @@
       </dependency>
       <dependency>
         <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider.bundle</artifactId>
+        <version>${stanbol-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.commons.web.base</artifactId>
         <version>${stanbol-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.commons.opennlp</artifactId>
+        <version>${stanbol-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.defaultdata</artifactId>
-        <version>0.0.1</version>
+        <version>0.0.2</version>
         <scope>provided</scope>
       </dependency>
 
@@ -743,6 +753,18 @@
         <type>jar</type>
         <scope>provided</scope>
       </dependency>
+
+    <!-- OpenNLP -->
+    <dependency>
+      <groupId>org.apache.opennlp</groupId>
+      <artifactId>opennlp-maxent</artifactId>
+      <version>3.0.1-incubating</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.opennlp</groupId>
+      <artifactId>opennlp-tools</artifactId>
+      <version>1.5.1-incubating</version>
+    </dependency>
 
     <!-- Solr Bundles -->
     <dependency>
