@@ -59,7 +59,7 @@ public final class FieldMappingUtils {
 
         @Override
         public int compare(FieldMapping fm17, FieldMapping fm33) {
-            //in my companies QM 9000 system
+            //in my company's QM 9000 system
             //  ... fm17 stands for critical deviation and
             //  ... fm33 stands for suggestion for improvement
             // and the nested in-line if are good for code quality!
