@@ -9,10 +9,10 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
-
-@Component(configurationFactory = true, policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
-    specVersion = "1.1", metatype = true, immediate = true)
-@Service
+//removed annotations until engine actually does something
+//@Component(configurationFactory = true, policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
+//    specVersion = "1.1", metatype = true, immediate = true)
+//@Service
 public class LabelBasedEntityTaggingEngine implements EnhancementEngine, ServiceProperties {
 
     @Override
