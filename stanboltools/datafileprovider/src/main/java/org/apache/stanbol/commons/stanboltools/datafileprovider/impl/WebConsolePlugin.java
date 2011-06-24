@@ -115,25 +115,32 @@ public class WebConsolePlugin extends HttpServlet {
         cell("td", pw, content);
     }
 
-    /** content parameters: tags at even indexes, content at odd indexes */
+    /** 
+     * Content parameters: tags at even indexes, content at odd indexes. If
+     * content is <code>null</code> than both tags and content are ignored.
+     */
     private static void cell(String tag, PrintWriter pw, String...content) {
         pw.print("<");
         pw.print(tag);
         pw.print(">");
         
         final StringBuilder sb = new StringBuilder();
+        boolean first = true;
         for(int i=0; i < content.length; i+= 2) {
-            if(i > 0) {
+            if(!first) {
                 sb.append("<br/>\n");
             }
-            
-            final String lineTag = content[i]; 
-            if(lineTag != null) {
-                sb.append("<").append(lineTag).append(">");
-            }
-            sb.append(content[i+1]);
-            if(lineTag != null) {
-                sb.append("</").append(lineTag).append(">");
+            String value = content[i+1];
+            if(value != null){
+                final String lineTag = content[i];
+                if(lineTag != null) {
+                    sb.append("<").append(lineTag).append(">");
+                }
+                sb.append(value);
+                if(lineTag != null) {
+                    sb.append("</").append(lineTag).append(">");
+                }
+                first = false;
             }
         } 
         

@@ -10,19 +10,21 @@
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
+  <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider.bundle</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Data File Provider</name>
+  <name>Apache Stanbol Data File Provider for Bundles</name>
   <description>
-    Main DataFileProvider services
-    </description>
+    This uses the Bundle Extender Pattern (http://www.aqute.biz/Snippets/Extender)
+    to automatically Bundles that provide Data Files and makes them available
+    to the Stanbol DataFileProvider 
+  </description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/stanboltools/datafileprovider
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/stanboltools/bundledatafileprovider
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/stanboltools/datafileprovider
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/stanboltools/bundledatafileprovider
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>
@@ -39,11 +41,15 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Bundle-Activator>
+              org.apache.stanbol.commons.stanboltools.datafileprovider.bundle.impl.Activator
+            </Bundle-Activator>
             <Export-Package>
-              org.apache.stanbol.commons.stanboltools.datafileprovider,
               org.apache.stanbol.commons.stanboltools.datafileprovider.bundle,
             </Export-Package>
-            <Private-Package>org.apache.stanbol.commons.stanboltools.datafileprovider.impl.*</Private-Package>
+            <Private-Package>
+              org.apache.stanbol.commons.stanboltools.datafileprovider.bundle.impl.*
+            </Private-Package>
           </instructions>
         </configuration>
       </plugin>
@@ -60,6 +66,10 @@
   </build>
 
   <dependencies>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>

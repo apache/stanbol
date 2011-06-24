@@ -47,10 +47,10 @@ public class DataFileProviderEvent {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append(getClass().getName());
-
-        sb.append(", bundleSymbolicName=");
-        sb.append(bundleSymbolicName);
-        
+        if(bundleSymbolicName != null) {
+            sb.append(", bundleSymbolicName=");
+            sb.append(bundleSymbolicName);
+        }
         sb.append(", filename=");
         sb.append(filename);
 
