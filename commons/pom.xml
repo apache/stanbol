@@ -26,6 +26,7 @@
 
   <modules>
     <module>jsonld</module>
+    <module>opennlp</module>
     <module>web/base</module>
     <module>web/home</module>
     <module>web/sparql</module>
@@ -34,6 +35,7 @@
     <module>testing/stanbol</module>
     <module>stanboltools/offline</module>
     <module>stanboltools/datafileprovider</module>
+    <module>stanboltools/bundledatafileprovider</module>
     <module>installer/bundleprovider</module>
     <!-- not in a stable state right now 
     <module>installer/jarprovider</module>

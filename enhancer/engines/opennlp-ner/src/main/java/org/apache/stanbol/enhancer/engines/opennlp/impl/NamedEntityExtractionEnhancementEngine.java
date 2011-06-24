@@ -23,6 +23,7 @@ import java.util.Map;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -35,11 +36,15 @@ import org.osgi.service.component.ComponentContext;
  * Apache Stanbol Enhancer Named Entity Recognition enhancement engine based on opennlp's Maximum Entropy
  * models.
  */
-@Component(immediate = true, metatype = true, label = "%stanbol.NamedEntityExtractionEnhancementEngine.name", description = "%stanbol.NamedEntityExtractionEnhancementEngine.description")
+@Component(immediate = true, metatype = true, 
+    label = "%stanbol.NamedEntityExtractionEnhancementEngine.name", 
+    description = "%stanbol.NamedEntityExtractionEnhancementEngine.description")
 @Service
 public class NamedEntityExtractionEnhancementEngine implements EnhancementEngine, ServiceProperties {
 
     private EnhancementEngine engineCore;
+    
+    public static final String DEFAULT_DATA_OPEN_NLP_MODEL_LOCATION = "org/apache/stanbol/defaultdata/opennlp";
     
     /**
      * The default value for the Execution of this Engine. Currently set to
@@ -50,18 +55,14 @@ public class NamedEntityExtractionEnhancementEngine implements EnhancementEngine
     private ServiceRegistration dfpServiceRegistration;
     
     @Reference
-    private DataFileProvider dataFileProvider;
+    private OpenNLP openNLP;
     
     protected void activate(ComponentContext ctx) throws IOException {
-        // Need our DataFileProvider before building the models
-        dfpServiceRegistration = ctx.getBundleContext().registerService(
-                DataFileProvider.class.getName(), 
-                new ClasspathDataFileProvider(ctx.getBundleContext().getBundle().getSymbolicName()), null);
-        
-        engineCore = new NEREngineCore(dataFileProvider, ctx.getBundleContext().getBundle().getSymbolicName());
+        // Need to register the default data before loading the models
+        engineCore = new NEREngineCore(openNLP);
     }
 
-    protected void deactivate(ComponentContext ce) {
+    protected void deactivate(ComponentContext ctx) {
         if(dfpServiceRegistration != null) {
             dfpServiceRegistration.unregister();
             dfpServiceRegistration = null;

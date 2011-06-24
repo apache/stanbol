@@ -66,7 +66,7 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
 
     @BeforeClass
     public static void setUpServices() throws IOException {
-        nerEngine = new NEREngineCore(new ClasspathDataFileProvider(FAKE_BUNDLE_SYMBOLIC_NAME), FAKE_BUNDLE_SYMBOLIC_NAME);
+        nerEngine = new NEREngineCore(new ClasspathDataFileProvider(FAKE_BUNDLE_SYMBOLIC_NAME));
     }
 
     public static ContentItem wrapAsContentItem(final String id,

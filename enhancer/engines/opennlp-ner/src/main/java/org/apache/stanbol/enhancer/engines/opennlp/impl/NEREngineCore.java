@@ -52,6 +52,8 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -69,14 +71,15 @@ public class NEREngineCore implements EnhancementEngine {
     protected static final String TEXT_PLAIN_MIMETYPE = "text/plain";
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private final DataFileProvider dataFileProvider;
-    private final String bundleSymbolicName;
+//    private final String bundleSymbolicName;
     protected final SentenceModel sentenceModel;
     protected final TokenNameFinderModel personNameModel;
     protected final TokenNameFinderModel locationNameModel;
     protected final TokenNameFinderModel organizationNameModel;
     protected Map<String,Object[]> entityTypes = new HashMap<String,Object[]>();
-
+    
+    private OpenNLP openNLP;
+    
     /** Comments about our models */
     public static final Map<String, String> DATA_FILE_COMMENTS;
     static {
@@ -84,22 +87,21 @@ public class NEREngineCore implements EnhancementEngine {
         DATA_FILE_COMMENTS.put("Default data files", "provided by the org.apache.stanbol.defaultdata bundle");
     }
 
-    NEREngineCore(DataFileProvider dfp, String bundleSymbolicName) throws InvalidFormatException, IOException {
-        dataFileProvider = dfp;
-        this.bundleSymbolicName = bundleSymbolicName;
-        sentenceModel = new SentenceModel(lookupModelStream("en-sent.bin"));
+    public NEREngineCore(OpenNLP openNLP) throws InvalidFormatException, IOException{
+        this.openNLP = openNLP;
+        sentenceModel = openNLP.buildSentenceModel("en");
         personNameModel = buildNameModel("person", OntologicalClasses.DBPEDIA_PERSON);
         locationNameModel = buildNameModel("location", OntologicalClasses.DBPEDIA_PLACE);
         organizationNameModel = buildNameModel("organization", OntologicalClasses.DBPEDIA_ORGANISATION);
     }
-
-    protected InputStream lookupModelStream(String modelRelativePath) throws IOException {
-        return dataFileProvider.getInputStream(bundleSymbolicName, modelRelativePath, DATA_FILE_COMMENTS);
+    
+    NEREngineCore(DataFileProvider dfp) throws InvalidFormatException, IOException {
+        this(new OpenNLP(dfp));
     }
 
     protected TokenNameFinderModel buildNameModel(String name, UriRef typeUri) throws IOException {
-        String modelRelativePath = String.format("en-ner-%s.bin", name);
-        TokenNameFinderModel model = new TokenNameFinderModel(lookupModelStream(modelRelativePath));
+        //String modelRelativePath = String.format("en-ner-%s.bin", name);
+        TokenNameFinderModel model = openNLP.buildNameModel(name, "en");
         // register the name finder instances for matching owl class
         entityTypes.put(name, new Object[] {typeUri, model});
         return model;

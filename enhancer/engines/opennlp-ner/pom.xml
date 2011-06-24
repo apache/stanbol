@@ -46,16 +46,10 @@
   </scm>
 
   <dependencies>
-    <!-- obviously we need opennlp -->
+    <!-- The current opennlp version is exported by the commons.opennlp bundle -->
     <dependency>
-      <groupId>org.apache.opennlp</groupId>
-      <artifactId>opennlp-maxent</artifactId>
-      <version>3.0.1-incubating</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.opennlp</groupId>
-      <artifactId>opennlp-tools</artifactId>
-      <version>1.5.1-incubating</version>
+	  <groupId>org.apache.stanbol</groupId>
+	  <artifactId>org.apache.stanbol.commons.opennlp</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -124,8 +118,8 @@
             <Private-Package>
               org.apache.stanbol.enhancer.engines.opennlp.impl.*
             </Private-Package>
-            <Embed-Dependency>opennlp-tools,opennlp-maxent</Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
+<!--            <Embed-Dependency></Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>  -->
             <Import-Package>
               org.apache.stanbol.defaultdata.opennlp,
               !net.didion.*,

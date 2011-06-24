@@ -234,6 +234,11 @@
             <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
             <version>0.9-SNAPSHOT</version>
         </bundle>
+	    <bundle>
+		    <groupId>org.apache.stanbol</groupId>
+		    <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider.bundle</artifactId>
+		    <version>0.9-SNAPSHOT</version>
+	    </bundle>
 	</startLevel>
 
 	<!-- Clerezza storage and sparql infrastructure -->
@@ -412,13 +417,18 @@
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.defaultdata</artifactId>
-			<version>0.0.1</version>
+			<version>0.0.2</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
+	    <bundle>
+	        <groupId>org.apache.stanbol</groupId>
+	        <artifactId>org.apache.stanbol.commons.opennlp</artifactId>
+	        <version>0.9-SNAPSHOT</version>
+	    </bundle>
 		<!--
 			The geonames.org LocationEnhancement Engines needs two additional
 			bundles 1) jettyjson 2) commons-io. Both of them are already

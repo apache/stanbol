@@ -148,10 +148,12 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
         
         // First look for the file in our data folder,
         // with and without bundle symbolic name prefix
-        final String [] candidateNames = {
-                bundleSymbolicName + "-" + filename,
-                filename
-        };
+        final String [] candidateNames = bundleSymbolicName == null ? 
+                new String[]{filename} : 
+                    new String[]{
+                        bundleSymbolicName + "-" + filename,
+                        filename
+                    };
         for(String name : candidateNames) {
             final File f = new File(dataFilesFolder, name);
             log.debug("Looking for file {}", f.getAbsolutePath());
