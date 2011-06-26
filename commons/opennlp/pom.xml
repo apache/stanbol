@@ -67,7 +67,7 @@
               opennlp.model,
               opennlp.perceptron,
               opennlp.tools.*,
-              org.apache.stanbol.commons.opennlp,
+              org.apache.stanbol.commons.opennlp
             </Export-Package>
             <Private-Package>
               org.apache.stanbol.commons.opennlp.impl.*
@@ -75,7 +75,6 @@
             <Embed-Dependency>opennlp-tools,opennlp-maxent</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>
-              org.apache.stanbol.defaultdata.opennlp,
               !net.didion.*,
               *
             </Import-Package>
