@@ -26,7 +26,6 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ST
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,7 +51,6 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -72,11 +70,17 @@ public class NEREngineCore implements EnhancementEngine {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 //    private final String bundleSymbolicName;
-    protected final SentenceModel sentenceModel;
-    protected final TokenNameFinderModel personNameModel;
-    protected final TokenNameFinderModel locationNameModel;
-    protected final TokenNameFinderModel organizationNameModel;
-    protected Map<String,Object[]> entityTypes = new HashMap<String,Object[]>();
+//    protected final SentenceModel sentenceModel;
+//    protected final TokenNameFinderModel personNameModel;
+//    protected final TokenNameFinderModel locationNameModel;
+//    protected final TokenNameFinderModel organizationNameModel;
+//    protected Map<String,Object[]> entityTypes = new HashMap<String,Object[]>();
+    private static Map<String,UriRef> entityTypes = new HashMap<String,UriRef>();
+    static {
+        entityTypes.put("person", OntologicalClasses.DBPEDIA_PERSON);
+        entityTypes.put("location", OntologicalClasses.DBPEDIA_PLACE);
+        entityTypes.put("organization", OntologicalClasses.DBPEDIA_ORGANISATION);
+    }
     
     private OpenNLP openNLP;
     
@@ -89,10 +93,10 @@ public class NEREngineCore implements EnhancementEngine {
 
     public NEREngineCore(OpenNLP openNLP) throws InvalidFormatException, IOException{
         this.openNLP = openNLP;
-        sentenceModel = openNLP.buildSentenceModel("en");
-        personNameModel = buildNameModel("person", OntologicalClasses.DBPEDIA_PERSON);
-        locationNameModel = buildNameModel("location", OntologicalClasses.DBPEDIA_PLACE);
-        organizationNameModel = buildNameModel("organization", OntologicalClasses.DBPEDIA_ORGANISATION);
+//        sentenceModel = openNLP.buildSentenceModel("en");
+//        personNameModel = buildNameModel("person", OntologicalClasses.DBPEDIA_PERSON);
+//        locationNameModel = buildNameModel("location", OntologicalClasses.DBPEDIA_PLACE);
+//        organizationNameModel = buildNameModel("organization", OntologicalClasses.DBPEDIA_ORGANISATION);
     }
     
     NEREngineCore(DataFileProvider dfp) throws InvalidFormatException, IOException {
@@ -103,7 +107,7 @@ public class NEREngineCore implements EnhancementEngine {
         //String modelRelativePath = String.format("en-ner-%s.bin", name);
         TokenNameFinderModel model = openNLP.buildNameModel(name, "en");
         // register the name finder instances for matching owl class
-        entityTypes.put(name, new Object[] {typeUri, model});
+//        entityTypes.put(name, new Object[] {typeUri, model});
         return model;
     }
 
@@ -132,11 +136,10 @@ public class NEREngineCore implements EnhancementEngine {
         log.debug("computeEnhancements {} text={}", ci.getId(), StringUtils.abbreviate(text, 100));
 
         try {
-            for (Map.Entry<String,Object[]> type : entityTypes.entrySet()) {
+            for (Map.Entry<String,UriRef> type : entityTypes.entrySet()) {
                 String typeLabel = type.getKey();
-                Object[] typeInfo = type.getValue();
-                UriRef typeUri = (UriRef) typeInfo[0];
-                TokenNameFinderModel nameFinderModel = (TokenNameFinderModel) typeInfo[1];
+                UriRef typeUri = type.getValue();
+                TokenNameFinderModel nameFinderModel = openNLP.buildNameModel(typeLabel, "en");
                 findNamedEntities(ci, text, typeUri, typeLabel, nameFinderModel);
             }
         } catch (Exception e) {
@@ -217,33 +220,84 @@ public class NEREngineCore implements EnhancementEngine {
     }
 
     public Collection<String> extractPersonNames(String text) {
-        return extractNames(personNameModel, text);
+        return extractNames(getNameModel("person","en"),text);
     }
 
     public Collection<String> extractLocationNames(String text) {
-        return extractNames(locationNameModel, text);
+        return extractNames(getNameModel("location","en"), text);
     }
 
     public Collection<String> extractOrganizationNames(String text) {
-        return extractNames(organizationNameModel, text);
+        return extractNames(getNameModel("organization","en"), text);
     }
 
     public Map<String,List<NameOccurrence>> extractPersonNameOccurrences(String text) {
-        return extractNameOccurrences(personNameModel, text);
+        return extractNameOccurrences(getNameModel("person","en"), text);
     }
 
     public Map<String,List<NameOccurrence>> extractLocationNameOccurrences(String text) {
-        return extractNameOccurrences(locationNameModel, text);
+        return extractNameOccurrences(getNameModel("location","en"), text);
     }
 
     public Map<String,List<NameOccurrence>> extractOrganizationNameOccurrences(String text) {
-        return extractNameOccurrences(organizationNameModel, text);
+        return extractNameOccurrences(getNameModel("organization","en"), text);
     }
 
     protected Collection<String> extractNames(TokenNameFinderModel nameFinderModel, String text) {
         return extractNameOccurrences(nameFinderModel, text).keySet();
     }
 
+    /**
+     * Gets/builds a TokenNameFinderModel by using {@link #openNLP} and throws
+     * {@link IllegalStateException}s in case the model could not be built or
+     * the data for the model where not found.
+     * @param the type of the named finder model
+     * @param language the language for the model
+     * @return the model or an {@link IllegalStateException} if not available
+     */
+    private TokenNameFinderModel getNameModel(String type,String language) {
+        try {
+            TokenNameFinderModel model = openNLP.buildNameModel(type, language);
+            if(model != null){
+                return model;
+            } else {
+                throw new IllegalStateException(String.format(
+                    "Unable to built Model for extracting %s from '%s' language " +
+                    "texts because the model data could not be loaded.",
+                    type,language));
+            }
+        } catch (InvalidFormatException e) {
+            throw new IllegalStateException(String.format(
+                "Unable to built Model for extracting %s from '%s' language texts.",
+                type,language),e);
+        } catch (IOException e) {
+            throw new IllegalStateException(String.format(
+                "Unable to built Model for extracting %s from '%s' language texts.",
+                type,language),e);
+        }
+    }
+    private SentenceModel getSentenceModel(String language) {
+        try {
+            SentenceModel model = openNLP.buildSentenceModel(language);
+            if(model != null){
+                return model;
+            } else {
+                throw new IllegalStateException(String.format(
+                    "Unable to built Model for extracting sentences from '%s' " +
+                    "language texts because the model data could not be loaded.",
+                    language));
+            }
+        } catch (InvalidFormatException e) {
+            throw new IllegalStateException(String.format(
+                "Unable to built Model for extracting sentences from '%s' language texts.",
+                language),e);
+        } catch (IOException e) {
+            throw new IllegalStateException(String.format(
+                "Unable to built Model for extracting sentences from '%s' language texts.",
+                language),e);
+        }
+    }
+    
     protected Map<String,List<NameOccurrence>> extractNameOccurrences(TokenNameFinderModel nameFinderModel,
                                                                       String text) {
 
@@ -252,7 +306,7 @@ public class NEREngineCore implements EnhancementEngine {
         String textWithDots = text.replaceAll("\\n\\n", ".\n");
         text = removeNonUtf8CompliantCharacters(text);
 
-        SentenceDetectorME sentenceDetector = new SentenceDetectorME(sentenceModel);
+        SentenceDetectorME sentenceDetector = new SentenceDetectorME(getSentenceModel("en"));
 
         Span[] sentenceSpans = sentenceDetector.sentPosDetect(textWithDots);
 
