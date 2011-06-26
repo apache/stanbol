@@ -29,8 +29,8 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Sign;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
@@ -44,7 +44,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntol
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
-import org.apache.stanbol.reasoners.base.api.Reasoner;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.Rule;
@@ -395,20 +394,14 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
 
 			@Override
 			public OWLOntology getRootOntology() {
-
-				InputStream inputStream;
 				try {
 					/*
 					 * The input stream for the dbpedia ontology is obtained
 					 * through the dereferencer component.
 					 */
-					
-					
 					 //inputStream = dereferencer.resolve(uri);
 					 OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 					 return manager.loadOntologyFromOntologyDocument(IRI.create(uri));
-					 
-					
 					//return getEntityOntology(uri);
 				} catch (Exception e) {
 					log.error("Cannot load the ontology "+uri, e);
@@ -700,7 +693,7 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
 		/*
 		 * Ask to the entityhub the fetch the entity.
 		 */
-		Sign entitySign = referencedSiteManager.getSign(entityURI);
+		Entity entitySign = referencedSiteManager.getEntity(entityURI);
 		
 		/*
 		 * Wrap the entity graph into an owl ontology.
