@@ -19,6 +19,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
@@ -54,7 +55,9 @@ public class GraphsResource extends BaseStanbolResource {
         storage = (ClerezzaOntologyStorage) (servletContext.getAttribute(ClerezzaOntologyStorage.class
                 .getName()));
         tcManager = (TcManager) servletContext.getAttribute(TcManager.class.getName());
-        onManager = (ONManager) (servletContext.getAttribute(ONManager.class.getName()));
+        
+        onManager = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
+        //onManager = (ONManager) (servletContext.getAttribute(ONManager.class.getName()));
         if (onManager == null) {
             throw new IllegalStateException("OntologyStorage missing in ServletContext");
         } else {

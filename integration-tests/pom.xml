@@ -46,6 +46,12 @@
       <version>0.9-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
+	<dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+      <version>0.9-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.testing.http</artifactId>
@@ -130,9 +136,9 @@
             <keepJarRunning>${keepJarRunning}</keepJarRunning>
             <server.ready.timeout.seconds>180</server.ready.timeout.seconds>
             <server.ready.path.1>/:stanbol.css</server.ready.path.1>
-            <server.ready.path.2>/engines:There are currently</server.ready.path.2>
+            <!--<server.ready.path.2>/engines:There are currently</server.ready.path.2>
             <server.ready.path.3>/contenthub:Recently uploaded Content Items</server.ready.path.3>
-            <server.ready.path.4>/factstore:The FactStore implements a store</server.ready.path.4>
+            <server.ready.path.4>/factstore:The FactStore implements a store</server.ready.path.4>-->
           </systemPropertyVariables>
         </configuration>
       </plugin>
