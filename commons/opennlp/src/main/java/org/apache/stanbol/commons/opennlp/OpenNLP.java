@@ -48,6 +48,10 @@ import org.slf4j.LoggerFactory;
 @Component(immediate=true)
 @Service(value=OpenNLP.class)
 public class OpenNLP {
+    /**
+     * added as link to the download location for requested model files
+     * Will show up in the DataFilePorivder tab in the Apache Felix Web Console
+     */
     private static final String DOWNLOAD_ROOT = "http://opennlp.sourceforge.net/models-1.5/";
 
     /**
@@ -62,18 +66,6 @@ public class OpenNLP {
      * TODO: change to use a WeakReferenceMap
      */
     protected Map<String,Object> models = new HashMap<String,Object>();
-//    /**
-//     * Holds a map of {@link #registerModelLocation(BundleContext, String...) registered}
-//     * model location. The bundle symbolic name is used as key to avoid a hard 
-//     * reference to the parsed {@link BundleContext}.
-//     */
-//    protected Map<String,ModelLocation> modelLocations = new HashMap<String,ModelLocation>();
-
-//    private static class ModelLocation {
-//        BundleContext bundleContext;
-//        String[] paths;
-//        BundleResourceProvider provider;
-//    }
     
     /**
      * Default constructor
@@ -91,43 +83,49 @@ public class OpenNLP {
         this.dataFileProvider = dataFileProvider;
     }
     /**
-     * Builds a a model for the tokenizing sentenced in a text with the given
-     * language 
+     * Getter for the sentence detection model of the parsed language. 
+     * If the model is not yet available a new one is built. The required data
+     * are loaded by using the {@link DataFileProvider} service.  
      * @param language the language
      * @return the model or <code>null</code> if no model data are found
      * @throws InvalidFormatException in case the found model data are in the wrong format
      * @throws IOException on any error while reading the model data
      */
-    public SentenceModel buildSentenceModel(String language) throws InvalidFormatException, IOException {
+    public SentenceModel getSentenceModel(String language) throws InvalidFormatException, IOException {
         return initModel(String.format("%s-sent.bin", language),
             SentenceModel.class);
     }
     /**
-     * Build a named entity finder model for the parsed entity type and language
+     * Getter for the named entity finder model for the parsed entity type and language.
+     * If the model is not yet available a new one is built. The required data
+     * are loaded by using the {@link DataFileProvider} service.  
      * @param type the type of the named entities to find (person, organization)
      * @param language the language
      * @return the model or <code>null</code> if no model data are found
      * @throws InvalidFormatException in case the found model data are in the wrong format
      * @throws IOException on any error while reading the model data
      */
-    public TokenNameFinderModel buildNameModel(String type, String language) throws InvalidFormatException, IOException {
+    public TokenNameFinderModel getNameModel(String type, String language) throws InvalidFormatException, IOException {
         return initModel(String.format("%s-ner-%s.bin", language, type),
             TokenNameFinderModel.class);
     }
     /**
-     * Builds a tokenizer model for the parsed language
+     * Getter for the tokenizer model for the parsed language.
+     * If the model is not yet available a new one is built. The required data
+     * are loaded by using the {@link DataFileProvider} service.  
      * @param language the language
      * @return the model or <code>null</code> if no model data are found
      * @throws InvalidFormatException in case the found model data are in the wrong format
      * @throws IOException on any error while reading the model data
      */
-    public TokenizerModel buildTokenizerModel(String language) throws InvalidFormatException, IOException {
+    public TokenizerModel getTokenizerModel(String language) throws InvalidFormatException, IOException {
         return initModel(String.format("%s-token.bin", language),TokenizerModel.class);
     }
     /**
-     * Tries to built a {@link TokenizerModel} for the parsed language. If this
-     * succeeds a {@link TokenizerME} instance is returned. If no model can be
-     * loaded the {@link SimpleTokenizer} instance is returned.
+     * Getter for the Tokenizer of a given language. This first tries to
+     * create an {@link TokenizerME} instance if the required 
+     * {@link TokenizerModel} for the parsed language is available. if such a
+     * model is not available it returns the {@link SimpleTokenizer} instance.
      * @param language the language or <code>null</code> to build a 
      * {@link SimpleTokenizer}
      * @return the {@link Tokenizer} for the parsed language.
@@ -136,7 +134,7 @@ public class OpenNLP {
         Tokenizer tokenizer = null;
         if(language != null){
             try {
-                tokenizer = new TokenizerME(buildTokenizerModel(language));
+                tokenizer = new TokenizerME(getTokenizerModel(language));
             } catch (InvalidFormatException e) {
                 log.warn("Unable to load Tokenizer Model for "+language+": " +
                 		"Will use Simple Tokenizer instead",e);
@@ -154,13 +152,15 @@ public class OpenNLP {
         return tokenizer;
     }
     /**
-     * Builds a "part-of-speach" model for the parsed language
+     * Getter for the "part-of-speach" model for the parsed language.
+     * If the model is not yet available a new one is built. The required data
+     * are loaded by using the {@link DataFileProvider} service.  
      * @param language the language
      * @return the model or <code>null</code> if no model data are found
      * @throws InvalidFormatException in case the found model data are in the wrong format
      * @throws IOException on any error while reading the model data
      */
-    public POSModel builtPartOfSpeachModel(String language) throws IOException, InvalidFormatException {
+    public POSModel getPartOfSpeachModel(String language) throws IOException, InvalidFormatException {
         //typically there are two versions
         //we prefer the perceptron variant but if not available try to build the other
         IOException first = null;
@@ -188,13 +188,15 @@ public class OpenNLP {
         return model;
     }
     /**
-     * builds a chunker model for the parsed model
+     * Getter for the chunker model for the parsed language.
+     * If the model is not yet available a new one is built. The required data
+     * are loaded by using the {@link DataFileProvider} service.  
      * @param language the language
      * @return the model or <code>null</code> if no model data are present
      * @throws InvalidFormatException in case the found model data are in the wrong format
      * @throws IOException on any error while reading the model data
      */
-    public ChunkerModel builtChunkerModel(String language) throws InvalidFormatException, IOException {
+    public ChunkerModel getChunkerModel(String language) throws InvalidFormatException, IOException {
         return initModel(String.format("%s-chunker.bin", language), ChunkerModel.class);
     }
     
