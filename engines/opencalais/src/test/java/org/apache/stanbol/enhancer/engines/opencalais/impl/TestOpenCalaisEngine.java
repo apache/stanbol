@@ -35,6 +35,7 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +58,7 @@ public class TestOpenCalaisEngine {
   private static String TEST_TEXT = "Israeli PM Netanyahu pulls out of US nuclear summit\nIsraeli PM Benjamin Netanyahu has cancelled a visit to the US where he was to attend a summit on nuclear security, Israeli officials say. Mr Netanyahu made the decision after learning that Egypt and Turkey intended to raise the issue of Israel's presumed nuclear arsenal, the officials said. Mr Obama is due to host dozens of world leaders at the two-day conference, which begins in Washington on Monday. Israel has never confirmed or denied that it possesses atomic weapons. Israel's Intelligence and Atomic Energy Minister Dan Meridor will take Netanyahu's place in the nuclear summit, Israeli radio said. More than 40 countries are expected at the meeting, which will focus on preventing the spread of nuclear weapons to militant groups.";
   
   @BeforeClass
-  public static void oneTimeSetup() {
+  public static void oneTimeSetup() throws ConfigurationException {
     calaisExtractor = new OpenCalaisEngine();
     calaisExtractor.setCalaisTypeMap(new HashMap<UriRef,UriRef>());
     calaisExtractor.tcManager = TcManager.getInstance();
