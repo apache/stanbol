@@ -13,7 +13,7 @@
 	<artifactId>org.apache.stanbol.launchers.kres</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Apache Stanbol KReS Sling-based standalone launcher</name>
+	<name>Apache Stanbol Launcher - KReS</name>
 	<description>Runnable jar that runs the KReS configuration</description>
     <scm>
         <connection>

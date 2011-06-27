@@ -13,7 +13,7 @@
   <artifactId>org.apache.stanbol.launchers.full</artifactId>
   <packaging>jar</packaging>
 
-  <name>Apache Stanbol Enhancer Sling-based standalone launcher</name>
+  <name>Apache Stanbol Launcher - Full</name>
   <description>Runnable jar that runs the full Stanbol configuration</description>
 
   <scm>
