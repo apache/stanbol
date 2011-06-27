@@ -50,6 +50,8 @@ public class FactsResource extends BaseStanbolResource {
         if (validationResponse != null) {
             return validationResponse;
         }
+        
+        logger.info("Request for getting existing fact schema {}", factSchemaURN);
 
         FactSchema factSchema = this.factStore.getFactSchema(factSchemaURN);
         if (factSchema == null) {
@@ -70,6 +72,8 @@ public class FactsResource extends BaseStanbolResource {
             return validationResponse;
         }
 
+        logger.info("Request for putting new fact schema {}", factSchemaURN);
+        
         JsonLdProfile profile = null;
         try {
             profile = JsonLdProfileParser.parseProfile(jsonLdProfileString);

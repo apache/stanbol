@@ -86,7 +86,9 @@ public class FactStoreWebFragment implements WebFragment {
     
     @Override
     public List<ScriptResource> getScriptResources() {
-        return Collections.emptyList();
+        List<ScriptResource> scripts = new ArrayList<ScriptResource>();
+        scripts.add(new ScriptResource("text/javascript", "scripts/json2.js", this, 10));
+        return scripts;
     }
 
     @Override
