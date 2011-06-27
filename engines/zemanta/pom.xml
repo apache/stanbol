@@ -52,6 +52,11 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>org.apache.clerezza.rdf.core</artifactId>
       <scope>provided</scope>
