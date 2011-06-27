@@ -13,7 +13,7 @@
   <artifactId>org.apache.stanbol.launchers.stateless</artifactId>
   <packaging>jar</packaging>
 
-  <name>Apache Stanbol Enhancer Sling-based standalone launcher - stateless version</name>
+  <name>Apache Stanbol Launcher - Stateless</name>
   <description>Runnable jar that runs the stateless Stanbol configuration</description>
 
   <scm>
