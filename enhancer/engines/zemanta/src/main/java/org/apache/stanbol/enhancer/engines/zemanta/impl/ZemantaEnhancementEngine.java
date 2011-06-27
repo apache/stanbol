@@ -25,6 +25,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_EN
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_CATEGORY;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
@@ -32,6 +33,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHAN
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -52,14 +54,18 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.stanboltools.offline.OnlineMode;
 import org.apache.stanbol.enhancer.engines.zemanta.ZemantaOntologyEnum;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
+import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +89,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(immediate = true, metatype = true)
 @Service
-public class ZemantaEnhancementEngine implements EnhancementEngine {
+public class ZemantaEnhancementEngine implements EnhancementEngine, ServiceProperties {
 
     @Property
     public static final String API_KEY_PROPERTY = "org.apache.stanbol.enhancer.engines.zemanta.key";
@@ -96,17 +102,29 @@ public class ZemantaEnhancementEngine implements EnhancementEngine {
 
     private static final Logger log = LoggerFactory.getLogger(ZemantaEnhancementEngine.class);
 
-    private static String key;
+    /**
+     * The default value for the Execution of this Engine. Currently set to
+     * {@link ServiceProperties#ORDERING_EXTRACTION_ENHANCEMENT} + 10. It should run after Metaxa and LangId.
+     */
+    public static final Integer defaultOrder = ServiceProperties.ORDERING_EXTRACTION_ENHANCEMENT + 10;
+
+    private String key;
 
     public LiteralFactory literalFactory;
 
     protected BundleContext bundleContext;
+    /**
+     * Only activate this engine in online mode
+     */
+    @SuppressWarnings("unused")
+    @Reference
+    private OnlineMode onlineMode;
 
     @Activate
-    protected void activate(ComponentContext ce) throws IOException {
+    protected void activate(ComponentContext ce) throws IOException,ConfigurationException {
         bundleContext = ce.getBundleContext();
         key = (String)ce.getProperties().get(API_KEY_PROPERTY);
-        
+        checkConfig();
         //init the LiteralFactory
         literalFactory = LiteralFactory.getInstance();
     }
@@ -114,36 +132,67 @@ public class ZemantaEnhancementEngine implements EnhancementEngine {
     @Deactivate
     protected void deactivate(ComponentContext ce) {
         literalFactory = null;
+        key = null;
+        bundleContext = null;
     }
-    
-    private void checkConfig() {
+    /**
+     * Checks the configuration of the {@link #API_KEY_PROPERTY}
+     * @throws ConfigurationException if the Zemanta key is not configured
+     */
+    private void checkConfig() throws ConfigurationException {
         if(key == null || key.trim().length() == 0) {
-            throw new IllegalStateException(getClass().getSimpleName() 
-                    + ": please configure a Zemanta key to use this engine, or "
-                    + "disable this service (" + getClass().getName() + ") to avoid this error"
-                    );
+            throw new ConfigurationException(API_KEY_PROPERTY,String.format(
+                "%s : please configure a Zemanta key to use this engine (e.g. by" +
+                "using the 'Configuration' tab of the Apache Felix Web Console).",
+                getClass().getSimpleName()));
         }
     }
 
     public int canEnhance(ContentItem ci) {
-        checkConfig();
-        String mimeType = ci.getMimeType().split(";", 2)[0];
-        if (TEXT_PLAIN_MIMETYPE.equalsIgnoreCase(mimeType)) {
+        if(isTextOrHtml(ci)){
             return ENHANCE_SYNCHRONOUS;
-        }
-        if (TEXT_HTML_MIMETYPE.equalsIgnoreCase(mimeType)) {
-            return ENHANCE_SYNCHRONOUS;
+        } else {
+            // check for existence of textual content in metadata
+            UriRef subj = new UriRef(ci.getId());
+            Iterator<Triple> it = ci.getMetadata().filter(subj, NIE_PLAINTEXTCONTENT, null);
+            if (it.hasNext()) {
+                return ENHANCE_SYNCHRONOUS;
+            }
         }
         return CANNOT_ENHANCE;
     }
 
+    /**
+     * @param ci
+     */
+    private boolean isTextOrHtml(ContentItem ci) {
+        String mimeType = ci.getMimeType().split(";", 2)[0];
+        if (TEXT_PLAIN_MIMETYPE.equalsIgnoreCase(mimeType)) {
+            return true;
+        } else if (TEXT_HTML_MIMETYPE.equalsIgnoreCase(mimeType)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public void computeEnhancements(ContentItem ci) throws EngineException {
-        checkConfig();
         String text;
-        try {
-            text = IOUtils.toString(ci.getStream(),"UTF-8");
-        } catch (IOException e) {
-            throw new InvalidContentException(this, ci, e);
+        if(isTextOrHtml(ci)){
+            try {
+                text = IOUtils.toString(ci.getStream(),"UTF-8");
+            } catch (IOException e) {
+                throw new InvalidContentException(this, ci, e);
+            }
+        } else {
+            //TODO: change that as soon the Adapter Pattern is used for multiple
+            // mimetype support.
+            StringBuilder textBuilder = new StringBuilder();
+            Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getId()), NIE_PLAINTEXTCONTENT, null);
+            while (it.hasNext()) {
+                textBuilder.append(it.next().getObject());
+            }
+            text = textBuilder.toString();
         }
         if (text.trim().length() == 0) {
             log.warn("nothing to enhance");
@@ -164,7 +213,13 @@ public class ZemantaEnhancementEngine implements EnhancementEngine {
         processRecognition(results, graph, text, ciId);
         processCategories(results, graph, ciId);
     }
-
+    public Map<String, Object> getServiceProperties() {
+        // TODO Auto-generated method stub
+        return Collections.unmodifiableMap(Collections.singletonMap(
+                ENHANCEMENT_ENGINE_ORDERING,
+                (Object) defaultOrder));
+    }
+    
     protected void processCategories(MGraph results, MGraph enhancements, UriRef ciId) {
         Iterator<Triple> categories = results.filter(null, RDF_TYPE, ZemantaOntologyEnum.Category.getUri());
         while (categories.hasNext()) {
