@@ -71,6 +71,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.stanboltools.offline.OnlineMode;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -78,6 +79,7 @@ import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,6 +150,12 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
 
     @Reference
     TcManager tcManager;
+    /**
+     * Only activate this engine in online mode
+     */
+    @SuppressWarnings("unused")
+    @Reference
+    private OnlineMode onlineMode;
 
     BundleContext bundleContext;
 
@@ -165,7 +173,13 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
         return licenseKey;
     }
 
-    public void setLicenseKey(String licenseKey) {
+    public void setLicenseKey(String licenseKey) throws ConfigurationException {
+        if(licenseKey == null || licenseKey.isEmpty()){
+            throw new ConfigurationException(LICENSE_KEY, String.format(
+                "%s : please configure a OpenCalais License key to use this engine (e.g. by" +
+                "using the 'Configuration' tab of the Apache Felix Web Console).",
+                getClass().getSimpleName()));
+        }
         this.licenseKey = licenseKey;
     }
 
@@ -173,7 +187,13 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
         return calaisUrl;
     }
 
-    public void setCalaisUrl(String calaisUrl) {
+    public void setCalaisUrl(String calaisUrl) throws ConfigurationException {
+        if(calaisUrl == null || calaisUrl.isEmpty()){
+            throw new ConfigurationException(CALAIS_URL_KEY, String.format(
+                "%s : please configure the URL of the OpenCalais Webservice (e.g. by" +
+                "using the 'Configuration' tab of the Apache Felix Web Console).",
+                getClass().getSimpleName()));
+        }
         this.calaisUrl = calaisUrl;
     }
 
@@ -221,11 +241,12 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
     }
 
     public int canEnhance(ContentItem ci) throws EngineException {
-        if (getLicenseKey() == null || getLicenseKey().trim().length() == 0) {
-            //do nothing if no license key is defined
-            log.warn("No license key defined. The engine will not work!");
-            return CANNOT_ENHANCE;
-        }
+        //Engine will no longer activate if no license key is set
+//        if (getLicenseKey() == null || getLicenseKey().trim().length() == 0) {
+//            //do nothing if no license key is defined
+//            log.warn("No license key defined. The engine will not work!");
+//            return CANNOT_ENHANCE;
+//        }
         UriRef subj = new UriRef(ci.getId());
         String mimeType = ci.getMimeType().split(";", 2)[0];
         if (SUPPORTED_MIMETYPES.contains(mimeType.toLowerCase())) {
@@ -594,7 +615,7 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
      *
      * @param ce the {@link ComponentContext}
      */
-    protected void activate(@SuppressWarnings("unused") ComponentContext ce) {
+    protected void activate(ComponentContext ce) throws ConfigurationException {
         if (ce != null) {
             this.bundleContext = ce.getBundleContext();
             //TODO initialize Extractor
