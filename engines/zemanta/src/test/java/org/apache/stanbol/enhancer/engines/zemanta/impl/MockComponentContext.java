@@ -25,7 +25,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentInstance;
 
-public class MockComponentContext implements ComponentContext {
+class MockComponentContext implements ComponentContext {
 
     protected final Dictionary<String, Object> properties;
 

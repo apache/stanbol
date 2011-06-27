@@ -51,6 +51,7 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +85,7 @@ public class ZemantaEnhancementEngineTest {
     private static final String ZEMANTA_TEST_APPLICATION_KEY = "2qsvcvkut8rhnqbhm35znn76";
 
     @BeforeClass
-    public static void setUpServices() throws IOException {
+    public static void setUpServices() throws IOException, ConfigurationException {
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
         properties.put(API_KEY_PROPERTY, ZEMANTA_TEST_APPLICATION_KEY);
         MockComponentContext context = new MockComponentContext(properties);
