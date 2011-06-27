@@ -105,7 +105,7 @@ public class NEREngineCore implements EnhancementEngine {
 
     protected TokenNameFinderModel buildNameModel(String name, UriRef typeUri) throws IOException {
         //String modelRelativePath = String.format("en-ner-%s.bin", name);
-        TokenNameFinderModel model = openNLP.buildNameModel(name, "en");
+        TokenNameFinderModel model = openNLP.getNameModel(name, "en");
         // register the name finder instances for matching owl class
 //        entityTypes.put(name, new Object[] {typeUri, model});
         return model;
@@ -113,7 +113,7 @@ public class NEREngineCore implements EnhancementEngine {
 
     public void computeEnhancements(ContentItem ci) throws EngineException {
         String mimeType = ci.getMimeType().split(";", 2)[0];
-        String text = "";
+        String text;
         if (TEXT_PLAIN_MIMETYPE.equals(mimeType)) {
             try {
                 text = IOUtils.toString(ci.getStream(),"UTF-8");
@@ -121,10 +121,14 @@ public class NEREngineCore implements EnhancementEngine {
                 throw new InvalidContentException(this, ci, e);
             }
         } else {
+            //TODO: change that as soon the Adapter Pattern is used for multiple
+            // mimetype support.
+            StringBuilder textBuilder = new StringBuilder();
             Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getId()), NIE_PLAINTEXTCONTENT, null);
             while (it.hasNext()) {
-                text += it.next().getObject();
+                textBuilder.append(it.next().getObject());
             }
+            text = textBuilder.toString();
         }
         if (text.trim().length() == 0) {
             // TODO: make the length of the data a field of the ContentItem
@@ -139,7 +143,7 @@ public class NEREngineCore implements EnhancementEngine {
             for (Map.Entry<String,UriRef> type : entityTypes.entrySet()) {
                 String typeLabel = type.getKey();
                 UriRef typeUri = type.getValue();
-                TokenNameFinderModel nameFinderModel = openNLP.buildNameModel(typeLabel, "en");
+                TokenNameFinderModel nameFinderModel = openNLP.getNameModel(typeLabel, "en");
                 findNamedEntities(ci, text, typeUri, typeLabel, nameFinderModel);
             }
         } catch (Exception e) {
@@ -257,7 +261,7 @@ public class NEREngineCore implements EnhancementEngine {
      */
     private TokenNameFinderModel getNameModel(String type,String language) {
         try {
-            TokenNameFinderModel model = openNLP.buildNameModel(type, language);
+            TokenNameFinderModel model = openNLP.getNameModel(type, language);
             if(model != null){
                 return model;
             } else {
@@ -278,7 +282,7 @@ public class NEREngineCore implements EnhancementEngine {
     }
     private SentenceModel getSentenceModel(String language) {
         try {
-            SentenceModel model = openNLP.buildSentenceModel(language);
+            SentenceModel model = openNLP.getSentenceModel(language);
             if(model != null){
                 return model;
             } else {
