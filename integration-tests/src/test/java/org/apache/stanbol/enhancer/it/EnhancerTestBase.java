@@ -71,7 +71,7 @@ public class EnhancerTestBase extends StanbolTestBase {
                     "org.apache.stanbol.*MetaxaEngine",
                     "org.apache.stanbol.*LangIdEnhancementEngine",
                     "org.apache.stanbol.*NamedEntityExtractionEnhancementEngine",
-                    "org.apache.stanbol.*OpenCalaisEngine",
+                    //"org.apache.stanbol.*OpenCalaisEngine", not available in offline mode
                     "org.apache.stanbol.*EntityMentionEnhancementEngine",
                     "org.apache.stanbol.*CachingDereferencerEngine"
                     //removed because not available in offline mode
