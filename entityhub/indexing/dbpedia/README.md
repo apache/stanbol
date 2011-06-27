@@ -8,7 +8,11 @@ If not yet build by the built process of the entityhub call
 
     mvn install
 
-in this directory.
+in this directory and than
+
+    mvn -o assembly:single
+    
+to build the jar with all the dependencies used later for indexing.
 
 If the build succeeds go to the /target directory and copy the
 
