@@ -473,6 +473,25 @@
       <version>0.9-SNAPSHOT</version>
     </bundle>
   </startLevel>
+ 
+  <!-- KReS -->
+  <startLevel level="22">
+    <bundle>
+	  <groupId>org.apache.stanbol</groupId>
+	  <artifactId>org.apache.stanbol.owl</artifactId>
+	  <version>0.9-SNAPSHOT</version>
+    </bundle>
+	<bundle>
+	  <groupId>org.apache.stanbol</groupId>
+	  <artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
+	  <version>0.9-SNAPSHOT</version>
+    </bundle>
+	<bundle>
+   	  <groupId>org.apache.stanbol</groupId>
+	  <artifactId>org.apache.stanbol.ontologymanager.web</artifactId>
+	  <version>0.9-SNAPSHOT</version>
+	</bundle>
+ </startLevel>
   
   <!-- Persistence Store Bundles
   <startLevel level="22">
