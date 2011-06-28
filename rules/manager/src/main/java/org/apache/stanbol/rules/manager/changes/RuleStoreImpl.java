@@ -67,18 +67,25 @@ import org.slf4j.LoggerFactory;
 @Service(RuleStore.class)
 public class RuleStoreImpl implements RuleStore {
 
+    public static final String _RULE_ONTOLOGY_DEFAULT = "";
+
+    public static final String _RULE_NAMESPACE_DEFAULT = "http://kres.iks-project.eu/ontology/meta/rmi.owl#";
+
     @Reference
     ONManager onManager;
 
-    @Property(value = "")
-    public static final String RULE_ONTOLOGY = "rule.ontology";
+    @Property(name = RuleStore.RULE_ONTOLOGY, value = _RULE_ONTOLOGY_DEFAULT)
+    private String ruleOntologyLocation;
 
-    @Property(value = "http://kres.iks-project.eu/ontology/meta/rmi.owl#")
-    public static final String RULE_ONTOLOGY_NAMESPACE = "rule.ontology.namespace";
+    @Property(name = RuleStore.RULE_NAMESPACE, value = _RULE_NAMESPACE_DEFAULT)
+    private String ruleNS;
+
+    // @Property(value = "http://kres.iks-project.eu/ontology/meta/rmi.owl#")
+    // public static final String RULE_ONTOLOGY_NAMESPACE = "rule.ontology.namespace";
 
     private final Logger log = LoggerFactory.getLogger(getClass());
     private OWLOntology owlmodel;
-    private String file;
+
     private String alias;
     private RuleStore ruleStore;
     private File owlfile;
@@ -93,21 +100,20 @@ public class RuleStoreImpl implements RuleStore {
      * Component Runtime support.
      * <p>
      * DO NOT USE to manually create instances - the RuleStoreImpl instances do need to be configured! YOU
-     * NEED TO USE {@link #RuleStoreImpl(ONManager, Dictionary)} or its overloads, to parse the
-     * configuration and then initialise the rule store if running outside a OSGI environment.
+     * NEED TO USE {@link #RuleStoreImpl(ONManager, Dictionary)} or its overloads, to parse the configuration
+     * and then initialise the rule store if running outside a OSGI environment.
      */
-    public RuleStoreImpl() {
+    public RuleStoreImpl() {}
 
-    /*
-     * The constructor should be empty as some issue derives from a filled one. The old version can be invoked
-     * with RuleStoreImpl(null)
+    /**
+     * To be invoked by non-OSGi environments.
+     * 
+     * @param configuration
      */
-    }
-
     public RuleStoreImpl(ONManager onm, Dictionary<String,Object> configuration) {
         this();
         this.onManager = onm;
-        //activate(configuration);
+        // activate(configuration);
     }
 
     /**
@@ -120,8 +126,9 @@ public class RuleStoreImpl implements RuleStore {
         /*
          * FIXME : This won't work if the activate() method is called at the end of the constructor, like it
          * is for other components. Constructors should not override activate().
+         * 
+         * Normally, this recursive constructor call should also invoke activate()
          */
-        // This recursive constructor call will also invoke activate()
         this(onm, configuration);
 
         if (filepath.isEmpty()) {
@@ -130,30 +137,30 @@ public class RuleStoreImpl implements RuleStore {
                 // Obsolete code
                 Properties configProps = System.getProperties();
                 String userdir = configProps.getProperty("user.dir");
-                
-                String respath = "KReSConf/";//"src/main/resources/";
-                String filepath2 ="rmi_config.owl"; //"RuleOntology/rmi_config.owl";
-//                userdir = userdir.substring(0, userdir.lastIndexOf("kres.") + 5) + "rules/";
-             
+
+                String respath = "KReSConf/";// "src/main/resources/";
+                String filepath2 = "rmi_config.owl"; // "RuleOntology/rmi_config.owl";
+                // userdir = userdir.substring(0, userdir.lastIndexOf("kres.") + 5) + "rules/";
+
                 userdir += "/";
-                
-                this.file = userdir + respath + filepath2;
-                this.owlfile = new File(file);
+
+                this.ruleOntologyLocation = userdir + respath + filepath2;
+                this.owlfile = new File(ruleOntologyLocation);
                 owlfile.setWritable(true);
 
-//                InputStream is = this.getClass().getResourceAsStream("/RuleOntology/rmi_config.owl");
-//                URL url = this.getClass().getResource("/RuleOntology/rmi_config.owl");
-//                System.err.println("DIOCANE "+url.toURI());
-//               this.owlfile = new File(url.toURI());
-//               owlfile.setWritable(true);
-                
+                // InputStream is = this.getClass().getResourceAsStream("/RuleOntology/rmi_config.owl");
+                // URL url = this.getClass().getResource("/RuleOntology/rmi_config.owl");
+                // System.err.println("DIOCANE "+url.toURI());
+                // this.owlfile = new File(url.toURI());
+                // owlfile.setWritable(true);
+
                 OWLOntologyManager owlmanager = OWLManager.createOWLOntologyManager();
-                
+
                 // FIXME : awful
                 URL u = getClass().getResource("/");
                 OWLOntologyIRIMapper mapper = new AutoIRIMapper(new File(u.toURI()), true);
                 owlmanager.addIRIMapper(mapper);
-                
+
                 this.owlmodel = owlmanager.loadOntology(IRI.create(owlfile));
 
             } catch (Exception io) {
@@ -161,8 +168,8 @@ public class RuleStoreImpl implements RuleStore {
                 this.owlmodel = null;
             }
         } else {
-            this.file = filepath;
-            this.owlfile = new File(file);
+            this.ruleOntologyLocation = filepath;
+            this.owlfile = new File(ruleOntologyLocation);
             owlfile.setWritable(true);
             OWLOntologyManager owlmanager = OWLManager.createOWLOntologyManager();
             try {
@@ -238,31 +245,42 @@ public class RuleStoreImpl implements RuleStore {
     }
 
     protected void activate(Dictionary<String,Object> configuration) {
-        
-        this.file = (String) configuration.get(RULE_ONTOLOGY);
-        this.ruleOntologyNS = (String) configuration.get(RULE_ONTOLOGY_NAMESPACE);
-        
-        if (file == null || file.equals("")) {
+
+        // TODO This bit is the "good" code, and any non-default constructor should call it.
+        ruleOntologyLocation = (String) configuration.get(RuleStore.RULE_ONTOLOGY);
+        if (ruleOntologyLocation == null) ruleOntologyLocation = _RULE_ONTOLOGY_DEFAULT;
+
+        ruleOntologyNS = (String) configuration.get(RuleStore.RULE_NAMESPACE);
+        if (ruleOntologyNS == null) ruleOntologyNS = _RULE_NAMESPACE_DEFAULT;
+
+        // this.file = (String) configuration.get(RULE_ONTOLOGY);
+        // this.ruleOntologyNS = (String) configuration.get(RULE_NAMESPACE);
+
+        // This about KReSConf is no good
+        if (ruleOntologyLocation == null || ruleOntologyLocation.equals("")) {
             String sep = System.getProperty("file.separator");
-            String filedir = System.getProperty("user.dir")+sep+"KReSConf"+sep+"rmi_config.owl";
-            
-            if((new File(filedir)).exists()){
-                this.file = filedir;
+            String filedir = System.getProperty("user.dir") + sep + "KReSConf" + sep + "rmi_config.owl";
+
+            if ((new File(filedir)).exists()) {
+                this.ruleOntologyLocation = filedir;
                 try {
-                    owlmodel = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(new File(file));
+                    owlmodel = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(
+                        new File(ruleOntologyLocation));
                 } catch (OWLOntologyCreationException e) {
                     log.error("Cannot create the ontology " + filedir.toString(), e);
                 } catch (Exception e) {
                     log.error("1 Rule Store: no rule ontology available.");
                 }
-            }else{    
-                IRI inputontology = IRI.create("http://ontologydesignpatterns.org/ont/iks/kres/rmi_config.owl");
+            } else {
+                IRI inputontology = IRI
+                        .create("http://ontologydesignpatterns.org/ont/iks/kres/rmi_config.owl");
                 try {
-                    owlmodel = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(inputontology);
+                    owlmodel = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(
+                        inputontology);
                 } catch (OWLOntologyCreationException e) {
                     log.error("Cannot create the ontology " + inputontology.toString(), e);
                 } catch (Exception e) {
-                log.error("Rule Store: no rule ontology available.");
+                    log.error("Rule Store: no rule ontology available.");
                 }
             }
 
@@ -270,11 +288,11 @@ public class RuleStoreImpl implements RuleStore {
 
                 File dirs = new File("./KReSConf");
                 if (!dirs.exists()) dirs.mkdir();
-                file = "./KReSConf/rmi_config.owl";
+                ruleOntologyLocation = "./KReSConf/rmi_config.owl";
 
                 FileOutputStream fos;
                 try {
-                    fos = new FileOutputStream(file);
+                    fos = new FileOutputStream(ruleOntologyLocation);
                     OWLManager.createOWLOntologyManager().saveOntology(owlmodel,
                         owlmodel.getOWLOntologyManager().getOntologyFormat(owlmodel), fos);
                 } catch (FileNotFoundException e) {
@@ -284,7 +302,7 @@ public class RuleStoreImpl implements RuleStore {
                 }
             }
         } else {
-            File pathIri = new File(file);
+            File pathIri = new File(ruleOntologyLocation);
             try {
                 owlmodel = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(pathIri);
             } catch (OWLOntologyCreationException e) {
@@ -439,7 +457,7 @@ public class RuleStoreImpl implements RuleStore {
      */
     @Override
     public String getFilePath() {
-        return this.file;
+        return this.ruleOntologyLocation;
     }
 
     /**
@@ -451,11 +469,12 @@ public class RuleStoreImpl implements RuleStore {
     public void saveOntology() {
         try {
             FileOutputStream fos;
-            if (this.file.isEmpty()) {
+            if (this.ruleOntologyLocation.isEmpty()) {
                 String sep = System.getProperty("file.separator");
-                this.file = System.getProperty("user.dir")+sep+"KReSConf"+sep+"rmi_config.owl";
+                this.ruleOntologyLocation = System.getProperty("user.dir") + sep + "KReSConf" + sep
+                                            + "rmi_config.owl";
                 try {
-                    fos = new FileOutputStream(file);
+                    fos = new FileOutputStream(ruleOntologyLocation);
                     OWLManager.createOWLOntologyManager().saveOntology(owlmodel,
                         owlmodel.getOWLOntologyManager().getOntologyFormat(owlmodel), fos);
                 } catch (FileNotFoundException e) {
@@ -464,7 +483,7 @@ public class RuleStoreImpl implements RuleStore {
                     log.error("Cannot store the ontology ", e);
                 }
             } else {
-                fos = new FileOutputStream(file);
+                fos = new FileOutputStream(ruleOntologyLocation);
                 this.owlmodel.getOWLOntologyManager().saveOntology(owlmodel, fos);
             }
 
@@ -567,8 +586,8 @@ public class RuleStoreImpl implements RuleStore {
 
         /**
          * Add the rule to the recipe in the rule ontology managed by the RuleStore. First we define the
-         * object property hasRule and then we add the literal that contains the rule in Rule Syntax to
-         * the recipe individual.
+         * object property hasRule and then we add the literal that contains the rule in Rule Syntax to the
+         * recipe individual.
          */
         String ruleNS = "http://kres.iks-project.eu/ontology/meta/rmi.owl#";
         OWLObjectProperty hasRule = factory.getOWLObjectProperty(IRI.create(ruleNS + "hasRule"));

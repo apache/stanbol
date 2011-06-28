@@ -7,37 +7,46 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
-
 public interface RuleStore {
 
-	OWLOntology getOntology();
+    /**
+     * The key used to configure default namespace of Stanbol rules.
+     */
+    String RULE_NAMESPACE = "org.apache.stanbol.rules.base.rule_namespace";
 
-	void setStore(OWLOntology owl);
-	
-	Set<IRI> listIRIRecipes();
-	
-	RecipeList listRecipes();
-	
-	Recipe getRecipe(IRI recipe) throws NoSuchRecipeException;
+    /**
+     * The key used to configure the path of the default rule ontology.
+     */
+    String RULE_ONTOLOGY = "org.apache.stanbol.rules.base.rule_ontology";
+
+    boolean addRecipe(IRI recipeIRI, String recipeDescription);
+
+    Recipe addRuleToRecipe(Recipe recipe, String kReSRuleInKReSSyntax);
+
+    Recipe addRuleToRecipe(String recipeID, String kReSRuleInKReSSyntax) throws NoSuchRecipeException;
+
+    void createRecipe(String recipeID, String rulesInKReSSyntax);
 
     String getFilePath();
 
-    void saveOntology() throws OWLOntologyStorageException;
-    
-    String getRuleStoreNamespace();
-    
-    boolean addRecipe(IRI recipeIRI, String recipeDescription);
-    
-    Recipe addRuleToRecipe(String recipeID, String kReSRuleInKReSSyntax) throws NoSuchRecipeException;
-    
-    Recipe addRuleToRecipe(Recipe recipe, String kReSRuleInKReSSyntax);
-    
-    void createRecipe(String recipeID, String rulesInKReSSyntax);
+    OWLOntology getOntology();
 
-    boolean removeRecipe(Recipe recipe);
+    Recipe getRecipe(IRI recipe) throws NoSuchRecipeException;
+
+    String getRuleStoreNamespace();
+
+    Set<IRI> listIRIRecipes();
+
+    RecipeList listRecipes();
 
     boolean removeRecipe(IRI recipeIRI);
 
+    boolean removeRecipe(Recipe recipe);
+
     boolean removeRule(Rule rule);
-	
+
+    void saveOntology() throws OWLOntologyStorageException;
+
+    void setStore(OWLOntology owl);
+
 }
