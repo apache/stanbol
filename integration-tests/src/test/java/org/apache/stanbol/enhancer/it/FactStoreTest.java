@@ -6,6 +6,7 @@ import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.stanbol.commons.testing.http.Request;
 import org.apache.stanbol.commons.testing.stanbol.StanbolTestBase;
@@ -139,6 +140,125 @@ public class FactStoreTest extends StanbolTestBase {
         Assert.assertEquals(expected, actual);
     }
 
+    @Test
+    public void postSingleFact() throws Exception {
+        Request r1 = builder
+                .buildOtherRequest(
+                    new HttpPut(builder.buildUrl("/factstore/facts/"
+                                                 + encodeURI("http://iks-project.eu/ont/employeeOf1"))))
+                .withContent(
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"#types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
+                .withHeader("Accept", "application/json");
+
+        executor.execute(r1).assertStatus(201);
+
+        Request r2 = builder
+                .buildOtherRequest(new HttpPost(builder.buildUrl("/factstore/facts/")))
+                .withContent(
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:employeeOf1\",\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}}")
+                .withHeader("Accept", "application/json");
+
+        executor.execute(r2).assertStatus(200);
+    }
+    
+    @Test
+    public void postSingleFactNeg() throws Exception {
+        Request r1 = builder
+                .buildOtherRequest(
+                    new HttpPut(builder.buildUrl("/factstore/facts/"
+                                                 + encodeURI("http://iks-project.eu/ont/employeeOf1Neg"))))
+                .withContent(
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"#types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
+                .withHeader("Accept", "application/json");
+
+        executor.execute(r1).assertStatus(201);
+
+        Request r2 = builder
+                .buildOtherRequest(new HttpPost(builder.buildUrl("/factstore/facts/")))
+                .withContent(
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:employeeOf1Wrong\",\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}}")
+                .withHeader("Accept", "application/json");
+
+        executor.execute(r2).assertStatus(500);
+    }
+    
+    @Test
+    public void postSingleFactNeg2() throws Exception {
+        Request r1 = builder
+                .buildOtherRequest(
+                    new HttpPut(builder.buildUrl("/factstore/facts/"
+                                                 + encodeURI("http://iks-project.eu/ont/employeeOf2Neg"))))
+                .withContent(
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"#types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
+                .withHeader("Accept", "application/json");
+
+        executor.execute(r1).assertStatus(201);
+
+        Request r2 = builder
+                .buildOtherRequest(new HttpPost(builder.buildUrl("/factstore/facts/")))
+                .withContent(
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:employeeOf2Neg\",\"people\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}}")
+                .withHeader("Accept", "application/json");
+
+        executor.execute(r2).assertStatus(500);
+    }
+
+    @Test
+    public void postMultiFactsMultiTypes() throws Exception {
+        Request r1 = builder
+                .buildOtherRequest(
+                    new HttpPut(builder.buildUrl("/factstore/facts/"
+                                                 + encodeURI("http://iks-project.eu/ont/employeeOf2"))))
+                .withContent(
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"#types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
+                .withHeader("Accept", "application/json");
+        executor.execute(r1).assertStatus(201);
+
+        Request r2 = builder
+                .buildOtherRequest(
+                    new HttpPut(builder.buildUrl("/factstore/facts/"
+                                                 + encodeURI("http://iks-project.eu/ont/friendOf2"))))
+                .withContent(
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"#types\":{\"person\":\"iks:person\",\"friend\":\"iks:person\"}}}")
+                .withHeader("Accept", "application/json");
+        executor.execute(r2).assertStatus(201);
+
+        Request r3 = builder
+                .buildOtherRequest(new HttpPost(builder.buildUrl("/factstore/facts/")))
+                .withContent(
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@\":[{\"@profile\":\"iks:employeeOf2\",\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}},{\"@profile\":\"iks:friendOf2\",\"person\":{\"@iri\":\"upb:bnagel\"},\"friend\":{\"@iri\":\"upb:fchrist\"}}]}")
+                .withHeader("Accept", "application/json");
+        executor.execute(r3).assertStatus(200);
+    }
+
+    @Test
+    public void postMultiFactsMultiTypesNeg() throws Exception {
+        Request r1 = builder
+                .buildOtherRequest(
+                    new HttpPut(builder.buildUrl("/factstore/facts/"
+                                                 + encodeURI("http://iks-project.eu/ont/employeeOf3Neg"))))
+                .withContent(
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"#types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
+                .withHeader("Accept", "application/json");
+        executor.execute(r1).assertStatus(201);
+
+        Request r2 = builder
+                .buildOtherRequest(
+                    new HttpPut(builder.buildUrl("/factstore/facts/"
+                                                 + encodeURI("http://iks-project.eu/ont/friendOf3Neg"))))
+                .withContent(
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"#types\":{\"person\":\"iks:person\",\"friend\":\"iks:person\"}}}")
+                .withHeader("Accept", "application/json");
+        executor.execute(r2).assertStatus(201);
+
+        Request r3 = builder
+                .buildOtherRequest(new HttpPost(builder.buildUrl("/factstore/facts/")))
+                .withContent(
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@\":[{\"@profile\":\"iks:employeeOf3NegWrong\",\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}},{\"@profile\":\"iks:friendOf3Neg\",\"person\":{\"@iri\":\"upb:bnagel\"},\"friend\":{\"@iri\":\"upb:fchrist\"}}]}")
+                .withHeader("Accept", "application/json");
+        executor.execute(r3).assertStatus(500);
+    }
+    
     private String encodeURI(String s) {
         StringBuilder o = new StringBuilder();
         for (char ch : s.toCharArray()) {
