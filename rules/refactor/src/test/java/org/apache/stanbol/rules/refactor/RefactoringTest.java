@@ -3,6 +3,7 @@ package org.apache.stanbol.rules.refactor;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -39,7 +40,10 @@ import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.semanticweb.owlapi.util.AutoIRIMapper;
 
 public class RefactoringTest {
 
@@ -48,17 +52,25 @@ public class RefactoringTest {
     static IRI recipeIRI;
 
     @BeforeClass
-    public static void setup() {
+    public static void setup() throws Exception {
 
         recipeIRI = IRI.create("http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyTestRecipe");
 
         InputStream ontologyStream = RefactoringTest.class
                 .getResourceAsStream("/META-INF/test/testKReSOnt.owl");
-        InputStream recipeStream = RefactoringTest.class.getResourceAsStream("/META-INF/test/rmi.owl");
+        InputStream recipeStream = RefactoringTest.class.getResourceAsStream("/META-INF/test/rmi_config.owl");
 
-        try {
-            final OWLOntology recipeModel = OWLManager.createOWLOntologyManager()
+            OWLOntologyIRIMapper map1 = new AutoIRIMapper(new File(RefactoringTest.class.getResource("/META-INF/test/").toURI()), false);
+            
+            OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
+            mgr.addIRIMapper(map1);
+            
+            final OWLOntology recipeModel = mgr
                     .loadOntologyFromOntologyDocument(recipeStream);
+            
+             mgr = OWLManager.createOWLOntologyManager();
+            mgr.addIRIMapper(map1);
+            
             ontology = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(ontologyStream);
 
             ruleStore = new RuleStore() {
@@ -210,10 +222,7 @@ public class RefactoringTest {
                     throw new UnsupportedOperationException("Not supported yet.");
                 }
             };
-        } catch (OWLOntologyCreationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+
     }
 
     @Test
