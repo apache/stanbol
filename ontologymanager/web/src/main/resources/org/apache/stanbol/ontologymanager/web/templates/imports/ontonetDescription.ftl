@@ -1,1 +1,1 @@
-<#macro view>This is a the implementation of Stanbol Ontonet</#macro>
+<#macro view>A controlled environment for managing ontologies and ontology networks and user sessions managing them.</#macro>
