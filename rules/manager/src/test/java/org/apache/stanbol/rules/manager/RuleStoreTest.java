@@ -26,6 +26,7 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.util.AutoIRIMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,12 +68,13 @@ public class RuleStoreTest {
 	public RuleStore store = null, blankStore = null;
 
     @Test
-    public void testKReSRuleStore(){
+    public void testKReSRuleStore() throws Exception {
         OWLOntology owlmodel = store.getOntology();
 		log.debug("Path for default store config is "
 				+ blankStore.getFilePath());
 		assertNotNull(owlmodel);
             OWLOntologyManager owlmanager = OWLManager.createOWLOntologyManager();
+            owlmanager.addIRIMapper(new AutoIRIMapper(new File("./src/main/resources/RuleOntology/"), false));
 		String src = "";
             try{
 			src = "./src/main/resources/RuleOntology/TestKReSOntologyRules.owl";
@@ -91,7 +93,7 @@ public class RuleStoreTest {
     }
 
     @Test
-    public void testKReSRuleStore_2(){
+    public void testKReSRuleStore_2()  throws Exception {
 		OWLOntology owlmodel = blankStore.getOntology();
 		System.out.println("Path for default store config is "
 				+ blankStore.getFilePath());

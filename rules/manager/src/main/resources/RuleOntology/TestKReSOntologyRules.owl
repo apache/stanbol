@@ -21,7 +21,9 @@
     <Prefix name="" IRI="http://www.w3.org/2002/07/owl#"/>
     <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
     <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <!--
     <Import>http://www.ontologydesignpatterns.org/cp/owl/sequence.owl</Import>
+    -->
     <Declaration>
         <Class IRI="#KReSRule"/>
     </Declaration>

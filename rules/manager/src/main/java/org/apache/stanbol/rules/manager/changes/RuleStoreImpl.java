@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -23,12 +24,12 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
+import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.apache.stanbol.rules.base.api.util.RecipeList;
+import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.apache.stanbol.rules.manager.KB;
 import org.apache.stanbol.rules.manager.parse.RuleParserImpl;
 import org.osgi.service.component.ComponentContext;
@@ -46,8 +47,10 @@ import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.semanticweb.owlapi.util.AutoIRIMapper;
 import org.semanticweb.owlapi.util.OWLEntityRemover;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,7 +148,13 @@ public class RuleStoreImpl implements RuleStore {
 //               owlfile.setWritable(true);
                 
                 OWLOntologyManager owlmanager = OWLManager.createOWLOntologyManager();
-                this.owlmodel = owlmanager.loadOntologyFromOntologyDocument(IRI.create(owlfile));
+                
+                // FIXME : awful
+                URL u = getClass().getResource("/");
+                OWLOntologyIRIMapper mapper = new AutoIRIMapper(new File(u.toURI()), true);
+                owlmanager.addIRIMapper(mapper);
+                
+                this.owlmodel = owlmanager.loadOntology(IRI.create(owlfile));
 
             } catch (Exception io) {
                 log.error(io.getLocalizedMessage(), io);
