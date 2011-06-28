@@ -8,13 +8,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.factstore.api.FactStore;
+import org.apache.stanbol.factstore.model.Fact;
 import org.apache.stanbol.factstore.model.FactSchema;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -132,67 +136,73 @@ public class DerbyFactStore implements FactStore {
 
         return exists;
     }
-    
+
     @Override
     public FactSchema getFactSchema(String factSchemaURN) {
         FactSchema factSchema = null;
-        
+
         Connection con = null;
         try {
             con = DriverManager.getConnection(DB_URL);
-            PreparedStatement ps = null;
-            ResultSet rs = null;
-            try {
-                String selectFactSchema = "SELECT factschemata.name AS schemaURN, factroles.name AS role, factroles.type AS type FROM factroles JOIN factschemata ON ( factschemata.id = factroles.factschema_id ) WHERE factschemata.name = ?";
-                ps = con.prepareStatement(selectFactSchema);
-                ps.setString(1, factSchemaURN);
-                rs = ps.executeQuery();
-                
-                boolean first = true;
-                while (rs.next()) {
-                    if (first) {
-                        factSchema = new FactSchema();
-                        factSchema.setFactSchemaURN(rs.getString("schemaURN"));
-                        first = false;
-                    }
-                    String typeFromDB = rs.getString("type");
-                    String [] types = typeFromDB.split(",");
-                    if (types.length > 0) {
-                        for (String type : types) {
-                            factSchema.addRole(rs.getString("role"), type);
-                        }
-                    }
-                    else {
-                        factSchema.addRole(rs.getString("role"), typeFromDB);
-                    }
-                }
-            } catch (SQLException e) {
-                throw new Exception("Error while selecting fact schema meta data", e);
-            } finally {
-                if (rs != null) {
-                    try {
-                        rs.close();
-                    } catch (SQLException e) {
-                        /* ignore */
-                    }
-                }
-                if (ps != null) {
-                    try {
-                        ps.close();
-                    } catch (SQLException e) {
-                        /* ignore */
-                    }
-                }
-            }
+            factSchema = loadFactSchema(factSchemaURN, con);
         } catch (Exception e) {
-            logger.error("Error while creating fact schema", e);
+            logger.error("Error while loading fact schema", e);
             factSchema = null;
         } finally {
             try {
                 con.close();
             } catch (Throwable t) { /* ignore */}
         }
-        
+
+        return factSchema;
+    }
+
+    private FactSchema loadFactSchema(String factSchemaURN, Connection con) throws Exception {
+        FactSchema factSchema = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            String selectFactSchema = "SELECT factschemata.name AS schemaURN, factroles.name AS role, factroles.type AS type FROM factroles JOIN factschemata ON ( factschemata.id = factroles.factschema_id ) WHERE factschemata.name = ?";
+            ps = con.prepareStatement(selectFactSchema);
+            ps.setString(1, factSchemaURN);
+            rs = ps.executeQuery();
+
+            boolean first = true;
+            while (rs.next()) {
+                if (first) {
+                    factSchema = new FactSchema();
+                    factSchema.setFactSchemaURN(rs.getString("schemaURN"));
+                    first = false;
+                }
+                String typeFromDB = rs.getString("type");
+                String[] types = typeFromDB.split(",");
+                if (types.length > 0) {
+                    for (String type : types) {
+                        factSchema.addRole(rs.getString("role"), type);
+                    }
+                } else {
+                    factSchema.addRole(rs.getString("role"), typeFromDB);
+                }
+            }
+        } catch (SQLException e) {
+            throw new Exception("Error while selecting fact schema meta data", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    /* ignore */
+                }
+            }
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    /* ignore */
+                }
+            }
+        }
+
         return factSchema;
     }
 
@@ -246,7 +256,7 @@ public class DerbyFactStore implements FactStore {
             for (String role : factSchema.getRoles()) {
                 ps.setInt(1, factSchemaId);
                 ps.setString(2, role);
-                
+
                 StringBuilder typeList = new StringBuilder();
                 boolean first = true;
                 for (String type : factSchema.getTypesOfRole(role)) {
@@ -315,6 +325,108 @@ public class DerbyFactStore implements FactStore {
                     statement.close();
                 } catch (Throwable t) { /* ignore */}
             }
+        }
+    }
+
+    @Override
+    public void addFact(Fact fact) throws Exception {
+        Connection con = null;
+        try {
+            con = DriverManager.getConnection(DB_URL);
+            this.addFact(fact, con);
+        } catch (Exception e) {
+            throw new Exception("Error while inserting new fact", e);
+        } finally {
+            try {
+                con.close();
+            } catch (Throwable t) { /* ignore */}
+        }
+
+        logger.info("Fact created for {}", fact.getFactSchemaURN());
+    }
+
+    private void addFact(Fact fact, Connection con) throws Exception {
+        FactSchema factSchema = this.loadFactSchema(fact.getFactSchemaURN(), con);
+        if (factSchema != null) {
+            String factSchemaB64 = Base64.encodeBase64URLSafeString(fact.getFactSchemaURN().getBytes());
+
+            StringBuilder insertSB = new StringBuilder("INSERT INTO ").append(factSchemaB64).append('(');
+            StringBuilder valueSB = new StringBuilder(" VALUES (");
+            Map<String,Integer> roleIndexMap = new HashMap<String,Integer>();
+            boolean firstRole = true;
+            int roleIndex = 0;
+            for (String role : factSchema.getRoles()) {
+                if (!firstRole) {
+                    insertSB.append(',');
+                    valueSB.append(',');
+                }
+                insertSB.append(role);
+                valueSB.append('?');
+                firstRole = false;
+
+                roleIndex++;
+                roleIndexMap.put(role, roleIndex);
+            }
+            insertSB.append(')').append(valueSB).append(')');
+
+            PreparedStatement ps = null;
+            try {
+                ps = con.prepareStatement(insertSB.toString(), PreparedStatement.RETURN_GENERATED_KEYS);
+                for (String role : fact.getRoles()) {
+                    Integer roleIdx = roleIndexMap.get(role);
+                    if (roleIdx == null) {
+                        throw new Exception("Unknown role '" + role + "' for fact schema "
+                                            + fact.getFactSchemaURN());
+                    } else {
+                        ps.setString(roleIdx, role);
+                    }
+                }
+                ps.executeUpdate();
+                ResultSet rs = ps.getGeneratedKeys();
+                int factId = -1;
+                if (rs.next()) {
+                    factId = rs.getInt(1);
+                }
+                if (factId < 0) {
+                    throw new Exception("Could not obtain fact ID after insert");
+                }
+
+                logger.info("Inserted new fact with ID {} into fact schema table {}", factId, factSchemaB64);
+            } catch (SQLException e) {
+                throw new Exception("Error while writing fact into database", e);
+            } finally {
+                if (ps != null) {
+                    try {
+                        ps.close();
+                    } catch (SQLException e) {
+                        /* ignore */
+                    }
+                }
+            }
+
+        } else {
+            throw new Exception("Unknown fact schema " + fact.getFactSchemaURN());
+        }
+    }
+
+    @Override
+    public void addFacts(Set<Fact> factSet) throws Exception {
+        
+        // TODO Improve roll back behavior if single fact of set could not be committed
+
+        Connection con = null;
+        try {
+            con = DriverManager.getConnection(DB_URL);
+            for (Fact fact : factSet) {
+                this.addFact(fact, con);
+                logger.info("Fact created for {}", fact.getFactSchemaURN());
+            }
+        } catch (Exception e) {
+            throw new Exception("Error while inserting new facts", e);
+        } finally {
+            try {
+                con.close();
+            } catch (Throwable t) { /* ignore */}
         }
     }
 

@@ -78,4 +78,34 @@ public class FactsResourceTest {
                     "test2");
         assertTrue(response.getStatus() == Status.CREATED.getStatusCode());
     }
+
+    @Test
+    public void testPostSingleFact() {
+        FactsResource fr = new FactsResource(this.servletContext);
+
+        Response response = fr
+                .postFacts("{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:employeeOf\",\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}}");
+
+        assertTrue(response.getStatus() == Status.OK.getStatusCode());
+    }
+
+    @Test
+    public void testPostMultiFacts() {
+        FactsResource fr = new FactsResource(this.servletContext);
+
+        Response response = fr
+                .postFacts("{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:employeeOf\",\"@\":[{\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}},{\"person\":{\"@iri\":\"upb:fchrist\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}}]}");
+
+        assertTrue(response.getStatus() == Status.OK.getStatusCode());
+    }
+
+    @Test
+    public void testPostMultiFactsDifferentTypes() {
+        FactsResource fr = new FactsResource(this.servletContext);
+
+        Response response = fr
+                .postFacts("{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@\":[{\"@profile\":\"iks:employeeOf\",\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}},{\"@profile\":\"iks:friendOf\",\"person\":{\"@iri\":\"upb:bnagel\"},\"friend\":{\"@iri\":\"upb:fchrist\"}}]}");
+
+        assertTrue(response.getStatus() == Status.OK.getStatusCode());
+    }
 }

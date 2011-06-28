@@ -2,9 +2,12 @@ package org.apache.stanbol.factstore.web.resource;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 
+import java.util.Set;
+
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -14,11 +17,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.stanbol.commons.jsonld.JsonLd;
+import org.apache.stanbol.commons.jsonld.JsonLdParser;
 import org.apache.stanbol.commons.jsonld.JsonLdProfile;
 import org.apache.stanbol.commons.jsonld.JsonLdProfileParser;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.factstore.api.FactStore;
+import org.apache.stanbol.factstore.model.Fact;
 import org.apache.stanbol.factstore.model.FactSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +56,7 @@ public class FactsResource extends BaseStanbolResource {
         if (validationResponse != null) {
             return validationResponse;
         }
-        
+
         logger.info("Request for getting existing fact schema {}", factSchemaURN);
 
         FactSchema factSchema = this.factStore.getFactSchema(factSchemaURN);
@@ -73,7 +79,7 @@ public class FactsResource extends BaseStanbolResource {
         }
 
         logger.info("Request for putting new fact schema {}", factSchemaURN);
-        
+
         JsonLdProfile profile = null;
         try {
             profile = JsonLdProfileParser.parseProfile(jsonLdProfileString);
@@ -103,6 +109,59 @@ public class FactsResource extends BaseStanbolResource {
         }
 
         return Response.status(Status.CREATED).build();
+    }
+
+    @POST
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response postFacts(String jsonLdFacts) {
+        JsonLd jsonLd = null;
+        try {
+            jsonLd = JsonLdParser.parse(jsonLdFacts);
+        } catch (Exception e) {
+            /* ignore here */
+        }
+
+        if (jsonLd == null) {
+            return Response.status(Status.BAD_REQUEST).entity("Could not parse provided JSON-LD structure.")
+                    .build();
+        }
+
+        if (jsonLd.getResourceSubjects().size() < 2) {
+            // post a single fact
+            Fact fact = Fact.factFromJsonLd(jsonLd);
+            if (fact != null) {
+                logger.info("Request for posting new fact for {}", fact.getFactSchemaURN());
+                try {
+                    this.factStore.addFact(fact);
+                } catch (Exception e) {
+                    logger.error("Error adding new fact", e);
+                    return Response.status(Status.INTERNAL_SERVER_ERROR).entity(
+                        "Error while adding new fact to the database.").build();
+                }
+            } else {
+                return Response.status(Status.BAD_REQUEST).entity(
+                    "Could not extract fact from JSON-LD input.").build();
+            }
+        } else {
+            // post multiple facts
+            Set<Fact> facts = Fact.factsFromJsonLd(jsonLd);
+            if (facts != null) {
+                logger.info("Request for posting a set of new facts");
+                try {
+                    this.factStore.addFacts(facts);
+                } catch (Exception e) {
+                    logger.error("Error adding new facts", e);
+                    return Response.status(Status.INTERNAL_SERVER_ERROR).entity(
+                        "Error while adding new facts to the database.").build();
+                }
+            } else {
+                return Response.status(Status.BAD_REQUEST).entity(
+                    "Could not extract facts from JSON-LD input.").build();
+            }
+        }
+
+        return Response.status(Status.OK).build();
     }
 
     private Response standardValidation(String factSchemaURN) {

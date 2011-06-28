@@ -1,7 +1,10 @@
 package org.apache.stanbol.factstore;
 
+import java.util.Set;
+
 import org.apache.stanbol.commons.jsonld.JsonLdCommon;
 import org.apache.stanbol.factstore.api.FactStore;
+import org.apache.stanbol.factstore.model.Fact;
 import org.apache.stanbol.factstore.model.FactSchema;
 
 public class FactStoreMock implements FactStore {
@@ -27,6 +30,18 @@ public class FactStoreMock implements FactStore {
     public FactSchema getFactSchema(String factSchemaURN) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void addFact(Fact fact) throws Exception {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void addFacts(Set<Fact> factSet) throws Exception {
+        // TODO Auto-generated method stub
+        
     }
 
 }
