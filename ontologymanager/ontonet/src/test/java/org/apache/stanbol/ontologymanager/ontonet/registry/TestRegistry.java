@@ -1,25 +1,39 @@
 package org.apache.stanbol.ontologymanager.ontonet.registry;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
+import java.net.URL;
+import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManagerConfiguration;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.ParentPathInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.io.OntologyRegistryIRISource;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
-
+import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.util.AutoIRIMapper;
 
 public class TestRegistry {
-
+	private static OWLOntologyManager ontologyManager;
+	private static RegistryLoader loader;
+	private static OntologyRegistryIRISource ontologySource;
+	private static ONManagerConfiguration configuration;
 	private static ONManager onm;
 
 	private static IRI testRegistryIri = IRI
@@ -32,19 +46,39 @@ public class TestRegistry {
 	@BeforeClass
 	public static void setup() {
 		// An ONManagerImpl with no store and default settings
-		onm = new ONManagerImpl(null,null, new Hashtable<String, Object>());
+		configuration = new ONManagerConfigurationImpl(
+				new Hashtable<String, Object>());
+		onm = new ONManagerImpl(null, null, configuration,
+				new Hashtable<String, Object>());
+		ontologyManager = onm.getOwlCacheManager();
+		loader = onm.getRegistryLoader();
+		
+
+	}
+
+	private static boolean mapperIsSet = false;
+
+	public void setupOfflineMapper() {
+		if (mapperIsSet) {
+		} else {
+			ontologySource = new OntologyRegistryIRISource(testRegistryIri,
+					ontologyManager, loader);
+			mapperIsSet = true;
+		}
 	}
 
 	@Test
 	public void testAddRegistryToSessionSpace() {
+		setupOfflineMapper();
 		IRI scopeIri = IRI.create("http://fise.iks-project.eu/scopone");
 		SessionOntologySpace space = null;
 		space = onm.getOntologySpaceFactory().createSessionOntologySpace(
 				scopeIri);
-
 		space.setUp();
 		try {
-			space.addOntology(new OntologyRegistryIRISource(testRegistryIri,onm.getOwlCacheManager(),onm.getRegistryLoader()));
+			// space.addOntology(new
+			// OntologyRegistryIRISource(testRegistryIri,onm.getOwlCacheManager(),onm.getRegistryLoader()));
+			space.addOntology(ontologySource);
 		} catch (UnmodifiableOntologySpaceException e) {
 			fail("Adding libraries to session space failed. "
 					+ "This should not happen for active session spaces.");
@@ -56,13 +90,14 @@ public class TestRegistry {
 
 	@Test
 	public void testScopeCreationWithRegistry() {
+		setupOfflineMapper();
 		IRI scopeIri = IRI.create("http://fise.iks-project.eu/scopone");
 		OntologyScope scope = null;
 		// The factory call also invokes loadRegistriesEager() and
 		// gatherOntologies() so no need to test them individually.
 		try {
-			scope = onm.getOntologyScopeFactory().createOntologyScope(
-					scopeIri, new OntologyRegistryIRISource(testRegistryIri,onm.getOwlCacheManager(),onm.getRegistryLoader()));
+			scope = onm.getOntologyScopeFactory().createOntologyScope(scopeIri,
+					ontologySource);
 		} catch (DuplicateIDException e) {
 			fail("DuplicateID exception caught when creating test scope.");
 		}
@@ -75,13 +110,13 @@ public class TestRegistry {
 
 	@Test
 	public void testSpaceCreationWithRegistry() {
+		setupOfflineMapper();
 		IRI scopeIri = IRI.create("http://fise.iks-project.eu/scopone");
 		CoreOntologySpace space = null;
 		// The factory call also invokes loadRegistriesEager() and
 		// gatherOntologies() so no need to test them individually.
-		space = onm.getOntologySpaceFactory().createCoreOntologySpace(
-				scopeIri, new OntologyRegistryIRISource(testRegistryIri,onm.getOwlCacheManager(),onm.getRegistryLoader()));
-
+		space = onm.getOntologySpaceFactory().createCoreOntologySpace(scopeIri,
+				ontologySource);
 		assertTrue(space != null && space.getTopOntology() != null);
 	}
 

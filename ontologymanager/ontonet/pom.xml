@@ -171,20 +171,20 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
+		<!--dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<scope>test</scope>
-		</dependency>
+		</dependency-->
 
 	</dependencies>
 
 
 	<repositories>
-		<repository>
+		<!--repository>
 			<id>stlab-cnr-repo</id>
 			<url>http://stlab.istc.cnr.it/software/maven/repo</url>
-		</repository>
+		</repository-->
 		<repository>
 			<id>com.hp.hpl.jena</id>
 			<name>jena maven repository</name>
