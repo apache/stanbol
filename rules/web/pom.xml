@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements. See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version
+    2.0 (the "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+    applicable law or agreed to in writing, software distributed under the
+    License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+    CONDITIONS OF ANY KIND, either express or implied. See the License for
+    the specific language governing permissions and limitations under the
+    License.
+  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
@@ -53,62 +68,6 @@
           </instructions>
         </configuration>
       </plugin>
-      <plugin>
-       <groupId>org.apache.maven.plugins</groupId>
-       <artifactId>maven-dependency-plugin</artifactId>
-       <executions>
-         <execution>
-           <id>copy-runnable-jar</id>
-           <goals>
-             <goal>copy-dependencies</goal>
-           </goals>
-           <phase>process-resources</phase>
-           <configuration>
-             <includeArtifactIds>org.apache.stanbol.launchers.full</includeArtifactIds>
-             <excludeTransitive>true</excludeTransitive>
-             <overWriteReleases>false</overWriteReleases>
-             <overWriteSnapshots>false</overWriteSnapshots>
-           </configuration>
-         </execution>
-       </executions>
-     </plugin>
-     <plugin>
-       <!-- Find free ports to run our server -->
-       <groupId>org.codehaus.mojo</groupId>
-       <artifactId>build-helper-maven-plugin</artifactId>
-       <executions>
-         <execution>
-           <id>reserve-server-port</id>
-           <goals>
-             <goal>reserve-network-port</goal>
-           </goals>
-           <phase>process-resources</phase>
-           <configuration>
-             <portNames>
-               <portName>http.port</portName>
-             </portNames>
-           </configuration>
-         </execution>
-       </executions>
-     </plugin>
-     <plugin>
-       <groupId>org.apache.maven.plugins</groupId>
-       <artifactId>maven-surefire-plugin</artifactId>
-       <configuration>
-         <systemPropertyVariables>
-           <test.server.url>${test.server.url}</test.server.url>
-           <jar.executor.server.port>${http.port}</jar.executor.server.port>
-           <jar.executor.vm.options>${jar.executor.vm.options}</jar.executor.vm.options>
-           <jar.executor.jar.folder>${project.basedir}/target/dependency</jar.executor.jar.folder>
-           <jar.executor.jar.name.regexp>org.apache.stanbol.*full.*jar$</jar.executor.jar.name.regexp>
-           <keepJarRunning>${keepJarRunning}</keepJarRunning>
-           <server.ready.timeout.seconds>180</server.ready.timeout.seconds>
-           <server.ready.path.1>/:stanbol.css</server.ready.path.1>
-           <server.ready.path.2>/engines:There are currently</server.ready.path.2>
-           <server.ready.path.3>/contenthub:Recently uploaded Content Items</server.ready.path.3>
-         </systemPropertyVariables>
-       </configuration>
-     </plugin>
     </plugins>
   </build>
 
@@ -172,34 +131,34 @@
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
     </dependency>
     <dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
-			<version>${stanbol-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.rules.manager</artifactId>
-			<version>${stanbol-version}</version>			
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.rules.refactor</artifactId>
-			<version>${stanbol-version}</version>			
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.rules.base</artifactId>
-			<version>${stanbol-version}</version>			
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.owl</artifactId>
-			<version>${stanbol-version}</version>			
-		</dependency>
-		<dependency>
-			<groupId>com.hp.hpl.jena</groupId>
-			<artifactId>jena</artifactId>
-		</dependency>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
+		<version>${stanbol-version}</version>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>org.apache.stanbol.rules.manager</artifactId>
+		<version>${stanbol-version}</version>			
+	</dependency>
+	<dependency>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>org.apache.stanbol.rules.refactor</artifactId>
+		<version>${stanbol-version}</version>			
+	</dependency>
+	<dependency>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>org.apache.stanbol.rules.base</artifactId>
+		<version>${stanbol-version}</version>			
+	</dependency>
+	<dependency>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>org.apache.stanbol.owl</artifactId>
+		<version>${stanbol-version}</version>			
+	</dependency>
+	<dependency>
+		<groupId>com.hp.hpl.jena</groupId>
+		<artifactId>jena</artifactId>
+	</dependency>
 
 		<!-- Clerezza -->
 		<dependency>
@@ -209,32 +168,8 @@
     	
     	<!-- Tests -->
     	<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.launchers.full</artifactId>
-			<version>0.9-SNAPSHOT</version>
-    		<scope>test</scope>
-   		</dependency>
-    	<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-    	<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.testing.jarexec</artifactId>
-			<version>${stanbol-version}</version>
-			<exclusions>
-        		<exclusion>
-          			<artifactId>slf4j-log4j12</artifactId>
-          			<groupId>org.slf4j</groupId>
-        		</exclusion>
-      		</exclusions>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
-			<version>${stanbol-version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -246,7 +181,7 @@
     	<dependency>
     		<groupId>javax.mail</groupId>
     		<artifactId>mail</artifactId>
-    		<version>1.4</version>
+    	<version>1.4</version>
     		<scope>test</scope>
 		</dependency>
     
