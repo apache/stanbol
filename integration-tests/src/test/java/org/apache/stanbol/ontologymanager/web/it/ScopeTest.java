@@ -10,11 +10,12 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.stanbol.commons.testing.http.RequestExecutor;
+import org.apache.stanbol.commons.testing.stanbol.StanbolTestBase;
 
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 
 
-public class ScopeTest extends OntonetTestBase{
+public class ScopeTest extends StanbolTestBase{
 
     public static final String ROOT_URI = "/ontonet";
 

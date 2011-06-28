@@ -8,9 +8,9 @@ import org.junit.Test;
 
 import org.apache.http.client.ClientProtocolException;
 
-import org.apache.stanbol.commons.web.base.format.KRFormat;
+import org.apache.stanbol.commons.testing.stanbol.StanbolTestBase;
 
-public class SessionTest extends OntonetTestBase{
+public class SessionTest extends StanbolTestBase{
 
     public static final String ROOT_URI = "/ontonet";
 
