@@ -93,20 +93,24 @@ public abstract class JsonLdCommon {
     }
 
     public String doCURIE(String uri) {
-        for (String namespace : namespacePrefixMap.keySet()) {
-            String prefix = namespacePrefixMap.get(namespace) + ":";
-            if (!uri.startsWith(prefix)) {
-                uri = uri.replace(namespace, prefix);
+        if (uri != null) {
+            for (String namespace : namespacePrefixMap.keySet()) {
+                String prefix = namespacePrefixMap.get(namespace) + ":";
+                if (!uri.startsWith(prefix)) {
+                    uri = uri.replace(namespace, prefix);
+                }
             }
         }
         return uri;
     }
 
     public String unCURIE(String uri) {
-        for (String namespace : namespacePrefixMap.keySet()) {
-            String prefix = namespacePrefixMap.get(namespace) + ":";
-            if (uri.startsWith(prefix)) {
-                uri = uri.replace(prefix, namespace);
+        if (uri != null) {
+            for (String namespace : namespacePrefixMap.keySet()) {
+                String prefix = namespacePrefixMap.get(namespace) + ":";
+                if (uri.startsWith(prefix)) {
+                    uri = uri.replace(prefix, namespace);
+                }
             }
         }
         return uri;
