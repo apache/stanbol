@@ -137,7 +137,7 @@ public class FactsResource extends BaseStanbolResource {
                 } catch (Exception e) {
                     logger.error("Error adding new fact", e);
                     return Response.status(Status.INTERNAL_SERVER_ERROR).entity(
-                        "Error while adding new fact to the database.").build();
+                        e.getMessage()).build();
                 }
             } else {
                 return Response.status(Status.BAD_REQUEST).entity(
@@ -153,7 +153,7 @@ public class FactsResource extends BaseStanbolResource {
                 } catch (Exception e) {
                     logger.error("Error adding new facts", e);
                     return Response.status(Status.INTERNAL_SERVER_ERROR).entity(
-                        "Error while adding new facts to the database.").build();
+                        e.getMessage()).build();
                 }
             } else {
                 return Response.status(Status.BAD_REQUEST).entity(

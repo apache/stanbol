@@ -5,6 +5,7 @@
 <ul>
 	<li><a href="#Publish_a_New_Fact_Schema">Publish a New Fact Schema</a></li>
 	<li><a href="#Get_Fact_Schema">Get Fact Schema</a></li>
+	<li><a href="#Publish_New_Facts">Publish New Facts</a></li>
 </ul>
 
 <a name="Publish_a_New_Fact_Schema" id="Publish_a_New_Fact_Schema"></a><h4>Publish a New Fact Schema</h4>
@@ -75,7 +76,7 @@
 
 <script language="javascript">
 function putNewFactSchema() {
- $("#newFactSchemaNameResult").show();
+ $("#newFactSchemaResult").show();
  $.ajax({
    type: "PUT",
    url: '${it.publicBaseUri}factstore/facts/' + encodeURIComponent($("#newFactSchemaName").val()),
@@ -84,10 +85,10 @@ function putNewFactSchema() {
    data: $("#newFactSchema").val(),
    cache: false,
    success: function(data, textStatus, jqXHR) {
-     $("#newFactSchemaNameResultText").text(textStatus + " (" + jqXHR.status + ")");
+     $("#newFactSchemaResultText").text(textStatus + " (" + jqXHR.status + ")");
    },
    error: function(jqXHR, textStatus, errorThrown) {
-     $("#newFactSchemaNameResultText").text(("Error putting new fact schema.\n" + jqXHR.statusText + "\n" + jqXHR.responseText));
+     $("#newFactSchemaResultText").text(("Error putting new fact schema.\n" + jqXHR.statusText + "\n" + jqXHR.responseText));
    } 
  });		  
 }
@@ -109,10 +110,10 @@ function putNewFactSchema() {
 <tr>
 	<th valign="top">Result</th>
 	<td>
-	<div id="newFactSchemaNameResult" style="display: none">
-<p><a href="#" onclick="$('#newFactSchemaNameResult').hide(); return false;">Hide results</a>
-<pre id="newFactSchemaNameResultText">... waiting for results ...</pre>
-</div>
+		<div id="newFactSchemaResult" style="display: none">
+			<p><a href="#" onclick="$('#newFactSchemaResult').hide(); return false;">Hide results</a>
+			<pre id="newFactSchemaResultText">... waiting for results ...</pre>
+		</div>
 	</td>
 </tr>
 </table>
@@ -189,6 +190,147 @@ function getFactSchema() {
 <p><a href="#" onclick="$('#getFactSchemaResult').hide(); return false;">Hide results</a>
 <pre id="getFactSchemaResultText">... waiting for results ...</pre>
 </div>
+	</td>
+</tr>
+</table>
+</form>
+
+<a name="Publish_New_Facts" id="Publish_New_Facts"></a><h4>Publish New Facts</h4>
+<table>
+	<tr>
+		<th valign="top">Description: </th>
+		<td>Allows clients to publish a new facts according to a defined fact schema that was previously
+		published to the FactStore. Each new fact is an n-tuple according to its schema where each tuple
+		element identifies an entity using its unique IRI.</td>
+	</tr>
+	<tr>
+		<th valign="top">Path: </th>
+		<td>/factstore/facts</td>
+	</tr>
+	<tr>
+		<th valign="top">Method:</th>
+		<td>POST with data type application/json returns HTTP 201 (created) on success.</td>
+	</tr>
+	<tr>
+		<th valign="top">Data:</th>
+		<td>The facts are sent as the POST payload in JSON-LD format refering to the defined JSON-LD profile.
+		The name of the fact is given by the URL and the "@profile" element of the JSON-LD object,
+		additionally. The JSON-LD object contains a list of facts under the attribute "facts" where each
+		element of that list is an n-tuple of entity instances according to fhe fact schema. The instance of
+		an entity can be specified either by its unique IRI or by specifying the instance by example.<br>
+		Using the instance by example variant requires the FactStore to resolve the entity in an EntityHub.
+		An entity by example is specified by defining attributes and required values of the searched entity.
+		A fact can only be stored if all entities can be uniquely identified either by their IRI or by
+		example.</td>
+	</tr>
+	<tr>
+		<th valign="top">Example 1:</th>
+		<td>POST /factstore/facts<br>
+		with the following data 
+<pre>{
+ "@context" : {
+   "iks" : "http://iks-project.eu/ont/",
+   "upb" : "http://upb.de/persons/"
+ },
+ "@profile"     : "iks:employeeOf",
+ "person"       : { "@iri" : "upb:bnagel" },
+ "organization" : { "@iri" : "http://uni-paderborn.de"}
+}</pre>
+		<p>creates a new fact of type http://iks-project.eu/ont/employeeof specifying that the person
+		http://upb.de/persons/bnagel is employee of the organization defined by the IRI
+		http://uni-paderborn.de.</p>
+		</td>
+	</tr>
+	<tr>
+		<th valign="top">Example 2:</th>
+		<td>POST /factstore/facts<br>
+		with the following data to create several facts of the same type at once
+<pre>{
+ "@context" : {
+   "iks" : "http://iks-project.eu/ont/",
+   "upb" : "http://upb.de/persons/"
+ },
+ "@profile"     : "iks:employeeOf",
+ "@" : [
+   { "person"       : { "@iri" : "upb:bnagel" },
+     "organization" : { "@iri" : "http://uni-paderborn.de" }
+   },
+   { "person"       : { "@iri" : "upb:fchrist" },
+     "organization" : { "@iri" : "http://uni-paderborn.de" }
+   }
+ ]
+}</pre>
+		<p>creates two new facts of type http://iks-project.eu/ont/employeeof specifying that the persons
+		http://upb.de/persons/bnagel and http://upb.de/persons/fchrist are employees of the organization
+		defined by the IRI http://uni-paderborn.de.</p>
+		</td>
+	</tr>
+	<tr>
+		<th valign="top">Example 3:</th>
+		<td>POST /factstore/facts<br>
+		with the following data to create several facts of different type
+<pre>{
+ "@context" : {
+   "iks" : "http://iks-project.eu/ont/",
+   "upb" : "http://upb.de/persons/"
+ },
+ "@" : [
+   { "@profile"     : "iks:employeeOf",
+     "person"       : { "@iri" : "upb:bnagel" },
+     "organization" : { "@iri" : "http://uni-paderborn.de" }
+   },
+   { "@profile"     : "iks:friendOf",
+     "person"       : { "@iri" : "upb:bnagel" },
+     "friend"       : { "@iri" : "upb:fchrist" }
+   }
+ ]
+}</pre>
+		<p>creates two new facts. The first one of type http://iks-project.eu/ont/employeeof specifying that
+		the person http://upb.de/persons/bnagel is employee of the organization defined by the IRI
+		http://uni-paderborn.de. The second of type http://iks-project.eu/ont/friendOf specifying that
+		http://upb.de/persons/fchrist is a friend of http://upb.de/persons/bnagel.</p>
+		</td>
+	</tr>
+</table>
+
+<script language="javascript">
+function postNewFact() {
+ $("#newFactResult").show();
+ $.ajax({
+   type: "POST",
+   url: '${it.publicBaseUri}factstore/facts',
+   dataType: "json",
+   contentType: "text/plain",
+   data: $("#newFact").val(),
+   cache: false,
+   success: function(data, textStatus, jqXHR) {
+     $("#newFactResultText").text(textStatus + " (" + jqXHR.status + ")");
+   },
+   error: function(jqXHR, textStatus, errorThrown) {
+     $("#newFactResultText").text(("Error posting new facts.\n" + jqXHR.statusText + "\n" + jqXHR.responseText));
+   } 
+ });		  
+}
+</script>
+
+<p>To test this feature you can publish your own fact using the following form. Note that the fact
+schema must exist before one can publish a fact.</p>
+<form name="newFactTestForm" id="newFactTestForm">
+<table>
+<tr>
+	<th valign="top" width="10%">Enter JSON-LD that specifies facts:</th>
+	<td>
+		<textarea name="newFact" id="newFact" rows="10" cols="40"></textarea><br>
+		<input type="submit" name="postNewFactButton" value="Publish" onclick="postNewFact(); return false;" />
+	</td>
+</tr>
+<tr>
+	<th valign="top">Result</th>
+	<td>
+		<div id="newFactResult" style="display: none">
+			<p><a href="#" onclick="$('#newFactResult').hide(); return false;">Hide results</a>
+			<pre id="newFactResultText">... waiting for results ...</pre>
+		</div>
 	</td>
 </tr>
 </table>

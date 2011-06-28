@@ -335,7 +335,7 @@ public class DerbyFactStore implements FactStore {
             con = DriverManager.getConnection(DB_URL);
             this.addFact(fact, con);
         } catch (Exception e) {
-            throw new Exception("Error while inserting new fact", e);
+            throw e;
         } finally {
             try {
                 con.close();
