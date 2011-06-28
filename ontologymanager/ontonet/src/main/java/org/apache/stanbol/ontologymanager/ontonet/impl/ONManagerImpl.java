@@ -18,7 +18,6 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
-import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManagerConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
@@ -61,15 +60,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The running context of a KReS Ontology Network Manager instance. From this object it is possible to obtain
+ * The running context of a Stanbol Ontology Network Manager instance. From this object it is possible to obtain
  * factories, indices, registries and what have you.
  * 
  * @author alessandro
+ * @see ONManager
  * 
  */
 @Component(immediate = true, metatype = true)
 @Service(ONManager.class)
-// @Property(name="service.ranking",intValue=5)
 public class ONManagerImpl implements ONManager {
 
     /**
@@ -80,41 +79,6 @@ public class ONManagerImpl implements ONManager {
      * 
      */
     private class Helper {
-
-        /**
-         * Adds the ontology from the given iri to the core space of the given scope.
-         * 
-         * 
-         * @param scopeID
-         * @param locationIri
-         */
-        public synchronized void addToCoreSpace(String scopeID, String[] locationIris) {
-            OntologyScope scope = getScopeRegistry().getScope(IRI.create(scopeID));
-            OntologySpace corespc = scope.getCoreSpace();
-            scope.tearDown();
-            corespc.tearDown();
-            for (String locationIri : locationIris) {
-                try {
-                    corespc.addOntology(new RootOntologyIRISource(IRI.create(locationIri)));
-                    //
-                    // corespc.addOntology(
-                    // createOntologyInputSource(locationIri));
-                    log.debug("Added " + locationIri + " to scope " + scopeID + " in the core space.", this);
-                    // OntologySpace cs = scope.getCustomSpace();
-                    // if (cs instanceof CustomOntologySpace) {
-                    // (
-                    // (CustomOntologySpace)cs).attachCoreSpace((CoreOntologySpace)corespc,
-                    // false);
-                    // }
-                } catch (UnmodifiableOntologySpaceException e) {
-                    log.error("Core space for scope " + scopeID + " denied addition of ontology "
-                              + locationIri, e);
-                } catch (OWLOntologyCreationException e) {
-                    log.error("Creation of ontology from source " + locationIri + " failed.", e);
-                }
-            }
-            corespc.setUp();
-        }
 
         /**
          * Adds the ontology fromt he given iri to the custom space of the given scope
@@ -150,29 +114,6 @@ public class ONManagerImpl implements ONManager {
             }
         }
 
-        /**
-         * Create an empty scope. The scope is created, registered and activated
-         * 
-         * @param scopeID
-         * @return
-         * @throws DuplicateIDException
-         */
-        public synchronized OntologyScope createScope(String scopeID) throws DuplicateIDException {
-            OntologyInputSource oisbase = new BlankOntologySource();
-
-            IRI scopeIRI = IRI.create(scopeID);
-
-            /*
-             * The scope is created by the ScopeFactory or loaded to the scope registry of KReS
-             */
-            OntologyScope scope;
-            scope = ontologyScopeFactory.createOntologyScope(scopeIRI, oisbase);
-
-            scope.setUp();
-            scopeRegistry.registerScope(scope, true);
-            log.debug("Created scope " + scopeIRI, this);
-            return scope;
-        }
     }
 
     @Reference
@@ -212,7 +153,6 @@ public class ONManagerImpl implements ONManager {
     private SessionManager sessionManager;
 
     private ClerezzaOntologyStorage storage;
-    // private ClerezzaOntologyStorage storage;
 
     @Reference
     private TcManager tcm;
@@ -259,15 +199,20 @@ public class ONManagerImpl implements ONManager {
      * Constructor to be invoked by non-OSGi environments.
      * 
      * @param tcm
+     *            the triple collection manager to be used for storing ontologies.
      * @param wtcp
+     *            the triple collection provider to be used for storing ontologies.
+     * @param onmconfig
+     *            the configuration of this ontology network manager.
      * @param configuration
+     *            additional parameters for the ONManager not included in {@link ONManagerConfiguration}.
      */
     public ONManagerImpl(TcManager tcm,
                          WeightedTcProvider wtcp,
                          ONManagerConfiguration onmconfig,
                          Dictionary<String,Object> configuration) {
         this();
-        // Assume this.tcm and this.wtcp were not filled in by OSGi-DS.
+        // Assume this.tcm this.wtcp and this.wtcp were not filled in by OSGi-DS.
         this.tcm = tcm;
         this.wtcp = wtcp;
         this.config = onmconfig;
