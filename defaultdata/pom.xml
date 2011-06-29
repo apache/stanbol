@@ -14,7 +14,7 @@
     See also:
     https://issues.apache.org/jira/browse/OPENNLP-68
   -->
-  <version>0.0.2</version>
+  <version>0.0.3</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Default Data</name>
@@ -61,7 +61,7 @@
               DataFileProvider
               -->
             <Data-Files> 
-              org/apache/stanbol/defaultdata/opennlp
+              org/apache/stanbol/defaultdata/opennlp,org/apache/stanbol/defaultdata/site/dbpedia/index
             </Data-Files>
             <!-- 
               Use a priority lower than 0 to allow providers without a
@@ -70,6 +70,9 @@
             <Data-Files-Priority>
               -100
             </Data-Files-Priority>
+            <Install-Path>
+              org/apache/stanbol/defaultdata/site/dbpedia
+            </Install-Path>
           </instructions>
         </configuration>
       </plugin>
