@@ -102,12 +102,12 @@ public class BundleDataFileProvider implements DataFileProvider {
         
         URL resource = null;
         Iterator<String> relativePathIterator = searchPaths.iterator();
-        while(resource == null){
+        while(resource == null && relativePathIterator.hasNext()){
             String path = relativePathIterator.next();
             final String resourceName = path != null ? path + filename : filename ;
             resource = bundle.getEntry(resourceName);
-            log.info("Resource {} found: {}", (resource == null ? "NOT" : ""), resourceName);
         }
+        log.info("Resource {} found: {}", (resource == null ? "NOT" : ""), filename);
         return resource != null ? resource.openStream() : null;
     }
     /**
