@@ -347,8 +347,8 @@ public final class SparqlQueryUtils {
      * @param query
      * @param queryString
      */
-    private static void addLimit(int limit, final StringBuilder queryString) {
-        if(limit > 0){
+    private static void addLimit(Integer limit, final StringBuilder queryString) {
+        if(limit != null && limit > 0){
             queryString.append(String.format("LIMIT %d \n", limit));
         }
     }

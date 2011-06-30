@@ -273,7 +273,9 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
                             + UNINITIALISED_INDEX_ARCHIVE_NAME_KEY + " property!");
         }
         propMap.remove(UNINITIALISED_INDEX_ARCHIVE_NAME_KEY);// do not parse this internal property
-        InputStream is = getDataFileProvider().getInputStream(symbolicName, archiveName, propMap);
+        //we need to parse null as bundleSymbolic name, because we will accept
+        //index data from any bundle!
+        InputStream is = getDataFileProvider().getInputStream(null, archiveName, propMap);
         return is == null ? null : ConfigUtils.getArchiveInputStream(archiveName, is);
     }
 
