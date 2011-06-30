@@ -146,11 +146,13 @@
 			<artifactId>commons-math</artifactId>
 			<version>2.1</version>
 		</bundle>
+        <!-- 
 		<bundle>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.12</version>
 		</bundle>
+        -->
 	</startLevel>
 
   <!-- Jersey -->
