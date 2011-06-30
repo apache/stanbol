@@ -14,12 +14,14 @@ import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
+import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.reasoners.base.api.Reasoner;
 import org.apache.stanbol.reasoners.web.resources.Classify;
 import org.apache.stanbol.reasoners.web.resources.ConsistencyCheck;
 import org.apache.stanbol.reasoners.web.resources.ConsistentRefactoring;
 import org.apache.stanbol.reasoners.web.resources.Enrichment;
 import org.apache.stanbol.reasoners.web.resources.ReasonersResource;
+import org.apache.stanbol.rules.base.api.RuleStore;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -46,6 +48,12 @@ public class ReasonersFragment implements WebFragment{
     
     @Reference
     Reasoner reasoners;
+    
+    @Reference
+    ONManager onm;
+    
+    @Reference
+    RuleStore kresRuleStore;
 
     private BundleContext bundleContext;
     

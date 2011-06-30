@@ -65,6 +65,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.sun.jersey.multipart.FormDataParam;
 
+import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
@@ -81,6 +82,7 @@ public class Classify extends BaseStanbolResource{
 
 	protected ONManager onm;
 	protected ClerezzaOntologyStorage storage;
+	protected ServletContext servletContext;
 
 	private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -91,28 +93,15 @@ public class Classify extends BaseStanbolResource{
 	 *            {To get the context where the REST service is running.}
      */
     public Classify(@Context ServletContext servletContext){
-		this.kresRuleStore = (RuleStore) servletContext
-				.getAttribute(RuleStore.class.getName());
-		this.onm = (ONManager) servletContext
-				.getAttribute(ONManager.class.getName());
-//      this.storage = (OntologyStorage) servletContext
-//      .getAttribute(OntologyStorage.class.getName());
-// Contingency code for missing components follows.
-/*
- * FIXME! The following code is required only for the tests. This should
- * be removed and the test should work without this code.
- */
-if (onm == null) {
-    log
-            .warn("No KReSONManager in servlet context. Instantiating manually...");
-    onm = new ONManagerImpl(new TcManager(), null,
-            new Hashtable<String, Object>());
-}
-this.storage = onm.getOntologyStore();
-if (storage == null) {
-    log.warn("No OntologyStorage in servlet context. Instantiating manually...");
-    storage = new ClerezzaOntologyStorage(new TcManager(),null);
-}
+        this.servletContext = servletContext;
+
+        // Retrieve the rule store
+        this.kresRuleStore = (RuleStore) ContextHelper.getServiceFromContext(RuleStore.class, servletContext);
+        
+		// Retrieve the ontology network manager
+        this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
+        this.storage = (ClerezzaOntologyStorage) ContextHelper.getServiceFromContext(ClerezzaOntologyStorage.class, servletContext);
+       
        if (kresRuleStore == null) {
 			log
 					.warn("No KReSRuleStore with stored rules and recipes found in servlet context. Instantiating manually with default values...");
@@ -220,10 +209,13 @@ if (storage == null) {
 			@FormDataParam(value = "input-graph") String input_graph,
 			@FormDataParam(value = "file") File file,
 			@FormDataParam(value = "owllink-endpoint") String owllink_endpoint) {
-       
+      
+        if(true)
+            return Response.status(Status.OK).build();
       try{
       
       if((session!=null)&&(scope==null)){
+           log.error("ERROR: Cannot load session without scope.");
            System.err.println("ERROR: Cannot load session without scope.");
            return Response.status(Status.BAD_REQUEST).build();
         }

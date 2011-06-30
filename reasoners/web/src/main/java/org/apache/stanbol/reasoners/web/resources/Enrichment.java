@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
@@ -80,6 +81,7 @@ public class Enrichment extends BaseStanbolResource{
 
 	protected ONManager onm;
 	protected ClerezzaOntologyStorage storage;
+	protected ServletContext servletContext;
 
 	private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -90,30 +92,15 @@ public class Enrichment extends BaseStanbolResource{
 	 *            {To get the context where the REST service is running.}
      */
     public Enrichment(@Context ServletContext servletContext){
+        this.servletContext = servletContext;
+        
 		// Retrieve the rule store
-		this.kresRuleStore = (RuleStore) servletContext
-				.getAttribute(RuleStore.class.getName());
+		this.kresRuleStore = (RuleStore) ContextHelper.getServiceFromContext(RuleStore.class, servletContext);
+		
 		// Retrieve the ontology network manager
-		this.onm = (ONManager) servletContext
-				.getAttribute(ONManager.class.getName());
-//      this.storage = (OntologyStorage) servletContext
-//      .getAttribute(OntologyStorage.class.getName());
-// Contingency code for missing components follows.
-/*
- * FIXME! The following code is required only for the tests. This should
- * be removed and the test should work without this code.
- */
-if (onm == null) {
-    log
-            .warn("No KReSONManager in servlet context. Instantiating manually...");
-    onm = new ONManagerImpl(new TcManager(), null,
-            new Hashtable<String, Object>());
-}
-this.storage = onm.getOntologyStore();
-if (storage == null) {
-    log.warn("No OntologyStorage in servlet context. Instantiating manually...");
-    storage = new ClerezzaOntologyStorage(new TcManager(),null);
-}
+		this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
+        this.storage = (ClerezzaOntologyStorage) ContextHelper.getServiceFromContext(ClerezzaOntologyStorage.class, servletContext);
+        
        if (kresRuleStore == null) {
 			log
 					.warn("No KReSRuleStore with stored rules and recipes found in servlet context. Instantiating manually with default values...");

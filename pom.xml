@@ -54,6 +54,7 @@
     <module>ontologymanager/ontonet</module>
     <module>ontologymanager/web</module>
     <module>rules</module>
+    <module>reasoners</module>
     <module>launchers/stable</module>
     <module>launchers/stateless</module>
     <module>launchers/full</module>
@@ -73,7 +74,6 @@
         <module>ontologymanager/store</module>
         <!--module>rules</module-->
         <module>reengineer</module>
-        <module>reasoners</module>
         <module>launchers/kres</module>
       </modules>
     </profile>

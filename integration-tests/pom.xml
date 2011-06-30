@@ -76,6 +76,24 @@
       <version>4.7</version>
       <scope>test</scope>
     </dependency>
+	<dependency>
+      <groupId>owlapi</groupId>
+      <artifactId>owlapi</artifactId>
+      <version>3.0.0</version>
+      <scope>test</scope>
+    </dependency>
+	<dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-server</artifactId>
+      <version>${jersey-version}</version>
+	  <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-core</artifactId>
+      <version>${jersey-version}</version>
+	  <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -139,7 +157,8 @@
             <server.ready.path.2>/engines:There are currently</server.ready.path.2>
             <server.ready.path.3>/contenthub:Recently uploaded Content Items</server.ready.path.3>
             <server.ready.path.4>/factstore:The FactStore implements a store</server.ready.path.4>
-			<server.ready.path.5>/ontonet:Apache Stanbol Ontonet</server.ready.path.5>
+			<server.ready.path.5>/ontonet:Apache Stanbol OntoNet</server.ready.path.5>
+			<server.ready.path.6>/reasoners:Apache Stanbol Reasoners</server.ready.path.6>
           </systemPropertyVariables>
         </configuration>
       </plugin>

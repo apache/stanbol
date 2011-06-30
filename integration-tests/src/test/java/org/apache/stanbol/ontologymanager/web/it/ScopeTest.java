@@ -1,5 +1,7 @@
 package org.apache.stanbol.ontologymanager.web.it;
 
+import static org.junit.Assert.assertFalse;
+
 import java.io.IOException;
 
 import org.junit.Test;
@@ -107,10 +109,10 @@ public class ScopeTest extends StanbolTestBase{
         );
 
         // get in RDF_XML format
-        /*executor.execute(
+        executor.execute(
             builder.buildGetRequest(SCOPE2_URI)
             .withHeader("Accept",KRFormat.RDF_XML)
-        ).assertStatus(200);*/
+        ).assertStatus(200);
 
     }
 
@@ -123,22 +125,19 @@ public class ScopeTest extends StanbolTestBase{
     public void testActiveVsAll() throws Exception {
 
         // The needed Web resources to GET from.
-        log.debug("Request: "+ONTOLOGY_URI);
-        RequestExecutor resActive = executor.execute(
+        executor.execute(
             builder.buildGetRequest(ONTOLOGY_URI)
-        );
-        log.debug(resActive.getContent());
+            .withHeader("Accept",KRFormat.RDF_XML)
+        ).assertStatus(200);
         log.info("Request: "+ONTOLOGY_URI +" ... DONE");
 
-        log.debug("Request: "+ONTOLOGY_URI+"?with-inactive=true");
-        RequestExecutor resAllScopes = executor.execute(
-            builder.buildGetRequest(ONTOLOGY_URI+"?with-inactive=true")
-        );
-        log.debug(resAllScopes.getContent());
+        executor.execute(
+            builder.buildGetRequest(ONTOLOGY_URI,"with-inactive","true")
+            .withHeader("Accept",KRFormat.RDF_XML)
+        ).assertStatus(200);
         log.info("Request: "+ONTOLOGY_URI+"?with-inactive=true"+" ... DONE");
 
         // Put a simple, inactive scope.
-        log.debug("Request: "+SCOPE_USER_URI+"?coreont=" + ONT_FOAF_URI);
         executor.execute(
             builder.buildOtherRequest( 
                 new HttpPut(
@@ -148,17 +147,15 @@ public class ScopeTest extends StanbolTestBase{
 
         // Check that it is in the list of all scopes.
         executor.execute(
-            builder.buildGetRequest(SCOPE_USER_URI+"?with-inactive=true")
-        ).assertContentContains(SCOPE_USER_URI);
+            builder.buildGetRequest(SCOPE_USER_URI,"with-inactive","true")
+        ).assertStatus(200).assertContentContains(SCOPE_USER_URI);
 
         // Check that it is not in the list of active scopes.
         executor.execute(
             builder.buildGetRequest(SCOPE_USER_URI)
-        ).assertContentContains(SCOPE_USER_URI);
-
+        ).assertStatus(200).assertContentContains(SCOPE_USER_URI);
 
         // Now create a scope that is active on startup.
-        log.debug("Request: "+SCOPE_BIZ_URI+"?activate=true&coreont=" + ONT_PIZZA_URI);
         executor.execute(
             builder.buildOtherRequest( 
                 new HttpPut(
@@ -167,17 +164,15 @@ public class ScopeTest extends StanbolTestBase{
         log.info("Request: "+SCOPE_BIZ_URI+"?activate=true&coreont=" + ONT_PIZZA_URI+" ... DONE");
 
         // Check that it appears in both sets.
-        /*executor.execute(
-            builder.buildGetRequest(ONTOLOGY_URI)
-        ).assertContentContains(SCOPE_BIZ_URI);
-
         executor.execute(
-            builder.buildGetRequest(ONTOLOGY_URI+"?with-inactive=true")
-        ).assertContentContains(SCOPE_BIZ_URI);*/
-
-        //log.info(executor.execute(builder.buildGetRequest(ONTOLOGY_URI)).getContent());
-
-        //log.info(executor.execute(builder.buildGetRequest(ONTOLOGY_URI+"?with-inactive=true")).getContent());
+            builder.buildGetRequest(ONTOLOGY_URI)
+            .withHeader("Accept",KRFormat.RDF_XML)
+        ).assertStatus(200).assertContentContains(SCOPE_BIZ_URI);
+        
+        executor.execute(
+            builder.buildGetRequest(ONTOLOGY_URI,"with-inactive","true")
+            .withHeader("Accept",KRFormat.RDF_XML)
+        ).assertStatus(200).assertContentContains(SCOPE_BIZ_URI);
 
     }
 

@@ -44,8 +44,8 @@
     <module>../owl</module>  
     <module>../rules/base</module>  
     <module>../rules/manager</module-->
-    <module>base</module>
     <module>hermit</module>
+    <module>base</module>
     <module>owllink</module>
     <module>web</module>
   </modules>
