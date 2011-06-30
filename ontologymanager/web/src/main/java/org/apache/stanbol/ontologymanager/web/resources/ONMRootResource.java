@@ -73,12 +73,6 @@ public class ONMRootResource extends BaseStanbolResource {
         onm.getOntologyStore().clear();
     }
 
-    @GET
-    @Path("/{param:.+}")
-    public Response echo(@PathParam("param") String s) {
-        return Response.ok(s).build();
-    }
-
     /**
      * Default GET method for obtaining the set of (both active and, optionally, inactive) ontology scopes
      * currently registered with this instance of KReS.

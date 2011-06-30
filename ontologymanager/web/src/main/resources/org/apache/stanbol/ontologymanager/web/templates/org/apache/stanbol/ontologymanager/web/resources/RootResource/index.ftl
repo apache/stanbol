@@ -25,7 +25,7 @@
           <h4>Ontology Scope Management (<code>"/ontonet/ontology"</code>):</h4>
           
           <ul>
-            <li>Scope registry @<a href="${it.publicBaseUri}ontonet/ontology">/ontonet/ontology</a>:
+            <li>Scope manager @<a href="${it.publicBaseUri}ontonet/ontology">/ontonet/ontology</a>:
               Perform CRUD operations on ontology scopes.
             </li>
             <li>Ontology scope @<code>/ontonet/ontology/{scopeName}</code>:
@@ -57,6 +57,9 @@
               Storage and retrieval operation of RDF graphs, scope-independent.
             </li>
           </ul>
+          
+          <hr>
+          <#include "inc_scopemgr.ftl">
       
     </div>
 
