@@ -501,12 +501,12 @@
     <!--
       The geonames.org LocationEnhancement Engines needs two additional bundles 1) jettyjson 2) commons-io.
       Both of them are already present in the bundle list.
-    -->
+    
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId>
       <version>0.9-SNAPSHOT</version>
-    </bundle>
+    </bundle> -->
     <!-- Entity Tagging Engine (depends on the Entityhub) -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
