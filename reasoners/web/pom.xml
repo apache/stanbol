@@ -74,7 +74,7 @@
          </instructions>
        </configuration>
      </plugin>
-	  <plugin>
+<!-- <plugin>
        <groupId>org.apache.maven.plugins</groupId>
        <artifactId>maven-dependency-plugin</artifactId>
        <executions>
@@ -94,7 +94,6 @@
        </executions>
      </plugin>
      <plugin>
-       <!-- Find free ports to run our server -->
        <groupId>org.codehaus.mojo</groupId>
        <artifactId>build-helper-maven-plugin</artifactId>
        <executions>
@@ -130,7 +129,7 @@
            <server.ready.path.3>/contenthub:Recently uploaded Content Items</server.ready.path.3>
          </systemPropertyVariables>
        </configuration>
-     </plugin>
+     </plugin> -->
    </plugins>
  </build>
 
