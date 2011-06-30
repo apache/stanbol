@@ -249,7 +249,7 @@ public class RuleStoreImpl implements RuleStore {
                     } catch (OWLOntologyCreationException e) {
                         log.error("Cannot create the ontology " + filedir.toString(), e);
                     } catch (Exception e) {
-                        log.error("1 Rule Store: no rule ontology available.");
+                        log.error("1 Rule Store: no rule ontology available.",e);
                     }
                 }
                 // default KReSConf dir does not exist
@@ -262,7 +262,7 @@ public class RuleStoreImpl implements RuleStore {
                     } catch (OWLOntologyCreationException e) {
                         log.error("Cannot create the ontology " + inputontology.toString(), e);
                     } catch (Exception e) {
-                        log.error("Rule Store: no rule ontology available.");
+                        log.error("Rule Store: no rule ontology available.",e);
                     }
                 }
 
@@ -285,16 +285,20 @@ public class RuleStoreImpl implements RuleStore {
                     }
                 }
             }
-            // Rule ontology location is set
+            // Rule ontology location is set. Prefer absolute IRIs to files.
             else {
-                File pathIri = new File(ruleOntologyLocation);
+
+                IRI pathIri = IRI.create(ruleOntologyLocation);
+                if (!pathIri.isAbsolute())
+                    pathIri = IRI.create(new File(ruleOntologyLocation));
+                
                 try {
                     owlmodel = mgr
-                    /* OWLManager.createOWLOntologyManager() */.loadOntologyFromOntologyDocument(pathIri);
+                    /* OWLManager.createOWLOntologyManager() */.loadOntology(pathIri);
                 } catch (OWLOntologyCreationException e) {
                     log.error("Cannot load the RMI configuration ontology", e);
                 } catch (Exception e) {
-                    log.error("Rule Store: no rule ontology available.");
+                    log.error("Rule Store: no rule ontology available.",e);
                 }
             }
         }
