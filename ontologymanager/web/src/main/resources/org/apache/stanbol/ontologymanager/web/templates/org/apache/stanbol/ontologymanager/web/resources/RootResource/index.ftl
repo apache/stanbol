@@ -25,28 +25,28 @@
           <h4>Ontology Scope Management (<code>"/ontonet/ontology"</code>):</h4>
           
           <ul>
-            <li>Ontology scope registry @<a href="${it.publicBaseUri}ontonet/ontology">/ontonet/ontology</a>:
+            <li>Scope registry @<a href="${it.publicBaseUri}ontonet/ontology">/ontonet/ontology</a>:
               Perform CRUD operations on ontology scopes.
             </li>
             <li>Ontology scope @<code>/ontonet/ontology/{scopeName}</code>:
-              Perform CRUD operations on ontology scopes.
+              Manage the set of ontologies loaded within a single scope.
             </li>
-            <li>Ontology scope <a href="${it.publicBaseUri}ontonet/ontology/get">/ontonet/ontology/get</a>:
-              Perform CRUD operations on ontology scopes.
+            <li>Ontology retrieval <a href="${it.publicBaseUri}ontonet/ontology/get">/ontonet/ontology/get</a>:
+              Manage ontologies whose ID is known but not the scope(s) using it.
             </li>
             <li>Ontology within scope @<code>/ontonet/ontology/{scopeName}/{ontologyID}</code>:
-              Perform CRUD operations on ontology scopes.
+              Load/Unload operations on a single ontology loaded within a scope.
             </li>
           </ul>
 
-          <h4>Session Management (<code>"/ontonet/session"</code>):</h4>
+          <h4>OntoNet Session Management (<code>"/ontonet/session"</code>):</h4>
       
           <ul>
-            <li>Ontology scope registry @<a href="${it.publicBaseUri}ontonet/session">/ontonet/session</a>:
-              Perform CRUD operations on ontology scopes.
+            <li>Session registry @<a href="${it.publicBaseUri}ontonet/session">/ontonet/session</a>:
+              Perform CRUD operations on ontology sessions.
             </li>
-            <li>Ontology scope @<code>/ontonet/session/{sessionId}</code>:
-              Perform CRUD operations on ontology scopes.
+            <li>OntoNet Session @<code>/ontonet/session/{sessionId}</code>:
+              Manage metadata for a single OntoNet session.
             </li>
           </ul>
       
