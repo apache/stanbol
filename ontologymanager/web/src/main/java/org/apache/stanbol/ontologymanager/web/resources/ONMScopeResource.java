@@ -1,10 +1,6 @@
 package org.apache.stanbol.ontologymanager.web.resources;
 
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.CONFLICT;
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-
-import java.util.Hashtable;
+import static javax.ws.rs.core.Response.Status.*;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -25,7 +21,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -36,11 +31,9 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeEventListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.io.OntologyRegistryIRISource;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -57,6 +50,7 @@ public class ONMScopeResource extends BaseStanbolResource {
 	 * Placeholder for the ONManager to be fetched from the servlet context.
 	 */
 	protected ONManager onm;
+	
 	protected ClerezzaOntologyStorage storage;
 
 	protected ServletContext servletContext;
@@ -147,7 +141,7 @@ public class ONMScopeResource extends BaseStanbolResource {
 				throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
 			}
 		} else
-			throw new WebApplicationException(404);
+			throw new WebApplicationException(NOT_FOUND);
 		return Response.ok(res).build();
 	}
 
@@ -197,8 +191,6 @@ public class ONMScopeResource extends BaseStanbolResource {
 				coreSrc = new RootOntologyIRISource(IRI.create(coreOntology));
 			} catch (Exception e2) {
 				// If this fails too, throw a bad request.
-				// System.out.println("1.1");
-				e2.printStackTrace();
 				throw new WebApplicationException(e2, BAD_REQUEST);
 			}
 		}
@@ -217,18 +209,11 @@ public class ONMScopeResource extends BaseStanbolResource {
 							.create(customOntology));
 				} catch (Exception e2) {
 					// If this fails too, throw a bad request.
-					// System.out.println("1.2");
-					e2.printStackTrace();
 					throw new WebApplicationException(e2, BAD_REQUEST);
 				}
 			}
 		}
-		// If we weren't able to build core source, throw bad request.
-		if (coreSrc == null) {
-			// System.out.println("1.3");
-			throw new WebApplicationException(BAD_REQUEST);
-		}
-
+		
 		// Now the creation.
 		try {
 			IRI scopeId = IRI.create(uriInfo.getAbsolutePath());

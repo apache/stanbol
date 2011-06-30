@@ -15,11 +15,10 @@ import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import com.sun.jersey.api.view.ImplicitProduces;
 import com.sun.jersey.api.view.Viewable;
 
-
 /**
  * 
  * @author andrea.nuzzolese
- *
+ * 
  */
 
 @Path("/ontonet")
@@ -27,10 +26,9 @@ import com.sun.jersey.api.view.Viewable;
 public class RootResource extends BaseStanbolResource {
 
     public RootResource(@Context ServletContext servletContext) {
-        
 
     }
-    
+
     @GET
     @Produces(TEXT_HTML)
     public Response get() {

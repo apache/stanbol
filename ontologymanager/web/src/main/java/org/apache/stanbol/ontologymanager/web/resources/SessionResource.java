@@ -1,5 +1,6 @@
 package org.apache.stanbol.ontologymanager.web.resources;
 
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
@@ -9,18 +10,21 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.commons.web.base.format.KRFormat;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
@@ -32,16 +36,12 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySp
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.renderers.SessionRenderer;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.commons.web.base.format.KRFormat;
-import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-
+import com.sun.jersey.api.view.Viewable;
 import com.sun.jersey.multipart.FormDataParam;
 
 @Path("/ontonet/session")
@@ -58,7 +58,7 @@ public class SessionResource extends BaseStanbolResource {
         this.servletContext = servletContext;
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
     }
-    
+
     @PUT
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response addOntology(@FormDataParam("scope") String scope,
@@ -152,7 +152,7 @@ public class SessionResource extends BaseStanbolResource {
         SessionOntologySpace sessionOntologySpace = ontologySpaceFactory.createSessionOntologySpace(scopeIRI);
         ontologyScope.addSessionSpace(sessionOntologySpace, ses.getID());
 
-        return Response.ok(SessionRenderer.getSessionMetadataRDF(ses)).build();
+        return Response.ok(SessionRenderer.getSessionMetadataRDFasOntology(ses)).build();
 
     }
 
@@ -200,6 +200,12 @@ public class SessionResource extends BaseStanbolResource {
             return Response.ok().build();
         }
 
+    }
+
+    @GET
+    @Produces(TEXT_HTML)
+    public Response getView() {
+        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
     }
 
 }

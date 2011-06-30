@@ -1,6 +1,7 @@
 package org.apache.stanbol.ontologymanager.web.resources;
 
-import java.util.Hashtable;
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
+
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -15,20 +16,19 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
-import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.commons.web.base.format.KRFormat;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.renderers.ScopeSetRenderer;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.commons.web.base.format.KRFormat;
-import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import com.sun.jersey.api.view.Viewable;
 
 /**
  * The main Web resource of the KReS ontology manager. All the scopes, sessions and ontologies are accessible
@@ -44,14 +44,14 @@ import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 public class ONMRootResource extends BaseStanbolResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
-
+    
     /*
      * Placeholder for the ONManager to be fetched from the servlet context.
      */
     protected ONManager onm;
-    protected ClerezzaOntologyStorage storage;
 
     protected ServletContext servletContext;
+    protected ClerezzaOntologyStorage storage;
 
     public ONMRootResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
@@ -105,6 +105,12 @@ public class ONMRootResource extends BaseStanbolResource {
         OWLOntology ontology = ScopeSetRenderer.getScopes(scopes);
 
         return Response.ok(ontology).build();
+    }
+
+    @GET
+    @Produces(TEXT_HTML)
+    public Response getView() {
+        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
     }
 
 }

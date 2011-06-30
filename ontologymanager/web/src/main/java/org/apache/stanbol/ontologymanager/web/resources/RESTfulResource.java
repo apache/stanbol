@@ -12,4 +12,3 @@ import com.sun.jersey.api.view.ImplicitProduces;
 public class RESTfulResource extends BaseStanbolResource {
 
 }
-

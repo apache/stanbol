@@ -1,7 +1,5 @@
 package org.apache.stanbol.ontologymanager.web.resources;
 
-import java.util.Hashtable;
-
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -11,13 +9,11 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
@@ -38,17 +34,19 @@ public class ONMOntResource extends BaseStanbolResource {
      * Placeholder for the ONManager to be fetched from the servlet context.
      */
     protected ONManager onm;
-    protected ClerezzaOntologyStorage storage;
+
+    protected Serializer serializer;
 
     protected ServletContext servletContext;
 
-    protected Serializer serializer;
+    protected ClerezzaOntologyStorage storage;
 
     public ONMOntResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
-		this.storage = (ClerezzaOntologyStorage) ContextHelper.getServiceFromContext(ClerezzaOntologyStorage.class, servletContext);
-        this.serializer = (Serializer) ContextHelper.getServiceFromContext(Serializer.class,servletContext);
+        this.storage = (ClerezzaOntologyStorage) ContextHelper.getServiceFromContext(
+            ClerezzaOntologyStorage.class, servletContext);
+        this.serializer = (Serializer) ContextHelper.getServiceFromContext(Serializer.class, servletContext);
     }
 
     @GET
