@@ -26,6 +26,21 @@
 <@entities.listing entities=it.placeOccurrences /> 
 </#if>
 </div>
+
+<div class="entitylisting">
+<#if it.conceptOccurrences?size != 0>
+<h3>Concepts</h3>
+<@entities.listing entities=it.conceptOccurrences /> 
+</#if>
+</div>
+
+<div class="entitylisting">
+<#if it.otherOccurrences?size != 0>
+<h3>Others</h3>
+<@entities.listing entities=it.otherOccurrences /> 
+</#if>
+</div>
+
 </div>
 <div style="clear: both"></div>
 
