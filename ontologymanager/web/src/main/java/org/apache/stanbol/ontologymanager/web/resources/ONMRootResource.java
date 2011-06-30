@@ -26,6 +26,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
@@ -54,25 +55,8 @@ public class ONMRootResource extends BaseStanbolResource {
 
     public ONMRootResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
-        this.onm = (ONManager) servletContext.getAttribute(ONManager.class.getName());
-//      this.storage = (OntologyStorage) servletContext
-//      .getAttribute(OntologyStorage.class.getName());
-// Contingency code for missing components follows.
-/*
- * FIXME! The following code is required only for the tests. This should
- * be removed and the test should work without this code.
- */
-if (onm == null) {
-    log
-            .warn("No KReSONManager in servlet context. Instantiating manually...");
-    onm = new ONManagerImpl(new TcManager(), null,
-            new Hashtable<String, Object>());
-}
-this.storage = onm.getOntologyStore();
-if (storage == null) {
-    log.warn("No OntologyStorage in servlet context. Instantiating manually...");
-    storage = new ClerezzaOntologyStorage(new TcManager(),null);
-}
+        this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
+		this.storage = (ClerezzaOntologyStorage) ContextHelper.getServiceFromContext(ClerezzaOntologyStorage.class, servletContext);
     }
 
     /**
@@ -122,61 +106,5 @@ if (storage == null) {
 
         return Response.ok(ontology).build();
     }
-
-    // @Path("upload")
-    // @Consumes(MediaType.MULTIPART_FORM_DATA)
-    // @POST
-    // public void uploadDumb(@FormParam("file") InputStream is) {
-    // Writer writer = new StringWriter();
-    //
-    // char[] buffer = new char[1024];
-    //
-    // try {
-    //
-    // Reader reader = new BufferedReader(
-    //
-    // new InputStreamReader(is, "UTF-8"));
-    //
-    // int n;
-    //
-    // while ((n = reader.read(buffer)) != -1) {
-    //
-    // writer.write(buffer, 0, n);
-    //
-    // }
-    // } catch (IOException ex) {
-    // throw new WebApplicationException(ex);
-    // } finally {
-    //
-    // try {
-    // is.close();
-    // } catch (IOException e) {
-    // throw new WebApplicationException(e);
-    // }
-    //
-    // }
-    // System.out.println(writer.toString());
-    // }
-    //
-    // @Path("formdata")
-    // @Consumes(MediaType.MULTIPART_FORM_DATA)
-    // @POST
-    // public void uploadUrlFormData(
-    // @FormDataParam("file") List<FormDataBodyPart> parts,
-    // @FormDataParam("submit") FormDataBodyPart submit)
-    // throws IOException, ParseException {
-    //
-    // System.out.println("XXXX: " + submit.getMediaType());
-    // System.out.println("XXXX: "
-    // + submit.getHeaders().getFirst("Content-Type"));
-    //
-    // for (FormDataBodyPart bp : parts) {
-    // System.out.println(bp.getMediaType());
-    // System.out.println(bp.getHeaders().get("Content-Disposition"));
-    // System.out.println(bp.getParameterizedHeaders().getFirst(
-    // "Content-Disposition").getParameters().get("name"));
-    // bp.cleanup();
-    // }
-    // }
 
 }

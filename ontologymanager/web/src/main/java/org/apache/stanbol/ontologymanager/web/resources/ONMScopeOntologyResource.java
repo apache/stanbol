@@ -21,6 +21,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
@@ -69,25 +70,8 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
 
     public ONMScopeOntologyResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
-        this.onm = (ONManager) servletContext.getAttribute(ONManager.class.getName());
-//      this.storage = (OntologyStorage) servletContext
-//      .getAttribute(OntologyStorage.class.getName());
-// Contingency code for missing components follows.
-/*
- * FIXME! The following code is required only for the tests. This should
- * be removed and the test should work without this code.
- */
-if (onm == null) {
-    log
-            .warn("No KReSONManager in servlet context. Instantiating manually...");
-    onm = new ONManagerImpl(new TcManager(), null,
-            new Hashtable<String, Object>());
-}
-this.storage = onm.getOntologyStore();
-if (storage == null) {
-    log.warn("No OntologyStorage in servlet context. Instantiating manually...");
-    storage = new ClerezzaOntologyStorage(new TcManager(),null);
-}
+        this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
+        this.storage = (ClerezzaOntologyStorage) ContextHelper.getServiceFromContext(ClerezzaOntologyStorage.class, servletContext);
     }
 
     /**
@@ -122,7 +106,7 @@ if (storage == null) {
             OntologyScope scope = reg.getScope(sciri);
             if (scope == null) return Response.status(NOT_FOUND).build();
 
-            /* BEGIN debug code, uncomment only for local testing */
+            /* BEGIN debug code, uncomment only for local testing 
             OWLOntology test = null, top = null;
             test = scope.getCustomSpace().getOntology(ontiri);
             System.out.println("Ontology " + ontiri);
@@ -132,7 +116,7 @@ if (storage == null) {
             System.out.println("Core root for scope " + scopeid);
             for (OWLImportsDeclaration imp : top.getImportsDeclarations())
                 System.out.println("\timports " + imp.getIRI());
-            /* END debug code */
+             END debug code */
 
             OWLOntology ont = null;
             // By default, always try retrieving the ontology from the custom space
@@ -307,10 +291,11 @@ if (storage == null) {
 
         if (ontologyid != null && !ontologyid.equals("")) {
             String scopeURI = uriInfo.getAbsolutePath().toString().replace(ontologyid, "");
-            System.out
+           /* System.out
                     .println("Received DELETE request for ontology " + ontologyid + " in scope " + scopeURI);
+            */
             IRI scopeIri = IRI.create(uriInfo.getBaseUri() + "ontology/" + scopeId);
-            System.out.println("SCOPE IRI : " + scopeIri);
+            //System.out.println("SCOPE IRI : " + scopeIri);
             IRI ontIri = IRI.create(ontologyid);
             ScopeRegistry reg = onm.getScopeRegistry();
             OntologyScope scope = reg.getScope(scopeIri);

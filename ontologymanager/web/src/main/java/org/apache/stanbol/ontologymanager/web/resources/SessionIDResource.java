@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
@@ -31,13 +32,7 @@ public class SessionIDResource extends BaseStanbolResource {
 
 	public SessionIDResource(@Context ServletContext servletContext) {
 		this.servletContext = servletContext;
-		onm = (ONManager) this.servletContext
-				.getAttribute(ONManager.class.getName());
-		if (onm == null) {
-			System.err
-					.println("[KReS] :: No KReS Ontology Network Manager provided by Servlet Context. Instantiating now...");
-			onm = new ONManagerImpl();
-		}
+		this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
 	}
 
 	@GET

@@ -38,6 +38,7 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
+import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
@@ -55,12 +56,7 @@ public class SessionResource extends BaseStanbolResource {
 
     public SessionResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
-        onm = (ONManager) this.servletContext.getAttribute(ONManager.class.getName());
-        if (onm == null) {
-            System.err
-                    .println("[KReS] :: No KReS Ontology Network Manager provided by Servlet Context. Instantiating now...");
-            onm = new ONManagerImpl();
-        }
+        this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
     }
     
     @PUT

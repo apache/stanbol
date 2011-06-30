@@ -26,6 +26,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
@@ -35,6 +36,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeEventListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.io.OntologyRegistryIRISource;
@@ -61,28 +63,8 @@ public class ONMScopeResource extends BaseStanbolResource {
 
 	public ONMScopeResource(@Context ServletContext servletContext) {
 		this.servletContext = servletContext;
-		this.onm = (ONManager) servletContext
-				.getAttribute(ONManager.class.getName());
-		this.storage = (ClerezzaOntologyStorage) servletContext
-				.getAttribute(ClerezzaOntologyStorage.class.getName());
-//      this.storage = (OntologyStorage) servletContext
-//      .getAttribute(OntologyStorage.class.getName());
-// Contingency code for missing components follows.
-/*
- * FIXME! The following code is required only for the tests. This should
- * be removed and the test should work without this code.
- */
-if (onm == null) {
-    log
-            .warn("No KReSONManager in servlet context. Instantiating manually...");
-    onm = new ONManagerImpl(new TcManager(), null,
-            new Hashtable<String, Object>());
-}
-this.storage = onm.getOntologyStore();
-if (storage == null) {
-    log.warn("No OntologyStorage in servlet context. Instantiating manually...");
-    storage = new ClerezzaOntologyStorage(new TcManager(),null);
-}
+		this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
+		this.storage = (ClerezzaOntologyStorage) ContextHelper.getServiceFromContext(ClerezzaOntologyStorage.class, servletContext);
 	}
 
 	@DELETE
@@ -202,8 +184,6 @@ if (storage == null) {
 		ScopeRegistry reg = onm.getScopeRegistry();
 		OntologyScopeFactory f = onm.getOntologyScopeFactory();
 
-		System.out.println("GOT PUT");
-
 		OntologyScope scope;
 		OntologyInputSource coreSrc = null, custSrc = null;
 
@@ -267,6 +247,8 @@ if (storage == null) {
 			reg.setScopeActive(scopeId, activateBool);
 		} catch (DuplicateIDException e) {
 			throw new WebApplicationException(e, CONFLICT);
+		} catch (Exception ex){
+			throw new WebApplicationException(ex, INTERNAL_SERVER_ERROR);
 		}
 
 		return Response.ok().build();
