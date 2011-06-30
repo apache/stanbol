@@ -42,6 +42,13 @@ public class CMSAdapterVocabulary {
     public static final Property CMSAD_PROPERTY_SOURCE_OBJECT_PROP = property(CMS_ADAPTER_VOCABULARY_URI,
         CMSAD_PROPERTY_SOURCE_OBJECT_PROP_NAME);
 
+    /**
+     * Property to access metadata of a specific cms object.
+     */
+    private static final String CMSAD_PROPERTY_CONTENT_ITEM_REF_NAME = "contentItemRef";
+    public static final Property CMSAD_PROPERTY_CONTENT_ITEM_REF = property(CMS_ADAPTER_VOCABULARY_URI,
+        CMSAD_PROPERTY_CONTENT_ITEM_REF_NAME);
+
     /*
      * Properties to store connection info in the ontology
      */

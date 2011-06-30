@@ -133,28 +133,144 @@ public interface RepositoryAccess {
      */
     CMSObject getFirstNodeByName(String name, ConnectionInfo connectionInfo) throws RepositoryAccessException;
 
+    /**
+     * Method to retrieve children of a specific node. Uses existing connection.
+     * 
+     * @param node
+     * @param session
+     *            An open connection, ready to access repository.
+     * @return list of children of the specified node as {@link CMSObject}s
+     * @throws RepositoryAccessException
+     *             If repository is not accessible or <b>node</b> can not be found.
+     */
     List<CMSObject> getChildren(CMSObject node, Object session) throws RepositoryAccessException;
 
+    /**
+     * Method to retrieve an {@link ObjectTypeDefinition}, given its reference. Uses existing connection.
+     * 
+     * @param typeRef
+     *            Unique identifier of the type in the repository.
+     * @param session
+     *            An open connection, ready to access repository.
+     * @return type definition identified by <b>typeRef</b> as {@link ObjectTypeDefinition}
+     * @throws RepositoryAccessException
+     *             If repository is not accessible or <b>node</b> can not be found.
+     */
     ObjectTypeDefinition getObjectTypeDefinition(String typeRef, Object session) throws RepositoryAccessException;
 
+    /**
+     * Method to retrieve properties of a CMS object. Uses an existing connection.
+     * 
+     * @param node
+     *            A {@link CMSObject} that represents a CMS object in a repository.
+     * @param session
+     *            An open connection, ready to access repository.
+     * @return list of properties of the CMS object, as {@link Property}
+     * @throws RepositoryAccessException
+     *             If repository is not accessible or <b>node</b> can not be found.
+     */
     List<Property> getProperties(CMSObject node, Object session) throws RepositoryAccessException;
 
+    /**
+     * Method to retrieve property definitions of a specific type. Uses an existing connection.
+     * 
+     * @param instance
+     * @param session
+     *            An open connection, ready to access repository.
+     * @return list of property definitions of the type, as {@link PropertyDefinition}
+     * @throws RepositoryAccessException
+     *             If repository is not accessible or <b>instance</b> can not be found.
+     */
     List<PropertyDefinition> getPropertyDefinitions(ObjectTypeDefinition instance, Object session) throws RepositoryAccessException;
 
+    /**
+     * Method to retrieve parent type definitions of a specific type definition. Uses an existing connection.
+     * 
+     * @param instance
+     * @param session
+     *            An open connection, ready to access repository.
+     * @return list of type definitions as {@link ObjectTypeDefinition}
+     * @throws RepositoryAccessException
+     *             If repository is not accessible or <b>instance</b> can not be found.
+     */
     List<ObjectTypeDefinition> getParentTypeDefinitions(ObjectTypeDefinition instance, Object session) throws RepositoryAccessException;
 
+    /**
+     * Method to retrieve child type definitions of a specific type definition. Uses an existing connection.
+     * 
+     * @param instance
+     * @param session
+     *            An open connection, ready to access repository.
+     * @return list of type definitions, as {@link ObjectTypeDefinition}
+     * @throws RepositoryAccessException
+     *             If repository is not accessible or <b>instance</b> can not be found.
+     */
     List<ObjectTypeDefinition> getChildObjectTypeDefinitions(ObjectTypeDefinition instance, Object session) throws RepositoryAccessException;
 
+    /**
+     * Method to get the CMS object which has <b>instance</b> as a property. Uses an existing connection.
+     * 
+     * @param instance
+     * @param session
+     *            An open connection, ready to access repository.
+     * @return CMS object, as a {@link CMSObject}
+     * @throws RepositoryAccessException
+     *             If repository is not accessible or <b>instance</b> can not be found.
+     */
     CMSObject getContainerObject(Property instance, Object session) throws RepositoryAccessException;
 
+    /**
+     * Method to get property definition of a property that belongs to a CMS object.
+     * 
+     * @param instance
+     * @param session
+     *            An open connection, ready to access repository.
+     * @return Property definition of the <b>instance</b>, as a {@link PropertyDefinition}
+     * @throws RepositoryAccessException
+     *             If repository is not accessible or <b>instance</b> can not be found.
+     * 
+     */
     PropertyDefinition getPropertyDefinition(Property instance, Object session) throws RepositoryAccessException;
 
+    /**
+     * Method to resolve namespace prefixes used by CMS repository. Uses an existing connection.
+     * 
+     * @param prefix
+     *            Prefix to be resolved.
+     * @param session
+     *            An open connection, ready to access repository.
+     * @return full URI of the namespace
+     * @throws RepositoryAccessException
+     *             If repository is not accessible or <b>prefix</b> can not be resolved.
+     */
     String getNamespaceURI(String prefix, Object session) throws RepositoryAccessException;
 
+    /**
+     * Method to retrieve parent of a CMS node.
+     * 
+     * @param instance
+     * @param session
+     *            An open connection, ready to access repository.
+     * @return parent of the node, as a {@link CMSObject}
+     * @throws RepositoryAccessException
+     *             If repository is not accessible or <b>prefix</b> can not be resolved.
+     */
+    CMSObject getParentByNode(CMSObject instance, Object session) throws RepositoryAccessException;
+
+    /**
+     * 
+     * @param connectionInfo
+     * @return true if the {@link RepositoryAccess} instance can connect to repository with the given
+     *         <b>connectionInfo</b>
+     */
     boolean canRetrieve(ConnectionInfo connectionInfo);
 
+    /**
+     * 
+     * @param session
+     * @return true if the {@link RepositoryAccess} instance can connect to repository with the given
+     *         <b>session</b>
+     */
     boolean canRetrieve(Object session);
-
-    CMSObject getParentByNode(CMSObject instance, Object session) throws RepositoryAccessException;
 
 }

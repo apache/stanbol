@@ -5,8 +5,16 @@ import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectTypeDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.Property;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropertyDefinition;
 
+/**
+ * Adapter Class for converting CMS model objects to Decorated CMS objects.
+ * The former group has no access to the original CMS repository they are extracted from.
+ * The latter can be configured to access to the repository if needed.
+ * @author cihan
+ *
+ */
 public interface DObjectAdapter {
 
+    
     DObject wrapAsDObject(CMSObject node);
 
     DObjectType wrapAsDObjectType(ObjectTypeDefinition definition);
@@ -15,6 +23,10 @@ public interface DObjectAdapter {
 
     DProperty wrapAsDProperty(Property property);
 
+    /**
+     * Session object to connect Remote CMS repository.
+     * @return
+     */
     Object getSession();
 
     /**
@@ -22,7 +34,6 @@ public interface DObjectAdapter {
      * faced.
      * 
      * @param mode
-     * @return
      */
     void setMode(AdapterMode mode);
 

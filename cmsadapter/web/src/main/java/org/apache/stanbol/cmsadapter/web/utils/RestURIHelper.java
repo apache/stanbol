@@ -13,7 +13,7 @@ public class RestURIHelper {
 	}
 
 	public static String getOntologyHref(String ontologyURI) {
-		return ONTOLOGY + "/" + ontologyURI;
+		return "/" + ONTOLOGY + "/" + ontologyURI;
 	}
 
 	public static String getClassHref(String ontologyURI, String classURI) {

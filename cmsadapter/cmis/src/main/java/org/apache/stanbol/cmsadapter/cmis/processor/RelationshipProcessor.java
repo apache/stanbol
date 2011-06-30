@@ -8,6 +8,8 @@ import org.apache.chemistry.opencmis.client.api.Relationship;
 import org.apache.chemistry.opencmis.client.api.RelationshipType;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisBaseException;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.cmsadapter.cmis.repository.CMISObjectId;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.OntologyResourceHelper;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.MappingEngine;
@@ -19,6 +21,20 @@ import org.slf4j.LoggerFactory;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntProperty;
 
+/**
+ * TODO: This processer is not tested yet.
+ * 
+ * This processor creates OWL object property assertions from CMIS {@link Relationship}s.
+ * Subject is the individual generated for the source object of the relationship.
+ * Property is the property generated for the type of the relationship.
+ * Object is the individual generated for the target object of the relationship.
+ * 
+ * @author cihan
+ *
+ */
+
+@Service
+@Component(immediate=true)
 public class RelationshipProcessor implements Processor {
     private static final Logger log = LoggerFactory.getLogger(RelationshipProcessor.class);
 

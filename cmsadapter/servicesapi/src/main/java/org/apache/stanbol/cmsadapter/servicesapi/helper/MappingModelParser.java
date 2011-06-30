@@ -25,6 +25,11 @@ import org.slf4j.LoggerFactory;
 public class MappingModelParser {
     private static final Logger logger = LoggerFactory.getLogger(MappingModelParser.class);
 
+    /**
+     * Parses an XML document and returns corresponding {@link BridgeDefinitions} instance.
+     * @param xmlContent String representation of XML Document.
+     * @return {@link BridgeDefinitions} instance or null if unsuccessful.
+     */
     public static BridgeDefinitions deserializeObject(String xmlContent) {
         BridgeDefinitions bridgeDefinitions = null;
 
@@ -41,6 +46,11 @@ public class MappingModelParser {
         return bridgeDefinitions;
     }
 
+    /**
+     * Converts an object to its XML form.
+     * @param object Any object that can be created by {@link ObjectFactory} 
+     * @return XML Document as a string.
+     */
     public static String serializeObject(Object object) {
         String bridgeDefinitions = null;
 

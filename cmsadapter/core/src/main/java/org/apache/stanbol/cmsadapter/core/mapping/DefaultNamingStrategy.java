@@ -116,21 +116,6 @@ public class DefaultNamingStrategy implements NamingStrategy {
         return getAvailableResourceName(ontologyURI, candidateNames, DATA_PROPERTY_DELIMITER);
     }
 
-    @Override
-    public void setRepositoryAccess(RepositoryAccess repositoryAccess) {
-        this.repositoryAccess = repositoryAccess;
-    }
-
-    @Override
-    public void setSession(Object session) {
-        this.session = session;
-    }
-
-    @Override
-    public void setOntModel(OntModel ontModel) {
-        this.processedModel = ontModel;
-    }
-
     private String getAvailableResourceName(String ontologyURI,
                                             List<String> candidates,
                                             String resourceDelimiter) {

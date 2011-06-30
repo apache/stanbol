@@ -16,6 +16,16 @@ import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropertyDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccess;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
 
+/**
+ * This class is used for mocking a {@link RepositoryAccess} service when there is not possible to access a
+ * remote CMS Repository. Instead when initialized with a list of CMS Objects, Offline Access acts as a
+ * repository, providing an implementation of {@link RepositoryAccess} so that there no separate interface for
+ * offline processing.
+ * 
+ * 
+ * @author cihan
+ * 
+ */
 public class OfflineAccess implements RepositoryAccess {
 
     MultiValueMap nameMap = new MultiValueMap();

@@ -13,6 +13,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.MappingModelParser;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.OntologyResourceHelper;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.MappingEngine;
+import org.apache.stanbol.cmsadapter.servicesapi.model.mapping.BridgeDefinitions;
 import org.apache.stanbol.cmsadapter.servicesapi.model.mapping.ConceptBridge;
 import org.apache.stanbol.cmsadapter.servicesapi.model.mapping.PropertyBridge;
 import org.apache.stanbol.cmsadapter.servicesapi.model.mapping.SubsumptionBridge;
@@ -33,6 +34,22 @@ import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.ontology.OntClass;
 
+/**
+ * This processor can process {@link ClassificationObject}s. On
+ * {@link #createDecoratedObjects(List, MappingEngine)} call, for each CMS Object of type
+ * {@link ClassificationObject} an OWL Class is created. Also if there is a property mapping defined in
+ * {@link BridgeDefinitions} then an instance of {@link PropertyProcesser} will be used to process these
+ * definitions. <br/>
+ * If there is a {@link SubsumptionBridge} service available, children of any {@link ClassificationObject}
+ * will be processed by subsumption processer.
+ * 
+ * On {@link #deleteObjects(List, MappingEngine)} call, for each CMS Object of the type
+ * {@link ClassificationObject} the previously created resource is found and all the triples of which the
+ * resource is the subject is deleted.
+ * 
+ * @author Suat
+ * 
+ */
 @Component(immediate = true)
 @Service
 @Reference(cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, referenceInterface = Processor.class, policy = ReferencePolicy.DYNAMIC, bind = "bindProcessor", unbind = "unbindProcessor", name = "processor")

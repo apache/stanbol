@@ -7,6 +7,11 @@ import org.apache.stanbol.cmsadapter.servicesapi.model.web.AnnotationType;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropType;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropertyDefinition;
 
+/**
+ * 
+ * @author cihan
+ *
+ */
 public interface DPropertyDefinition {
 
     String getUniqueRef();

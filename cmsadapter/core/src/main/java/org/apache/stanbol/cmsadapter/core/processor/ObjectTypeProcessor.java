@@ -30,6 +30,22 @@ import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.OWL;
 
+/**
+ * This processer can process CMS Objects of type {@link ObjectTypeDefinition}.
+ * A type definition corresponds to an OWL Class and properties defined on the type corresponds to OWL datatype or OWL object properties.
+ * <br/>
+ * A property is converted to an OWL object property if it is type is amongst following:
+ * <ul>
+ *  <li>{@link PropType#NAME}</li>
+ *  <li>{@link PropType#PATH}</li>
+ *  <li>{@link PropType#REFERENCE}</li>
+ * </ul> 
+ * Otherwise the property is converted to an OWL datatype property.
+ * <br/>
+ * 
+ * @author Suat
+ *
+ */
 @Component(immediate = true)
 @Service
 public class ObjectTypeProcessor implements Processor, ProcessorProperties {

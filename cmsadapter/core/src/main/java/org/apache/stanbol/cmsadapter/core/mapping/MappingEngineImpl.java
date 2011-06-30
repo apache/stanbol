@@ -67,11 +67,10 @@ public class MappingEngineImpl implements MappingEngine {
     private NamingStrategy namingStrategy;
 
     @Activate
-    protected void activate(final Map<?,?> properties){
-        //TODO need to do something here?
+    protected void activate(final Map<?,?> properties) {
+        // TODO need to do something here?
     }
-    
-    
+
     private void runProcessors(List<Object> cmsObjects, String mode) {
         Iterator<Processor> processorIterator;
         synchronized (processors) {
@@ -105,6 +104,8 @@ public class MappingEngineImpl implements MappingEngine {
                 new JCRNodeTypeLifter(this).lift();
             } else if (connectionType.contentEquals("CMIS")) {
                 new CMISNodeTypeLifter(this).liftNodes();
+            } else {
+                throw new IllegalArgumentException("Connection type must be one of JCR or CMIS.");
             }
         } catch (RepositoryException e) {
             logger.warn("Lifting error", e);

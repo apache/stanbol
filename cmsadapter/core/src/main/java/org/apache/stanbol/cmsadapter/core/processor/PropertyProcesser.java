@@ -8,10 +8,13 @@ import org.apache.stanbol.cmsadapter.servicesapi.mapping.MappingEngine;
 import org.apache.stanbol.cmsadapter.servicesapi.model.mapping.PropertyBridge;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.AnnotationType;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.CMSObject;
+import org.apache.stanbol.cmsadapter.servicesapi.model.web.ClassificationObject;
+import org.apache.stanbol.cmsadapter.servicesapi.model.web.ContentObject;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropType;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DObject;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DProperty;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DPropertyDefinition;
+import org.apache.stanbol.cmsadapter.servicesapi.processor.Processor;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccess;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
 import org.slf4j.Logger;
@@ -26,6 +29,31 @@ import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntResource;
 
+/**
+ * This class does not implement {@link Processor} interface. However other processors uses this class to
+ * process instances of {@link PropertyBridge}s. If the property belongs to a {@link ContentObject} the
+ * following annotations are processed.
+ * <ul>
+ * <li>{@link AnnotationType#INSTANCE_OF}: The OWL Individual that represents source ClassificationObject's
+ * type becomes the OWL Class that represents target value of the property.</li>
+ * <li>{@link AnnotationType#FUNCTIONAL}: The property becomes a functional property.</li>
+ * <li>{@link AnnotationType#SYMMETRIC}: The property becomes a symmetric property.</li>
+ * <li>{@link AnnotationType#TRANSITIVE}: The property becomes a transitive property.</li>
+ * <li>{@link AnnotationType#INVERSE_FUNCTIONAL}: The property becomes an inverse functional property.</li>
+ * </ul>
+ * If the property belongs to a {@link ClassificationObject} the following annotations are processed.
+ * <ul>
+ * <li>{@link AnnotationType#SUBSUMPTION}: The OWL class that represents target ClassificationObject is
+ * considered as subclass of OWL Class that represents source ClassificationObject</li>
+ * <li>{@link AnnotationType#EQUIVALENT_CLASS} The OWL class that represents target ClassificationObject is
+ * considered as equivalent of OWL Class that represents source ClassificationObject</li>
+ * <li>{@link AnnotationType#DISJOINT_WITH} The OWL class that represents source ClassificationObject is
+ * considered as disjoint with OWL Class that represents target ClassificationObject</li>
+ * </ul>
+ * 
+ * @author Suat
+ * 
+ */
 public class PropertyProcesser {
 
     private static final Logger logger = LoggerFactory.getLogger(PropertyProcesser.class);
@@ -167,7 +195,8 @@ public class PropertyProcesser {
             }
             String propName = propDef.getName();
             String propFullName = propDef.getNamespace() + ":" + propDef.getName();
-            if (propName.equals(predicateName) || propName.contains(predicateName) || propFullName.equals(predicateName)) {
+            if (propName.equals(predicateName) || propName.contains(predicateName)
+                || propFullName.equals(predicateName)) {
                 AnnotationType annotation = getAnnotation(propertyBridge.getPropertyAnnotation());
                 processContentObjectProperty(property, propDef, contentObject, individual, annotation, engine);
                 // property found break the loop

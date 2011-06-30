@@ -14,6 +14,10 @@ import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 @Path("/cmsadapter")
 public class RootResource extends BaseStanbolResource {
 
+    /**
+     * Simply redirects user to CMS Adapter's wiki page at IKS Wiki. 
+     * @return  
+     */
     @GET
     public Response notifyChange() {
         try {

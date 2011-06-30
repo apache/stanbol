@@ -90,7 +90,7 @@ public class CMISNodeTypeLifter {
     }
 
     /**
-     * Extracts semantics through CMIS interface using bridge definitions
+     * Extracts semantics through CMIS interface
      * 
      * @param mappingFileContent
      * @throws Exception
@@ -195,7 +195,7 @@ public class CMISNodeTypeLifter {
     private static Boolean objectPropertyCheck(org.apache.stanbol.cmsadapter.servicesapi.model.web.PropertyDefinition prop) {
         PropType propType = prop.getPropertyType();
         // TODO consider all object properties
-        if (propType == PropType.REFERENCE || propType == PropType.PATH || propType == PropType.NAME) {
+        if (propType == PropType.REFERENCE ) {
             return true;
         }
         return false;

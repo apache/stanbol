@@ -2,6 +2,11 @@ package org.apache.stanbol.cmsadapter.servicesapi.processor;
 
 import java.util.Map;
 
+/**
+ * Implementors of this Interface can override their default processing order.
+ * @author cihan
+ *
+ */
 public interface ProcessorProperties {
     String PROCESSING_ORDER = "org.apache.stanbol.cmsadapter.servicesapi.processor.processing_order";
 

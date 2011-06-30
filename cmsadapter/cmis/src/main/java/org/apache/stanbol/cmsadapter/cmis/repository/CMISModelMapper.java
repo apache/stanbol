@@ -20,6 +20,13 @@ import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropType;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.Property;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropertyDefinition;
 
+/**
+ * This class converts objects from {@linkplain org.apache.chemistry.opencmis.client.api} to objects from
+ * {@linkplain org.apache.stanbol.cmsadapter.servicesapi.model.web}
+ * 
+ * @author cihan
+ * 
+ */
 public class CMISModelMapper {
 
     private static final SimpleDateFormat XML_DATETIME_FORMAT = new SimpleDateFormat("yyyy-mm-dd HH:mm:ssZ");
@@ -34,7 +41,6 @@ public class CMISModelMapper {
             throw new IllegalArgumentException("Expected cmis:document or cmis:folder, found "
                                                + object.getBaseTypeId().name());
         }
-
     }
 
     private static CMSObject getCMSObjectFromDocument(Document document) {
