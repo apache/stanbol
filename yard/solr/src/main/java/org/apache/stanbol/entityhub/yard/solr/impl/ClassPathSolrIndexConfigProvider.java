@@ -31,9 +31,9 @@ public class ClassPathSolrIndexConfigProvider implements DataFileProvider {
     public InputStream getInputStream(String bundleSymbolicName,
             String filename, Map<String, String> comments) 
     throws IOException {
-        //if the symbolicName is null accept any request
+        //if the parsed bundleSymbolicName is null accept any request
         //if not, than check if the request is from the correct bundle.
-        if(symbolicName != null && !symbolicName.equals(bundleSymbolicName)) {
+        if(bundleSymbolicName != null && !bundleSymbolicName.equals(bundleSymbolicName)) {
             log.debug("Requested bundleSymbolicName {} does not match mine ({}), request ignored",
                     bundleSymbolicName, symbolicName);
             return null;

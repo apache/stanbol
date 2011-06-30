@@ -114,11 +114,12 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  * 
  */
-@Component(metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE, // the ID and
-// SOLR_SERVER_LOCATION
-// are
-// required!
-specVersion = "1.1")
+@Component(
+    metatype = true, 
+    immediate = true,
+    configurationFactory = true, 
+    policy = ConfigurationPolicy.REQUIRE,
+    specVersion = "1.1")
 @Service
 @Properties(
     value = {
@@ -861,16 +862,30 @@ public class SolrYard extends AbstractYard implements Yard {
         } // else we need to do nothing
         inputDocument.addField(fieldMapper.getDocumentIdField(), representation.getId());
         // first process the document boost
-        float documentBoost = documentBoostFieldName == null ? 1.0f : getDocumentBoost(representation);
+        Float documentBoost = getDocumentBoost(representation);
+        //NOTE: Do not use DocumentBoost, because FieldBoost will override
+        //      document boosts and are not multiplied with with document boosts
+//        if(documentBoost != null){
+//            inputDocument.setDocumentBoost(documentBoost);
+//        }
         for (Iterator<String> fields = representation.getFieldNames(); fields.hasNext();) {
             // TODO: maybe add some functionality to prevent indexing of the
             // field configured as documentBoostFieldName!
             // But this would also prevent the possibility to intentionally
             // override the boost.
             String field = fields.next();
+            float boost;
             Float fieldBoost = fieldBoostMap == null ? null : fieldBoostMap.get(field);
-            float boost = fieldBoost == null ? documentBoost : fieldBoost >= 0 ? fieldBoost * documentBoost
-                    : documentBoost;
+            if(documentBoost != null){
+                boost = documentBoost;
+                if(fieldBoost != null){
+                    boost = boost*fieldBoost;
+                }
+            } else if(fieldBoost != null){
+                boost = fieldBoost;
+            } else {
+                boost = -1;
+            }
             for (Iterator<Object> values = representation.get(field); values.hasNext();) {
                 // now we need to get the indexField for the value
                 Object next = values.next();
@@ -878,7 +893,11 @@ public class SolrYard extends AbstractYard implements Yard {
                 try {
                     value = indexValueFactory.createIndexValue(next);
                     for (String fieldName : fieldMapper.getFieldNames(Arrays.asList(field), value)) {
-                        inputDocument.addField(fieldName, value.getValue(), boost);
+                        if(boost > 0){
+                            inputDocument.addField(fieldName, value.getValue(), boost);
+                        } else {
+                            inputDocument.addField(fieldName, value.getValue());
+                        }
                     }
                 } catch (Exception e) {
                     log.warn(
@@ -897,13 +916,13 @@ public class SolrYard extends AbstractYard implements Yard {
      *            the representation
      * @return the Boost or <code>null</code> if not found or lower equals zero
      */
-    private float getDocumentBoost(Representation representation) {
+    private Float getDocumentBoost(Representation representation) {
         if (documentBoostFieldName == null) {
-            return 1.0f;
+            return null;
         }
         Float documentBoost = null;
-        for (Iterator<Object> values = representation.get(documentBoostFieldName); values.hasNext()
-                                                                                   && documentBoost == null;) {
+        for (Iterator<Object> values = representation.get(documentBoostFieldName); 
+                values.hasNext() && documentBoost == null;) {
             Object value = values.next();
             if (value instanceof Float) {
                 documentBoost = (Float) value;
@@ -918,7 +937,7 @@ public class SolrYard extends AbstractYard implements Yard {
                 }
             }
         }
-        return documentBoost == null ? 1.0f : documentBoost >= 0 ? documentBoost : 1.0f;
+        return documentBoost == null ? null : documentBoost >= 0 ? documentBoost : null;
     }
 
     @Override
