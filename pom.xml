@@ -54,6 +54,7 @@
     <module>ontologymanager/ontonet</module>
     <module>ontologymanager/web</module>
     <module>rules</module>
+    <module>launchers/stable</module>
     <module>launchers/stateless</module>
     <module>launchers/full</module>
     <module>integration-tests</module>
