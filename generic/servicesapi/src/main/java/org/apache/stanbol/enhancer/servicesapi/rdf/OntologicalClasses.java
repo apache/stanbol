@@ -23,6 +23,9 @@ public class OntologicalClasses {
     public static final UriRef DBPEDIA_ORGANISATION = new UriRef(
             NamespaceEnum.dbpedia_ont+"Organisation");
 
+    public static final UriRef SKOS_CONCEPT = new UriRef(
+        NamespaceEnum.skos+"Concept");
+
     private OntologicalClasses() {
     }
 

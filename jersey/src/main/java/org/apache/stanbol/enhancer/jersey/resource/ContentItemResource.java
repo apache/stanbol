@@ -4,6 +4,7 @@ import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_ORGANISATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PERSON;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PLACE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.SKOS_CONCEPT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.GEO_LAT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.GEO_LONG;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
@@ -97,6 +98,10 @@ public class ContentItemResource extends BaseStanbolResource {
 
     protected Collection<EntityExtractionSummary> places;
 
+    protected Collection<EntityExtractionSummary> concepts;
+    
+    protected Collection<EntityExtractionSummary> others;
+
     public ContentItemResource(String localId,
                                ContentItem ci,
                                TripleCollection remoteEntityCache,
@@ -131,7 +136,8 @@ public class ContentItemResource extends BaseStanbolResource {
         defaultThumbnails.put(DBPEDIA_PERSON, getStaticRootUrl() + "/home/images/user_48.png");
         defaultThumbnails.put(DBPEDIA_ORGANISATION, getStaticRootUrl() + "/home/images/organization_48.png");
         defaultThumbnails.put(DBPEDIA_PLACE, getStaticRootUrl() + "/home/images/compass_48.png");
-
+        defaultThumbnails.put(SKOS_CONCEPT, getStaticRootUrl() + "/home/images/black_gear_48.png");
+        defaultThumbnails.put(null, getStaticRootUrl() + "/home/images/unknown_48.png");
     }
 
     public String getRdfMetadata(String mediatype) throws UnsupportedEncodingException {
@@ -174,6 +180,12 @@ public class ContentItemResource extends BaseStanbolResource {
         }
         return people;
     }
+    public Collection<EntityExtractionSummary> getOtherOccurrences() throws ParseException {
+        if(others == null){
+            others = getOccurrences(null);
+        }
+        return others;
+    }
 
     public Collection<EntityExtractionSummary> getOrganizationOccurrences() throws ParseException {
         if (organizations == null) {
@@ -188,25 +200,38 @@ public class ContentItemResource extends BaseStanbolResource {
         }
         return places;
     }
+    public Collection<EntityExtractionSummary> getConceptOccurrences() throws ParseException {
+        if (concepts == null) {
+            concepts = getOccurrences(SKOS_CONCEPT);
+        }
+        return concepts;
+    }
 
     public Collection<EntityExtractionSummary> getOccurrences(UriRef type) throws ParseException {
         MGraph graph = contentItem.getMetadata();
-        String q = "PREFIX enhancer: <http://fise.iks-project.eu/ontology/> "
-                   + "PREFIX dc:   <http://purl.org/dc/terms/> "
-                   + "SELECT ?textAnnotation ?text ?entity ?entity_label ?confidence WHERE { "
-                   + "  ?textAnnotation a enhancer:TextAnnotation ." 
-                   + "  ?textAnnotation dc:type %s ."
-                   + "  ?textAnnotation enhancer:selected-text ?text ." 
-                   + " OPTIONAL {"
-                   + "   ?entityAnnotation dc:relation ?textAnnotation ."
-                   + "   ?entityAnnotation a enhancer:EntityAnnotation . "
-                   + "   ?entityAnnotation enhancer:entity-reference ?entity ."
-                   + "   ?entityAnnotation enhancer:entity-label ?entity_label ."
-                   + "   ?entityAnnotation enhancer:confidence ?confidence . }" 
-                   + "} ORDER BY ?text ";
-        q = String.format(q, type);
+        StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append("PREFIX enhancer: <http://fise.iks-project.eu/ontology/> ");
+        queryBuilder.append("PREFIX dc:   <http://purl.org/dc/terms/> ");
+        queryBuilder.append("SELECT ?textAnnotation ?text ?entity ?entity_label ?confidence WHERE { ");
+        queryBuilder.append("  ?textAnnotation a enhancer:TextAnnotation ." );
+        if(type != null){
+            queryBuilder.append("  ?textAnnotation dc:type ").append(type).append(" . ");
+        } else {
+            //append a filter that this value needs to be non existent
+            queryBuilder.append(" OPTIONAL { ?textAnnotation dc:type ?type } . ");
+            queryBuilder.append(" FILTER(!bound(?type)) ");
+        }
+        queryBuilder.append("  ?textAnnotation enhancer:selected-text ?text ." );
+        queryBuilder.append(" OPTIONAL {");
+        queryBuilder.append("   ?entityAnnotation dc:relation ?textAnnotation .");
+        queryBuilder.append("   ?entityAnnotation a enhancer:EntityAnnotation . ");
+        queryBuilder.append("   ?entityAnnotation enhancer:entity-reference ?entity .");
+        queryBuilder.append("   ?entityAnnotation enhancer:entity-label ?entity_label .");
+        queryBuilder.append("   ?entityAnnotation enhancer:confidence ?confidence . }" );
+        queryBuilder.append("} ORDER BY ?text ");
+//        String queryString = String.format(queryBuilder.toString(), type);
 
-        SelectQuery query = (SelectQuery) QueryParser.getInstance().parse(q);
+        SelectQuery query = (SelectQuery) QueryParser.getInstance().parse(queryBuilder.toString());
         ResultSet result = tcManager.executeSparqlQuery(query, graph);
         Map<String,EntityExtractionSummary> occurrenceMap = new TreeMap<String,EntityExtractionSummary>();
         LiteralFactory lf = LiteralFactory.getInstance();
@@ -221,8 +246,8 @@ public class ContentItemResource extends BaseStanbolResource {
             // TODO: collect the selected text and contexts of subsumed
             // annotations
 
-            TypedLiteral textLiteral = (TypedLiteral) mapping.get("text");
-            String text = lf.createObject(String.class, textLiteral);
+            Literal textLiteral = (Literal) mapping.get("text");
+            String text = textLiteral.getLexicalForm();
 
             EntityExtractionSummary entity = occurrenceMap.get(text);
             if (entity == null) {
