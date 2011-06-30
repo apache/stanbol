@@ -135,12 +135,14 @@
  </build>
 
   <dependencies>
+  <!--
 	<dependency>
 		<groupId>org.apache.stanbol</groupId>
 		<artifactId>org.apache.stanbol.launchers.full</artifactId>
 		<version>0.9-SNAPSHOT</version>
     	<scope>provided</scope>
    	</dependency>
+  -->
     <!-- dependencies on other IKS modules -->
     <dependency>
       <groupId>org.apache.clerezza</groupId>
