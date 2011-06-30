@@ -350,7 +350,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.defaultdata</artifactId>
-      <version>0.0.2</version>
+      <version>0.0.3</version>
     </bundle>
   </startLevel>
 
@@ -499,14 +499,15 @@
       <version>0.9-SNAPSHOT</version>
     </bundle>
     <!--
-      The geonames.org LocationEnhancement Engines needs two additional bundles 1) jettyjson 2) commons-io.
-      Both of them are already present in the bundle list.
-    
+      The geonames.org webservice is often overloaded and than causes errors.
+      To use the api.geonames.org service users need to create a free account
+      and change the configuration.
+      Therefore this is deactivated in the stable launcher
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId>
       <version>0.9-SNAPSHOT</version>
-    </bundle> -->
+    </bundle>     -->
     <!-- Entity Tagging Engine (depends on the Entityhub) -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>

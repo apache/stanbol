@@ -362,7 +362,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.defaultdata</artifactId>
-      <version>0.0.2</version>
+      <version>0.0.3</version>
     </bundle>
   </startLevel>
 
@@ -629,6 +629,12 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.entitytagging</artifactId>
+      <version>0.9-SNAPSHOT</version>
+    </bundle>
+    <!-- Taxonomy Linking Engine (depends on the Entityhub) -->
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engine.taxonomy</artifactId>
       <version>0.9-SNAPSHOT</version>
     </bundle>
   </startLevel>
