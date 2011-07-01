@@ -51,6 +51,7 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,8 +85,13 @@ public class TestLocationEnhancementEngine {
     static LocationEnhancementEngine locationEnhancementEngine = new LocationEnhancementEngine();
 
     @BeforeClass
-    public static void setUpServices() throws IOException {
+    public static void setUpServices() throws IOException, ConfigurationException {
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        // use the anonymous service for the unit tests
+        properties.put(LocationEnhancementEngine.GEONAMES_USERNAME, 
+            "\u0073\u0074\u0061\u006E\u0062\u006F\u006C");
+        properties.put(LocationEnhancementEngine.GEONAMES_TOKEN, 
+            "\u0073\u0074\u006E\u0062\u006C\u002E\u0075\u0074");
         MockComponentContext context = new MockComponentContext(properties);
         locationEnhancementEngine.activate(context);
     }
