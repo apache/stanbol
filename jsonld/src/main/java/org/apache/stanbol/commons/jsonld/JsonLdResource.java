@@ -4,18 +4,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Fabian Christ
- *
+ * 
  */
 public class JsonLdResource {
 
     private String subject;
     private String profile;
     private List<String> types = new ArrayList<String>();
-    private Map<String, String> coercionMap = new HashMap<String, String>();
-    private Map<String, Object> propertyMap = new HashMap<String, Object>();
+    private Map<String,String> coercionMap = new HashMap<String,String>();
+    private Map<String,Object> propertyMap = new HashMap<String,Object>();
 
     public String getSubject() {
         return subject;
@@ -40,16 +41,16 @@ public class JsonLdResource {
     public void addAllTypes(List<String> types) {
         this.types.addAll(types);
     }
-    
+
     public void putCoercionType(String property, String type) {
         this.coercionMap.put(property, type);
     }
-    
+
     public String getCoercionTypeOf(String property) {
         return this.coercionMap.get(property);
     }
-    
-    public Map<String, String> getCoercionMap() {
+
+    public Map<String,String> getCoercionMap() {
         return this.coercionMap;
     }
 
@@ -57,7 +58,7 @@ public class JsonLdResource {
         return types;
     }
 
-    public void putAllProperties(Map<String, Object> propertyMap) {
+    public void putAllProperties(Map<String,Object> propertyMap) {
         this.propertyMap.putAll(propertyMap);
     }
 
@@ -65,8 +66,30 @@ public class JsonLdResource {
         propertyMap.put(property, value);
     }
 
-    public Map<String, Object> getPropertyMap() {
-        return propertyMap;
+    public Object getPropertyValueIgnoreCase(String property) {
+        for (String p : this.propertyMap.keySet()) {
+            if (p.equalsIgnoreCase(property)) {
+                return this.propertyMap.get(p);
+            }
+        }
+        return null;
+    }
+    
+    public Set<String> getProperties() {
+        return this.propertyMap.keySet();
+    }
+   
+    public Map<String,Object> getPropertyMap() {
+        return this.propertyMap;
     }
 
+    public boolean hasPropertyIgnorecase(String property) {
+        for (String p : this.propertyMap.keySet()) {
+            if (p.equalsIgnoreCase(property)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
