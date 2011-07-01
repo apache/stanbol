@@ -20,6 +20,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.factstore.api.FactStore;
 import org.apache.stanbol.factstore.model.Fact;
 import org.apache.stanbol.factstore.model.FactSchema;
+import org.apache.stanbol.factstore.model.Query;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -428,6 +429,12 @@ public class DerbyFactStore implements FactStore {
                 con.close();
             } catch (Throwable t) { /* ignore */}
         }
+    }
+
+    @Override
+    public org.apache.stanbol.factstore.model.ResultSet query(Query query) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

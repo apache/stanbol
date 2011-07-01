@@ -6,6 +6,8 @@ import org.apache.stanbol.commons.jsonld.JsonLdCommon;
 import org.apache.stanbol.factstore.api.FactStore;
 import org.apache.stanbol.factstore.model.Fact;
 import org.apache.stanbol.factstore.model.FactSchema;
+import org.apache.stanbol.factstore.model.Query;
+import org.apache.stanbol.factstore.model.ResultSet;
 
 public class FactStoreMock implements FactStore {
 
@@ -42,6 +44,12 @@ public class FactStoreMock implements FactStore {
     public void addFacts(Set<Fact> factSet) throws Exception {
         // TODO Auto-generated method stub
         
+    }
+
+    @Override
+    public ResultSet query(Query query) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
