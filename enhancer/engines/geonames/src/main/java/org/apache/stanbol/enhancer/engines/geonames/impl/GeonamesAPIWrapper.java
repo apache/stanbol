@@ -38,10 +38,18 @@ public class GeonamesAPIWrapper {
 
     static final Logger log = LoggerFactory.getLogger(GeonamesAPIWrapper.class);
     /**
-     * URI of the geonames.orf web services. This URI is used for the free as
-     * well as premium accounts without an own sub domain.
+     * URI of the geonames.org web services used as default. Currently this is
+     * the server that requires authentication with a free user account. The
+     * server that allows anonymous requests is often overloaded and is therefore
+     * no longer the default. Note that the anonymous server is still used in 
+     * case this class is initialised with the default constructor.
      */
-    public static final String GEONAMES_ORG_WEBSERVICE_URL = "http://ws.geonames.org/";
+    public static final String DEFAULT_GEONAMES_ORG_WEBSERVICE_URL = "http://api.geonames.org/";
+    /**
+     * The geonames.org web service URI allowing anonymous connections. Often
+     * overloaded. Will be used with the default constructor
+     */
+    public static final String ANONYMOUS_GEONAMES_ORG_WEBSERVICE_URL = "http://ws.geonames.org/";
     /**
      * Relative path to the search service
      */
@@ -53,16 +61,16 @@ public class GeonamesAPIWrapper {
 
     /**
      * The access url for the search service. As default
-     * {@link #GEONAMES_ORG_WEBSERVICE_URL}+{@link #SEARCH_SERVICE_PATH}
-     * ({@value #GEONAMES_ORG_WEBSERVICE_URL}{@value #SEARCH_SERVICE_PATH})
+     * {@link #DEFAULT_GEONAMES_ORG_WEBSERVICE_URL}+{@link #SEARCH_SERVICE_PATH}
+     * ({@value #DEFAULT_GEONAMES_ORG_WEBSERVICE_URL}{@value #SEARCH_SERVICE_PATH})
      * is used. Users with a premium account including an own sub domain
      * might need to change this.
      */
     protected String searchServiceUrl;
     /**
      * The access url for the hierarchy service. As default
-     * {@link #GEONAMES_ORG_WEBSERVICE_URL}+{@link #HIERARCHY_SERVICE_PATH}
-     * ({@value #GEONAMES_ORG_WEBSERVICE_URL}{@value #HIERARCHY_SERVICE_PATH})
+     * {@link #DEFAULT_GEONAMES_ORG_WEBSERVICE_URL}+{@link #HIERARCHY_SERVICE_PATH}
+     * ({@value #DEFAULT_GEONAMES_ORG_WEBSERVICE_URL}{@value #HIERARCHY_SERVICE_PATH})
      * is used. Users with a premium account including an own sub domain
      * might need to change this.
      */
@@ -282,8 +290,8 @@ public class GeonamesAPIWrapper {
      * Initialises a the geonames API wrapper as used for the free service
      */
     public GeonamesAPIWrapper() {
-        this(GEONAMES_ORG_WEBSERVICE_URL + SEARCH_SERVICE_PATH,
-                GEONAMES_ORG_WEBSERVICE_URL + HIERARCHY_SERVICE_PATH,
+        this(ANONYMOUS_GEONAMES_ORG_WEBSERVICE_URL + SEARCH_SERVICE_PATH,
+                DEFAULT_GEONAMES_ORG_WEBSERVICE_URL + HIERARCHY_SERVICE_PATH,
                 null, null);
     }
 
@@ -328,10 +336,19 @@ public class GeonamesAPIWrapper {
      * If no valid user name is parsed the token will be ignored.
      */
     public GeonamesAPIWrapper(String searchService, String hierarchyService, String userName, String token) {
-        this.searchServiceUrl = searchService != null ? searchService : (GEONAMES_ORG_WEBSERVICE_URL + SEARCH_SERVICE_PATH);
-        this.hierarchyServiceUrl = hierarchyService != null ? hierarchyService : (GEONAMES_ORG_WEBSERVICE_URL + HIERARCHY_SERVICE_PATH);
         this.userName = userName == null || userName.isEmpty() ? null : userName;
         this.token = this.userName == null ? null : token;
+        if(this.userName != null && this.token == null){
+            throw new IllegalArgumentException("The Token MUST NOT be NULL nor empty of a User-Name is parsed!");
+        }
+        String defaultServer; //only used if the parsed service urls are null
+        if(this.userName != null){
+            defaultServer = DEFAULT_GEONAMES_ORG_WEBSERVICE_URL;
+        } else {
+            defaultServer = ANONYMOUS_GEONAMES_ORG_WEBSERVICE_URL;
+        }
+        this.searchServiceUrl = searchService != null ? searchService : (defaultServer + SEARCH_SERVICE_PATH);
+        this.hierarchyServiceUrl = hierarchyService != null ? hierarchyService : (defaultServer + HIERARCHY_SERVICE_PATH);
     }
 
     public List<Toponym> searchToponyms(String name) throws IOException {

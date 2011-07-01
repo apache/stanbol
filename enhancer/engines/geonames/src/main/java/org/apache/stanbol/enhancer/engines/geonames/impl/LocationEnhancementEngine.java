@@ -61,6 +61,7 @@ import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.apache.stanbol.commons.stanboltools.offline.OnlineMode;
+import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,8 +115,14 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
     public static final String MIN_HIERARCHY_SCORE = "org.apache.stanbol.enhancer.engines.geonames.locationEnhancementEngine.min-hierarchy-score";
 
     public static final UriRef CONCEPT_GEONAMES_FEATURE = new UriRef(NamespaceEnum.geonames.toString() + "Feature");
-    @Property(value = GeonamesAPIWrapper.GEONAMES_ORG_WEBSERVICE_URL)
+    @Property(value = GeonamesAPIWrapper.DEFAULT_GEONAMES_ORG_WEBSERVICE_URL)
     public static final String GEONAMES_SERVER_URL = "org.apache.stanbol.enhancer.engines.geonames.locationEnhancementEngine.serverURL";
+    /**
+     * The useage of the anonymous server is deactivated by default because it
+     * is often overloaded and therefore causes randomly errors.
+     */
+    @Property(boolValue=false)
+    public static final String GEONAMES_ANONYMOUS_SERVICE_STATE = "org.apache.stanbol.enhancer.engines.geonames.locationEnhancementEngine.allow-anonymous-service";
     @Property
     public static final String GEONAMES_USERNAME = "org.apache.stanbol.enhancer.engines.geonames.locationEnhancementEngine.username";
     @Property
@@ -229,7 +236,7 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
     private Double minHierarchyScore;
 
     @SuppressWarnings("unchecked")
-    protected void activate(ComponentContext ce) throws IOException {
+    protected void activate(ComponentContext ce) throws IOException, ConfigurationException {
         Dictionary<String, Object> properties = ce.getProperties();
         log.debug("activating ...");
         //NOTE: The type of the values is ensured by the default values in the
@@ -237,12 +244,40 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
         setMinScore((Double) properties.get(MIN_SCORE));
         setMaxLocationEnhancements((Integer) properties.get(MAX_LOCATION_ENHANCEMENTS));
         setMinHierarchyScore((Double) properties.get(MIN_HIERARCHY_SCORE));
-        String serverUrl = (String) properties.get(GEONAMES_SERVER_URL);
-        if (serverUrl != null && serverUrl.isEmpty()) {
-            serverUrl = null; //prevent empty serverURLs (e.g. if the user deletes an value)
+        //parse geonames.org service specific configuration
+        Object value = properties.get(GEONAMES_ANONYMOUS_SERVICE_STATE);
+        boolean allowAnonymous;
+        if(value instanceof Boolean){
+            allowAnonymous = ((Boolean)value).booleanValue();
+        } else if(value != null){
+            allowAnonymous = Boolean.parseBoolean(value.toString());
+        } else {
+            allowAnonymous = false;
         }
+        String serverUrl = (String) properties.get(GEONAMES_SERVER_URL);
         String userName = (String) properties.get(GEONAMES_USERNAME);
         String token = (String) properties.get(GEONAMES_TOKEN);
+        if(userName == null || userName.isEmpty()){
+            if(allowAnonymous) {
+                log.info("Anonymous Access is enabled and no User-Name is configured." +
+                		"Ignore configred server URL {} and will use the anonymous server {}",
+                		serverUrl,GeonamesAPIWrapper.ANONYMOUS_GEONAMES_ORG_WEBSERVICE_URL);
+                serverUrl = GeonamesAPIWrapper.ANONYMOUS_GEONAMES_ORG_WEBSERVICE_URL;
+            } else {
+                throw new ConfigurationException(GEONAMES_USERNAME, 
+                    "A User-Name MUST be configured if anonymous access to 'http://ws.geonames.org' is deactivated");
+            }
+        } else {
+            if( token == null || token.isEmpty()){
+                throw new ConfigurationException(GEONAMES_TOKEN, 
+                    "The Token MUST NOT be NULL nor empty if a User-Name is defined!");
+            }
+            if(serverUrl == null || serverUrl.isEmpty()){
+                log.info("No ServerUrl is configured. Will use the default {}",
+                    GeonamesAPIWrapper.DEFAULT_GEONAMES_ORG_WEBSERVICE_URL);
+                serverUrl = GeonamesAPIWrapper.DEFAULT_GEONAMES_ORG_WEBSERVICE_URL;
+            }
+        }
         log.info(String.format("create Geonames Client for server: %s and user: %s (token not logged)",
                 serverUrl, userName));
         geonamesService = new GeonamesAPIWrapper(serverUrl, userName, token);
