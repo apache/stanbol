@@ -13,13 +13,13 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDatatype;
+import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-import org.semanticweb.owlapi.model.OWLTypedLiteral;
 import org.slf4j.LoggerFactory;
 
 public class SessionRenderer {
@@ -64,7 +64,7 @@ public class SessionRenderer {
 				cSession, iSes)));
 		OWLDatatype anyURI = __factory.getOWLDatatype(IRI
 				.create("http://www.w3.org/2001/XMLSchema#anyURI"));
-		OWLTypedLiteral hasIdValue = __factory.getOWLTypedLiteral(session
+		OWLLiteral hasIdValue = __factory.getOWLTypedLiteral(session
 				.getID().toString(), anyURI);
 		additions.add(new AddAxiom(ont, __factory
 				.getOWLDataPropertyAssertionAxiom(hasId, iSes, hasIdValue)));
@@ -104,7 +104,7 @@ public class SessionRenderer {
 				cSession, iSes)));
 		OWLDatatype anyURI = __factory.getOWLDatatype(IRI
 				.create("http://www.w3.org/2001/XMLSchema#anyURI"));
-		OWLTypedLiteral hasIdValue = __factory.getOWLTypedLiteral(session
+		OWLLiteral hasIdValue = __factory.getOWLTypedLiteral(session
 				.getID().toString(), anyURI);
 		additions.add(new AddAxiom(ont, __factory
 				.getOWLDataPropertyAssertionAxiom(hasId, iSes, hasIdValue)));

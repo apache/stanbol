@@ -25,7 +25,7 @@
 
 <h5>Example</h5>
 
-<pre>curl -H &quot;Accept:application/rdf+xml&quot; "${it.publicBaseUri}ontonet/ontology?with-inactive=true</pre>
+<pre>curl -H &quot;Accept:application/rdf+xml&quot; "${it.publicBaseUri}ontonet/ontology?with-inactive=true"</pre>
 
 
 <h4> DELETE ontonet/session</h4>
@@ -52,4 +52,4 @@
 
 <h5>Example</h5>
 
-<pre>curl -X DELETE "${it.publicBaseUri}ontonet/ontology</pre>
+<pre>curl -X DELETE "${it.publicBaseUri}ontonet/ontology"</pre>

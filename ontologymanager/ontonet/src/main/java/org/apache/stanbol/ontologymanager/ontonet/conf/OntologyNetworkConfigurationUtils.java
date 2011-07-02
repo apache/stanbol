@@ -103,9 +103,7 @@ public class OntologyNetworkConfigurationUtils {
 			Iterator<OWLLiteral> it = activate.iterator();
 			while (it.hasNext() && !doActivate) {
 				OWLLiteral l = it.next();
-				if (l.isOWLTypedLiteral())
-					doActivate |= Boolean.parseBoolean(l.asOWLTypedLiteral()
-							.getLiteral());
+				doActivate |= Boolean.parseBoolean(l.getLiteral());
 			}
 
 			if (iScope.isNamed() && doActivate)

@@ -1,21 +1,21 @@
 package org.apache.stanbol.reasoners.web.resources;
 
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
+
 import java.io.File;
 import java.net.URL;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -23,7 +23,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
@@ -32,13 +31,12 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.reasoners.base.commands.CreateReasoner;
 import org.apache.stanbol.reasoners.base.commands.RunReasoner;
 import org.apache.stanbol.reasoners.base.commands.RunRules;
-import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
+import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.apache.stanbol.rules.manager.KB;
@@ -66,6 +64,7 @@ import org.slf4j.LoggerFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.sun.jersey.api.view.Viewable;
 import com.sun.jersey.multipart.FormDataParam;
 
 
@@ -280,8 +279,7 @@ public class ConsistencyCheck extends BaseStanbolResource{
 	 *         500 Some error occurred
 	 */
 	@POST
-	//@Consumes(MediaType.MULTIPART_FORM_DATA)
-	@Consumes("multipart/form-data")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response getConsistencyCheck(
 			@FormDataParam(value = "session") String session,
 			@FormDataParam(value = "scope") String scope,
@@ -292,9 +290,9 @@ public class ConsistencyCheck extends BaseStanbolResource{
 	) {
 
 	    log.info("Start consistency check.", this);
-        return Response.status(Status.OK).build();
+        
 	    
-		/*try {
+		try {
 
 			if ((session != null) && (scope == null)) {
 				log.error("Cannot load session without scope.", this);
@@ -514,8 +512,14 @@ public class ConsistencyCheck extends BaseStanbolResource{
 
 		} catch (Exception e) {
 			throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
-		}*/
+		}
 
 	}
+	
+	@GET
+    @Produces(TEXT_HTML)
+    public Response getView() {
+        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+    }
 
 }

@@ -153,11 +153,6 @@
 			<version>0.8.5</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>owlapi</groupId>
-			<artifactId>owlapi</artifactId>
-			<version>3.0.0</version>
-		</dependency>
 
 		<!-- Clerezza deps -->
 		<dependency>

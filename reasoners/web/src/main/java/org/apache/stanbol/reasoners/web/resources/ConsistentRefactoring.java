@@ -1,5 +1,6 @@
 package org.apache.stanbol.reasoners.web.resources;
 
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
@@ -28,6 +29,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
+import com.sun.jersey.api.view.Viewable;
 import com.sun.jersey.multipart.FormDataParam;
 
 /**
@@ -108,6 +110,12 @@ public class ConsistentRefactoring extends BaseStanbolResource{
             return Response.status(NOT_FOUND).build();
         }
 
+    }
+    
+    @GET
+    @Produces(TEXT_HTML)
+    public Response getView() {
+        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
     }
 
 }

@@ -7,16 +7,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.xd.lang.Language;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationValue;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLStringLiteral;
-import org.semanticweb.owlapi.model.OWLTypedLiteral;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 
@@ -47,15 +45,10 @@ public class RDFSLabelGetter {
 				if (value instanceof IRI) {
 					IRI asIRI = (IRI) value;
 					allLabels.put(asIRI.toQuotedString(), null);
-				} else if (value instanceof OWLStringLiteral) {
-					OWLStringLiteral sLiteral = (OWLStringLiteral) value;
+				} else if (value instanceof OWLLiteral) {
+					OWLLiteral sLiteral = (OWLLiteral) value;
 					allLabels.put(sLiteral.getLiteral(), sLiteral.getLang());
-				} else if (value instanceof OWLTypedLiteral) {
-					OWLTypedLiteral tLiteral = (OWLTypedLiteral) value;
-					allLabels.put(tLiteral.getLiteral(), tLiteral.getDatatype()
-							.getIRI().toQuotedString());
 				}
-
 			}
 		}
 	}

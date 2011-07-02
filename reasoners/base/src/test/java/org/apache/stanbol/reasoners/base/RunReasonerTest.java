@@ -119,7 +119,7 @@ public class RunReasonerTest {
     @Test
     public void testIsConsistence() {
         OWLReasoner expris = (new ReasonerFactory()).createReasoner(owl);
-        expris.prepareReasoner();
+        //expris.prepareReasoner();
         CreateReasoner reasoner = new CreateReasoner(owl);
         RunReasoner instance = new RunReasoner(reasoner.getReasoner());
         boolean expResult = expris.isConsistent();
@@ -146,7 +146,7 @@ public class RunReasonerTest {
         System.out.println(":::::::::::::::: consistency check "+run.isConsistent());
 
         OWLReasoner expris = (new ReasonerFactory()).createReasoner(owl);
-        expris.prepareReasoner();
+        //expris.prepareReasoner();
         InferredOntologyGenerator iogpellet  = new InferredOntologyGenerator(expris);
 
         iogpellet.fillOntology(owlmanager, owl);
@@ -184,7 +184,7 @@ public class RunReasonerTest {
         System.out.println(":::::::::::::::: consistency check "+run.isConsistent());
         
         OWLReasoner expris = (new ReasonerFactory()).createReasoner(owl);
-        expris.prepareReasoner();
+        //expris.prepareReasoner();
         InferredOntologyGenerator iogpellet  =new InferredOntologyGenerator(expris);
         iogpellet.fillOntology(owlmanager, owl);
         OWLOntology expResult = owl;

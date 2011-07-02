@@ -247,12 +247,6 @@
       <version>2.6.2</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>owlapi</groupId>
-      <artifactId>owlapi</artifactId>
-      <version>3.0.0</version>
-      <scope>provided</scope>
-    </dependency>
 		
 	<!-- Testing deps -->
 		<dependency>

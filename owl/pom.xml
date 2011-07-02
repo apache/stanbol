@@ -31,6 +31,19 @@
     constructs of the OWL and OWL 2 languages.
   </description>
 
+  <repositories>
+    <repository>
+             <releases>
+                     <updatePolicy>always</updatePolicy>
+             </releases>
+             <snapshots>
+                     <updatePolicy>always</updatePolicy>
+             </snapshots>
+             <id>reasoners-owlapi-embedded</id>
+             <url>file://localhost/${project.basedir}/src/main/resources/maven/repo</url>
+     </repository>
+  </repositories>
+  
   <inceptionYear>2010</inceptionYear>
 
   <build>
@@ -121,7 +134,7 @@
   <dependency>
     <groupId>owlapi</groupId>
     <artifactId>owlapi</artifactId>
-    <version>3.0.0</version>
+    <version>3.2.3</version>
   </dependency>
 
   <!-- Persistence deps -->
@@ -182,11 +195,11 @@
 </dependencies>
 
 
-<repositories>
+<!--repositories>
   <repository>
     <id>stlab-cnr-repo</id>
     <url>http://stlab.istc.cnr.it/software/maven/repo</url>
   </repository>
-</repositories>
+</repositories-->
 
 </project>

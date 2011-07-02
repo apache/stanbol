@@ -5,6 +5,8 @@
 
 package org.apache.stanbol.reasoners.web.resources;
 
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
+
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -18,6 +20,7 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -27,19 +30,20 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.commons.web.base.format.KRFormat;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.reasoners.base.commands.CreateReasoner;
 import org.apache.stanbol.reasoners.base.commands.RunReasoner;
 import org.apache.stanbol.reasoners.base.commands.RunRules;
-import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
+import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.apache.stanbol.rules.manager.KB;
@@ -47,6 +51,7 @@ import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
 import org.apache.stanbol.rules.manager.parse.RuleParserImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
+import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -69,11 +74,8 @@ import org.slf4j.LoggerFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.sun.jersey.api.view.Viewable;
 import com.sun.jersey.multipart.FormDataParam;
-
-import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.commons.web.base.format.KRFormat;
-import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
 /**
  *
@@ -120,7 +122,6 @@ public class Classify extends BaseStanbolResource{
     }
 
      /**
-     * To trasform a sequence of rules to a Jena Model
 	 * 
 	 * @param owl
 	 *            {OWLOntology object contains a single recipe}
@@ -136,13 +137,31 @@ public class Classify extends BaseStanbolResource{
 
 		OWLDataFactory factory = owl.getOWLOntologyManager()
 				.getOWLDataFactory();
-		OWLClass ontocls = factory
+		/*OWLClass ontocls = factory
 				.getOWLClass(IRI
 						.create("http://kres.iks-project.eu/ontology/meta/rmi.owl#Recipe"));
         Set<OWLClassAssertionAxiom> cls = owl.getClassAssertionAxioms(ontocls);
         Iterator<OWLClassAssertionAxiom> iter = cls.iterator();
         IRI recipeiri = IRI.create(iter.next().getIndividual().toStringID());
+*/
+		
+		IRI recipeclass = IRI.create("http://kres.iks-project.eu/ontology/meta/rmi.owl#Recipe");
+		OWLClass claz = factory.getOWLClass(recipeclass);
+		
+		Set<OWLAxiom> axioms = owl.getReferencingAxioms(claz);
+		
+        IRI recipeiri = null;
+        for(OWLAxiom axiom : axioms){
+        	if(axiom instanceof OWLClassAssertionAxiom){
+        		OWLClassAssertionAxiom caa = (OWLClassAssertionAxiom) axiom;
+        		recipeiri = IRI.create(caa.getIndividual().toStringID());
+        	}
+        }
 
+        if(recipeiri == null) {
+        	throw new NoSuchRecipeException(null);
+        }
+        
 		OWLIndividual recipeIndividual = factory
 				.getOWLNamedIndividual(recipeiri);
 
@@ -166,11 +185,7 @@ public class Classify extends BaseStanbolResource{
 		}
 
 	//"ProvaParent = <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#> . rule1[ has(ProvaParent:hasParent, ?x, ?y) . has(ProvaParent:hasBrother, ?y, ?z) -> has(ProvaParent:hasUncle, ?x, ?z) ]");
-        System.out.println(kReSRules);
-        // We escape back the XML entities
-        //kReSRules = kReSRules.replaceAll("&lt;", "<");
-        //kReSRules = kReSRules.replaceAll("&gt;", ">");
-        System.out.println(kReSRules);
+        System.out.println("KReS rule: "+kReSRules);
         
         KB kReSKB = RuleParserImpl.parse(kReSRules);
         RuleList listrules = kReSKB.getkReSRuleList();
@@ -235,9 +250,7 @@ public class Classify extends BaseStanbolResource{
 			@FormDataParam(value = "input-graph") String input_graph,
 			@FormDataParam(value = "file") File file,
 			@FormDataParam(value = "owllink-endpoint") String owllink_endpoint) {
-      System.out.println("CLASSIFY");
-      /*  if(true)
-            return Response.status(Status.OK).build();*/
+
       try{
       
       if((session!=null)&&(scope==null)){
@@ -507,6 +520,12 @@ public class Classify extends BaseStanbolResource{
           throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
       }
 
+    }
+    
+    @GET
+    @Produces(TEXT_HTML)
+    public Response getView() {
+        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
     }
 
 }

@@ -32,9 +32,15 @@
 
   <repositories>
     <repository>
-      <id>stlab-cnr-repo</id>
-      <url>http://stlab.istc.cnr.it/software/maven/repo</url>
-    </repository>
+             <releases>
+                     <updatePolicy>always</updatePolicy>
+             </releases>
+             <snapshots>
+                     <updatePolicy>always</updatePolicy>
+             </snapshots>
+             <id>reasoners-owllink-embedded</id>
+             <url>file://localhost/${project.basedir}/src/main/resources/maven/repo</url>
+     </repository>
   </repositories>
 
   <dependencies>
@@ -46,14 +52,14 @@
     <dependency>
       <groupId>owl-link</groupId>
       <artifactId>owl-link</artifactId>
-      <version>1.0.2</version>
+      <version>1.2.0</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>owlapi</groupId>
-      <artifactId>owlapi</artifactId>
-      <version>3.0.0</version>
-      <scope>provided</scope>
+      <groupId>org.apache.stanbol</groupId>
+	  <artifactId>org.apache.stanbol.owl</artifactId>
+	  <version>${stanbol-version}</version>
+	  <scope>provided</scope>
     </dependency>
 
 		<!-- Testing deps -->

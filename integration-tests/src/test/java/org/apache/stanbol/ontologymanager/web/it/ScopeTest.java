@@ -1,7 +1,5 @@
 package org.apache.stanbol.ontologymanager.web.it;
 
-import static org.junit.Assert.assertFalse;
-
 import java.io.IOException;
 
 import org.junit.Test;
@@ -67,8 +65,8 @@ public class ScopeTest extends StanbolTestBase{
 
         request
         .assertStatus(200)
-        .assertContentContains("[ owl:imports <http://www.ontologydesignpatterns.org/schemas/meta.owl>\n] .");
-
+        .assertContentContains("owl:imports <http://www.ontologydesignpatterns.org/schemas/meta.owl>");
+        
         log.debug("Request: "+ONTOLOGY_URI+"\n"+request.getContent());
 
     }

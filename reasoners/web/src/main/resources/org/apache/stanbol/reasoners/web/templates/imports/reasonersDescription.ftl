@@ -1,3 +1,1 @@
-<#macro view>
-This is a the implementation of Stanbol Reasoners
-</#macro>
+<#macro view>This is a the implementation of Stanbol Reasoners.</#macro>

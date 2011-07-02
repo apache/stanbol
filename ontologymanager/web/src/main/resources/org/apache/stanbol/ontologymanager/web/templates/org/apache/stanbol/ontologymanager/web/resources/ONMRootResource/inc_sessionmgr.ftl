@@ -1,5 +1,5 @@
 <h4>Subresource ontonet/session</h4>
-<p>Service to get/clear the set of registered and/or active ontology scopes.
+<p>Service to get/clear the set of registered and/or active ontology scopes.</p>
 
 <h4> GET ontonet/session</h4>
 <table>

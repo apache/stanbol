@@ -77,9 +77,9 @@
       <scope>test</scope>
     </dependency>
 	<dependency>
-      <groupId>owlapi</groupId>
-      <artifactId>owlapi</artifactId>
-      <version>3.0.0</version>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.owl</artifactId>
+      <version>${stanbol-version}</version>
       <scope>test</scope>
     </dependency>
 	<dependency>

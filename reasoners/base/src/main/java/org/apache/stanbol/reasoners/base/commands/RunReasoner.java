@@ -47,7 +47,7 @@ public class RunReasoner {
         //Create the reasoner
         this.loadreasoner = reasoner;
         //Prepare the reasoner
-        this.loadreasoner.prepareReasoner();
+        //this.loadreasoner.prepareReasoner();
 
     }
 

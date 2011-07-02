@@ -79,7 +79,7 @@ public final class RunRules {
         this.reasoner = (new CreateReasoner(workontology)).getReasoner();
 
         //Prepare the reasoner
-        this.reasoner.prepareReasoner();
+        //this.reasoner.prepareReasoner();
   
 
     }
@@ -120,7 +120,7 @@ public final class RunRules {
         this.reasoner = (new CreateReasoner(workontology,reasonerurl)).getReasoner();
 
         //Prepare the reasoner
-        this.reasoner.prepareReasoner();
+        //this.reasoner.prepareReasoner();
     }
 
    /**
@@ -165,7 +165,7 @@ public final class RunRules {
         this.reasoner = (new CreateReasoner(workontology)).getReasoner();
 
         //Prepare the reasoner
-        this.reasoner.prepareReasoner();
+        //this.reasoner.prepareReasoner();
 
     }
 
@@ -210,7 +210,7 @@ public final class RunRules {
         //Create the reasoner
         this.reasoner = (new CreateReasoner(workontology,reasonerurl)).getReasoner();
         //Prepare the reasoner
-        this.reasoner.prepareReasoner();
+        //this.reasoner.prepareReasoner();
 
     }
     
