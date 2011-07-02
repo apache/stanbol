@@ -30,11 +30,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
+import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.manager.changes.AddRecipe;
 import org.apache.stanbol.rules.manager.changes.GetRecipe;
 import org.apache.stanbol.rules.manager.changes.RemoveRecipe;
@@ -76,32 +78,9 @@ public class RecipeResource extends BaseStanbolResource {
      *            {To get the context where the REST service is running.}
      */
     public RecipeResource(@Context ServletContext servletContext) {
-        this.kresRuleStore = (RuleStoreImpl) servletContext.getAttribute(RuleStoreImpl.class.getName());
-        this.onm = (ONManager) servletContext.getAttribute(ONManager.class.getName());
-        //      this.storage = (OntologyStorage) servletContext
-        //      .getAttribute(OntologyStorage.class.getName());
-        // Contingency code for missing components follows.
-
-        /*
-			 * FIXME! The following code is required only for the tests. This should
-			 * be removed and the test should work without this code.
-		 */
-		if (onm == null) {
-		    log.warn("No ONManager in servlet context. Instantiating manually...");
-		    onm = new ONManagerImpl(new TcManager(), null,
-		            new Hashtable<String, Object>());
-		}
-		this.storage = onm.getOntologyStore();
-		if (storage == null) {
-		    log.warn("No OntologyStorage in servlet context. Instantiating manually...");
-		    storage = new ClerezzaOntologyStorage(new TcManager(),null);
-		}
-        if (kresRuleStore == null) {
-            log.warn("No RuleStore with stored rules and recipes found in servlet context. Instantiating manually with default values...");
-
-            this.kresRuleStore = new RuleStoreImpl(onm, new Hashtable<String,Object>(), "");
-
-        }
+    	this.kresRuleStore = (RuleStoreImpl) ContextHelper.getServiceFromContext(RuleStore.class, servletContext);
+        this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
+        this.storage = onm.getOntologyStore();
     }
 
     /**

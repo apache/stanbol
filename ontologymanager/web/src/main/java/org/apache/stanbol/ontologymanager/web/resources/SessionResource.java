@@ -60,7 +60,7 @@ public class SessionResource extends BaseStanbolResource {
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
     }
 
-    @PUT
+    @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response addOntology(@FormDataParam("scope") String scope,
                                 @FormDataParam("import") InputStream importOntology,
@@ -92,15 +92,31 @@ public class SessionResource extends BaseStanbolResource {
 
     }
 
-    @PUT
+    /**
+     * 
+     * If the session param is missing, this method creates a new session, ignoring other params
+     * 
+     * @param scope
+     * @param session
+     * @param location
+     * @param uriInfo
+     * @param headers
+     * @param servletContext
+     * @return
+     */
+    @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
+                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
     public Response addOntology(@FormParam("scope") String scope,
                                 @FormParam("session") String session,
                                 @FormParam("location") String location,
                                 @Context UriInfo uriInfo,
                                 @Context HttpHeaders headers,
                                 @Context ServletContext servletContext) {
-
+    	if(session==null||session.equals("")){
+    		return createSession(scope, uriInfo, headers);
+    	}else{
         IRI scopeIRI = IRI.create(scope);
         IRI sessionIRI = IRI.create(session);
         IRI ontologyIRI = IRI.create(location);
@@ -116,17 +132,22 @@ public class SessionResource extends BaseStanbolResource {
         } catch (OWLOntologyCreationException e) {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
-
+    	}
     }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
-                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
-    public Response createSession(@FormParam("scope") String scope,
-                                  @Context UriInfo uriInfo,
-                                  @Context HttpHeaders headers) {
-
+	/**
+	 * This method creates a session.
+	 * 
+	 * @param scope
+	 * @param uriInfo
+	 * @param headers
+	 * @return
+	 */
+    private Response createSession(String scope,
+                                  UriInfo uriInfo,
+                                  HttpHeaders headers) {
+    	if(scope==null||scope.equals("")){
+    		return Response.status(INTERNAL_SERVER_ERROR).build();
+    	}
         Session ses = null;
         SessionManager mgr = onm.getSessionManager();
 

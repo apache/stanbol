@@ -7,6 +7,8 @@ package org.apache.stanbol.reasoners.web.resources;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -46,16 +48,20 @@ import org.apache.stanbol.rules.manager.parse.RuleParserImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.SWRLRule;
 import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,15 +124,15 @@ public class Classify extends BaseStanbolResource{
 	 * 
 	 * @param owl
 	 *            {OWLOntology object contains a single recipe}
-     * @return {A jena rdf model contains the SWRL rule.}
+     * @return {An Set<SWRLRule> that contains the SWRL rule.}
      */
-	private Model fromRecipeToModel(OWLOntology owl)
+	private Set<SWRLRule> fromRecipeToModel(OWLOntology owl)
 			throws NoSuchRecipeException {
 
 		// FIXME: why the heck is this method re-instantiating a rule store?!?
 		RuleStore store = new RuleStoreImpl(onm,
 				new Hashtable<String, Object>(), owl);
-        Model jenamodel = ModelFactory.createDefaultModel();
+        //Model jenamodel = ModelFactory.createDefaultModel();
 
 		OWLDataFactory factory = owl.getOWLOntologyManager()
 				.getOWLDataFactory();
@@ -160,18 +166,38 @@ public class Classify extends BaseStanbolResource{
 		}
 
 	//"ProvaParent = <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#> . rule1[ has(ProvaParent:hasParent, ?x, ?y) . has(ProvaParent:hasBrother, ?y, ?z) -> has(ProvaParent:hasUncle, ?x, ?z) ]");
+        System.out.println(kReSRules);
+        // We escape back the XML entities
+        //kReSRules = kReSRules.replaceAll("&lt;", "<");
+        //kReSRules = kReSRules.replaceAll("&gt;", ">");
+        System.out.println(kReSRules);
+        
         KB kReSKB = RuleParserImpl.parse(kReSRules);
         RuleList listrules = kReSKB.getkReSRuleList();
         Iterator<Rule> iterule = listrules.iterator();
+        Set<SWRLRule> swrlrules = new HashSet<SWRLRule>();
         while(iterule.hasNext()){
             Rule singlerule = iterule.next();
-            Resource resource = singlerule.toSWRL(jenamodel);
+            System.out.println("Single rule: "+singlerule.toSPARQL());
+            System.out.println("To KReS Syntax: "+singlerule.toKReSSyntax());
+            System.out.println("Single OWLAPI SWRL: "+singlerule.toSWRL(factory));
+            //Resource resource = singlerule.toSWRL(jenamodel); <-- FIXME This method does not work properly
+            swrlrules.add(singlerule.toSWRL(factory));
         }
-
-        return jenamodel;
+        return swrlrules;
 
     }
-
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Produces(value = { KRFormat.RDF_XML, KRFormat.TURTLE,
+			KRFormat.OWL_XML })
+	public Response classify(
+			@FormParam(value = "session") String session,
+			@FormParam(value = "scope") String scope,
+			@FormParam(value = "recipe") String recipe
+	){
+		return ontologyClassify(session,scope,recipe,null,null,null);
+	}
    /**
 	 * To run a classifying reasoner on a RDF input File or IRI on the base of a
 	 * Scope (or an ontology) and a recipe. Can be used either HermiT or an
@@ -209,9 +235,9 @@ public class Classify extends BaseStanbolResource{
 			@FormDataParam(value = "input-graph") String input_graph,
 			@FormDataParam(value = "file") File file,
 			@FormDataParam(value = "owllink-endpoint") String owllink_endpoint) {
-      
-        if(true)
-            return Response.status(Status.OK).build();
+      System.out.println("CLASSIFY");
+      /*  if(true)
+            return Response.status(Status.OK).build();*/
       try{
       
       if((session!=null)&&(scope==null)){
@@ -349,20 +375,39 @@ public class Classify extends BaseStanbolResource{
 
       //Run HermiT if the reasonerURL is null;
       if(owllink_endpoint==null){
-
+    	  /**
+    	   * If we run hermit, we must remove all datatype assertions
+    	   * from the ontology. Non default datatypes, such http://dbpedia.org/datatype/hour
+    	   * would break the process
+    	   */
+    	  Set<OWLAxiom> removeThese = new HashSet<OWLAxiom>();
+    	  for(OWLAxiom axiom: inputowl.getAxioms()){
+    		  if(!axiom.getDatatypesInSignature().isEmpty()){
+    			  Set<OWLDatatype> datatypes = axiom.getDatatypesInSignature();
+    			  for(OWLDatatype datatype : datatypes){
+    				  if(!datatype.isBuiltIn()){
+    					  removeThese.add(axiom);
+    					  break;
+    				  }
+    			  }
+    		  }
+    	  }
+    	  inputowl.getOWLOntologyManager().removeAxioms(inputowl, removeThese);
+    	  inputowl = inputowl.getOWLOntologyManager().getOntology(inputowl.getOntologyID());
        try{
        if(recipe!=null) {
-						OWLOntology recipeowl = OWLManager
-								.createOWLOntologyManager()
+    	   OWLOntologyManager mngr = OWLManager
+			.createOWLOntologyManager();
+						OWLOntology recipeowl = mngr
 								.loadOntologyFromOntologyDocument(
 										IRI.create(recipe));
-						// Get Jea RDF model of SWRL rule contained in the
-						// recipe
-            Model swrlmodel = fromRecipeToModel(recipeowl);
-
+						OWLOntology rulesOntology = mngr.createOntology();
+						Set<SWRLRule> swrlRules = fromRecipeToModel(recipeowl);
+						mngr.addAxioms(rulesOntology, swrlRules);
+						rulesOntology = mngr.getOntology(rulesOntology.getOntologyID());
 						// Create a reasoner to run rules contained in the
 						// recipe
-						RunRules rulereasoner = new RunRules(swrlmodel,
+						RunRules rulereasoner = new RunRules(rulesOntology,
 								inputowl);
 						// Run the rule reasoner to the input RDF with the added
 						// top-ontology
@@ -407,16 +452,19 @@ public class Classify extends BaseStanbolResource{
 
       try{
        if(recipe!=null) {
-						OWLOntology recipeowl = OWLManager
-								.createOWLOntologyManager()
+
+    	   OWLOntologyManager mngr = OWLManager
+			.createOWLOntologyManager();
+						OWLOntology recipeowl = mngr
 								.loadOntologyFromOntologyDocument(
 										IRI.create(recipe));
-						// Get Jea RDF model of SWRL rule contained in the
-						// recipe
-         Model swrlmodel = fromRecipeToModel(recipeowl);
+						OWLOntology rulesOntology = mngr.createOntology();
+						Set<SWRLRule> swrlRules = fromRecipeToModel(recipeowl);
+						mngr.addAxioms(rulesOntology, swrlRules);
+						rulesOntology = mngr.getOntology(rulesOntology.getOntologyID());
 						// Create a reasoner to run rules contained in the
 						// recipe by using the server and-point
-						RunRules rulereasoner = new RunRules(swrlmodel,
+						RunRules rulereasoner = new RunRules(rulesOntology,
 								inputowl, new URL(owllink_endpoint));
 						// Run the rule reasoner to the input RDF with the added
 						// top-ontology
