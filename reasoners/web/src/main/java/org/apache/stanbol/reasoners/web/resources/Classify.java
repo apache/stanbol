@@ -133,17 +133,9 @@ public class Classify extends BaseStanbolResource{
 		// FIXME: why the heck is this method re-instantiating a rule store?!?
 		RuleStore store = new RuleStoreImpl(onm,
 				new Hashtable<String, Object>(), owl);
-        //Model jenamodel = ModelFactory.createDefaultModel();
 
 		OWLDataFactory factory = owl.getOWLOntologyManager()
 				.getOWLDataFactory();
-		/*OWLClass ontocls = factory
-				.getOWLClass(IRI
-						.create("http://kres.iks-project.eu/ontology/meta/rmi.owl#Recipe"));
-        Set<OWLClassAssertionAxiom> cls = owl.getClassAssertionAxioms(ontocls);
-        Iterator<OWLClassAssertionAxiom> iter = cls.iterator();
-        IRI recipeiri = IRI.create(iter.next().getIndividual().toStringID());
-*/
 		
 		IRI recipeclass = IRI.create("http://kres.iks-project.eu/ontology/meta/rmi.owl#Recipe");
 		OWLClass claz = factory.getOWLClass(recipeclass);
@@ -184,18 +176,15 @@ public class Classify extends BaseStanbolResource{
 			}
 		}
 
-	//"ProvaParent = <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#> . rule1[ has(ProvaParent:hasParent, ?x, ?y) . has(ProvaParent:hasBrother, ?y, ?z) -> has(ProvaParent:hasUncle, ?x, ?z) ]");
-        System.out.println("KReS rule: "+kReSRules);
-        
         KB kReSKB = RuleParserImpl.parse(kReSRules);
         RuleList listrules = kReSKB.getkReSRuleList();
         Iterator<Rule> iterule = listrules.iterator();
         Set<SWRLRule> swrlrules = new HashSet<SWRLRule>();
         while(iterule.hasNext()){
             Rule singlerule = iterule.next();
-            System.out.println("Single rule: "+singlerule.toSPARQL());
-            System.out.println("To KReS Syntax: "+singlerule.toKReSSyntax());
-            System.out.println("Single OWLAPI SWRL: "+singlerule.toSWRL(factory));
+            //System.out.println("Single rule: "+singlerule.toSPARQL());
+            //System.out.println("To KReS Syntax: "+singlerule.toKReSSyntax());
+            //System.out.println("Single OWLAPI SWRL: "+singlerule.toSWRL(factory));
             //Resource resource = singlerule.toSWRL(jenamodel); <-- FIXME This method does not work properly
             swrlrules.add(singlerule.toSWRL(factory));
         }
@@ -255,13 +244,12 @@ public class Classify extends BaseStanbolResource{
       
       if((session!=null)&&(scope==null)){
            log.error("ERROR: Cannot load session without scope.");
-           System.err.println("ERROR: Cannot load session without scope.");
            return Response.status(Status.BAD_REQUEST).build();
         }
 
        //Check for input conflict. Only one input at once is allowed
        if((file!=null)&&(input_graph!=null)){
-           System.err.println("ERROR: To much RDF input");
+           System.err.println("ERROR: Cannot handle both parameters: file and input graph");
            return Response.status(Status.CONFLICT).build();
        }
 
@@ -355,24 +343,22 @@ public class Classify extends BaseStanbolResource{
           OntologyScope ontoscope = reg.getScope(iri);
 					SessionOntologySpace sos = ontoscope.getSessionSpace(IRI
 							.create(session));
-          
+					/*
+					for(OWLOntology a:ontoscope.getCoreSpace().getOntologies()){	
+						System.out.println("CORE ONTOLOGY: "+a);
+					}
+					*/
+					for(OWLOntology a:ontoscope.getCustomSpace().getOntologies()){
+						//System.out.println("CUSTOM ONTOLOGY: "+a);
+						mgr.addAxioms(inputowl, a.getAxioms());
+					}
 					Set<OWLOntology> ontos = sos.getOntologyManager()
 							.getOntologies();
-          Iterator<OWLOntology> iteronto = ontos.iterator();
-
-					// Add session ontologies as import, if it is anonymus we
-					// try to add single axioms.
-          while(iteronto.hasNext()){
-            OWLOntology auxonto = iteronto.next();
-            if(!auxonto.getOntologyID().isAnonymous()){
-							additions.add(new AddImport(inputowl, factory
-									.getOWLImportsDeclaration(auxonto
-											.getOWLOntologyManager()
-											.getOntologyDocumentIRI(auxonto))));
-            }else{
-                mgr.addAxioms(inputowl,auxonto.getAxioms());
-            }
-          }
+					for(OWLOntology a:ontos){
+							//System.out.println("SESSION ONTOLOGY: "+a);
+							mgr.addAxioms(inputowl, a.getAxioms());
+					}
+		            inputowl = mgr.getOntology(inputowl.getOntologyID());
 
       }catch(Exception e){
 					System.err.println("ERROR: Problem with session: "
@@ -386,6 +372,8 @@ public class Classify extends BaseStanbolResource{
       if(additions.size()>0)
         mgr.applyChanges(additions);
 
+      inputowl = mgr.getOntology(inputowl.getOntologyID());
+      
       //Run HermiT if the reasonerURL is null;
       if(owllink_endpoint==null){
     	  /**
@@ -396,13 +384,7 @@ public class Classify extends BaseStanbolResource{
     	  Set<OWLAxiom> removeThese = new HashSet<OWLAxiom>();
     	  for(OWLAxiom axiom: inputowl.getAxioms()){
     		  if(!axiom.getDatatypesInSignature().isEmpty()){
-    			  Set<OWLDatatype> datatypes = axiom.getDatatypesInSignature();
-    			  for(OWLDatatype datatype : datatypes){
-    				  if(!datatype.isBuiltIn()){
-    					  removeThese.add(axiom);
-    					  break;
-    				  }
-    			  }
+    			  removeThese.add(axiom);
     		  }
     	  }
     	  inputowl.getOWLOntologyManager().removeAxioms(inputowl, removeThese);
@@ -414,19 +396,11 @@ public class Classify extends BaseStanbolResource{
 						OWLOntology recipeowl = mngr
 								.loadOntologyFromOntologyDocument(
 										IRI.create(recipe));
-						OWLOntology rulesOntology = mngr.createOntology();
+						//OWLOntology rulesOntology = mngr.createOntology();
 						Set<SWRLRule> swrlRules = fromRecipeToModel(recipeowl);
-						mngr.addAxioms(rulesOntology, swrlRules);
-						rulesOntology = mngr.getOntology(rulesOntology.getOntologyID());
-						// Create a reasoner to run rules contained in the
-						// recipe
-						RunRules rulereasoner = new RunRules(rulesOntology,
-								inputowl);
-						// Run the rule reasoner to the input RDF with the added
-						// top-ontology
-            inputowl = rulereasoner.runRulesReasoner();
+						inputowl.getOWLOntologyManager().addAxioms(inputowl, swrlRules);
+						inputowl = inputowl.getOWLOntologyManager().getOntology(inputowl.getOntologyID());
        }
-
             //Create the reasoner for the classification
 					CreateReasoner newreasoner = new CreateReasoner(
 							inputowl);
