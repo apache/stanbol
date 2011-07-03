@@ -135,8 +135,8 @@ $(document).ready(function(){
 		 * c) Now we collect the data from the web
 		 */
 		$("#step-2-after .message").append("<br/>Now, we load the result of the <b>/enhance</b>, in the <b>/ontonet/session</b> from the web");
-		sessionID = $.cookie("ontonet-session-id");
-		scopeID = $.cookie("ontonet-scope-id");
+		var sessionID = $.cookie("ontonet-session-id");
+		var scopeID = $.cookie("ontonet-scope-id");
 		$("#step-1-results li").each(function(){
 			var entityUri = $(this).html();
 			// TODO Try using entityhub
@@ -148,9 +148,7 @@ $(document).ready(function(){
 			$.ajax({
 				type: "POST",
 			       url: "/ontonet/session",
-			       beforeSend: function(xhr){
-			    	   xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-			       },
+				   contentType: "application/x-www-form-urlencoded",
 			       dataType: "json",
 			       data:{
 			    	   scope: scopeID,
@@ -180,6 +178,9 @@ $(document).ready(function(){
 		// We disable the UI item
 		$(this).attr('disabled','disabled');
 		
+		var sessionID = $.cookie("ontonet-session-id");
+		var scopeID = $.cookie("ontonet-scope-id");
+		
 		// Generate an identifier for the recipe and rule
 		// We smartly reuse the sessionID for that
 		var recipeID = sessionID.replace("/session","/recipe");
@@ -206,9 +207,9 @@ $(document).ready(function(){
 		    cache: false,
 		    async: false,
 		    beforeSend: function(xhr){
-				xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
 				xhr.setRequestHeader("Accept", "application/rdf+json");
 		    },
+			contentType: "application/x-www-form-urlencoded",
 		    success: function(result) {
 		       $("#step-3-after .message").append("...DONE");
 		    },
@@ -231,9 +232,9 @@ $(document).ready(function(){
 		    cache: false,
 		    async: false,
 		    beforeSend: function(xhr){
-				xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded"),
 				xhr.setRequestHeader("Accept", "application/rdf+xml") // This is a strange behaviour... we need to set this to have 'success' event launched when response is 200: OK!
 		    },
+			contentType: "application/x-www-form-urlencoded",
 		    success: function(result) {
 		       $("#step-3-after .message").append("...DONE");
 		       $("#step-4").show();
@@ -273,9 +274,9 @@ $(document).ready(function(){
 		    cache: false,
 		    async: false,
 		    beforeSend: function(xhr){
-				xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded"),
 				xhr.setRequestHeader("Accept", "application/rdf+xml");
 		    },
+			contentType: "application/x-www-form-urlencoded",
 		    success: function(result) {
 		    	var databank = $.rdf.databank().load(result);
 		    	$("#step-4-after .message").append("...DONE");
