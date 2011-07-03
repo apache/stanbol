@@ -1,13 +1,11 @@
 package org.apache.stanbol.rules.web.resources;
 
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.*;
 
 import java.io.InputStream;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -42,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import com.sun.jersey.api.view.ImplicitProduces;
 import com.sun.jersey.multipart.FormDataParam;
 
-
 /**
  * 
  * @author andrea.nuzzolese
@@ -60,8 +57,8 @@ public class RefactorResource extends BaseStanbolResource {
     protected TcManager tcManager;
 
     public RefactorResource(@Context ServletContext servletContext) {
-    	refactorer = (Refactorer) ContextHelper.getServiceFromContext(Refactorer.class, servletContext);
-    	onManager = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
+        refactorer = (Refactorer) ContextHelper.getServiceFromContext(Refactorer.class, servletContext);
+        onManager = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
         tcManager = (TcManager) ContextHelper.getServiceFromContext(TcManager.class, servletContext);
         if (refactorer == null) {
             throw new IllegalStateException("SemionRefactorer missing in ServletContext");
@@ -84,34 +81,75 @@ public class RefactorResource extends BaseStanbolResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(value = {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
                        KRFormat.OWL_XML, KRFormat.RDF_JSON})
-    public Response applyRefactoring(@FormDataParam("recipe") String recipe, @FormDataParam("input") InputStream input) {
+    public Response applyRefactoring(@FormDataParam("recipe") String recipe,
+                                     @FormDataParam("input") InputStream input) {
 
-        // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
+        OWLOntology output = null;
+        try {
+            output = doRefactoring(input, RuleParserImpl.parse(recipe));
+        } catch (OWLOntologyCreationException e1) {
+            throw new WebApplicationException(e1, INTERNAL_SERVER_ERROR);
+        } catch (RefactoringException e1) {
+            throw new WebApplicationException(e1, INTERNAL_SERVER_ERROR);
+        }
+        if (output == null) return Response.status(NOT_FOUND).build();
+        return Response.ok(output).build();
 
-        KB kb = RuleParserImpl.parse(recipe);
+    }
 
-        if (kb == null) return Response.status(NOT_FOUND).build();
+    /**
+     * The apply mode allows the client to compose a recipe, by mean of string containg the rules, and apply
+     * it "on the fly" to the graph in input.
+     * 
+     * @param recipe
+     *            String
+     * @param input
+     *            InputStream
+     * @return a Response containing the transformed graph
+     */
+    @POST
+    @Path("/applyfile")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(value = {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
+                       KRFormat.OWL_XML, KRFormat.RDF_JSON})
+    public Response applyRefactoringFromRuleFile(@FormDataParam("recipe") InputStream recipeStream,
+                                                 @FormDataParam("input") InputStream input) {
 
+        OWLOntology output = null;
+        try {
+            output = doRefactoring(input, RuleParserImpl.parse(recipeStream));
+        } catch (OWLOntologyCreationException e1) {
+            throw new WebApplicationException(e1, INTERNAL_SERVER_ERROR);
+        } catch (RefactoringException e1) {
+            throw new WebApplicationException(e1, INTERNAL_SERVER_ERROR);
+        }
+        if (output == null) return Response.status(NOT_FOUND).build();
+        return Response.ok(output).build();
+
+    }
+
+    /**
+     * Utility method that groups all calls to the refactorer.
+     * 
+     * @param input
+     * @param recipe
+     * @return
+     * @throws OWLOntologyCreationException
+     * @throws RefactoringException
+     */
+    private OWLOntology doRefactoring(InputStream input, KB kb) throws OWLOntologyCreationException,
+                                                               RefactoringException {
+        if (kb == null) return null;
         RuleList ruleList = kb.getkReSRuleList();
-        if (ruleList == null) return Response.status(NOT_FOUND).build();
+        if (ruleList == null) return null;
         Recipe actualRecipe = new RecipeImpl(null, null, ruleList);
 
+        // Parse the input ontology
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLOntology inputOntology;
-        try {
-            inputOntology = manager.loadOntologyFromOntologyDocument(input);
-            OWLOntology outputOntology;
-            try {
-                outputOntology = refactorer.ontologyRefactoring(inputOntology, actualRecipe);
-            } catch (RefactoringException e) {
-                // refactoring exceptions are re-thrown
-                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
-            }
-            return Response.ok(outputOntology).build();
-        } catch (OWLOntologyCreationException e) {
-            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
-        }
+        OWLOntology inputOntology = manager.loadOntologyFromOntologyDocument(input);
 
+        // Refactor
+        return refactorer.ontologyRefactoring(inputOntology, actualRecipe);
     }
 
     public String getNamespace() {
