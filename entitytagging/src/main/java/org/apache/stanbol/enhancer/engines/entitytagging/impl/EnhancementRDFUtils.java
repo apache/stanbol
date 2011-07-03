@@ -39,6 +39,7 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
+import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 
@@ -68,18 +69,19 @@ public class EnhancementRDFUtils {
                                                MGraph graph,
                                                UriRef contentItemId,
                                                Collection<NonLiteral> relatedEnhancements,
-                                               Entity entity,
+                                               Representation rep,
                                                String nameField) {
         // 1. check if the returned Entity does has a label -> if not return null
         // add labels (set only a single label. Use "en" if available!
         Text label = null;
-        Iterator<Text> labels = entity.getRepresentation().getText(nameField);
+        Iterator<Text> labels = rep.getText(nameField);
         while (labels.hasNext()) {
             Text actLabel = labels.next();
             if (label == null) {
                 label = actLabel;
             } else {
-                if ("en".equals(actLabel.getLanguage())) {
+                //use startWith to match also en-GB and en-US ...
+                if (actLabel.getLanguage() != null && actLabel.getLanguage().startsWith("en")) {
                     label = actLabel;
                 }
             }
@@ -100,7 +102,7 @@ public class EnhancementRDFUtils {
         for (NonLiteral enhancement : relatedEnhancements) {
             graph.add(new TripleImpl(entityAnnotation, DC_RELATION, enhancement));
         }
-        UriRef entityUri = new UriRef(entity.getId());
+        UriRef entityUri = new UriRef(rep.getId());
         // add the link to the referred entity
         graph.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_REFERENCE, entityUri));
         // add the label parsed above
@@ -108,7 +110,7 @@ public class EnhancementRDFUtils {
         // TODO: add real confidence values!
         // -> in case of SolrYards this will be a Lucene score and not within the range [0..1]
         // -> in case of SPARQL there will be no score information at all.
-        Object score = entity.getRepresentation().getFirst(RdfResourceEnum.resultScore.getUri());
+        Object score = rep.getFirst(RdfResourceEnum.resultScore.getUri());
         Double scoreValue = new Double(-1); // use -1 if no score is available!
         if (score != null) {
             try {
@@ -120,7 +122,7 @@ public class EnhancementRDFUtils {
         graph.add(new TripleImpl(entityAnnotation, ENHANCER_CONFIDENCE, literalFactory
                 .createTypedLiteral(scoreValue)));
 
-        Iterator<Reference> types = entity.getRepresentation().getReferences(RDF_TYPE.getUnicodeString());
+        Iterator<Reference> types = rep.getReferences(RDF_TYPE.getUnicodeString());
         while (types.hasNext()) {
             graph.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_TYPE, new UriRef(types.next()
                     .getReference())));
