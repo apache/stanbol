@@ -58,6 +58,9 @@ import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
+import org.apache.stanbol.entityhub.servicesapi.model.Representation;
+import org.apache.stanbol.entityhub.servicesapi.model.Text;
+import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
@@ -396,7 +399,7 @@ public class NamedEntityTaggingEngine implements EnhancementEngine, ServicePrope
                 return Collections.emptyList();
             }
         }
-        query.setLimit(this.numSuggestions);
+        query.setLimit(Math.max(20,this.numSuggestions*3));
         QueryResultList<Entity> results = site == null? //if site is NULL
                 entityhub.findEntities(query) : //use the Entityhub
                     site.findEntities(query); //else the referenced site
@@ -405,12 +408,49 @@ public class NamedEntityTaggingEngine implements EnhancementEngine, ServicePrope
         List<NonLiteral> annotationsToRelate = new ArrayList<NonLiteral>();
         annotationsToRelate.add(textAnnotation);
         annotationsToRelate.addAll(subsumedAnnotations);
-
-        for (Entity guess : results) {
-            log.debug("Adding {} to ContentItem {}", guess, contentItemId);
-            EnhancementRDFUtils.writeEntityAnnotation(this, literalFactory, graph, contentItemId,
-                annotationsToRelate, guess, nameField);
+        Float maxScore = null;
+        int exactCount = 0;
+        List<Entity> matches = new ArrayList<Entity>(numSuggestions);
+        for (Iterator<Entity> guesses = results.iterator();guesses.hasNext() && exactCount<numSuggestions;) {
+            Entity guess = guesses.next();
+            Representation rep = guess.getRepresentation();
+            if(maxScore == null){
+                maxScore = rep.getFirst(RdfResourceEnum.resultScore.getUri(),Float.class);
+            }
+            Iterator<Text> labels = rep.getText(nameField);
+            boolean found = false;
+            while(labels.hasNext() && !found){
+                Text label = labels.next();
+                if(label.getLanguage() == null || label.getLanguage().startsWith("en")){
+                    if(label.getText().equalsIgnoreCase(name)){
+                        found = true;
+                    }
+                }
+            }
+            if(found){
+                matches.add(exactCount,guess);
+                exactCount++;
+            } else if(matches.size()<numSuggestions){
+                matches.add(guess);
+            }
         }
+        //now write the results
+        for(int i=0;i<matches.size();i++){
+            Representation rep = matches.get(i).getRepresentation();
+            if(i<exactCount){ //and boost the scores of the exact matches
+                if(maxScore == null){
+                    rep.set(RdfResourceEnum.resultScore.getUri(), 1.0f);
+                } else {
+                    Float score = rep.getFirst(RdfResourceEnum.resultScore.getUri(), Float.class);
+                    rep.set(RdfResourceEnum.resultScore.getUri(), 
+                        maxScore.doubleValue()+(score != null?score.doubleValue():0));
+                }
+            }
+            log.debug("Adding {} to ContentItem {}", rep.getId(), contentItemId);
+            EnhancementRDFUtils.writeEntityAnnotation(this, literalFactory, graph, contentItemId,
+                annotationsToRelate, rep, nameField);
+        }
+        
         return results;
     }
 
