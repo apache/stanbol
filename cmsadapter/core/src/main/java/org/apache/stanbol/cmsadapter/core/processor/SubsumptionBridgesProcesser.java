@@ -163,7 +163,7 @@ public class SubsumptionBridgesProcesser extends BaseProcessor implements Proces
     }
 
     @Override
-    public Boolean canProcess(Object object) {
+    public Boolean canProcess(Object object, Object session) {
         return object instanceof ClassificationObject;
     }
 
@@ -177,7 +177,7 @@ public class SubsumptionBridgesProcesser extends BaseProcessor implements Proces
         if (objects != null) {
             DObjectAdapter adapter = engine.getDObjectAdapter();
             for (Object o : objects) {
-                if (canProcess(o)) {
+                if (canProcess(o, null)) {
                     dObjects.add(adapter.wrapAsDObject((CMSObject) o));
                 }
             }

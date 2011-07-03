@@ -7,13 +7,8 @@ public class RestURIHelper {
 	private static final String DATATYPE_PROPERTIES = "datatypeProperties";
 	private static final String OBJECT_PROPERTIES = "objectProperties";
 
-	public static void main(String[] args) {
-		String targetStr = "http://jcr_test/NClassO41_1";
-		System.out.println(targetStr.substring(0, targetStr.lastIndexOf('#')));
-	}
-
 	public static String getOntologyHref(String ontologyURI) {
-		return "/" + ONTOLOGY + "/" + ontologyURI;
+		return ONTOLOGY + "/" + ontologyURI;
 	}
 
 	public static String getClassHref(String ontologyURI, String classURI) {

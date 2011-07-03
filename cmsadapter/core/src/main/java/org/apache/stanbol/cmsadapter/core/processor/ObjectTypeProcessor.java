@@ -59,7 +59,7 @@ public class ObjectTypeProcessor implements Processor, ProcessorProperties {
     }
 
     @Override
-    public Boolean canProcess(Object cmsObject) {
+    public Boolean canProcess(Object cmsObject, Object session) {
         return cmsObject instanceof ObjectTypeDefinition;
     }
 
@@ -71,7 +71,7 @@ public class ObjectTypeProcessor implements Processor, ProcessorProperties {
 
     private void createDecoratedObjectTypes(List<DObjectType> objectTypes, MappingEngine engine) {
         for (DObjectType objectType : objectTypes) {
-            if (canProcess(objectType.getInstance())) {
+            if (canProcess(objectType.getInstance(), null)) {
                 try {
                     OntClass parentClass = processType(objectType, engine);
                     if (parentClass == null) {
@@ -200,7 +200,7 @@ public class ObjectTypeProcessor implements Processor, ProcessorProperties {
     private void deleteDecoratedObjectTypes(List<DObjectType> objectTypes, MappingEngine engine) {
         OntologyResourceHelper orh = engine.getOntologyResourceHelper();
         for (DObjectType objectType : objectTypes) {
-            if (canProcess(objectType.getInstance())) {
+            if (canProcess(objectType.getInstance(), null)) {
                 orh.deleteStatementsByReference(objectType.getID());
                 deletePropertyDefinitions(objectType.getID(), orh);
                 
@@ -230,7 +230,7 @@ public class ObjectTypeProcessor implements Processor, ProcessorProperties {
         if (objects != null) {
             DObjectAdapter adapter = engine.getDObjectAdapter();
             for (Object o : objects) {
-                if (canProcess(o)) {
+                if (canProcess(o, null)) {
                     dObjectTypes.add(adapter.wrapAsDObjectType((ObjectTypeDefinition) o));
                 }
             }

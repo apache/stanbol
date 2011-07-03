@@ -24,50 +24,51 @@ import com.hp.hpl.jena.ontology.OntProperty;
 /**
  * TODO: This processer is not tested yet.
  * 
- * This processor creates OWL object property assertions from CMIS {@link Relationship}s.
- * Subject is the individual generated for the source object of the relationship.
- * Property is the property generated for the type of the relationship.
- * Object is the individual generated for the target object of the relationship.
+ * This processor creates OWL object property assertions from CMIS {@link Relationship}s. Subject is the
+ * individual generated for the source object of the relationship. Property is the property generated for the
+ * type of the relationship. Object is the individual generated for the target object of the relationship.
  * 
  * @author cihan
- *
+ * 
  */
 
 @Service
-@Component(immediate=true)
+@Component(immediate = true)
 public class RelationshipProcessor implements Processor {
     private static final Logger log = LoggerFactory.getLogger(RelationshipProcessor.class);
 
     @Override
-    public Boolean canProcess(Object cmsObject) {
-        // TODO need to check the session too
+    public Boolean canProcess(Object cmsObject, Object session) {
         // here we assume Document and Folder types of CMIS spec is converted to CMSObjects
-        return cmsObject instanceof CMSObject;
+        return cmsObject instanceof CMSObject && session instanceof Session;
     }
 
     @Override
     public void createObjects(List<Object> objects, MappingEngine engine) {
-        for (Object object : objects) {
-            if (!(object instanceof CMSObject)) {
-                log.info("Incompatible type given as argument: {}. Skipping ...", object.getClass().getName());
-            } else {
-                try {
-                    CMSObject cmsObject = (CMSObject) object;
-                    CmisObject node = ((Session) engine.getSession()).getObject(CMISObjectId
-                            .getObjectId(cmsObject.getUniqueRef()));
-                    List<Relationship> relations = node.getRelationships();
-                    //FIXME find a better way to reuse cmislifters' func.
-                    CMISNodeTypeLifter lifter = new CMISNodeTypeLifter(engine);
+        if (objects != null) {
+            for (Object object : objects) {
+                if (canProcess(object, engine.getSession())) {
+                    try {
+                        CMSObject cmsObject = (CMSObject) object;
+                        CmisObject node = ((Session) engine.getSession()).getObject(CMISObjectId
+                                .getObjectId(cmsObject.getUniqueRef()));
+                        List<Relationship> relations = node.getRelationships();
+                        // FIXME find a better way to reuse cmislifters' func.
+                        CMISNodeTypeLifter lifter = new CMISNodeTypeLifter(engine);
 
-                    for (Relationship relation : relations) {
-                        processRelation(cmsObject, relation, engine, lifter);
+                        for (Relationship relation : relations) {
+                            processRelation(cmsObject, relation, engine, lifter);
+                        }
+                    } catch (ClassCastException e) {
+                        log.info("Class cast exception at processing Object: {} ", object);
+                        log.info("Exception is ", e);
+                    } catch (CmisBaseException e) {
+                        log.info("Repository exception at processing Object: {}", object);
+                        log.info("Exception is ", e);
                     }
-                } catch (ClassCastException e) {
-                    log.info("Class cast exception at processing Object: {} ", object);
-                    log.info("Exception is ", e);
-                } catch (CmisBaseException e) {
-                    log.info("Repository exception at processing Object: {}", object);
-                    log.info("Exception is ", e);
+                } else {
+                    log.info("Incompatible type given as argument: {}. Skipping ...", object.getClass()
+                            .getName());
                 }
             }
         }
@@ -91,7 +92,7 @@ public class RelationshipProcessor implements Processor {
 
     @Override
     public void deleteObjects(List<Object> objects, MappingEngine engine) {
-       log.debug("Other processors should have already deleted my triples because I only add property assertions to an individual");
+        log.debug("Other processors should have already deleted my triples because I only add property assertions to an individual");
     }
 
 }

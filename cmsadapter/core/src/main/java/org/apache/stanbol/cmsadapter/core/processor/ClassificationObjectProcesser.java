@@ -113,7 +113,7 @@ public class ClassificationObjectProcesser extends BaseProcessor implements Proc
         } else {
             // work without bridge definitions
             for (DObject cmsObject : cmsObjects) {
-                if (canProcess(cmsObject.getInstance())) {
+                if (canProcess(cmsObject.getInstance(), null)) {
                     try {
                         OntClass parentClass = processObject(cmsObject, engine);
                         if (parentClass == null) {
@@ -239,7 +239,7 @@ public class ClassificationObjectProcesser extends BaseProcessor implements Proc
             }
         } else {
             for (DObject cmsObject : cmsObjects) {
-                if (canProcess(cmsObject.getInstance())) {
+                if (canProcess(cmsObject.getInstance(), null)) {
                     orh.deleteStatementsByReference(cmsObject.getID());
                 }
             }
@@ -247,7 +247,7 @@ public class ClassificationObjectProcesser extends BaseProcessor implements Proc
     }
 
     @Override
-    public Boolean canProcess(Object cmsObject) {
+    public Boolean canProcess(Object cmsObject, Object session) {
         return cmsObject instanceof ClassificationObject;
     }
 
@@ -273,7 +273,7 @@ public class ClassificationObjectProcesser extends BaseProcessor implements Proc
         if (objects != null) {
             DObjectAdapter adapter = engine.getDObjectAdapter();
             for (Object o : objects) {
-                if (canProcess(o)) {
+                if (canProcess(o, null)) {
                     dObjects.add(adapter.wrapAsDObject((CMSObject) o));
                 }
             }

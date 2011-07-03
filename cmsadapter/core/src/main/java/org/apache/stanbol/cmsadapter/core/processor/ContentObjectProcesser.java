@@ -100,7 +100,7 @@ public class ContentObjectProcesser extends BaseProcessor implements Processor, 
         } else {
             // work without bridge definitions
             for (DObject cmsObject : cmsObjects) {
-                if (canProcess(cmsObject.getInstance())) {
+                if (canProcess(cmsObject.getInstance(), null)) {
                     try {
                         Individual individual = processObject(cmsObject, engine);
                         if (individual == null) {
@@ -162,7 +162,7 @@ public class ContentObjectProcesser extends BaseProcessor implements Processor, 
     }
 
     @Override
-    public Boolean canProcess(Object object) {
+    public Boolean canProcess(Object object, Object session) {
         return object instanceof ContentObject;
     }
 
@@ -202,7 +202,7 @@ public class ContentObjectProcesser extends BaseProcessor implements Processor, 
             }
         } else {
             for (DObject cmsObject : cmsObjects) {
-                if (canProcess(cmsObject.getInstance())) {
+                if (canProcess(cmsObject.getInstance(), null)) {
                     orh.deleteStatementsByReference(cmsObject.getID());
                 }
             }
@@ -226,7 +226,7 @@ public class ContentObjectProcesser extends BaseProcessor implements Processor, 
         if (objects != null) {
             DObjectAdapter adapter = engine.getDObjectAdapter();
             for (Object o : objects) {
-                if (canProcess(o)) {
+                if (canProcess(o, null)) {
                     dObjects.add(adapter.wrapAsDObject((CMSObject) o));
                 }
             }

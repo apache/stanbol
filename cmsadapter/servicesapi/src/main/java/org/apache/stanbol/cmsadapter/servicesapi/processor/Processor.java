@@ -16,9 +16,10 @@ public interface Processor {
     /**
      * Method for determining if the processor can process the specified CMS object.
      * @param cmsObject
+     * @param session a JCR or CMIS Session object 
      * @return true if the CMS object can be processed.
      */
-    Boolean canProcess(Object cmsObject);
+    Boolean canProcess(Object cmsObject, Object session);
     
     /**
      * Creates extracted triples from the provided CMS objects. 

@@ -79,7 +79,7 @@ public class EnhancementFetcher extends BaseProcessor implements Processor, Proc
     }
 
     @Override
-    public Boolean canProcess(Object cmsObject) {
+    public Boolean canProcess(Object cmsObject, Object session) {
         return cmsObject instanceof ContentObject;
     }
 
@@ -121,7 +121,7 @@ public class EnhancementFetcher extends BaseProcessor implements Processor, Proc
         } else {
             // work without bridge definitions
             for (DObject cmsObject : cmsObjects) {
-                if (canProcess(cmsObject.getInstance())) {
+                if (canProcess(cmsObject.getInstance(), null)) {
                     getEnhancements(cmsObject, engine);
                 }
             }
@@ -212,7 +212,7 @@ public class EnhancementFetcher extends BaseProcessor implements Processor, Proc
         } else {
             List<DObject> processableObjects = new ArrayList<DObject>();
             for (DObject cmsObject : cmsObjects) {
-                if (canProcess(cmsObject.getInstance())) {
+                if (canProcess(cmsObject.getInstance(), null)) {
                     processableObjects.add(cmsObject);
                 }
             }
@@ -231,7 +231,7 @@ public class EnhancementFetcher extends BaseProcessor implements Processor, Proc
         if (objects != null) {
             DObjectAdapter adapter = engine.getDObjectAdapter();
             for (Object o : objects) {
-                if (canProcess(o)) {
+                if (canProcess(o, null)) {
                     dObjects.add(adapter.wrapAsDObject((CMSObject) o));
                 }
             }
