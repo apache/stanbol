@@ -53,7 +53,7 @@
       <groupId>hermit</groupId>
       <artifactId>hermit</artifactId>
       <version>1.3.4</version>
-      <type>jar</type>
+      <scope>compile</scope>
     </dependency>
     
 		<!-- Testing deps -->
@@ -108,7 +108,7 @@
               org.coode.owlapi.rdfxml.parser,
               org.coode.owlapi.turtle,
               org.coode.string,org.coode.xml,
-              org.semanticweb.HermiT.*,
+              org.semanticweb.HermiT.*;version=1.3.4,
               org.semanticweb.owlapi.*,
               rationals.*,
               uk.ac.manchester.cs.bhig.util,
