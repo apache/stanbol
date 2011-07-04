@@ -7,7 +7,12 @@ package org.apache.stanbol.reasoners.web.resources;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -50,9 +55,14 @@ import org.apache.stanbol.rules.manager.KB;
 import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
 import org.apache.stanbol.rules.manager.parse.RuleParserImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.FileDocumentTarget;
+import org.semanticweb.owlapi.io.StreamDocumentTarget;
+import org.semanticweb.owlapi.io.StringDocumentTarget;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotation;
+import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
@@ -278,7 +288,7 @@ public class Classify extends BaseStanbolResource{
 			OWLDataFactory factory = inputowl.getOWLOntologyManager()
 					.getOWLDataFactory();
        List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
-
+       
        boolean ok = false;
 
       //Load ontologies from scope, RDF input and recipe
@@ -401,6 +411,14 @@ public class Classify extends BaseStanbolResource{
 						inputowl.getOWLOntologyManager().addAxioms(inputowl, swrlRules);
 						inputowl = inputowl.getOWLOntologyManager().getOntology(inputowl.getOntologyID());
        }
+       
+       StringDocumentTarget tgt = new StringDocumentTarget();;
+       
+       inputowl.getOWLOntologyManager().saveOntology(inputowl,tgt);
+       inputowl = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(new ByteArrayInputStream(tgt.toString().getBytes()));
+//for (OWLAnnotationProperty ax : inputowl.getAnnotationPropertiesInSignature())      
+//    System.out.println(ax);
+
             //Create the reasoner for the classification
 					CreateReasoner newreasoner = new CreateReasoner(
 							inputowl);
@@ -417,6 +435,9 @@ public class Classify extends BaseStanbolResource{
             int startax = output.getAxiomCount();
             //Run the classification
             output = reasoner.runClassifyInference(output);
+            
+//            output.getOWLOntologyManager().saveOntology(output,new FileDocumentTarget(new File("./dioschifoso.owl")));
+            
             //End output axioms count
             int endax = output.getAxiomCount();
 

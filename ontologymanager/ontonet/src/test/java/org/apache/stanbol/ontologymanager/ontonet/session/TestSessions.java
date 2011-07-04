@@ -68,7 +68,7 @@ public class TestSessions {
 	}
 
 	@Test
-	public void testCreateSessionSpaceManual() {
+	public void testCreateSessionSpaceManual() throws Exception {
 		OntologyScope scope = null;
 		try {
 			// we don't register it

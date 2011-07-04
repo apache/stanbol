@@ -32,8 +32,9 @@ public interface OntologyScope extends ScopeOntologyListenable {
 	 * 
 	 * @param sessionSpace
 	 *            the ontology space to be added.
+	 * @throws UnmodifiableOntologySpaceException 
 	 */
-    void addSessionSpace(OntologySpace sessionSpace, IRI sessionID);
+    void addSessionSpace(OntologySpace sessionSpace, IRI sessionID) throws UnmodifiableOntologySpaceException;
 
 	/**
 	 * Returns the core ontology space for this ontology scope. The core space

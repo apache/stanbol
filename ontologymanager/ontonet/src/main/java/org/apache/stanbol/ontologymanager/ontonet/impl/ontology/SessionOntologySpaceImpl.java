@@ -3,12 +3,14 @@ package org.apache.stanbol.ontologymanager.ontonet.impl.ontology;
 import java.util.Random;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.StringUtils;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
@@ -97,5 +99,22 @@ public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl
 	public synchronized void tearDown() {
 		// TODO Auto-generated method stub
 	}
+
+    @Override
+    public void attachSpace(OntologySpace space, boolean skipRoot) throws UnmodifiableOntologySpaceException {
+        if (!(space instanceof SessionOntologySpace)) {
+        OWLOntology o = space.getTopOntology();
+        // This does the append thingy
+        log.debug("Attaching " + o + " TO " + getTopOntology() + " ...");
+        try {
+            // It is in fact the addition of the core space top ontology to the
+            // custom space, with import statements and all.
+            addOntology(new RootOntologySource(o, null));
+            // log.debug("ok");
+        } catch (Exception ex) {
+            log.error("FAILED", ex);
+        }
+        }
+    }
 
 }

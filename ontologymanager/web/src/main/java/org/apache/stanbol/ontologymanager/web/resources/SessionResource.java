@@ -17,6 +17,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -172,7 +173,11 @@ public class SessionResource extends BaseStanbolResource {
          */
         OntologySpaceFactory ontologySpaceFactory = onm.getOntologySpaceFactory();
         SessionOntologySpace sessionOntologySpace = ontologySpaceFactory.createSessionOntologySpace(scopeIRI);
-        ontologyScope.addSessionSpace(sessionOntologySpace, ses.getID());
+        try {
+            ontologyScope.addSessionSpace(sessionOntologySpace, ses.getID());
+        } catch (UnmodifiableOntologySpaceException e) {
+throw new WebApplicationException(e);
+        }
 
         return Response.ok(SessionRenderer.getSessionMetadataRDFasOntology(ses)).build();
 

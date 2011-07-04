@@ -24,6 +24,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
@@ -228,8 +229,12 @@ public class RefactorerImpl implements Refactorer {
             scope = onManager.getScopeRegistry().getScope(refactoringScopeIRI);
         }
 
-        scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(refactoringSpaceIRI),
-            kReSSession.getID());
+        try {
+            scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(refactoringSpaceIRI),
+                kReSSession.getID());
+        } catch (UnmodifiableOntologySpaceException e) {
+log.error("Failed to create session space",e);
+        }
 
         scopeRegistry.setScopeActive(refactoringScopeIRI, true);
 

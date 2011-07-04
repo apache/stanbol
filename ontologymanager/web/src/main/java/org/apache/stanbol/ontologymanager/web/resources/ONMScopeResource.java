@@ -26,6 +26,7 @@ import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
@@ -181,6 +182,10 @@ public class ONMScopeResource extends BaseStanbolResource {
 		OntologyScope scope;
 		OntologyInputSource coreSrc = null, custSrc = null;
 
+		if (coreOntology==null && coreRegistry==null) {
+		    coreSrc = new BlankOntologySource();
+		}
+		
 		// First thing, check the core source.
 		try {
 			coreSrc = new OntologyRegistryIRISource(IRI.create(coreRegistry),
