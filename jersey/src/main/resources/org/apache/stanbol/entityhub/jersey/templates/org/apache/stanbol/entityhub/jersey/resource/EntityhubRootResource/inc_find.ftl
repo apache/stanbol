@@ -51,7 +51,7 @@ function findSymbol() {
    type: 'POST',
    url: "${it.publicBaseUri}entityhub/symbol/find",
    data: $("#findSymbolForm").serialize(),
-   dataType: "text/plain",
+   dataType: "text",
    cache: false,
    success: function(data) {
      $("#findSymbolResultText").text(data);

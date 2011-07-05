@@ -40,7 +40,7 @@ function getMappingForUri() {
    type: "GET",
    url: "${it.publicBaseUri}entityhub/mapping",
    data: $("#getMappingForUriForm").serialize(),
-   dataType: "text/plain",
+   dataType: "text",
    cache: false,
    success: function(data, textStatus, jqXHR) {
      $("#mappingResultText").text(data);

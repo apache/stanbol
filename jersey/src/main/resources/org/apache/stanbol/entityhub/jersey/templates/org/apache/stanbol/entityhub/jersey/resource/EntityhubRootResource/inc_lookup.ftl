@@ -64,7 +64,7 @@ function lookupEntity(entity, create) {
    type: "GET",
    url: "${it.publicBaseUri}entityhub/lookup",
    data: "id=" + entity + "&create=" + create,
-   dataType: "text/plain",
+   dataType: "text",
    cache: false,
    success: function(data) {
      $("#lookupEntityResultText").text(data);

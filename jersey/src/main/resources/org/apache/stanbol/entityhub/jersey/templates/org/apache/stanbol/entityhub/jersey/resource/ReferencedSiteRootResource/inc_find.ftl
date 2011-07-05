@@ -56,7 +56,7 @@ function startTestSearch() {
    type: "POST",
    url: "find",
    data: data,
-   dataType: "text/plain",
+   dataType: "text",
    cache: false,
    success: function(result) {
      $("#testSearchResultText").text(result);

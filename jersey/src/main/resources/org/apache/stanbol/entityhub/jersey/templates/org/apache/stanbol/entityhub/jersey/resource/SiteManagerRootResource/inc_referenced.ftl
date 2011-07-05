@@ -42,7 +42,7 @@ function listReferencedSites() {
    type: "GET",
    url: "${it.publicBaseUri}entityhub/sites/referenced",
    data: "",
-   dataType: "text/plain",
+   dataType: "text",
    cache: false,
    success: function(result) {
      $("#listReferencedSitesResultText").text(result);
