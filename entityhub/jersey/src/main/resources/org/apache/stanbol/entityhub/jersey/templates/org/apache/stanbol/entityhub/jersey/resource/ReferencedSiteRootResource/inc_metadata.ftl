@@ -52,7 +52,7 @@ function getSiteMetadata() {
    url: window.location.href,
    cache: false,
    data: "",
-   dataType: "text/plain",
+   dataType: "text",
    success: function(result) {
      $("#siteMetadataResultText").text(result);
    },

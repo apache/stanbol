@@ -41,7 +41,7 @@ function searchEntityParis() {
    type: "GET",
    url: "${it.publicBaseUri}entityhub/sites/entity",
    data: "id=http://dbpedia.org/resource/Paris",
-   dataType: "text/plain",
+   dataType: "text",
    cache: false,
    success: function(result) {
      $("#searchEntityParisResultText").text(result);

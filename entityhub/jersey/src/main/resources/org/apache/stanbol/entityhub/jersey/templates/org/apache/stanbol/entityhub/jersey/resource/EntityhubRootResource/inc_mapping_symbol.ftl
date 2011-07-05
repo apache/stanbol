@@ -45,7 +45,7 @@ function getMappingForSymbol() {
  $.ajax({
    type: "GET",
    url: "${it.publicBaseUri}entityhub/mapping/symbol?id=" + $("#mappingSymbolId").val(),
-   dataType: "text/plain",
+   dataType: "text",
    cache: false,
    success: function(data, textStatus, jqXHR) {
      $("#mappingForSymbolResultText").text(data.toString());

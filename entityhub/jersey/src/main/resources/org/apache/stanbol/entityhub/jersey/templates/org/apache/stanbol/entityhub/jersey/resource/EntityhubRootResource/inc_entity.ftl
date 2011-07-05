@@ -40,7 +40,7 @@ function getEntityForUri() {
    type: "GET",
    url: "${it.publicBaseUri}entityhub/entity",
    data: $("#getEntityForUriForm").serialize(),
-   dataType: "text/plain",
+   dataType: "text",
    cache: false,
    success: function(data, textStatus, jqXHR) {
      $("#entityResultText").text(data);
