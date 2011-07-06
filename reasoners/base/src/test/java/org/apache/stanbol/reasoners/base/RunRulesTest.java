@@ -24,25 +24,35 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 /**
- *
+ * 
  * @author elvio
  */
 public class RunRulesTest {
 
+    private Logger log = LoggerFactory.getLogger(getClass());
+
     public OWLOntologyManager owlmanagertarget;
+
     public OWLOntologyManager owlnamagerswrlt;
+
     public OWLOntology owltarget;
+
     public OWLOntology owlswrl;
+
     public OntModel jenaswrl;
 
     public RunRulesTest() throws OWLOntologyCreationException, IOException {
-        this.owltarget = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(new File("./src/main/resources/TestFile/ProvaParent.owl"));
-        this.owlswrl = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(new File("./src/main/resources/TestFile/OnlyRuledProvaParent.owl"));
+        this.owltarget = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(
+            new File("./src/main/resources/TestFile/ProvaParent.owl"));
+        this.owlswrl = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(
+            new File("./src/main/resources/TestFile/OnlyRuledProvaParent.owl"));
         this.owlmanagertarget = owltarget.getOWLOntologyManager();
         this.owlnamagerswrlt = owlswrl.getOWLOntologyManager();
         this.jenaswrl = ModelFactory.createOntologyModel();
@@ -50,90 +60,80 @@ public class RunRulesTest {
     }
 
     @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
+    public static void setUpClass() throws Exception {}
 
     @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
+    public static void tearDownClass() throws Exception {}
 
     @Before
-    public void setUp() {
-    }
+    public void setUp() {}
 
     @After
-    public void tearDown() {
-    }
+    public void tearDown() {}
 
     /**
      * Test of runRulesReasoner method, of class RunRules.
      */
     @Test
-    public void testRunRulesReasoner_OWLOntology_1() throws OWLOntologyCreationException{
+    public void testRunRulesReasoner_OWLOntology_1() throws OWLOntologyCreationException {
 
-        OWLOntology newmodel = OWLManager.createOWLOntologyManager().createOntology(owltarget.getOntologyID());
-        RunRules instance = new RunRules(owlswrl,owltarget);
-       
+        OWLOntology newmodel = OWLManager.createOWLOntologyManager()
+                .createOntology(owltarget.getOntologyID());
+        RunRules instance = new RunRules(owlswrl, owltarget);
+
         newmodel = instance.runRulesReasoner(newmodel);
-        
+
         CreateReasoner reasonerforcheck = new CreateReasoner(newmodel);
         RunReasoner run = new RunReasoner(reasonerforcheck.getReasoner());
-        System.out.println(":::::::::::::::: consistency check "+run.isConsistent());
-        
+        log.debug("Ontology {} is " + (run.isConsistent() ? "consistent" : "NOT consistent") + ".",
+            newmodel.getOntologyID());
+
         Iterator<OWLAxiom> axiom = newmodel.getAxioms().iterator();
         Iterator<OWLAxiom> axt = owltarget.getAxioms().iterator();
 
-        String inferedaxiom ="ObjectPropertyAssertion(<http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#hasUncle> <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#Tom> <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#John>)";
+        String inferedaxiom = "ObjectPropertyAssertion(<http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#hasUncle> <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#Tom> <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#John>)";
         String ax;
-        
-        if(newmodel!=null){
-        while(axt.hasNext()){
+
+        assertNotNull(newmodel);
+
+        while (axt.hasNext()) {
             ax = axt.next().toString();
-            if(ax.equals(inferedaxiom))
-                fail("Some errors occur with runRulesReasoner with new ontology in KReSRunRules.");
-        // TODO review the generated test code and remove the default call to fail.
-        }}else{
-            fail("Some errors occur with runRulesReasoner with new ontology in KReSRunRules.");
+            if (ax.equals(inferedaxiom)) fail("Some errors occur with runRulesReasoner with new ontology in KReSRunRules.");
         }
 
-        if(newmodel!=null){
-        while(axiom.hasNext()){
+        while (axiom.hasNext()) {
             ax = axiom.next().toString();
-            if(ax.equals(inferedaxiom))
-                assertEquals(inferedaxiom, ax.toString());
-        // TODO review the generated test code and remove the default call to fail.
-        }}else{
-            fail("Some errors occur with runRulesReasoner with new ontology in KReSRunRules.");
+            if (ax.equals(inferedaxiom)) assertEquals(inferedaxiom, ax.toString());
         }
+
     }
 
     /**
      * Test of runRulesReasoner method, of class RunRules.
      */
     @Test
-    public void testRunRulesReasoner_0args_1(){
+    public void testRunRulesReasoner_0args_1() {
 
-        RunRules instance = new RunRules(owlswrl,owltarget);
+        RunRules instance = new RunRules(owlswrl, owltarget);
         OWLOntology newmodel = instance.runRulesReasoner();
 
         CreateReasoner reasonerforcheck = new CreateReasoner(newmodel);
         RunReasoner run = new RunReasoner(reasonerforcheck.getReasoner());
-        System.out.println(":::::::::::::::: consistency check "+run.isConsistent());
+        log.debug("Ontology {} is " + (run.isConsistent() ? "consistent" : "NOT consistent") + ".",
+            newmodel.getOntologyID());
 
         Iterator<OWLAxiom> axiom = newmodel.getAxioms().iterator();
 
-        String inferedaxiom ="ObjectPropertyAssertion(<http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#hasUncle> <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#Tom> <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#John>)";
+        String inferedaxiom = "ObjectPropertyAssertion(<http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#hasUncle> <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#Tom> <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#John>)";
         String ax;
 
-        if(newmodel!=null){
-        while(axiom.hasNext()){
+        assertNotNull(newmodel);
+
+        while (axiom.hasNext()) {
             ax = axiom.next().toString();
-            if(ax.equals(inferedaxiom))
-                assertEquals(inferedaxiom, ax.toString());
-        // TODO review the generated test code and remove the default call to fail.
-        }}else{
-            fail("Some errors occur with runRulesReasoner in KReSRunRules.");
+            if (ax.equals(inferedaxiom)) assertEquals(inferedaxiom, ax.toString());
         }
+
     }
 
     /**
@@ -142,69 +142,63 @@ public class RunRulesTest {
     @Test
     public void testRunRulesReasoner_OWLOntology_2() throws OWLOntologyCreationException {
 
-        OWLOntology newmodel = OWLManager.createOWLOntologyManager().createOntology(owltarget.getOntologyID());
-        RunRules instance = new RunRules(jenaswrl.getBaseModel(),owltarget);
+        OWLOntology newmodel = OWLManager.createOWLOntologyManager()
+                .createOntology(owltarget.getOntologyID());
+        RunRules instance = new RunRules(jenaswrl.getBaseModel(), owltarget);
 
         newmodel = instance.runRulesReasoner(newmodel);
 
         CreateReasoner reasonerforcheck = new CreateReasoner(newmodel);
         RunReasoner run = new RunReasoner(reasonerforcheck.getReasoner());
-        System.out.println(":::::::::::::::: consistency check "+run.isConsistent());
+        log.debug("Ontology {} is " + (run.isConsistent() ? "consistent" : "NOT consistent") + ".",
+            newmodel.getOntologyID());
 
         Iterator<OWLAxiom> axiom = newmodel.getAxioms().iterator();
         Iterator<OWLAxiom> axt = owltarget.getAxioms().iterator();
 
-        String inferedaxiom ="ObjectPropertyAssertion(<http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#hasUncle> <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#Tom> <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#John>)";
+        String inferedaxiom = "ObjectPropertyAssertion(<http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#hasUncle> <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#Tom> <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#John>)";
         String ax;
 
-        if(newmodel!=null){
-        while(axt.hasNext()){
+        assertNotNull(newmodel);
+
+        while (axt.hasNext()) {
             ax = axt.next().toString();
-            if(ax.equals(inferedaxiom))
-                fail("Some errors occur with runRulesReasoner with new ontology in KReSRunRules.");
-        // TODO review the generated test code and remove the default call to fail.
-        }}else{
-            fail("Some errors occur with runRulesReasoner with new ontology in KReSRunRules.");
+            if (ax.equals(inferedaxiom)) fail("Some errors occur with runRulesReasoner with new ontology in KReSRunRules.");
         }
-        
-        if(newmodel!=null){
-        while(axiom.hasNext()){
+
+        while (axiom.hasNext()) {
             ax = axiom.next().toString();
-            if(ax.equals(inferedaxiom))
-                assertEquals(inferedaxiom, ax.toString());
-        // TODO review the generated test code and remove the default call to fail.
-        }}else{
-            fail("Some errors occur with runRulesReasoner with new ontology in KReSRunRules.");
+            if (ax.equals(inferedaxiom)) assertEquals(inferedaxiom, ax.toString());
         }
+
     }
 
     /**
      * Test of runRulesReasoner method, of class RunRules.
      */
     @Test
-    public void testRunRulesReasoner_0args_2(){
+    public void testRunRulesReasoner_0args_2() {
 
-        RunRules instance = new RunRules(jenaswrl,owltarget);
+        RunRules instance = new RunRules(jenaswrl, owltarget);
         OWLOntology newmodel = instance.runRulesReasoner();
 
         CreateReasoner reasonerforcheck = new CreateReasoner(newmodel);
         RunReasoner run = new RunReasoner(reasonerforcheck.getReasoner());
-        System.out.println(":::::::::::::::: consistency check "+run.isConsistent());
+        log.debug("Ontology {} is " + (run.isConsistent() ? "consistent" : "NOT consistent") + ".",
+            newmodel.getOntologyID());
 
         Iterator<OWLAxiom> axiom = newmodel.getAxioms().iterator();
 
-        String inferedaxiom ="ObjectPropertyAssertion(<http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#hasUncle> <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#Tom> <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#John>)";
+        String inferedaxiom = "ObjectPropertyAssertion(<http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#hasUncle> <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#Tom> <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#John>)";
         String ax;
 
-        if(newmodel!=null){
-        while(axiom.hasNext()){
+        assertNotNull(newmodel);
+
+        while (axiom.hasNext()) {
             ax = axiom.next().toString();
-            if(ax.equals(inferedaxiom))
-                assertEquals(inferedaxiom, ax.toString());
-        // TODO review the generated test code and remove the default call to fail.
-        }}else{
-            fail("Some errors occur with runRulesReasoner in KReSRunRules.");
+            if (ax.equals(inferedaxiom)) assertEquals(inferedaxiom, ax.toString());
         }
+
     }
 
 }

@@ -1,8 +1,8 @@
 package org.apache.stanbol.reasoners.web.resources;
 
-import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.MediaType.*;
+import static javax.ws.rs.core.Response.Status.*;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.*;
 
 import java.io.InputStream;
 
@@ -14,10 +14,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.reasoners.base.api.ConsistentRefactorer;
 import org.apache.stanbol.reasoners.base.api.InconcistencyException;
@@ -28,6 +26,8 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.Viewable;
 import com.sun.jersey.multipart.FormDataParam;
@@ -39,7 +39,9 @@ import com.sun.jersey.multipart.FormDataParam;
  * 
  */
 @Path("/reasoners/refactor")
-public class ConsistentRefactoring extends BaseStanbolResource{
+public class ConsistentRefactoring extends BaseStanbolResource {
+
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     protected ConsistentRefactorer refactorer;
 
@@ -70,18 +72,19 @@ public class ConsistentRefactoring extends BaseStanbolResource{
         } catch (RefactoringException e) {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         } catch (NoSuchRecipeException e) {
-            return Response.status(204).build();
+            return Response.status(NO_CONTENT).build();
         } catch (InconcistencyException e) {
-            return Response.status(415).build();
+            log.error("Cannot classify ionconsistent graph " + inputGraph, e);
+            return Response.status(PRECONDITION_FAILED).build();
         }
 
     }
 
     @POST
     @Path("/consistent")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces({KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
-               KRFormat.OWL_XML, KRFormat.RDF_JSON})
+    @Consumes(MULTIPART_FORM_DATA)
+    @Produces({TURTLE, FUNCTIONAL_OWL, MANCHESTER_OWL, RDF_XML,
+               OWL_XML, RDF_JSON})
     public Response consistentRefactoringOfNewGraph(@FormDataParam("recipe") String recipe,
                                                     @FormDataParam("input") InputStream input) {
 
@@ -100,9 +103,10 @@ public class ConsistentRefactoring extends BaseStanbolResource{
             } catch (RefactoringException e) {
                 return Response.status(INTERNAL_SERVER_ERROR).build();
             } catch (NoSuchRecipeException e) {
-                return Response.status(204).build();
+                return Response.status(NO_CONTENT).build();
             } catch (InconcistencyException e) {
-                return Response.status(415).build();
+                log.error("Cannot classify ionconsistent graph " + inputOntology, e);
+                return Response.status(PRECONDITION_FAILED).build();
             }
 
             return Response.ok(outputOntology).build();
@@ -111,7 +115,7 @@ public class ConsistentRefactoring extends BaseStanbolResource{
         }
 
     }
-    
+
     @GET
     @Produces(TEXT_HTML)
     public Response getView() {

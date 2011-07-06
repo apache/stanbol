@@ -1,6 +1,7 @@
 package org.apache.stanbol.reasoners.web.resources;
 
-import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static javax.ws.rs.core.MediaType.*;
+import static javax.ws.rs.core.Response.Status.*;
 
 import java.io.File;
 import java.net.URL;
@@ -19,9 +20,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -67,456 +66,389 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.sun.jersey.api.view.Viewable;
 import com.sun.jersey.multipart.FormDataParam;
 
-
 /**
- * This class implements the REST interface for the /check-consistency service
- * of KReS.
+ * This class implements the REST interface for the /check-consistency service of KReS.
  * 
  * @author elvio
  */
 @Path("/reasoners/check-consistency")
-public class ConsistencyCheck extends BaseStanbolResource{
+public class ConsistencyCheck extends BaseStanbolResource {
 
-	private RuleStore kresRuleStore;
-	private OWLOntology inputowl;
-	private OWLOntology scopeowl;
+    private RuleStore kresRuleStore;
+    private OWLOntology inputowl;
 
-	private final OWLDuplicateSafeLoader loader = new OWLDuplicateSafeLoader();
-	protected ONManager onm;
-	protected ClerezzaOntologyStorage storage;
-	
-	protected ServletContext servletContext;
+    private final OWLDuplicateSafeLoader loader = new OWLDuplicateSafeLoader();
+    protected ONManager onm;
+    protected ClerezzaOntologyStorage storage;
 
-	private Logger log = LoggerFactory.getLogger(getClass());
+    protected ServletContext servletContext;
 
-	/**
-	 * The constructor.
-	 * 
-	 * @param servletContext
-	 *            {To get the context where the REST service is running.}
-	 */
-	public ConsistencyCheck(@Context ServletContext servletContext) {
-	    this.servletContext = servletContext;
-        
-		// Retrieve the rule store
-	    this.kresRuleStore = (RuleStore) ContextHelper.getServiceFromContext(RuleStore.class, servletContext);
-		
-		// Retrieve the ontology network manager
-		this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
-        this.storage = (ClerezzaOntologyStorage) ContextHelper.getServiceFromContext(ClerezzaOntologyStorage.class, servletContext);
-        
-		if (kresRuleStore == null) {
-			log
-					.warn("No KReSRuleStore with stored rules and recipes found in servlet context. Instantiating manually with default values...");
-			this.kresRuleStore = new RuleStoreImpl(onm,
-					new Hashtable<String, Object>(), "");
-			log
-					.debug("PATH TO OWL FILE LOADED: "
-					+ kresRuleStore.getFilePath());
-		}
+    private Logger log = LoggerFactory.getLogger(getClass());
 
-	}
+    /**
+     * The constructor.
+     * 
+     * @param servletContext
+     *            {To get the context where the REST service is running.}
+     */
+    public ConsistencyCheck(@Context ServletContext servletContext) {
+        this.servletContext = servletContext;
 
-	/**
-	 * To trasform a sequence of rules to a Jena Model
-	 * 
-	 * @param owl
-	 *            {OWLOntology object contains a single recipe}
-	 * @return {A jena rdf model contains the SWRL rule.}
-	 */
-	private Model fromRecipeToModel(OWLOntology owl)
-			throws NoSuchRecipeException, OWLOntologyCreationException {
+        // Retrieve the rule store
+        this.kresRuleStore = (RuleStore) ContextHelper.getServiceFromContext(RuleStore.class, servletContext);
 
-		// FIXME: why the heck is this method re-instantiating a rule store?!?
-		RuleStore store = new RuleStoreImpl(onm,
-				new Hashtable<String, Object>(), owl);
-		Model jenamodel = ModelFactory.createDefaultModel();
+        // Retrieve the ontology network manager
+        this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
+        this.storage = (ClerezzaOntologyStorage) ContextHelper.getServiceFromContext(
+            ClerezzaOntologyStorage.class, servletContext);
 
-		OWLDataFactory factory = owl.getOWLOntologyManager()
-				.getOWLDataFactory();
-		OWLClass ontocls = factory
-				.getOWLClass(IRI
-						.create("http://kres.iks-project.eu/ontology/meta/rmi.owl#Recipe"));
-		Set<OWLClassAssertionAxiom> cls = owl.getClassAssertionAxioms(ontocls);
-		Iterator<OWLClassAssertionAxiom> iter = cls.iterator();
-		IRI recipeiri = IRI.create(iter.next().getIndividual().toStringID());
+        if (kresRuleStore == null) {
+            log.warn("No KReSRuleStore with stored rules and recipes found in servlet context. Instantiating manually with default values...");
+            this.kresRuleStore = new RuleStoreImpl(onm, new Hashtable<String,Object>(), "");
+            log.debug("PATH TO OWL FILE LOADED: " + kresRuleStore.getFilePath());
+        }
 
-		OWLIndividual recipeIndividual = factory
-				.getOWLNamedIndividual(recipeiri);
+    }
 
-		OWLObjectProperty objectProperty = factory
-				.getOWLObjectProperty(IRI
-						.create("http://kres.iks-project.eu/ontology/meta/rmi.owl#hasRule"));
-		Set<OWLIndividual> rules = recipeIndividual.getObjectPropertyValues(
-				objectProperty, store.getOntology());
-		String kReSRules = "";
-		for (OWLIndividual rule : rules) {
-			OWLDataProperty hasBodyAndHead = factory
-					.getOWLDataProperty(IRI
-							.create("http://kres.iks-project.eu/ontology/meta/rmi.owl#hasBodyAndHead"));
-			Set<OWLLiteral> kReSRuleLiterals = rule.getDataPropertyValues(
-					hasBodyAndHead, store.getOntology());
-			for (OWLLiteral kReSRuleLiteral : kReSRuleLiterals) {
-				kReSRules += kReSRuleLiteral.getLiteral()
-						+ System.getProperty("line.separator");
-			}
-		}
+    /**
+     * To trasform a sequence of rules to a Jena Model
+     * 
+     * @param owl
+     *            {OWLOntology object contains a single recipe}
+     * @return {A jena rdf model contains the SWRL rule.}
+     */
+    private Model fromRecipeToModel(OWLOntology owl) throws NoSuchRecipeException,
+                                                    OWLOntologyCreationException {
 
-		// kReSRules =
-		// "ProvaParent = <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#> . rule1[ has(ProvaParent:hasParent, ?x, ?y) . has(ProvaParent:hasBrother, ?y, ?z) -> has(ProvaParent:hasUncle, ?x, ?z) ]";
-		KB kReSKB = RuleParserImpl.parse(kReSRules);
-		RuleList listrules = kReSKB.getkReSRuleList();
-		Iterator<Rule> iterule = listrules.iterator();
-		while (iterule.hasNext()) {
-			Rule singlerule = iterule.next();
-			Resource resource = singlerule.toSWRL(jenamodel);
-		}
+        // FIXME: why the heck is this method re-instantiating a rule store?!?
+        RuleStore store = new RuleStoreImpl(onm, new Hashtable<String,Object>(), owl);
+        Model jenamodel = ModelFactory.createDefaultModel();
 
-		return jenamodel;
+        OWLDataFactory factory = owl.getOWLOntologyManager().getOWLDataFactory();
+        OWLClass ontocls = factory.getOWLClass(IRI
+                .create("http://kres.iks-project.eu/ontology/meta/rmi.owl#Recipe"));
+        Set<OWLClassAssertionAxiom> cls = owl.getClassAssertionAxioms(ontocls);
+        Iterator<OWLClassAssertionAxiom> iter = cls.iterator();
+        IRI recipeiri = IRI.create(iter.next().getIndividual().toStringID());
 
-	}
+        OWLIndividual recipeIndividual = factory.getOWLNamedIndividual(recipeiri);
 
-	/**
-	 * To check the consistency of an Ontology or a Scope (as top ontology)
-	 * using the default reasoner
-	 * 
-	 * @param uri
-	 *            {A string contains the IRI of RDF (either RDF/XML or owl or
-	 *            scope) to be checked.}
-	 * @return Return: <br/>
-	 *         200 No data is retrieved, the graph IS consistent <br/>
-	 *         204 No data is retrieved, the graph IS NOT consistent <br/>
-	 *         404 File not found. The ontology cannot be retrieved. <br/>
-	 *         412 Precondition failed. The ontology cannot be checked. This
-	 *         happens, for example, if the ontology includes missing imports. <br/>
-	 *         500 Some error occurred.
-	 */
-	@GET
-	//@Path("{uri:.+}")
-	public Response GetSimpleConsistencyCheck(
-			@QueryParam("uri") String uri) {
-		log.info("Start simple consistency check with input: "+uri, this);
-		
-		if(uri==null){
-		    return Response.status(Status.BAD_REQUEST).build();
-		}
-		
-		try {
-			boolean ok = false;
-			OWLOntology owl;
-			try {
-				// First create a manager
-				OWLOntologyManager mng = OWLManager.createOWLOntologyManager();
+        OWLObjectProperty objectProperty = factory.getOWLObjectProperty(IRI
+                .create("http://kres.iks-project.eu/ontology/meta/rmi.owl#hasRule"));
+        Set<OWLIndividual> rules = recipeIndividual.getObjectPropertyValues(objectProperty,
+            store.getOntology());
+        String kReSRules = "";
+        for (OWLIndividual rule : rules) {
+            OWLDataProperty hasBodyAndHead = factory.getOWLDataProperty(IRI
+                    .create("http://kres.iks-project.eu/ontology/meta/rmi.owl#hasBodyAndHead"));
+            Set<OWLLiteral> kReSRuleLiterals = rule
+                    .getDataPropertyValues(hasBodyAndHead, store.getOntology());
+            for (OWLLiteral kReSRuleLiteral : kReSRuleLiterals) {
+                kReSRules += kReSRuleLiteral.getLiteral() + System.getProperty("line.separator");
+            }
+        }
 
-				/**
-				 * We use the loader to support duplicate owl:imports
-				 */
-				log.debug("Loading "+uri, this);
-				owl = loader.load(mng, uri);
-				// owl = mng.loadOntologyFromOntologyDocument(IRI.create(uri));
-			} catch (UnloadableImportException uu) {
-				log.debug("Some ontology import failed. Cannot continue.", uu);
-				return Response.status(Status.PRECONDITION_FAILED).build();
-			} catch (Exception ee) {
-				log
-						.error(
-								"Cannot fetch the ontology. Some error occurred. Cannot continue.",
-								ee);
-				return Response.status(Status.NOT_FOUND).build();
-			}
-			CreateReasoner newreasoner = new CreateReasoner(owl);
-			// KReSReasonerImpl reasoner = new KReSReasonerImpl();
-			try {
-				RunReasoner reasoner = new RunReasoner(newreasoner
-						.getReasoner());
-				ok = reasoner.isConsistent();
-			} catch (InconsistentOntologyException exc) {
-				ok = false;
-			}
+        // kReSRules =
+        // "ProvaParent = <http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#> . rule1[ has(ProvaParent:hasParent, ?x, ?y) . has(ProvaParent:hasBrother, ?y, ?z) -> has(ProvaParent:hasUncle, ?x, ?z) ]";
+        KB kReSKB = RuleParserImpl.parse(kReSRules);
+        RuleList listrules = kReSKB.getkReSRuleList();
+        Iterator<Rule> iterule = listrules.iterator();
+        while (iterule.hasNext()) {
+            Rule singlerule = iterule.next();
+            Resource resource = singlerule.toSWRL(jenamodel);
+        }
 
-			if (ok) {
-				log.debug("The give graph is consistent.",this);
-				// No data is retrieved, the graph IS consistent
-				return Response.status(Status.OK).build();
-			} else {
-				log.debug("The give graph is NOT consistent.",this);
-				// No data is retrieved, the graph IS NOT consistent
-				return Response.status(Status.NO_CONTENT).build();
-			}
+        return jenamodel;
 
-		} catch (Exception e) {
-			// Some error occurred
-			throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
-		}
+    }
 
-	}
+    /**
+     * To check the consistency of an Ontology or a Scope (as top ontology) using the default reasoner
+     * 
+     * @param uri
+     *            {A string contains the IRI of RDF (either RDF/XML or owl or scope) to be checked.}
+     * @return Return: <br/>
+     *         200 No data is retrieved, the graph IS consistent <br/>
+     *         204 No data is retrieved, the graph IS NOT consistent <br/>
+     *         404 File not found. The ontology cannot be retrieved. <br/>
+     *         412 Precondition failed. The ontology cannot be checked. This happens, for example, if the
+     *         ontology includes missing imports. <br/>
+     *         500 Some error occurred.
+     */
+    @GET
+    // @Path("{uri:.+}")
+    public Response GetSimpleConsistencyCheck(@QueryParam("uri") String uri) {
+        log.info("Start simple consistency check with input: " + uri, this);
 
-	/**
-	 * To check the consistency of a RDF input File or IRI on the base of a
-	 * Scope (or an ontology) and a recipe. Can be used either HermiT or an
-	 * owl-link server reasoner end-point
-	 * 
-	 * @param session
-	 *            {A string contains the session IRI used to check the
-	 *            consistency.}
-	 * @param scope
-	 *            {A string contains either a specific scope's ontology or the
-	 *            scope IRI used to check the consistency.}
-	 * @param recipe
-	 *            {A string contains the recipe IRI from the service
-	 *            http://localhost:port/kres/recipe/recipeName.}
-	 * @Param file {A file in a RDF (eihter RDF/XML or owl) to be checked.}
-	 * @Param input_graph {A string contains the IRI of RDF (either RDF/XML or
-	 *        OWL) to be checked.}
-	 * @Param owllink_endpoint {A string contains the reasoner server end-point
-	 *        URL.}
-	 * @return Return: <br/>
-	 *         200 No data is retrieved, the graph IS consistent <br/>
-	 *         204 No data is retrieved, the graph IS NOT consistent <br/>
-	 *         400 To run the session is needed the scope <br/>
-	 *         404 Scope either Ontology or recipe or RDF input not found <br/>
-	 *         409 Too much RDF input <br/>
-	 *         500 Some error occurred
-	 */
-	@POST
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response getConsistencyCheck(
-			@FormDataParam(value = "session") String session,
-			@FormDataParam(value = "scope") String scope,
-			@FormDataParam(value = "recipe") String recipe,
-			@FormDataParam(value = "input-graph") String input_graph,
-			@FormDataParam(value = "file") File file,
-			@FormDataParam(value = "owllink-endpoint") String owllink_endpoint
-	) {
+        if (uri == null) {
+            return Response.status(BAD_REQUEST).build();
+        }
 
-	    log.info("Start consistency check.", this);
-        
-	    
-		try {
+        try {
+            boolean ok = false;
+            OWLOntology owl;
+            try {
+                // First create a manager
+                OWLOntologyManager mng = OWLManager.createOWLOntologyManager();
 
-			if ((session != null) && (scope == null)) {
-				log.error("Cannot load session without scope.", this);
-				return Response.status(Status.BAD_REQUEST).build();
-			}
+                /**
+                 * We use the loader to support duplicate owl:imports
+                 */
+                log.debug("Loading " + uri, this);
+                owl = loader.load(mng, uri);
+                // owl = mng.loadOntologyFromOntologyDocument(IRI.create(uri));
+            } catch (UnloadableImportException uu) {
+                log.debug("Some ontology import failed. Cannot continue.", uu);
+                return Response.status(PRECONDITION_FAILED).build();
+            } catch (Exception ee) {
+                log.error("Cannot fetch the ontology. Some error occurred. Cannot continue.", ee);
+                return Response.status(NOT_FOUND).build();
+            }
+            CreateReasoner newreasoner = new CreateReasoner(owl);
+            // KReSReasonerImpl reasoner = new KReSReasonerImpl();
+            try {
+                RunReasoner reasoner = new RunReasoner(newreasoner.getReasoner());
+                ok = reasoner.isConsistent();
+            } catch (InconsistentOntologyException exc) {
+                ok = false;
+            }
 
-			// Check for input conflict. Only one input at once is allowed
-			if ((file != null) && (input_graph != null)) {
-				log.error("To much RDF input", this);
-				return Response.status(Status.CONFLICT).build();
-			}
+            if (ok) {
+                log.debug("The given graph is consistent.", this);
+                // No data is retrieved, the graph IS consistent
+                return Response.ok().build();
+            } else {
+                log.debug("The given graph is NOT consistent.", this);
+                // No data is retrieved, the graph IS NOT consistent
+                return Response.status(NO_CONTENT).build();
+            }
 
-			// Load input file or graph
-			if (file != null)
-				this.inputowl = OWLManager.createOWLOntologyManager()
-						.loadOntologyFromOntologyDocument(file);
-			if (input_graph != null)
-				this.inputowl = OWLManager.createOWLOntologyManager()
-						.loadOntologyFromOntologyDocument(
-								IRI.create(input_graph));
-			if (inputowl == null && (session == null || scope == null))
-				return Response.status(Status.NOT_FOUND).build();
-			if (inputowl == null) {
-				if (scope != null)
-					this.inputowl = OWLManager.createOWLOntologyManager()
-							.createOntology();
-				else {
-					this.inputowl = OWLManager.createOWLOntologyManager()
-							.createOntology();
-				}
-			}
+        } catch (Exception e) {
+            // Some error occurred
+            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+        }
 
-			// Create list to add ontologies as imported
-			OWLOntologyManager mgr = inputowl.getOWLOntologyManager();
-			OWLDataFactory factory = inputowl.getOWLOntologyManager()
-					.getOWLDataFactory();
-			List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
+    }
 
-			boolean ok = false;
+    /**
+     * To check the consistency of a RDF input File or IRI on the base of a Scope (or an ontology) and a
+     * recipe. Can be used either HermiT or an owl-link server reasoner end-point
+     * 
+     * @param session
+     *            {A string contains the session IRI used to check the consistency.}
+     * @param scope
+     *            {A string contains either a specific scope's ontology or the scope IRI used to check the
+     *            consistency.}
+     * @param recipe
+     *            {A string contains the recipe IRI from the service
+     *            http://localhost:port/kres/recipe/recipeName.}
+     * @Param file {A file in a RDF (eihter RDF/XML or owl) to be checked.}
+     * @Param input_graph {A string contains the IRI of RDF (either RDF/XML or OWL) to be checked.}
+     * @Param owllink_endpoint {A string contains the reasoner server end-point URL.}
+     * @return Return: <br/>
+     *         200 No data is retrieved, the graph IS consistent <br/>
+     *         204 No data is retrieved, the graph IS NOT consistent <br/>
+     *         400 To run the session is needed the scope <br/>
+     *         404 Scope either Ontology or recipe or RDF input not found <br/>
+     *         409 Too much RDF input <br/>
+     *         500 Some error occurred
+     */
+    @POST
+    @Consumes(MULTIPART_FORM_DATA)
+    public Response getConsistencyCheck(@FormDataParam(value = "session") String session,
+                                        @FormDataParam(value = "scope") String scope,
+                                        @FormDataParam(value = "recipe") String recipe,
+                                        @FormDataParam(value = "input-graph") String input_graph,
+                                        @FormDataParam(value = "file") File file,
+                                        @FormDataParam(value = "owllink-endpoint") String owllink_endpoint) {
 
-			// Load ontologies from scope, RDF input and recipe
-			// Try to resolve scope IRI
-			if ((scope != null) && (session == null))
-				try {
-					IRI iri = IRI.create(scope);
-					ScopeRegistry reg = onm.getScopeRegistry();
-					OntologyScope ontoscope = reg.getScope(iri);
-					Iterator<OWLOntology> importscope = ontoscope
-							.getCustomSpace().getOntologies().iterator();
-					Iterator<OntologySpace> importsession = ontoscope
-							.getSessionSpaces().iterator();
+        log.info("Start consistency check.", this);
 
-					// Add ontology as import form scope, if it is anonymus we
-					// try to add single axioms.
-					while (importscope.hasNext()) {
-						OWLOntology auxonto = importscope.next();
-						if (!auxonto.getOntologyID().isAnonymous()) {
-							additions.add(new AddImport(inputowl, factory
-									.getOWLImportsDeclaration(auxonto
-											.getOWLOntologyManager()
-											.getOntologyDocumentIRI(auxonto))));
-						} else {
-							mgr.addAxioms(inputowl, auxonto.getAxioms());
-						}
-					}
+        try {
 
-					// Add ontology form sessions
-					while (importsession.hasNext()) {
-						Iterator<OWLOntology> sessionontos = importsession
-								.next().getOntologies().iterator();
-						while (sessionontos.hasNext()) {
-							OWLOntology auxonto = sessionontos.next();
-							if (!auxonto.getOntologyID().isAnonymous()) {
-								additions
-										.add(new AddImport(
-												inputowl,
-												factory
-														.getOWLImportsDeclaration(auxonto
-																.getOWLOntologyManager()
-																.getOntologyDocumentIRI(
-																		auxonto))));
-							} else {
-								mgr.addAxioms(inputowl, auxonto.getAxioms());
-							}
-						}
+            if ((session != null) && (scope == null)) {
+                log.error("Cannot load session without scope.", this);
+                return Response.status(BAD_REQUEST).build();
+            }
 
-					}
+            // Check for input conflict. Only one input at once is allowed
+            if ((file != null) && (input_graph != null)) {
+                log.error("Too much RDF input", this);
+                return Response.status(CONFLICT).build();
+            }
 
-				} catch (Exception e) {
-					log.error("Problem with scope: " + scope, this);
-					log.debug("Exception is ", e);
-					Response.status(Status.NOT_FOUND).build();
-				}
+            // Load input file or graph
+            if (file != null) this.inputowl = OWLManager.createOWLOntologyManager()
+                    .loadOntologyFromOntologyDocument(file);
+            if (input_graph != null) this.inputowl = OWLManager.createOWLOntologyManager()
+                    .loadOntologyFromOntologyDocument(IRI.create(input_graph));
+            if (inputowl == null && (session == null || scope == null)) return Response.status(NOT_FOUND)
+                    .build();
+            if (inputowl == null) {
+                if (scope != null) this.inputowl = OWLManager.createOWLOntologyManager().createOntology();
+                else {
+                    this.inputowl = OWLManager.createOWLOntologyManager().createOntology();
+                }
+            }
 
-			// Get Ontologies from session
-			if ((session != null) && (scope != null))
-				try {
-					IRI iri = IRI.create(scope);
-					ScopeRegistry reg = onm.getScopeRegistry();
-					OntologyScope ontoscope = reg.getScope(iri);
-					SessionOntologySpace sos = ontoscope.getSessionSpace(IRI
-							.create(session));
+            // Create list to add ontologies as imported
+            OWLOntologyManager mgr = inputowl.getOWLOntologyManager();
+            OWLDataFactory factory = inputowl.getOWLOntologyManager().getOWLDataFactory();
+            List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
 
-					Set<OWLOntology> ontos = sos.getOntologyManager()
-							.getOntologies();
-					Iterator<OWLOntology> iteronto = ontos.iterator();
+            boolean ok = false;
 
-					// Add session ontologies as import, if it is anonymus we
-					// try to add single axioms.
-					while (iteronto.hasNext()) {
-						OWLOntology auxonto = iteronto.next();
-						if (!auxonto.getOntologyID().isAnonymous()) {
-							additions.add(new AddImport(inputowl, factory
-									.getOWLImportsDeclaration(auxonto
-											.getOWLOntologyManager()
-											.getOntologyDocumentIRI(auxonto))));
-						} else {
-							mgr.addAxioms(inputowl, auxonto.getAxioms());
-						}
-					}
+            // Load ontologies from scope, RDF input and recipe
+            // Try to resolve scope IRI
+            if ((scope != null) && (session == null)) try {
+                IRI iri = IRI.create(scope);
+                ScopeRegistry reg = onm.getScopeRegistry();
+                OntologyScope ontoscope = reg.getScope(iri);
+                Iterator<OWLOntology> importscope = ontoscope.getCustomSpace().getOntologies().iterator();
+                Iterator<OntologySpace> importsession = ontoscope.getSessionSpaces().iterator();
 
-				} catch (Exception e) {
-					log.error("Problem with session: " + session, this);
-					log.debug("Exception is", e);
-					Response.status(Status.NOT_FOUND).build();
-				}
+                // Add ontology as import form scope, if it is anonymus we
+                // try to add single axioms.
+                while (importscope.hasNext()) {
+                    OWLOntology auxonto = importscope.next();
+                    if (!auxonto.getOntologyID().isAnonymous()) {
+                        additions.add(new AddImport(inputowl, factory.getOWLImportsDeclaration(auxonto
+                                .getOWLOntologyManager().getOntologyDocumentIRI(auxonto))));
+                    } else {
+                        mgr.addAxioms(inputowl, auxonto.getAxioms());
+                    }
+                }
 
-			// After gathered the all ontology as imported now we apply the
-			// changes
-			if (additions.size() > 0)
-				mgr.applyChanges(additions);
+                // Add ontology form sessions
+                while (importsession.hasNext()) {
+                    Iterator<OWLOntology> sessionontos = importsession.next().getOntologies().iterator();
+                    while (sessionontos.hasNext()) {
+                        OWLOntology auxonto = sessionontos.next();
+                        if (!auxonto.getOntologyID().isAnonymous()) {
+                            additions.add(new AddImport(inputowl, factory.getOWLImportsDeclaration(auxonto
+                                    .getOWLOntologyManager().getOntologyDocumentIRI(auxonto))));
+                        } else {
+                            mgr.addAxioms(inputowl, auxonto.getAxioms());
+                        }
+                    }
 
-			// Run HermiT if the reasonerURL is null;
-			if (owllink_endpoint == null) {
+                }
 
-				// Create the reasoner for the consistency check
-				try {
+            } catch (Exception e) {
+                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+            }
 
-					if (recipe != null) {
-						OWLOntology recipeowl = OWLManager
-								.createOWLOntologyManager()
-								.loadOntologyFromOntologyDocument(
-										IRI.create(recipe));
+            // Get Ontologies from session
+            if ((session != null) && (scope != null)) try {
+                IRI iri = IRI.create(scope);
+                ScopeRegistry reg = onm.getScopeRegistry();
+                OntologyScope ontoscope = reg.getScope(iri);
+                SessionOntologySpace sos = ontoscope.getSessionSpace(IRI.create(session));
 
-						// Get Jea RDF model of SWRL rule contained in the
-						// recipe
-						Model swrlmodel = fromRecipeToModel(recipeowl);
-						// Create a reasoner to run rules contained in the
-						// recipe
-						RunRules rulereasoner = new RunRules(swrlmodel,
-								inputowl);
-						// Run the rule reasoner to the input RDF with the added
-						// top-ontology
-						inputowl = rulereasoner.runRulesReasoner();
-					}
-					CreateReasoner newreasoner = new CreateReasoner(
-							inputowl);
-					// Prepare and start the reasoner to check the consistence
-					RunReasoner reasoner = new RunReasoner(newreasoner
-							.getReasoner());
-					ok = reasoner.isConsistent();
-				} catch (InconsistentOntologyException exc) {
-					ok = false;
-				}
+                Set<OWLOntology> ontos = sos.getOntologyManager().getOntologies();
+                Iterator<OWLOntology> iteronto = ontos.iterator();
 
-				if (ok) {
-					// No data is retrieved, the graph IS consistent
-					return Response.status(Status.OK).build();
-				} else {
-					// No data is retrieved, the graph IS NOT consistent
-					return Response.status(Status.NO_CONTENT).build();
-				}
+                // Add session ontologies as import, if it is anonymus we
+                // try to add single axioms.
+                while (iteronto.hasNext()) {
+                    OWLOntology auxonto = iteronto.next();
+                    if (!auxonto.getOntologyID().isAnonymous()) {
+                        additions.add(new AddImport(inputowl, factory.getOWLImportsDeclaration(auxonto
+                                .getOWLOntologyManager().getOntologyDocumentIRI(auxonto))));
+                    } else {
+                        mgr.addAxioms(inputowl, auxonto.getAxioms());
+                    }
+                }
 
-				// If there is an owl-link server end-point specified in the
-				// form
-			} else {
+            } catch (Exception e) {
+                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+            }
 
-				// Create the reasoner for the consistency check by using the
-				// server and-point
-				try {
-					if (recipe != null) {
-						OWLOntology recipeowl = OWLManager
-								.createOWLOntologyManager()
-								.loadOntologyFromOntologyDocument(
-										IRI.create(recipe));
-						// Get Jea RDF model of SWRL rule contained in the
-						// recipe
-						Model swrlmodel = fromRecipeToModel(recipeowl);
+            // After gathered the all ontology as imported now we apply the
+            // changes
+            if (additions.size() > 0) mgr.applyChanges(additions);
 
-						// Create a reasoner to run rules contained in the
-						// recipe by using the server and-point
-						RunRules rulereasoner = new RunRules(swrlmodel,
-								inputowl, new URL(owllink_endpoint));
-						// Run the rule reasoner to the input RDF with the added
-						// top-ontology
-						inputowl = rulereasoner.runRulesReasoner();
-					}
+            // Run HermiT if the reasonerURL is null;
+            if (owllink_endpoint == null) {
 
-					CreateReasoner newreasoner = new CreateReasoner(
-							inputowl, new URL(owllink_endpoint));
-					// Prepare and start the reasoner to check the consistence
-					RunReasoner reasoner = new RunReasoner(newreasoner
-							.getReasoner());
-					ok = reasoner.isConsistent();
-				} catch (InconsistentOntologyException exc) {
-					ok = false;
-				}
+                // Create the reasoner for the consistency check
+                try {
 
-				if (ok) {
-					// No data is retrieved, the graph IS consistent
-					return Response.status(Status.OK).build();
-				} else {
-					// No data is retrieved, the graph IS NOT consistent
-					return Response.status(Status.NO_CONTENT).build();
-				}
-			}
+                    if (recipe != null) {
+                        OWLOntology recipeowl = OWLManager.createOWLOntologyManager()
+                                .loadOntologyFromOntologyDocument(IRI.create(recipe));
 
-		} catch (Exception e) {
-			throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
-		}
+                        // Get Jea RDF model of SWRL rule contained in the
+                        // recipe
+                        Model swrlmodel = fromRecipeToModel(recipeowl);
+                        // Create a reasoner to run rules contained in the
+                        // recipe
+                        RunRules rulereasoner = new RunRules(swrlmodel, inputowl);
+                        // Run the rule reasoner to the input RDF with the added
+                        // top-ontology
+                        inputowl = rulereasoner.runRulesReasoner();
+                    }
+                    CreateReasoner newreasoner = new CreateReasoner(inputowl);
+                    // Prepare and start the reasoner to check the consistence
+                    RunReasoner reasoner = new RunReasoner(newreasoner.getReasoner());
+                    ok = reasoner.isConsistent();
+                } catch (InconsistentOntologyException exc) {
+                    ok = false;
+                }
 
-	}
-	
-	@GET
+                if (ok) {
+                    // No data is retrieved, the graph IS consistent
+                    return Response.ok().build();
+                } else {
+                    // No data is retrieved, the graph IS NOT consistent
+                    return Response.status(NO_CONTENT).build();
+                }
+
+                // If there is an owl-link server end-point specified in the
+                // form
+            } else {
+
+                // Create the reasoner for the consistency check by using the
+                // server and-point
+                try {
+                    if (recipe != null) {
+                        OWLOntology recipeowl = OWLManager.createOWLOntologyManager()
+                                .loadOntologyFromOntologyDocument(IRI.create(recipe));
+                        // Get Jea RDF model of SWRL rule contained in the
+                        // recipe
+                        Model swrlmodel = fromRecipeToModel(recipeowl);
+
+                        // Create a reasoner to run rules contained in the
+                        // recipe by using the server and-point
+                        RunRules rulereasoner = new RunRules(swrlmodel, inputowl, new URL(owllink_endpoint));
+                        // Run the rule reasoner to the input RDF with the added
+                        // top-ontology
+                        inputowl = rulereasoner.runRulesReasoner();
+                    }
+
+                    CreateReasoner newreasoner = new CreateReasoner(inputowl, new URL(owllink_endpoint));
+                    // Prepare and start the reasoner to check the consistence
+                    RunReasoner reasoner = new RunReasoner(newreasoner.getReasoner());
+                    ok = reasoner.isConsistent();
+                } catch (InconsistentOntologyException exc) {
+                    ok = false;
+                }
+                if (ok) {
+                    // No data is retrieved, the graph IS consistent
+                    return Response.status(OK).build();
+                } else {
+                    // No data is retrieved, the graph IS NOT consistent
+                    return Response.status(NO_CONTENT).build();
+                }
+            }
+
+        } catch (Exception e) {
+            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    @GET
     @Produces(TEXT_HTML)
     public Response getView() {
         return Response.ok(new Viewable("index", this), TEXT_HTML).build();

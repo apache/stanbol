@@ -15,16 +15,12 @@ import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import com.sun.jersey.api.view.ImplicitProduces;
 import com.sun.jersey.api.view.Viewable;
 
-
 @Path("/reasoners")
 @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
 public class ReasonersResource extends BaseStanbolResource {
 
-    public ReasonersResource(@Context ServletContext servletContext) {
-        
+    public ReasonersResource(@Context ServletContext servletContext) {}
 
-    }
-    
     @GET
     @Produces(TEXT_HTML)
     public Response get() {
