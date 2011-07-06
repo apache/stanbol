@@ -269,7 +269,7 @@ public class RuleStoreImpl implements RuleStore {
                 // Can we skip this step of saving the ontology?
                 if (owlmodel != null) {
 
-                    File dirs = new File("./KReSConf");
+                    File dirs = new File("." + sep + "KReSConf");
                     if (!dirs.exists()) dirs.mkdir();
                     ruleOntologyLocation = "." + sep + "KReSConf" + sep + "rmi_config.owl";
 
