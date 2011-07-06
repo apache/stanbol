@@ -109,7 +109,7 @@ public class RuleStoreImpl implements RuleStore {
     private RuleParserImpl kReSRuleParser;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-    
+
     @Reference
     ONManager onManager;
 
@@ -249,7 +249,7 @@ public class RuleStoreImpl implements RuleStore {
                     } catch (OWLOntologyCreationException e) {
                         log.error("Cannot create the ontology " + filedir.toString(), e);
                     } catch (Exception e) {
-                        log.error("1 Rule Store: no rule ontology available.",e);
+                        log.error("1 Rule Store: no rule ontology available.", e);
                     }
                 }
                 // default KReSConf dir does not exist
@@ -262,7 +262,7 @@ public class RuleStoreImpl implements RuleStore {
                     } catch (OWLOntologyCreationException e) {
                         log.error("Cannot create the ontology " + inputontology.toString(), e);
                     } catch (Exception e) {
-                        log.error("Rule Store: no rule ontology available.",e);
+                        log.error("Rule Store: no rule ontology available.", e);
                     }
                 }
 
@@ -271,7 +271,7 @@ public class RuleStoreImpl implements RuleStore {
 
                     File dirs = new File("./KReSConf");
                     if (!dirs.exists()) dirs.mkdir();
-                    ruleOntologyLocation = "./KReSConf/rmi_config.owl";
+                    ruleOntologyLocation = "." + sep + "KReSConf" + sep + "rmi_config.owl";
 
                     FileOutputStream fos;
                     try {
@@ -289,16 +289,15 @@ public class RuleStoreImpl implements RuleStore {
             else {
 
                 IRI pathIri = IRI.create(ruleOntologyLocation);
-                if (!pathIri.isAbsolute())
-                    pathIri = IRI.create(new File(ruleOntologyLocation));
-                
+                if (!pathIri.isAbsolute()) pathIri = IRI.create(new File(ruleOntologyLocation));
+
                 try {
                     owlmodel = mgr
                     /* OWLManager.createOWLOntologyManager() */.loadOntology(pathIri);
                 } catch (OWLOntologyCreationException e) {
                     log.error("Cannot load the RMI configuration ontology", e);
                 } catch (Exception e) {
-                    log.error("Rule Store: no rule ontology available.",e);
+                    log.error("Rule Store: no rule ontology available.", e);
                 }
             }
         }
