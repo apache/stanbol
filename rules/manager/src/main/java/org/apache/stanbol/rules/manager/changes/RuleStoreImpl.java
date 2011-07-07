@@ -95,7 +95,8 @@ public class RuleStoreImpl implements RuleStore {
             userdir += System.getProperty("file.separator");
 
             location = userdir + respath + filepath2;
-
+            // The location string variable must be a valid uri
+            location = new File(location).toURI().toString();
         } else location = filepath;
 
         // We do this instead of setting the global, non-static var
