@@ -88,11 +88,11 @@ public class RuleStoreImpl implements RuleStore {
             Properties configProps = System.getProperties();
             String userdir = configProps.getProperty("user.dir");
 
-            String respath = "KReSConf/"; // "src/main/resources/";
+            String respath = "KReSConf" + System.getProperty("file.separator"); // "src/main/resources/";
             String filepath2 = "rmi_config.owl"; // "RuleOntology/rmi_config.owl";
             // userdir = userdir.substring(0, userdir.lastIndexOf("kres.") + 5) + "rules/";
 
-            userdir += "/";
+            userdir += System.getProperty("file.separator");
 
             location = userdir + respath + filepath2;
 
