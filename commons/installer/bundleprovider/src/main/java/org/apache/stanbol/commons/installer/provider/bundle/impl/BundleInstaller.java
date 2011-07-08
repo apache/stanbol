@@ -178,7 +178,7 @@ public class BundleInstaller implements BundleListener {
             }
             installer.updateResources(PROVIDER_SCHEME, updated.toArray(new InstallableResource[updated.size()]), new String[]{});
         } else {
-            log.info("  ... no Configuration to process");
+            log.debug("  ... no Configuration to process");
         }
     }
 
@@ -193,39 +193,48 @@ public class BundleInstaller implements BundleListener {
      */
     private InstallableResource createInstallableResource(Bundle bundle, String path, URL bundleResource) {
         //define the id
-        String id = bundleResource.toString();
-        String relPath = id.substring(id.lastIndexOf(path) + path.length(), id.length());
+        String relPath = getInstallableResourceId(path, bundleResource);
         String name = FilenameUtils.getName(relPath);
         if (name == null || name.isEmpty()) {
             return null; //ignore directories!
         }
-
         InstallableResource resource;
         try {
             /*
              * Notes:
-             *  - use bundleinstaller:<relativepath> as id
+             *  - use <relativepath> as id
              *  - parse null as type to enable autodetection for configs as
              *    implemented by InternalReseouce.create(..)
-             *  - we use the modification date of the bundle as digest
+             *  - we use the symbolic name and the modification date of the bundle as digest
              *  - the Dictionary will be ignored if an input stream is present
              *    so it is best to parse null
              *  - No idea how the priority is used by the Sling Installer. For
              *    now parse null than the default priority is used.
              */
-            resource = new InstallableResource(
-                    BundleInstallerConstants.PROVIDER_SCHEME + ':' + relPath,
+            resource = new InstallableResource(relPath,
                     bundleResource.openStream(), null,
-                    String.valueOf(bundle.getLastModified()), null, null);
-            log.info(" ... found installable resource " + id);
+                    String.valueOf(bundle.getSymbolicName()+bundle.getLastModified()), null, null);
+            log.info(" ... found installable resource " + bundleResource);
         } catch (IOException e) {
             log.error(String.format("Unable to process configuration File %s from Bundle %s",
-                    id, bundle.getSymbolicName()), e);
+                bundleResource, bundle.getSymbolicName()), e);
             return null;
         }
         return resource;
     }
 
+    /**
+     * @param path
+     * @param bundleResource
+     * @return
+     */
+    private String getInstallableResourceId(String path, URL bundleResource) {
+        String id = bundleResource.toString();
+        String relPath = id.substring(id.lastIndexOf(path) + path.length(), id.length());
+        return relPath;
+    }
+
+    @SuppressWarnings("unchecked")
     private void unregister(Bundle bundle) {
         String path;
         synchronized (activated) {
@@ -234,11 +243,23 @@ public class BundleInstaller implements BundleListener {
             }
             path = activated.remove(bundle);
         }
-        if (path != null) {
-            //remove the files ...
-            //TODO: Maybe removing installed stuff when the bundle is stopped is
-            //      not so a good Idea! Maybe it is ?!
-        }
+        //TODO: This code does not yet work correctly if the bundle is restarted
+        //      and the resources need to be readded. Therefore uninstalling is
+        //      currently deactivated
+/*        if (path != null) {
+            log.info(" ... remove configurations within path " + path);
+            ArrayList<String> removedResources = new ArrayList<String>();
+            for (Enumeration<URL> resources = (Enumeration<URL>) bundle.findEntries(path, null, true); resources.hasMoreElements();) {
+                String installableResourceId = getInstallableResourceId(path, resources.nextElement());
+                if (installableResourceId != null) {
+                    log.info("  ... remove Installable Resource {}",installableResourceId);
+                    removedResources.add(installableResourceId);
+                }
+            }
+            installer.updateResources(PROVIDER_SCHEME, null, removedResources.toArray(new String[removedResources.size()]));
+        } else {
+            log.info("  ... no Configuration to process");
+        }    */
     }
 
     /**
