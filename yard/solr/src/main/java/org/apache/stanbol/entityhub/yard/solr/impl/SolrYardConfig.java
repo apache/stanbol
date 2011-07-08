@@ -20,9 +20,10 @@ import java.util.Dictionary;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrServer;
+import org.apache.stanbol.commons.solr.SolrServerProvider;
 import org.apache.stanbol.entityhub.core.yard.AbstractYard.YardConfig;
-import org.apache.stanbol.entityhub.yard.solr.SolrDirectoryManager;
-import org.apache.stanbol.entityhub.yard.solr.SolrServerProvider.Type;
+import org.apache.stanbol.commons.solr.SolrDirectoryManager;
+import org.apache.stanbol.commons.solr.SolrServerProvider.Type;
 import org.osgi.service.cm.ConfigurationException;
 
 /**
@@ -81,7 +82,7 @@ public final class SolrYardConfig extends YardConfig {
      * @param type
      *            The type to use
      */
-    public void setSolrServerType(Type type) {
+    public void setSolrServerType(SolrServerProvider.Type type) {
         if (type == null) {
             config.remove(SolrYard.SOLR_SERVER_TYPE);
         } else {
@@ -89,14 +90,14 @@ public final class SolrYardConfig extends YardConfig {
         }
     }
 
-    public Type getSolrServerType() {
+    public SolrServerProvider.Type getSolrServerType() {
         Object serverType = config.get(SolrYard.SOLR_SERVER_TYPE);
         if (serverType != null) {
-            if (serverType instanceof Type) {
-                return (Type) serverType;
+            if (serverType instanceof SolrServerProvider.Type) {
+                return (SolrServerProvider.Type) serverType;
             } else {
                 try {
-                    return Type.valueOf(serverType.toString());
+                    return SolrServerProvider.Type.valueOf(serverType.toString());
                 } catch (IllegalArgumentException e) {
                     // invalid value set!
                     config.remove(SolrYard.SOLR_SERVER_TYPE);
@@ -107,9 +108,9 @@ public final class SolrYardConfig extends YardConfig {
         String serverLocation = getSolrServerLocation();
         // TODO: maybe we need to improve this detection code.
         if (serverLocation.startsWith("http")) {
-            return Type.HTTP;
+            return SolrServerProvider.Type.HTTP;
         } else {
-            return Type.EMBEDDED;
+            return SolrServerProvider.Type.EMBEDDED;
         }
     }
 

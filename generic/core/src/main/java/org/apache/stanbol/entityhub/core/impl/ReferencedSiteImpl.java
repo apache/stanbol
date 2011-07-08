@@ -585,7 +585,16 @@ public class ReferencedSiteImpl implements ReferencedSite {
      * the configured cache instance is not available.
      */
     protected Cache getCache(){
-        return siteConfiguration.getCacheStrategy() == CacheStrategy.none?null:(Cache)cacheTracker.getService();
+        if(siteConfiguration.getCacheStrategy() == CacheStrategy.none){
+            return null;
+        } else {
+            Cache cache = (Cache)cacheTracker.getService();
+            if(cache != null && cache.isAvailable()){
+                return cache;
+            } else {
+                return null;
+            }
+        }
     }
 
     /*--------------------------------------------------------------------------

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.entityhub.yard.solr.utils;
+package org.apache.stanbol.entityhub.yard.solr.query;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,26 +23,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.stanbol.commons.solr.utils.SolrUtil;
 import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 
-public final class SolrUtil {
-    private SolrUtil() {}
-
-    private static final String LUCENE_ESCAPE_CHARS = "[\\\\+\\-\\!\\(\\)\\:\\^\\[\\]\\{\\}\\~\\*\\?]";
-    private static final Pattern LUCENE_PATTERN = Pattern.compile(LUCENE_ESCAPE_CHARS);
-    private static final String REPLACEMENT_STRING = "\\\\$0";
-
-    /**
-     * Escapes all special chars in an string (field name or constraint) to be used in an SolrQuery.
-     * 
-     * @param string
-     *            the string to be escaped
-     * @return the escaped string
-     */
-    public static String escapeSolrSpecialChars(String string) {
-        return string != null ? LUCENE_PATTERN.matcher(string).replaceAll(REPLACEMENT_STRING) : null;
-    }
+public final class QueryUtils {
+    private QueryUtils() {}
 
     /**
      * This method encodes a parsed index value as needed for queries.

@@ -25,7 +25,7 @@ import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
-import org.apache.stanbol.entityhub.yard.solr.SolrDirectoryManager;
+import org.apache.stanbol.commons.solr.SolrDirectoryManager;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYard;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig;
 import org.slf4j.Logger;

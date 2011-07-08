@@ -19,6 +19,7 @@ package org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.apache.stanbol.commons.solr.utils.SolrUtil;
 import org.apache.stanbol.entityhub.yard.solr.model.FieldMapper;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexDataType;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexField;
@@ -28,8 +29,8 @@ import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition;
 import org.apache.stanbol.entityhub.yard.solr.query.EncodedConstraintParts;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
+import org.apache.stanbol.entityhub.yard.solr.query.QueryUtils;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition.PositionType;
-import org.apache.stanbol.entityhub.yard.solr.utils.SolrUtil;
 
 /**
  * Encodes the DataType to the field name.

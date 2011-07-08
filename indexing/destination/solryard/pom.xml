@@ -62,6 +62,14 @@
 		</plugins>
 	</build>
 	<dependencies>
+        <dependency>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.commons.solr</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>

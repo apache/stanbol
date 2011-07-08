@@ -21,13 +21,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 
+import org.apache.stanbol.commons.solr.utils.SolrUtil;
 import org.apache.stanbol.entityhub.yard.solr.model.FieldMapper;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition;
 import org.apache.stanbol.entityhub.yard.solr.query.EncodedConstraintParts;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
+import org.apache.stanbol.entityhub.yard.solr.query.QueryUtils;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition.PositionType;
-import org.apache.stanbol.entityhub.yard.solr.utils.SolrUtil;
 
 public class LangEncoder implements IndexConstraintTypeEncoder<Collection<String>> {
 
