@@ -1,6 +1,13 @@
+#rules-tutorial{
+	margin-bottom: 20px;
+}
+
+#rules-syntax{
+	margin-bottom: 20px;
+}
+
 div.indent {
 	margin-left: 20px;
-	display: none; 
 }
 
 input.hide-button{

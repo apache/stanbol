@@ -7,56 +7,41 @@
 <#import "/imports/tutorial4.ftl" as tutorial4>
 <#import "/imports/tutorial5.ftl" as tutorial5>
 <#escape x as x?html>
-<@common.page title="Apache Stanbol Rules" hasrestapi=false> 
+<@common.page title="Apache Stanbol Rules" hasrestapi=true>
 
-<div id="syntax-title" class="title-point">Rules syntax in BNF
-<input id="show-syntax-button" class="show-button" value="show" type="button" onClick="javascript:var interaction = new Interaction(); interaction.show('syntax');">
-<input id="hide-syntax-button" class="hide-button" value="hide" type="button" onClick="javascript:var interaction = new Interaction(); interaction.hide('syntax');">
-<div id="syntax-body"  class="indent">
+ <div class="panel" id="webview">
+          
+	<div id="rules-tutorial" class="title-point">
+		<h3>Rules tutorial</h3>
+		<div id="tutorial-body">
+			<div id="tutorial0" class="active"><@tutorial0.view /></div>
 
-<@ruleSyntax.view /> 
+			<div id="tutorial1" class="inactive"><@tutorial1.view /></div>
 
-</div> 
-</div>
+			<div id="tutorial2" class="inactive"><@tutorial2.view /></div>
 
+			<div id="tutorial3" class="inactive"><@tutorial3.view /></div>
 
-<div id="tutorial-title" class="title-point">Rules tutorial
-<input id="show-tutorial-button" class="show-button" value="show" type="button" onClick="javascript:var interaction = new Interaction(); interaction.show('tutorial');">
-<input id="hide-tutorial-button" class="hide-button" value="hide" type="button" onClick="javascript:var interaction = new Interaction(); interaction.hide('tutorial');">
-<div id="tutorial-body" class="indent">
+			<div id="tutorial4" class="inactive"><@tutorial4.view /></div>
 
-<div id="tutorial0" class="active"> 
-<@tutorial0.view />
-</div>
-
-<div id="tutorial1" class="inactive"> 
-<@tutorial1.view />
-
-
-</div>
-
-<div id="tutorial2" class="inactive"> 
-<@tutorial2.view />
-</div>
-
-<div id="tutorial3" class="inactive"> 
-<@tutorial3.view />
-</div>
-
-<div id="tutorial4" class="inactive"> 
-<@tutorial4.view />
-</div>
-
-<div id="tutorial5" class="inactive"> 
-<@tutorial5.view />
-</div>
+			<div id="tutorial5" class="inactive"><@tutorial5.view /></div>
  
-<div class="arrows">
-<a id="previous" href="javascript:var interaction = new Interaction(); interaction.previousTutorial()">Previous</a> | <a id="next" href="javascript:var interaction = new Interaction(); interaction.nextTutorial()">Next</a>
-</div>
+		</div> <!-- end tutorial-body -->
+		
+		<div class="arrows">
+			<a id="previous" href="javascript:var interaction = new Interaction(); interaction.previousTutorial()">Previous</a> | <a id="next" href="javascript:var interaction = new Interaction(); interaction.nextTutorial()">Next</a>
+		</div>
 
-</div>
+	</div> <!-- end rules-tutorial -->
+	
+	<div id="rules-syntax" class="title-point">
+		<h3>Rules syntax in BNF</h3>
+		<div id="syntax-body"><@ruleSyntax.view /></div>
+	</div>
 
-</div>
+</div> <!-- end webview -->
+
+<div class="panel" id="restapi" style="display: none;"/>
+
 </@common.page>
 </#escape>

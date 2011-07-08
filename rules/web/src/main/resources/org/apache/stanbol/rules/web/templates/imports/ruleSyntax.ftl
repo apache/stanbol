@@ -1,6 +1,6 @@
 <#macro view>
 
-<H3>TOKENS</H2> 
+<H4>TOKEN</H4>
 <TABLE> 
  <!-- Token --> 
  <TR> 
@@ -9,8 +9,7 @@
 &lt;DEFAULT&gt; SKIP : {
 " "
 }
- 
-   </PRE> 
+</PRE> 
   </TD> 
  </TR> 
  <!-- Token --> 
@@ -22,7 +21,6 @@
 | "\t"
 | "\n"
 }
- 
    </PRE> 
   </TD> 
  </TR> 
@@ -70,7 +68,6 @@
 | &lt;IS_BLANK: "isBlank"&gt;
 | &lt;FORWARD_CHAIN: "!"&gt;
 }
- 
    </PRE> 
   </TD> 
  </TR> 
@@ -85,7 +82,6 @@
 | &lt;LQUAD: "["&gt;
 | &lt;RQUAD: "]"&gt;
 }
- 
    </PRE> 
   </TD> 
  </TR> 
@@ -102,12 +98,11 @@
 | &lt;SPARQL_STRING: "%" (["0"-"9","a"-"z","A"-"Z","-","_",".",":","/","#","\\","?"," ","!","$","%","{","}","(",")","\"","&lt;","&gt;","=","+","\n","\t","&amp;","|",","])+ "%"&gt;
 | &lt;BNODE: "_:" (["0"-"9","a"-"z","A"-"Z","-","_","."])+&gt;
 }
- 
    </PRE> 
   </TD> 
  </TR> 
 </TABLE> 
-<H3>NON-TERMINALS</H2> 
+<H4>NON-TERMINALS</H4> 
 <TABLE> 
 <TR> 
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod1">start</A></TD> 
