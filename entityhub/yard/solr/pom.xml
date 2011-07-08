@@ -76,6 +76,13 @@
             </Private-Package>
             <Embed-Dependency>
             </Embed-Dependency>
+            <!-- 
+              We need to provide the default SolrYard indexConfigurations to
+              the DataFileProvider infrastructure
+              -->
+            <Data-Files> 
+              solr/core
+            </Data-Files>
           </instructions>
         </configuration>
       </plugin>
