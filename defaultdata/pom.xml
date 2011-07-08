@@ -71,7 +71,7 @@
               -100
             </Data-Files-Priority>
             <Install-Path>
-              org/apache/stanbol/defaultdata/site/dbpedia
+              org/apache/stanbol/defaultdata/site/dbpedia/config
             </Install-Path>
           </instructions>
         </configuration>

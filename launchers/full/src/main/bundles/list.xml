@@ -333,6 +333,11 @@
       <artifactId>org.apache.stanbol.commons.opennlp</artifactId>
       <version>0.9-SNAPSHOT</version>
     </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr</artifactId>
+      <version>0.9-SNAPSHOT</version>
+    </bundle>
     <!-- support for JSON-LD -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>

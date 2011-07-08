@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import org.apache.stanbol.commons.solr.SolrDirectoryManager;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;

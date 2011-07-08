@@ -348,8 +348,13 @@ public class NamedEntityTaggingEngine implements EnhancementEngine, ServicePrope
         // ... and check the values
         String name = EnhancementEngineHelper.getString(graph, textAnnotation, ENHANCER_SELECTED_TEXT);
         if (name == null) {
-            log.warn("Unable to process TextAnnotation " + textAnnotation + " because property"
+            log.info("Unable to process TextAnnotation " + textAnnotation + " because property"
                      + ENHANCER_SELECTED_TEXT + " is not present");
+            return Collections.emptyList();
+        }
+        if(name.isEmpty()){
+            log.info("Unable to process TextAnnotation " + textAnnotation + 
+                " because an empty Stirng is selected by " + ENHANCER_SELECTED_TEXT + "");
             return Collections.emptyList();
         }
 

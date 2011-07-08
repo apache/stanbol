@@ -30,7 +30,7 @@ import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition.Posit
 import org.apache.stanbol.entityhub.yard.solr.query.EncodedConstraintParts;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
-import org.apache.stanbol.entityhub.yard.solr.utils.SolrUtil;
+import org.apache.stanbol.entityhub.yard.solr.query.QueryUtils;
 
 public class WildcardEncoder implements IndexConstraintTypeEncoder<IndexValue> {
 
@@ -53,7 +53,7 @@ public class WildcardEncoder implements IndexConstraintTypeEncoder<IndexValue> {
                 "This encoder does not support the IndexDataType %s (supported: %s)", value.getType(),
                 SUPPORTED_TYPES));
         } else {
-            constraint.addEncoded(POS, SolrUtil.encodeQueryValue(value, false));
+            constraint.addEncoded(POS, QueryUtils.encodeQueryValue(value, false));
         }
     }
 

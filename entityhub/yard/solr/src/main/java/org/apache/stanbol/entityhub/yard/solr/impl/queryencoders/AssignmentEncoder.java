@@ -26,7 +26,7 @@ import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition.Posit
 import org.apache.stanbol.entityhub.yard.solr.query.EncodedConstraintParts;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
-import org.apache.stanbol.entityhub.yard.solr.utils.SolrUtil;
+import org.apache.stanbol.entityhub.yard.solr.query.QueryUtils;
 
 /**
  * Encodes the Assignment of the field to an value. If a value is parsed, than it encodes that the field must
@@ -58,7 +58,7 @@ public class AssignmentEncoder implements IndexConstraintTypeEncoder<Object> {
             indexValue = indexValueFactory.createIndexValue(value);
         }
         // encode the value based on the type
-        String[] queryConstraints = SolrUtil.encodeQueryValue(indexValue, true);
+        String[] queryConstraints = QueryUtils.encodeQueryValue(indexValue, true);
         String[] eqConstraints;
         if (queryConstraints != null) {
             eqConstraints = new String[queryConstraints.length];
