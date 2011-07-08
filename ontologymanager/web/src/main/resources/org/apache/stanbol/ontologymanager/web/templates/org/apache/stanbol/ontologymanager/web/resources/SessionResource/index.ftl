@@ -9,7 +9,7 @@
     </div>
     
     <hr>
-    <#include "inc_sessionmgr.ftl">
+    <#include "/imports/inc_sessionmgr.ftl">
 
   </@common.page>
 </#escape>

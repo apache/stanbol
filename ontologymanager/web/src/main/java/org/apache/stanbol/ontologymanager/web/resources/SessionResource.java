@@ -1,8 +1,8 @@
 package org.apache.stanbol.ontologymanager.web.resources;
 
-import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.MediaType.*;
+import static javax.ws.rs.core.Response.Status.*;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.*;
 
 import java.io.InputStream;
 
@@ -12,20 +12,16 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
@@ -62,7 +58,7 @@ public class SessionResource extends BaseStanbolResource {
     }
 
     @POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Consumes(MULTIPART_FORM_DATA)
     public Response addOntology(@FormDataParam("scope") String scope,
                                 @FormDataParam("import") InputStream importOntology,
                                 @FormDataParam("session") String session,
@@ -106,49 +102,47 @@ public class SessionResource extends BaseStanbolResource {
      * @return
      */
     @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
-                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
+    @Consumes(APPLICATION_FORM_URLENCODED)
+    @Produces(value = {RDF_XML, OWL_XML, TURTLE, FUNCTIONAL_OWL, MANCHESTER_OWL, RDF_JSON})
     public Response addOntology(@FormParam("scope") String scope,
                                 @FormParam("session") String session,
                                 @FormParam("location") String location,
                                 @Context UriInfo uriInfo,
                                 @Context HttpHeaders headers,
                                 @Context ServletContext servletContext) {
-    	if(session==null||session.equals("")){
-    		return createSession(scope, uriInfo, headers);
-    	}else{
-        IRI scopeIRI = IRI.create(scope);
-        IRI sessionIRI = IRI.create(session);
-        IRI ontologyIRI = IRI.create(location);
-        ScopeRegistry scopeRegistry = onm.getScopeRegistry();
+        if (session == null || session.equals("")) {
+            return createSession(scope, uriInfo, headers);
+        } else {
+            IRI scopeIRI = IRI.create(scope);
+            IRI sessionIRI = IRI.create(session);
+            IRI ontologyIRI = IRI.create(location);
+            ScopeRegistry scopeRegistry = onm.getScopeRegistry();
 
-        OntologyScope ontologyScope = scopeRegistry.getScope(scopeIRI);
-        SessionOntologySpace sos = ontologyScope.getSessionSpace(sessionIRI);
-        try {
-            sos.addOntology(new RootOntologyIRISource(ontologyIRI));
-            return Response.ok().build();
-        } catch (UnmodifiableOntologySpaceException e) {
-            return Response.status(INTERNAL_SERVER_ERROR).build();
-        } catch (OWLOntologyCreationException e) {
+            OntologyScope ontologyScope = scopeRegistry.getScope(scopeIRI);
+            SessionOntologySpace sos = ontologyScope.getSessionSpace(sessionIRI);
+            try {
+                sos.addOntology(new RootOntologyIRISource(ontologyIRI));
+                return Response.ok().build();
+            } catch (UnmodifiableOntologySpaceException e) {
+                return Response.status(INTERNAL_SERVER_ERROR).build();
+            } catch (OWLOntologyCreationException e) {
+                return Response.status(INTERNAL_SERVER_ERROR).build();
+            }
+        }
+    }
+
+    /**
+     * This method creates a session.
+     * 
+     * @param scope
+     * @param uriInfo
+     * @param headers
+     * @return
+     */
+    private Response createSession(String scope, UriInfo uriInfo, HttpHeaders headers) {
+        if (scope == null || scope.equals("")) {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
-    	}
-    }
-	/**
-	 * This method creates a session.
-	 * 
-	 * @param scope
-	 * @param uriInfo
-	 * @param headers
-	 * @return
-	 */
-    private Response createSession(String scope,
-                                  UriInfo uriInfo,
-                                  HttpHeaders headers) {
-    	if(scope==null||scope.equals("")){
-    		return Response.status(INTERNAL_SERVER_ERROR).build();
-    	}
         Session ses = null;
         SessionManager mgr = onm.getSessionManager();
 
@@ -176,7 +170,7 @@ public class SessionResource extends BaseStanbolResource {
         try {
             ontologyScope.addSessionSpace(sessionOntologySpace, ses.getID());
         } catch (UnmodifiableOntologySpaceException e) {
-throw new WebApplicationException(e);
+            throw new WebApplicationException(e);
         }
 
         return Response.ok(SessionRenderer.getSessionMetadataRDFasOntology(ses)).build();

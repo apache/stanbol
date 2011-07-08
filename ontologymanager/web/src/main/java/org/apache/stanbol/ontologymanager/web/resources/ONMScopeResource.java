@@ -103,7 +103,6 @@ public class ONMScopeResource extends BaseStanbolResource {
 
 	@POST
 	// @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	@Produces("text/plain")
 	public Response loadCustomOntology(@PathParam("scopeid") String scopeid,
 			@FormParam("location") String physIri,
 			@FormParam("registry") boolean asRegistry,
@@ -112,7 +111,6 @@ public class ONMScopeResource extends BaseStanbolResource {
 
 		ScopeRegistry reg = onm.getScopeRegistry();
 
-		String res = "";
 		IRI scopeiri = null;
 		IRI ontoiri = null;
 		try {
@@ -123,7 +121,6 @@ public class ONMScopeResource extends BaseStanbolResource {
 			throw new WebApplicationException(ex, BAD_REQUEST);
 		}
 		if (reg.containsScope(scopeiri)) {
-			res = "Ok, scope is there";
 			OntologyScope scope = reg.getScope(scopeiri);
 			try {
 				OntologyInputSource src = new RootOntologyIRISource(ontoiri);
@@ -143,7 +140,7 @@ public class ONMScopeResource extends BaseStanbolResource {
 			}
 		} else
 			throw new WebApplicationException(NOT_FOUND);
-		return Response.ok(res).build();
+		return Response.ok().build();
 	}
 
 	/**

@@ -9,7 +9,8 @@
     </div>
     
     <hr>
-    <#include "inc_scopemgr.ftl">
+    <#include "/imports/inc_scopemgr.ftl">
+    <#include "/imports/inc_scope.ftl">
 
   </@common.page>
 </#escape>

@@ -39,7 +39,7 @@
       <th>Request</th>
       <td>DELETE <code>/ontonet/ontology</code></td>
     </tr>
-        <tr>
+    <tr>
       <th>Parameters</th>
       <td><span style="font-style:italic">none</span></td>
     </tr>

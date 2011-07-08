@@ -6,8 +6,8 @@
 
     <@ontonetDescription.view />
 		
-    <div class="panel" id="webview">
-      <p>This is the start page of the ontology network manager.</p>
+    <div class="panel" id="webview"> 
+      <#include "webview.ftl">
     </div>
 
     <div class="panel" id="restapi" style="display: none;">
@@ -31,9 +31,11 @@
             <li>Ontology scope @<code>/ontonet/ontology/{scopeName}</code>:
               Manage the set of ontologies loaded within a single scope.
             </li>
+<!--
             <li>Ontology retrieval <a href="${it.publicBaseUri}ontonet/ontology/get">/ontonet/ontology/get</a>:
               Manage ontologies whose ID is known but not the scope(s) using it.
             </li>
+-->
             <li>Ontology within scope @<code>/ontonet/ontology/{scopeName}/{ontologyID}</code>:
               Load/Unload operations on a single ontology loaded within a scope.
             </li>
@@ -49,7 +51,7 @@
               Manage metadata for a single OntoNet session.
             </li>
           </ul>
-      
+<!--      
           <h4>Graph Management (<code>"/ontonet/graphs"</code>):</h4>
           
           <ul>
@@ -57,10 +59,11 @@
               Storage and retrieval operation of RDF graphs, scope-independent.
             </li>
           </ul>
-          
+-->          
           <hr>
-          <#include "inc_scopemgr.ftl">
-      
+          <#include "/imports/inc_scopemgr.ftl">
+          <#include "/imports/inc_scope.ftl">
+          <#include "/imports/inc_sessionmgr.ftl">
     </div>
 
   </@common.page>
