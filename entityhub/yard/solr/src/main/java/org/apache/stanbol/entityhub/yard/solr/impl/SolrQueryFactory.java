@@ -33,6 +33,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MoreLikeThisParams;
+import org.apache.stanbol.commons.solr.utils.SolrUtil;
 import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
@@ -66,7 +67,7 @@ import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition;
 import org.apache.stanbol.entityhub.yard.solr.query.EncodedConstraintParts;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
-import org.apache.stanbol.entityhub.yard.solr.utils.SolrUtil;
+import org.apache.stanbol.entityhub.yard.solr.query.QueryUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
