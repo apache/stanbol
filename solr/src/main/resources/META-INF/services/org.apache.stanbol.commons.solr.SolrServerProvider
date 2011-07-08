@@ -1,0 +1,2 @@
+org.apache.stanbol.commons.solr.impl.DefaultSolrServerProvider
+org.apache.stanbol.commons.solr.impl.EmbeddedSolrPorovider
