@@ -19,12 +19,13 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.reengineer.base.api.DataSource;
-import org.apache.stanbol.reengineer.base.api.ReengineeringException;
-import org.apache.stanbol.reengineer.base.api.ReengineerManager;
 import org.apache.stanbol.reengineer.base.api.Reengineer;
+import org.apache.stanbol.reengineer.base.api.ReengineerManager;
+import org.apache.stanbol.reengineer.base.api.ReengineeringException;
 import org.apache.stanbol.reengineer.base.api.settings.ConnectionSettings;
 import org.apache.stanbol.reengineer.base.api.util.ReengineerType;
 import org.apache.stanbol.reengineer.base.api.util.UnsupportedReengineerException;
@@ -32,7 +33,6 @@ import org.apache.stanbol.reengineer.db.vocab.DBS_L1;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -100,14 +100,13 @@ public class DBExtractor implements Reengineer {
     MGraph schemaGraph;
     protected OntologyScope scope;
 
-    
     /**
      * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
      * Component Runtime support.
      * <p>
      * DO NOT USE to manually create instances - the DBExtractor instances do need to be configured! YOU NEED
-     * TO USE {@link #DBExtractor(ONManager)} or its overloads, to parse the configuration and then
-     * initialise the rule store if running outside a OSGI environment.
+     * TO USE {@link #DBExtractor(ONManager)} or its overloads, to parse the configuration and then initialise
+     * the rule store if running outside a OSGI environment.
      */
     public DBExtractor() {
 
@@ -183,7 +182,8 @@ public class DBExtractor implements Reengineer {
 
         hostNameAndPort = "http://" + hostNameAndPort;
 
-        reengineeringScopeIRI = IRI.create(hostNameAndPort + "/kres/ontoman/ontology/ontology/" + reengineeringScopeID);
+        reengineeringScopeIRI = IRI.create(hostNameAndPort + "/kres/ontoman/ontology/ontology/"
+                                           + reengineeringScopeID);
         reengineeringSpaceIRI = IRI.create(DB_REENGINEERING_SESSION_SPACE);
 
         reengineeringManager.bindReengineer(this);
@@ -201,12 +201,11 @@ public class DBExtractor implements Reengineer {
 
         scope = null;
         try {
-            log.info("Semion DBExtractor : created scope with IRI " + REENGINEERING_SCOPE);
+            log.info("Created scope with IRI " + REENGINEERING_SCOPE);
             IRI iri = IRI.create(DBS_L1.URI);
             OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
             OWLOntology owlOntology = ontologyManager.createOntology(iri);
-
-            System.out.println("Created ONTOLOGY OWL");
+            log.info("Ontology {} created.", iri);
 
             scope = ontologyScopeFactory.createOntologyScope(reengineeringScopeIRI,
                 new RootOntologyIRISource(IRI.create(DBS_L1.URI)));
@@ -219,17 +218,20 @@ public class DBExtractor implements Reengineer {
             log.info("Semion DBExtractor : already existing scope for IRI " + REENGINEERING_SCOPE);
             scope = scopeRegistry.getScope(reengineeringScopeIRI);
         } catch (OWLOntologyCreationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Failed to creare ontology " + DBS_L1.URI, e);
         } catch (Exception e) {
             log.error("Semion DBExtractor : No OntologyInputSource for ONManager.");
         }
 
         if (scope != null) {
-            scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(reengineeringSpaceIRI),
-                kReSSession.getID());
-
-            scopeRegistry.setScopeActive(reengineeringScopeIRI, true);
+            try {
+                scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(reengineeringSpaceIRI),
+                    kReSSession.getID());
+                scopeRegistry.setScopeActive(reengineeringScopeIRI, true);
+            } catch (UnmodifiableOntologySpaceException ex) {
+                log.error("Cannot add session space " + reengineeringSpaceIRI + " to unmodifiable scope "
+                          + scope, ex);
+            }
         }
 
         log.info("Activated KReS Semion RDB Reengineer");
@@ -270,8 +272,7 @@ public class DBExtractor implements Reengineer {
                                          DataSource dataSource,
                                          OWLOntology schemaOntology) throws ReengineeringException {
 
-        DBDataTransformer semionDBDataTransformer = new DBDataTransformer(onManager,
-                schemaOntology);
+        DBDataTransformer semionDBDataTransformer = new DBDataTransformer(onManager, schemaOntology);
         return semionDBDataTransformer.transformData(graphNS, outputIRI);
 
     }
@@ -329,11 +330,10 @@ public class DBExtractor implements Reengineer {
         OntologyScope reengineeringScope = getScope();
         if (reengineeringScope != null) {
             ConnectionSettings connectionSettings = (ConnectionSettings) dataSource.getDataSource();
-            DBSchemaGenerator schemaGenerator = new DBSchemaGenerator(outputIRI,
-                    connectionSettings);
+            DBSchemaGenerator schemaGenerator = new DBSchemaGenerator(outputIRI, connectionSettings);
 
             System.out.println("OWL MANAGER IN SEMION: " + onManager);
-            
+
             /*
              * Extract the schema from the source.
              */

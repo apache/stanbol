@@ -28,6 +28,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.reengineer.base.api.DataSource;
@@ -170,8 +171,7 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
             IRI iri = IRI.create(XML_OWL.URI);
             OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
             OWLOntology owlOntology = ontologyManager.createOntology(iri);
-
-            log.info("Created OWL Ontology " + iri);
+            log.info("Ontology {} created.", iri);
 
             scope = ontologyScopeFactory.createOntologyScope(scopeIRI,
                 new RootOntologyIRISource(IRI.create(XML_OWL.URI))
@@ -183,17 +183,20 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
             log.info("Semion DBExtractor : already existing scope for IRI " + REENGINEERING_SCOPE);
             scope = onManager.getScopeRegistry().getScope(scopeIRI);
         } catch (OWLOntologyCreationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Failed to creare ontology " + XML_OWL.URI, e);
         } catch (Exception e) {
             log.error("Semion XMLExtractor : No OntologyInputSource for ONManager.", e);
         }
 
         if (scope != null) {
-            scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(spaceIRI),
-                kReSSession.getID());
+            try {
+                scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(spaceIRI),
+                    kReSSession.getID());
 
-            scopeRegistry.setScopeActive(scopeIRI, true);
+                scopeRegistry.setScopeActive(scopeIRI, true);
+            } catch (UnmodifiableOntologySpaceException ex) {
+                log.error("Cannot add session space " + spaceIRI + " to unmodifiable scope " + scope, ex);
+            }
         }
 
         log.info("Activated KReS Semion RDB Reengineer");
