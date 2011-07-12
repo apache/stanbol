@@ -136,7 +136,7 @@
     <bundle>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
-      <version>1.4</version>
+      <version>1.5</version>
     </bundle>
     <bundle>
       <groupId>commons-fileupload</groupId>
@@ -203,44 +203,44 @@
   <startLevel level="16">
     <bundle>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.core</artifactId>
+      <artifactId>rdf.core</artifactId>
       <version>0.12-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.utils</artifactId>
+      <artifactId>rdf.utils</artifactId>
       <version>0.13-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.utils</artifactId>
+      <artifactId>utils</artifactId>
       <version>0.1-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.ontologies</artifactId>
+      <artifactId>rdf.ontologies</artifactId>
       <version>0.11-incubating-SNAPSHOT</version>
     </bundle>
     <!--
     <bundle>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.simple.storage</artifactId>
+      <artifactId>rdf.simple.storage</artifactId>
       <version>0.7-incubating-SNAPSHOT</version>
     </bundle>
     -->
     <bundle>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.sparql</artifactId>
+      <artifactId>rdf.jena.sparql</artifactId>
       <version>0.5-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.commons</artifactId>
+      <artifactId>rdf.jena.commons</artifactId>
       <version>0.5-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.facade</artifactId>
+      <artifactId>rdf.jena.facade</artifactId>
       <version>0.12-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
@@ -265,27 +265,27 @@
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.storage</artifactId>
+      <artifactId>rdf.jena.storage</artifactId>
       <version>0.5-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.tdb.storage</artifactId>
+      <artifactId>rdf.jena.tdb.storage</artifactId>
       <version>0.5-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
+      <artifactId>rdf.jena.serializer</artifactId>
       <version>0.9-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.parser</artifactId>
+      <artifactId>rdf.jena.parser</artifactId>
       <version>0.10-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.rdfjson</artifactId>
+      <artifactId>rdf.rdfjson</artifactId>
       <version>0.3-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>

@@ -12,8 +12,8 @@
 
         <bundle>mvn:org.apache.felix/org.apache.felix.scr/1.4.0</bundle>
 
-        <bundle>mvn:org.apache.clerezza/org.apache.clerezza.rdf.core/0.12-incubating-SNAPSHOT</bundle>
-        <bundle>mvn:org.apache.clerezza/org.apache.clerezza.rdf.simple.storage/0.7-incubating-SNAPSHOT</bundle>
+        <bundle>mvn:org.apache.clerezza/rdf.core/0.12-incubating-SNAPSHOT</bundle>
+        <bundle>mvn:org.apache.clerezza/rdf.simple.storage/0.7-incubating-SNAPSHOT</bundle>
 
         <bundle>mvn:org.apache.stanbol/org.apache.stanbol.enhancer.servicesapi/0.9-SNAPSHOT</bundle>
         <bundle>mvn:org.apache.stanbol/org.apache.stanbol.enhancer.standalone/0.9-SNAPSHOT</bundle>
