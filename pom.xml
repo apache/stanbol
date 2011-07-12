@@ -539,7 +539,7 @@
     <dependency>
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
-        <version>1.4</version>
+        <version>1.5</version>
         <!-- <version>1.3</version>  -->
         <scope>provided</scope>
     </dependency>
