@@ -75,7 +75,7 @@
     <!-- Clerezza dependencies -->
     <dependency>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
+      <artifactId>rdf.jena.serializer</artifactId>
     </dependency>
 
     <!-- Jersey -->

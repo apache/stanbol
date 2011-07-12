@@ -112,19 +112,19 @@
     <!-- Clerezza dependencies -->
     <dependency>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.core</artifactId>
+      <artifactId>rdf.core</artifactId>
     </dependency>
     <!-- <dependency>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.jaxrs.rdf.providers</artifactId>
+      <artifactId>jaxrs.rdf.providers</artifactId>
     </dependency>  -->
     <dependency>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
+      <artifactId>rdf.jena.serializer</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.parser</artifactId>
+      <artifactId>rdf.jena.parser</artifactId>
     </dependency>
 
   </dependencies>
