@@ -4,7 +4,7 @@ The **LangId** engine determines the language of text.
 
 ## Technical Description
 
-The provided engine is based on the [TextCat library](http://textcat.sourceforge.net/).
+The provided engine is based on the language identifier of [Apache Tika](http://tika.apache.org/).
 The text to be checked must be provided in plain text format in one of two forms:
 
 * a plain text content item
@@ -28,6 +28,7 @@ By default the language identifier distinguishes the languages listed below. Aft
 
 * German: de
 * English: en
+* Estonian: et
 * French: fr
 * Spanish: es
 * Italian: it
@@ -36,13 +37,16 @@ By default the language identifier distinguishes the languages listed below. Aft
 * Dutch: nl
 * Norwegian: no
 * Finnish: fi
-* Albanian: sq
-* Slovak (ASCII): sk
-* Slovenian (ASCII): sl
+* Greek: el
 * Danish: da
 * Hungarian: hu
+* Icelandic: is
+* Lithuanian: lt
+* Portuguese: pt
+* Russian: ru
+* Thai: th
 
-Tools for creating new or additional language models are provided by the underlying TextCat system as documented at [http://textcat.sourceforge.net](http://textcat.sourceforge.net/).
+Additional language models can be created as Tika [LanguageProfile](org.apache.tika.language.LanguageProfile).
 
 ## Configuration options
 
@@ -52,13 +56,6 @@ Tools for creating new or additional language models are provided by the underly
     identification. A value of 0 or below means to use the complete
     text. Otherwise only a substring of the specified length taken from the
     middle of the text will be used. The default value is 400 characters.
-
-* <pre><code>org.apache.stanbol.enhancer.engines.langid.model-configuration-file</pre></code>
-
-    the name of a file that defines which statistical language models are
-    used and the mappings from statistical model names to language labels
-    that will appear as the value in the enhancement structure. By default
-    the resource file *languageLabelsMap.txt* is used.
 
 ## Usage
 
