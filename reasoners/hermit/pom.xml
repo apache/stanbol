@@ -127,7 +127,6 @@
               !javax.mail.*,
               !javax.swing.*,
               !javax.xml.namespace.*,
-              !javax.xml.parsers.*,
               !javax.xml.transform.sax.*,
               !javax.xml.validation.*,
               !org.apache.avalon.framework.logger.*,
@@ -135,7 +134,6 @@
               !org.jaxen.*,
               !org.protege.editor.owl.model.*,
               !org.w3c.dom.*,
-              !org.xml.sax.*,
               *
             </Import-Package>
             <_nouses>true</_nouses>
