@@ -431,66 +431,66 @@
       <!-- Apache Clerezza -->
       <dependency>
         <groupId>org.apache.clerezza</groupId>
-        <artifactId>org.apache.clerezza.rdf.core</artifactId>
+        <artifactId>rdf.core</artifactId>
         <version>0.12-incubating-SNAPSHOT</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
-        <artifactId>org.apache.clerezza.rdf.utils</artifactId>
+        <artifactId>rdf.utils</artifactId>
         <version>0.13-incubating-SNAPSHOT</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
-        <artifactId>org.apache.clerezza.rdf.metadata</artifactId>
+        <artifactId>rdf.metadata</artifactId>
         <version>0.1-incubating-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
-        <artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
+        <artifactId>rdf.jena.serializer</artifactId>
         <version>0.9-incubating-SNAPSHOT</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
-        <artifactId>org.apache.clerezza.rdf.jena.parser</artifactId>
+        <artifactId>rdf.jena.parser</artifactId>
         <version>0.10-incubating-SNAPSHOT</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
-        <artifactId>org.apache.clerezza.rdf.rdfjson</artifactId>
+        <artifactId>rdf.rdfjson</artifactId>
         <version>0.3-incubating-SNAPSHOT</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
-        <artifactId>org.apache.clerezza.platform.content</artifactId>
+        <artifactId>platform.content</artifactId>
         <version>0.13-incubating-SNAPSHOT</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
-        <artifactId>org.apache.clerezza.platform.graphprovider.content</artifactId>
+        <artifactId>platform.graphprovider.content</artifactId>
         <version>0.6-incubating-SNAPSHOT</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
-        <artifactId>org.apache.clerezza.platform.typerendering.scalaserverpages</artifactId>
+        <artifactId>platform.typerendering.scalaserverpages</artifactId>
         <version>0.3-incubating-SNAPSHOT</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
-        <artifactId>org.apache.clerezza.jaxrs.rdf.providers</artifactId>
+        <artifactId>jaxrs.rdf.providers</artifactId>
         <version>0.13-incubating-SNAPSHOT</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
-        <artifactId>org.apache.clerezza.rdf.simple.storage</artifactId>
+        <artifactId>rdf.simple.storage</artifactId>
         <version>0.7-incubating-SNAPSHOT</version>
         <scope>provided</scope>
       </dependency>
