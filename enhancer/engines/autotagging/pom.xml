@@ -118,7 +118,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.core</artifactId>
+      <artifactId>rdf.core</artifactId>
     </dependency>
     <!-- The Lucene dependencies need to define the version 3.0.1 here
          because the parent POM uses 2.9.4 (compatible to Solr 1.4.1)

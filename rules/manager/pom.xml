@@ -110,13 +110,13 @@
 		<!-- Persistence deps -->
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.core</artifactId>
+			<artifactId>rdf.core</artifactId>
 			<version>0.12-incubating-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
+			<artifactId>rdf.jena.serializer</artifactId>
 			<version>0.9-incubating-SNAPSHOT</version>
 			<type>bundle</type>
 		</dependency>

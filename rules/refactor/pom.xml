@@ -104,24 +104,24 @@
 		<!-- Persistence deps -->
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.core</artifactId>
+			<artifactId>rdf.core</artifactId>
 			<version>0.12-incubating-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.jena.parser</artifactId>
+			<artifactId>rdf.jena.parser</artifactId>
 			<version>0.10-incubating-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.jena.sparql</artifactId>
+			<artifactId>rdf.jena.sparql</artifactId>
 			<version>0.5-incubating-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.simple.storage</artifactId>
+			<artifactId>rdf.simple.storage</artifactId>
 			<version>0.7-incubating-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>

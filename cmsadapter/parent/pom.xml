@@ -254,7 +254,7 @@
 			<!-- Apache Clerezza -->
 			<dependency>
 				<groupId>org.apache.clerezza</groupId>
-				<artifactId>org.apache.clerezza.rdf.core</artifactId>
+				<artifactId>rdf.core</artifactId>
 				<version>0.12-incubating-SNAPSHOT</version>
 				<scope>provided</scope>
 			</dependency>

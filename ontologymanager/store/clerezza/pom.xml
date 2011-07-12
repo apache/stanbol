@@ -84,14 +84,14 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.jena.facade</artifactId>
+			<artifactId>rdf.jena.facade</artifactId>
 			<version>0.12-incubating-SNAPSHOT</version>
 			<type>bundle</type>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.core</artifactId>
+			<artifactId>rdf.core</artifactId>
 			<version>0.12-incubating-SNAPSHOT</version>
 			<type>bundle</type>
 			<scope>compile</scope>

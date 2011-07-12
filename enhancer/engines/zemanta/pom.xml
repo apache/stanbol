@@ -58,12 +58,12 @@
     </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.core</artifactId>
+      <artifactId>rdf.core</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.parser</artifactId>
+      <artifactId>rdf.jena.parser</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -91,7 +91,7 @@
     </dependency>
     <dependency><!--  for debugging enhancements -->
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.jena.serializer</artifactId>
+      <artifactId>rdf.jena.serializer</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
