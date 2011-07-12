@@ -87,27 +87,27 @@
 
     <dependency>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.core</artifactId>
+      <artifactId>rdf.core</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.utils</artifactId>
+      <artifactId>rdf.utils</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.rdf.metadata</artifactId>
+      <artifactId>rdf.metadata</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.platform.content</artifactId>
+      <artifactId>platform.content</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.platform.graphprovider.content</artifactId>
+      <artifactId>platform.graphprovider.content</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>
-      <artifactId>org.apache.clerezza.platform.typerendering.scalaserverpages</artifactId>
+      <artifactId>platform.typerendering.scalaserverpages</artifactId>
     </dependency>
   </dependencies>
 

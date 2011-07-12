@@ -55,7 +55,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
-			<artifactId>org.apache.clerezza.rdf.core</artifactId>
+			<artifactId>rdf.core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
