@@ -16,17 +16,16 @@
  */
 package org.apache.stanbol.enhancer.engines.langid.core;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
-import org.apache.commons.io.IOUtils;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.apache.tika.language.LanguageIdentifier;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.tika.language.LanguageIdentifier;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  * {@link LangIdTest} is a test class for {@link TextCategorizer}.
