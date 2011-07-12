@@ -86,8 +86,8 @@
     </dependency>
 
     <dependency>
-      <groupId>net.sourceforge</groupId>
-      <artifactId>textcat</artifactId>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-core</artifactId>
     </dependency>
 
     <dependency>
@@ -113,20 +113,5 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <repositories>
-    <repository>
-      <releases>
-        <enabled>true</enabled>
-        <updatePolicy>never</updatePolicy>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>dfki-lt-repo</id>
-      <name>DFKI LT Repository</name>
-      <url>http://www.dfki.de/~kasper/IKS/maven</url>
-    </repository>
-  </repositories>
 
 </project>
