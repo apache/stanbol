@@ -272,7 +272,7 @@ and the engine is activated, from the command line commands like this can be use
 
 * stateless interface
 
-    curl -i -X PUT -H "Content-Type:text/html" -T testpage.html http://localhost:8080/engines
+    curl -i -X POST -H "Content-Type:text/html" -T testpage.html http://localhost:8080/engines
 
 * stateful interface
 
