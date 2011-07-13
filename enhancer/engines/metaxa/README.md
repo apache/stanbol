@@ -268,7 +268,7 @@ Assuming that the Stanbol endpoint with the full launcher is running at
 
     http://localhost:8080
 
-and the license key has been defined and the engine is activated, from the command line commands like this can be used for submitting some file as content item, where the mime type must match the document type:
+and the engine is activated, from the command line commands like this can be used for submitting some file as content item, where the mime type must match the document type:
 
 * stateless interface
 
