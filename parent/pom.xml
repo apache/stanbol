@@ -1232,6 +1232,42 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>release</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.rat</groupId>
+            <artifactId>apache-rat-plugin</artifactId>
+            <version>0.8-SNAPSHOT</version>
+            <executions>
+              <execution>
+                <phase>verify</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <licenses>
+                <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
+                  <licenseFamilyCategory>PublicDomain</licenseFamilyCategory>
+                  <licenseFamilyName>Public Domain licensed files.</licenseFamilyName>
+                  <notes></notes>
+                  <patterns>
+                    <pattern>Public Domain.</pattern>
+                  </patterns>
+                </license>
+              </licenses>
+            </configuration>
+            
+          </plugin>
+        </plugins>
+      </build>      
+    </profile>    
   </profiles>
 
   <repositories>
