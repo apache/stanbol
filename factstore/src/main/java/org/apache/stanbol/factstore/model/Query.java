@@ -1,14 +1,13 @@
 package org.apache.stanbol.factstore.model;
 
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.stanbol.commons.jsonld.JsonLd;
 import org.apache.stanbol.commons.jsonld.JsonLdIRI;
 import org.apache.stanbol.commons.jsonld.JsonLdResource;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONObject;
 
 public class Query {
 
@@ -69,9 +68,8 @@ public class Query {
     }
 
     private static void handleSelect(JsonLdResource subject, Query query) throws Exception {
-        JSONArray selects = (JSONArray)subject.getPropertyValueIgnoreCase(SELECT);
-        for (int i=0; i<selects.length(); i++) {
-            String role = selects.getString(i);
+        List<String> selects = (List<String>)subject.getPropertyValueIgnoreCase(SELECT);
+        for (String role : selects) {
             query.roles.add(role);
         }
     }
@@ -82,17 +80,13 @@ public class Query {
     }
 
     private static void handleWhere(JsonLd jsonLd, JsonLdResource subject, Query query) throws Exception {
-        JSONArray wheres = (JSONArray)subject.getPropertyValueIgnoreCase(WHERE);
-        for (int i=0; i<wheres.length(); i++) {
-            JSONObject whereObj = wheres.getJSONObject(i);
-            Iterator<?> whereIt = whereObj.keys();
-            while (whereIt.hasNext()) {
-                String operator = (String)whereIt.next();
+        List<Map<String,Map<String,Object>>> wheres = (List)subject.getPropertyValueIgnoreCase(WHERE);
+        for (Map<String,Map<String,Object>> whereObj : wheres) {
+            for (String operator : whereObj.keySet()) {
                 if (operator.equalsIgnoreCase(CompareOperator.EQ.getLiteral())) {
-                    JSONObject compareValues = whereObj.getJSONObject(operator);
-                    Iterator<?> compareIt = compareValues.keys();
-                    if (compareIt.hasNext()) {
-                        String comparedRole = (String)compareIt.next();
+                    Map<String,Object> compareValues = whereObj.get(operator);
+                    if (compareValues.keySet().size() == 1) {
+                        String comparedRole = (String)compareValues.keySet().iterator().next();
                         String searchedValue = null;
                         
                         Object searchedValueObj = compareValues.get(comparedRole);
