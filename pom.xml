@@ -59,7 +59,7 @@
     <module>launchers/stateless</module>
     <module>launchers/full</module>
     <module>integration-tests</module>
-  </modules>
+  </modules> 
 
   <profiles>
     <profile>
@@ -76,6 +76,29 @@
         <module>reengineer</module>
         <module>launchers/kres</module>
       </modules>
+    </profile>
+    <profile>
+      <id>release</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.rat</groupId>
+            <artifactId>apache-rat-plugin</artifactId>
+            <version>0.8-SNAPSHOT</version>
+            <executions>
+              <execution>
+                <phase>verify</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>      
     </profile>
   </profiles>
 
