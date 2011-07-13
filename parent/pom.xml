@@ -1261,6 +1261,14 @@
                     <pattern>Public Domain.</pattern>
                   </patterns>
                 </license>
+                <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
+                  <licenseFamilyCategory>DualMIT</licenseFamilyCategory>
+                  <licenseFamilyName>Dual licensed with MIT</licenseFamilyName>
+                  <notes></notes>
+                  <patterns>
+                    <pattern>Dual licensed under the MIT</pattern>
+                  </patterns>
+                </license>
               </licenses>
             </configuration>
             
