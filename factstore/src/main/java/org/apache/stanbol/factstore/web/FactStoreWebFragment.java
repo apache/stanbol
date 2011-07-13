@@ -17,6 +17,7 @@ import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.factstore.api.FactStore;
 import org.apache.stanbol.factstore.web.resource.FactStoreRootResource;
 import org.apache.stanbol.factstore.web.resource.FactsResource;
+import org.apache.stanbol.factstore.web.resource.QueryResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -59,6 +60,7 @@ public class FactStoreWebFragment implements WebFragment {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         classes.add(FactStoreRootResource.class);
         classes.add(FactsResource.class);
+        classes.add(QueryResource.class);
         return classes;
     }
 

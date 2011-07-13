@@ -7,7 +7,7 @@ import org.apache.stanbol.factstore.api.FactStore;
 import org.apache.stanbol.factstore.model.Fact;
 import org.apache.stanbol.factstore.model.FactSchema;
 import org.apache.stanbol.factstore.model.Query;
-import org.apache.stanbol.factstore.model.ResultSet;
+import org.apache.stanbol.factstore.model.FactResultSet;
 
 public class FactStoreMock implements FactStore {
 
@@ -47,7 +47,7 @@ public class FactStoreMock implements FactStore {
     }
 
     @Override
-    public ResultSet query(Query query) {
+    public FactResultSet query(Query query) {
         // TODO Auto-generated method stub
         return null;
     }

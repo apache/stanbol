@@ -19,14 +19,18 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.factstore.api.FactStore;
 import org.apache.stanbol.factstore.model.Fact;
+import org.apache.stanbol.factstore.model.FactResult;
+import org.apache.stanbol.factstore.model.FactResultSet;
 import org.apache.stanbol.factstore.model.FactSchema;
 import org.apache.stanbol.factstore.model.Query;
+import org.apache.stanbol.factstore.model.WhereClause;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implementation of the FactStore interface based on an Apache Derby relational database.
+ * Implementation of the FactStore interface based on an Apache Derby relational
+ * database.
  * 
  * @author Fabian Christ
  */
@@ -34,407 +38,579 @@ import org.slf4j.LoggerFactory;
 @Service
 public class DerbyFactStore implements FactStore {
 
-    private static Logger logger = LoggerFactory.getLogger(DerbyFactStore.class);
+	private static Logger logger = LoggerFactory
+			.getLogger(DerbyFactStore.class);
 
-    private static int MAX_FACTSCHEMAURN_LENGTH = 96;
+	private static int MAX_FACTSCHEMAURN_LENGTH = 96;
 
-    private static final String CreateTableFactSchemata = "CREATE TABLE factschemata ( id INT GENERATED ALWAYS AS IDENTITY CONSTRAINT factschema_id PRIMARY KEY, name VARCHAR(128) NOT NULL )";
-    private static final String CreateTableFactRoles = "CREATE TABLE factroles ( id INT GENERATED ALWAYS AS IDENTITY CONSTRAINT factrole_id PRIMARY KEY, factschema_id INT NOT NULL CONSTRAINT factschema_foreign_key REFERENCES factschemata ON DELETE CASCADE ON UPDATE RESTRICT, name VARCHAR(128) NOT NULL, type VARCHAR(512) NOT NULL )";
+	private static final String CreateTableFactSchemata = "CREATE TABLE factschemata ( id INT GENERATED ALWAYS AS IDENTITY CONSTRAINT factschema_id PRIMARY KEY, name VARCHAR(128) NOT NULL )";
+	private static final String CreateTableFactRoles = "CREATE TABLE factroles ( id INT GENERATED ALWAYS AS IDENTITY CONSTRAINT factrole_id PRIMARY KEY, factschema_id INT NOT NULL CONSTRAINT factschema_foreign_key REFERENCES factschemata ON DELETE CASCADE ON UPDATE RESTRICT, name VARCHAR(128) NOT NULL, type VARCHAR(512) NOT NULL )";
+	private static final String CreateTableFactContexts = "CREATE TABLE factcontexts ( id INT GENERATED ALWAYS AS IDENTITY CONSTRAINT context_id PRIMARY KEY, validFrom TIMESTAMP, validTo TIMESTAMP, contextURN VARCHAR(1024) )";
 
-    public static final String DB_URL = "jdbc:derby:factstore;create=true";
+	public static final String DB_URL = "jdbc:derby:factstore;create=true";
 
-    @Activate
-    protected void activate(ComponentContext cc) throws Exception {
-        logger.info("Activating FactStore...");
+	@Activate
+	protected void activate(ComponentContext cc) throws Exception {
+		logger.info("Activating FactStore...");
 
-        logger.info("Connecting to Derby DB {}", DB_URL);
-        Connection con = null;
-        try {
-            con = DriverManager.getConnection(DB_URL);
+		logger.info("Connecting to Derby DB {}", DB_URL);
+		Connection con = null;
+		try {
+			con = DriverManager.getConnection(DB_URL);
 
-            if (con != null) {
-                logger.info("Derby connection established.");
+			if (con != null) {
+				logger.info("Derby connection established.");
 
-                try {
-                    if (!existsTable("factschemata", con)) {
-                        List<String> sqls = new ArrayList<String>();
-                        sqls.add(CreateTableFactSchemata);
-                        sqls.add(CreateTableFactRoles);
+				try {
+					if (!existsTable("factschemata", con)) {
+						List<String> sqls = new ArrayList<String>();
+						sqls.add(CreateTableFactSchemata);
+						sqls.add(CreateTableFactRoles);
+						sqls.add(CreateTableFactContexts);
 
-                        this.executeUpdate(sqls, con);
+						this.executeUpdate(sqls, con);
 
-                        logger.info("Created FactStore meta tables.");
-                    }
-                } catch (Exception e) {
-                    throw new Exception("Error creating meta data tables", e);
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception("Derby DB error. Can't activate.", e);
-        } finally {
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (SQLException e) {
-                    /* ignore */
-                }
-            }
-        }
+						logger.info("Created FactStore meta tables.");
+					}
+				} catch (Exception e) {
+					throw new Exception("Error creating meta data tables", e);
+				}
+			}
+		} catch (Exception e) {
+			throw new Exception("Derby DB error. Can't activate.", e);
+		} finally {
+			if (con != null) {
+				try {
+					con.close();
+				} catch (SQLException e) {
+					/* ignore */
+				}
+			}
+		}
 
-        logger.info("FactStore activated.");
-    }
+		logger.info("FactStore activated.");
+	}
 
-    @Override
-    public int getMaxFactSchemaURNLength() {
-        return MAX_FACTSCHEMAURN_LENGTH;
-    }
+	@Override
+	public int getMaxFactSchemaURNLength() {
+		return MAX_FACTSCHEMAURN_LENGTH;
+	}
 
-    @Override
-    public boolean existsFactSchema(String factSchemaURN) throws Exception {
-        String factSchemaB64 = Base64.encodeBase64URLSafeString(factSchemaURN.getBytes());
-        boolean tableExists = false;
-        Connection con = null;
-        try {
-            con = DriverManager.getConnection(DB_URL);
-            tableExists = this.existsTable(factSchemaB64, con);
-        } catch (Exception e) {
-            throw new Exception("Error checking table existence", e);
-        } finally {
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (SQLException e) {
-                    /* ignore */
-                }
-            }
-        }
+	@Override
+	public boolean existsFactSchema(String factSchemaURN) throws Exception {
+		String factSchemaB64 = Base64.encodeBase64URLSafeString(factSchemaURN
+				.getBytes());
+		boolean tableExists = false;
+		Connection con = null;
+		try {
+			con = DriverManager.getConnection(DB_URL);
+			tableExists = this.existsTable(factSchemaB64, con);
+		} catch (Exception e) {
+			throw new Exception("Error checking table existence", e);
+		} finally {
+			if (con != null) {
+				try {
+					con.close();
+				} catch (SQLException e) {
+					/* ignore */
+				}
+			}
+		}
 
-        return tableExists;
-    }
+		return tableExists;
+	}
 
-    private boolean existsTable(String tableName, Connection con) throws Exception {
-        boolean exists = false;
+	private boolean existsTable(String tableName, Connection con)
+			throws Exception {
+		boolean exists = false;
 
-        ResultSet res = null;
-        try {
-            con = DriverManager.getConnection(DB_URL);
-            DatabaseMetaData meta = con.getMetaData();
-            res = meta.getTables(null, null, null, new String[] {"TABLE"});
-            while (res.next()) {
-                if (res.getString("TABLE_NAME").equalsIgnoreCase(tableName)) {
-                    exists = true;
-                    break;
-                }
-            }
-        } catch (SQLException e) {
-            logger.error("Error while reading tables' metadata to check if table '{}' exists", tableName);
-            throw new Exception("Error while reading tables' metadata", e);
-        } finally {
-            try {
-                res.close();
-            } catch (Throwable t) { /* ignore */}
-        }
+		ResultSet res = null;
+		try {
+			con = DriverManager.getConnection(DB_URL);
+			DatabaseMetaData meta = con.getMetaData();
+			res = meta.getTables(null, null, null, new String[] { "TABLE" });
+			while (res.next()) {
+				if (res.getString("TABLE_NAME").equalsIgnoreCase(tableName)) {
+					exists = true;
+					break;
+				}
+			}
+		} catch (SQLException e) {
+			logger
+					.error(
+							"Error while reading tables' metadata to check if table '{}' exists",
+							tableName);
+			throw new Exception("Error while reading tables' metadata", e);
+		} finally {
+			try {
+				res.close();
+			} catch (Throwable t) { /* ignore */
+			}
+		}
 
-        return exists;
-    }
+		return exists;
+	}
 
-    @Override
-    public FactSchema getFactSchema(String factSchemaURN) {
-        FactSchema factSchema = null;
+	@Override
+	public FactSchema getFactSchema(String factSchemaURN) {
+		FactSchema factSchema = null;
 
-        Connection con = null;
-        try {
-            con = DriverManager.getConnection(DB_URL);
-            factSchema = loadFactSchema(factSchemaURN, con);
-        } catch (Exception e) {
-            logger.error("Error while loading fact schema", e);
-            factSchema = null;
-        } finally {
-            try {
-                con.close();
-            } catch (Throwable t) { /* ignore */}
-        }
+		Connection con = null;
+		try {
+			con = DriverManager.getConnection(DB_URL);
+			factSchema = loadFactSchema(factSchemaURN, con);
+		} catch (Exception e) {
+			logger.error("Error while loading fact schema", e);
+			factSchema = null;
+		} finally {
+			try {
+				con.close();
+			} catch (Throwable t) { /* ignore */
+			}
+		}
 
-        return factSchema;
-    }
+		return factSchema;
+	}
 
-    private FactSchema loadFactSchema(String factSchemaURN, Connection con) throws Exception {
-        FactSchema factSchema = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            String selectFactSchema = "SELECT factschemata.name AS schemaURN, factroles.name AS role, factroles.type AS type FROM factroles JOIN factschemata ON ( factschemata.id = factroles.factschema_id ) WHERE factschemata.name = ?";
-            ps = con.prepareStatement(selectFactSchema);
-            ps.setString(1, factSchemaURN);
-            rs = ps.executeQuery();
+	private FactSchema loadFactSchema(String factSchemaURN, Connection con)
+			throws Exception {
+		FactSchema factSchema = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			String selectFactSchema = "SELECT factschemata.name AS schemaURN, factroles.name AS role, factroles.type AS type FROM factroles JOIN factschemata ON ( factschemata.id = factroles.factschema_id ) WHERE factschemata.name = ?";
+			ps = con.prepareStatement(selectFactSchema);
+			ps.setString(1, factSchemaURN);
+			rs = ps.executeQuery();
 
-            boolean first = true;
-            while (rs.next()) {
-                if (first) {
-                    factSchema = new FactSchema();
-                    factSchema.setFactSchemaURN(rs.getString("schemaURN"));
-                    first = false;
-                }
-                String typeFromDB = rs.getString("type");
-                String[] types = typeFromDB.split(",");
-                if (types.length > 0) {
-                    for (String type : types) {
-                        factSchema.addRole(rs.getString("role"), type);
-                    }
-                } else {
-                    factSchema.addRole(rs.getString("role"), typeFromDB);
-                }
-            }
-        } catch (SQLException e) {
-            throw new Exception("Error while selecting fact schema meta data", e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    /* ignore */
-                }
-            }
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    /* ignore */
-                }
-            }
-        }
+			boolean first = true;
+			while (rs.next()) {
+				if (first) {
+					factSchema = new FactSchema();
+					factSchema.setFactSchemaURN(rs.getString("schemaURN"));
+					first = false;
+				}
+				String typeFromDB = rs.getString("type");
+				String[] types = typeFromDB.split(",");
+				if (types.length > 0) {
+					for (String type : types) {
+						factSchema.addRole(rs.getString("role"), type);
+					}
+				} else {
+					factSchema.addRole(rs.getString("role"), typeFromDB);
+				}
+			}
+		} catch (SQLException e) {
+			throw new Exception("Error while selecting fact schema meta data",
+					e);
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					/* ignore */
+				}
+			}
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					/* ignore */
+				}
+			}
+		}
 
-        return factSchema;
-    }
+		return factSchema;
+	}
 
-    @Override
-    public void createFactSchema(FactSchema factSchema) throws Exception {
-        // TODO Implement roll back behavior (transaction)
+	@Override
+	public void createFactSchema(FactSchema factSchema) throws Exception {
+		// TODO Implement roll back behavior (transaction)
 
-        String factSchemaB64 = Base64.encodeBase64URLSafeString(factSchema.getFactSchemaURN().getBytes());
+		String factSchemaB64 = Base64.encodeBase64URLSafeString(factSchema
+				.getFactSchemaURN().getBytes());
 
-        List<String> createFactSchemaTable = this.toSQLfromSchema(factSchemaB64, factSchema);
+		List<String> createFactSchemaTable = this.toSQLfromSchema(
+				factSchemaB64, factSchema);
 
-        Connection con = null;
-        try {
-            con = DriverManager.getConnection(DB_URL);
-            this.executeUpdate(createFactSchemaTable, con);
-            this.insertFactSchemaMetadata(factSchema, con);
-        } catch (Exception e) {
-            throw new Exception("Error while creating fact schema", e);
-        } finally {
-            try {
-                con.close();
-            } catch (Throwable t) { /* ignore */}
-        }
+		Connection con = null;
+		try {
+			con = DriverManager.getConnection(DB_URL);
+			this.executeUpdate(createFactSchemaTable, con);
+			this.insertFactSchemaMetadata(factSchema, con);
+		} catch (Exception e) {
+			throw new Exception("Error while creating fact schema", e);
+		} finally {
+			try {
+				con.close();
+			} catch (Throwable t) { /* ignore */
+			}
+		}
 
-        logger.info("Fact schema {} created as {}", factSchema.getFactSchemaURN(), factSchemaB64);
-    }
+		logger.info("Fact schema {} created as {}", factSchema
+				.getFactSchemaURN(), factSchemaB64);
+	}
 
-    private void insertFactSchemaMetadata(FactSchema factSchema, Connection con) throws Exception {
-        PreparedStatement ps = null;
-        try {
-            String insertFactSchema = "INSERT INTO factschemata (name) VALUES ( ? )";
-            ps = con.prepareStatement(insertFactSchema, PreparedStatement.RETURN_GENERATED_KEYS);
-            ps.setString(1, factSchema.getFactSchemaURN());
-            ps.executeUpdate();
-            ResultSet rs = ps.getGeneratedKeys();
+	protected List<String> toSQLfromSchema(String factSchemaB64,
+			FactSchema factSchema) throws Exception {
+		List<String> sqls = new ArrayList<String>();
 
-            int factSchemaId = -1;
-            if (rs.next()) {
-                factSchemaId = rs.getInt(1);
-            }
-            if (factSchemaId < 0) {
-                throw new Exception("Could not obtain fact schema ID after insert");
-            }
+		// TODO Add SQL command for index creation
 
-            logger
-                    .info("Inserted new fact schema {} with ID {}", factSchema.getFactSchemaURN(),
-                        factSchemaId);
+		StringBuilder createTableSQL = new StringBuilder("CREATE TABLE ");
+		createTableSQL.append(factSchemaB64).append(' ');
+		createTableSQL.append('(');
+		createTableSQL.append("id INT GENERATED ALWAYS AS IDENTITY");
+		createTableSQL.append(", context_id INT CONSTRAINT ");
+		createTableSQL.append(factSchemaB64).append("_CFK");
+		createTableSQL
+				.append(" REFERENCES factcontexts ON DELETE CASCADE ON UPDATE RESTRICT");
 
-            String insertFactRoles = "INSERT INTO factroles (factschema_id, name, type) VALUES ( ?, ?, ? )";
-            ps = con.prepareStatement(insertFactRoles);
-            for (String role : factSchema.getRoles()) {
-                ps.setInt(1, factSchemaId);
-                ps.setString(2, role);
+		for (String role : factSchema.getRoles()) {
+			createTableSQL.append(", ");
+			createTableSQL.append(role);
+			createTableSQL.append(" VARCHAR(1024)");
+		}
 
-                StringBuilder typeList = new StringBuilder();
-                boolean first = true;
-                for (String type : factSchema.getTypesOfRole(role)) {
-                    if (!first) {
-                        typeList.append(",");
-                    }
-                    typeList.append(type);
-                    first = false;
-                }
-                ps.setString(3, typeList.toString());
+		// Append created time stamp
+		createTableSQL
+				.append(", created TIMESTAMP NOT NULL WITH DEFAULT CURRENT TIMESTAMP)");
 
-                ps.addBatch();
-            }
-            ps.executeBatch();
-        } catch (SQLException e) {
-            throw new Exception("Error while inserting fact schema meta data", e);
-        } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    /* ignore */
-                }
-            }
-        }
-    }
+		sqls.add(createTableSQL.toString());
 
-    protected List<String> toSQLfromSchema(String factSchemaB64, FactSchema factSchema) throws Exception {
-        List<String> sqls = new ArrayList<String>();
+		return sqls;
+	}
 
-        // TODO Add SQL command for index creation
+	private void insertFactSchemaMetadata(FactSchema factSchema, Connection con)
+			throws Exception {
+		PreparedStatement ps = null;
+		try {
+			String insertFactSchema = "INSERT INTO factschemata (name) VALUES ( ? )";
+			ps = con.prepareStatement(insertFactSchema,
+					PreparedStatement.RETURN_GENERATED_KEYS);
+			ps.setString(1, factSchema.getFactSchemaURN());
+			ps.executeUpdate();
+			ResultSet rs = ps.getGeneratedKeys();
 
-        StringBuilder createTableSQL = new StringBuilder("CREATE TABLE ");
-        createTableSQL.append(factSchemaB64).append(' ');
-        createTableSQL.append('(');
-        createTableSQL.append("id INT GENERATED ALWAYS AS IDENTITY");
+			int factSchemaId = -1;
+			if (rs.next()) {
+				factSchemaId = rs.getInt(1);
+			}
+			if (factSchemaId < 0) {
+				throw new Exception(
+						"Could not obtain fact schema ID after insert");
+			}
 
-        for (String role : factSchema.getRoles()) {
-            createTableSQL.append(", ");
-            createTableSQL.append(role);
-            createTableSQL.append(" VARCHAR(1024)");
-        }
-        createTableSQL.append(')');
+			logger.info("Inserted new fact schema {} with ID {}", factSchema
+					.getFactSchemaURN(), factSchemaId);
 
-        sqls.add(createTableSQL.toString());
+			String insertFactRoles = "INSERT INTO factroles (factschema_id, name, type) VALUES ( ?, ?, ? )";
+			ps = con.prepareStatement(insertFactRoles);
+			for (String role : factSchema.getRoles()) {
+				ps.setInt(1, factSchemaId);
+				ps.setString(2, role);
 
-        return sqls;
-    }
+				StringBuilder typeList = new StringBuilder();
+				boolean first = true;
+				for (String type : factSchema.getTypesOfRole(role)) {
+					if (!first) {
+						typeList.append(",");
+					}
+					typeList.append(type);
+					first = false;
+				}
+				ps.setString(3, typeList.toString());
 
-    private void executeUpdate(List<String> sqls, Connection con) throws Exception {
-        for (String sql : sqls) {
-            int res = -1;
-            Statement statement = null;
-            try {
-                statement = con.createStatement();
-                res = statement.executeUpdate(sql);
-                if (res < 0) {
-                    logger.error("Negative result after executing SQL '{}'", sql);
-                    throw new Exception("Negative result after executing SQL");
-                }
-            } catch (SQLException e) {
-                logger.error("Error executing SQL '{}'", sql, e);
-                throw new Exception("Error executing SQL", e);
-            } finally {
-                try {
-                    statement.close();
-                } catch (Throwable t) { /* ignore */}
-            }
-        }
-    }
+				ps.addBatch();
+			}
+			ps.executeBatch();
+		} catch (SQLException e) {
+			throw new Exception("Error while inserting fact schema meta data",
+					e);
+		} finally {
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					/* ignore */
+				}
+			}
+		}
+	}
 
-    @Override
-    public void addFact(Fact fact) throws Exception {
-        Connection con = null;
-        try {
-            con = DriverManager.getConnection(DB_URL);
-            this.addFact(fact, con);
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            try {
-                con.close();
-            } catch (Throwable t) { /* ignore */}
-        }
+	private void executeUpdate(List<String> sqls, Connection con)
+			throws Exception {
+		for (String sql : sqls) {
+			int res = -1;
+			Statement statement = null;
+			try {
+				statement = con.createStatement();
+				res = statement.executeUpdate(sql);
+				if (res < 0) {
+					logger.error("Negative result after executing SQL '{}'",
+							sql);
+					throw new Exception("Negative result after executing SQL");
+				}
+			} catch (SQLException e) {
+				logger.error("Error executing SQL '{}'", sql, e);
+				throw new Exception("Error executing SQL", e);
+			} finally {
+				try {
+					statement.close();
+				} catch (Throwable t) { /* ignore */
+				}
+			}
+		}
+	}
 
-        logger.info("Fact created for {}", fact.getFactSchemaURN());
-    }
+	@Override
+	public void addFact(Fact fact) throws Exception {
+		Connection con = null;
+		try {
+			con = DriverManager.getConnection(DB_URL);
+			this.addFact(fact, con);
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			try {
+				con.close();
+			} catch (Throwable t) { /* ignore */
+			}
+		}
 
-    private void addFact(Fact fact, Connection con) throws Exception {
-        FactSchema factSchema = this.loadFactSchema(fact.getFactSchemaURN(), con);
-        if (factSchema != null) {
-            String factSchemaB64 = Base64.encodeBase64URLSafeString(fact.getFactSchemaURN().getBytes());
+		logger.info("Fact created for {}", fact.getFactSchemaURN());
+	}
 
-            StringBuilder insertSB = new StringBuilder("INSERT INTO ").append(factSchemaB64).append('(');
-            StringBuilder valueSB = new StringBuilder(" VALUES (");
-            Map<String,Integer> roleIndexMap = new HashMap<String,Integer>();
-            boolean firstRole = true;
-            int roleIndex = 0;
-            for (String role : factSchema.getRoles()) {
-                if (!firstRole) {
-                    insertSB.append(',');
-                    valueSB.append(',');
-                }
-                insertSB.append(role);
-                valueSB.append('?');
-                firstRole = false;
+	private void addFact(Fact fact, Connection con) throws Exception {
+		FactSchema factSchema = this.loadFactSchema(fact.getFactSchemaURN(),
+				con);
+		if (factSchema != null) {
+			if (fact.getContext() != null) {
+				// TODO Create the context if present
+			}
 
-                roleIndex++;
-                roleIndexMap.put(role, roleIndex);
-            }
-            insertSB.append(')').append(valueSB).append(')');
+			// Create the fact
+			String factSchemaB64 = Base64.encodeBase64URLSafeString(fact
+					.getFactSchemaURN().getBytes());
 
-            PreparedStatement ps = null;
-            try {
-                ps = con.prepareStatement(insertSB.toString(), PreparedStatement.RETURN_GENERATED_KEYS);
-                for (String role : fact.getRoles()) {
-                    Integer roleIdx = roleIndexMap.get(role);
-                    if (roleIdx == null) {
-                        throw new Exception("Unknown role '" + role + "' for fact schema "
-                                            + fact.getFactSchemaURN());
-                    } else {
-                        ps.setString(roleIdx, role);
-                    }
-                }
-                ps.executeUpdate();
-                ResultSet rs = ps.getGeneratedKeys();
-                int factId = -1;
-                if (rs.next()) {
-                    factId = rs.getInt(1);
-                }
-                if (factId < 0) {
-                    throw new Exception("Could not obtain fact ID after insert");
-                }
+			StringBuilder insertFact = new StringBuilder("INSERT INTO ")
+					.append(factSchemaB64).append('(');
+			StringBuilder valueSB = new StringBuilder(" VALUES (");
+			Map<String, Integer> roleIndexMap = new HashMap<String, Integer>();
+			boolean firstRole = true;
+			int roleIndex = 0;
+			for (String role : factSchema.getRoles()) {
+				if (!firstRole) {
+					insertFact.append(',');
+					valueSB.append(',');
+				}
+				insertFact.append(role);
+				valueSB.append('?');
+				firstRole = false;
 
-                logger.info("Inserted new fact with ID {} into fact schema table {}", factId, factSchemaB64);
-            } catch (SQLException e) {
-                throw new Exception("Error while writing fact into database", e);
-            } finally {
-                if (ps != null) {
-                    try {
-                        ps.close();
-                    } catch (SQLException e) {
-                        /* ignore */
-                    }
-                }
-            }
+				roleIndex++;
+				roleIndexMap.put(role, roleIndex);
+			}
+			insertFact.append(')').append(valueSB).append(')');
 
-        } else {
-            throw new Exception("Unknown fact schema " + fact.getFactSchemaURN());
-        }
-    }
+			PreparedStatement ps = null;
+			try {
+				ps = con.prepareStatement(insertFact.toString(),
+						PreparedStatement.RETURN_GENERATED_KEYS);
+				for (String role : fact.getRoles()) {
+					Integer roleIdx = roleIndexMap.get(role);
+					if (roleIdx == null) {
+						throw new Exception("Unknown role '" + role
+								+ "' for fact schema "
+								+ fact.getFactSchemaURN());
+					} else {
+						ps.setString(roleIdx, fact.getValueOfRole(role));
+					}
+				}
+				ps.executeUpdate();
+				ResultSet rs = ps.getGeneratedKeys();
+				int factId = -1;
+				if (rs.next()) {
+					factId = rs.getInt(1);
+				}
+				if (factId < 0) {
+					throw new Exception("Could not obtain fact ID after insert");
+				}
 
-    @Override
-    public void addFacts(Set<Fact> factSet) throws Exception {
-        
-        // TODO Improve roll back behavior if single fact of set could not be committed
+				logger
+						.info(
+								"Inserted new fact with ID {} into fact schema table {}",
+								factId, factSchemaB64);
+			} catch (SQLException e) {
+				throw new Exception("Error while writing fact into database", e);
+			} finally {
+				if (ps != null) {
+					try {
+						ps.close();
+					} catch (SQLException e) {
+						/* ignore */
+					}
+				}
+			}
 
-        Connection con = null;
-        try {
-            con = DriverManager.getConnection(DB_URL);
-            for (Fact fact : factSet) {
-                this.addFact(fact, con);
-                logger.info("Fact created for {}", fact.getFactSchemaURN());
-            }
-        } catch (Exception e) {
-            throw new Exception("Error while inserting new facts", e);
-        } finally {
-            try {
-                con.close();
-            } catch (Throwable t) { /* ignore */}
-        }
-    }
+		} else {
+			throw new Exception("Unknown fact schema "
+					+ fact.getFactSchemaURN());
+		}
+	}
 
-    @Override
-    public org.apache.stanbol.factstore.model.ResultSet query(Query query) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+	@Override
+	public void addFacts(Set<Fact> factSet) throws Exception {
+
+		// TODO Improve roll back behavior if single fact of set could not be
+		// committed
+
+		Connection con = null;
+		try {
+			con = DriverManager.getConnection(DB_URL);
+			for (Fact fact : factSet) {
+				this.addFact(fact, con);
+				logger.info("Fact created for {}", fact.getFactSchemaURN());
+			}
+		} catch (Exception e) {
+			throw new Exception("Error while inserting new facts", e);
+		} finally {
+			try {
+				con.close();
+			} catch (Throwable t) { /* ignore */
+			}
+		}
+	}
+
+	@Override
+	public FactResultSet query(Query query) throws Exception {
+		FactResultSet frs = null;
+		if (query != null) {
+
+			Connection con = null;
+			PreparedStatement ps = null;
+			ResultSet rs = null;
+			try {
+				con = DriverManager.getConnection(DB_URL);
+
+				validateQuery(query, con);
+
+				// from here on we have valid data
+
+				String factSchemaB64 = Base64.encodeBase64URLSafeString(query
+						.getFromSchemaURN().getBytes());
+
+				StringBuilder querySql = new StringBuilder("SELECT ");
+
+				boolean firstRole = true;
+				for (String role : query.getRoles()) {
+					if (!firstRole) {
+						querySql.append(",");
+					}
+					querySql.append(role);
+					firstRole = false;
+				}
+
+				querySql.append(" FROM ").append(factSchemaB64);
+
+				List<String> queryParams = new ArrayList<String>();
+				querySql.append(" WHERE ");
+				for (WhereClause wc : query.getWhereClauses()) {
+					querySql.append('(');
+					querySql.append(wc.getComparedRole());
+					switch (wc.getCompareOperator()) {
+					case EQ:
+						querySql.append(" = ").append('?');
+						queryParams.add(wc.getSearchedValue());
+						break;
+					}
+				}
+				querySql.append(')');
+
+				
+				logger.info("performing query {}", querySql);
+
+				ps = con.prepareStatement(querySql.toString());
+				for (int i = 0; i < queryParams.size(); i++) {
+					ps.setString(i + 1, queryParams.get(i));
+				}
+
+				rs = ps.executeQuery();
+				if (rs != null) {
+					List<String> header = new ArrayList<String>();
+					for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+						header.add(rs.getMetaData().getColumnName(i));
+					}
+
+					frs = new FactResultSet();
+					frs.setHeader(header);
+
+					while (rs.next()) {
+						FactResult result = new FactResult();
+						List<String> values = new ArrayList<String>();
+						for (String head : header) {
+							values.add(rs.getString(head));
+						}
+						result.setValues(values);
+						frs.addFactResult(result);
+					}
+				}
+
+			} catch (Exception e) {
+				throw e;
+			} finally {
+				if (rs != null) {
+					try {
+						rs.close();
+					} catch (Throwable t) {
+						// ignore
+					}
+				}
+				if (ps != null) {
+					try {
+						ps.close();
+					} catch (Throwable t) {
+						// ignore
+					}
+
+				}
+				if (con != null) {
+					try {
+						con.close();
+					} catch (Throwable t) {
+						// ignore
+					}
+				}
+			}
+
+		}
+
+		return frs;
+	}
+
+	private void validateQuery(Query query, Connection con) throws Exception {
+		FactSchema schema = this.loadFactSchema(query.getFromSchemaURN(), con);
+
+		if (schema == null) {
+			throw new Exception("Fact schema " + query.getFromSchemaURN()
+					+ " does not exist.");
+		}
+
+		StringBuilder unknownRoles = new StringBuilder();
+		for (String role : query.getRoles()) {
+			if (!schema.hasRole(role)) {
+				if (!unknownRoles.toString().isEmpty()) {
+					unknownRoles.append(',');
+				}
+				unknownRoles.append("role");
+			}
+		}
+		if (!unknownRoles.toString().isEmpty()) {
+			throw new Exception(
+					"The following roles are unknown for the fact schema '"
+							+ query.getFromSchemaURN() + "': "
+							+ unknownRoles.toString());
+		}
+	}
 
 }

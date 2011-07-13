@@ -5,7 +5,7 @@ import java.util.Set;
 import org.apache.stanbol.factstore.model.Fact;
 import org.apache.stanbol.factstore.model.FactSchema;
 import org.apache.stanbol.factstore.model.Query;
-import org.apache.stanbol.factstore.model.ResultSet;
+import org.apache.stanbol.factstore.model.FactResultSet;
 
 public interface FactStore {
 
@@ -21,6 +21,6 @@ public interface FactStore {
     
     public void addFacts(Set<Fact> factSet) throws Exception;
 
-    public ResultSet query(Query query);
+    public FactResultSet query(Query query) throws Exception;
 
 }

@@ -31,13 +31,11 @@ public class FactTest {
         boolean roleOrgaOK = false;
         for (String role : fact.getRoles()) {
             if (role.equals("person")) {
-                assertEquals(1, fact.getTypesOfRole(role).size());
-                assertEquals("http://upb.de/persons/bnagel", fact.getTypesOfRole(role).get(0));
+                assertEquals("http://upb.de/persons/bnagel", fact.getValueOfRole(role));
                 rolePersonOK = true;
             }
             if (role.equals("organization")) {
-                assertEquals(1, fact.getTypesOfRole(role).size());
-                assertEquals("http://uni-paderborn.de", fact.getTypesOfRole(role).get(0));
+                assertEquals("http://uni-paderborn.de", fact.getValueOfRole(role));
                 roleOrgaOK = true;
             }
         }
@@ -100,13 +98,11 @@ public class FactTest {
             boolean roleOrgaOK = false;
             for (String role : fact.getRoles()) {
                 if (role.equals("person")) {
-                    assertEquals(1, fact.getTypesOfRole(role).size());
-                    assertTrue(fact.getTypesOfRole(role).get(0).startsWith("http://upb.de/persons/"));
+                    assertTrue(fact.getValueOfRole(role).startsWith("http://upb.de/persons/"));
                     rolePersonOK = true;
                 }
                 if (role.equals("organization")) {
-                    assertEquals(1, fact.getTypesOfRole(role).size());
-                    assertEquals("http://uni-paderborn.de", fact.getTypesOfRole(role).get(0));
+                    assertEquals("http://uni-paderborn.de", fact.getValueOfRole(role));
                     roleOrgaOK = true;
                 }
             }
@@ -149,13 +145,11 @@ public class FactTest {
                 boolean roleOrgaOK = false;
                 for (String role : fact.getRoles()) {
                     if (role.equals("person")) {
-                        assertEquals(1, fact.getTypesOfRole(role).size());
-                        assertEquals("http://upb.de/persons/bnagel", fact.getTypesOfRole(role).get(0));
+                        assertEquals("http://upb.de/persons/bnagel", fact.getValueOfRole(role));
                         rolePersonOK = true;
                     }
                     if (role.equals("organization")) {
-                        assertEquals(1, fact.getTypesOfRole(role).size());
-                        assertEquals("http://uni-paderborn.de", fact.getTypesOfRole(role).get(0));
+                        assertEquals("http://uni-paderborn.de", fact.getValueOfRole(role));
                         roleOrgaOK = true;
                     }
                 }
@@ -171,13 +165,11 @@ public class FactTest {
                 boolean roleFriendOK = false;
                 for (String role : fact.getRoles()) {
                     if (role.equals("person")) {
-                        assertEquals(1, fact.getTypesOfRole(role).size());
-                        assertEquals("http://upb.de/persons/bnagel", fact.getTypesOfRole(role).get(0));
+                        assertEquals("http://upb.de/persons/bnagel", fact.getValueOfRole(role));
                         rolePersonOK = true;
                     }
                     if (role.equals("friend")) {
-                        assertEquals(1, fact.getTypesOfRole(role).size());
-                        assertEquals("http://upb.de/persons/fchrist", fact.getTypesOfRole(role).get(0));
+                        assertEquals("http://upb.de/persons/fchrist", fact.getValueOfRole(role));
                         roleFriendOK = true;
                     }
                 }

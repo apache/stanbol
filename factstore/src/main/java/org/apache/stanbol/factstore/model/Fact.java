@@ -1,9 +1,7 @@
 package org.apache.stanbol.factstore.model;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,8 +12,8 @@ import org.apache.stanbol.commons.jsonld.JsonLdResource;
 public class Fact {
 
     private String factSchemaURN;
-    
-    private Map<String, List<String>> roleMap = new HashMap<String,List<String>>();
+    private Map<String, String> roleMap = new HashMap<String,String>();
+    private FactContext context;
     
     public String getFactSchemaURN() {
         return factSchemaURN;
@@ -25,23 +23,27 @@ public class Fact {
         this.factSchemaURN = factSchemaURN;
     }
 
-    public void addRole(String role, String type) {
-        if (this.roleMap.get(role) == null) {
-            this.roleMap.put(role, new ArrayList<String>());
-        }
-        List<String> types = this.roleMap.get(role);
-        types.add(type);
+    public void addRole(String role, String value) {
+    	this.roleMap.put(role, value);
     }
     
     public Set<String> getRoles() {
         return this.roleMap.keySet();
     }
 
-    public List<String> getTypesOfRole(String role) {
+    public String getValueOfRole(String role) {
         return this.roleMap.get(role);
     }
+    
+    public FactContext getContext() {
+		return context;
+	}
 
-    public static Fact factFromJsonLd(JsonLd jsonLd) {
+	public void setContext(FactContext context) {
+		this.context = context;
+	}
+
+	public static Fact factFromJsonLd(JsonLd jsonLd) {
         Fact fact = null;
         
         if (jsonLd.getResourceSubjects().size() == 1) {
@@ -94,4 +96,5 @@ public class Fact {
         
         return fact;
     }
+    
 }

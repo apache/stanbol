@@ -22,7 +22,7 @@ public class DerbyFactStoreTest {
         String profile = "http://iks-project.eu/ont/employeeOf";
         String profileB64 = Base64.encodeBase64URLSafeString(profile.getBytes());
         
-        String expected = "CREATE TABLE aHR0cDovL2lrcy1wcm9qZWN0LmV1L29udC9lbXBsb3llZU9m (id INT GENERATED ALWAYS AS IDENTITY, person VARCHAR(1024), organization VARCHAR(1024))";
+        String expected = "CREATE TABLE aHR0cDovL2lrcy1wcm9qZWN0LmV1L29udC9lbXBsb3llZU9m (id INT GENERATED ALWAYS AS IDENTITY, context_id INT CONSTRAINT aHR0cDovL2lrcy1wcm9qZWN0LmV1L29udC9lbXBsb3llZU9m_CFK REFERENCES factcontexts ON DELETE CASCADE ON UPDATE RESTRICT, person VARCHAR(1024), organization VARCHAR(1024), created TIMESTAMP NOT NULL WITH DEFAULT CURRENT TIMESTAMP)";
         List<String> sqls = fs.toSQLfromSchema(profileB64, FactSchema.fromJsonLdProfile(profile, jsonLd));
         Assert.assertEquals(1, sqls.size());
         Assert.assertEquals(expected, sqls.get(0));

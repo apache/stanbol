@@ -1,12 +1,16 @@
 package org.apache.stanbol.factstore.model;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.stanbol.commons.jsonld.JsonLd;
 import org.apache.stanbol.commons.jsonld.JsonLdIRI;
 import org.apache.stanbol.commons.jsonld.JsonLdResource;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONObject;
 import org.junit.Test;
 
 public class QueryTest {
@@ -17,19 +21,19 @@ public class QueryTest {
         jldq.addNamespacePrefix("http://iks-project.eu/ont/", "iks");
         
         JsonLdResource subject = new JsonLdResource();
-        JSONArray select = new JSONArray();
-        select.put("person");
+        List<String> select = new ArrayList<String>();
+        select.add("person");
         subject.putProperty("select", select);
         subject.putProperty("from", "iks:employeeOf");
 
-        JSONObject orga = new JSONObject();
+        Map<String, Object> orga = new HashMap<String, Object>();
         orga.put("organization", new JsonLdIRI("http://upb.de"));
 
-        JSONObject eq = new JSONObject();
+        Map<String, Object> eq = new HashMap<String, Object>();
         eq.put("=", orga);
         
-        JSONArray where = new JSONArray();
-        where.put(eq);
+        List<Object> where = new ArrayList<Object>();
+        where.add(eq);
         
         subject.putProperty("where", where);
         
@@ -62,19 +66,19 @@ public class QueryTest {
         jldq.addNamespacePrefix("http://upd.de/persons/", "upb");
         
         JsonLdResource subject = new JsonLdResource();
-        JSONArray select = new JSONArray();
-        select.put("person");
+        List<String> select = new ArrayList<String>();
+        select.add("person");
         subject.putProperty("select", select);
         subject.putProperty("from", "iks:employeeOf");
 
-        JSONObject orga = new JSONObject();
+        Map<String, Object> orga = new HashMap<String, Object>();
         orga.put("person", new JsonLdIRI("upb:fchrist"));
 
-        JSONObject eq = new JSONObject();
+        Map<String, Object> eq = new HashMap<String, Object>();
         eq.put("=", orga);
         
-        JSONArray where = new JSONArray();
-        where.put(eq);
+        List<Object> where = new ArrayList<Object>();
+        where.add(eq);
         
         subject.putProperty("where", where);
         

@@ -67,5 +67,9 @@ public class FactSchema {
 
         return factSchema;
     }
+
+	public boolean hasRole(String role) {
+		return this.roleMap.keySet().contains(role);
+	}
     
 }
