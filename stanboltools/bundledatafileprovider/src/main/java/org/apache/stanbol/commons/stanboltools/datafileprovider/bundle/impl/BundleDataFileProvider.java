@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
@@ -104,7 +105,9 @@ public class BundleDataFileProvider implements DataFileProvider {
         Iterator<String> relativePathIterator = searchPaths.iterator();
         while(resource == null && relativePathIterator.hasNext()){
             String path = relativePathIterator.next();
-            final String resourceName = path != null ? path + filename : filename ;
+            String resourceName = path != null ? path + filename : filename ;
+            //make the path platform independent (STANBOL-259)
+            resourceName = FilenameUtils.separatorsToSystem(resourceName);
             resource = bundle.getEntry(resourceName);
         }
         log.info("Resource {} found: {}", (resource == null ? "NOT" : ""), filename);
