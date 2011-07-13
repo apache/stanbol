@@ -68,7 +68,7 @@ can be used for submitting some text file as content item:
 
 * stateless interface
 
-    curl -i -X PUT -H "Content-Type:text/plain" -T testfile.txt http://localhost:8080/engines
+    curl -i -X POST -H "Content-Type:text/plain" -T testfile.txt http://localhost:8080/engines
 
 * stateful interface
 
