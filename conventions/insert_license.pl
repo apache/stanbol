@@ -117,7 +117,7 @@ my @xmlFileTypes = (
   ".jdo", ".orm", ".jdoquery", ".jelly",
   ".jxt", ".meta", ".pagesheet", ".stx", ".xegrm", ".xgrm", ".xlex", ".xmi",
   ".xsd", ".rng", ".rdf", ".rdfs", ".xul", ".tld", ".xxe", ".ft", ".fv",
-  ".wsdd", ".wsdl", ".xlog", ".pom",
+  ".wsdd", ".wsdl", ".xlog", ".pom", ".owl",
 );
 my @sgmlFileTypes = (
   ".dtd", ".mod", ".sgml", ".sgm",
