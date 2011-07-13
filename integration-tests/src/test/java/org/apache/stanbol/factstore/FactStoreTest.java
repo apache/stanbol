@@ -1,4 +1,4 @@
-package org.apache.stanbol.enhancer.it;
+package org.apache.stanbol.factstore;
 
 import java.io.File;
 
@@ -257,6 +257,33 @@ public class FactStoreTest extends StanbolTestBase {
                     "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@\":[{\"@profile\":\"iks:employeeOf3NegWrong\",\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}},{\"@profile\":\"iks:friendOf3Neg\",\"person\":{\"@iri\":\"upb:bnagel\"},\"friend\":{\"@iri\":\"upb:fchrist\"}}]}")
                 .withHeader("Accept", "application/json");
         executor.execute(r3).assertStatus(500);
+    }
+    
+    @Test
+    public void querySingleFact() throws Exception {
+        Request r1 = builder
+        .buildOtherRequest(
+            new HttpPut(builder.buildUrl("/factstore/facts/"
+                                         + encodeURI("http://iks-project.eu/ont/employeeOf"))))
+        .withContent(
+            "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"#types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
+        .withHeader("Accept", "application/json");
+        executor.execute(r1).assertStatus(201);
+
+        Request r2 = builder
+        .buildOtherRequest(new HttpPost(builder.buildUrl("/factstore/facts/")))
+        .withContent(
+            "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:employeeOf\",\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://upb.de\"}}")
+        .withHeader("Accept", "application/json");
+        executor.execute(r2).assertStatus(200);
+        
+        String queryString = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\"},\"select\":[\"person\"],\"from\":\"iks:employeeOf\",\"where\":[{\"=\":{\"organization\":{\"@iri\":\"http://upb.de\"}}}]}";
+        Request q1 = builder.buildGetRequest("/factstore/query", "q", queryString)
+        .withHeader("Accept", "application/json");
+        
+        String expected = "{\"resultset\":[{\"PERSON\":\"http:\\/\\/upb.de\\/persons\\/bnagel\"}]}";
+        String actual = executor.execute(q1).assertStatus(200).getContent();
+        Assert.assertEquals(expected, actual);
     }
     
     private String encodeURI(String s) {
