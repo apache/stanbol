@@ -42,27 +42,50 @@
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Export-Package>
-                            org.apache.stanbol.entityhub.indexing.core;version=${pom.version},
-                            org.apache.stanbol.entityhub.indexing.core.normaliser;version=${pom.version},
-                            org.apache.stanbol.entityhub.indexing.core.processor;version=${pom.version}
-                        </Export-Package>
-                    <!--     <Private-Package>
-                            org.apache.stanbol.entityhub.indexing.core.impl;version=${pom.version}
-                        </Private-Package>  -->
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>
+              org.apache.stanbol.entityhub.indexing.core;version=${pom.version},
+              org.apache.stanbol.entityhub.indexing.core.normaliser;version=${pom.version},
+              org.apache.stanbol.entityhub.indexing.core.processor;version=${pom.version}
+            </Export-Package>
+            <!--
+            <Private-Package>
+              org.apache.stanbol.entityhub.indexing.core.impl;version=${pom.version}
+            </Private-Package>
+            -->
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- License provided in src/test/resources/README -->
+            <exclude>src/test/resources/resourceLoaderTest/testFolder/otherFileInFolder.txt</exclude>
+            <exclude>src/test/resources/resourceLoaderTest/testFolder/ignoreFileInFolder.txt</exclude>
+            <exclude>src/test/resources/resourceLoaderTest/testFolder/errorFileInFolder.txt</exclude>
+            <exclude>src/test/resources/resourceLoaderTest/testFolder/fileInFolder.txt</exclude>
+            <exclude>src/test/resources/resourceLoaderTest/singleFileTest.txt</exclude>
+            <exclude>src/test/resources/testConfigs/simple/indexing/config/indexfieldconfig.txt</exclude>
+            <exclude>src/test/resources/testConfigs/simple/indexing/config/dbpediamappings.txt</exclude>
+            <exclude>src/test/resources/testConfigs/simple/indexing/resources/testEntityScore.txt</exclude>
+            <exclude>src/test/resources/indexerTests/dataIterating/indexing/config/indexerTestMappings.txt</exclude>
+            <exclude>src/test/resources/indexerTests/idIterating/indexing/config/indexerTestMappings.txt</exclude>
+          </excludes>
+        </configuration>
+      </plugin>          
+    </plugins>
+  </build>
+  
   <dependencies>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
