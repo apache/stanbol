@@ -82,6 +82,16 @@
           </systemPropertyVariables>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>de>
+            <!-- License provided in src/main/resources/README -->
+            <exclude>src/main/resources/calaisTypeMap.txt</exclude>
+          </excludes>
+        </configuration>
+      </plugin>      
     </plugins>
   </build>
 
