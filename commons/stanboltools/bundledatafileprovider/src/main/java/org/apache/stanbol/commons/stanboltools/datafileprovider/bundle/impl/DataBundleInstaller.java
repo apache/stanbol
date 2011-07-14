@@ -135,7 +135,8 @@ public class DataBundleInstaller implements BundleListener {
                         BUNDLE_DATAFILES_PRIORITY_HEADER,dataFilesRankingString);
                 }
             } //else no service ranking
-            List<String> paths = Arrays.asList(pathsString.trim().split(","));
+            List<String> paths = Arrays.asList(pathsString.replaceAll("\\s", "").split(","));
+            
             BundleDataFileProvider provider = new BundleDataFileProvider(bundle, paths);
             properties.put(Constants.SERVICE_DESCRIPTION, String.format(
                 "%s for Bundle %s and Paths %s", 
