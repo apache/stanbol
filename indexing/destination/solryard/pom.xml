@@ -59,6 +59,30 @@
 					</instructions>
 				</configuration>
 			</plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- License provided in src/test/resources/README -->
+            <exclude>src/test/resources/testConfigs/missingDefaultSolrConf/indexing/config/indexFieldConfig.txt</exclude>
+            <exclude>src/test/resources/testConfigs/missingDefaultSolrConf/indexing/resources/testEntityScore.txt</exclude>
+            <exclude>src/test/resources/testConfigs/missingSolrConf/indexing/config/indexFieldConfig.txt</exclude>
+            <exclude>src/test/resources/testConfigs/missingSolrConf/indexing/resources/testEntityScore.txt</exclude>
+            <exclude>src/test/resources/testConfigs/simple/indexing/config/dbPediaMappings.txt</exclude>
+            <exclude>src/test/resources/testConfigs/simple/indexing/config/indexFieldConfig.txt</exclude>
+            <exclude>src/test/resources/testConfigs/simple/indexing/resources/testEntityScore.txt</exclude>
+            <exclude>src/test/resources/testConfigs/missingBoostConfig/indexing/config/indexFieldConfig.txt</exclude>
+            <exclude>src/test/resources/testConfigs/missingBoostConfig/indexing/resources/testEntityScore.txt</exclude>
+            <exclude>src/test/resources/testConfigs/withSolrConf/indexing/config/dbPediaMappings.txt</exclude>
+            <exclude>src/test/resources/testConfigs/withSolrConf/indexing/config/simple/conf/spellings.txt</exclude>
+            <exclude>src/test/resources/testConfigs/withSolrConf/indexing/config/indexFieldConfig.txt</exclude>
+            <exclude>src/test/resources/testConfigs/withSolrConf/indexing/resources/testEntityScore.txt</exclude>
+            <exclude>src/test/resources/testConfigs/invalidBoostConfig/indexing/config/indexFieldConfig.txt</exclude>
+            <exclude>src/test/resources/testConfigs/invalidBoostConfig/indexing/resources/testEntityScore.txt</exclude>
+          </excludes>
+        </configuration>
+      </plugin>			
 		</plugins>
 	</build>
 	<dependencies>
