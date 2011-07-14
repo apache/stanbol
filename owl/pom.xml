@@ -81,6 +81,20 @@
       </configuration>
     </plugin>
     <plugin>
+      <groupId>org.apache.rat</groupId>
+      <artifactId>apache-rat-plugin</artifactId>
+      <configuration>
+        <excludes>
+          <exclude>src/main/resources/maven/repo/owlapi/owlapi/maven-metadata-local.xml</exclude>
+          <exclude>src/main/resources/maven/repo/owlapi/owlapi/3.2.2/owlapi-3.2.2.pom</exclude>
+          <exclude>src/main/resources/maven/repo/owlapi/owlapi/3.0.0/owlapi-3.0.0.pom</exclude>
+          <exclude>src/main/resources/maven/repo/owlapi/owlapi/3.0.0/owlapi-3.0.0.jar.sha1</exclude>
+          <exclude>src/main/resources/maven/repo/owlapi/owlapi/3.0.0/owlapi-3.0.0.pom.sha1</exclude>
+          <exclude>src/main/resources/maven/repo/owlapi/owlapi/3.2.3/owlapi-3.2.3.pom</exclude>
+        </excludes>
+      </configuration>
+    </plugin>
+    <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-compiler-plugin</artifactId>
       <configuration>
