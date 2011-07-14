@@ -61,6 +61,21 @@
           </instructions>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- License provided in src/test/resources/README -->
+            <exclude>src/test/resources/testConfigs/provider/indexing/config/indexFieldConfig.txt</exclude>
+            <exclude>src/test/resources/testConfigs/provider/indexing/resources/testEntityIds.txt</exclude>
+            <exclude>src/test/resources/testConfigs/existing/indexing/config/indexFieldConfig.txt</exclude>
+            <exclude>src/test/resources/testConfigs/existing/indexing/resources/testEntityIds.txt</exclude>
+            <exclude>src/test/resources/testConfigs/iterable/indexing/config/indexFieldConfig.txt</exclude>
+            <exclude>src/test/resources/testConfigs/iterable/indexing/resources/testEntityScore.txt</exclude>
+          </excludes>
+        </configuration>
+      </plugin>      
     </plugins>
   </build>
   <dependencies>
