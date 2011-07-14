@@ -360,6 +360,17 @@
 					</execution>
 				</executions>
 			</plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- License provided in src/test/resources/README -->
+            <exclude>src/main/resources/indexing/config/dbpedia/conf/spellings.txt</exclude>
+            <exclude>src/test/resources/indexing/resources/incoming_links.txt</exclude>
+          </excludes>
+        </configuration>
+      </plugin>			
 		</plugins>
 	</build>
 </project>
