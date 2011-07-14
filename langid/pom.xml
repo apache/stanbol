@@ -70,6 +70,16 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- License provided in src/test/resources/README -->
+            <exclude>src/test/resources/en.txt</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
