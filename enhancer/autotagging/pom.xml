@@ -54,6 +54,21 @@
 					</archive>
 				</configuration>
 			</plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- License provided in samples/README -->
+            <exclude>samples/russia_timezones.txt</exclude>
+            <exclude>samples/bob_marley.txt</exclude>
+            <exclude>samples/jimi_hendrix.txt</exclude>
+            <!-- License provided in src/test/resources/README -->
+            <exclude>src/test/resources/dbpedia_3.4_longabstract_en.nt</exclude>
+            <exclude>src/test/resources/dbpedia_3.4_instancetype_en.nt</exclude>
+          </excludes>
+        </configuration>
+      </plugin>			
 		</plugins>
 	</build>
 	
