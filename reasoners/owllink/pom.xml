@@ -61,6 +61,13 @@
 	  <version>${stanbol-version}</version>
 	  <scope>provided</scope>
     </dependency>
+    <dependency>
+		<groupId>com.sun.org.apache</groupId>
+		<artifactId>jaxp-ri</artifactId>
+		<version>1.4</version>
+		<type>jar</type>
+		<scope>compile</scope>
+	</dependency>    
 
 		<!-- Testing deps -->
 		<dependency>
@@ -73,7 +80,7 @@
 			<artifactId>slf4j-log4j12</artifactId>
 			<scope>test</scope>
 		</dependency>    
-    
+
   </dependencies>
 
   <build>
@@ -91,13 +98,10 @@
             <Private-Package>
               eu.iksproject.kres.shared.dependency.owllink.*
             </Private-Package>
+            <Embed-Dependency>jaxp-ri</Embed-Dependency>
+			<Embed-Transitive>true</Embed-Transitive>	
             <Import-Package>
-              !com.sun.org.apache.xml.internal.serialize,
-              !javax.xml.parsers,
-              !org.coode.owlapi.owlxml.renderer,
-              !org.coode.owlapi.owlxmlparser,
-              !org.coode.string,
-              !org.coode.xml,
+              !com.sun.java_cup.*,
               !org.mortbay.http,
               !org.mortbay.http.handler,
               !org.mortbay.util,
@@ -107,17 +111,10 @@
               !org.semanticweb.owl.util,
               !org.semanticweb.owl.vocab,
               !org.semanticweb.owlapi.apibinding,
-              !org.semanticweb.owlapi.io,
-              !org.semanticweb.owlapi.model,
               !org.semanticweb.owlapi.profiles,
-              !org.semanticweb.owlapi.reasoner,
-              !org.semanticweb.owlapi.reasoner.impl,
-              !org.semanticweb.owlapi.util,
-              !org.semanticweb.owlapi.vocab,
               !org.semanticweb.reasonerfactory.pellet,
-              !org.xml.sax,
-              !org.xml.sax.helpers,
-              !uk.ac.manchester.cs.owl
+              !uk.ac.manchester.cs.owl,
+              *
             </Import-Package>
             <_nouses>true</_nouses>
           </instructions>

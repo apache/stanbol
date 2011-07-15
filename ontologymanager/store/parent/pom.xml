@@ -29,14 +29,9 @@
 
 	<inceptionYear>2010</inceptionYear>
 
-	<scm>
-		<connection>scm:svn:http://iks-project.googlecode.com/svn/sandbox/persistencestore/trunk/parent</connection>
-		<developerConnection>scm:svn:https://iks-project.googlecode.com/svn/sandbox/persistencestore/trunk/parent</developerConnection>
-	</scm>
-
 	<dependencyManagement>
 		<dependencies>
-			<!-- Ontology Manager - Store-->
+			<!-- Ontology Manager - Store -->
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.ontologymanager.store.api</artifactId>
@@ -79,32 +74,18 @@
 				<version>${stanbol-version}</version>
 				<scope>provided</scope>
 			</dependency>
-		    
+
 			<!-- OWL -->
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
-				<artifactId>org.semanticweb.owlapi</artifactId>
-				<version>3.0.0-SNAPSHOT</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.semanticweb.owlapi</groupId>
-				<artifactId>owlapi</artifactId>
-				<version>3.0.0</version>
-				<type>jar</type>
+				<artifactId>org.apache.stanbol.owl</artifactId>
+				<version>${stanbol-version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
-				<artifactId>org.semanticweb.owlapi.owllink</artifactId>
-				<version>1.0.2-SNAPSHOT</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.semanticweb.owlapi</groupId>
-				<artifactId>owllink</artifactId>
-				<version>1.0.2</version>
-				<type>jar</type>
+				<artifactId>org.apache.stanbol.reasoners.owllink</artifactId>
+				<version>${stanbol-version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
@@ -114,7 +95,7 @@
 				<type>jar</type>
 				<scope>provided</scope>
 			</dependency>
-			
+
 			<!--Apache Derby -->
 			<dependency>
 				<groupId>org.apache.derby</groupId>
@@ -122,7 +103,7 @@
 				<version>10.6.2.1</version>
 				<scope>provided</scope>
 			</dependency>
-			
+
 			<!-- Commmons -->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -130,15 +111,15 @@
 				<version>2.1</version>
 				<scope>provided</scope>
 			</dependency>
-			
-			<!-- Jersey Client-->
+
+			<!-- Jersey Client -->
 			<dependency>
 				<groupId>com.sun.jersey</groupId>
 				<artifactId>jersey-client</artifactId>
 				<version>${jersey-version}</version>
-			<scope>provided</scope>
+				<scope>provided</scope>
 			</dependency>
-	</dependencies>
+		</dependencies>
 	</dependencyManagement>
 
 </project>

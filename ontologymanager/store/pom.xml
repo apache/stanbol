@@ -44,14 +44,12 @@
 
   <modules>
     <module>parent</module>
-    <module>ext/org.semanticweb.owlapi</module>
-    <module>ext/org.semanticweb.owlapi.owllink</module>
     <module>api</module>
     <module>rest-client</module>
     <module>jena</module>
     <module>clerezza</module>
     <module>tdb</module>
-    <!--<module>fise-adapter</module>-->
-    <!--<module>launchers/lite</module>-->
+    <module>../../commons/web/ontology</module>
+    <module>launchers/fise</module>
   </modules>
 </project>

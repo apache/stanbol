@@ -56,12 +56,12 @@
 		
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.semanticweb.owlapi</artifactId>
+			<artifactId>org.apache.stanbol.owl</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.semanticweb.owlapi.owllink</artifactId>
-		</dependency>		
+			<artifactId>org.apache.stanbol.reasoners.owllink</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.felix</groupId>
@@ -132,16 +132,10 @@
 		<dependency>
 			<groupId>org.apache.sling</groupId>
 			<artifactId>org.apache.sling.installer.core</artifactId>
-			<version>3.1.2</version>
-			<type>bundle</type>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
-			<version>0.9-SNAPSHOT</version>
-			<type>bundle</type>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>

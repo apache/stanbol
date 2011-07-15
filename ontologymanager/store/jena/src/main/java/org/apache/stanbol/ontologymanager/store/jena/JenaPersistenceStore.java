@@ -87,11 +87,13 @@ import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -1561,7 +1563,7 @@ public class JenaPersistenceStore implements PersistenceStore {
                                                     OWLClass owlClass,
                                                     OWLReasoner reasoner) {
         DisjointClasses disjointClasses = objectFactory.createDisjointClasses();
-        Set<OWLClass> disjClasses = reasoner.getDisjointClasses(owlClass, false).getFlattened();
+        Set<OWLClass> disjClasses = reasoner.getDisjointClasses(owlClass).getFlattened();
         for (OWLClass klazz : disjClasses) {
             ClassMetaInformation classMetaInformation = generateClassMetaInformation(klazz.getIRI()
                     .toString());
@@ -2198,12 +2200,12 @@ public class JenaPersistenceStore implements PersistenceStore {
                                                                             OWLObjectProperty owlObjectProperty,
                                                                             OWLReasoner reasoner) {
         EquivalentProperties equivalentProperties = objectFactory.createEquivalentProperties();
-        Set<OWLObjectProperty> equiProperties = reasoner.getEquivalentObjectProperties(owlObjectProperty)
+        Set<OWLObjectPropertyExpression> equiProperties = reasoner.getEquivalentObjectProperties(owlObjectProperty)
                 .getEntities();
-        for (OWLObjectProperty objectProp : equiProperties) {
+        for (OWLObjectPropertyExpression objectProp : equiProperties) {
 
             PropertyMetaInformation datatypePropertyMetaInformation = generatePropertyMetaInformation(objectProp
-                    .getIRI().toString());
+                    .getNamedProperty().getIRI().toString());
             equivalentProperties.getPropertyMetaInformation().add(datatypePropertyMetaInformation);
         }
         return equivalentProperties;
@@ -2230,11 +2232,11 @@ public class JenaPersistenceStore implements PersistenceStore {
                                                                   OWLObjectProperty owlObjectProperty,
                                                                   OWLReasoner reasoner) {
         SuperProperties superProperties = objectFactory.createSuperProperties();
-        Set<OWLObjectProperty> supProperties = reasoner.getSuperObjectProperties(owlObjectProperty, false)
+        Set<OWLObjectPropertyExpression> supProperties = reasoner.getSuperObjectProperties(owlObjectProperty, false)
                 .getFlattened();
-        for (OWLObjectProperty objectProp : supProperties) {
+        for (OWLObjectPropertyExpression objectProp : supProperties) {
             PropertyMetaInformation datatypePropertyMetaInformation = generatePropertyMetaInformation(objectProp
-                    .getIRI().toString());
+                    .getNamedProperty().getIRI().toString());
             superProperties.getPropertyMetaInformation().add(datatypePropertyMetaInformation);
         }
         return superProperties;
