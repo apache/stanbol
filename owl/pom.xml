@@ -135,7 +135,6 @@
     <artifactId>jettison</artifactId>
   </dependency>
 
-
   <!-- OWL deps -->
   <dependency>
     <groupId>com.hp.hpl.jena</groupId>
@@ -182,6 +181,16 @@
   <dependency>
     <groupId>javax.servlet</groupId>
     <artifactId>servlet-api</artifactId>
+  </dependency>
+  
+  <!-- Misc deps -->
+  <dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-compress</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>commons-io</groupId>
+    <artifactId>commons-io</artifactId>
   </dependency>
 
   <!-- Diagnostics deps -->
