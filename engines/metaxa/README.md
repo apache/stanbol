@@ -26,6 +26,7 @@ The engine is based on the [Aperture
 framework](http://aperture.sourceforge.net/) with new extensions to handling
 structured content embedded in HTML web content, 
 such as [Microformats](http://microformats.org/) and [RDFa](http://www.w3.org/TR/rdfa-syntax/).
+Also some of the original extractors of Aperture were replaced by other engines using different base libraries.
 Metaxa introduces a single TextEnhancement instance that refers to the content
 item by its *extracted-from* property. The specific metadata extracted by
 Metaxa are ascribed directly to the content item/document since they represent
@@ -36,87 +37,80 @@ The general structure of the Metaxa annotations consists of three levels of anno
 
 #### The top-level <tt>TextAnnotation</tt> instance
 
-<pre>
-&lt;urn:enhancement-03c9e85e-2681-21b7-a5af-6da62d67ef6b&gt;
-      a       &lt;http://fise.iks-project.eu/ontology/TextAnnotation&gt; , &lt;http://fise.iks-project.eu/ontology/Enhancement&gt;&nbsp;;
-      &lt;http://fise.iks-project.eu/ontology/confidence&gt;
-              &quot;1.0&quot;^^&lt;http://www.w3.org/2001/XMLSchema#double&gt;&nbsp;;
-      &lt;http://fise.iks-project.eu/ontology/extracted-from&gt;
-              &lt;http://localhost:8080/store/content/mf_example.htm&gt;&nbsp;;
-      &lt;http://purl.org/dc/terms/created&gt;
-              &quot;2010-09-22T09:06:53.056+02:00&quot;^^&lt;http://www.w3.org/2001/XMLSchema#dateTime&gt;&nbsp;;
-      &lt;http://purl.org/dc/terms/creator&gt;
-              &quot;eu.iksproject.fise.engines.metaxa.MetaxaEngine&quot;^^&lt;http://www.w3.org/2001/XMLSchema#string&gt; .
-</pre>
+    <urn:enhancement-03c9e85e-2681-21b7-a5af-6da62d67ef6b>
+         a       <http://fise.iks-project.eu/ontology/TextAnnotation> ,
+		         <http://fise.iks-project.eu/ontology/Enhancement> ;
+                 <http://fise.iks-project.eu/ontology/confidence>
+                     "1.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
+         <http://fise.iks-project.eu/ontology/extracted-from>
+                 <http://localhost:8080/store/content/mf_example.htm> ;
+         <http://purl.org/dc/terms/created>
+                 "2010-09-22T09:06:53.056+02:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+         <http://purl.org/dc/terms/creator>
+                  "org.apache.enhancer.engines.metaxa.MetaxaEngine"^^<http://www.w3.org/2001/XMLSchema#string> .
+
 
 #### The top-level document metadata, referenced from the <tt>TextAnnotation</tt> instance via the *extracted-from* property:
 
-<pre>
-&lt;http://localhost:8080/store/content/mf_example.htm&gt;
-      a       &lt;http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#HtmlDocument&gt;&nbsp;;
-      &lt;http://www.semanticdesktop.org/ontologies/2007/01/19/nie#contains&gt;
-              &lt;urn:rnd:-9e25553:12b3843df43:-7ffe&gt;&nbsp;;
-      &lt;http://www.semanticdesktop.org/ontologies/2007/01/19/nie#description&gt;
-              &quot;Cheap Flights to Tenerife, Arrecife, Paphos, Mahon, Las Palmas, Malaga, Alicante, Faro, Heraklion, Palma and the rest of the World. Flightline searches over 100 Airlines and 30,000 Hotels. ABTA, IATA, ATOL Bonded.&quot;&nbsp;;
-      &lt;http://www.semanticdesktop.org/ontologies/2007/01/19/nie#keyword&gt;
-              &quot;travel&quot; , &quot;bargain flights&quot; , &quot;late deals&quot; , &quot;hotels&quot; , &quot;air tickets&quot; , &quot;air fares&quot; , &quot;discount travel&quot; , &quot;last minute flights&quot; , &quot;cheap airlines&quot; , &quot;cheap holidays&quot; , &quot;cheap flights&quot; , &quot;flightline&quot; , &quot;hotel reservations&quot; , &quot;discount flights&quot; , &quot;air travel&quot; , &quot;package holidays&quot;&nbsp;;
-      &lt;http://www.semanticdesktop.org/ontologies/2007/01/19/nie#plainTextContent&gt;
-
-              &quot;More Than Just Cheap Flights ...&quot;&nbsp;;
-      &lt;http://www.semanticdesktop.org/ontologies/2007/01/19/nie#title&gt;
-              &quot;Flightline | Cheap Flights, Package Holidays, Hotels, Travel Insurance &amp; More&quot; .
-</pre>
+    <http://localhost:8080/store/content/mf_example.htm>
+         a       <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#HtmlDocument> ;
+         <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#contains>
+                 <urn:rnd:-9e25553:12b3843df43:-7ffe> ;
+         <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#description>
+                 "Cheap Flights to Tenerife, Arrecife, Paphos, Mahon, Las Palmas, Malaga, Alicante, Faro, Heraklion, Palma and the rest of the World. Flightline searches over 100 Airlines and 30,000 Hotels. ABTA, IATA, ATOL Bonded." ;
+         <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#keyword>
+                 "travel" , "bargain flights" , "late deals" , "hotels" , "air tickets" , "air fares" , "discount travel" , "last minute flights" , "cheap airlines" , "cheap holidays" , "cheap flights" , "flightline" , "hotel reservations" , "discount flights" , "air travel" , "package holidays" ;
+         <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#plainTextContent>
+                 "More Than Just Cheap Flights ..." ;
+         <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#title>
+                 "Flightline | Cheap Flights, Package Holidays, Hotels, Travel Insurance &amp; More" .
 
 #### Embedded <tt>hCard</tt> microformat data referenced via the <tt>nie:contains</tt> property:
 
-<pre>
-&lt;urn:rnd:-9e25553:12b3843df43:-7ffe&gt;
-      a       &lt;http://www.w3.org/2006/vcard/ns#VCard&gt;&nbsp;;
-      &lt;http://www.w3.org/2006/vcard/ns#adr&gt;
-              &lt;urn:rnd:-9e25553:12b3843df43:-7ffc&gt;&nbsp;;
-      &lt;http://www.w3.org/2006/vcard/ns#fn&gt;
-              &quot;Flightgeoline Essex Limited&quot;&nbsp;;
-      &lt;http://www.w3.org/2006/vcard/ns#geo&gt;
 
-              &lt;urn:rnd:-9e25553:12b3843df43:-7ffb&gt;&nbsp;;
-      &lt;http://www.w3.org/2006/vcard/ns#org&gt;
-              &lt;urn:rnd:-9e25553:12b3843df43:-7ffd&gt;&nbsp;;
-      &lt;http://www.w3.org/2006/vcard/ns#photo&gt;
-              &lt;https://www.flightline.co.uk/common/images/building_banner_sm.jpg&gt;&nbsp;;
-      &lt;http://www.w3.org/2006/vcard/ns#url&gt;
-              &lt;http://www.flightline.co.uk&gt;&nbsp;;
-      &lt;http://www.w3.org/2006/vcard/ns#workTel&gt;
+    <urn:rnd:-9e25553:12b3843df43:-7ffe>
+         a       <http://www.w3.org/2006/vcard/ns#VCard> ;
+         <http://www.w3.org/2006/vcard/ns#adr>
+               <urn:rnd:-9e25553:12b3843df43:-7ffc> ;
+         <http://www.w3.org/2006/vcard/ns#fn>
+               "Flightgeoline Essex Limited" ;
+         <http://www.w3.org/2006/vcard/ns#geo>
+               <urn:rnd:-9e25553:12b3843df43:-7ffb> ;
+        <http://www.w3.org/2006/vcard/ns#org>
+               <urn:rnd:-9e25553:12b3843df43:-7ffd> ;
+        <http://www.w3.org/2006/vcard/ns#photo>
+               <https://www.flightline.co.uk/common/images/building_banner_sm.jpg> ;
+        <http://www.w3.org/2006/vcard/ns#url>
+               <http://www.flightline.co.uk> ;
+        <http://www.w3.org/2006/vcard/ns#workTel>
+               <tel:0800541541> .
 
-              &lt;tel:0800541541&gt; .
+    <urn:rnd:-9e25553:12b3843df43:-7ffd>
+         a       <http://www.w3.org/2006/vcard/ns#Organization> ;
+         <http://www.w3.org/2006/vcard/ns#organization-name>
+               "Flightline Essex Limited" .
 
-&lt;urn:rnd:-9e25553:12b3843df43:-7ffd&gt;
-      a       &lt;http://www.w3.org/2006/vcard/ns#Organization&gt;&nbsp;;
-      &lt;http://www.w3.org/2006/vcard/ns#organization-name&gt;
-              &quot;Flightline Essex Limited&quot; .
+    <urn:rnd:-9e25553:12b3843df43:-7ffc>
+         a       <http://www.w3.org/2006/vcard/ns#Address> ;
+         <http://www.w3.org/2006/vcard/ns#countryName>
+               "UK" ;
+         <http://www.w3.org/2006/vcard/ns#extendedAddress>
+              "Flightline House" ;
+         <http://www.w3.org/2006/vcard/ns#locality>
+              "Westcliff-on-Sea" ;
+         <http://www.w3.org/2006/vcard/ns#postalCode>
+              "SS0 7JE" ;
+         <http://www.w3.org/2006/vcard/ns#region>
+              "Essex" ;
+         <http://www.w3.org/2006/vcard/ns#streetAddress>
+              "32-38 Milton Road" .
 
-&lt;urn:rnd:-9e25553:12b3843df43:-7ffc&gt;
-
-      a       &lt;http://www.w3.org/2006/vcard/ns#Address&gt;&nbsp;;
-      &lt;http://www.w3.org/2006/vcard/ns#countryName&gt;
-              &quot;UK&quot;&nbsp;;
-      &lt;http://www.w3.org/2006/vcard/ns#extendedAddress&gt;
-              &quot;Flightline House&quot;&nbsp;;
-      &lt;http://www.w3.org/2006/vcard/ns#locality&gt;
-              &quot;Westcliff-on-Sea&quot;&nbsp;;
-      &lt;http://www.w3.org/2006/vcard/ns#postalCode&gt;
-              &quot;SS0 7JE&quot;&nbsp;;
-      &lt;http://www.w3.org/2006/vcard/ns#region&gt;
-              &quot;Essex&quot;&nbsp;;
-      &lt;http://www.w3.org/2006/vcard/ns#streetAddress&gt;
-              &quot;32-38 Milton Road&quot; .
-
-&lt;urn:rnd:-9e25553:12b3843df43:-7ffb&gt;
-      a       &lt;http://www.w3.org/2006/vcard/ns#Location&gt;&nbsp;;
-      &lt;http://www.w3.org/2006/vcard/ns#latitude&gt;
-              &quot;51.53894902845868&quot;&nbsp;;
-      &lt;http://www.w3.org/2006/vcard/ns#longitude&gt;
-              &quot;0.700753927230835&quot; .
-</pre>
+    <urn:rnd:-9e25553:12b3843df43:-7ffb>
+         a       <http://www.w3.org/2006/vcard/ns#Location> ;
+         <http://www.w3.org/2006/vcard/ns#latitude>
+              "51.53894902845868" ;
+         <http://www.w3.org/2006/vcard/ns#longitude>
+              "0.700753927230835" .
 
 
 
