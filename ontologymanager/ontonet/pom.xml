@@ -79,14 +79,17 @@
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-scr-plugin</artifactId>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- Exclude OWL files until STANBOL-277 is fixed -->
+            <exclude>src/test/resources/ontologies/**/*.owl</exclude>
+            <exclude>src/test/resources/ontologies/index.rdf</exclude>
+          </excludes>
+        </configuration>
+      </plugin> 
 		</plugins>
 	</build>
 
