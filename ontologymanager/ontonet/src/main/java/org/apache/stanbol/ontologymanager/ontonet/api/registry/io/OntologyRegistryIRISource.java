@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.ontonet.api.registry.io;
 
 import java.util.HashSet;
@@ -25,6 +25,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
@@ -33,106 +34,92 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * An input source that provides a single ontology that imports all the imported
- * ontology libraries found in the ontology registry obtained by dereferencing a
- * supplied IRI.
- * 
- * @author alessandro
+ * An input source that provides a single ontology that imports all the imported ontology libraries found in
+ * the ontology registry obtained by dereferencing a supplied IRI.
  * 
  */
 public class OntologyRegistryIRISource extends AbstractOntologyInputSource {
 
-	protected IRI registryIRI = null;
+    private Logger log = LoggerFactory.getLogger(getClass());
 
-	public OntologyRegistryIRISource(IRI registryIRI,
-			OWLOntologyManager ontologyManager, RegistryLoader loader) {
-		this(registryIRI, ontologyManager, loader, null);
-	}
+    protected IRI registryIRI = null;
 
-	/**
-	 * Creates a new ontology input source by providing a new root ontology that
-	 * imports the entire network addressed by the ontology registry at the
-	 * supplied IRI.
-	 * 
-	 * @param registryIRI
-	 */
-	public OntologyRegistryIRISource(IRI registryIRI,
-			OWLOntologyManager ontologyManager, RegistryLoader loader,
-			OntologyInputSource parentSrc) {
+    /**
+     * @param registryIRI
+     * @param ontologyManager
+     * @param loader
+     */
+    public OntologyRegistryIRISource(IRI registryIRI,
+                                     OWLOntologyManager ontologyManager,
+                                     RegistryLoader loader) {
+        this(registryIRI, ontologyManager, loader, null);
+    }
 
-		this.registryIRI = registryIRI;
+    /**
+     * Creates a new ontology input source by providing a new root ontology that imports the entire network
+     * addressed by the ontology registry at the supplied IRI.
+     * 
+     * @param registryIRI
+     */
+    public OntologyRegistryIRISource(IRI registryIRI,
+                                     OWLOntologyManager ontologyManager,
+                                     RegistryLoader loader,
+                                     OntologyInputSource parentSrc) {
 
-		Logger log = LoggerFactory.getLogger(getClass());
+        this.registryIRI = registryIRI;
 
-		Set<OWLOntology> subtrees = new HashSet<OWLOntology>();
-		for (Registry reg : loader.loadRegistriesEager(registryIRI)) {
-			for (RegistryItem ri : reg.getChildren()) {
-				if (ri.isLibrary())
-					try {
-						Set<OWLOntology> adds = loader.gatherOntologies(ri,
-								ontologyManager, true);
-						subtrees.addAll(adds);
-					} catch (OWLOntologyAlreadyExistsException e) {
-						// Chettefreca
-						continue;
-					} catch (OWLOntologyCreationException e) {
-						log.warn(
-								"KReS : [NONFATAL] Failed to load ontology library "
-										+ ri.getName() + ". Skipping.", e);
-						// If we can't load this library at all, scrap it.
-						// TODO : not entirely convinced of this step.
-						continue;
-					}
-			}
-		}
-		// We always construct a new root now, even if there's just one subtree.
+        // The ontology that imports the whole network is created in-memory, therefore it has no physical IRI.
+        bindPhysicalIri(null);
 
-		// Set<OWLOntology> subtrees = mgr.getOntologies();
-		// if (subtrees.size() == 1)
-		// rootOntology = subtrees.iterator().next();
-		// else
-		try {
-			if (parentSrc != null)
-				rootOntology = OntologyUtils.buildImportTree(parentSrc,
-						subtrees, ontologyManager);
-			else
-				rootOntology = OntologyUtils.buildImportTree(subtrees,
-						ontologyManager);
-		} catch (OWLOntologyCreationException e) {
-			log.error(
-					"KReS :: Failed to build import tree for registry source "
-							+ registryIRI, e);
-		}
-	}
+        Set<OWLOntology> subtrees = new HashSet<OWLOntology>();
+        for (Registry reg : loader.loadRegistriesEager(registryIRI)) {
+            for (RegistryItem ri : reg.getChildren()) {
+                if (ri.isLibrary()) try {
+                    Set<OWLOntology> adds = loader.gatherOntologies(ri, ontologyManager, true);
+                    subtrees.addAll(adds);
+                } catch (OWLOntologyAlreadyExistsException e) {
+                    // Chettefreca
+                    continue;
+                } catch (OWLOntologyCreationException e) {
+                    log.warn("Failed to load ontology library " + ri.getName() + ". Skipping.", e);
+                    // If we can't load this library at all, scrap it.
+                    // TODO : not entirely convinced of this step.
+                    continue;
+                }
+            }
+        }
+        // We always construct a new root now, even if there's just one subtree.
 
-	/**
-	 * This method always return null. The ontology that imports the whole
-	 * network is created in-memory, therefore it has no physical IRI.
-	 */
-	@Override
-	public IRI getPhysicalIRI() {
-		return null;
-	}
+        // Set<OWLOntology> subtrees = mgr.getOntologies();
+        // if (subtrees.size() == 1)
+        // rootOntology = subtrees.iterator().next();
+        // else
+        try {
+            if (parentSrc != null) bindRootOntology(OntologyUtils.buildImportTree(parentSrc, subtrees,
+                ontologyManager));
+            else bindRootOntology(OntologyUtils.buildImportTree(subtrees, ontologyManager));
+        } catch (OWLOntologyCreationException e) {
+            log.error("Failed to build import tree for registry source " + registryIRI, e);
+        }
+    }
 
-	/**
-	 * This method always return false. The ontology that imports the whole
-	 * network is created in-memory, therefore it has no physical IRI.
-	 */
-	@Override
-	public boolean hasPhysicalIRI() {
-		return false;
-	}
+    public OntologyRegistryIRISource(IRI registryIRI, RegistryLoader loader) {
+        this(registryIRI, OWLManager.createOWLOntologyManager(), loader, null);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see eu.iksproject.kres.manager.io.AbstractOntologyInputSource#toString()
-	 */
-	@Override
-	public String toString() {
-		return "REGISTRY_IRI<" + registryIRI + ">";
-	}
+    public OntologyRegistryIRISource(IRI registryIRI, RegistryLoader loader, OntologyInputSource parentSrc) {
+        this(registryIRI, OWLManager.createOWLOntologyManager(), loader, parentSrc);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.stanbol.ontologymanager.ontonet.api.io.AbstractOntologyInputSource#toString()
+     */
+    @Override
+    public String toString() {
+        return "REGISTRY_IRI<" + registryIRI + ">";
+    }
 
 }
