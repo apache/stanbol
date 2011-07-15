@@ -68,6 +68,21 @@
           </instructions>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- JIT is BSD Licensed -->
+            <exclude>src/main/resources/META-INF/static/scripts/jit.js</exclude>
+            <exclude>src/main/resources/META-INF/static/scripts/jit-yc.js</exclude>
+            <!-- License provided in src/main/resources/META-INF/static/scripts/README - STANBOL-281 -->
+            <exclude>src/main/resources/META-INF/static/scripts/jsonToTurtle.js</exclude>
+            <exclude>src/main/resources/META-INF/static/scripts/tinybox.js</exclude>
+            <exclude>src/main/resources/META-INF/static/scripts/scout.js</exclude>
+          </excludes>
+        </configuration>
+      </plugin>       
     </plugins>
   </build>
 
