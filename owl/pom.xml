@@ -73,7 +73,7 @@
               org.coode.*,
               uk.ac.manchester.cs.*,
               com.clarkparsia.owlapi.*,
-              org.apache.stanbol.owl.*;version=${stanbol-version}
+              org.apache.stanbol.owl.*
             </Export-Package>
             <Private-Package />
             <_nouses>true</_nouses>
@@ -85,6 +85,7 @@
       <artifactId>apache-rat-plugin</artifactId>
       <configuration>
         <excludes>
+          <!-- See src/main/resources/maven/README for license info on OWLAPI -->
           <exclude>src/main/resources/maven/repo/owlapi/owlapi/maven-metadata-local.xml</exclude>
           <exclude>src/main/resources/maven/repo/owlapi/owlapi/3.2.2/owlapi-3.2.2.pom</exclude>
           <exclude>src/main/resources/maven/repo/owlapi/owlapi/3.0.0/owlapi-3.0.0.pom</exclude>
@@ -92,14 +93,6 @@
           <exclude>src/main/resources/maven/repo/owlapi/owlapi/3.0.0/owlapi-3.0.0.pom.sha1</exclude>
           <exclude>src/main/resources/maven/repo/owlapi/owlapi/3.2.3/owlapi-3.2.3.pom</exclude>
         </excludes>
-      </configuration>
-    </plugin>
-    <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-compiler-plugin</artifactId>
-      <configuration>
-        <source>1.6</source>
-        <target>1.6</target>
       </configuration>
     </plugin>
     <plugin>
@@ -147,7 +140,6 @@
   <dependency>
     <groupId>owlapi</groupId>
     <artifactId>owlapi</artifactId>
-    <version>3.2.3</version>
   </dependency>
 
   <!-- Persistence deps -->
@@ -193,36 +185,12 @@
     <artifactId>commons-io</artifactId>
   </dependency>
 
-  <!-- Diagnostics deps -->
-  <dependency>
-    <groupId>org.slf4j</groupId>
-    <artifactId>slf4j-log4j12</artifactId>
-  </dependency>
-  <dependency> <!-- see also the log4j.properties in src/main/resources -->
-    <groupId>log4j</groupId>
-    <artifactId>log4j</artifactId>
-  </dependency>
-
   <!-- Testing deps -->
   <dependency>
     <groupId>junit</groupId>
     <artifactId>junit</artifactId>
-    <scope>test</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.slf4j</groupId>
-    <artifactId>slf4j-log4j12</artifactId>
-    <scope>test</scope>
   </dependency>
 
 </dependencies>
-
-
-<!--repositories>
-  <repository>
-    <id>stlab-cnr-repo</id>
-    <url>http://stlab.istc.cnr.it/software/maven/repo</url>
-  </repository>
-</repositories-->
 
 </project>
