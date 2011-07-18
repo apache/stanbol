@@ -397,7 +397,30 @@
         <version>${stanbol-version}</version>
         <scope>provided</scope>
       </dependency>
-
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.launchers.full</artifactId>
+        <version>${stanbol-version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+        <version>${stanbol-version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.commons.testing.http</artifactId>
+        <version>${stanbol-version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
+        <version>${stanbol-version}</version>
+        <scope>provided</scope>
+      </dependency>
 
 
       <!-- OSGi -->
