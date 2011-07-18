@@ -45,14 +45,6 @@
 			<artifactId>org.apache.stanbol.ontologymanager.store.rest.client</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.jcr</groupId>
-			<artifactId>jcr</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.chemistry.opencmis</groupId>
-			<artifactId>chemistry-opencmis-client-api</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
@@ -61,5 +53,4 @@
 			<artifactId>jena</artifactId>
 		</dependency>
 	</dependencies>
-
 </project>

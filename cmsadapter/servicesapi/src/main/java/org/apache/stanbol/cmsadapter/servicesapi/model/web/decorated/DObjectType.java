@@ -2,7 +2,6 @@ package org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated;
 
 import java.util.List;
 
-import org.apache.chemistry.opencmis.commons.definitions.TypeDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectTypeDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
 
