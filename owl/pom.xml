@@ -85,7 +85,7 @@
       <artifactId>apache-rat-plugin</artifactId>
       <configuration>
         <excludes>
-          <!-- See src/main/resources/maven/README for license info on OWLAPI -->
+          <!-- See src/main/resources/maven/repo/README and LICENSE files -->
           <exclude>src/main/resources/maven/repo/owlapi/owlapi/maven-metadata-local.xml</exclude>
           <exclude>src/main/resources/maven/repo/owlapi/owlapi/3.2.2/owlapi-3.2.2.pom</exclude>
           <exclude>src/main/resources/maven/repo/owlapi/owlapi/3.0.0/owlapi-3.0.0.pom</exclude>
