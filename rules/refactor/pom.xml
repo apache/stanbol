@@ -41,7 +41,7 @@
 				<configuration>
 					<instructions>
 						<Export-Package>
-							org.apache.stanbol.rules.refactor.*;version=${stanbol-version}
+							org.apache.stanbol.rules.refactor.*
             </Export-Package>
 						<Import-Package>
 							org.slf4j.*,
@@ -55,14 +55,6 @@
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-scr-plugin</artifactId>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
 
@@ -72,108 +64,66 @@
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
-			<version>4.1.0</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.compendium</artifactId>
-			<version>4.1.0</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.scr.annotations</artifactId>
-			<version>1.2.0</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<!-- OWL deps -->
 		<dependency>
 			<groupId>com.hp.hpl.jena</groupId>
 			<artifactId>arq</artifactId>
-			<version>2.8.3</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.hp.hpl.jena</groupId>
 			<artifactId>jena</artifactId>
-			<version>2.6.2</version>
 		</dependency>
 
 		<!-- Persistence deps -->
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>rdf.core</artifactId>
-			<version>0.12-incubating-SNAPSHOT</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>rdf.jena.parser</artifactId>
-			<version>0.10-incubating-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>rdf.jena.sparql</artifactId>
-			<version>0.5-incubating-SNAPSHOT</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>rdf.simple.storage</artifactId>
-			<version>0.7-incubating-SNAPSHOT</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<!-- Stanbol deps -->
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.owl</artifactId>
-			<version>${stanbol-version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
-			<version>${stanbol-version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.rules.base</artifactId>
-			<version>${stanbol-version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.rules.manager</artifactId>
-			<version>${stanbol-version}</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- Diagnostics deps -->
-		<dependency> <!-- we use log4j 1.2 -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency> <!-- see also the log4j.properties in src/main/resources -->
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 
 		<!-- Testing deps -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
