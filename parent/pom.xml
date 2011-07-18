@@ -421,8 +421,21 @@
         <artifactId>org.apache.stanbol.owl</artifactId>
         <version>${stanbol-version}</version>
         <scope>provided</scope>
-      </dependency>      
-      
+      </dependency>
+
+		  <dependency>
+			  <groupId>org.apache.stanbol</groupId>
+			  <artifactId>org.apache.stanbol.rules.base</artifactId>
+			  <version>${stanbol-version}</version>
+			  <scope>provided</scope>
+		  </dependency>
+		  <dependency>
+			  <groupId>org.apache.stanbol</groupId>
+			  <artifactId>org.apache.stanbol.rules.manager</artifactId>
+			  <version>${stanbol-version}</version>
+			  <scope>provided</scope>
+		  </dependency>
+		
       <dependency>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.commons.testing.http</artifactId>
@@ -495,6 +508,12 @@
         <version>0.10-incubating-SNAPSHOT</version>
         <scope>provided</scope>
       </dependency>
+		  <dependency>
+			  <groupId>org.apache.clerezza</groupId>
+			  <artifactId>rdf.jena.sparql</artifactId>
+			  <version>0.5-incubating-SNAPSHOT</version>
+			  <scope>provided</scope>
+		  </dependency>      
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.rdfjson</artifactId>
@@ -1013,21 +1032,21 @@
         <artifactId>jdom</artifactId>
         <version>1.1</version>
     </dependency>
-	<dependency>
-	    <groupId>org.jdom</groupId>
-	    <artifactId>jaxen-core</artifactId>
-	    <version>1.0-FCS</version>
-	</dependency>    
-	<dependency>
-	    <groupId>org.jdom</groupId>
-	    <artifactId>jaxen-jdom</artifactId>
-	    <version>1.0-FCS</version>
-	</dependency>
-	<dependency>
-	    <groupId>org.jdom</groupId>
-	    <artifactId>saxpath</artifactId>
-	    <version>1.0-FCS</version>
-	</dependency>
+	  <dependency>
+	      <groupId>org.jdom</groupId>
+	      <artifactId>jaxen-core</artifactId>
+	      <version>1.0-FCS</version>
+	  </dependency>    
+	  <dependency>
+	      <groupId>org.jdom</groupId>
+	      <artifactId>jaxen-jdom</artifactId>
+	      <version>1.0-FCS</version>
+	  </dependency>
+	  <dependency>
+	      <groupId>org.jdom</groupId>
+	      <artifactId>saxpath</artifactId>
+	      <version>1.0-FCS</version>
+	  </dependency>
 
       <!-- OpenNLP -->
       <dependency>
