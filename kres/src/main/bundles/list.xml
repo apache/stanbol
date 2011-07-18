@@ -69,16 +69,16 @@
     
     <!-- Sling installer and Stanbol extensions -->
     <startLevel level="9">
-        <bundle>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.installer.core</artifactId>
-            <version>3.1.2</version>
-        </bundle>
-        <bundle>
-            <groupId>org.apache.stanbol</groupId>
-            <artifactId>org.apache.stanbol.commons.installer.bundleprovider</artifactId>
-            <version>0.9-SNAPSHOT</version>
-        </bundle>
+		    <bundle>
+		      <groupId>org.apache.sling</groupId>
+		      <artifactId>org.apache.sling.installer.core</artifactId>
+		      <version>3.2.0</version>
+		    </bundle>
+		    <bundle>
+		      <groupId>org.apache.sling</groupId>
+		      <artifactId>org.apache.sling.installer.factory.configuration</artifactId>
+		      <version>1.0.0</version>
+		    </bundle>
 <!-- 		<bundle>
 		    <groupId>org.apache.sling</groupId>
 		    <artifactId>org.apache.sling.installer.provider.file</artifactId>
