@@ -1069,6 +1069,11 @@
       </dependency>
 
       <!-- OWL -->
+      <dependency>
+        <groupId>owlapi</groupId>
+        <artifactId>owlapi</artifactId>
+        <version>3.2.3</version>
+      </dependency>      
       <!-- see also lucene-xercesImpl -->
       <dependency>
         <groupId>xerces</groupId>
