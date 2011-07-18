@@ -24,19 +24,13 @@
     <relativePath>../parent</relativePath>
     <version>0.9-SNAPSHOT</version>
   </parent>
+
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.frameworkfragment</artifactId>
   <packaging>jar</packaging>
-  <name>Apache Stanbol Default Framework Fragment Bundle</name>
-
-  <!-- XXX: the version number is intentionnally not stanbol-version since the
-  groovy script converting it into a bundle version number is not good enough to
-  insert the required but missing third numercial element
-
-  Also: version numbers should also be updated to handle the -incubating suffix
-  at some point (before the first release).
-  -->
   <version>0.9.0-SNAPSHOT</version>
+
+  <name>Apache Stanbol Default Framework Fragment Bundle</name>
 
   <description>
     Fragment bundle that causes additional packages from the JVM
