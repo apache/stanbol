@@ -13,21 +13,12 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <!--
-  <parent>
-    <groupId>org.apache.stanbol</groupId>
-    <artifactId>stanbol-parent</artifactId>
-    <version>0.9-SNAPSHOT</version>
-    <relativePath>parent</relativePath>
-  </parent>
-  -->
-
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-reactor</artifactId>
   <version>0.9-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Apache Stanbol : Reactor</name>
+  <name>Apache Stanbol Reactor</name>
   <description>
     Pseudo project to build the complete stanbol project
   </description>
@@ -89,6 +80,8 @@
         <module>ontologymanager/ontonet</module>
         <module>ontologymanager/web</module>
         <module>rules</module>
+        <module>launchers/stable</module>
+        <module>launchers/stateless</module>
         <module>launchers/full</module>
         <module>integration-tests</module>
       </modules>

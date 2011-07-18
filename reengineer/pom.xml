@@ -20,18 +20,12 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.apache.stanbol</groupId>
-    <artifactId>stanbol-parent</artifactId>
-    <version>0.9-SNAPSHOT</version>
-    <relativePath>../parent</relativePath>
-  </parent>
-
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.reengineer.reactor</artifactId>
+  <version>0.9-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Apache Stanbol Reengineer reactor</name>
+  <name>Apache Stanbol Reengineer Reactor</name>
   <description>
     Pseudo project to build the complete Apache Stanbol Reengineer.
   </description>

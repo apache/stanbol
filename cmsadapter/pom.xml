@@ -4,15 +4,11 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.apache.stanbol</groupId>
-		<artifactId>org.apache.stanbol.cmsadapter.parent</artifactId>
-		<version>0.9-SNAPSHOT</version>
-		<relativePath>parent</relativePath>
-	</parent>
-
+  <groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.cmsadapter.reactor</artifactId>
+	<version>0.9-SNAPSHOT</version>
 	<packaging>pom</packaging>
+	
 	<name>Apache Stanbol CMS Adapter Reactor</name>
 
 	<modules>
