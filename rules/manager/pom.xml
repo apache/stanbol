@@ -101,38 +101,16 @@
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
-			<version>${stanbol-version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.rules.base</artifactId>
-			<version>${stanbol-version}</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- Diagnostics deps -->
-		<dependency> <!-- we use log4j 1.2 -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency> <!-- see also the log4j.properties in src/main/resources -->
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 
 		<!-- Testing deps -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
