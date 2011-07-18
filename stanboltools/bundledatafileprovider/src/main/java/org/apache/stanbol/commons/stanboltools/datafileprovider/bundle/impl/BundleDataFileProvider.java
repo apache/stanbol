@@ -77,9 +77,14 @@ public class BundleDataFileProvider implements DataFileProvider {
             List<String> paths = new ArrayList<String>(searchPaths.size());
             for(String path : searchPaths){
                 if(path == null){ //null element is interpreted as the "" path
-                    path = File.separator;
-                } else if(!path.endsWith(File.separator)){ //normalise
-                    path = path+File.separator;
+                    path = "/";
+                } else {
+                    //we need Unix style '/' to search resources within bundles
+                    //even on Windows! (see STANBOL-259)
+                    path = FilenameUtils.separatorsToUnix(path);
+                    if(!path.endsWith("/")){ //normalise
+                        path = path+'/';
+                    }
                 }
                 if(!paths.contains(path)){ //do not add paths more than once
                     paths.add(path);
@@ -106,8 +111,6 @@ public class BundleDataFileProvider implements DataFileProvider {
         while(resource == null && relativePathIterator.hasNext()){
             String path = relativePathIterator.next();
             String resourceName = path != null ? path + filename : filename ;
-            //make the path platform independent (STANBOL-259)
-            resourceName = FilenameUtils.separatorsToSystem(resourceName);
             resource = bundle.getEntry(resourceName);
         }
         log.info("Resource {} found: {}", (resource == null ? "NOT" : ""), filename);
