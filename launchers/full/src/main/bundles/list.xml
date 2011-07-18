@@ -456,8 +456,6 @@
       <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
       <version>0.9-SNAPSHOT</version>
     </bundle>
-<!--   </startLevel>
-  <startLevel level="21">  -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
@@ -529,26 +527,6 @@
 		<artifactId>org.apache.stanbol.rules.refactor</artifactId>
 		<version>0.9-SNAPSHOT</version>
 	</bundle>
-	<!-- Stanbol Reasoners (requires Rules) -->
-	<bundle>
-		<groupId>org.apache.stanbol</groupId>
-		<artifactId>org.apache.stanbol.reasoners.base</artifactId>
-		<version>0.9-SNAPSHOT</version>
-	</bundle>
-	<bundle>
-		<groupId>org.apache.stanbol</groupId>
-		<artifactId>org.apache.stanbol.reasoners.hermit</artifactId>
-		<version>0.9-SNAPSHOT</version>
-	</bundle>
-	<bundle>
-		<groupId>org.apache.stanbol</groupId>
-		<artifactId>org.apache.stanbol.reasoners.owllink</artifactId>
-		<version>0.9-SNAPSHOT</version>
-	</bundle>
-  </startLevel>
-    
-  <!-- KReS Web -->
-  <startLevel level="23">
 	<bundle>
    	  <groupId>org.apache.stanbol</groupId>
 	  <artifactId>org.apache.stanbol.ontologymanager.web</artifactId>
@@ -556,54 +534,10 @@
 	</bundle>
 	<bundle>
 		<groupId>org.apache.stanbol</groupId>
-		<artifactId>org.apache.stanbol.reasoners.web</artifactId>
-		<version>0.9-SNAPSHOT</version>
-	</bundle>
-	<bundle>
-		<groupId>org.apache.stanbol</groupId>
 		<artifactId>org.apache.stanbol.rules.web</artifactId>
 		<version>0.9-SNAPSHOT</version>
 	</bundle>
  </startLevel>
-  
-  <!-- Persistence Store Bundles
-  <startLevel level="22">
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.stores.persistencestore
-            </artifactId>
-      <version>0.9-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.stores.persistencestore.jena
-            </artifactId>
-      <version>0.9-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.stores.persistencestore.jena.tdb
-            </artifactId>
-      <version>0.9-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.stores.persistencestore.adapter
-            </artifactId>
-      <version>0.9-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.semanticweb.owlapi.owllink</artifactId>
-      <version>1.0.2-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.semanticweb.owlapi</artifactId>
-      <version>3.0.0-SNAPSHOT</version>
-    </bundle>
-  </startLevel>
-  -->
  
   <!-- *********************************************************************
           start level 25 TO 29 reserved for Stanbol plug-ins

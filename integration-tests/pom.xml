@@ -173,8 +173,8 @@
             <server.ready.path.2>/engines:There are currently</server.ready.path.2>
             <server.ready.path.3>/contenthub:Recently uploaded Content Items</server.ready.path.3>
             <server.ready.path.4>/factstore:The FactStore implements a store</server.ready.path.4>
-			<server.ready.path.5>/ontonet:Apache Stanbol OntoNet</server.ready.path.5>
-			<server.ready.path.6>/reasoners:Apache Stanbol Reasoners</server.ready.path.6>
+			      <server.ready.path.5>/ontonet:Apache Stanbol OntoNet</server.ready.path.5>
+            <!-- server.ready.path.6>/reasoners:Apache Stanbol Reasoners</server.ready.path.6 -->
           </systemPropertyVariables>
         </configuration>
       </plugin>
