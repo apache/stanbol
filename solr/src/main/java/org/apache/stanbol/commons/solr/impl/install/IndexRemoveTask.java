@@ -18,10 +18,13 @@ package org.apache.stanbol.commons.solr.impl.install;
 
 import org.apache.sling.installer.api.tasks.InstallTask;
 import org.apache.sling.installer.api.tasks.InstallationContext;
+import org.apache.sling.installer.api.tasks.ResourceState;
 import org.apache.sling.installer.api.tasks.TaskResourceGroup;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.CoreContainer;
 import org.apache.stanbol.commons.solr.SolrDirectoryManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO: To remove a SolrIndex one would need first to close the SolrCore or shutdown the SolrContainer. This
@@ -39,6 +42,8 @@ import org.apache.stanbol.commons.solr.SolrDirectoryManager;
  * 
  */
 public class IndexRemoveTask extends InstallTask {
+    
+    private static final Logger log = LoggerFactory.getLogger(IndexRemoveTask.class);
     /**
      * Use 11 because the RemoveConfiguration uses 10 and we need to ensure that the files are removed after
      * the services are shut down.
@@ -51,7 +56,8 @@ public class IndexRemoveTask extends InstallTask {
 
     @Override
     public void execute(InstallationContext ctx) {
-        throw new UnsupportedOperationException("TODO: Not yet implemented :(");
+        log.warn("Uninstalling of SolrIndexes not yet Implemented -> marking as uninstalled (see STANBOL-287)");
+        setFinishedState(ResourceState.UNINSTALLED);
     }
 
     @Override

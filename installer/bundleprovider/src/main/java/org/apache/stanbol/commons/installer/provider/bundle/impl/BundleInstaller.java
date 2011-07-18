@@ -243,10 +243,7 @@ public class BundleInstaller implements BundleListener {
             }
             path = activated.remove(bundle);
         }
-        //TODO: This code does not yet work correctly if the bundle is restarted
-        //      and the resources need to be readded. Therefore uninstalling is
-        //      currently deactivated
-/*        if (path != null) {
+        if (path != null) {
             log.info(" ... remove configurations within path " + path);
             ArrayList<String> removedResources = new ArrayList<String>();
             for (Enumeration<URL> resources = (Enumeration<URL>) bundle.findEntries(path, null, true); resources.hasMoreElements();) {
@@ -259,7 +256,7 @@ public class BundleInstaller implements BundleListener {
             installer.updateResources(PROVIDER_SCHEME, null, removedResources.toArray(new String[removedResources.size()]));
         } else {
             log.info("  ... no Configuration to process");
-        }    */
+        }
     }
 
     /**
