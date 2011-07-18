@@ -51,8 +51,8 @@
 							org.apache.stanbol.ontologymanager.ontonet.impl.Activator
 						</Bundle-Activator>
 						<Export-Package>
-							org.apache.stanbol.ontologymanager.ontonet.*;version=${stanbol-version}
-	          			</Export-Package>
+							org.apache.stanbol.ontologymanager.ontonet.*
+	          </Export-Package>
 						<Import-Package>
 							com.hp.hpl.jena.ontology,
 							com.hp.hpl.jena.util,
