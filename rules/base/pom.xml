@@ -41,7 +41,7 @@
 				<configuration>
 					<instructions>
 						<Export-Package>
-							org.apache.stanbol.rules.base.*;version=${stanbol-version}
+							org.apache.stanbol.rules.base.*
             </Export-Package>
 						<Import-Package>
 							org.slf4j.*,
@@ -55,14 +55,6 @@
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-scr-plugin</artifactId>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
 
@@ -73,45 +65,22 @@
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.scr.annotations</artifactId>
-			<version>1.2.0</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<!-- OWL deps -->
 		<dependency>
 			<groupId>com.hp.hpl.jena</groupId>
 			<artifactId>jena</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.owl</artifactId>
-			<version>${stanbol-version}</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- Diagnostics deps -->
-		<dependency> <!-- we use log4j 1.2 -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency> <!-- see also the log4j.properties in src/main/resources -->
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 
 		<!-- Testing deps -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
