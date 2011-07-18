@@ -97,6 +97,10 @@
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>rdf.jena.sparql</artifactId>
 		</dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.jena.serializer</artifactId>
+    </dependency>
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>rdf.simple.storage</artifactId>
