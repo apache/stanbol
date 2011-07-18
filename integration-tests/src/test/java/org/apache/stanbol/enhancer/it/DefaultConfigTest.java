@@ -36,7 +36,7 @@ public class DefaultConfigTest extends EnhancerTestBase {
                 "PID.*org.apache.stanbol.examples.ExampleBootstrapConfig",
                 "anotherValue.*This is AnotherValue.",
                 "message.*This test config should be loaded at startup",
-                "org.apache.sling.installer.osgi.path.*launchpad:resources/config/org.apache.stanbol.examples.ExampleBootstrapConfig.cfg"
+                "org.apache.stanbol.examples.ExampleBootstrapConfig.*launchpad:resources/config/org.apache.stanbol.examples.ExampleBootstrapConfig.cfg"
         );
     }
 }
