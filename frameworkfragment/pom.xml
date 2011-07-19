@@ -22,13 +22,13 @@
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
     <relativePath>../parent</relativePath>
-    <version>0.9-SNAPSHOT</version>
+    <version>0.9.0-incubating-SNAPSHOT</version>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.frameworkfragment</artifactId>
   <packaging>jar</packaging>
-  <version>0.9.0-SNAPSHOT</version>
+  <version>0.9.0-incubating-SNAPSHOT</version>
 
   <name>Apache Stanbol Default Framework Fragment Bundle</name>
 
@@ -60,7 +60,7 @@
               <source>
                 // Convert POM version to valid OSGi version identifier
                 project.properties['osgi.version'] =
-                (project.properties['rawVersion'] =~ /-/).replaceAll('.')
+                (project.properties['rawVersion'] =~ /-/).replaceFirst('.')
               </source>
             </configuration>
           </execution>

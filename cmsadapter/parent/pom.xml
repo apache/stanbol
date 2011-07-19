@@ -23,7 +23,7 @@
 	<groupId>org.apache.stanbol</groupId>
 	<artifactId>org.apache.stanbol.cmsadapter.parent</artifactId>
 	<packaging>pom</packaging>
-	<version>0.9-SNAPSHOT</version>
+	<version>0.9.0-incubating-SNAPSHOT</version>
 
 	<name>Apache Stanbol CMS Adapter parent POM</name>
 	<description>
@@ -216,20 +216,20 @@
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.commons.web.base</artifactId>
-				<version>0.9-SNAPSHOT</version>
+				<version>0.9.0-incubating-SNAPSHOT</version>
 			</dependency>
 
 			<!-- Ontology manager store -->
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.ontologymanager.store.rest.client</artifactId>
-				<version>0.9-SNAPSHOT</version>
+				<version>0.9.0-incubating-SNAPSHOT</version>
 				<scope>compile</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.ontologymanager.store.api</artifactId>
-				<version>0.9-SNAPSHOT</version>
+				<version>0.9.0-incubating-SNAPSHOT</version>
 				<scope>provided</scope>
 			</dependency>
 
@@ -237,31 +237,31 @@
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.cmsadapter.servicesapi</artifactId>
-				<version>0.9-SNAPSHOT</version>
+				<version>0.9.0-incubating-SNAPSHOT</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.cmsadapter.core</artifactId>
-				<version>0.9-SNAPSHOT</version>
+				<version>0.9.0-incubating-SNAPSHOT</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.cmsadapter.rest.client</artifactId>
-				<version>0.9-SNAPSHOT</version>
+				<version>0.9.0-incubating-SNAPSHOT</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.cmsadapter.jcr</artifactId>
-				<version>0.9-SNAPSHOT</version>
+				<version>0.9.0-incubating-SNAPSHOT</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.cmsadapter.cmis</artifactId>
-				<version>0.9-SNAPSHOT</version>
+				<version>0.9.0-incubating-SNAPSHOT</version>
 				<scope>provided</scope>
 			</dependency>
 
@@ -269,7 +269,7 @@
 			<dependency>
 				<groupId>org.apache.stanbol</groupId>
 				<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-				<version>0.9-SNAPSHOT</version>
+				<version>0.9.0-incubating-SNAPSHOT</version>
 				<scope>provided</scope>
 			</dependency>
 

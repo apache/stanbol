@@ -28,7 +28,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.frameworkfragment</artifactId>
-      <version>0.9.0-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.sling</groupId>
@@ -86,7 +86,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.installer.bundleprovider</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
 
@@ -322,52 +322,52 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <!-- DataFileProvider and implementations -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider.bundle</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <!-- OpenNLP as bundle + utilities -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.opennlp</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <!-- support for JSON-LD -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.jsonld</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <!-- The common web interface -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.home</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <!-- 
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.sparql</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle> -->
   </startLevel>
 
@@ -390,17 +390,17 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.standalone</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.jobmanager</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
   <!-- Clerezza based SPARQL query engine 
@@ -408,7 +408,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.clerezza.sparql</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel> -->
 
@@ -417,37 +417,37 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.query.clerezza</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.site.linkeddata</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.yard.clerezza</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>  
   <!-- FactStore 
@@ -455,7 +455,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.factstore</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel> -->
 
@@ -464,17 +464,17 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <!--  bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.web</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.jersey</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
   <!-- Benchmarks for the Stanbol Enhancer 
@@ -482,7 +482,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.benchmark</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel> -->
  
@@ -497,32 +497,32 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.langid</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.metaxa</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.opencalais</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.autotagging</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.zemanta</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle> -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <!--
       The geonames.org webservice is often overloaded and than causes errors.
@@ -532,13 +532,13 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>     -->
     <!-- Entity Tagging Engine (depends on the Entityhub) -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.entitytagging</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
 

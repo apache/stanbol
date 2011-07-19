@@ -295,49 +295,49 @@
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.web.base
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.web.home
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.opennlp</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 
 		<!-- Enhancer -->
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.jobmanager</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.standalone</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 
 		<!-- Entityhub -->
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 
 		<!-- Generic -->
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.jsonld</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
@@ -348,13 +348,13 @@
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.stanboltools.offline
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 
 		<!-- Store -->
@@ -362,90 +362,90 @@
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.ontologymanager.store.api
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.web.ontology
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.ontologymanager.store.jena
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.ontologymanager.store.clerezza
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.ontologymanager.store.rest.client
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.owl</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.reasoners.owllink</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<!-- CMS Adapter -->
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.servicesapi
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.core
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.web
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.jcr
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.cmis</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.rest.client
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>crx-rmi
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 
 		<!-- Content hub -->
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.contenthub.web</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
 
@@ -454,7 +454,7 @@
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.entityhub.core</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
 
@@ -463,7 +463,7 @@
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
 
@@ -472,19 +472,19 @@
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.engines.langid</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.engines.opencalais
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.engines.autotagging
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
@@ -495,19 +495,19 @@
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<!-- The geonames.org LocationEnhancement Engines needs two additional 
 			bundles 1) jettyjson 2) commons-io. Both of them are already present in the 
 			bundle list. -->
 		<!-- <bundle> <groupId>org.apache.stanbol</groupId> <artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId> 
-			<version>0.9-SNAPSHOT</version> </bundle> -->
+			<version>0.9.0-incubating-SNAPSHOT</version> </bundle> -->
 		<!-- Entity Tagging Engine based on RICK -->
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.engine.entitytagging
 			</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
 
