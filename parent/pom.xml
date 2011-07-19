@@ -12,6 +12,13 @@
 
   <modelVersion>4.0.0</modelVersion>
 
+  <parent>
+   	<groupId>org.apache</groupId>
+   	<artifactId>apache</artifactId>
+    <version>9</version>
+    <relativePath />
+	</parent> 
+
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-parent</artifactId>
   <packaging>pom</packaging>
