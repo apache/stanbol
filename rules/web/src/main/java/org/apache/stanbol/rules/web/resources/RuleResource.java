@@ -252,13 +252,13 @@ public class RuleResource extends BaseStanbolResource{
 					.encode(
 							"http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRecipeA",
 							"UTF-8");
-			System.out.println("RECIPE : "+recipeURIEnc);
+			log.debug("Recipe: "+recipeURIEnc);
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	
-    	System.out.println("RECIPE IRI : "+IRI.create(recipeURI).toString());
+		
+		log.debug("Recipe IRI: "+IRI.create(recipeURI));
 		OWLOntology ontology = kReSGetRule.getAllRulesOfARecipe(IRI
 				.create(recipeURI));
 		
@@ -371,6 +371,7 @@ public class RuleResource extends BaseStanbolResource{
             AddRule inrule = new AddRule(kresRuleStore);
             boolean ok = inrule.addRule(IRI.create(rule), kres_syntax, description);
             if(!ok){
+                log.error("Problem to add: "+rule);
                 System.err.println("PROBLEM TO ADD: "+rule);
                 return Response.status(Status.CONFLICT).build();
             }
@@ -378,7 +379,6 @@ public class RuleResource extends BaseStanbolResource{
             //Get the recipe
             GetRecipe getrecipe = new GetRecipe(kresRuleStore);
             this.map = getrecipe.getRecipe(IRI.create(recipe));
-            System.out.println("RECIPE FOR RULE: "+recipe);
             if(map!=null){
                 this.desc = getrecipe.getDescription(IRI.create(recipe));
                
