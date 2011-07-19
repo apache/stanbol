@@ -77,7 +77,7 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
-        <module>ontologymanager</module>
+        <module>ontologymanager/store</module>
         <module>rules</module>
         <module>reasoners</module>
         <module>reengineer</module>
