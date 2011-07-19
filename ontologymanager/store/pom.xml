@@ -50,7 +50,7 @@
     <module>jena</module>
     <module>clerezza</module>
     <module>tdb</module>
-    <module>../../commons/web/ontology</module>
+    <module>web</module>
     <module>launchers/fise</module>
   </modules>
 </project>
