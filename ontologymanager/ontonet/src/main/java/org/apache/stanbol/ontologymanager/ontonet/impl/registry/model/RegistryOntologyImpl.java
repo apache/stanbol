@@ -14,21 +14,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.registry.models;
+package org.apache.stanbol.ontologymanager.ontonet.impl.registry.model;
 
-public class RegistryContentException extends Exception {
+import java.net.URISyntaxException;
+import java.net.URL;
 
-    /**
-	 * 
-	 */
-    private static final long serialVersionUID = 1L;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryOntology;
+import org.semanticweb.owlapi.model.OWLOntology;
 
-    public RegistryContentException(Throwable cause) {
-        initCause(cause);
+public class RegistryOntologyImpl extends AbstractRegistryItem implements RegistryOntology {
+
+    public RegistryOntologyImpl(String name) {
+        super(name);
     }
 
-    public RegistryContentException(String message) {
-        super(message);
+    public RegistryOntologyImpl(String name, URL url) throws URISyntaxException {
+        super(name, url);
     }
 
+    @Override
+    public boolean isLibrary() {
+        return false;
+    }
+
+    @Override
+    public boolean isOntology() {
+        return true;
+    }
+
+    @Override
+    public OWLOntology asOWLOntology() {
+        // TODO Implement me!
+        return null;
+    }
 }

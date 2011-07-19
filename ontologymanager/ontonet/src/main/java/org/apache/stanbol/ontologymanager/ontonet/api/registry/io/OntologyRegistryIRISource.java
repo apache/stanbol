@@ -22,8 +22,8 @@ import java.util.Set;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.AbstractOntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
+import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.RegistryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -73,7 +73,7 @@ public class OntologyRegistryIRISource extends AbstractOntologyInputSource {
         bindPhysicalIri(null);
 
         Set<OWLOntology> subtrees = new HashSet<OWLOntology>();
-        for (Registry reg : loader.loadRegistriesEager(registryIRI)) {
+        for (RegistryImpl reg : loader.loadRegistriesEager(registryIRI)) {
             for (RegistryItem ri : reg.getChildren()) {
                 if (ri.isLibrary()) try {
                     Set<OWLOntology> adds = loader.gatherOntologies(ri, ontologyManager, true);

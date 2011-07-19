@@ -29,10 +29,10 @@ import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.io.LibrarySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryLibrary;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.impl.RegistryLoaderImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.registry.RegistryLoaderImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.RegistryImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
@@ -40,6 +40,10 @@ import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
 
+/**
+ * This class tests the correct loading of ontology libraries from an OWL repository. It also checks that
+ * ontologies referred to only by other libraries in the same repository are not loaded.
+ */
 public class TestOntologyLibrary {
 
     private String registryResource = "/ontologies/registry/krestest.owl";
@@ -49,7 +53,7 @@ public class TestOntologyLibrary {
     private RegistryLoader loader;
 
     /**
-     * Reset the ontology network manager and registry loader.
+     * Reset the ontology network manager and registry loader before running each test.
      */
     @Before
     public void setupTest() throws Exception {
@@ -81,9 +85,9 @@ public class TestOntologyLibrary {
             } catch (Exception e) {
                 return false;
             }
-        } else if (item.isLibrary() || item instanceof Registry)
+        } else if (item.isLibrary() || item instanceof RegistryImpl)
         // Inspect children
-        for (RegistryItem child : ((RegistryLibrary) item).getChildren()) {
+        for (RegistryItem child : ((RegistryItem) item).getChildren()) {
             result |= containsOntologyRecursive(child, ontologyId);
             if (result) break;
         }
@@ -100,7 +104,7 @@ public class TestOntologyLibrary {
     @Test
     public void testLibraryLoad() throws Exception {
         IRI localTestRegistry = IRI.create(getClass().getResource(registryResource));
-        RegistryLibrary lib = loader.loadLibraryEager(localTestRegistry, Locations.LIBRARY_TEST2);
+        Registry lib = loader.loadLibraryEager(localTestRegistry, Locations.LIBRARY_TEST2);
         assertTrue(lib.hasChildren());
         // Should be in the library.
         boolean hasSituation = containsOntologyRecursive(lib, Locations.ODP_SITUATION);
@@ -109,6 +113,12 @@ public class TestOntologyLibrary {
         assertTrue(hasSituation && !hasTypes);
     }
 
+    /**
+     * Tests the creation of an ontology input source from a single library. Because the test is run offline,
+     * import statements might be file URIs, so tests will not fail on this.
+     * 
+     * @throws Exception
+     */
     @Test
     public void testLibrarySourceCreation() throws Exception {
         IRI localTestRegistry = IRI.create(getClass().getResource(registryResource));

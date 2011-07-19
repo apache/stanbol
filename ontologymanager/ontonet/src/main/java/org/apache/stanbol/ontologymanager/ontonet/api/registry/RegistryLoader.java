@@ -18,10 +18,10 @@ package org.apache.stanbol.ontologymanager.ontonet.api.registry;
 
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryContentException;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryLibrary;
+import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.RegistryImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.RegistryLibraryImpl;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -37,13 +37,13 @@ public interface RegistryLoader {
                                       OWLOntologyManager manager,
                                       boolean recurseRegistries) throws OWLOntologyCreationException;
 
-    RegistryLibrary getLibrary(Registry reg, IRI libraryID);
+    RegistryLibraryImpl getLibrary(RegistryImpl reg, IRI libraryID);
 
     Object getParent(Object child);
 
     boolean hasChildren(Object parent);
 
-    boolean hasLibrary(Registry reg, IRI libraryID);
+    boolean hasLibrary(RegistryImpl reg, IRI libraryID);
 
     /**
      * Only extract the ontologies belonging to the library specified, if found in the registry at the
@@ -53,7 +53,7 @@ public interface RegistryLoader {
      * @param libraryID
      * @return
      */
-    Registry loadLibraryEager(IRI registryPhysicalIRI, IRI libraryID);
+    RegistryImpl loadLibraryEager(IRI registryPhysicalIRI, IRI libraryID);
 
     void loadLocations() throws RegistryContentException;
 
@@ -63,5 +63,5 @@ public interface RegistryLoader {
      * @param physicalIRI
      * @return
      */
-    Set<Registry> loadRegistriesEager(IRI physicalIRI);
+    Set<RegistryImpl> loadRegistriesEager(IRI physicalIRI);
 }

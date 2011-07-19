@@ -22,8 +22,9 @@ import java.util.Set;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.AbstractOntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
+import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.RegistryImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.RegistryLibraryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.owl.util.URIUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -35,20 +36,50 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * An ontology input source that loads all the ontologies in a given library and attaches them to a parent
+ * ontology, either new or supplied by the developer. This input source can either accept an already built
+ * {@link RegistryLibraryImpl} object, or parse a library OWL file from its logical URI.
+ */
 public class LibrarySource extends AbstractOntologyInputSource {
 
     private IRI libraryID;
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
+    /**
+     * Creates a new ontology source from a library. The physical registry location is assumed to be the
+     * parent URL of <code>libraryID</code>. <br/>
+     * <br/>
+     * Example : if <code>libraryID</code> is <tt>http://foo.bar.baz/registry#library</tt>, the registry
+     * location will be <tt>http://foo.bar.baz/registry</tt>. Same goes for slash-URIs.
+     * 
+     * @param libraryID
+     *            the identifier of the ontology library.
+     */
     public LibrarySource(IRI libraryID) {
         this(libraryID, URIUtils.upOne(libraryID));
     }
 
+    /**
+     * Creates a new ontology source from a library.
+     * 
+     * @param libraryID
+     * @param registryLocation
+     */
     public LibrarySource(IRI libraryID, IRI registryLocation) {
         this(libraryID, registryLocation, null);
     }
 
+    /**
+     * Creates a new ontology source from a library.
+     * 
+     * @param libraryID
+     *            the identifier of the ontology library.
+     * @param registryLocation
+     * @param ontologyManager
+     * @param loader
+     */
     public LibrarySource(IRI libraryID,
                          IRI registryLocation,
                          OWLOntologyManager ontologyManager,
@@ -57,13 +88,16 @@ public class LibrarySource extends AbstractOntologyInputSource {
     }
 
     /**
-     * The most complete constructor
+     * Creates a new ontology source from a library.
      * 
      * @param libraryID
+     *            the identifier of the ontology library.
      * @param registryLocation
      * @param ontologyManager
      * @param loader
      * @param parentSrc
+     *            the source of the ontology that will import all the ontologies in the registry. If null, a
+     *            new blank ontology will be used.
      */
     public LibrarySource(IRI libraryID,
                          IRI registryLocation,
@@ -76,7 +110,7 @@ public class LibrarySource extends AbstractOntologyInputSource {
         bindPhysicalIri(null);
 
         Set<OWLOntology> subtrees = new HashSet<OWLOntology>();
-        Registry reg = loader.loadLibraryEager(registryLocation, libraryID);
+        RegistryImpl reg = loader.loadLibraryEager(registryLocation, libraryID);
         for (RegistryItem ri : reg.getChildren()) {
             if (ri.isLibrary()) try {
                 Set<OWLOntology> adds = loader.gatherOntologies(ri, ontologyManager, true);
@@ -107,10 +141,29 @@ public class LibrarySource extends AbstractOntologyInputSource {
         }
     }
 
+    /**
+     * Creates a new ontology source from a library.
+     * 
+     * @param libraryID
+     *            the identifier of the ontology library.
+     * @param registryLocation
+     * @param loader
+     */
     public LibrarySource(IRI libraryID, IRI registryLocation, RegistryLoader loader) {
         this(libraryID, registryLocation, OWLManager.createOWLOntologyManager(), loader);
     }
 
+    /**
+     * Creates a new ontology source from a library.
+     * 
+     * @param libraryID
+     *            the identifier of the ontology library.
+     * @param registryLocation
+     * @param loader
+     * @param parentSrc
+     *            the source of the ontology that will import all the ontologies in the registry. If null, a
+     *            new blank ontology will be used.
+     */
     public LibrarySource(IRI libraryID,
                          IRI registryLocation,
                          RegistryLoader loader,
@@ -118,10 +171,37 @@ public class LibrarySource extends AbstractOntologyInputSource {
         this(libraryID, registryLocation, OWLManager.createOWLOntologyManager(), loader, parentSrc);
     }
 
+    /**
+     * Creates a new ontology source from a library. The physical registry location is assumed to be the
+     * parent URL of <code>libraryID</code>. <br/>
+     * <br/>
+     * Example : if <code>libraryID</code> is <tt>http://foo.bar.baz/registry#library</tt>, the registry
+     * location will be <tt>http://foo.bar.baz/registry</tt>. Same goes for slash-URIs.
+     * 
+     * @param libraryID
+     *            the identifier of the ontology library.
+     * @param ontologyManager
+     * @param loader
+     */
     public LibrarySource(IRI libraryID, OWLOntologyManager ontologyManager, RegistryLoader loader) {
         this(libraryID, URIUtils.upOne(libraryID), ontologyManager, loader);
     }
 
+    /**
+     * Creates a new ontology source from a library. The physical registry location is assumed to be the
+     * parent URL of <code>libraryID</code>. <br/>
+     * <br/>
+     * Example : if <code>libraryID</code> is <tt>http://foo.bar.baz/registry#library</tt>, the registry
+     * location will be <tt>http://foo.bar.baz/registry</tt>. Same goes for slash-URIs.
+     * 
+     * @param libraryID
+     *            the identifier of the ontology library.
+     * @param ontologyManager
+     * @param loader
+     * @param parentSrc
+     *            the source of the ontology that will import all the ontologies in the registry. If null, a
+     *            new blank ontology will be used.
+     */
     public LibrarySource(IRI libraryID,
                          OWLOntologyManager ontologyManager,
                          RegistryLoader loader,
@@ -129,10 +209,35 @@ public class LibrarySource extends AbstractOntologyInputSource {
         this(libraryID, URIUtils.upOne(libraryID), ontologyManager, loader, parentSrc);
     }
 
+    /**
+     * Creates a new ontology source from a library. The physical registry location is assumed to be the
+     * parent URL of <code>libraryID</code>. <br/>
+     * <br/>
+     * Example : if <code>libraryID</code> is <tt>http://foo.bar.baz/registry#library</tt>, the registry
+     * location will be <tt>http://foo.bar.baz/registry</tt>. Same goes for slash-URIs.
+     * 
+     * @param libraryID
+     *            the identifier of the ontology library.
+     * @param loader
+     */
     public LibrarySource(IRI libraryID, RegistryLoader loader) {
         this(libraryID, URIUtils.upOne(libraryID), loader);
     }
 
+    /**
+     * Creates a new ontology source from a library. The physical registry location is assumed to be the
+     * parent URL of <code>libraryID</code>. <br/>
+     * <br/>
+     * Example : if <code>libraryID</code> is <tt>http://foo.bar.baz/registry#library</tt>, the registry
+     * location will be <tt>http://foo.bar.baz/registry</tt>. Same goes for slash-URIs.
+     * 
+     * @param libraryID
+     *            the identifier of the ontology library.
+     * @param loader
+     * @param parentSrc
+     *            the source of the ontology that will import all the ontologies in the registry. If null, a
+     *            new blank ontology will be used.
+     */
     public LibrarySource(IRI libraryID, RegistryLoader loader, OntologyInputSource parentSrc) {
         this(libraryID, URIUtils.upOne(libraryID), OWLManager.createOWLOntologyManager(), loader, parentSrc);
     }
