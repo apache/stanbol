@@ -47,7 +47,7 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.reasoners.base.*;version=${stanbol-version}
+              org.apache.stanbol.reasoners.base.*
             </Export-Package>
             <Import-Package>
               com.hp.hpl.jena.*,
@@ -147,42 +147,29 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.owl</artifactId>
-      <version>${stanbol-version}</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>slf4j-log4j12</artifactId>
-          <groupId>org.slf4j</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
-      <version>${stanbol-version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.base</artifactId>
-      <version>${stanbol-version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.refactor</artifactId>
-      <version>${stanbol-version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.reasoners.hermit</artifactId>
-      <version>${stanbol-version}</version>
+      <version>0.9-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.reasoners.owllink</artifactId>
-      <version>${stanbol-version}</version>
+      <version>0.9-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
 		<!-- Diagnostics deps -->
