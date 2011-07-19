@@ -403,7 +403,7 @@
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.web.ontology</artifactId>
+			<artifactId>org.apache.stanbol.ontologymanager.store.web</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 	</startLevel>

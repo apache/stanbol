@@ -1,0 +1,200 @@
+/*
+* Licensed to the Apache Software Foundation (ASF) under one or more
+* contributor license agreements.  See the NOTICE file distributed with
+* this work for additional information regarding copyright ownership.
+* The ASF licenses this file to You under the Apache License, Version 2.0
+* (the "License"); you may not use this file except in compliance with
+* the License.  You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+.ontology {
+	border: 1px solid #eee;
+	border-spacing: 1px;
+	border-radius: 6px;
+	-moz-border-radius: 6px;
+	padding-bottom: 3px;
+	padding-top: 3px;
+	padding-left: 3px;
+	padding-right: 3px;
+}
+
+.ontologyHeader {
+	display: inline;
+	background: url("/static/home/images/foldable_unfolded.png");
+	background-repeat: no-repeat;
+	background-position: right;
+	text-indent: 5%;
+	border: 0;
+	width: 10%;
+	height: 16px;
+	float: right;
+	cursor: hand;
+}
+
+.collapsed .ontologyHeader {
+	background: url("/static/home/images/foldable_folded.png");
+	background-repeat: no-repeat;
+	background-position: right;
+}
+
+.imgOnt {
+	display: inline;
+	background: url(/static/home/images/rdf_flyer_16.png);
+	background-repeat: no-repeat;
+	padding-left: 20px;
+}
+
+.imgOntClass {
+	display: inline;
+	background: url(/static/ontology/images/ont_class_16.png);
+	background-repeat: no-repeat;
+	padding-left: 20px;
+}
+
+.imgOntDataProp {
+	display: inline;
+	background: url(/static/ontology/images/ont_data_prop.png);
+	background-repeat: no-repeat;
+	padding-left: 20px;
+}
+
+.imgOntObjectProp {
+	display: inline;
+	background: url(/static/ontology/images/ont_obj_prop.png);
+	background-repeat: no-repeat;
+	padding-left: 20px;
+}
+
+.imgOntInd {
+	display: inline;
+	background: url(/static/ontology/images/ont_ind.png);
+	background-repeat: no-repeat;
+	padding-left: 20px;
+}
+
+.ontology .collapsed .ontologyCollapsable {
+	display: none
+}
+
+.rightFloat {
+	float: right;
+	align: right;
+}
+
+.ontology .ontologySubmitHeader {
+	background: url(/static/ontology/images/add_icon_16.png),
+		url("/static/home/images/foldable_unfolded.png");
+	background-repeat: no-repeat;
+	background-position: 1%, right;
+	text-indent: 4%;
+	margin-top: 1px;
+	margin-bottom: 1px;
+}
+
+.ontology .collapsed .ontologySubmitHeader {
+	background: url(/static/ontology/images/add_icon_16.png),
+		url("/static/home/images/foldable_folded.png");
+	background-repeat: no-repeat;
+	background-position: 1%, right;
+	text-indent: 4%;
+}
+
+.delete {
+	background: url(/static/ontology/images/delete_icon_16.png) no-repeat
+		center;
+	border: 0;
+	width: 36px;
+	height: 16px;
+	padding-left: 20px;
+	cursor: hand;
+}
+
+.addHeader {
+	background: url(/static/ontology/images/add_icon_16.png);
+	background-repeat: no-repeat;
+	background-position: 1%;
+	text-indent: 4%;
+}
+
+.invisible {
+	display: none;
+}
+
+.horizontal {
+	horizontal-align: left;
+}
+
+.inline {
+	display: inline;
+}
+
+.margined {
+	margin: 10px 0px 10px 0px;
+}
+
+.show {
+	padding: 4px 6px 5px;
+	position: absolute;
+	left: 50%;
+}
+
+.previousButton {
+	border: 1px solid #c3c3c3;
+	background-color: #fafafa;
+	padding: 4px 6px 5px;
+	align: left;
+}
+
+.nextButton {
+	border: 1px solid #c3c3c3;
+	background-color: #fafafa;
+	padding: 4px 6px 5px;
+	float: right;
+	align: right;
+}
+
+.props th {
+	color: #000;
+	font-size: 105%;
+	font-weight: normal;
+	padding: 6px 10px;
+	border-bottom: 1px solid #d1dfce;
+	background-color: #f8f8f8;
+}
+
+.formParams th {
+	color: #000;
+	font-size: 105%;
+	font-weight: normal;
+	padding: 6px 10px;
+	border-bottom: 1px solid #d1dfce;
+	background-color: #f8f8f8;
+}
+
+.props td {
+	padding: 4px 10px 5px;
+	border-bottom: 1px solid #ffe8f9;
+}
+
+.formParams td {
+	padding: 4px 10px 5px;
+	border-bottom: 1px solid #ffe8f9;
+}
+
+.bordered {
+	padding-bottom: 4px;
+	padding-right: 4px;
+	border: 1px solid #d1dfce;
+}
+
+li {
+	padding-bottom: 2px;
+	padding-top: 2px;
+}
