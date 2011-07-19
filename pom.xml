@@ -17,7 +17,7 @@
    	<artifactId>apache</artifactId>
     <version>9</version>
     <relativePath />
-	</parent> 
+  </parent> 
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-parent</artifactId>
