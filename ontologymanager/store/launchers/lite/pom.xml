@@ -25,7 +25,6 @@
   <artifactId>org.apache.stanbol.ontologymanager.store.launchers.lite</artifactId>
   <packaging>jar</packaging>
   <name>Apache Stanbol Ontology Manager Store - Sling-based standalone launcher - lite version</name>
-  <version>${stanbol-version}</version>
   <description>Runnable jar that runs the lite Apache Stanbol Ontology Manager Store configuration	</description>
   
   <build>
