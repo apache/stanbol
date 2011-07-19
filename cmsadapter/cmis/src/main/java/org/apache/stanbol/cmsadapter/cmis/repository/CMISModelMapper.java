@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.cmsadapter.cmis.repository;
 
 import java.text.SimpleDateFormat;
@@ -50,7 +66,7 @@ public class CMISModelMapper {
         cmsObject.setLocalname(names[0]);
         cmsObject.setNamespace(names[1]);
         // TODO Handle Documents with multiple paths
-        
+
         cmsObject.setPath(document.getParents().get(0).getPath() + "/" + document.getName());
         cmsObject.setObjectTypeRef(document.getType().getId());
         if (document.getParents().size() > 0) {
@@ -102,7 +118,7 @@ public class CMISModelMapper {
         property.setPropertyDefinition(getPropertyDefinition(cmisProperty.getDefinition()));
         if (cmisProperty.getValues() != null) {
             for (Object value : cmisProperty.getValues()) {
-                if(value == null){
+                if (value == null) {
                     continue;
                 }
                 if (cmisProperty.getType() == PropertyType.DATETIME) {
@@ -185,21 +201,21 @@ public class CMISModelMapper {
             }
         }
     }
-    
-    public static void fillChildObjectTypeDefinitions(ObjectTypeDefinition instance, ObjectType type){
+
+    public static void fillChildObjectTypeDefinitions(ObjectTypeDefinition instance, ObjectType type) {
         Iterator<ObjectType> children = type.getChildren().iterator();
-        while(children.hasNext()){
+        while (children.hasNext()) {
             ObjectType child = children.next();
             instance.getObjectTypeDefinition().add(getObjectTypeDefinition(child));
         }
     }
-    
-    private static String[] separateNamespace(String name){
+
+    private static String[] separateNamespace(String name) {
         String[] parts = name.split(":", 2);
-        if(parts.length != 2){
-            return new String[]{name, ""};
-        }else{
-            return new String[]{parts[1], parts[0]};
+        if (parts.length != 2) {
+            return new String[] {name, ""};
+        } else {
+            return new String[] {parts[1], parts[0]};
         }
     }
 }

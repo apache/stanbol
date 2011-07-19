@@ -1,4 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
 <!-- List of initial bundles for the CMS Adapter Sling-based standalone launcher -->
 <bundles>
 
@@ -91,6 +108,16 @@
 			<version>2.1</version>
 		</bundle>
 		<bundle>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.5</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-core</artifactId>
+			<version>0.9</version>
+		</bundle>
+		<bundle>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpcore-osgi</artifactId>
 			<version>4.0.1</version>
@@ -105,16 +132,16 @@
 			<artifactId>derby</artifactId>
 			<version>10.6.2.1</version>
 		</bundle>
-    <bundle>
-        <groupId>joda-time</groupId>
-        <artifactId>joda-time</artifactId>
-        <version>1.6.2</version>
-    </bundle>
-    <bundle>
-		<groupId>eu.medsea.mimeutil</groupId>
-		<artifactId>mime-util</artifactId>
-		<version>2.1.3</version>
-	</bundle>
+		<bundle>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>1.6.2</version>
+		</bundle>
+		<bundle>
+			<groupId>eu.medsea.mimeutil</groupId>
+			<artifactId>mime-util</artifactId>
+			<version>2.1.3</version>
+		</bundle>
 
 	</startLevel>
 
@@ -276,6 +303,11 @@
 			</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.opennlp</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
 
 		<!-- Enhancer -->
 		<bundle>
@@ -303,14 +335,14 @@
 
 		<!-- Generic -->
 		<bundle>
-            <groupId>org.apache.stanbol</groupId>
-            <artifactId>org.apache.stanbol.commons.jsonld</artifactId>
-            <version>0.9-SNAPSHOT</version>
-        </bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.jsonld</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.defaultdata</artifactId>
-			<version>0.0.1</version>
+			<version>0.0.3</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
@@ -358,13 +390,13 @@
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.semanticweb.owlapi.owllink</artifactId>
-			<version>1.0.2-SNAPSHOT</version>
+			<artifactId>org.apache.stanbol.owl</artifactId>
+			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.semanticweb.owlapi</artifactId>
-			<version>3.0.0-SNAPSHOT</version>
+			<artifactId>org.apache.stanbol.reasoners.owllink</artifactId>
+			<version>0.9-SNAPSHOT</version>
 		</bundle>
 		<!-- CMS Adapter -->
 		<bundle>
@@ -457,7 +489,7 @@
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.defaultdata</artifactId>
-			<version>0.0.1</version>
+			<version>0.0.3</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
@@ -468,11 +500,8 @@
 		<!-- The geonames.org LocationEnhancement Engines needs two additional 
 			bundles 1) jettyjson 2) commons-io. Both of them are already present in the 
 			bundle list. -->
-		<!--  <bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId>
-			<version>0.9-SNAPSHOT</version>
-		</bundle> -->
+		<!-- <bundle> <groupId>org.apache.stanbol</groupId> <artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId> 
+			<version>0.9-SNAPSHOT</version> </bundle> -->
 		<!-- Entity Tagging Engine based on RICK -->
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>

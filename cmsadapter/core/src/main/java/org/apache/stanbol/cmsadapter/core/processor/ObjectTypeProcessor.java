@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.cmsadapter.core.processor;
 
 import java.util.ArrayList;
@@ -31,20 +47,18 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.OWL;
 
 /**
- * This processer can process CMS Objects of type {@link ObjectTypeDefinition}.
- * A type definition corresponds to an OWL Class and properties defined on the type corresponds to OWL datatype or OWL object properties.
- * <br/>
+ * This processer can process CMS Objects of type {@link ObjectTypeDefinition}. A type definition corresponds
+ * to an OWL Class and properties defined on the type corresponds to OWL datatype or OWL object properties. <br/>
  * A property is converted to an OWL object property if it is type is amongst following:
  * <ul>
- *  <li>{@link PropType#NAME}</li>
- *  <li>{@link PropType#PATH}</li>
- *  <li>{@link PropType#REFERENCE}</li>
- * </ul> 
- * Otherwise the property is converted to an OWL datatype property.
- * <br/>
+ * <li>{@link PropType#NAME}</li>
+ * <li>{@link PropType#PATH}</li>
+ * <li>{@link PropType#REFERENCE}</li>
+ * </ul>
+ * Otherwise the property is converted to an OWL datatype property. <br/>
  * 
  * @author Suat
- *
+ * 
  */
 @Component(immediate = true)
 @Service
@@ -196,14 +210,14 @@ public class ObjectTypeProcessor implements Processor, ProcessorProperties {
         List<DObjectType> objectTypes = cmsObject2dobjectType(objects, engine);
         deleteDecoratedObjectTypes(objectTypes, engine);
     }
-    
+
     private void deleteDecoratedObjectTypes(List<DObjectType> objectTypes, MappingEngine engine) {
         OntologyResourceHelper orh = engine.getOntologyResourceHelper();
         for (DObjectType objectType : objectTypes) {
             if (canProcess(objectType.getInstance(), null)) {
                 orh.deleteStatementsByReference(objectType.getID());
                 deletePropertyDefinitions(objectType.getID(), orh);
-                
+
                 List<DObjectType> children = new ArrayList<DObjectType>();
                 try {
                     children = objectType.getChildDefinitions();
@@ -212,7 +226,7 @@ public class ObjectTypeProcessor implements Processor, ProcessorProperties {
                 }
                 deleteDecoratedObjectTypes(children, engine);
             }
-        }        
+        }
     }
 
     private void deletePropertyDefinitions(String objectTypeRef, OntologyResourceHelper orh) {

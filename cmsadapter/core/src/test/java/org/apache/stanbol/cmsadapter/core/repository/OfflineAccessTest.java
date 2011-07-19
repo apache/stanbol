@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.cmsadapter.core.repository;
 
 import static org.junit.Assert.assertEquals;
@@ -220,7 +236,7 @@ public class OfflineAccessTest {
         Property p = root.getProperty().get(0);
         CMSObject real = offlineAccess.getContainerObject(p, null);
         assertSame(root, real);
-        
+
         expectedException.expect(IllegalArgumentException.class);
         offlineAccess.getContainerObject(p, new Object());
     }
@@ -232,7 +248,7 @@ public class OfflineAccessTest {
         Property p = root.getProperty().get(0);
         PropertyDefinition propDef = offlineAccess.getPropertyDefinition(p, null);
         assertSame(expected, propDef);
-        
+
     }
 
     @Test
@@ -244,7 +260,7 @@ public class OfflineAccessTest {
     @Test
     public void testCanRetrieveConnectionInfo() {
         expectedException.expect(UnsupportedOperationException.class);
-        offlineAccess.canRetrieve((ConnectionInfo)null);
+        offlineAccess.canRetrieve((ConnectionInfo) null);
     }
 
     @Test
@@ -259,7 +275,7 @@ public class OfflineAccessTest {
         CMSObject root = (CMSObject) repository.get(0);
         CMSObject parent = offlineAccess.getParentByNode(child11, null);
         assertSame(root, parent);
-        
+
         expectedException.expect(IllegalArgumentException.class);
         offlineAccess.getParentByNode(child11, new Object());
     }
