@@ -21,36 +21,42 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.enhancer.reactor</artifactId>
+  <artifactId>org.apache.stanbol.enhancer.engines.reactor</artifactId>
   <version>0.9.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Apache Stanbol Enhancer reactor</name>
+  <name>Apache Stanbol Enhancer Engines Reactor</name>
   <description>
-    Pseudo project to build the complete Stanbol Enhancer component
+    Pseudo project to build Enhancer Engines
   </description>
   <inceptionYear>2010</inceptionYear>
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/engines
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>
 
   <modules>
-    <module>parent</module>
-
-    <module>generic/servicesapi</module>
-    <module>generic/jobmanager</module>
-    <module>generic/standalone</module>
-
-    <module>jersey</module>
-    <module>benchmark</module>
-
-    <module>engines</module>
+    <module>../autotagging</module>
+  
+    <module>autotagging</module>
+    <module>opennlp-ner</module>
+    <module>langid</module>
+    <module>metaxa</module>
+    <module>geonames</module>
+    <module>entitytagging</module>
+    <module>taxonomylinking</module>
+    <!-- RICK based enhancement engine(s) -->
+    <module>opencalais</module>
+    <module>zemanta</module>
+    
+    <module>../clerezza/org.apache.stanbol.enhancer.clerezza</module>
+    <module>../clerezza/clerezza-sparql</module>
+    <module>../SemiAutomaticContentEnhancer</module>
   </modules>
 </project>
