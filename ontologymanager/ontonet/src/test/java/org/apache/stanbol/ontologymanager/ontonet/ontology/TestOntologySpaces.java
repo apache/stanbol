@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.ontonet.ontology;
 
 import static org.junit.Assert.*;
@@ -51,7 +51,7 @@ public class TestOntologySpaces {
 
     public static IRI baseIri = IRI.create(Constants.PEANUTS_MAIN_BASE), baseIri2 = IRI
             .create(Constants.PEANUTS_MINOR_BASE), scopeIri = IRI
-            .create("http://kres.iks-project.eu/scope/Peanuts");
+            .create("http://stanbol.apache.org/scope/Comics");
 
     private static OWLAxiom linusIsHuman = null;
 
@@ -59,7 +59,7 @@ public class TestOntologySpaces {
 
     private static OWLOntology ont = null, ont2 = null;
 
-    private static OntologyInputSource ontSrc, ont2Src, pizzaSrc, colleSrc;
+    private static OntologyInputSource ontSrc, minorSrc, dropSrc, nonexSrc;
 
     private static OntologySpaceFactory spaceFactory;
 
@@ -91,39 +91,34 @@ public class TestOntologySpaces {
         mgr.applyChange(new AddAxiom(ont, linusIsHuman));
 
         ont2 = mgr.createOntology(baseIri2);
-        ont2Src = new RootOntologySource(ont2);
+        minorSrc = new RootOntologySource(ont2);
 
-        pizzaSrc = getLocalSource("/ontologies/pizza.owl", mgr);
-        colleSrc = getLocalSource("/ontologies/odp/collectionentity.owl", mgr);
-        ont2Src = new RootOntologySource(ont2, null);
+        dropSrc = getLocalSource("/ontologies/droppedcharacters.owl", mgr);
+        nonexSrc = getLocalSource("/ontologies/nonexistentcharacters.owl", mgr);
+        minorSrc = new RootOntologySource(ont2, null);
 
     }
 
     @Test
-    public void testAddOntology() {
+    public void testAddOntology() throws Exception {
         CustomOntologySpace space = null;
-        IRI logicalId = colleSrc.getRootOntology().getOntologyID().getOntologyIRI();
-        try {
-            space = spaceFactory.createCustomOntologySpace(scopeIri, pizzaSrc);
-            space.addOntology(ont2Src);
+        IRI logicalId = nonexSrc.getRootOntology().getOntologyID().getOntologyIRI();
 
-            space.addOntology(colleSrc);
-
-        } catch (UnmodifiableOntologySpaceException e) {
-            fail("Add operation on " + scopeIri + " custom space was denied due to unexpected lock.");
-        }
+        space = spaceFactory.createCustomOntologySpace(scopeIri, dropSrc);
+        space.addOntology(minorSrc);
+        space.addOntology(nonexSrc);
 
         assertTrue(space.containsOntology(logicalId));
-        logicalId = pizzaSrc.getRootOntology().getOntologyID().getOntologyIRI();
+        logicalId = dropSrc.getRootOntology().getOntologyID().getOntologyIRI();
         assertTrue(space.containsOntology(logicalId));
     }
 
     @Test
-    public void testCoreLock() {
+    public void testCoreLock() throws Exception {
         CoreOntologySpace space = spaceFactory.createCoreOntologySpace(scopeIri, ontSrc);
         space.setUp();
         try {
-            space.addOntology(ont2Src);
+            space.addOntology(minorSrc);
             fail("Modification was permitted on locked ontology space.");
         } catch (UnmodifiableOntologySpaceException e) {
             assertSame(space, e.getSpace());
@@ -132,17 +127,17 @@ public class TestOntologySpaces {
 
     @Test
     public void testCreateSpace() throws Exception {
-        CustomOntologySpace space = spaceFactory.createCustomOntologySpace(scopeIri, pizzaSrc);
-        IRI logicalId = pizzaSrc.getRootOntology().getOntologyID().getOntologyIRI();
+        CustomOntologySpace space = spaceFactory.createCustomOntologySpace(scopeIri, dropSrc);
+        IRI logicalId = dropSrc.getRootOntology().getOntologyID().getOntologyIRI();
         assertTrue(space.containsOntology(logicalId));
     }
 
     @Test
-    public void testCustomLock() {
+    public void testCustomLock() throws Exception {
         CustomOntologySpace space = spaceFactory.createCustomOntologySpace(scopeIri, ontSrc);
         space.setUp();
         try {
-            space.addOntology(ont2Src);
+            space.addOntology(minorSrc);
             fail("Modification was permitted on locked ontology space.");
         } catch (UnmodifiableOntologySpaceException e) {
             assertSame(space, e.getSpace());
@@ -150,20 +145,20 @@ public class TestOntologySpaces {
     }
 
     @Test
-    public void testRemoveCustomOntology() {
+    public void testRemoveCustomOntology() throws Exception {
         CustomOntologySpace space = null;
-        space = spaceFactory.createCustomOntologySpace(scopeIri, pizzaSrc);
-        IRI pizzaId = pizzaSrc.getRootOntology().getOntologyID().getOntologyIRI();
-        IRI wineId = colleSrc.getRootOntology().getOntologyID().getOntologyIRI();
+        space = spaceFactory.createCustomOntologySpace(scopeIri, dropSrc);
+        IRI pizzaId = dropSrc.getRootOntology().getOntologyID().getOntologyIRI();
+        IRI wineId = nonexSrc.getRootOntology().getOntologyID().getOntologyIRI();
         try {
             space.addOntology(ontSrc);
-            space.addOntology(colleSrc);
+            space.addOntology(nonexSrc);
             // The other remote ontologies may change base IRI...
             assertTrue(space.containsOntology(ont.getOntologyID().getOntologyIRI())
                        && space.containsOntology(pizzaId) && space.containsOntology(wineId));
-            space.removeOntology(pizzaSrc);
+            space.removeOntology(dropSrc);
             assertFalse(space.containsOntology(pizzaId));
-            space.removeOntology(colleSrc);
+            space.removeOntology(nonexSrc);
             assertFalse(space.containsOntology(wineId));
             // OntologyUtils.printOntology(space.getTopOntology(), System.err);
         } catch (UnmodifiableOntologySpaceException e) {
@@ -174,14 +169,14 @@ public class TestOntologySpaces {
     }
 
     @Test
-    public void testSessionModification() {
+    public void testSessionModification() throws Exception {
         SessionOntologySpace space = spaceFactory.createSessionOntologySpace(scopeIri);
         space.setUp();
         try {
             // First add an in-memory ontology with a few axioms.
             space.addOntology(ontSrc);
             // Now add a real online ontology
-            space.addOntology(pizzaSrc);
+            space.addOntology(dropSrc);
             // The in-memory ontology must be in the space.
             assertTrue(space.getOntologies().contains(ont));
             // The in-memory ontology must still have its axioms.

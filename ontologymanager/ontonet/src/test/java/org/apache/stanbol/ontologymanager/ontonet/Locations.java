@@ -26,37 +26,37 @@ public class Locations {
     /**
      * Default physical location of the ontology registry for testing.
      */
-    public static final IRI _CP_NAMESPACE = IRI.create("http://www.ontologydesignpatterns.org/cp/owl/");
+    public static final IRI _STANBOL_ONT_NAMESPACE = IRI.create("http://stanbol.apache.org/ontologies/");
 
     /**
      * Default physical location of the ontology registry for testing.
      */
-    public static final IRI _REGISTRY_TEST = IRI
-            .create("http://www.ontologydesignpatterns.org/registry/krestest.owl");
+    public static final IRI _REGISTRY_TEST = IRI.create(_STANBOL_ONT_NAMESPACE + "registries/onmtest.owl");
 
     /**
      * Identifier of test ontology library 1.
      */
-    public static final IRI LIBRARY_TEST1 = IRI.create(_REGISTRY_TEST + "#TestRegistry");
+    public static final IRI LIBRARY_TEST1 = IRI.create(_REGISTRY_TEST + "#Library1");
 
     /**
      * Identifier of test ontology library 2.
      */
-    public static final IRI LIBRARY_TEST2 = IRI.create(_REGISTRY_TEST + "#TestLibrary2");
+    public static final IRI LIBRARY_TEST2 = IRI.create(_REGISTRY_TEST + "#Library2");
 
     /**
      * An ontology in test libraries 1 and 2.
      */
-    public static final IRI ODP_OBJECTROLE = IRI.create(_CP_NAMESPACE + "objectrole.owl");
+    public static final IRI CHAR_MAIN = IRI.create(_STANBOL_ONT_NAMESPACE + "pcomics/maincharacters.owl");
 
     /**
      * An ontology in test library 2 but not in test library 1.
      */
-    public static final IRI ODP_SITUATION = IRI.create(_CP_NAMESPACE + "situation.owl");
+    public static final IRI CHAR_DROPPED = IRI.create(_STANBOL_ONT_NAMESPACE
+                                                      + "pcomics/droppedcharacters.owl");
 
     /**
      * An ontology in test library 1 but not in test library 2.
      */
-    public static final IRI ODP_TYPESOFENTITIES = IRI.create(_CP_NAMESPACE + "typesofentities.owl");
+    public static final IRI CHAR_ACTIVE = IRI.create(_STANBOL_ONT_NAMESPACE + "pcomics/characters_all.owl");
 
 }

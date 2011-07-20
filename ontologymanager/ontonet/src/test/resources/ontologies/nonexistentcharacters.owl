@@ -25,14 +25,14 @@
 ]>
 
 
-<rdf:RDF xmlns="http://stanbol.apache.org/ontologies/pcomics/maincharacters.owl#"
-     xml:base="http://stanbol.apache.org/ontologies/pcomics/maincharacters.owl"
+<rdf:RDF xmlns="http://stanbol.apache.org/ontologies/pcomics/nonexistentcharacters.owl#"
+     xml:base="http://stanbol.apache.org/ontologies/pcomics/nonexistentcharacters.owl"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      xmlns:foaf="http://xmlns.com/foaf/0.1/"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-    <owl:Ontology rdf:about="http://stanbol.apache.org/ontologies/pcomics/maincharacters.owl">
+    <owl:Ontology rdf:about="http://stanbol.apache.org/ontologies/pcomics/nonexistentcharacters.owl">
         <rdfs:comment>Should import: http://xmlns.com/foaf/0.1/</rdfs:comment>
         <owl:versionInfo xml:lang="en">Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the &quot;License&quot;); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
@@ -60,7 +60,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
     //
     // Datatypes
     //
-    ///////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////nonexistentcharacters.owl/////////////////////////////////////////
      -->
 
     
@@ -74,25 +74,13 @@ Unless required by applicable law or agreed to in writing, software distributed 
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
-    
+    <!-- http://stanbol.apache.org/ontologies/pcomics/nonexistentcharacters.owl#Brukurutrukk -->
 
-
-    <!-- http://stanbol.apache.org/ontologies/pcomics/maincharacters.owl#Linus -->
-
-    <foaf:Person rdf:about="http://stanbol.apache.org/ontologies/pcomics/maincharacters.owl#Linus">
+    <foaf:Person rdf:about="http://stanbol.apache.org/ontologies/pcomics/nonexistentcharacters.owl#Brukurutrukk">
         <rdf:type rdf:resource="&owl;NamedIndividual"/>
-        <rdfs:label xml:lang="en">Linus</rdfs:label>
-    </foaf:Person>
-    
+        <rdfs:label xml:lang="en">Brukurutrukk</rdfs:label>
+    </foaf:Person>    
 
-
-    <!-- http://stanbol.apache.org/ontologies/pcomics/maincharacters.owl#Lucy -->
-
-    <foaf:Perzon rdf:about="http://stanbol.apache.org/ontologies/pcomics/maincharacters.owl#Lucy">
-        <rdf:type rdf:resource="&owl;NamedIndividual"/>
-        <rdfs:label xml:lang="en">Lucy</rdfs:label>
-        <rdfs:comment xml:lang="en">The typing of this individual as foaf:Perzon is wilful, DO NOT REMOVE.</rdfs:comment>
-    </foaf:Perzon>
 </rdf:RDF>
 
 

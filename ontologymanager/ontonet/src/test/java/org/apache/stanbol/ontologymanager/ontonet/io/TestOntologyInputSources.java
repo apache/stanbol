@@ -131,7 +131,7 @@ public class TestOntologyInputSources {
      */
     @Test
     public void testOfflineSingleton() throws Exception {
-        URL url = getClass().getResource("/ontologies/index.rdf");
+        URL url = getClass().getResource("/ontologies/mockfoaf.rdf");
         assertNotNull(url);
         OntologyInputSource coreSource = new RootOntologyIRISource(IRI.create(url));
         assertNotNull(df);

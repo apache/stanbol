@@ -18,7 +18,6 @@ package org.apache.stanbol.ontologymanager.ontonet.registry;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.util.Hashtable;
 
 import org.apache.stanbol.ontologymanager.ontonet.Locations;
@@ -38,7 +37,6 @@ import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.util.AutoIRIMapper;
 
 /**
  * This class tests the correct loading of ontology libraries from an OWL repository. It also checks that
@@ -46,7 +44,7 @@ import org.semanticweb.owlapi.util.AutoIRIMapper;
  */
 public class TestOntologyLibrary {
 
-    private String registryResource = "/ontologies/registry/krestest.owl";
+    private String registryResource = "/ontologies/registry/onmtest.owl";
 
     private ONManager onm;
 
@@ -57,12 +55,19 @@ public class TestOntologyLibrary {
      */
     @Before
     public void setupTest() throws Exception {
+
         // An ONManagerImpl with no store and default settings
         ONManagerConfiguration configuration = new ONManagerConfigurationImpl(new Hashtable<String,Object>());
         onm = new ONManagerImpl(null, null, configuration, new Hashtable<String,Object>());
-        onm.getOwlCacheManager().addIRIMapper(
-            new AutoIRIMapper(new File(getClass().getResource("/ontologies/odp").toURI()), true));
+
+        // *Not* adding mappers to empty resource directories.
+        // It seems the Maven surefire plugin won't copy them.
+
+        // onm.getOwlCacheManager().addIRIMapper(
+        // new AutoIRIMapper(new File(getClass().getResource("/ontologies/odp").toURI()), true));
+
         loader = new RegistryLoaderImpl(onm);
+
     }
 
     /**
@@ -107,10 +112,10 @@ public class TestOntologyLibrary {
         Registry lib = loader.loadLibraryEager(localTestRegistry, Locations.LIBRARY_TEST2);
         assertTrue(lib.hasChildren());
         // Should be in the library.
-        boolean hasSituation = containsOntologyRecursive(lib, Locations.ODP_SITUATION);
+        boolean hasShould = containsOntologyRecursive(lib, Locations.CHAR_DROPPED);
         // Should NOT be in the library (belongs to another library in the same registry).
-        boolean hasTypes = containsOntologyRecursive(lib, Locations.ODP_TYPESOFENTITIES);
-        assertTrue(hasSituation && !hasTypes);
+        boolean hasShouldNot = containsOntologyRecursive(lib, Locations.CHAR_ACTIVE);
+        assertTrue(hasShould && !hasShouldNot);
     }
 
     /**
@@ -125,16 +130,16 @@ public class TestOntologyLibrary {
         OntologyInputSource src = new LibrarySource(Locations.LIBRARY_TEST1, localTestRegistry,
                 onm.getOwlCacheManager(), loader);
         OWLOntology o = src.getRootOntology();
-        boolean hasTypes = false, hasObjectRole = false;
+        boolean hasImporting = false, hasImported = false;
         for (OWLImportsDeclaration ax : o.getImportsDeclarations()) {
             // Since we added a local IRI mapping, import statements might be using file: IRIs instead of
             // HTTP, in which case IRI equality would fail.
             String tmpstr = ax.getIRI().toString();
-            if (!hasTypes && tmpstr.endsWith("typesofentities.owl")) hasTypes = true;
-            else if (!hasObjectRole && tmpstr.endsWith("objectrole.owl")) hasObjectRole = true;
-            if (hasTypes && hasObjectRole) break;
+            if (!hasImporting && tmpstr.endsWith("characters_all.owl")) hasImporting = true;
+            else if (!hasImported && tmpstr.endsWith("maincharacters.owl")) hasImported = true;
+            if (hasImporting && hasImported) break;
         }
-        assertTrue(hasTypes && hasObjectRole);
+        assertTrue(hasImporting && hasImported);
     }
 
 }

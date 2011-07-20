@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.ontonet.ontology;
 
 import static org.junit.Assert.*;
@@ -46,13 +46,11 @@ public class TestIndexing {
 
     private static OWLOntologyManager mgr;
 
-    private static IRI communitiesCpIri = IRI
-            .create("http://www.ontologydesignpatterns.org/cp/owl/communities.owl"), objrole = IRI
-            .create("http://www.ontologydesignpatterns.org/cp/owl/objectrole.owl"), scopeIri = IRI
-            .create("http://fise.iks-project.eu/TestIndexing"),
-    // submissionsIri = IRI
-    // .create("http://www.ontologydesignpatterns.org/registry/submissions.owl"),
-            testRegistryIri = IRI.create("http://www.ontologydesignpatterns.org/registry/krestest.owl");
+    private static IRI iri_minor = IRI
+            .create("http://stanbol.apache.org/ontologies/pcomics/minorcharacters.owl"), iri_main = IRI
+            .create("http://stanbol.apache.org/ontologies/pcomics/maincharacters.owl"), scopeIri = IRI
+            .create("http://stanbol.apache.org/scope/IndexingTest"), testRegistryIri = IRI
+            .create("http://stanbol.apache.org/ontologies/registries/onmtest.owl");
 
     private static OntologyScope scope = null;
 
@@ -65,9 +63,9 @@ public class TestIndexing {
 
         // Since it is registered, this scope must be unique, or subsequent
         // tests will fail on duplicate ID exceptions!
-        scopeIri = IRI.create("http://fise.iks-project.eu/TestIndexing");
+        scopeIri = IRI.create("http://stanbol.apache.org/scope/IndexingTest");
         IRI coreroot = IRI.create(scopeIri + "/core/root.owl");
-        
+
         @SuppressWarnings("unused")
         OWLOntology oParent = null;
         try {
@@ -99,7 +97,7 @@ public class TestIndexing {
         OntologyIndex index = onm.getOntologyIndex();
 
         // Load communities ODP (and its import closure) from local resource.
-        URL url = getClass().getResource("/ontologies/odp/communities.owl");
+        URL url = getClass().getResource("/ontologies/characters_all.owl");
         assertNotNull(url);
         File f = new File(url.toURI());
         assertNotNull(f);
@@ -108,24 +106,26 @@ public class TestIndexing {
         OntologySpace cust = scope.getCustomSpace();
         cust.addOntology(commSrc);
 
-        assertTrue(index.isOntologyLoaded(communitiesCpIri));
-        url = getClass().getResource("/ontologies/odp/topic.owl");
+        assertTrue(index.isOntologyLoaded(iri_minor));
+
+        url = getClass().getResource("/ontologies/minorcharacters.owl");
         assertNotNull(url);
         f = new File(url.toURI());
         assertNotNull(f);
-        cust.addOntology(new ParentPathInputSource(f));
-        cust.removeOntology(commSrc);
 
-        assertFalse(index.isOntologyLoaded(communitiesCpIri));
+        cust.removeOntology(new ParentPathInputSource(f));
+        // cust.removeOntology(commSrc);
+
+        assertFalse(index.isOntologyLoaded(iri_minor));
     }
 
     @Test
     public void testGetOntology() throws Exception {
         // Load the original objectRole ODP
-        OWLOntology oObjRole = mgr.loadOntology(objrole);
+        OWLOntology oObjRole = mgr.loadOntology(iri_main);
         assertNotNull(oObjRole);
         // Compare it against the one indexed.
-//         FIXME reinstate these checks
+        // FIXME reinstate these checks
         // OntologyIndex index = onm.getOntologyIndex();
         // assertNotNull(index.getOntology(objrole));
         // // assertSame() would fail.

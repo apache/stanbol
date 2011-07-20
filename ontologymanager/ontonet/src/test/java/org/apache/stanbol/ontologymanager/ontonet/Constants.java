@@ -18,9 +18,9 @@ package org.apache.stanbol.ontologymanager.ontonet;
 
 public class Constants {
 
-	public static final String PEANUTS_MAIN_BASE = "http://stanbol.apache.org/ontologies/peanuts/maincharacters.owl";
+	public static final String PEANUTS_MAIN_BASE = "http://stanbol.apache.org/ontologies/pcomics/maincharacters.owl";
 
-	public static final String PEANUTS_MINOR_BASE = "http://stanbol.apache.org/ontologies/peanuts/minorcharacters.owl";
+	public static final String PEANUTS_MINOR_BASE = "http://stanbol.apache.org/ontologies/pcomics/minorcharacters.owl";
 
 	public static final String dog = "Dog";
 
