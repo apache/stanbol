@@ -434,12 +434,6 @@
 			</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>crx-rmi
-			</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
 
 		<!-- Content hub -->
 		<bundle>

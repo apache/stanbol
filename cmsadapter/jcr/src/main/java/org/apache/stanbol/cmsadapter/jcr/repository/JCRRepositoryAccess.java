@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.cmsadapter.jcr.repository;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +38,7 @@ import javax.jcr.query.QueryResult;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.rmi.repository.RMIRemoteRepository;
+import org.apache.jackrabbit.rmi.repository.URLRemoteRepository;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.CMSObject;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ConnectionInfo;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectTypeDefinition;
@@ -54,17 +56,43 @@ public class JCRRepositoryAccess implements RepositoryAccess {
 
     private static final Logger log = LoggerFactory.getLogger(JCRRepositoryAccess.class);
 
+    /**
+     * Tries to get a {@link Session} first through a {@link RMIRemoteRepository}. If the attempt is
+     * unsuccessful it tries {@link URLRemoteRepository}. If the second attempt is also unsuccessful, throws a
+     * {@link RepositoryAccessException}, otherwise returns a {@link Session} object.
+     * 
+     * @param connectionInfo
+     * @return {@link Session} if it was able to get one
+     * @throws RepositoryAccessException
+     */
     @Override
     public Session getSession(ConnectionInfo connectionInfo) throws RepositoryAccessException {
-        Repository repository = new RMIRemoteRepository(connectionInfo.getRepositoryURL());
+
         Session session = null;
 
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(JCRRepositoryAccess.class.getClassLoader());
+            session = getSessionByRMI(connectionInfo);
+            if (session == null) {
+                session = getSessionByURL(connectionInfo);
+            }
+            if (session == null) {
+                throw new RepositoryAccessException("Failed to get JCR Session");
+            }
+        } finally {
+            Thread.currentThread().setContextClassLoader(cl);
+        }
 
+        return session;
+    }
+
+    private Session getSessionByRMI(ConnectionInfo connectionInfo) {
+        Repository repository = new RMIRemoteRepository(connectionInfo.getRepositoryURL());
+        Session session = null;
+        try {
             String workspaceName = connectionInfo.getWorkspaceName();
-            String username = connectionInfo.getPassword();
+            String username = connectionInfo.getUsername();
             String password = connectionInfo.getPassword();
 
             if (workspaceName == null || workspaceName.equals("") || workspaceName.equals("default")) {
@@ -76,13 +104,41 @@ public class JCRRepositoryAccess implements RepositoryAccess {
             }
 
         } catch (LoginException e) {
-            throw new RepositoryAccessException("Error at login:", e);
+            log.debug("Failed to get JCR session by RMIRemoteRepository");
+            log.debug("Error message: " + e.getMessage());
         } catch (RepositoryException e) {
-            throw new RepositoryAccessException("Error at obtaining session", e);
-        } finally {
-            Thread.currentThread().setContextClassLoader(cl);
+            log.debug("Failed to get JCR session by RMIRemoteRepository");
+            log.debug("Error message: " + e.getMessage());
         }
+        return session;
+    }
 
+    private Session getSessionByURL(ConnectionInfo connectionInfo) {
+        Session session = null;
+        try {
+            Repository repository = new URLRemoteRepository(connectionInfo.getRepositoryURL());
+            String workspaceName = connectionInfo.getWorkspaceName();
+            String username = connectionInfo.getUsername();
+            String password = connectionInfo.getPassword();
+
+            if (workspaceName == null || workspaceName.equals("") || workspaceName.equals("default")) {
+
+                session = repository.login(new SimpleCredentials(username, password.toCharArray()));
+            } else {
+                session = repository.login(new SimpleCredentials(username, password.toCharArray()),
+                    workspaceName);
+            }
+
+        } catch (LoginException e) {
+            log.debug("Failed to get JCR session by URLRemoteRepository");
+            log.debug("Error message: " + e.getMessage());
+        } catch (RepositoryException e) {
+            log.debug("Failed to get JCR session by URLRemoteRepository");
+            log.debug("Error message: " + e.getMessage());
+        } catch (MalformedURLException e) {
+            log.debug("Failed to get JCR session by URLRemoteRepository");
+            log.debug("Error message: " + e.getMessage());
+        }
         return session;
     }
 
