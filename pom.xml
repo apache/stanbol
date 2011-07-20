@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Apache Stanbol software is licensed under the Apache License, Version 2.0,
-  see http://www.apache.org/licenses/LICENSE-2.0 Unless required by
-  applicable law or agreed to in writing, software distributed under the
-  License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-  CONDITIONS OF ANY KIND, either express or implied. See the License for
-  the specific language governing permissions and limitations under the
-  License.
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -35,6 +42,7 @@
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>
 
+  <!-- These modules form the Stanbol Framework -->
   <modules>
     <module>parent</module>
     <module>frameworkfragment</module>
@@ -42,34 +50,42 @@
     <module>owl</module>
     <module>entityhub</module>
     <module>factstore</module>
-    <module>enhancer</module>
-    <module>data</module>
+    
+    <module>enhancer/parent</module>
+    <module>enhancer/generic/servicesapi</module>
+    <module>enhancer/generic/jobmanager</module>
+    <module>enhancer/generic/standalone</module>
+    <module>enhancer/jersey</module>
+    <module>enhancer/benchmark</module>
+    
     <module>contenthub/web</module>
     <module>ontologymanager/ontonet</module>
     <module>ontologymanager/web</module>
     <module>rules</module>
-    <module>launchers/stable</module>
-    <module>launchers/stateless</module>
-    <module>launchers/full</module>
-    <module>integration-tests</module>
   </modules>
 
   <profiles>
     <profile>
-      <id>dev</id>
+      <id>stack</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
+        <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
-        <module>rules</module>
-        <module>reasoners</module>
+        <module>data</module>
+        
+        <module>enhancer/engines</module>
+        
+        <module>launchers/stable</module>
+        <module>launchers/stateless</module>
+        <module>launchers/full</module>
+        <module>integration-tests</module>
       </modules>
-    </profile>
+    </profile>  
     <profile>
-      <id>release</id>
+      <id>framework</id>
       <activation>
         <activeByDefault>false</activeByDefault>
-      </activation>
+      </activation>     
     </profile>
     <profile>
       <id>kres</id>
@@ -78,7 +94,6 @@
       </activation>
       <modules>
         <module>ontologymanager/store</module>
-        <module>rules</module>
         <module>reasoners</module>
         <module>reengineer</module>
         <module>launchers/kres</module>
