@@ -21,13 +21,13 @@ import java.net.URL;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Library;
 
-public class RegistryLibraryImpl extends AbstractRegistryItem implements Library {
+public class LibraryImpl extends AbstractRegistryItem implements Library {
 
-    public RegistryLibraryImpl(String name) {
+    public LibraryImpl(String name) {
         super(name);
     }
 
-    public RegistryLibraryImpl(String name, URL url) throws URISyntaxException {
+    public LibraryImpl(String name, URL url) throws URISyntaxException {
         super(name, url);
     }
 

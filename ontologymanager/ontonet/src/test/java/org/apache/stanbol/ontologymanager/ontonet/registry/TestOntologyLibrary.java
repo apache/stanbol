@@ -18,6 +18,8 @@ package org.apache.stanbol.ontologymanager.ontonet.registry;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+import java.net.URL;
 import java.util.Hashtable;
 
 import org.apache.stanbol.ontologymanager.ontonet.Locations;
@@ -26,17 +28,22 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ONManagerConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.io.LibrarySource;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Library;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryOntology;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.RegistryLoaderImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.RegistryImpl;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.util.AutoIRIMapper;
 
 /**
  * This class tests the correct loading of ontology libraries from an OWL repository. It also checks that
@@ -46,28 +53,42 @@ public class TestOntologyLibrary {
 
     private String registryResource = "/ontologies/registry/onmtest.owl";
 
-    private ONManager onm;
+    private static ONManager onm;
 
-    private RegistryLoader loader;
+    private static RegistryLoader loader;
+
+    private OWLOntologyManager virginOntologyManager;
 
     /**
-     * Reset the ontology network manager and registry loader before running each test.
+     * Sets the ontology network manager and registry loader before running the tests.
      */
-    @Before
-    public void setupTest() throws Exception {
-
+    @BeforeClass
+    public static void setupTest() throws Exception {
         // An ONManagerImpl with no store and default settings
         ONManagerConfiguration configuration = new ONManagerConfigurationImpl(new Hashtable<String,Object>());
         onm = new ONManagerImpl(null, null, configuration, new Hashtable<String,Object>());
+        loader = new RegistryLoaderImpl(onm);
+    }
+
+    /**
+     * Resets the {@link OWLOntologyManager} used for tests, since caching phenomena across tests could bias
+     * the results.
+     * 
+     * @throws Exception
+     *             if any error occurs;
+     */
+    @Before
+    public void resetOntologyManager() throws Exception {
+        virginOntologyManager = OWLManager.createOWLOntologyManager();
+        URL url = getClass().getResource("/ontologies");
+        virginOntologyManager.addIRIMapper(new AutoIRIMapper(new File(url.toURI()), true));
+        url = getClass().getResource("/ontologies/registry");
+        virginOntologyManager.addIRIMapper(new AutoIRIMapper(new File(url.toURI()), true));
 
         // *Not* adding mappers to empty resource directories.
         // It seems the Maven surefire plugin won't copy them.
-
-        // onm.getOwlCacheManager().addIRIMapper(
-        // new AutoIRIMapper(new File(getClass().getResource("/ontologies/odp").toURI()), true));
-
-        loader = new RegistryLoaderImpl(onm);
-
+        // url = getClass().getResource("/ontologies/odp");
+        // virginOntologyManager.addIRIMapper(new AutoIRIMapper(new File(url.toURI()), true));
     }
 
     /**
@@ -82,7 +103,7 @@ public class TestOntologyLibrary {
     private boolean containsOntologyRecursive(RegistryItem item, IRI ontologyId) {
 
         boolean result = false;
-        if (item.isOntology()) {
+        if (item instanceof RegistryOntology) {
             // An Ontology MUST have a non-null URI.
             try {
                 IRI iri = IRI.create(item.getURL());
@@ -90,7 +111,7 @@ public class TestOntologyLibrary {
             } catch (Exception e) {
                 return false;
             }
-        } else if (item.isLibrary() || item instanceof RegistryImpl)
+        } else if (item instanceof Library || item instanceof Registry)
         // Inspect children
         for (RegistryItem child : ((RegistryItem) item).getChildren()) {
             result |= containsOntologyRecursive(child, ontologyId);
@@ -109,13 +130,23 @@ public class TestOntologyLibrary {
     @Test
     public void testLibraryLoad() throws Exception {
         IRI localTestRegistry = IRI.create(getClass().getResource(registryResource));
-        Registry lib = loader.loadLibraryEager(localTestRegistry, Locations.LIBRARY_TEST2);
-        assertTrue(lib.hasChildren());
+        Registry reg = loader.loadRegistry(localTestRegistry, virginOntologyManager);
+        assertTrue(reg.hasChildren());
+        Library lib = null;
+        // Look for test #Library2
+        for (RegistryItem item : reg.getChildren()) {
+            if (Locations.LIBRARY_TEST2.toURI().toURL().equals(item.getURL())) {
+                lib = (Library) item;
+                break;
+            }
+        }
+        assertNotNull(lib);
         // Should be in the library.
         boolean hasShould = containsOntologyRecursive(lib, Locations.CHAR_DROPPED);
         // Should NOT be in the library (belongs to another library in the same registry).
         boolean hasShouldNot = containsOntologyRecursive(lib, Locations.CHAR_ACTIVE);
-        assertTrue(hasShould && !hasShouldNot);
+        assertTrue(hasShould);
+        assertFalse(hasShouldNot);
     }
 
     /**
@@ -128,7 +159,7 @@ public class TestOntologyLibrary {
     public void testLibrarySourceCreation() throws Exception {
         IRI localTestRegistry = IRI.create(getClass().getResource(registryResource));
         OntologyInputSource src = new LibrarySource(Locations.LIBRARY_TEST1, localTestRegistry,
-                onm.getOwlCacheManager(), loader);
+                virginOntologyManager, loader);
         OWLOntology o = src.getRootOntology();
         boolean hasImporting = false, hasImported = false;
         for (OWLImportsDeclaration ax : o.getImportsDeclarations()) {
@@ -139,7 +170,8 @@ public class TestOntologyLibrary {
             else if (!hasImported && tmpstr.endsWith("maincharacters.owl")) hasImported = true;
             if (hasImporting && hasImported) break;
         }
-        assertTrue(hasImporting && hasImported);
+        assertTrue(hasImporting);
+        assertTrue(hasImported);
     }
 
 }

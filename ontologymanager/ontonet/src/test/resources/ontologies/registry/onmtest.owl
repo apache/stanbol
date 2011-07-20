@@ -46,17 +46,17 @@ Unless required by applicable law or agreed to in writing, software distributed 
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ONM Test Library 2</rdfs:label>
     <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#OntologyLibrary"/>
     <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.1</owl:versionInfo>
+    <meta:hasOntology rdf:resource="http://stanbol.apache.org/ontologies/pcomics/droppedcharacters.owl"/>
   </rdf:Description>
 
   <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/pcomics/characters_all.owl">
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">All actual characters</rdfs:label>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">All active characters</rdfs:label>
     <meta:isOntologyOf rdf:resource="#Library1"/>
     <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
   </rdf:Description>
 
   <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/pcomics/droppedcharacters.owl">
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Dropped characters</rdfs:label>
-    <meta:isOntologyOf rdf:resource="#Library2"/>
     <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
   </rdf:Description>
   

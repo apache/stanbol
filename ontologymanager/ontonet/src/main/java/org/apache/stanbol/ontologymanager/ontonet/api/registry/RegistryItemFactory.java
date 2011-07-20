@@ -21,29 +21,51 @@ import java.util.Set;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Library;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryOntology;
+import org.apache.stanbol.ontologymanager.ontonet.impl.registry.cache.RegistryUtils;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 
+/**
+ * A factory that creates the basic elements of the ontology registry metamodel, starting from OWL objects
+ * that are required not to be anonymous.<br/>
+ * <br/>
+ * <b>Note that implementations should not be aggressive</b>, in that they should <b>not</b> recursively
+ * create and/or append the parents and children of any generated object. Refer to the following static
+ * methods in the {@link RegistryUtils} class to recursively populate a registry item:
+ * <ul>
+ * <li>{@link RegistryUtils#populateLibrary(OWLNamedIndividual, Set)}</li>
+ * <li>{@link RegistryUtils#populateOntology(OWLNamedIndividual, Set)}</li>
+ * <li>{@link RegistryUtils#populateRegistry(OWLOntology)}</li>
+ * </ul>
+ */
 public interface RegistryItemFactory {
 
     /**
-     * Implementations should recurse into factory method {@link #createRegistryOntology(OWLNamedIndividual)}
-     * for creating the ontology entries and setting them as children.
+     * Creates a new {@link Library} object named after the ID of the supplied individual.
      * 
      * @param ind
-     * @return
+     *            the named individual to extract the library model from.
+     * @return the library model.
      */
-    Library createLibrary(OWLNamedIndividual ind, Set<OWLOntology> ontologies);
+    Library createLibrary(OWLNamedIndividual ind);
 
     /**
-     * Implementations should recurse into factory method {@link #createRegistry(OWLNamedIndividual)} for
-     * creating the referenced libraries and setting them as children.
+     * Creates a new {@link Registry} object named after the ID of the supplied ontology.
+     * 
+     * @param o
+     *            the ontology to extract the registry model from. Should be a named ontology, lest the method
+     *            return null.
+     * @return the registry model, or null if <code>o</code> is anonymous.
+     */
+    Registry createRegistry(OWLOntology o);
+
+    /**
+     * Creates a new {@link RegistryOntology} object named after the ID of the supplied individual.
      * 
      * @param ind
-     * @return
+     *            the named individual to extract the ontology model from.
+     * @return the ontology model.
      */
-    Registry createRegistry(OWLNamedIndividual ind);
-
     RegistryOntology createRegistryOntology(OWLNamedIndividual ind);
 
 }

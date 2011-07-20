@@ -22,9 +22,9 @@ import java.util.Set;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.AbstractOntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
-import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.RegistryImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.RegistryLibraryImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.LibraryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.owl.util.URIUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 /**
  * An ontology input source that loads all the ontologies in a given library and attaches them to a parent
  * ontology, either new or supplied by the developer. This input source can either accept an already built
- * {@link RegistryLibraryImpl} object, or parse a library OWL file from its logical URI.
+ * {@link LibraryImpl} object, or parse a library OWL file from its logical URI.
  */
 public class LibrarySource extends AbstractOntologyInputSource {
 
@@ -110,7 +110,7 @@ public class LibrarySource extends AbstractOntologyInputSource {
         bindPhysicalIri(null);
 
         Set<OWLOntology> subtrees = new HashSet<OWLOntology>();
-        RegistryImpl reg = loader.loadLibraryEager(registryLocation, libraryID);
+        Registry reg = loader.loadLibraryEager(registryLocation, libraryID);
         for (RegistryItem ri : reg.getChildren()) {
             if (ri.isLibrary()) try {
                 Set<OWLOntology> adds = loader.gatherOntologies(ri, ontologyManager, true);

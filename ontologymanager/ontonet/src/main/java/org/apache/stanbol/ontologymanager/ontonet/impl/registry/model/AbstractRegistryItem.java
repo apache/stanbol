@@ -28,13 +28,15 @@ import org.semanticweb.owlapi.model.IRI;
 
 public abstract class AbstractRegistryItem implements RegistryItem {
 
+    // Two-way adjacency TODO use maps instead?
     protected Set<RegistryItem> children = new HashSet<RegistryItem>();
-
     private IRI iri;
 
     private String name;
 
-    private RegistryItem parent;
+    protected Set<RegistryItem> parents = new HashSet<RegistryItem>();
+
+    // private RegistryItem parent;
 
     public AbstractRegistryItem(String name) {
         setName(name);
@@ -47,13 +49,25 @@ public abstract class AbstractRegistryItem implements RegistryItem {
 
     @Override
     public void addChild(RegistryItem child) throws RegistryContentException {
-        if (child.equals(parent)) throw new RegistryContentException("Cannot add parent item " + parent
-                                                                     + " as a child.");
-        children.add(child);
-        try {
-            child.setParent(this);
-        } catch (RegistryContentException e) {
-            // Shouldn't happen. null is always legal.
+        if (parents.contains(child)) throw new RegistryContentException("Cannot add parent item " + child
+                                                                        + " as a child.");
+        if (!children.contains(child)) {
+            children.add(child);
+            try {
+                child.addContainer(this);
+            } catch (RegistryContentException e) {
+                // Shouldn't happen. null is always legal.
+            }
+        }
+    }
+
+    @Override
+    public void addContainer(RegistryItem container) throws RegistryContentException {
+        if (children.contains(container)) throw new RegistryContentException("Cannot set child item "
+                                                                             + container + " as a parent.");
+        if (!parents.contains(container)) {
+            parents.add(container);
+            container.addChild(this);
         }
     }
 
@@ -68,13 +82,13 @@ public abstract class AbstractRegistryItem implements RegistryItem {
         return children.toArray(new RegistryItem[children.size()]);
     }
 
-    public String getName() {
-        return this.name;
+    @Override
+    public RegistryItem[] getContainers() {
+        return parents.toArray(new RegistryItem[parents.size()]);
     }
 
-    @Override
-    public RegistryItem getParent() {
-        return parent;
+    public String getName() {
+        return this.name;
     }
 
     public URL getURL() {
@@ -93,24 +107,23 @@ public abstract class AbstractRegistryItem implements RegistryItem {
 
     @Override
     public void removeChild(RegistryItem child) {
-        children.remove(child);
-        try {
-            child.setParent(null);
-        } catch (RegistryContentException e) {
-            // Shouldn't happen. null is always legal.
+        if (children.contains(child)) {
+            children.remove(child);
+            child.removeContainer(this);
+        }
+    }
+
+    @Override
+    public void removeContainer(RegistryItem container) {
+        if (parents.contains(container)) {
+            parents.remove(container);
+            container.removeChild(this);
         }
     }
 
     @Override
     public void setName(String string) {
         this.name = string;
-    }
-
-    @Override
-    public void setParent(RegistryItem parent) throws RegistryContentException {
-        if (children.contains(parent)) throw new RegistryContentException("Cannot set child item " + parent
-                                                                          + " as a parent.");
-        this.parent = parent;
     }
 
     @Override

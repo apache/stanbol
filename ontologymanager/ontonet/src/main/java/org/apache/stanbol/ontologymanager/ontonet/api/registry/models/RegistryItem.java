@@ -21,6 +21,15 @@ import java.net.URL;
 
 public interface RegistryItem {
 
+    /**
+     * The allowed types of registry item that a registry manager can handle.
+     */
+    public enum Type {
+        LIBRARY,
+        ONTOLOGY,
+        REGISTRY;
+    }
+
     void addChild(RegistryItem child) throws RegistryContentException;
 
     void clearChildren();
@@ -29,7 +38,7 @@ public interface RegistryItem {
 
     String getName();
 
-    RegistryItem getParent();
+    RegistryItem[] getContainers();
 
     URL getURL();
 
@@ -40,10 +49,12 @@ public interface RegistryItem {
     boolean isOntology();
 
     void removeChild(RegistryItem child);
+    
+    void removeContainer(RegistryItem container);
 
     void setName(String string);
-
-    void setParent(RegistryItem parent) throws RegistryContentException;
+    
+    void addContainer(RegistryItem container) throws RegistryContentException;
 
     void setURL(URL url) throws URISyntaxException;
 

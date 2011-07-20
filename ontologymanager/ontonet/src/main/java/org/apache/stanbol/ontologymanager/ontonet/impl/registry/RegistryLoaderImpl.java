@@ -32,16 +32,18 @@ import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.io.XDRegistrySource;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Library;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryContentException;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OWLOntologyManagerFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.cache.ODPRegistryCacheException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.cache.ODPRegistryCacheManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.registry.cache.RegistryUtils;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.cache.URIUnresolvableException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.AbstractRegistryItem;
+import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.LibraryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.RegistryImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.RegistryLibraryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.RegistryOntologyImpl;
 import org.apache.stanbol.ontologymanager.ontonet.xd.utils.RDFSLabelGetter;
 import org.apache.stanbol.ontologymanager.ontonet.xd.vocabulary.CODOVocabulary;
@@ -67,11 +69,55 @@ import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Default implementation of the registry loader.<br/>
+ * <br/>
+ * TODO will be dismissed along with its interface in favor of the new registry management.
+ */
 public class RegistryLoaderImpl implements RegistryLoader {
 
     private static final OWLClass cRegistryLibrary;
 
     private static final OWLObjectProperty isPartOf, isOntologyOf;
+
+    static {
+        OWLDataFactory factory = OWLManager.getOWLDataFactory();
+        cRegistryLibrary = factory.getOWLClass(IRI.create(CODOVocabulary.CODD_OntologyLibrary));
+        isPartOf = factory.getOWLObjectProperty(IRI.create(CODOVocabulary.PARTOF_IsPartOf));
+        isOntologyOf = factory.getOWLObjectProperty(IRI.create(CODOVocabulary.ODPM_IsOntologyOf));
+    }
+
+    public static Set<OWLIndividual> getParentContainer(OWLNamedIndividual child, OWLOntology ontology) {
+
+        if (child.getObjectPropertyValues(ontology).containsKey(isPartOf)
+            || child.getObjectPropertyValues(ontology).containsKey(isOntologyOf)) {
+            Set<OWLIndividual> partOfSet = child.getObjectPropertyValues(ontology).get(isPartOf);
+            Set<OWLIndividual> ontologyOfSet = child.getObjectPropertyValues(ontology).get(isOntologyOf);
+
+            Set<OWLIndividual> mergedSet = new HashSet<OWLIndividual>();
+            if (partOfSet != null) mergedSet.addAll(partOfSet);
+            if (ontologyOfSet != null) mergedSet.addAll(ontologyOfSet);
+            return mergedSet;
+        } else return new HashSet<OWLIndividual>();
+    }
+
+    public static Set<OWLNamedIndividual> getParts(OWLIndividual parent, OWLOntology ontology) {
+        Set<OWLNamedIndividual> indies = ontology.getIndividualsInSignature();
+        Iterator<OWLNamedIndividual> iter = indies.iterator();
+        Set<OWLNamedIndividual> tor = new HashSet<OWLNamedIndividual>();
+        // For each individual in this ontology
+        while (iter.hasNext()) {
+            OWLNamedIndividual n = iter.next();
+            // Get its parent wrt to isPartOf or isOntologyOf relationships
+            for (OWLIndividual i : getParentContainer(n, ontology)) {
+                if (i.equals(parent)) {
+                    tor.add(n);
+                    break;
+                }
+            }
+        }
+        return tor;
+    }
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -81,22 +127,20 @@ public class RegistryLoaderImpl implements RegistryLoader {
 
     private Map<URI,OWLOntology> registryOntologiesCache = new HashMap<URI,OWLOntology>();
 
-    static {
-        OWLDataFactory factory = OWLManager.getOWLDataFactory();
-        cRegistryLibrary = factory.getOWLClass(IRI.create(CODOVocabulary.CODD_OntologyLibrary));
-        isPartOf = factory.getOWLObjectProperty(IRI.create(CODOVocabulary.PARTOF_IsPartOf));
-        isOntologyOf = factory.getOWLObjectProperty(IRI.create(CODOVocabulary.ODPM_IsOntologyOf));
-    }
-
     /**
 	 */
     public RegistryLoaderImpl(ONManager onm) {
         this.onm = onm;
-        // OWLDataFactory factory = OWLManager.getOWLDataFactory();
-        // cRegistryLibrary = factory.getOWLClass(IRI.create(CODOVocabulary.CODD_OntologyLibrary));
-        // isPartOf = factory.getOWLObjectProperty(IRI.create(CODOVocabulary.PARTOF_IsPartOf));
-        // isOntologyOf = factory.getOWLObjectProperty(IRI.create(CODOVocabulary.ODPM_IsOntologyOf));
     }
+
+    // private OWLOntology getMergedOntology(IRI registryLocation) throws RegistryContentException {
+    // try {
+    // return getMergedOntology(registryLocation.toURI().toURL());
+    // } catch (MalformedURLException e) {
+    // log.warn("Malformed URI for merged ontology from registry " + registryLocation, e);
+    // return null;
+    // }
+    // }
 
     public Set<OWLOntology> gatherOntologies(RegistryItem registryItem,
                                              OWLOntologyManager manager,
@@ -104,8 +148,8 @@ public class RegistryLoaderImpl implements RegistryLoader {
 
         Set<OWLOntology> result = new HashSet<OWLOntology>();
 
-        if (registryItem instanceof RegistryImpl) {
-            for (RegistryItem item : ((RegistryImpl) registryItem).getChildren())
+        if (registryItem instanceof Registry) {
+            for (RegistryItem item : ((Registry) registryItem).getChildren())
                 try {
                     result.addAll(gatherOntologies(item, manager, recurseRegistries));
                 } catch (OWLOntologyCreationException e) {
@@ -119,7 +163,7 @@ public class RegistryLoaderImpl implements RegistryLoader {
                 locationIri = IRI.create(((RegistryOntologyImpl) registryItem).getURL());
                 result.add(manager.loadOntology(locationIri));
             } catch (OWLOntologyAlreadyExistsException ex) {
-                // We are trying to oad an alread existing ontology,
+                // We are trying to oad an already existing ontology,
                 // we take it from the manager directly
                 result.add(manager.getOntology(ex.getOntologyID()));
 
@@ -129,32 +173,27 @@ public class RegistryLoaderImpl implements RegistryLoader {
                 log.warn("Malformed URI for ontology " + registryItem.getName() + ". Skipping.", e);
             }
         } else if (registryItem.isLibrary()) {
-            for (RegistryItem item : ((RegistryLibraryImpl) registryItem).getChildren()) {
+            for (RegistryItem item : ((LibraryImpl) registryItem).getChildren()) {
                 result.addAll(gatherOntologies(item, manager, recurseRegistries));
             }
         }
         return result;
     }
 
-    public RegistryLibraryImpl getLibrary(RegistryImpl reg, IRI libraryID) {
+    // private OWLOntology getOntologyForRegistryLocation(URI location) {
+    // return registryOntologiesCache.get(location);
+    // }
+
+    public Library getLibrary(Registry reg, IRI libraryID) {
         for (RegistryItem child : reg.getChildren()) {
             try {
-                if (child.isLibrary() && IRI.create(child.getURL()).equals(libraryID)) return (RegistryLibraryImpl) child;
+                if (child.isLibrary() && IRI.create(child.getURL()).equals(libraryID)) return (LibraryImpl) child;
             } catch (URISyntaxException e) {
                 // If some URL is not well-formed here and there, sticazzi
                 continue;
             }
         }
         return null;
-    }
-
-    private OWLOntology getMergedOntology(IRI registryLocation) throws RegistryContentException {
-        try {
-            return getMergedOntology(registryLocation.toURI().toURL());
-        } catch (MalformedURLException e) {
-            log.warn("Malformed URI for merged ontology from registry " + registryLocation, e);
-            return null;
-        }
     }
 
     private OWLOntology getMergedOntology(URL registryLocation) throws RegistryContentException {
@@ -224,10 +263,6 @@ public class RegistryLoaderImpl implements RegistryLoader {
         return ontology;
     }
 
-    private OWLOntology getOntologyForRegistryLocation(URI location) {
-        return registryOntologiesCache.get(location);
-    }
-
     private OWLOntology getOntologyForRegistryLocationNoCached(URI location) {
         OWLOntologyManagerFactoryImpl factory = onm.getOntologyManagerFactory();
         IRI iri = IRI.create(location);
@@ -243,45 +278,13 @@ public class RegistryLoaderImpl implements RegistryLoader {
 
     public Object getParent(Object child) {
         if (child instanceof AbstractRegistryItem) {
-            return ((RegistryItem) child).getParent();
+            return ((RegistryItem) child).getContainers();
         }
         return null;
     }
 
-    public static Set<OWLIndividual> getParentContainer(OWLNamedIndividual child, OWLOntology ontology) {
-
-        if (child.getObjectPropertyValues(ontology).containsKey(isPartOf)
-            || child.getObjectPropertyValues(ontology).containsKey(isOntologyOf)) {
-            Set<OWLIndividual> partOfSet = child.getObjectPropertyValues(ontology).get(isPartOf);
-            Set<OWLIndividual> ontologyOfSet = child.getObjectPropertyValues(ontology).get(isOntologyOf);
-
-            Set<OWLIndividual> mergedSet = new HashSet<OWLIndividual>();
-            if (partOfSet != null) mergedSet.addAll(partOfSet);
-            if (ontologyOfSet != null) mergedSet.addAll(ontologyOfSet);
-            return mergedSet;
-        } else return new HashSet<OWLIndividual>();
-    }
-
-    public static Set<OWLNamedIndividual> getParts(OWLIndividual parent, OWLOntology ontology) {
-        Set<OWLNamedIndividual> indies = ontology.getIndividualsInSignature();
-        Iterator<OWLNamedIndividual> iter = indies.iterator();
-        Set<OWLNamedIndividual> tor = new HashSet<OWLNamedIndividual>();
-        // For each individual in this ontology
-        while (iter.hasNext()) {
-            OWLNamedIndividual n = iter.next();
-            // Get its parent wrt to isPartOf or isOntologyOf relationships
-            for (OWLIndividual i : getParentContainer(n, ontology)) {
-                if (i.equals(parent)) {
-                    tor.add(n);
-                    break;
-                }
-            }
-        }
-        return tor;
-    }
-
-    private List<RegistryImpl> getRegistries() {
-        List<RegistryImpl> registries = new ArrayList<RegistryImpl>();
+    private List<Registry> getRegistries() {
+        List<Registry> registries = new ArrayList<Registry>();
         // String storedStringValue = XDRegistryPlugin.getDefault()
         // .getPreferenceStore().getString(
         // PreferenceConstants.P_ODP_REGISTRIES);
@@ -314,31 +317,30 @@ public class RegistryLoaderImpl implements RegistryLoader {
         return registries;
     }
 
-    private List<RegistryImpl> getRegistries(XDRegistrySource source) {
+    // private List<Registry> getRegistries(XDRegistrySource source) {
+    //
+    // List<Registry> registries = new ArrayList<Registry>();
+    //
+    // if (source.getPhysicalIRI() != null) {
+    //
+    // } else if (source.isInputStreamAvailable()) {
+    //
+    // } else if (source.isReaderAvailable()) {
+    //
+    // }
+    //
+    // return registries;
+    // }
 
-        List<RegistryImpl> registries = new ArrayList<RegistryImpl>();
+    private Library getTree(OWLNamedIndividual i, OWLOntology ontology) {
 
-        if (source.getPhysicalIRI() != null) {
-
-        } else if (source.isInputStreamAvailable()) {
-
-        } else if (source.isReaderAvailable()) {
-
-        }
-
-        return registries;
-    }
-
-    private RegistryLibraryImpl getTree(OWLNamedIndividual i, OWLOntology ontology) {
-
-        RegistryLibraryImpl to = new RegistryLibraryImpl(
-                new RDFSLabelGetter(ontology, i.getIRI(), false).getPreferred());
+        Library to = new LibraryImpl(new RDFSLabelGetter(ontology, i.getIRI(), false).getPreferred());
         try {
-            Set<OWLNamedIndividual> children = this.getParts(i, ontology);
+            Set<OWLNamedIndividual> children = getParts(i, ontology);
             if (children.size() == 0) return to;
             for (OWLNamedIndividual childIndividual : children) {
                 if (isLibrary(childIndividual, ontology)) {
-                    RegistryLibraryImpl t = this.getTree(childIndividual, ontology);
+                    Library t = this.getTree(childIndividual, ontology);
                     t.setURL(childIndividual.getIRI().toURI().toURL());
                     to.addChild(t);
                 } else if (isOntology(childIndividual, ontology)) {
@@ -360,11 +362,11 @@ public class RegistryLoaderImpl implements RegistryLoader {
     }
 
     public boolean hasChildren(Object parent) {
-        if (parent instanceof RegistryLibraryImpl) return ((RegistryLibraryImpl) parent).hasChildren();
+        if (parent instanceof LibraryImpl) return ((LibraryImpl) parent).hasChildren();
         return false;
     }
 
-    public boolean hasLibrary(RegistryImpl reg, IRI libraryID) {
+    public boolean hasLibrary(Registry reg, IRI libraryID) {
         for (RegistryItem child : reg.getChildren()) {
             try {
                 if (child.isLibrary() && IRI.create(child.getURL()).equals(libraryID)) return true;
@@ -389,59 +391,85 @@ public class RegistryLoaderImpl implements RegistryLoader {
     }
 
     @Override
-    public RegistryImpl loadLibraryEager(IRI registryPhysicalIRI, IRI libraryID) {
-        RegistryImpl registry = null;
-        OWLOntologyManager mgr = onm.getOwlCacheManager();// getManager();
-
+    public Registry loadLibraryEager(IRI registryPhysicalIRI, IRI libraryID) {
+        // FIXME! linbraryID unused
+        Registry registry = null;
+        OWLOntologyManager mgr = onm.getOwlCacheManager();
         try {
             OWLOntology ontology = mgr.loadOntology(registryPhysicalIRI);
-            for (OWLIndividual ind : cRegistryLibrary.getIndividuals(ontology))
-                if (ind.isNamed()) {
-                    OWLNamedIndividual nind = ind.asOWLNamedIndividual();
-                    IRI regiri = nind.getIRI();
-                    if (!regiri.equals(libraryID)) continue;
-                    try {
-                        registry = new RegistryImpl(regiri.getFragment(), regiri.toURI().toURL());
-                    } catch (MalformedURLException e1) {
-                        log.warn("Ontology document IRI " + registryPhysicalIRI
-                                 + " matches a malformed URI pattern.", e1);
-                    } catch (URISyntaxException e1) {
-                        log.warn("Ontology document IRI " + registryPhysicalIRI
-                                 + " matches a malformed URI pattern.", e1);
-                    }
-                    // Find the ontologies in this registry. If this is individual is not "ontology of" or
-                    // "part of", then proceed.
-                    if (!nind.getObjectPropertyValues(ontology).containsKey(isPartOf)
-                        && !nind.getObjectPropertyValues(ontology).containsKey(isOntologyOf)) {
-                        try {
-                            registry.addChild(this.getTree((OWLNamedIndividual) nind, ontology));
-                        } catch (RegistryContentException e) {
-                            log.warn("Illegal child addition detected. Skipping.", e);
-                        }
-                    }
-                }
+            registry = RegistryUtils.populateRegistry(ontology);
         } catch (OWLOntologyDocumentAlreadyExistsException e) {
             log.warn("Ontology document at " + e.getOntologyDocumentIRI()
                      + " exists and will not be reloaded.", e);
         } catch (OWLOntologyAlreadyExistsException e) {
-            log.warn("KReS :: ontology " + e.getOntologyID() + " exists and will not be reloaded.", e);
+            log.warn("Ontology " + e.getOntologyID() + " exists and will not be reloaded.", e);
             // Do nothing. Existing ontologies are fine.
         } catch (OWLOntologyCreationException e) {
-            log.error("KReS :: Could not load ontology " + registryPhysicalIRI + " .", e);
+            log.error("Could not load ontology " + registryPhysicalIRI + " .", e);
+        } catch (RegistryContentException e) {
+            log.error("Could not populate registry " + registryPhysicalIRI + " .", e);
         } finally {}
         return registry;
     }
+
+    // /**
+    // * FIXME : this was a stupid idea : the meta-model construction should always be eager: it's the actual
+    // * loading of ontologies in the libraries that can be lazy.
+    // */
+    // // @Override
+    // public Registry loadLibraryEager2(IRI registryPhysicalIRI, IRI libraryID) {
+    // Registry registry = null;
+    // OWLOntologyManager mgr = onm.getOwlCacheManager();// getManager();
+    //
+    // try {
+    // OWLOntology ontology = mgr.loadOntology(registryPhysicalIRI);
+    // for (OWLIndividual ind : cRegistryLibrary.getIndividuals(ontology))
+    // if (ind.isNamed()) {
+    // OWLNamedIndividual nind = ind.asOWLNamedIndividual();
+    // IRI regiri = nind.getIRI();
+    // if (!regiri.equals(libraryID)) continue;
+    // try {
+    // registry = new RegistryImpl(regiri.getFragment(), regiri.toURI().toURL());
+    // } catch (MalformedURLException e1) {
+    // log.warn("Ontology document IRI " + registryPhysicalIRI
+    // + " matches a malformed URI pattern.", e1);
+    // } catch (URISyntaxException e1) {
+    // log.warn("Ontology document IRI " + registryPhysicalIRI
+    // + " matches a malformed URI pattern.", e1);
+    // }
+    // // Find the ontologies in this registry. If this is individual is not "ontology of" or
+    // // "part of", then proceed.
+    // if (!nind.getObjectPropertyValues(ontology).containsKey(isPartOf)
+    // && !nind.getObjectPropertyValues(ontology).containsKey(isOntologyOf)) {
+    // try {
+    // registry.addChild(this.getTree((OWLNamedIndividual) nind, ontology));
+    // } catch (RegistryContentException e) {
+    // log.warn("Illegal child addition detected. Skipping.", e);
+    // }
+    // }
+    // }
+    // } catch (OWLOntologyDocumentAlreadyExistsException e) {
+    // log.warn("Ontology document at " + e.getOntologyDocumentIRI()
+    // + " exists and will not be reloaded.", e);
+    // } catch (OWLOntologyAlreadyExistsException e) {
+    // log.warn("KReS :: ontology " + e.getOntologyID() + " exists and will not be reloaded.", e);
+    // // Do nothing. Existing ontologies are fine.
+    // } catch (OWLOntologyCreationException e) {
+    // log.error("KReS :: Could not load ontology " + registryPhysicalIRI + " .", e);
+    // } finally {}
+    // return registry;
+    // }
 
     public void loadLocations() throws RegistryContentException {
 
         try {
 
             registryOntologiesCache.clear();
-            List<RegistryImpl> registries = getRegistries();
+            List<Registry> registries = getRegistries();
 
             int regsize = registries.size();
             int c = 0;
-            for (RegistryImpl current : registries) {
+            for (Registry current : registries) {
                 c++;
                 log.debug("Loading " + current.toString() + " [" + c + "/" + regsize + "]");
                 if (!ODPRegistryCacheManager.registryContains(current.getURL().toURI())) {
@@ -459,12 +487,13 @@ public class RegistryLoaderImpl implements RegistryLoader {
                 }
             }
             c = 0;
-            for (RegistryImpl registry : registries) {
+            for (Registry registry : registries) {
                 c++;
                 try {
                     registry = setupRegistry(registry);
                 } catch (RegistryContentException e) {
-                    registry.setError(" [Unable to load from location " + registry.getURL().toString() + "]");
+                    ((RegistryImpl) registry).setError(" [Unable to load from location "
+                                                       + registry.getURL().toString() + "]");
                 }
             }
         } catch (Throwable th) {
@@ -472,64 +501,86 @@ public class RegistryLoaderImpl implements RegistryLoader {
         }
     }
 
-    /**
-     * The ontology at <code>physicalIRI</code> may in turn include more than one registry.
-     * 
-     * @param physicalIRI
-     * @return
-     */
-    public Set<RegistryImpl> loadRegistriesEager(IRI physicalIRI) {
-
-        Set<RegistryImpl> results = new HashSet<RegistryImpl>();
-        OWLOntologyManager mgr = onm.getOwlCacheManager();// getManager();
-
+    @Override
+    public Registry loadRegistry(IRI registryPhysicalIRI, OWLOntologyManager mgr) {
+        // FIXME! linbraryID unused
+        Registry registry = null;
+        if (mgr == null) mgr = onm.getOwlCacheManager();
         try {
-            OWLOntology ontology = mgr.loadOntology(physicalIRI);
-            for (OWLIndividual ind : cRegistryLibrary.getIndividuals(ontology))
-                if (ind.isNamed()) {
-                    OWLNamedIndividual nind = ind.asOWLNamedIndividual();
-                    IRI regiri = nind.getIRI();
-                    // TODO: avoid using toURL crap
-                    RegistryImpl registry = null;
-                    try {
-                        registry = new RegistryImpl(regiri.getFragment(), regiri.toURI().toURL());
-                    } catch (MalformedURLException e1) {
-                        // Why should a well-formed IRI be a malformed URL
-                        // anyway ?
-                        log.warn("KReS :: ontology document IRI " + physicalIRI
-                                 + " matches a malformed URI pattern.", e1);
-                    } catch (URISyntaxException e1) {
-                        // Why should a well-formed IRI be a malformed URL
-                        // anyway ?
-                        log.warn("KReS :: ontology document IRI " + physicalIRI
-                                 + " matches a malformed URI pattern.", e1);
-                    }
-                    if (registry != null) {
-                        // Find the ontologies in this registry
-                        // If this is individual is not "ontology of" or "part of",
-                        // then proceed.
-                        if (!nind.getObjectPropertyValues(ontology).containsKey(isPartOf)
-                            && !nind.getObjectPropertyValues(ontology).containsKey(isOntologyOf)) {
-                            try {
-                                registry.addChild(this.getTree((OWLNamedIndividual) nind, ontology));
-                            } catch (RegistryContentException e) {
-                                log.warn("Illegal child addition detected. Skipping.", e);
-                            }
-                        }
-                        results.add(registry);
-                    }
-                }
+            OWLOntology ontology = mgr.loadOntology(registryPhysicalIRI);
+            registry = RegistryUtils.populateRegistry(ontology);
         } catch (OWLOntologyDocumentAlreadyExistsException e) {
-            log.warn("Ontology document at" + e.getOntologyDocumentIRI()
+            log.warn("Ontology document at " + e.getOntologyDocumentIRI()
                      + " exists and will not be reloaded.", e);
         } catch (OWLOntologyAlreadyExistsException e) {
-            log.warn("KReS :: ontology " + e.getOntologyID() + " exists and will not be reloaded.", e);
+            log.warn("Ontology " + e.getOntologyID() + " exists and will not be reloaded.", e);
             // Do nothing. Existing ontologies are fine.
         } catch (OWLOntologyCreationException e) {
-            log.error("KReS :: Could not load ontology " + physicalIRI + " .", e);
+            log.error("Could not load ontology " + registryPhysicalIRI + " .", e);
+        } catch (RegistryContentException e) {
+            log.error("Could not populate registry " + registryPhysicalIRI + " .", e);
         } finally {}
-        return results;
+        return registry;
     }
+
+    // /**
+    // * The ontology at <code>physicalIRI</code> may in turn include more than one registry.
+    // *
+    // * @param physicalIRI
+    // * @return
+    // */
+    // public Set<Registry> loadRegistriesEager2(IRI physicalIRI) {
+    //
+    // Set<Registry> results = new HashSet<Registry>();
+    // OWLOntologyManager mgr = onm.getOwlCacheManager();// getManager();
+    //
+    // try {
+    // OWLOntology ontology = mgr.loadOntology(physicalIRI);
+    // for (OWLIndividual ind : cRegistryLibrary.getIndividuals(ontology))
+    // if (ind.isNamed()) {
+    // OWLNamedIndividual nind = ind.asOWLNamedIndividual();
+    // IRI regiri = nind.getIRI();
+    // // TODO: avoid using toURL crap
+    // Registry registry = null;
+    // try {
+    // registry = new RegistryImpl(regiri.getFragment(), regiri.toURI().toURL());
+    // } catch (MalformedURLException e1) {
+    // // Why should a well-formed IRI be a malformed URL
+    // // anyway ?
+    // log.warn("KReS :: ontology document IRI " + physicalIRI
+    // + " matches a malformed URI pattern.", e1);
+    // } catch (URISyntaxException e1) {
+    // // Why should a well-formed IRI be a malformed URL
+    // // anyway ?
+    // log.warn("KReS :: ontology document IRI " + physicalIRI
+    // + " matches a malformed URI pattern.", e1);
+    // }
+    // if (registry != null) {
+    // // Find the ontologies in this registry
+    // // If this is individual is not "ontology of" or "part of",
+    // // then proceed.
+    // if (!nind.getObjectPropertyValues(ontology).containsKey(isPartOf)
+    // && !nind.getObjectPropertyValues(ontology).containsKey(isOntologyOf)) {
+    // try {
+    // registry.addChild(this.getTree((OWLNamedIndividual) nind, ontology));
+    // } catch (RegistryContentException e) {
+    // log.warn("Illegal child addition detected. Skipping.", e);
+    // }
+    // }
+    // results.add(registry);
+    // }
+    // }
+    // } catch (OWLOntologyDocumentAlreadyExistsException e) {
+    // log.warn("Ontology document at" + e.getOntologyDocumentIRI()
+    // + " exists and will not be reloaded.", e);
+    // } catch (OWLOntologyAlreadyExistsException e) {
+    // log.warn("KReS :: ontology " + e.getOntologyID() + " exists and will not be reloaded.", e);
+    // // Do nothing. Existing ontologies are fine.
+    // } catch (OWLOntologyCreationException e) {
+    // log.error("KReS :: Could not load ontology " + physicalIRI + " .", e);
+    // } finally {}
+    // return results;
+    // }
 
     /**
      * Requires that Registry objects are created earlier. Problem is, we might not know their names a priori.
@@ -538,7 +589,7 @@ public class RegistryLoaderImpl implements RegistryLoader {
      * @return
      * @throws RegistryContentException
      */
-    private RegistryImpl setupRegistry(RegistryImpl registry) throws RegistryContentException {
+    private Registry setupRegistry(Registry registry) throws RegistryContentException {
 
         // For each registry:
         registry.clearChildren();
