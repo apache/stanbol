@@ -6,7 +6,7 @@ components.
 
 To start this after building use:
 
-  java -Xmx512M -jar target/org.apache.stanbol.enhancer.launchers.stable-0.9-SNAPSHOT.jar
+  java -Xmx512M -jar target/org.apache.stanbol.launchers.stable-0.9.0-incubating-SNAPSHOT.jar
 
 The Stanbol Enhancer HTTP endpoint should then be available at 
 

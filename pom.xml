@@ -86,7 +86,10 @@
       <id>framework</id>
       <activation>
         <activeByDefault>false</activeByDefault>
-      </activation>     
+      </activation>
+      <modules>
+        <module>launchers/framework</module>
+      </modules>
     </profile>
     <profile>
       <id>kres</id>
