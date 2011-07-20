@@ -57,11 +57,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.defaultdata</artifactId>
-    </dependency>
-
-    <dependency>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
     </dependency>
@@ -100,10 +95,22 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.data.opennlp.ner.en</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -121,7 +128,6 @@
 <!--            <Embed-Dependency></Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>  -->
             <Import-Package>
-              org.apache.stanbol.defaultdata.opennlp,
               !net.didion.*,
               *
             </Import-Package>
