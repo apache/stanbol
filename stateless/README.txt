@@ -6,7 +6,7 @@ That Sling plugin is not released as I write this, so you need to build it
 
 To start this after building use:
 
-  java -Xmx512M -jar target/org.apache.stanbol.enhancer.launchers.lite-0.9-SNAPSHOT.jar
+  java -Xmx512M -jar target/org.apache.stanbol.launchers.stateless-0.9.0-incubating-SNAPSHOT.jar
 
 The Stanbol Enhancer HTTP endpoint should then be available at 
 
