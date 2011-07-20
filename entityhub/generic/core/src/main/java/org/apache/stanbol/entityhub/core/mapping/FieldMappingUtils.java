@@ -151,7 +151,12 @@ public final class FieldMappingUtils {
 
         String[] parts = mapping.split(" "); //TODO: maybe we should not use the spaces here
         List<String> mappedTo = Collections.emptyList();
-        String fieldPattern = NamespaceEnum.getFullName(parts[0]);
+        String fieldPattern;
+        if(!parts[0].isEmpty() && !parts[0].equals("*")){
+            fieldPattern = NamespaceEnum.getFullName(parts[0]);
+        } else {
+            fieldPattern = parts[0];
+        }
         Constraint filter = null;
         for(int i=1;i<parts.length;i++){
             if("|".equals(parts[i]) && parts.length > i+1){
@@ -246,9 +251,11 @@ public final class FieldMappingUtils {
     private static List<String> parseMappings(String[] parts, int start) {
         ArrayList<String> mappings = new ArrayList<String>(parts.length-start);
         for(int i=start;i<parts.length;i++){
-            String act = NamespaceEnum.getFullName(parts[i]);
-            if(!act.isEmpty()){ //needed to remove two spaces in a row
-                mappings.add(act);
+            if(!parts[i].isEmpty()){ //needed to remove two spaces in a row
+                String act = NamespaceEnum.getFullName(parts[i]);
+//                if(!act.isEmpty()){ 
+                    mappings.add(act);
+ //               }
             }
         }
         return mappings;

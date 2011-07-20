@@ -599,12 +599,15 @@ public final class SparqlQueryUtils {
                     boolean firstWord = true;;
                     //TODO: maybe we should use a better word tokenizer
                     for(String word : constraint.getText().split(" ")){
-                        if(firstWord){
-                            firstWord = false;
-                        } else {
-                            queryString.append(" AND ");
+                        word = word.trim();
+                        if(!word.isEmpty()){
+                            if(firstWord){
+                                firstWord = false;
+                            } else {
+                                queryString.append(" AND ");
+                            }
+                            queryString.append('"').append(word).append('"');
                         }
-                        queryString.append('"').append(word).append('"');
                     }
                     queryString.append('\'');
 //                    queryString.append(String.format("?%s bif:contains '\"%s\"'", var,constraint.getText()

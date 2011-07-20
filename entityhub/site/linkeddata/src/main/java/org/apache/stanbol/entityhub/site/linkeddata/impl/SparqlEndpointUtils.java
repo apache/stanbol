@@ -18,11 +18,14 @@ package org.apache.stanbol.entityhub.site.linkeddata.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URLConnection;
 
 import javax.ws.rs.core.UriBuilder;
+
+import org.apache.commons.io.IOUtils;
 
 public final class SparqlEndpointUtils {
     private SparqlEndpointUtils() {/* Do not create instances of utility classes*/}
@@ -46,7 +49,26 @@ public final class SparqlEndpointUtils {
             .build(query, contentType);
         final URLConnection con = dereferenceUri.toURL().openConnection();
         con.addRequestProperty("Accept", contentType);
-        return con.getInputStream();
+        try {
+            return con.getInputStream();
+        } catch (IOException e) {
+            if(con instanceof HttpURLConnection){
+                //try to create a better Error Message
+                InputStream reason = ((HttpURLConnection)con).getErrorStream();
+                String errorMessage = null;
+                try {
+                    errorMessage = IOUtils.toString(reason);
+                } catch (IOException e1) {
+                    //ignore ...
+                }
+                if(errorMessage != null && !errorMessage.isEmpty()){
+                    throw new IOException(((HttpURLConnection)con).getRequestMethod()+" with Content: \n"+errorMessage,e);
+                }
+                IOUtils.closeQuietly(reason);
+            }
+            //if still here re-throw the original exception
+            throw e;
+        }
     }
 
 }
