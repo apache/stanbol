@@ -88,6 +88,11 @@
       <artifactId>org.apache.stanbol.commons.installer.bundleprovider</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
+    <bundle>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.installer.provider.file</artifactId>
+      <version>1.0.0</version>
+    </bundle>
   </startLevel>
 
   <!-- Felix web console and plugins -->
@@ -375,8 +380,18 @@
   <startLevel level="19">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.defaultdata</artifactId>
-      <version>0.0.3</version>
+      <artifactId>org.apache.stanbol.data.opennlp.ner.en</artifactId>
+      <version>1.0.0-incubating</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
+      <version>1.0.0-incubating</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.data.sites.dbpedia.default</artifactId>
+      <version>1.0.0-incubating</version>
     </bundle>
   </startLevel>
 

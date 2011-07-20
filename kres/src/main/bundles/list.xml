@@ -429,11 +429,21 @@
 			<artifactId>org.apache.stanbol.enhancer.engines.autotagging</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.defaultdata</artifactId>
-			<version>0.0.3</version>
-		</bundle>
+	    <bundle>
+            <groupId>org.apache.stanbol</groupId>
+		    <artifactId>org.apache.stanbol.data.opennlp.ner.en</artifactId>
+		    <version>1.0.0-incubating</version>
+	    </bundle>
+	    <bundle>
+	        <groupId>org.apache.stanbol</groupId>
+	        <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
+	        <version>1.0.0-incubating</version>
+	    </bundle>
+	    <bundle>
+	        <groupId>org.apache.stanbol</groupId>
+	        <artifactId>org.apache.stanbol.data.sites.dbpedia.default</artifactId>
+	        <version>1.0.0-incubating</version>
+	    </bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner</artifactId>
