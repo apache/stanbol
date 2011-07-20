@@ -1,0 +1,17 @@
+<projectDescription>
+  <name>org.apache.stanbol.data.sites.dbpedia</name>
+  <comment>This bundle installs DBpedia as Referenced Site with a full local cache to
+    the Apache Stanbol Entityhub.
+    The data of the local cache are not included but MUST be either downloaded
+    or precomputed by using the DBpedia indexing utility (see 
+    &quot;{stanbol}/entityhub/indexing/dbpedia&quot;). NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
+  <projects/>
+  <buildSpec>
+    <buildCommand>
+      <name>org.eclipse.jdt.core.javabuilder</name>
+    </buildCommand>
+  </buildSpec>
+  <natures>
+    <nature>org.eclipse.jdt.core.javanature</nature>
+  </natures>
+</projectDescription>

@@ -28,7 +28,12 @@ import org.slf4j.LoggerFactory;
 public class ClasspathDataFileProvider implements DataFileProvider {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-    public static final String RESOURCE_BASE_PATH = "org/apache/stanbol/defaultdata/opennlp/";
+    /*
+     * NOTE: This path needs to be the same as the one used by the
+     *       org.apache.stanbol.data.opennlp.lang.en bundle to store the 
+     *       OpenNLP models
+     */
+    public static final String RESOURCE_BASE_PATH = "org/apache/stanbol/data/opennlp/";
     
     private final String symbolicName;
     
