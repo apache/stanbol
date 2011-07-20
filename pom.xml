@@ -71,8 +71,9 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
+        <module>commons/opennlp</module>
         <module>data</module>
-        
+
         <module>enhancer/engines</module>
         
         <module>launchers/stable</module>
