@@ -1320,7 +1320,7 @@
       </build>
     </profile>
     <profile>
-      <id>release</id>
+      <id>rat</id>
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
