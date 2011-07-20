@@ -36,7 +36,11 @@
 
   <modules>
     <module>jsonld</module>
+    <!--
+    Deactivated as not releasable under Apache because of license issue. The
+    opennlp bundle is only added when using the 'stack' profile.
     <module>opennlp</module>
+    -->
     <module>solr</module>
     <module>web/base</module>
     <module>web/home</module>
