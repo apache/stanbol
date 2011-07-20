@@ -18,6 +18,13 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>stanbol-parent</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+      <relativePath>parent</relativePath>
+    </parent>
+
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.data.reactor</artifactId>
     <version>0.9.0-incubating-SNAPSHOT</version>
@@ -34,7 +41,42 @@
         <url>http://incubator.apache.org/stanbol/</url>
     </scm>
 
-    <modules>
-        <module>sites</module>
-    </modules>
+  <profiles>
+    <profile>
+      <!--
+        Provile that includes all the data modules used as default data
+        within the Stanbol Launchers.
+        
+        This profile is activated by default because this bundles are
+        referenced by other stanbol modules and the launchers.
+      -->
+      <id>defaultdata</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <modules>
+        <module>sites/dbpediadefault</module>
+        <module>opennlp/lang/en</module>
+        <module>opennlp/ner/en</module>
+      </modules>
+    </profile>
+    <profile>
+      <!--
+        Profile including data modules that are predefined configurations of 
+        referenced sites that do not use a precomputed local index, but directly 
+        access a remote service for query and retrievel. However they they will
+        use a local cache to store retrieved entities.
+        
+        This profile is activated by default because it does not need to download
+        remote resources
+      -->
+      <id>siteconfigs</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <modules>
+        <module>sites/dbpediacached</module>
+      </modules>
+    </profile>
+  </profiles>
 </project>
