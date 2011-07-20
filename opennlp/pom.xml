@@ -150,7 +150,7 @@
     </dependency>
     <dependency> <!-- used to provide the English models while testing -->
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.defaultdata</artifactId>
+      <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
       <scope>test</scope>
     </dependency>
     
