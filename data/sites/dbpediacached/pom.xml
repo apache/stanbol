@@ -72,7 +72,20 @@
           </instructions>
         </configuration>
       </plugin>
-    </plugins>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- License provided in src/main/resources/README -->
+            <exclude>src/main/resources/org/apache/data/site/dbpedia/cached/org.apache.stanbol.enhancer.engines.entitytagging.impl.NamedEntityTaggingEngine-dbpedia.config</exclude>
+            <exclude>src/main/resources/org/apache/data/site/dbpedia/cached/org.apache.stanbol.entityhub.core.site.CacheImpl-dbpedia.config</exclude>
+            <exclude>src/main/resources/org/apache/data/site/dbpedia/cached/org.apache.stanbol.entityhub.site.referencedSite-dbpedia.config</exclude>
+            <exclude>src/main/resources/org/apache/data/site/dbpedia/cached/org.apache.stanbol.entityhub.yard.solr.impl.SolrYard-dbpediaCache.config</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+     </plugins>
   </build>
 
 </project>
