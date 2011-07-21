@@ -16,10 +16,14 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.registry;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.stanbol.ontologymanager.ontonet.Locations;
@@ -31,12 +35,13 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.io.OntologyRegistryIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.registry.cache.RegistryUtils;
+import org.apache.stanbol.ontologymanager.ontonet.impl.registry.RegistryManagerImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -45,34 +50,34 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
 
-public class TestRegistry {
+public class TestOntologyRegistry {
+
     private static OWLOntologyManager ontologyManager;
     private static RegistryLoader loader;
     private static OntologyRegistryIRISource ontologySource;
     private static ONManagerConfiguration configuration;
     private static ONManager onm;
 
-    private static IRI testRegistryIri = IRI
-            .create("http://www.ontologydesignpatterns.org/registry/krestest.owl");
-
     @BeforeClass
     public static void setup() {
+        final Dictionary<String,Object> emptyConfig = new Hashtable<String,Object>();
+        configuration = new ONManagerConfigurationImpl(emptyConfig);
+        RegistryManager regman = new RegistryManagerImpl(emptyConfig);
         // An ONManagerImpl with no store and default settings
-        configuration = new ONManagerConfigurationImpl(new Hashtable<String,Object>());
-        onm = new ONManagerImpl(null, null, configuration, new Hashtable<String,Object>());
+        onm = new ONManagerImpl(null, null, configuration, regman, emptyConfig);
         ontologyManager = onm.getOwlCacheManager();
         loader = onm.getRegistryLoader();
 
     }
 
-//    private static boolean mapperIsSet = false;
-//
-//    public void setupOfflineMapper() {
-//        if (mapperIsSet) {} else {
-//            ontologySource = new OntologyRegistryIRISource(testRegistryIri, ontologyManager, loader);
-//            mapperIsSet = true;
-//        }
-//    }
+    // private static boolean mapperIsSet = false;
+    //
+    // public void setupOfflineMapper() {
+    // if (mapperIsSet) {} else {
+    // ontologySource = new OntologyRegistryIRISource(testRegistryIri, ontologyManager, loader);
+    // mapperIsSet = true;
+    // }
+    // }
 
     @Test
     public void testPopulateRegistry() throws Exception {
@@ -82,22 +87,50 @@ public class TestRegistry {
         virginOntologyManager.addIRIMapper(new AutoIRIMapper(new File(url.toURI()), true));
         // Population is lazy; no need to add other mappers.
         OWLOntology oReg = virginOntologyManager.loadOntology(Locations._REGISTRY_TEST);
-        Registry r = RegistryUtils.populateRegistry(oReg);
+        Registry r = onm.getRegistryManager().populateRegistry(oReg);
         assertNotNull(r);
-        assertEquals(2,r.getChildren().length);
         int count = 2;
-//        System.err.println(r);
-//        for (RegistryItem c1 : r.getChildren()) {
-//            System.err.println("\t" + c1);
-//            for (RegistryItem c2 : c1.getChildren())
-//                System.err.println("\t\t" + c2);
-//
+        assertEquals(count, r.getChildren().length);
+    }
+
+    /**
+     * Verify that, when loading multiple registries that add library information to each other, the overall
+     * model reflects the union of these registries.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testRegistryUnion() throws Exception {
+        OWLOntologyManager virginOntologyManager = OWLManager.createOWLOntologyManager();
+        URL url = getClass().getResource("/ontologies/registry");
+        assertNotNull(url);
+        virginOntologyManager.addIRIMapper(new AutoIRIMapper(new File(url.toURI()), true));
+        // Population is lazy; no need to add other mappers.
+        OWLOntology oReg = virginOntologyManager.loadOntology(Locations._REGISTRY_TEST);
+        Registry r1 = onm.getRegistryManager().populateRegistry(oReg);
+        // Now the second registry.
+        oReg = virginOntologyManager.loadOntology(Locations._REGISTRY_TEST_ADDITIONS);
+        Registry r2 = onm.getRegistryManager().populateRegistry(oReg);
+        assertNotNull(r2);
+        int count = 2;
+        assertEquals(count, r1.getChildren().length);
+//        for (RegistryItem lib : r1.getChildren()) {
+//            System.out.println("\t"+lib);
+//            for (RegistryItem ont : lib.getChildren()) {
+//                System.out.println("\t\t"+ont);      
+//            }
+//        }
+//        for (RegistryItem lib : r2.getChildren()) {
+//            System.out.println("\t"+lib);
+//            for (RegistryItem ont : lib.getChildren()) {
+//                System.out.println("\t\t"+ont);      
+//            }
 //        }
     }
 
     @Test
     public void testAddRegistryToSessionSpace() throws Exception {
-//        setupOfflineMapper();
+        // setupOfflineMapper();
         IRI scopeIri = IRI.create("http://fise.iks-project.eu/scopone");
         SessionOntologySpace space = null;
         space = onm.getOntologySpaceFactory().createSessionOntologySpace(scopeIri);
@@ -117,7 +150,7 @@ public class TestRegistry {
 
     @Test
     public void testScopeCreationWithRegistry() {
-//        setupOfflineMapper();
+        // setupOfflineMapper();
         IRI scopeIri = IRI.create("http://fise.iks-project.eu/scopone");
         OntologyScope scope = null;
         // The factory call also invokes loadRegistriesEager() and
@@ -129,13 +162,11 @@ public class TestRegistry {
         }
 
         assertTrue(scope != null && scope.getCoreSpace().getTopOntology() != null);
-        // OntologyUtils.printOntology(scope.getCoreSpace().getTopOntology(),
-        // System.err);
     }
 
     @Test
     public void testSpaceCreationWithRegistry() {
-//        setupOfflineMapper();
+        // setupOfflineMapper();
         IRI scopeIri = IRI.create("http://fise.iks-project.eu/scopone");
         CoreOntologySpace space = null;
         // The factory call also invokes loadRegistriesEager() and

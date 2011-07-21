@@ -14,21 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.registry.models;
+package org.apache.stanbol.ontologymanager.ontonet.api.registry;
 
-public class RegistryContentException extends Exception {
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryOntology;
+
+public class RegistryOntologyNotLoadedException extends RegistryContentException {
 
     /**
-	 * 
-	 */
-    private static final long serialVersionUID = 1L;
+     * 
+     */
+    private static final long serialVersionUID = 6336128674251128796L;
 
-    public RegistryContentException(Throwable cause) {
-        initCause(cause);
+    private RegistryOntology ontology;
+
+    public RegistryOntologyNotLoadedException(RegistryOntology ontology) {
+        super(ontology.getName());
+        this.ontology = ontology;
     }
 
-    public RegistryContentException(String message) {
-        super(message);
+    public RegistryOntology getOntology() {
+        return ontology;
     }
 
 }

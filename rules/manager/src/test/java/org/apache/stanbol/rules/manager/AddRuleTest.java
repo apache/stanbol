@@ -62,8 +62,8 @@ public class AddRuleTest {
 
     @Before
     public void setUp() {
-    	Dictionary<String, Object> configuration = new Hashtable<String, Object>();
-    	onm = new ONManagerImpl(null,null, new Hashtable<String, Object>());
+        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        onm = new ONManagerImpl(null,null, null,configuration);
     	store = new RuleStoreImpl(onm, configuration,"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
     }
 

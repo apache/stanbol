@@ -49,6 +49,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.conf.OntologyNetworkConfigurationUtils;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
@@ -133,6 +134,9 @@ public class ONManagerImpl implements ONManager {
 
     @Reference
     private ONManagerConfiguration config;
+    
+    @Reference
+    private RegistryManager regman;
 
     private Helper helper = null;
 
@@ -205,9 +209,9 @@ public class ONManagerImpl implements ONManager {
      * @param configuration
      */
     @Deprecated
-    public ONManagerImpl(TcManager tcm, WeightedTcProvider wtcp, Dictionary<String,Object> configuration) {
+    public ONManagerImpl(TcManager tcm, WeightedTcProvider wtcp, RegistryManager registryManager, Dictionary<String,Object> configuration) {
         // Copy the same configuration to the ONManagerConfigurationImpl.
-        this(tcm, wtcp, new ONManagerConfigurationImpl(configuration), configuration);
+        this(tcm, wtcp, new ONManagerConfigurationImpl(configuration), registryManager, configuration);
     }
 
     /**
@@ -225,12 +229,14 @@ public class ONManagerImpl implements ONManager {
     public ONManagerImpl(TcManager tcm,
                          WeightedTcProvider wtcp,
                          ONManagerConfiguration onmconfig,
+                         RegistryManager registryManager,
                          Dictionary<String,Object> configuration) {
         this();
         // Assume this.tcm this.wtcp and this.wtcp were not filled in by OSGi-DS.
         this.tcm = tcm;
         this.wtcp = wtcp;
         this.config = onmconfig;
+        this.regman = registryManager;
         try {
             activate(configuration);
         } catch (IOException e) {
@@ -575,5 +581,10 @@ public class ONManagerImpl implements ONManager {
      */
     protected final boolean isOfflineMode() {
         return offlineMode != null;
+    }
+
+    @Override
+    public RegistryManager getRegistryManager() {
+        return regman;
     }
 }

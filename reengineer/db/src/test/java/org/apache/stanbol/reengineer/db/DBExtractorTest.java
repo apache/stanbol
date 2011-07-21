@@ -39,9 +39,8 @@ public class DBExtractorTest {
         TcManager tcm = new SpecialTcManager(qe, wtcp);
 
         // Two different ontology storagez, the same sparql engine and tcprovider
-		
-		
-		onManager = new ONManagerImpl(tcm, wtcp,emptyConf);
+        
+		onManager = new ONManagerImpl(tcm, wtcp,null,emptyConf);
 		dbExtractor = new DBExtractor(new ReengineerManagerImpl(new Hashtable<String,Object>()),
 				onManager, tcm, wtcp, emptyConf);
 		graphNS = "http://kres.iks-project.eu/reengineering/test";

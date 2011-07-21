@@ -20,17 +20,36 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class RegistryImpl extends AbstractRegistryItem implements Registry {
+
+    private OWLOntologyManager cache;
 
     private String message = "";
 
     public RegistryImpl(String name) {
+        this(name, OWLManager.createOWLOntologyManager());
+    }
+
+    public RegistryImpl(String name, OWLOntologyManager cache) {
         super(name);
+        setCache(cache);
     }
 
     public RegistryImpl(String name, URL url) throws URISyntaxException {
+        this(name, url, OWLManager.createOWLOntologyManager());
+    }
+
+    public RegistryImpl(String name, URL url, OWLOntologyManager cache) throws URISyntaxException {
         super(name, url);
+        setCache(cache);
+    }
+
+    @Override
+    public OWLOntologyManager getCache() {
+        return cache;
     }
 
     public String getError() {
@@ -41,13 +60,13 @@ public class RegistryImpl extends AbstractRegistryItem implements Registry {
         return super.getName() + getError();
     }
 
-    public boolean isError() {
-        return !isOK();
+    @Override
+    public Type getType() {
+        return type;
     }
 
-    @Override
-    public boolean isLibrary() {
-        return false;
+    public boolean isError() {
+        return !isOK();
     }
 
     public boolean isOK() {
@@ -55,8 +74,8 @@ public class RegistryImpl extends AbstractRegistryItem implements Registry {
     }
 
     @Override
-    public boolean isOntology() {
-        return false;
+    public void setCache(OWLOntologyManager cache) {
+        this.cache = cache;
     }
 
     public void setError(String message) {

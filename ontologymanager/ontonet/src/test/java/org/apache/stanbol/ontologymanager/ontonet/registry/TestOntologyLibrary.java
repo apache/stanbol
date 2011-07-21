@@ -16,25 +16,29 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.registry;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.stanbol.ontologymanager.ontonet.Locations;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManagerConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.io.LibrarySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Library;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryOntology;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.RegistryLoaderImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.registry.RegistryManagerImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.registry.cache.RegistryUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -64,9 +68,10 @@ public class TestOntologyLibrary {
      */
     @BeforeClass
     public static void setupTest() throws Exception {
+        final Dictionary<String,Object> emptyConfig = new Hashtable<String,Object>();
+        RegistryManager regman = new RegistryManagerImpl(emptyConfig);
         // An ONManagerImpl with no store and default settings
-        ONManagerConfiguration configuration = new ONManagerConfigurationImpl(new Hashtable<String,Object>());
-        onm = new ONManagerImpl(null, null, configuration, new Hashtable<String,Object>());
+        onm = new ONManagerImpl(null, null, new ONManagerConfigurationImpl(emptyConfig), regman, emptyConfig);
         loader = new RegistryLoaderImpl(onm);
     }
 
@@ -92,36 +97,6 @@ public class TestOntologyLibrary {
     }
 
     /**
-     * Utility method to recurse into registry items.
-     * 
-     * TODO: move this to main?
-     * 
-     * @param item
-     * @param ontologyId
-     * @return
-     */
-    private boolean containsOntologyRecursive(RegistryItem item, IRI ontologyId) {
-
-        boolean result = false;
-        if (item instanceof RegistryOntology) {
-            // An Ontology MUST have a non-null URI.
-            try {
-                IRI iri = IRI.create(item.getURL());
-                result |= iri.equals(ontologyId);
-            } catch (Exception e) {
-                return false;
-            }
-        } else if (item instanceof Library || item instanceof Registry)
-        // Inspect children
-        for (RegistryItem child : ((RegistryItem) item).getChildren()) {
-            result |= containsOntologyRecursive(child, ontologyId);
-            if (result) break;
-        }
-        return result;
-
-    }
-
-    /**
      * Uses a plain {@link RegistryLoader} to load a single ontology library and checks for its expected hits
      * and misses.
      * 
@@ -142,16 +117,16 @@ public class TestOntologyLibrary {
         }
         assertNotNull(lib);
         // Should be in the library.
-        boolean hasShould = containsOntologyRecursive(lib, Locations.CHAR_DROPPED);
+        boolean hasShould = RegistryUtils.containsOntologyRecursive(lib, Locations.CHAR_DROPPED);
         // Should NOT be in the library (belongs to another library in the same registry).
-        boolean hasShouldNot = containsOntologyRecursive(lib, Locations.CHAR_ACTIVE);
+        boolean hasShouldNot = RegistryUtils.containsOntologyRecursive(lib, Locations.CHAR_ACTIVE);
         assertTrue(hasShould);
         assertFalse(hasShouldNot);
     }
 
     /**
      * Tests the creation of an ontology input source from a single library. Because the test is run offline,
-     * import statements might be file URIs, so tests will not fail on this.
+     * import statements might be file URIs, so tests should not fail on this.
      * 
      * @throws Exception
      */
@@ -164,7 +139,7 @@ public class TestOntologyLibrary {
         boolean hasImporting = false, hasImported = false;
         for (OWLImportsDeclaration ax : o.getImportsDeclarations()) {
             // Since we added a local IRI mapping, import statements might be using file: IRIs instead of
-            // HTTP, in which case IRI equality would fail.
+            // HTTP, in which case IRI equality would fail. So it is enough here to just check the filename.
             String tmpstr = ax.getIRI().toString();
             if (!hasImporting && tmpstr.endsWith("characters_all.owl")) hasImporting = true;
             else if (!hasImported && tmpstr.endsWith("maincharacters.owl")) hasImported = true;

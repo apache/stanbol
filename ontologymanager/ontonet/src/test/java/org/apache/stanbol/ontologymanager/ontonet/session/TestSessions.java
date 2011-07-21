@@ -65,7 +65,7 @@ public class TestSessions {
 	@BeforeClass
 	public static void setup() {
 		// An ONManagerImpl with no store and default settings
-		ONManager onm = new ONManagerImpl(null,null, new Hashtable<String, Object>());
+		ONManager onm = new ONManagerImpl(null,null, null, new Hashtable<String, Object>());
 		sesmgr = onm.getSessionManager();
 		scopeFactory = onm.getOntologyScopeFactory();
 		spaceFactory = onm.getOntologySpaceFactory();

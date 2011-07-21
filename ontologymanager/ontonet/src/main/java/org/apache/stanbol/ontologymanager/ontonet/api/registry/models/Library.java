@@ -16,6 +16,28 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.registry.models;
 
+import java.util.Set;
+
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryContentException;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+
 public interface Library extends RegistryItem {
+
+    final Type type = Type.LIBRARY;
+
+    /**
+     * Upon invocation, this method immediately fires a registry content request event on itself. Note,
+     * however, that this method is in general not synchronized. Therefore, any listeners that react by
+     * invoking a load method may or may not cause the content to be available to this method.
+     * 
+     * @return
+     * @throws RegistryContentException
+     */
+    Set<OWLOntology> getOntologies() throws RegistryContentException;
+
+    boolean isLoaded();
+
+    void loadOntologies(OWLOntologyManager mgr);
 
 }

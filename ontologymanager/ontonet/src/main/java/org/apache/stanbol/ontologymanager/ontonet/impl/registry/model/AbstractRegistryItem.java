@@ -22,21 +22,22 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryContentException;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryContentException;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryContentListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
 import org.semanticweb.owlapi.model.IRI;
 
 public abstract class AbstractRegistryItem implements RegistryItem {
 
-    // Two-way adjacency TODO use maps instead?
-    protected Set<RegistryItem> children = new HashSet<RegistryItem>();
+    /* Two-way adjacency TODO use maps instead? */
+    protected Set<RegistryItem> children = new HashSet<RegistryItem>(),
+            parents = new HashSet<RegistryItem>();
+
     private IRI iri;
 
+    protected Set<RegistryContentListener> listeners = new HashSet<RegistryContentListener>();
+
     private String name;
-
-    protected Set<RegistryItem> parents = new HashSet<RegistryItem>();
-
-    // private RegistryItem parent;
 
     public AbstractRegistryItem(String name) {
         setName(name);
@@ -45,6 +46,11 @@ public abstract class AbstractRegistryItem implements RegistryItem {
     public AbstractRegistryItem(String name, URL url) throws URISyntaxException {
         this(name);
         setURL(url);
+    }
+
+    protected void fireContentRequested(RegistryItem item) {
+        for (RegistryContentListener listener : getRegistryContentListeners())
+            listener.registryContentRequested(item);
     }
 
     @Override
@@ -71,10 +77,22 @@ public abstract class AbstractRegistryItem implements RegistryItem {
         }
     }
 
+    // private RegistryItem parent;
+
+    @Override
+    public void addRegistryContentListener(RegistryContentListener listener) {
+        listeners.add(listener);
+    }
+
     @Override
     public void clearChildren() {
         for (RegistryItem child : children)
             removeChild(child);
+    }
+
+    @Override
+    public void clearRegistryContentListeners() {
+        listeners.clear();
     }
 
     @Override
@@ -89,6 +107,11 @@ public abstract class AbstractRegistryItem implements RegistryItem {
 
     public String getName() {
         return this.name;
+    }
+
+    @Override
+    public Set<RegistryContentListener> getRegistryContentListeners() {
+        return listeners;
     }
 
     public URL getURL() {
@@ -106,6 +129,16 @@ public abstract class AbstractRegistryItem implements RegistryItem {
     }
 
     @Override
+    public boolean isLibrary() {
+        return Type.LIBRARY.equals(getType());
+    }
+
+    @Override
+    public boolean isOntology() {
+        return Type.ONTOLOGY.equals(getType());
+    }
+
+    @Override
     public void removeChild(RegistryItem child) {
         if (children.contains(child)) {
             children.remove(child);
@@ -119,6 +152,11 @@ public abstract class AbstractRegistryItem implements RegistryItem {
             parents.remove(container);
             container.removeChild(this);
         }
+    }
+
+    @Override
+    public void removeRegistryContentListener(RegistryContentListener listener) {
+        listeners.remove(listener);
     }
 
     @Override

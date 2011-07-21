@@ -257,7 +257,7 @@ public class RefactoringTest {
         WeightedTcProvider wtcp = new SimpleTcProvider();
         TcManager tcm = new SpecialTcManager(qe, wtcp);
 
-        ONManager onm = new ONManagerImpl(tcm, wtcp, emptyConfig);
+        ONManager onm = new ONManagerImpl(tcm, wtcp, null,emptyConfig);
         Refactorer refactorer = new RefactorerImpl(null, new Serializer(), tcm, onm, ruleStore, emptyConfig);
         try {
             refactorer.ontologyRefactoring(ontology, recipeIRI);
@@ -292,7 +292,7 @@ public class RefactoringTest {
         RuleList ruleList = kb.getkReSRuleList();
         Recipe actualRecipe = new RecipeImpl(null, null, ruleList);
         	
-        ONManager onm = new ONManagerImpl(tcm, wtcp, emptyConfig);
+        ONManager onm = new ONManagerImpl(tcm, wtcp, null,emptyConfig);
         Refactorer refactorer = new RefactorerImpl(null, new Serializer(), tcm, onm, ruleStore, emptyConfig);
         try {
             refactorer.ontologyRefactoring(ontology, actualRecipe);

@@ -16,23 +16,28 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.ontology;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManagerConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.ParentPathInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.io.OntologyRegistryIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.registry.RegistryManagerImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
@@ -56,9 +61,10 @@ public class TestIndexing {
 
     @BeforeClass
     public static void setup() {
+        final Dictionary<String,Object> emptyConfig = new Hashtable<String,Object>();
+        RegistryManager regman = new RegistryManagerImpl(emptyConfig);
         // An ONManagerImpl with no store and default settings
-        ONManagerConfiguration conf = new ONManagerConfigurationImpl(new Hashtable<String,Object>());
-        onm = new ONManagerImpl(null, null, conf, new Hashtable<String,Object>());
+        onm = new ONManagerImpl(null, null, new ONManagerConfigurationImpl(emptyConfig), regman, emptyConfig);
         mgr = onm.getOntologyManagerFactory().createOntologyManager(true);
 
         // Since it is registered, this scope must be unique, or subsequent

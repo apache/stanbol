@@ -24,6 +24,8 @@ import org.semanticweb.owlapi.model.OWLOntology;
 
 public class RegistryOntologyImpl extends AbstractRegistryItem implements RegistryOntology {
 
+    private OWLOntology owl;
+
     public RegistryOntologyImpl(String name) {
         super(name);
     }
@@ -33,18 +35,19 @@ public class RegistryOntologyImpl extends AbstractRegistryItem implements Regist
     }
 
     @Override
-    public boolean isLibrary() {
-        return false;
-    }
-
-    @Override
-    public boolean isOntology() {
-        return true;
-    }
-
-    @Override
     public OWLOntology asOWLOntology() {
-        // TODO Implement me!
-        return null;
+        fireContentRequested(this);
+        return owl;
     }
+
+    @Override
+    public Type getType() {
+        return type;
+    }
+
+    @Override
+    public void setOWLOntology(OWLOntology owl) {
+        this.owl = owl;
+    }
+
 }

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -30,12 +31,24 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryContentException;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryItemFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Library;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem.Type;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryOntology;
+import org.apache.stanbol.ontologymanager.ontonet.impl.registry.cache.RegistryUtils;
+import org.apache.stanbol.ontologymanager.ontonet.xd.vocabulary.CODOVocabulary;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -49,6 +62,29 @@ public class RegistryManagerImpl implements RegistryManager {
 
     private static final boolean _LAZY_LOADING_DEFAULT = false;
 
+    private static final OWLClass cRegistryLibrary, cOntology;
+
+    private static final OWLObjectProperty hasPart, hasOntology, isPartOf, isOntologyOf;
+
+    static {
+        OWLDataFactory factory = OWLManager.getOWLDataFactory();
+        cOntology = factory.getOWLClass(IRI.create(CODOVocabulary.CODK_Ontology));
+        cRegistryLibrary = factory.getOWLClass(IRI.create(CODOVocabulary.CODD_OntologyLibrary));
+        isPartOf = factory.getOWLObjectProperty(IRI.create(CODOVocabulary.PARTOF_IsPartOf));
+        isOntologyOf = factory.getOWLObjectProperty(IRI.create(CODOVocabulary.ODPM_IsOntologyOf));
+        hasPart = factory.getOWLObjectProperty(IRI.create(CODOVocabulary.PARTOF_HasPart));
+        hasOntology = factory.getOWLObjectProperty(IRI.create(CODOVocabulary.ODPM_HasOntology));
+    }
+
+    @Property(name = RegistryManager.CACHING_POLICY, options = {
+                                                                @PropertyOption(value = '%'
+                                                                                        + RegistryManager.CACHING_POLICY
+                                                                                        + ".option.registry", name = "registry"),
+                                                                @PropertyOption(value = '%'
+                                                                                        + RegistryManager.CACHING_POLICY
+                                                                                        + ".option.all", name = "all")}, value = "all")
+    private String cachingPolicyString;
+
     @Property(name = RegistryManager.LAZY_LOADING, boolValue = _LAZY_LOADING_DEFAULT)
     private boolean lazyLoading = _LAZY_LOADING_DEFAULT;
 
@@ -61,16 +97,11 @@ public class RegistryManagerImpl implements RegistryManager {
 
     private Map<IRI,Set<IRI>> ontologyIndex = new HashMap<IRI,Set<IRI>>();
 
+    private Map<IRI,RegistryItem> population = new TreeMap<IRI,RegistryItem>();
+
     private Map<IRI,Registry> registries = new HashMap<IRI,Registry>();
 
-    @Property(name = RegistryManager.CACHING_POLICY, options = {
-                                                                @PropertyOption(value = '%'
-                                                                                        + RegistryManager.CACHING_POLICY
-                                                                                        + ".option.registry", name = "registry"),
-                                                                @PropertyOption(value = '%'
-                                                                                        + RegistryManager.CACHING_POLICY
-                                                                                        + ".option.all", name = "all")}, value = "all")
-    private String cachingPolicyString;
+    private RegistryItemFactory riFactory;
 
     /**
      * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
@@ -80,7 +111,9 @@ public class RegistryManagerImpl implements RegistryManager {
      * YOU NEED TO USE {@link #RegistryManagerImpl(Dictionary)} or its overloads, to parse the configuration
      * and then initialise the rule store if running outside an OSGI environment.
      */
-    public RegistryManagerImpl() {}
+    public RegistryManagerImpl() {
+        riFactory = new RegistryItemFactoryImpl();
+    }
 
     /**
      * To be invoked by non-OSGi environments.
@@ -112,7 +145,7 @@ public class RegistryManagerImpl implements RegistryManager {
         locations = (String[]) configuration.get(RegistryManager.REGISTRY_LOCATIONS);
         if (locations == null) locations = new String[] {};
         // TODO manage enum constants for caching policy.
-        
+
         OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
         // Load registries
         for (String loc : locations) {
@@ -177,6 +210,96 @@ public class RegistryManagerImpl implements RegistryManager {
     @Override
     public boolean isLazyLoading() {
         return lazyLoading;
+    }
+
+    public Library populateLibrary(OWLNamedIndividual ind, Set<OWLOntology> registries) throws RegistryContentException {
+        IRI id = ind.getIRI();
+        RegistryItem lib = null;
+        if (population.containsKey(id)) {
+            // We are not allowing multityping either.
+            lib = population.get(id);
+            if (!(lib instanceof Library)) throw new RegistryContentException(
+                    "Inconsistent multityping: for item " + id + " : {" + Library.class + ", "
+                            + lib.getClass() + "}");
+        } else {
+            lib = riFactory.createLibrary(ind.asOWLNamedIndividual());
+            try {
+                population.put(IRI.create(lib.getURL()), lib);
+            } catch (URISyntaxException e) {
+                log.error("Invalid identifier for library item " + lib, e);
+                return null;
+            }
+        }
+        // EXIT nodes.
+        Set<OWLIndividual> ronts = new HashSet<OWLIndividual>();
+        for (OWLOntology o : registries)
+            ronts.addAll(ind.getObjectPropertyValues(hasOntology, o));
+        for (OWLIndividual iont : ronts) {
+            if (iont.isNamed()) lib.addChild(populateOntology(iont.asOWLNamedIndividual(), registries));
+        }
+        return (Library) lib;
+    }
+
+    public RegistryOntology populateOntology(OWLNamedIndividual ind, Set<OWLOntology> registries) throws RegistryContentException {
+        IRI id = ind.getIRI();
+        RegistryItem ront = null;
+        if (population.containsKey(id)) {
+            // We are not allowing multityping either.
+            ront = population.get(id);
+            if (!(ront instanceof RegistryOntology)) throw new RegistryContentException(
+                    "Inconsistent multityping: for item " + id + " : {" + RegistryOntology.class + ", "
+                            + ront.getClass() + "}");
+        } else {
+            ront = riFactory.createRegistryOntology(ind);
+            try {
+                population.put(IRI.create(ront.getURL()), ront);
+            } catch (URISyntaxException e) {
+                log.error("Invalid identifier for library item " + ront, e);
+                return null;
+            }
+        }
+        // EXIT nodes.
+        Set<OWLIndividual> libs = new HashSet<OWLIndividual>();
+        for (OWLOntology o : registries)
+            libs.addAll(ind.getObjectPropertyValues(isOntologyOf, o));
+        for (OWLIndividual ilib : libs) {
+            if (ilib.isNamed()) ront.addContainer(populateLibrary(ilib.asOWLNamedIndividual(), registries));
+        }
+        return (RegistryOntology) ront;
+    }
+
+    public Registry populateRegistry(OWLOntology registry) throws RegistryContentException {
+
+        Registry reg = riFactory.createRegistry(registry);
+        Set<OWLOntology> closure = registry.getOWLOntologyManager().getImportsClosure(registry);
+
+        // Just scan all individuals. Recurse in case the registry imports more registries.
+        for (OWLIndividual ind : registry.getIndividualsInSignature(true)) {
+            // We do not allow anonymous registry items.
+            if (ind.isAnonymous()) continue;
+            RegistryItem item = null;
+            // IRI id = ind.asOWLNamedIndividual().getIRI();
+            Type t = RegistryUtils.getType(ind, closure);
+            if (t == null) {
+                log.warn("Undetermined type for registry ontology individual {}", ind);
+                continue;
+            }
+            switch (t) {
+                case LIBRARY:
+                    // // Create the library and attach to parent and children
+                    item = populateLibrary(ind.asOWLNamedIndividual(), closure);
+                    reg.addChild(item);
+                    break;
+                case ONTOLOGY:
+                    // Create the ontology and attach to parent
+                    item = populateOntology(ind.asOWLNamedIndividual(), closure);
+                    // We don't know where to attach it to in this method.
+                    break;
+                default:
+                    break;
+            }
+        }
+        return reg;
     }
 
     @Override

@@ -31,10 +31,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryContentException;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Library;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryContentException;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OWLOntologyManagerFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.cache.ODPRegistryCacheException;
@@ -397,7 +398,7 @@ public class RegistryLoaderImpl implements RegistryLoader {
         OWLOntologyManager mgr = onm.getOwlCacheManager();
         try {
             OWLOntology ontology = mgr.loadOntology(registryPhysicalIRI);
-            registry = RegistryUtils.populateRegistry(ontology);
+            registry = onm.getRegistryManager().populateRegistry(ontology);
         } catch (OWLOntologyDocumentAlreadyExistsException e) {
             log.warn("Ontology document at " + e.getOntologyDocumentIRI()
                      + " exists and will not be reloaded.", e);
@@ -508,7 +509,7 @@ public class RegistryLoaderImpl implements RegistryLoader {
         if (mgr == null) mgr = onm.getOwlCacheManager();
         try {
             OWLOntology ontology = mgr.loadOntology(registryPhysicalIRI);
-            registry = RegistryUtils.populateRegistry(ontology);
+            registry = onm.getRegistryManager().populateRegistry(ontology);
         } catch (OWLOntologyDocumentAlreadyExistsException e) {
             log.warn("Ontology document at " + e.getOntologyDocumentIRI()
                      + " exists and will not be reloaded.", e);

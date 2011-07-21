@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -47,74 +47,64 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * 
  * @author elvio
  */
 public class RuleStoreTest {
 
-	private Logger log = LoggerFactory.getLogger(getClass());
+    private Logger log = LoggerFactory.getLogger(getClass());
 
-    public RuleStoreTest() {
-    }
+    public RuleStoreTest() {}
 
     @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
+    public static void setUpClass() throws Exception {}
 
     @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
+    public static void tearDownClass() throws Exception {}
 
     @Before
     public void setUp() {
-		Dictionary<String, Object> configuration = new Hashtable<String, Object>();
-		store = new RuleStoreImpl(new ONManagerImpl(null,null, configuration),
-				configuration,
-				"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
-		blankStore = new RuleStoreImpl(new ONManagerImpl(null,null, configuration),
-				configuration, "");
+        Dictionary<String,Object> configuration = new Hashtable<String,Object>();
+        store = new RuleStoreImpl(new ONManagerImpl(null, null, null, configuration), configuration,
+                "./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+        blankStore = new RuleStoreImpl(new ONManagerImpl(null, null, null, configuration), configuration, "");
     }
 
     @After
     public void tearDown() {
-		store = null;
-		blankStore = null;
+        store = null;
+        blankStore = null;
     }
 
-	public RuleStore store = null, blankStore = null;
+    public RuleStore store = null, blankStore = null;
 
     @Test
     public void testKReSRuleStore() throws Exception {
         OWLOntology owlmodel = store.getOntology();
-		log.debug("Path for default store config is "
-				+ blankStore.getFilePath());
-		assertNotNull(owlmodel);
-            OWLOntologyManager owlmanager = OWLManager.createOWLOntologyManager();
-            owlmanager.addIRIMapper(new AutoIRIMapper(new File("./src/main/resources/RuleOntology/"), false));
-		String src = "";
-            try{
-			src = "./src/main/resources/RuleOntology/TestKReSOntologyRules.owl";
-			assertEquals(owlmodel, owlmanager
-					.loadOntologyFromOntologyDocument(new File(src)));
-                }catch (Exception e){
-			try {
-				src = "./src/main/resources/RuleOntology/OffLineKReSOntologyRules.owl";
-				assertEquals(owlmodel, owlmanager
-						.loadOntologyFromOntologyDocument(new File(src)));
-			} catch (OWLOntologyCreationException ex) {
-				fail("OWLOntologyCreationException caught when loading from "
-						+ src);
-                }
+        log.debug("Path for default store config is " + blankStore.getFilePath());
+        assertNotNull(owlmodel);
+        OWLOntologyManager owlmanager = OWLManager.createOWLOntologyManager();
+        owlmanager.addIRIMapper(new AutoIRIMapper(new File("./src/main/resources/RuleOntology/"), false));
+        String src = "";
+        try {
+            src = "./src/main/resources/RuleOntology/TestKReSOntologyRules.owl";
+            assertEquals(owlmodel, owlmanager.loadOntologyFromOntologyDocument(new File(src)));
+        } catch (Exception e) {
+            try {
+                src = "./src/main/resources/RuleOntology/OffLineKReSOntologyRules.owl";
+                assertEquals(owlmodel, owlmanager.loadOntologyFromOntologyDocument(new File(src)));
+            } catch (OWLOntologyCreationException ex) {
+                fail("OWLOntologyCreationException caught when loading from " + src);
+            }
         }
     }
 
     @Test
-    public void testKReSRuleStore_2()  throws Exception {
-		OWLOntology owlmodel = blankStore.getOntology();
-		System.out.println("Path for default store config is "
-				+ blankStore.getFilePath());
-		assertNotNull(owlmodel);
-            assertTrue(!owlmodel.isEmpty());
-        }
+    public void testKReSRuleStore_2() throws Exception {
+        OWLOntology owlmodel = blankStore.getOntology();
+        System.out.println("Path for default store config is " + blankStore.getFilePath());
+        assertNotNull(owlmodel);
+        assertTrue(!owlmodel.isEmpty());
+    }
 
 }

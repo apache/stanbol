@@ -20,13 +20,16 @@ import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Library;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryOntology;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 /**
  * Replacement for {@link RegistryLoader}. Also indexes libraries (and ontologies?).
  */
 public interface RegistryManager {
-    
+
     public String CACHING_POLICY = "org.apache.stanbol.ontologymanager.ontonet.registryCaching";
 
     public String LAZY_LOADING = "org.apache.stanbol.ontologymanager.ontonet.registryLazy";
@@ -46,6 +49,12 @@ public interface RegistryManager {
     Registry getRegistry(IRI id);
 
     boolean isLazyLoading();
+
+    Library populateLibrary(OWLNamedIndividual ind, Set<OWLOntology> registries) throws RegistryContentException;
+
+    RegistryOntology populateOntology(OWLNamedIndividual ind, Set<OWLOntology> registries) throws RegistryContentException;
+
+    Registry populateRegistry(OWLOntology registry) throws RegistryContentException;
 
     void removeRegistry(IRI registryId);
 

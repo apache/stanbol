@@ -16,9 +16,24 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.registry.models;
 
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+
 /**
  * An ontology registry can reference zero or more ontology libraries.
  */
 public interface Registry extends RegistryItem {
 
+    final Type type = Type.REGISTRY;
+
+    /**
+     * 
+     * @return
+     */
+    OWLOntologyManager getCache();
+
+    /**
+     * 
+     * @param cache
+     */
+    void setCache(OWLOntologyManager cache);
 }

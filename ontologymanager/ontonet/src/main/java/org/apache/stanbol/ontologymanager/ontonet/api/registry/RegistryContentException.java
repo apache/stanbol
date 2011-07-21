@@ -14,16 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.api.registry.models;
+package org.apache.stanbol.ontologymanager.ontonet.api.registry;
 
-import org.semanticweb.owlapi.model.OWLOntology;
+public class RegistryContentException extends Exception {
 
-public interface RegistryOntology extends RegistryItem {
+    /**
+	 * 
+	 */
+    private static final long serialVersionUID = 1L;
 
-    final Type type = Type.ONTOLOGY;
-    
-    OWLOntology asOWLOntology();
-    
-    void setOWLOntology(OWLOntology owl);
+    public RegistryContentException(Throwable cause) {
+        initCause(cause);
+    }
+
+    public RegistryContentException(String message) {
+        super(message);
+    }
 
 }

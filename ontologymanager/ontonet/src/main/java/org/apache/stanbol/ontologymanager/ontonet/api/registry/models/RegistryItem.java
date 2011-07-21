@@ -18,6 +18,10 @@ package org.apache.stanbol.ontologymanager.ontonet.api.registry.models;
 
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Set;
+
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryContentException;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryContentListener;
 
 public interface RegistryItem {
 
@@ -32,13 +36,23 @@ public interface RegistryItem {
 
     void addChild(RegistryItem child) throws RegistryContentException;
 
+    void addContainer(RegistryItem container) throws RegistryContentException;
+
+    void addRegistryContentListener(RegistryContentListener listener);
+
     void clearChildren();
+
+    void clearRegistryContentListeners();
 
     RegistryItem[] getChildren();
 
+    RegistryItem[] getContainers();
+
     String getName();
 
-    RegistryItem[] getContainers();
+    Set<RegistryContentListener> getRegistryContentListeners();
+
+    Type getType();
 
     URL getURL();
 
@@ -49,12 +63,12 @@ public interface RegistryItem {
     boolean isOntology();
 
     void removeChild(RegistryItem child);
-    
+
     void removeContainer(RegistryItem container);
 
+    void removeRegistryContentListener(RegistryContentListener listener);
+
     void setName(String string);
-    
-    void addContainer(RegistryItem container) throws RegistryContentException;
 
     void setURL(URL url) throws URISyntaxException;
 

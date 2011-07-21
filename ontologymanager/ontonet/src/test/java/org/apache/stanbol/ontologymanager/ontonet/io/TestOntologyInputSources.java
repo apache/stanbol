@@ -52,7 +52,7 @@ public class TestOntologyInputSources {
 
     @BeforeClass
     public static void setUp() {
-        onm = new ONManagerImpl(null, null, new Hashtable<String,Object>());
+        onm = new ONManagerImpl(null, null, null, new Hashtable<String,Object>());
         df = onm.getOwlFactory();
     }
 
