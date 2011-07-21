@@ -12,13 +12,18 @@ need
 
 The Stanbol build system consists of the following profiles:
 
-   - 'stack' (default) - to build the Stanbol Stack
-   - 'framework'       - to build the Stanbol Framework only
-   - 'kres'            - to build additional Reasoning components that
-                         are not yet in a stable state
+   - 'stack'     - to build the Stanbol Stack
+   - 'framework' - to build the Stanbol Framework only
+   - 'kres'      - to build additional Reasoning components that
+                   are not yet in a stable state
 
-The 'stack' profile is activated by default. If you whish to activate another
-profile use the Maven -P command line switch.
+If you build Stanbol from a source tree that contains the whole Stanbol
+project, the 'stack' profile is activated by default. If you whish to activate
+another profile use the Maven -P command line switch.
+
+If you build Stanbol from a source tree that just contains the Stanbol
+Framework, e.g. after downloading a Stanbol Framework source release, the
+'framework' profile will be activated by default.
 
 If you want to skip the tests for any build profile, add `-DskipTests` to the
 Maven command.
@@ -61,6 +66,12 @@ In the Stanbol source directory type
 
     $ mvn install -Pframework
 
+If you build Stanbol from a source tree that just contains the Stanbol
+Framework, e.g. after downloading a Stanbol Framework source release, the
+'framework' is activated automatically and it is enough to type
+
+    $ mvn install
+    
 
 ## Preloading the Entity Hub cache with a DBpedia index
 

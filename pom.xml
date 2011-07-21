@@ -20,9 +20,15 @@
 
   <modelVersion>4.0.0</modelVersion>
 
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <version>0.9.0-incubating-SNAPSHOT</version>
+    <relativePath>parent</relativePath>
+  </parent>
+
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-reactor</artifactId>
-  <version>0.9.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Reactor</name>
@@ -69,7 +75,10 @@
       <id>stack</id>
       <activation>
         <activeByDefault>true</activeByDefault>
-      </activation>
+      </activation>      
+      <build>
+        <finalName>stanbol-stack-${project.version}</finalName>
+      </build>      
       <modules>
         <module>commons/opennlp</module>
         <module>data</module>
@@ -81,12 +90,28 @@
         <module>launchers/full</module>
         <module>integration-tests</module>
       </modules>
-    </profile>  
+    </profile>
     <profile>
       <id>framework</id>
       <activation>
         <activeByDefault>false</activeByDefault>
+        <!-- The framework profile is activated automatically if the
+             full launcher is missing. This is used for framework releases
+             where the full launcher is not packaged. -->
+        <file>
+          <missing>launchers/full</missing>
+        </file>        
       </activation>
+      <properties>
+        <!-- Define the framework source release packaging descriptor for
+             framework releases when using the apache-release profile -->
+        <sourceReleaseAssemblyDescriptor>
+          framework-source-release-zip-tar
+        </sourceReleaseAssemblyDescriptor>
+      </properties>
+      <build>
+        <finalName>stanbol-framework-${project.version}</finalName>
+      </build>
       <modules>
         <module>launchers/framework</module>
       </modules>
