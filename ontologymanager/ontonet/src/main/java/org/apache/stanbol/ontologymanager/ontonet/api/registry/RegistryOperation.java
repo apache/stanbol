@@ -16,20 +16,19 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.registry;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
-
 /**
- * Object that react to direct content requests to ontology registry items will implement this interface.
+ * The possible types of operations that can be performed with registry items.
  */
-public interface RegistryContentListener {
+public enum RegistryOperation {
 
     /**
-     * Called when a registry item receives a request for some resource in its content, regardless whether the
-     * actual resource has been previously loaded.
-     * 
-     * @param requestTarget
-     *            the registry item that was requested.
+     * The addition of a registry item as a parent of another registry item.
      */
-    void registryContentRequested(RegistryItem requestTarget);
+    ADD_CHILD,
+
+    /**
+     * The addition of a registry item as a child of another registry item.
+     */
+    ADD_PARENT;
 
 }

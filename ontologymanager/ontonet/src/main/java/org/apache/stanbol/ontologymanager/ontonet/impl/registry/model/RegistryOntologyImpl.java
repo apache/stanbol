@@ -16,26 +16,25 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.registry.model;
 
-import java.net.URISyntaxException;
-import java.net.URL;
-
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryOntologyNotLoadedException;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryOntology;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 public class RegistryOntologyImpl extends AbstractRegistryItem implements RegistryOntology {
 
     private OWLOntology owl;
 
-    public RegistryOntologyImpl(String name) {
-        super(name);
+    public RegistryOntologyImpl(IRI iri) {
+        super(iri);
     }
 
-    public RegistryOntologyImpl(String name, URL url) throws URISyntaxException {
-        super(name, url);
+    public RegistryOntologyImpl(IRI iri, String name) {
+        super(iri, name);
     }
 
     @Override
-    public OWLOntology asOWLOntology() {
+    public OWLOntology asOWLOntology() throws RegistryOntologyNotLoadedException {
         fireContentRequested(this);
         return owl;
     }

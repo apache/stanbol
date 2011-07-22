@@ -16,9 +16,6 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.registry;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryItemFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Library;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
@@ -26,82 +23,33 @@ import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryOn
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.LibraryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.RegistryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.RegistryOntologyImpl;
-import org.apache.stanbol.ontologymanager.ontonet.xd.vocabulary.CODOVocabulary;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 
+/**
+ * Default implementation of a registry item factory.
+ */
 public class RegistryItemFactoryImpl implements RegistryItemFactory {
 
-    public static final String REGISTRY_LIBRARY_ID = CODOVocabulary.CODD_OntologyLibrary;
-
-    public static final String IS_PART_OF_ID = CODOVocabulary.PARTOF_IsPartOf;
-
-    public static final String IS_ONTOLOGY_OF_ID = CODOVocabulary.ODPM_IsOntologyOf;
-
-    private final OWLClass cRegistryLibrary;
-
-    private final OWLObjectProperty isPartOf, isOntologyOf;
-
-    public RegistryItemFactoryImpl() {
-        OWLDataFactory df = OWLManager.getOWLDataFactory();
-        cRegistryLibrary = df.getOWLClass(IRI.create(REGISTRY_LIBRARY_ID));
-        isPartOf = df.getOWLObjectProperty(IRI.create(IS_PART_OF_ID));
-        isOntologyOf = df.getOWLObjectProperty(IRI.create(IS_ONTOLOGY_OF_ID));
-    }
+    /**
+     * Creates a new instance of {@link RegistryItemFactoryImpl}.
+     */
+    public RegistryItemFactoryImpl() {}
 
     @Override
     public Library createLibrary(OWLNamedIndividual ind) {
-        // if (!ind.getTypes(ontologies).contains(cRegistryLibrary)) throw new IllegalArgumentException(
-        // "Will not create a library from an individual not stated to be of type "
-        // + REGISTRY_LIBRARY_ID + " in the supplied ontologies.");
-        Library l = null;
-        try {
-            l = new LibraryImpl(ind.getIRI().getFragment(), ind.getIRI().toURI().toURL());
-            // // recurse into its children
-            // for (OWLOntology o : ontologies) {
-            // for (OWLAxiom ax : ind.getReferencingAxioms(o, true)) {
-            // if (ax.isOfType(AxiomType.OBJECT_PROPERTY_ASSERTION)
-            // && (isOntologyOf.equals(((OWLObjectPropertyAssertionAxiom) ax).getProperty()) || isPartOf
-            // .equals(((OWLObjectPropertyAssertionAxiom) ax).getProperty()))) {
-            //
-            // }
-            // }
-            // }
-
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException(e);
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(e);
-        }
-        return l;
+        return new LibraryImpl(ind.getIRI(), ind.getIRI().getFragment());
     }
 
     @Override
     public Registry createRegistry(OWLOntology o) {
-        try {
-            return new RegistryImpl(o.getOntologyID().toString(), o.isAnonymous() ? null : o.getOntologyID()
-                    .getOntologyIRI().toURI().toURL());
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException(e);
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(e);
-        }
+        return o.isAnonymous() ? null : new RegistryImpl(o.getOntologyID().getOntologyIRI(), o
+                .getOntologyID().toString());
     }
 
     @Override
     public RegistryOntology createRegistryOntology(OWLNamedIndividual ind) {
-        try {
-            return new RegistryOntologyImpl(ind.getIRI().getFragment(), ind.getIRI().toURI().toURL());
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException(e);
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(e);
-        }
+        return new RegistryOntologyImpl(ind.getIRI(), ind.getIRI().getFragment());
     }
 
 }

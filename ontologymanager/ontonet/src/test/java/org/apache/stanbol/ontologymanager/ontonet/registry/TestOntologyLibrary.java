@@ -110,7 +110,7 @@ public class TestOntologyLibrary {
         Library lib = null;
         // Look for test #Library2
         for (RegistryItem item : reg.getChildren()) {
-            if (Locations.LIBRARY_TEST2.toURI().toURL().equals(item.getURL())) {
+            if (Locations.LIBRARY_TEST2.equals(item.getIRI())) {
                 lib = (Library) item;
                 break;
             }

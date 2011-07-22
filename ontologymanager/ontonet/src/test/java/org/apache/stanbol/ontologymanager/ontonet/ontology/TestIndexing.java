@@ -34,7 +34,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.io.OntologyRegistryIRISource;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.io.RegistryIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.RegistryManagerImpl;
@@ -85,7 +85,7 @@ public class TestIndexing {
         try {
             scope = onm.getOntologyScopeFactory().createOntologyScope(
                 scopeIri,
-                new OntologyRegistryIRISource(testRegistryIri, onm.getOwlCacheManager(), onm
+                new RegistryIRISource(testRegistryIri, onm.getOwlCacheManager(), onm
                         .getRegistryLoader(), null
                 // new RootOntologySource(oParent
                 ));

@@ -22,22 +22,47 @@ import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryContentEx
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
+/**
+ * An ontology library references one or more ontologies.
+ */
 public interface Library extends RegistryItem {
 
+    /**
+     * The type of this registry item is {@link Type#LIBRARY}.
+     */
     final Type type = Type.LIBRARY;
 
     /**
+     * Returns the OWL ontologies that have been loaded in this library, if any, otherwise an exception is
+     * thrown.<br/>
+     * <br/>
      * Upon invocation, this method immediately fires a registry content request event on itself. Note,
      * however, that this method is in general not synchronized. Therefore, any listeners that react by
-     * invoking a load method may or may not cause the content to be available to this method.
+     * invoking a load method may or may not cause the content to be available to this method before it
+     * returns.
      * 
-     * @return
+     * @return the set of loaded OWL ontologies.
      * @throws RegistryContentException
+     *             if the requested ontologies have not been loaded.
      */
     Set<OWLOntology> getOntologies() throws RegistryContentException;
 
+    /**
+     * Determines if the contents of this library have been loaded and are up-to-date.
+     * 
+     * @return true if the contents are loaded and up-to-date, false otherwise.
+     */
     boolean isLoaded();
 
+    /**
+     * Causes all the ontologies referenced by this library to be loaded, so that when
+     * {@link RegistryOntology#asOWLOntology()} is invoked on one of its children, it will return the
+     * corresponding OWL ontology, if a valid one was parsed from its location.
+     * 
+     * @param mgr
+     *            the OWL ontology manager to use for loading the ontologies in the library. It must not be
+     *            null, lest an {@link IllegalArgumentException} be thrown.
+     */
     void loadOntologies(OWLOntologyManager mgr);
 
 }

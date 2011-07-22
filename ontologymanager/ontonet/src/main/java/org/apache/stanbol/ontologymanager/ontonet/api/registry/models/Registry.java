@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.registry.models;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem.Type;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
@@ -23,17 +24,24 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  */
 public interface Registry extends RegistryItem {
 
+    /**
+     * The type of this registry item is {@link Type#REGISTRY}.
+     */
     final Type type = Type.REGISTRY;
 
     /**
+     * Returns the OWL ontology manager that this registry is using as a cache of its ontologies.
      * 
-     * @return
+     * @return the ontology manager that is used as a cache.
      */
     OWLOntologyManager getCache();
 
     /**
+     * Sets the OWL ontology manager that this registry will use as a cache of its ontologies. If null, if
+     * will create its own.
      * 
      * @param cache
+     *            the ontology manager to be used as a cache.
      */
     void setCache(OWLOntologyManager cache);
 }

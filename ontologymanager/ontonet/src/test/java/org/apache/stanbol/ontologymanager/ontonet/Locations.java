@@ -64,5 +64,10 @@ public class Locations {
      * Identifier of test ontology library 2.
      */
     public static final IRI LIBRARY_TEST2 = IRI.create(_REGISTRY_TEST + "#Library2");
+    
+    /**
+     * Identifier of test ontology library 1.
+     */
+    public static final IRI ONT_TEST1 = IRI.create(__STANBOL_ONT_NAMESPACE + "test1.owl");
 
 }

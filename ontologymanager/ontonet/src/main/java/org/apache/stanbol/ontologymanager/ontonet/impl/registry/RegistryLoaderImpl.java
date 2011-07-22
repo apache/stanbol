@@ -17,12 +17,10 @@
 package org.apache.stanbol.ontologymanager.ontonet.impl.registry;
 
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -33,14 +31,12 @@ import java.util.Set;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryContentException;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Library;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OWLOntologyManagerFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.cache.ODPRegistryCacheException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.cache.ODPRegistryCacheManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.registry.cache.RegistryUtils;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.cache.URIUnresolvableException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.AbstractRegistryItem;
 import org.apache.stanbol.ontologymanager.ontonet.impl.registry.model.LibraryImpl;
@@ -161,7 +157,7 @@ public class RegistryLoaderImpl implements RegistryLoader {
         } else if (registryItem.isOntology()) {
             IRI locationIri = null;
             try {
-                locationIri = IRI.create(((RegistryOntologyImpl) registryItem).getURL());
+                locationIri = ((RegistryOntologyImpl) registryItem).getIRI();
                 result.add(manager.loadOntology(locationIri));
             } catch (OWLOntologyAlreadyExistsException ex) {
                 // We are trying to oad an already existing ontology,
@@ -170,8 +166,6 @@ public class RegistryLoaderImpl implements RegistryLoader {
 
             } catch (OWLOntologyCreationIOException ex) {
                 log.error("Cannot load ontology from " + locationIri);
-            } catch (URISyntaxException e) {
-                log.warn("Malformed URI for ontology " + registryItem.getName() + ". Skipping.", e);
             }
         } else if (registryItem.isLibrary()) {
             for (RegistryItem item : ((LibraryImpl) registryItem).getChildren()) {
@@ -188,8 +182,8 @@ public class RegistryLoaderImpl implements RegistryLoader {
     public Library getLibrary(Registry reg, IRI libraryID) {
         for (RegistryItem child : reg.getChildren()) {
             try {
-                if (child.isLibrary() && IRI.create(child.getURL()).equals(libraryID)) return (LibraryImpl) child;
-            } catch (URISyntaxException e) {
+                if (child.isLibrary() && child.getIRI().equals(libraryID)) return (LibraryImpl) child;
+            } catch (Exception e) {
                 // If some URL is not well-formed here and there, sticazzi
                 continue;
             }
@@ -197,7 +191,7 @@ public class RegistryLoaderImpl implements RegistryLoader {
         return null;
     }
 
-    private OWLOntology getMergedOntology(URL registryLocation) throws RegistryContentException {
+    private OWLOntology getMergedOntology(IRI registryLocation) throws RegistryContentException {
         OWLOntology ontology = null;
 
         try {
@@ -258,8 +252,6 @@ public class RegistryLoaderImpl implements RegistryLoader {
             throw new RegistryContentException(e);
         } catch (UnsupportedEncodingException e) {
             throw new RegistryContentException(e);
-        } catch (URISyntaxException e) {
-            throw new RegistryContentException(e);
         }
         return ontology;
     }
@@ -279,7 +271,7 @@ public class RegistryLoaderImpl implements RegistryLoader {
 
     public Object getParent(Object child) {
         if (child instanceof AbstractRegistryItem) {
-            return ((RegistryItem) child).getContainers();
+            return ((RegistryItem) child).getParents();
         }
         return null;
     }
@@ -304,16 +296,15 @@ public class RegistryLoaderImpl implements RegistryLoader {
                 String registryLocation = ""/*
                                              * URLListEditor .parseNameValueString(regs[i])[1]
                                              */;
-                registry1 = new RegistryImpl(registryName);
-                registry1.setURL(new URL(registryLocation));
+                registry1 = new RegistryImpl(IRI.create(registryLocation), registryName);
             } catch (Exception e) {
                 if (registry1 != null) {
                     registry1.setError(e.getLocalizedMessage());
-                    log.error("KReS :: Error on ODP registry: " + registry1.getName(), e);
+                    log.error("Error on ODP registry: " + registry1.getName(), e);
                 }
             }
             if (registry1 != null) registries.add(registry1);
-            else log.error("KReS :: Cannot load ODP registry: " + regs[i]);
+            else log.error("Cannot load ODP registry: " + regs[i]);
         }
         return registries;
     }
@@ -335,27 +326,22 @@ public class RegistryLoaderImpl implements RegistryLoader {
 
     private Library getTree(OWLNamedIndividual i, OWLOntology ontology) {
 
-        Library to = new LibraryImpl(new RDFSLabelGetter(ontology, i.getIRI(), false).getPreferred());
+        Library to = new LibraryImpl(i.getIRI(),
+                new RDFSLabelGetter(ontology, i.getIRI(), false).getPreferred());
         try {
             Set<OWLNamedIndividual> children = getParts(i, ontology);
             if (children.size() == 0) return to;
             for (OWLNamedIndividual childIndividual : children) {
                 if (isLibrary(childIndividual, ontology)) {
                     Library t = this.getTree(childIndividual, ontology);
-                    t.setURL(childIndividual.getIRI().toURI().toURL());
+                    t.setIRI(childIndividual.getIRI());
                     to.addChild(t);
                 } else if (isOntology(childIndividual, ontology)) {
-                    RegistryOntologyImpl t = new RegistryOntologyImpl(new RDFSLabelGetter(ontology,
-                            childIndividual.getIRI(), false).getPreferred());
-                    t.setURL(childIndividual.getIRI().toURI().toURL());
+                    RegistryOntologyImpl t = new RegistryOntologyImpl(childIndividual.getIRI(),
+                            new RDFSLabelGetter(ontology, childIndividual.getIRI(), false).getPreferred());
                     to.addChild(t);
                 }
             }
-        } catch (MalformedURLException e) {
-            log.error("MalformedURLException caught while getting tree for " + i.getIRI(), e);
-
-        } catch (URISyntaxException e) {
-            log.error("URISyntaxException caught while getting tree for " + i.getIRI(), e);
         } catch (RegistryContentException e) {
             log.error("RegistryContentException caught while getting tree for " + i.getIRI(), e);
         }
@@ -370,8 +356,8 @@ public class RegistryLoaderImpl implements RegistryLoader {
     public boolean hasLibrary(Registry reg, IRI libraryID) {
         for (RegistryItem child : reg.getChildren()) {
             try {
-                if (child.isLibrary() && IRI.create(child.getURL()).equals(libraryID)) return true;
-            } catch (URISyntaxException e) {
+                if (child.isLibrary() && child.getIRI().equals(libraryID)) return true;
+            } catch (Exception e) {
                 // If some URL is not well-formed here and there, sticazzi
                 continue;
             }
@@ -392,13 +378,14 @@ public class RegistryLoaderImpl implements RegistryLoader {
     }
 
     @Override
-    public Registry loadLibraryEager(IRI registryPhysicalIRI, IRI libraryID) {
+    public Registry loadLibrary(IRI registryPhysicalIRI, IRI libraryID) {
         // FIXME! linbraryID unused
         Registry registry = null;
         OWLOntologyManager mgr = onm.getOwlCacheManager();
         try {
             OWLOntology ontology = mgr.loadOntology(registryPhysicalIRI);
-            registry = onm.getRegistryManager().populateRegistry(ontology);
+            registry = onm.getRegistryManager().createModel(Collections.singleton(ontology)).iterator()
+                    .next();
         } catch (OWLOntologyDocumentAlreadyExistsException e) {
             log.warn("Ontology document at " + e.getOntologyDocumentIRI()
                      + " exists and will not be reloaded.", e);
@@ -407,8 +394,6 @@ public class RegistryLoaderImpl implements RegistryLoader {
             // Do nothing. Existing ontologies are fine.
         } catch (OWLOntologyCreationException e) {
             log.error("Could not load ontology " + registryPhysicalIRI + " .", e);
-        } catch (RegistryContentException e) {
-            log.error("Could not populate registry " + registryPhysicalIRI + " .", e);
         } finally {}
         return registry;
     }
@@ -473,17 +458,17 @@ public class RegistryLoaderImpl implements RegistryLoader {
             for (Registry current : registries) {
                 c++;
                 log.debug("Loading " + current.toString() + " [" + c + "/" + regsize + "]");
-                if (!ODPRegistryCacheManager.registryContains(current.getURL().toURI())) {
+                if (!ODPRegistryCacheManager.registryContains(current.getIRI().toURI())) {
                     try {
-                        log.debug("Fetching: " + current.getURL().toURI());
-                        registryOntologiesCache.put(current.getURL().toURI(),
-                            ODPRegistryCacheManager.getOntology(current.getURL().toURI()));
+                        log.debug("Fetching: " + current.getIRI().toURI());
+                        registryOntologiesCache.put(current.getIRI().toURI(),
+                            ODPRegistryCacheManager.getOntology(current.getIRI().toURI()));
                     } catch (URIUnresolvableException e) {
-                        log.error("KReS :: could not resolve URI " + current.getURL().toURI(), e);
-                        registryOntologiesCache.put(current.getURL().toURI(), null);
+                        log.error("KReS :: could not resolve URI " + current.getIRI().toURI(), e);
+                        registryOntologiesCache.put(current.getIRI().toURI(), null);
                     } catch (ODPRegistryCacheException e) {
-                        log.error("KReS :: failed to cache ontology " + current.getURL().toURI(), e);
-                        registryOntologiesCache.put(current.getURL().toURI(), null);
+                        log.error("KReS :: failed to cache ontology " + current.getIRI().toURI(), e);
+                        registryOntologiesCache.put(current.getIRI().toURI(), null);
                     }
                 }
             }
@@ -494,7 +479,7 @@ public class RegistryLoaderImpl implements RegistryLoader {
                     registry = setupRegistry(registry);
                 } catch (RegistryContentException e) {
                     ((RegistryImpl) registry).setError(" [Unable to load from location "
-                                                       + registry.getURL().toString() + "]");
+                                                       + registry.getIRI().toString() + "]");
                 }
             }
         } catch (Throwable th) {
@@ -509,7 +494,9 @@ public class RegistryLoaderImpl implements RegistryLoader {
         if (mgr == null) mgr = onm.getOwlCacheManager();
         try {
             OWLOntology ontology = mgr.loadOntology(registryPhysicalIRI);
-            registry = onm.getRegistryManager().populateRegistry(ontology);
+            // registry = onm.getRegistryManager().populateRegistry(ontology);
+            registry = onm.getRegistryManager().createModel(Collections.singleton(ontology)).iterator()
+                    .next();
         } catch (OWLOntologyDocumentAlreadyExistsException e) {
             log.warn("Ontology document at " + e.getOntologyDocumentIRI()
                      + " exists and will not be reloaded.", e);
@@ -518,8 +505,6 @@ public class RegistryLoaderImpl implements RegistryLoader {
             // Do nothing. Existing ontologies are fine.
         } catch (OWLOntologyCreationException e) {
             log.error("Could not load ontology " + registryPhysicalIRI + " .", e);
-        } catch (RegistryContentException e) {
-            log.error("Could not populate registry " + registryPhysicalIRI + " .", e);
         } finally {}
         return registry;
     }
@@ -594,7 +579,7 @@ public class RegistryLoaderImpl implements RegistryLoader {
 
         // For each registry:
         registry.clearChildren();
-        OWLOntology ontology = getMergedOntology(registry.getURL());
+        OWLOntology ontology = getMergedOntology(registry.getIRI());
 
         // TODO: Restore ODP cache manager.
         // setManager(ODPRegistryCacheManager.getManager());

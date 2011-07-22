@@ -16,22 +16,23 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.registry.model;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.IllegalRegistryCycleException;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryContentException;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryContentListener;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryOperation;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
 import org.semanticweb.owlapi.model.IRI;
 
 public abstract class AbstractRegistryItem implements RegistryItem {
 
-    /* Two-way adjacency TODO use maps instead? */
-    protected Set<RegistryItem> children = new HashSet<RegistryItem>(),
-            parents = new HashSet<RegistryItem>();
+    /* Two-way adjacency index TODO use maps instead? */
+    protected Map<IRI,RegistryItem> children = new HashMap<IRI,RegistryItem>(),
+            parents = new HashMap<IRI,RegistryItem>();
 
     private IRI iri;
 
@@ -39,28 +40,23 @@ public abstract class AbstractRegistryItem implements RegistryItem {
 
     private String name;
 
-    public AbstractRegistryItem(String name) {
+    public AbstractRegistryItem(IRI iri) {
+        setIRI(iri);
+    }
+
+    public AbstractRegistryItem(IRI iri, String name) {
+        this(iri);
         setName(name);
-    }
-
-    public AbstractRegistryItem(String name, URL url) throws URISyntaxException {
-        this(name);
-        setURL(url);
-    }
-
-    protected void fireContentRequested(RegistryItem item) {
-        for (RegistryContentListener listener : getRegistryContentListeners())
-            listener.registryContentRequested(item);
     }
 
     @Override
     public void addChild(RegistryItem child) throws RegistryContentException {
-        if (parents.contains(child)) throw new RegistryContentException("Cannot add parent item " + child
-                                                                        + " as a child.");
-        if (!children.contains(child)) {
-            children.add(child);
+        if (this.equals(child) || parents.values().contains(child)) throw new IllegalRegistryCycleException(
+                this, child, RegistryOperation.ADD_CHILD);
+        if (!children.values().contains(child)) {
+            children.put(child.getIRI(), child);
             try {
-                child.addContainer(this);
+                child.addParent(this);
             } catch (RegistryContentException e) {
                 // Shouldn't happen. null is always legal.
             }
@@ -68,16 +64,18 @@ public abstract class AbstractRegistryItem implements RegistryItem {
     }
 
     @Override
-    public void addContainer(RegistryItem container) throws RegistryContentException {
-        if (children.contains(container)) throw new RegistryContentException("Cannot set child item "
-                                                                             + container + " as a parent.");
-        if (!parents.contains(container)) {
-            parents.add(container);
-            container.addChild(this);
+    public void addParent(RegistryItem parent) throws RegistryContentException {
+        if (this.equals(parent) || children.values().contains(parent)) throw new IllegalRegistryCycleException(
+                this, parent, RegistryOperation.ADD_PARENT);
+        if (!parents.values().contains(parent)) {
+            parents.put(parent.getIRI(), parent);
+            try {
+                parent.addChild(this);
+            } catch (RegistryContentException e) {
+                // Shouldn't happen. null is always legal.
+            }
         }
     }
-
-    // private RegistryItem parent;
 
     @Override
     public void addRegistryContentListener(RegistryContentListener listener) {
@@ -86,8 +84,14 @@ public abstract class AbstractRegistryItem implements RegistryItem {
 
     @Override
     public void clearChildren() {
-        for (RegistryItem child : children)
+        for (RegistryItem child : children.values())
             removeChild(child);
+    }
+
+    @Override
+    public void clearParents() {
+        for (RegistryItem parent : parents.values())
+            removeParent(parent);
     }
 
     @Override
@@ -95,14 +99,24 @@ public abstract class AbstractRegistryItem implements RegistryItem {
         listeners.clear();
     }
 
-    @Override
-    public RegistryItem[] getChildren() {
-        return children.toArray(new RegistryItem[children.size()]);
+    protected void fireContentRequested(RegistryItem item) {
+        for (RegistryContentListener listener : getRegistryContentListeners())
+            listener.registryContentRequested(item);
     }
 
     @Override
-    public RegistryItem[] getContainers() {
-        return parents.toArray(new RegistryItem[parents.size()]);
+    public RegistryItem getChild(IRI id) {
+        return children.get(id);
+    }
+
+    @Override
+    public RegistryItem[] getChildren() {
+        return children.values().toArray(new RegistryItem[children.size()]);
+    }
+
+    @Override
+    public IRI getIRI() {
+        return iri;
     }
 
     public String getName() {
@@ -110,22 +124,28 @@ public abstract class AbstractRegistryItem implements RegistryItem {
     }
 
     @Override
-    public Set<RegistryContentListener> getRegistryContentListeners() {
-        return listeners;
+    public RegistryItem getParent(IRI id) {
+        return parents.get(id);
     }
 
-    public URL getURL() {
-        try {
-            return iri.toURI().toURL();
-        } catch (MalformedURLException e) {
-            // Will be obsolete once we replace URLs with IRIs
-            return null;
-        }
+    @Override
+    public RegistryItem[] getParents() {
+        return parents.values().toArray(new RegistryItem[parents.size()]);
+    }
+
+    @Override
+    public Set<RegistryContentListener> getRegistryContentListeners() {
+        return listeners;
     }
 
     @Override
     public boolean hasChildren() {
         return !children.isEmpty();
+    }
+
+    @Override
+    public boolean hasParents() {
+        return !parents.isEmpty();
     }
 
     @Override
@@ -139,18 +159,24 @@ public abstract class AbstractRegistryItem implements RegistryItem {
     }
 
     @Override
+    public void prune() {
+        clearChildren();
+        clearParents();
+    }
+
+    @Override
     public void removeChild(RegistryItem child) {
-        if (children.contains(child)) {
-            children.remove(child);
-            child.removeContainer(this);
+        if (children.values().contains(child)) {
+            children.remove(child.getIRI());
+            child.removeParent(this);
         }
     }
 
     @Override
-    public void removeContainer(RegistryItem container) {
-        if (parents.contains(container)) {
-            parents.remove(container);
-            container.removeChild(this);
+    public void removeParent(RegistryItem parent) {
+        if (parents.values().contains(parent)) {
+            parents.remove(parent.getIRI());
+            parent.removeChild(this);
         }
     }
 
@@ -160,13 +186,13 @@ public abstract class AbstractRegistryItem implements RegistryItem {
     }
 
     @Override
-    public void setName(String string) {
-        this.name = string;
+    public void setIRI(IRI iri) {
+        this.iri = iri;
     }
 
     @Override
-    public void setURL(URL url) throws URISyntaxException {
-        this.iri = IRI.create(url);
+    public void setName(String string) {
+        this.name = string;
     }
 
     @Override

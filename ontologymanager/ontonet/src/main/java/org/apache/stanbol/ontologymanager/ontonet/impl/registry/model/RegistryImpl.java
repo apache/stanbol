@@ -16,11 +16,9 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.registry.model;
 
-import java.net.URISyntaxException;
-import java.net.URL;
-
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class RegistryImpl extends AbstractRegistryItem implements Registry {
@@ -29,21 +27,21 @@ public class RegistryImpl extends AbstractRegistryItem implements Registry {
 
     private String message = "";
 
-    public RegistryImpl(String name) {
-        this(name, OWLManager.createOWLOntologyManager());
+    public RegistryImpl(IRI iri) {
+        this(iri, OWLManager.createOWLOntologyManager());
     }
 
-    public RegistryImpl(String name, OWLOntologyManager cache) {
-        super(name);
+    public RegistryImpl(IRI iri, OWLOntologyManager cache) {
+        super(iri);
         setCache(cache);
     }
 
-    public RegistryImpl(String name, URL url) throws URISyntaxException {
-        this(name, url, OWLManager.createOWLOntologyManager());
+    public RegistryImpl(IRI iri, String name) {
+        this(iri, name, OWLManager.createOWLOntologyManager());
     }
 
-    public RegistryImpl(String name, URL url, OWLOntologyManager cache) throws URISyntaxException {
-        super(name, url);
+    public RegistryImpl(IRI iri, String name, OWLOntologyManager cache) {
+        super(iri, name);
         setCache(cache);
     }
 
@@ -65,19 +63,24 @@ public class RegistryImpl extends AbstractRegistryItem implements Registry {
         return type;
     }
 
+    @Deprecated
     public boolean isError() {
         return !isOK();
     }
 
+    @Deprecated
     public boolean isOK() {
         return this.getError().equals("");
     }
 
     @Override
     public void setCache(OWLOntologyManager cache) {
+        // TODO use the ontology manager factory.
+        if (cache == null) cache = OWLManager.createOWLOntologyManager();
         this.cache = cache;
     }
 
+    @Deprecated
     public void setError(String message) {
         this.message = message;
     }

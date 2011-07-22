@@ -30,6 +30,8 @@ public class LibraryContentNotLoadedException extends RegistryContentException {
      */
     private static final long serialVersionUID = 4442769260608567120L;
 
+    private Library library;
+
     /**
      * Creates a new instance of {@link LibraryContentNotLoadedException}.
      * 
@@ -40,8 +42,6 @@ public class LibraryContentNotLoadedException extends RegistryContentException {
         super(library.toString());
         this.library = library;
     }
-
-    private Library library;
 
     /**
      * Returns the library whose content was requested that is not loaded yet.

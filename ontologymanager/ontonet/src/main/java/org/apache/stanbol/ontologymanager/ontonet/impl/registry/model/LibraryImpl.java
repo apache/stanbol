@@ -16,8 +16,6 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.registry.model;
 
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,6 +25,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryOntologyN
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Library;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryOntology;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
@@ -37,12 +36,12 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
 
     private boolean loaded = false;
 
-    public LibraryImpl(String name) {
-        super(name);
+    public LibraryImpl(IRI iri) {
+        super(iri);
     }
 
-    public LibraryImpl(String name, URL url) throws URISyntaxException {
-        super(name, url);
+    public LibraryImpl(IRI iri, String name) {
+        super(iri, name);
     }
 
     @Override
@@ -80,6 +79,7 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
 
     @Override
     public void loadOntologies(OWLOntologyManager mgr) {
+        if (mgr == null) throw new IllegalArgumentException("A null ontology manager is not allowed.");
         // TODO Auto-generated method stub
         loaded = true;
     }

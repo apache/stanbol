@@ -16,8 +16,18 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.registry;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryOntology;
 
+/**
+ * Thrown whenever there is a request for the raw OWL version of a registry ontology which has not been loaded
+ * yet (e.g. due to lazy loading policies). Developers who catch this exception may, for example, decide to
+ * load the ontology.<br/>
+ * <br/>
+ * Note that this exception is independent from calls to
+ * {@link RegistryContentListener#registryContentRequested(RegistryItem)}, although it can be expected to be
+ * thrown thereafter.
+ */
 public class RegistryOntologyNotLoadedException extends RegistryContentException {
 
     /**
@@ -27,11 +37,22 @@ public class RegistryOntologyNotLoadedException extends RegistryContentException
 
     private RegistryOntology ontology;
 
+    /**
+     * Creates a new instance of {@link RegistryOntologyNotLoadedException}.
+     * 
+     * @param library
+     *            the ontology that caused the exception.
+     */
     public RegistryOntologyNotLoadedException(RegistryOntology ontology) {
         super(ontology.getName());
         this.ontology = ontology;
     }
 
+    /**
+     * Returns the requested ontology that is not loaded yet.
+     * 
+     * @return the ontology that caused the exception.
+     */
     public RegistryOntology getOntology() {
         return ontology;
     }

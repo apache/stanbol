@@ -21,22 +21,17 @@ import java.util.Set;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Library;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryOntology;
-import org.apache.stanbol.ontologymanager.ontonet.impl.registry.cache.RegistryUtils;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 /**
- * A factory that creates the basic elements of the ontology registry metamodel, starting from OWL objects
- * that are required not to be anonymous.<br/>
+ * A factory that creates the basic elements of the ontology registry metamodel from OWL objects that are
+ * required not to be anonymous.<br/>
  * <br/>
  * <b>Note that implementations should not be aggressive</b>, in that they should <b>not</b> recursively
- * create and/or append the parents and children of any generated object. Refer to the following static
- * methods in the {@link RegistryUtils} class to recursively populate a registry item:
- * <ul>
- * <li>{@link RegistryUtils#populateLibrary(OWLNamedIndividual, Set)}</li>
- * <li>{@link RegistryUtils#populateOntology(OWLNamedIndividual, Set)}</li>
- * <li>{@link RegistryUtils#populateRegistry(OWLOntology)}</li>
- * </ul>
+ * create and/or append the parents and children of any generated object. Refer to
+ * {@link RegistryManager#createModel(Set)} to recursively populate registry item starting from a set of
+ * registries.
  */
 public interface RegistryItemFactory {
 

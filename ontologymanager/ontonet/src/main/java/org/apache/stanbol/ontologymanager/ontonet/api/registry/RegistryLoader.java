@@ -34,28 +34,59 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  */
 public interface RegistryLoader {
 
-    Set<OWLOntology> gatherOntologies(RegistryItem registryItem,
-                                      OWLOntologyManager manager,
-                                      boolean recurseRegistries) throws OWLOntologyCreationException;
+    /**
+     * Loads all the OWL ontologies referenced by <code>registryItem</code>.
+     * 
+     * @param registryItem
+     *            the parent registry item.
+     * @param manager
+     *            the OWL ontology manager to use for loading (e.g. to avoid reloading ontologies).
+     * @param recurse
+     *            if true, load also ontologies that are indirectly referenced (e.g. if
+     *            <code>registryItem</code> is a {@link Registry}).
+     * @return
+     * @throws OWLOntologyCreationException
+     */
+    Set<OWLOntology> gatherOntologies(RegistryItem registryItem, OWLOntologyManager manager, boolean recurse) throws OWLOntologyCreationException;
 
+    /**
+     * @deprecated obsolete. Refer to {@link Registry#getChild(IRI)} instead.
+     */
     Library getLibrary(Registry reg, IRI libraryID);
 
+    /**
+     * @deprecated obsolete. Refer to {@link RegistryItem#getParent(IRI)} instead.
+     */
     Object getParent(Object child);
 
+    /**
+     * @deprecated obsolete. Refer to {@link RegistryItem#hasChildren()} instead.
+     */
     boolean hasChildren(Object parent);
 
+    /**
+     * @deprecated obsolete. Refer to {@link Registry#getChild(IRI)} instead.
+     */
     boolean hasLibrary(Registry reg, IRI libraryID);
 
     /**
-     * Only extract the ontologies belonging to the library specified, if found in the registry at the
+     * Only extracts the ontologies belonging to the library specified, if found in the registry at the
      * supplied location.
      * 
      * @param registryPhysicalRIRI
      * @param libraryID
      * @return
+     * @deprecated This method does not what is supposed to do (ontology loading is selective, not model
+     *             construction). Calls to this method should be replaced by the sequence:
+     *             {@link RegistryManager#createModel(Set)} and {@link RegistryManager#getRegistry(IRI)}.
      */
-    Registry loadLibraryEager(IRI registryPhysicalIRI, IRI libraryID);
+    Registry loadLibrary(IRI registryPhysicalIRI, IRI libraryID);
 
+    /**
+     * 
+     * @throws RegistryContentException
+     * @deprecated obsolete
+     */
     void loadLocations() throws RegistryContentException;
 
     /**
@@ -63,6 +94,8 @@ public interface RegistryLoader {
      * 
      * @param physicalIRI
      * @return
+     * @deprecated Calls to this method should be replaced by the sequence:
+     *             {@link RegistryManager#createModel(Set)} and {@link RegistryManager#getRegistry(IRI)}.
      */
     Registry loadRegistry(IRI registryPhysicalIRI, OWLOntologyManager mgr);
 }

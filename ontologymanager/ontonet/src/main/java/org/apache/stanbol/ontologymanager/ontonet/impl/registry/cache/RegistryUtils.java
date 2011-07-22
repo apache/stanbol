@@ -16,30 +16,28 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.registry.cache;
 
-import java.net.URISyntaxException;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryContentException;
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryItemFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Library;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Registry;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryItem.Type;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.RegistryOntology;
-import org.apache.stanbol.ontologymanager.ontonet.impl.registry.RegistryItemFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.xd.vocabulary.CODOVocabulary;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLAxiomVisitor;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.util.OWLAxiomVisitorAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,14 +47,10 @@ public class RegistryUtils {
 
     private static final OWLObjectProperty hasPart, hasOntology, isPartOf, isOntologyOf;
 
+    @SuppressWarnings("unused")
     private static Logger log = LoggerFactory.getLogger(RegistryUtils.class);
 
-    private static Map<IRI,RegistryItem> population = new TreeMap<IRI,RegistryItem>();
-
-    private static RegistryItemFactory riFactory;
-
     static {
-        riFactory = new RegistryItemFactoryImpl();
         OWLDataFactory factory = OWLManager.getOWLDataFactory();
         cOntology = factory.getOWLClass(IRI.create(CODOVocabulary.CODK_Ontology));
         cRegistryLibrary = factory.getOWLClass(IRI.create(CODOVocabulary.CODD_OntologyLibrary));
@@ -81,7 +75,7 @@ public class RegistryUtils {
         if (item instanceof RegistryOntology) {
             // An Ontology MUST have a non-null URI.
             try {
-                IRI iri = IRI.create(item.getURL());
+                IRI iri = item.getIRI();
                 result |= iri.equals(ontologyId);
             } catch (Exception e) {
                 return false;
@@ -96,115 +90,65 @@ public class RegistryUtils {
 
     }
 
-    /**
-     * Simulates a classifier.
-     * 
-     * @param ind
-     * @param o
-     * @return
-     */
-    public static Type getType(OWLIndividual ind, Set<OWLOntology> ontologies) {
-        // TODO also use property values
-        Set<OWLClassExpression> types = ind.getTypes(ontologies);
-        if (types.contains(cOntology) && !types.contains(cRegistryLibrary))
-            return Type.ONTOLOGY;
-        if (!types.contains(cOntology) && types.contains(cRegistryLibrary))
-            return Type.LIBRARY;
+    @Deprecated
+    public static Type getType(final OWLIndividual ind, Set<OWLOntology> ontologies) {
+
+        // 0 is for library, 1 is for ontology (more in the future?)
+        final int[] pointsFor = new int[] {0, 0};
+        final int[] pointsAgainst = new int[] {0, 0};
+
+        OWLAxiomVisitor v = new OWLAxiomVisitorAdapter() {
+
+            @Override
+            public void visit(OWLClassAssertionAxiom axiom) {
+                if (ind.equals(axiom.getIndividual())) {
+                    OWLClassExpression type = axiom.getClassExpression();
+                    if (cRegistryLibrary.equals(type)) {
+                        pointsFor[0]++;
+                        pointsAgainst[1]++;
+                    } else if (cOntology.equals(type)) {
+                        pointsFor[1]++;
+                        pointsAgainst[0]++;
+                    }
+                }
+            }
+
+            @Override
+            public void visit(OWLObjectPropertyAssertionAxiom axiom) {
+                OWLObjectPropertyExpression prop = axiom.getProperty();
+                if (ind.equals(axiom.getSubject())) {
+
+                    if (hasOntology.equals(prop)) {
+                        pointsFor[0]++;
+                        pointsAgainst[1]++;
+                    } else if (isOntologyOf.equals(prop)) {
+                        pointsFor[1]++;
+                        pointsAgainst[0]++;
+                    }
+
+                } else if (ind.equals(axiom.getObject())) {
+                    if (isOntologyOf.equals(prop)) {
+                        pointsFor[0]++;
+                        pointsAgainst[1]++;
+                    } else if (hasOntology.equals(prop)) {
+                        pointsFor[1]++;
+                        pointsAgainst[0]++;
+                    }
+                }
+            }
+
+        };
+
+        // TODO use this strategy in the single pass algorithm for constructing the model.
+        for (OWLOntology o : ontologies)
+            for (OWLAxiom ax : o.getAxioms())
+                ax.accept(v);
+
+        if (pointsFor[0] > 0 && pointsAgainst[0] == 0) return Type.LIBRARY;
+        if (pointsFor[1] > 0 && pointsAgainst[1] == 0) return Type.ONTOLOGY;
+        // Cannot determine registries, since they have no associated individual.
         return null;
+
     }
-   
-//    public static Library populateLibrary(OWLNamedIndividual ind, Set<OWLOntology> registries) throws RegistryContentException {
-//        IRI id = ind.getIRI();
-//        RegistryItem lib = null;
-//        if (population.containsKey(id)) {
-//            // We are not allowing multityping either.
-//            lib = population.get(id);
-//            if (!(lib instanceof Library)) throw new RegistryContentException(
-//                    "Inconsistent multityping: for item " + id + " : {" + Library.class + ", "
-//                            + lib.getClass() + "}");
-//        } else {
-//            lib = riFactory.createLibrary(ind.asOWLNamedIndividual());
-//            try {
-//                population.put(IRI.create(lib.getURL()), lib);
-//            } catch (URISyntaxException e) {
-//                log.error("Invalid identifier for library item " + lib, e);
-//                return null;
-//            }
-//        }
-//        // EXIT nodes.
-//        Set<OWLIndividual> ronts = new HashSet<OWLIndividual>();
-//        for (OWLOntology o : registries)
-//            ronts.addAll(ind.getObjectPropertyValues(hasOntology, o));
-//        for (OWLIndividual iont : ronts) {
-//            if (iont.isNamed())
-//                lib.addChild(populateOntology(iont.asOWLNamedIndividual(), registries));
-//        }
-//        return (Library) lib;
-//    }
-//    
-//    public static RegistryOntology populateOntology(OWLNamedIndividual ind, Set<OWLOntology> registries) throws RegistryContentException {
-//        IRI id = ind.getIRI();
-//        RegistryItem ront = null;
-//        if (population.containsKey(id)) {
-//            // We are not allowing multityping either.
-//            ront = population.get(id);
-//            if (!(ront instanceof RegistryOntology)) throw new RegistryContentException(
-//                    "Inconsistent multityping: for item " + id + " : {" + RegistryOntology.class + ", "
-//                            + ront.getClass() + "}");
-//        } else {
-//            ront = riFactory.createRegistryOntology(ind);
-//            try {
-//                population.put(IRI.create(ront.getURL()), ront);
-//            } catch (URISyntaxException e) {
-//                log.error("Invalid identifier for library item " + ront, e);
-//                return null;
-//            }
-//        }
-//        // EXIT nodes.
-//        Set<OWLIndividual> libs = new HashSet<OWLIndividual>();
-//        for (OWLOntology o : registries)
-//            libs.addAll(ind.getObjectPropertyValues(isOntologyOf, o));
-//        for (OWLIndividual ilib : libs) {
-//            if (ilib.isNamed())
-//                ront.addContainer(populateLibrary(ilib.asOWLNamedIndividual(), registries));
-//        }
-//        return (RegistryOntology) ront;
-//    }
-//
-//    public static Registry populateRegistry(OWLOntology registry) throws RegistryContentException {
-//
-//        Registry reg = riFactory.createRegistry(registry);
-//        Set<OWLOntology> closure = registry.getOWLOntologyManager().getImportsClosure(registry);
-//
-//        // Just scan all individuals. Recurse in case the registry imports more registries.
-//        for (OWLIndividual ind : registry.getIndividualsInSignature(true)) {
-//            // We do not allow anonymous registry items.
-//            if (ind.isAnonymous()) continue;
-//            RegistryItem item = null;
-//            // IRI id = ind.asOWLNamedIndividual().getIRI();
-//            Type t = getType(ind, closure);
-//            if (t==null) {
-//                log.warn("Undetermined type for registry ontology individual {}",ind);
-//                continue;
-//            }
-//            switch (getType(ind, closure)) {
-//                case LIBRARY:
-//                    // // Create the library and attach to parent and children
-//                    item = populateLibrary(ind.asOWLNamedIndividual(), closure);
-//                    reg.addChild(item);
-//                    break;
-//                case ONTOLOGY:
-//                    // Create the ontology and attach to parent
-//                    item = populateOntology(ind.asOWLNamedIndividual(), closure);
-//                    // We don't know where to attach it to in this method.
-//                    break;
-//                default:
-//                    break;
-//            }
-//        }
-//
-//        population = new TreeMap<IRI,RegistryItem>();
-//        return reg;
-//    }
 
 }

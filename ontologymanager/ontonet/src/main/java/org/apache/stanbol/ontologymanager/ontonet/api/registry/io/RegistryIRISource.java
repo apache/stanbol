@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * the ontology registry obtained by dereferencing a supplied IRI.
  * 
  */
-public class OntologyRegistryIRISource extends AbstractOntologyInputSource {
+public class RegistryIRISource extends AbstractOntologyInputSource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -50,9 +50,7 @@ public class OntologyRegistryIRISource extends AbstractOntologyInputSource {
      * @param ontologyManager
      * @param loader
      */
-    public OntologyRegistryIRISource(IRI registryIRI,
-                                     OWLOntologyManager ontologyManager,
-                                     RegistryLoader loader) {
+    public RegistryIRISource(IRI registryIRI, OWLOntologyManager ontologyManager, RegistryLoader loader) {
         this(registryIRI, ontologyManager, loader, null);
     }
 
@@ -62,10 +60,10 @@ public class OntologyRegistryIRISource extends AbstractOntologyInputSource {
      * 
      * @param registryIRI
      */
-    public OntologyRegistryIRISource(IRI registryIRI,
-                                     OWLOntologyManager ontologyManager,
-                                     RegistryLoader loader,
-                                     OntologyInputSource parentSrc) {
+    public RegistryIRISource(IRI registryIRI,
+                             OWLOntologyManager ontologyManager,
+                             RegistryLoader loader,
+                             OntologyInputSource parentSrc) {
 
         this.registryIRI = registryIRI;
 
@@ -73,23 +71,23 @@ public class OntologyRegistryIRISource extends AbstractOntologyInputSource {
         bindPhysicalIri(null);
 
         Set<OWLOntology> subtrees = new HashSet<OWLOntology>();
-        Registry reg = loader.loadRegistry(registryIRI,ontologyManager);
-        //        for (Registry reg : loader.loadRegistriesEager(registryIRI)) {
-            for (RegistryItem ri : reg.getChildren()) {
-                if (ri.isLibrary()) try {
-                    Set<OWLOntology> adds = loader.gatherOntologies(ri, ontologyManager, true);
-                    subtrees.addAll(adds);
-                } catch (OWLOntologyAlreadyExistsException e) {
-                    // Chettefreca
-                    continue;
-                } catch (OWLOntologyCreationException e) {
-                    log.warn("Failed to load ontology library " + ri.getName() + ". Skipping.", e);
-                    // If we can't load this library at all, scrap it.
-                    // TODO : not entirely convinced of this step.
-                    continue;
-                }
+        Registry reg = loader.loadRegistry(registryIRI, ontologyManager);
+        // for (Registry reg : loader.loadRegistriesEager(registryIRI)) {
+        for (RegistryItem ri : reg.getChildren()) {
+            if (ri.isLibrary()) try {
+                Set<OWLOntology> adds = loader.gatherOntologies(ri, ontologyManager, true);
+                subtrees.addAll(adds);
+            } catch (OWLOntologyAlreadyExistsException e) {
+                // Chettefreca
+                continue;
+            } catch (OWLOntologyCreationException e) {
+                log.warn("Failed to load ontology library " + ri.getName() + ". Skipping.", e);
+                // If we can't load this library at all, scrap it.
+                // TODO : not entirely convinced of this step.
+                continue;
             }
-//        }
+        }
+        // }
         // We always construct a new root now, even if there's just one subtree.
 
         // Set<OWLOntology> subtrees = mgr.getOntologies();
@@ -105,11 +103,11 @@ public class OntologyRegistryIRISource extends AbstractOntologyInputSource {
         }
     }
 
-    public OntologyRegistryIRISource(IRI registryIRI, RegistryLoader loader) {
+    public RegistryIRISource(IRI registryIRI, RegistryLoader loader) {
         this(registryIRI, OWLManager.createOWLOntologyManager(), loader, null);
     }
 
-    public OntologyRegistryIRISource(IRI registryIRI, RegistryLoader loader, OntologyInputSource parentSrc) {
+    public RegistryIRISource(IRI registryIRI, RegistryLoader loader, OntologyInputSource parentSrc) {
         this(registryIRI, OWLManager.createOWLOntologyManager(), loader, parentSrc);
     }
 

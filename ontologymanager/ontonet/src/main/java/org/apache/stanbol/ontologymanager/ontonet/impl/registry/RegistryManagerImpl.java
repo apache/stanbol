@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.registry;
 
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -32,6 +31,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryContentException;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryContentListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryItemFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.registry.models.Library;
@@ -44,21 +44,32 @@ import org.apache.stanbol.ontologymanager.ontonet.xd.vocabulary.CODOVocabulary;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLAxiomVisitor;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.util.OWLAxiomVisitorAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Default implementation of the registry manager, that listens to requests on its referenced resources and
+ * issues loading requests accordingly.
+ */
 @Component(immediate = true, metatype = true)
 @Service(RegistryManager.class)
-public class RegistryManagerImpl implements RegistryManager {
+public class RegistryManagerImpl implements RegistryManager, RegistryContentListener {
 
     private static final boolean _LAZY_LOADING_DEFAULT = false;
 
@@ -88,6 +99,7 @@ public class RegistryManagerImpl implements RegistryManager {
     @Property(name = RegistryManager.LAZY_LOADING, boolValue = _LAZY_LOADING_DEFAULT)
     private boolean lazyLoading = _LAZY_LOADING_DEFAULT;
 
+    /* Maps registries to libraries */
     private Map<IRI,Set<IRI>> libraryIndex = new HashMap<IRI,Set<IRI>>();
 
     @Property(name = RegistryManager.REGISTRY_LOCATIONS, cardinality = 1000)
@@ -95,11 +107,12 @@ public class RegistryManagerImpl implements RegistryManager {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
+    /* Maps libraries to ontologies */
     private Map<IRI,Set<IRI>> ontologyIndex = new HashMap<IRI,Set<IRI>>();
 
     private Map<IRI,RegistryItem> population = new TreeMap<IRI,RegistryItem>();
 
-    private Map<IRI,Registry> registries = new HashMap<IRI,Registry>();
+    private Set<IRI> registries = new HashSet<IRI>();
 
     private RegistryItemFactory riFactory;
 
@@ -148,9 +161,10 @@ public class RegistryManagerImpl implements RegistryManager {
 
         OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
         // Load registries
+        Set<OWLOntology> regOnts = new HashSet<OWLOntology>();
         for (String loc : locations) {
             try {
-                OWLOntology o = mgr.loadOntology(IRI.create(loc));
+                regOnts.add(mgr.loadOntology(IRI.create(loc)));
             } catch (OWLOntologyAlreadyExistsException e) {
                 log.info("Skipping cached ontology {}.", e.getOntologyID());
                 continue;
@@ -159,23 +173,129 @@ public class RegistryManagerImpl implements RegistryManager {
                 continue;
             }
         }
-
+        // Build the model!
+        createModel(regOnts);
     }
 
     @Override
     public void addRegistry(Registry registry) {
         try {
-            registries.put(IRI.create(registry.getURL()), registry);
+            population.put(registry.getIRI(), registry);
+            registries.add(registry.getIRI());
             updateLocations();
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             log.error("Failed to add ontology registry.", e);
         }
     }
 
     @Override
     public void clearRegistries() {
-        registries.clear();
+        for (IRI id : registries)
+            if (registries.remove(id)) population.remove(id);
         updateLocations();
+    }
+
+    @Override
+    public Set<Registry> createModel(Set<OWLOntology> registryOntologies) {
+
+        Set<Registry> results = new HashSet<Registry>();
+        // Reset population
+        population.clear();
+
+        // Build the transitive imports closure of the union.
+        Set<OWLOntology> closure = new HashSet<OWLOntology>();
+        for (OWLOntology rego : registryOntologies)
+            closure.addAll(rego.getOWLOntologyManager().getImportsClosure(rego));
+
+        final Map<IRI,int[]> candidateTypes = new HashMap<IRI,int[]>();
+
+        OWLAxiomVisitor v = new OWLAxiomVisitorAdapter() {
+
+            private int[] checkScores(IRI key) {
+                int[] scores;
+                if (candidateTypes.containsKey(key)) scores = candidateTypes.get(key);
+                else {
+                    scores = new int[] {0, 0};
+                    candidateTypes.put(key, scores);
+                }
+                return scores;
+            }
+
+            @Override
+            public void visit(OWLClassAssertionAxiom axiom) {
+                OWLIndividual ind = axiom.getIndividual();
+                if (ind.isAnonymous()) return;
+                IRI iri = ind.asOWLNamedIndividual().getIRI();
+                int[] scores = checkScores(iri);
+
+                OWLClassExpression type = axiom.getClassExpression();
+                if (cRegistryLibrary.equals(type)) {
+                    scores[0]++;
+                } else if (cOntology.equals(type)) {
+                    scores[1]++;
+                }
+
+            }
+
+            @Override
+            public void visit(OWLObjectPropertyAssertionAxiom axiom) {
+                OWLObjectPropertyExpression prop = axiom.getProperty();
+
+                if (hasOntology.equals(prop)) {
+                    IRI iri;
+                    OWLIndividual ind = axiom.getSubject();
+                    if (!ind.isAnonymous()) {
+                        iri = ind.asOWLNamedIndividual().getIRI();
+                        checkScores(iri)[0]++;
+                    }
+                    ind = axiom.getObject();
+                    if (!ind.isAnonymous()) {
+                        iri = ind.asOWLNamedIndividual().getIRI();
+                        checkScores(iri)[1]++;
+                    }
+                } else if (isOntologyOf.equals(prop)) {
+                    IRI iri;
+                    OWLIndividual ind = axiom.getSubject();
+                    if (!ind.isAnonymous()) {
+                        iri = ind.asOWLNamedIndividual().getIRI();
+                        checkScores(iri)[1]++;
+                    }
+                    ind = axiom.getObject();
+                    if (!ind.isAnonymous()) {
+                        iri = ind.asOWLNamedIndividual().getIRI();
+                        checkScores(iri)[0]++;
+                    }
+                }
+
+            }
+
+        };
+
+        // First pass to determine the types.
+        for (OWLOntology o : closure)
+            for (OWLAxiom ax : o.getAxioms())
+                ax.accept(v);
+
+        // Then populate on the registry
+        OWLDataFactory df = OWLManager.getOWLDataFactory();
+        for (IRI iri : candidateTypes.keySet()) {
+            int[] scores = candidateTypes.get(iri);
+            if (scores != null && (scores[0] > 0 || scores[1] > 0)) {
+                if (scores[0] > 0 && scores[1] == 0) population.put(iri,
+                    riFactory.createLibrary(df.getOWLNamedIndividual(iri)));
+                else if (scores[0] == 0 && scores[1] > 0) population.put(iri,
+                    riFactory.createRegistryOntology(df.getOWLNamedIndividual(iri)));
+            } else log.warn("Unable to determine type for registry item {}", iri);
+        }
+
+        for (OWLOntology oReg : registryOntologies) {
+            try {
+                results.add(populateRegistry(oReg));
+            } catch (RegistryContentException e) {
+                log.error("An error occurred while populating an ontology registry.", e);
+            }
+        }
+        return results;
     }
 
     @Deactivate
@@ -193,7 +313,12 @@ public class RegistryManagerImpl implements RegistryManager {
 
     @Override
     public Set<Registry> getRegistries() {
-        return new HashSet<Registry>(registries.values());
+        Set<Registry> results = new HashSet<Registry>();
+        for (IRI key : population.keySet()) {
+            RegistryItem item = population.get(key);
+            if (item instanceof Registry) results.add((Registry) item);
+        }
+        return results;
     }
 
     @Override
@@ -204,7 +329,8 @@ public class RegistryManagerImpl implements RegistryManager {
 
     @Override
     public Registry getRegistry(IRI id) {
-        return registries.get(id);
+        RegistryItem item = population.get(id);
+        return item != null && item instanceof Registry ? (Registry) item : null;
     }
 
     @Override
@@ -212,7 +338,7 @@ public class RegistryManagerImpl implements RegistryManager {
         return lazyLoading;
     }
 
-    public Library populateLibrary(OWLNamedIndividual ind, Set<OWLOntology> registries) throws RegistryContentException {
+    protected Library populateLibrary(OWLNamedIndividual ind, Set<OWLOntology> registries) throws RegistryContentException {
         IRI id = ind.getIRI();
         RegistryItem lib = null;
         if (population.containsKey(id)) {
@@ -224,8 +350,8 @@ public class RegistryManagerImpl implements RegistryManager {
         } else {
             lib = riFactory.createLibrary(ind.asOWLNamedIndividual());
             try {
-                population.put(IRI.create(lib.getURL()), lib);
-            } catch (URISyntaxException e) {
+                population.put(lib.getIRI(), lib);
+            } catch (Exception e) {
                 log.error("Invalid identifier for library item " + lib, e);
                 return null;
             }
@@ -240,7 +366,7 @@ public class RegistryManagerImpl implements RegistryManager {
         return (Library) lib;
     }
 
-    public RegistryOntology populateOntology(OWLNamedIndividual ind, Set<OWLOntology> registries) throws RegistryContentException {
+    protected RegistryOntology populateOntology(OWLNamedIndividual ind, Set<OWLOntology> registries) throws RegistryContentException {
         IRI id = ind.getIRI();
         RegistryItem ront = null;
         if (population.containsKey(id)) {
@@ -252,8 +378,8 @@ public class RegistryManagerImpl implements RegistryManager {
         } else {
             ront = riFactory.createRegistryOntology(ind);
             try {
-                population.put(IRI.create(ront.getURL()), ront);
-            } catch (URISyntaxException e) {
+                population.put(ront.getIRI(), ront);
+            } catch (Exception e) {
                 log.error("Invalid identifier for library item " + ront, e);
                 return null;
             }
@@ -263,12 +389,12 @@ public class RegistryManagerImpl implements RegistryManager {
         for (OWLOntology o : registries)
             libs.addAll(ind.getObjectPropertyValues(isOntologyOf, o));
         for (OWLIndividual ilib : libs) {
-            if (ilib.isNamed()) ront.addContainer(populateLibrary(ilib.asOWLNamedIndividual(), registries));
+            if (ilib.isNamed()) ront.addParent(populateLibrary(ilib.asOWLNamedIndividual(), registries));
         }
         return (RegistryOntology) ront;
     }
 
-    public Registry populateRegistry(OWLOntology registry) throws RegistryContentException {
+    protected Registry populateRegistry(OWLOntology registry) throws RegistryContentException {
 
         Registry reg = riFactory.createRegistry(registry);
         Set<OWLOntology> closure = registry.getOWLOntologyManager().getImportsClosure(registry);
@@ -286,20 +412,35 @@ public class RegistryManagerImpl implements RegistryManager {
             }
             switch (t) {
                 case LIBRARY:
-                    // // Create the library and attach to parent and children
+                    // Create the library and attach to parent and children
                     item = populateLibrary(ind.asOWLNamedIndividual(), closure);
                     reg.addChild(item);
+                    item.addRegistryContentListener(this);
                     break;
                 case ONTOLOGY:
                     // Create the ontology and attach to parent
                     item = populateOntology(ind.asOWLNamedIndividual(), closure);
-                    // We don't know where to attach it to in this method.
+                    item.addRegistryContentListener(this);
+                    // We don't know where to attach it within this method.
                     break;
                 default:
                     break;
             }
         }
+        try {
+            reg.addRegistryContentListener(this);
+            population.put(reg.getIRI(), reg);
+        } catch (Exception e) {
+            log.error("Invalid identifier for library item " + reg, e);
+            return null;
+        }
         return reg;
+    }
+
+    @Override
+    public void registryContentRequested(RegistryItem requestTarget) {
+        // TODO Auto-generated method stub
+
     }
 
     @Override
@@ -314,7 +455,7 @@ public class RegistryManagerImpl implements RegistryManager {
     }
 
     protected synchronized void updateLocations() {
-        Set<IRI> locations = Collections.unmodifiableSet(registries.keySet());
+        Set<IRI> locations = Collections.unmodifiableSet(registries);
         this.locations = locations.toArray(new String[0]);
     }
 

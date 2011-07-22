@@ -110,7 +110,7 @@ public class LibrarySource extends AbstractOntologyInputSource {
         bindPhysicalIri(null);
 
         Set<OWLOntology> subtrees = new HashSet<OWLOntology>();
-        Registry reg = loader.loadLibraryEager(registryLocation, libraryID);
+        Registry reg = loader.loadLibrary(registryLocation, libraryID);
         for (RegistryItem ri : reg.getChildren()) {
             if (ri.isLibrary()) try {
                 Set<OWLOntology> adds = loader.gatherOntologies(ri, ontologyManager, true);

@@ -16,17 +16,33 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.registry;
 
+/**
+ * Thrown when trying to process an invalid registry item. The reason why it is invalid can be specified by
+ * the cause, message or subclasses of this exception.
+ */
 public class RegistryContentException extends Exception {
 
     /**
-	 * 
-	 */
+     * 
+     */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Creates a new instance of {@link RegistryContentException}.
+     * 
+     * @param cause
+     *            the throwable that caused this exception to be thrown.
+     */
     public RegistryContentException(Throwable cause) {
         initCause(cause);
     }
 
+    /**
+     * Creates a new instance of {@link RegistryContentException}.
+     * 
+     * @param message
+     *            the exception message.
+     */
     public RegistryContentException(String message) {
         super(message);
     }
