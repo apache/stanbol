@@ -25,11 +25,13 @@ import java.util.Set;
 import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexDataType;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
+import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition;
 import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition.PositionType;
 import org.apache.stanbol.entityhub.yard.solr.query.EncodedConstraintParts;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
+import org.apache.stanbol.entityhub.yard.solr.query.QueryUtils;
 
 /**
  * TODO: This encoder is not functional! It would need to convert the REGEX Pattern to the according WildCard
@@ -39,7 +41,7 @@ import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
  * @author Rupert Westenthaler
  * 
  */
-public class RegexEncoder implements IndexConstraintTypeEncoder<IndexValue> {
+public class RegexEncoder implements IndexConstraintTypeEncoder<Object> {
 
     private static final ConstraintTypePosition POS = new ConstraintTypePosition(PositionType.value);
 
@@ -50,18 +52,33 @@ public class RegexEncoder implements IndexConstraintTypeEncoder<IndexValue> {
         types.add(IndexDataTypeEnum.STR.getIndexType());
         SUPPORTED_TYPES = Collections.unmodifiableSet(types);
     }
+    private final IndexValueFactory indexValueFactory;
+
+    public RegexEncoder(IndexValueFactory indexValueFactory) {
+        if (indexValueFactory == null) {
+            throw new IllegalArgumentException("The indexValueFactory MUST NOT be NULL");
+        }
+        this.indexValueFactory = indexValueFactory;
+    }
 
     @Override
-    public void encode(EncodedConstraintParts constraint, IndexValue value) {
-        if (value == null) {
+    public void encode(EncodedConstraintParts constraint, Object value) {
+        Set<IndexValue> indexValues = QueryUtils.parseIndexValues(indexValueFactory,value);
+        if(indexValues.size() == 1 && indexValues.iterator().next() == null){
             throw new IllegalArgumentException("This encoder does not support the NULL IndexValue!");
-        } else if (!SUPPORTED_TYPES.contains(value.getType())) {
-            throw new IllegalArgumentException(String.format(
-                "This encoder does not support the IndexDataType %s (supported: %s)", value.getType(),
-                SUPPORTED_TYPES));
-        } else {
-            // TODO: Implement some REGEX to WILDCard conversion for Solr
-            constraint.addEncoded(POS, value.getValue().toLowerCase());
+        }
+        // encode the value based on the type
+        for(IndexValue indexValue : indexValues){
+            if (value != null) {
+                if (!SUPPORTED_TYPES.contains(indexValue.getType())) {
+                    throw new IllegalArgumentException(String.format(
+                        "This encoder does not support the IndexDataType %s (supported: %s)", indexValue.getType(),
+                        SUPPORTED_TYPES));
+                } else {
+                    // TODO: Implement some REGEX to WILDCard conversion for Solr
+                    constraint.addEncoded(POS, indexValue.getValue().toLowerCase());
+                }
+            } //else ignore null element
         }
     }
 
@@ -81,8 +98,8 @@ public class RegexEncoder implements IndexConstraintTypeEncoder<IndexValue> {
     }
 
     @Override
-    public Class<IndexValue> acceptsValueType() {
-        return IndexValue.class;
+    public Class<Object> acceptsValueType() {
+        return Object.class;
     }
 
 }

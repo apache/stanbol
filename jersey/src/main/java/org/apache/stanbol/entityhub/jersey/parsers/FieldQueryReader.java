@@ -23,6 +23,8 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
@@ -325,7 +327,17 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
         }
         //parse text and create constraint
         if(jConstraint.has("text") && !jConstraint.isNull("text")){
-            constraint = new TextConstraint(jConstraint.getString("text"),
+            List<String> textConstraints;
+            JSONArray jTextConstraints = jConstraint.optJSONArray("text");
+            if(jTextConstraints != null){
+                textConstraints = new ArrayList<String>(jTextConstraints.length());
+                for(int i=0;i<jTextConstraints.length();i++){
+                   textConstraints.add(jTextConstraints.getString(i));
+                }
+            } else {
+                textConstraints = Collections.singletonList(jConstraint.getString("text"));
+            }
+            constraint = new TextConstraint(textConstraints,
                 patternType,caseSensitive,
                 languages == null?null:languages.toArray(new String[languages.size()]));
         } else {

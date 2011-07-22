@@ -144,7 +144,13 @@ TextConstraint for this</p>
 
 <p>Additional key:</p>
 <ul>
-    <li><code>text</code>: the text to search (required)</li>
+    <li><code>text</code>: the text to search (required). If multiple values
+        are parsed, that those values are connected by using OR.<br>
+        Parsing "Barack Obama" returns Entities that contain "Barack Obama" as
+        value for the field. Parsing ["Barack","Obama"] will return all Entities
+        that contain any of the two words. Most Sites however will boost results
+        that contain both values over such that only contain a single one. 
+    </li>
     <li><code>languages</code>: json array with the languages to search 
         (default is all languages) </li>
     <li><code>patternType</code>: one of "wildcard", "regex" or "none" 
@@ -154,7 +160,12 @@ TextConstraint for this</p>
 
 <h5>Example:</h5>
 
-<p>Searches for entities with an german rdfs:label starting with "Frankf"</p>
+<p>
+(1) Searches for entities with an german rdfs:label starting with "Frankf"<br>
+(2) Searches for entities that contain "Frankfurt" OR "Main" OR "Airport".
+Typically the "Frankfurt am Main Airport" should be ranked first because it
+contains all the optional terms.
+</p>
 
 <code><pre>
 { 
@@ -162,6 +173,11 @@ TextConstraint for this</p>
    "languages": ["de"], 
    "patternType": "wildcard", 
    "text": "Frankf*", 
+   "field": "http:\/\/www.w3.org\/2000\/01\/rdf-schema#label" 
+}, 
+{ 
+   "type": "text", 
+   "text": ["Frankfurt","Main","Airport"] 
    "field": "http:\/\/www.w3.org\/2000\/01\/rdf-schema#label" 
 }, 
 </pre></code>

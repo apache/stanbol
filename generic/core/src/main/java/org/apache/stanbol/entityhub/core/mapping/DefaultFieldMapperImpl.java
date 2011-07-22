@@ -355,7 +355,7 @@ public class DefaultFieldMapperImpl implements FieldMapper, Cloneable {
      * @return the modified collection to allow nested calls
      */
     private Collection<Object> processFilter(TextConstraint textConstraint, Collection<Object> values,boolean filterNonTextValues) {
-        if(textConstraint.getText() != null){
+        if(textConstraint.getTexts() != null){
             log.warn("Filtering based on values is not implemented");
         }
         /*

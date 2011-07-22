@@ -19,13 +19,16 @@ package org.apache.stanbol.entityhub.yard.solr.query;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.stanbol.commons.solr.utils.SolrUtil;
 import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
+import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
 
 public final class QueryUtils {
     private QueryUtils() {}
@@ -66,5 +69,39 @@ public final class QueryUtils {
             queryConstraints = new String[] {value};
         }
         return queryConstraints;
+    }
+    
+    /**
+     * Utility Method that extracts IndexValues form an parsed {@link Object}.
+     * This checks for {@link IndexValue}, {@link Iterable}s and values
+     * @param indexValueFactory The indexValueFactory used to create indexValues if necessary
+     * @param value the value to parse
+     * @return A set with the parsed values. The returned Set is guaranteed 
+     * not to be <code>null</code> and contains at least a single element. 
+     * If no IndexValue could be parsed from the parsed value than a set containing
+     * the <code>null</code> value is returned.
+     */
+    public static Set<IndexValue> parseIndexValues(IndexValueFactory indexValueFactory,Object value) {
+        Set<IndexValue> indexValues;
+        if (value == null) {
+            indexValues = Collections.singleton(null);
+        } else if (value instanceof IndexValue) {
+            indexValues = Collections.singleton((IndexValue) value);
+        } else if (value instanceof Iterable<?>){
+            indexValues = new HashSet<IndexValue>();
+            for(Object o : (Iterable<?>) value){
+                if(o instanceof IndexValue){
+                    indexValues.add((IndexValue)o);
+                } else if (o != null){
+                    indexValues.add(indexValueFactory.createIndexValue(o));
+                }
+            }
+            if(indexValues.isEmpty()){
+                indexValues.add(null); //add null element instead of an empty set
+            }
+        } else {
+            indexValues = Collections.singleton(indexValueFactory.createIndexValue(value));
+        }
+        return indexValues;
     }
 }

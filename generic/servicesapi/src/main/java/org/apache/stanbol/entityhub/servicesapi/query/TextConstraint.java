@@ -16,9 +16,12 @@
  */
 package org.apache.stanbol.entityhub.servicesapi.query;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -42,24 +45,59 @@ public class TextConstraint extends Constraint {
     private final PatternType wildcardType;
     private final Set<String> languages;
     private final boolean caseSensitive;
-    private final String text;
+    private final List<String> texts;
+    /**
+     * Creates a TextConstraint for multiple texts and languages. Parsed texts
+     * are connected using OR and may appear in any of the parsed languages.
+     * @param text the texts or <code>null</code> to search for any text in active languages
+     * @param languages the set of active languages
+     */
+    public TextConstraint(List<String> text,String...languages) {
+        this(text,PatternType.none,false,languages);
+    }
     /**
      * Creates a TextConstraint for a text and languages.
      * @param text the text or <code>null</code> to search for any text in active languages
      * @param languages the set of active languages.
      */
     public TextConstraint(String text,String...languages) {
-        this(text,PatternType.none,false,languages);
+        this(text == null || text.isEmpty() ? null : Collections.singletonList(text),
+                PatternType.none,false,languages);
     }
-    public TextConstraint(String text,boolean caseSensitive,String...languages) {
+    public TextConstraint(List<String> text,boolean caseSensitive,String...languages) {
         this(text,PatternType.none,caseSensitive,languages);
     }
+    public TextConstraint(String text,boolean caseSensitive,String...languages) {
+        this(text == null || text.isEmpty() ? null : Collections.singletonList(text),
+                PatternType.none,caseSensitive,languages);
+    }
     public TextConstraint(String text,PatternType wildcardType,boolean caseSensitive,String...languages) {
+        this(text == null || text.isEmpty() ? null : Collections.singletonList(text),
+                wildcardType,caseSensitive,languages);
+    }
+    public TextConstraint(List<String> text,PatternType wildcardType,boolean caseSensitive,String...languages) {
         super(ConstraintType.text);
-        if((text == null || text.isEmpty()) && (languages == null || languages.length<1)){
+        //create a local copy and filter null and empty elements
+        if(text == null || text.isEmpty()){
+            this.texts = null;
+        } else {
+            List<String> processedText = new ArrayList<String>(text);
+            for(Iterator<String> constraints = processedText.iterator();constraints.hasNext();){
+                String constraint = constraints.next();
+                if(constraint == null || constraint.isEmpty()){
+                    constraints.remove(); //remove null and empty elements
+                }
+            }
+            if(processedText.isEmpty()){
+                this.texts = null;
+            } else {
+                this.texts = Collections.unmodifiableList(processedText);
+            }
+        }
+        //check that we have at least a text or a language
+        if(this.texts == null && (languages == null || languages.length<1)){
             throw new IllegalArgumentException("Text Constraint MUST define a non empty text OR a non empty list of language constraints");
         }
-        this.text = text;
         if(wildcardType == null){
             this.wildcardType = PatternType.none;
         } else {
@@ -83,33 +121,48 @@ public class TextConstraint extends Constraint {
 
     }
     /**
+     * The pattern type to be used for this query.
      * @return the wildcardType
      */
     public final PatternType getPatternType() {
         return wildcardType;
     }
     /**
+     * The set of languages for this query.
      * @return the languages
      */
     public final Set<String> getLanguages() {
         return languages;
     }
     /**
-     * @return the caseSensitive
+     * If the query is case sensitive
+     * @return the caseSensitive state
      */
     public final boolean isCaseSensitive() {
         return caseSensitive;
     }
     /**
-     * @return the text
+     * Getter for the text constraints. Multiple constraints need to be connected
+     * with OR. For AND simple post all required words in a single String.
+     * @return the text constraints
      */
-    public final String getText() {
-        return text;
+    public final List<String> getTexts() {
+        return texts;
+    }
+    /**
+     * Getter for the first text constraint. If multiple constrains are set only
+     * the first one will be returned.
+     * @return the fist text constraint (of possible multiple text constraints)
+     * @deprecated 
+     */
+    @Deprecated
+    public final String getText(){
+        return texts == null || texts.isEmpty() ? null : texts.get(0);
     }
     @Override
     public String toString() {
         return String.format("TextConstraint[value=%s|%s|case %sensitive|languages:%s]",
-                text,wildcardType.name(),caseSensitive?"":"in",languages);
+                texts,wildcardType.name(),caseSensitive?"":"in",languages);
     }
 
 }
