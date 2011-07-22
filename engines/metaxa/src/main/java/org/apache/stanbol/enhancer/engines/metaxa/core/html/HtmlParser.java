@@ -22,7 +22,6 @@ import java.io.InputStream;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.htmlcleaner.CleanerProperties;
-import org.htmlcleaner.DomSerializer;
 import org.htmlcleaner.HtmlCleaner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +42,7 @@ public class HtmlParser {
 
     private HtmlCleaner htmlToXmlParser;
     private CleanerProperties parserProps;
-    private DomSerializer domCreator;
+    private DomSerializer2 domCreator;
 
 
     public HtmlParser() {
@@ -51,11 +50,11 @@ public class HtmlParser {
         this.parserProps = this.htmlToXmlParser.getProperties();
         this.parserProps.setRecognizeUnicodeChars(true);
         this.parserProps.setUseEmptyElementTags(true);
-        // this.parserProps.setAdvancedXmlEscape(true);
+        this.parserProps.setAdvancedXmlEscape(true);
         this.parserProps.setTranslateSpecialEntities(true);
         this.parserProps.setOmitComments(true);
         this.parserProps.setPruneTags("script,style,form,map,noscript");
-        this.domCreator = new DomSerializer(this.parserProps);
+        this.domCreator = new DomSerializer2(this.parserProps,true);
         // TODO override otpions form config
     }
 

@@ -18,6 +18,7 @@ package org.apache.stanbol.enhancer.engines.metaxa;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,10 +33,12 @@ import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.impl.TypedLiteralImpl;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.enhancer.engines.metaxa.core.MetaxaCore;
 import org.apache.stanbol.enhancer.engines.metaxa.core.RDF2GoUtils;
 import org.apache.stanbol.enhancer.engines.metaxa.core.html.BundleURIResolver;
+import org.apache.stanbol.enhancer.engines.metaxa.core.html.HtmlExtractorFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -50,6 +53,7 @@ import org.ontoware.rdf2go.model.node.DatatypeLiteral;
 import org.ontoware.rdf2go.model.node.Node;
 import org.ontoware.rdf2go.model.node.PlainLiteral;
 import org.ontoware.rdf2go.model.node.URI;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.semanticdesktop.aperture.extractor.ExtractorException;
 import org.slf4j.Logger;
@@ -62,13 +66,12 @@ import org.slf4j.LoggerFactory;
  * @author Joerg Steffen, DFKI
  * @version $Id$
  */
-@Component(immediate = true, metatype = true)
+@Component(immediate = true, metatype = true,
+    label="Apache Stanbol Text and Metadata Extraction Engine",
+    description="Extract plain text and embedded metadata form various document types and formats")
 @Service
 public class MetaxaEngine implements EnhancementEngine, ServiceProperties {
 
-    /**
-     * This contains the logger.
-     */
     private static final Logger log = LoggerFactory.getLogger(MetaxaEngine.class);
 
     /**
@@ -78,10 +81,27 @@ public class MetaxaEngine implements EnhancementEngine, ServiceProperties {
     public static final Integer defaultOrder = ORDERING_PRE_PROCESSING;
 
     /**
-     * This contains the Aperture extractor.
+     * name of a file defining the available docuemnt extractors for Metaxa. By defualt, the builtin file 'extractionregistry.xml' is used.
      */
-    private MetaxaCore extractor;
+    @Property(label="ExtractorRegistry",
+        description="The path of a resource on the bundle classpath that specifies which extractors to use.",
+        value="extractionregistry.xml")
+    public static final String GLOBAL_EXTRACTOR_REGISTRY = "org.apache.stanbol.enhancer.engines.metaxa.extractionregistry";
 
+    /**
+     * name of a file that defines the set of extractors for HTML documents. By default, the builtin file 'htmlextractors.xml' is used."
+     */
+    @Property(label="HtmlExtractors",value="htmlextractors.xml",
+        description="The path of a resource on the bundle classpath that specifies which extractors are used for HTML pages.")
+    public static final String HTML_EXTRACTOR_REGISTRY = "org.apache.stanbol.enhancer.engines.metaxa.htmlextractors";
+
+    private MetaxaCore extractor;
+    
+    BundleContext bundleContext;
+
+    public static final String DEFAULT_EXTRACTION_REGISTRY = "extractionregistry.xml";
+    public static final String DEFAULT_HTML_EXTRACTOR_REGISTRY = "htmlextractors.xml";
+    
     /**
      * The activate method.
      *
@@ -89,13 +109,27 @@ public class MetaxaEngine implements EnhancementEngine, ServiceProperties {
      * @throws IOException if initializing fails
      */
     protected void activate(ComponentContext ce) throws IOException {
-
-        try {
-            this.extractor = new MetaxaCore("extractionregistry.xml");
-            BundleURIResolver.BUNDLE = ce.getBundleContext().getBundle();
-        } catch (IOException e) {
-            log.error(e.getLocalizedMessage(), e);
-            throw e;
+        String extractionRegistry = DEFAULT_EXTRACTION_REGISTRY;
+        String htmlExtractors = DEFAULT_HTML_EXTRACTOR_REGISTRY;
+        if (ce != null) {
+            this.bundleContext = ce.getBundleContext();
+            BundleURIResolver.BUNDLE = this.bundleContext.getBundle();
+            try {
+                Dictionary<String, String> properties = ce.getProperties();
+                String confFile = properties.get(GLOBAL_EXTRACTOR_REGISTRY);
+                if (confFile != null && confFile.trim().length() > 0) {
+                    extractionRegistry = confFile;
+                }
+                confFile = properties.get(HTML_EXTRACTOR_REGISTRY);
+                if (confFile != null && confFile.trim().length() > 0) {
+                    htmlExtractors = confFile;
+                }
+                this.extractor = new MetaxaCore(extractionRegistry);
+                HtmlExtractorFactory.REGISTRY_CONFIGURATION = htmlExtractors;
+            } catch (IOException e) {
+                log.error(e.getLocalizedMessage(), e);
+                throw e;
+            }
         }
     }
 
@@ -119,13 +153,6 @@ public class MetaxaEngine implements EnhancementEngine, ServiceProperties {
     public void computeEnhancements(ContentItem ci) throws EngineException {
 
         try {
-            // get the model where to add the statements
-            MGraph g = ci.getMetadata();
-            // create enhancement
-            UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
-            // set confidence value to 1.0
-            LiteralFactory literalFactory = LiteralFactory.getInstance();
-            g.add(new TripleImpl(textEnhancement, Properties.ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(1.0)));
             // get model from the extraction
             Model m = this.extractor.extract(ci.getStream(), ci.getId(), ci.getMimeType());
             // add the statements from this model to the Metadata model
@@ -134,6 +161,13 @@ public class MetaxaEngine implements EnhancementEngine, ServiceProperties {
                String text = MetaxaCore.getText(m);
                log.info(text);
                 */
+                // get the model where to add the statements
+                MGraph g = ci.getMetadata();
+                // create enhancement
+                UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
+                // set confidence value to 1.0
+                LiteralFactory literalFactory = LiteralFactory.getInstance();
+                g.add(new TripleImpl(textEnhancement, Properties.ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(1.0)));
                 RDF2GoUtils.urifyBlankNodes(m);
                 HashMap<BlankNode, BNode> blankNodeMap = new HashMap<BlankNode, BNode>();
                 ClosableIterator<Statement> it = m.iterator();
@@ -147,10 +181,11 @@ public class MetaxaEngine implements EnhancementEngine, ServiceProperties {
                     if (null != subject && null != predicate && null != object) {
                         Triple t = new TripleImpl(subject, predicate, object);
                         g.add(t);
-                        log.info("added " + t.toString());
+                        log.debug("added " + t.toString());
                     }
                 }
                 it.close();
+                m.close();
             }
         } catch (ExtractorException e) {
             throw new EngineException(e.getLocalizedMessage(), e);
