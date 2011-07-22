@@ -18,6 +18,7 @@ package org.apache.stanbol.enhancer.engines.metaxa.core.html;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -66,10 +67,20 @@ public class HtmlExtractionRegistry {
     public HtmlExtractionRegistry(String configFileName)
             throws InitializationException {
         this();
-        initialize(configFileName);
+        InputStream config = getClass().getClassLoader().getResourceAsStream(configFileName);
+        if (config == null) {
+            throw new InitializationException("File not found: "+configFileName);
+        }
+        initialize(config);
     }
 
-    public void initialize(String configFileName)
+    public HtmlExtractionRegistry(InputStream config) throws InitializationException {
+        this();
+        initialize(config);
+    }
+    
+    
+    public void initialize(InputStream configFileStream)
             throws InitializationException {
 
         try {
@@ -77,7 +88,7 @@ public class HtmlExtractionRegistry {
             XPath xPath = factory.newXPath();
             DocumentBuilder parser =
                 DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document document = parser.parse(new InputSource(getClass().getClassLoader().getResourceAsStream(configFileName)));
+            Document document = parser.parse(new InputSource(configFileStream));
             Node node;
             NodeList nodes = (NodeList) xPath.evaluate("/htmlextractors/extractor", document, XPathConstants.NODESET);
             if (nodes != null) {

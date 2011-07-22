@@ -48,32 +48,38 @@ public class IksHtmlExtractor implements Extractor {
 
     public static String DEFAULT_CONFIGURATION = "htmlextractors.xml";
 
-    private static HtmlParser htmlParser = new HtmlParser();
+    private HtmlParser htmlParser;
 
-    private static HtmlExtractionRegistry registry =
-        new HtmlExtractionRegistry();
-    static {
-        try {
-            registry.initialize(DEFAULT_CONFIGURATION);
-        } catch (InitializationException e) {
-            LOG.error("Registration Initialization Error: " + e.getMessage());
-        }
-    }
+    public HtmlExtractionRegistry registry = null;
 
     public IksHtmlExtractor() {
+      // lazy initialization when used first
+      if (registry == null) {
+        try {
+            this.htmlParser = new HtmlParser();
+            this.registry = new HtmlExtractionRegistry(DEFAULT_CONFIGURATION);
+        } catch (InitializationException e) {
+          LOG.error("Registry Initialization Error: " + e.getMessage());
+        }
+      }
     }
-
+    public IksHtmlExtractor(HtmlExtractionRegistry registry, HtmlParser parser) {
+        this.registry = registry;
+        this.htmlParser = parser;
+    }
+    
     public IksHtmlExtractor(String configFileName)
             throws InitializationException {
-        this();
-        registry = new HtmlExtractionRegistry(configFileName);
+        this.htmlParser = new HtmlParser();
+        this.registry = new HtmlExtractionRegistry(configFileName);
     }
 
     public void extract(URI id,
             InputStream input, Charset charset, String mimeType,
             RDFContainer result)
             throws ExtractorException {
-
+        if (registry == null)
+            return;
         String encoding;
         if (charset == null) {
             if (!input.markSupported()) {

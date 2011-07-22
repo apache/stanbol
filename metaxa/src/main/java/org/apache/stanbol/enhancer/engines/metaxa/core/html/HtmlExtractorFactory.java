@@ -17,6 +17,8 @@
 package org.apache.stanbol.enhancer.engines.metaxa.core.html;
 
 import org.semanticdesktop.aperture.extractor.Extractor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * HtmlExtractorFactory.java
@@ -27,9 +29,26 @@ import org.semanticdesktop.aperture.extractor.Extractor;
 public class HtmlExtractorFactory extends
         org.semanticdesktop.aperture.extractor.html.HtmlExtractorFactory {
 
+    private static final Logger LOG = LoggerFactory.getLogger(HtmlExtractorFactory.class);
+    
+    public static String REGISTRY_CONFIGURATION = "htmlextractors.xml";
+    private HtmlExtractionRegistry registry;
+    private HtmlParser parser;
+
+    public HtmlExtractorFactory() throws InstantiationException {
+        this.parser = new HtmlParser();
+        try {
+            registry = new HtmlExtractionRegistry(REGISTRY_CONFIGURATION);
+        }
+        catch (InitializationException e) {
+            LOG.error("Registry Initialization Error: " + e.getMessage());
+            throw new InstantiationException(e.getMessage());
+        }
+    }
+    
     @Override
     public Extractor get() {
-        return new IksHtmlExtractor();
+        return new IksHtmlExtractor(registry, parser);
     }
 
 }

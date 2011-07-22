@@ -270,6 +270,18 @@ The following table describes which vocabularies are used for representing micro
     </tr>
 </table>
 
+## Configuration options
+
+By default, Metaxa uses the extractors specified in the resource "extractionregistry.xml", and for HTML pages, the resource "htmlregistry.xml".
+Alternative configurations and extractors can be attached to Metaxa as fragment bundles, specifying as host bundle
+
+    Fragment-Host: org.apache.stanbol.enhancer.engines.metaxa
+
+The alternative configuration files then can be set as values of the properties
+
+* <pre><code>org.apache.stanbol.enhancer.engines.metaxa.extractionregistry</pre></code>
+
+* <pre><code>org.apache.stanbol.enhancer.engines.metaxa.htmlextractors</pre></code>
 
 ## Usage
 
