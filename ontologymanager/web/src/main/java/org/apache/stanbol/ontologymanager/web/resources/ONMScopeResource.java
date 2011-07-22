@@ -50,7 +50,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.io.OntologyRegistryIRISource;
+import org.apache.stanbol.ontologymanager.ontonet.api.registry.io.RegistryIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -201,7 +201,7 @@ public class ONMScopeResource extends BaseStanbolResource {
 		
 		// First thing, check the core source.
 		try {
-			coreSrc = new OntologyRegistryIRISource(IRI.create(coreRegistry),
+			coreSrc = new RegistryIRISource(IRI.create(coreRegistry),
 					onm.getOwlCacheManager(), onm.getRegistryLoader());
 		} catch (Exception e1) {
 			// Bad or not supplied core registry, try the ontology.
@@ -217,7 +217,7 @@ public class ONMScopeResource extends BaseStanbolResource {
 		if (customOntology != null || customRegistry != null) {
 			// ...but if it was, be prepared to throw exceptions.
 			try {
-				custSrc = new OntologyRegistryIRISource(IRI
+				custSrc = new RegistryIRISource(IRI
 						.create(customRegistry), onm.getOwlCacheManager(), onm
 						.getRegistryLoader());
 			} catch (Exception e1) {
