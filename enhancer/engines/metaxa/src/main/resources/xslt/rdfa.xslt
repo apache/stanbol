@@ -22,14 +22,8 @@
     xmlns:rdf  ="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
   xmlns:nfo="http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#"
   xmlns:nie="http://www.semanticdesktop.org/ontologies/2007/01/19/nie#"
-  xmlns:owl="http://www.w3.org/??/owl#"
+  xmlns:owl="http://www.w3.org/2002/07/owl#"
     >
-
-
-<!-- Version 0.14 by Fabien.Gandon@sophia.inria.fr -->
-<!-- This transformation is available as freeware and under the non viral open-source licence CeCILL-C -->
-<!-- see licence details at : http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html -->
-
 
 <output indent="yes" method="xml" media-type="application/rdf+xml" encoding="UTF-8" omit-xml-declaration="yes"/>
 
@@ -39,12 +33,8 @@
 <!-- base of the current HTML doc -->
 <variable name='html_base' select="//*/head/base[position()=1]/@href"/>
 
-<!-- default HTML vocabulary namespace -->
-<!--  GR: we do not want this 
-<variable name='default_voc' select="'http://www.w3.org/1999/xhtml/vocab#'"/>
--->
 <!-- url of the current XHTML page if provided by the XSLT engine -->
-<param name='uri' select="'http://foobar.com'"/>
+<param name='uri' select="'http://foobar.com/'"/>
 
 <!-- this contains the URL of the source document whether it was provided by the base or as a parameter e.g. http://example.org/bla/file.html-->
 <variable name='this' >
@@ -68,11 +58,10 @@
 
 <!-- templates for parsing - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-<!--  TODO: not all web pages containing RDFa contains the official markers in the root element or doctype -->
 <!--Start the RDF generation-->
 <template match="/">
 <rdf:RDF>
-<xsl:if test="html/@version = 'XHTML+RDFa 1.0'">
+<xsl:if test="html/@version = 'XHTML+RDFa 1.0' or descendant::*/@property or descendant::*/@typeof">
 	<xsl:choose>
 		<xsl:when test="$uri != $this">
 			<nfo:HtmlDocument rdf:about="{$uri}">
