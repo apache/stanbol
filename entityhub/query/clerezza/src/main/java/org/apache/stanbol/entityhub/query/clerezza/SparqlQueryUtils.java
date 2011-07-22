@@ -17,6 +17,7 @@
 package org.apache.stanbol.entityhub.query.clerezza;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -584,59 +585,60 @@ public final class SparqlQueryUtils {
      */
     private static void addTextConstraint(StringBuilder queryString,String var,TextConstraint constraint,EndpointTypeEnum endpointType,String intend){
         boolean filterAdded = false;
-        boolean isTextValueConstraint = constraint.getText() != null && constraint.getText().length()>0;
+        boolean isTextValueConstraint = constraint.getTexts() != null && !constraint.getTexts().isEmpty();
         if(isTextValueConstraint){
             if(constraint.getPatternType() == PatternType.regex){
                 queryString.append(" \n").append(intend).append("  FILTER(");
                 filterAdded = true;
-                addRegexFilter(queryString,var,constraint.getText(),constraint.isCaseSensitive());
+                addRegexFilter(queryString,var,constraint.getTexts(),constraint.isCaseSensitive());
             } else {
                 //TODO: This optimised versions for Virtuoso and LARQ might not
                 //      respect case sensitive queries. Need more testing!
                 if (EndpointTypeEnum.Virtuoso == endpointType) {
                     queryString.append(". \n  ").append(intend);
-                    queryString.append(String.format("?%s bif:contains '",var));
-                    boolean firstWord = true;;
-                    //TODO: maybe we should use a better word tokenizer
-                    for(String word : constraint.getText().split(" ")){
-                        word = word.trim();
-                        if(!word.isEmpty()){
-                            if(firstWord){
-                                firstWord = false;
-                            } else {
-                                queryString.append(" AND ");
-                            }
-                            queryString.append('"').append(word).append('"');
-                        }
-                    }
-                    queryString.append('\'');
-//                    queryString.append(String.format("?%s bif:contains '\"%s\"'", var,constraint.getText()
-//                        .replace("'", " ") //escape search string to avoid breaking the SPARQL query!
-//                        //.replace(" ", " AND ") looks like AND operator is no longer supported by Virtuoso
-//                        ));
-                    //q.append("ORDER BY DESC ( <LONG::IRI_RANK> (?uri) ) ");
+                    queryString.append(String.format("?%s bif:contains '%s'",
+                        var,createFullTextQueryString(constraint.getTexts())));
                 } else if (EndpointTypeEnum.LARQ == endpointType) {
                     queryString.append(". \n  ").append(intend);
-                    queryString.append(String.format("?%s <http://jena.hpl.hp.com/ARQ/property#textMatch> '+%s'", var, constraint.getText().replace("'", " ")));
-                    //q.append("?incoming ?p ?uri . } ");
-                    //q.append("ORDER BY DESC (COUNT (?incoming) ) ");
+                    queryString.append(String.format("?%s <http://jena.hpl.hp.com/ARQ/property#textMatch> '%s'", 
+                        var, createFullTextQueryString(constraint.getTexts())));
                 } else {
                     queryString.append(" \n").append(intend).append("  FILTER(");
                     filterAdded = true;
                     if(constraint.getPatternType() == PatternType.none){
                         if(constraint.isCaseSensitive()){
-                            queryString.append(String.format("(str(?%s) = \"%s\")", var,constraint.getText()));
+                            boolean first = true;
+                            for(String textConstraint : constraint.getTexts()){
+                                if(first){
+                                    first = false;
+                                } else {
+                                    queryString.append(" || ");
+                                }
+                                if(textConstraint != null && !textConstraint.isEmpty()){
+                                    queryString.append(String.format("(str(?%s) = \"%s\")", var,textConstraint));
+                                }
+                            }
                         } else {
-                            String regexQueryText = PatternUtils.value2Regex(constraint.getText());
-                            addRegexFilter(queryString,var,regexQueryText,constraint.isCaseSensitive());
+                            Collection<String> regexQueryTexts = new ArrayList<String>(constraint.getTexts().size());
+                            for(String textConstraint : constraint.getTexts()){
+                                if(textConstraint != null && !textConstraint.isEmpty()){
+                                    regexQueryTexts.add(PatternUtils.value2Regex(textConstraint));
+                                }
+                            }
+                            addRegexFilter(queryString,var,regexQueryTexts,constraint.isCaseSensitive());
                         }
                     } else if(constraint.getPatternType() == PatternType.wildcard){
                         //parse false, because that is more in line with the expectations of users!
-                        String regexQueryText = PatternUtils.wildcardToRegex(constraint.getText(),false);
-                        addRegexFilter(queryString,var,regexQueryText,constraint.isCaseSensitive());
+                        Collection<String> regexQueryTexts = new ArrayList<String>(constraint.getTexts().size());
+                        for(String textConstraint : constraint.getTexts()){
+                            if(textConstraint != null && !textConstraint.isEmpty()){
+                                regexQueryTexts.add(PatternUtils.wildcardToRegex(textConstraint,false));
+                            }
+                        }
+                        addRegexFilter(queryString,var,regexQueryTexts,constraint.isCaseSensitive());
                     } else {
-                        log.warn("Unspported Patterntype "+constraint.getPatternType()+"! Change this impplementation to support this type! -> treat constaint \""+constraint.getText()+"\"as REGEX");
-                        addRegexFilter(queryString,var,constraint.getText(),constraint.isCaseSensitive());
+                        log.warn("Unspported Patterntype "+constraint.getPatternType()+"! Change this impplementation to support this type! -> treat constaint \""+constraint.getTexts()+"\"as REGEX");
+                        addRegexFilter(queryString,var,constraint.getTexts(),constraint.isCaseSensitive());
                     }
                 }
             }
@@ -658,14 +660,69 @@ public final class SparqlQueryUtils {
     }
 
     /**
+     * (Creates AND Text) OR (Query AND String) like queries based on the
+     * parsed TextConstraint as used by {@link EndpointTypeEnum#LARQ LARQ} and
+     * {@link EndpointTypeEnum#Virtuoso VIRTUOSO} SPARQL endpoints to speed up
+     * full text queries.
+     * @param constraints the as returned by {@link TextConstraint#getTexts()}
+     * @return the full text query string 
+     */
+    private static String createFullTextQueryString(Collection<String> constraints) {
+        StringBuilder textQuery = new StringBuilder();
+        boolean firstText = true;
+        for(String constraintText : constraints){
+            if(constraintText != null && !constraintText.isEmpty()){
+                if(firstText){
+                    firstText = false;
+                } else {
+                    textQuery.append(" OR ");
+                }
+                //TODO: maybe we should use a word tokenizer here
+                String[] words = constraintText.split("\\s");
+                if(words.length>1){
+                    //not perfect because words might contain empty string, but
+                    //it will eliminate most unnecessary brackets .
+                    textQuery.append('(');
+                }
+                boolean firstAndWord = true;
+                for(String word : words){
+                    word = word.trim();
+                    if(!word.isEmpty()){
+                        if(firstAndWord){
+                            firstAndWord = false;
+                        } else {
+                            textQuery.append(" AND ");
+                        }
+                        textQuery.append('"').append(word).append('"');
+                    }
+                }
+                if(words.length>1){
+                    textQuery.append(')');
+                }
+            } //end if not null and not empty
+        }
+        return textQuery.toString();
+    }
+
+    /**
      * Adds a SPARQL regex filter to the parsed query string
      * @param queryString the string builder to add the constraint
      * @param var the variable to constrain
-     * @param regexQueryText the regex encoded search string
+     * @param regexContraints the regex encoded search strings (connected with '||' (OR))
      * @param isCasesensitive if the constraint is case sensitive or not
      */
-    private static void addRegexFilter(StringBuilder queryString, String var, String regexQueryText,boolean isCasesensitive) {
-        queryString.append(String.format("regex(str(?%s),\"%s\"%s)", var,regexQueryText,isCasesensitive?"":",\"i\""));
+    private static void addRegexFilter(StringBuilder queryString, String var, Collection<String> regexContraints,boolean isCasesensitive) {
+        boolean first = true;
+        for(String regex : regexContraints){
+            if(regex != null && !regex.isEmpty()){
+                if(first){
+                    first = false;
+                } else {
+                    queryString.append(" || ");
+                }
+                queryString.append(String.format("regex(str(?%s),\"%s\"%s)", var,regex,isCasesensitive?"":",\"i\""));
+            }
+        }
     }
 
     /**
@@ -787,7 +844,7 @@ public final class SparqlQueryUtils {
     }
 
 
-/*    public static void main(String[] args) {
+    public static void main(String[] args) {
         SparqlFieldQuery query = SparqlFieldQueryFactory.getInstance().createFieldQuery();
 //        query.setConstraint("urn:field1", new ReferenceConstraint("urn:testReference"));
 //        query.setConstraint("urn:field1a", new ValueConstraint(null, Arrays.asList(
@@ -801,12 +858,13 @@ public final class SparqlQueryUtils {
 //        query.setConstraint("urn:field1d", new ValueConstraint(9, Arrays.asList(
 //                DataTypeEnum.Float.getUri(),DataTypeEnum.Double.getUri(),DataTypeEnum.Decimal.getUri())));
 //        query.setConstraint("urn:field2", new TextConstraint("test value"));
-        query.setConstraint("urn:field3", new TextConstraint("text value",true));
+        query.setConstraint("urn:field3", new TextConstraint(Arrays.asList(
+            "text value","anothertest","some more values"),true));
 //        query.setConstraint("urn:field2a", new TextConstraint(":-]")); //tests escaping of REGEX
-        query.setConstraint("urn:field3", new TextConstraint("language text","en"));
+//        query.setConstraint("urn:field3", new TextConstraint("language text","en"));
 //        query.setConstraint("urn:field4", new TextConstraint("multi language text","en","de",null));
-        query.setConstraint("urn:field5", new TextConstraint("wildcar*",PatternType.wildcard,false,"en","de"));
-        query.addSelectedField("urn:field5");
+//        query.setConstraint("urn:field5", new TextConstraint("wildcar*",PatternType.wildcard,false,"en","de"));
+//        query.addSelectedField("urn:field5");
 //        query.setConstraint("urn:field6", new TextConstraint("^regex",PatternType.REGEX,true));
 //        query.setConstraint("urn:field7", new TextConstraint("par*",PatternType.WildCard,false,"en","de",null));
 //        query.setConstraint("urn:field8", new TextConstraint(null,"en","de",null));
@@ -826,7 +884,7 @@ public final class SparqlQueryUtils {
         System.out.println(createSparqlSelectQuery(query,true,0,EndpointTypeEnum.Standard));
         System.out.println();
         System.out.println(createSparqlConstructQuery(query,0,EndpointTypeEnum.Virtuoso));
-    }*/
+    }
 
     /**
      * @param query

@@ -22,30 +22,29 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MoreLikeThisParams;
 import org.apache.stanbol.commons.solr.utils.SolrUtil;
-import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
+import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
+import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
-import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
-import org.apache.stanbol.entityhub.servicesapi.query.Constraint.ConstraintType;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.Query;
 import org.apache.stanbol.entityhub.servicesapi.query.RangeConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.SimilarityConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint;
+import org.apache.stanbol.entityhub.servicesapi.query.Constraint.ConstraintType;
 import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.apache.stanbol.entityhub.yard.solr.defaults.IndexDataTypeEnum;
 import org.apache.stanbol.entityhub.yard.solr.impl.queryencoders.AssignmentEncoder;
@@ -67,7 +66,6 @@ import org.apache.stanbol.entityhub.yard.solr.query.ConstraintTypePosition;
 import org.apache.stanbol.entityhub.yard.solr.query.EncodedConstraintParts;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEncoder;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
-import org.apache.stanbol.entityhub.yard.solr.query.QueryUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -136,8 +134,8 @@ public class SolrQueryFactory {
                 fieldMapper));
         constraintEncoders.put(IndexConstraintTypeEnum.FIELD, new FieldEncoder(fieldMapper));
         constraintEncoders.put(IndexConstraintTypeEnum.EQ, new AssignmentEncoder(indexValueFactory));
-        constraintEncoders.put(IndexConstraintTypeEnum.WILDCARD, new WildcardEncoder());
-        constraintEncoders.put(IndexConstraintTypeEnum.REGEX, new RegexEncoder());
+        constraintEncoders.put(IndexConstraintTypeEnum.WILDCARD, new WildcardEncoder(indexValueFactory));
+        constraintEncoders.put(IndexConstraintTypeEnum.REGEX, new RegexEncoder(indexValueFactory));
         constraintEncoders.put(IndexConstraintTypeEnum.GE, new GeEncoder(indexValueFactory));
         constraintEncoders.put(IndexConstraintTypeEnum.LE, new LeEncoder(indexValueFactory));
         constraintEncoders.put(IndexConstraintTypeEnum.GT, new GtEncoder(indexValueFactory));
@@ -311,19 +309,22 @@ public class SolrQueryFactory {
      * @param textConstraint
      */
     private void initIndexConstraint(IndexConstraint indexConstraint, TextConstraint textConstraint) {
-        Text text = valueFactory.createText(textConstraint.getText());
-        IndexValue textValue = indexValueFactory.createIndexValue(text);
-        indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.DATATYPE, text);
+        List<IndexValue> textValues = new ArrayList<IndexValue>(textConstraint.getTexts().size());
+        for(String text : textConstraint.getTexts()){
+            textValues.add(indexValueFactory.createIndexValue(
+                valueFactory.createText(text)));
+        }
+        indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.DATATYPE, IndexDataTypeEnum.TXT.getIndexType());
         indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.LANG, textConstraint.getLanguages());
         switch (textConstraint.getPatternType()) {
             case none:
-                indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.EQ, textValue);
+                indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.EQ, textValues);
                 break;
             case wildcard:
-                indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.WILDCARD, textValue);
+                indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.WILDCARD, textValues);
                 break;
             case regex:
-                indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.REGEX, textValue);
+                indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.REGEX, textValues);
                 break;
             default:
                 indexConstraint.setInvalid(String.format(
@@ -629,28 +630,41 @@ public class SolrQueryFactory {
                                                    EncodedConstraintParts encodedConstraintParts) {
             // list of all constraints that need to be connected with OR
             List<List<StringBuilder>> constraints = new ArrayList<List<StringBuilder>>();
+            log.info("Constriants: "+encodedConstraintParts);
             // init with a single constraint
             constraints.add(new ArrayList<StringBuilder>(Arrays.asList(new StringBuilder())));
             for (Entry<ConstraintTypePosition,Set<Set<String>>> entry : encodedConstraintParts) {
                 // one position may contain multiple options that need to be connected with OR
+//                log.info("process: pos {} ({})",entry.getKey().getPos(),entry.getKey());
                 Set<Set<String>> orParts = entry.getValue();
-                int i = 0;
                 int constraintsSize = constraints.size();
+                int i = 0;
                 for (Set<String> andParts : orParts) {
+//                    log.info("  OR {}",andParts);
                     i++;
                     // add the and constraints to all or
                     if (i == orParts.size()) {
                         // for the last iteration, append the part to the existing constraints
                         for (int j = 0; j < constraintsSize; j++) {
+//                            String parsedConstraint = constraints.get(j).toString();
                             encodeAndParts(andParts, constraints.get(j));
+//                            log.info("    appand AND {} to [{}]:{} -> {}",
+//                                new Object[]{andParts,j,parsedConstraint, constraints.get(j).toString()});
                         }
                     } else {
                         // if there is more than one value, we need to generate new variants for
                         // every option other than the last.
                         for (int j = 0; j < constraintsSize; j++) {
-                            List<StringBuilder> additional = new ArrayList<StringBuilder>(constraints.get(j));
-                            encodeAndParts(andParts, additional);
+                            //we need a deep "clone" of the Constraints of index 'j'
+                            List<StringBuilder> additional = new ArrayList<StringBuilder>(constraints.get(j).size());
+                            for(StringBuilder sb : constraints.get(j)){
+                                additional.add(new StringBuilder(sb));
+                            }
                             constraints.add(additional);
+//                            String parsedConstraint = constraints.get(j).toString();
+                            encodeAndParts(andParts, additional);
+//                            log.info("    create AND {} to [{}]:{} -> {}",
+//                                new Object[]{andParts,j,parsedConstraint, constraints.get(j).toString()});
                         }
                     }
                 }
@@ -663,7 +677,7 @@ public class SolrQueryFactory {
                         queryString.append('(');
                         firstOr = false;
                     } else {
-                        queryString.append(" OR (");
+                        queryString.append(") OR (");
                     }
                     boolean firstAnd = true;
                     for (StringBuilder andConstraint : constraint) {
@@ -727,5 +741,21 @@ public class SolrQueryFactory {
         // }
         // this.fieldConstraints.remove(constraintType);
         // }
+    }
+    public static void main(String[] args) {
+        SolrQueryFactory factory = new SolrQueryFactory(
+            InMemoryValueFactory.getInstance(), 
+            IndexValueFactory.getInstance(), 
+            new SolrFieldMapper(null));
+        FieldQuery query = DefaultQueryFactory.getInstance().createFieldQuery();
+//        query.setConstraint("urn:field2", new TextConstraint("test","en","de"));
+        query.setConstraint("urn:field3", new TextConstraint(Arrays.asList(
+            "text value","anothertest","some more values"),"en","de",null));
+        query.addSelectedField("urn:field2a");
+        query.addSelectedField("urn:field3");
+        query.setLimit(5);
+        query.setOffset(5);
+        SolrQuery solrQuery = factory.parseFieldQuery(query, SELECT.QUERY);
+        System.out.println(solrQuery.getQuery());
     }
 }

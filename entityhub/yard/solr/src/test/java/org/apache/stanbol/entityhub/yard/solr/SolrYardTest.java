@@ -123,13 +123,13 @@ public class SolrYardTest extends YardTest {
         assertNotNull(updatedIterable);
 
         FieldQuery query = yard.getQueryFactory().createFieldQuery();
-        query.setConstraint(field, new TextConstraint("text content"));
+        query.setConstraint(field, new TextConstraint(Arrays.asList("text content")));
         QueryResultList<Representation> results = yard.find(query);
         assertEquals(2, results.size());
 
         // fetch the light / minimal representation
         query = yard.getQueryFactory().createFieldQuery();
-        query.setConstraint(field, new TextConstraint("value2"));
+        query.setConstraint(field, new TextConstraint(Arrays.asList("value2")));
         results = yard.find(query);
         assertEquals(1, results.size());
         Representation result = results.iterator().next();
@@ -189,7 +189,7 @@ public class SolrYardTest extends YardTest {
         // combine similarity with traditional filtering
         query = yard.getQueryFactory().createFieldQuery();
         query.setConstraint(similarityfield, new SimilarityConstraint("aaaa aaaa aaaa aaaa zzzz yyyy"));
-        query.setConstraint(filterfield, new TextConstraint("other"));
+        query.setConstraint(filterfield, new TextConstraint(Arrays.asList("other")));
         results = yard.find(query);
         assertEquals(1, results.size());
         it = results.iterator();

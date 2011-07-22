@@ -295,7 +295,7 @@ public final class FieldMappingUtils {
                 log.warn("Unable to parse a language form \"%s\"! A language filter MUST define at least a singel language. No filter will be used."+filterString);
                 return null;
             } else {
-                return new TextConstraint(null,langs);
+                return new TextConstraint((String)null,langs);
             }
         } else {
             log.warn(String.format("Filters need to start with \"p=\" (dataType) or \"@=\" (language). Parsed filter: \"%s\".",filterString));

@@ -18,6 +18,10 @@ package org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValue;
 import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
@@ -49,27 +53,24 @@ public class AssignmentEncoder implements IndexConstraintTypeEncoder<Object> {
 
     @Override
     public void encode(EncodedConstraintParts constraint, Object value) {
-        IndexValue indexValue;
-        if (value == null) {
-            indexValue = null;
-        } else if (value instanceof IndexValue) {
-            indexValue = (IndexValue) value;
-        } else {
-            indexValue = indexValueFactory.createIndexValue(value);
-        }
+        Set<IndexValue> indexValues = QueryUtils.parseIndexValues(indexValueFactory,value);
         // encode the value based on the type
-        String[] queryConstraints = QueryUtils.encodeQueryValue(indexValue, true);
-        String[] eqConstraints;
-        if (queryConstraints != null) {
-            eqConstraints = new String[queryConstraints.length];
-            for (int i = 0; i < eqConstraints.length; i++) {
-                eqConstraints[i] = EQ + queryConstraints[i];
+        for(IndexValue indexValue : indexValues){
+            String[] queryConstraints = QueryUtils.encodeQueryValue(indexValue, true);
+            String[] eqConstraints;
+            if (queryConstraints != null) {
+                eqConstraints = new String[queryConstraints.length];
+                for (int i = 0; i < eqConstraints.length; i++) {
+                    eqConstraints[i] = EQ + queryConstraints[i];
+                }
+            } else {
+                eqConstraints = new String[] {EQ};
             }
-        } else {
-            eqConstraints = new String[] {EQ};
+            constraint.addEncoded(POS, eqConstraints);
         }
-        constraint.addEncoded(POS, eqConstraints);
     }
+
+
 
     @Override
     public boolean supportsDefault() {

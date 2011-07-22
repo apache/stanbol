@@ -79,9 +79,12 @@ public class ConstraintTypePosition implements Comparable<ConstraintTypePosition
         return obj instanceof ConstraintTypePosition && ((ConstraintTypePosition) obj).type == type
                && ((ConstraintTypePosition) obj).pos == pos;
     }
+    public String getPos(){
+        return type.ordinal()+"."+pos;
+    }
 
     @Override
     public String toString() {
-        return String.format("constraintPosition %s,%d", type, pos);
+        return type.name()+'.'+ pos;
     }
 }

@@ -102,8 +102,12 @@ final class FieldQueryToJSON {
                     jConstraint.put("languages", new JSONArray(textConstraint.getLanguages()));
                 }
                 jConstraint.put("patternType", textConstraint.getPatternType().name());
-                if (textConstraint.getText() != null && !textConstraint.getText().isEmpty()) {
-                    jConstraint.put("text", textConstraint.getText());
+                if (textConstraint.getTexts() != null && !textConstraint.getTexts().isEmpty()) {
+                    if(textConstraint.getTexts().size() == 1){ //write a string
+                        jConstraint.put("text", textConstraint.getTexts().get(0));
+                    } else { //write an array
+                        jConstraint.put("text", textConstraint.getTexts());
+                    }
                 }
                 if(textConstraint.isCaseSensitive()){
                     jConstraint.put("caseSensitive", true);

@@ -134,7 +134,8 @@ public class SolrFieldMapper implements FieldMapper {
 
     public SolrFieldMapper(SolrServer server) {
         if (server == null) {
-            throw new IllegalArgumentException("The parsed SolrServer MUST NOT be NULL");
+            log.warn("NULL parsed as SolrServer: Loading and Saving of the Namespace Prefix Settings will be deactivated!");
+            log.warn("  This is OK for Unit Test but should not happen in productive use!");
         }
         this.server = server;
     }
@@ -755,14 +756,16 @@ public class SolrFieldMapper implements FieldMapper {
         for (Entry<String,String> entry : prefixMap.entrySet()) {
             inputDoc.addField(getConfigFieldName(entry.getKey()), entry.getValue());
         }
-        try {
-            server.add(inputDoc);
-        } catch (IOException e) {
-            log.error("Unable save Configuration to SolrProvider", e);
-        } catch (SolrServerException e) {
-            log.error("Unable save Configuration to SolrProvider", e);
-        } catch (SolrException e) {
-            log.error("Unable save Configuration to SolrProvider", e);
+        if(server != null){
+            try {
+                server.add(inputDoc);
+            } catch (IOException e) {
+                log.error("Unable save Configuration to SolrProvider", e);
+            } catch (SolrServerException e) {
+                log.error("Unable save Configuration to SolrProvider", e);
+            } catch (SolrException e) {
+                log.error("Unable save Configuration to SolrProvider", e);
+            }
         }
     }
 
@@ -773,6 +776,9 @@ public class SolrFieldMapper implements FieldMapper {
      *            the document to store
      */
     protected SolrDocument getSolrDocument(String uri) throws SolrServerException, IOException {
+        if(server == null){
+            return null;
+        }
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.addField("*"); // select all fields
         solrQuery.setRows(1); // we query for the id, there is only one result
