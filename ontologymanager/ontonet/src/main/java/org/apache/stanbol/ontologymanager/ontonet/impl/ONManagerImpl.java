@@ -261,8 +261,6 @@ public class ONManagerImpl implements ONManager {
         // Parse configuration
         if (config.getID() == null || config.getID().isEmpty()) {
             log.warn("The Ontology Network Manager configuration does not define a ID for the Ontology Network Manager");
-        } else {
-            log.info("id: {}", config.getID());
         }
 
         // Bind components, starting with the local directories.
@@ -326,7 +324,7 @@ public class ONManagerImpl implements ONManager {
             }
 
             if (oConfSrc == null) {
-                log.warn("[NONFATAL] No ONM configuration file found at path " + configPath
+                log.warn("No ONM configuration file found at path " + configPath
                          + ". Starting with blank scope set.");
             } else {
                 try {
@@ -395,12 +393,12 @@ public class ONManagerImpl implements ONManager {
                     scopeIRI);
 
                 // "Be a man. Use printf"
-                log.debug("KReS :: Scope " + scopeIRI);
+                log.debug("Scope " + scopeIRI);
                 for (String s : cores) {
-                    log.debug("\tKReS :: Core ontology " + s);
+                    log.debug("\tCore ontology " + s);
                 }
                 for (String s : customs) {
-                    log.debug("\tKReS :: Custom ontology " + s);
+                    log.debug("\tCustom ontology " + s);
                 }
 
                 // Create the scope
@@ -441,7 +439,7 @@ public class ONManagerImpl implements ONManager {
                 try {
                     IRI scopeId = IRI.create(scopeID.trim());
                     scopeRegistry.setScopeActive(scopeId, true);
-                    log.info("KReS :: Ontology scope " + scopeID + " activated.");
+                    log.info("Ontology scope " + scopeID + " activated.");
                 } catch (NoSuchScopeException ex) {
                     log.warn("Tried to activate unavailable scope " + scopeID + ".");
                 } catch (Exception ex) {
@@ -451,8 +449,7 @@ public class ONManagerImpl implements ONManager {
             }
 
         } catch (Throwable e) {
-            log.error("[NONFATAL] Invalid ONM configuration file found. " + "Starting with blank scope set.",
-                e);
+            log.warn("Invalid ONM configuration file found. " + "Starting with blank scope set.", e);
         }
 
     }
