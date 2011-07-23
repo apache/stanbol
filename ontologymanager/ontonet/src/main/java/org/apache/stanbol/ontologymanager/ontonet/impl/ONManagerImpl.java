@@ -49,7 +49,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.conf.OntologyNetworkConfigurationUtils;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
@@ -59,7 +58,6 @@ import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyIndexImp
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologySpaceFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.ScopeRegistryImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.registry.RegistryLoaderImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.session.ScopeSessionSynchronizer;
 import org.apache.stanbol.ontologymanager.ontonet.impl.session.SessionManagerImpl;
 import org.osgi.service.component.ComponentContext;
@@ -77,8 +75,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The running context of a Stanbol Ontology Network Manager instance. From this object it is possible to obtain
- * factories, indices, registries and what have you.
+ * The running context of a Stanbol Ontology Network Manager instance. From this object it is possible to
+ * obtain factories, indices, registries and what have you.
  * 
  * @see ONManager
  * 
@@ -134,9 +132,6 @@ public class ONManagerImpl implements ONManager {
 
     @Reference
     private ONManagerConfiguration config;
-    
-    @Reference
-    private RegistryManager regman;
 
     private Helper helper = null;
 
@@ -164,8 +159,6 @@ public class ONManagerImpl implements ONManager {
     private OWLOntologyManager owlCacheManager;
 
     private OWLDataFactory owlFactory;
-
-    private RegistryLoaderImpl registryLoader;
 
     private ScopeRegistry scopeRegistry;
 
@@ -209,9 +202,9 @@ public class ONManagerImpl implements ONManager {
      * @param configuration
      */
     @Deprecated
-    public ONManagerImpl(TcManager tcm, WeightedTcProvider wtcp, RegistryManager registryManager, Dictionary<String,Object> configuration) {
+    public ONManagerImpl(TcManager tcm, WeightedTcProvider wtcp, Dictionary<String,Object> configuration) {
         // Copy the same configuration to the ONManagerConfigurationImpl.
-        this(tcm, wtcp, new ONManagerConfigurationImpl(configuration), registryManager, configuration);
+        this(tcm, wtcp, new ONManagerConfigurationImpl(configuration), configuration);
     }
 
     /**
@@ -229,14 +222,12 @@ public class ONManagerImpl implements ONManager {
     public ONManagerImpl(TcManager tcm,
                          WeightedTcProvider wtcp,
                          ONManagerConfiguration onmconfig,
-                         RegistryManager registryManager,
                          Dictionary<String,Object> configuration) {
         this();
         // Assume this.tcm this.wtcp and this.wtcp were not filled in by OSGi-DS.
         this.tcm = tcm;
         this.wtcp = wtcp;
         this.config = onmconfig;
-        this.regman = registryManager;
         try {
             activate(configuration);
         } catch (IOException e) {
@@ -374,8 +365,8 @@ public class ONManagerImpl implements ONManager {
         ontologyScopeFactory = new OntologyScopeFactoryImpl(scopeRegistry, ontologySpaceFactory);
         ontologyScopeFactory.addScopeEventListener(oIndex);
 
-        // This requires the OWL cache manager
-        registryLoader = new RegistryLoaderImpl(this);
+        // // This requires the OWL cache manager
+        // registryLoader = new RegistryLoaderImpl(this);
 
         // TODO : assign dynamically in case the FISE persistence store is not
         // available.
@@ -541,15 +532,6 @@ public class ONManagerImpl implements ONManager {
         return owlFactory;
     }
 
-    /**
-     * Returns the default ontology registry loader.
-     * 
-     * @return the default ontology registry loader
-     */
-    public RegistryLoaderImpl getRegistryLoader() {
-        return registryLoader;
-    }
-
     public Helper getScopeHelper() {
         if (helper == null) {
             helper = new Helper();
@@ -583,8 +565,4 @@ public class ONManagerImpl implements ONManager {
         return offlineMode != null;
     }
 
-    @Override
-    public RegistryManager getRegistryManager() {
-        return regman;
-    }
 }

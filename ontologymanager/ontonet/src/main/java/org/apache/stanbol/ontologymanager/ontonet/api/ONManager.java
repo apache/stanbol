@@ -20,8 +20,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryLoader;
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.RegistryManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OWLOntologyManagerFactoryImpl;
@@ -92,15 +90,6 @@ public interface ONManager {
      * @return the default OWL data factory
      */
     OWLDataFactory getOwlFactory();
-
-    /**
-     * Returns the default ontology registry loader.
-     * 
-     * @return the default ontology registry loader.
-     */
-    RegistryLoader getRegistryLoader();
-
-    RegistryManager getRegistryManager();
 
     /**
      * Returns the unique ontology scope registry for this context.

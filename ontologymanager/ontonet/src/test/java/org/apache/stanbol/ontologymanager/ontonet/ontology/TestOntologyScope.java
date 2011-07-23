@@ -66,7 +66,7 @@ public class TestOntologyScope {
     @BeforeClass
     public static void setup() {
         // An ONManagerImpl with no store and default settings
-        onm = new ONManagerImpl(null, null, null, new Hashtable<String,Object>());
+        onm = new ONManagerImpl(null, null, new Hashtable<String,Object>());
         factory = onm.getOntologyScopeFactory();
         if (factory == null) fail("Could not instantiate ontology space factory");
         OWLOntologyManager mgr = onm.getOntologyManagerFactory().createOntologyManager(true);

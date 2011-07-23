@@ -31,6 +31,7 @@ import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.web.resources.DocumentationResource;
 import org.apache.stanbol.ontologymanager.web.resources.GraphsResource;
 import org.apache.stanbol.ontologymanager.web.resources.ONMOntResource;
@@ -69,6 +70,9 @@ public class OntonetFragment implements WebFragment{
 
     @Reference
     ONManager onm;
+    
+    @Reference
+    RegistryManager regMgr;
 
     @Override
     public BundleContext getBundleContext() {

@@ -8,8 +8,7 @@
 	by applicable law or agreed to in writing, software distributed under the 
 	License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
 	OF ANY KIND, either express or implied. See the License for the specific 
-	language governing permissions and limitations under the License.
--->
+	language governing permissions and limitations under the License. -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -52,7 +51,7 @@
 						</Bundle-Activator>
 						<Export-Package>
 							org.apache.stanbol.ontologymanager.ontonet.*
-	          </Export-Package>
+	          			</Export-Package>
 						<Import-Package>
 							com.hp.hpl.jena.ontology,
 							com.hp.hpl.jena.util,
@@ -68,9 +67,6 @@
 							org.slf4j.*,
 							*
             			</Import-Package>
-						<Private-Package>
-							org.apache.stanbol.ontologymanager.ontonet.xd.*
-						</Private-Package>
 						<_nouses>true</_nouses>
 					</instructions>
 				</configuration>
@@ -113,10 +109,8 @@
 			<artifactId>org.apache.stanbol.owl</artifactId>
 		</dependency>
 		<!-- Stanbol Persistence sotre -->
-		<!--dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.ontologymanager.store.api</artifactId>
-		</dependency-->
+		<!--dependency> <groupId>org.apache.stanbol</groupId> <artifactId>org.apache.stanbol.ontologymanager.store.api</artifactId> 
+			</dependency -->
 
 		<!-- Persistence deps -->
 		<dependency>

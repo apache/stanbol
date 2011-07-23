@@ -1,0 +1,356 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<rdf:RDF xmlns="http://stanbol.apache.org/ontologies/test1.owl#"
+     xml:base="http://stanbol.apache.org/ontologies/test1.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://stanbol.apache.org/ontologies/test1.owl">
+		<owl:versionInfo xml:lang="en">Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the &quot;License&quot;); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+		</owl:versionInfo>
+		<rdfs:comment>A dummy model whose only purpose if to test the presence of its members.</rdfs:comment>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:AnnotationProperty rdf:about="&rdfs;label"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#aboutFiction -->
+
+    <owl:ObjectProperty rdf:about="http://stanbol.apache.org/ontologies/test1.owl#aboutFiction">
+        <rdfs:label xml:lang="en">aboutFiction</rdfs:label>
+        <rdfs:range rdf:resource="http://stanbol.apache.org/ontologies/test1.owl#ComicWhale"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#friend -->
+
+    <owl:ObjectProperty rdf:about="http://stanbol.apache.org/ontologies/test1.owl#friend">
+        <rdf:type rdf:resource="&owl;SymmetricProperty"/>
+        <rdfs:label xml:lang="en">friend</rdfs:label>
+        <rdfs:subPropertyOf rdf:resource="http://stanbol.apache.org/ontologies/test1.owl#knows"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#knows -->
+
+    <owl:ObjectProperty rdf:about="http://stanbol.apache.org/ontologies/test1.owl#knows">
+        <rdf:type rdf:resource="&owl;TransitiveProperty"/>
+        <rdfs:label xml:lang="en">knows</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#livesIn -->
+
+    <owl:ObjectProperty rdf:about="http://stanbol.apache.org/ontologies/test1.owl#livesIn">
+        <rdfs:label xml:lang="en">livesIn</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#sellsTo -->
+
+    <owl:ObjectProperty rdf:about="http://stanbol.apache.org/ontologies/test1.owl#sellsTo">
+        <rdfs:label xml:lang="en">sells to</rdfs:label>
+        <rdfs:label xml:lang="it">vende a</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#topObjectProperty -->
+
+    <owl:ObjectProperty rdf:about="&owl;topObjectProperty"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#longInMeters -->
+
+    <owl:DatatypeProperty rdf:about="http://stanbol.apache.org/ontologies/test1.owl#longInMeters">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:label xml:lang="en">longInMeters</rdfs:label>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#AquaticMammal -->
+
+    <owl:Class rdf:about="http://stanbol.apache.org/ontologies/test1.owl#AquaticMammal">
+        <rdfs:label>AquaticMammal</rdfs:label>
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/test1.owl#AquaticOrganism"/>
+                    <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/test1.owl#Mammal"/>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#AquaticOrganism -->
+
+    <owl:Class rdf:about="http://stanbol.apache.org/ontologies/test1.owl#AquaticOrganism">
+        <rdfs:label>AquaticOrganism</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#ComicWhale -->
+
+    <owl:Class rdf:about="http://stanbol.apache.org/ontologies/test1.owl#ComicWhale">
+        <rdfs:label xml:lang="en">Comic whale</rdfs:label>
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:oneOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/test1.owl#Porpy"/>
+                    <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/test1.owl#MobyDick"/>
+                </owl:oneOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://stanbol.apache.org/ontologies/test1.owl#Whale"/>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#Crustacean -->
+
+    <owl:Class rdf:about="http://stanbol.apache.org/ontologies/test1.owl#Crustacean">
+        <rdfs:label>Crustacean</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#Fish -->
+
+    <owl:Class rdf:about="http://stanbol.apache.org/ontologies/test1.owl#Fish">
+        <rdfs:label>Fish</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#Institution -->
+
+    <owl:Class rdf:about="http://stanbol.apache.org/ontologies/test1.owl#Institution"/>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#Mammal -->
+
+    <owl:Class rdf:about="http://stanbol.apache.org/ontologies/test1.owl#Mammal">
+        <rdfs:label>Mammal</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#Whale -->
+
+    <owl:Class rdf:about="http://stanbol.apache.org/ontologies/test1.owl#Whale">
+        <rdfs:label>Whale</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://stanbol.apache.org/ontologies/test1.owl#AquaticMammal"/>
+    </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#ACME -->
+
+    <owl:NamedIndividual rdf:about="http://stanbol.apache.org/ontologies/test1.owl#ACME">
+        <sellsTo rdf:resource="http://stanbol.apache.org/ontologies/test1.owl#Wile"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#BalenaBianca -->
+
+    <owl:NamedIndividual rdf:about="http://stanbol.apache.org/ontologies/test1.owl#BalenaBianca">
+        <rdf:type rdf:resource="http://stanbol.apache.org/ontologies/test1.owl#AquaticMammal"/>
+        <rdfs:label xml:lang="en">BalenaBianca</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#MobyDick -->
+
+    <owl:NamedIndividual rdf:about="http://stanbol.apache.org/ontologies/test1.owl#MobyDick">
+        <rdf:type rdf:resource="http://stanbol.apache.org/ontologies/test1.owl#AquaticOrganism"/>
+        <rdf:type rdf:resource="http://stanbol.apache.org/ontologies/test1.owl#Mammal"/>
+        <rdfs:label>MobyDick</rdfs:label>
+        <longInMeters rdf:datatype="&xsd;nonNegativeInteger">23</longInMeters>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#MobyDickTheNovel -->
+
+    <owl:NamedIndividual rdf:about="http://stanbol.apache.org/ontologies/test1.owl#MobyDickTheNovel">
+        <rdfs:label xml:lang="en">MelvilleNovel</rdfs:label>
+        <aboutFiction rdf:resource="http://stanbol.apache.org/ontologies/test1.owl#BalenaBianca"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#Porpy -->
+
+    <owl:NamedIndividual rdf:about="http://stanbol.apache.org/ontologies/test1.owl#Porpy">
+        <rdf:type rdf:resource="http://stanbol.apache.org/ontologies/test1.owl#AquaticOrganism"/>
+        <rdfs:label>Porpy</rdfs:label>
+        <knows rdf:resource="http://stanbol.apache.org/ontologies/test1.owl#MobyDick"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#Snorky -->
+
+    <owl:NamedIndividual rdf:about="http://stanbol.apache.org/ontologies/test1.owl#Snorky">
+        <rdf:type rdf:resource="http://stanbol.apache.org/ontologies/test1.owl#Crustacean"/>
+        <rdfs:label xml:lang="en">Snorky</rdfs:label>
+        <friend rdf:resource="http://stanbol.apache.org/ontologies/test1.owl#BalenaBianca"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl#Wile -->
+
+    <owl:NamedIndividual rdf:about="http://stanbol.apache.org/ontologies/test1.owl#Wile">
+        <knows rdf:resource="http://stanbol.apache.org/ontologies/test1.owl#Porpy"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:Class>
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <owl:intersectionOf rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/test1.owl#AquaticOrganism"/>
+            <owl:Class>
+                <owl:complementOf rdf:resource="http://stanbol.apache.org/ontologies/test1.owl#Fish"/>
+            </owl:Class>
+        </owl:intersectionOf>
+    </owl:Class>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDifferent"/>
+        <owl:distinctMembers rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/test1.owl#BalenaBianca"/>
+            <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/test1.owl#Porpy"/>
+        </owl:distinctMembers>
+    </rdf:Description>
+    <owl:Class>
+        <rdfs:subClassOf rdf:resource="http://stanbol.apache.org/ontologies/test1.owl#AquaticOrganism"/>
+        <owl:unionOf rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/test1.owl#AquaticMammal"/>
+            <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/test1.owl#Crustacean"/>
+            <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/test1.owl#Fish"/>
+        </owl:unionOf>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.2.2.1785) http://owlapi.sourceforge.net -->
+

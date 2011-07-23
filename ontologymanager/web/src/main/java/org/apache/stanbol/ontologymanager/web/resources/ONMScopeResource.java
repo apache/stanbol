@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.Response.Status.*;
@@ -50,8 +50,11 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
-import org.apache.stanbol.ontologymanager.ontonet.api.registry.io.RegistryIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
+import org.apache.stanbol.ontologymanager.registry.api.RegistryLoader;
+import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
+import org.apache.stanbol.ontologymanager.registry.impl.RegistryLoaderImpl;
+import org.apache.stanbol.ontologymanager.registry.io.RegistryIRISource;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -61,200 +64,199 @@ import org.slf4j.LoggerFactory;
 @Path("/ontonet/ontology/{scopeid}")
 public class ONMScopeResource extends BaseStanbolResource {
 
-	private Logger log = LoggerFactory.getLogger(getClass());
+    private Logger log = LoggerFactory.getLogger(getClass());
 
-	/*
-	 * Placeholder for the ONManager to be fetched from the servlet context.
-	 */
-	protected ONManager onm;
-	
-	protected ClerezzaOntologyStorage storage;
+    /*
+     * Placeholder for the ONManager to be fetched from the servlet context.
+     */
+    protected ONManager onm;
 
-	protected ServletContext servletContext;
+    /*
+     * Placeholder for the ONManager to be fetched from the servlet context.
+     */
+    protected RegistryManager regMgr;
 
-	public ONMScopeResource(@Context ServletContext servletContext) {
-		this.servletContext = servletContext;
-		this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
-		this.storage = (ClerezzaOntologyStorage) ContextHelper.getServiceFromContext(ClerezzaOntologyStorage.class, servletContext);
-	}
+    protected RegistryLoader loader;
 
-	@DELETE
-	public void deregisterScope(@PathParam("scopeid") String scopeid,
-			@Context UriInfo uriInfo, @Context HttpHeaders headers,
-			@Context ServletContext servletContext) {
+    protected ClerezzaOntologyStorage storage;
 
-		ScopeRegistry reg = onm.getScopeRegistry();
+    protected ServletContext servletContext;
 
-		OntologyScope scope = reg.getScope(IRI
-				.create(uriInfo.getAbsolutePath()));
-		if (scope == null)
-			return;
-		reg.deregisterScope(scope);
-	}
+    public ONMScopeResource(@Context ServletContext servletContext) {
+        this.servletContext = servletContext;
+        this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
+        this.regMgr = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
+            servletContext);
+        loader = new RegistryLoaderImpl(regMgr, onm);
+        this.storage = (ClerezzaOntologyStorage) ContextHelper.getServiceFromContext(
+            ClerezzaOntologyStorage.class, servletContext);
+    }
 
-	@GET
-	@Produces(value = { KRFormat.RDF_XML, KRFormat.OWL_XML,
-			KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
-			KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON })
-	public Response getTopOntology(@Context UriInfo uriInfo,
-			@Context HttpHeaders headers, @Context ServletContext servletContext) {
+    @DELETE
+    public void deregisterScope(@PathParam("scopeid") String scopeid,
+                                @Context UriInfo uriInfo,
+                                @Context HttpHeaders headers,
+                                @Context ServletContext servletContext) {
 
-		ScopeRegistry reg = onm.getScopeRegistry();
+        ScopeRegistry reg = onm.getScopeRegistry();
 
-		OntologyScope scope = reg.getScope(IRI
-				.create(uriInfo.getAbsolutePath()));
-		if (scope == null)
-			return Response.status(404).build();
+        OntologyScope scope = reg.getScope(IRI.create(uriInfo.getAbsolutePath()));
+        if (scope == null) return;
+        reg.deregisterScope(scope);
+    }
 
-		OntologySpace cs = scope.getCustomSpace();
-		OWLOntology ont = null;
-		if (cs != null)
-			ont = scope.getCustomSpace().getTopOntology();
-		if (ont == null)
-			ont = scope.getCoreSpace().getTopOntology();
+    @GET
+    @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
+                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
+    public Response getTopOntology(@Context UriInfo uriInfo,
+                                   @Context HttpHeaders headers,
+                                   @Context ServletContext servletContext) {
 
-		return Response.ok(ont).build();
+        ScopeRegistry reg = onm.getScopeRegistry();
 
-	}
+        OntologyScope scope = reg.getScope(IRI.create(uriInfo.getAbsolutePath()));
+        if (scope == null) return Response.status(404).build();
 
-	@POST
-	// @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response loadCustomOntology(@PathParam("scopeid") String scopeid,
-			@FormParam("location") String physIri,
-			@FormParam("registry") boolean asRegistry,
-			@Context UriInfo uriInfo, @Context HttpHeaders headers,
-			@Context ServletContext servletContext) {
+        OntologySpace cs = scope.getCustomSpace();
+        OWLOntology ont = null;
+        if (cs != null) ont = scope.getCustomSpace().getTopOntology();
+        if (ont == null) ont = scope.getCoreSpace().getTopOntology();
 
-		ScopeRegistry reg = onm.getScopeRegistry();
+        return Response.ok(ont).build();
 
-		IRI scopeiri = null;
-		IRI ontoiri = null;
-		try {
-			scopeiri = IRI.create(uriInfo.getAbsolutePath());
-			ontoiri = IRI.create(physIri);
-		} catch (Exception ex) {
-			// Malformed IRI, throw bad request.
-			throw new WebApplicationException(ex, BAD_REQUEST);
-		}
-		if (reg.containsScope(scopeiri)) {
-			OntologyScope scope = reg.getScope(scopeiri);
-			try {
-				OntologyInputSource src = new RootOntologyIRISource(ontoiri);
-				OntologySpace space = scope.getCustomSpace();
-				if (space == null) {
-					space = onm.getOntologySpaceFactory()
-							.createCustomOntologySpace(scopeiri, src);
+    }
 
-					scope.setCustomSpace(space);
-					// space.setUp();
-				} else
-					space.addOntology(src);
-			} catch (OWLOntologyCreationException e) {
-				throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
-			} catch (UnmodifiableOntologySpaceException e) {
-				throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
-			}
-		} else
-			throw new WebApplicationException(NOT_FOUND);
-		return Response.ok().build();
-	}
+    @POST
+    // @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response loadCustomOntology(@PathParam("scopeid") String scopeid,
+                                       @FormParam("location") String physIri,
+                                       @FormParam("registry") boolean asRegistry,
+                                       @Context UriInfo uriInfo,
+                                       @Context HttpHeaders headers,
+                                       @Context ServletContext servletContext) {
 
-	/**
-	 * At least one between corereg and coreont must be present. Registry iris
-	 * supersede ontology iris.
-	 * 
-	 * @param scopeid
-	 * @param coreRegistry
-	 *            a. If it is a well-formed IRI it supersedes
-	 *            <code>coreOntology</code>.
-	 * @param coreOntology
-	 * @param customRegistry
-	 *            a. If it is a well-formed IRI it supersedes
-	 *            <code>customOntology</code>.
-	 * @param customOntology
-	 * @param activate
-	 *            if true, the new scope will be activated upon creation.
-	 * @param uriInfo
-	 * @param headers
-	 * @return
-	 */
-	@PUT
-	@Consumes(MediaType.WILDCARD)
-	public Response registerScope(@PathParam("scopeid") String scopeid,
-			@QueryParam("corereg") String coreRegistry,
-			@QueryParam("coreont") String coreOntology,
-			@QueryParam("customreg") String customRegistry,
-			@QueryParam("customont") String customOntology,
-			@DefaultValue("false") @QueryParam("activate") String activate,
-			@Context UriInfo uriInfo, @Context HttpHeaders headers,
-			@Context ServletContext servletContext) {
+        ScopeRegistry reg = onm.getScopeRegistry();
 
-		ScopeRegistry reg = onm.getScopeRegistry();
-		OntologyScopeFactory f = onm.getOntologyScopeFactory();
+        IRI scopeiri = null;
+        IRI ontoiri = null;
+        try {
+            scopeiri = IRI.create(uriInfo.getAbsolutePath());
+            ontoiri = IRI.create(physIri);
+        } catch (Exception ex) {
+            // Malformed IRI, throw bad request.
+            throw new WebApplicationException(ex, BAD_REQUEST);
+        }
+        if (reg.containsScope(scopeiri)) {
+            OntologyScope scope = reg.getScope(scopeiri);
+            try {
+                OntologyInputSource src = new RootOntologyIRISource(ontoiri);
+                OntologySpace space = scope.getCustomSpace();
+                if (space == null) {
+                    space = onm.getOntologySpaceFactory().createCustomOntologySpace(scopeiri, src);
 
-		OntologyScope scope;
-		OntologyInputSource coreSrc = null, custSrc = null;
+                    scope.setCustomSpace(space);
+                    // space.setUp();
+                } else space.addOntology(src);
+            } catch (OWLOntologyCreationException e) {
+                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+            } catch (UnmodifiableOntologySpaceException e) {
+                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+            }
+        } else throw new WebApplicationException(NOT_FOUND);
+        return Response.ok().build();
+    }
 
-		if (coreOntology==null && coreRegistry==null) {
-		    coreSrc = new BlankOntologySource();
-		}
-		
-		// First thing, check the core source.
-		try {
-			coreSrc = new RegistryIRISource(IRI.create(coreRegistry),
-					onm.getOwlCacheManager(), onm.getRegistryLoader());
-		} catch (Exception e1) {
-			// Bad or not supplied core registry, try the ontology.
-			try {
-				coreSrc = new RootOntologyIRISource(IRI.create(coreOntology));
-			} catch (Exception e2) {
-				// If this fails too, throw a bad request.
-				throw new WebApplicationException(e2, BAD_REQUEST);
-			}
-		}
+    /**
+     * At least one between corereg and coreont must be present. Registry iris supersede ontology iris.
+     * 
+     * @param scopeid
+     * @param coreRegistry
+     *            a. If it is a well-formed IRI it supersedes <code>coreOntology</code>.
+     * @param coreOntology
+     * @param customRegistry
+     *            a. If it is a well-formed IRI it supersedes <code>customOntology</code>.
+     * @param customOntology
+     * @param activate
+     *            if true, the new scope will be activated upon creation.
+     * @param uriInfo
+     * @param headers
+     * @return
+     */
+    @PUT
+    @Consumes(MediaType.WILDCARD)
+    public Response registerScope(@PathParam("scopeid") String scopeid,
+                                  @QueryParam("corereg") String coreRegistry,
+                                  @QueryParam("coreont") String coreOntology,
+                                  @QueryParam("customreg") String customRegistry,
+                                  @QueryParam("customont") String customOntology,
+                                  @DefaultValue("false") @QueryParam("activate") String activate,
+                                  @Context UriInfo uriInfo,
+                                  @Context HttpHeaders headers,
+                                  @Context ServletContext servletContext) {
 
-		// Don't bother if no custom was supplied at all...
-		if (customOntology != null || customRegistry != null) {
-			// ...but if it was, be prepared to throw exceptions.
-			try {
-				custSrc = new RegistryIRISource(IRI
-						.create(customRegistry), onm.getOwlCacheManager(), onm
-						.getRegistryLoader());
-			} catch (Exception e1) {
-				// Bad or not supplied custom registry, try the ontology.
-				try {
-					custSrc = new RootOntologyIRISource(IRI
-							.create(customOntology));
-				} catch (Exception e2) {
-					// If this fails too, throw a bad request.
-					throw new WebApplicationException(e2, BAD_REQUEST);
-				}
-			}
-		}
-		
-		// Now the creation.
-		try {
-			IRI scopeId = IRI.create(uriInfo.getAbsolutePath());
-			// Invoke the appropriate factory method depending on the
-			// availability of a custom source.
-			scope = (custSrc != null) ? f.createOntologyScope(scopeId, coreSrc,
-					custSrc) : f.createOntologyScope(scopeId, coreSrc);
-			// Setup and register the scope. If no custom space was set, it will
-			// still be open for modification.
-			scope.setUp();
-			reg.registerScope(scope);
-			boolean activateBool = true;
-			if (activate != null && !activate.equals("")) {
-				activateBool = Boolean.valueOf(activate);
-			}
-			reg.setScopeActive(scopeId, activateBool);
-		} catch (DuplicateIDException e) {
-			throw new WebApplicationException(e, CONFLICT);
-		} catch (Exception ex){
-			throw new WebApplicationException(ex, INTERNAL_SERVER_ERROR);
-		}
+        ScopeRegistry reg = onm.getScopeRegistry();
+        OntologyScopeFactory f = onm.getOntologyScopeFactory();
 
-		return Response.ok().build();
-	}
+        OntologyScope scope;
+        OntologyInputSource coreSrc = null, custSrc = null;
+
+        if (coreOntology == null && coreRegistry == null) {
+            coreSrc = new BlankOntologySource();
+        }
+
+        // First thing, check the core source.
+        try {
+
+            coreSrc = new RegistryIRISource(IRI.create(coreRegistry), onm.getOwlCacheManager(), loader);
+        } catch (Exception e1) {
+            // Bad or not supplied core registry, try the ontology.
+            try {
+                coreSrc = new RootOntologyIRISource(IRI.create(coreOntology));
+            } catch (Exception e2) {
+                // If this fails too, throw a bad request.
+                throw new WebApplicationException(e2, BAD_REQUEST);
+            }
+        }
+
+        // Don't bother if no custom was supplied at all...
+        if (customOntology != null || customRegistry != null) {
+            // ...but if it was, be prepared to throw exceptions.
+            try {
+                custSrc = new RegistryIRISource(IRI.create(customRegistry), onm.getOwlCacheManager(), loader);
+            } catch (Exception e1) {
+                // Bad or not supplied custom registry, try the ontology.
+                try {
+                    custSrc = new RootOntologyIRISource(IRI.create(customOntology));
+                } catch (Exception e2) {
+                    // If this fails too, throw a bad request.
+                    throw new WebApplicationException(e2, BAD_REQUEST);
+                }
+            }
+        }
+
+        // Now the creation.
+        try {
+            IRI scopeId = IRI.create(uriInfo.getAbsolutePath());
+            // Invoke the appropriate factory method depending on the
+            // availability of a custom source.
+            scope = (custSrc != null) ? f.createOntologyScope(scopeId, coreSrc, custSrc) : f
+                    .createOntologyScope(scopeId, coreSrc);
+            // Setup and register the scope. If no custom space was set, it will
+            // still be open for modification.
+            scope.setUp();
+            reg.registerScope(scope);
+            boolean activateBool = true;
+            if (activate != null && !activate.equals("")) {
+                activateBool = Boolean.valueOf(activate);
+            }
+            reg.setScopeActive(scopeId, activateBool);
+        } catch (DuplicateIDException e) {
+            throw new WebApplicationException(e, CONFLICT);
+        } catch (Exception ex) {
+            throw new WebApplicationException(ex, INTERNAL_SERVER_ERROR);
+        }
+
+        return Response.ok().build();
+    }
 
 }

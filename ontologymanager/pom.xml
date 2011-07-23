@@ -33,7 +33,8 @@
   <inceptionYear>2011</inceptionYear>
 
   <modules>
-    <module>ontonet</module>    
+    <module>ontonet</module>   
+    <module>registry</module>   
     <module>web</module>
     <module>store</module>
   </modules>

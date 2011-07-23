@@ -524,6 +524,11 @@
 		<artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
 		<version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
+    <bundle>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.ontologymanager.registry</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
 	<!-- Stanbol Rules -->
 	<bundle>
 		<groupId>org.apache.stanbol</groupId>

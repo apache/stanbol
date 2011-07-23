@@ -62,7 +62,7 @@ public class RemoveRecipeTest {
     @Before
     public void setUp() {
     	Dictionary<String, Object> configuration = new Hashtable<String, Object>();
-        onm = new ONManagerImpl(null,null, null,configuration);
+        onm = new ONManagerImpl(null,null,configuration);
     	store = new RuleStoreImpl(onm, configuration,"./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
     }
 

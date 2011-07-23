@@ -66,6 +66,7 @@
     
     <module>contenthub/web</module>
     <module>ontologymanager/ontonet</module>
+    <module>ontologymanager/registry</module>
     <module>ontologymanager/web</module>
     <module>rules</module>
   </modules>

@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
-import org.apache.stanbol.ontologymanager.ontonet.xd.vocabulary.Vocabulary;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.AddImport;
@@ -69,7 +68,7 @@ public class ScopeSetRenderer {
 		// The ODP metadata vocabulary is always imported.
 		// TODO : also import the ONM meta when it goes online.
 		additions.add(new AddImport(ont, __factory
-				.getOWLImportsDeclaration(Vocabulary.ODPM.getIRI())));
+				.getOWLImportsDeclaration(IRI.create("http://www.ontologydesignpatterns.org/schemas/meta.owl"))));
 		for (OntologyScope scope : scopes) {
 			OWLNamedIndividual iScope = __factory.getOWLNamedIndividual(scope
 					.getID());
