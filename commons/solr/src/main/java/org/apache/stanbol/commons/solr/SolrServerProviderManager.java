@@ -33,7 +33,6 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.solr.client.solrj.SolrServer;
-import org.apache.stanbol.commons.solr.SolrServerProvider.Type;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,9 +62,9 @@ public final class SolrServerProviderManager {
         cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, 
         bind = "addSolrProvider", 
         unbind = "removeSolrProvider")
-    private Map<Type,List<SolrServerProvider>> solrServerProviders = Collections
-            .synchronizedMap(new EnumMap<Type,List<SolrServerProvider>>(Type.class));
-
+    private Map<SolrServerTypeEnum,List<SolrServerProvider>> solrServerProviders = Collections
+            .synchronizedMap(new EnumMap<SolrServerTypeEnum,List<SolrServerProvider>>(SolrServerTypeEnum.class));
+    
     public static SolrServerProviderManager getInstance() {
         if (solrServerProviderManager == null) {
             SolrServerProviderManager manager = new SolrServerProviderManager();
@@ -95,7 +94,7 @@ public final class SolrServerProviderManager {
         solrServerProviderManager = null;
     }
 
-    public SolrServer getSolrServer(Type type, String uriOrPath, String... additionalServerLocations) {
+    public SolrServer getSolrServer(SolrServerTypeEnum type, String uriOrPath, String... additionalServerLocations) {
         List<SolrServerProvider> providers = solrServerProviders.get(type);
         if (providers == null) {
             throw new IllegalArgumentException("No Provider for type " + type + " available");
@@ -113,7 +112,7 @@ public final class SolrServerProviderManager {
 
     protected void addSolrProvider(SolrServerProvider provider) {
         log.info("add SolrProvider " + provider + " types " + provider.supportedTypes());
-        for (Type type : provider.supportedTypes()) {
+        for (SolrServerTypeEnum type : provider.supportedTypes()) {
             List<SolrServerProvider> providers = solrServerProviders.get(type);
             if (providers == null) {
                 providers = new CopyOnWriteArrayList<SolrServerProvider>();
@@ -125,7 +124,7 @@ public final class SolrServerProviderManager {
 
     protected void removeSolrProvider(SolrServerProvider provider) {
         log.info("remove SolrProvider " + provider + " types " + provider.supportedTypes());
-        for (Type type : provider.supportedTypes()) {
+        for (SolrServerTypeEnum type : provider.supportedTypes()) {
             List<SolrServerProvider> providers = solrServerProviders.get(type);
             if (providers != null) {
                 if (providers.remove(provider) && providers.isEmpty()) {

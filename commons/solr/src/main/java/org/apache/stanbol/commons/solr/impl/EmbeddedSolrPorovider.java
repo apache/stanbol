@@ -36,7 +36,7 @@ import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreDescriptor;
 import org.apache.solr.core.SolrCore;
 import org.apache.stanbol.commons.solr.SolrServerProvider;
-import org.apache.stanbol.commons.solr.SolrServerProvider.Type;
+import org.apache.stanbol.commons.solr.SolrServerTypeEnum;
 import org.apache.stanbol.commons.solr.utils.ConfigUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -45,7 +45,7 @@ import org.xml.sax.SAXException;
 
 /**
  * Support for the use of {@link EmbeddedSolrPorovider} in combination with the SolrYard implementation. This
- * implements the {@link SolrServerProvider} interface for the {@link Type#EMBEDDED}.
+ * implements the {@link SolrServerProvider} interface for the {@link SolrServerTypeEnum#EMBEDDED}.
  * <p>
  * 
  * TODO: add functionality to lookup the internally managed {@link CoreContainer}. Maybe this requires to add
@@ -69,10 +69,27 @@ public class EmbeddedSolrPorovider implements SolrServerProvider {
     @SuppressWarnings("unchecked")
     private Map<String,CoreContainer> coreContainers = new ReferenceMap();
 
+//    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY,
+//        policy=ReferencePolicy.DYNAMIC,
+//        strategy=ReferenceStrategy.EVENT,
+//        bind="bindSolrDirectoryManager",
+//        unbind="unbindSolrDirectoryManager")
+//    private SolrDirectoryManager solrDirectoryManager;
+
     public EmbeddedSolrPorovider() {}
 
+//    protected void bindSolrDirectoryManager(SolrDirectoryManager solrDirectoryManager){
+//        this.solrDirectoryManager = solrDirectoryManager;
+//    }
+//    protected void unbindSolrDirectoryManager(SolrDirectoryManager solrDirectoryManager) {
+//        this.solrDirectoryManager = null;
+//    }
+//    protected SolrDirectoryManager getSolrDirectoryManager(){
+//        return this.solrDirectoryManager;
+//    }
+
     @Override
-    public SolrServer getSolrServer(Type type, String uriOrPath, String... additional) throws NullPointerException,
+    public SolrServer getSolrServer(SolrServerTypeEnum type, String uriOrPath, String... additional) throws NullPointerException,
                                                                                       IllegalArgumentException {
         log.debug(String.format("getSolrServer Request for %s and path %s", type, uriOrPath));
         if (uriOrPath == null) {
@@ -184,8 +201,8 @@ public class EmbeddedSolrPorovider implements SolrServerProvider {
     }
 
     @Override
-    public Set<Type> supportedTypes() {
-        return Collections.singleton(Type.EMBEDDED);
+    public Set<SolrServerTypeEnum> supportedTypes() {
+        return Collections.singleton(SolrServerTypeEnum.EMBEDDED);
     }
 
     @Activate
