@@ -20,7 +20,7 @@ import org.apache.stanbol.ontologymanager.registry.api.model.RegistryItem;
 
 /**
  * Thrown when an attempt to create an illegal cycle in the registry item model is detected. Examples of
- * illegal cycle include being both a parent and a child of the same registry item, or a parent or child of
+ * illegal cycles include being both a parent and a child of the same registry item, or a parent or child of
  * itself.
  */
 public class IllegalRegistryCycleException extends RegistryContentException {
