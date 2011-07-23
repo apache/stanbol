@@ -38,36 +38,11 @@ import org.apache.solr.client.solrj.SolrServer;
 public interface SolrServerProvider {
 
     /**
-     * SolrServer types defined here to avoid java dependencies to the according java classes
-     * 
-     * @author Rupert Westenthaler
-     * 
-     */
-    enum Type {
-        /**
-         * Uses an embedded SolrServer that runs within the same virtual machine
-         */
-        EMBEDDED,
-        /**
-         * The default type that can be used for query and updates
-         */
-        HTTP,
-        /**
-         * This server is preferable used for updates
-         */
-        STREAMING,
-        /**
-         * This allows to use load balancing on multiple SolrServers via a round robin algorithm.
-         */
-        LOAD_BALANCE
-    }
-
-    /**
      * Getter for the supported types of this Provider
      * 
      * @return the Types supported by this Provider
      */
-    Set<Type> supportedTypes();
+    Set<SolrServerTypeEnum> supportedTypes();
 
     /**
      * Getter for the {@link SolrServer} instance for the provided URI or path (in case of an embedded server)
@@ -84,7 +59,7 @@ public interface SolrServerProvider {
      * @throws NullPointerException
      * @throws IllegalArgumentException
      *             if <code>null</code> is parsed as uriOrPath or if the parsed URI or path is not valid for
-     *             the requested {@link Type} or the parsed type is not supported by this provider
+     *             the requested {@link SolrServerTypeEnum} or the parsed type is not supported by this provider
      */
-    SolrServer getSolrServer(Type type, String uriOrPath, String... additional) throws IllegalArgumentException;
+    SolrServer getSolrServer(SolrServerTypeEnum type, String uriOrPath, String... additional) throws IllegalArgumentException;
 }

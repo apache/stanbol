@@ -16,6 +16,10 @@
  */
 package org.apache.stanbol.commons.solr.impl.install;
 
+import static org.apache.stanbol.commons.solr.impl.install.IndexInstallerConstants.PROPERTY_INDEX_NAME;
+
+import java.io.File;
+
 import org.apache.sling.installer.api.tasks.InstallTask;
 import org.apache.sling.installer.api.tasks.InstallationContext;
 import org.apache.sling.installer.api.tasks.ResourceState;
@@ -49,15 +53,31 @@ public class IndexRemoveTask extends InstallTask {
      * the services are shut down.
      */
     private static final String CONFIG_INSTALL_ORDER = "11-";
+    
+    private final SolrDirectoryManager solrDirectoryManager;
 
     public IndexRemoveTask(TaskResourceGroup trg, SolrDirectoryManager solrDirectoryManager) {
         super(trg);
+        if(solrDirectoryManager == null){
+            throw new IllegalArgumentException("The parsed SolrDirectoryManager MUST NOT be NULL");
+        }
+        this.solrDirectoryManager = solrDirectoryManager;
     }
 
     @Override
     public void execute(InstallationContext ctx) {
-        log.warn("Uninstalling of SolrIndexes not yet Implemented -> marking as uninstalled (see STANBOL-287)");
-        setFinishedState(ResourceState.UNINSTALLED);
+        String indexName = (String) getResource().getAttribute(PROPERTY_INDEX_NAME);
+        File solrIndexDir = solrDirectoryManager.getSolrIndexDirectory(indexName);
+        if (solrIndexDir == null) {
+            // no index with that name installed -> nothing to do
+            ctx.log(String.format("SolrIndex '%s' not installed. Nothing to uninstall",
+                indexName));
+            setFinishedState(ResourceState.IGNORED);
+        } else { // this index does not exist
+            //solrDirectoryManager.removeSolrIndex()
+            log.warn("Uninstalling of SolrIndexes not yet Implemented -> marking as uninstalled (see STANBOL-287)");
+            setFinishedState(ResourceState.UNINSTALLED);
+        }
     }
 
     @Override

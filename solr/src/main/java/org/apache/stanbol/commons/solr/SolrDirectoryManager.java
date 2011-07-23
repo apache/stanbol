@@ -24,7 +24,6 @@ import java.util.Properties;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.core.CoreContainer;
-import org.apache.stanbol.commons.solr.SolrServerProvider.Type;
 import org.apache.stanbol.commons.solr.utils.ConfigUtils;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.osgi.framework.BundleContext;
@@ -35,7 +34,7 @@ import org.osgi.service.component.ComponentContext;
  * (configuration and data) needed to create a Solr Server.
  * <p>
  * Note that is only refers to the Files and not the Solr server (or EmbeddedSolrServer). Users need to use
- * the {@link SolrServerProvider#getSolrServer(Type, String, String...)} to get an {@link SolrServer} instance
+ * the {@link SolrServerProvider#getSolrServer(SolrServerTypeEnum, String, String...)} to get an {@link SolrServer} instance
  * based on the directory provided by this Interface.
  * <p>
  * The {@link #MANAGED_SOLR_DIR_PROPERTY} property can be used to define the location of the internally
@@ -126,7 +125,7 @@ public interface SolrDirectoryManager {
      * are valid Solr indices (or Solr Cores)
      * <p>
      * Directories returned by this method are typically used as second parameter of
-     * {@link SolrServerProvider#getSolrServer(Type, String, String...)} to create an {@link SolrServer}
+     * {@link SolrServerProvider#getSolrServer(SolrServerTypeEnum, String, String...)} to create an {@link SolrServer}
      * instance.
      * <p>
      * If the requested Index is currently initialising, than this method MUST

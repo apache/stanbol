@@ -31,6 +31,7 @@ import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.impl.LBHttpSolrServer;
 import org.apache.solr.client.solrj.impl.StreamingUpdateSolrServer;
 import org.apache.stanbol.commons.solr.SolrServerProvider;
+import org.apache.stanbol.commons.solr.SolrServerTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,14 +51,14 @@ public class DefaultSolrServerProvider implements SolrServerProvider {
     private final Logger log = LoggerFactory.getLogger(DefaultSolrServerProvider.class);
 
     @Override
-    public SolrServer getSolrServer(Type type, String uriOrPath, String... additional) throws NullPointerException,
+    public SolrServer getSolrServer(SolrServerTypeEnum type, String uriOrPath, String... additional) throws NullPointerException,
                                                                                       IllegalArgumentException {
         if (uriOrPath == null) {
             throw new IllegalArgumentException("The parsed SolrServer URI MUST NOT be NULL!");
         }
         if (type == null) {
-            type = Type.HTTP;
-        } else if (type == Type.EMBEDDED) {
+            type = SolrServerTypeEnum.HTTP;
+        } else if (type == SolrServerTypeEnum.EMBEDDED) {
             throw new IllegalArgumentException(
                     String.format(
                         "The EmbeddedSolrServer (type=%s) is not supported by this SolrServerProvider implementation",
@@ -69,7 +70,7 @@ public class DefaultSolrServerProvider implements SolrServerProvider {
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("The parsed SolrServer location is not a valid URL", e);
         }
-        if (type != Type.LOAD_BALANCE && additional != null && additional.length > 0) {
+        if (type != SolrServerTypeEnum.LOAD_BALANCE && additional != null && additional.length > 0) {
             log.warn(String.format(
                 "The parsed SolrServer type \"%s\" does not support multiple SolrServer instaces."
                         + "The %s additional SolrServer locations parsed are ignored! (ignored Servers: %s)",
@@ -120,8 +121,8 @@ public class DefaultSolrServerProvider implements SolrServerProvider {
     }
 
     @Override
-    public Set<Type> supportedTypes() {
-        return EnumSet.of(Type.HTTP, Type.LOAD_BALANCE, Type.STREAMING);
+    public Set<SolrServerTypeEnum> supportedTypes() {
+        return EnumSet.of(SolrServerTypeEnum.HTTP, SolrServerTypeEnum.LOAD_BALANCE, SolrServerTypeEnum.STREAMING);
     }
 
 }
