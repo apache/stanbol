@@ -80,6 +80,8 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
 
     private static final OWLObjectProperty hasPart, hasOntology, isPartOf, isOntologyOf;
 
+    private OWLOntologyManager cache = null;
+
     static {
         OWLDataFactory factory = OWLManager.getOWLDataFactory();
         cOntology = factory.getOWLClass(IRI.create(CODOVocabulary.CODK_Ontology));
@@ -166,8 +168,8 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         } else {
             this.cachingPolicyString = cachingPolicy.toString();
         }
-        // System.err.println(cachingPolicy);
 
+        // Used only for creating the registry model, do not use for caching.
         OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
         // Load registries
         Set<OWLOntology> regOnts = new HashSet<OWLOntology>();
@@ -182,8 +184,19 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
                 continue;
             }
         }
-        // Build the model!
+        // Build the model.
         createModel(regOnts);
+
+        // Set the cache.
+        if (cachingPolicyString.equals(CachingPolicy.CROSS_REGISTRY.name())) {
+            this.cache = OWLManager.createOWLOntologyManager();
+            for (Registry reg : getRegistries())
+                reg.setCache(this.cache);
+        } else if (cachingPolicyString.equals(CachingPolicy.PER_REGISTRY.name())) {
+            for (Registry reg : getRegistries())
+                reg.setCache(OWLManager.createOWLOntologyManager());
+            this.cache = null;
+        }
     }
 
     @Override
@@ -216,10 +229,23 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         for (OWLOntology rego : registryOntologies)
             closure.addAll(rego.getOWLOntologyManager().getImportsClosure(rego));
 
+        /*
+         * For each value in this map, index 0 is the score of the library class, while 1 is the score of the
+         * ontology class.
+         */
         final Map<IRI,int[]> candidateTypes = new HashMap<IRI,int[]>();
 
-        OWLAxiomVisitor v = new OWLAxiomVisitorAdapter() {
+        /*
+         * Scans class assertions and object property values and tries to determine the type of each
+         * individual it finds.
+         */
+        OWLAxiomVisitor scanner = new OWLAxiomVisitorAdapter() {
 
+            /*
+             * For a given identifier, returns the array of integers whose value determine the likelihood if
+             * the corresponding entity being a library or an ontology. If no such array exists, it is
+             * created.
+             */
             private int[] checkScores(IRI key) {
                 int[] scores;
                 if (candidateTypes.containsKey(key)) scores = candidateTypes.get(key);
@@ -233,17 +259,19 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
             @Override
             public void visit(OWLClassAssertionAxiom axiom) {
                 OWLIndividual ind = axiom.getIndividual();
+                // Do not accept anonymous registry items.
                 if (ind.isAnonymous()) return;
                 IRI iri = ind.asOWLNamedIndividual().getIRI();
                 int[] scores = checkScores(iri);
-
                 OWLClassExpression type = axiom.getClassExpression();
+                // If the type is stated to be a library, increase its library score.
                 if (cRegistryLibrary.equals(type)) {
                     scores[0]++;
-                } else if (cOntology.equals(type)) {
+                } else
+                // If the type is stated to be an ontology, increase its ontology score.
+                if (cOntology.equals(type)) {
                     scores[1]++;
                 }
-
             }
 
             @Override
@@ -252,11 +280,13 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
 
                 if (hasOntology.equals(prop)) {
                     IRI iri;
+                    // The axiom subject gets a +1 in its library score.
                     OWLIndividual ind = axiom.getSubject();
                     if (!ind.isAnonymous()) {
                         iri = ind.asOWLNamedIndividual().getIRI();
                         checkScores(iri)[0]++;
                     }
+                    // The axiom object gets a +1 in its ontology score.
                     ind = axiom.getObject();
                     if (!ind.isAnonymous()) {
                         iri = ind.asOWLNamedIndividual().getIRI();
@@ -264,11 +294,13 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
                     }
                 } else if (isOntologyOf.equals(prop)) {
                     IRI iri;
+                    // The axiom subject gets a +1 in its ontology score.
                     OWLIndividual ind = axiom.getSubject();
                     if (!ind.isAnonymous()) {
                         iri = ind.asOWLNamedIndividual().getIRI();
                         checkScores(iri)[1]++;
                     }
+                    // The axiom object gets a +1 in its library score.
                     ind = axiom.getObject();
                     if (!ind.isAnonymous()) {
                         iri = ind.asOWLNamedIndividual().getIRI();
@@ -283,7 +315,7 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         // First pass to determine the types.
         for (OWLOntology o : closure)
             for (OWLAxiom ax : o.getAxioms())
-                ax.accept(v);
+                ax.accept(scanner);
 
         // Then populate on the registry
         OWLDataFactory df = OWLManager.getOWLDataFactory();
