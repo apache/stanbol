@@ -18,6 +18,7 @@ package org.apache.stanbol.ontologymanager.registry.api;
 
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.registry.api.model.CachingPolicy;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryOntology;
@@ -75,6 +76,13 @@ public interface RegistryManager {
      * @return the ontology registries that are the parent items of the entire model.
      */
     Set<Registry> createModel(Set<OWLOntology> registryOntologies);
+
+    /**
+     * Returns the ontology caching policy currently adopted by the registry manager.
+     * 
+     * @return the caching policy.
+     */
+    CachingPolicy getCachingPolicy();
 
     /**
      * Returns all the libraries that contain the ontology with the given identifier.

@@ -34,6 +34,7 @@ import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentListener;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryItemFactory;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
+import org.apache.stanbol.ontologymanager.registry.api.model.CachingPolicy;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryItem;
@@ -71,6 +72,8 @@ import org.slf4j.LoggerFactory;
 @Service(RegistryManager.class)
 public class RegistryManagerImpl implements RegistryManager, RegistryContentListener {
 
+    private static final CachingPolicy _CACHING_POLICY_DEFAULT = CachingPolicy.CROSS_REGISTRY;
+
     private static final boolean _LAZY_LOADING_DEFAULT = false;
 
     private static final OWLClass cRegistryLibrary, cOntology;
@@ -90,10 +93,10 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
     @Property(name = RegistryManager.CACHING_POLICY, options = {
                                                                 @PropertyOption(value = '%'
                                                                                         + RegistryManager.CACHING_POLICY
-                                                                                        + ".option.registry", name = "registry"),
+                                                                                        + ".option.registry", name = "PER_REGISTRY"),
                                                                 @PropertyOption(value = '%'
                                                                                         + RegistryManager.CACHING_POLICY
-                                                                                        + ".option.all", name = "all")}, value = "all")
+                                                                                        + ".option.all", name = "CROSS_REGISTRY")}, value = "CROSS_REGISTRY")
     private String cachingPolicyString;
 
     @Property(name = RegistryManager.LAZY_LOADING, boolValue = _LAZY_LOADING_DEFAULT)
@@ -157,7 +160,13 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         }
         locations = (String[]) configuration.get(RegistryManager.REGISTRY_LOCATIONS);
         if (locations == null) locations = new String[] {};
-        // TODO manage enum constants for caching policy.
+        Object cachingPolicy = configuration.get(RegistryManager.CACHING_POLICY);
+        if (cachingPolicy == null) {
+            this.cachingPolicyString = _CACHING_POLICY_DEFAULT.name();
+        } else {
+            this.cachingPolicyString = cachingPolicy.toString();
+        }
+        // System.err.println(cachingPolicy);
 
         OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
         // Load registries
@@ -303,6 +312,18 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         lazyLoading = _LAZY_LOADING_DEFAULT;
         locations = null;
         log.info("in {} deactivate with context {}", getClass(), context);
+    }
+
+    @Override
+    public CachingPolicy getCachingPolicy() {
+        try {
+            return CachingPolicy.valueOf(cachingPolicyString);
+        } catch (IllegalArgumentException e) {
+            log.warn("The value \"" + cachingPolicyString
+                     + "\" configured as default CachingPolicy does not match any value of the Enumeration! "
+                     + "Return the default policy as defined by the " + CachingPolicy.class + ".");
+            return _CACHING_POLICY_DEFAULT;
+        }
     }
 
     @Override
