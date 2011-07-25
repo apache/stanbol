@@ -32,7 +32,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.ParentPathInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerConfigurationImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.junit.BeforeClass;
 import org.semanticweb.owlapi.model.IRI;
@@ -59,7 +59,7 @@ public class TestIndexing {
         final Dictionary<String,Object> emptyConfig = new Hashtable<String,Object>();
 //        RegistryManager regman = new RegistryManagerImpl(emptyConfig);
         // An ONManagerImpl with no store and default settings
-        onm = new ONManagerImpl(null, null, new ONManagerConfigurationImpl(emptyConfig), emptyConfig);
+        onm = new ONManagerImpl(null, null, new OfflineConfigurationImpl(emptyConfig), emptyConfig);
         mgr = onm.getOntologyManagerFactory().createOntologyManager(true);
 
         // Since it is registered, this scope must be unique, or subsequent

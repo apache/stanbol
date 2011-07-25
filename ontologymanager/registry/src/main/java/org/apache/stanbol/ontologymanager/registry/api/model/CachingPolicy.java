@@ -9,11 +9,11 @@ public enum CachingPolicy {
      * A single ontology manager will be used for all known registries, which implies that only one possible
      * version of each ontology can be loaded at one time.
      */
-    CROSS_REGISTRY,
+    CENTRALISED,
 
     /**
      * Every registry is assigned its own ontology manager for caching ontologies once they are loaded. If a
      * library is referenced across multiple registries, an ontology set will be instantiated for each.
      */
-    PER_REGISTRY;
+    DISTRIBUTED;
 }

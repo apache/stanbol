@@ -28,6 +28,7 @@ import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
@@ -35,7 +36,7 @@ import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManagerConfiguration;
+import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
@@ -81,7 +82,7 @@ import org.slf4j.LoggerFactory;
  * @see ONManager
  * 
  */
-@Component(immediate = true)
+@Component(immediate = true, metatype = true)
 @Service(ONManager.class)
 public class ONManagerImpl implements ONManager {
 
@@ -130,8 +131,17 @@ public class ONManagerImpl implements ONManager {
 
     }
 
+    public static final String _CONFIG_ONTOLOGY_PATH_DEFAULT = "";
+
+    public static final String _ID_DEFAULT = "ontonet";
+
+    public static final String _ONTOLOGY_NETWORK_NS_DEFAULT = "http://stanbol.apache.org/";
+
     @Reference
-    private ONManagerConfiguration config;
+    private OfflineConfiguration config;
+
+    @Property(name = ONManager.CONFIG_ONTOLOGY_PATH, value = _CONFIG_ONTOLOGY_PATH_DEFAULT)
+    private String configPath;
 
     private Helper helper = null;
 
@@ -155,6 +165,12 @@ public class ONManagerImpl implements ONManager {
     private OntologyScopeFactory ontologyScopeFactory;
 
     private OntologySpaceFactory ontologySpaceFactory;
+
+    @Property(name = ONManager.ID, value = _ID_DEFAULT)
+    private String ontonetID;
+
+    @Property(name = ONManager.ONTOLOGY_NETWORK_NS, value = _ONTOLOGY_NETWORK_NS_DEFAULT)
+    private String ontonetNS;
 
     private OWLOntologyManager owlCacheManager;
 
@@ -182,10 +198,9 @@ public class ONManagerImpl implements ONManager {
      * Component Runtime support.
      * <p>
      * DO NOT USE to manually create instances - the ReengineerManagerImpl instances do need to be configured!
-     * YOU NEED TO USE
-     * {@link #ONManagerImpl(TcManager, WeightedTcProvider, ONManagerConfiguration, Dictionary)} or its
-     * overloads, to parse the configuration and then initialise the rule store if running outside an OSGI
-     * environment.
+     * YOU NEED TO USE {@link #ONManagerImpl(TcManager, WeightedTcProvider, OfflineConfiguration, Dictionary)}
+     * or its overloads, to parse the configuration and then initialise the rule store if running outside an
+     * OSGI environment.
      */
     public ONManagerImpl() {
         super();
@@ -193,10 +208,9 @@ public class ONManagerImpl implements ONManager {
     }
 
     /**
-     * @deprecated use
-     *             {@link #ONManagerImpl(TcManager, WeightedTcProvider, ONManagerConfiguration, Dictionary)}
+     * @deprecated use {@link #ONManagerImpl(TcManager, WeightedTcProvider, OfflineConfiguration, Dictionary)}
      *             instead. Note that if the deprecated method is used instead, its effect will be to copy the
-     *             Dictionary context to a new {@link ONManagerConfiguration} object.
+     *             Dictionary context to a new {@link OfflineConfiguration} object.
      * @param tcm
      * @param wtcp
      * @param configuration
@@ -204,7 +218,7 @@ public class ONManagerImpl implements ONManager {
     @Deprecated
     public ONManagerImpl(TcManager tcm, WeightedTcProvider wtcp, Dictionary<String,Object> configuration) {
         // Copy the same configuration to the ONManagerConfigurationImpl.
-        this(tcm, wtcp, new ONManagerConfigurationImpl(configuration), configuration);
+        this(tcm, wtcp, new OfflineConfigurationImpl(configuration), configuration);
     }
 
     /**
@@ -217,11 +231,11 @@ public class ONManagerImpl implements ONManager {
      * @param onmconfig
      *            the configuration of this ontology network manager.
      * @param configuration
-     *            additional parameters for the ONManager not included in {@link ONManagerConfiguration}.
+     *            additional parameters for the ONManager not included in {@link OfflineConfiguration}.
      */
     public ONManagerImpl(TcManager tcm,
                          WeightedTcProvider wtcp,
-                         ONManagerConfiguration onmconfig,
+                         OfflineConfiguration onmconfig,
                          Dictionary<String,Object> configuration) {
         this();
         // Assume this.tcm this.wtcp and this.wtcp were not filled in by OSGi-DS.
@@ -259,7 +273,14 @@ public class ONManagerImpl implements ONManager {
     protected void activate(Dictionary<String,Object> configuration) throws IOException {
 
         // Parse configuration
-        if (config.getID() == null || config.getID().isEmpty()) {
+        ontonetID = (String) configuration.get(ONManager.ID);
+        if (ontonetID == null) ontonetID = _ID_DEFAULT;
+        ontonetNS = (String) configuration.get(ONManager.ONTOLOGY_NETWORK_NS);
+        if (ontonetNS == null) ontonetNS = _ONTOLOGY_NETWORK_NS_DEFAULT;
+        configPath = (String) configuration.get(ONManager.CONFIG_ONTOLOGY_PATH);
+        if (configPath == null) configPath = _CONFIG_ONTOLOGY_PATH_DEFAULT;
+
+        if (ontonetID == null || ontonetID.isEmpty()) {
             log.warn("The Ontology Network Manager configuration does not define a ID for the Ontology Network Manager");
         }
 
@@ -292,7 +313,7 @@ public class ONManagerImpl implements ONManager {
          * If there is no configuration file, just start with an empty scope set
          */
 
-        String configPath = config.getOntologyNetworkConfigurationPath();
+        String configPath = getOntologyNetworkConfigurationPath();
 
         if (configPath != null && !configPath.trim().isEmpty()) {
             OWLOntology oConf = null;
@@ -459,6 +480,9 @@ public class ONManagerImpl implements ONManager {
      */
     @Deactivate
     protected void deactivate(ComponentContext context) {
+        ontonetID = null;
+        ontonetNS = null;
+        configPath = null;
         log.info("in " + ONManagerImpl.class + " deactivate with context " + context);
     }
 
@@ -481,8 +505,9 @@ public class ONManagerImpl implements ONManager {
     }
 
     @Override
-    public String getKReSNamespace() {
-        return config.getOntologyNetworkNamespace();
+    public String getID() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     public OntologyIndex getOntologyIndex() {
@@ -491,6 +516,16 @@ public class ONManagerImpl implements ONManager {
 
     public OWLOntologyManagerFactoryImpl getOntologyManagerFactory() {
         return omgrFactory;
+    }
+
+    @Override
+    public String getOntologyNetworkConfigurationPath() {
+        return configPath;
+    }
+
+    @Override
+    public String getOntologyNetworkNamespace() {
+        return ontonetNS;
     }
 
     /**

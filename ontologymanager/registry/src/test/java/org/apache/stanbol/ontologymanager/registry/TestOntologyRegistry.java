@@ -16,10 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.registry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.net.URL;
@@ -31,13 +28,13 @@ import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManagerConfiguration;
+import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryItem;
@@ -55,17 +52,17 @@ import org.semanticweb.owlapi.util.AutoIRIMapper;
 public class TestOntologyRegistry {
 
     private static RegistryIRISource ontologySource;
-    private static ONManagerConfiguration configuration;
     private static ONManager onm;
     private static RegistryManager regman;
 
     @BeforeClass
     public static void setup() {
-        final Dictionary<String,Object> emptyConfig = new Hashtable<String,Object>();
-        configuration = new ONManagerConfigurationImpl(emptyConfig);
-        regman = new RegistryManagerImpl(emptyConfig);
-        // An ONManagerImpl with no store and default settings
-        onm = new ONManagerImpl(null, null, configuration, emptyConfig);
+        final Dictionary<String,Object> config = new Hashtable<String,Object>();
+        config.put(OfflineConfiguration.ONTOLOGY_PATHS, new String[] {"/ontologies", "/ontologies/registry"});
+        OfflineConfiguration offline = new OfflineConfigurationImpl(config);
+        regman = new RegistryManagerImpl(offline, config);
+        // An ONManagerImpl with no store and same offline settings as the registry manager.
+        onm = new ONManagerImpl(null, null, offline, config);
     }
 
     // private static boolean mapperIsSet = false;

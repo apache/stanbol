@@ -1,20 +1,22 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.web.resources;
+
+import static javax.ws.rs.core.Response.Status.*;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -61,24 +64,55 @@ import com.sun.jersey.multipart.FormDataParam;
 @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
 public class GraphsResource extends BaseStanbolResource {
 
-    protected TcManager tcManager;
+    private final Logger log = LoggerFactory.getLogger(getClass());
     protected ONManager onManager;
     protected ClerezzaOntologyStorage storage;
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    protected TcManager tcManager;
 
     public GraphsResource(@Context ServletContext servletContext) {
         storage = (ClerezzaOntologyStorage) (servletContext.getAttribute(ClerezzaOntologyStorage.class
                 .getName()));
         tcManager = (TcManager) servletContext.getAttribute(TcManager.class.getName());
-        
+
         onManager = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
-        //onManager = (ONManager) (servletContext.getAttribute(ONManager.class.getName()));
+        // onManager = (ONManager) (servletContext.getAttribute(ONManager.class.getName()));
         if (onManager == null) {
             throw new IllegalStateException("OntologyStorage missing in ServletContext");
         } else {
             storage = onManager.getOntologyStore();
         }
+    }
+
+    @GET
+    @Path("/{graphid:.+}")
+    public Response getGraph(@PathParam("graphid") String graphid,
+                             @Context UriInfo uriInfo,
+                             @Context HttpHeaders headers) {
+
+        IRI ontologyID = IRI.create(graphid);
+
+        // return Response.ok(tcManager.getMGraph(new UriRef(graphid))).build();
+        try {
+            return Response.ok(storage.getGraph(ontologyID)).build();
+        } catch (NoSuchStoreException e) {
+            return Response.status(NO_CONTENT).build();
+        }
+
+    }
+
+    public String getNamespace() {
+        return onManager.getOntologyNetworkNamespace();
+    }
+
+    public List<String> getStoredGraphs() {
+        Set<IRI> iris = storage.listGraphs();
+
+        ArrayList<String> graphs = new ArrayList<String>();
+        for (IRI iri : iris) {
+            graphs.add(iri.toString());
+        }
+        return graphs;
     }
 
     @GET
@@ -96,7 +130,7 @@ public class GraphsResource extends BaseStanbolResource {
             try {
                 ontology = manager.createOntology();
 
-                String ns = onManager.getKReSNamespace();
+                String ns = onManager.getOntologyNetworkNamespace();
 
                 OWLNamedIndividual storage = factory.getOWLNamedIndividual(IRI.create(ns + "Storage"));
 
@@ -112,29 +146,12 @@ public class GraphsResource extends BaseStanbolResource {
 
                 return Response.ok(ontology).build();
             } catch (OWLOntologyCreationException e) {
-                return Response.status(500).build();
+                throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             }
 
         }
 
-        return Response.status(404).build();
-    }
-
-    @GET
-    @Path("/{graphid:.+}")
-    public Response getGraph(@PathParam("graphid") String graphid,
-                             @Context UriInfo uriInfo,
-                             @Context HttpHeaders headers) {
-
-        IRI ontologyID = IRI.create(graphid);
-
-        // return Response.ok(tcManager.getMGraph(new UriRef(graphid))).build();
-        try {
-            return Response.ok(storage.getGraph(ontologyID)).build();
-        } catch (NoSuchStoreException e) {
-            return Response.status(204).build();
-        }
-
+        return Response.status(NOT_FOUND).build();
     }
 
     @POST
@@ -146,21 +163,7 @@ public class GraphsResource extends BaseStanbolResource {
             storage.store(ontology, IRI.create(id));
             return Response.ok().build();
         } catch (OWLOntologyCreationException e) {
-            return Response.status(500).build();
+            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
-    }
-
-    public String getNamespace() {
-        return onManager.getKReSNamespace();
-    }
-
-    public List<String> getStoredGraphs() {
-        Set<IRI> iris = storage.listGraphs();
-
-        ArrayList<String> graphs = new ArrayList<String>();
-        for (IRI iri : iris) {
-            graphs.add(iri.toString());
-        }
-        return graphs;
     }
 }

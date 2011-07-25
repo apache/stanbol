@@ -16,9 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.registry;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.net.URL;
@@ -26,9 +24,10 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryLoader;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
@@ -67,10 +66,12 @@ public class TestOntologyLibrary {
      */
     @BeforeClass
     public static void setupTest() throws Exception {
-        final Dictionary<String,Object> emptyConfig = new Hashtable<String,Object>();
-        RegistryManager regman = new RegistryManagerImpl(emptyConfig);
+        final Dictionary<String,Object> config = new Hashtable<String,Object>();
+        config.put(OfflineConfiguration.ONTOLOGY_PATHS, new String[] {"/ontologies", "/ontologies/registry"});
+        OfflineConfiguration offline = new OfflineConfigurationImpl(config);
+        RegistryManager regman = new RegistryManagerImpl(offline, config);
         // An ONManagerImpl with no store and default settings
-        onm = new ONManagerImpl(null, null, new ONManagerConfigurationImpl(emptyConfig), emptyConfig);
+        onm = new ONManagerImpl(null, null, offline, config);
         loader = new RegistryLoaderImpl(regman, onm);
     }
 

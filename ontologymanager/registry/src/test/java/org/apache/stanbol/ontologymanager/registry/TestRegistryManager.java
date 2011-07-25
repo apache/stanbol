@@ -6,6 +6,9 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.CachingPolicy;
 import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
@@ -22,14 +25,19 @@ public class TestRegistryManager {
 
     @Test
     public void testDistributedCaching() {
-        Dictionary<String,Object> configuration = new Hashtable<String,Object>();
-        configuration.put(RegistryManager.CACHING_POLICY, CachingPolicy.CROSS_REGISTRY);
+
+        final Dictionary<String,Object> configuration = new Hashtable<String,Object>();
+        configuration.put(OfflineConfiguration.ONTOLOGY_PATHS, new String[] {"/ontologies",
+                                                                             "/ontologies/registry"});
+        OfflineConfiguration offline = new OfflineConfigurationImpl(configuration);
+        configuration.put(RegistryManager.CACHING_POLICY, CachingPolicy.CENTRALISED);
         configuration.put(RegistryManager.REGISTRY_LOCATIONS,
             new String[] {getClass().getResource("/ontologies/registry/onmtest.owl").toString(),
                           getClass().getResource("/ontologies/registry/onmtest_additions.owl").toString()});
-        regman = new RegistryManagerImpl(configuration);
+        regman = new RegistryManagerImpl(offline, configuration);
+
         assertNotNull(regman);
-        assertSame(CachingPolicy.CROSS_REGISTRY, regman.getCachingPolicy());
+        assertSame(CachingPolicy.CENTRALISED, regman.getCachingPolicy());
         Iterator<Registry> it = regman.getRegistries().iterator();
         OWLOntologyManager cache = it.next().getCache();
         while (it.hasNext())

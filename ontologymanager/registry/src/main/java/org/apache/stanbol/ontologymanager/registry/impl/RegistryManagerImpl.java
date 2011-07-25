@@ -16,10 +16,13 @@
  */
 package org.apache.stanbol.ontologymanager.registry.impl;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -29,7 +32,9 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentListener;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryItemFactory;
@@ -42,6 +47,7 @@ import org.apache.stanbol.ontologymanager.registry.api.model.RegistryItem.Type;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryOntology;
 import org.apache.stanbol.ontologymanager.registry.impl.util.RegistryUtils;
 import org.apache.stanbol.ontologymanager.registry.xd.vocabulary.CODOVocabulary;
+import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -72,15 +78,13 @@ import org.slf4j.LoggerFactory;
 @Service(RegistryManager.class)
 public class RegistryManagerImpl implements RegistryManager, RegistryContentListener {
 
-    private static final CachingPolicy _CACHING_POLICY_DEFAULT = CachingPolicy.CROSS_REGISTRY;
+    private static final CachingPolicy _CACHING_POLICY_DEFAULT = CachingPolicy.CENTRALISED;
 
     private static final boolean _LAZY_LOADING_DEFAULT = false;
 
     private static final OWLClass cRegistryLibrary, cOntology;
 
     private static final OWLObjectProperty hasPart, hasOntology, isPartOf, isOntologyOf;
-
-    private OWLOntologyManager cache = null;
 
     static {
         OWLDataFactory factory = OWLManager.getOWLDataFactory();
@@ -92,14 +96,19 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         hasOntology = factory.getOWLObjectProperty(IRI.create(CODOVocabulary.ODPM_HasOntology));
     }
 
+    private OWLOntologyManager cache = null;
+
     @Property(name = RegistryManager.CACHING_POLICY, options = {
                                                                 @PropertyOption(value = '%'
                                                                                         + RegistryManager.CACHING_POLICY
-                                                                                        + ".option.registry", name = "PER_REGISTRY"),
+                                                                                        + ".option.distributed", name = "DISTRIBUTED"),
                                                                 @PropertyOption(value = '%'
                                                                                         + RegistryManager.CACHING_POLICY
-                                                                                        + ".option.all", name = "CROSS_REGISTRY")}, value = "CROSS_REGISTRY")
+                                                                                        + ".option.centralised", name = "CENTRALISED")}, value = "CENTRALISED")
     private String cachingPolicyString;
+
+    @Reference
+    private OfflineConfiguration offline;
 
     @Property(name = RegistryManager.LAZY_LOADING, boolValue = _LAZY_LOADING_DEFAULT)
     private boolean lazyLoading = _LAZY_LOADING_DEFAULT;
@@ -138,8 +147,9 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
      * 
      * @param configuration
      */
-    public RegistryManagerImpl(Dictionary<String,Object> configuration) {
+    public RegistryManagerImpl(OfflineConfiguration offline, Dictionary<String,Object> configuration) {
         this();
+        this.offline = offline;
         activate(configuration);
     }
 
@@ -169,8 +179,35 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
             this.cachingPolicyString = cachingPolicy.toString();
         }
 
+        List<String> paths = offline.getOntologySourceDirectories();
+        final IRI[] offlineResources;
+        if (paths != null) {
+            List<IRI> list = new ArrayList<IRI>();
+            for (String path : paths) {
+                IRI iri = null;
+                if (path.startsWith("/")) {
+                    try {
+                        iri = IRI.create(getClass().getResource(path));
+                    } catch (Exception e) {
+                        // TODO: Don't give up. It could still an absolute path.
+                    }
+                } else try {
+                    iri = IRI.create(path);
+                } catch (Exception e1) {
+                    try {
+                        iri = IRI.create(new File(path));
+                    } catch (Exception e2) {
+                        log.warn("Unable to obtain a path for {}. Skipping...", iri, e2);
+                        iri = null;
+                    }
+                }
+                if (iri != null) list.add(iri);
+            }
+            offlineResources = list.toArray(new IRI[0]);
+        } else offlineResources = new IRI[0];
+
         // Used only for creating the registry model, do not use for caching.
-        OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
+        OWLOntologyManager mgr = OWLOntologyManagerFactory.createOWLOntologyManager(offlineResources);
         // Load registries
         Set<OWLOntology> regOnts = new HashSet<OWLOntology>();
         for (String loc : locations) {
@@ -182,19 +219,23 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
             } catch (OWLOntologyCreationException e) {
                 log.warn("Failed to load ontology " + loc + " - Skipping...", e);
                 continue;
+            } catch (Exception e) {
+                log.warn("Invalid registry configuration " + loc + " - Skipping...", e);
+                continue;
             }
         }
+
         // Build the model.
         createModel(regOnts);
 
         // Set the cache.
-        if (cachingPolicyString.equals(CachingPolicy.CROSS_REGISTRY.name())) {
-            this.cache = OWLManager.createOWLOntologyManager();
+        if (cachingPolicyString.equals(CachingPolicy.CENTRALISED.name())) {
+            this.cache = OWLOntologyManagerFactory.createOWLOntologyManager(offlineResources);
             for (Registry reg : getRegistries())
                 reg.setCache(this.cache);
-        } else if (cachingPolicyString.equals(CachingPolicy.PER_REGISTRY.name())) {
+        } else if (cachingPolicyString.equals(CachingPolicy.DISTRIBUTED.name())) {
             for (Registry reg : getRegistries())
-                reg.setCache(OWLManager.createOWLOntologyManager());
+                reg.setCache(OWLOntologyManagerFactory.createOWLOntologyManager(offlineResources));
             this.cache = null;
         }
     }
