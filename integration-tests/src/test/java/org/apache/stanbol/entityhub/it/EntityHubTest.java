@@ -19,7 +19,11 @@ package org.apache.stanbol.entityhub.it;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.stanbol.commons.testing.http.RequestExecutor;
+import org.apache.stanbol.commons.web.base.writers.JsonLdSerializerProvider;
 import org.apache.stanbol.enhancer.it.EnhancerTestBase;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONObject;
+import org.junit.Assert;
 import org.junit.Test;
 
 //inherit from EnhancerTestBase, but we more care about the entityhub readiness than engine's one.
@@ -68,7 +72,7 @@ public class EntityHubTest extends EnhancerTestBase {
     	for(String s:queryRequests){
     		i += 1;
     		RequestExecutor re = executor.execute(
-	        		builder.buildPostRequest("/entityhub/query")
+	        		builder.buildPostRequest("/entityhub/sites/query")
 	        		.withHeader("Content-Type", "application/json")
 	        		.withHeader("Accept", "application/json")
 	        		.withContent(s)
@@ -77,22 +81,19 @@ public class EntityHubTest extends EnhancerTestBase {
     		log.info("Test request number {}/{} : ",i,queryRequests.length);
     		log.info(re.getContent());
     	
-    		re
-    		//TODO : why this assert don't work ?
-            //.assertStatus(200)
-            .assertContentType("application/json")
-            //TODO : uncomment this assert when situation solved
-            //.assertContentRegexp("!\"results\": \\[\\]")
-            .assertContentRegexp("\"results\": \\[\\]")
-            ;
+    		re.assertStatus(200)
+            .assertContentType("application/json");
+    		
+    		JSONObject jso = new JSONObject(re.getContent());
+    		JSONArray result = jso.getJSONArray("results");
+    		Assert.assertNotSame(0, result.length());
     	}
     }
     
     @Test
     public void testSymbolFindEndpoint() throws Exception{
     	RequestExecutor re = executor.execute(
-        		builder.buildPostRequest("/entityhub/symbol/find")
-        		//.withHeader("Content-Type", "application/json")
+        		builder.buildPostRequest("/entityhub/sites/find")
         		.withHeader("Accept", "application/json")
         		.withContent("name=Paris&lang=de")
         	) ;
@@ -100,12 +101,11 @@ public class EntityHubTest extends EnhancerTestBase {
 		log.info("Test request : ");
 		log.info(re.getContent());
 	
-		re
-		//TODO : enable this assert when ok
-        //.assertStatus(200)
-        //.assertContentType("application/json")
-        //TODO : write a good assertion when solve
-        .assertContentRegexp("404")
-        ;
+		re.assertStatus(200)
+        .assertContentType("application/json");
+		
+		JSONObject jso = new JSONObject(re.getContent());
+		JSONArray result = jso.getJSONArray("results");
+		Assert.assertNotSame(0, result.length());
     }
 }
