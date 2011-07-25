@@ -26,16 +26,19 @@ import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.CachingPolicy;
+import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
+import org.apache.stanbol.ontologymanager.registry.api.model.RegistryItem;
 import org.apache.stanbol.ontologymanager.registry.impl.RegistryManagerImpl;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
+/**
+ * Test the correct creation and setup of {@link RegistryManager} implementations.
+ */
 public class TestRegistryManager {
-
-    private RegistryManager regman;
 
     /*
      * This is the registry manager configuration (which varies across tests).
@@ -50,6 +53,7 @@ public class TestRegistryManager {
     @BeforeClass
     public static void setup() throws Exception {
         configuration = new Hashtable<String,Object>();
+        // We need this to make sure the local meta.owl (which does not import codolight) is loaded.
         configuration.put(OfflineConfiguration.ONTOLOGY_PATHS, new String[] {"/ontologies",
                                                                              "/ontologies/registry"});
         configuration.put(
@@ -62,11 +66,19 @@ public class TestRegistryManager {
         offline = new OfflineConfigurationImpl(configuration);
     }
 
+    private RegistryManager regman;
+
     @Before
     public void setupTests() throws Exception {}
 
+    /**
+     * Verifies that by instantiating a new {@link RegistryManager} with a centralised caching policy and
+     * loading two registries, they share the same cache ontology manager.
+     * 
+     * @throws Exception
+     */
     @Test
-    public void testCentralisedCaching() throws Exception {
+    public void testCachingCentralised() throws Exception {
         // Change the caching policy and setup a new registry manager.
         configuration.put(RegistryManager.CACHING_POLICY, CachingPolicy.CENTRALISED);
         regman = new RegistryManagerImpl(offline, configuration);
@@ -78,10 +90,33 @@ public class TestRegistryManager {
         OWLOntologyManager cache = it.next().getCache();
         while (it.hasNext())
             assertSame(cache, it.next().getCache());
+
+        // Now "touch" a library.
+        Registry reg;
+        do
+            reg = regman.getRegistries().iterator().next();
+        while (!reg.hasChildren());
+        assertNotNull(reg);
+
+        // There has to be at least one non-empty lib from the test ontologies.
+        Library lib = null;
+        RegistryItem[] children = reg.getChildren();
+        for (int i = 0; i < children.length && lib == null; i++)
+            if (children[i] instanceof Library) lib = (Library) (children[i]);
+        assertNotNull(lib);
+
+        // Touch the library. Also test that the listener system works.
+        assertFalse(lib.getOntologies().isEmpty());
     }
 
+    /**
+     * Verifies that by instantiating a new {@link RegistryManager} with a distributed caching policy and
+     * loading two registries, they have different ontology managers.
+     * 
+     * @throws Exception
+     */
     @Test
-    public void testDistributedCaching() throws Exception {
+    public void testCachingDistributed() throws Exception {
         // Change the caching policy and setup a new registry manager.
         configuration.put(RegistryManager.CACHING_POLICY, CachingPolicy.DISTRIBUTED);
         regman = new RegistryManagerImpl(offline, configuration);
@@ -91,8 +126,64 @@ public class TestRegistryManager {
         // Each registry must have its own distinct cache.
         Iterator<Registry> it = regman.getRegistries().iterator();
         OWLOntologyManager cache = it.next().getCache();
-        while (it.hasNext())
+        // Just checking against the first in the list.
+        while (it.hasNext()) {
             assertNotSame(cache, it.next().getCache());
+        }
+    }
+
+    @Test
+    public void testLoadingEager() throws Exception {
+        // Change the caching policy and setup a new registry manager.
+        configuration.put(RegistryManager.CACHING_POLICY, CachingPolicy.CENTRALISED);
+        configuration.put(RegistryManager.LAZY_LOADING, false);
+        regman = new RegistryManagerImpl(offline, configuration);
+        // Check that the configuration was set.
+        assertNotNull(regman);
+
+        // Now pick a library.
+        Registry reg;
+        do
+            reg = regman.getRegistries().iterator().next();
+        while (!reg.hasChildren());
+        assertNotNull(reg);
+
+        // There has to be at least one non-empty lib from the test ontologies.
+        Library lib = null;
+        RegistryItem[] children = reg.getChildren();
+        for (int i = 0; i < children.length && lib == null; i++)
+            if (children[i] instanceof Library) lib = (Library) (children[i]);
+        assertNotNull(lib);
+        assertTrue(lib.isLoaded());
+    }
+
+    @Test
+    public void testLoadingLazy() throws Exception {
+        // Change the caching policy and setup a new registry manager.
+        configuration.put(RegistryManager.CACHING_POLICY, CachingPolicy.CENTRALISED);
+        configuration.put(RegistryManager.LAZY_LOADING, true);
+        regman = new RegistryManagerImpl(offline, configuration);
+        // Check that the configuration was set.
+        assertNotNull(regman);
+
+        // Now pick a library.
+        Registry reg;
+        do
+            reg = regman.getRegistries().iterator().next();
+        while (!reg.hasChildren());
+        assertNotNull(reg);
+
+        // There has to be at least one non-empty lib from the test ontologies.
+        Library lib = null;
+        RegistryItem[] children = reg.getChildren();
+        for (int i = 0; i < children.length && lib == null; i++)
+            if (children[i] instanceof Library) lib = (Library) (children[i]);
+        assertNotNull(lib);
+        assertFalse(lib.isLoaded());
+
+        // Touch the library. Also test that the listener system works.
+        assertFalse(lib.getOntologies().isEmpty());
+        assertTrue(lib.isLoaded());
     }
 
 }

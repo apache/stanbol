@@ -40,6 +40,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ONM Test Library 1</rdfs:label>
     <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#OntologyLibrary"/>
     <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.1</owl:versionInfo>
+    <meta:hasOntology rdf:resource="http://stanbol.apache.org/ontologies/pcomics/maincharacters.owl"/>
   </rdf:Description>
   
     <rdf:Description rdf:ID="Library2">
@@ -70,7 +71,6 @@ Unless required by applicable law or agreed to in writing, software distributed 
   <!-- For testing already loaded ontologies -->
   <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/pcomics/maincharacters.owl">
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Main Characters</rdfs:label>
-    <meta:isOntologyOf rdf:resource="#Library1"/>
     <meta:isOntologyOf rdf:resource="#Library2"/>
     <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
   </rdf:Description>

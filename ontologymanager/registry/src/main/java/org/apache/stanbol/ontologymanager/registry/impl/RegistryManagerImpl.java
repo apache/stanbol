@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -107,9 +108,6 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
                                                                                         + ".option.centralised", name = "CENTRALISED")}, value = "CENTRALISED")
     private String cachingPolicyString;
 
-    @Reference
-    private OfflineConfiguration offline;
-
     @Property(name = RegistryManager.LAZY_LOADING, boolValue = _LAZY_LOADING_DEFAULT)
     private boolean lazyLoading = _LAZY_LOADING_DEFAULT;
 
@@ -120,6 +118,9 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
     private String[] locations;
 
     private Logger log = LoggerFactory.getLogger(getClass());
+
+    @Reference
+    private OfflineConfiguration offline;
 
     /* Maps libraries to ontologies */
     private Map<IRI,Set<IRI>> ontologyIndex = new HashMap<IRI,Set<IRI>>();
@@ -228,7 +229,7 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         // Build the model.
         createModel(regOnts);
 
-        // Set the cache.
+        // Create and set the cache.
         if (cachingPolicyString.equals(CachingPolicy.CENTRALISED.name())) {
             this.cache = OWLOntologyManagerFactory.createOWLOntologyManager(offlineResources);
             for (Registry reg : getRegistries())
@@ -237,6 +238,12 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
             for (Registry reg : getRegistries())
                 reg.setCache(OWLOntologyManagerFactory.createOWLOntologyManager(offlineResources));
             this.cache = null;
+        }
+
+        if (isLazyLoading()) {
+            // Nothing to do about it at the moment.
+        } else {
+            loadEager();
         }
     }
 
@@ -256,6 +263,11 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         for (IRI id : registries)
             if (registries.remove(id)) population.remove(id);
         updateLocations();
+    }
+
+    protected Map<Library,Float> computeLoadFactors() {
+        Map<Library,Float> loadFactors = new HashMap<Library,Float>();
+        return loadFactors;
     }
 
     @Override
@@ -417,8 +429,14 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
 
     @Override
     public Set<Registry> getRegistries(IRI libraryID) {
-        // TODO Auto-generated method stub
-        return null;
+        Set<Registry> results = new HashSet<Registry>();
+        try {
+            for (RegistryItem item : population.get(libraryID).getParents())
+                if (item instanceof Registry) results.add((Registry) item);
+        } catch (NullPointerException ex) {
+            return results;
+        }
+        return results;
     }
 
     @Override
@@ -531,10 +549,39 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         return reg;
     }
 
+    private void loadEager() {
+        for (RegistryItem item : population.values()) {
+            if (item instanceof Library && !((Library) item).isLoaded()) {
+                // TODO: implement ontology request targets.
+                if (CachingPolicy.CENTRALISED.equals(getCachingPolicy()) && this.cache != null) {
+                    ((Library) item).loadOntologies(this.cache);
+                } else if (CachingPolicy.DISTRIBUTED.equals(getCachingPolicy())) {
+                    // TODO implement load balancing.
+                    Iterator<Registry> it = getRegistries(item.getIRI()).iterator();
+                    if (it.hasNext()) ((Library) item).loadOntologies(it.next().getCache());
+                } else {
+                    log.error("Tried to load ontology resource {} using a null cache.", item);
+                }
+            }
+        }
+    }
+
     @Override
     public void registryContentRequested(RegistryItem requestTarget) {
-        // TODO Auto-generated method stub
-
+        log.debug("In {} registry content was requested on {}.", getClass(), requestTarget);
+        // TODO: implement ontology request targets.
+        if (CachingPolicy.CENTRALISED.equals(getCachingPolicy()) && this.cache != null) {
+            if (requestTarget instanceof Library && !((Library) requestTarget).isLoaded()) ((Library) requestTarget)
+                    .loadOntologies(this.cache);
+        } else if (CachingPolicy.DISTRIBUTED.equals(getCachingPolicy())) {
+            if (requestTarget instanceof Library && !((Library) requestTarget).isLoaded()) {
+                // TODO implement load balancing.
+                Iterator<Registry> it = getRegistries(requestTarget.getIRI()).iterator();
+                if (it.hasNext()) ((Library) requestTarget).loadOntologies(it.next().getCache());
+            }
+        } else {
+            log.error("Tried to load ontology resource {} using a null cache.", requestTarget);
+        }
     }
 
     @Override

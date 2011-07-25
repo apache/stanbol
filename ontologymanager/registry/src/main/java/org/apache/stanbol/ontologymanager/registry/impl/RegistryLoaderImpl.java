@@ -449,6 +449,7 @@ public class RegistryLoaderImpl implements RegistryLoader {
     // return registry;
     // }
 
+    @Override
     public void loadLocations() throws RegistryContentException {
 
         try {

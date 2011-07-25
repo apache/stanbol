@@ -27,8 +27,12 @@ import org.apache.stanbol.ontologymanager.registry.api.model.RegistryItem;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryOntology;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyDocumentAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Default implementation of the ontology library model.
@@ -36,6 +40,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 public class LibraryImpl extends AbstractRegistryItem implements Library {
 
     private boolean loaded = false;
+
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     public LibraryImpl(IRI iri) {
         super(iri);
@@ -54,6 +60,7 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
          * getOntologies() in sequence.
          */
         fireContentRequested(this);
+        // If no listener has saved the day by loading the ontologies by now, an exception will be thrown.
         if (!loaded) throw new LibraryContentNotLoadedException(this);
         Set<OWLOntology> ontologies = new HashSet<OWLOntology>();
         for (RegistryItem child : getChildren()) {
@@ -79,9 +86,23 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
     }
 
     @Override
-    public void loadOntologies(OWLOntologyManager mgr) {
+    public synchronized void loadOntologies(OWLOntologyManager mgr) {
         if (mgr == null) throw new IllegalArgumentException("A null ontology manager is not allowed.");
-        // TODO Auto-generated method stub
+        for (RegistryItem item : getChildren()) {
+            if (item instanceof RegistryOntology) {
+                RegistryOntology o = (RegistryOntology) item;
+                IRI id = o.getIRI();
+                try {
+                    o.setOWLOntology(mgr.loadOntology(id));
+                } catch (OWLOntologyAlreadyExistsException e) {
+                    o.setOWLOntology(mgr.getOntology(e.getOntologyID()));
+                } catch (OWLOntologyDocumentAlreadyExistsException e) {
+                    o.setOWLOntology(mgr.getOntology(e.getOntologyDocumentIRI()));
+                } catch (OWLOntologyCreationException e) {
+                    log.error("Failed to load ontology " + id, e);
+                }
+            }
+        }
         loaded = true;
     }
 
