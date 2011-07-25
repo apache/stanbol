@@ -116,6 +116,7 @@ public class RulesFragment implements WebFragment{
 	public List<ScriptResource> getScriptResources() {
 		List<ScriptResource> resources = new ArrayList<ScriptResource>();
 		resources.add(new ScriptResource("text/javascript", "actions/actions.js", this, 10));
+		resources.add(new ScriptResource("text/javascript", "actions/tutorial.js", this, 10));
         return resources;
 	}
 
