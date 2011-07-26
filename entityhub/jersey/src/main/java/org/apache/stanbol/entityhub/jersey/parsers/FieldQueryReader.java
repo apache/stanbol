@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
@@ -36,7 +37,12 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
+import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
+import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
+import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
@@ -55,6 +61,10 @@ import org.slf4j.LoggerFactory;
 @Provider
 public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
     private static final Logger log = LoggerFactory.getLogger(FieldQueryReader.class);
+    
+    private static final ValueFactory valueFactory = InMemoryValueFactory.getInstance();
+    private static final ValueConverterFactory converterFactory = ValueConverterFactory.getDefaultInstance();
+    
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
         log.info("isReadable type {}, mediaType {}",type,mediaType);
@@ -264,6 +274,52 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
         }
         Object upperBound = jConstraint.opt("upperBound");
         Object lowerBound = jConstraint.opt("lowerBound");
+        Collection<String> datatypes = parseDatatypeProperty(jConstraint);
+        if(datatypes != null && !datatypes.isEmpty()){
+            Iterator<String> it = datatypes.iterator();
+            String datatype = it.next();
+            if(datatypes.size() > 1){ //write warning in case of multiple values
+                log.warn("Multiple datatypes are not supported by RangeConstriants!");
+                log.warn("  used: {}",datatype);
+                while(it.hasNext()){
+                    log.warn("  ignored: {}",it.next());
+                }
+            }
+            StringBuilder convertingError = null;
+            if(upperBound != null){
+                Object convertedUpperBound = converterFactory.convert(upperBound, datatype, valueFactory);
+                if(convertedUpperBound == null){
+                    log.warn("Unable to convert upper bound {} to data type {}",
+                        upperBound,datatype);
+                    convertingError = new StringBuilder();
+                    convertingError.append("Unable to convert the parsed upper bound value ")
+                        .append(upperBound).append(" to data type ").append(datatype);
+                } else { //set the converted upper bound
+                    upperBound = convertedUpperBound;
+                }
+            }
+            if(lowerBound != null){
+                Object convertedLowerBound = converterFactory.convert(lowerBound, datatype, valueFactory);
+                if(convertedLowerBound == null){
+                    log.warn("Unable to convert lower bound {} to data type {}",
+                        lowerBound,datatype);
+                    if(convertingError == null){
+                        convertingError = new StringBuilder();
+                    } else {
+                        convertingError.append('\n');
+                    }
+                    convertingError.append("Unable to convert the parsed value ")
+                        .append(lowerBound).append(" to data type ").append(datatype);
+                } else { //set the converted lower bound
+                    lowerBound = convertedLowerBound;
+                }
+            }
+            if(convertingError != null){ //if there was an error throw an exception
+                convertingError.append("Parsed Constraint: \n");
+                convertingError.append(jConstraint.toString(4));
+                throw new IllegalArgumentException(convertingError.toString());
+            }
+        }
         if(upperBound == null && lowerBound == null){
             log.warn("Range Constraint does not define an 'upperBound' nor an 'lowerBound'! " +
             		"At least one of the two MUST BE parsed for a valid RangeConstraint.");
@@ -289,7 +345,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
         boolean caseSensitive = jConstraint.optBoolean("caseSensitive", false);
         //parse patternType
         PatternType patternType;
-        String jPatternType = jConstraint.optString("patternType");
+        String jPatternType = jConstraint.optString("patternType",null);
         if(jPatternType == null){
             patternType = PatternType.none;
         } else {
@@ -310,17 +366,35 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
         }
         //parse languages
         Collection<String> languages;
-        JSONArray jLanguages = jConstraint.optJSONArray("languages");
-        if(jLanguages != null && jLanguages.length()>0){
-            languages = new ArrayList<String>(jLanguages.length());
-            for(int i=0;i<jLanguages.length();i++){
-                String lang = jLanguages.getString(i);
-                if(lang != null && !lang.isEmpty()){
-                    languages.add(lang);
+        String languageKey = null; //support both "languages" and "language"
+        if(jConstraint.has("language")){
+            languageKey = "language";
+        } else if(jConstraint.has("languages")){
+            log.warn("The key \"languages\" is deprecated. Use \"language\" instead.");
+            languageKey = "languages";
+        }
+        if(languageKey != null){
+            JSONArray jLanguages = jConstraint.optJSONArray(languageKey);
+            if(jLanguages != null && jLanguages.length()>0){
+                languages = new ArrayList<String>(jLanguages.length());
+                for(int i=0;i<jLanguages.length();i++){
+                    String lang = jLanguages.getString(i);
+                    if(lang != null && !lang.isEmpty()){
+                        languages.add(lang);
+                    } else if(!languages.contains(null)){
+                        languages.add(null);
+                    }
                 }
-            }
-            if(languages.isEmpty()){
-                languages = null; //if no one was successfully added set the list back to null
+                if(languages.isEmpty()){
+                    languages = null; //if no one was successfully added set the list back to null
+                }
+            } else {
+                String language = jConstraint.getString(languageKey);
+                if(language.isEmpty()){
+                    languages = null;
+                } else {  //add the single language
+                    languages = Collections.singletonList(language);
+                }
             }
         } else {
             languages = null;
@@ -332,10 +406,25 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             if(jTextConstraints != null){
                 textConstraints = new ArrayList<String>(jTextConstraints.length());
                 for(int i=0;i<jTextConstraints.length();i++){
-                   textConstraints.add(jTextConstraints.getString(i));
+                    String text = jTextConstraints.getString(i);
+                    if(text != null && !text.isEmpty()){
+                        textConstraints.add(jTextConstraints.getString(i));
+                    }
                 }
             } else {
-                textConstraints = Collections.singletonList(jConstraint.getString("text"));
+                String text = jConstraint.getString("text");
+                if(text == null || text.isEmpty()){
+                    textConstraints = Collections.emptyList();
+                } else {
+                    textConstraints = Collections.singletonList(text);
+                }
+            }
+            if(textConstraints.isEmpty()){
+                StringBuilder message = new StringBuilder();
+                message.append("Parsed TextConstraint doese not define a valid (none empty) value for the 'text' property !\n");
+                message.append("Parsed Constraint: \n");
+                message.append(jConstraint.toString(4));
+                throw new IllegalArgumentException(message.toString());
             }
             constraint = new TextConstraint(textConstraints,
                 patternType,caseSensitive,
@@ -357,22 +446,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
      */
     private static Constraint parseValueConstraint(JSONObject jConstraint) throws JSONException {
         Constraint constraint;
-        Collection<String> dataTypes;
-        JSONArray jDataTypes = jConstraint.optJSONArray("dataTypes");
-        if(jDataTypes != null && jDataTypes.length()>0){
-            dataTypes = new ArrayList<String>(jDataTypes.length());
-            for(int i=0;i<jDataTypes.length();i++){
-                String dataType = jDataTypes.getString(i);
-                if(dataType != null && !dataType.isEmpty()){
-                    dataTypes.add(dataType);
-                }
-            }
-            if(dataTypes.isEmpty()){
-                dataTypes = null; //if no one was successfully added set the list back to null
-            }
-        } else {
-            dataTypes = null;
-        }
+        Collection<String> dataTypes = parseDatatypeProperty(jConstraint);
         if(jConstraint.has("value") && !jConstraint.isNull("value")){
             constraint = new ValueConstraint(jConstraint.get("value"), dataTypes);
         } else {
@@ -384,6 +458,48 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             throw new IllegalArgumentException(message.toString());
         }
         return constraint;
+    }
+
+    /**
+     * @param jConstraint
+     * @return
+     * @throws JSONException
+     */
+    private static Collection<String> parseDatatypeProperty(JSONObject jConstraint) throws JSONException {
+        Collection<String> dataTypes;
+        String dataTypeKey = null;
+        if(jConstraint.has("datatype")){
+            dataTypeKey = "datatype";
+        } else if(jConstraint.has("dataTypes")){
+            log.warn("The use of \"dataTypes\" is deprecated. Please use \"dataType\" instead");
+            dataTypeKey = "dataTypes";
+        }
+        if(dataTypeKey != null){
+            JSONArray jDataTypes = jConstraint.optJSONArray(dataTypeKey);
+            if(jDataTypes != null && jDataTypes.length()>0){
+                dataTypes = new ArrayList<String>(jDataTypes.length());
+                for(int i=0;i<jDataTypes.length();i++){
+                    String dataType = jDataTypes.getString(i);
+                    if(dataType != null && !dataType.isEmpty()){
+                        //convert prefix:localName to fill URI
+                        dataTypes.add(NamespaceEnum.getFullName(dataType));
+                    }
+                }
+                if(dataTypes.isEmpty()){
+                    dataTypes = null; //if no one was successfully added set the list back to null
+                }
+            } else {
+                String dataType = jConstraint.getString(dataTypeKey);
+                if(dataType != null && !dataType.isEmpty()){
+                    dataTypes = Collections.singleton(NamespaceEnum.getFullName(dataType));
+                } else {
+                    dataTypes = null;
+                }
+            }
+        } else {
+            dataTypes = null;
+        }
+        return dataTypes;
     }
 
     /**

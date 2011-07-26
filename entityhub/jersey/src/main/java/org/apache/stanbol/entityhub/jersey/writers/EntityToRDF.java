@@ -44,13 +44,18 @@ import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 final class EntityToRDF {
     private EntityToRDF() { /* do not create instances of utility classes */}
 
-    private static UriRef FOAF_DOCUMENT = FOAF.Document;
-    private static UriRef FOAF_PRIMARY_TOPIC = FOAF.primaryTopic;
-    private static UriRef FOAF_PRIMARY_TOPIC_OF = FOAF.isPrimaryTopicOf;
-    private static UriRef signSite = new UriRef(RdfResourceEnum.site.getUri());
-    private static UriRef ENTITY_TYPE = new UriRef(RdfResourceEnum.Entity.getUri());
-    private static RdfValueFactory valueFactory = RdfValueFactory.getInstance();
-    private static LiteralFactory literalFactory = LiteralFactory.getInstance();
+    private final static UriRef FOAF_DOCUMENT = FOAF.Document;
+    private final static UriRef FOAF_PRIMARY_TOPIC = FOAF.primaryTopic;
+    private final static UriRef FOAF_PRIMARY_TOPIC_OF = FOAF.isPrimaryTopicOf;
+    private final static UriRef signSite = new UriRef(RdfResourceEnum.site.getUri());
+    private final static UriRef ENTITY_TYPE = new UriRef(RdfResourceEnum.Entity.getUri());
+    private final static RdfValueFactory valueFactory = RdfValueFactory.getInstance();
+    /**
+     * The literal factory used (currently {@link LiteralFactory#getInstance()},
+     * but we might use a custom one for Stanbol therefore it is better to
+     * have it as a field 
+     */
+    static final LiteralFactory literalFactory = LiteralFactory.getInstance();
 
     static MGraph toRDF(Representation representation) {
         MGraph graph = new SimpleMGraph();

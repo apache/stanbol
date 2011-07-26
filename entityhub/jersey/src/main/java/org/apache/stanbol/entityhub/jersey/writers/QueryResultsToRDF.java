@@ -18,6 +18,7 @@ package org.apache.stanbol.entityhub.jersey.writers;
 
 import java.util.Iterator;
 
+import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
@@ -34,8 +35,23 @@ final class QueryResultsToRDF {
 
     private QueryResultsToRDF() { /* do not create instances of utility classes */}
 
-    static final UriRef queryResultList = new UriRef(RdfResourceEnum.QueryResultSet.getUri());
-    static final UriRef queryResult = new UriRef(RdfResourceEnum.queryResult.getUri());
+    /**
+     * The URI used for the query result list (static for all responses)
+     */
+    static final UriRef QUERY_RESULT_LIST = new UriRef(RdfResourceEnum.QueryResultSet.getUri());
+    /**
+     * The property used for all results
+     */
+    static final UriRef QUERY_RESULT = new UriRef(RdfResourceEnum.queryResult.getUri());
+    /**
+     * The property used for the JSON serialised FieldQuery (STANBOL-298)
+     */
+    static final UriRef FIELD_QUERY = new UriRef(RdfResourceEnum.queryResult.getUri());
+    
+    /**
+     * The LiteralFactory retrieved from {@link EntityToRDF#literalFactory}
+     */
+    static final LiteralFactory literalFactory = EntityToRDF.literalFactory;
 
     static MGraph toRDF(QueryResultList<?> resultList) {
         final MGraph resultGraph;
@@ -44,7 +60,7 @@ final class QueryResultsToRDF {
             resultGraph = new SimpleMGraph(); //create a new Graph
             for (Object result : resultList) {
                 //add a triple to each reference in the result set
-                resultGraph.add(new TripleImpl(queryResultList, queryResult, new UriRef(result.toString())));
+                resultGraph.add(new TripleImpl(QUERY_RESULT_LIST, FIELD_QUERY, new UriRef(result.toString())));
             }
         } else {
             //first determine the type of the resultList
@@ -62,7 +78,7 @@ final class QueryResultsToRDF {
                 resultGraph = ((RdfQueryResultList) resultList).getResultGraph();
                 if (isSignType) { //if we build a ResultList for Signs, that we need to do more things
                     //first remove all triples representing results
-                    Iterator<Triple> resultTripleIt = resultGraph.filter(queryResultList, queryResult, null);
+                    Iterator<Triple> resultTripleIt = resultGraph.filter(QUERY_RESULT_LIST, FIELD_QUERY, null);
                     while (resultTripleIt.hasNext()) {
                         resultTripleIt.next();
                         resultTripleIt.remove();
@@ -72,7 +88,7 @@ final class QueryResultsToRDF {
                     for (Object result : resultList) {
                         UriRef signId = new UriRef(((Entity) result).getId());
                         EntityToRDF.addEntityTriplesToGraph(resultGraph, (Entity) result);
-                        resultGraph.add(new TripleImpl(queryResultList, queryResult, signId));
+                        resultGraph.add(new TripleImpl(QUERY_RESULT_LIST, FIELD_QUERY, signId));
                     }
                 }
             } else { //any other implementation of the QueryResultList interface
@@ -90,7 +106,7 @@ final class QueryResultsToRDF {
                         //Note: In case of Representation this Triple points to
                         //      the representation. In case of Signs it points to
                         //      the sign.
-                        resultGraph.add(new TripleImpl(queryResultList, queryResult, resultId));
+                        resultGraph.add(new TripleImpl(QUERY_RESULT_LIST, FIELD_QUERY, resultId));
                     }
                 }
             }
