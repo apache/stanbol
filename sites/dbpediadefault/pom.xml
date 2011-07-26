@@ -29,7 +29,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.data.sites.dbpedia.default</artifactId>
-  <version>1.0.0-incubating</version>
+  <version>1.0.1-incubating</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Data: DBpedia.org defaultdata version</name>
@@ -54,7 +54,7 @@
   </scm>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <dbpedia.default.index.url>http://dl.dropbox.com/u/5743203/IKS/dbpedia/3.6/dbpedia_43k.solrindex.zip</dbpedia.default.index.url>
+    <dbpedia.default.index.url>http://www.salzburgresearch.at/~rwesten/stanbol/dbpedia_43k.solrindex.zip</dbpedia.default.index.url>
     <dbpedia.default.path>org/apache/stanbol/data/site/dbpedia/default</dbpedia.default.path>
     <dbpedia.default.index.path>${dbpedia.default.path}/index</dbpedia.default.index.path>
     <dbpedia.default.config.path>${dbpedia.default.path}/config</dbpedia.default.config.path>
