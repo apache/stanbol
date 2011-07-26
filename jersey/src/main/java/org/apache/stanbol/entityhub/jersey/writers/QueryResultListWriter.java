@@ -40,11 +40,14 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,16 +91,29 @@ public class QueryResultListWriter implements MessageBodyWriter<QueryResultList<
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             }
         } else { //RDF
-            /*
-             * TODO: We would need to add the query to the RDF Result.
-             *       Currently not implemented, because I do not want to create
-             *       a triple version of the query and there is not yet String
-             *       representation defined for FieldQuery
-             */
             MGraph resultGraph = QueryResultsToRDF.toRDF(resultList);
+            addFieldQuery(resultList.getQuery(),resultGraph);
             getSerializer().serialize(entityStream, resultGraph, mediaType.toString());
         }
     }
-
+    private void addFieldQuery(FieldQuery query, MGraph resultGraph) {
+        if(query == null){
+            return;
+        }
+        try {
+            JSONObject fieldQueryJson = FieldQueryToJSON.toJSON(query);
+            if(fieldQueryJson != null){
+                //add the triple with the fieldQuery
+                resultGraph.add(new TripleImpl(
+                    QueryResultsToRDF.QUERY_RESULT_LIST, 
+                    QueryResultsToRDF.FIELD_QUERY, 
+                    QueryResultsToRDF.literalFactory.createTypedLiteral(
+                        fieldQueryJson.toString())));
+            }
+        } catch (JSONException e) {
+            log.warn(String.format("Unable to serialize Fieldquery %s to JSON",
+                query),e);
+        }
+    }
 
 }

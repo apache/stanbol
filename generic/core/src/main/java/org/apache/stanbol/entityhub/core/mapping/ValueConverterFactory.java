@@ -226,12 +226,23 @@ public class ValueConverterFactory {
             }
             if(value instanceof Byte){
                 return (Byte)value;
+            } else if(value instanceof Long || value instanceof Integer || value instanceof Short){
+                long longValue = ((Long)value).longValue();
+                if(longValue <= Byte.MAX_VALUE && longValue >= Byte.MIN_VALUE){
+                    return (byte)longValue;
+                } else {
+                    return null;
+                }
+            } else if(value instanceof Float || value instanceof Double){
+                try {
+                    return BigDecimal.valueOf(((Number)value).doubleValue()).byteValueExact();
+                } catch (ArithmeticException e) { return null; }
             } else {
                 try {
-                    return Byte.parseByte(value.toString());
-                } catch (NumberFormatException e){ return null;}
-            }
-        }
+                    return new BigDecimal(value.toString()).byteValueExact();
+                } catch (NumberFormatException e){ return null;
+                } catch (ArithmeticException e) { return null; }
+            }        }
         @Override
         public String getDataType() {return DataTypeEnum.Byte.getUri();}
 
@@ -244,10 +255,22 @@ public class ValueConverterFactory {
             }
             if(value instanceof Short){
                 return (Short)value;
+            } else if(value instanceof Long || value instanceof Integer){
+                long longValue = ((Long)value).longValue();
+                if(longValue <= Short.MAX_VALUE && longValue >= Short.MIN_VALUE){
+                    return (short)longValue;
+                } else {
+                    return null;
+                }
+            } else if(value instanceof Float || value instanceof Double){
+                try {
+                    return BigDecimal.valueOf(((Number)value).doubleValue()).shortValueExact();
+                } catch (ArithmeticException e) { return null; }
             } else {
                 try {
-                    return Short.parseShort(value.toString());
-                } catch (NumberFormatException e){ return null;}
+                    return new BigDecimal(value.toString()).shortValueExact();
+                } catch (NumberFormatException e){ return null;
+                } catch (ArithmeticException e) { return null; }
             }
         }
         @Override
@@ -262,10 +285,22 @@ public class ValueConverterFactory {
             }
             if(value instanceof Integer){
                 return (Integer)value;
+            } else if(value instanceof Long){
+                long longValue = ((Long)value).longValue();
+                if(longValue <= Integer.MAX_VALUE && longValue >= Integer.MIN_VALUE){
+                    return (int)longValue;
+                } else {
+                    return null;
+                }
+            } else if(value instanceof Float || value instanceof Double){
+                try {
+                    return BigDecimal.valueOf(((Number)value).doubleValue()).intValueExact();
+                } catch (ArithmeticException e) { return null; }
             } else {
                 try {
-                    return Integer.parseInt(value.toString());
-                } catch (NumberFormatException e){ return null;}
+                    return new BigDecimal(value.toString()).intValueExact();
+                } catch (NumberFormatException e){ return null;
+                } catch (ArithmeticException e) { return null; }
             }
         }
         @Override
@@ -280,10 +315,17 @@ public class ValueConverterFactory {
             }
             if(value instanceof Long){
                 return (Long)value;
+            } else if(value instanceof Integer){
+                return ((Integer)value).longValue();
+            } else if(value instanceof Float || value instanceof Double){
+                try {
+                    return BigDecimal.valueOf(((Number)value).doubleValue()).longValueExact();
+                } catch (ArithmeticException e) { return null; }
             } else {
                 try {
-                    return Long.parseLong(value.toString());
-                } catch (NumberFormatException e){ return null;}
+                    return new BigDecimal(value.toString()).longValueExact();
+                } catch (NumberFormatException e){ return null;
+                } catch (ArithmeticException e) { return null; }
             }
         }
         @Override
@@ -332,9 +374,10 @@ public class ValueConverterFactory {
             if(value instanceof BigInteger){
                 return (BigInteger)value;
             } else {
-                try {
-                    return new BigInteger(value.toString());
-                } catch (NumberFormatException e){ return null;}
+                try { //would also support 10000000000000000000000000000000.0
+                    return new BigDecimal(value.toString()).toBigIntegerExact();
+                } catch (NumberFormatException e){ return null;
+                } catch (ArithmeticException e) { return null; }
             }
         }
         @Override

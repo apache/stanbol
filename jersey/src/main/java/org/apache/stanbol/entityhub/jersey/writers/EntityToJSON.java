@@ -16,8 +16,12 @@
  */
 package org.apache.stanbol.entityhub.jersey.writers;
 
+import java.util.Date;
 import java.util.Iterator;
+import java.util.Set;
 
+import org.apache.stanbol.entityhub.core.utils.TimeUtils;
+import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -134,13 +138,26 @@ final class EntityToJSON {
         JSONObject jValue = new JSONObject();
         if (value instanceof Reference) {
             jValue.put("type", "reference");
+            jValue.put("xsd:datatype", DataTypeEnum.AnyUri.getShortName());
+            jValue.put("value", ((Reference)value).getReference());
         } else if (value instanceof Text) {
             jValue.put("type", "text");
             jValue.put("xml:lang", ((Text) value).getLanguage());
+            jValue.put("value", ((Text)value).getText());
+        } else if(value instanceof Date){
+            jValue.put("type", "value");
+            jValue.put("value", TimeUtils.toString(DataTypeEnum.DateTime, (Date)value));
+            jValue.put("xsd:datatype", DataTypeEnum.DateTime.getShortName());
         } else {
-            jValue.put("type", "value");//TODO: better name? ^^
+            jValue.put("type", "value");
+            Set<DataTypeEnum> dataTypes = DataTypeEnum.getPrimaryDataTypes(value.getClass());
+            if(!dataTypes.isEmpty()){
+                jValue.put("xsd:datatype", dataTypes.iterator().next().getShortName());
+            } else {
+                jValue.put("xsd:datatype", DataTypeEnum.String.getShortName());
+            }
+            jValue.put("value", value);
         }
-        jValue.put("value", value.toString());
         return jValue;
     }
 }

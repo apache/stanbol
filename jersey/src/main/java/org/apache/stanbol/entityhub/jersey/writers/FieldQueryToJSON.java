@@ -16,13 +16,18 @@
  */
 package org.apache.stanbol.entityhub.jersey.writers;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.RangeConstraint;
+import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint;
 import org.codehaus.jettison.json.JSONArray;
@@ -74,32 +79,43 @@ final class FieldQueryToJSON {
         JSONObject jConstraint = new JSONObject();
         jConstraint.put("type", constraint.getType().name());
         switch (constraint.getType()) {
-            case value:
+            case value: //both ValueConstraint and ReferenceConstraint
                 ValueConstraint valueConstraint = ((ValueConstraint) constraint);
                 if (valueConstraint.getValue() != null) {
                     jConstraint.put("value", valueConstraint.getValue());
                 }
-                Collection<String> dataTypes = valueConstraint.getDataTypes();
-                if (dataTypes != null && !dataTypes.isEmpty()) {
-                    //in case of type = reference we do not need to add any dataTypes!
-                    jConstraint.put("dataTypes", valueConstraint.getDataTypes());
-                    //Event that internally "reference" is not part of the
-                    //ConstraintType enum it is still present in the serialisation
-                    //ant the Java API (see ReferenceConstraint class)
-                    //Value constraints with the dataType Reference and AnyURI are
-                    //considered to represent reference constraints
-                    if(dataTypes.size() == 1 && 
-                            (dataTypes.contains(DataTypeEnum.Reference.getUri()) || 
-                                    dataTypes.contains(DataTypeEnum.AnyUri.getUri()))){
-                        jConstraint.remove("type");
-                        jConstraint.put("type", "reference");
+                if(constraint instanceof ReferenceConstraint){
+                    //the type "reference" is not present in the ConstraintType
+                    //enum, because internally ReferenceConstraints are just a
+                    //ValueConstraint with a predefined data type, but "reference"
+                    //is still a valid value of the type property in JSON
+                    jConstraint.put("type", "reference");
+                } else { // valueConstraint
+                    jConstraint.put("type", constraint.getType().name());
+                    //for valueConstraints we need to add also the dataType(s)
+                    Collection<String> dataTypes = valueConstraint.getDataTypes();
+                    if (dataTypes != null && !dataTypes.isEmpty()) {
+                        if(dataTypes.size() == 1) {
+                            jConstraint.put("datatype", NamespaceEnum.getShortName(dataTypes.iterator().next()));
+                        } else {
+                            ArrayList<String> dataTypeValues = new ArrayList<String>(dataTypes.size());
+                            for(String dataType : dataTypes){
+                                dataTypeValues.add(NamespaceEnum.getShortName(dataType));
+                            }
+                            jConstraint.put("datatype", dataTypeValues);
+                        }
                     }
                 }
                 break;
             case text:
                 TextConstraint textConstraint = (TextConstraint) constraint;
-                if (textConstraint.getLanguages() != null && !textConstraint.getLanguages().isEmpty()) {
-                    jConstraint.put("languages", new JSONArray(textConstraint.getLanguages()));
+                Collection<String> languages = textConstraint.getLanguages();
+                if (languages != null && !languages.isEmpty()) {
+                    if(languages.size() == 1){
+                        jConstraint.put("language", languages.iterator().next());
+                    } else {
+                        jConstraint.put("language", new JSONArray(languages));
+                    }
                 }
                 jConstraint.put("patternType", textConstraint.getPatternType().name());
                 if (textConstraint.getTexts() != null && !textConstraint.getTexts().isEmpty()) {
@@ -115,13 +131,21 @@ final class FieldQueryToJSON {
                 break;
             case range:
                 RangeConstraint rangeConstraint = (RangeConstraint) constraint;
+                Set<DataTypeEnum> dataTypes = EnumSet.noneOf(DataTypeEnum.class);
                 if (rangeConstraint.getLowerBound() != null) {
                     jConstraint.put("lowerBound", rangeConstraint.getLowerBound());
+                    dataTypes.addAll(DataTypeEnum.getPrimaryDataTypes(
+                        rangeConstraint.getLowerBound().getClass()));
                 }
                 if (rangeConstraint.getUpperBound() != null) {
                     jConstraint.put("upperBound", rangeConstraint.getUpperBound());
+                    dataTypes.addAll(DataTypeEnum.getPrimaryDataTypes(
+                        rangeConstraint.getUpperBound().getClass()));
                 }
                 jConstraint.put("inclusive", rangeConstraint.isInclusive());
+                if(!dataTypes.isEmpty()){
+                    jConstraint.put("datatype", dataTypes.iterator().next().getShortName());
+                }
             default:
                 //unknown constraint type
                 log.warn("Unsupported Constriant Type " + constraint.getType() + " (implementing class=" + constraint.getClass() + "| toString=" + constraint + ") -> skiped");

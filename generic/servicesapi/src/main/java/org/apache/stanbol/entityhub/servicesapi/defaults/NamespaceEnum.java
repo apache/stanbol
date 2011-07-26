@@ -246,6 +246,30 @@ public enum NamespaceEnum {
         return shortUri;
     }
     /**
+     * Parsed the namespace of the parsed full URI by searching the last occurrence
+     * of '#' or '/' and than looks if the namespace is part of this enumeration.
+     * If a namesoace is found it is replaced by the registered prefix. If not
+     * the parsed URI is resturned
+     * @param fullUri the full uri to convert
+     * @return the converted URI or the parsed value of <code>null</code> was
+     * parsed, no local name was present (e.g. if the namespace itself was parsed)
+     * or the parsed namespace is not known.
+     */
+    public static String getShortName(String fullUri){
+        if(fullUri == null){
+            return fullUri;
+        }
+        int index = Math.max(fullUri.lastIndexOf('#'),fullUri.lastIndexOf('/'));
+        //do not convert if the parsed uri does not contain a local name
+        if(index > 0 && index+1 < fullUri.length()){
+            NamespaceEnum namespace = namespace2Prefix.get(fullUri.substring(0, index));
+            if(namespace != null){
+                return namespace.getPrefix()+':'+fullUri.substring(index+1);
+            }
+        }
+        return fullUri;
+    }
+    /**
      * @return the defaultPrefix
      */
     public boolean isDefault() {

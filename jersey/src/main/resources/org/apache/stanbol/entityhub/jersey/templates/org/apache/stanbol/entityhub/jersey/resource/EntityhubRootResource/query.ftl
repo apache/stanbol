@@ -19,6 +19,8 @@
 <@common.page title="Entityhub Query" hasrestapi=false> 
 
 <#include "inc_query.ftl">
+<hr>
+<#include "/imports/fieldquerydocumentation.ftl">
 
 </@common.page>
 </#escape>

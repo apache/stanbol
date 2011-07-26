@@ -19,6 +19,7 @@
 <@common.page> 
 
 <#include "inc_query.ftl">
-
+<hr>
+<#include "/imports/fieldquerydocumentation.ftl">
 </@common.page>
 </#escape>
