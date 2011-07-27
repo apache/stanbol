@@ -16,13 +16,10 @@
  */
 package org.apache.stanbol.ontologymanager.registry.impl;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -180,32 +177,15 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
             this.cachingPolicyString = cachingPolicy.toString();
         }
 
-        List<String> paths = offline.getOntologySourceDirectories();
         final IRI[] offlineResources;
-        if (paths != null) {
-            List<IRI> list = new ArrayList<IRI>();
-            for (String path : paths) {
-                IRI iri = null;
-                if (path.startsWith("/")) {
-                    try {
-                        iri = IRI.create(getClass().getResource(path));
-                    } catch (Exception e) {
-                        // TODO: Don't give up. It could still an absolute path.
-                    }
-                } else try {
-                    iri = IRI.create(path);
-                } catch (Exception e1) {
-                    try {
-                        iri = IRI.create(new File(path));
-                    } catch (Exception e2) {
-                        log.warn("Unable to obtain a path for {}. Skipping...", iri, e2);
-                        iri = null;
-                    }
-                }
-                if (iri != null) list.add(iri);
-            }
-            offlineResources = list.toArray(new IRI[0]);
-        } else offlineResources = new IRI[0];
+        if (this.offline != null) {
+            List<IRI> paths = offline.getOntologySourceLocations();
+            if (paths != null) offlineResources = paths.toArray(new IRI[0]);
+            // There are no offline paths.
+            else offlineResources = new IRI[0];
+        }
+        // There's no offline configuration at all.
+        else offlineResources = new IRI[0];
 
         // Used only for creating the registry model, do not use for caching.
         OWLOntologyManager mgr = OWLOntologyManagerFactory.createOWLOntologyManager(offlineResources);
@@ -232,13 +212,21 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         // Create and set the cache.
         if (cachingPolicyString.equals(CachingPolicy.CENTRALISED.name())) {
             this.cache = OWLOntologyManagerFactory.createOWLOntologyManager(offlineResources);
-            for (Registry reg : getRegistries())
-                reg.setCache(this.cache);
         } else if (cachingPolicyString.equals(CachingPolicy.DISTRIBUTED.name())) {
-            for (Registry reg : getRegistries())
-                reg.setCache(OWLOntologyManagerFactory.createOWLOntologyManager(offlineResources));
             this.cache = null;
         }
+
+        Set<RegistryItem> visited = new HashSet<RegistryItem>();
+        for (Registry reg : getRegistries())
+            for (RegistryItem child : reg.getChildren())
+                if (!visited.contains(child)) {
+                    if (child instanceof Library) {
+                        if (this.cache != null) ((Library) child).setCache(this.cache);
+                        else ((Library) child).setCache(OWLOntologyManagerFactory
+                                .createOWLOntologyManager(offlineResources));
+                    }
+                    visited.add(child);
+                }
 
         if (isLazyLoading()) {
             // Nothing to do about it at the moment.
@@ -249,6 +237,7 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
 
     @Override
     public void addRegistry(Registry registry) {
+        // TODO: automatically set the cache if unset or non conform to the caching policy.
         try {
             population.put(registry.getIRI(), registry);
             registries.add(registry.getIRI());
@@ -265,8 +254,44 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         updateLocations();
     }
 
-    protected Map<Library,Float> computeLoadFactors() {
-        Map<Library,Float> loadFactors = new HashMap<Library,Float>();
+    /**
+     * @deprecated with each library having its own cache, load balancing is no longer necessary
+     * @return
+     */
+    protected Registry computeBestCandidate(Library lib) {
+        Map<IRI,Float> loadFactors = computeLoadFactors();
+        IRI current = null;
+        float lowest = 1.0f;
+        for (RegistryItem item : lib.getParents()) {
+            IRI iri = item.getIRI();
+            if (loadFactors.containsKey(iri)) {
+                float f = loadFactors.get(iri);
+                if (f < lowest) {
+                    lowest = f;
+                    current = iri;
+                }
+            }
+        }
+        return (Registry) (population.get(current));
+    }
+
+    /**
+     * @deprecated with each library having its own cache, load balancing is no longer necessary
+     * @return
+     */
+    protected Map<IRI,Float> computeLoadFactors() {
+        Map<IRI,Float> loadFactors = new HashMap<IRI,Float>();
+        for (Registry r : getRegistries()) {
+            int tot = 0, num = 0;
+            RegistryItem[] children = r.getChildren();
+            for (int i = 0; i < children.length; i++) {
+                if (children[i] instanceof Library) {
+                    if (((Library) children[i]).isLoaded()) num++;
+                    tot++;
+                }
+            }
+            loadFactors.put(r.getIRI(), (float) num / (float) tot);
+        }
         return loadFactors;
     }
 
@@ -412,9 +437,33 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
     }
 
     @Override
+    public Set<Library> getLibraries() {
+        Set<Library> results = new HashSet<Library>();
+        for (IRI key : population.keySet()) {
+            RegistryItem item = population.get(key);
+            if (item instanceof Library) results.add((Library) item);
+        }
+        return results;
+    }
+
+    @Override
     public Set<Library> getLibraries(IRI ontologyID) {
-        // TODO Auto-generated method stub
+        Set<Library> results = new HashSet<Library>();
+        for (RegistryItem item : population.get(ontologyID).getParents())
+            if (item instanceof Library) results.add((Library) item);
+        return results;
+    }
+
+    @Override
+    public Library getLibrary(IRI id) {
+        RegistryItem item = population.get(id);
+        if (item != null && item instanceof Library) return (Library) item;
         return null;
+    }
+
+    @Override
+    public OfflineConfiguration getOfflineConfiguration() {
+        return offline;
     }
 
     @Override
@@ -448,6 +497,22 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
     @Override
     public boolean isLazyLoading() {
         return lazyLoading;
+    }
+
+    private void loadEager() {
+        for (RegistryItem item : population.values()) {
+            if (item instanceof Library && !((Library) item).isLoaded()) {
+                // TODO: implement ontology request targets.
+                if (CachingPolicy.CENTRALISED.equals(getCachingPolicy()) && this.cache != null) {
+                    ((Library) item).loadOntologies(this.cache);
+                } else if (CachingPolicy.DISTRIBUTED.equals(getCachingPolicy())) {
+                    Library lib = (Library) item;
+                    lib.loadOntologies(lib.getCache());
+                } else {
+                    log.error("Tried to load ontology resource {} using a null cache.", item);
+                }
+            }
+        }
     }
 
     protected Library populateLibrary(OWLNamedIndividual ind, Set<OWLOntology> registries) throws RegistryContentException {
@@ -549,23 +614,6 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         return reg;
     }
 
-    private void loadEager() {
-        for (RegistryItem item : population.values()) {
-            if (item instanceof Library && !((Library) item).isLoaded()) {
-                // TODO: implement ontology request targets.
-                if (CachingPolicy.CENTRALISED.equals(getCachingPolicy()) && this.cache != null) {
-                    ((Library) item).loadOntologies(this.cache);
-                } else if (CachingPolicy.DISTRIBUTED.equals(getCachingPolicy())) {
-                    // TODO implement load balancing.
-                    Iterator<Registry> it = getRegistries(item.getIRI()).iterator();
-                    if (it.hasNext()) ((Library) item).loadOntologies(it.next().getCache());
-                } else {
-                    log.error("Tried to load ontology resource {} using a null cache.", item);
-                }
-            }
-        }
-    }
-
     @Override
     public void registryContentRequested(RegistryItem requestTarget) {
         log.debug("In {} registry content was requested on {}.", getClass(), requestTarget);
@@ -575,9 +623,8 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
                     .loadOntologies(this.cache);
         } else if (CachingPolicy.DISTRIBUTED.equals(getCachingPolicy())) {
             if (requestTarget instanceof Library && !((Library) requestTarget).isLoaded()) {
-                // TODO implement load balancing.
-                Iterator<Registry> it = getRegistries(requestTarget.getIRI()).iterator();
-                if (it.hasNext()) ((Library) requestTarget).loadOntologies(it.next().getCache());
+                Library lib = (Library) requestTarget;
+                lib.loadOntologies(lib.getCache());
             }
         } else {
             log.error("Tried to load ontology resource {} using a null cache.", requestTarget);
@@ -586,13 +633,16 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
 
     @Override
     public void removeRegistry(IRI registryId) {
+        // TODO: automatically remove ontologies from the cache if centralised.
         registries.remove(registryId);
         updateLocations();
     }
 
     @Override
     public void setLazyLoading(boolean lazy) {
+        // Warning: do not use in constructor!
         this.lazyLoading = lazy;
+        if (!lazy) loadEager();
     }
 
     protected synchronized void updateLocations() {

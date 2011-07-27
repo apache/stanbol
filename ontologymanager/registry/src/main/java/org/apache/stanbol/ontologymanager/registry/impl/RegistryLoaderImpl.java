@@ -72,6 +72,7 @@ import org.slf4j.LoggerFactory;
  * <br/>
  * TODO will be dismissed along with its interface in favor of the new registry management.
  */
+@Deprecated
 public class RegistryLoaderImpl implements RegistryLoader {
 
     private static final OWLClass cRegistryLibrary;
@@ -493,7 +494,7 @@ public class RegistryLoaderImpl implements RegistryLoader {
 
     @Override
     public Registry loadRegistry(IRI registryPhysicalIRI, OWLOntologyManager mgr) {
-        // FIXME! linbraryID unused
+        // FIXME! libraryID unused
         Registry registry = null;
         if (mgr == null) mgr = onm.getOwlCacheManager();
         try {

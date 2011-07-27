@@ -16,7 +16,8 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl;
 
-import java.util.Arrays;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
 
@@ -27,14 +28,12 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.osgi.service.component.ComponentContext;
+import org.semanticweb.owlapi.model.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Default implementation of the {@link OfflineConfiguration}.
- * 
- * @author alessandro
- * 
  */
 @Component(immediate = true, metatype = true)
 @Service
@@ -47,6 +46,8 @@ public class OfflineConfigurationImpl implements OfflineConfiguration {
      */
     @Property(name = OfflineConfiguration.ONTOLOGY_PATHS, value = {".", "/ontologies"})
     private String[] ontologyDirs;
+
+    private List<IRI> locations = new ArrayList<IRI>();
 
     /**
      * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
@@ -83,6 +84,28 @@ public class OfflineConfigurationImpl implements OfflineConfiguration {
         ontologyDirs = (String[]) configuration.get(OfflineConfiguration.ONTOLOGY_PATHS);
         if (ontologyDirs == null) ontologyDirs = new String[] {".", "/ontologies"};
 
+        for (String path : ontologyDirs) {
+            IRI iri = null;
+            if (path.startsWith("/")) {
+                try {
+                    iri = IRI.create(getClass().getResource(path));
+                } catch (Exception e) {
+                    // TODO: Don't give up. It could still an absolute path.
+                }
+            } else try {
+                iri = IRI.create(path);
+            } catch (Exception e1) {
+                try {
+                    iri = IRI.create(new File(path));
+                } catch (Exception e2) {
+                    log.warn("Unable to obtain a path for {}. Skipping...", iri, e2);
+                    iri = null;
+                }
+            }
+            if (iri != null) locations.add(iri);
+        }
+        // else location stays empty.
+
     }
 
     @Deactivate
@@ -92,8 +115,8 @@ public class OfflineConfigurationImpl implements OfflineConfiguration {
     }
 
     @Override
-    public List<String> getOntologySourceDirectories() {
-        return Arrays.asList(ontologyDirs);
+    public List<IRI> getOntologySourceLocations() {
+        return locations;
     }
 
 }

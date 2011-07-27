@@ -17,37 +17,18 @@
 package org.apache.stanbol.ontologymanager.registry.impl.model;
 
 import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class RegistryImpl extends AbstractRegistryItem implements Registry {
-
-    private OWLOntologyManager cache;
 
     private String message = "";
 
     public RegistryImpl(IRI iri) {
-        this(iri, OWLManager.createOWLOntologyManager());
-    }
-
-    public RegistryImpl(IRI iri, OWLOntologyManager cache) {
         super(iri);
-        setCache(cache);
     }
 
     public RegistryImpl(IRI iri, String name) {
-        this(iri, name, OWLManager.createOWLOntologyManager());
-    }
-
-    public RegistryImpl(IRI iri, String name, OWLOntologyManager cache) {
         super(iri, name);
-        setCache(cache);
-    }
-
-    @Override
-    public OWLOntologyManager getCache() {
-        return cache;
     }
 
     public String getError() {
@@ -71,13 +52,6 @@ public class RegistryImpl extends AbstractRegistryItem implements Registry {
     @Deprecated
     public boolean isOK() {
         return this.getError().equals("");
-    }
-
-    @Override
-    public void setCache(OWLOntologyManager cache) {
-        // TODO use the ontology manager factory.
-        if (cache == null) cache = OWLManager.createOWLOntologyManager();
-        this.cache = cache;
     }
 
     @Deprecated

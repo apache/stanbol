@@ -18,6 +18,8 @@ package org.apache.stanbol.ontologymanager.ontonet.api;
 
 import java.util.List;
 
+import org.semanticweb.owlapi.model.IRI;
+
 /**
  * Provides the configuration needed for the {@link ONManager}. A configuration should only be handled
  * internally by the {@link ONManager} implementation.
@@ -38,6 +40,6 @@ public interface OfflineConfiguration {
      * 
      * @return an ordered list of directory paths for offline ontologies.
      */
-    List<String> getOntologySourceDirectories();
+    List<IRI> getOntologySourceLocations();
 
 }

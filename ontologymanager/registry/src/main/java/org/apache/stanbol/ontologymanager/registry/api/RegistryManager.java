@@ -18,6 +18,7 @@ package org.apache.stanbol.ontologymanager.registry.api;
 
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.registry.api.model.CachingPolicy;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
@@ -28,7 +29,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 /**
  * Replacement for {@link RegistryLoader}. Also indexes libraries (and ontologies?).
  */
-public interface RegistryManager {
+public interface RegistryManager extends RegistryItemIndex {
 
     /**
      * The key used to configure the caching policy of the registry manager.
@@ -84,39 +85,7 @@ public interface RegistryManager {
      */
     CachingPolicy getCachingPolicy();
 
-    /**
-     * Returns all the libraries that contain the ontology with the given identifier.
-     * 
-     * @param ontologyID
-     *            the ontology identifier.
-     * @return the set of libraries that contain the ontology.
-     */
-    Set<Library> getLibraries(IRI ontologyID);
-
-    /**
-     * Returns the set of registries managed by this object.
-     * 
-     * @return the set of all managed registries.
-     */
-    Set<Registry> getRegistries();
-
-    /**
-     * Returns all the registries that reference the library with the given identifier.
-     * 
-     * @return the set of all managed registries.
-     */
-    Set<Registry> getRegistries(IRI libraryID);
-
-    /**
-     * Returns the registry with the given identifier, if present.<br/>
-     * <br/>
-     * NOTE THAT IF THE REGISTRY ITEM EXIST BUT IS NOT A REGISTRY, THIS METHOD WILL RETURN NULL.
-     * 
-     * @param id
-     *            the registry identifier.
-     * @return the registry with the given identifier, or null if not present.
-     */
-    Registry getRegistry(IRI id);
+    OfflineConfiguration getOfflineConfiguration();
 
     /**
      * Determines if the registry manager is set to load its resources only when a specific request for them
@@ -135,7 +104,7 @@ public interface RegistryManager {
      *            the ontology registry to be removed.
      */
     void removeRegistry(IRI registryId);
-
+    
     /**
      * Sets the resource loading policy of this registry manager. There is no guarantee that setting a policy
      * after a model has already been created will affect the existing model (i.e. unload all its ontologies

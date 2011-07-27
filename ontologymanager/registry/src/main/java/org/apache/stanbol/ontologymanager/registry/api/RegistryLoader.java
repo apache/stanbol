@@ -32,10 +32,13 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * <br/>
  * TODO will be dismissed along with its implementation in favor of the new registry management.
  */
+@Deprecated
 public interface RegistryLoader {
 
     /**
      * Loads all the OWL ontologies referenced by <code>registryItem</code>.
+     * 
+     * @deprecated
      * 
      * @param registryItem
      *            the parent registry item.
@@ -73,29 +76,31 @@ public interface RegistryLoader {
      * Only extracts the ontologies belonging to the library specified, if found in the registry at the
      * supplied location.
      * 
-     * @param registryPhysicalRIRI
-     * @param libraryID
-     * @return
+     * 
      * @deprecated This method does not what is supposed to do (ontology loading is selective, not model
      *             construction). Calls to this method should be replaced by the sequence:
      *             {@link RegistryManager#createModel(Set)} and {@link RegistryManager#getRegistry(IRI)}.
+     * 
+     * @param registryPhysicalRIRI
+     * @param libraryID
+     * @return
      */
     Registry loadLibrary(IRI registryPhysicalIRI, IRI libraryID);
 
     /**
-     * 
-     * @throws RegistryContentException
      * @deprecated obsolete
+     * @throws RegistryContentException
      */
     void loadLocations() throws RegistryContentException;
 
     /**
      * The ontology at <code>physicalIRI</code> may in turn include more than one library.
      * 
-     * @param physicalIRI
-     * @return
      * @deprecated Calls to this method should be replaced by the sequence:
      *             {@link RegistryManager#createModel(Set)} and {@link RegistryManager#getRegistry(IRI)}.
+     * 
+     * @param physicalIRI
+     * @return
      */
     Registry loadRegistry(IRI registryPhysicalIRI, OWLOntologyManager mgr);
 }

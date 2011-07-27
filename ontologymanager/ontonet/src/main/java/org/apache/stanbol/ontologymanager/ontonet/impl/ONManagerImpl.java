@@ -287,7 +287,8 @@ public class ONManagerImpl implements ONManager {
         // Bind components, starting with the local directories.
         List<String> dirs = new ArrayList<String>();
         try {
-            dirs = config.getOntologySourceDirectories();
+            for (IRI iri : config.getOntologySourceLocations())
+                dirs.add(iri.toString());
         } catch (NullPointerException ex) {
             // Ok, go empty
         }

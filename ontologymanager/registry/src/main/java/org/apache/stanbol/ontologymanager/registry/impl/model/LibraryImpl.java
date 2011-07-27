@@ -25,6 +25,7 @@ import org.apache.stanbol.ontologymanager.registry.api.RegistryOntologyNotLoaded
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryItem;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryOntology;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
@@ -39,16 +40,33 @@ import org.slf4j.LoggerFactory;
  */
 public class LibraryImpl extends AbstractRegistryItem implements Library {
 
+    private OWLOntologyManager cache;
+
     private boolean loaded = false;
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
     public LibraryImpl(IRI iri) {
+        this(iri, OWLManager.createOWLOntologyManager());
+    }
+
+    public LibraryImpl(IRI iri, OWLOntologyManager cache) {
         super(iri);
+        setCache(cache);
     }
 
     public LibraryImpl(IRI iri, String name) {
+        this(iri, name, OWLManager.createOWLOntologyManager());
+    }
+
+    public LibraryImpl(IRI iri, String name, OWLOntologyManager cache) {
         super(iri, name);
+        setCache(cache);
+    }
+
+    @Override
+    public OWLOntologyManager getCache() {
+        return cache;
     }
 
     @Override
@@ -104,6 +122,13 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
             }
         }
         loaded = true;
+    }
+
+    @Override
+    public void setCache(OWLOntologyManager cache) {
+        // TODO use the ontology manager factory.
+        if (cache == null) cache = OWLManager.createOWLOntologyManager();
+        this.cache = cache;
     }
 
 }

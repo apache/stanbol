@@ -33,6 +33,13 @@ public interface Library extends RegistryItem {
     final Type type = Type.LIBRARY;
 
     /**
+     * Returns the OWL ontology manager that this library is using as a cache of its ontologies.
+     * 
+     * @return the ontology manager that is used as a cache.
+     */
+    OWLOntologyManager getCache();
+
+    /**
      * Returns the OWL ontologies that have been loaded in this library, if any, otherwise an exception is
      * thrown.<br/>
      * <br/>
@@ -64,5 +71,14 @@ public interface Library extends RegistryItem {
      *            null, lest an {@link IllegalArgumentException} be thrown.
      */
     void loadOntologies(OWLOntologyManager mgr);
+
+    /**
+     * Sets the OWL ontology manager that this library will use as a cache of its ontologies. If null, if will
+     * create its own.
+     * 
+     * @param cache
+     *            the ontology manager to be used as a cache.
+     */
+    void setCache(OWLOntologyManager cache);
 
 }
