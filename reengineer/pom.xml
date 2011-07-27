@@ -42,7 +42,9 @@
     <module>mysql</module>
     -->
     <module>web</module>
+    <!--
     <module>xerces</module>
+    -->
     <module>xml</module>
   </modules>
 
