@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.rules.refactor.impl;
 
 import java.io.ByteArrayInputStream;
@@ -80,7 +80,26 @@ import com.hp.hpl.jena.reasoner.Reasoner;
 import com.hp.hpl.jena.sparql.function.FunctionRegistry;
 import com.hp.hpl.jena.sparql.pfunction.PropertyFunctionRegistry;
 import com.hp.hpl.jena.update.UpdateAction;
-import com.hp.hpl.jena.util.FileManager;
+
+class ForwardChainingRefactoringGraph {
+
+    private MGraph inputGraph;
+    private Graph outputGraph;
+
+    public ForwardChainingRefactoringGraph(MGraph inputGraph, Graph outputGraph) {
+        this.inputGraph = inputGraph;
+        this.outputGraph = outputGraph;
+    }
+
+    public MGraph getInputGraph() {
+        return inputGraph;
+    }
+
+    public Graph getOutputGraph() {
+        return outputGraph;
+    }
+
+}
 
 /**
  * The RefactorerImpl is the concrete implementation of the Refactorer interface defined in the KReS APIs. A
@@ -121,21 +140,24 @@ public class RefactorerImpl implements Refactorer {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    @Reference
+    protected ONManager onManager;
+
     private IRI refactoringScopeIRI;
 
     private IRI refactoringSpaceIRI;
 
-    private OntologyScope scope;
-
-    @Reference
-    protected ONManager onManager;
     @Reference
     protected RuleStore ruleStore;
 
+    private OntologyScope scope;
+
     @Reference
     protected Serializer serializer;
+
     @Reference
     protected TcManager tcManager;
+
     @Reference
     protected WeightedTcProvider weightedTcProvider;
 
@@ -249,7 +271,7 @@ public class RefactorerImpl implements Refactorer {
             scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(refactoringSpaceIRI),
                 kReSSession.getID());
         } catch (UnmodifiableOntologySpaceException e) {
-log.error("Failed to create session space",e);
+            log.error("Failed to create session space", e);
         }
 
         scopeRegistry.setScopeActive(refactoringScopeIRI, true);
@@ -280,10 +302,42 @@ log.error("Failed to create session space",e);
         this.ruleStore = null;
     }
 
+    private ForwardChainingRefactoringGraph forwardChainingOperation(String query, MGraph mGraph) {
+
+        Graph graph = kReSCoreOperation(query, mGraph);
+
+        mGraph.addAll(graph);
+
+        return new ForwardChainingRefactoringGraph(mGraph, graph);
+    }
+
     @Override
     public MGraph getRefactoredDataSet(UriRef uriRef) {
 
         return weightedTcProvider.getMGraph(uriRef);
+    }
+
+    private Graph kReSCoreOperation(String query, MGraph mGraph) {
+
+        /*
+         * 
+         * Graph constructedGraph = null; try { ConstructQuery constructQuery = (ConstructQuery)
+         * QueryParser.getInstance() .parse(query); constructedGraph = tcManager.executeSparqlQuery(
+         * constructQuery, mGraph);
+         * 
+         * } catch (ParseException e) { log.error(e.getMessage()); } catch (NoQueryEngineException e) {
+         * log.error(e.getMessage()); }
+         * 
+         * return constructedGraph;
+         */
+
+        Model model = JenaToClerezzaConverter.clerezzaMGraphToJenaModel(mGraph);
+
+        Query sparqlQuery = QueryFactory.create(query, Syntax.syntaxARQ);
+        QueryExecution qexec = QueryExecutionFactory.create(sparqlQuery, model);
+
+        return JenaToClerezzaConverter.jenaModelToClerezzaMGraph(qexec.execConstruct()).getGraph();
+
     }
 
     @Override
@@ -368,7 +422,6 @@ log.error("Failed to create session space",e);
         // OntModel ontModel =
         // jenaToOwlConvert.ModelOwlToJenaConvert(inputOntology, "RDF/XML");
 
-
         Recipe recipe;
         try {
             recipe = ruleStore.getRecipe(recipeIRI);
@@ -432,7 +485,6 @@ log.error("Failed to create session space",e);
             return refactoredOntology;
         }
     }
-    
 
     @Override
     public OWLOntology ontologyRefactoring(OWLOntology inputOntology, Recipe recipe) throws RefactoringException {
@@ -443,14 +495,13 @@ log.error("Failed to create session space",e);
         // OntModel ontModel =
         // jenaToOwlConvert.ModelOwlToJenaConvert(inputOntology, "RDF/XML");
 
-//        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+        // OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
-        
         RuleList ruleList = recipe.getkReSRuleList();
         log.info("RULE LIST SIZE : " + ruleList.size());
 
-//        OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
-//        OWLOntologyManager ontologyManager2 = OWLManager.createOWLOntologyManager();
+        // OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
+        // OWLOntologyManager ontologyManager2 = OWLManager.createOWLOntologyManager();
 
         MGraph unionMGraph = new SimpleMGraph();
 
@@ -496,72 +547,17 @@ log.error("Failed to create session space",e);
 
         refactoredOntology = OWLAPIToClerezzaConverter.clerezzaMGraphToOWLOntology(unionMGraph);
 
-    
         if (refactoredOntology == null) {
             throw new RefactoringException();
         } else {
             return refactoredOntology;
         }
     }
-    
-    
-    
-    private Graph kReSCoreOperation(String query, MGraph mGraph) {
-
-        /*
-         * 
-         * Graph constructedGraph = null; try { ConstructQuery constructQuery = (ConstructQuery)
-         * QueryParser.getInstance() .parse(query); constructedGraph = tcManager.executeSparqlQuery(
-         * constructQuery, mGraph);
-         * 
-         * } catch (ParseException e) { log.error(e.getMessage()); } catch (NoQueryEngineException e) {
-         * log.error(e.getMessage()); }
-         * 
-         * return constructedGraph;
-         */
-
-        Model model = JenaToClerezzaConverter.clerezzaMGraphToJenaModel(mGraph);
-
-        Query sparqlQuery = QueryFactory.create(query, Syntax.syntaxARQ);
-        QueryExecution qexec = QueryExecutionFactory.create(sparqlQuery, model);
-
-        return JenaToClerezzaConverter.jenaModelToClerezzaMGraph(qexec.execConstruct()).getGraph();
-
-    }
-
-    private ForwardChainingRefactoringGraph forwardChainingOperation(String query, MGraph mGraph) {
-
-        Graph graph = kReSCoreOperation(query, mGraph);
-
-        mGraph.addAll(graph);
-
-        return new ForwardChainingRefactoringGraph(mGraph, graph);
-    }
 
     private Graph sparqlUpdateOperation(String query, MGraph mGraph) {
         Model model = JenaToClerezzaConverter.clerezzaMGraphToJenaModel(mGraph);
         UpdateAction.parseExecute(query, model);
         return JenaToClerezzaConverter.jenaModelToClerezzaMGraph(model).getGraph();
-    }
-
-}
-
-class ForwardChainingRefactoringGraph {
-
-    private MGraph inputGraph;
-    private Graph outputGraph;
-
-    public ForwardChainingRefactoringGraph(MGraph inputGraph, Graph outputGraph) {
-        this.inputGraph = inputGraph;
-        this.outputGraph = outputGraph;
-    }
-
-    public MGraph getInputGraph() {
-        return inputGraph;
-    }
-
-    public Graph getOutputGraph() {
-        return outputGraph;
     }
 
 }
