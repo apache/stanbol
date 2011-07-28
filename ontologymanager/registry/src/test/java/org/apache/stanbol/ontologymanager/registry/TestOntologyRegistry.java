@@ -118,14 +118,8 @@ public class TestOntologyRegistry {
 
         for (Registry r : rs) {
             // The nonexistent library should also be included, if using the more powerful algorithm.
-            if (Locations._REGISTRY_TEST.equals(r.getIRI())) assertEquals(3, r.getChildren().length); // set
-                                                                                                      // to 2
-                                                                                                      // if
-                                                                                                      // using
-                                                                                                      // the
-                                                                                                      // less
-                                                                                                      // powerful
-                                                                                                      // algorithm.
+            int count = 3; // set to 2 if using the less powerful algorithm.
+            if (Locations._REGISTRY_TEST.equals(r.getIRI())) assertEquals(count, r.getChildren().length);
             else if (Locations._REGISTRY_TEST_ADDITIONS.equals(r.getIRI())) assertEquals(1,
                 r.getChildren().length);
             // check

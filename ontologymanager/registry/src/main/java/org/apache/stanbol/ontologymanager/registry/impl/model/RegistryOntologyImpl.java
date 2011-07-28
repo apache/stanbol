@@ -16,14 +16,22 @@
  */
 package org.apache.stanbol.ontologymanager.registry.impl.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.stanbol.ontologymanager.registry.api.RegistryOntologyNotLoadedException;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryOntology;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
+/**
+ * 
+ * TODO: propagate removal of children in the model to registered raw ontologies.
+ * 
+ */
 public class RegistryOntologyImpl extends AbstractRegistryItem implements RegistryOntology {
 
-    private OWLOntology owl;
+    private Map<IRI,OWLOntology> owl = new HashMap<IRI,OWLOntology>();
 
     public RegistryOntologyImpl(IRI iri) {
         super(iri);
@@ -34,9 +42,14 @@ public class RegistryOntologyImpl extends AbstractRegistryItem implements Regist
     }
 
     @Override
-    public OWLOntology asOWLOntology() throws RegistryOntologyNotLoadedException {
-        fireContentRequested(this);
+    public Map<IRI,OWLOntology> getRawOntologies() throws RegistryOntologyNotLoadedException {
         return owl;
+    }
+
+    @Override
+    public OWLOntology getRawOntology(IRI libraryID) throws RegistryOntologyNotLoadedException {
+        fireContentRequested(this);
+        return owl.get(libraryID);
     }
 
     @Override
@@ -45,8 +58,9 @@ public class RegistryOntologyImpl extends AbstractRegistryItem implements Regist
     }
 
     @Override
-    public void setOWLOntology(OWLOntology owl) {
-        this.owl = owl;
+    public void setRawOntology(IRI libraryID, OWLOntology owl) {
+        if (owl == null) this.owl.remove(libraryID);
+        this.owl.put(libraryID, owl);
     }
 
 }

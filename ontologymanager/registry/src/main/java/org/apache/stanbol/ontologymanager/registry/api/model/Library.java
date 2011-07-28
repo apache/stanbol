@@ -19,6 +19,7 @@ package org.apache.stanbol.ontologymanager.registry.api.model;
 import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
@@ -63,7 +64,7 @@ public interface Library extends RegistryItem {
 
     /**
      * Causes all the ontologies referenced by this library to be loaded, so that when
-     * {@link RegistryOntology#asOWLOntology()} is invoked on one of its children, it will return the
+     * {@link RegistryOntology#getRawOntology(IRI)} is invoked on one of its children, it will return the
      * corresponding OWL ontology, if a valid one was parsed from its location.
      * 
      * @param mgr

@@ -89,7 +89,7 @@ public interface RegistryManager extends RegistryItemIndex {
 
     /**
      * Determines if the registry manager is set to load its resources only when a specific request for them
-     * (e.g. by a call to {@link RegistryOntology#asOWLOntology()} or {@link Library#getOntologies()} is
+     * (e.g. by a call to {@link RegistryOntology#getRawOntology(IRI)} or {@link Library#getOntologies()} is
      * issued).
      * 
      * @return true if set to load resources only upon request, false if set to load all resources eagerly

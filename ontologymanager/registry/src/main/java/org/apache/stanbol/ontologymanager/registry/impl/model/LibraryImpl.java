@@ -83,7 +83,7 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
         Set<OWLOntology> ontologies = new HashSet<OWLOntology>();
         for (RegistryItem child : getChildren()) {
             if (child instanceof RegistryOntology) {
-                OWLOntology o = ((RegistryOntology) child).asOWLOntology();
+                OWLOntology o = ((RegistryOntology) child).getRawOntology(this.getIRI());
                 // Should never be null if the library was loaded correctly (an error should have already been
                 // thrown when loading it), but just in case.
                 if (o != null) ontologies.add(o);
@@ -104,6 +104,13 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
     }
 
     @Override
+    public void removeChild(RegistryItem child) {
+        super.removeChild(child);
+        // Also unload the ontology version that comes from this library.
+        if (child instanceof RegistryOntology) ((RegistryOntology) child).setRawOntology(getIRI(), null);
+    }
+
+    @Override
     public synchronized void loadOntologies(OWLOntologyManager mgr) {
         if (mgr == null) throw new IllegalArgumentException("A null ontology manager is not allowed.");
         for (RegistryItem item : getChildren()) {
@@ -111,11 +118,11 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
                 RegistryOntology o = (RegistryOntology) item;
                 IRI id = o.getIRI();
                 try {
-                    o.setOWLOntology(mgr.loadOntology(id));
+                    o.setRawOntology(getIRI(), mgr.loadOntology(id));
                 } catch (OWLOntologyAlreadyExistsException e) {
-                    o.setOWLOntology(mgr.getOntology(e.getOntologyID()));
+                    o.setRawOntology(getIRI(), mgr.getOntology(e.getOntologyID()));
                 } catch (OWLOntologyDocumentAlreadyExistsException e) {
-                    o.setOWLOntology(mgr.getOntology(e.getOntologyDocumentIRI()));
+                    o.setRawOntology(getIRI(), mgr.getOntology(e.getOntologyDocumentIRI()));
                 } catch (OWLOntologyCreationException e) {
                     log.error("Failed to load ontology " + id, e);
                 }

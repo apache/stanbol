@@ -16,7 +16,10 @@
  */
 package org.apache.stanbol.ontologymanager.registry.api.model;
 
+import java.util.Map;
+
 import org.apache.stanbol.ontologymanager.registry.api.RegistryOntologyNotLoadedException;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
@@ -30,7 +33,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * <br/>
  * Once the corresponding ontology has been loaded (e.g. by a call to
  * {@link Library#loadOntologies(OWLOntologyManager)}), the corresponding {@link OWLOntology} object is
- * available via calls to {@link #asOWLOntology()}.
+ * available via calls to {@link #getRawOntology(IRI)}.
  */
 public interface RegistryOntology extends RegistryItem {
 
@@ -38,6 +41,8 @@ public interface RegistryOntology extends RegistryItem {
      * The type of this registry item is {@link Type#ONTOLOGY}.
      */
     final Type type = Type.ONTOLOGY;
+
+    Map<IRI,OWLOntology> getRawOntologies() throws RegistryOntologyNotLoadedException;
 
     /**
      * Returns the {@link OWLOntology} object corresponding to this registry ontology. If the ontology was not
@@ -48,19 +53,22 @@ public interface RegistryOntology extends RegistryItem {
      * invoking a load method may or may not cause the content to be available to this method before it
      * returns.
      * 
+     * @param libraryID
+     *            TODO
+     * 
      * @return the OWL ontology corresponding to this registry ontology.
      * @throws RegistryOntologyNotLoadedException
      *             if the ontology is not loaded.
      */
-    OWLOntology asOWLOntology() throws RegistryOntologyNotLoadedException;
-
+    OWLOntology getRawOntology(IRI libraryID) throws RegistryOntologyNotLoadedException;
+    
     /**
      * Returns the {@link OWLOntology} object corresponding to this registry ontology. Note that the method
      * does not check whether the registry item ID matches the ontology ID or its physical location.
-     * 
+     * @param libraryID TODO
      * @param owl
      *            the OWL ontology corresponding to this registry ontology.
      */
-    void setOWLOntology(OWLOntology owl);
+    void setRawOntology(IRI libraryID, OWLOntology owl);
 
 }
