@@ -22,6 +22,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
@@ -53,7 +54,10 @@ public class TestOntologyLibrary {
     private static OfflineConfiguration offline;
 
     /**
-     * Sets the ontology network manager and registry loader before running the tests.
+     * Sets the offline configuration (identical across tests) before running the tests.
+     * 
+     * @throws Exception
+     *             if any error occurs;
      */
     @BeforeClass
     public static void setupTest() throws Exception {
@@ -62,12 +66,15 @@ public class TestOntologyLibrary {
         offline = new OfflineConfigurationImpl(config);
     }
 
-    private String registryResource = "/ontologies/registry/onmtest.owl";
+    private String registryResourcePath = "/ontologies/registry/onmtest.owl";
 
     private RegistryManager regMgr;
 
     private OWLOntologyManager virginOntologyManager;
 
+    /**
+     * Resets the registry manager, which each unit test needs to reconfigure individually.
+     */
     @After
     public void reset() {
         regMgr = null;
@@ -95,24 +102,28 @@ public class TestOntologyLibrary {
     }
 
     /**
-     * Uses a plain {@link RegistryLoader} to load a single ontology library and checks for its expected hits
+     * Uses a plain {@link RegistryManager} to load a single ontology library and checks for its expected hits
      * and misses.
      * 
      * @throws Exception
+     *             if any error occurs;
      */
     @Test
     public void testLibraryLoad() throws Exception {
 
-        IRI localTestRegistry = IRI.create(getClass().getResource(registryResource));
-
+        IRI localTestRegistry = IRI.create(getClass().getResource(registryResourcePath));
         Dictionary<String,Object> regmanConf = new Hashtable<String,Object>();
         regmanConf.put(RegistryManager.REGISTRY_LOCATIONS, new String[] {localTestRegistry.toString()});
+        // Instantiating the registry manager will also load the registry data.
         regMgr = new RegistryManagerImpl(offline, regmanConf);
-        assertNotNull(regMgr);
 
-        assertFalse(regMgr.getRegistries().isEmpty());
-        assertEquals(1, regMgr.getRegistries().size());
-        Registry reg = regMgr.getRegistries().iterator().next();
+        // The resulting manager must exist and have exactly one registry.
+        assertNotNull(regMgr);
+        Set<Registry> registries = regMgr.getRegistries();
+        assertFalse(registries.isEmpty());
+        assertEquals(1, registries.size());
+
+        Registry reg = registries.iterator().next();
         assertTrue(reg.hasChildren());
         Library lib = null;
         // Look for test #Library2
@@ -140,13 +151,14 @@ public class TestOntologyLibrary {
     @Test
     public void testLibrarySourceCreation() throws Exception {
 
-        IRI localTestRegistry = IRI.create(getClass().getResource(registryResource));
-
+        IRI localTestRegistry = IRI.create(getClass().getResource(registryResourcePath));
         Dictionary<String,Object> regmanConf = new Hashtable<String,Object>();
         regmanConf.put(RegistryManager.REGISTRY_LOCATIONS, new String[] {localTestRegistry.toString()});
+        // Instantiating the registry manager will also load the registry data.
         regMgr = new RegistryManagerImpl(offline, regmanConf);
         assertNotNull(regMgr);
 
+        // Now use this registry manager to instantiate an input source.
         OntologyInputSource src = new LibrarySource(Locations.LIBRARY_TEST1, regMgr, virginOntologyManager);
         OWLOntology o = src.getRootOntology();
         boolean hasImporting = false, hasImported = false;

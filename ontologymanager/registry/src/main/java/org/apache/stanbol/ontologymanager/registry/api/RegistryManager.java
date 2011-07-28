@@ -85,6 +85,11 @@ public interface RegistryManager extends RegistryItemIndex {
      */
     CachingPolicy getCachingPolicy();
 
+    /**
+     * Returns the offline configuration currently employed by this registry manager.
+     * 
+     * @return the offline configuration in use.
+     */
     OfflineConfiguration getOfflineConfiguration();
 
     /**
@@ -104,7 +109,7 @@ public interface RegistryManager extends RegistryItemIndex {
      *            the ontology registry to be removed.
      */
     void removeRegistry(IRI registryId);
-    
+
     /**
      * Sets the resource loading policy of this registry manager. There is no guarantee that setting a policy
      * after a model has already been created will affect the existing model (i.e. unload all its ontologies

@@ -35,6 +35,7 @@ public class RegistryImpl extends AbstractRegistryItem implements Registry {
         return this.message;
     }
 
+    @Override
     public String getName() {
         return super.getName() + getError();
     }

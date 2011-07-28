@@ -46,19 +46,51 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
+    /**
+     * Creates a new instance of {@link LibraryImpl}.
+     * 
+     * @param iri
+     *            the library identifier and possible physical location.
+     */
     public LibraryImpl(IRI iri) {
         this(iri, OWLManager.createOWLOntologyManager());
     }
 
+    /**
+     * Creates a new instance of {@link LibraryImpl}.
+     * 
+     * @param iri
+     *            the library identifier and possible physical location.
+     * @param cache
+     *            the {@link OWLOntologyManager} to be used for caching ontologies in-memory.
+     */
     public LibraryImpl(IRI iri, OWLOntologyManager cache) {
         super(iri);
         setCache(cache);
     }
 
+    /**
+     * Creates a new instance of {@link LibraryImpl}.
+     * 
+     * @param iri
+     *            the library identifier and possible physical location.
+     * @param name
+     *            the short name of this library.
+     */
     public LibraryImpl(IRI iri, String name) {
         this(iri, name, OWLManager.createOWLOntologyManager());
     }
 
+    /**
+     * Creates a new instance of {@link LibraryImpl}.
+     * 
+     * @param iri
+     *            the library identifier and possible physical location.
+     * @param name
+     *            the short name of this library.
+     * @param cache
+     *            the {@link OWLOntologyManager} to be used for caching ontologies in-memory.
+     */
     public LibraryImpl(IRI iri, String name, OWLOntologyManager cache) {
         super(iri, name);
         setCache(cache);
@@ -104,13 +136,6 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
     }
 
     @Override
-    public void removeChild(RegistryItem child) {
-        super.removeChild(child);
-        // Also unload the ontology version that comes from this library.
-        if (child instanceof RegistryOntology) ((RegistryOntology) child).setRawOntology(getIRI(), null);
-    }
-
-    @Override
     public synchronized void loadOntologies(OWLOntologyManager mgr) {
         if (mgr == null) throw new IllegalArgumentException("A null ontology manager is not allowed.");
         for (RegistryItem item : getChildren()) {
@@ -129,6 +154,13 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
             }
         }
         loaded = true;
+    }
+
+    @Override
+    public void removeChild(RegistryItem child) {
+        super.removeChild(child);
+        // Also unload the ontology version that comes from this library.
+        if (child instanceof RegistryOntology) ((RegistryOntology) child).setRawOntology(getIRI(), null);
     }
 
     @Override

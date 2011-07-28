@@ -46,10 +46,15 @@ public class TestRegistryManager {
     private static Dictionary<String,Object> configuration;
 
     /*
-     * This can very well stay the same across
+     * This can very well stay the same across tests.
      */
     private static OfflineConfiguration offline;
 
+    /**
+     * Resets all configurations (the offline and registry manager ones).
+     * 
+     * @throws Exception
+     */
     @BeforeClass
     public static void setup() throws Exception {
         configuration = new Hashtable<String,Object>();
@@ -132,6 +137,12 @@ public class TestRegistryManager {
         }
     }
 
+    /**
+     * Verifies that by setting the loading policy to eager (LAZY_LOADING = false), any random library will
+     * respond true to a call to {@link Library#isLoaded()} without ever "touching" its content.
+     * 
+     * @throws Exception
+     */
     @Test
     public void testLoadingEager() throws Exception {
         // Change the caching policy and setup a new registry manager.
@@ -158,6 +169,13 @@ public class TestRegistryManager {
         assertTrue(lib.isLoaded());
     }
 
+    /**
+     * Verifies that by setting the loading policy to lazy (LAZY_LOADING = true), any random library will
+     * respond false to a call to {@link Library#isLoaded()}, until its content is "touched" via a call to
+     * {@link Library#getOntologies()}, only after which will it return true.
+     * 
+     * @throws Exception
+     */
     @Test
     public void testLoadingLazy() throws Exception {
         // Change the caching policy and setup a new registry manager.
@@ -169,23 +187,31 @@ public class TestRegistryManager {
 
         // Now pick a library.
         Registry reg;
+        Iterator<Registry> it =regman.getRegistries().iterator();
         do
-            reg = regman.getRegistries().iterator().next();
-        while (!reg.hasChildren());
+            reg = it.next();
+        // We need a registry with at least 2 libraries to check that only one will be loaded.
+        while (it.hasNext() && !reg.hasChildren() || reg.getChildren().length < 2);
         assertNotNull(reg);
 
-        // There has to be at least one non-empty library from the test registries...
-        Library lib = null;
+        // There has to be at least one library with 2 children or more from the test registries...
+        Library lib1 = null, lib2 = null;
         RegistryItem[] children = reg.getChildren();
-        for (int i = 0; i < children.length && lib == null; i++)
-            if (children[i] instanceof Library) lib = (Library) (children[i]);
-        assertNotNull(lib);
+        assertTrue(children.length >= 2);
+        for (int i = 0; i < children.length - 1 && lib1 == null && lib2 == null; i++) {
+            if (children[i] instanceof Library) lib1 = (Library) (children[i]);
+            if (children[i + 1] instanceof Library) lib2 = (Library) (children[i + 1]);
+        }
+        assertFalse(lib1==lib2);
+        assertNotNull(lib1);
         // ...but its ontologies must not be loaded yet.
-        assertFalse(lib.isLoaded());
+        assertFalse(lib1.isLoaded());
+        assertFalse(lib2.isLoaded());
 
         // Touch the library. Also test that the listener system works.
-        assertFalse(lib.getOntologies().isEmpty());
-        assertTrue(lib.isLoaded());
+        assertFalse(lib1.getOntologies().isEmpty());
+        assertTrue(lib1.isLoaded());
+        assertFalse(lib2.isLoaded());
     }
 
 }

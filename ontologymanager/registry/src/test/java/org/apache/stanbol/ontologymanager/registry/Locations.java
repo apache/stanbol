@@ -66,8 +66,12 @@ public class Locations {
     public static final IRI LIBRARY_TEST2 = IRI.create(_REGISTRY_TEST + "#Library2");
 
     /**
+     * Non existing and not referenced by any library. Used for negative tests.
+     */
+    public static final IRI ONT_BOGUS = IRI.create(__STANBOL_ONT_NAMESPACE + "bogus.owl");
+
+    /**
      * Identifier of test ontology library 1.
      */
     public static final IRI ONT_TEST1 = IRI.create(__STANBOL_ONT_NAMESPACE + "test1.owl");
-
 }
