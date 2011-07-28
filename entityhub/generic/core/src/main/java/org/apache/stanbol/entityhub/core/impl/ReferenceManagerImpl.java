@@ -255,11 +255,25 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
         log.debug("findIds for query{}", query);
         // We need to search all referenced Sites
         Set<String> entityIds = new HashSet<String>();
+        //TODO: The QueryResultList expects that the query as executed is added
+        //to the response. However when executing queries on multiple site they
+        //might support a different set of features and therefore execute
+        //different variants. For now I return simple the query as executed by
+        //the first Site that contributes results
+        FieldQuery processedQuery = null;
+        FieldQuery queryWithResults = null; 
         for(ReferencedSite site : referencedSites){
             if(site.supportsSearch()){
                 log.debug(" > query site {}",site.getId());
                 try {
-                    for(String entityId : site.findReferences(query)){
+                    QueryResultList<String> results = site.findReferences(query);
+                    if(processedQuery == null){
+                        processedQuery = results.getQuery();
+                    }
+                    if(!results.isEmpty() && queryWithResults == null){
+                        processedQuery = results.getQuery();
+                    }
+                    for(String entityId : results){
                         entityIds.add(entityId);
                     }
                 } catch (ReferencedSiteException e) {
@@ -270,17 +284,35 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
                 log.debug(" > Site {} does not support queries",site.getId());
             }
         }
-        return new QueryResultListImpl<String>(query, entityIds.iterator(),String.class);
+        return new QueryResultListImpl<String>(
+                queryWithResults != null ? queryWithResults : //use the query with results
+                    processedQuery != null ? processedQuery : //if not a processed
+                        query, //else the parsed one
+                            entityIds.iterator(),String.class);
     }
     @Override
     public QueryResultList<Representation> find(FieldQuery query) {
         log.debug("find with query{}", query);
         Set<Representation> representations = new HashSet<Representation>();
+        //TODO: The QueryResultList expects that the query as executed is added
+        //to the response. However when executing queries on multiple site they
+        //might support a different set of features and therefore execute
+        //different variants. For now I return simple the query as executed by
+        //the first Site that contributes results
+        FieldQuery processedQuery = null;
+        FieldQuery queryWithResults = null; 
         for(ReferencedSite site : referencedSites){
             if(site.supportsSearch()){
                 log.debug(" > query site {}",site.getId());
                 try {
-                    for(Representation rep : site.find(query)){
+                    QueryResultList<Representation> results = site.find(query);
+                    if(processedQuery == null){
+                        processedQuery = results.getQuery();
+                    }
+                    if(!results.isEmpty() && queryWithResults == null){
+                        processedQuery = results.getQuery();
+                    }
+                    for(Representation rep : results){
                         if(!representations.contains(rep)){ //do not override
                             representations.add(rep);
                         } else {
@@ -297,17 +329,35 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
                 log.debug(" > Site {} does not support queries",site.getId());
             }
         }
-        return new QueryResultListImpl<Representation>(query, representations,Representation.class);
+        return new QueryResultListImpl<Representation>(
+                queryWithResults != null ? queryWithResults : //use the query with results
+                    processedQuery != null ? processedQuery : //if not a processed
+                        query, //else the parsed one
+                            representations,Representation.class);
     }
     @Override
     public QueryResultList<Entity> findEntities(FieldQuery query) {
         log.debug("findEntities for query{}", query);
+        //TODO: The QueryResultList expects that the query as executed is added
+        //to the response. However when executing queries on multiple site they
+        //might support a different set of features and therefore execute
+        //different variants. For now I return simple the query as executed by
+        //the first Site that contributes results
+        FieldQuery processedQuery = null;
+        FieldQuery queryWithResults = null; 
         Set<Entity> entities = new HashSet<Entity>();
         for(ReferencedSite site : referencedSites){
             if(site.supportsSearch()){ //do not search on sites that do not support it
                 log.debug(" > query site {}",site.getId());
                 try {
-                    for(Entity rep : site.findEntities(query)){
+                    QueryResultList<Entity> results = site.findEntities(query);
+                    if(processedQuery == null){
+                        processedQuery = results.getQuery();
+                    }
+                    if(!results.isEmpty() && queryWithResults == null){
+                        processedQuery = results.getQuery();
+                    }
+                    for(Entity rep : results){
                         if(!entities.contains(rep)){ //do not override
                             entities.add(rep);
                         } else {
@@ -326,7 +376,11 @@ public class ReferenceManagerImpl implements ReferencedSiteManager {
                 log.debug(" > Site {} does not support queries",site.getId());
             }
         }
-        return new QueryResultListImpl<Entity>(query, entities,Entity.class);
+        return new QueryResultListImpl<Entity>(
+                queryWithResults != null ? queryWithResults : //use the query with results
+                    processedQuery != null ? processedQuery : //if not a processed
+                        query, //else the parsed one
+                            entities,Entity.class);
     }
     @Override
     public InputStream getContent(String entityId, String contentType) {

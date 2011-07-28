@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -37,10 +38,12 @@ import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
+import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.Query;
 import org.apache.stanbol.entityhub.servicesapi.query.RangeConstraint;
+import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.SimilarityConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint;
@@ -147,11 +150,20 @@ public class SolrQueryFactory {
         QUERY,
         ALL
     }
-
+    /**
+     * Converts the field query to a SolrQuery. In addition changes the parsed
+     * FieldQuery (e.g. removing unsupported features, setting defaults for
+     * missing parameters)
+     * @param fieldQuery the field query (will be modified to reflect the query
+     * as executed)
+     * @param select the SELECT mode
+     * @return the SolrQuery
+     */
     public SolrQuery parseFieldQuery(FieldQuery fieldQuery, SELECT select) {
         SolrQuery query = initSolrQuery(fieldQuery);
-        setSelected(query, fieldQuery.getSelectedFields(), select);
+        setSelected(query, fieldQuery, select);
         StringBuilder queryString = new StringBuilder();
+        Map<String,Constraint> processedFieldConstraints = new HashMap<String,Constraint>();
         for (Entry<String,Constraint> fieldConstraint : fieldQuery) {
             if (fieldConstraint.getValue().getType() == ConstraintType.similarity) {
                 // TODO: log make the FieldQuery ensure that there is no more than one instead of similarity
@@ -174,18 +186,27 @@ public class SolrQueryFactory {
             } else {
                 IndexConstraint indexConstraint = createIndexConstraint(fieldConstraint);
                 if (indexConstraint.isInvalid()) {
-                    log.warn(String
-                            .format(
-                                "Unable to create IndexConstraint for Constraint %s (type: %s) and Field %s (Reosens: %s)",
-                                fieldConstraint.getValue(), fieldConstraint.getValue().getType(),
-                                fieldConstraint.getKey(), indexConstraint.getInvalidMessages()));
+                    log.warn(String.format(
+                        "Unable to create IndexConstraint for Constraint %s (type: %s) and Field %s (Reosens: %s)",
+                        fieldConstraint.getValue(), fieldConstraint.getValue().getType(),
+                        fieldConstraint.getKey(), indexConstraint.getInvalidMessages()));
                 } else {
                     if (queryString.length() > 0) {
                         queryString.append(" AND ");
                     }
                     indexConstraint.encode(queryString);
+                    //set the constraint (may be changed because of some unsupported features)
+                    processedFieldConstraints.put(fieldConstraint.getKey(), 
+                        indexConstraint.getFieldQueryConstraint() == null ? //if null
+                                fieldConstraint.getValue() : //assume no change and add the parsed one
+                                    indexConstraint.getFieldQueryConstraint()); //add the changed version
                 }
             }
+        }
+        //set the constraints as processed to the parsed query
+        fieldQuery.removeAllConstraints();
+        for(Entry<String,Constraint> constraint : processedFieldConstraints.entrySet()){
+            fieldQuery.setConstraint(constraint.getKey(), constraint.getValue());
         }
         if (queryString.length() > 0) {
             String qs = queryString.toString();
@@ -210,13 +231,14 @@ public class SolrQueryFactory {
      * @param query
      * @param selected
      */
-    private void setSelected(SolrQuery query, Collection<String> selected, SELECT select) {
+    private void setSelected(SolrQuery query, FieldQuery fieldQuery, SELECT select) {
         switch (select) {
             case ID:
                 query.addField(fieldMapper.getDocumentIdField());
+                fieldQuery.removeAllSelectedFields();
                 break;
             case QUERY:
-                if (selected.isEmpty()) {
+                if (fieldQuery.getSelectedFields().isEmpty()) {
                     query.addField(fieldMapper.getDocumentIdField());
                 } else {
                     query.addField("*");
@@ -239,6 +261,7 @@ public class SolrQueryFactory {
         }
         // add the select for the score
         query.addField("score");
+        fieldQuery.addSelectedField(RdfResourceEnum.resultScore.getUri());
     }
 
     private IndexConstraint createIndexConstraint(Entry<String,Constraint> fieldConstraint) {
@@ -344,12 +367,14 @@ public class SolrQueryFactory {
                 valueConstraint.getDataTypes()));
         } else {
             // first process the parsed dataTypes to get the supported types
-            Collection<IndexDataType> indexDataTypes = new ArrayList<IndexDataType>();
+            List<IndexDataType> indexDataTypes = new ArrayList<IndexDataType>();
+            List<String> acceptedDataTypes = new ArrayList<String>();
             if (valueConstraint.getDataTypes() != null) {
                 for (String dataType : valueConstraint.getDataTypes()) {
                     IndexDataTypeEnum indexDataTypeEnumEntry = IndexDataTypeEnum.forUri(dataType);
                     if (indexDataTypeEnumEntry != null) {
                         indexDataTypes.add(indexDataTypeEnumEntry.getIndexType());
+                        acceptedDataTypes.add(dataType);
                     } else {
                         // TODO: Add possibility to add warnings to indexConstraints
                         log.warn("A Datatype parsed for a ValueConstraint is not " +
@@ -358,35 +383,33 @@ public class SolrQueryFactory {
                     }
                 }
             }
-            IndexDataType indexDataType;
-            if(indexDataTypes.isEmpty()){
-                indexDataType = null;
-            } else {
-                Iterator<IndexDataType> it = indexDataTypes.iterator();
-                indexDataType = it.next();
-                if(it.hasNext()){
-                    log.warn("Only a single DataType is supported for ValueConstraints" +
-                    		"used: {} ignored {}", indexDataType,
-                    		ModelUtils.asCollection(it));
-                }
-            }
             IndexValue constraintValue;
-            if (indexDataType == null) { // if no supported types are present
+            if(indexDataTypes.isEmpty()){ // if no supported types are present
                 // get the dataType based on the type of the value
                 try {
                     constraintValue = indexValueFactory.createIndexValue(valueConstraint.getValue());
                 } catch (NoConverterException e) {
                     // if not found use the toString() and string as type
-                    indexDataType = IndexDataTypeEnum.STR.getIndexType();
                     log.warn(String
                             .format(
                                 "Unable to create IndexValue for value %s (type: %s). Create IndexValue manually by using the first parsed IndexDataType %s",
                                 valueConstraint.getValue(), valueConstraint.getValue().getClass(),
-                                indexDataType));
-                    constraintValue = new IndexValue(valueConstraint.getValue().toString(), indexDataType);
+                                IndexDataTypeEnum.STR.getIndexType()));
+                    constraintValue = new IndexValue(valueConstraint.getValue().toString(), 
+                        IndexDataTypeEnum.STR.getIndexType());
                 }
-            } else { // one or more supported dataTypes are present
-                constraintValue = new IndexValue(valueConstraint.getValue().toString(), indexDataType);
+                acceptedDataTypes.add(constraintValue.getType().getId());
+            } else {
+                constraintValue = new IndexValue(valueConstraint.getValue().toString(), indexDataTypes.get(0));
+                //we support only a single dataType ...
+                //  ... therefore remove additional data types from the ValueConstraint
+                if(indexDataTypes.size() > 1){
+                    log.warn("Only a single DataType is supported for ValueConstraints!");
+                    while(acceptedDataTypes.size()>1){
+                        String ignored = acceptedDataTypes.remove(acceptedDataTypes.size()-1);
+                        log.warn("  > ignore parsed dataType {}",ignored);
+                    }
+                }
             }
             indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.DATATYPE, constraintValue);
             if(IndexDataTypeEnum.TXT.getIndexType().equals(constraintValue.getType())){
@@ -396,6 +419,13 @@ public class SolrQueryFactory {
                     Collections.singleton(constraintValue.getLanguage()));
             }
             indexConstraint.setFieldConstraint(IndexConstraintTypeEnum.EQ, constraintValue);
+            //update this constraint!
+            if(valueConstraint instanceof ReferenceConstraint){
+                indexConstraint.setFieldQueryConstraint(valueConstraint);
+            } else {
+                indexConstraint.setFieldQueryConstraint(
+                    new ValueConstraint(valueConstraint.getValue(), acceptedDataTypes));
+            }
         }
     }
 
@@ -416,12 +446,14 @@ public class SolrQueryFactory {
                 log.warn(String.format(
                     "Parsed Number of QueryResults %d is greater than the allowed maximum of %d!",
                     entityhubQuery.getLimit(), MAX_QUERY_RESULTS));
+                entityhubQuery.setLimit(MAX_QUERY_RESULTS);
             }
         } else {
             // maybe remove that to prevent to many results! But for now I would
             // rather like to have a default value within the FieldQuery!
             // e.g. set by the FieldQueryFactory when creating new queries!
-            query.setRows(MAX_QUERY_RESULTS);
+            query.setRows(DEFAULT_QUERY_RESULTS);
+            entityhubQuery.setLimit(DEFAULT_QUERY_RESULTS);
         }
         return query;
     }
@@ -518,6 +550,7 @@ public class SolrQueryFactory {
         private final Map<IndexConstraintTypeEnum,Object> fieldConstraints = new EnumMap<IndexConstraintTypeEnum,Object>(
                 IndexConstraintTypeEnum.class);
         private List<String> invalidMessages = new ArrayList<String>();
+        private Constraint fieldQueryConstraint;
 
         /**
          * Creates a Field Term for the parsed path
@@ -563,6 +596,24 @@ public class SolrQueryFactory {
          */
         public List<String> getInvalidMessages() {
             return invalidMessages;
+        }
+        /**
+         * Getter for the (possible modified against the parsed constrained)
+         * version of the FieldQuery {@link Constraint}
+         * @return the Constraint or <code>null</code> if 
+         * <code>{@link #isInvalid()} == false</code>
+         */
+        public final Constraint getFieldQueryConstraint() {
+            return fieldQueryConstraint;
+        }
+        /**
+        /**
+         * Getter for the (possible modified against the parsed constrained)
+         * version of the FieldQuery {@link Constraint}
+         * @param fieldQueryConstraint the constraint
+         */
+        protected final void setFieldQueryConstraint(Constraint fieldQueryConstraint) {
+            this.fieldQueryConstraint = fieldQueryConstraint;
         }
 
         /**

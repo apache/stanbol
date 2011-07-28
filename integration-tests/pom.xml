@@ -60,7 +60,7 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.full</artifactId>
     </dependency>
-	  <dependency>
+	<dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
     </dependency>
@@ -71,6 +71,10 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.test</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>

@@ -16,19 +16,26 @@
  */
 package org.apache.stanbol.entityhub.it;
 
+import static junit.framework.Assert.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.stanbol.commons.testing.http.RequestExecutor;
-import org.apache.stanbol.commons.web.base.writers.JsonLdSerializerProvider;
-import org.apache.stanbol.enhancer.it.EnhancerTestBase;
+import org.apache.stanbol.entityhub.test.it.EntityhubTestBase;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
-import org.junit.Assert;
 import org.junit.Test;
 
 //inherit from EnhancerTestBase, but we more care about the entityhub readiness than engine's one.
-public class EntityHubTest extends EnhancerTestBase {
+public final class EntityHubTest extends EntityhubTestBase {
     
+    public EntityHubTest() {
+        super(new ArrayList<String>(),LoggerFactory.getLogger(EntityHubTest.class));
+    }
+
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     final String PARIS_VALUE =
@@ -79,14 +86,14 @@ public class EntityHubTest extends EnhancerTestBase {
 	        	) ;
     		
     		log.info("Test request number {}/{} : ",i,queryRequests.length);
-    		log.info(re.getContent());
+    		log.debug(re.getContent());
     	
     		re.assertStatus(200)
             .assertContentType("application/json");
     		
     		JSONObject jso = new JSONObject(re.getContent());
     		JSONArray result = jso.getJSONArray("results");
-    		Assert.assertNotSame(0, result.length());
+    		assertNotSame(0, result.length());
     	}
     }
     
@@ -99,13 +106,13 @@ public class EntityHubTest extends EnhancerTestBase {
         	) ;
 		
 		log.info("Test request : ");
-		log.info(re.getContent());
+		log.debug(re.getContent());
 	
 		re.assertStatus(200)
         .assertContentType("application/json");
 		
 		JSONObject jso = new JSONObject(re.getContent());
 		JSONArray result = jso.getJSONArray("results");
-		Assert.assertNotSame(0, result.length());
+		assertNotSame(0, result.length());
     }
 }

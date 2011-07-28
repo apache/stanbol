@@ -47,7 +47,7 @@ import org.apache.stanbol.entityhub.yard.solr.model.IndexDataType;
 public enum IndexDataTypeEnum {
     BOOLEAN(NamespaceEnum.xsd + "boolean", "bool", Boolean.class),
     // BYTE("byt",Byte.class),
-    INT(NamespaceEnum.xsd + "integer", "int", Integer.class),
+    INT(NamespaceEnum.xsd + "int", "int", Integer.class),
     LONG(NamespaceEnum.xsd + "long", "lon", Long.class),
     FLOAT(NamespaceEnum.xsd + "float", "flo", Float.class),
     DOUBLE(NamespaceEnum.xsd + "double", "dou", Double.class),
