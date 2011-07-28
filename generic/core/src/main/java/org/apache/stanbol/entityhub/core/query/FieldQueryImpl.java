@@ -158,11 +158,11 @@ public class FieldQueryImpl implements Cloneable, FieldQuery{
     }
     @Override
     public void removeAllConstraints() {
-        selected.clear();
+        queryConstraint.clear();
     }
     @Override
     public void removeAllSelectedFields() {
-        queryConstraint.clear();
+        selected.clear();
     }
     @Override
     public final String getQueryType() {

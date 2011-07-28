@@ -262,7 +262,8 @@ public enum NamespaceEnum {
         int index = Math.max(fullUri.lastIndexOf('#'),fullUri.lastIndexOf('/'));
         //do not convert if the parsed uri does not contain a local name
         if(index > 0 && index+1 < fullUri.length()){
-            NamespaceEnum namespace = namespace2Prefix.get(fullUri.substring(0, index));
+            String ns = fullUri.substring(0, index+1);
+            NamespaceEnum namespace = namespace2Prefix.get(ns);
             if(namespace != null){
                 return namespace.getPrefix()+':'+fullUri.substring(index+1);
             }

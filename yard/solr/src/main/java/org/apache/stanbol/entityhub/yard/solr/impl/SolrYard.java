@@ -601,12 +601,15 @@ public class SolrYard extends AbstractYard implements Yard {
     }
 
     private QueryResultList<Representation> find(final FieldMapper fieldMapper,final FieldQuery parsedQuery, SELECT select) throws YardException {
-        log.debug("find " + parsedQuery);
+        //create a clone of the query, because we need to refine it because the
+        //query (as executed) needs to be included in the result set
+        FieldQuery fieldQuery = parsedQuery.clone();
+        log.debug("find " + fieldQuery);
         long start = System.currentTimeMillis();
         final Set<String> selected;
         if (select == SELECT.QUERY) {
             // if query set the fields to add to the result Representations
-            selected = new HashSet<String>(parsedQuery.getSelectedFields());
+            selected = new HashSet<String>(fieldQuery.getSelectedFields());
             // add the score to query results!
             selected.add(RdfResourceEnum.resultScore.getUri());
         } else {
@@ -614,7 +617,7 @@ public class SolrYard extends AbstractYard implements Yard {
             selected = null;
         }
 
-        SolrQuery query = getSolrQueryFactory().parseFieldQuery(parsedQuery, select);
+        SolrQuery query = getSolrQueryFactory().parseFieldQuery(fieldQuery, select);
         long queryGeneration = System.currentTimeMillis();
 
         QueryResponse response;
@@ -631,7 +634,7 @@ public class SolrYard extends AbstractYard implements Yard {
         }
         long queryTime = System.currentTimeMillis();
         // return a queryResultList
-        QueryResultListImpl<Representation> resultList = new QueryResultListImpl<Representation>(parsedQuery,
+        QueryResultListImpl<Representation> resultList = new QueryResultListImpl<Representation>(fieldQuery,
         // by adapting SolrDocuments to Representations
                 new AdaptingIterator<SolrDocument,Representation>(response.getResults().iterator(),
                 // inline Adapter Implementation
@@ -652,7 +655,10 @@ public class SolrYard extends AbstractYard implements Yard {
 
     @Override
     public final QueryResultList<String> findReferences(FieldQuery parsedQuery) throws YardException {
-        SolrQuery query = getSolrQueryFactory().parseFieldQuery(parsedQuery, SELECT.ID);
+        //create a clone of the query, because we need to refine it because the
+        //query (as executed) needs to be included in the result set
+        FieldQuery fieldQuery = parsedQuery.clone();
+        SolrQuery query = getSolrQueryFactory().parseFieldQuery(fieldQuery, SELECT.ID);
         QueryResponse respone;
         try {
             respone = getServer().query(query, METHOD.POST);
@@ -661,7 +667,7 @@ public class SolrYard extends AbstractYard implements Yard {
         }
         final FieldMapper fieldMapper = getFieldMapper();
         // return a queryResultList
-        return new QueryResultListImpl<String>(parsedQuery,
+        return new QueryResultListImpl<String>(fieldQuery,
         // by adapting SolrDocuments to Representations
                 new AdaptingIterator<SolrDocument,String>(respone.getResults().iterator(),
                 // inline Adapter Implementation

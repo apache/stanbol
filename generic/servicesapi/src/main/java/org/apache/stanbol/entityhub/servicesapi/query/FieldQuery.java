@@ -34,7 +34,7 @@ import java.util.Map.Entry;
  *       constraints (e.g. via Capability levels ...)
  * @author Rupert Westenthaler
  */
-public interface FieldQuery extends Query,Iterable<Entry<String, Constraint>>{
+public interface FieldQuery extends Query,Iterable<Entry<String, Constraint>>,Cloneable{
 
     /**
      * The value used as result for {@link Query#getQueryType()} of this query
@@ -124,5 +124,9 @@ public interface FieldQuery extends Query,Iterable<Entry<String, Constraint>>{
      * @return the parsed instance with the exact same state as this one
      */
     <T extends FieldQuery> T copyTo(T copyTo);
-
+    /**
+     * Clones the FieldQuery
+     * @return the clone
+     */
+    FieldQuery clone();
 }

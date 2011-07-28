@@ -27,7 +27,7 @@ import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
  * @author Rupert Westenthaler
  *
  */
-public interface Query {
+public interface Query extends Cloneable {
     /**
      * The type of the Query (e.g. "fieldQuery" or "entityQuery"). Typically the
      * type should be defines as String constant in the java interface of the
@@ -64,4 +64,9 @@ public interface Query {
      *    Parsing a negative number results to setting the offset to <code>0</code>
      */
     void setOffset(int offset);
+    /**
+     * Clones the query.
+     * @return the clone
+     */
+    Query clone();
 }

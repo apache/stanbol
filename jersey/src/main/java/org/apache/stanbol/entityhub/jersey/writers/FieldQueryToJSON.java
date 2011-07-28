@@ -62,9 +62,9 @@ final class FieldQueryToJSON {
         if(query.getLimit() != null){
             jQuery.put("limit", query.getLimit());
         }
-        if(query.getOffset() != 0){
+        //if(query.getOffset() != 0){
             jQuery.put("offset", query.getOffset());
-        }
+        //}
         return jQuery;
     }
 

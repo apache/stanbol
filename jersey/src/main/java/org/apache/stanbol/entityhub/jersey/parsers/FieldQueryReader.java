@@ -178,7 +178,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
                         continue;
                     }
                 }
-            } else { //no field defined -> ignroe and write warning!
+            } else { //empty field
                 parsingErrorMessages.append('\n');
                 parsingErrorMessages.append("Constraints MUST define a value for 'field'\n");
                 parsingErrorMessages.append("Parsed Constraint:\n");
@@ -208,10 +208,28 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
         } //else no selected fields -> funny but maybe someone do need only the ids
         //parse limit and offset
         if(jQuery.has("limit") && !jQuery.isNull("limit")){
-            query.setLimit(jQuery.getInt("limit"));
+            try {
+                query.setLimit(jQuery.getInt("limit"));
+            } catch (JSONException e) {
+                parsingErrorMessages.append('\n');
+                parsingErrorMessages.append("Property \"limit\" MUST BE a valid integer number!\n");
+                parsingErrorMessages.append("Parsed Value:");
+                parsingErrorMessages.append(jQuery.get("init"));
+                parsingErrorMessages.append('\n');
+                parsingError = true;
+            }
         }
         if(jQuery.has("offset") && !jQuery.isNull("offset")){
-            query.setOffset(jQuery.getInt("offset"));
+            try {
+                query.setOffset(jQuery.getInt("offset"));
+            } catch (JSONException e) {
+                parsingErrorMessages.append('\n');
+                parsingErrorMessages.append("Property \"offset\" MUST BE a valid integer number!\n");
+                parsingErrorMessages.append("Parsed Value:");
+                parsingErrorMessages.append(jQuery.get("init"));
+                parsingErrorMessages.append('\n');
+                parsingError = true;
+            }
         }
         return query;
     }
