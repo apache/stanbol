@@ -48,13 +48,18 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>provided</scope>
     </dependency>
+    <!-- Logging -->
     <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
     </dependency>
     <!-- dependency>
       <groupId>org.apache.stanbol</groupId>
