@@ -1,16 +1,14 @@
 package org.apache.stanbol.entityhub.test.query;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
+import static org.apache.stanbol.entityhub.test.it.AssertEntityhubJson.assertResponseQuery;
+import static org.apache.stanbol.entityhub.test.it.AssertEntityhubJson.assertSelectedField;
+import static org.apache.stanbol.entityhub.test.it.AssertEntityhubJson.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 import java.util.UUID;
 import java.util.Map.Entry;
 
@@ -98,129 +96,10 @@ public abstract class QueryTestBase extends EntityhubTestBase {
             request.withHeader(header.getKey(), header.getValue());
         }
         request.withContent(test.getContent());
-        return executor.execute(request);
+        RequestExecutor re = executor.execute(request);
+        assertQueryResults(re, test);
+        return re;
     }
-    /**
-     * Validates Results of a Query (/find or /query requests) based on the
-     * data defined by the test case
-     * @param re the {@link RequestExecutor} used for the test case
-     * @param test the query test case
-     * @throws JSONException in case the {@link RequestExecutor#getContent()} are
-     * no valid JSON. NOTE that the contents are only parsed if the
-     * {@link QueryTestCase#getExpectedStatus()} is a 2xx status code.
-     */
-    protected void assertQueryResults(RequestExecutor re, QueryTestCase test) throws JSONException{
-        re.assertStatus(test.getExpectedStatus());
-        re.assertContentType("application/json"); //currently only application/json is supported
-        if(!test.expectsSuccess()){
-            return; //no further checks for tests that expect failure
-        }
-        JSONObject jso = new JSONObject(re.getContent());
-        JSONArray results = jso.getJSONArray("results");
-        if(test.expectesResults()){
-            assertTrue("Missing Results for Query: \n "+test,
-                results.length() > 0);
-        } else {
-            assertTrue("Unexpected Results for Query:\n "+test,
-                results.length() == 0);
-        }
-        Set<String> expectedIds;
-        if(test.getExpectedResultIds() != null && !test.getExpectedResultIds().isEmpty()){
-            expectedIds = new HashSet<String>(test.getExpectedResultIds());
-        } else {
-            expectedIds = null;
-        }
-        
-        //iterate over the results
-        //General NOTE:
-        //  use opt**(..) methods to avoid JSON Exception. We want to parse
-        //  everything and than do asserts!
-        for(int i=0;i<results.length();i++){
-            JSONObject result = results.getJSONObject(i);
-            String id = result.optString("id", null);
-            assertNotNull("ID missing for an Result", id);
-            if(expectedIds != null && expectedIds.remove(id)){ //not all results must be in the list
-                log.info("  > expected result: {}",id);
-            } else {
-                log.debug("  > result: {}",id);
-            }
-            if(test.getProhibitedResultIds() != null){
-                assertFalse("Prohibited Result '"+id+"' found!",
-                    test.getProhibitedResultIds().contains(id));
-            }
-            Set<String> checkRequiredFields; //copy over the required fields
-            if(test.getRequiredFields() != null && !test.getRequiredFields().isEmpty()){
-                checkRequiredFields = new HashSet<String>(test.getRequiredFields());
-            } else {
-                checkRequiredFields = null;
-            }
-            for(Iterator<?> keys = result.keys(); keys.hasNext();){
-                Object key = keys.next();
-                //process key
-                assertTrue("Field "+key+" is not an expected one",
-                    test.getAllowedFields().contains(key));
-                if(checkRequiredFields != null && checkRequiredFields.remove(key)){
-                    log.info("     - required field {}", key);
-                } else {
-                    log.debug("     - optional field {}", key);
-                }
-            }
-            if(checkRequiredFields != null){
-                assertTrue("Missing required Fields "+checkRequiredFields,
-                    checkRequiredFields.isEmpty());
-            }
-        }
-        if(expectedIds != null){ // if there where expected results check that all where found
-            assertTrue("The following expected results where missing in the Response: \n "+expectedIds,
-                expectedIds.isEmpty());
-        }
-    }
-    /**
-     * Asserts that the Query is present in the response and if so returns the
-     * query
-     * @param content the returned content
-     * @return the query as contained in the response
-     * @throws JSONException on any Error while parsing the JSON query from the
-     * parsed content
-     */
-    protected JSONObject assertResponseQuery(String content) throws JSONException {
-        assertNotNull("The content of the Response is NULL",content);
-        JSONObject jResult = new JSONObject(content);
-        JSONObject jQuery = jResult.optJSONObject("query");
-        assertNotNull("Result does not contain the processed Query",jQuery);
-        return jQuery;
-    }
-    /**
-     * Asserts that the selected JSONArray of the field query returned within
-     * the result list contains parsed selected fields
-     * @param jQuery the query e.g. as returned by 
-     * {@link #assertQueryResults(RequestExecutor, QueryTestCase)}
-     * @return the selected fields for further processing
-     * @throws JSONException on any error while parsing the JSON
-     */
-    protected JSONArray assertSelectedField(JSONObject jQuery,String...selected) throws JSONException {
-        Set<String> selectedSet = new HashSet<String>();
-        if(selected == null || selected.length == 0) {
-            selectedSet = Collections.emptySet();
-        } else {
-            selectedSet = new HashSet<String>(Arrays.asList(selected));
-        }
-        JSONArray jSelected = jQuery.optJSONArray("selected");
-        assertNotNull("Result Query is missing the 'selected' property",jSelected);
-        assertTrue("Result Query is expected to have at least a single selected field",
-            jSelected.length() > 0);
-        boolean found = false;
-        for(int i=0;i<jSelected.length() && !found;i++){
-            String selectedField = jSelected.optString(i,null);
-            assertNotNull("Selected array contains a NULL element \n"+jSelected.toString(4),
-                selectedField);
-            selectedSet.remove(selectedField);
-        }
-        assertTrue("Fields "+selectedSet+" are not selected by\n"+jSelected.toString(4),
-            selectedSet.isEmpty());
-        return jSelected;
-    }    
-    
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      *  Find Query Test Methods:
      * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
