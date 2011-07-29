@@ -15,7 +15,6 @@ public abstract class QueryTestCase {
      */
     public static final Set<String> DEFAULT_RESULT_FIELDS = 
         Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-            "id",
             "http://www.iks-project.eu/ontology/rick/query/score")));
 
     public static final Map<? extends String,? extends String> DEFAULT_HEADER;
@@ -73,22 +72,13 @@ public abstract class QueryTestCase {
     /**
      * Setter for the required fields
      * @param requiredFields
-     * @throws IllegalArgumentException In case a parsed required field is not
-     * contained in the {@link #getAllowedFields()} or the 
+     * @throws IllegalArgumentException In case the 
      * {@link #getExpectedStatus()} is not an 2xx code
      */
     protected final void setRequiredFields(Collection<String> requiredFields) {
         if(!expectsSuccess()){
             throw new IllegalArgumentException("Required fields can only be set" +
             		"if the expected status of a test case has a 2xx code");
-        }
-        if(requiredFields != null){ //check if the required are in the list
-            if(!allowedFields.containsAll(requiredFields)){
-                throw new IllegalArgumentException(String.format(
-                    "Based on the parsed Query only the Fields %s are expected, but" +
-                    "%s are parsed as required one!",
-                    allowedFields,requiredFields));
-            }
         }
         this.requiredFields = requiredFields;
     }
@@ -201,6 +191,6 @@ public abstract class QueryTestCase {
             }
             sb.append(']');
         }
-        return super.toString();
+        return sb.toString();
     }
 }

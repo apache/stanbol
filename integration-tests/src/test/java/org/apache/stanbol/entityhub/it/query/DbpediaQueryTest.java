@@ -3,6 +3,8 @@ package org.apache.stanbol.entityhub.it.query;
 import java.io.IOException;
 import java.util.Arrays;
 
+import org.apache.stanbol.entityhub.it.ReferencedSiteTest;
+import org.apache.stanbol.entityhub.it.SitesManagerTest;
 import org.apache.stanbol.entityhub.test.query.FieldQueryTestCase;
 import org.apache.stanbol.entityhub.test.query.FindQueryTestCase;
 import org.apache.stanbol.entityhub.test.query.QueryTestBase;
@@ -18,8 +20,8 @@ import org.slf4j.LoggerFactory;
  * This test cases are used to test both the ReferencedSiteManager and 
  * the ReferencedSite. This is also the reason why having this abstract super
  * class defining the tests.
- * @see ReferencedSiteFieldQueryTest
- * @see SitesManagerFieldQueryTest
+ * @see ReferencedSiteTest
+ * @see SitesManagerTest
  * @author Rupert Westenthaler
  *
  */
@@ -116,7 +118,7 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
         test.setLanguage("en");
         executeQuery(test);
         //now the same search with wildcards
-        test = new FindQueryTestCase("ABC*",
+        test = new FindQueryTestCase("cia*",
             Arrays.asList(
                 "http://dbpedia.org/resource/CIA",
                 "http://dbpedia.org/resource/Ciara",

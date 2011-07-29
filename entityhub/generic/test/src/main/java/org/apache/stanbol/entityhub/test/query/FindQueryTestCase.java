@@ -1,10 +1,17 @@
 package org.apache.stanbol.entityhub.test.query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 public class FindQueryTestCase extends QueryTestCase {
 
+    /**
+     * If {@link #getField()} set this field is expected to be used as default
+     * search field (rdfs:label)
+     */
+    public static final String DEFAULT_SEARCH_FIELD = "http://www.w3.org/2000/01/rdf-schema#label";
+    
     private final String text;
     private String language;
     private String field;
@@ -66,6 +73,12 @@ public class FindQueryTestCase extends QueryTestCase {
                               Collection<String> prohibitedResultIds){
         super(status,expectedResultIds,prohibitedResultIds);
         this.text = text;
+        //For queries that should succeed
+        if(expectsSuccess()){
+            //add the default search field (needed to correctly init that the
+            //default search field is required to be included in results
+            setField(null);
+        }
     }
     /**
      * @return the language
@@ -92,6 +105,9 @@ public class FindQueryTestCase extends QueryTestCase {
      */
     public final void setField(String field) {
         this.field = field;
+        //set also the new field as required for results!
+        setRequiredFields(Arrays.asList(
+            field == null ? DEFAULT_SEARCH_FIELD : field));
     }
     /**
      * Getter for the offset of this query
@@ -140,7 +156,7 @@ public class FindQueryTestCase extends QueryTestCase {
         StringBuilder sb = new StringBuilder();
         addParam(sb,"name",text);
         addParam(sb, "field", field);
-        addParam(sb, "language", language);
+        addParam(sb, "lang", language);
         addParam(sb, "offset", offset);
         addParam(sb, "limit", limit);
         return sb.toString();

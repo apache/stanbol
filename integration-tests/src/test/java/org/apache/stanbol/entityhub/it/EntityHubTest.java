@@ -16,18 +16,17 @@
  */
 package org.apache.stanbol.entityhub.it;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertNotSame;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.stanbol.commons.testing.http.RequestExecutor;
 import org.apache.stanbol.entityhub.test.it.EntityhubTestBase;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //inherit from EnhancerTestBase, but we more care about the entityhub readiness than engine's one.
 public final class EntityHubTest extends EntityhubTestBase {
