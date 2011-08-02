@@ -272,9 +272,9 @@ public class RepresentationReader implements MessageBodyReader<Set<Representatio
                     header(HttpHeaders.ACCEPT, acceptedMediaType).build());
                 
             }
-            for(Iterator<Triple> st = graph.filter(null, RDF.type, null);st.hasNext();){
+            for(Iterator<Triple> st = graph.iterator();st.hasNext();){
                 NonLiteral resource = st.next().getSubject();
-                if(processed.add(resource) && resource instanceof UriRef){
+                if(resource instanceof UriRef && processed.add(resource)){
                     //build a new representation
                     representations.add(
                         valueFactory.createRdfRepresentation((UriRef)resource, graph));
