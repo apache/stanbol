@@ -16,7 +16,8 @@
 */
 package org.apache.stanbol.ontologymanager.web.resources;
 
-import static javax.ws.rs.core.Response.Status.*;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -38,6 +39,7 @@ import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
@@ -45,12 +47,12 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceModi
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.web.util.OntologyRenderUtils;
+import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -75,8 +77,6 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
      * Placeholder for the ONManager to be fetched from the servlet context.
      */
     protected ONManager onm;
-
-    protected ServletContext servletContext;
 
     protected ClerezzaOntologyStorage storage;
 
@@ -136,8 +136,15 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
             if (space != null) ont = space.getOntology(ontiri);
 
             if (ont == null) {
-                OWLOntologyManager man = onm.getOntologyManagerFactory().createOntologyManager(true);
-                final Set<OWLOntology> ontologies = scope.getSessionSpace(ontiri).getOntologies();
+                OWLOntologyManager tmpmgr;
+                OfflineConfiguration offline = (OfflineConfiguration) ContextHelper.getServiceFromContext(
+                    OfflineConfiguration.class, servletContext);
+                if (offline == null) throw new IllegalStateException(
+                        "OfflineConfiguration missing in ServletContext");
+                else tmpmgr = OWLOntologyManagerFactory.createOWLOntologyManager(offline
+                        .getOntologySourceLocations().toArray(new IRI[0]));
+                
+              final Set<OWLOntology> ontologies = scope.getSessionSpace(ontiri).getOntologies();
 
                 OWLOntologySetProvider provider = new OWLOntologySetProvider() {
                     @Override
@@ -147,7 +154,7 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
                 };
                 OWLOntologyMerger merger = new OWLOntologyMerger(provider);
                 try {
-                    ont = merger.createMergedOntology(man, ontiri);
+                    ont = merger.createMergedOntology(tmpmgr, ontiri);
                 } catch (OWLOntologyCreationException e) {
                     throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
                 }
@@ -180,7 +187,6 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
 
             // Creo un manager per gestire tutte le ontologie
             final OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-            OWLDataFactory factory = OWLManager.getOWLDataFactory();
 
             // Creo un set con tutte le ontologie dello scope
             OWLOntologySetProvider provider = new OWLOntologySetProvider() {
@@ -291,7 +297,7 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
         if (ontologyid != null && !ontologyid.equals("")) {
             String scopeURI = uriInfo.getAbsolutePath().toString().replace(ontologyid, "");
             IRI scopeIri = IRI.create(uriInfo.getBaseUri() + "ontology/" + scopeId);
-            // System.out.println("SCOPE IRI : " + scopeIri);
+
             IRI ontIri = IRI.create(ontologyid);
             ScopeRegistry reg = onm.getScopeRegistry();
             OntologyScope scope = reg.getScope(scopeIri);

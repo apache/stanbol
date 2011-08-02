@@ -64,6 +64,7 @@ import org.slf4j.LoggerFactory;
 @Path("/ontonet/ontology/{scopeid}")
 public class ONMScopeResource extends BaseStanbolResource {
 
+    @SuppressWarnings("unused")
     private Logger log = LoggerFactory.getLogger(getClass());
 
     /*

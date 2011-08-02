@@ -16,7 +16,9 @@
  */
 package org.apache.stanbol.ontologymanager.web.resources;
 
-import static javax.ws.rs.core.Response.Status.*;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -42,8 +44,10 @@ import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.NoSuchStoreException;
+import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
@@ -64,13 +68,16 @@ import com.sun.jersey.multipart.FormDataParam;
 @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
 public class GraphsResource extends BaseStanbolResource {
 
+    @SuppressWarnings("unused")
     private final Logger log = LoggerFactory.getLogger(getClass());
+
     protected ONManager onManager;
     protected ClerezzaOntologyStorage storage;
 
     protected TcManager tcManager;
 
     public GraphsResource(@Context ServletContext servletContext) {
+        this.servletContext = servletContext;
         storage = (ClerezzaOntologyStorage) (servletContext.getAttribute(ClerezzaOntologyStorage.class
                 .getName()));
         tcManager = (TcManager) servletContext.getAttribute(TcManager.class.getName());
@@ -123,8 +130,16 @@ public class GraphsResource extends BaseStanbolResource {
         Set<IRI> iris = storage.listGraphs();
         if (iris != null) {
 
-            OWLOntologyManager manager = onManager.getOntologyManagerFactory().createOntologyManager(true);
+            // OWLOntologyManager manager = onManager.getOntologyManagerFactory().createOntologyManager(true);
             OWLDataFactory factory = OWLManager.getOWLDataFactory();
+
+            OWLOntologyManager manager;
+            OfflineConfiguration offline = (OfflineConfiguration) ContextHelper.getServiceFromContext(
+                OfflineConfiguration.class, servletContext);
+            if (offline == null) throw new IllegalStateException(
+                    "OfflineConfiguration missing in ServletContext");
+            else manager = OWLOntologyManagerFactory.createOWLOntologyManager(offline
+                    .getOntologySourceLocations().toArray(new IRI[0]));
 
             OWLOntology ontology;
             try {
@@ -157,9 +172,16 @@ public class GraphsResource extends BaseStanbolResource {
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response storeGraph(@FormDataParam("graph") InputStream graph, @FormDataParam("id") String id) {
+
+        OWLOntologyManager manager;
+        OfflineConfiguration offline = (OfflineConfiguration) ContextHelper.getServiceFromContext(
+            OfflineConfiguration.class, servletContext);
+        if (offline == null) throw new IllegalStateException("OfflineConfiguration missing in ServletContext");
+        else manager = OWLOntologyManagerFactory.createOWLOntologyManager(offline
+                .getOntologySourceLocations().toArray(new IRI[0]));
+
         try {
-            OWLOntology ontology = onManager.getOntologyManagerFactory().createOntologyManager(true)
-                    .loadOntologyFromOntologyDocument(graph);
+            OWLOntology ontology = manager.loadOntologyFromOntologyDocument(graph);
             storage.store(ontology, IRI.create(id));
             return Response.ok().build();
         } catch (OWLOntologyCreationException e) {
