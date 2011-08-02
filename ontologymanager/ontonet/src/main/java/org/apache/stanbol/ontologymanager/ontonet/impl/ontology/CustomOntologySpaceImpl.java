@@ -27,6 +27,9 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
+/**
+ * Default implementation of the custom ontology space.
+ */
 public class CustomOntologySpaceImpl extends AbstractOntologySpaceImpl implements CustomOntologySpace {
 
     public static final String SUFFIX = SpaceType.CUSTOM.getIRISuffix();

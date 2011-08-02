@@ -1,21 +1,22 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.ontonet.impl.ontology;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CustomOntologySpace;
@@ -25,6 +26,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.semanticweb.owlapi.model.IRI;
@@ -34,12 +36,14 @@ import org.slf4j.LoggerFactory;
 /**
  * Utility class that generates default implementations of the three types of ontology scope.
  * 
- * @author alessandro
- * 
  */
 public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
+
+    protected OWLOntologyManagerFactoryImpl mgrFactory;
+
+    protected OfflineConfiguration offline;
 
     protected ScopeRegistry registry;
 
@@ -48,57 +52,13 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
      * Stanbol)
      */
     protected ClerezzaOntologyStorage storage;
-    
-    protected OWLOntologyManagerFactoryImpl mgrFactory;
 
-    public OntologySpaceFactoryImpl(ScopeRegistry registry, ClerezzaOntologyStorage storage, OWLOntologyManagerFactoryImpl mgrFactory) {
+    public OntologySpaceFactoryImpl(ScopeRegistry registry,
+                                    ClerezzaOntologyStorage storage,
+                                    OWLOntologyManagerFactoryImpl mgrFactory) {
         this.registry = registry;
         this.storage = storage;
         this.mgrFactory = mgrFactory;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory#createCoreOntologySpace
-     * (org.semanticweb.owlapi.model.IRI,
-     * org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource)
-     */
-    @Override
-    public CoreOntologySpace createCoreOntologySpace(IRI scopeID, OntologyInputSource coreSource) {
-        CoreOntologySpace s = new CoreOntologySpaceImpl(scopeID, storage,mgrFactory.createOntologyManager(true));
-        configureSpace(s, scopeID, coreSource);
-        return s;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory#createCustomOntologySpace
-     * (org.semanticweb.owlapi.model.IRI,
-     * org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource)
-     */
-    @Override
-    public CustomOntologySpace createCustomOntologySpace(IRI scopeID, OntologyInputSource customSource) {
-        CustomOntologySpace s = new CustomOntologySpaceImpl(scopeID, storage,mgrFactory.createOntologyManager(true));
-        configureSpace(s, scopeID, customSource);
-        return s;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory#createSessionOntologySpace
-     * (org.semanticweb.owlapi.model.IRI)
-     */
-    @Override
-    public SessionOntologySpace createSessionOntologySpace(IRI scopeID) {
-        SessionOntologySpace s = new SessionOntologySpaceImpl(scopeID, storage,mgrFactory.createOntologyManager(true));
-        // s.setUp();
-        return s;
     }
 
     /**
@@ -108,7 +68,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
      * @param scopeID
      * @param rootSource
      */
-    private void configureSpace(OntologySpace s, IRI scopeID, OntologyInputSource rootSource) {
+    private void configureSpace(OntologySpace s, IRI scopeID, OntologyInputSource... rootSource) {
         // FIXME: ensure that this is not null
         OntologyScope parentScope = registry.getScope(scopeID);
 
@@ -116,11 +76,74 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
                 .addOntologySpaceListener((OntologySpaceListener) parentScope);
         // Set the supplied ontology's parent as the root for this space.
         try {
-            s.setTopOntology(rootSource, true);
+            // FIXME USE THE WHOLE ARRAY
+            s.setTopOntology(rootSource[0], true);
         } catch (UnmodifiableOntologySpaceException e) {
             log.error("Ontology space " + s.getID() + " was found locked at creation time!", e);
         }
         // s.setUp();
+    }
+
+    @Override
+    public CoreOntologySpace createCoreOntologySpace(IRI scopeId, OntologyInputSource coreSource) {
+        return createCoreOntologySpace(scopeId, new OntologyInputSource[] {coreSource});
+    }
+
+    @Override
+    public CoreOntologySpace createCoreOntologySpace(IRI scopeId, OntologyInputSource... coreSources) {
+        CoreOntologySpace s = new CoreOntologySpaceImpl(scopeId, storage,
+                mgrFactory.createOntologyManager(true));
+        configureSpace(s, scopeId, coreSources);
+        return s;
+    }
+
+    @Override
+    public CustomOntologySpace createCustomOntologySpace(IRI scopeId, OntologyInputSource customSource) {
+        return createCustomOntologySpace(scopeId, new OntologyInputSource[] {customSource});
+    }
+
+    @Override
+    public CustomOntologySpace createCustomOntologySpace(IRI scopeId, OntologyInputSource... customSources) {
+        CustomOntologySpace s = new CustomOntologySpaceImpl(scopeId, storage,
+                mgrFactory.createOntologyManager(true));
+        configureSpace(s, scopeId, customSources);
+        return s;
+    }
+
+    @Override
+    public OntologySpace createOntologySpace(IRI scopeId,
+                                             SpaceType type,
+                                             OntologyInputSource... ontologySources) {
+        switch (type) {
+            case CORE:
+                return createCoreOntologySpace(scopeId, ontologySources);
+            case CUSTOM:
+                return createCustomOntologySpace(scopeId, ontologySources);
+            case SESSION:
+                return createSessionOntologySpace(scopeId, ontologySources);
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public SessionOntologySpace createSessionOntologySpace(IRI scopeId) {
+        return createSessionOntologySpace(scopeId, new OntologyInputSource[] {});
+    }
+
+    @Override
+    public SessionOntologySpace createSessionOntologySpace(IRI scopeId, OntologyInputSource... sessionSources) {
+        SessionOntologySpace s = new SessionOntologySpaceImpl(scopeId, storage,
+                mgrFactory.createOntologyManager(true));
+        for (OntologyInputSource src : sessionSources)
+            try {
+                s.addOntology(src);
+            } catch (UnmodifiableOntologySpaceException e) {
+                // Should never happen anyway...
+                continue;
+            }
+        // s.setUp();
+        return s;
     }
 
 }
