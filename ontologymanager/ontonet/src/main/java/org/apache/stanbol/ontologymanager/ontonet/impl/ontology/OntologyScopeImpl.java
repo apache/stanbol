@@ -1,24 +1,26 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.ontonet.impl.ontology;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,7 +34,15 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceList
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeOntologyListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -66,6 +76,8 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
      */
     protected boolean locked = false;
 
+    private Logger log = LoggerFactory.getLogger(getClass());
+
     /**
      * Maps session IDs to ontology space. A single scope has at most one space per session.
      */
@@ -92,55 +104,58 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
         } catch (UnmodifiableOntologySpaceException e) {
             // Can't happen unless the factory or space implementations are
             // really naughty.
-            LoggerFactory
-                    .getLogger(getClass())
-                    .warn(
-                        "KReS :: Ontology scope "
-                                + id
-                                + " was denied creation of its own custom space upon initialization! This should not happen.",
-                        e);
+            log.warn(
+                "Ontology scope "
+                        + id
+                        + " was denied creation of its own custom space upon initialization! This should not happen.",
+                e);
         }
         this.customSpace.addOntologySpaceListener(this);
         // }
         sessionSpaces = new HashMap<IRI,SessionOntologySpace>();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seeeu.iksproject.kres.api.manager.ontology.OntologyScope# addOntologyScopeListener
-     * (eu.iksproject.kres.api.manager.ontology.ScopeOntologyListener)
-     */
     @Override
     public void addOntologyScopeListener(ScopeOntologyListener listener) {
         listeners.add(listener);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.ontology.OntologyScope#addSessionSpace
-     * (eu.iksproject.kres.api.manager.ontology.OntologySpace, org.semanticweb.owlapi.model.IRI)
-     */
     @Override
     public synchronized void addSessionSpace(OntologySpace sessionSpace, IRI sessionId) throws UnmodifiableOntologySpaceException {
         if (sessionSpace instanceof SessionOntologySpace) {
             sessionSpaces.put(sessionId, (SessionOntologySpace) sessionSpace);
             sessionSpace.addOntologySpaceListener(this);
 
-            if (this.getCustomSpace() != null)
-                ((SessionOntologySpace) sessionSpace).attachSpace(this.getCustomSpace(), true);
-            else
-                ((SessionOntologySpace) sessionSpace).attachSpace(this.getCoreSpace(), true);
+            if (this.getCustomSpace() != null) ((SessionOntologySpace) sessionSpace).attachSpace(
+                this.getCustomSpace(), true);
+            else ((SessionOntologySpace) sessionSpace).attachSpace(this.getCoreSpace(), true);
 
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seeeu.iksproject.kres.api.manager.ontology.OntologyScope# clearOntologyScopeListeners()
-     */
+    @Override
+    public OWLOntology asOWLOntology() {
+        // Create an ontology manager on the fly. We don't really need a permanent one.
+        OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
+        OWLDataFactory df = mgr.getOWLDataFactory();
+        OWLOntology ont;
+        try {
+            ont = mgr.createOntology(getID());
+            List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
+            OntologySpace spc = getCustomSpace();
+            if (spc != null && !spc.getOntologies(false).isEmpty()) additions.add(new AddImport(ont, df
+                    .getOWLImportsDeclaration(spc.getID())));
+            spc = getCoreSpace();
+            if (spc != null && !spc.getOntologies(false).isEmpty()) additions.add(new AddImport(ont, df
+                    .getOWLImportsDeclaration(spc.getID())));
+            mgr.applyChanges(additions);
+        } catch (OWLOntologyCreationException e) {
+            log.error("Failed to generate an OWL form of scope " + getID(), e);
+            ont = null;
+        }
+        return ont;
+    }
+
     @Override
     public void clearOntologyScopeListeners() {
         listeners.clear();
@@ -156,85 +171,42 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
             listener.onOntologyRemoved(this.getID(), ontologyIri);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.ontology.OntologyScope#getCoreSpace()
-     */
     @Override
     public OntologySpace getCoreSpace() {
         return coreSpace;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.ontology.OntologyScope#getCustomSpace()
-     */
     @Override
     public OntologySpace getCustomSpace() {
         return customSpace;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.ontology.OntologyScope#getID()
-     */
     @Override
     public IRI getID() {
         return id;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seeeu.iksproject.kres.api.manager.ontology.OntologyScope# getOntologyScopeListeners()
-     */
     @Override
     public Collection<ScopeOntologyListener> getOntologyScopeListeners() {
         return listeners;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.ontology.OntologyScope#getSessionSpace
-     * (org.semanticweb.owlapi.model.IRI)
-     */
     @Override
     public SessionOntologySpace getSessionSpace(IRI sessionID) {
         return sessionSpaces.get(sessionID);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.ontology.OntologyScope#getSessionSpaces()
-     */
     @Override
     public Set<OntologySpace> getSessionSpaces() {
         return new HashSet<OntologySpace>(sessionSpaces.values());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.ontology.OntologySpaceListener#onOntologyAdded
-     * (org.semanticweb.owlapi.model.IRI, org.semanticweb.owlapi.model.IRI)
-     */
     @Override
     public void onOntologyAdded(IRI spaceId, IRI addedOntology) {
         // Propagate events to scope listeners
         fireOntologyAdded(addedOntology);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seeeu.iksproject.kres.api.manager.ontology.OntologySpaceListener#
-     * onOntologyRemoved(org.semanticweb.owlapi.model.IRI, org.semanticweb.owlapi.model.IRI)
-     */
     @Override
     public void onOntologyRemoved(IRI spaceId, IRI removedOntology) {
         // Propagate events to scope listeners
@@ -246,12 +218,6 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
         listeners.remove(listener);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.ontology.OntologyScope#setCustomSpace(
-     * eu.iksproject.kres.api.manager.ontology.OntologySpace)
-     */
     @Override
     public synchronized void setCustomSpace(OntologySpace customSpace) throws UnmodifiableOntologySpaceException {
         if (this.customSpace != null && this.customSpace.isLocked()) throw new UnmodifiableOntologySpaceException(
@@ -266,11 +232,6 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.ontology.OntologyScope#setUp()
-     */
     @Override
     public synchronized void setUp() {
         if (locked || (customSpace != null && !customSpace.isLocked())) return;
@@ -283,11 +244,12 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
         locked = true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.ontology.OntologyScope#tearDown()
-     */
+    @Override
+    public void synchronizeSpaces() {
+        // TODO Auto-generated method stub
+
+    }
+
     @Override
     public synchronized void tearDown() {
         // this.coreSpace.addOntologySpaceListener(this);
@@ -299,20 +261,9 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
         locked = false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return getID().toString();
-    }
-
-    @Override
-    public void synchronizeSpaces() {
-        // TODO Auto-generated method stub
-
     }
 
 }

@@ -247,7 +247,7 @@ public class Enrichment extends BaseStanbolResource {
                 IRI iri = IRI.create(scope);
                 ScopeRegistry reg = onm.getScopeRegistry();
                 OntologyScope ontoscope = reg.getScope(iri);
-                Iterator<OWLOntology> importscope = ontoscope.getCustomSpace().getOntologies().iterator();
+                Iterator<OWLOntology> importscope = ontoscope.getCustomSpace().getOntologies(true).iterator();
                 Iterator<OntologySpace> importsession = ontoscope.getSessionSpaces().iterator();
 
                 // Add ontology as import form scope, if it is anonymus we
@@ -264,7 +264,7 @@ public class Enrichment extends BaseStanbolResource {
 
                 // Add ontology form sessions
                 while (importsession.hasNext()) {
-                    Iterator<OWLOntology> sessionontos = importsession.next().getOntologies().iterator();
+                    Iterator<OWLOntology> sessionontos = importsession.next().getOntologies(true).iterator();
                     while (sessionontos.hasNext()) {
                         OWLOntology auxonto = sessionontos.next();
                         if (!auxonto.getOntologyID().isAnonymous()) {

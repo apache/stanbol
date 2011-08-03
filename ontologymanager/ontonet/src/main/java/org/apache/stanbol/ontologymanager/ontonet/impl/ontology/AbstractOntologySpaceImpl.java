@@ -1,29 +1,31 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.ontonet.impl.ontology;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.IrremovableOntologyException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.MissingOntologyException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceListener;
@@ -34,19 +36,21 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntol
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.StringUtils;
+import org.apache.stanbol.owl.util.URIUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.io.StringDocumentTarget;
+import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLImportsDeclaration;
+import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-import org.semanticweb.owlapi.model.RemoveImport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,8 +89,13 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 
     protected IRI parentID = null;
 
-    // public static String SUFFIX = "";
+    /**
+     * The identifier of the ontologies directly managed by this space (i.e. that were directly added to this
+     * space, hence not including those just pulled in via import statements).
+     */
+    protected Set<OWLOntology> managedOntologies;
 
+    @Deprecated
     protected OWLOntology rootOntology = null;
 
     protected boolean silent = false;
@@ -125,6 +134,7 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
         if (ontologyManager != null) this.ontologyManager = ontologyManager;
         else this.ontologyManager = OWLManager.createOWLOntologyManager();
 
+        this.managedOntologies = new HashSet<OWLOntology>();
     }
 
     /**
@@ -137,22 +147,25 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 
         if (locked) throw new UnmodifiableOntologySpaceException(this);
 
-        if (getTopOntology() == null) {
-            // If no top ontology has been set, we must create one first.
-            IRI rootIri = null;
-            try {
-                rootIri = IRI.create(StringUtils.stripIRITerminator(getID()) + "/root.owl");
-                OntologyInputSource src = new RootOntologySource(ontologyManager.createOntology(rootIri),
-                        null);
-                // Don't bother about the ontology to be added right now.
-                setTopOntology(src, false);
-            } catch (OWLOntologyCreationException e) {
-                log.error("KReS :: Exception caught when creating top ontology " + rootIri + " for space "
-                          + this.getID() + ".", e);
-                // No point in continuing if we can't even create the root...
-                return;
-            }
-        }
+        // if (getTopOntology() == null) {
+        // log.warn("Root ontology for ontology space {} was found to be null. This should not happen.",
+        // this.getID());
+        // // If no top ontology has been set, we must create one first.
+        // IRI rootIri = null;
+        // try {
+        // rootIri = IRI.create(StringUtils.stripIRITerminator(this.getID()) + "/root.owl");
+        // OntologyInputSource src = new RootOntologySource(ontologyManager.createOntology(rootIri),
+        // null);
+        // // Don't bother about the ontology to be added right now.
+        // setTopOntology(src, false);
+        // } catch (OWLOntologyCreationException e) {
+        // log.error(
+        // "Exception caught when creating top ontology " + rootIri + " for space " + this.getID()
+        // + ".", e);
+        // // No point in continuing if we can't even create the root...
+        // return;
+        // }
+        // }
 
         // Now add the new ontology.
         if (ontologySource != null && ontologySource.hasRootOntology()) {
@@ -177,11 +190,23 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
         return ontologyManager.contains(ontologyIri);
     }
 
+    /**
+     * Notifies all ontology space listeners that an ontology has been added to this space.
+     * 
+     * @param ontologyIri
+     *            the identifier of the ontology that was added to this space.
+     */
     protected void fireOntologyAdded(IRI ontologyIri) {
         for (OntologySpaceListener listener : listeners)
             listener.onOntologyAdded(this.getID(), ontologyIri);
     }
 
+    /**
+     * Notifies all ontology space listeners that an ontology has been removed from this space.
+     * 
+     * @param ontologyIri
+     *            the identifier of the ontology that was removed from this space.
+     */
     protected void fireOntologyRemoved(IRI ontologyIri) {
         for (OntologySpaceListener listener : listeners)
             listener.onOntologyRemoved(this.getID(), ontologyIri);
@@ -193,13 +218,20 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     }
 
     @Override
-    public synchronized Set<OWLOntology> getOntologies() {
-        return ontologyManager.getOntologies();
+    public synchronized Set<OWLOntology> getOntologies(boolean withClosure) {
+        return withClosure ? ontologyManager.getOntologies() : managedOntologies;
     }
 
     @Override
     public OWLOntology getOntology(IRI ontologyIri) {
-        return ontologyManager.getOntology(ontologyIri);
+        OWLOntology o = null;
+        Iterator<OWLOntology> it = managedOntologies.iterator();
+        while (it.hasNext() && o == null) {
+            OWLOntology temp = it.next();
+            if (!temp.isAnonymous() && ontologyIri.equals(temp.getOntologyID().getOntologyIRI())) o = temp;
+        }
+        if (o == null) o = ontologyManager.getOntology(ontologyIri);
+        return o;
     }
 
     @Override
@@ -209,7 +241,52 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 
     @Override
     public OWLOntology getTopOntology() {
-        return rootOntology;
+        OWLOntology root;
+        try {
+            root = ontologyManager.createOntology(_id);
+        } catch (OWLOntologyAlreadyExistsException e) {
+            ontologyManager.removeOntology(ontologyManager.getOntology(_id));
+            try {
+                root = ontologyManager.createOntology(_id);
+            } catch (OWLOntologyAlreadyExistsException e1) {
+                root = ontologyManager.getOntology(_id);
+            } catch (OWLOntologyCreationException e1) {
+                log.error("Failed to assemble root ontology for scope " + _id, e);
+                root = null;
+            }
+        } catch (OWLOntologyCreationException e) {
+            log.error("Failed to assemble root ontology for scope " + _id, e);
+            root = null;
+        }
+
+        // Add the import declarations for directly managed ontologies.
+        if (root != null) {
+            List<OWLOntologyChange> changes = new LinkedList<OWLOntologyChange>();
+            OWLDataFactory df = ontologyManager.getOWLDataFactory();
+            for (OWLOntology o : getOntologies(false)) {
+                if (o == null) continue;
+
+                String base = URIUtils.upOne(getID()) + "/";
+
+                IRI ontologyIri;
+
+                if (o.isAnonymous()) try {
+                    ontologyIri = ontologyManager.getOntologyDocumentIRI(o);
+                } catch (Exception ex) {
+                    ontologyIri = o.getOWLOntologyManager().getOntologyDocumentIRI(o);
+                }
+                else {
+                    ontologyIri = o.getOntologyID().getDefaultDocumentIRI();
+                }
+
+                IRI physIRI = IRI.create(base + ontologyIri);
+
+                changes.add(new AddImport(root, df.getOWLImportsDeclaration(physIRI)));
+            }
+            ontologyManager.applyChanges(changes);
+        }
+        // return rootOntology;
+        return root;
     }
 
     @Override
@@ -228,6 +305,39 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     }
 
     private void performAdd(OntologyInputSource ontSrc) {
+        OWLOntology ontology = ontSrc.getRootOntology();
+        OWLOntologyID id = ontology.getOntologyID();
+
+        // Should not modify the child ontology in any way.
+        // TODO implement transaction control.
+        // OntologyUtils.appendOntology(new RootOntologySource(getTopOntology(), null), ontSrc,
+        // ontologyManager);
+
+        // See to it that the ontology is copied to this manager
+        reload(ontology, ontologyManager, true, false);
+
+        OWLOntology newOnt = ontologyManager.getOntology(id);
+        managedOntologies.add(newOnt);
+
+        try {
+            // Store the top ontology
+            if (!(this instanceof SessionOntologySpace)) {
+                if (storage == null) log.warn("No ontology storage found. Ontology "
+                                              + ontology.getOntologyID() + " will be stored in-memory only.");
+                else {
+                    // storage = new ClerezzaOntologyStorage(tcManager, wtcProvider)
+                    storage.store(ontology);
+                }
+            }
+            // ONManager.get().getOntologyStore().load(rootOntology.getOntologyID().getOntologyIRI());
+        } catch (Exception ex) {
+            log.warn("An error occurred while storing ontology " + ontology
+                     + " . Ontology management will be volatile.", ex);
+        }
+        fireOntologyAdded(id.getOntologyIRI());
+    }
+
+    private void performAddOld(OntologyInputSource ontSrc) {
         OWLOntology ontology = ontSrc.getRootOntology();
         OWLOntologyID id = ontology.getOntologyID();
 
@@ -266,9 +376,8 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
         try {
             // Store the top ontology
             if (!(this instanceof SessionOntologySpace)) {
-                if (storage == null) log
-                        .error("KReS :: [NONFATAL] no ontology storage found. Ontology "
-                               + ontology.getOntologyID() + " will be stored in-memory only.");
+                if (storage == null) log.warn("No ontology storage found. Ontology "
+                                              + ontology.getOntologyID() + " will be stored in-memory only.");
                 else {
                     // storage = new ClerezzaOntologyStorage(tcManager, wtcProvider)
                     storage.store(ontology);
@@ -276,8 +385,8 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
             }
             // ONManager.get().getOntologyStore().load(rootOntology.getOntologyID().getOntologyIRI());
         } catch (Exception ex) {
-            log.error("KReS :: [NONFATAL] An error occurred while storing ontology " + ontology
-                      + " . Ontology management will be volatile!", ex);
+            log.warn("An error occurred while storing ontology " + ontology
+                     + " . Ontology management will be volatile.", ex);
         }
         fireOntologyAdded(id.getOntologyIRI());
     }
@@ -303,17 +412,17 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
                 if (isSilentMissingOntologyHandling()) return;
                 else throw new MissingOntologyException(this, null);
             }
-            if (o.equals(getTopOntology()))
-            // setTopOntology(null, false);
-            throw new IrremovableOntologyException(this, logicalID);
+            // if (o.equals(getTopOntology()))
+            // // setTopOntology(null, false);
+            // throw new IrremovableOntologyException(this, logicalID);
             try {
-                OWLImportsDeclaration imp = ontologyManager.getOWLDataFactory().getOWLImportsDeclaration(
-                    physicalIRI);
-                ontologyManager.applyChange(new RemoveImport(getTopOntology(), imp));
+                // OWLImportsDeclaration imp = ontologyManager.getOWLDataFactory().getOWLImportsDeclaration(
+                // physicalIRI);
+                // ontologyManager.applyChange(new RemoveImport(getTopOntology(), imp));
                 ontologyManager.removeOntology(o);
                 fireOntologyRemoved(logicalID);
             } catch (RuntimeException ex) {
-                throw new OntologySpaceModificationException(this);
+                throw new OntologySpaceModificationException(this, ex);
             }
         }
     }
@@ -336,6 +445,12 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
      *            <code>withClosure</code> is set to false.
      */
     protected void reload(OWLOntology ontology, OWLOntologyManager mgr, boolean withClosure, boolean merge) {
+        if (ontology == null) throw new IllegalArgumentException("ontology cannot be null");
+        if (ontology.getOWLOntologyManager() == ontologyManager) {
+            log.warn("Ontology {} is already managed by the supplied OWLOntologyManager. Skipping copy.",
+                ontology);
+            return;
+        }
         if (mgr == null) mgr = ontologyManager;
         Set<OWLOntology> closure = withClosure ? ontology.getOWLOntologyManager().getImportsClosure(ontology)
                 : Collections.singleton(ontology);
@@ -347,9 +462,12 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
                       + " across managers", e1);
         }
         else {
+
             for (OWLOntology o : closure) {
                 OWLOntologyID id = o.getOntologyID();
-                if (mgr.contains(id)) mgr.removeOntology(mgr.getOntology(id));
+                if (mgr.contains(id)) {
+                    mgr.removeOntology(mgr.getOntology(id));
+                }
                 try {
                     mgr.createOntology(id.getOntologyIRI(), Collections.singleton(o));
                 } catch (OWLOntologyAlreadyExistsException e) {
@@ -383,15 +501,10 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
         this.silent = silent;
     }
 
-    @Override
-    public synchronized void setTopOntology(OntologyInputSource ontologySource) throws UnmodifiableOntologySpaceException {
-        setTopOntology(ontologySource, true);
-    }
-
     /**
      * TODO 1 : Attention: the ontology from <code>ontologySource</code> is NOT added to the ontology manager!
      */
-    @Override
+    @Deprecated
     public synchronized void setTopOntology(OntologyInputSource ontologySource, boolean createParent) throws UnmodifiableOntologySpaceException {
 
         // TODO : implement or avoid passing of OWLOntology objects across managers
@@ -446,12 +559,12 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
             // reload(oParent, ontologyManager, true, false);
 
         } catch (OWLOntologyAlreadyExistsException e) {
-            log.warn("KReS : [NONFATAL] Tried to copy ontology " + id + " to existing one.", e);
+            log.warn("Tried to copy ontology " + id + " to existing one.", e);
         } catch (OWLOntologyCreationException e) {
-            log.error("KReS : [FATAL] Failed to create ontology " + id, e);
+            log.error("Failed to create ontology " + id, e);
         } catch (OWLOntologyStorageException e) {
             // Shouldn't be a problem to save it in memory as RDF/XML...
-            log.error("KReS : [FATAL] In-memory store failed for ontology " + id, e);
+            log.error("In-memory store failed for ontology " + id, e);
         }
 
         // Assign the ontology and fire the corresponding event.

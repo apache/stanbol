@@ -78,10 +78,10 @@ public class OntologyIndexImpl implements OntologyIndex {
         Set<OWLOntology> ontologies = new HashSet<OWLOntology>();
         try {
             // ontologies.add(scope.getCoreSpace().getTopOntology());
-            ontologies.addAll(scope.getCoreSpace().getOntologies());
+            ontologies.addAll(scope.getCoreSpace().getOntologies(true));
         } catch (Exception ex) {}
         try {
-            ontologies.addAll(scope.getCustomSpace().getOntologies());
+            ontologies.addAll(scope.getCustomSpace().getOntologies(true));
         } catch (Exception ex) {}
         // for (OWLOntology o : ontologies) {
         // System.out.println(o.getOntologyID());

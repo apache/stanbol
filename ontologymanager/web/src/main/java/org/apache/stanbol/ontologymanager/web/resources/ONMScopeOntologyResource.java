@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
@@ -106,6 +106,8 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
 
         if (!ontologyid.equals("all")) {
 
+            // First of all, it could be a simple request for the space root!
+
             String absur = uriInfo.getAbsolutePath().toString();
             URI uri = URI.create(absur.substring(0, absur.lastIndexOf(ontologyid) - 1));
 
@@ -118,6 +120,15 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
             ScopeRegistry reg = onm.getScopeRegistry();
             OntologyScope scope = reg.getScope(sciri);
             if (scope == null) return Response.status(NOT_FOUND).build();
+
+            // First of all, it could be a simple request for the space root!
+            if (ontiri.equals(scope.getCoreSpace().getID())) {
+                return Response.ok(scope.getCoreSpace().getTopOntology()).build();
+            } else if (ontiri.equals(scope.getCustomSpace().getID())) {
+                return Response.ok(scope.getCustomSpace().getTopOntology()).build();
+            } else if (scope.getSessionSpace(ontiri) != null) {
+                return Response.ok(scope.getSessionSpace(ontiri).getTopOntology()).build();
+            }
 
             /*
              * BEGIN debug code, uncomment only for local testing OWLOntology test = null, top = null; test =
@@ -132,8 +143,11 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
             // By default, always try retrieving the ontology from the custom space
             // first.
             OntologySpace space = scope.getCustomSpace();
-            if (space == null) space = scope.getCoreSpace();
             if (space != null) ont = space.getOntology(ontiri);
+            if (space == null || ont == null) {
+                space = scope.getCoreSpace();
+                if (space != null) ont = space.getOntology(ontiri);
+            }
 
             if (ont == null) {
                 OWLOntologyManager tmpmgr;
@@ -143,8 +157,8 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
                         "OfflineConfiguration missing in ServletContext");
                 else tmpmgr = OWLOntologyManagerFactory.createOWLOntologyManager(offline
                         .getOntologySourceLocations().toArray(new IRI[0]));
-                
-              final Set<OWLOntology> ontologies = scope.getSessionSpace(ontiri).getOntologies();
+
+                final Set<OWLOntology> ontologies = scope.getSessionSpace(ontiri).getOntologies(true);
 
                 OWLOntologySetProvider provider = new OWLOntologySetProvider() {
                     @Override
@@ -179,9 +193,9 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
 
             if (scope == null) return Response.status(404).build();
 
-            final Set<OWLOntology> customOntologies = scope.getCustomSpace().getOntologies();
+            final Set<OWLOntology> customOntologies = scope.getCustomSpace().getOntologies(true);
 
-            final Set<OWLOntology> coreOntologies = scope.getCoreSpace().getOntologies();
+            final Set<OWLOntology> coreOntologies = scope.getCoreSpace().getOntologies(true);
 
             final Set<OntologySpace> sessionSpaces = scope.getSessionSpaces();
 
@@ -240,7 +254,7 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
 
                     // Inserisco le session ontologies;
                     for (OntologySpace ontologySpace : sessionSpaces) {
-                        Set<OWLOntology> sessionOntologies = ontologySpace.getOntologies();
+                        Set<OWLOntology> sessionOntologies = ontologySpace.getOntologies(true);
                         for (OWLOntology ontology : sessionOntologies) {
 
                             OWLOntology ont;

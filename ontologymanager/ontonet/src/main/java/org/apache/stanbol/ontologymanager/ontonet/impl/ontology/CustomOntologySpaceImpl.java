@@ -48,18 +48,18 @@ public class CustomOntologySpaceImpl extends AbstractOntologySpaceImpl implement
 
     @Override
     public void attachCoreSpace(CoreOntologySpace coreSpace, boolean skipRoot) throws UnmodifiableOntologySpaceException {
-
-        OWLOntology o = coreSpace.getTopOntology();
-        // This does the append thingy
-        log.debug("Attaching " + o + " TO " + getTopOntology() + " ...");
-        try {
-            // It is in fact the addition of the core space top ontology to the
-            // custom space, with import statements and all.
-            addOntology(new RootOntologySource(o, null));
-            // log.debug("ok");
-        } catch (Exception ex) {
-            log.error("FAILED", ex);
-        }
+// FIXME re-implement!
+//        OWLOntology o = coreSpace.getTopOntology();
+//        // This does the append thingy
+//        log.debug("Attaching " + o + " TO " + getTopOntology() + " ...");
+//        try {
+//            // It is in fact the addition of the core space top ontology to the
+//            // custom space, with import statements and all.
+//            addOntology(new RootOntologySource(o, null));
+//            // log.debug("ok");
+//        } catch (Exception ex) {
+//            log.error("FAILED", ex);
+//        }
 
     }
 

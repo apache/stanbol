@@ -56,7 +56,6 @@ import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.impl.RegistryLoaderImpl;
 import org.apache.stanbol.ontologymanager.registry.io.RegistryIRISource;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,8 +79,6 @@ public class ONMScopeResource extends BaseStanbolResource {
     protected RegistryLoader loader;
 
     protected ClerezzaOntologyStorage storage;
-
-    protected ServletContext servletContext;
 
     public ONMScopeResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
@@ -112,19 +109,10 @@ public class ONMScopeResource extends BaseStanbolResource {
     public Response getTopOntology(@Context UriInfo uriInfo,
                                    @Context HttpHeaders headers,
                                    @Context ServletContext servletContext) {
-
         ScopeRegistry reg = onm.getScopeRegistry();
-
         OntologyScope scope = reg.getScope(IRI.create(uriInfo.getAbsolutePath()));
-        if (scope == null) return Response.status(404).build();
-
-        OntologySpace cs = scope.getCustomSpace();
-        OWLOntology ont = null;
-        if (cs != null) ont = scope.getCustomSpace().getTopOntology();
-        if (ont == null) ont = scope.getCoreSpace().getTopOntology();
-
-        return Response.ok(ont).build();
-
+        if (scope == null) return Response.status(NOT_FOUND).build();
+        else return Response.ok(scope.asOWLOntology()).build();
     }
 
     @POST
@@ -207,7 +195,6 @@ public class ONMScopeResource extends BaseStanbolResource {
 
         // First thing, check the core source.
         try {
-
             coreSrc = new RegistryIRISource(IRI.create(coreRegistry), onm.getOwlCacheManager(), loader);
         } catch (Exception e1) {
             // Bad or not supplied core registry, try the ontology.

@@ -265,7 +265,7 @@ public class SessionManagerImpl implements SessionManager {
          * For each gession space in the session save all the ontologies contained in the space.
          */
         for (SessionOntologySpace so : getSessionSpaces(sessionID)) {
-            for (OWLOntology owlOntology : so.getOntologies()) {
+            for (OWLOntology owlOntology : so.getOntologies(true)) {
 
                 store.store(owlOntology);
 

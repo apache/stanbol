@@ -163,8 +163,9 @@ public class TestOntologyRegistry {
         // space.addOntology(new
         // OntologyRegistryIRISource(testRegistryIri,onm.getOwlCacheManager(),onm.getRegistryLoader()));
         space.addOntology(ontologySource);
+        // FIXME : no longer use the top ontology?
         assertTrue(space.getTopOntology() != null);
-        assertTrue(space.getOntologies().contains(space.getTopOntology()));
+        assertTrue(space.getOntologies(true).contains(space.getTopOntology()));
     }
 
     /**

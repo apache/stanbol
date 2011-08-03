@@ -27,10 +27,7 @@ import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorag
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.StringUtils;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Default implementation of the session ontology space.
@@ -44,16 +41,16 @@ public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl implemen
         super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/" + SpaceType.SESSION.getIRISuffix()
                          + "-" + new Random().nextLong()), SpaceType.SESSION, store/* , scopeID */);
 
-        IRI iri = IRI.create(StringUtils.stripIRITerminator(getID()) + "/root.owl");
-        try {
-            setTopOntology(new RootOntologySource(ontologyManager.createOntology(iri), null), false);
-        } catch (OWLOntologyCreationException e) {
-            log.error("Could not create session space root ontology " + iri, e);
-        } catch (UnmodifiableOntologySpaceException e) {
-            // Should not happen...
-            log.error("Session space ontology " + iri
-                      + " was denied modification by the space itself. This should not happen.", e);
-        }
+        // IRI iri = IRI.create(StringUtils.stripIRITerminator(getID()) + "/root.owl");
+        // try {
+        // setTopOntology(new RootOntologySource(ontologyManager.createOntology(iri), null), false);
+        // } catch (OWLOntologyCreationException e) {
+        // log.error("Could not create session space root ontology " + iri, e);
+        // } catch (UnmodifiableOntologySpaceException e) {
+        // // Should not happen...
+        // log.error("Session space ontology " + iri
+        // + " was denied modification by the space itself. This should not happen.", e);
+        // }
     }
 
     public SessionOntologySpaceImpl(IRI scopeID,
@@ -63,36 +60,37 @@ public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl implemen
         // FIXME : sync session id with session space ID
         super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/" + SpaceType.SESSION.getIRISuffix()
                          + "-" + new Random().nextLong()), SpaceType.SESSION, store, /* scopeID, */
-                ontologyManager);
+        ontologyManager);
 
-        Logger log = LoggerFactory.getLogger(getClass());
-        IRI iri = IRI.create(StringUtils.stripIRITerminator(getID()) + "/root.owl");
-        try {
-            setTopOntology(new RootOntologySource(ontologyManager.createOntology(iri), null), false);
-        } catch (OWLOntologyCreationException e) {
-            log.error("Could not create session space root ontology " + iri, e);
-        } catch (UnmodifiableOntologySpaceException e) {
-            // Should not happen...
-            log.error("Session space ontology " + iri
-                      + " was denied modification by the space itself. This should not happen.", e);
-        }
+        // Logger log = LoggerFactory.getLogger(getClass());
+        // IRI iri = IRI.create(StringUtils.stripIRITerminator(getID()) + "/root.owl");
+        // try {
+        // setTopOntology(new RootOntologySource(ontologyManager.createOntology(iri), null), false);
+        // } catch (OWLOntologyCreationException e) {
+        // log.error("Could not create session space root ontology " + iri, e);
+        // } catch (UnmodifiableOntologySpaceException e) {
+        // // Should not happen...
+        // log.error("Session space ontology " + iri
+        // + " was denied modification by the space itself. This should not happen.", e);
+        // }
     }
 
     @Override
     public void attachSpace(OntologySpace space, boolean skipRoot) throws UnmodifiableOntologySpaceException {
-        if (!(space instanceof SessionOntologySpace)) {
-            OWLOntology o = space.getTopOntology();
-            // This does the append thingy
-            log.debug("Attaching " + o + " TO " + getTopOntology() + " ...");
-            try {
-                // It is in fact the addition of the core space top ontology to the
-                // custom space, with import statements and all.
-                addOntology(new RootOntologySource(o, null));
-                // log.debug("ok");
-            } catch (Exception ex) {
-                log.error("FAILED", ex);
-            }
-        }
+        // FIXME re-implement!
+//        if (!(space instanceof SessionOntologySpace)) {
+//            OWLOntology o = space.getTopOntology();
+//            // This does the append thingy
+//            log.debug("Attaching " + o + " TO " + getTopOntology() + " ...");
+//            try {
+//                // It is in fact the addition of the core space top ontology to the
+//                // custom space, with import statements and all.
+//                addOntology(new RootOntologySource(o, null));
+//                // log.debug("ok");
+//            } catch (Exception ex) {
+//                log.error("FAILED", ex);
+//            }
+//        }
     }
 
     @Override

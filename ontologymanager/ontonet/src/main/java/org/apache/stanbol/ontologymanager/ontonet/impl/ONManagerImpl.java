@@ -61,6 +61,7 @@ import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologySpaceFac
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.ScopeRegistryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.session.ScopeSessionSynchronizer;
 import org.apache.stanbol.ontologymanager.ontonet.impl.session.SessionManagerImpl;
+import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.FileDocumentSource;
@@ -137,15 +138,15 @@ public class ONManagerImpl implements ONManager {
 
     public static final String _ONTOLOGY_NETWORK_NS_DEFAULT = "http://stanbol.apache.org/";
 
-    @Reference
-    private OfflineConfiguration config;
-
     @Property(name = ONManager.CONFIG_ONTOLOGY_PATH, value = _CONFIG_ONTOLOGY_PATH_DEFAULT)
     private String configPath;
 
     private Helper helper = null;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
+
+    @Reference
+    private OfflineConfiguration offline;
 
     /**
      * The {@link OfflineMode} is used by Stanbol to indicate that no external service should be referenced.
@@ -241,7 +242,7 @@ public class ONManagerImpl implements ONManager {
         // Assume this.tcm this.wtcp and this.wtcp were not filled in by OSGi-DS.
         this.tcm = tcm;
         this.wtcp = wtcp;
-        this.config = onmconfig;
+        this.offline = onmconfig;
         try {
             activate(configuration);
         } catch (IOException e) {
@@ -287,7 +288,7 @@ public class ONManagerImpl implements ONManager {
         // Bind components, starting with the local directories.
         List<String> dirs = new ArrayList<String>();
         try {
-            for (IRI iri : config.getOntologySourceLocations())
+            for (IRI iri : offline.getOntologySourceLocations())
                 dirs.add(iri.toString());
         } catch (NullPointerException ex) {
             // Ok, go empty
@@ -295,7 +296,8 @@ public class ONManagerImpl implements ONManager {
 
         omgrFactory = new OWLOntologyManagerFactoryImpl(dirs);
         owlFactory = OWLManager.getOWLDataFactory();
-        owlCacheManager = omgrFactory.createOntologyManager(true);
+        owlCacheManager = OWLOntologyManagerFactory.createOWLOntologyManager(offline
+                .getOntologySourceLocations().toArray(new IRI[0]));
 
         // These depend on one another
         scopeRegistry = new ScopeRegistryImpl();
@@ -381,7 +383,7 @@ public class ONManagerImpl implements ONManager {
         // Now create everything that depends on the Storage object.
 
         // These may require the OWL cache manager
-        ontologySpaceFactory = new OntologySpaceFactoryImpl(scopeRegistry, storage, omgrFactory);
+        ontologySpaceFactory = new OntologySpaceFactoryImpl(scopeRegistry, storage, offline);
         ontologyScopeFactory = new OntologyScopeFactoryImpl(scopeRegistry, ontologySpaceFactory);
         ontologyScopeFactory.addScopeEventListener(oIndex);
 

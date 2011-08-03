@@ -44,6 +44,8 @@ public interface OntologySpace {
 
     void clearOntologySpaceListeners();
 
+    boolean containsOntology(IRI ontologyIri);
+
     /**
      * Returns a Unique Resource Identifier (URI) that identifies this ontology space. For instance, this URI
      * could be the parent of (some/most of) the base URIs for the ontologies within this space.<br/>
@@ -56,11 +58,14 @@ public interface OntologySpace {
     IRI getID();
 
     /**
-     * Returns all the ontologies encompassed by this ontology space.
+     * Returns the ontologies managed by this ontology space.
      * 
+     * @param withClosure
+     *            if true, also the ontologies imported by those directly managed by this space will be
+     *            included.
      * @return the set of ontologies in the ontology space
      */
-    Set<OWLOntology> getOntologies();
+    Set<OWLOntology> getOntologies(boolean withClosure);
 
     /**
      * Returns the ontology identified by the supplied <i>logical</i> IRI, if such an ontology has been loaded
@@ -75,8 +80,6 @@ public interface OntologySpace {
      * @return the requested ontology, or null if no ontology with this ID has been loaded.
      */
     OWLOntology getOntology(IRI ontologyIri);
-
-    boolean containsOntology(IRI ontologyIri);
 
     Collection<OntologySpaceListener> getOntologyScopeListeners();
 
@@ -124,38 +127,6 @@ public interface OntologySpace {
     void removeOntologySpaceListener(OntologySpaceListener listener);
 
     void setSilentMissingOntologyHandling(boolean silent);
-
-    /**
-     * Sets the supplied ontology as the root ontology that (recursively) references the whole underlying
-     * ontology network. This actually <i>replaces</i> the ontology to be obtained by a call to
-     * <code>getTopOntology()</code> with this one, i.e. it is <code>not</code> equivalent to adding this
-     * ontology to a blank network!<br>
-     * <br>
-     * Implementations can arbitrarily behave with respect to the unset <code>createParent</code> parameter
-     * from the other method signature.
-     * 
-     * @param ontology
-     *            the new top ontology.
-     * @throws OntologySpaceModificationException
-     *             if the ontology space is read-only or the ontology could not be removed.
-     */
-    void setTopOntology(OntologyInputSource ontologySource) throws UnmodifiableOntologySpaceException;
-
-    /**
-     * Sets the supplied ontology as the root ontology that (recursively) references the whole underlying
-     * ontology network. This actually <i>replaces</i> the ontology to be obtained by a call to
-     * <code>getTopOntology()</code> with this one, i.e. it is <code>not</code> equivalent to adding this
-     * ontology to a blank network!
-     * 
-     * @param ontology
-     *            the new top ontology.
-     * @param createParent
-     *            if true, a new ontology will be created and set as the top ontology that will import this
-     *            one.
-     * @throws UnmodifiableOntologySpaceException
-     *             if the ontology space is read-only.
-     */
-    void setTopOntology(OntologyInputSource ontologySource, boolean createParent) throws UnmodifiableOntologySpaceException;
 
     /**
      * Bootstraps the ontology space. In some cases (such as with core and custom spaces) this also implies
