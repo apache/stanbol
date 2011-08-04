@@ -16,6 +16,8 @@
  */
 package org.apache.stanbol.cmsadapter.servicesapi.helper;
 
+import org.apache.clerezza.rdf.core.UriRef;
+
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
@@ -28,15 +30,13 @@ import com.hp.hpl.jena.rdf.model.ResourceFactory;
  * 
  */
 public class CMSAdapterVocabulary {
-    private static final String RESOURCE_DELIMITER = "#";
     private static final String PATH_DELIMITER = "/";
 
     public static final String DEFAULT_NS_URI = "http://org.apache.stanbol";
 
     public static final String CMS_ADAPTER_VOCABULARY_PREFIX = "cmsad";
     public static final String CMS_ADAPTER_VOCABULARY_URI = DEFAULT_NS_URI + PATH_DELIMITER
-                                                            + CMS_ADAPTER_VOCABULARY_PREFIX
-                                                            + RESOURCE_DELIMITER;
+                                                            + CMS_ADAPTER_VOCABULARY_PREFIX;
 
     /*
      * Property to represent the path of the CMS item
@@ -120,4 +120,48 @@ public class CMSAdapterVocabulary {
         URI = OntologyResourceHelper.addResourceDelimiter(URI);
         return ResourceFactory.createResource(URI + local);
     }
+
+    /**
+     * Represent the RDF type of CMS Object in the content management system
+     */
+    public static final UriRef CMS_OBJECT = new UriRef(CMS_ADAPTER_VOCABULARY_URI + PATH_DELIMITER
+                                                       + "CMSObject");
+
+    /**
+     * Represents a reference to name of a CMS Object
+     */
+    public static final UriRef CMS_OBJECT_NAME = new UriRef(CMS_ADAPTER_VOCABULARY_URI + "#name");
+    
+    /**
+     * Represents a reference to path of a CMS Object
+     */
+    public static final UriRef CMS_OBJECT_PATH = new UriRef(CMS_ADAPTER_VOCABULARY_URI + "#path");
+    
+    /**
+     * Represents a reference to parent of a CMS Object
+     */
+    public static final UriRef CMS_OBJECT_PARENT_REF = new UriRef(CMS_ADAPTER_VOCABULARY_URI + "#parentRef");
+
+    /**
+     * Represents a reference to a property of a CMS Object
+     */
+    public static final UriRef CMS_OBJECT_HAS_PROPERTY = new UriRef(CMS_ADAPTER_VOCABULARY_URI
+                                                                    + "#hasProperty");
+
+    /**
+     * Represents a reference to name of a property of a CMS Object
+     */
+    public static final UriRef CMS_OBJECT_PROPERTY_NAME = new UriRef(CMS_ADAPTER_VOCABULARY_URI
+                                                                     + "#propertyName");
+
+    /**
+     * Represents a reference to URI of a property of a CMS Object
+     */
+    public static final UriRef CMS_OBJECT_PROPERTY_URI = new UriRef(CMS_ADAPTER_VOCABULARY_URI
+                                                                   + "#propertyURI");
+
+    /**
+     * Represents a reference to a child of a CMS Object
+     */
+    public static final UriRef CMS_OBJECT_HAS_CHILD = new UriRef(CMS_ADAPTER_VOCABULARY_URI + "#childRef");
 }

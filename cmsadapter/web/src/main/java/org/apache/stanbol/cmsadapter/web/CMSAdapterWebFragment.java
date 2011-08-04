@@ -27,6 +27,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.cmsadapter.web.resources.BridgeDefinitionsResource;
 import org.apache.stanbol.cmsadapter.web.resources.NotifyResource;
 import org.apache.stanbol.cmsadapter.web.resources.ObjectTypesResource;
+import org.apache.stanbol.cmsadapter.web.resources.RDFMapperResource;
 import org.apache.stanbol.cmsadapter.web.resources.RootResource;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
@@ -75,6 +76,7 @@ public class CMSAdapterWebFragment implements WebFragment {
         classes.add(NotifyResource.class);
         classes.add(ObjectTypesResource.class);
         classes.add(RootResource.class);
+        classes.add(RDFMapperResource.class);
         return classes;
     }
 
