@@ -26,7 +26,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.OntologyResourceHelper;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.MappingEngine;
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.CMSObject;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectTypeDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropType;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DObjectAdapter;
@@ -34,7 +33,6 @@ import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DObjectType
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DPropertyDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.processor.Processor;
 import org.apache.stanbol.cmsadapter.servicesapi.processor.ProcessorProperties;
-import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccess;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,9 +40,7 @@ import org.slf4j.LoggerFactory;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntClass;
-import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.vocabulary.OWL;
 
 /**
  * This processer can process CMS Objects of type {@link ObjectTypeDefinition}. A type definition corresponds
@@ -128,65 +124,13 @@ public class ObjectTypeProcessor implements Processor, ProcessorProperties {
 
     private void processProperties(DObjectType objectType, OntClass subjectClass, MappingEngine engine) throws RepositoryAccessException {
         for (DPropertyDefinition propDef : objectType.getPropertyDefinitions()) {
-            RepositoryAccess accessor = engine.getRepositoryAccess();
-            Object session = engine.getSession();
             OntologyResourceHelper orh = engine.getOntologyResourceHelper();
 
             if ((propDef.getPropertyType() == PropType.NAME) || (propDef.getPropertyType() == PropType.PATH)
                 || (propDef.getPropertyType() == PropType.REFERENCE)) {
 
-                List<String> constraints = propDef.getValueConstraints();
-                List<CMSObject> referencedObjects = new ArrayList<CMSObject>();
-
-                if (propDef.getPropertyType() == PropType.NAME) {
-                    for (String constraint : constraints) {
-                        try {
-                            referencedObjects.addAll(accessor.getNodeByName(constraint, session));
-                        } catch (RepositoryAccessException e) {
-                            logger.warn("Error while getting referenced value {} ", constraint, e);
-                        }
-                    }
-
-                } else if (propDef.getPropertyType() == PropType.PATH) {
-                    for (String constraint : constraints) {
-                        try {
-                            referencedObjects.addAll(accessor.getNodeByPath(constraint, session));
-                        } catch (RepositoryAccessException e) {
-                            logger.warn("Error while getting referenced value {} ", constraint, e);
-                        }
-                    }
-
-                } else if (propDef.getPropertyType() == PropType.REFERENCE) {
-                    for (String constraint : constraints) {
-                        try {
-                            referencedObjects.addAll(accessor.getNodeById(constraint, session));
-                        } catch (RepositoryAccessException e) {
-                            logger.warn("Error while getting referenced value {} ", constraint, e);
-                        }
-                    }
-                }
-
-                Resource rangeClass = null;
-                if (referencedObjects.size() == 0) {
-                    rangeClass = OWL.Thing;
-
-                } else if (referencedObjects.size() == 1) {
-                    rangeClass = orh.createOntClassByCMSObject(referencedObjects.get(0));
-
-                    if (rangeClass == null) {
-                        logger.warn("Failed create class for range value {}", referencedObjects.get(0)
-                                .getLocalname());
-                    }
-
-                } else {
-                    RDFList rdfList = engine.getOntModel().createList();
-                    for (CMSObject referencedObject : referencedObjects) {
-                        rdfList = rdfList.cons(orh.createOntClassByCMSObject(referencedObject));
-                    }
-                    rangeClass = orh.createUnionClass(rdfList);
-                }
                 ObjectProperty op = orh.createObjectPropertyByPropertyDefinition(propDef.getInstance(),
-                    Arrays.asList(new Resource[] {subjectClass}), Arrays.asList(new Resource[] {rangeClass}));
+                    Arrays.asList(new Resource[] {subjectClass}), new ArrayList<Resource>());
 
                 if (op == null) {
                     logger.warn("Failed to create ObjectProperty for property definition {}",

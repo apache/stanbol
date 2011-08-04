@@ -322,12 +322,11 @@ public class PropertyProcesser {
             return;
         }
 
-        OntResource individualType = ontologyResourceHelper.createOntClassByReference(contentObject
-                .getInstance().getObjectTypeRef());
-
         for (CMSObject referencedObject : referencedObjects) {
+            OntResource targetIndividualType = ontologyResourceHelper
+                    .createOntClassByReference(referencedObject.getObjectTypeRef());
             Individual ind = ontologyResourceHelper.createIndividualByCMSObject(referencedObject,
-                individualType);
+                targetIndividualType);
             if (ind != null) {
                 individual.addProperty(objectProperty, ind);
             } else {
