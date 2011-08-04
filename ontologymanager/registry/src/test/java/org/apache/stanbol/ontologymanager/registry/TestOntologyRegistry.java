@@ -164,8 +164,8 @@ public class TestOntologyRegistry {
         // OntologyRegistryIRISource(testRegistryIri,onm.getOwlCacheManager(),onm.getRegistryLoader()));
         space.addOntology(ontologySource);
         // FIXME : no longer use the top ontology?
-        assertTrue(space.getTopOntology() != null);
-        assertTrue(space.getOntologies(true).contains(space.getTopOntology()));
+        assertTrue(space.asOWLOntology() != null);
+        assertTrue(space.getOntologies(true).contains(space.asOWLOntology()));
     }
 
     /**
@@ -177,7 +177,7 @@ public class TestOntologyRegistry {
         // The input source instantiation automatically loads the entire content of a registry, no need to
         // test loading methods individually.
         scope = onm.getOntologyScopeFactory().createOntologyScope(scopeIri, ontologySource);
-        assertTrue(scope != null && scope.getCoreSpace().getTopOntology() != null);
+        assertTrue(scope != null && scope.getCoreSpace().asOWLOntology() != null);
     }
 
     /**
@@ -190,7 +190,7 @@ public class TestOntologyRegistry {
         // The input source instantiation automatically loads the entire content of a registry, no need to
         // test loading methods individually.
         space = onm.getOntologySpaceFactory().createCoreOntologySpace(scopeIri, ontologySource);
-        assertTrue(space != null && space.getTopOntology() != null);
+        assertTrue(space != null && space.asOWLOntology() != null);
     }
 
 }

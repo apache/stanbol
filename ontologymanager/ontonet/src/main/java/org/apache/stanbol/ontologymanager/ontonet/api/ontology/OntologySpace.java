@@ -42,6 +42,13 @@ public interface OntologySpace {
 
     void addOntologySpaceListener(OntologySpaceListener listener);
 
+    /**
+     * Returns the ontology that serves as a root module for this ontology space.
+     * 
+     * @return the OWL form of this ontology space.
+     */
+    OWLOntology asOWLOntology();
+
     void clearOntologySpaceListeners();
 
     boolean containsOntology(IRI ontologyIri);
@@ -82,13 +89,6 @@ public interface OntologySpace {
     OWLOntology getOntology(IRI ontologyIri);
 
     Collection<OntologySpaceListener> getOntologyScopeListeners();
-
-    /**
-     * Returns the ontology that serves as a root module for this ontology space.
-     * 
-     * @return the root module of the ontology space
-     */
-    OWLOntology getTopOntology();
 
     /**
      * Determines if the ontology identified by the supplied <i>logical</i> IRI has been loaded in this space.<br>

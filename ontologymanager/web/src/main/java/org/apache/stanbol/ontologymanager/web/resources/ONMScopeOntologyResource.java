@@ -123,11 +123,11 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
 
             // First of all, it could be a simple request for the space root!
             if (ontiri.equals(scope.getCoreSpace().getID())) {
-                return Response.ok(scope.getCoreSpace().getTopOntology()).build();
+                return Response.ok(scope.getCoreSpace().asOWLOntology()).build();
             } else if (ontiri.equals(scope.getCustomSpace().getID())) {
-                return Response.ok(scope.getCustomSpace().getTopOntology()).build();
+                return Response.ok(scope.getCustomSpace().asOWLOntology()).build();
             } else if (scope.getSessionSpace(ontiri) != null) {
-                return Response.ok(scope.getSessionSpace(ontiri).getTopOntology()).build();
+                return Response.ok(scope.getSessionSpace(ontiri).asOWLOntology()).build();
             }
 
             /*

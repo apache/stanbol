@@ -22,6 +22,12 @@ import org.semanticweb.owlapi.model.IRI;
 
 public class URIUtils {
 
+    /**
+     * Removes either the fragment, or query, or last path component from a URI, whatever it finds first.
+     * 
+     * @param iri
+     * @return
+     */
     public static IRI upOne(IRI iri) {
         return upOne(iri.toURI());
     }

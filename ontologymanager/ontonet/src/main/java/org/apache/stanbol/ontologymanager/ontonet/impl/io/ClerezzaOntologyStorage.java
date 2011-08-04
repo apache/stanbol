@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.ontonet.impl.io;
 
 import java.util.Dictionary;
@@ -46,175 +46,161 @@ import com.hp.hpl.jena.util.FileManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.NoSuchStoreException;
 import org.apache.stanbol.owl.transformation.JenaToClerezzaConverter;
 import org.apache.stanbol.owl.transformation.JenaToOwlConvert;
+import org.apache.stanbol.owl.util.OWLUtils;
 
 public class ClerezzaOntologyStorage {
 
-	private static Logger log = LoggerFactory.getLogger(ClerezzaOntologyStorage.class);
-	
-	public static final String URI = "http://ontologydesignpatterns.org/ont/iks/oxml.owl";
-	
-	TcManager tcManager;
-	
-	WeightedTcProvider weightedTcProvider;
-	
-	/**
-	 * This default constructor is <b>only</b> intended to be used by the OSGI
-	 * environment with Service Component Runtime support.
-	 * <p>
-	 * DO NOT USE to manually create instances - the ClerezzaStorage instances
-	 * do need to be configured! YOU NEED TO USE
-	 * {@link #ClerezzaStorage(TcManager, WeightedTcProvider, OntologyStoreProvider)}
-	 * or its overloads, to parse the configuration and then initialise the rule
-	 * store if running outside a OSGI environment.
-	 */
-	protected ClerezzaOntologyStorage() {
+    private static Logger log = LoggerFactory.getLogger(ClerezzaOntologyStorage.class);
 
-	}
-	
-	/**
-	 * Basic constructor to be used if outside of an OSGi environment. Invokes
-	 * default constructor.
-	 * 
-	 * @param tcManager
-	 * @param wtcProvider
-	 * @param osProvider
-	 */
-	public ClerezzaOntologyStorage(TcManager tcManager, WeightedTcProvider wtcProvider) {
-		this();
-		this.tcManager = tcManager;
-		this.weightedTcProvider = wtcProvider;
-		activate(new Hashtable<String, Object>());
-	}
+    public static final String URI = "http://ontologydesignpatterns.org/ont/iks/oxml.owl";
 
-	@SuppressWarnings("unchecked")
+    TcManager tcManager;
+
+    WeightedTcProvider weightedTcProvider;
+
+    /**
+     * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
+     * Component Runtime support.
+     * <p>
+     * DO NOT USE to manually create instances - the ClerezzaStorage instances do need to be configured! YOU
+     * NEED TO USE {@link #ClerezzaStorage(TcManager, WeightedTcProvider, OntologyStoreProvider)} or its
+     * overloads, to parse the configuration and then initialise the rule store if running outside a OSGI
+     * environment.
+     */
+    protected ClerezzaOntologyStorage() {
+
+    }
+
+    /**
+     * Basic constructor to be used if outside of an OSGi environment. Invokes default constructor.
+     * 
+     * @param tcManager
+     * @param wtcProvider
+     * @param osProvider
+     */
+    public ClerezzaOntologyStorage(TcManager tcManager, WeightedTcProvider wtcProvider) {
+        this();
+        this.tcManager = tcManager;
+        this.weightedTcProvider = wtcProvider;
+        activate(new Hashtable<String,Object>());
+    }
+
+    @SuppressWarnings("unchecked")
     protected void activate(ComponentContext context) {
-		log.info("in " + ClerezzaOntologyStorage.class + " activate with context "
-				+ context);
-		if (context == null) {
-			throw new IllegalStateException("No valid" + ComponentContext.class
-					+ " parsed in activate!");
-		}
-		activate((Dictionary<String, Object>) context.getProperties());
-	}
+        log.info("in " + ClerezzaOntologyStorage.class + " activate with context " + context);
+        if (context == null) {
+            throw new IllegalStateException("No valid" + ComponentContext.class + " parsed in activate!");
+        }
+        activate((Dictionary<String,Object>) context.getProperties());
+    }
 
-	protected void activate(Dictionary<String, Object> configuration) {
+    protected void activate(Dictionary<String,Object> configuration) {
 
-	}
+    }
 
-	public void clear() {
-		// TODO Auto-generated method stub
-	}
+    public void clear() {
+        // TODO Auto-generated method stub
+    }
 
-	protected void deactivate(ComponentContext context) {
-		log.info("in " + ClerezzaOntologyStorage.class + " deactivate with context "
-				+ context);
-		tcManager = null;
-		weightedTcProvider = null;
-	}
+    protected void deactivate(ComponentContext context) {
+        log.info("in " + ClerezzaOntologyStorage.class + " deactivate with context " + context);
+        tcManager = null;
+        weightedTcProvider = null;
+    }
 
-	public void delete(IRI ontologyId) {
-		// TODO Auto-generated method stub
-	}
+    public void delete(IRI ontologyId) {
+        // TODO Auto-generated method stub
+    }
 
-	public void deleteAll(Set<IRI> ontologyIds) {
-		// TODO Auto-generated method stub
-	}
+    public void deleteAll(Set<IRI> ontologyIds) {
+        // TODO Auto-generated method stub
+    }
 
-	public OWLOntology getGraph(IRI ontologyID) throws NoSuchStoreException {
-		OWLOntology ontology = null;
+    public OWLOntology getGraph(IRI ontologyID) throws NoSuchStoreException {
+        OWLOntology ontology = null;
 
-		if (tcManager != null) {
-			MGraph mGraph = tcManager.getMGraph(new UriRef(ontologyID
-					.toString()));
-			JenaToOwlConvert jowl = new JenaToOwlConvert();
-			OntModel ontModel = ModelFactory.createOntologyModel(
-					OntModelSpec.OWL_DL_MEM, FileManager.get().loadModel(
-					    URI));
-			ontModel.add(JenaToClerezzaConverter
-					.clerezzaMGraphToJenaModel(mGraph));
-			ontology = jowl.ModelJenaToOwlConvert(ontModel, "RDF/XML");
-			// ontology =
-			// OWLAPIToClerezzaConverter.clerezzaMGraphToOWLOntology(mGraph);
+        if (tcManager != null) {
+            MGraph mGraph = tcManager.getMGraph(new UriRef(ontologyID.toString()));
+            JenaToOwlConvert jowl = new JenaToOwlConvert();
+            OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM, FileManager.get()
+                    .loadModel(URI));
+            ontModel.add(JenaToClerezzaConverter.clerezzaMGraphToJenaModel(mGraph));
+            ontology = jowl.ModelJenaToOwlConvert(ontModel, "RDF/XML");
+            // ontology =
+            // OWLAPIToClerezzaConverter.clerezzaMGraphToOWLOntology(mGraph);
 
-		} else {
-			throw new NoSuchStoreException(
-					"No store registered or activated in the environment.");
-		}
-		return ontology;
-	}
+        } else {
+            throw new NoSuchStoreException("No store registered or activated in the environment.");
+        }
+        return ontology;
+    }
 
-	public Set<IRI> listGraphs() {
+    public Set<IRI> listGraphs() {
 
-		Set<IRI> iris = null;
-		Set<UriRef> uriRefs = tcManager.listTripleCollections();
-		if (uriRefs != null) {
-			iris = new HashSet<IRI>();
-			for (UriRef uriRef : uriRefs) {
-				iris.add(IRI.create(uriRef.toString()));
-			}
-		}
-		return iris;
+        Set<IRI> iris = null;
+        Set<UriRef> uriRefs = tcManager.listTripleCollections();
+        if (uriRefs != null) {
+            iris = new HashSet<IRI>();
+            for (UriRef uriRef : uriRefs) {
+                iris.add(IRI.create(uriRef.toString()));
+            }
+        }
+        return iris;
 
-	}
+    }
 
-	public OWLOntology load(IRI ontologyId) {
-		MGraph triples = TcManager.getInstance().getMGraph(
-				new UriRef(ontologyId.toString()));
-		Model om = JenaToClerezzaConverter.clerezzaMGraphToJenaModel(triples);
-		JenaToOwlConvert converter = new JenaToOwlConvert();
-		return converter.ModelJenaToOwlConvert(om, "RDF/XML");
-	}
-	
-	public OWLOntology sparqlConstruct(String sparql, String datasetURI) {
-		
-		Query query;
-		
-		MGraph mGraph = new SimpleMGraph();
-		try {
-			query = QueryParser.getInstance().parse(sparql);
-			
-			UriRef datasetUriRef = new UriRef(datasetURI);
-			MGraph dataset = weightedTcProvider.getMGraph(datasetUriRef);
-			
-			mGraph.addAll((SimpleGraph) tcManager.executeSparqlQuery(query,
-					dataset));
-			
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		Model om = JenaToClerezzaConverter.clerezzaMGraphToJenaModel(mGraph);
-		JenaToOwlConvert converter = new JenaToOwlConvert();
-		return converter.ModelJenaToOwlConvert(om, "RDF/XML");
-	}
+    public OWLOntology load(IRI ontologyId) {
+        MGraph triples = TcManager.getInstance().getMGraph(new UriRef(ontologyId.toString()));
+        Model om = JenaToClerezzaConverter.clerezzaMGraphToJenaModel(triples);
+        JenaToOwlConvert converter = new JenaToOwlConvert();
+        return converter.ModelJenaToOwlConvert(om, "RDF/XML");
+    }
 
-	public void store(OWLOntology o) {
-		
-		JenaToOwlConvert converter = new JenaToOwlConvert();
-		OntModel om = converter.ModelOwlToJenaConvert(o, "RDF/XML");
-		MGraph mg = JenaToClerezzaConverter.jenaModelToClerezzaMGraph(om);
-		// MGraph mg = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(o);
-		MGraph mg2 = null;
-UriRef ref = new UriRef(o.getOntologyID()
-    .getOntologyIRI().toString());
-		try {
-		mg2 = tcManager.createMGraph(ref);
-		} catch (EntityAlreadyExistsException ex) {
-		    log.info("Entity "+ref+" already exists in store. Replacing...");
-		    mg2 = tcManager.getMGraph(ref);
-		}
-		
-		mg2.addAll(mg);
-	}
-	
-	public void store(OWLOntology o, IRI ontologyID) {
-			
-		JenaToOwlConvert converter = new JenaToOwlConvert();
-		OntModel om = converter.ModelOwlToJenaConvert(o, "RDF/XML");
-		MGraph mg = JenaToClerezzaConverter.jenaModelToClerezzaMGraph(om);
-		// MGraph mg = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(o);
-		MGraph mg2 = tcManager.createMGraph(new UriRef(ontologyID.toString()));
-		mg2.addAll(mg);
-	}
+    public OWLOntology sparqlConstruct(String sparql, String datasetURI) {
+
+        Query query;
+        MGraph mGraph = new SimpleMGraph();
+        try {
+            query = QueryParser.getInstance().parse(sparql);
+            UriRef datasetUriRef = new UriRef(datasetURI);
+            MGraph dataset = weightedTcProvider.getMGraph(datasetUriRef);
+            mGraph.addAll((SimpleGraph) tcManager.executeSparqlQuery(query, dataset));
+        } catch (ParseException e) {
+            log.error("Unable to execute SPARQL. ", e);
+        }
+
+        Model om = JenaToClerezzaConverter.clerezzaMGraphToJenaModel(mGraph);
+        JenaToOwlConvert converter = new JenaToOwlConvert();
+
+        return converter.ModelJenaToOwlConvert(om, "RDF/XML");
+    }
+
+    public void store(OWLOntology o) {
+
+        JenaToOwlConvert converter = new JenaToOwlConvert();
+        OntModel om = converter.ModelOwlToJenaConvert(o, "RDF/XML");
+        MGraph mg = JenaToClerezzaConverter.jenaModelToClerezzaMGraph(om);
+        // MGraph mg = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(o);
+        MGraph mg2 = null;
+        IRI iri = OWLUtils.getIdentifyingIRI(o);
+        UriRef ref = new UriRef(iri.toString());
+        try {
+            mg2 = tcManager.createMGraph(ref);
+        } catch (EntityAlreadyExistsException ex) {
+            log.info("Entity " + ref + " already exists in store. Replacing...");
+            mg2 = tcManager.getMGraph(ref);
+        }
+
+        mg2.addAll(mg);
+    }
+
+    public void store(OWLOntology o, IRI ontologyID) {
+
+        JenaToOwlConvert converter = new JenaToOwlConvert();
+        OntModel om = converter.ModelOwlToJenaConvert(o, "RDF/XML");
+        MGraph mg = JenaToClerezzaConverter.jenaModelToClerezzaMGraph(om);
+        // MGraph mg = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(o);
+        MGraph mg2 = tcManager.createMGraph(new UriRef(ontologyID.toString()));
+        mg2.addAll(mg);
+    }
 }
