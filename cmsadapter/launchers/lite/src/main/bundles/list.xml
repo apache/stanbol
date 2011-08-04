@@ -1,30 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Licensed to the Apache Software Foundation (ASF) under one or more
-  contributor license agreements.  See the NOTICE file distributed with
-  this work for additional information regarding copyright ownership.
-  The ASF licenses this file to You under the Apache License, Version 2.0
-  (the "License"); you may not use this file except in compliance with
-  the License.  You may obtain a copy of the License at
+<!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor 
+	license agreements. See the NOTICE file distributed with this work for additional 
+	information regarding copyright ownership. The ASF licenses this file to 
+	You under the Apache License, Version 2.0 (the "License"); you may not use 
+	this file except in compliance with the License. You may obtain a copy of 
+	the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required 
+	by applicable law or agreed to in writing, software distributed under the 
+	License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
+	OF ANY KIND, either express or implied. See the License for the specific 
+	language governing permissions and limitations under the License. -->
 
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
-
-<!-- List of initial bundles for the CMS Adapter Sling-based standalone launcher -->
 <bundles>
-
+	<!-- ********************************************************************* 
+		start level < 10 reserved for OSGI and Sling Infrastructure ********************************************************************* -->
 	<!-- OSGi infrastructure -->
 	<startLevel level="5">
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.frameworkfragment</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
 		<bundle>
 			<groupId>org.apache.sling</groupId>
 			<artifactId>org.apache.sling.commons.log</artifactId>
 			<version>2.1.2</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<version>1.4.0</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.felix</groupId>
@@ -33,44 +37,62 @@
 		</bundle>
 		<bundle>
 			<groupId>org.apache.felix</groupId>
-			<artifactId>org.osgi.core</artifactId>
-			<version>1.2.0</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.configadmin</artifactId>
-			<version>1.2.4</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.eventadmin</artifactId>
-			<version>1.2.2</version>
+			<version>1.2.8</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.metatype</artifactId>
 			<version>1.0.4</version>
 		</bundle>
-		<!-- HTTP service -->
+	</startLevel>
+
+	<!-- HTTP service -->
+	<startLevel level="5">
 		<bundle>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.http.whiteboard</artifactId>
-			<version>2.0.4</version>
+			<version>2.2.0</version>
 		</bundle>
 		<bundle>
-			<groupId>org.osgi</groupId>
+			<groupId>org.apache.felix</groupId>
 			<artifactId>org.osgi.compendium</artifactId>
-			<version>4.2.0</version>
+			<version>1.4.0</version>
 		</bundle>
 	</startLevel>
 
+	<!-- Sling installer and Stanbol extensions -->
+	<startLevel level="8">
+		<bundle>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.installer.core</artifactId>
+			<version>3.2.0</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.installer.factory.configuration
+			</artifactId>
+			<version>1.0.0</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.installer.bundleprovider
+			</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.installer.provider.file</artifactId>
+			<version>1.0.0</version>
+		</bundle>
+	</startLevel>
 
 	<!-- Felix web console and plugins -->
-	<startLevel level="10">
+	<startLevel level="9">
 		<bundle>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.webconsole</artifactId>
-			<version>3.1.2</version>
+			<version>3.1.8</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.felix</groupId>
@@ -80,6 +102,23 @@
 		</bundle>
 	</startLevel>
 
+	<!-- Sling launchpad -->
+	<startLevel level="9">
+		<bundle>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.launchpad.installer</artifactId>
+			<version>1.0.0</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.launchpad.api</artifactId>
+			<version>1.0.0</version>
+		</bundle>
+	</startLevel>
+
+	<!-- ********************************************************************* 
+		start level 10 TO 19 reserved for required libraries (internal and external) 
+		********************************************************************* -->
 	<!-- General-purpose libraries -->
 	<startLevel level="10">
 		<bundle>
@@ -88,9 +127,14 @@
 			<version>1.2</version>
 		</bundle>
 		<bundle>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-compress</artifactId>
-			<version>1.0</version>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.4</version>
+		</bundle>
+		<bundle>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.1</version>
 		</bundle>
 		<bundle>
 			<groupId>commons-io</groupId>
@@ -98,24 +142,9 @@
 			<version>1.4</version>
 		</bundle>
 		<bundle>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-			<version>2.4</version>
-		</bundle>
-		<bundle>
 			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-math</artifactId>
-			<version>2.1</version>
-		</bundle>
-		<bundle>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-			<version>1.5</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-core</artifactId>
-			<version>0.9</version>
+			<artifactId>commons-compress</artifactId>
+			<version>1.0</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -123,26 +152,72 @@
 			<version>4.0.1</version>
 		</bundle>
 		<bundle>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.12</version>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.5</version>
 		</bundle>
 		<bundle>
-			<groupId>org.apache.derby</groupId>
-			<artifactId>derby</artifactId>
-			<version>10.6.2.1</version>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.2.2</version>
 		</bundle>
-		<bundle>
+		<bundle> <!-- only used by the Entityhub -->
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
 			<version>1.6.2</version>
 		</bundle>
 		<bundle>
+			<!-- only used by the Contenthub -->
 			<groupId>eu.medsea.mimeutil</groupId>
 			<artifactId>mime-util</artifactId>
 			<version>2.1.3</version>
 		</bundle>
+		<bundle>
+			<!-- only used by the Factstore -->
+			<groupId>org.apache.derby</groupId>
+			<artifactId>derby</artifactId>
+			<version>10.7.1.1</version>
+		</bundle>
+	</startLevel>
 
+	<!-- Jersey -->
+	<startLevel level="14">
+		<!-- NOTE: jersey-core bug, must start before jersey-server to avoid jersey 
+			spi class not found errors. Restart jersey-server manually if getting those. -->
+		<bundle>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-core</artifactId>
+			<version>1.7</version>
+		</bundle>
+	</startLevel>
+	<startLevel level="15">
+		<bundle>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>1.7</version>
+		</bundle>
+		<bundle>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-server</artifactId>
+			<version>1.7</version>
+		</bundle>
+		<!-- needed to read data from mime multipart requests -->
+		<bundle>
+			<groupId>com.sun.jersey.contribs</groupId>
+			<artifactId>jersey-multipart</artifactId>
+			<version>1.7</version>
+		</bundle>
+		<!-- dependency of jersey-multipart -->
+		<bundle>
+			<groupId>org.jvnet</groupId>
+			<artifactId>mimepull</artifactId>
+			<version>1.4</version>
+		</bundle>
+		<bundle> <!-- used also for all the other JSON parsing/writing in Stanbol -->
+			<groupId>org.codehaus.jettison</groupId>
+			<artifactId>jettison</artifactId>
+			<version>1.3</version>
+		</bundle>
 	</startLevel>
 
 	<!-- Clerezza storage and sparql infrastructure -->
@@ -214,8 +289,8 @@
 		</bundle>
 		<bundle>
 			<groupId>org.apache.clerezza</groupId>
-			<artifactId>rdf.simple.storage</artifactId>
-			<version>0.7-incubating-SNAPSHOT</version>
+			<artifactId>rdf.jena.serializer</artifactId>
+			<version>0.9-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.clerezza</groupId>
@@ -234,82 +309,86 @@
 		</bundle>
 	</startLevel>
 
-	<!-- JAX-RS -->
-	<startLevel level="5">
-		<!-- WARNING: jersey-core bug, must start before jersey-server to avoid 
-			jersey spi class not found errors. Restart jersey-server manually if getting 
-			those. -->
-		<bundle>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-core</artifactId>
-			<version>1.7</version>
-		</bundle>
-	</startLevel>
-
-	<startLevel level="15">
-		<bundle>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-server</artifactId>
-			<version>1.7</version>
-		</bundle>
-		<bundle>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-client</artifactId>
-			<version>1.7</version>
-		</bundle>
-		<bundle>
-			<groupId>com.sun.jersey.contribs</groupId>
-			<artifactId>jersey-multipart</artifactId>
-			<version>1.7</version>
-		</bundle>
-		<bundle>
-			<groupId>org.jvnet</groupId>
-			<artifactId>mimepull</artifactId>
-			<version>1.4</version>
-		</bundle>
-		<bundle>
-			<groupId>org.codehaus.jettison</groupId>
-			<artifactId>jettison</artifactId>
-			<version>1.3</version>
-		</bundle>
-		<bundle>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-lgpl</artifactId>
-			<version>0.9.5</version>
-		</bundle>
-	</startLevel>
-
-	<!-- Serializers -->
+	<!-- Stanbol Commons -->
 	<startLevel level="17">
-		<bundle>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>rdf.jena.serializer</artifactId>
-			<version>0.9-incubating-SNAPSHOT</version>
-		</bundle>
-	</startLevel>
-
-	<!-- Stanbol Bundles -->
-	<startLevel level="20">
-		<!-- Commons -->
+		<!-- Allows to run Stanbol in offline mode -->
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.web.base
+			<artifactId>org.apache.stanbol.commons.stanboltools.offline
+			</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<!-- DataFileProvider and implementations -->
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider
 			</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.web.home
+			<artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider.bundle
 			</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
+		<!-- OpenNLP as bundle + utilities -->
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.opennlp</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.solr</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<!-- support for JSON-LD -->
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.jsonld</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<!-- The common web interface -->
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.base</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.home</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<!-- <bundle> <groupId>org.apache.stanbol</groupId> <artifactId>org.apache.stanbol.commons.web.sparql</artifactId> 
+			<version>0.9.0-incubating-SNAPSHOT</version> </bundle> -->
+	</startLevel>
 
-		<!-- Enhancer -->
+	<!-- The default data expected by the default configuration of Stanbol -->
+	<startLevel level="19">
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.data.opennlp.ner.en</artifactId>
+			<version>1.0.0-incubating</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
+			<version>1.0.0-incubating</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.data.sites.dbpedia.default
+			</artifactId>
+			<version>1.0.1-incubating</version>
+		</bundle>
+	</startLevel>
+
+	<!-- ********************************************************************* 
+		start level 20 TO 24 reserved for Stanbol Framework (Enhancer, Entityhub, 
+		Contenthub, Factstore ... incl. Web Fragments) ********************************************************************* -->
+
+	<!-- Stanbol Enhancer infrastructure and required libraries -->
+	<startLevel level="20">
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
@@ -317,46 +396,76 @@
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.jobmanager</artifactId>
+			<artifactId>org.apache.stanbol.enhancer.standalone</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.standalone</artifactId>
+			<artifactId>org.apache.stanbol.enhancer.jobmanager</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
+	</startLevel>
+	<!-- Clerezza based SPARQL query engine <startLevel level="20"> <bundle> 
+		<groupId>org.apache.stanbol</groupId> <artifactId>org.apache.stanbol.enhancer.clerezza.sparql</artifactId> 
+		<version>0.9.0-incubating-SNAPSHOT</version> </bundle> </startLevel> -->
 
-		<!-- Entityhub -->
+	<!-- Stanbol Entityhub infrastructure and required libraries -->
+	<startLevel level="20">
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.query.clerezza</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.site.linkeddata</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.yard.clerezza</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.core</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+	</startLevel>
+	<!-- FactStore <startLevel level="20"> <bundle> <groupId>org.apache.stanbol</groupId> 
+		<artifactId>org.apache.stanbol.factstore</artifactId> <version>0.9.0-incubating-SNAPSHOT</version> 
+		</bundle> </startLevel> -->
 
-		<!-- Generic -->
+	<!-- Stanbol Web Fragments -->
+	<startLevel level="21">
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.jsonld</artifactId>
+			<artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.defaultdata</artifactId>
-			<version>0.0.3</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.stanboltools.offline
-			</artifactId>
+			<artifactId>org.apache.stanbol.contenthub.web</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider
-			</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
+	</startLevel>
 
+	<startLevel level="22">
 		<!-- Store -->
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
@@ -434,69 +543,26 @@
 			</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
-
-		<!-- Content hub -->
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.contenthub.web</artifactId>
+			<artifactId>crx-rmi</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
 
-	<!-- Entity hub infrastructure -->
-	<startLevel level="16">
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.entityhub.core</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-	</startLevel>
+	<!-- ********************************************************************* 
+		start level 25 TO 29 reserved for Stanbol plug-ins (currently the Enhancement 
+		Engines) ********************************************************************* -->
 
-	<!-- Stanbol Enhancer plug-ins -->
-	<startLevel level="20">
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-	</startLevel>
-
-	<!-- Stanbol Enhancer Enhancement Engines -->
-	<startLevel level="30">
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.engines.langid</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.engines.opencalais
-			</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.engines.autotagging
-			</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.defaultdata</artifactId>
-			<version>0.0.3</version>
-		</bundle>
+	<!-- Stanbol Enhancer plug-ins (the Enhancement Engines) -->
+	<startLevel level="25">
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner
 			</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
-		<!-- The geonames.org LocationEnhancement Engines needs two additional 
-			bundles 1) jettyjson 2) commons-io. Both of them are already present in the 
-			bundle list. -->
-		<!-- <bundle> <groupId>org.apache.stanbol</groupId> <artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId> 
-			<version>0.9.0-incubating-SNAPSHOT</version> </bundle> -->
-		<!-- Entity Tagging Engine based on RICK -->
+		<!-- Entity Tagging Engine (depends on the Entityhub) -->
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.engine.entitytagging
@@ -505,6 +571,8 @@
 		</bundle>
 	</startLevel>
 
+	<!-- ********************************************************************* 
+		start level >= 30 are unused ********************************************************************* -->
 
 	<!-- JCR Bundles -->
 	<startLevel level="30">
@@ -535,27 +603,27 @@
 		<bundle>
 			<groupId>org.apache.chemistry.opencmis</groupId>
 			<artifactId>chemistry-opencmis-client-api</artifactId>
-			<version>0.1.0-incubating</version>
+			<version>0.4.0</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.chemistry.opencmis</groupId>
 			<artifactId>chemistry-opencmis-commons-api</artifactId>
-			<version>0.1.0-incubating</version>
+			<version>0.4.0</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.chemistry.opencmis</groupId>
 			<artifactId>chemistry-opencmis-client-impl</artifactId>
-			<version>0.1.0-incubating</version>
+			<version>0.4.0</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.chemistry.opencmis</groupId>
 			<artifactId>chemistry-opencmis-client-bindings</artifactId>
-			<version>0.1.0-incubating</version>
+			<version>0.4.0</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.chemistry.opencmis</groupId>
 			<artifactId>chemistry-opencmis-commons-impl</artifactId>
-			<version>0.1.0-incubating</version>
+			<version>0.4.0</version>
 		</bundle>
 	</startLevel>
 </bundles>
