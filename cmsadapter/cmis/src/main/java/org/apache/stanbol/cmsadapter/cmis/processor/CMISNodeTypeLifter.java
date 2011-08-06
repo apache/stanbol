@@ -27,10 +27,13 @@ import org.apache.chemistry.opencmis.client.api.Tree;
 import org.apache.chemistry.opencmis.commons.definitions.PropertyDefinition;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisInvalidArgumentException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.cmsadapter.cmis.repository.CMISModelMapper;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.OntologyResourceHelper;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.MappingEngine;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropType;
+import org.apache.stanbol.cmsadapter.servicesapi.processor.TypeLifter;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +42,9 @@ import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-public class CMISNodeTypeLifter {
+@Component(immediate = true)
+@Service
+public class CMISNodeTypeLifter implements TypeLifter {
     private static final Logger logger = LoggerFactory.getLogger(CMISNodeTypeLifter.class);
     // FIXME Make adjustable
     private static final int DESCENDANT_DEPTH = 1000;
@@ -47,6 +52,11 @@ public class CMISNodeTypeLifter {
     private Session session;
     private OntologyResourceHelper orh;
 
+    //dummy constructor
+    public CMISNodeTypeLifter() {
+        
+    }
+    
     public CMISNodeTypeLifter(MappingEngine engine) {
         this.session = (Session) engine.getSession();
         this.orh = engine.getOntologyResourceHelper();
@@ -111,7 +121,11 @@ public class CMISNodeTypeLifter {
      * @param mappingFileContent
      * @throws Exception
      */
-    public void liftNodes() throws RepositoryAccessException {
+    @Override
+    public void liftNodeTypes(MappingEngine engine) throws RepositoryAccessException {
+        this.orh = engine.getOntologyResourceHelper();
+        this.session = (Session) engine.getSession();
+
         try {
             // Create classes for Folder Object Type and its descendants
             createClassesForObjectTypes(getAllFolderTypes());
@@ -124,7 +138,6 @@ public class CMISNodeTypeLifter {
         }
     }
 
-    // TODO ID ler icin gereken deisiklik 2-
     /**
      * Creates classes for the given Object Types Furthermore, creates subsumption relations using the
      * parentId field
@@ -215,5 +228,10 @@ public class CMISNodeTypeLifter {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean canLift(String type) {
+        return type.contentEquals("CMIS");
     }
 }

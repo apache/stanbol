@@ -60,10 +60,6 @@
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.servicesapi</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.cmsadapter.jcr</artifactId>
-		</dependency>
 
 		<!-- Enhancer -->
 		<dependency>
@@ -126,10 +122,6 @@
 		<dependency>
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.cmsadapter.cmis</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.jersey</groupId>

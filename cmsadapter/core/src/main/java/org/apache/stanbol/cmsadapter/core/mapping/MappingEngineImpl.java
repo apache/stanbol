@@ -22,19 +22,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import javax.jcr.RepositoryException;
-
-import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.cmsadapter.cmis.processor.CMISNodeTypeLifter;
 import org.apache.stanbol.cmsadapter.core.decorated.DObjectFactoryImp;
-import org.apache.stanbol.cmsadapter.jcr.processor.JCRNodeTypeLifter;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.OntologyResourceHelper;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.MappingConfiguration;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.MappingEngine;
@@ -45,6 +39,8 @@ import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.AdapterMode
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.decorated.DObjectAdapter;
 import org.apache.stanbol.cmsadapter.servicesapi.processor.Processor;
 import org.apache.stanbol.cmsadapter.servicesapi.processor.ProcessorProperties;
+import org.apache.stanbol.cmsadapter.servicesapi.processor.TypeLifter;
+import org.apache.stanbol.cmsadapter.servicesapi.processor.TypeLifterManager;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccess;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessManager;
@@ -69,7 +65,11 @@ public class MappingEngineImpl implements MappingEngine {
     private List<Processor> processors = new ArrayList<Processor>();
 
     @Reference
+    private TypeLifterManager typeLifterManager;
+
+    @Reference
     private RestClient storeClient;
+
     @Reference
     private RepositoryAccessManager accessManager;
 
@@ -81,11 +81,6 @@ public class MappingEngineImpl implements MappingEngine {
     private OntologyResourceHelper ontologyResourceHelper;
     private DObjectAdapter adapter;
     private NamingStrategy namingStrategy;
-
-    @Activate
-    protected void activate(final Map<?,?> properties) {
-        // TODO need to do something here?
-    }
 
     private void runProcessors(List<Object> cmsObjects, String mode) {
         Iterator<Processor> processorIterator;
@@ -114,19 +109,15 @@ public class MappingEngineImpl implements MappingEngine {
         initializeEngine(conf);
 
         long t1 = System.currentTimeMillis();
-        try {
-            String connectionType = conf.getConnectionInfo().getConnectionType();
-            if (connectionType.contentEquals("JCR")) {
-                new JCRNodeTypeLifter(this).lift();
-            } else if (connectionType.contentEquals("CMIS")) {
-                new CMISNodeTypeLifter(this).liftNodes();
-            } else {
-                throw new IllegalArgumentException("Connection type must be one of JCR or CMIS.");
-            }
-        } catch (RepositoryException e) {
-            logger.warn("Lifting error", e);
-            return;
+        String connectionType = conf.getConnectionInfo().getConnectionType();
+        if (connectionType != null
+            && !(connectionType.contentEquals("JCR") || connectionType.contentEquals("CMIS"))) {
+            throw new IllegalArgumentException("Connection type must be one of JCR or CMIS.");
         }
+
+        // lift type defintions
+        TypeLifter typeLifter = typeLifterManager.getRepositoryAccessor(connectionType);
+        typeLifter.liftNodeTypes(this);
 
         runProcessors(null, "create");
         OntologyResourceHelper.saveConnectionInfo(conf.getConnectionInfo(), this.ontModel);
@@ -311,14 +302,14 @@ public class MappingEngineImpl implements MappingEngine {
         storeClient.saveOntology(ontologyContentAsString, ontologyURI, "UTF-8");
     }
 
-    public void bindProcessor(Processor processor) {
+    protected void bindProcessor(Processor processor) {
         synchronized (processors) {
             processors.add(processor);
             Collections.sort(processors, COMPARATOR);
         }
     }
 
-    public void unbindProcessor(Processor processor) {
+    protected void unbindProcessor(Processor processor) {
         synchronized (processors) {
             processors.remove(processor);
         }
