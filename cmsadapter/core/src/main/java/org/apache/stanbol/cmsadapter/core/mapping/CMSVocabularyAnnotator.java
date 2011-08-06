@@ -16,9 +16,6 @@
  */
 package org.apache.stanbol.cmsadapter.core.mapping;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -30,28 +27,44 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.clerezza.rdf.jena.facade.JenaGraph;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.CMSAdapterVocabulary;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFBridge;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.RDFWriter;
-
+/**
+ * This class takes an RDF in {@link MGraph} and annotates it according to specified {@link RDFBridge}s.
+ * 
+ * @author suat
+ * 
+ */
 public class CMSVocabularyAnnotator {
     private static final Logger log = LoggerFactory.getLogger(CMSAdapterVocabulary.class);
 
-    private static final UriRef RDF_TYPE = new UriRef(NamespaceEnum.rdf + "Type");
-
+    /**
+     * It is the single method of this class that add CMS vocabulary annotations to the {@link MGraph}
+     * specified.<br>
+     * <br>
+     * It first select target resources by using the configurations obtained from
+     * {@link RDFBridge#getTargetPropertyResources()} and {@link RDFBridge#getTargetResourceValue()}.<br>
+     * <br>
+     * In the next step, parent/child relations are set according to configuration values obtained from
+     * {@link RDFBridge#getChildrenResources()}. In case of multiple children having same name, an integer
+     * value added to the end of the name incrementally e.g <b>name</b>,<b>name1</b>,<b>name2</b>,...<br>
+     * <br>
+     * Then property annotations are added to according configuration values obtained from
+     * {@link RDFBridge#getTargetPropertyResources()}. Name of a property is kept for each bridge to to make
+     * possible giving different names for the same property in different bridges.<br>
+     * <br>
+     * In the last step parent annotations are added according hierarchy that was formed previously.
+     * 
+     * @param rdfBridges
+     *            {@link RDFBridge} instances keeping configurations to annotate raw RDF data
+     * @param graph
+     *            {@link MGraph} keeping the raw RDF data
+     */
     public void addAnnotationsToGraph(List<RDFBridge> rdfBridges, MGraph graph) {
         LiteralFactory literalFactory = LiteralFactory.getInstance();
         Map<UriRef,Object> children;
@@ -73,7 +86,8 @@ public class CMSVocabularyAnnotator {
 
                 // There should be a valid name for CMS Object
                 if (!name.contentEquals("")) {
-                    graph.add(new TripleImpl(subject, RDF_TYPE, CMSAdapterVocabulary.CMS_OBJECT));
+                    graph.add(new TripleImpl(subject, RDFBridgeHelper.RDF_TYPE,
+                            CMSAdapterVocabulary.CMS_OBJECT));
 
                     // if this object has already has name and path annotations, it means that it's already
                     // processed as child of another object. So, don't put new name and path annotations
@@ -88,15 +102,15 @@ public class CMSVocabularyAnnotator {
                         Map<String,Integer> childNames = new HashMap<String,Integer>();
                         while (childrenIt.hasNext()) {
                             Triple child = childrenIt.next();
-                            NonLiteral childSubject = new UriRef(replaceEndCharacters(child.getObject()
-                                    .toString()));
+                            NonLiteral childSubject = new UriRef(RDFBridgeHelper.removeEndCharacters(child
+                                    .getObject().toString()));
 
                             String childName = getNameOfProperty(childSubject, children.get(childPropURI),
                                 graph);
                             if (!childName.contentEquals("")) {
-                                removeExistingTriple(childSubject, CMSAdapterVocabulary.CMS_OBJECT_NAME,
-                                    graph);
-                                graph.add(new TripleImpl(childSubject, RDF_TYPE,
+                                RDFBridgeHelper.removeExistingTriple(childSubject,
+                                    CMSAdapterVocabulary.CMS_OBJECT_NAME, graph);
+                                graph.add(new TripleImpl(childSubject, RDFBridgeHelper.RDF_TYPE,
                                         CMSAdapterVocabulary.CMS_OBJECT));
                                 graph.add(new TripleImpl(childSubject,
                                         CMSAdapterVocabulary.CMS_OBJECT_PARENT_REF, subject));
@@ -141,26 +155,11 @@ public class CMSVocabularyAnnotator {
              */
             annotatePaths(targetRootPath, graph);
         }
-
-        // remove code
-        try {
-            saveOntology(graph, ontologyURI, true);
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
     }
 
     private static void annotatePaths(String targetRootPath, MGraph graph) {
         // first detect root objects
-        List<NonLiteral> roots = new ArrayList<NonLiteral>();
-        Iterator<Triple> it = graph.filter(null, RDF_TYPE, CMSAdapterVocabulary.CMS_OBJECT);
-        while (it.hasNext()) {
-            Triple t = it.next();
-            if (isRoot(t, graph)) {
-                roots.add(t.getSubject());
-            }
-        }
+        List<NonLiteral> roots = RDFBridgeHelper.getRootObjetsOfGraph(graph);
 
         // assign paths to children recursively
         LiteralFactory literalFactory = LiteralFactory.getInstance();
@@ -194,15 +193,6 @@ public class CMSVocabularyAnnotator {
         }
     }
 
-    private static boolean isRoot(Triple cmsObjectTriple, MGraph graph) {
-        NonLiteral subject = cmsObjectTriple.getSubject();
-        if (graph.filter(subject, CMSAdapterVocabulary.CMS_OBJECT_PARENT_REF, null).hasNext()) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
     private static String formRootPath(String targetRootPath, String objectName) {
         if (!targetRootPath.endsWith("/")) {
             targetRootPath += "/";
@@ -232,10 +222,6 @@ public class CMSVocabularyAnnotator {
         return candidateName;
     }
 
-    private static String replaceEndCharacters(String resource) {
-        return resource.replace("<", "").replace(">", "");
-    }
-
     private static String getResourceStringValue(NonLiteral subject, UriRef nameProp, MGraph graph) {
         Iterator<Triple> it = graph.filter(subject, nameProp, null);
         if (it.hasNext()) {
@@ -252,94 +238,4 @@ public class CMSVocabularyAnnotator {
             return "";
         }
     }
-
-    private static void removeExistingTriple(NonLiteral subject, UriRef predicate, MGraph mGraph) {
-        Iterator<Triple> it = mGraph.filter(subject, predicate, null);
-        if (it.hasNext()) {
-            mGraph.remove(it.next());
-        }
-    }
-
-    // /////////////////////////////////////
-
-    private static String ontologyURI = "http://deneme#";
-
-    public static void main(String[] args) throws FileNotFoundException {
-        CMSVocabularyAnnotator cmsVocabularyAnnotator = new CMSVocabularyAnnotator();
-        cmsVocabularyAnnotator.fillCMSObjects();
-    }
-
-    private MGraph fillCMSObjects() throws FileNotFoundException {
-
-        MGraph mGraph = new SimpleMGraph();
-        UriRef cmsObject1 = new UriRef(ontologyURI + "Concept1");
-        UriRef cmsObject2 = new UriRef(ontologyURI + "Concept2");
-        UriRef cmsObject3 = new UriRef(ontologyURI + "Concept3");
-        UriRef populatedPlace2 = new UriRef(ontologyURI + "PopulatedPlace2");
-        UriRef populatedPlace3 = new UriRef(ontologyURI + "PopulatedPlace3");
-        UriRef city1 = new UriRef(ontologyURI + "City1");
-        UriRef city2 = new UriRef(ontologyURI + "City2");
-
-        // types
-        addProperty(cmsObject1, NamespaceEnum.rdf + "Type", new UriRef(NamespaceEnum.skos + "Concept"), null,
-            mGraph);
-        addProperty(cmsObject2, NamespaceEnum.rdf + "Type", new UriRef(NamespaceEnum.skos + "Concept"), null,
-            mGraph);
-        addProperty(cmsObject3, NamespaceEnum.rdf + "Type", new UriRef(NamespaceEnum.skos + "Concept"), null,
-            mGraph);
-        addProperty(populatedPlace2, NamespaceEnum.rdf + "Type", new UriRef(NamespaceEnum.dbpediaOnt
-                                                                            + "PopulatedPlace"), null, mGraph);
-        addProperty(populatedPlace3, NamespaceEnum.rdf + "Type", new UriRef(NamespaceEnum.dbpediaOnt
-                                                                            + "PopulatedPlace"), null, mGraph);
-
-        // labels
-        addProperty(cmsObject1, NamespaceEnum.rdfs + "label", null, "CMSObject1", mGraph);
-        addProperty(cmsObject2, NamespaceEnum.rdfs + "label", null, "CMSObject2", mGraph);
-        addProperty(cmsObject3, NamespaceEnum.rdfs + "label", null, "CMSObject3", mGraph);
-
-        // children
-        addProperty(cmsObject1, NamespaceEnum.skos + "narrower", cmsObject2, null, mGraph);
-        addProperty(cmsObject3, NamespaceEnum.skos + "narrower", cmsObject3, null, mGraph);
-        addProperty(cmsObject1, NamespaceEnum.dbpediaProp + "city", city1, null, mGraph);
-        addProperty(cmsObject2, NamespaceEnum.dbpediaProp + "city", city2, null, mGraph);
-
-        // prop
-        addProperty(cmsObject2, NamespaceEnum.dbpediaProp + "place", populatedPlace2, null, mGraph);
-        addProperty(cmsObject3, NamespaceEnum.dbpediaProp + "place", populatedPlace3, null, mGraph);
-        addProperty(cmsObject1, NamespaceEnum.skos + "definition", null, "CMSObject1Def", mGraph);
-        addProperty(cmsObject2, NamespaceEnum.skos + "definition", null, "CMSObject2Def", mGraph);
-        addProperty(cmsObject3, NamespaceEnum.skos + "definition", null, "CMSObject3Def", mGraph);
-
-        saveOntology(mGraph, ontologyURI, false);
-
-        return mGraph;
-    }
-
-    private void addProperty(UriRef subject, String predicate, UriRef object, Object litObject, MGraph mGraph) {
-        UriRef prop = new UriRef(predicate);
-        if (object != null) {
-            mGraph.add(new TripleImpl(subject, prop, object));
-        } else if (litObject != null) {
-            mGraph.add(new TripleImpl(subject, prop, LiteralFactory.getInstance().createTypedLiteral(
-                litObject)));
-        }
-    }
-
-    private static void saveOntology(TripleCollection tc, String ontologyURI, boolean output) throws FileNotFoundException {
-        JenaGraph jenaGraph = new JenaGraph(tc);
-        Model model = ModelFactory.createModelForGraph(jenaGraph);
-        OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM, model);
-
-        FileOutputStream fos;
-        if (output) {
-            fos = new FileOutputStream("/home/srdc/Desktop/cmsAdapterTest/rdfmap/Outmgraph");
-        } else {
-            fos = new FileOutputStream("/home/srdc/Desktop/cmsAdapterTest/rdfmap/mgraph");
-        }
-        RDFWriter rdfWriter = ontModel.getWriter("RDF/XML");
-        rdfWriter.setProperty("xmlbase", ontologyURI);
-        rdfWriter.write(ontModel, fos, ontologyURI);
-    }
-
-    // /////////////////////////////////////
 }

@@ -49,16 +49,21 @@ public class RDFBridgeManager {
 
     private static final Logger log = LoggerFactory.getLogger(RDFBridgeManager.class);
 
-    @Reference(cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, referenceInterface = RDFBridge.class, policy = ReferencePolicy.DYNAMIC, bind = "bindRDFBridge", unbind = "unbindRDFBridge", strategy = ReferenceStrategy.EVENT)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, referenceInterface = RDFBridge.class, policy = ReferencePolicy.DYNAMIC, bind = "bindRDFBridge", unbind = "unbindRDFBridge", strategy = ReferenceStrategy.EVENT)
     List<RDFBridge> rdfBridges = new CopyOnWriteArrayList<RDFBridge>();
 
-    @Reference(cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, referenceInterface = RDFMapper.class, policy = ReferencePolicy.DYNAMIC, bind = "bindRDFMapper", unbind = "unbindRDFMapper", strategy = ReferenceStrategy.EVENT)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, referenceInterface = RDFMapper.class, policy = ReferencePolicy.DYNAMIC, bind = "bindRDFMapper", unbind = "unbindRDFMapper", strategy = ReferenceStrategy.EVENT)
     List<RDFMapper> rdfMappers = new CopyOnWriteArrayList<RDFMapper>();
 
     @Reference
     RepositoryAccessManager accessManager;
 
     public void storeRDFToRepository(ConnectionInfo connectionInfo, MGraph rawRDFData) throws RepositoryAccessException {
+        if(rdfBridges.size() == 0) {
+            log.info("There is no RDF Bridge to execute");
+            return;
+        }
+        
         // According to connection type get RDF mapper, repository accessor, session
         RDFMapper mapper = getRDFMapper(connectionInfo);
         RepositoryAccess repositoryAccess = accessManager.getRepositoryAccessor(connectionInfo);
