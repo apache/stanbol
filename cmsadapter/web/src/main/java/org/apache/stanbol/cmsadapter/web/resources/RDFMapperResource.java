@@ -19,6 +19,7 @@ import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.stanbol.cmsadapter.core.mapping.RDFBridgeManager;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFBridge;
+import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFBridgeException;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ConnectionInfo;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
 import org.apache.stanbol.commons.web.base.ContextHelper;
@@ -95,6 +96,9 @@ public class RDFMapperResource extends BaseStanbolResource {
             logger.warn("Failed to obtain a session from repository", e);
             return Response.status(Status.INTERNAL_SERVER_ERROR)
                     .entity("Failed to obtain a session from repository").build();
+        } catch (RDFBridgeException e) {
+            logger.warn(e.getMessage());
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
         return Response.ok().build();
     }

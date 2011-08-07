@@ -27,6 +27,7 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFBridge;
+import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFBridgeException;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFMapper;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.ConnectionInfo;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccess;
@@ -58,12 +59,13 @@ public class RDFBridgeManager {
     @Reference
     RepositoryAccessManager accessManager;
 
-    public void storeRDFToRepository(ConnectionInfo connectionInfo, MGraph rawRDFData) throws RepositoryAccessException {
-        if(rdfBridges.size() == 0) {
+    public void storeRDFToRepository(ConnectionInfo connectionInfo, MGraph rawRDFData) throws RepositoryAccessException,
+                                                                                      RDFBridgeException {
+        if (rdfBridges.size() == 0) {
             log.info("There is no RDF Bridge to execute");
             return;
         }
-        
+
         // According to connection type get RDF mapper, repository accessor, session
         RDFMapper mapper = getRDFMapper(connectionInfo);
         RepositoryAccess repositoryAccess = accessManager.getRepositoryAccessor(connectionInfo);

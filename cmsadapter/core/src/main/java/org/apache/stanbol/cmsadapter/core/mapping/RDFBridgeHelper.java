@@ -59,6 +59,18 @@ public class RDFBridgeHelper {
         return roots;
     }
 
+    public static List<NonLiteral> getRootObjectsOfGraph(MGraph annotatedGraph, List<NonLiteral> candidates) {
+        List<NonLiteral> roots = new ArrayList<NonLiteral>();
+        Iterator<Triple> it = annotatedGraph.filter(null, RDF_TYPE, CMSAdapterVocabulary.CMS_OBJECT);
+        while (it.hasNext()) {
+            Triple t = it.next();
+            if (isRoot(t, annotatedGraph) && candidates.contains(t.getSubject())) {
+                roots.add(t.getSubject());
+            }
+        }
+        return roots;
+    }
+
     private static boolean isRoot(Triple cmsObjectTriple, MGraph graph) {
         NonLiteral subject = cmsObjectTriple.getSubject();
         if (graph.filter(subject, CMSAdapterVocabulary.CMS_OBJECT_PARENT_REF, null).hasNext()) {

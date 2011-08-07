@@ -20,7 +20,8 @@ public interface RDFMapper {
      * @param annotatedGraph
      *            This {@link MGraph} object is an enhanced version of raw RDF data with "CMS vocabulary"
      *            annotations according to {@link RDFBridge}s.
+     * @throws RDFBridgeException
      */
-    void storeRDFinRepository(Object session, MGraph annotatedGraph);
+    void storeRDFinRepository(Object session, MGraph annotatedGraph) throws RDFBridgeException;
 
 }

@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.cmsadapter.core.mapping;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -77,6 +78,7 @@ public class CMSVocabularyAnnotator {
                 bridge.getTargetResourceValue());
             UriRef nameProp = bridge.getNameResource();
             String targetRootPath = bridge.getTargetCMSPath();
+            List<NonLiteral> processedURIs = new ArrayList<NonLiteral>();
 
             // add cms object annotations
             while (tripleIterator.hasNext()) {
@@ -97,55 +99,12 @@ public class CMSVocabularyAnnotator {
                     }
 
                     // check children and add child and parent annotations
-                    for (UriRef childPropURI : children.keySet()) {
-                        Iterator<Triple> childrenIt = graph.filter(subject, childPropURI, null);
-                        Map<String,Integer> childNames = new HashMap<String,Integer>();
-                        while (childrenIt.hasNext()) {
-                            Triple child = childrenIt.next();
-                            NonLiteral childSubject = new UriRef(RDFBridgeHelper.removeEndCharacters(child
-                                    .getObject().toString()));
-
-                            String childName = getNameOfProperty(childSubject, children.get(childPropURI),
-                                graph);
-                            if (!childName.contentEquals("")) {
-                                RDFBridgeHelper.removeExistingTriple(childSubject,
-                                    CMSAdapterVocabulary.CMS_OBJECT_NAME, graph);
-                                graph.add(new TripleImpl(childSubject, RDFBridgeHelper.RDF_TYPE,
-                                        CMSAdapterVocabulary.CMS_OBJECT));
-                                graph.add(new TripleImpl(childSubject,
-                                        CMSAdapterVocabulary.CMS_OBJECT_PARENT_REF, subject));
-                                graph.add(new TripleImpl(childSubject, CMSAdapterVocabulary.CMS_OBJECT_NAME,
-                                        literalFactory
-                                                .createTypedLiteral(getChildName(childName, childNames))));
-
-                            } else {
-                                log.warn("Failed to obtain a name for child property: {}", childPropURI);
-                            }
-                        }
-                    }
+                    checkChildren(children, subject, graph);
 
                     // check desired properties to be mapped
-                    Map<UriRef,UriRef> propertiesNamesInBridge = new HashMap<UriRef,UriRef>();
-                    for (UriRef propURI : properties.keySet()) {
-                        String propertyName = getNameOfProperty(subject, properties.get(propURI), graph);
-                        if (!propertyName.contentEquals("")) {
-                            if (!propertiesNamesInBridge.containsKey(propURI)) {
-
-                                UriRef tempRef = new UriRef(propertyName + "Prop" + bridge.hashCode());
-                                propertiesNamesInBridge.put(propURI, tempRef);
-
-                                graph.add(new TripleImpl(tempRef,
-                                        CMSAdapterVocabulary.CMS_OBJECT_PROPERTY_NAME, literalFactory
-                                                .createTypedLiteral(propertyName)));
-                                graph.add(new TripleImpl(tempRef,
-                                        CMSAdapterVocabulary.CMS_OBJECT_PROPERTY_URI, propURI));
-                            }
-                            graph.add(new TripleImpl(subject, CMSAdapterVocabulary.CMS_OBJECT_HAS_PROPERTY,
-                                    propertiesNamesInBridge.get(propURI)));
-                        } else {
-                            log.warn("Failed to obtain a name for property: {}", propURI);
-                        }
-                    }
+                    checkProperties(properties, subject, bridge, graph);
+                    
+                    processedURIs.add(subject);
                 }
             }
 
@@ -153,13 +112,68 @@ public class CMSVocabularyAnnotator {
              * it is assumed that any two object to be created from different bridges will not be related with
              * each other. Otherwise, it is necessary to assign target cms path for each CMS Object
              */
-            annotatePaths(targetRootPath, graph);
+            annotatePaths(processedURIs, targetRootPath, graph);
         }
     }
 
-    private static void annotatePaths(String targetRootPath, MGraph graph) {
+    private static void checkChildren(Map<UriRef,Object> children, NonLiteral objectURI, MGraph graph) {
+        LiteralFactory literalFactory = LiteralFactory.getInstance();
+        for (UriRef childPropURI : children.keySet()) {
+            Iterator<Triple> childrenIt = graph.filter(objectURI, childPropURI, null);
+            Map<String,Integer> childNames = new HashMap<String,Integer>();
+            while (childrenIt.hasNext()) {
+                Triple child = childrenIt.next();
+                NonLiteral childSubject = new UriRef(RDFBridgeHelper.removeEndCharacters(child.getObject()
+                        .toString()));
+
+                String childName = getNameOfProperty(childSubject, children.get(childPropURI), graph);
+                if (!childName.contentEquals("")) {
+                    RDFBridgeHelper.removeExistingTriple(childSubject, CMSAdapterVocabulary.CMS_OBJECT_NAME,
+                        graph);
+                    graph.add(new TripleImpl(childSubject, RDFBridgeHelper.RDF_TYPE,
+                            CMSAdapterVocabulary.CMS_OBJECT));
+                    graph.add(new TripleImpl(childSubject, CMSAdapterVocabulary.CMS_OBJECT_PARENT_REF,
+                            objectURI));
+                    graph.add(new TripleImpl(childSubject, CMSAdapterVocabulary.CMS_OBJECT_NAME,
+                            literalFactory.createTypedLiteral(getChildName(childName, childNames))));
+
+                } else {
+                    log.warn("Failed to obtain a name for child property: {}", childPropURI);
+                }
+            }
+        }
+    }
+
+    private static void checkProperties(Map<UriRef,Object> properties,
+                                        NonLiteral subject,
+                                        RDFBridge bridge,
+                                        MGraph graph) {
+        
+        LiteralFactory literalFactory = LiteralFactory.getInstance();
+        Map<UriRef,UriRef> propertiesNamesInBridge = new HashMap<UriRef,UriRef>();
+        for (UriRef propURI : properties.keySet()) {
+            String propertyName = getNameOfProperty(subject, properties.get(propURI), graph);
+            if (!propertyName.contentEquals("")) {
+                if (!propertiesNamesInBridge.containsKey(propURI)) {
+
+                    UriRef tempRef = new UriRef(propertyName + "Prop" + bridge.hashCode());
+                    propertiesNamesInBridge.put(propURI, tempRef);
+
+                    graph.add(new TripleImpl(tempRef, CMSAdapterVocabulary.CMS_OBJECT_PROPERTY_NAME,
+                            literalFactory.createTypedLiteral(propertyName)));
+                    graph.add(new TripleImpl(tempRef, CMSAdapterVocabulary.CMS_OBJECT_PROPERTY_URI, propURI));
+                }
+                graph.add(new TripleImpl(subject, CMSAdapterVocabulary.CMS_OBJECT_HAS_PROPERTY,
+                        propertiesNamesInBridge.get(propURI)));
+            } else {
+                log.warn("Failed to obtain a name for property: {}", propURI);
+            }
+        }
+    }
+
+    private static void annotatePaths(List<NonLiteral> candidates, String targetRootPath, MGraph graph) {
         // first detect root objects
-        List<NonLiteral> roots = RDFBridgeHelper.getRootObjetsOfGraph(graph);
+        List<NonLiteral> roots = RDFBridgeHelper.getRootObjectsOfGraph(graph, candidates);
 
         // assign paths to children recursively
         LiteralFactory literalFactory = LiteralFactory.getInstance();

@@ -89,6 +89,12 @@
 				<version>0.4.0</version>
 				<scope>provided</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.apache.chemistry.opencmis</groupId>
+				<artifactId>chemistry-opencmis-client-impl</artifactId>
+				<version>0.4.0</version>
+				<scope>provided</scope>
+			</dependency>
 
 			<!-- JCR -->
 			<dependency>
