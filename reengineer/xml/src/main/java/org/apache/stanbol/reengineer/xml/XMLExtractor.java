@@ -199,7 +199,7 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
             }
         }
 
-        log.info("Activated KReS Semion RDB Reengineer");
+        log.info("Stanbol XML Reengineer active.");
     }
 
     @Override

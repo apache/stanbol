@@ -59,7 +59,7 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.xerces.*,
+              org.apache.xerces.*;version=2.7.1,
               org.apache.xml.serialize,
               org.castor.core.*,
               org.castor.mapping,

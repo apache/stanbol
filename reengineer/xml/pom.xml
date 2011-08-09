@@ -57,6 +57,7 @@
             <Import-Package>
               !org.apache.xml.resolver.*,
               !sun.io.*,
+              org.apache.xerces.*;version=2.7.1,
               org.slf4j.*,
               org.xml.sax.*,
               *
