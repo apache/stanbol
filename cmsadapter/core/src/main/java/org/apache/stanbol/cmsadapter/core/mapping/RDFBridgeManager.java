@@ -19,6 +19,7 @@ package org.apache.stanbol.cmsadapter.core.mapping;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -59,24 +60,45 @@ public class RDFBridgeManager {
     @Reference
     RepositoryAccessManager accessManager;
 
-    public void storeRDFToRepository(ConnectionInfo connectionInfo, MGraph rawRDFData) throws RepositoryAccessException,
-                                                                                      RDFBridgeException {
+    /**
+     * This method runs the collected {@link RDFBridge}s on the RDF data passed in a {@link Graph} instance.
+     * Afterwards, according to connection info, it tries to fetch related {@link RDFMapper} instance and
+     * delegates process to the related mapper.
+     * 
+     * @param connectionInfo
+     *            credentials to access repository
+     * @param rootPath
+     *            path in which the root objects in the annotated graph will be stored
+     * @param rawRDFData
+     *            RDF to be annotated
+     * @throws RepositoryAccessException
+     * @throws RDFBridgeException
+     */
+    public void storeRDFToRepository(ConnectionInfo connectionInfo, String rootPath, Graph rawRDFData) throws RepositoryAccessException,
+                                                                                                      RDFBridgeException {
         if (rdfBridges.size() == 0) {
             log.info("There is no RDF Bridge to execute");
             return;
         }
 
-        // According to connection type get RDF mapper, repository accessor, session
+        // According to connection type get RDF mapper, repository accessor,
+        // session
         RDFMapper mapper = getRDFMapper(connectionInfo);
         RepositoryAccess repositoryAccess = accessManager.getRepositoryAccessor(connectionInfo);
         Object session = repositoryAccess.getSession(connectionInfo);
 
         // Annotate raw RDF with CMS vocabulary annotations according to bridges
-        CMSVocabularyAnnotator annotator = new CMSVocabularyAnnotator();
-        annotator.addAnnotationsToGraph(rdfBridges, rawRDFData);
+        MGraph annotatedGraph;
+        for (RDFBridge bridge : rdfBridges) {
+            // first annotate raw RDF with
+            // TODO: it may be better to expand annotated graph accumulatively.
+            // Each annotation operation would add new ones onto already
+            // existing ones
+            annotatedGraph = bridge.annotateGraph(rawRDFData);
 
-        // Store annotated RDF in repository
-        mapper.storeRDFinRepository(session, rawRDFData);
+            // Store annotated RDF in repository
+            mapper.storeRDFinRepository(session, rootPath, annotatedGraph);
+        }
     }
 
     private RDFMapper getRDFMapper(ConnectionInfo connectionInfo) {

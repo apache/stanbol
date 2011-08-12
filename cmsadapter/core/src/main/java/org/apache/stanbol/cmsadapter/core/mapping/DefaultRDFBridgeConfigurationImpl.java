@@ -26,7 +26,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFBridge;
+import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFBridgeConfiguration;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -34,9 +34,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Main aim of this class is to provide ability to create {@code RDFBridge} instances through the
- * configuration interface of Felix console. Currently there are 5 configuration field in this implementation
- * of {@link RDFBridge}:
+ * Main aim of this class is to provide ability to create {@code RDFBridgeConfiguration}s through the
+ * configuration interface of Felix console. Currently there are 5 configuration field:
  * 
  * <ul>
  * <li><b>Resource selector:</b></li> This property is used to filter resources from the RDF data. It should
@@ -56,7 +55,7 @@ import org.slf4j.LoggerFactory;
  * <li><b>Properties:</b></li> This property specifies the properties of nodes/objects to be created in the
  * repository. Value of this configuration should be like <b>skos:Definition > definition</b> or
  * <b>skos:Definition</b>. First option states that skos:Definition property of a filtered subject will be
- * created as a property having name "repository" of repository object. In the second case the name of the
+ * created as a property having name "definition" of repository object. In the second case the name of the
  * property will directly be "skos:Definition".
  * <li><b>Children:</b></li> This property specifies the children of nodes/objecs to be created in the
  * repository. Value of this configuration should be like <b>skos:narrower > narrowerObject</b> or
@@ -69,26 +68,23 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @Component(configurationFactory = true, metatype = true, immediate = true)
-@Service(value = RDFBridge.class)
+@Service(value = RDFBridgeConfiguration.class)
 @Properties(value = {
-                     @Property(name = RDFBridgeImpl.PROP_RESOURCE_SELECTOR, value = "rdf:Type > skos:Concept"),
-                     @Property(name = RDFBridgeImpl.PROP_NAME, value = "rdfs:label"),
-                     @Property(name = RDFBridgeImpl.PROP_PROPERTIES, cardinality = 1000, value = {
-                                                                                                  "skos:related > relatedWith",
-                                                                                                  "skos:definition > definition"}),
-                     @Property(name = RDFBridgeImpl.PROP_CHILDREN, cardinality = 1000, value = {"skos:narrower > narrowerConcept"}),
-                     @Property(name = RDFBridgeImpl.PROP_CMS_PATH)})
-public class RDFBridgeImpl implements RDFBridge {
+                     @Property(name = DefaultRDFBridgeConfigurationImpl.PROP_RESOURCE_SELECTOR, value = "rdf:Type > skos:Concept"),
+                     @Property(name = DefaultRDFBridgeConfigurationImpl.PROP_NAME, value = "rdfs:label"),
+                     @Property(name = DefaultRDFBridgeConfigurationImpl.PROP_PROPERTIES, cardinality = 1000, value = {
+                                                                                                                      "skos:related > relatedWith",
+                                                                                                                      "skos:definition > definition"}),
+                     @Property(name = DefaultRDFBridgeConfigurationImpl.PROP_CHILDREN, cardinality = 1000, value = {"skos:narrower > narrowerConcept"})})
+public class DefaultRDFBridgeConfigurationImpl implements RDFBridgeConfiguration {
 
     public static final String PROP_RESOURCE_SELECTOR = "org.apache.stanbol.cmsadapter.rdfbridge.resourceSelector";
     public static final String PROP_PROPERTIES = "org.apache.stanbol.cmsadapter.rdfbridge.properties";
     public static final String PROP_NAME = "org.apache.stanbol.cmsadapter.rdfbridge.name";
     public static final String PROP_CHILDREN = "org.apache.stanbol.cmsadapter.rdfbridge.children";
-    public static final String PROP_CMS_PATH = "org.apaches.stanbol.cmsadapter.rdfbridge.cmsPath";
 
-    private static final Logger log = LoggerFactory.getLogger(RDFBridgeImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultRDFBridgeConfigurationImpl.class);
 
-    private String targetCMSPath;
     private UriRef targetResourcePredicate;
     private UriRef targetResourceValue;
     private UriRef nameResource;
@@ -102,13 +98,7 @@ public class RDFBridgeImpl implements RDFBridge {
         parseTargetResourceConfig(properties);
         parsePropertyMappings(properties);
         parseChilrenMappings(properties);
-        this.targetCMSPath = (String) checkProperty(properties, PROP_CMS_PATH, true);
         this.nameResource = parseUriRefFromConfig((String) checkProperty(properties, PROP_NAME, true));
-    }
-
-    @Override
-    public String getTargetCMSPath() {
-        return this.targetCMSPath;
     }
 
     @Override
@@ -223,7 +213,7 @@ public class RDFBridgeImpl implements RDFBridge {
             return config;
         }
     }
-
+    
     private Object checkProperty(Dictionary<String,Object> properties, String key, boolean required) throws ConfigurationException {
         Object value = properties.get(key);
         if (value == null) {

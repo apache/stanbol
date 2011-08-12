@@ -81,14 +81,12 @@ public class CMISRDFMapper implements RDFMapper {
     Serializer serializer;
 
     @Override
-    public void storeRDFinRepository(Object session, MGraph annotatedGraph) throws RDFBridgeException {
+    public void storeRDFinRepository(Object session, String rootPath, MGraph annotatedGraph) throws RDFBridgeException {
         List<NonLiteral> rootObjects = RDFBridgeHelper.getRootObjetsOfGraph(annotatedGraph);
         for (NonLiteral root : rootObjects) {
-            String documentPath = RDFBridgeHelper.getResourceStringValue(root,
-                CMSAdapterVocabulary.CMS_OBJECT_PATH, annotatedGraph);
             String documentName = RDFBridgeHelper.getResourceStringValue(root,
                 CMSAdapterVocabulary.CMS_OBJECT_NAME, annotatedGraph);
-            Folder rootFolder = checkCreateParentNodes(documentPath, (Session) session);
+            Folder rootFolder = checkCreateParentNodes(rootPath, (Session) session);
             createDocument(rootFolder, root, documentName, annotatedGraph, (Session) session);
         }
     }
@@ -182,22 +180,21 @@ public class CMISRDFMapper implements RDFMapper {
     }
 
     /**
-     * Takes path of a root object in the annotated RDF and tries to check parent folders. If parent folders
-     * do not exist, they are created.
+     * Takes a path and tries to check nodes that forms that path. If nodes do not exist, they are created.
      * 
-     * @param nodePath
-     *            path of a root object
+     * @param rootPath
+     *            path in which root objects will be created or existing one will be searched
      * @param session
      *            session to access repository
      * @return
      * @throws RDFBridgeException
      *             when another object which is not a folder in the specified path
      */
-    private Folder checkCreateParentNodes(String nodePath, Session session) throws RDFBridgeException {
+    private Folder checkCreateParentNodes(String rootPath, Session session) throws RDFBridgeException {
         Folder f = session.getRootFolder();
-        String[] pathSections = nodePath.split("/");
+        String[] pathSections = rootPath.split("/");
         String currentPath = "/";
-        for (int i = 1; i < pathSections.length - 1; i++) {
+        for (int i = 1; i < pathSections.length; i++) {
             String folderName = pathSections[i];
             currentPath += folderName;
             CmisObject o;

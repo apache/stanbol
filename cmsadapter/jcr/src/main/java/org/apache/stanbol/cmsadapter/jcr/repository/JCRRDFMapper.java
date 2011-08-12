@@ -34,14 +34,12 @@ public class JCRRDFMapper implements RDFMapper {
     private static final Logger log = LoggerFactory.getLogger(JCRRDFMapper.class);
 
     @Override
-    public void storeRDFinRepository(Object session, MGraph annotatedGraph) {
+    public void storeRDFinRepository(Object session, String rootPath, MGraph annotatedGraph) {
         List<NonLiteral> rootObjects = RDFBridgeHelper.getRootObjetsOfGraph(annotatedGraph);
         for (NonLiteral root : rootObjects) {
-            String nodePath = RDFBridgeHelper.getResourceStringValue(root,
-                CMSAdapterVocabulary.CMS_OBJECT_PATH, annotatedGraph);
             String nodeName = RDFBridgeHelper.getResourceStringValue(root,
                 CMSAdapterVocabulary.CMS_OBJECT_NAME, annotatedGraph);
-            Node parent = checkCreateParentNodes(nodePath, (Session) session);
+            Node parent = checkCreateParentNodes(rootPath, (Session) session);
             createNode(parent, root, nodeName, annotatedGraph, (Session) session);
         }
         try {
@@ -145,29 +143,28 @@ public class JCRRDFMapper implements RDFMapper {
     }
 
     /**
-     * Takes path of a root object in the annotated RDF and tries to check parent nodes. If parent nodes do
-     * not exist, they are created.
+     * Takes a path and tries to check nodes that forms that path. If nodes do not exist, they are created.
      * 
-     * @param nodePath
-     *            path of a root object
+     * @param rootPath
+     *            path in which root objects will be created or existing one will be searched
      * @param session
      *            session to access repository
      * @return the first level parent {@link Node} of the node specified with <code>nodePath</code> if there
      *         is not any exception, otherwise returns <code>null</code>.
      */
-    private Node checkCreateParentNodes(String nodePath, Session session) {
+    private Node checkCreateParentNodes(String rootPath, Session session) {
         Node n;
         String currentPath;
         try {
             n = session.getRootNode();
             currentPath = n.getPath();
         } catch (RepositoryException e) {
-            log.warn("Failed to get root node while trying to get Node for path: {}", nodePath, e);
+            log.warn("Failed to get root node while trying to get Node for path: {}", rootPath, e);
             return null;
         }
 
-        String[] pathSections = nodePath.split("/");
-        for (int i = 1; i < pathSections.length - 1; i++) {
+        String[] pathSections = rootPath.split("/");
+        for (int i = 1; i < pathSections.length; i++) {
             try {
                 if (!n.hasNode(pathSections[i])) {
                     n = n.addNode(pathSections[i]);
