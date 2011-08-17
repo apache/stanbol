@@ -19,7 +19,7 @@
 		List of initial bundles for the Stanbol Sling-based standalone launcher.
 	-->
 <bundles>
-  
+
   <!-- *********************************************************************
           start level < 10 reserved for OSGI and Sling Infrastructure
        ********************************************************************* -->
@@ -70,7 +70,7 @@
       <version>1.4.0</version>
     </bundle>
   </startLevel>
-  
+
   <!-- Sling installer and Stanbol extensions -->
   <startLevel level="8">
     <bundle>
@@ -175,13 +175,13 @@
       <version>1.6.2</version>
     </bundle>
     <!--
-    <bundle>  only used by the Contenthub 
+    <bundle>  only used by the Contenthub
       <groupId>eu.medsea.mimeutil</groupId>
       <artifactId>mime-util</artifactId>
       <version>2.1.3</version>
     </bundle> -->
     <!--
-    <bundle>  only used by the Factstore 
+    <bundle>  only used by the Factstore
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
       <version>10.7.1.1</version>
@@ -191,7 +191,7 @@
   <!-- Jersey -->
   <startLevel level="14">
     <!--
-      NOTE: jersey-core bug, must start before jersey-server to avoid jersey 
+      NOTE: jersey-core bug, must start before jersey-server to avoid jersey
       spi class not found errors. Restart jersey-server manually if getting those.
     -->
     <bundle>
@@ -224,7 +224,7 @@
       <version>1.3</version>
     </bundle>
   </startLevel>
-  
+
   <!-- Clerezza storage and sparql infrastructure -->
   <startLevel level="16">
     <bundle>
@@ -368,7 +368,7 @@
       <artifactId>org.apache.stanbol.commons.web.home</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
-    <!-- 
+    <!--
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.sparql</artifactId>
@@ -418,7 +418,7 @@
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
-  <!-- Clerezza based SPARQL query engine 
+  <!-- Clerezza based SPARQL query engine
   <startLevel level="20">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
@@ -464,8 +464,8 @@
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
-  </startLevel>  
-  <!-- FactStore 
+  </startLevel>
+  <!-- FactStore
   <startLevel level="20">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
@@ -492,7 +492,7 @@
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
-  <!-- Benchmarks for the Stanbol Enhancer 
+  <!-- Benchmarks for the Stanbol Enhancer
   <startLevel level="21">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
@@ -500,12 +500,12 @@
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel> -->
- 
+
   <!-- *********************************************************************
           start level 25 TO 29 reserved for Stanbol plug-ins
           (currently the Enhancement Engines)
        ********************************************************************* -->
-  
+
   <!-- Stanbol Enhancer plug-ins (the Enhancement Engines) -->
   <startLevel level="25">
     <!-- unstable
@@ -560,5 +560,5 @@
   <!-- *********************************************************************
           start level >= 30 are unused
        ********************************************************************* -->
-  
+
 </bundles>
