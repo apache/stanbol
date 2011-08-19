@@ -667,7 +667,7 @@ public final class SparqlQueryUtils {
      * @param constraints the as returned by {@link TextConstraint#getTexts()}
      * @return the full text query string 
      */
-    private static String createFullTextQueryString(Collection<String> constraints) {
+    protected static String createFullTextQueryString(Collection<String> constraints) {
         StringBuilder textQuery = new StringBuilder();
         boolean firstText = true;
         for(String constraintText : constraints){
@@ -693,10 +693,13 @@ public final class SparqlQueryUtils {
                         } else {
                             textQuery.append(" AND ");
                         }
-                        textQuery.append('"').append(word).append('"');
+                        // we need to double the backslashes because of replaceAll takes a regular expression
+                        // as input.
+                        String escapedWord = word.replaceAll("\\\"", "\\\\\"");
+                        textQuery.append('"').append(escapedWord).append('"');
                     }
                 }
-                if(words.length>1){
+                if (words.length > 1) {
                     textQuery.append(')');
                 }
             } //end if not null and not empty
