@@ -16,117 +16,148 @@
  */
 package org.apache.stanbol.cmsadapter.core.mapping;
 
+import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
+import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferenceStrategy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.CMSAdapterVocabulary;
+import org.apache.stanbol.cmsadapter.servicesapi.helper.NamespaceEnum;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFBridge;
-import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFBridgeConfiguration;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Default implementation of {@link RDFBridge} interface. It basically provides annotation of raw RDF data
- * using the {@link RDFBridgeConfiguration} instances available in the environment.
+ * Default implementation of {@link RDFBridge} interface. It provides annotation of raw RDF data and
+ * generating RDF from the content repository based on the configurations described below:
+ * 
+ * <ul>
+ * <li><b>Resource selector:</b></li> This property is used to filter resources from the RDF data. It should
+ * have the syntax:<br>
+ * <b> rdf:Type > skos:Concept </b>. This example states that triples having value <b>skos:Concept</b> of
+ * <b>rdf:type</b> predicate will be filtered. And subject of selected triples indicates the resource to be
+ * created/updated as node/object in the repository. It is also acceptable to pass full URIs such as <br>
+ * <b> http://www.w3.org/1999/02/22-rdf-syntax-ns#type > http://www.w3.org/2004/02/skos/core#Concept</b><br>
+ * <li><b>Name:</b></li> This configuration indicates the predicate which points to the name of node/object to
+ * be created in the repository. It should indicate a single URI such as <b>rdfs:label</b> or
+ * <b>http://www.w3.org/2000/01/rdf-schema#label</b>. Actually name value is obtained through the triple
+ * (s,p,o) where <b>s</b> is one of the subjects filtered by the "Resource Selector" configuration, <b>p</b>
+ * is this parameter. This configuration is optional. If an empty configuration is passed name of the CMS
+ * objects will be set as the local name of the URI represented by <b>s</b><br>
+ * <li><b>Children:</b></li> This property specifies the children of nodes/objects to be created in the
+ * repository. Value of this configuration should be like <b>skos:narrower > narrowerObject</b> or
+ * <b>skos:narrower > rdfs:label</b>. First option has same logic with the previous parameter. It determines
+ * the name of the child CMS object to be created/updated. In the second case, value rdfs:label predicate of
+ * resource representing child object will be set as the name of child object/node in the repository. This
+ * option would be useful to create hierarchies.
+ * <p>
+ * It is also possible to set only predicate indicating the subsumption relations such as only
+ * <b>skos:narrower</b>. In this case name of the child resource will be obtained from the local name of URI
+ * representing this CMS object. This configuration is optional.
+ * <li><b>Default child predicate:</b></li> First of all this configuration is used only when generating an
+ * RDF from the repository. If there are more than one child selector in previous configuration, it is not
+ * possible to detect the predicate that will be used as the child assertion. In that case, this configuration
+ * is used to set child assertion between parent and child objects. This configuration is optional. But if
+ * there is a case in which this configuration should be used and if it is not set, this causes missing
+ * assertions in the generated RDF.
+ * <li><b>Content repository path:</b></li> This property specifies the content repository path in which the
+ * new CMS objects will be created or existing ones will be updated.
+ * </ul>
  * 
  * @author suat
  * 
  */
-@Component(immediate = true)
+@Component(configurationFactory = true, metatype = true, immediate = true)
 @Service
+@Properties(value = {
+                     @Property(name = DefaultRDFBridgeImpl.PROP_RESOURCE_SELECTOR, value = "rdf:type > skos:Concept"),
+                     @Property(name = DefaultRDFBridgeImpl.PROP_NAME, value = "rdfs:label"),
+                     @Property(name = DefaultRDFBridgeImpl.PROP_CHILDREN, cardinality = 1000, value = {"skos:narrower"}),
+                     @Property(name = DefaultRDFBridgeImpl.PROP_DEFAULT_CHILD_PREDICATE, value = "skos:narrower"),
+                     @Property(name = DefaultRDFBridgeImpl.PROP_CMS_PATH, value = "/rdfmaptest")})
 public class DefaultRDFBridgeImpl implements RDFBridge {
+    public static final String PROP_RESOURCE_SELECTOR = "org.apache.stanbol.cmsadapter.core.mapping.DefaultRDFBridgeImpl.resourceSelector";
+    public static final String PROP_NAME = "org.apache.stanbol.cmsadapter.core.mapping.DefaultRDFBridgeImpl.resourceNamePredicate";
+    public static final String PROP_CHILDREN = "org.apache.stanbol.cmsadapter.core.mapping.DefaultRDFBridgeImpl.childrenPredicates";
+    public static final String PROP_DEFAULT_CHILD_PREDICATE = "org.apache.stanbol.cmsadapter.core.mapping.DefaultRDFBridgeImpl.defaultChildPredicate";
+    public static final String PROP_CMS_PATH = "org.apache.stanbol.cmsadapter.core.mapping.DefaultRDFBridgeImpl.contentRepositoryPath";
+
     private static final Logger log = LoggerFactory.getLogger(CMSAdapterVocabulary.class);
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, referenceInterface = RDFBridgeConfiguration.class, policy = ReferencePolicy.DYNAMIC, bind = "bindRDFBridgeConfiguration", unbind = "unbindRDFBridgeConfiguration", strategy = ReferenceStrategy.EVENT)
-    List<RDFBridgeConfiguration> defaultBridgeConfigs = new CopyOnWriteArrayList<RDFBridgeConfiguration>();
+    private UriRef targetResourcePredicate;
+    private UriRef targetResourceValue;
+    private UriRef nameResource;
+    private Map<UriRef,Object> targetChildrenMappings = new HashMap<UriRef,Object>();
+    private UriRef defaultChildPredicate;
+    private String cmsPath;
+
+    @SuppressWarnings("unchecked")
+    @Activate
+    protected void activate(ComponentContext context) throws ConfigurationException {
+        Dictionary<String,Object> properties = (Dictionary<String,Object>) context.getProperties();
+        parseTargetResourceConfig(properties);
+        parseURIConfig(PROP_NAME, properties);
+        parseChildrenMappings(properties);
+        parseURIConfig(PROP_DEFAULT_CHILD_PREDICATE, properties);
+        this.cmsPath = (String) checkProperty(properties, PROP_CMS_PATH, true);
+    }
 
     @Override
     public MGraph annotateGraph(Graph rawRDF) {
-        MGraph annotatedGraph = new SimpleMGraph(rawRDF);
-        addAnnotationsToGraph(annotatedGraph);
-        return annotatedGraph;
-    }
-
-    /**
-     * Adds annotations according to available {@link RDFBridgeConfiguration} instances<br>
-     * <br>
-     * It first select target resources by using the configurations obtained from
-     * {@link RDFBridgeConfiguration#getTargetPropertyResources()} and
-     * {@link RDFBridgeConfiguration#getTargetResourceValue()}.<br>
-     * <br>
-     * In the next step, parent/child relations are set according to configuration values obtained from
-     * {@link RDFBridgeConfiguration#getChildrenResources()}. In case of multiple children having same name,
-     * an integer value added to the end of the name incrementally e.g
-     * <b>name</b>,<b>name1</b>,<b>name2</b>,...<br>
-     * <br>
-     * Then property annotations are added to according configuration values obtained from
-     * {@link RDFBridgeConfiguration#getTargetPropertyResources()}. Name of a property is kept for each bridge
-     * to to make possible giving different names for the same property in different bridges.<br>
-     * <br>
-     * 
-     * @param graph
-     *            {@link MGraph} keeping the raw RDF data
-     */
-    private void addAnnotationsToGraph(MGraph graph) {
+        MGraph graph = new SimpleMGraph(rawRDF);
         LiteralFactory literalFactory = LiteralFactory.getInstance();
-        Map<UriRef,Object> children;
-        Map<UriRef,Object> properties;
+        Iterator<Triple> tripleIterator = graph.filter(null, targetResourcePredicate, targetResourceValue);
+        List<NonLiteral> processedURIs = new ArrayList<NonLiteral>();
 
-        for (RDFBridgeConfiguration config : defaultBridgeConfigs) {
-            children = config.getChildrenResources();
-            properties = config.getTargetPropertyResources();
-            Iterator<Triple> tripleIterator = graph.filter(null, config.getTargetResourcePredicate(),
-                config.getTargetResourceValue());
-            UriRef nameProp = config.getNameResource();
+        // add cms object annotations
+        while (tripleIterator.hasNext()) {
+            Triple t = tripleIterator.next();
+            NonLiteral subject = t.getSubject();
+            String name = getObjectName(subject, nameResource, graph, false);
 
-            // add cms object annotations
-            while (tripleIterator.hasNext()) {
-                Triple t = tripleIterator.next();
-                NonLiteral subject = t.getSubject();
-                String name = RDFBridgeHelper.getResourceStringValue(subject, nameProp, graph);
+            // There should be a valid name for CMS Object
+            if (!name.contentEquals("")) {
+                graph.add(new TripleImpl(subject, RDFBridgeHelper.RDF_TYPE, CMSAdapterVocabulary.CMS_OBJECT));
+                processedURIs.add(subject);
 
-                // There should be a valid name for CMS Object
-                if (!name.contentEquals("")) {
-                    graph.add(new TripleImpl(subject, RDFBridgeHelper.RDF_TYPE,
-                            CMSAdapterVocabulary.CMS_OBJECT));
-
-                    // if this object has already has name and path annotations, it means that it's already
-                    // processed as child of another object. So, don't put new name and path annotations
-                    if (!graph.filter(subject, CMSAdapterVocabulary.CMS_OBJECT_NAME, null).hasNext()) {
-                        graph.add(new TripleImpl(subject, CMSAdapterVocabulary.CMS_OBJECT_NAME,
-                                literalFactory.createTypedLiteral(name)));
-                    }
-
-                    // check children and add child and parent annotations
-                    checkChildren(children, subject, graph);
-
-                    // check desired properties to be mapped
-                    checkProperties(properties, subject, config, graph);
+                /*
+                 * if this object has already has name and path annotations, it means that it's already
+                 * processed as child of another object. So, don't put new name annotations
+                 */
+                if (!graph.filter(subject, CMSAdapterVocabulary.CMS_OBJECT_NAME, null).hasNext()) {
+                    graph.add(new TripleImpl(subject, CMSAdapterVocabulary.CMS_OBJECT_NAME, literalFactory
+                            .createTypedLiteral(name)));
                 }
+
+                // check children and add child and parent annotations
+                checkChildren(subject, processedURIs, graph);
             }
         }
+        RDFBridgeHelper.addPathAnnotations(cmsPath, processedURIs, graph);
+        return graph;
     }
 
-    private static void checkChildren(Map<UriRef,Object> children, NonLiteral objectURI, MGraph graph) {
+    private void checkChildren(NonLiteral objectURI, List<NonLiteral> processedURIs, MGraph graph) {
         LiteralFactory literalFactory = LiteralFactory.getInstance();
-        for (UriRef childPropURI : children.keySet()) {
+        for (UriRef childPropURI : targetChildrenMappings.keySet()) {
             Iterator<Triple> childrenIt = graph.filter(objectURI, childPropURI, null);
             Map<String,Integer> childNames = new HashMap<String,Integer>();
             while (childrenIt.hasNext()) {
@@ -134,7 +165,7 @@ public class DefaultRDFBridgeImpl implements RDFBridge {
                 NonLiteral childSubject = new UriRef(RDFBridgeHelper.removeEndCharacters(child.getObject()
                         .toString()));
 
-                String childName = getNameOfProperty(childSubject, children.get(childPropURI), graph);
+                String childName = getChildName(childSubject, targetChildrenMappings.get(childPropURI), graph);
                 if (!childName.contentEquals("")) {
                     RDFBridgeHelper.removeExistingTriple(childSubject, CMSAdapterVocabulary.CMS_OBJECT_NAME,
                         graph);
@@ -143,7 +174,7 @@ public class DefaultRDFBridgeImpl implements RDFBridge {
                     graph.add(new TripleImpl(childSubject, CMSAdapterVocabulary.CMS_OBJECT_PARENT_REF,
                             objectURI));
                     graph.add(new TripleImpl(childSubject, CMSAdapterVocabulary.CMS_OBJECT_NAME,
-                            literalFactory.createTypedLiteral(getChildName(childName, childNames))));
+                            literalFactory.createTypedLiteral(checkDuplicateChildName(childName, childNames))));
 
                 } else {
                     log.warn("Failed to obtain a name for child property: {}", childPropURI);
@@ -152,45 +183,51 @@ public class DefaultRDFBridgeImpl implements RDFBridge {
         }
     }
 
-    private static void checkProperties(Map<UriRef,Object> properties,
-                                        NonLiteral subject,
-                                        RDFBridgeConfiguration bridge,
-                                        MGraph graph) {
+    private String getObjectName(NonLiteral subject,
+                                 UriRef namePredicate,
+                                 MGraph graph,
+                                 boolean tryTargetResourceNamePredicate) {
+        String name = "";
+        // try to get name through default CMS Vocabulary predicate
+        name = RDFBridgeHelper.getResourceStringValue(subject, CMSAdapterVocabulary.CMS_OBJECT_NAME, graph);
+        if (!name.contentEquals("")) {
+            return name;
+        }
 
-        LiteralFactory literalFactory = LiteralFactory.getInstance();
-        Map<UriRef,UriRef> propertiesNamesInBridge = new HashMap<UriRef,UriRef>();
-        for (UriRef propURI : properties.keySet()) {
-            String propertyName = getNameOfProperty(subject, properties.get(propURI), graph);
-            if (!propertyName.contentEquals("")) {
-                if (!propertiesNamesInBridge.containsKey(propURI)) {
-
-                    UriRef tempRef = new UriRef(propertyName + "Prop" + bridge.hashCode());
-                    propertiesNamesInBridge.put(propURI, tempRef);
-
-                    graph.add(new TripleImpl(tempRef, CMSAdapterVocabulary.CMS_OBJECT_PROPERTY_NAME,
-                            literalFactory.createTypedLiteral(propertyName)));
-                    graph.add(new TripleImpl(tempRef, CMSAdapterVocabulary.CMS_OBJECT_PROPERTY_URI, propURI));
-                }
-                graph.add(new TripleImpl(subject, CMSAdapterVocabulary.CMS_OBJECT_HAS_PROPERTY,
-                        propertiesNamesInBridge.get(propURI)));
-            } else {
-                log.warn("Failed to obtain a name for property: {}", propURI);
+        // if there is a configuration specifying the name try to obtain through it
+        if (namePredicate != null) {
+            name = RDFBridgeHelper.getResourceStringValue(subject, namePredicate, graph);
+            if (!name.contentEquals("")) {
+                return name;
             }
         }
+
+        // if this method is called from a child node try to obtain name by target resource name predicate
+        if (nameResource != null) {
+            name = RDFBridgeHelper.getResourceStringValue(subject, nameResource, graph);
+            if (!name.contentEquals("")) {
+                return name;
+            }
+        }
+
+        // failed to obtain name by the specified property assign local name from the URI
+        name = RDFBridgeHelper.extractLocalNameFromURI(subject);
+        return name;
     }
 
-    private static String getNameOfProperty(NonLiteral subject, Object nameProp, MGraph graph) {
+    private String getChildName(NonLiteral subject, Object nameProp, MGraph graph) {
         if (nameProp instanceof String) {
-            return (String) nameProp;
-        } else if (nameProp instanceof UriRef) {
-            return RDFBridgeHelper.getResourceStringValue(subject, (UriRef) nameProp, graph);
+            if (((String) nameProp).contentEquals("")) {
+                return getObjectName(subject, null, graph, true);
+            } else {
+                return (String) nameProp;
+            }
         } else {
-            log.warn("Only String and UriRef instance can be passed to specify property name");
-            return "";
+            return getObjectName(subject, (UriRef) nameProp, graph, true);
         }
     }
 
-    private static String getChildName(String candidateName, Map<String,Integer> childNames) {
+    private static String checkDuplicateChildName(String candidateName, Map<String,Integer> childNames) {
         Integer childNameCount = childNames.get(candidateName);
         if (childNameCount != null) {
             candidateName += (childNameCount + 1);
@@ -201,11 +238,185 @@ public class DefaultRDFBridgeImpl implements RDFBridge {
         return candidateName;
     }
 
-    protected void bindRDFBridgeConfiguration(RDFBridgeConfiguration rdfBridgeConfiguration) {
-        defaultBridgeConfigs.add(rdfBridgeConfiguration);
+    @Override
+    public void annotateCMSGraph(MGraph cmsGraph) {
+        List<NonLiteral> roots = RDFBridgeHelper.getRootObjectsOfGraph(cmsPath, cmsGraph);
+        for (NonLiteral rootObjectURI : roots) {
+            applyReverseBridgeSettings(rootObjectURI, cmsGraph);
+            if (defaultChildPredicate != null) {
+                addChildrenAnnotations(rootObjectURI, cmsGraph);
+            }
+        }
     }
 
-    protected void unbindRDFBridgeConfiguration(RDFBridgeConfiguration rdfBridgeConfiguration) {
-        defaultBridgeConfigs.remove(rdfBridgeConfiguration);
+    private void addChildrenAnnotations(NonLiteral parentURI, MGraph graph) {
+        Iterator<Triple> children = graph.filter(null, CMSAdapterVocabulary.CMS_OBJECT_PARENT_REF, parentURI);
+        while (children.hasNext()) {
+            NonLiteral childURI = children.next().getSubject();
+            /*
+             * If parent has already a property referencing child, do not add a new subsumption relation.
+             * Otherwise, if children configurations has a single item use that property, if there are more
+             * than one children configuration use the default child predicate.
+             */
+            Iterator<Triple> childParentRelations = graph.filter(parentURI, null, childURI);
+            if (!childParentRelations.hasNext()) {
+                UriRef childPredicate;
+                if (targetChildrenMappings.size() == 1) {
+                    childPredicate = targetChildrenMappings.keySet().iterator().next();
+                } else {
+                    childPredicate = defaultChildPredicate;
+                }
+                graph.add(new TripleImpl(parentURI, childPredicate, childURI));
+                applyReverseBridgeSettings(childURI, graph);
+                addChildrenAnnotations(childURI, graph);
+            }
+        }
+    }
+
+    private void applyReverseBridgeSettings(NonLiteral subject, MGraph graph) {
+        graph.add(new TripleImpl(subject, targetResourcePredicate, targetResourceValue));
+        revertObjectName(subject, graph);
+    }
+
+    private void revertObjectName(NonLiteral objectURI, MGraph graph) {
+        if (nameResource != null) {
+            Iterator<Triple> it = graph.filter(objectURI, CMSAdapterVocabulary.CMS_OBJECT_NAME, null);
+            if (it.hasNext()) {
+                Triple nameProp = it.next();
+                Resource name = nameProp.getObject();
+                graph.remove(nameProp);
+                graph.add(new TripleImpl(objectURI, nameResource, name));
+            } else {
+                log.warn("Failed to find name property for URI: {}", objectURI);
+            }
+        }
+    }
+
+    @Override
+    public String getCMSPath() {
+        return this.cmsPath;
+    }
+
+    /*
+     * Methods to parse configurations
+     */
+
+    private void parseURIConfig(String config, Dictionary<String,Object> properties) {
+        Object value = null;
+        try {
+            value = checkProperty(properties, config, false);
+            if (value != null && !((String) value).trim().contentEquals("")) {
+                if (config.contentEquals(PROP_NAME)) {
+                    this.nameResource = parseUriRefFromConfig((String) value);
+                } else if (config.contentEquals(PROP_DEFAULT_CHILD_PREDICATE)) {
+                    this.defaultChildPredicate = parseUriRefFromConfig((String) value);
+                }
+            }
+        } catch (ConfigurationException e) {
+            log.warn("This configuration should be either empty or has one of the following formats:"
+                     + "\nskos:narrower" + "\nhttp://www.w3.org/2004/02/skos/core#narrower");
+        }
+    }
+
+    private void parseTargetResourceConfig(Dictionary<String,Object> properties) throws ConfigurationException {
+        String targetResourceConfig = (String) checkProperty(properties, PROP_RESOURCE_SELECTOR, true);
+        String[] configParts = parsePropertyConfig(targetResourceConfig);
+
+        this.targetResourcePredicate = parseUriRefFromConfig(configParts[0]);
+        this.targetResourceValue = parseUriRefFromConfig(configParts[1]);
+    }
+
+    private void parseChildrenMappings(Dictionary<String,Object> properties) {
+        Object value = null;
+        try {
+            value = checkProperty(properties, PROP_CHILDREN, false);
+        } catch (ConfigurationException e) {
+            // not the case
+        }
+        if (value != null) {
+            if (value instanceof String) {
+                getChildConfiguration((String) value);
+
+            } else if (value instanceof String[]) {
+                for (String config : (String[]) value) {
+                    getChildConfiguration(config);
+                }
+            }
+        }
+    }
+
+    private UriRef parseUriRefFromConfig(String config) {
+        return new UriRef(NamespaceEnum.getFullName(config));
+    }
+
+    private void getChildConfiguration(String config) {
+        try {
+            String[] configParts = parseChildrenConfig(config);
+            int configLength = configParts.length;
+
+            Object name = null;
+            if (configLength == 2) {
+                if (configParts[1].contains(":")) {
+                    if (RDFBridgeHelper.isShortNameResolvable(configParts[1])) {
+                        name = new UriRef(NamespaceEnum.getFullName(configParts[1]));
+                    } else {
+                        name = null;
+                    }
+                } else {
+                    name = configParts[1];
+                }
+            }
+
+            this.targetChildrenMappings.put(parseUriRefFromConfig(configParts[0]), name);
+
+        } catch (ConfigurationException e) {
+            log.warn("Failed to parse configuration value: {}", config);
+            log.warn("Configuration value should be in the format e.g skos:Definition > definition");
+        }
+    }
+
+    private Object checkProperty(Dictionary<String,Object> properties, String key, boolean required) throws ConfigurationException {
+        Object value = properties.get(key);
+        if (value == null) {
+            if (required) {
+                throw new ConfigurationException(key, "Failed to get value for this property");
+            } else {
+                return null;
+            }
+        } else {
+            return value;
+        }
+    }
+
+    private String[] parseChildrenConfig(String config) throws ConfigurationException {
+        String[] configParts = config.split(">");
+        int parts = configParts.length;
+
+        if (parts == 1 || parts == 2) {
+            for (int i = 0; i < parts; i++) {
+                configParts[i] = configParts[i].trim();
+            }
+        } else {
+            throw new ConfigurationException(PROP_CHILDREN,
+                    "Children resource configuration should have a value like one of the following three alternatives: "
+                            + "\nskos:narrower" + "\nskos:narrower > narrower"
+                            + "\nskos:narrawer > rdfs:label");
+        }
+        return configParts;
+    }
+
+    private String[] parsePropertyConfig(String config) throws ConfigurationException {
+        String[] configParts = config.split(">");
+        int parts = configParts.length;
+
+        if (parts == 1 || parts == 2) {
+            for (int i = 0; i < parts; i++) {
+                configParts[i] = configParts[i].trim();
+            }
+        } else {
+            throw new ConfigurationException(PROP_RESOURCE_SELECTOR,
+                    "Target resource and resource value should be seperated by a single'>' sign");
+        }
+        return configParts;
     }
 }

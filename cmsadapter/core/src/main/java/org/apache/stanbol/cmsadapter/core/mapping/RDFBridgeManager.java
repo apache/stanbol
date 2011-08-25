@@ -21,6 +21,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -39,8 +40,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This component keeps track of {@link RDFBridge}s and {@link RDFMapper}s in the environment and it provides
- * a method to submit RDF data to be annotated according to <code>RDFBridge</code>s. <code>RDFMapper</code>s
- * update repository based on the annotated RDF.
+ * a method to submit RDF data to be annotated according to <code>RDFBridge</code>s. Then
+ * <code>RDFMapper</code>s update repository based on the annotated RDF. It also allows generating RDF from
+ * the content repository.
  * 
  * @author suat
  * 
@@ -67,15 +69,13 @@ public class RDFBridgeManager {
      * 
      * @param connectionInfo
      *            credentials to access repository
-     * @param rootPath
-     *            path in which the root objects in the annotated graph will be stored
      * @param rawRDFData
      *            RDF to be annotated
      * @throws RepositoryAccessException
      * @throws RDFBridgeException
      */
-    public void storeRDFToRepository(ConnectionInfo connectionInfo, String rootPath, Graph rawRDFData) throws RepositoryAccessException,
-                                                                                                      RDFBridgeException {
+    public void storeRDFToRepository(ConnectionInfo connectionInfo, Graph rawRDFData) throws RepositoryAccessException,
+                                                                                     RDFBridgeException {
         if (rdfBridges.size() == 0) {
             log.info("There is no RDF Bridge to execute");
             return;
@@ -85,27 +85,59 @@ public class RDFBridgeManager {
         // session
         RDFMapper mapper = getRDFMapper(connectionInfo);
         RepositoryAccess repositoryAccess = accessManager.getRepositoryAccessor(connectionInfo);
+        if (repositoryAccess == null) {
+            log.warn("Failed to retrieve a repository access with the specified connection info");
+            return;
+        }
         Object session = repositoryAccess.getSession(connectionInfo);
 
         // Annotate raw RDF with CMS vocabulary annotations according to bridges
-        MGraph annotatedGraph;
+        MGraph annotatedGraph = new SimpleMGraph();
         for (RDFBridge bridge : rdfBridges) {
-            // first annotate raw RDF with
-            // TODO: it may be better to expand annotated graph accumulatively.
-            // Each annotation operation would add new ones onto already
-            // existing ones
-            annotatedGraph = bridge.annotateGraph(rawRDFData);
-
-            // Store annotated RDF in repository
-            mapper.storeRDFinRepository(session, rootPath, annotatedGraph);
+            annotatedGraph.addAll(bridge.annotateGraph(rawRDFData));
         }
+
+        // Store annotated RDF in repository
+        mapper.storeRDFinRepository(session, annotatedGraph);
+    }
+
+    /**
+     * This method gets the RDF from the content repository based on the path configurations of
+     * {@link RDFBridge}s and annotate them using {@link RDFBridge#annotateCMSGraph(MGraph)}.
+     * 
+     * @param connectionInfo
+     *            is the object that holds all necessary information to connect repository.
+     * @return {@link MGraph} formed by the aggregation of generated RDF for each RDF bridge
+     * @throws RepositoryAccessException
+     * @throws RDFBridgeException
+     */
+    public MGraph generateRDFFromRepository(ConnectionInfo connectionInfo) throws RepositoryAccessException,
+                                                                          RDFBridgeException {
+        if (rdfBridges.size() == 0) {
+            log.info("There is no RDF Bridge to execute");
+            return new SimpleMGraph();
+        }
+
+        // According to connection type get RDF mapper, repository accessor,
+        // session
+        RDFMapper mapper = getRDFMapper(connectionInfo);
+        RepositoryAccess repositoryAccess = accessManager.getRepositoryAccessor(connectionInfo);
+        Object session = repositoryAccess.getSession(connectionInfo);
+
+        MGraph cmsGraph = new SimpleMGraph();
+        for (RDFBridge bridge : rdfBridges) {
+            MGraph generatedGraph = mapper.generateRDFFromRepository(session, bridge.getCMSPath());
+            bridge.annotateCMSGraph(generatedGraph);
+            cmsGraph.addAll(generatedGraph);
+        }
+        return cmsGraph;
     }
 
     private RDFMapper getRDFMapper(ConnectionInfo connectionInfo) {
         RDFMapper mapper = null;
         String type = connectionInfo.getConnectionType();
         for (RDFMapper rdfMapper : rdfMappers) {
-            if (rdfMapper.getClass().getSimpleName().startsWith(type)) {
+            if (rdfMapper.canMap(type)) {
                 mapper = (RDFMapper) rdfMapper;
             }
         }

@@ -4,22 +4,23 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.jcr.PropertyType;
-
 import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.CMSAdapterVocabulary;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
+import org.apache.stanbol.cmsadapter.servicesapi.helper.NamespaceEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.rdf.model.impl.Util;
+
 /**
- * Provides utility classes that are used parsing the RDF data
+ * Provides utility classes that are used during the RDF bridging process
  * 
  * @author suat
  * 
@@ -27,48 +28,98 @@ import org.slf4j.LoggerFactory;
 public class RDFBridgeHelper {
     private static final Logger log = LoggerFactory.getLogger(RDFBridgeHelper.class);
 
-    public static final UriRef RDF_TYPE = new UriRef(NamespaceEnum.rdf + "Type");
+    public static final UriRef RDF_TYPE = new UriRef(NamespaceEnum.rdf + "type");
 
-    private static final UriRef base64Uri = dataTypeURI("base64Binary");
-    private static final UriRef dateTimeUri = dataTypeURI("dateTime");
-    private static final UriRef booleanUri = dataTypeURI("boolean");
-    private static final UriRef stringUri = dataTypeURI("string");
-    private static final UriRef xsdInteger = dataTypeURI("integer");
-    private static final UriRef xsdInt = dataTypeURI("int");
-    private static final UriRef xsdShort = dataTypeURI("short");
-    private static final UriRef xsdLong = dataTypeURI("long");
-    private static final UriRef xsdDouble = dataTypeURI("double");
-    private static final UriRef xsdAnyURI = dataTypeURI("anyURI");
+    public static final UriRef base64Uri = dataTypeURI("base64Binary");
+    public static final UriRef dateTimeUri = dataTypeURI("dateTime");
+    public static final UriRef booleanUri = dataTypeURI("boolean");
+    public static final UriRef stringUri = dataTypeURI("string");
+    public static final UriRef xsdInteger = dataTypeURI("integer");
+    public static final UriRef xsdInt = dataTypeURI("int");
+    public static final UriRef xsdShort = dataTypeURI("short");
+    public static final UriRef xsdLong = dataTypeURI("long");
+    public static final UriRef xsdDouble = dataTypeURI("double");
+    public static final UriRef xsdAnyURI = dataTypeURI("anyURI");
 
     /**
-     * Gets a list of {@link NonLiteral} which indicates URIs of resources representing the root objects in
-     * the graph e.g the object that do not have {@code CMSAdapterVocabulary#CMS_OBJECT_PARENT_REF} property
+     * Extracts a list of {@link NonLiteral} which indicates URIs of resources representing the root objects
+     * in the graph e.g the object that do not have {@code CMSAdapterVocabulary#CMS_OBJECT_PARENT_REF}
+     * property. Returned URIs should also be included in the candidate URIs passed as a parameter.
      * 
-     * @param annotatedGraph
-     * @return
+     * @param candidates
+     *            candidate URI list
+     * @param graph
+     *            {@link MGraph} in which root URIs will be searched
+     * @return list of {@link NonLiteral}s
      */
-    public static List<NonLiteral> getRootObjetsOfGraph(MGraph annotatedGraph) {
+    public static List<NonLiteral> getRootObjetsOfGraph(List<NonLiteral> candidates, MGraph graph) {
+        List<NonLiteral> roots = getRootObjectsOfGraph(graph);
+        List<NonLiteral> rootsToBeReturned = new ArrayList<NonLiteral>();
+        for (NonLiteral root : roots) {
+            if (candidates.contains(root)) {
+                rootsToBeReturned.add(root);
+            }
+        }
+        return rootsToBeReturned;
+    }
+
+    /**
+     * Extracts a list of {@link NonLiteral} which indicates URIs of resources representing the root objects
+     * in the graph e.g the object that do not have {link CMSAdapterVocabulary#CMS_OBJECT_PARENT_REF}
+     * property. Returned URIs should have {@link CMSAdapterVocabulary#CMS_OBJECT_NAME} assertions which have
+     * value equal with the <code>path</code> parameter passed. In other words, this method determines the
+     * root objects under the <code>path</code> specified.
+     * 
+     * @param path
+     *            content repository path
+     * @param graph
+     *            {@link MGraph} in which root URIs will be searched
+     * @return list of {@link NonLiteral}s
+     */
+    public static List<NonLiteral> getRootObjectsOfGraph(String path, MGraph graph) {
+        List<NonLiteral> roots = getRootObjectsOfGraph(graph);
+        List<NonLiteral> rootsToBeReturned = new ArrayList<NonLiteral>();
+        for (NonLiteral root : roots) {
+            if (isUnderAbsolutePath(path, root, graph)) {
+                rootsToBeReturned.add(root);
+            }
+        }
+        return rootsToBeReturned;
+    }
+
+    /**
+     * Extracts a list of {@link NonLiteral} which indicates URIs of resources representing the root objects
+     * in the graph e.g the object that do not have {link CMSAdapterVocabulary#CMS_OBJECT_PARENT_REF}
+     * property.
+     * 
+     * @param graph
+     *            {@link MGraph} in which root URIs will be searched
+     * @return list of {@link NonLiteral}s
+     */
+    public static List<NonLiteral> getRootObjectsOfGraph(MGraph graph) {
         List<NonLiteral> roots = new ArrayList<NonLiteral>();
-        Iterator<Triple> it = annotatedGraph.filter(null, RDF_TYPE, CMSAdapterVocabulary.CMS_OBJECT);
+        Iterator<Triple> it = graph.filter(null, RDF_TYPE, CMSAdapterVocabulary.CMS_OBJECT);
         while (it.hasNext()) {
             Triple t = it.next();
-            if (isRoot(t, annotatedGraph)) {
+            if (isRoot(t, graph)) {
                 roots.add(t.getSubject());
             }
         }
         return roots;
     }
 
-    public static List<NonLiteral> getRootObjectsOfGraph(MGraph annotatedGraph, List<NonLiteral> candidates) {
-        List<NonLiteral> roots = new ArrayList<NonLiteral>();
-        Iterator<Triple> it = annotatedGraph.filter(null, RDF_TYPE, CMSAdapterVocabulary.CMS_OBJECT);
-        while (it.hasNext()) {
-            Triple t = it.next();
-            if (isRoot(t, annotatedGraph) && candidates.contains(t.getSubject())) {
-                roots.add(t.getSubject());
-            }
+    private static boolean isUnderAbsolutePath(String path, NonLiteral subject, MGraph graph) {
+        String name = getResourceStringValue(subject, CMSAdapterVocabulary.CMS_OBJECT_NAME, graph);
+        if (name.contentEquals("")) {
+            return false;
         }
-        return roots;
+        String objectPath = getResourceStringValue(subject, CMSAdapterVocabulary.CMS_OBJECT_PATH, graph);
+        int nameIndex = objectPath.lastIndexOf(name);
+        if (nameIndex == -1) {
+            return false;
+        }
+        String precedingPath = objectPath.substring(0, nameIndex);
+        return precedingPath.contentEquals(path) || precedingPath.contentEquals(path + "/");
     }
 
     private static boolean isRoot(Triple cmsObjectTriple, MGraph graph) {
@@ -100,17 +151,28 @@ public class RDFBridgeHelper {
     }
 
     /**
-     * Gets lexical form of {@code Triple} which is specified the <code>subject</code> and
-     * <code>propName</code> parameters if the target resource is an instance of {@link Literal}.
+     * Gets lexical form of the {@link Resource} of {@link Triple} which is specified the <code>subject</code>
+     * and <code>propName</code> parameters if the target resource is an instance of {@link Literal}.
      * 
      * @param subject
-     * @param propName
+     * @param predicate
      * @param graph
      * @return lexical value of specified resource it exists and an instance of {@link Literal}, otherwise it
      *         returns empty string
      */
-    public static String getResourceStringValue(NonLiteral subject, UriRef propName, MGraph graph) {
-        Resource r = getResource(subject, propName, graph);
+    public static String getResourceStringValue(NonLiteral subject, UriRef predicate, MGraph graph) {
+        Resource r = getResource(subject, predicate, graph);
+        return getResourceStringValue(r);
+    }
+
+    /**
+     * Gets lexical form of the specified {@link Resource} if it is an instance of {@link Literal}.
+     * 
+     * @param r
+     * @return lexical value of specified resource it is not null and an instance of {@link Literal},
+     *         otherwise it returns empty string
+     */
+    public static String getResourceStringValue(Resource r) {
         if (r != null) {
             if (r instanceof Literal) {
                 return ((Literal) r).getLexicalForm();
@@ -124,17 +186,32 @@ public class RDFBridgeHelper {
     }
 
     /**
-     * Gets {@link UriRef} from the {@link Resource} of {@link Triple} which is specified the
+     * Gets {@link UriRef} from the {@link Resource} of {@link Triple} which is specified by the
      * <code>subject</code> and <code>propName</code> parameters if the target resource is an instance of
      * {@link UriRef}.
      * 
      * @param subject
-     * @param propName
+     *            subject of the target triple
+     * @param predicate
+     *            predicate of the target triple
      * @param graph
-     * @return {@link UriRef} of resource if it exists and is instance of {@link UriRef}
+     *            graph which the target triple is in
+     * @return {@link UriRef} of resource if it exists and is instance of {@link UriRef}, otherwise
+     *         <code>null</code>
      */
-    public static UriRef getResourceURIValue(NonLiteral subject, UriRef propName, MGraph graph) {
-        Resource r = getResource(subject, propName, graph);
+    public static UriRef getResourceURIValue(NonLiteral subject, UriRef predicate, MGraph graph) {
+        Resource r = getResource(subject, predicate, graph);
+        return getResourceURIValue(r);
+    }
+
+    /**
+     * Gets {@link UriRef} from the specified {@link Resource}.
+     * 
+     * @param r
+     * @return {@link UriRef} of resource if is not <code>null</code> and instance of an {@link UriRef},
+     *         otherwise <code>null</code>
+     */
+    public static UriRef getResourceURIValue(Resource r) {
         if (r != null) {
             if (r instanceof UriRef) {
                 return new UriRef(removeEndCharacters(r.toString()));
@@ -145,6 +222,25 @@ public class RDFBridgeHelper {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Extracts a short URI e.g <b>skos:Concept</b> from a specified {@link Resource}.
+     * 
+     * @param r
+     * @return short URI if the resource is an instance of {@link Literal} or {@link UriRef}
+     */
+    public static String getShortURIFromResource(Resource r) {
+        String shortURI = "";
+        if (r instanceof Literal) {
+            shortURI = getResourceStringValue(r);
+        } else if (r instanceof UriRef) {
+            UriRef uri = getResourceURIValue(r);
+            shortURI = NamespaceEnum.getShortName(removeEndCharacters(uri.toString()));
+        } else {
+            log.warn("Unexpected resource type:{} of mixin type resource", r);
+        }
+        return shortURI;
     }
 
     /**
@@ -176,48 +272,97 @@ public class RDFBridgeHelper {
     }
 
     /**
-     * Return related {@link PropertyType} according to data type of a {@link Resource} if it is an instance
-     * of {@link TypedLiteral} ot {@link UriRef}, otherwise it return {@code PropertyType#STRING} as default
-     * type.
+     * Tries to separate the local name from the given {@link NonLiteral}
      * 
-     * @param r
-     * @link {@link Resource} instance of which property type is demanded
-     * @return related {@link PropertyType}
+     * @param uri
+     *            absolute URI from which local name will be extracted
+     * @return extracted local name
      */
-    public static int getPropertyType(Resource r) {
-        if (r instanceof TypedLiteral) {
-            UriRef type = ((TypedLiteral) r).getDataType();
-            if (type.equals(stringUri)) {
-                return PropertyType.STRING;
-            } else if (type.equals(base64Uri)) {
-                return PropertyType.BINARY;
-            } else if (type.equals(booleanUri)) {
-                return PropertyType.BOOLEAN;
-            } else if (type.equals(dateTimeUri)) {
-                return PropertyType.DATE;
-            } else if (type.equals(xsdAnyURI)) {
-                return PropertyType.URI;
-            } else if (type.equals(xsdDouble)) {
-                return PropertyType.DOUBLE;
-            } else if (type.equals(xsdInt)) {
-                return PropertyType.DECIMAL;
-            } else if (type.equals(xsdInteger)) {
-                return PropertyType.DECIMAL;
-            } else if (type.equals(xsdLong)) {
-                return PropertyType.LONG;
-            } else if (type.equals(xsdShort)) {
-                return PropertyType.DECIMAL;
-            } else {
-                return PropertyType.STRING;
-            }
-        } else if (r instanceof UriRef) {
-            return PropertyType.URI;
-        } else {
-            return PropertyType.STRING;
+    public static String extractLocalNameFromURI(NonLiteral subject) {
+        String uri = RDFBridgeHelper.removeEndCharacters(subject.toString());
+        return uri.substring(Util.splitNamespace(uri));
+    }
+
+    /**
+     * Add path annotations to the resources whose rdf:Type's is {@link CMSAdapterVocabulary#CMS_OBJECT}.
+     * Paths of objects are constructed according to {@link CMSAdapterVocabulary#CMS_OBJECT_PARENT_REF}
+     * annotations among the objects.
+     * 
+     * @param rootPath
+     *            the path representing the location in the CMS. This will be added as a prefix in front of
+     *            the path annotations
+     * @param graph
+     *            containing the target resource to be annotated
+     */
+    public static void addPathAnnotations(String rootPath, List<NonLiteral> candidates, MGraph graph) {
+        // first detect root objects
+        List<NonLiteral> roots = getRootObjetsOfGraph(candidates, graph);
+
+        // assign paths to children recursively
+        LiteralFactory literalFactory = LiteralFactory.getInstance();
+        for (NonLiteral root : roots) {
+            assignChildrenPaths(rootPath, root, graph, literalFactory, true);
         }
+    }
+
+    private static void assignChildrenPaths(String cmsRootPath,
+                                            NonLiteral root,
+                                            MGraph graph,
+                                            LiteralFactory literalFactory,
+                                            boolean firstLevel) {
+        String rootName = getResourceStringValue(root, CMSAdapterVocabulary.CMS_OBJECT_NAME, graph);
+        String rootPath = cmsRootPath;
+        if (firstLevel) {
+            rootPath = formRootPath(cmsRootPath, rootName);
+            graph.add(new TripleImpl(root, CMSAdapterVocabulary.CMS_OBJECT_PATH, literalFactory
+                    .createTypedLiteral(rootPath)));
+        }
+
+        Iterator<Triple> it = graph.filter(null, CMSAdapterVocabulary.CMS_OBJECT_PARENT_REF, root);
+        while (it.hasNext()) {
+            NonLiteral childSubject = it.next().getSubject();
+            String childName = getResourceStringValue(childSubject, CMSAdapterVocabulary.CMS_OBJECT_NAME,
+                graph);
+            String childPath = formRootPath(rootPath, childName);
+            graph.add(new TripleImpl(childSubject, CMSAdapterVocabulary.CMS_OBJECT_PATH, literalFactory
+                    .createTypedLiteral(childPath)));
+            assignChildrenPaths(childPath, childSubject, graph, literalFactory, false);
+        }
+    }
+
+    private static String formRootPath(String targetRootPath, String objectName) {
+        if (!targetRootPath.endsWith("/")) {
+            targetRootPath += "/";
+        }
+        return targetRootPath + objectName;
     }
 
     private static UriRef dataTypeURI(String type) {
         return new UriRef(NamespaceEnum.xsd + type);
+    }
+
+    /**
+     * Adds the specified <code>localName</code> at the end of the <code>baseURI</code>
+     * 
+     * @param baseURI
+     * @param localName
+     * @return concatenated URI
+     */
+    public static String appendLocalName(String baseURI, String localName) {
+        if (baseURI.endsWith("#") || baseURI.endsWith("/")) {
+            return baseURI + localName;
+        }
+        return baseURI + "#" + localName;
+    }
+
+    /**
+     * Returns if it is possible to get full URI of the specified short URI e.g <b>skos:Concept</b>
+     * 
+     * @param shortURI
+     * @return <code>true</code> if it is possible to get full URI of the specified short URI
+     */
+    public static boolean isShortNameResolvable(String shortURI) {
+        String fullName = NamespaceEnum.getFullName(shortURI);
+        return !fullName.contentEquals(shortURI);
     }
 }
