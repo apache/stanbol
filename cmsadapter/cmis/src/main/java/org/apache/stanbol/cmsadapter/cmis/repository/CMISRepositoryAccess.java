@@ -390,7 +390,7 @@ public class CMISRepositoryAccess implements RepositoryAccess {
             getSession(connectionInfo);
             return true;
         } catch (Exception e) {
-            logger.debug("Error at trying to get session from connection info", e);
+            logger.warn("Error at trying to get session from connection info", e);
             return false;
         }
     }
