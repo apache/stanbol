@@ -86,8 +86,8 @@ public class FactsResource extends BaseStanbolResource {
 
     @PUT
     @Path("/{factSchemaURN}")
-    @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
     public Response putFactSchema(String jsonLdProfileString, @PathParam("factSchemaURN") String factSchemaURN) {
         Response validationResponse = standardValidation(factSchemaURN);
         if (validationResponse != null) {
@@ -128,8 +128,8 @@ public class FactsResource extends BaseStanbolResource {
     }
 
     @POST
-    @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
     public Response postFacts(String jsonLdFacts) {
         JsonLd jsonLd = null;
         try {

@@ -1,0 +1,12 @@
+{
+ "@context" :
+ {
+  "iks"     : "http://iks-project.eu/ont/",
+  "#types"  :
+  {
+    "person"       : "iks:person",
+    "organization" : "iks:organization"
+  }
+ }
+}
+

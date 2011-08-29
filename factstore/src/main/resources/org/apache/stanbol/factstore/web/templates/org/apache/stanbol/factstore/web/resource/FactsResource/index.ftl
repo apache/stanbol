@@ -41,6 +41,14 @@
 		<td>PUT with data type application/json returns HTTP 201 (created) on success.</td>
 	</tr>
 	<tr>
+		<th valign="top">Consumes:</th>
+		<td>application/json</td>
+	</tr>
+	<tr>
+		<th valign="top">Produces:</th>
+		<td>text/plain on error messages</td>
+	</tr>
+	<tr>
 		<th valign="top">Data:</th>
 		<td>The fact schema is sent as the PUT payload in JSON-LD format as a JSON-LD profile. The name of the
 		fact is given by the URL. The elements of the schema are defined in the "#types" section of the
@@ -64,6 +72,9 @@
 }</pre>
 		<p>will create the new fact schema for &quot;employeeOf&quot; at the given URL which is in decoded
 		   representation: /factstore/facts/http://iks-project.eu/ont/employeeOf</p>
+		<p>Instead one can use the cURL tool for this. Store the fact schema in a JSON file and then use this
+		   command.</p>
+<pre>curl http://localhost:8080/factstore/facts/http%3A%2F%2Fiks-project.eu%2Font%2FemployeeOf -T spec-example1.json</pre>
 		</td>
 	</tr>
 	<tr>
@@ -96,8 +107,8 @@ function putNewFactSchema() {
  $.ajax({
    type: "PUT",
    url: '${it.publicBaseUri}factstore/facts/' + encodeURIComponent($("#newFactSchemaName").val()),
-   dataType: "json",
-   contentType: "text/plain",
+   dataType: "text/plain",
+   contentType: "application/json",
    data: $("#newFactSchema").val(),
    cache: false,
    success: function(data, textStatus, jqXHR) {
@@ -149,6 +160,10 @@ function putNewFactSchema() {
 		<th valign="top">Method:</th>
 		<td>GET with data type application/json returns HTTP 200 on success.</td>
 	</tr>
+	<tr>
+		<th valign="top">Produces:</th>
+		<td>application/json</td>
+	</tr>	
 	<tr>
 		<th valign="top">Data:</th>
 		<td>The fact schema is returned as a JSON-LD profile.</td>
@@ -228,11 +243,19 @@ function getFactSchema() {
 		<td>POST with data type application/json returns HTTP 201 (created) on success.</td>
 	</tr>
 	<tr>
+		<th valign="top">Consumes:</th>
+		<td>application/json</td>
+	</tr>
+	<tr>
+		<th valign="top">Produces:</th>
+		<td>text/plain on error messages</td>
+	</tr>	
+	<tr>
 		<th valign="top">Data:</th>
-		<td>The facts are sent as the POST payload in JSON-LD format refering to the defined JSON-LD profile.
-		The name of the fact is given by the URL and the "@profile" element of the JSON-LD object,
-		additionally. The JSON-LD object contains a list of facts under the attribute "facts" where each
-		element of that list is an n-tuple of entity instances according to fhe fact schema. The instance of
+		<td>The facts are sent as the POST payload in JSON-LD format referring to the defined JSON-LD profile.
+		The name of the fact is given by the "@profile" element of the JSON-LD object.
+		The JSON-LD object contains a list of facts under the attribute "facts" where each
+		element of that list is an n-tuple of entity instances according to the fact schema. The instance of
 		an entity can be specified either by its unique IRI or by specifying the instance by example.<br>
 		Using the instance by example variant requires the FactStore to resolve the entity in an EntityHub.
 		An entity by example is specified by defining attributes and required values of the searched entity.
@@ -255,6 +278,10 @@ function getFactSchema() {
 		<p>creates a new fact of type http://iks-project.eu/ont/employeeof specifying that the person
 		http://upb.de/persons/bnagel is employee of the organization defined by the IRI
 		http://uni-paderborn.de.</p>
+		<p>You can store the facts in a JSON file and use the cURL tool like this:</p>
+<pre>
+curl -d @fact-example1.json -H "Content-Type: application/json" http://localhost:8080/factstore/facts
+</pre>		
 		</td>
 	</tr>
 	<tr>
@@ -315,8 +342,8 @@ function postNewFact() {
  $.ajax({
    type: "POST",
    url: '${it.publicBaseUri}factstore/facts',
-   dataType: "json",
-   contentType: "text/plain",
+   dataType: "text/plain",
+   contentType: "application/json",
    data: $("#newFact").val(),
    cache: false,
    success: function(data, textStatus, jqXHR) {
