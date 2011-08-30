@@ -22,6 +22,7 @@
 	<li><a href="#Publish_a_New_Fact_Schema">Publish a New Fact Schema</a></li>
 	<li><a href="#Get_Fact_Schema">Get Fact Schema</a></li>
 	<li><a href="#Publish_New_Facts">Publish New Facts</a></li>
+	<li><a href="#Query_for_Facts_of_a_Certain_Type">Query for Facts of a Certain Type</a></li>
 </ul>
 
 <a name="Publish_a_New_Fact_Schema" id="Publish_a_New_Fact_Schema"></a><h4>Publish a New Fact Schema</h4>
@@ -57,7 +58,7 @@
 	</tr>
 	<tr>
 		<th valign="top">Example 1:</th>
-		<td>PUT /factstore/facts/http%3A%2F%2Fwww.schema.org%2FEvent.attendees<br>
+		<td>PUT /factstore/facts/http%3A%2F%2Fiks-project.eu%2Font%2FemployeeOf<br>
 		with the following data 
 <pre>{
  "@context" :
@@ -378,6 +379,75 @@ schema must exist before one can publish a fact.</p>
 </tr>
 </table>
 </form>
+
+<a name="Query_for_Facts_of_a_Certain_Type" id="Query_for_Facts_of_a_Certain_Type"></a>
+<h4>Query for Facts of a Certain Type</h4>
+<table>
+	<tr>
+		<th valign="top">Description: </th>
+		<td>Allows clients to query stored facts of a specific type defined by the fact's schema. The clients
+		specify the desired fact plus an arbitrary number of entities that play some role in the fact. </td>
+	</tr>
+	<tr>
+		<th valign="top">Path: </th>
+		<td>/factstore/query</td>
+	</tr>
+	<tr>
+		<th valign="top">Method:</th>
+		<td>POST with data type application/json returns application/json.</td>
+	</tr>
+	<tr>
+		<th valign="top">Consumes:</th>
+		<td>application/json</td>
+	</tr>
+	<tr>
+		<th valign="top">Produces:</th>
+		<td>application/json</td>
+	</tr>	
+	<tr>
+		<th valign="top">Data:</th>
+		<td>The query is specified by a JSON-LD object in the payload of the request. The query defines a
+		"select" to specify the desired type of result to be returned in the result set. The "from" part
+		specifies the fact type to query and the "where" clause specifies constraints to be fulfilled.<br />
+		<br />
+	    <i>Note</i>: For the moment constraints only support the equals "=" relation. There may be more
+	    relations like ">" in future versions of this specification. If there is more than one constraint all
+	    constraints are concatenated by "AND".</td>
+	</tr>
+	<tr>
+		<th valign="top">Example 1:</th>
+		<td>POST /factstore/query<br>
+		with the following data 
+<pre>{
+ "@context" : {
+   "iks" : "http://iks-project.eu/ont/"
+ },
+ "select" : [ "person" ],
+ "from"   : "iks:employeeOf",
+ "where"  : [
+   {
+     "="  : {
+       "organization" : { "@iri" : "http://uni-paderborn.de" }
+     }
+   }
+ ]
+}</pre>
+		<p>returns the list of all persons participating in the fact of type
+		http://iks-project.eu/ont/employeeOf where the organization is http://uni-paderborn.de.</p>
+		<p>To send such a query via cURL, store the query in a JSON file and use this command:<p>
+<pre>curl -d @query-spec-example1.json -H "Content-Type: application/json" http://localhost:8080/factstore/query</pre>
+		<p>The result is sent back in JSON-LD format with the result set specified by the select clause.</p>
+<pre>{
+ "resultset": [
+   { "PERSON" : { "@iri" : "http://upb.de/persons/gengels" } },
+   { "PERSON" : { "@iri" : "http://upb.de/persons/ssauer"  } },
+   { "PERSON" : { "@iri" : "http://upb.de/persons/bnagel"  } },
+   { "PERSON" : { "@iri" : "http://upb.de/persons/fchrist" } }
+ ]
+}</pre>		
+		</td>
+	</tr>
+</table>
 
 </@common.page>
 </#escape>

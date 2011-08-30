@@ -294,11 +294,14 @@ public class FactStoreTest extends StanbolTestBase {
         executor.execute(r2).assertStatus(200);
         
         String queryString = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\"},\"select\":[\"person\"],\"from\":\"iks:employeeOf\",\"where\":[{\"=\":{\"organization\":{\"@iri\":\"http://upb.de\"}}}]}";
-        Request q1 = builder.buildGetRequest("/factstore/query", "q", queryString)
+        Request q = builder
+        .buildOtherRequest(new HttpPost(builder.buildUrl("/factstore/query/")))
+        .withContent(queryString)
+        .withHeader("Content-Type", "application/json")
         .withHeader("Accept", "application/json");
-        
+                
         String expected = "{\"resultset\":[{\"PERSON\":\"http:\\/\\/upb.de\\/persons\\/bnagel\"}]}";
-        String actual = executor.execute(q1).assertStatus(200).getContent();
+        String actual = executor.execute(q).assertStatus(200).getContent();
         Assert.assertEquals(expected, actual);
     }
     

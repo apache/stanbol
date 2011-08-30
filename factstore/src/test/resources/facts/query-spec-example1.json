@@ -1,0 +1,15 @@
+{
+ "@context" : {
+   "iks" : "http://iks-project.eu/ont/"
+ },
+ "select" : [ "person" ],
+ "from"   : "iks:employeeOf",
+ "where"  : [
+   {
+     "="  : {
+       "organization" : { "@iri" : "http://uni-paderborn.de" }
+     }
+   }
+ ]
+}
+

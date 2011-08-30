@@ -1,0 +1,11 @@
+{
+ "@context" :
+ {
+  "sorg"       : "http://www.schema.org/",
+  "#types"     :
+  {
+    "event"    : "sorg:Event",
+    "attendee" : ["sorg:Person","sorg:Organization"]
+  }
+ }
+}

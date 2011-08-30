@@ -17,10 +17,10 @@
 package org.apache.stanbol.factstore.web.resource;
 
 import javax.servlet.ServletContext;
-import javax.ws.rs.GET;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -31,8 +31,8 @@ import org.apache.stanbol.commons.jsonld.JsonLdParser;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.factstore.api.FactStore;
-import org.apache.stanbol.factstore.model.Query;
 import org.apache.stanbol.factstore.model.FactResultSet;
+import org.apache.stanbol.factstore.model.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,24 +48,25 @@ public class QueryResource extends BaseStanbolResource {
 				context);
 	}
 
-	@GET
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response query(@QueryParam("q") String q) {
-        logger.info("Query for fact: {}", q);
+	public Response query(String queryString) {
+        logger.info("Query for fact: {}", queryString);
 		
 		if (this.factStore == null) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(
 					"The FactStore is not configured properly").build();
 		}
 
-		if (q == null || q.isEmpty()) {
+		if (queryString == null || queryString.isEmpty()) {
 			return Response.status(Status.BAD_REQUEST).entity("No query sent.")
 					.build();
 		}
 
 		JsonLd jsonLdQuery = null;
 		try {
-			jsonLdQuery = JsonLdParser.parse(q);
+			jsonLdQuery = JsonLdParser.parse(queryString);
 		} catch (Exception e) {
 			logger.info("Could not parse query", e);
 			return Response.status(Status.BAD_REQUEST).entity(

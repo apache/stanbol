@@ -1,0 +1,16 @@
+{
+ "@context" : {
+   "iks" : "http://iks-project.eu/ont/",
+   "upb" : "http://upb.de/persons/"
+ },
+ "@" : [
+   { "@profile"     : "iks:employeeOf",
+     "person"       : { "@iri" : "upb:bnagel" },
+     "organization" : { "@iri" : "http://uni-paderborn.de" }
+   },
+   { "@profile"     : "iks:friendOf",
+     "person"       : { "@iri" : "upb:bnagel" },
+     "friend"       : { "@iri" : "upb:fchrist" }
+   }
+ ]
+}

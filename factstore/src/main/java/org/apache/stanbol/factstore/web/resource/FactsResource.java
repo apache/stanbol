@@ -1,23 +1,23 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.factstore.web.resource;
 
-import static javax.ws.rs.core.MediaType.TEXT_HTML;
-
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -61,13 +61,13 @@ public class FactsResource extends BaseStanbolResource {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public Response get() {
-        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+        return Response.ok(new Viewable("index", this), MediaType.TEXT_HTML).build();
     }
 
     @GET
     @Path("/{factSchemaURN}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getFactSchema(@PathParam("factSchemaURN") String factSchemaURN) {
+    public Response getFactSchemaAsJSON(@PathParam("factSchemaURN") String factSchemaURN) {
         Response validationResponse = standardValidation(factSchemaURN);
         if (validationResponse != null) {
             return validationResponse;
@@ -78,10 +78,35 @@ public class FactsResource extends BaseStanbolResource {
         FactSchema factSchema = this.factStore.getFactSchema(factSchemaURN);
         if (factSchema == null) {
             return Response.status(Status.NOT_FOUND).entity("Could not find fact schema " + factSchemaURN)
-                    .build();
+                    .type(MediaType.TEXT_PLAIN).build();
         }
 
-        return Response.ok(factSchema.toJsonLdProfile().toString()).build();
+        return Response.ok(factSchema.toJsonLdProfile().toString(), MediaType.APPLICATION_JSON).build();
+    }
+
+    @GET
+    @Path("/{factSchemaURN}")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getFactSchemaAsHtml(@PathParam("factSchemaURN") String factSchemaURN) {
+        Response validationResponse = standardValidation(factSchemaURN);
+        if (validationResponse != null) {
+            return validationResponse;
+        }
+
+        logger.info("Request for getting existing fact schema {}", factSchemaURN);
+
+        FactSchema factSchema = this.factStore.getFactSchema(factSchemaURN);
+        if (factSchema == null) {
+            return Response.status(Status.NOT_FOUND).entity("Could not find fact schema " + factSchemaURN)
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+
+        Map<String, Object> model = new HashMap<String,Object>();
+        model.put("it", this);
+        model.put("factSchemaURN", factSchemaURN);
+        model.put("factschema", factSchema.toJsonLdProfile().toString(2));
+        
+        return Response.ok(new Viewable("factschema", model), MediaType.TEXT_HTML).build();
     }
 
     @PUT
@@ -103,17 +128,19 @@ public class FactsResource extends BaseStanbolResource {
 
         if (profile == null) {
             return Response.status(Status.BAD_REQUEST).entity(
-                "Could not parse provided JSON-LD Profile structure.").build();
+                "Could not parse provided JSON-LD Profile structure.").type(MediaType.TEXT_PLAIN).build();
         }
 
         try {
             if (this.factStore.existsFactSchema(factSchemaURN)) {
                 return Response.status(Status.CONFLICT).entity(
-                    "The fact schema " + factSchemaURN + " already exists.").build();
+                    "The fact schema " + factSchemaURN + " already exists.").type(MediaType.TEXT_PLAIN)
+                        .build();
             }
         } catch (Exception e) {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity(
-                "Error while checking existence of fact schema " + factSchemaURN).build();
+                "Error while checking existence of fact schema " + factSchemaURN).type(MediaType.TEXT_PLAIN)
+                    .build();
         }
 
         try {
@@ -121,10 +148,10 @@ public class FactsResource extends BaseStanbolResource {
         } catch (Exception e) {
             logger.error("Error creating new fact schema {}", factSchemaURN, e);
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity(
-                "Error while creating new fact in database.").build();
+                "Error while creating new fact in database.").type(MediaType.TEXT_PLAIN).build();
         }
 
-        return Response.status(Status.CREATED).build();
+        return Response.status(Status.CREATED).type(MediaType.TEXT_PLAIN).build();
     }
 
     @POST
@@ -140,7 +167,7 @@ public class FactsResource extends BaseStanbolResource {
 
         if (jsonLd == null) {
             return Response.status(Status.BAD_REQUEST).entity("Could not parse provided JSON-LD structure.")
-                    .build();
+                    .type(MediaType.TEXT_PLAIN).build();
         }
 
         if (jsonLd.getResourceSubjects().size() < 2) {
@@ -152,12 +179,12 @@ public class FactsResource extends BaseStanbolResource {
                     this.factStore.addFact(fact);
                 } catch (Exception e) {
                     logger.error("Error adding new fact", e);
-                    return Response.status(Status.INTERNAL_SERVER_ERROR).entity(
-                        e.getMessage()).build();
+                    return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).type(
+                        MediaType.TEXT_PLAIN).build();
                 }
             } else {
                 return Response.status(Status.BAD_REQUEST).entity(
-                    "Could not extract fact from JSON-LD input.").build();
+                    "Could not extract fact from JSON-LD input.").type(MediaType.TEXT_PLAIN).build();
             }
         } else {
             // post multiple facts
@@ -168,16 +195,16 @@ public class FactsResource extends BaseStanbolResource {
                     this.factStore.addFacts(facts);
                 } catch (Exception e) {
                     logger.error("Error adding new facts", e);
-                    return Response.status(Status.INTERNAL_SERVER_ERROR).entity(
-                        e.getMessage()).build();
+                    return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).type(
+                        MediaType.TEXT_PLAIN).build();
                 }
             } else {
                 return Response.status(Status.BAD_REQUEST).entity(
-                    "Could not extract facts from JSON-LD input.").build();
+                    "Could not extract facts from JSON-LD input.").type(MediaType.TEXT_PLAIN).build();
             }
         }
 
-        return Response.status(Status.OK).build();
+        return Response.status(Status.OK).type(MediaType.TEXT_PLAIN).build();
     }
 
     private Response standardValidation(String factSchemaURN) {
