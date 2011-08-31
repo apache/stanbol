@@ -38,8 +38,12 @@
     <module>../owl</module>  
     <module>../rules/base</module>  
     <module>../rules/manager</module-->
-    <module>hermit</module>
-    <module>base</module>
+    <module>servicesapi</module>
+    <module>manager</module>
+    <module>owlapi</module>
+    <module>jena</module>
+    <!--module>hermit</module-->
+    <!--module>base</module-->
     <module>owllink</module>
     <module>web</module>
   </modules>

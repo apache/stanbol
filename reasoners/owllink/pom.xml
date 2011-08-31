@@ -28,7 +28,7 @@
 
   <artifactId>org.apache.stanbol.reasoners.owllink</artifactId>
   <packaging>bundle</packaging>
-  <name>Apache Stanbol Reasoners OwlLink Dependency</name>
+  <name>Apache Stanbol Reasoners: OwlLink Dependency</name>
 
   <repositories>
     <repository>
@@ -131,7 +131,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>2.2</version>
+        <!-- version>2.2</version-->
         <configuration>
           <encoding>${project.build.sourceEncoding}</encoding>
         </configuration>

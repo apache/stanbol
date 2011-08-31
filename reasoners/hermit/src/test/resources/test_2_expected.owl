@@ -1,0 +1,18 @@
+# Test 2: expected axioms
+Prefix: xsd: <http://www.w3.org/2001/XMLSchema#>
+Prefix: owl: <http://www.w3.org/2002/07/owl#>
+Prefix: vs: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+Prefix: foaf: <http://xmlns.com/foaf/0.1/>
+Prefix: xml: <http://www.w3.org/XML/1998/namespace>
+Prefix: rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+Prefix: dc: <http://purl.org/dc/elements/1.1/>
+Prefix: rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+Prefix: wot: <http://xmlns.com/wot/0.1/>
+Prefix: dbpedia: <http://dbpedia.org/ontology/>
+Prefix: test: <http://www.example.org/test/>
+
+Ontology: <http://www.example.org/test/2/expected/>
+    Import: <http://www.example.org/test/2/>
+
+   
+# Test 2 ontology is inconsistent!!!
