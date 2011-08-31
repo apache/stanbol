@@ -11,8 +11,26 @@ $(document).ready(function(){
 	// Base application URL, (we want to know this several times in the process)
 	var baseA = document.createElement("a");
 	baseA.href="/";
-	var baseURL = baseA.protocol+"//"+baseA.host; 
+	var baseURL = baseA.protocol+"//"+baseA.host;
 	
+	// Utility
+	contains=function(sbj,obj) {
+	    for (var i = 0; i < sbj.length; i++) {
+	        if (sbj[i] === obj) {
+	            return true;
+	        }
+	    }
+	    return false;
+	};
+	distinct = function(sbj) {
+		var res = [];
+	    for (var i = 0; i < sbj.length; i++) {
+	        if (!contains(res,sbj[i])) {
+	            res.push(sbj[i]);
+	        }
+	    }
+	    return res;
+	};
 	/*********************************************
 	 * This function implements Step 1 of the Demo
 	 *********************************************/
@@ -41,13 +59,18 @@ $(document).ready(function(){
 			        var references = rdf.prefix('fise', 'http://fise.iks-project.eu/ontology/')
 									 .where('?subject fise:entity-reference ?reference')
 									 .select();
-			        
+			        // get unique values
+			        var urls = new Array();
+			        for(var subject in references){
+		 				var referenceURI = references[subject].reference.toString().replace("<", "").replace(">", "");
+		 				urls.push(referenceURI);
+			        }
+			        urls = distinct(urls);
 			        var resultsUL = $("#step-1-results");
 			        resultsUL.empty();
 			        resultsUL.show();
-			        for(var subject in references){
-		 				var referenceURI = references[subject].reference.toString().replace("<", "").replace(">", "");
-		 				resultsUL.append("<li>"+referenceURI+"</li>");
+			        for(var u in urls){
+		 				resultsUL.append("<li>"+urls[u]+"</li>");
 			        }
 			        $("#step-1-after .message").html("These are the entities found by the <b>/engines</b> service:");
 			        $("#step-1-after").show();
@@ -60,6 +83,7 @@ $(document).ready(function(){
 		       }
 		});
 	}
+	
 	/*************************************************
 	 * This function implements Step 2 of the demo.
 	 * This step is dedicated to the /ontonet service
@@ -74,100 +98,116 @@ $(document).ready(function(){
 		var scopeName = "integritycheck";
 		var scopeID = "/ontonet/ontology/"+scopeName;
 
-		$.ajax({
-		       type: "PUT",
-		       url: scopeID+"?coreont="+baseURL+"/static/integritycheck/dbpedia_demo.owl&activate=true",
-		       cache: false,
-		       async: false,
-		       success: function(result) {
-			        $("#step-2-after .message").html("Scope <b>"+scopeID+"</b> have been created.");
-			        $("#step-2-after").show();
-		       },
-		       error: function(result) {
-		    	   var msg="";
-		    	   if(result.status == '409'){
-		    		   msg = "Scope <b>"+scopeID+"</b> is ready.";
-		    	   }else{
-		    		   msg = "["+result.status+": "+result.statusText+"] There can be a problem to connect to a remote server. Please try again."
-		    	   }
-		    	   $("#step-2-after .message").html(msg);
-			       $("#step-2-after").show();
-		       }
-		});
-		$("#step-2-after .message").append("<br/>Creating /ontonet session...");
-		/**
-		 * b) Then we create a /ontonet Session, which we use to load data to process in this single demo instance.
-		 */
-		$.ajax({
-		       type: "POST",
-		       url: "/ontonet/session",
-		       data: {
-		    	   scope: baseURL + scopeID
-		       },
-		       beforeSend: function(xhr){
-		    	   xhr.setRequestHeader("Accept", "application/rdf+json");
-		       },
-		       cache: false,
-		       async: false,
-		       success: function(result) {
-		    	   var datab = $.rdf.databank();
-		    	   datab.load(result);
-		    	   var rdf = $.rdf({databank:datab});
-		    	   var sessionMetadata = rdf.prefix('meta', 'http://kres.iks-project.eu/ontology/onm/meta.owl#')
-	    	   			.where('?session meta:hasID ?id')
-	    	   			.select();
-		    	   for(var subject in sessionMetadata){
-		    		   sessionID = sessionMetadata[subject].id.value;
-		    	   }
-		    	   if(sessionID) {
-		    		   // We set the cookie, we will launch a DELETE to remove the session on unload!
-		    		   $.cookie("ontonet-session-id", sessionID);
-		    		   $.cookie("ontonet-scope-id", baseURL + scopeID);
-		    		   $("#step-2-after .message").append("<br/>Session <b>"+sessionID+"</b> have been created.");
-		    	   }else throw Exception("Error parsing service output");
-		       },
-		       error: function(result) {
-		    	   var msg = "<br/>["+result.status+": "+result.statusText+"] There can be a problem opening the session on /ontonet."
-		    	   $("#step-2-after .message").append(msg);			       
-		       }
-		});
-		/**
-		 * c) Now we collect the data from the web
-		 */
-		$("#step-2-after .message").append("<br/>Now, we load the result of the <b>/enhance</b>, in the <b>/ontonet/session</b> from the web");
-		var sessionID = $.cookie("ontonet-session-id");
-		var scopeID = $.cookie("ontonet-scope-id");
-		$("#step-1-results li").each(function(){
-			var entityUri = $(this).html();
-			// TODO Try using entityhub
-			//var entityHub = baseURL + "/entityhub/site/dbpedia/entity?id=" + escape(entityUri);
-			//entityUri = entityHub;
-			$("#step-2-after .message").append("<br/>Adding <b><a href=\""+entityUri+"\" target=\"_blank\">"+entityUri+"</a></b>...");
-			// We could as alternative show links to the entityhub/sites/entity service, but it does not accept text/html yet
-			//$("#step-2-after .message").append("<br/>Adding <b><a href=\""+entityHub+"\" target=\"_blank\">"+entityUri+"</a></b>...");
+		setupScope = function(scopeID){
 			$.ajax({
-				type: "POST",
+			       type: "PUT",
+			       url: scopeID+"?coreont=" + baseURL + "/static/integritycheck/foaf.rdf" + "&activate=true",
+			       cache: false,
+			       async: true,
+			       success: function(result) {
+				        $("#step-2-after .message").html("Scope <b>"+scopeID+"</b> have been created.");
+				        $("#step-2-after").show();
+				        setupSession(baseURL,scopeID);
+			       },
+			       error: function(result) {
+			    	   var msg="";
+			    	   var go = false;
+			    	   if(result.status == '409'){
+			    		   msg = "Scope <b>"+scopeID+"</b> is ready."; 
+			    		   go = true;
+			    	   }else{
+			    		   msg = "["+result.status+": "+result.statusText+"] There can be a problem to connect to a remote server. Please try again."
+			    	   }
+			    	   $("#step-2-after .message").html(msg);
+				       $("#step-2-after").show();
+				       if(go){
+				    	   setupSession(baseURL,scopeID);
+				       }
+			       }
+			});			
+		}
+		setupSession = function(baseURL,scopeID){
+			// We set the scope ID
+ 		    $.cookie("ontonet-scope-id", baseURL + scopeID);
+			// If a) is success
+	        $("#step-2-after .message").append("<br/>Creating /ontonet session...");
+			/**
+			 * b) Then we create a /ontonet Session, which we use to load data to process in this single demo instance.
+			 */
+			$.ajax({
+			       type: "POST",
 			       url: "/ontonet/session",
-				   contentType: "application/x-www-form-urlencoded",
-			       dataType: "json",
-			       data:{
-			    	   scope: scopeID,
-			    	   session: sessionID,
-			    	   location: entityUri
+			       data: {
+			    	   scope: baseURL + scopeID
+			       },
+			       beforeSend: function(xhr){
+			    	   xhr.setRequestHeader("Accept", "application/rdf+json");
 			       },
 			       cache: false,
 			       async: false,
 			       success: function(result) {
-			    	   $("#step-2-after .message").append("....OK");
+			    	   var datab = $.rdf.databank();
+			    	   datab.load(result);
+			    	   var rdf = $.rdf({databank:datab});
+			    	   var sessionMetadata = rdf.prefix('meta', 'http://kres.iks-project.eu/ontology/onm/meta.owl#')
+		    	   			.where('?session meta:hasID ?id')
+		    	   			.select();
+			    	   for(var subject in sessionMetadata){
+			    		   sessionID = sessionMetadata[subject].id.value;
+			    	   }
+			    	   if(sessionID) {
+			    		   //console.log("Session ID is: ",sessionID.toString().replace('<', '').replace('>', ''));
+			    		   // We set the cookie, we will launch a DELETE to remove the session on unload!
+			    		   $.cookie("ontonet-session-id", sessionID.toString().replace('<', '').replace('>', ''));
+			    		   // We get back the scopeID from the cookie
+			    		   var scopeID = $.cookie("ontonet-scope-id");
+			    		   var sessionID = $.cookie("ontonet-session-id");
+			    		   $("#step-2-after .message").append("<br/>Session <b>"+sessionID+"</b> have been created.");
+			    		   //console.log("Base url is: ",baseURL);
+			    		   //console.log("Scope ID is: ",scopeID);
+			    		   /**
+			    			 * c) Now we load the demo ontology in the session
+			    			 */
+			    		   // Loading the demo ontology in the session
+			    		   var demoOntologyUrl = baseURL+"/static/integritycheck/demo.owl";
+			    		   $("#step-2-after .message").append("<br/>Now, we load the <a href=\""+baseURL+"/static/integritycheck/demo.owl\">demo ontology</a> in the <b>/ontonet/session</b>...");
+			    		   $.ajax({
+		    					type: "POST",
+		    				       url: "/ontonet/session",
+		    					   contentType: "application/x-www-form-urlencoded",
+		    				       dataType: "json",
+		    				       data:{
+		    				    	   scope: scopeID,
+		    				    	   session: sessionID,
+		    				    	   location: demoOntologyUrl
+		    				       },
+		    				       cache: false,
+		    				       timeout: 5000,
+		    				       async: true,
+		    				       success: function(result) {
+		    				    	   $("#step-2-after .message").append("Done.");
+		    				    	   $("#step-3").show();
+		    				       },
+		    				       error: function(result) {
+		    				    	   try{
+		    				    		   $("#step-2-after .message").append("....FAILED ["+result.status+": "+result.statusText+"]");		       			    				    		   
+		    				    	   }catch(e){
+		    				    		   // Timed out ...
+		    				    		   $("#step-2-after .message").append("....Timeout ");
+		    				    	   }	
+		    				       }
+		    				});
+			    	   }else throw Exception("Error parsing service output");
 			       },
 			       error: function(result) {
-			    	   $("#step-2-after .message").append("....FAILED ["+result.status+": "+result.statusText+"]");			       
+			    	   var msg = "<br/>["+result.status+": "+result.statusText+"] There can be a problem opening the session on /ontonet."
+			    	   $("#step-2-after .message").append(msg);			       
 			       }
 			});
-		});
-		// FIXME! At lest 1 entity should be successfully retrieve... elsewhere do not go on
-        // If everything worked fine, we show next step!
-        $("#step-3").show();
+		}
+        
+		setupScope(scopeID);
+		
 	};
 	/*************************************************
 	 * This function implements Step 3 of the demo.
@@ -247,57 +287,94 @@ $(document).ready(function(){
 	/*************************************************
 	 * Step 4: Check the integrity.
 	 * Ths step launch the /reasoners/classify service
-	 * over the given session and recipe
+	 * over the given session and recipe, on each entity
+	 * we ask the service to get the entity from the entityhub
 	 *************************************************/
 	checkIntegrity = function(event){
 		event.preventDefault();
 		// We disable UI item
 		$(this).attr('disabled','disabled');
 		
+		var number = $("#step-1-results li").size();
+		
+		$("#step-4-after .message").append("Invoking <b>/reasoners</b> on " + number + " found entities (this can take some time...).<br/>Entities are fetched from the entityhub.");
+		$("#step-4-after").show();
+		
 		var sessionID = $.cookie("ontonet-session-id");
 		var scopeID = $.cookie("ontonet-scope-id");
 		var recipeID = $.cookie("recipe-id");
-		var recipeGET = baseURL + "/recipe/" + recipeID;
-		
-		$("#step-4-after .message").append("Invoking <b>/reasoners/classify</b>....");
-		$("#step-4-after").show();
-		//return; // FIXME! We disable the reasoning step for the moment
-		$.ajax({
-			type: "POST",
-			url: "/reasoners/classify",
-			dataType: "xml",
-		    data:{
-		    	session: sessionID,
-		    	recipe: recipeGET,
-		    	scope: scopeID
-		    },
-		    cache: false,
-		    async: false,
-		    beforeSend: function(xhr){
-				xhr.setRequestHeader("Accept", "application/rdf+xml");
-		    },
-			contentType: "application/x-www-form-urlencoded",
-		    success: function(result) {
-		    	var databank = $.rdf.databank().load(result);
-		    	$("#step-4-after .message").append("...DONE");
-		       
-				var rdf = $.rdf({databank:databank});
-				var validContents = null;
-				validContents = rdf.prefix('dbpedia', 'http://dbpedia.org/ontology/').where('?content a dbpedia:ValidContent').select();
-				var content="";					
-				for(var validContent in validContents){
-					content += "\n<li>"+validContents[validContent].content.toString().replace('<', '').replace('>', '')+"</li>";
-				}
-				if(content!=""){
-					$("#step-4 .message").html("Valid contents:");
-					$("#step-4-results").html(content);
-				}else{
-					$("#step-4 .message").html("No valid contents...");	
-				}
-		    },
-		    error: function(result) {
-		       $("#step-4-after .message").append("...FAILED ["+result.status+": "+result.statusText+"]. <a href=\"/\">You can try again</a>.");			       
-		    }
+		var start = new Date();
+		var entityHubService = "http://localhost:8080/entityhub/sites/entity?create=true";
+		$("#step-1-results li").each(function(){
+			var entityUri = $(this).html();
+			var reasonerCall = {
+				entity: entityUri,
+				type: "GET",
+				url: "/reasoners/owl2/classify",
+				dataType: "xml",
+			    data:{
+			    	session: sessionID,
+			    	recipe: recipeID,
+			    	scope: scopeID,
+			    	url: entityHubService+"&id=" + entityUri
+			    },
+			    cache: false,
+			    async: true,
+			    beforeSend: function(xhr){
+					xhr.setRequestHeader("Accept", "application/rdf+xml");
+			    },
+			    timeout: 30000,
+				contentType: "application/x-www-form-urlencoded",
+			    success: function(result) {
+			    	number = number-1;
+			    	$("#step-4-results").append("<li id=\""+this.entity+"\">"+this.entity+"</li>");
+			    	
+			    	var databank = $.rdf.databank().load(result);
+			    	var lit = $('#step-4-results li[id="' + this.entity + '"]');
+			        
+					var rdf = $.rdf({databank:databank});
+					var validContents = null;
+					validContents = rdf.prefix('demo', 'http://www.example.org/integritycheck/').where('?content a demo:ValidContent').select();
+					var content="";	
+					for(var validContent in validContents){
+						var ent = validContents[validContent].content.toString().replace('<', '').replace('>', '');
+						if(ent==this.entity){
+							content=ent;
+							break;
+						}
+					}
+					if(content != "" ){
+						lit.append(" &gt; <font color=green>Valid</font> ");
+					}else{
+						lit.append(" &gt; <font color=red>Not valid</font> ");	
+					}
+					if(number == 0){
+						var end = new Date();
+			    		$("#step-4-after").append("Finished in " + (end - start) + " ms");
+			    	}
+			    },
+			    error: function(result) {
+			    	number = number-1;
+			    	$("#step-4-results").append("<li id=\""+this.entity+"\">"+this.entity+"</li>");
+			    	var lit = $('#step-4-results li[id="' + this.entity + '"]');
+			    	try{
+			    		if(result.status==204){
+			    			msg = " &gt; <font color=grey>Inconsistent :(</font>";
+			    		}else{
+			    			msg = " &gt; <font color=red>FAILED ["+result.status+"].</font>";
+			    		}
+			    	}catch(e){
+		    		   // Timed out ...
+		    		   msg = " &gt; Timeout";
+			    	}
+			    	lit.append(msg);
+			    	if(number == 0){
+						var end = new Date();
+			    		$("#step-4-after").append("Finished in " + (end - start) + " ms");
+			    	}
+			    }
+			};
+			$.ajax(reasonerCall);
 		});
 	}
 	/**

@@ -1,7 +1,7 @@
 <#macro view>
 <div id="step-4" class="step-4 step">
 <div id="step-4-before" class="step-4 before">
-<h3 class="step-4">Step 4: /reasoners/classify</h3>
+<h3 class="step-4">Step 4: /reasoners and /entityhub</h3>
 <p>
   <button type="button" id="step-4-start" class="start">Start</button>
 </p>
