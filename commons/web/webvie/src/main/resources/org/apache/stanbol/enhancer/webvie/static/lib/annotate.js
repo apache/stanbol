@@ -351,7 +351,9 @@
       },
       disable: function() {
         return $(':IKS-annotationSelector', this.element).each(function() {
-          return $(this).annotationSelector('disable');
+          if ($(this).data().annotationSelector) {
+            return $(this).annotationSelector('disable');
+          }
         });
       },
       processTextEnhancement: function(textEnh, parentEl) {
@@ -367,7 +369,7 @@
           start: textEnh.getStart(),
           end: textEnh.getEnd()
         }));
-        sType = textEnh.getType();
+        sType = textEnh.getType() || "Other";
         widget = this;
         el.addClass('entity').addClass(ANTT.uriSuffix(sType).toLowerCase());
         if (textEnh.getEntityEnhancements().length) {
@@ -605,9 +607,9 @@
       annotate: function(entityEnhancement, styleClass) {
         var entityClass, entityHtml, entityType, entityUri, newElement, sType;
         entityUri = entityEnhancement.getUri();
-        entityType = entityEnhancement.getTextEnhancement().getType();
+        entityType = entityEnhancement.getTextEnhancement().getType() || "";
         entityHtml = this.element.html();
-        sType = entityEnhancement.getTextEnhancement().getType();
+        sType = entityEnhancement.getTextEnhancement().getType() || "";
         entityClass = 'entity ' + ANTT.uriSuffix(sType).toLowerCase();
         newElement = $("<a href='" + entityUri + "'                about='" + entityUri + "'                typeof='" + entityType + "'                class='" + entityClass + "'>" + entityHtml + "</a>");
         ANTT.cloneCopyEvent(this.element[0], newElement[0]);
@@ -680,7 +682,7 @@
       _renderItem: function(ul, eEnhancement) {
         var active, label, source, type;
         label = eEnhancement.getLabel().replace(/^\"|\"$/g, "");
-        type = this._typeLabels(eEnhancement.getTypes());
+        type = this._typeLabels(eEnhancement.getTypes()).toString() || "Other";
         source = this._sourceLabel(eEnhancement.getUri());
         active = this.linkedEntity && eEnhancement.getUri() === this.linkedEntity.uri ? " class='ui-state-active'" : "";
         return $("<li" + active + "><a href='#'>" + label + " <small>(" + type + " from " + source + ")</small></a></li>").data('enhancement', eEnhancement).appendTo(ul);

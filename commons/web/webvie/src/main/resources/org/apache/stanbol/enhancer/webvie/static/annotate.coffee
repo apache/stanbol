@@ -327,7 +327,7 @@
         # Remove all not accepted text enhancement widgets
         disable: ->
             $( ':IKS-annotationSelector', @element ).each () ->
-                $(@).annotationSelector 'disable'
+                $(@).annotationSelector 'disable' if $(@).data().annotationSelector
 
         # processTextEnhancement deals with one TextEnhancement in an ancestor element of its occurrence
         processTextEnhancement: (textEnh, parentEl) ->
@@ -340,7 +340,7 @@
                 context: textEnh.getContext()
                 start:   textEnh.getStart()
                 end:     textEnh.getEnd()
-            sType = textEnh.getType()
+            sType = textEnh.getType() or "Other"
             widget = @
             el.addClass('entity')
             .addClass ANTT.uriSuffix(sType).toLowerCase()
@@ -437,7 +437,7 @@
                 @dialog.element.remove()
                 @dialog.uiDialogTitlebar.remove()
                 delete @dialog
-            
+
         # Produce type label list out of a uri list.
         # Filtered by the @options.types list
         _typeLabels: (types) ->
@@ -543,11 +543,11 @@
         # Place the annotation on the DOM element (about and typeof attributes)
         annotate: (entityEnhancement, styleClass) ->
             entityUri = entityEnhancement.getUri()
-            entityType = entityEnhancement.getTextEnhancement().getType()
+            entityType = entityEnhancement.getTextEnhancement().getType() or ""
             entityHtml = @element.html()
             # We ignore the old style classes
             # entityClass = @element.attr 'class'
-            sType = entityEnhancement.getTextEnhancement().getType()
+            sType = entityEnhancement.getTextEnhancement().getType() or ""
             entityClass = 'entity ' + ANTT.uriSuffix(sType).toLowerCase()
             newElement = $ "<a href='#{entityUri}'
                 about='#{entityUri}'
@@ -614,7 +614,7 @@
             @_logger.info 'rendered menu for the elements', entityEnhancements
         _renderItem: (ul, eEnhancement) ->
             label = eEnhancement.getLabel().replace /^\"|\"$/g, ""
-            type = @_typeLabels eEnhancement.getTypes()
+            type = @_typeLabels(eEnhancement.getTypes()).toString() or "Other"
             source = @_sourceLabel eEnhancement.getUri()
             active = if @linkedEntity and eEnhancement.getUri() is @linkedEntity.uri
                     " class='ui-state-active'"
