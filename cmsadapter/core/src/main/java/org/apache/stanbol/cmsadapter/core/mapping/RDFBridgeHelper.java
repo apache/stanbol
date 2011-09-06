@@ -3,6 +3,8 @@ package org.apache.stanbol.cmsadapter.core.mapping;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
@@ -40,6 +42,8 @@ public class RDFBridgeHelper {
     public static final UriRef xsdLong = dataTypeURI("long");
     public static final UriRef xsdDouble = dataTypeURI("double");
     public static final UriRef xsdAnyURI = dataTypeURI("anyURI");
+
+    private static Pattern pattern = Pattern.compile("\"(.*?)\"");
 
     /**
      * Extracts a list of {@link NonLiteral} which indicates URIs of resources representing the root objects
@@ -364,5 +368,42 @@ public class RDFBridgeHelper {
     public static boolean isShortNameResolvable(String shortURI) {
         String fullName = NamespaceEnum.getFullName(shortURI);
         return !fullName.contentEquals(shortURI);
+    }
+
+    public static void createDefaultPropertiesForRDF(NonLiteral subject,
+                                                     MGraph graph,
+                                                     String path,
+                                                     String name) {
+        if (valueCheck(path)) {
+            checkDefaultPropertyInitialization(subject, CMSAdapterVocabulary.CMS_OBJECT_PATH, path, graph);
+        }
+
+        if (valueCheck(name)) {
+            checkDefaultPropertyInitialization(subject, CMSAdapterVocabulary.CMS_OBJECT_NAME, name, graph);
+        }
+    }
+
+    public static String parseStringValue(String typedString) {
+        Matcher matcher = pattern.matcher(typedString);
+        if (matcher.find()) {
+            return matcher.group(1);
+        } else {
+            return typedString;
+        }
+    }
+
+    private static void checkDefaultPropertyInitialization(NonLiteral subject,
+                                                           UriRef property,
+                                                           String value,
+                                                           MGraph graph) {
+        LiteralFactory literalFactory = LiteralFactory.getInstance();
+        String oldValue = RDFBridgeHelper.getResourceStringValue(subject, property, graph);
+        if (oldValue.contentEquals("")) {
+            graph.add(new TripleImpl(subject, property, literalFactory.createTypedLiteral(value)));
+        }
+    }
+
+    private static boolean valueCheck(String s) {
+        return s != null && !s.trim().contentEquals("");
     }
 }

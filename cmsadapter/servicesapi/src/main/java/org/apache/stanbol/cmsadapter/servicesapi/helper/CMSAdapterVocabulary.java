@@ -153,4 +153,12 @@ public class CMSAdapterVocabulary {
      * in the original RDF.
      */
     public static final UriRef CMS_OBJECT_HAS_URI = new UriRef(CMS_ADAPTER_VOCABULARY_URI + "#hasURI");
+    
+    /*
+     * CMIS Specific URI references
+     */
+    /**
+     * The predicate representing the base type of CMIS content repository objects
+     */
+    public static final UriRef BASE_TYPE_ID = new UriRef(NamespaceEnum.cmis + "baseTypeId");
 }

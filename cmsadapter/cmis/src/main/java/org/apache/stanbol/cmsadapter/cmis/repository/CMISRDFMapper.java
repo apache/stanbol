@@ -20,6 +20,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -28,17 +30,23 @@ import java.util.Map;
 import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Folder;
+import org.apache.chemistry.opencmis.client.api.Property;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.enums.BaseTypeId;
+import org.apache.chemistry.opencmis.commons.enums.PropertyType;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
+import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.felix.scr.annotations.Component;
@@ -47,7 +55,8 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.cmsadapter.core.mapping.BaseRDFMapper;
 import org.apache.stanbol.cmsadapter.core.mapping.RDFBridgeHelper;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.CMSAdapterVocabulary;
-import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFBridge;
+import org.apache.stanbol.cmsadapter.servicesapi.helper.NamespaceEnum;
+import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFBridgeException;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,9 +64,14 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of {@link RDFMapper} for CMIS repositories.
  * <p>
- * As CMIS specification does not allow hierarchy in the documents and custom properties for documents and
- * folders, a folder-document mix workaround is applied to represent hierarchical structures. See the
- * explanations in {@link #storeRDFinRepository(Object, MGraph)} and
+ * While updating the content repository based on an RDF data, this implementation creates an additional
+ * document containing metadata for each CMS object processed as CMIS specification does not allow adding
+ * custom properties for content repository objects. For detailed explanation about updating content
+ * repository based on RDF data see {@link #storeRDFinRepository(Object, MGraph)}.
+ * <p>
+ * While generating RDF from content repository, this implementation process all content repository object
+ * located under a given path. All properties of objects are transformed into RDF. Furthermore, hierarchical
+ * structure of the content repository is reflected to the generated RDF. For more detailed explanation see
  * {@link #generateRDFFromRepository(Object, String)}.
  * 
  * @author suat
@@ -75,19 +89,22 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
     @Reference
     Serializer serializer;
 
+    @Reference
+    Parser parser;
+
     /**
      * This implementation of {@link RDFMapper#storeRDFinRepository(Object, MGraph)} realizes a workaround to
-     * come up with the restriction of not being able to create hierarchical documents and set custom
-     * properties to documents.
+     * come up with the restriction of not being able to set custom properties to content repository objects.
      * <p>
-     * The workaround is to create 3 object in the content repository for each object that will normally be
-     * created from the RDF data. For example if a single object named <b>MyObject</b> is expected to be
-     * created from the annotated RDF data in the content repository, first of all a {@link Folder} named
-     * <b>MyObject</b> will be created. In this folder a {@link Document} named <b>MyObject</b> representing
-     * the actual object and another document named <b>MyObject_metadata</b> will be created.
+     * For each resource having {@link CMSAdapterVocabulary#CMS_OBJECT} as rdf:type in the RDF, an additional
+     * document containing all resources about a certain content repository object is created in the same
+     * folder with the actual object. For example, if a single object named <b>MyObject</b> is assumed to be
+     * created from the annotated RDF data in the content repository, an additional document named
+     * <b>MyObject_metadata</b> will be created.
      * <p>
-     * Child relations between is set through the folder hierarchy and <b>MyObject_metadata</b> contains an
-     * RDF data formed by the {@link RDFBridge}.
+     * The type of the object to be created is determined according to assertions in the RDF. More details can
+     * be found in
+     * {@link #createStructureForDocument(String, NonLiteral, NonLiteral, Folder, Session, MGraph)}.
      * 
      * @param session
      *            {@link Session} object to access the repository
@@ -103,57 +120,150 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
             String documentPath = getObjectPath(root, documentName, annotatedGraph);
             Folder rootFolder = checkCreateParentFolders(documentPath, (Session) session);
             if (rootFolder != null) {
-                createDocument(rootFolder, root, documentName, annotatedGraph, (Session) session);
+                createObject(rootFolder, root, null, documentName, annotatedGraph, (Session) session);
             } else {
                 log.warn("Failed to get Folder for path: {}", documentPath);
             }
         }
     }
 
-    private void createDocument(Folder parent,
-                                NonLiteral documentURI,
-                                String documentName,
-                                MGraph graph,
-                                Session session) {
+    private void createObject(Folder parent,
+                              NonLiteral documentURI,
+                              NonLiteral parentURI,
+                              String documentName,
+                              MGraph graph,
+                              Session session) {
 
-        Folder containerFolder = createStructureForDocument(documentName, documentURI, parent, session, graph);
+        Folder containerFolder = createStructureForDocument(documentName, documentURI, parentURI, parent,
+            session, graph);
 
         Iterator<Triple> it = graph.filter(null, CMSAdapterVocabulary.CMS_OBJECT_PARENT_REF, documentURI);
         while (it.hasNext()) {
             NonLiteral childSubject = it.next().getSubject();
             String childName = RDFBridgeHelper.getResourceStringValue(childSubject,
                 CMSAdapterVocabulary.CMS_OBJECT_NAME, graph);
-            createDocument(containerFolder, childSubject, childName, graph, session);
+            createObject(containerFolder, childSubject, documentURI, childName, graph, session);
         }
     }
 
-    private Folder createStructureForDocument(String documentName,
+    /**
+     * This method creates the actual object in the content repository. The type of the object to be created
+     * is determined by following conditions:
+     * <p>
+     * First if its base type is set by {@link CMSAdapterVocabulary#BASE_TYPE_ID} predicate and it is set as
+     * <b>cmis:folder</b> or <b>cmis:document</b>.
+     * <p>
+     * If the base type of the object is not set, its parent assertion is checked. If it has a parent
+     * assertion through {@link CMSAdapterVocabulary#CMS_OBJECT_PARENT_REF}, is rdf:type assertion is checked.
+     * If the URI specified in <code>parentURI</code> is one of the <b>rdf:type</b>s of processed object. The
+     * object is created as a {@link Document} under the folder specified by <code>parentFolder</code>.
+     * Otherwise, it is created as a {@link Folder} even if it does not have any children. This assumption is
+     * done based on the idea that the created object is a part of a hierarchy.
+     * <p>
+     * If the parent assertion of the processed object is not set, this means that a root object is being
+     * created. If this object has any child objects it is created as a {@link Folder}, otherwise it is
+     * created as a {@link Document} based on the assumption that the object represents a single
+     * {@link Document}.
+     * <p>
+     * For any object created an additional metadata document is created. This document has the name <b>
+     * <code>objectName + {@link #DOCUMENT_RDF}</code></b>. This document is created so that content
+     * management systems would manage semantic information content repository object within their own
+     * systems.
+     * 
+     * @param objectName
+     * @param documentURI
+     * @param parentURI
+     * @param parentFolder
+     * @param session
+     * @param graph
+     * @return
+     */
+    private Folder createStructureForDocument(String objectName,
                                               NonLiteral documentURI,
+                                              NonLiteral parentURI,
                                               Folder parentFolder,
                                               Session session,
                                               MGraph graph) {
 
-        String documentPath;
+        String objectPath;
         String parentPath = parentFolder.getPath();
+        boolean createFolder = true;
         if (parentPath.endsWith("/")) {
-            documentPath = parentPath + documentName;
+            objectPath = parentPath + objectName;
         } else {
-            documentPath = parentPath + "/" + documentName;
+            objectPath = parentPath + "/" + objectName;
         }
 
-        Folder containerFolder = createFolderByPath(parentFolder, documentName, documentPath, session);
-        if (containerFolder != null) {
-            String rdfDocumentName = documentName + DOCUMENT_RDF;
-            createDocumentByPath(containerFolder, rdfDocumentName, documentPath + "/" + rdfDocumentName,
-                getDocumentContentStream(rdfDocumentName, documentURI, graph), session);
-            createDocumentByPath(containerFolder, documentName, documentPath + "/" + documentName, null,
-                session);
+        // determine whether a document or a folder will be created
+        @SuppressWarnings("rawtypes")
+        Class type = hasBaseType(documentURI, graph);
+        if (type != null) {
+            if (type.equals(Document.class)) {
+                createFolder = false;
+            }
+        } else {
+            if (parentURI == null) {
+                // root object is being created
+                if (!hasChildren(documentURI, graph)) {
+                    createFolder = false;
+                }
+            } else {
+                if (hasParentAsType(documentURI, parentURI, graph)) {
+                    createFolder = false;
+                }
+            }
         }
-        return containerFolder;
+
+        Folder createdFolder = null;
+        CmisObject createdObject;
+        if (createFolder) {
+            createdFolder = createFolderByPath(parentFolder, objectName, objectPath, session);
+            createdObject = createdFolder;
+        } else {
+            createdObject = createDocumentByPath(parentFolder, objectName, objectPath, null, session);
+        }
+
+        String rdfDocumentName = objectName + DOCUMENT_RDF;
+        String rdfDocumentPath = objectPath + DOCUMENT_RDF;
+
+        createDocumentByPath(parentFolder, rdfDocumentName, rdfDocumentPath,
+            getDocumentContentStream(createdObject, rdfDocumentName, documentURI, graph), session);
+        return createdFolder;
     }
 
-    private ContentStream getDocumentContentStream(String documentName, NonLiteral documentURI, MGraph graph) {
-        MGraph documentMGraph = collectedDocumentResources(documentURI, graph);
+    @SuppressWarnings("rawtypes")
+    private Class hasBaseType(NonLiteral uri, MGraph graph) {
+        Iterator<Triple> it = graph.filter(uri, CMSAdapterVocabulary.BASE_TYPE_ID, null);
+        if (it.hasNext()) {
+            String type = RDFBridgeHelper.parseStringValue(it.next().getObject().toString());
+            if (type.contentEquals(BaseTypeId.CMIS_FOLDER.value())) {
+                return Folder.class;
+            } else if (type.contentEquals(BaseTypeId.CMIS_DOCUMENT.value())) {
+                return Document.class;
+            } else {
+                log.warn("Base type: {} is not supported yet", type);
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    private boolean hasChildren(NonLiteral uri, MGraph graph) {
+        Iterator<Triple> it = graph.filter(null, CMSAdapterVocabulary.CMS_OBJECT_PARENT_REF, uri);
+        return it.hasNext();
+    }
+
+    private boolean hasParentAsType(NonLiteral uri, NonLiteral parentURI, MGraph graph) {
+        Iterator<Triple> it = graph.filter(uri, RDFBridgeHelper.RDF_TYPE, parentURI);
+        return it.hasNext();
+    }
+
+    private ContentStream getDocumentContentStream(CmisObject createdObject,
+                                                   String documentName,
+                                                   NonLiteral documentURI,
+                                                   MGraph graph) {
+        MGraph documentMGraph = collectedDocumentResources(createdObject, documentURI, graph);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serializer.serialize(baos, documentMGraph, SupportedFormat.RDF_XML);
         byte[] serializedGraph = baos.toByteArray();
@@ -164,11 +274,22 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
         return contentStream;
     }
 
-    private MGraph collectedDocumentResources(NonLiteral subject, MGraph graph) {
+    private MGraph collectedDocumentResources(CmisObject createdObject, NonLiteral subject, MGraph graph) {
+        boolean sameObject = true;
+        if (createdObject.getId().contentEquals(RDFBridgeHelper.removeEndCharacters(subject.toString()))) {
+            sameObject = false;
+        }
         MGraph documentMGraph = new SimpleMGraph();
         Iterator<Triple> it = graph.filter(subject, null, null);
         while (it.hasNext()) {
-            documentMGraph.add(it.next());
+            Triple t = it.next();
+            if (sameObject) {
+                UriRef pURI = t.getPredicate();
+                if (pURI.toString().contains(NamespaceEnum.cmis.getNamespace())) {
+                    continue;
+                }
+            }
+            documentMGraph.add(t);
         }
         return documentMGraph;
     }
@@ -229,6 +350,9 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
             CmisObject o = session.getObjectByPath(path);
             if (hasType(o, BaseTypeId.CMIS_DOCUMENT)) {
                 d = (Document) o;
+                if (contentStream != null) {
+                    d.setContentStream(contentStream, true);
+                }
             } else {
                 log.warn(
                     "Object having path: {} does not have Folder base type. It should have Folder base type to allow create documents in it",
@@ -255,8 +379,185 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
     }
 
     @Override
-    public MGraph generateRDFFromRepository(Object session, String rootPath) {
-        throw new UnsupportedOperationException("This method is not implemented yet");
+    public MGraph generateRDFFromRepository(Object session, String rootPath) throws RDFBridgeException {
+        MGraph cmsGraph = new SimpleMGraph();
+        Session cmisSession = (Session) session;
+
+        Iterator<CmisObject> cmisObjectIt;
+        CmisObject rootObject;
+        try {
+            rootObject = cmisSession.getObjectByPath(rootPath);
+        } catch (CmisObjectNotFoundException e) {
+            throw new RDFBridgeException(String.format("There is Cmis Object in the path: %s", rootPath), e);
+        }
+        if (hasType(rootObject, BaseTypeId.CMIS_FOLDER)) {
+            cmisObjectIt = ((Folder) rootObject).getChildren().iterator();
+        } else {
+            throw new RDFBridgeException(String.format("A folder object is expected at the path: %s",
+                rootPath));
+        }
+
+        while (cmisObjectIt.hasNext()) {
+            CmisObject o = cmisObjectIt.next();
+            cmsGraph.addAll(getGraphForObject(o, (Folder) rootObject, null));
+        }
+        return cmsGraph;
+    }
+
+    private MGraph getGraphForObject(CmisObject o, Folder parentFolder, NonLiteral parentURI) {
+        MGraph graph = new SimpleMGraph();
+        // check metadata
+        if (o.getName().endsWith(DOCUMENT_RDF)) {
+            return graph;
+        }
+
+        MGraph metadata = new SimpleMGraph();
+        metadata = checkMetadata(parentFolder, o);
+
+        // create CMS Object annotation
+        NonLiteral subject = getObjectURI(o, metadata);
+        graph.add(new TripleImpl(subject, RDFBridgeHelper.RDF_TYPE, CMSAdapterVocabulary.CMS_OBJECT));
+
+        // add parent assertion
+        if (parentURI != null) {
+            graph.add(new TripleImpl(subject, CMSAdapterVocabulary.CMS_OBJECT_PARENT_REF, parentURI));
+        }
+
+        if (hasType(o, BaseTypeId.CMIS_FOLDER)) {
+            Folder f = (Folder) o;
+            putObjectPropertiesIntoGraph(f, subject, metadata, graph);
+
+            // process children
+            Iterator<CmisObject> childIt = f.getChildren().iterator();
+            while (childIt.hasNext()) {
+                CmisObject child = childIt.next();
+                graph.addAll(getGraphForObject(child, f, subject));
+            }
+        } else if (hasType(o, BaseTypeId.CMIS_DOCUMENT)) {
+            putObjectPropertiesIntoGraph(o, subject, metadata, graph);
+            if (parentURI != null) {
+                graph.add(new TripleImpl(subject, RDFBridgeHelper.RDF_TYPE, parentURI));
+            }
+        }
+        return graph;
+    }
+
+    private void putObjectPropertiesIntoGraph(CmisObject o, NonLiteral subject, MGraph metadata, MGraph g) {
+        g.addAll(metadata);
+        LiteralFactory literalFactory = LiteralFactory.getInstance();
+
+        List<Property<?>> docProps = o.getProperties();
+        for (Property<?> p : docProps) {
+            PropertyType t = p.getType();
+            UriRef pURI = getPropertyURI(p);
+            if (pURI == null) {
+                continue;
+            }
+
+            List<Object> values = new ArrayList<Object>();
+            if (p.isMultiValued()) {
+                values.addAll(getTypedPropertyValues(t, p.getValues()));
+            } else {
+                values.add(getTypedPropertyValue(t, p.getValue()));
+            }
+
+            for (Object val : values) {
+                if (val != null) {
+                    if (val instanceof UriRef) {
+                        g.add(new TripleImpl(subject, pURI, (UriRef) val));
+                    } else {
+                        g.add(new TripleImpl(subject, pURI, literalFactory.createTypedLiteral(val)));
+                    }
+                }
+            }
+        }
+        /*
+         * TODO handle multiple paths both transforming an RDF into repository and generating an RDF from
+         * repository
+         */
+        String path = "";
+        if (o instanceof Folder) {
+            path = ((Folder) o).getPath();
+        } else if (o instanceof Document) {
+            path = ((Document) o).getPaths().get(0);
+        }
+        RDFBridgeHelper.createDefaultPropertiesForRDF(subject, g, path, o.getName());
+    }
+
+    private List<Object> getTypedPropertyValues(PropertyType property, List<?> values) {
+        List<Object> typedValues = new ArrayList<Object>();
+        if (values != null) {
+            for (Object v : values) {
+                typedValues.add(getTypedPropertyValue(property, v));
+            }
+        }
+        return typedValues;
+    }
+
+    private Object getTypedPropertyValue(PropertyType propertyType, Object value) {
+        if (value == null) {
+            return value;
+        }
+        switch (propertyType) {
+            case BOOLEAN:
+                return (Boolean) value;
+            case DECIMAL:
+                return (Integer) value;
+            case DATETIME:
+                return ((Calendar) value).getTime();
+            case HTML:
+                // not meet with this property
+                return null;
+            case ID:
+                return value.toString();
+            case INTEGER:
+                return ((BigInteger) value).intValue();
+            case STRING:
+                return value;
+            case URI:
+                // not meet with this property
+                return new UriRef(value.toString());
+            default:
+                return value.toString();
+        }
+    }
+
+    private NonLiteral getObjectURI(CmisObject o, MGraph metadata) {
+        Iterator<Triple> it = metadata.filter(null, null, null);
+        if (it.hasNext()) {
+            return it.next().getSubject();
+        }
+        String baseURI = CMSAdapterVocabulary.CMS_ADAPTER_VOCABULARY_URI;
+        String nodeURI = RDFBridgeHelper.appendLocalName(baseURI, o.getId());
+        return new UriRef(nodeURI);
+    }
+
+    private static UriRef getPropertyURI(Property<?> p) {
+        String name = p.getQueryName();
+        if (!name.contains(":")) {
+            name = NamespaceEnum.cms.getPrefix() + ":" + name;
+        }
+        if (RDFBridgeHelper.isShortNameResolvable(name)) {
+            return new UriRef(NamespaceEnum.getFullName(name));
+        } else {
+            log.warn("Failed to resolve property: {}", name);
+            return null;
+        }
+    }
+
+    private MGraph checkMetadata(Folder parentFolder, CmisObject object) {
+        MGraph metadata = new SimpleMGraph();
+        Iterator<CmisObject> it = parentFolder.getChildren().iterator();
+        while (it.hasNext()) {
+            CmisObject o = it.next();
+            if (o instanceof Document) {
+                if (o.getName().contentEquals(object.getName() + DOCUMENT_RDF)) {
+                    ContentStream cs = ((Document) o).getContentStream();
+                    parser.parse(metadata, cs.getStream(), SupportedFormat.RDF_XML);
+                }
+            }
+        }
+        return metadata;
     }
 
     @Override
