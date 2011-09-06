@@ -155,10 +155,23 @@ public class CMSAdapterVocabulary {
     public static final UriRef CMS_OBJECT_HAS_URI = new UriRef(CMS_ADAPTER_VOCABULARY_URI + "#hasURI");
     
     /*
+     * JCR Specific URI references
+     */
+    /**
+     * The predicate representing the primary type of JCR content repository objects
+     */
+    public static final UriRef JCR_PRIMARY_TYPE = new UriRef(NamespaceEnum.jcr + "primaryType");
+    
+    /**
+     * The predicate representing mixin types of JCR content repository objects
+     */
+    public static final UriRef JCR_MIXIN_TYPES = new UriRef(NamespaceEnum.cmis + "mixinTypes");
+    
+    /*
      * CMIS Specific URI references
      */
     /**
      * The predicate representing the base type of CMIS content repository objects
      */
-    public static final UriRef BASE_TYPE_ID = new UriRef(NamespaceEnum.cmis + "baseTypeId");
+    public static final UriRef CMIS_BASE_TYPE_ID = new UriRef(NamespaceEnum.cmis + "baseTypeId");
 }

@@ -150,7 +150,7 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
      * This method creates the actual object in the content repository. The type of the object to be created
      * is determined by following conditions:
      * <p>
-     * First if its base type is set by {@link CMSAdapterVocabulary#BASE_TYPE_ID} predicate and it is set as
+     * First if its base type is set by {@link CMSAdapterVocabulary#CMIS_BASE_TYPE_ID} predicate and it is set as
      * <b>cmis:folder</b> or <b>cmis:document</b>.
      * <p>
      * If the base type of the object is not set, its parent assertion is checked. If it has a parent
@@ -233,7 +233,7 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
 
     @SuppressWarnings("rawtypes")
     private Class hasBaseType(NonLiteral uri, MGraph graph) {
-        Iterator<Triple> it = graph.filter(uri, CMSAdapterVocabulary.BASE_TYPE_ID, null);
+        Iterator<Triple> it = graph.filter(uri, CMSAdapterVocabulary.CMIS_BASE_TYPE_ID, null);
         if (it.hasNext()) {
             String type = RDFBridgeHelper.parseStringValue(it.next().getObject().toString());
             if (type.contentEquals(BaseTypeId.CMIS_FOLDER.value())) {

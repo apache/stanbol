@@ -138,7 +138,7 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
             n = parent.getNode(nodeName);
         } else {
             String nodeType = RDFBridgeHelper.getResourceStringValue(nodeSubject,
-                getUriRefFromJCRConstant(Property.JCR_PRIMARY_TYPE), graph);
+                CMSAdapterVocabulary.JCR_PRIMARY_TYPE, graph);
 
             if (nodeType.contentEquals("")) {
                 n = parent.addNode(nodeName);
@@ -153,8 +153,7 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
             }
 
             // check mixin types
-            Iterator<Triple> mixins = graph.filter(nodeSubject,
-                getUriRefFromJCRConstant(Property.JCR_MIXIN_TYPES), null);
+            Iterator<Triple> mixins = graph.filter(nodeSubject, CMSAdapterVocabulary.JCR_MIXIN_TYPES, null);
             String mixinType = "";
             while (mixins.hasNext()) {
                 Resource r = mixins.next().getObject();
@@ -427,33 +426,21 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
                 log.warn("Failed to process property of node", e);
             }
         }
-        createDefaultPropertiesForRDF(n, subject, graph);
-    }
 
-    private void createDefaultPropertiesForRDF(Node n, NonLiteral subject, MGraph graph) {
+        String path = "";
         try {
-            checkDefaultPropertyInitialization(subject, CMSAdapterVocabulary.CMS_OBJECT_PATH, n.getPath(),
-                graph);
+            path = n.getPath();
         } catch (RepositoryException e) {
-            log.warn("Failed to initialize path property", e);
+            log.warn("Failed to get path of node", e);
         }
+        String name = "";
         try {
-            checkDefaultPropertyInitialization(subject, CMSAdapterVocabulary.CMS_OBJECT_NAME, n.getName(),
-                graph);
+            name = n.getName();
         } catch (RepositoryException e) {
-            log.warn("Failed to initialize name property", e);
+            log.warn("Failed to get name of the node", e);
         }
-    }
 
-    private void checkDefaultPropertyInitialization(NonLiteral subject,
-                                                    UriRef property,
-                                                    String value,
-                                                    MGraph graph) {
-        LiteralFactory literalFactory = LiteralFactory.getInstance();
-        String oldValue = RDFBridgeHelper.getResourceStringValue(subject, property, graph);
-        if (oldValue.contentEquals("")) {
-            graph.add(new TripleImpl(subject, property, literalFactory.createTypedLiteral(value)));
-        }
+        RDFBridgeHelper.createDefaultPropertiesForRDF(subject, graph, path, name);
     }
 
     private UriRef getNodeURI(Node n) {
@@ -585,12 +572,6 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
             String namespaceURI = NamespaceEnum.forPrefix(prefix).getNamespace();
             session.getWorkspace().getNamespaceRegistry().registerNamespace(prefix, namespaceURI);
         }
-    }
-
-    private UriRef getUriRefFromJCRConstant(String jcrConstant) {
-        int end = jcrConstant.indexOf('}');
-        String uri = jcrConstant.substring(1, end) + "/" + jcrConstant.substring(end + 1);
-        return new UriRef(uri);
     }
 
     @Override

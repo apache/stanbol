@@ -67,13 +67,7 @@
 			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
 		</dependency>
 		
-		<!-- Entityhub -->
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-		</dependency>
-		
-		<!-- Clerezza -->
+  		<!-- Clerezza -->
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>rdf.core</artifactId>
@@ -83,14 +77,6 @@
 			<artifactId>rdf.jena.facade</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>javax.jcr</groupId>
-			<artifactId>jcr</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.jackrabbit</groupId>
-			<artifactId>jackrabbit-jcr-rmi</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.scr.annotations</artifactId>
