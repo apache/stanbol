@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 #NOTE: THIS IS A DEFAULT MAPPING SPECIFICATION THAT INCLUDES MAPPINGS FOR
-#      COMMON ONTOLOGIES. USERS MIGHT WANT TO ADAPT THIS CONFIGURATION AB
+#      COMMON ONTOLOGIES. USERS MIGHT WANT TO ADAPT THIS CONFIGURATION BY
 #      COMMENTING/UNCOMMENTING AND/OR ADDING NEW MAPPINGS
 
 # --- Define the Languages for all fields ---
@@ -27,7 +27,7 @@
 
 # --- RDF RDFS and OWL Mappings ---
 # This configuration only index properties that are typically used to store
-# instance data defined by such namespaces. This excludes Ontology definitions
+# instance data defined by such namespaces. This excludes ontology definitions
 
 # NOTE that nearly all other ontologies are are using properties of these three
 #      schemas, therefore it is strongly recommended to include such information!
@@ -41,14 +41,14 @@ rdfs:seeAlso | d=entityhub:ref
 
 owl:sameAs | d=entityhub:ref
 
-#If one likes to also index Ontologies one should add the following statements
+#If one likes to also index ontologies one should add the following statements
 #owl:*
 #rdfs:*
 
 # --- Dublin Core (DC) ---
-# The default configuration imports all dc-terms data and copies vlaues for the
-# old dc-elements standard over to the according properties ofthe dc-terms
-#standard.
+# The default configuration imports all dc-terms data and copies values for the
+# old dc-elements standard over to the according properties of the dc-terms
+# standard.
 
 # NOTE that a lot of other ontologies are also using DC for some of there data
 #      therefore it is strongly recommended to include such information!
@@ -78,11 +78,11 @@ dc-elements:source > dc:source
 dc-elements:subject > dc:subject
 dc-elements:title > dc:title
 dc-elements:type > dc:type
-#also use ec-elements:title as label
+#also use dc-elements:title as label
 dc-elements:title > rdfs:label
 
 # --- Social Networks (via foaf) ---
-#The Friend of a Friend schema often used to describe social relations between people
+#The Friend of a Friend schema is often used to describe social relations between people
 foaf:*
 
 # copy the name of a person over to rdfs:label
@@ -104,7 +104,7 @@ foaf:page | d=xsd:anyURI
 # --- Simple Knowledge Organization System (SKOS) ---
 
 # A common data model for sharing and linking knowledge organization systems 
-# via the Semantic Web. Typically used to encode controlled vocabularies auch as
+# via the Semantic Web. Typically used to encode controlled vocabularies as
 # a thesaurus  
 skos:*
 
@@ -123,14 +123,14 @@ skos:narrowMatch > skos:skos:narrower
 # however such properties are only intended to be used by reasoners to
 # calculate transitive closures over broader/narrower hierarchies.
 # see http://www.w3.org/TR/skos-reference/#L2413 for details
-# to correct such cases we will copy transitive relations to there counterpart
+# to correct such cases we will copy transitive relations to their counterpart
 skos:narrowerTransitive > skos:narrower
 skos:broaderTransitive > skos:broader
 
 
 # --- Semantically-Interlinked Online Communities (SIOC) ---
 
-# an ontology for describing the information in online communities. 
+# An ontology for describing the information in online communities. 
 # This information can be used to export information from online communities 
 # and to link them together. The scope of the application areas that SIOC can 
 # be used for includes (and is not limited to) weblogs, message boards, 
