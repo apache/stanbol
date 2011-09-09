@@ -104,11 +104,11 @@ public class JCRRepositoryAccess implements RepositoryAccess {
             }
 
         } catch (LoginException e) {
-            log.debug("Failed to get JCR session by RMIRemoteRepository");
-            log.debug("Error message: " + e.getMessage());
+            log.warn("Failed to get JCR session by RMIRemoteRepository");
+            log.warn("Error message: " + e.getMessage());
         } catch (RepositoryException e) {
-            log.debug("Failed to get JCR session by RMIRemoteRepository");
-            log.debug("Error message: " + e.getMessage());
+            log.warn("Failed to get JCR session by RMIRemoteRepository");
+            log.warn("Error message: " + e.getMessage());
         }
         return session;
     }
