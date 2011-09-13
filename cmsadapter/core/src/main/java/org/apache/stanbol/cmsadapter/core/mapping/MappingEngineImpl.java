@@ -16,19 +16,20 @@
  */
 package org.apache.stanbol.cmsadapter.core.mapping;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.cmsadapter.core.decorated.DObjectFactoryImp;
+import org.apache.stanbol.cmsadapter.core.helper.TcManagerClient;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.OntologyResourceHelper;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.MappingConfiguration;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.MappingEngine;
@@ -44,15 +45,12 @@ import org.apache.stanbol.cmsadapter.servicesapi.processor.TypeLifterManager;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccess;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessManager;
-import org.apache.stanbol.ontologymanager.store.rest.client.RestClient;
-import org.apache.stanbol.ontologymanager.store.rest.client.RestClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.RDFWriter;
 
 @Component(factory = "org.apache.stanbol.cmsadapter.servicesapi.mapping.MappingEngineFactory")
 @Service
@@ -68,10 +66,10 @@ public class MappingEngineImpl implements MappingEngine {
     private TypeLifterManager typeLifterManager;
 
     @Reference
-    private RestClient storeClient;
+    private RepositoryAccessManager accessManager;
 
     @Reference
-    private RepositoryAccessManager accessManager;
+    private TcManager tcManager;
 
     private RepositoryAccess accessor;
     private Object session;
@@ -124,11 +122,7 @@ public class MappingEngineImpl implements MappingEngine {
         OntologyResourceHelper.saveBridgeDefinitions(conf.getBridgeDefinitions(), this.ontModel);
         logger.debug("Total process time for ontology {} is {} ms", ontologyURI, System.currentTimeMillis()
                                                                                  - t1);
-        try {
-            storeOntology();
-        } catch (RestClientException e) {
-            logger.warn("Failed to store ontology for ontologyURI {}", ontologyURI, e);
-        }
+        storeOntology();
     }
 
     @Override
@@ -145,12 +139,7 @@ public class MappingEngineImpl implements MappingEngine {
         runProcessors(conf.getObjects(), "create");
         logger.debug("Total process time for ontology {} is {} ms", ontologyURI, System.currentTimeMillis()
                                                                                  - t1);
-
-        try {
-            storeOntology();
-        } catch (RestClientException e) {
-            logger.warn("Failed to store ontology for ontologyURI {}", ontologyURI, e);
-        }
+        storeOntology();
     }
 
     @Override
@@ -168,11 +157,7 @@ public class MappingEngineImpl implements MappingEngine {
         runProcessors(conf.getObjects(), "create");
         logger.debug("Total process time for ontology {} is {} ms", ontologyURI, System.currentTimeMillis()
                                                                                  - t1);
-        try {
-            storeOntology();
-        } catch (RestClientException e) {
-            logger.warn("Failed to store ontology for ontologyURI {}", ontologyURI, e);
-        }
+        storeOntology();
     }
 
     @Override
@@ -187,12 +172,7 @@ public class MappingEngineImpl implements MappingEngine {
         runProcessors(conf.getObjects(), "delete");
         logger.debug("Total process time for ontology {} is {} ms", ontologyURI, System.currentTimeMillis()
                                                                                  - t1);
-
-        try {
-            storeOntology();
-        } catch (RestClientException e) {
-            logger.warn("Failed to store ontology for ontologyURI {}", ontologyURI, e);
-        }
+        storeOntology();
     }
 
     @Override
@@ -258,7 +238,7 @@ public class MappingEngineImpl implements MappingEngine {
                 connectionInfo = OntologyResourceHelper.getConnectionInfo(this.ontModel);
                 if (connectionInfo == null) {
                     logger.warn("Failed to retrieve connection info from ontmodel");
-                    return;
+                    throw new RuntimeException("Failed to retrieve connection info from ontmodel");
                 }
             }
         }
@@ -292,14 +272,9 @@ public class MappingEngineImpl implements MappingEngine {
         this.ontologyResourceHelper = new OntologyResourceHelper(this);
     }
 
-    private void storeOntology() throws RestClientException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        RDFWriter rdfWriter = ontModel.getWriter("RDF/XML");
-        rdfWriter.setProperty("xmlbase", ontologyURI);
-        rdfWriter.write(ontModel, bos, ontologyURI);
-        byte[] ontologyContentAsByteArray = bos.toByteArray();
-        String ontologyContentAsString = new String(ontologyContentAsByteArray);
-        storeClient.saveOntology(ontologyContentAsString, ontologyURI, "UTF-8");
+    private void storeOntology() {
+        TcManagerClient tcManagerClient = new TcManagerClient(tcManager);
+        tcManagerClient.saveOntology(ontModel, ontologyURI);
     }
 
     protected void bindProcessor(Processor processor) {
