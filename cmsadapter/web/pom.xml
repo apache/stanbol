@@ -52,14 +52,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.ontologymanager.store.rest.client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.ontologymanager.store.api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.servicesapi</artifactId>
 		</dependency>
 		<dependency>

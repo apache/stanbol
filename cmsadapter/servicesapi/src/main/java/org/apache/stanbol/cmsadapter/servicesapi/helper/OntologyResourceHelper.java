@@ -16,9 +16,6 @@
  */
 package org.apache.stanbol.cmsadapter.servicesapi.helper;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,9 +29,6 @@ import org.apache.stanbol.cmsadapter.servicesapi.model.web.ObjectTypeDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropType;
 import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropertyDefinition;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
-import org.apache.stanbol.ontologymanager.store.model.OntologyMetaInformation;
-import org.apache.stanbol.ontologymanager.store.rest.client.RestClient;
-import org.apache.stanbol.ontologymanager.store.rest.client.RestClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,11 +39,9 @@ import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.UnionClass;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.ResIterator;
@@ -730,44 +722,6 @@ public class OntologyResourceHelper {
             return MappingModelParser.deserializeObject(bridgeStr);
         } catch (Exception e) {
             return null;
-        }
-    }
-
-    /**
-     * Creates an OWL_DL compatible {@link OntModel}. Retrieves the ontology through {@link RestClient} of
-     * <b>Store</b> and reads its content from the created OntModel.
-     * 
-     * @param storeClient
-     *            REST client of Store component
-     * @param ontologyURI
-     *            URI of the ontology
-     * @param ontologyHref
-     *            corresponding path of ontology in Store component
-     * @return {@link OntModel} of retrieved ontology
-     * @throws RestClientException
-     * @throws UnsupportedEncodingException
-     */
-    public static OntModel getOntModel(RestClient storeClient, String ontologyURI, String ontologyHref) throws RestClientException,
-                                                                                                       UnsupportedEncodingException {
-        OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
-        String ontContent = storeClient.retrieveOntology(ontologyHref, "RDF/XML", false);
-        InputStream is = new ByteArrayInputStream(ontContent.getBytes("UTF-8"));
-        ontModel.read(is, ontologyURI, "RDF/XML");
-        return ontModel;
-    }
-
-    public static OntModel createOntModel(RestClient storeClient, String ontologyURI, String ontologyHref) throws UnsupportedEncodingException,
-                                                                                                          RestClientException {
-        OntologyMetaInformation omi = null;
-        try {
-            omi = storeClient.retrieveOntologyMetaInformation(ontologyHref);
-        } catch (RestClientException e) {
-            log.warn(e.getMessage());
-        }
-        if (omi == null) {
-            return ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
-        } else {
-            return getOntModel(storeClient, ontologyURI, ontologyHref);
         }
     }
 

@@ -466,47 +466,6 @@
 	</startLevel>
 
 	<startLevel level="22">
-		<!-- Store -->
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.ontologymanager.store.api
-			</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.ontologymanager.store.web
-			</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.ontologymanager.store.jena
-			</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.ontologymanager.store.clerezza
-			</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.ontologymanager.store.rest.client
-			</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.owl</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.reasoners.owllink</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
 		<!-- CMS Adapter -->
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
