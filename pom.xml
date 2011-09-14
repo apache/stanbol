@@ -69,6 +69,8 @@
     <module>ontologymanager/registry</module>
     <module>ontologymanager/web</module>
     <module>rules</module>
+
+    <module>cmsadapter</module>
   </modules>
 
   <profiles>
