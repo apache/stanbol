@@ -54,9 +54,11 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHAN
  * an Content Item and searches for related Entities by using the Autotagger
  *
  * @author ogrisel, rwesten
+ * @deprecated use NamedEntityTaggingEngine and the EntityHub instead
  */
 @Component(immediate = true, metatype = true)
 @Service
+@Deprecated
 public class EntityMentionEnhancementEngine implements EnhancementEngine,
         ServiceProperties {
 

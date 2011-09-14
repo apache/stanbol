@@ -26,8 +26,8 @@ public class BenchmarkTest extends EnhancerTestBase {
         "= INPUT = \n"
         + "Bob Marley was born in Kingston, Jamaica. \n"
         + "= EXPECT = \n"
-        + "Description: Kingston must be found \n"
-        + "http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Kingston%2C_Jamaica"
+        + "Description: Jamaica must be found \n"
+        + "http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Jamaica"
         ;
     
     @Test
