@@ -187,30 +187,25 @@ with no incoming links would get a score of zero.
 
 ### (5) Using the precomputed Index:
 
-After the indexing completes the distribution folder will contain two files
 
-1. dbpedia.solrindex.ref: This contains the configuration for the
-SolrIndex. It does not contain the data and is intended to provide
-configurations without the need to also include the precomputed
-index. When loading this file to Apache Stanbol (typically via the
-Apache Sling Installer Framework) the Stanbol DataFileProvider service
-will ask for the binary data.
+## Use the created index with the Entityhub
 
-2. dbpedia.solrindex.zip: This is the ZIP archive with the precomputed
-data. Typically you will need to copy this file to the data directory
-of the Apache Stanbol DataFileProvider (defaults to "sling/datafiles").
+After the indexing completes the distribution folder 
 
-## Using DBPedia.org as Referenced Site of the Entityhub
+    /indexing/dist
 
-The necessary configurations needed to use DBPedia as referenced site for the
-Apache Stanbol Entityhub are provided by the "Apache Stanbol Data: DBpedia.org"
-bundle.
+will contain two files
 
-See [{stanbol}/data/sites/dbpedia](http://svn.apache.org/repos/asf/incubator/stanbol/trunk/data/sites/dbpedia)
+1. dbpedia.solrindex.zip: This is the ZIP archive with the indexed data. This file will be requested by the Apache Stanbol Data File Provider after installing the Bundle described above. To install the data you need copy this file to the "/sling/datafiles" folder within the working directory of your Stanbol Server.
 
-The README of this Bundle provides details about the installation process.
-During the installation the "dbpedia.solrindex.zip" created by this utility is
-needed.
+2. org.apache.stanbol.data.site.dbpedia-{version}.jar: This is a Bundle that can be installed to any OSGI environment running the Apache Stanbol Entityhub. When Started it will create and configure
+
+ * a "ReferencedSite" accessible at "http://{host}/{root}/entityhub/site/dbpedia"
+ * a "Cache" used to connect the ReferencedSite with your Data and
+ * a "SolrYard" that managed the data indexed by this utility.
+
+In case you install the bundle before copying the "dbpedia.solrindex.zip" to 
+"/sling/datafiles" you will need to restart the dbpedia "SolrYard" instance.
 
 
 ## The used Default configuration:
