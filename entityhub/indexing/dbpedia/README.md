@@ -190,21 +190,30 @@ with no incoming links would get a score of zero.
 
 ## Use the created index with the Entityhub
 
-After the indexing completes the distribution folder 
+After the indexing completes the distribution folder
 
     /indexing/dist
 
 will contain two files
 
-1. dbpedia.solrindex.zip: This is the ZIP archive with the indexed data. This file will be requested by the Apache Stanbol Data File Provider after installing the Bundle described above. To install the data you need copy this file to the "/sling/datafiles" folder within the working directory of your Stanbol Server.
+1. `dbpedia.solrindex.zip`: This is the ZIP archive with the indexed
+   data. This file will be requested by the Apache Stanbol Data File
+   Provider after installing the Bundle described above. To install the
+   data you need copy this file to the "/sling/datafiles" folder within
+   the working directory of your Stanbol Server.
 
-2. org.apache.stanbol.data.site.dbpedia-{version}.jar: This is a Bundle that can be installed to any OSGI environment running the Apache Stanbol Entityhub. When Started it will create and configure
+2. `org.apache.stanbol.data.site.dbpedia-{version}.jar`: This is a Bundle
+   that can be installed to any OSGI environment running the Apache Stanbol
+   Entityhub (for instance using the Apache Felix web console under
+   http://server:port/system/console - with account admin / admin by default).
 
- * a "ReferencedSite" accessible at "http://{host}/{root}/entityhub/site/dbpedia"
- * a "Cache" used to connect the ReferencedSite with your Data and
- * a "SolrYard" that managed the data indexed by this utility.
+   When Started it will create and configure:
 
-In case you install the bundle before copying the "dbpedia.solrindex.zip" to 
+   * a "ReferencedSite" accessible at "http://{host}/{root}/entityhub/site/dbpedia"
+   * a "Cache" used to connect the ReferencedSite with your Data and
+   * a "SolrYard" that managed the data indexed by this utility.
+
+In case you install the bundle before copying the "dbpedia.solrindex.zip" to
 "/sling/datafiles" you will need to restart the dbpedia "SolrYard" instance.
 
 
