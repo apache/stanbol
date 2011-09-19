@@ -12,12 +12,13 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
 # Indexer for the [DBLP](http://dblp.uni-trier.de/) dataset.
 
-This Tool creates a full cache for DBLP based on the RDF Dump available at
+This tool creates a full cache for DBLP based on the RDF Dump available at
 http://dblp.l3s.de/dblp.rdf.gz
 
-## Building:
+## Building
 
 If not yet build by the built process of the entityhub call
 
@@ -25,7 +26,7 @@ If not yet build by the built process of the entityhub call
 
 in this directory and than
 
-    mvn -o assembly:single
+    mvn assembly:single
     
 to build the jar with all the dependencies used later for indexing.
 
@@ -35,11 +36,11 @@ If the build succeeds go to the /target directory and copy the
 
 to the directory you would like to start the indexing.
 
-## Index:
+## Index
 
-### (1) Initialise the configuration
+### (1) Initialize the configuration
 
-The default configuration is initialised by calling
+The default configuration is initialized by calling
 
     java -jar org.apache.stanbol.entityhub.indexing.dblp-*-jar-with-dependencies.jar init
 
@@ -53,7 +54,7 @@ Within this folder all the
 
 will be located.
 
-### (2) Download the Source File:
+### (2) Download the Source File
 
 Download the DBLP RDF dump from http://dblp.l3s.de/dblp.rdf.gz to
 "indexing/resources/rdfdata" and rename it to "dblp.nt.gz" (because this file
@@ -72,19 +73,34 @@ Note that calling the utility with the option -h will print the help.
 Indexing took about 3h on a normal hard disk and about 40min on a SSD (on a
 2010 MacBook Pro).
 
-### (4) Using the precomputed Index:
+### (4) Using the precomputed Index
 
-After the indexing completes the distribution folder will contain two files
+After the indexing completes the distribution folder
 
-1. dblp.solrindex.ref: This contains the configuration for the SolrIndex. It does
-not contain the data and is intended to be used to provide configurations without
-the need to also include the precomputed index. When loading this file to
-Apache Stanbol (typically via the Apache Sling Installer Framework) the 
-Stanbol DataFileProvder service will ask for the binary data.
+    /indexing/dist
 
-2. dblp.solrindex.zip: This is the ZIP archive with the precomputed data.
-Typically you will need to copy this file to the data directory of the
-Apache Stanbol DataFileProvider (defaults to "sling/datafiles").
+will contain two files
+
+1. `dblp.solrindex.zip`: This is the ZIP archive with the indexed
+   data. This file will be requested by the Apache Stanbol Data File
+   Provider after installing the Bundle described above. To install the
+   data you need copy this file to the "/sling/datafiles" folder within
+   the working directory of your Stanbol Server.
+
+2. `org.apache.stanbol.data.site.dblp-{version}.jar`: This is a Bundle
+   that can be installed to any OSGI environment running the Apache Stanbol
+   Entityhub (for instance using the Apache Felix web console under
+   http://server:port/system/console - with account admin / admin by default).
+
+   When started it will create and configure:
+
+   * a "ReferencedSite" accessible at "http://{host}/{root}/entityhub/site/dblp"
+   * a "Cache" used to connect the ReferencedSite with your Data and
+   * a "SolrYard" that managed the data indexed by this utility.
+
+In case you install the bundle before copying the "dblp.solrindex.zip" to
+"/sling/datafiles" you will need to restart the dblp "SolrYard" instance.
+
 
 ## Using DBLP as Referenced Site of the Entityhub
 
