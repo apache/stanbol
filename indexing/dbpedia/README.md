@@ -15,7 +15,7 @@ limitations under the License.
 
 # Indexer for the DBpedia dataset (see http://dbpedia.org/)
 
-This Tool creates local indexes of DBpedia to be used with the Stanbol Entityhub.
+This tool creates local indexes of DBpedia to be used with the Stanbol Entityhub.
 
 ## Building:
 
@@ -25,7 +25,7 @@ If not yet build by the built process of the entityhub call
 
 in this directory and than
 
-    mvn -o assembly:single
+    mvn assembly:single
 
 to build the jar with all the dependencies used later for indexing.
 
@@ -207,7 +207,7 @@ will contain two files
    Entityhub (for instance using the Apache Felix web console under
    http://server:port/system/console - with account admin / admin by default).
 
-   When Started it will create and configure:
+   When started it will create and configure:
 
    * a "ReferencedSite" accessible at "http://{host}/{root}/entityhub/site/dbpedia"
    * a "Cache" used to connect the ReferencedSite with your Data and
