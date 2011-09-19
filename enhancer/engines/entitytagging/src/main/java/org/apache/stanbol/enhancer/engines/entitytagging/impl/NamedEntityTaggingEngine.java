@@ -364,7 +364,7 @@ public class NamedEntityTaggingEngine implements EnhancementEngine, ServicePrope
                      + " is not present");
             return Collections.emptyList();
         }
-        // remove punctations form the search string
+        // remove punctuation form the search string
         name = cleanupKeywords(name);
 
         log.debug("Process TextAnnotation " + name + " type=" + type);
@@ -474,7 +474,7 @@ public class NamedEntityTaggingEngine implements EnhancementEngine, ServicePrope
     }
 
     /**
-     * Removes punctuations form a parsed string
+     * Removes punctuation form a parsed string
      */
     private static String cleanupKeywords(String keywords) {
         return keywords.replaceAll("\\p{P}", " ").trim();
