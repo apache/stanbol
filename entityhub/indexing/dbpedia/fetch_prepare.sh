@@ -45,8 +45,15 @@ wget -c $DBPEDIA/ru/labels_ru.nt.bz2
 wget -c $DBPEDIA/tr/labels_tr.nt.bz2
 wget -c $DBPEDIA/zh/labels_zh.nt.bz2
 wget -c $DBPEDIA/en/short_abstracts_en.nt.bz2
-wget -c $DBPEDIA/en/images_en.nt.bz2
 #wget -c $DBPEDIA/en/long_abstracts_en.not.bz2
+
+# special handling of the image file that has 5 corrupted entries
+if [ ! -f images_en.nt ]
+then
+    wget -c $DBPEDIA/en/images_en.nt.bz2
+    bzcat images_en.nt.bz2 | grep -v '\\' > images_en.nt
+    rm -f images_en.nt.bz2
+fi
 
 # Type specific attributes
 wget -c $DBPEDIA/en/geo_coordinates_en.nt.bz2
