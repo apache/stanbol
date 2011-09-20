@@ -6,7 +6,7 @@ DBPEDIA=http://downloads.dbpedia.org/3.7
 MAX_SORT_MEM=2G
 
 # Turn on echoing and exit on error
-set -xe
+set -x -e -o pipefail
 
 # Ensure that the workspace exists
 mkdir -p $WORKSPACE
