@@ -23,7 +23,10 @@
 
 #NOTE: null is used to import labels with no specified language
 
-# to import all languages leave this empty
+# --- Define the Languages for all fields ---
+# Uncomment to restrict indexing to a specific list of languages, otherwise all
+# languages are indexed
+#| @=null;en;de;fr;it
 
 # --- RDF RDFS and OWL Mappings ---
 # This configuration only index properties that are typically used to store
