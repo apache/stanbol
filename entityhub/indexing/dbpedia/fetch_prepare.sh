@@ -34,7 +34,6 @@ cd $WORKSPACE/indexing/resources/rdfdata
 wget -c $DBPEDIA/dbpedia_3.7.owl.bz2
 wget -c $DBPEDIA/en/instance_types_en.nt.bz2
 wget -c $DBPEDIA/ar/labels_ar.nt.bz2
-wget -c $DBPEDIA/de/labels_de.nt.bz2
 wget -c $DBPEDIA/en/labels_en.nt.bz2
 wget -c $DBPEDIA/es/labels_es.nt.bz2
 wget -c $DBPEDIA/fr/labels_fr.nt.bz2
@@ -51,8 +50,16 @@ wget -c $DBPEDIA/en/short_abstracts_en.nt.bz2
 if [ ! -f images_en.nt ]
 then
     wget -c $DBPEDIA/en/images_en.nt.bz2
-    bzcat images_en.nt.bz2 | grep -v '\\' > images_en.nt
+    bzcat images_en.nt.bz2 | grep -v '\\\\' > images_en.nt
     rm -f images_en.nt.bz2
+fi
+
+# same problem for german labels
+if [ ! -f labels_de.nt ]
+then
+    wget -c $DBPEDIA/de/labels_de.nt.bz2
+    bzcat labels_de.nt.bz2 | grep -v '\\\\' > labels_de.nt
+    rm -f labels_de.nt.bz2
 fi
 
 # Type specific attributes
