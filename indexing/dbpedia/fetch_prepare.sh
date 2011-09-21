@@ -50,7 +50,8 @@ wget -c $DBPEDIA/en/short_abstracts_en.nt.bz2
 if [ ! -f images_en.nt ]
 then
     wget -c $DBPEDIA/en/images_en.nt.bz2
-    bzcat images_en.nt.bz2 | sed 's/\\\\/\\u005c/g' > images_en.nt
+    bzcat images_en.nt.bz2 \
+      | sed 's/\\\\/\\u005c\\u005c/g;s/\\\([^u"]\)/\\u005c\1/g' > images_en.nt
     rm -f images_en.nt.bz2
 fi
 
@@ -58,7 +59,8 @@ fi
 if [ ! -f labels_de.nt ]
 then
     wget -c $DBPEDIA/de/labels_de.nt.bz2
-    bzcat labels_de.nt.bz2 | sed 's/\\\\/\\u005c/g' > labels_de.nt
+    bzcat labels_de.nt.bz2 \
+      | sed 's/\\\\/\\u005c\\u005c/g;s/\\\([^u"]\)/\\u005c\1/g' > labels_de.nt
     rm -f labels_de.nt.bz2
 fi
 
