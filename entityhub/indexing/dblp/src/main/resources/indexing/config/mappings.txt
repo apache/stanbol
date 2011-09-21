@@ -14,7 +14,9 @@
 # limitations under the License.
 
 # --- Define the Languages for all fields ---
-# all languages
+# Uncomment to restrict indexing to a specific list of languages, otherwise all
+# languages are indexed
+#| @=null;en;de;fr;it
 
 # --- RDF RDFS and OWL Mappings ---
 rdfs:label 
