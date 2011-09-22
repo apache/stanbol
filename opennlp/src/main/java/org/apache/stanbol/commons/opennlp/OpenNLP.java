@@ -350,6 +350,10 @@ public class OpenNLP {
                 log.info("Unable to load Resource {} via the DataFileProvider",name);
                 return null;
             }
+            if(modelDataStream == null){
+                log.info("Unable to load Resource {} via the DataFileProvider",name);
+                return null;
+            }
             T built;
             try {
                 Constructor<T> constructor;

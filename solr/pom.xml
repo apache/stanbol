@@ -57,8 +57,8 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.commons.solr;version=${pom.version},
-              org.apache.stanbol.commons.solr.utils;version=${pom.version},
+              org.apache.stanbol.commons.solr;version=${project.version},
+              org.apache.stanbol.commons.solr.utils;version=${project.version},
               org.apache.solr.client.solrj,
               org.apache.solr.client.solrj.beans,
               org.apache.solr.client.solrj.impl,
@@ -93,8 +93,8 @@
               *
             </Import-Package>
             <Private-Package>
-              org.apache.stanbol.commons.solr.impl;version=${pom.version},
-              org.apache.stanbol.commons.solr.impl.install;version=${pom.version}
+              org.apache.stanbol.commons.solr.impl;version=${project.version},
+              org.apache.stanbol.commons.solr.impl.install;version=${project.version}
             </Private-Package>
             <Embed-Dependency>
               solr-solrj, solr-core, solr-noggit, solr-dataimporthandler,

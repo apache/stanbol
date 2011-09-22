@@ -17,70 +17,77 @@
 package org.apache.stanbol.commons.opennlp;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import opennlp.tools.chunker.Chunker;
-import opennlp.tools.util.Sequence;
 import opennlp.tools.util.Span;
 
 /**
- * Simple version of a {@link Chunker} that uses the POS tags to build chunks.
- * It does not implement the {@link Chunker} interface because implementing
- * methods other than the {@link Chunker#chunkAsSpans(String[], String[])}
- * is not feasible.
+ * Simple version of a {@link opennlp.tools.chunker.Chunker} that uses the POS tags to build chunks.
+ * It does not implement the {@link opennlp.tools.chunker.Chunker} interface because implementing
+ * methods other than the {@link opennlp.tools.chunker.Chunker#chunkAsSpans(String[], String[])}
+ * is not feasible.<p>
+ * Defaults are based on the <a href="http://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html">
+ * Penn Treebank</a> tag set
+
  * 
  * TODO: <ul>
  *   <li> Test if POS tags are the same for different languages
- *   <li> Check if it is possible to implement the {@link Chunker} interface
+ *   <li> Check if it is possible to implement the {@link opennlp.tools.chunker.Chunker} interface
  *   </ul>
  * @author Rupert Westenthaler
  *
  */
 public class PosTypeChunker {
-    /**
-     * Set of POS tags used to build chunks of no {@link Chunker} is used.
-     * NOTE that all tags starting with 'N' (Nouns) are included anyway
-     */
-    public static final Set<String> DEFAULT_FOLLOW_POS_TYPES = Collections.unmodifiableSet(
-        new TreeSet<String>(Arrays.asList(
-            "#","$"," ","(",")",",",".",":","``","POS","CD","IN","FW",
-            "NN","NNP","NNPS","NNS")));//,"''")));
-    /**
-     * Set of POS tags used for searches.
-     * NOTE that all tags starting with 'N' (Nouns) are included anyway
-     */
-    public static final Set<String> DEFAULT_BUILD_CHUNK_POS_TYPES = Collections.unmodifiableSet(
-        new TreeSet<String>(Arrays.asList(
-            "NN","NNP","NNPS","NNS","FW")));//,"''")));
     
     public final Set<String> followTypes;
+
     public final Set<String> buildTypes;
 
     /**
-     * Initialise a new PosTypeChunker with the default POS type configuration
+     * Creates an instance for the given language based on the configuration
+     * within the {@link PosTagsCollectionEnum}.
+     * @param lang The language
+     * @return the instance or <code>null</code> if no configuration for the
+     * parsed language is present in the {@link PosTagsCollectionEnum}.
      */
-    public PosTypeChunker(){
-        this(null,null);
+    public static PosTypeChunker getInstance(String lang){
+        Set<String> nounPosTagCollection = 
+            PosTagsCollectionEnum.getPosTagCollection(lang, PosTypeCollectionType.NOUN);
+        if(nounPosTagCollection != null && !nounPosTagCollection.isEmpty()){
+            return new PosTypeChunker(nounPosTagCollection, 
+                PosTagsCollectionEnum.getPosTagCollection(
+                    lang,PosTypeCollectionType.FOLLOW));
+        } else {
+            return null;
+        }
+        
     }
     /**
-     * Initialise a new PosTypeChunker for the parsed Types.<p>
-     * Note that buildPosTypes are not automatically followed. They need be
-     * explicitly added to the followPosTypes!.
-     * @param buildPosTypes the POS types that trigger a new Chunk
-     * @param followPosType the POS types followed to build Chunks
+     * Initialise a new PosTypeChunker for the parsed POS tag collections. This
+     * Constructor can be used if no predefined Configuration for a given 
+     * language is available in the {@link PosTagsCollectionEnum}<p>
+     * Note that buildPosTypes are added to the followed once. Therefore the
+     * followPosTypes may or may not include some/all buildPosTypes.
+     * @param buildPosTypes the POS types that trigger a new Chunk (MUST NOT be
+     * <code>null</code> nor {@link Set#isEmpty() empty}).
+     * @param followPosTypes additional POS types followed to extend Chunks (MAY
+     * BE <code>null</code> or empty).
      */
-    public PosTypeChunker(Set<String> buildPosTypes,Set<String> followPosType){
-        this.buildTypes = buildPosTypes == null ?
-                DEFAULT_BUILD_CHUNK_POS_TYPES :
-                    new HashSet<String>(buildPosTypes);
-        this.followTypes = followPosType == null ?
-                DEFAULT_FOLLOW_POS_TYPES :
-                    new HashSet<String>(followPosType);
+    public PosTypeChunker(Set<String> buildPosTypes,Set<String> followPosTypes){
+        if(buildPosTypes == null || buildPosTypes.isEmpty()){
+            throw new IllegalArgumentException("The set of POS types used to" +
+            		"build Chunks MUST NOT be NULL nor empty!");
+        }
+        this.buildTypes = Collections.unmodifiableSet(new TreeSet<String>(buildPosTypes));
+        Set<String> follow = new TreeSet<String>();
+        follow.addAll(buildTypes);
+        if(followPosTypes != null){
+            follow.addAll(followPosTypes);
+        }
+        this.followTypes = Collections.unmodifiableSet(follow);
     }
     /**
      * TODO: This might be language specific!
@@ -93,30 +100,51 @@ public class PosTypeChunker {
     private boolean includePOS(String pos){
         return buildTypes.contains(pos);
     }
+    /**
+     * The set of POS types followed to extend Chunks. This includes the
+     * {@link #getChunkPosTypes()} values
+     * @return the followTypes
+     */
+    public final Set<String> getFollowedPosTypes() {
+        return followTypes;
+    }
+    /**
+     * The set of POS types used to create Chunks
+     * @return the buildTypes
+     */
+    public final Set<String> getChunkPosTypes() {
+        return buildTypes;
+    }
 
     /**
      * Build the chunks based on the parsed tokens and tags. <p>
-     * This method is the equivalent to {@link Chunker#chunkAsSpans(String[], String[])}
+     * This method is the equivalent to 
+     * {@link opennlp.tools.chunker.Chunker#chunkAsSpans(String[], String[])}
      * @param tokens the tokens
      * @param tags the POS tags for the tokens
      * @return the chunks as spans over the parsed tokens
      */
     public Span[] chunkAsSpans(String[] tokens, String[] tags) {
-        int consumed = -1;
+//        int consumed = -1;
         List<Span> chunks = new ArrayList<Span>();
         for(int i=0;i<tokens.length;i++){
             if(includePOS(tags[i])){
                 int start = i;
-                while(start-1 > consumed && followPOS(tags[start-1])){
-                    start--; //follow backwards until consumed
-                }
+                //do not follow backwards!
+//                while(start-1 > consumed && followPOS(tags[start-1])){
+//                    start--; //follow backwards until consumed
+//                }
+                int followEnd = i;
                 int end = i;
-                while(end+1 < tokens.length && followPOS(tags[end+1])){
-                    end++; //follow forwards until consumed
+                while(followEnd+1 < tokens.length && followPOS(tags[followEnd+1])){
+                    followEnd++; //follow
+                    if(includePOS(tags[followEnd])){
+                        end = followEnd; //extend end only if act is include
+                    }
                 }
                 chunks.add(new Span(start,end));
-                consumed = end;
-                i = end;
+//                consumed = end;
+                i = followEnd;
             }//build no chunk for this token
         }
         return chunks.toArray(new Span[chunks.size()]);
