@@ -33,6 +33,10 @@ public final class ReferencedSiteTest extends DbpediaQueryTest {
     public ReferencedSiteTest() {
         super(DBPEDIA_SITE_PATH, DBPEDIA_SITE_ID);
     }
+    @Override
+    protected String getDefaultFindQueryField() {
+        return RDFS_LABEL;
+    }
     /**
      * Tests retrieval of Entities
      * @throws IOException
@@ -50,6 +54,7 @@ public final class ReferencedSiteTest extends DbpediaQueryTest {
         assertRepresentation(jEntity.getJSONObject("representation"), 
             DBPEDIA_DEFAULTDATA_REQUIRED_FIELDS, 
             DBPEDIA_DEFAULTDATA_OPTIONAL_FIELDS);
+
     }
 
 }

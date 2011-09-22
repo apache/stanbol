@@ -55,12 +55,12 @@
 				<configuration>
 					<instructions>
 						<Export-Package>
-							org.apache.stanbol.enhancer.servicesapi;version=${pom.version},
-							org.apache.stanbol.enhancer.servicesapi.helper;version=${pom.version},
-							org.apache.stanbol.enhancer.servicesapi.rdf;version=${pom.version}
+							org.apache.stanbol.enhancer.servicesapi;version=${project.version},
+							org.apache.stanbol.enhancer.servicesapi.helper;version=${project.version},
+							org.apache.stanbol.enhancer.servicesapi.rdf;version=${project.version}
 			            </Export-Package>
 						<Private-Package>
-							org.apache.stanbol.enhancer.servicesapi.helper.impl;version=${pom.version}
+							org.apache.stanbol.enhancer.servicesapi.helper.impl;version=${project.version}
             			</Private-Package>
 					</instructions>
 				</configuration>

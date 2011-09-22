@@ -76,7 +76,7 @@
             </Install-Path>
             <_versionpolicy>$${version;===;${@}}</_versionpolicy>
             <Export-Package>
-              org.apache.stanbol.data.site.geonames.*;version="${pom.version}"
+              org.apache.stanbol.data.site.geonames.*;version="${project.version}ion}"
             </Export-Package>
           </instructions>
         </configuration>

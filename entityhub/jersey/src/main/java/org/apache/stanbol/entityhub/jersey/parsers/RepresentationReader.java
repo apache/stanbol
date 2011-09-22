@@ -103,7 +103,7 @@ public class RepresentationReader implements MessageBodyReader<Set<Representatio
         String mediaTypeWithoutParameter = 
             mediaType.getType().toLowerCase()+'/'+
             mediaType.getSubtype().toLowerCase();
-        log.info("isreadable: [genericType: {}| mediaType {}]",
+        log.debug("isreadable: [genericType: {}| mediaType {}]",
             genericType,mediaTypeWithoutParameter);
         //first check the parsed type
         if(genericType instanceof ParameterizedType && 
@@ -126,7 +126,7 @@ public class RepresentationReader implements MessageBodyReader<Set<Representatio
                 MediaType.APPLICATION_FORM_URLENCODED.equals(mediaTypeWithoutParameter) ||
                 //and mime multipart
                 MediaType.MULTIPART_FORM_DATA.equals(mediaTypeWithoutParameter));
-        log.info("  > java-type: {}, media-type {}",typeOK,mediaTypeOK);
+        log.debug("  > java-type: {}, media-type {}",typeOK,mediaTypeOK);
         return typeOK && mediaTypeOK;
     }
 

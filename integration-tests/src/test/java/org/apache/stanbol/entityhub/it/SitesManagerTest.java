@@ -38,6 +38,10 @@ public final class SitesManagerTest extends DbpediaQueryTest {
     public SitesManagerTest() {
         super(SITES_MANAGER_PATH, null);
     }
+    @Override
+    protected String getDefaultFindQueryField() {
+        return RDFS_LABEL;
+    }
     /**
      * Tests retrieval of Entities
      * @throws IOException

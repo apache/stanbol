@@ -52,13 +52,13 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.entityhub.indexing.core;version=${pom.version},
-              org.apache.stanbol.entityhub.indexing.core.normaliser;version=${pom.version},
-              org.apache.stanbol.entityhub.indexing.core.processor;version=${pom.version}
+              org.apache.stanbol.entityhub.indexing.core;version=${project.version},
+              org.apache.stanbol.entityhub.indexing.core.normaliser;version=${project.version},
+              org.apache.stanbol.entityhub.indexing.core.processor;version=${project.version}
             </Export-Package>
             <!--
             <Private-Package>
-              org.apache.stanbol.entityhub.indexing.core.impl;version=${pom.version}
+              org.apache.stanbol.entityhub.indexing.core.impl;version=${project.version}
             </Private-Package>
             -->
           </instructions>

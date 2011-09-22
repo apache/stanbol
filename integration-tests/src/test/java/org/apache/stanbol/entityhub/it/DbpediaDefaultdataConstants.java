@@ -31,6 +31,7 @@ public class DbpediaDefaultdataConstants {
         optional.add("http://dbpedia.org/ontology/birthDate");
         optional.add("http://dbpedia.org/ontology/deathDate");
         optional.add("http://xmlns.com/foaf/0.1/homepage");
+        optional.add("http://www.w3.org/2000/01/rdf-schema#comment");
         DBPEDIA_DEFAULTDATA_OPTIONAL_FIELDS = Collections.unmodifiableSet(optional);
     }
 

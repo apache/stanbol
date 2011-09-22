@@ -57,11 +57,9 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.entityhub.yard.solr;version=${pom.version},
-              org.apache.stanbol.entityhub.yard.solr.defaults;version=${pom.version},
-              org.apache.stanbol.entityhub.yard.solr.model;version=${pom.version},
-              org.apache.stanbol.entityhub.yard.solr.query;version=${pom.version},
-              org.apache.stanbol.entityhub.yard.solr.utils;version=${pom.version}
+              org.apache.stanbol.entityhub.yard.solr.defaults;version=${project.version},
+              org.apache.stanbol.entityhub.yard.solr.model;version=${project.version},
+              org.apache.stanbol.entityhub.yard.solr.query;version=${project.version}
             </Export-Package>
             <!-- NOTE: The exclusion of javax.xml.stream assumes that only serialised
                  java objects are used as serialisation to and from the SolrServer
@@ -70,9 +68,8 @@
               *
             </Import-Package>
             <Private-Package>
-              org.apache.stanbol.entityhub.yard.solr.impl;version=${pom.version},
-              org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;version=${pom.version},
-              org.apache.stanbol.entityhub.yard.solr.impl.install;version=${pom.version}
+              org.apache.stanbol.entityhub.yard.solr.impl;version=${project.version},
+              org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;version=${project.version}
             </Private-Package>
             <Embed-Dependency>
             </Embed-Dependency>

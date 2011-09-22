@@ -19,12 +19,17 @@ package org.apache.stanbol.commons.testing.http;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.LineIterator;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -163,6 +168,33 @@ public class RequestExecutor {
 
         // And check for match
         assertEquals(this + ": expecting content type " + expected, expected, contentType);
+        return this;
+    }
+    
+    public RequestExecutor assertHeader(String key, String...values){
+        assertNotNull(this.toString(),response);
+        Set<String> expectedValues;
+        if(values == null || values.length<1){
+            expectedValues = null;
+        } else {
+            expectedValues = new HashSet<String>(Arrays.asList(values));
+        }
+        Header[] headers = response.getHeaders(key);
+        if(headers.length < 1){
+            headers = null;
+        }
+        if(expectedValues == null){
+            assertTrue("The header "+key+" MUST NOT have any values (values: "+headers+")", 
+                headers == null);
+        } else {
+            assertNotNull("There are no values for header "+key+"!", headers);
+            for(Header header : headers){
+                assertTrue("Unexpected header value "+header.getValue(),
+                    expectedValues.remove(header.getValue()));
+            }
+            assertTrue("Missing header values "+expectedValues+"!",
+                expectedValues.isEmpty());
+        }
         return this;
     }
 

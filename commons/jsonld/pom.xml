@@ -57,7 +57,7 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.commons.jsonld.*;version=${pom.version}
+              org.apache.stanbol.commons.jsonld.*;version=${project.version}ion}
             </Export-Package>
           </instructions>
         </configuration>

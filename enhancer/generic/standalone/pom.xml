@@ -55,7 +55,7 @@
 				<configuration>
 					<instructions>
 						<Private-Package>
-							org.apache.stanbol.enhancer.standalone.*;version=${pom.version}
+							org.apache.stanbol.enhancer.standalone.*;version=${project.version}
             			</Private-Package>
 					</instructions>
 				</configuration>

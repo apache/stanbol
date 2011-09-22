@@ -20,16 +20,22 @@
 <tbody>
 	<tr>
 		<th>Description</th>
-		<td>Find a symbol by specifying name, field, language, limit, offset, and selected fields.</td>
+        <td>This service can be used to search for Entities in the Entityhub.
+        Both a POST and a GET version are available.</td>
 	</tr>
 	<tr>
 		<th>Request</th>
-		<td>POST /symbol/find</td>
+        <td><ul>
+            <li>GET /entityhub/find?name={query}&field={field}&lang={lang}&limit={limit}&offset={offset}</li>
+            <li>POST -d "name={query}&field={field}&lang={lang}&limit={limit}&offset={offset}" /entityhub/find</li>
+            </ul>
+        </td>
 	</tr>
 	<tr>
 		<th>Parameter</th>
 		<td><ul><li>name: The name of the Entity to search. Supports '*' and '?'</li>
-    			<li>field: The name of the field to search the name (optional)</li>
+    			<li>field: The name of the field to search the name (optional, 
+    			default is "http://www.iks-project.eu/ontology/rick/model/label").</li>
     			<li>language: The language of the parsed name (default: any)</li>
     			<li>limit: The maximum number of returned Entities (optional)</li>
     			<li>offset: The offset of the first returned Entity (default: 0)</li>
@@ -45,8 +51,10 @@
 </table>
 
 <h5>Example</h5>
+<p>The following query would search for Entities with a 'rdfs:label' that starts
+with 'Pari'.</p>
 
-<pre>curl ${it.publicBaseUri}entityhub/find</pre>
+<pre>curl -X POST -d "name=Pari*&field=http://www.w3.org/2000/01/rdf-schema#label" ${it.publicBaseUri}entityhub/sites/find</pre>
 
 <h5>Test</h5>
 
@@ -65,7 +73,7 @@ function findSymbol() {
  $("#findSymbolResult").show();
  $.ajax({
    type: 'POST',
-   url: "${it.publicBaseUri}entityhub/symbol/find",
+   url: "${it.publicBaseUri}entityhub/find",
    data: $("#findSymbolForm").serialize(),
    dataType: "text",
    cache: false,

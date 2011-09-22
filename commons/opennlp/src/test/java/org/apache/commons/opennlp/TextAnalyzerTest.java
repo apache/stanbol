@@ -33,6 +33,7 @@ public class TextAnalyzerTest {
 
     public static final String SINGLE_SENTENCE = "Dr Patrick Marshall (1869 - November 1950) was a"
         + " geologist who lived in New Zealand and worked at the University of Otago.";
+//    public static final String SINGLE_SENTENCE = "John is interested in buying a new drums set for his son Joe.";
     
     public static final String[] SINGLE_SENTENCE_TOKENS = new String[]{
         "Dr", "Patrick", "Marshall", "(", "1869", "-", "November", "1950", 
@@ -45,6 +46,7 @@ public class TextAnalyzerTest {
         + "in New Zealand and worked at the University of Otago. "
         + "This is another unrelated sentence without any name.";
 
+    public static final String LANGUAGE = "en";
     private static String[][] MULTIPLE_SENTENCE_TOKENS = new String[3][];
     static {
         MULTIPLE_SENTENCE_TOKENS[0] = new String[]{
@@ -66,11 +68,11 @@ public class TextAnalyzerTest {
 
     @Test
     public void testSingleSentenceDefaultConfig(){
-        TextAnalyzer analyzer = new TextAnalyzer(openNLP, "en");
-        AnalysedText analysed = analyzer.analyseSentence(SINGLE_SENTENCE);
+        TextAnalyzer analyzer = new TextAnalyzer(openNLP);
+        AnalysedText analysed = analyzer.analyseSentence(SINGLE_SENTENCE,LANGUAGE);
         assertNotNull(analysed);
         //check the default config
-        assertTrue(analyzer.isSimpleTokenizerForced());
+        assertFalse(analyzer.isSimpleTokenizerForced());
         assertTrue(analyzer.isPosTaggerEnable());
         assertTrue(analyzer.isPosTypeChunkerEnabled());
         assertTrue(analyzer.isChunkerEnabled());
@@ -79,12 +81,12 @@ public class TextAnalyzerTest {
     }
     @Test
     public void testSingleSentenceChunkerConfig(){
-        TextAnalyzer analyzer = new TextAnalyzer(openNLP, "en");
+        TextAnalyzer analyzer = new TextAnalyzer(openNLP);
         analyzer.forcePosTypeChunker(false);
-        AnalysedText analysed = analyzer.analyseSentence(SINGLE_SENTENCE);
+        AnalysedText analysed = analyzer.analyseSentence(SINGLE_SENTENCE,LANGUAGE);
         assertNotNull(analysed);
         //check the default config
-        assertTrue(analyzer.isSimpleTokenizerForced());
+        assertFalse(analyzer.isSimpleTokenizerForced());
         assertTrue(analyzer.isPosTaggerEnable());
         assertTrue(analyzer.isChunkerEnabled());
         assertTrue(analyzer.isPosTypeChunkerEnabled());
@@ -93,12 +95,12 @@ public class TextAnalyzerTest {
     }
     @Test
     public void testSingleSentenceNoChunkerConfig(){
-        TextAnalyzer analyzer = new TextAnalyzer(openNLP, "en");
+        TextAnalyzer analyzer = new TextAnalyzer(openNLP);
         analyzer.enableChunker(false);
-        AnalysedText analysed = analyzer.analyseSentence(SINGLE_SENTENCE);
+        AnalysedText analysed = analyzer.analyseSentence(SINGLE_SENTENCE,LANGUAGE);
         assertNotNull(analysed);
         //check the default config
-        assertTrue(analyzer.isSimpleTokenizerForced());
+        assertFalse(analyzer.isSimpleTokenizerForced());
         assertTrue(analyzer.isPosTaggerEnable());
         assertFalse(analyzer.isChunkerEnabled());
         assertTrue(analyzer.isPosTypeChunkerEnabled());
@@ -107,13 +109,13 @@ public class TextAnalyzerTest {
     }
     @Test
     public void testSingleSentenceNoChunkerNoPosConfig(){
-        TextAnalyzer analyzer = new TextAnalyzer(openNLP, "en");
+        TextAnalyzer analyzer = new TextAnalyzer(openNLP);
         analyzer.enablePosTagger(false);
         analyzer.enableChunker(true);//must be ignored for Chunks if no Pos
-        AnalysedText analysed = analyzer.analyseSentence(SINGLE_SENTENCE);
+        AnalysedText analysed = analyzer.analyseSentence(SINGLE_SENTENCE,LANGUAGE);
         assertNotNull(analysed);
         //check the default config
-        assertTrue(analyzer.isSimpleTokenizerForced());
+        assertFalse(analyzer.isSimpleTokenizerForced());
         assertFalse(analyzer.isPosTaggerEnable());
         assertTrue(analyzer.isChunkerEnabled());
         assertTrue(analyzer.isPosTypeChunkerEnabled());
@@ -123,8 +125,8 @@ public class TextAnalyzerTest {
 
     @Test
     public void testMultipleSentenceDefaultConfig(){
-        TextAnalyzer analyzer = new TextAnalyzer(openNLP, "en");
-        Iterator<AnalysedText> analysedSentences = analyzer.analyse(MULTI_SENTENCES);
+        TextAnalyzer analyzer = new TextAnalyzer(openNLP);
+        Iterator<AnalysedText> analysedSentences = analyzer.analyse(MULTI_SENTENCES,LANGUAGE);
         assertNotNull(analysedSentences);
         int sentenceCount = 0;
         while(analysedSentences.hasNext()){

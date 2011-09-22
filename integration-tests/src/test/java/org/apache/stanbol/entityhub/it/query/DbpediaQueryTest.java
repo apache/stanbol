@@ -29,16 +29,16 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
 
     
     public DbpediaQueryTest(String path,String referencedSite) {
-        super(path,referencedSite,
-            LoggerFactory.getLogger(DbpediaQueryTest.class));
+        super(path,referencedSite);
     }
     @Test
     public void testFindNameQuery() throws IOException, JSONException {
         FindQueryTestCase test = new FindQueryTestCase("Paris",
             Arrays.asList(
                 "http://dbpedia.org/resource/Paris",
-                "http://dbpedia.org/resource/University_of_Paris",
-                "http://dbpedia.org/resource/Paris_Hilton"));
+                "http://dbpedia.org/resource/Paris_Saint-Germain_F.C.",
+                "http://dbpedia.org/resource/University_of_Paris"));//,
+                //"http://dbpedia.org/resource/Paris_Hilton"));
         executeQuery(test);
     }
     @Test
@@ -48,6 +48,7 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
             Arrays.asList(
                 "http://dbpedia.org/resource/Paris"),
             Arrays.asList(
+                "http://dbpedia.org/resource/Paris_Saint-Germain_F.C.",
                 "http://dbpedia.org/resource/University_of_Paris",
                 "http://dbpedia.org/resource/Paris_Hilton"));
         test.setLimit(1);
@@ -55,11 +56,12 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
         //the second result
         test = new FindQueryTestCase("Paris",
             Arrays.asList(
+                "http://dbpedia.org/resource/Paris_Saint-Germain_F.C.",
                 "http://dbpedia.org/resource/University_of_Paris"),
             Arrays.asList(
                 "http://dbpedia.org/resource/Paris",
                 "http://dbpedia.org/resource/Paris_Hilton"));
-        test.setLimit(1);
+        test.setLimit(2);
         test.setOffset(1);
         executeQuery(test);
         //the second and third
@@ -68,9 +70,10 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
                 "http://dbpedia.org/resource/University_of_Paris",
                 "http://dbpedia.org/resource/Paris_Hilton"),
             Arrays.asList(
+                "http://dbpedia.org/resource/Paris_Saint-Germain_F.C.",
                 "http://dbpedia.org/resource/Paris"));
         test.setLimit(2);
-        test.setOffset(1);
+        test.setOffset(2);
         executeQuery(test);
     }
     @Test
@@ -145,8 +148,10 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
         test.setLanguage("en");
         executeQuery(test);
     }
+    @Test
     public void testFindSpecificFieldQuery() throws IOException, JSONException {
-        
+        //TODO: there is no other text field as rdfs:label in the dbpedia 
+        //default dataset :(
     }
     
     @Test
@@ -257,6 +262,7 @@ public abstract class DbpediaQueryTest extends QueryTestBase {
                 "'constraints': [{ "+
                     "'type': 'text', "+
                     "'text': ['Frankfurt','Main','Flughafen'], "+
+                    "'language': 'de', "+
                     "'field': 'http:\\/\\/www.w3.org\\/2000\\/01\\/rdf-schema#label' "+
                 "}]"+
              "}",

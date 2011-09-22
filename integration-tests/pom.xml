@@ -162,6 +162,12 @@
 			      <!-- server.ready.path.5>/ontonet:Apache Stanbol OntoNet</server.ready.path.5 -->
             <!-- server.ready.path.6>/reasoners:Apache Stanbol Reasoners</server.ready.path.6 -->
           </systemPropertyVariables>
+          <excludes>
+            <!-- TODO: remove before commit -->
+            <exclude>**/enhancer/it/*.java</exclude>
+            <exclude>**/factstore/*.java</exclude>
+            <exclude>**/ontologymanager/web/it/*.java</exclude>
+          </excludes>
         </configuration>
       </plugin>
     </plugins>

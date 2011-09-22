@@ -35,7 +35,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>org.apache.stanbol.enhancer.store.*;version=${pom.version}</Export-Package>
+            <Export-Package>org.apache.stanbol.enhancer.store.*;version=${project.version}</Export-Package>
             <Import-Package>*</Import-Package>
             <!-- Embed-Dependency>
                jcr, org.apache.sling.jcr.jackrabbit.server, org.apache.sling.jcr.api, org.apache.sling.jcr.base,

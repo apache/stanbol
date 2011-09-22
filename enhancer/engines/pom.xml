@@ -50,6 +50,7 @@
     <module>metaxa</module>
     <module>geonames</module>
     <module>entitytagging</module>
+    <module>keywordextraction</module>
     <module>taxonomylinking</module>
     <!-- RICK based enhancement engine(s) -->
     <module>opencalais</module>

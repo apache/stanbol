@@ -21,6 +21,8 @@ import static org.apache.stanbol.entityhub.indexing.core.impl.IndexerConstants.P
 import static org.apache.stanbol.entityhub.indexing.core.impl.IndexerConstants.PROCESS_STARTED;
 
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
@@ -35,16 +37,16 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
  *
  */
 public class EntityProcessorRunnable extends IndexingDaemon<Representation,Representation> {
-    private final EntityProcessor processor;
+    private final List<EntityProcessor> processors;
     private final Set<String> keys;
     public EntityProcessorRunnable(String name,
                                    BlockingQueue<QueueItem<Representation>> consume,
                                    BlockingQueue<QueueItem<Representation>> produce,
                                    BlockingQueue<QueueItem<IndexingError>> error,
-                                   EntityProcessor processor,Set<String> keys) {
+                                   List<EntityProcessor> processors,Set<String> keys) {
         super(name,IndexerConstants.SEQUENCE_NUMBER_PROCESSOR_DAEMON,
             consume,produce,error);
-        this.processor = processor;
+        this.processors = processors;
         if(keys == null){
             this.keys = Collections.emptySet();
         } else {
@@ -58,11 +60,15 @@ public class EntityProcessorRunnable extends IndexingDaemon<Representation,Repre
             if(item != null){
                 Long start = Long.valueOf(System.currentTimeMillis());
                 item.setProperty(PROCESS_STARTED, start);
-                Representation processed = processor.process(item.getItem());
+                Iterator<EntityProcessor> it = processors.iterator();
+                Representation processed = item.getItem();
+                EntityProcessor processor = null;
+                while(processed != null && it.hasNext()){
+                    processor = it.next();
+                    processed = processor.process(processed);
+                }
                 if(processed == null){
-                    sendError(item.getItem().getId(),item, 
-                        String.format("Processor %s returned NULL for Entity %s",
-                            processor,item.getItem().getId()), null);
+                    log.debug("Item {} filtered by processor {}",item.getItem().getId(),processor);
                 } else {
                     for(String key : keys){
                         //consume the property and add it to the

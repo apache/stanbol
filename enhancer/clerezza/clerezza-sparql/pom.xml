@@ -53,7 +53,7 @@
         <configuration>
           <instructions>
             <Private-Package>
-              org.apache.stanbol.enhancer.clerezza.sparql.*;version=${pom.version}
+              org.apache.stanbol.enhancer.clerezza.sparql.*;version=${project.version}
             </Private-Package>
           </instructions>
         </configuration>

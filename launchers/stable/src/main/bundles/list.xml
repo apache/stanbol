@@ -391,7 +391,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.sites.dbpedia.default</artifactId>
-      <version>1.0.1-incubating</version>
+      <version>1.0.2-incubating</version>
     </bundle>
   </startLevel>
 

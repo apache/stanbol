@@ -186,10 +186,11 @@ public class SolrQueryFactory {
             } else {
                 IndexConstraint indexConstraint = createIndexConstraint(fieldConstraint);
                 if (indexConstraint.isInvalid()) {
-                    log.warn(String.format(
-                        "Unable to create IndexConstraint for Constraint %s (type: %s) and Field %s (Reosens: %s)",
-                        fieldConstraint.getValue(), fieldConstraint.getValue().getType(),
-                        fieldConstraint.getKey(), indexConstraint.getInvalidMessages()));
+                    log.warn("Unable to create IndexConstraint for Constraint {} (type: {}) and Field {} (Reosens: {})",
+                        new Object[]{
+                            fieldConstraint.getValue(), fieldConstraint.getValue().getType(),
+                            fieldConstraint.getKey(), indexConstraint.getInvalidMessages()
+                            });
                 } else {
                     if (queryString.length() > 0) {
                         queryString.append(" AND ");
@@ -210,7 +211,7 @@ public class SolrQueryFactory {
         }
         if (queryString.length() > 0) {
             String qs = queryString.toString();
-            log.info("QueryString: " + qs);
+            log.debug("QueryString: {}", qs);
             if (MLT_QUERY_TYPE.equals(query.getQueryType())) {
                 query.set(CommonParams.FQ, qs);
             } else {
@@ -390,11 +391,11 @@ public class SolrQueryFactory {
                     constraintValue = indexValueFactory.createIndexValue(valueConstraint.getValue());
                 } catch (NoConverterException e) {
                     // if not found use the toString() and string as type
-                    log.warn(String
-                            .format(
-                                "Unable to create IndexValue for value %s (type: %s). Create IndexValue manually by using the first parsed IndexDataType %s",
-                                valueConstraint.getValue(), valueConstraint.getValue().getClass(),
-                                IndexDataTypeEnum.STR.getIndexType()));
+                    log.warn("Unable to create IndexValue for value {} (type: {}). Create IndexValue manually by using the first parsed IndexDataType {}",
+                                new Object[]{
+                                    valueConstraint.getValue(), valueConstraint.getValue().getClass(),
+                                    IndexDataTypeEnum.STR.getIndexType()
+                                });
                     constraintValue = new IndexValue(valueConstraint.getValue().toString(), 
                         IndexDataTypeEnum.STR.getIndexType());
                 }
@@ -444,7 +445,7 @@ public class SolrQueryFactory {
                 query.setRows(entityhubQuery.getLimit());
             } else {
                 log.warn(String.format(
-                    "Parsed Number of QueryResults %d is greater than the allowed maximum of %d!",
+                    "Parsed Number of QueryResults {} is greater than the allowed maximum of {}!",
                     entityhubQuery.getLimit(), MAX_QUERY_RESULTS));
                 entityhubQuery.setLimit(MAX_QUERY_RESULTS);
             }
@@ -681,7 +682,7 @@ public class SolrQueryFactory {
                                                    EncodedConstraintParts encodedConstraintParts) {
             // list of all constraints that need to be connected with OR
             List<List<StringBuilder>> constraints = new ArrayList<List<StringBuilder>>();
-            log.info("Constriants: "+encodedConstraintParts);
+            log.debug("Constriants: {}",encodedConstraintParts);
             // init with a single constraint
             constraints.add(new ArrayList<StringBuilder>(Arrays.asList(new StringBuilder())));
             for (Entry<ConstraintTypePosition,Set<Set<String>>> entry : encodedConstraintParts) {

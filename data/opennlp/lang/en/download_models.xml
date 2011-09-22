@@ -24,6 +24,7 @@
   <target name="download">
     <copy todir="${target.directory}" flatten="true">
       <resources>
+        <url url="${model.url}/en-token.bin"/>
         <url url="${model.url}/en-sent.bin"/>
         <url url="${model.url}/en-pos-perceptron.bin"/>
         <url url="${model.url}/en-chunker.bin"/>

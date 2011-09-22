@@ -383,9 +383,15 @@ public class EntityhubRootResource extends BaseStanbolResource {
         final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers,
             ENTITY_SUPPORTED_MEDIA_TYPE_INCL_HTML,
             MediaType.APPLICATION_JSON_TYPE);
-        if(acceptedMediaType.isCompatible(TEXT_HTML_TYPE) && name == null){
-            //return HTML docu
-            return Response.ok(new Viewable("find", this), TEXT_HTML).build();
+        if(name == null || name.isEmpty()){
+            if(acceptedMediaType.isCompatible(TEXT_HTML_TYPE)){
+                //return HTML docu
+                return Response.ok(new Viewable("find", this), TEXT_HTML).build();
+            } else {
+                return Response.status(Status.BAD_REQUEST)
+                    .entity("The name must not be null nor empty for find requests. Missing parameter name.\n")
+                    .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
+            }
         } else {
             if (field == null || field.trim().isEmpty()) {
                 field = DEFAULT_FIND_FIELD;

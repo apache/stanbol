@@ -481,6 +481,11 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         } catch (YardException e) {
             log.error("Unable to store FieldMapperConfiguration to the Store!",e);
         }
+        try {
+            solrYard.optimize();
+        } catch (YardException e) {
+            log.error("Unable to optimize SolrIndex after indexing! IndexArchive will not be optimized ...",e);
+        }
         solrYard.close();
         //zip the index and copy it over to distribution
         if(solrArchive != null){

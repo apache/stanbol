@@ -158,7 +158,7 @@ public class BundleInstaller implements BundleListener {
                 return;
             }
         }
-        log.info("Register Bundle " + bundle.getSymbolicName() + " with BundleInstaller");
+        log.debug("Register Bundle {} with BundleInstaller",bundle.getSymbolicName());
         Dictionary<String, Object> headers = (Dictionary<String, Object>) bundle.getHeaders();
         //        log.info("With Headers:");
         //        for(Enumeration<String> keys = headers.keys();keys.hasMoreElements();){
@@ -168,7 +168,7 @@ public class BundleInstaller implements BundleListener {
         String path = (String) headers.get(BUNDLE_INSTALLER_HEADER);
         activated.put(bundle, path);
         if (path != null) {
-            log.info(" ... process configuration within path " + path);
+            log.info(" ... process configuration within path {} for bundle {}",path,bundle.getSymbolicName());
             ArrayList<InstallableResource> updated = new ArrayList<InstallableResource>();
             for (Enumeration<URL> resources = (Enumeration<URL>) bundle.findEntries(path, null, true); resources.hasMoreElements();) {
                 InstallableResource resource = createInstallableResource(bundle, path, resources.nextElement());
@@ -244,7 +244,7 @@ public class BundleInstaller implements BundleListener {
             path = activated.remove(bundle);
         }
         if (path != null) {
-            log.info(" ... remove configurations within path " + path);
+            log.info(" ... remove configurations within path {}", path);
             ArrayList<String> removedResources = new ArrayList<String>();
             for (Enumeration<URL> resources = (Enumeration<URL>) bundle.findEntries(path, null, true); resources.hasMoreElements();) {
                 String installableResourceId = getInstallableResourceId(path, resources.nextElement());
@@ -255,7 +255,7 @@ public class BundleInstaller implements BundleListener {
             }
             installer.updateResources(PROVIDER_SCHEME, null, removedResources.toArray(new String[removedResources.size()]));
         } else {
-            log.info("  ... no Configuration to process");
+            log.debug("  ... no Configuration to process");
         }
     }
 
