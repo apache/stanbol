@@ -529,13 +529,23 @@
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.reasoners.base</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
+			<artifactId>org.apache.stanbol.reasoners.servicesapi</artifactId>
+			<version>0.1</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.reasoners.hermit</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
+			<artifactId>org.apache.stanbol.reasoners.manager</artifactId>
+			<version>0.1</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.reasoners.jena</artifactId>
+			<version>0.1</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.reasoners.owlapi</artifactId>
+			<version>0.1</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
