@@ -62,7 +62,7 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.enhancer.engines.refactor;version=${pom.version}
+              org.apache.stanbol.enhancer.engines.refactor;version=${project.version}
             </Export-Package>
             <Import-Package>
               !javax.xml.stream.*,

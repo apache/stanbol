@@ -58,15 +58,15 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.enhancer.engines.autotagging;version=${pom.version},
-              org.apache.stanbol.autotagging;version="${pom.version}",
+              org.apache.stanbol.enhancer.engines.autotagging;version=${project.version},
+              org.apache.stanbol.autotagging;version=${project.version}",
               org.apache.lucene.*,
               opennlp.english.namefind,
               opennlp.english.sentdetect,
               dbpedia
             </Export-Package>
             <Private-Package>
-              org.apache.stanbol.enhancer.engines.autotagging.impl.*
+              org.apache.stanbol.enhancer.engines.autotagging.impl.*;version=${project.version}
             </Private-Package>
             <!-- TODO those should be bundles! -->
             <Embed-Dependency>

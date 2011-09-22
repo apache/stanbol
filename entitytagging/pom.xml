@@ -60,7 +60,7 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.enhancer.engines.entitytagging;version=${pom.version}
+              org.apache.stanbol.enhancer.engines.entitytagging;version=${project.version}
             </Export-Package>
             <Private-Package>
               org.apache.stanbol.enhancer.engines.entitytagging.impl.*
