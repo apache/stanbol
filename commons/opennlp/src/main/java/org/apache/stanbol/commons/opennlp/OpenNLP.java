@@ -134,7 +134,10 @@ public class OpenNLP {
         Tokenizer tokenizer = null;
         if(language != null){
             try {
-                tokenizer = new TokenizerME(getTokenizerModel(language));
+                TokenizerModel model = getTokenizerModel(language);
+                if(model != null){
+                    tokenizer = new TokenizerME(getTokenizerModel(language));
+                }
             } catch (InvalidFormatException e) {
                 log.warn("Unable to load Tokenizer Model for "+language+": " +
                 		"Will use Simple Tokenizer instead",e);
