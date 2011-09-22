@@ -24,10 +24,12 @@
   <target name="download">
     <copy todir="${target.directory}" flatten="true">
       <resources>
-        <url url="${model.url}/en-token.bin"/>
-        <url url="${model.url}/en-sent.bin"/>
-        <url url="${model.url}/en-pos-perceptron.bin"/>
-        <url url="${model.url}/en-chunker.bin"/>
+        <url url="${model.url}/pt-token.bin"/>
+        <url url="${model.url}/pt-sent.bin"/>
+        <url url="${model.url}/pt-pos-perceptron.bin"/>
+        <!-- no Chunker for pt
+         <url url="${model.url}/pt-chunker.bin"/>
+          -->
       </resources>
     </copy>
   </target>
