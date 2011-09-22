@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;

@@ -44,13 +44,10 @@ import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.sentdetect.SentenceModel;
 import opennlp.tools.tokenize.SimpleTokenizer;
 import opennlp.tools.tokenize.Tokenizer;
-import opennlp.tools.tokenize.TokenizerME;
-import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.Span;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
@@ -87,9 +84,7 @@ import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
-import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteException;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
-import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 //removed annotations until engine actually does something
 //@Component(configurationFactory = true, policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
 //    specVersion = "1.1", metatype = true, immediate = true)
@@ -98,11 +93,22 @@ import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.NameList;
 
+/**
+ * This is the first try of an EnhancementEngine that finds concepts present within 
+ * an taxonomy (controlled vocabulary) within content.<p>
+ * Currently users should not use this engine but use the KeywordLinkingEngine
+ * (org.apache.stanbol.enhancer.engine.keywordextraction bundle) instead.<p>
+ * It is planed to re-introduce this engine with additional features specific to
+ * taxonomies (such as support for concept hierarchies).
+ * @deprecated
+ * @author Rupert Westenthaler
+ *
+ */
 @Component(configurationFactory = true, policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
     specVersion = "1.1", metatype = true, immediate = true)
 @Service
+@Deprecated
 public class TaxonomyLinkingEngine implements EnhancementEngine, ServiceProperties {
 
     private static Logger log = LoggerFactory.getLogger(TaxonomyLinkingEngine.class);

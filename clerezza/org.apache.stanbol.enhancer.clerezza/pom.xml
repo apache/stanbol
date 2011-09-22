@@ -50,7 +50,7 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.enhancer.bundle;version=${pom.version}
+              org.apache.stanbol.enhancer.bundle;version=${project.version}
             </Export-Package>
           </instructions>
         </configuration>
