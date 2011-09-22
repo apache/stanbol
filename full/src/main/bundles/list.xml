@@ -406,7 +406,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.sites.dbpedia.default</artifactId>
-      <version>1.0.1-incubating</version>
+      <version>1.0.2-incubating</version>
     </bundle>
   </startLevel>
 
@@ -692,12 +692,19 @@
       <artifactId>org.apache.stanbol.enhancer.engine.entitytagging</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
-    <!-- Taxonomy Linking Engine (depends on the Entityhub) -->
+    <!-- Taxonomy Linking Engine (depends on the Entityhub) Deprecated 
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.taxonomy</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle> -->
+    <!-- Keyword Extraction Engine (depends on the Entityhub) -->
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engine.keywordextraction</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
+    
   </startLevel>
 
   <!-- *********************************************************************
