@@ -79,7 +79,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
                                MultivaluedMap<String,String> httpHeaders,
                                InputStream entityStream) throws IOException, WebApplicationException {
         String queryString = IOUtils.toString(entityStream);
-        log.info("Parsed QueryString: \n{}",queryString);
+        log.debug("Parsed QueryString: \n{}",queryString);
         MediaType acceptedType = MediaType.valueOf(httpHeaders.getFirst("Accept"));
         if(acceptedType.isWildcardType()){
             acceptedType = MediaType.TEXT_PLAIN_TYPE;

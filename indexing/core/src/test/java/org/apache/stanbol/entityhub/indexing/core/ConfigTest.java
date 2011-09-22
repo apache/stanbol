@@ -19,6 +19,7 @@ package org.apache.stanbol.entityhub.indexing.core;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
@@ -162,8 +163,8 @@ public class ConfigTest {
             assertTrue("Entity score "+score+" is not the expected "+expectedScore,expectedScore.compareTo(score)==0);
         }
         assertTrue(entityIds.isEmpty());
-        EntityProcessor processor = config.getEntityProcessor();
-        assertNotNull(processor);
+        List<EntityProcessor> processors = config.getEntityProcessors();
+        assertNotNull(processors);
     }
     
 

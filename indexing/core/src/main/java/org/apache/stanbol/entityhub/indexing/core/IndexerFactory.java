@@ -16,6 +16,8 @@
 */
 package org.apache.stanbol.entityhub.indexing.core;
 
+import java.util.List;
+
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConstants;
 import org.apache.stanbol.entityhub.indexing.core.impl.IndexerImpl;
@@ -91,8 +93,8 @@ public class IndexerFactory {
                 IndexingConstants.KEY_INDEXING_DESTINATION,config.getConfigFolder());
             throw new IllegalArgumentException("No IndexingDestination present");
         }
-        EntityProcessor processor = config.getEntityProcessor();
-        if(processor == null){
+        List<EntityProcessor> processors = config.getEntityProcessors();
+        if(processors == null){
             log.error("The indexing configuration does not provide an " +
                 "entity processor. This needs to be configured by the key " +
                 "'{}' in the indexing.properties within the directory {}",
@@ -103,14 +105,20 @@ public class IndexerFactory {
         log.info(" - EntityIterator: {}",idIterator);
         log.info(" - EntityDataProvider: {}",dataProvider);
         log.info(" - EntityScoreProvider: {}",scoreProvider);
+        log.info(" - EntityProcessors ({}):",processors.size());
+        int i=0;
+        for(EntityProcessor processor : processors){
+            i++;
+            log.info("    {}) {}",i,processor);
+        }
         if(dataIterable != null && scoreProvider != null){
             // iterate over data and lookup scores
             indexer = new IndexerImpl(dataIterable, scoreProvider, 
-                config.getNormaliser(),destination, processor);
+                config.getNormaliser(),destination, processors);
         } else if(idIterator != null && dataProvider != null){
             // iterate over id and lookup data
             indexer = new IndexerImpl(idIterator,dataProvider,
-                config.getNormaliser(),destination, processor);
+                config.getNormaliser(),destination, processors);
         } else if(dataIterable != null && idIterator != null){
             // create an EntityIterator to EntityScoreProvider adapter
             log.info(
@@ -120,7 +128,7 @@ public class IndexerFactory {
             	idIterator.getClass(), dataIterable.getClass());
             indexer = new IndexerImpl(dataIterable,
                 new EntityIneratorToScoreProviderAdapter(idIterator),
-                config.getNormaliser(),destination, processor);
+                config.getNormaliser(),destination, processors);
         } else {
             log.error("Invalid Indexing Source configuration: ");
             log.error(" - To iterate over the data and lookup scores one need to " +
@@ -134,13 +142,13 @@ public class IndexerFactory {
 
     public Indexer create(EntityIterator idIterator, EntityDataProvider dataProvider,
                           ScoreNormaliser normaliser,
-                          EntityProcessor processor, IndexingDestination destination){
-        return new IndexerImpl(idIterator, dataProvider, normaliser,destination, processor);
+                          List<EntityProcessor> processors, IndexingDestination destination){
+        return new IndexerImpl(idIterator, dataProvider, normaliser,destination, processors);
     }
     
     public Indexer create(EntityDataIterable dataIterable,EntityScoreProvider scoreProvider,
                           ScoreNormaliser normaliser,
-                          EntityProcessor processor, IndexingDestination destination){
-        return new IndexerImpl(dataIterable, scoreProvider, normaliser,destination, processor);
+                          List<EntityProcessor> processors, IndexingDestination destination){
+        return new IndexerImpl(dataIterable, scoreProvider, normaliser,destination, processors);
     }
 }

@@ -577,7 +577,20 @@ public class SolrYard extends AbstractYard implements Yard {
         this.immediateCommit = DEFAULT_IMMEDIATE_COMMIT_STATE;
         super.deactivate(); // deactivate the super implementation
     }
-
+    /**
+     * This will case the SolrIndex to be optimised
+     * @throws YardException on any error while optimising
+     */
+    public final void optimize() throws YardException{
+        SolrServer server = getServer();
+        try {
+            server.optimize();
+        } catch (SolrServerException e) {
+            throw new YardException("Unable to optimise SolrIndex!", e);
+        } catch (IOException e) {
+            throw new YardException("Unable to optimise SolrIndex!", e);
+        }
+    }
     /**
      * can be used outside of the OSGI environment to deactivate this instance. Thiw will cause the SolrIndex
      * to be committed and optimised.

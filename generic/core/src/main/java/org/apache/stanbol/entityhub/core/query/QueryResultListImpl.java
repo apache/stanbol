@@ -106,6 +106,10 @@ public class QueryResultListImpl<T> implements Iterable<T>, QueryResultList<T>{
     public final Iterator<T> iterator() {
         return results.iterator();
     }
+    @Override
+    public Collection<T> results() {
+        return results;
+    }
     /* (non-Javadoc)
      * @see org.apache.stanbol.entityhub.core.query.ResultList#isEmpty()
      */

@@ -24,9 +24,12 @@ public interface EntityProcessor extends IndexingComponent {
     /**
      * Processes the source representation based on some processing rules.
      * This interface is used by the {@link IndexerImpl} to process Entities
-     * retrieved from the Source before they are stored to the {@link Yard}
+     * retrieved from the Source before they are stored to the {@link Yard}.
+     * If a processor returns <code>null</code> for an parsed source than this
+     * Entity is not indexed - filtered.
      * @param source the source
-     * @return the processed/mapped representation
+     * @return the processed/mapped representation or <code>null</code> to filter
+     * (do not index) the parsed Representation
      */
     Representation process(Representation source);
 

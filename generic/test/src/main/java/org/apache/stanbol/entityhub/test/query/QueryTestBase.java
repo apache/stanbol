@@ -20,6 +20,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.Test;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *  <p>
@@ -44,6 +45,8 @@ import org.slf4j.Logger;
  */
 public abstract class QueryTestBase extends EntityhubTestBase {
     
+    private final Logger log = LoggerFactory.getLogger(getClass());
+    
     public static final String RDFS_LABEL = "http://www.w3.org/2000/01/rdf-schema#label";
     protected final String endpointPath;
     /**
@@ -52,8 +55,8 @@ public abstract class QueryTestBase extends EntityhubTestBase {
      * @param referencedSiteId if the 
      * @param log
      */
-    public QueryTestBase(String servicePath, String referencedSiteId,Logger log){
-        super(referencedSiteId == null ? null : Collections.singleton(referencedSiteId),log);
+    public QueryTestBase(String servicePath, String referencedSiteId){
+        super(referencedSiteId == null ? null : Collections.singleton(referencedSiteId));
         if(servicePath == null){
             throw new IllegalArgumentException("The path to the FieldQuery endpoint MUST NOT be NULL!");
         }
@@ -138,7 +141,7 @@ public abstract class QueryTestBase extends EntityhubTestBase {
         assertTrue("Result Query does not contain offset property",jQuery.has("offset"));
         assertTrue("Returned offset is != 0",jQuery.getInt("offset") == 0);
         
-        assertSelectedField(jQuery,RDFS_LABEL);
+        assertSelectedField(jQuery,getDefaultFindQueryField());
         
         JSONArray jConstraints = jQuery.optJSONArray("constraints");
         assertNotNull("Result Query is missing the 'constraints' property",jConstraints);
@@ -154,9 +157,17 @@ public abstract class QueryTestBase extends EntityhubTestBase {
         assertEquals("The 'patternType' of the Constraint is not 'wildcard' but "+constraint.opt("patternType"), 
             "wildcard",constraint.optString("patternType"));
         
-        assertEquals("The 'field' of the Constraint is not rdfs:label but "+constraint.opt("field"), 
-            RDFS_LABEL,constraint.optString("field"));
+        assertEquals("The 'field' of the Constraint is not "+getDefaultFindQueryField()+" but "+constraint.opt("field"), 
+            getDefaultFindQueryField(),constraint.optString("field"));
     }
+    /**
+     * Getter for the default field used for find queries of the 'field' parameter
+     * is not defined.<p>
+     * This default is different for the '/entityhub' and the other service
+     * endpoints that support find queries.
+     * @return the default field
+     */
+    protected abstract String getDefaultFindQueryField();
     
     @Test
     public void testCustomFieldParameter() throws IOException, JSONException {

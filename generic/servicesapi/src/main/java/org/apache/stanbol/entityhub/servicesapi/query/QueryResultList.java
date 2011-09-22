@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.entityhub.servicesapi.query;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -38,6 +39,11 @@ public interface QueryResultList<T> extends Iterable<T> {
      * Iterator over the results of this query
      */
     Iterator<T> iterator();
+    /**
+     * Unmodifiable collection of the results
+     * @return the resutls
+     */
+    Collection<? extends T> results();
     /**
      * <code>true</code> if the result set is empty
      * @return <code>true</code> if the result set is empty. Otherwise <code>false</code>

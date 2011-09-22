@@ -50,10 +50,12 @@ public class AssertEntityhubJson {
         JSONObject jso = new JSONObject(re.getContent());
         JSONArray results = jso.getJSONArray("results");
         if(test.expectesResults()){
-            assertTrue("Missing Results for Query: \n "+test,
+            assertTrue("Missing Results for Query: \n "+test+
+                "\n Result:\n "+results.toString(4),
                 results.length() > 0);
         } else {
-            assertTrue("Unexpected Results for Query:\n "+test,
+            assertTrue("Unexpected Results for Query:\n "+test+
+                "\n Result:\n "+results.toString(4),
                 results.length() == 0);
         }
         Set<String> expectedIds;

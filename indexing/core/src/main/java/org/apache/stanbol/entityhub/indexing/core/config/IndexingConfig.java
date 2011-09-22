@@ -35,6 +35,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -173,13 +174,13 @@ public class IndexingConfig {
      */
     private ScoreNormaliser scoreNormaliser = null;
     /**
-     * The {@link EntityProcessor} instance initialised based on the value
+     * The {@link EntityProcessor}s initialised based on the value
      * of the {@link IndexingConstants#KEY_ENTITY_PROCESSOR} key or
      * <code>null</code> if not configured.
      * This variable uses lazy initialisation
      * @see #getEntityProcessor()
      */
-    private EntityProcessor entityProcessor = null;
+    private List<EntityProcessor> entityProcessor = null;
     /**
      * The {@link IndexingDestination} instance initialised based on the value
      * of the {@link IndexingConstants#KEY_INDEXING_DESTINATION} key or
@@ -796,21 +797,34 @@ public class IndexingConfig {
     public Collection<FieldMapping> getIndexFieldConfiguration(){
         return fieldMappings;
     }
-    public EntityProcessor getEntityProcessor() {
+    /**
+     * Getter for the list of {@link EntityProcessor}s or <code>null</code> if
+     * none are configured.
+     * @return
+     */
+    public List<EntityProcessor> getEntityProcessors() {
         if(entityProcessor != null){
             return entityProcessor;
         } else if (configuration.containsKey(KEY_ENTITY_PROCESSOR)){
-            ConfigEntry config = parseConfigEntry(configuration.get(KEY_ENTITY_PROCESSOR).toString());
-            try {
-                entityProcessor = (EntityProcessor)Class.forName(config.getClassName()).newInstance();
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Invalid EntityProcessor configuration '"+config.getConfigString()+"'!",e);
+            List<ConfigEntry> configs = parseConfigEntries(configuration.get(KEY_ENTITY_PROCESSOR).toString());
+            List<EntityProcessor> processorList = new ArrayList<EntityProcessor>(configs.size());
+            for(ConfigEntry config : configs){
+                EntityProcessor processor;
+                try {
+                    processor = (EntityProcessor)Class.forName(config.getClassName()).newInstance();
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Invalid EntityProcessor configuration '"+config.getConfigString()+"'!",e);
+                }
+                //add the configuration
+                Map<String,Object> configMap = getComponentConfig(config, processor.getClass().getSimpleName(), false);
+                //add also the directly provided parameters
+                configMap.putAll(config.getParams());
+                processor.setConfiguration(configMap);
+                processorList.add(processor);
             }
-            //add the configuration
-            Map<String,Object> configMap = getComponentConfig(config, entityProcessor.getClass().getSimpleName(), false);
-            //add also the directly provided parameters
-            configMap.putAll(config.getParams());
-            entityProcessor.setConfiguration(configMap);
+            if(!processorList.isEmpty()){ //do not set empty lists
+                entityProcessor = Collections.unmodifiableList(processorList);
+            }
             return entityProcessor;
         } else {
             return null;

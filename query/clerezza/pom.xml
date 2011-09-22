@@ -56,10 +56,10 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.entityhub.query.clerezza;version=${pom.version},
+              org.apache.stanbol.entityhub.query.clerezza;version=${project.version},
             </Export-Package>
            <Private-Package>
-              org.apache.stanbol.entityhub.query.clerezza.impl;version=${pom.version},
+              org.apache.stanbol.entityhub.query.clerezza.impl;version=${project.version},
             </Private-Package>
            </instructions>
         </configuration>

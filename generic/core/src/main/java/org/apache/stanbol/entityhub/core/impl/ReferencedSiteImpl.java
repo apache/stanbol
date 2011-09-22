@@ -462,6 +462,8 @@ public class ReferencedSiteImpl implements ReferencedSite {
                 if(rep != null){
                    entity = new EntityImpl(getId(), rep, null);
                    entity.getMetadata().set(RdfResourceEnum.isChached.getUri(), Boolean.TRUE);
+                } else if(siteConfiguration.getCacheStrategy() == CacheStrategy.all){
+                    return null; //do no remote lokkups on CacheStrategy.all!!
                 }
             } catch (YardException e) {
                 if (siteConfiguration.getEntityDereferencerType() == null || isOfflineMode()) {

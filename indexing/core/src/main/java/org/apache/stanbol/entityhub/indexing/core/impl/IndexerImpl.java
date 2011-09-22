@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -108,7 +109,7 @@ public class IndexerImpl implements Indexer {
     private final Collection<IndexingComponent> indexingComponents;
     
     private final IndexingDestination indexingDestination;
-    private final EntityProcessor entityProcessor;
+    private final List<EntityProcessor> entityProcessors;
     private final ScoreNormaliser scoreNormaliser;
     
     private State state = State.UNINITIALISED;
@@ -118,8 +119,8 @@ public class IndexerImpl implements Indexer {
                        EntityDataProvider dataProvider,
                        ScoreNormaliser normaliser,
                        IndexingDestination indexingDestination, 
-                       EntityProcessor entityProcessor){
-        this(normaliser,indexingDestination,entityProcessor);
+                       List<EntityProcessor> entityProcessors){
+        this(normaliser,indexingDestination,entityProcessors);
         //set entityMode interfaces
         if(entityIterator == null){
             throw new IllegalArgumentException("The EntityIterator MUST NOT be NULL!");
@@ -134,8 +135,8 @@ public class IndexerImpl implements Indexer {
                        EntityScoreProvider scoreProvider, 
                        ScoreNormaliser normaliser,
                        IndexingDestination indexingDestination, 
-                       EntityProcessor entityProcessor){
-        this(normaliser,indexingDestination,entityProcessor);
+                       List<EntityProcessor> entityProcessors){
+        this(normaliser,indexingDestination,entityProcessors);
         //deactivate entityMode interfaces
         this.entityIterator = null;
         if(scoreProvider == null){
@@ -150,21 +151,21 @@ public class IndexerImpl implements Indexer {
     
     protected IndexerImpl(ScoreNormaliser normaliser,
                           IndexingDestination indexingDestination, 
-                          EntityProcessor entityProcessor){
+                          List<EntityProcessor> entityProcessors){
         if(indexingDestination == null){
             throw new IllegalArgumentException("The Yard MUST NOT be NULL!");
         }
         this.indexingDestination = indexingDestination;
-        if(entityProcessor == null){
-            this.entityProcessor = new EmptyProcessor();
+        if(entityProcessors == null){
+            this.entityProcessors = Collections.singletonList((EntityProcessor)new EmptyProcessor());
         } else {
-            this.entityProcessor = entityProcessor;
+            this.entityProcessors = entityProcessors;
         }
         setChunkSize(DEFAULT_CHUNK_SIZE); //init the chunk size and the cache
         this.scoreNormaliser = normaliser;
         indexingComponents = new ArrayList<IndexingComponent>();
         indexingComponents.add(indexingDestination);
-        indexingComponents.add(entityProcessor);
+        indexingComponents.addAll(entityProcessors);
         listeners = new HashSet<IndexingListener>();
     }
     public boolean addIndexListener(IndexingListener listener){
@@ -384,7 +385,7 @@ public class IndexerImpl implements Indexer {
                 indexedEntityQueue, //it consumes indexed Entities
                 processedEntityQueue,  //it produces processed Entities
                 errorEntityQueue,
-                entityProcessor, 
+                entityProcessors, 
                 Collections.singleton(SCORE_FIELD)));
         //(3) The daemon for persisting the entities
         activeIndexingDeamons.add(

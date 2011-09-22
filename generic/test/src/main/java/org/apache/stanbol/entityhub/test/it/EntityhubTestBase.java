@@ -18,16 +18,11 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class EntityhubTestBase extends StanbolTestBase{
     
-    protected final Logger log;
+    private final Logger log = LoggerFactory.getLogger(getClass());
     
     private final Collection<String> referencedSites;
     
-    public EntityhubTestBase(Collection<String> referencedSites,Logger log) {
-        if(log != null){
-            this.log = log;
-        } else {
-            this.log = LoggerFactory.getLogger(getClass());
-        }
+    public EntityhubTestBase(Collection<String> referencedSites) {
         if(referencedSites == null){
             this.referencedSites = Collections.emptyList();
         } else {
@@ -86,7 +81,7 @@ public abstract class EntityhubTestBase extends StanbolTestBase{
                             referencedSite));
                     }
                 }
-                log.info("Enhancement engines checked, all present");
+                log.info("Entityhub services checked, all present");
                 return true;
             }
             

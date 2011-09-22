@@ -141,7 +141,7 @@ public final class ModelUtils {
         }
         return info.toString();
     }
-    public static <T> Collection<T> asCollection(Iterator<T> it){
+    public static <T> Collection<T> asCollection(Iterator<? extends T> it){
         Collection<T> c = new ArrayList<T>();
         while(it.hasNext()){
             c.add(it.next());

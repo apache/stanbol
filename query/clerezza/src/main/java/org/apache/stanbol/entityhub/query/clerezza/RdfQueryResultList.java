@@ -75,7 +75,10 @@ public class RdfQueryResultList implements QueryResultList<Representation> {
             public void remove() { it.remove(); }
         };
     }
-
+    @Override
+    public Collection<RdfRepresentation> results() {
+        return results;
+    }
     @Override
     public final int size() {
         return results.size();
