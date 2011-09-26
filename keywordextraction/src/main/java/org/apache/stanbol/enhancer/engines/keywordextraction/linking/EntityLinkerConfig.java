@@ -66,6 +66,12 @@ public class EntityLinkerConfig {
      */
     public static final String DEFAULT_REDIRECT_FIELD = "rdfs:seeAlso";
     /**
+     * The default language used to search for labels regardless of the language
+     * of the text. The default value is <code>null</code> causing to include
+     * labels that do not have a language assigned.
+     */
+    public static final String DEFAULT_LANGUAGE = null;
+    /**
      * Default mapping for Concept types to dc:type values added for
      * TextAnnotations.
      */
@@ -157,6 +163,11 @@ public class EntityLinkerConfig {
     private String redirectField;
     private String typeField;
     private Set<String> selectedFields = new HashSet<String>();
+    /**
+     * The language always included in searches (regardless of the language
+     * detected for the text.
+     */
+    private String defaultLanguage = DEFAULT_LANGUAGE;
     /**
      * Default constructor the initialises the configuration with the 
      * default values
@@ -395,5 +406,24 @@ public class EntityLinkerConfig {
      */
     public Map<String,UriRef> getTypeMappings() {
         return unmodTypeMappings;
+    }
+    /**
+     * Setter for the language of labels searched in addition to the current
+     * language of the text. Setting this to <code>null</code> (also the default)
+     * will cause to search labels without any defined language.<p>
+     * Changing this makes only sense if a dataset (such as dbpedia.org) adds
+     * language tags to labels even if they are typically used in any language.
+     * @param defaultLanguage the default language
+     */
+    public void setDefaultLanguage(String defaultLanguage) {
+        this.defaultLanguage = defaultLanguage;
+    }
+    /**
+     * Getter for the language of labels searched in addition to the current
+     * language of the text.
+     * @return the default language 
+     */
+    public String getDefaultLanguage() {
+        return defaultLanguage;
     }
 }

@@ -250,7 +250,7 @@ public class EntityLinker {
     private List<Suggestion> lookupEntities(List<String> searchStrings) {
         Collection<? extends Representation> results = entitySearcher.lookup(
             config.getNameField(),config.getSelectedFields(),
-            searchStrings, state.getSentence().getLanguage());
+            searchStrings, state.getSentence().getLanguage(),config.getDefaultLanguage());
         List<Suggestion> suggestions = new ArrayList<Suggestion>();
         for(Representation result : results){
             Suggestion match = matchLabels(result);
@@ -282,13 +282,27 @@ public class EntityLinker {
      * @return The result of the matching.
      */
     private Suggestion matchLabels(Representation rep) {
+        String curLang = state.getLanguage(); //language of the current sentence
+        String defLang = config.getDefaultLanguage(); //configured default language 
+//        Iterator<Text> labels = rep.get(config.getNameField(), //get all labels
+//            state.getLanguage(), //in the current language
+//            config.getDefaultLanguage()); //and the default language
         Iterator<Text> labels = rep.getText(config.getNameField());
         Suggestion match = new Suggestion(rep);
         while(labels.hasNext()){
             Text label = labels.next();
-            //NOTE: I use here startWith language because I want 'en-GB' labels accepted for 'en'
-            if(label.getLanguage() == null || label.getLanguage().startsWith(
-                    state.getSentence().getLanguage())){
+            String lang = label.getLanguage();
+            //check the language of the current label
+            //NOTE: Stirng.startWith is used to match'en-GB' with 'en'
+            if((lang == null && ( //if lang is null
+                            defLang == null || //default lang is null
+                            curLang == null)) //or current lang is null
+                    || (lang != null && ( //if lang is not null
+                            //NOTE: starsWith does not like parsing NULL
+                            curLang != null && lang.startsWith(curLang) || //match with default
+                            defLang != null && lang.startsWith(defLang)) //or match with current
+                        ) //end or
+                    ){ //end if
                 String text = label.getText().toLowerCase();
                 List<String> labelTokens = Arrays.asList(content.tokenize(text));
                 int foundTokens = 0;
@@ -307,6 +321,7 @@ public class EntityLinker {
                         if(isProcessable){
                             foundTokens++; //only count processable Tokens
                         }
+                        //TODO: maybe move this also in the "isProcessable" ...
                         foundInLabelIndex = found+currentToken.getText().length();
                         lastFoundIndex = currentIndex;
                     } else { //not found

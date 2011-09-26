@@ -75,6 +75,14 @@ public class ProcessingState {
         return token;
     }
     /**
+     * Getter for the language of the current Token (based on the current
+     * sentence)
+     * @return the language
+     */
+    public final String getLanguage() {
+        return sentence.getLanguage();
+    }
+    /**
      * The currently active chunk or <code>null</code> if no chunks are
      * available. If chunks are present this can not be <code>null</code>
      * because {@link Token}s outside of chunks are skiped.
