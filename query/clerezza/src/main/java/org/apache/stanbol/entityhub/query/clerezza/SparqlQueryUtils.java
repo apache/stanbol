@@ -32,6 +32,7 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.util.W3CDateFormat;
+import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.entityhub.core.utils.AdaptingIterator;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
@@ -687,7 +688,14 @@ public final class SparqlQueryUtils {
                 boolean firstAndWord = true;
                 for(String word : words){
                     word = word.trim();
-                    if(!word.isEmpty()){
+                    boolean hasAlphaNumeric = false;
+                    for(int i = 0; i < word.length() && !hasAlphaNumeric;i++){
+                        char ch = word.charAt(i);
+                        if(Character.isLetter(ch) || Character.isDigit(ch)){
+                            hasAlphaNumeric = true;
+                        }
+                    }
+                    if(hasAlphaNumeric){
                         if(firstAndWord){
                             firstAndWord = false;
                         } else {
