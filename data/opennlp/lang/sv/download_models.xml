@@ -20,17 +20,29 @@
     Contains only a singel target that is used by the Maven Ant
     Plugin to download OpenNLP Models from the Web
   </description>
+  <!-- We need to use the merge mapper to rename model files from
+       "se-*" to "sv-*"
+   -->
+  <mapper type="merge" />
    
   <target name="download">
-    <copy todir="${target.directory}" flatten="true">
-      <resources>
-        <url url="${model.url}/se-token.bin"/>
-        <url url="${model.url}/se-sent.bin"/>
-        <url url="${model.url}/se-pos-perceptron.bin"/>
-        <!-- no Chunker for se
-         <url url="${model.url}/se-chunker.bin"/>
-          -->
-      </resources>
-    </copy>
+      <copy toDir="${target.directory}/">
+          <resources>
+              <url url="${model.url}/se-token.bin"/>
+          </resources>
+          <mergemapper to="sv-token.bin"/>
+      </copy>
+      <copy toDir="${target.directory}/">
+          <resources>
+              <url url="${model.url}/se-sent.bin"/>
+          </resources>
+          <mergemapper to="sv-sent.bin"/>
+      </copy>
+      <copy toDir="${target.directory}/">
+          <resources>
+              <url url="${model.url}/se-pos-perceptron.bin"/>
+          </resources>
+          <mergemapper to="sv-pos-perceptron.bin"/>
+      </copy>
   </target>
 </project>
