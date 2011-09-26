@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.util.Span;
 
 import org.apache.stanbol.commons.opennlp.PosTagsCollectionEnum;
@@ -91,11 +92,13 @@ public class OpenNlpAnalysedContentFactory {
         private final String language;
         private final Iterator<AnalysedText> sentences;
         private final Set<String> posTags;
+        private final Tokenizer tokenizer;
 
         private OpenNlpAnalysedContent(String text, String lang){
             this.language = lang;
             this.sentences = textAnalyzer.analyse(text, lang);
             this.posTags = PosTagsCollectionEnum.getPosTagCollection(lang, PosTypeCollectionType.NOUN);
+            this.tokenizer = textAnalyzer.getTokenizer(lang);
         }
         
         /**
@@ -131,7 +134,7 @@ public class OpenNlpAnalysedContentFactory {
         }
         @Override
         public String[] tokenize(String label) {
-            return textAnalyzer.getTokenizer(language).tokenize(label);
+            return tokenizer.tokenize(label);
         }
     }
 }

@@ -89,7 +89,8 @@ import org.slf4j.LoggerFactory;
         intValue=EntityLinkerConfig.DEFAULT_MIN_SEARCH_TOKEN_LENGTH),
     @Property(name=KeywordLinkingEngine.MAX_SUGGESTIONS,
         intValue=EntityLinkerConfig.DEFAULT_SUGGESTIONS),
-    @Property(name=KeywordLinkingEngine.PROCESSED_LANGUAGES,value="")
+    @Property(name=KeywordLinkingEngine.PROCESSED_LANGUAGES,value=""),
+    @Property(name=KeywordLinkingEngine.DEFAULT_MATCHING_LANGUAGE,value="")
 })
 public class KeywordLinkingEngine implements EnhancementEngine, ServiceProperties{
 
@@ -117,6 +118,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
     public static final String MAX_SUGGESTIONS = "org.apache.stanbol.enhancer.engines.keywordextraction.maxSuggestions";
     public static final String PROCESSED_LANGUAGES = "org.apache.stanbol.enhancer.engines.keywordextraction.processedLanguages";
     public static final String MIN_FOUND_TOKENS= "org.apache.stanbol.enhancer.engines.keywordextraction.minFoundTokens";
+    public static final String DEFAULT_MATCHING_LANGUAGE = "org.apache.stanbol.enhancer.engines.keywordextraction.defaultMatchingLanguage";
 //  public static final String SIMPLE_TOKENIZER = "org.apache.stanbol.enhancer.engines.keywordextraction.simpleTokenizer";
 //  public static final String ENABLE_CHUNKER = "org.apache.stanbol.enhancer.engines.keywordextraction.enableChunker";
     /**
@@ -603,6 +605,19 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
             } catch (IllegalArgumentException e) {
                 throw new ConfigurationException(REDIRECT_PROCESSING_MODE, "Values MUST be one of "+
                     Arrays.toString(RedirectProcessingMode.values()));
+            }
+        }
+        //init the DEFAULT_LANGUAGE
+        value = configuration.get(DEFAULT_MATCHING_LANGUAGE);
+        if(value != null){
+            String defaultLang = value.toString().trim();
+            if(defaultLang.isEmpty()){
+                config.setDefaultLanguage(null);
+            } else if(defaultLang.length() == 1){
+                throw new ConfigurationException(DEFAULT_MATCHING_LANGUAGE, "Illegal language code '"+
+                    defaultLang+"'! Language Codes MUST BE at least 2 chars long.");
+            } else {
+                config.setDefaultLanguage(defaultLang);
             }
         }
     }
