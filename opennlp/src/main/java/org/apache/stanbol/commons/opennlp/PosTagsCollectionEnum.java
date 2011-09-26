@@ -141,10 +141,11 @@ public enum PosTagsCollectionEnum {
      * NOTE: <ul>
      * <li> This includes all typical noun categories as defined by MAMBA
      * <li> Unclassifiable part-of-speech and
-     * <li> Numerical ("RO" and "EN") 
+     * <li> Numerical "RO"
+     * <li> EN is excluded 
      * </ul>
      */
-    SV_NOUN("sv",PosTypeCollectionType.NOUN,"NN","PN","AN","MN","VN","XX","EN","RO"),
+    SV_NOUN("sv",PosTypeCollectionType.NOUN,"NN","PN","AN","MN","VN","XX","RO"),
     /**
      * POS types for Verbs of the Swedish language based on the
      * <a href="http://w3.msi.vxu.se/users/nivre/research/MAMBAlex.html">
