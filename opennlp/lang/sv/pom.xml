@@ -33,7 +33,10 @@
 
   <name>Apache Stanbol Data: OpenNLP Models for Swedish</name>
   <description>
-    Bundle containing all necessary/available models for parsing Swedish language texts. This does not include Models for named entity recocnition (NER).
+    Bundle containing all necessary/available models for parsing Swedish language texts. 
+    This does not include Models for named entity recocnition (NER).
+    NOTE: OpenNLP modles use incorrectly "se" instead of "sv" as language code.
+    This is corrected by renaming the downloaded files accordingly.
   </description>
   <inceptionYear>2011</inceptionYear>
 
