@@ -12,14 +12,21 @@ public class SparqlQueryUtilsTest {
     @Test
     public void testCreateFullTextQueryString() {
         List<String> keywords = Arrays.asList("test", "keyword");
-        assertEquals("\"test\" OR \"keyword\"", SparqlQueryUtils.createFullTextQueryString(keywords));
+        assertEquals("\"test\" OR \"keyword\"", 
+            SparqlQueryUtils.createFullTextQueryString(keywords));
 
         keywords = Arrays.asList("test keyword");
-        assertEquals("(\"test\" AND \"keyword\")", SparqlQueryUtils.createFullTextQueryString(keywords));
+        assertEquals("(\"test\" AND \"keyword\")", 
+            SparqlQueryUtils.createFullTextQueryString(keywords));
 
         keywords = Arrays.asList("'test' \"keyword\"");
         assertEquals("(\"'test'\" AND \"\\\"keyword\\\"\")",
             SparqlQueryUtils.createFullTextQueryString(keywords));
+        
+        keywords = Arrays.asList("1 Alpha ? Numeric Test .");
+        assertEquals("(\"1\" AND \"Alpha\" AND \"Numeric\" AND \"Test\")",
+            SparqlQueryUtils.createFullTextQueryString(keywords));
+        
     }
 
 }
