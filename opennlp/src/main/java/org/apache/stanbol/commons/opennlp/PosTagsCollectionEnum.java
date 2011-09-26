@@ -90,8 +90,74 @@ public enum PosTagsCollectionEnum {
      * </ul>
      */
     DA_FOLLOW("da",PosTypeCollectionType.FOLLOW,"XP","XA","SP","CS","CC","U"),
-    
-    ;
+    /**
+     * POS types for Nouns based on the
+     * <a href="http://beta.visl.sdu.dk/visl/pt/symbolset-floresta.html">PALAVRAS tag set</a>
+     * for Portuguese.<p>
+     * TODO: Someone who speaks this language should check this List<p>
+     * NOTES: Currently this includes nouns, proper nouns and numbers.
+     */
+    PT_NOUN("pt",PosTypeCollectionType.NOUN,"n","num","prop"),
+    /**
+     * POS types for Verbs based on the
+     * <a href="http://beta.visl.sdu.dk/visl/pt/symbolset-floresta.html">PALAVRAS tag set</a>
+     * for Portuguese.<p>
+     * TODO: Someone who speaks this language should check this List<p>
+     */
+    PT_VERB("pt",PosTypeCollectionType.VERB,"v-pcp","v-fin","v-inf","v-ger"),
+    /**
+     * POS types followed to build Chunks based on the
+     * <a href="http://beta.visl.sdu.dk/visl/pt/symbolset-floresta.html">PALAVRAS tag set</a>
+     * for Portuguese.<p>
+     * TODO: Someone who speaks this language should check this List<p>
+     * NOTES: Currently this pubctations and prepositions.
+     */
+    PT_FOLLOW("pt",PosTypeCollectionType.FOLLOW,"punc", "prp"),
+    /**
+     * POS types for Nouns based on the WOTAN tagset for Dutch (as used with 
+     * Mbt).<p>
+     * TODOO: Someone who speaks this language should checkthis List<p>
+     * NOTES: This includes now Nouns, Numbers and "others".
+     */
+    NL_NOUN("nl",PosTypeCollectionType.NOUN,"N","Num","Misc"),
+    /**
+     * POS types for Verbs based on the WOTAN tagset for Dutch (as used with 
+     * Mbt).<p>
+     * The tagger does not distinguish the different forms fo verbs. Therefore
+     * it is enough so include "V"
+     */
+    NL_VERB("nl",PosTypeCollectionType.VERB,"V"),
+    /**
+     * POS types followed to build Chunks based on the WOTAN tagset for Dutch 
+     * (as used with Mbt).<p>
+     * NOTES: THis includes only prepositions and punctuations
+     * 
+     */
+    NL_FOLLOW("nl",PosTypeCollectionType.FOLLOW,"Punc","Prep"),
+    /**
+     * POS types for Nouns for Swedish language based on 
+     * <a href="http://w3.msi.vxu.se/users/nivre/research/MAMBAlex.html">
+     * Lexical categories in MAMBA</a>
+     * NOTE: <ul>
+     * <li> This includes all typical noun categories as defined by MAMBA
+     * <li> Unclassifiable part-of-speech and
+     * <li> Numerical ("RO" and "EN") 
+     * </ul>
+     */
+    SV_NOUN("sv",PosTypeCollectionType.NOUN,"NN","PN","AN","MN","VN","XX","EN","RO"),
+    /**
+     * POS types for Verbs of the Swedish language based on the
+     * <a href="http://w3.msi.vxu.se/users/nivre/research/MAMBAlex.html">
+     * Lexical categories in MAMBA</a>
+     */
+    SV_VERB("sv",PosTypeCollectionType.VERB,"MV","AV","BV","FV","GV","HV","KV","QV","SV","VV","WV"),
+    /**
+     * POS types followed to build Chunks based on the TODO
+     * <p>
+     * NOTES: this includes  prepositions, Part of idiom, Infinitive marker
+     *  as well as all kinds of punctuations
+     */
+    SV_FOLLOW("sv",PosTypeCollectionType.FOLLOW,"PR","ID","IM","I?","IC","IG","IK","IP","IQ","IR","IS","IT","IU");
     Set<String> tags;
     private String language;
     private PosTypeCollectionType type;
