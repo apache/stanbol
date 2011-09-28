@@ -379,8 +379,14 @@ public class EntityLinker {
      */
     private boolean isProcessableToken(Token token) {
         Boolean processToken = null;
-        if(token.getPosTag() != null){
-            processToken = content.processPOS(token.getPosTag());
+        String[] posTags = token.getPosTags();
+        double[] posProb = token.getPosProbabilities();
+        if(posTags != null){
+            int i=0;
+            do {
+                processToken = content.processPOS(posTags[i],posProb[i]);
+                i++;
+            } while(processToken != null && processToken.equals(Boolean.FALSE) && i<posTags.length);
         }
         if(processToken == null) {
              processToken = token.getText().length() >= config.getMinSearchTokenLength();

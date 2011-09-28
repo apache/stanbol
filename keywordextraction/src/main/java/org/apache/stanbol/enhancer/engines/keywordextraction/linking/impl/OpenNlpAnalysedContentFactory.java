@@ -89,6 +89,7 @@ public class OpenNlpAnalysedContentFactory {
      *
      */
     private class OpenNlpAnalysedContent implements AnalysedContent{
+        private final double minPosTagProbability;
         private final String language;
         private final Iterator<AnalysedText> sentences;
         private final Set<String> posTags;
@@ -99,6 +100,7 @@ public class OpenNlpAnalysedContentFactory {
             this.sentences = textAnalyzer.analyse(text, lang);
             this.posTags = PosTagsCollectionEnum.getPosTagCollection(lang, PosTypeCollectionType.NOUN);
             this.tokenizer = textAnalyzer.getTokenizer(lang);
+            minPosTagProbability = textAnalyzer.getMinPosTypeProbability();
         }
         
         /**
@@ -113,22 +115,25 @@ public class OpenNlpAnalysedContentFactory {
          * Called to check if a {@link Token} should be used to search for
          * Concepts within the Taxonomy based on the POS tag of the Token.
          * @param posTag the POS tag to check
+         * @param posProb the probability of the parsed POS tag
          * @return <code>true</code> if Tokens with this POS tag should be
          * included in searches. Otherwise <code>false</code>. Also returns
          * <code>true</code> if no POS type configuration is available for the
          * language parsed in the constructor
          */
         @Override
-        public Boolean processPOS(String posTag) {
-            return posTags != null ? Boolean.valueOf(posTags.contains(posTag)) : null;
+        public Boolean processPOS(String posTag, double posProb) {
+            return posTags != null && posProb > minPosTagProbability ? 
+                    Boolean.valueOf(posTags.contains(posTag)) : null;
         }
         /**
          * Not yet implemented.
          * @param chunkTag the type of the chunk
+         * @param chunkProb the probability of the parsed chunk tag
          * @return returns always <code>true</code>
          */
         @Override
-        public Boolean processChunk(String chunkTag) {
+        public Boolean processChunk(String chunkTag, double chunkProb) {
             // TODO implement
             return null;
         }
