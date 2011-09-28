@@ -55,16 +55,18 @@ public final class SparqlEndpointUtils {
             if(con instanceof HttpURLConnection){
                 //try to create a better Error Message
                 InputStream reason = ((HttpURLConnection)con).getErrorStream();
-                String errorMessage = null;
-                try {
-                    errorMessage = IOUtils.toString(reason);
-                } catch (IOException e1) {
-                    //ignore ...
+                if(reason != null){
+                    String errorMessage = null;
+                    try {
+                        errorMessage = IOUtils.toString(reason);
+                    } catch (IOException e1) {
+                        //ignore ...
+                    }
+                    IOUtils.closeQuietly(reason);
+                    if(errorMessage != null && !errorMessage.isEmpty()){
+                        throw new IOException(((HttpURLConnection)con).getRequestMethod()+" with Content: \n"+errorMessage,e);
+                    }
                 }
-                if(errorMessage != null && !errorMessage.isEmpty()){
-                    throw new IOException(((HttpURLConnection)con).getRequestMethod()+" with Content: \n"+errorMessage,e);
-                }
-                IOUtils.closeQuietly(reason);
             }
             //if still here re-throw the original exception
             throw e;
