@@ -111,8 +111,10 @@ foaf:page | d=xsd:anyURI
 # a thesaurus  
 skos:*
 
-# copy the preferred label  over to rdfs:label
+# copy all SKOS labels (preferred, alternative and hidden) over to rdfs:label
 skos:prefLabel > rdfs:label
+skos:altLabel > rdfs:label
+skos:hiddenLabel > rdfs:label
 
 # copy values of **Match relations to the according related, broader and narrower
 skos:relatedMatch > skos:related
