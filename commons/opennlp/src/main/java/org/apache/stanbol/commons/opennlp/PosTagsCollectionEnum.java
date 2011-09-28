@@ -96,8 +96,11 @@ public enum PosTagsCollectionEnum {
      * for Portuguese.<p>
      * TODO: Someone who speaks this language should check this List<p>
      * NOTES: Currently this includes nouns, proper nouns and numbers.
+     * In addition I added "vp". "vp" is not part of the POS tag set 
+     * documentation but in the training set there is a single occurrence 
+     * therefore the POS tagger sometimes do tag words with this tag.
      */
-    PT_NOUN("pt",PosTypeCollectionType.NOUN,"n","num","prop"),
+    PT_NOUN("pt",PosTypeCollectionType.NOUN,"n","num","prop","vp"),
     /**
      * POS types for Verbs based on the
      * <a href="http://beta.visl.sdu.dk/visl/pt/symbolset-floresta.html">PALAVRAS tag set</a>
@@ -110,7 +113,7 @@ public enum PosTagsCollectionEnum {
      * <a href="http://beta.visl.sdu.dk/visl/pt/symbolset-floresta.html">PALAVRAS tag set</a>
      * for Portuguese.<p>
      * TODO: Someone who speaks this language should check this List<p>
-     * NOTES: Currently this pubctations and prepositions.
+     * NOTES: Currently this pubctations and prepositions. 
      */
     PT_FOLLOW("pt",PosTypeCollectionType.FOLLOW,"punc", "prp"),
     /**

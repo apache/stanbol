@@ -119,6 +119,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
     public static final String PROCESSED_LANGUAGES = "org.apache.stanbol.enhancer.engines.keywordextraction.processedLanguages";
     public static final String MIN_FOUND_TOKENS= "org.apache.stanbol.enhancer.engines.keywordextraction.minFoundTokens";
     public static final String DEFAULT_MATCHING_LANGUAGE = "org.apache.stanbol.enhancer.engines.keywordextraction.defaultMatchingLanguage";
+    public static final String MIN_POS_TAG_PROBABILITY = "org.apache.stanbol.enhancer.engines.keywordextraction.minPosTagProbability";
 //  public static final String SIMPLE_TOKENIZER = "org.apache.stanbol.enhancer.engines.keywordextraction.simpleTokenizer";
 //  public static final String ENABLE_CHUNKER = "org.apache.stanbol.enhancer.engines.keywordextraction.enableChunker";
     /**
@@ -126,6 +127,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
      * language are processed. 
      */
     public static final Set<String> DEFAULT_LANGUAGES = Collections.emptySet();
+    public static final double DEFAULT_MIN_POS_TAG_PROBABILITY = 0.75;
     /**
      * The languages this engine is configured to enhance. An empty List is
      * considered as active for any language
@@ -444,7 +446,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
      * call<ul>
      * <li> {@link #activateEntitySearcher(ComponentContext, Dictionary)}
      * <li> {@link #initEntityLinkerConfig(Dictionary, EntityLinkerConfig)} and
-     * <li> {@link #activateProcessedLanguages(Dictionary)}
+     * <li> {@link #activateTextAnalyzer(Dictionary)}
      * </ul>
      * if applicable.
      * @param context the Component context
@@ -454,21 +456,26 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
     @Activate
     @SuppressWarnings("unchecked")
     protected void activate(ComponentContext context) throws ConfigurationException {
-        textAnalyser = new TextAnalyzer(openNLP);
-        analysedContentFactory = OpenNlpAnalysedContentFactory.getInstance(textAnalyser);
         Dictionary<String,Object> properties = context.getProperties();
+        activateTextAnalyzer(properties);
         activateEntitySearcher(context, properties);
         activateEntityLinkerConfig(properties);
-        activateProcessedLanguages(properties);
     }
 
     /**
-     * Initialise the processed languages based on the value of the
-     * {@link #PROCESSED_LANGUAGES} key. If no configuration is present the
+     * Initialise the {@link TextAnalyzer} component.<p>
+     * Currently this includes the following configurations: <ul>
+     * <li>{@link #PROCESSED_LANGUAGES}: If no configuration is present the
      * default (process all languages) is used.
+     * <li> {@value #MIN_POS_TAG_PROBABILITY}: If no configuration is
+     * present the #DEFAULT_MIN_POS_TAG_PROBABILITY is used
+     * languages based on the value of the
+     * 
      * @param configuration the OSGI component configuration
      */
-    protected final void activateProcessedLanguages(Dictionary<String,Object> configuration) {
+    protected final void activateTextAnalyzer(Dictionary<String,Object> configuration) throws ConfigurationException {
+        textAnalyser = new TextAnalyzer(openNLP);
+        analysedContentFactory = OpenNlpAnalysedContentFactory.getInstance(textAnalyser);
         Object value;
         value = configuration.get(PROCESSED_LANGUAGES);
         if(value == null){
@@ -487,6 +494,26 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
                 }
             }
         }
+        value = configuration.get(MIN_POS_TAG_PROBABILITY);
+        double minPosTagProb;
+        if(value instanceof Number){
+            minPosTagProb = ((Number)value).doubleValue();
+        } else if(value != null && !value.toString().isEmpty()){
+            try {
+                minPosTagProb = Double.valueOf(value.toString());
+            } catch (NumberFormatException e) {
+                throw new ConfigurationException(MIN_POS_TAG_PROBABILITY, 
+                    "Unable to parse the min POS tag probability from the parsed value "+value,e);
+            }
+        } else {
+            minPosTagProb = DEFAULT_MIN_POS_TAG_PROBABILITY;
+        }
+        if(minPosTagProb > 1){
+            throw new ConfigurationException(MIN_POS_TAG_PROBABILITY, 
+                "The configured min POS tag probability MUST BE in the range [0..1] " +
+                "or < 0 to deactivate this feature (parsed value "+value+")!");
+        }
+        textAnalyser.setMinPosTagProbability(minPosTagProb);
     }
 
     /**
@@ -659,14 +686,17 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
     @Deactivate
     protected void deactivate(ComponentContext context) {
         deactivateEntitySearcher();
-        deactivateProcessedLanguages();
+        deactivateTextAnalyzer();
         deactivateEntityLinkerConfig();
     }
 
     /**
-     * Sets the languages to {@link #DEFAULT_LANGUAGES}
+     * Deactivates the {@link TextAnalyzer} as well as resets the set of languages
+     * to process to {@link #DEFAULT_LANGUAGES}
      */
-    protected void deactivateProcessedLanguages() {
+    protected void deactivateTextAnalyzer() {
+        this.textAnalyser = null;
+        this.analysedContentFactory = null;
         languages = DEFAULT_LANGUAGES;
     }
 
