@@ -35,6 +35,7 @@ import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.sentdetect.SentenceModel;
 import opennlp.tools.tokenize.SimpleTokenizer;
 import opennlp.tools.tokenize.Tokenizer;
+import opennlp.tools.util.Sequence;
 import opennlp.tools.util.Span;
 
 import org.apache.felix.scr.annotations.Reference;
@@ -56,6 +57,10 @@ public class TextAnalyzer {
     private boolean enableSentenceDetector = true;
     private boolean enablePosTypeChunker = true;
     private boolean forcePosTypeChunker = true;
+    /**
+     * The minimum POS type probability used by the PosTypeChunker
+     */
+    private double minPosTagProbability = 0.75;
     
     //private POSTaggerME posTagger;
     //private SentenceDetector sentenceDetector;
@@ -66,6 +71,7 @@ public class TextAnalyzer {
      * PosTypeChunkers for the different languages
      */
     private Map<String,PosTypeChunker> posTypeChunkers = new HashMap<String,PosTypeChunker>();
+
 
     
     public TextAnalyzer(OpenNLP openNLP){
@@ -133,7 +139,7 @@ public class TextAnalyzer {
         }
         PosTypeChunker ptc = posTypeChunkers.get(language);
         if(ptc == null){
-            ptc = PosTypeChunker.getInstance(language);
+            ptc = PosTypeChunker.getInstance(language,minPosTagProbability);
             if(ptc != null){
                 posTypeChunkers.put(language, ptc);
             }
@@ -224,6 +230,29 @@ public class TextAnalyzer {
         if(forcePosTypeChunker) {
             enablePosTypeChunker(true);
         }
+    }
+
+    /**
+     * Getter for the minimum POS tag probability so that the
+     * {@link PosTypeChunker} processes a POS tag.
+     * @return the minPosTypeProbability
+     */
+    public final double getMinPosTypeProbability() {
+        return minPosTagProbability;
+    }
+
+    /**
+     * Setter for the minimum POS tag probability so that the
+     * {@link PosTypeChunker} processes a POS tag.
+     * @param minPosTagProbability The probability [0..1] or value < 0 to 
+     * deactivate this feature
+     * @throws IllegalArgumentException if values > 1 are parsed as probability
+     */
+    public final void setMinPosTagProbability(double probability) {
+        if(probability > 1){
+            throw new IllegalArgumentException("The minimum POS tag probability MUST be set to a value <= 1 (parsed:"+minPosTagProbability+"");
+        }
+        this.minPosTagProbability = probability;
     }
 
     /**
@@ -343,18 +372,48 @@ public class TextAnalyzer {
             for(int ti = 0; ti<tokenSpans.length;ti++) {
                 tokens[ti] = tokenSpans[ti].getCoveredText(sentence).toString();
             }
-            String[] pos;
-            double[] posProbs;
+            String[][] posTags;
+            double[][] posProbs;
             Span[] chunkSpans;
             double[] chunkProps;
             if(tagger != null){
-                pos = tagger.tag(tokens);
-                posProbs = tagger.probs();
+                posTags = new String[tokens.length][];
+                posProbs = new double[tokens.length][];
+                //get the topK POS tags and props and copy it over to the 2dim Arrays
+                Sequence[] posSequences = tagger.topKSequences(tokens);
+                //extract the POS tags and props for the current token from the
+                //posSequences.
+                //NOTE: Sequence includes always POS tags for all Tokens. If
+                //      less then posSequences.length are available it adds the
+                //      best match for all followings.
+                //      We do not want such copies.
+                String[] actPos = new String[posSequences.length];
+                double[] actProp = new double[posSequences.length];
+                for(int i=0;i<tokenSpans.length;i++){
+                    boolean done = false;
+                    int j = 0;
+                    while( j < posSequences.length && !done){
+                        String p = posSequences[j].getOutcomes().get(i);
+                        done = j > 0 && p.equals(actPos[0]);
+                        if(!done){
+                            actPos[j] = p;
+                            actProp[j] = posSequences[j].getProbs()[i];
+                            j++;
+                        }
+                    }
+                    posTags[i] = new String[j];
+                    System.arraycopy(actPos, 0, posTags[i], 0, j);
+                    posProbs[i] = new double[j];
+                    System.arraycopy(actProp, 0, posProbs[i], 0, j);
+                }
+                //posProbs = tagger.probs();
                 if(chunker != null){
+                    //we still need the Array of the best ranked POS tags for the chunker
+                    String[] pos = posSequences[0].getOutcomes().toArray(new String[tokens.length]);
                     chunkSpans = chunker.chunkAsSpans(tokens, pos);
                     chunkProps = chunker.probs();
                 } else if(posTypeChunker != null){
-                    chunkSpans = posTypeChunker.chunkAsSpans(tokens, pos);
+                    chunkSpans = posTypeChunker.chunkAsSpans(tokens, posTags, posProbs);
                     chunkProps = new double[chunkSpans.length];
                     Arrays.fill(chunkProps, 1.0);
                 } else {
@@ -362,7 +421,7 @@ public class TextAnalyzer {
                     chunkProps = null;
                 }
             } else {
-                pos = null;
+                posTags = null;
                 posProbs = null;
                 chunkSpans = null;
                 chunkProps = null;
@@ -370,9 +429,10 @@ public class TextAnalyzer {
             List<Token> tokenList = new ArrayList<Token>(tokenSpans.length);
             for(int i=0;i<tokenSpans.length;i++){
                 tokenList.add(new Token(tokenSpans[i], tokens[i],
-                    pos!=null?pos[i]:null, pos!=null?posProbs[i]:-1));
+                    posTags == null ? null: posTags[i], 
+                            posProbs == null ? null : posProbs[i]));
             }
-            //assign the list to the member var but make itunmodifiable!
+            //assign the list to the member var but make unmodifiable!
             this.tokens = Collections.unmodifiableList(tokenList);
             if(chunkSpans != null){
                 List<Chunk> chunkList = new ArrayList<Chunk>(chunkSpans.length);
@@ -412,14 +472,27 @@ public class TextAnalyzer {
             //NOTE: Members are protected to allow the JVM direct access
             protected final Span span;
             protected String token;
-            protected final String pos;
-            protected final double posProbability;
+            protected final String[] posTags;
+            protected final double[] posProbabilities;
 
             private Token(Span span,String token,String pos,double posProbability){
+                this(span,token,new String[]{pos},new double[] {posProbability});
+            }
+            private Token(Span span,String token,String[] posTags, double[] posProbabilities){
                 this.span = span;
-                this.pos = pos;
+                if(posTags == null || posTags.length < 1){
+                    this.posTags = null;
+                } else {
+                    this.posTags = posTags;
+                }
                 this.token = token;
-                this.posProbability = posProbability;
+                if(this.posTags == null){
+                    this.posProbabilities = null;
+                } else if(posTags.length != posProbabilities.length){
+                    throw new IllegalStateException("POS Tag array and POS probability array MUST BE of the same size!");
+                } else {
+                    this.posProbabilities = posProbabilities;
+                }
             }
 
             public int getStart(){
@@ -428,14 +501,35 @@ public class TextAnalyzer {
             public int getEnd(){
                 return span.getEnd();
             }
+            /**
+             * Getter for the best ranked POS tag for this token
+             * @return
+             */
             public String getPosTag(){
-                return pos;
+                return posTags == null ? null : posTags[0];
             }
             /**
+             * Getter for all the POS tags of this Token. The one with the
+             * highest probability is at index 0.
+             * @return All POS tags assigned to this Token
+             */
+            public String[] getPosTags(){
+                return posTags;
+            }
+            /**
+             * Getter for the probability of the top ranked POS tag
              * @return the POS probability
              */
             public double getPosProbability() {
-                return posProbability;
+                return posProbabilities == null ? -1 : posProbabilities[0];
+            }
+            /**
+             * Getter for the probabilities of all {@link #getPosTags() POS tags}
+             * @return the probabilities of the POS tags returned by
+             * {@link #getPosTags()}
+             */
+            public double[] getPosProbabilities(){
+                return posProbabilities;
             }
             /**
              * Getter for the value of this token
@@ -449,7 +543,10 @@ public class TextAnalyzer {
             }
             @Override
             public String toString() {
-                return getText()+(pos != null?'_'+pos:"");
+                return getText()+(posTags != null?
+                        '_'+(posTags.length == 1 ?
+                                posTags[0] :
+                                    Arrays.toString(posTags)):"");
             }
         }
         public class Chunk {
