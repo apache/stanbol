@@ -9,8 +9,5 @@ To avoid loading subversion repository with large binary files this artifact has
 
 This bundle needs to include a small local index of DBPedia.org that includes the 43k entities with the most incoming Wiki links.
 
-This index is not in the subversion but needs to be downloaded by using the
-
-    download_index.sh
-
-This shell script needs to be executed before this bundle is build.
+This index is not in the subversion but is downloaded from `http://www.salzburgresearch.at/~rwesten/stanbol/dbpedia_43k.solrindex.zip` by the maven build
+and stored at`./src/main/resources/org/apache/stanbol/data/site/dbpedia/default/index/dbpedia_43k.solrindex.zip`.
