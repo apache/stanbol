@@ -39,21 +39,25 @@ public interface AnalysedContent {
      * Called to check if a {@link Token} should be used to search for
      * Concepts within the Taxonomy based on the POS tag of the Token.
      * @param posTag the POS tag to check
+     * @param posProb the probability of the POS tag or <code>1.0</code> if not
+     * available
      * @return <code>true</code> if Tokens with this POS tag should be
      * included in searches. Otherwise <code>false</code>.  If this information 
      * is not available (e.g. no set of Tags that need to be processed is defined) 
      * this Method MUST return <code>null</code>
      */
-    public Boolean processPOS(String posTag);
+    public Boolean processPOS(String posTag, double posProb);
     /**
      * Called to check if a chunk should be used to search for Concepts.
      * @param chunkTag the tag (type) of the chunk
+     * @param chunkProb the probability of the chunk tag or <code>1.0</code> if
+     * not available
      * @return <code>true</code> if chunks with this tag (type) should be
      * processed (used to search for matches of concepts) and <code>false</code>
      * if not. If this information is not available (e.g. no set of Tags that
      * need to be processed is defined) this Method MUST return <code>null</code>
      */
-    public Boolean processChunk(String chunkTag);
+    public Boolean processChunk(String chunkTag,double chunkProb);
     /**
      * Tokenizes the parsed label
      * @param label the label to tokenize
