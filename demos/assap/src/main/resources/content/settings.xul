@@ -15,7 +15,6 @@
   buttonlabelcancel="&cancel;"
   buttonaccesskeycancel="C">
 
-  <script src="chrome://assap/content/json.js" />
   <script src="chrome://assap/content/settings.js" />
   <groupbox> 
     <caption label="&server;"/>

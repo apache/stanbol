@@ -2,8 +2,7 @@
 <?xml-stylesheet href="chrome://assap/skin/overlay.css" type="text/css"?>
 <!DOCTYPE overlay SYSTEM "chrome://assap/locale/assap.dtd">
 <overlay id="assap-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  <script src="chrome://assap/content/jquery.js" />
-  <script src="chrome://assap/content/json.js" />
+  <script src="chrome://assap/content/json2.js" />
   <script src="chrome://assap/content/functions.js" />
   <script src="chrome://assap/content/overlay.js" />
   <stringbundleset id="assap-stringbundleset">

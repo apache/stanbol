@@ -6,7 +6,7 @@ This is a Mozilla Firefox extension that let's you analyse any web page by
 sending its plain text content to a running instance of Stanbol Enhancement
 engines. The raw annotation results will be displayed in an extra window.
 
-* Supported Firefox versions    : 3.0 - 4.x
+* Supported Firefox versions    : 3.0 - 6.x
 * Tested on Ubuntu with Firefox : 3.6.22
 
 ## Packaging the SAP

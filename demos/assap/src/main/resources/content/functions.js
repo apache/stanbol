@@ -25,6 +25,9 @@ function extractTextContent(element) {
 	var output = element_clone.textContent;
   output = output.replace(/<\S[^><]*>/g, "");
 
+  output = output.replace(/\n\n/g, " ");
+  output = output.replace(/\t/g, " ");
+  
 	return output;
 }
 

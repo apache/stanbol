@@ -30,6 +30,9 @@ var assap = {
         this.analyseDocument(document);
       }
     }
+    
+    // load jQuery on startup
+    this.loadjQuery(assap);
   },
   /* Determines current window and starts analysis */
   onManualAnalyse : function(e) {
@@ -38,9 +41,27 @@ var assap = {
     var mainwindow = firefox.getMostRecentWindow("navigator:browser");
     this.analyseDocument(mainwindow.content.document);
   },
+  loadjQuery : function(context) {
+    var loader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+                .getService(Components.interfaces.mozIJSSubScriptLoader);
+    loader.loadSubScript("chrome://assap/content/jquery.js",context);
+
+    var jQuery = window.jQuery.noConflict(true);
+        if( typeof(jQuery.fn._init) == 'undefined') { jQuery.fn._init = jQuery.fn.init; }
+    assap.jQuery = jQuery;
+  },  
   /* Send document to Stanbol */
   analyseDocument : function(document) {
+    // init jQuery
+    var jQuery = assap.jQuery;
+    var $ = function(selector,context){
+       return new  jQuery.fn.init(selector,context||window._content.document);
+    };
+    $.fn = $.prototype = jQuery.fn;
+    assap.env=window._content.document;
+    
     var input_data = extractTextContent(document.body);
+    
     if ((input_data != "") && (document.contentType == "text/html")) {
       var prefManager = Components.classes["@mozilla.org/preferences-service;1"]
           .getService(Components.interfaces.nsIPrefBranch);
@@ -49,8 +70,8 @@ var assap = {
       jQuery.ajax( {
         type : "POST",
         url : prefManager.getCharPref("extensions.assap.server"),
-        dataType : "application/json",
         contentType : "text/plain",
+        dataType : "text",
         data : input_data,
         cache : false,
         success : function(data, textStatus, jqXHR) {
@@ -68,3 +89,4 @@ var assap = {
 window.addEventListener("load", function(e) {
   assap.onInit();
 }, false);
+
