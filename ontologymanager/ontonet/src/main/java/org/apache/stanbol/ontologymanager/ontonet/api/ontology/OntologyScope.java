@@ -41,13 +41,6 @@ import org.semanticweb.owlapi.model.OWLOntology;
 public interface OntologyScope extends ScopeOntologyListenable {
 
     /**
-     * Returns an ontological form of this scope.
-     * 
-     * @return an OWL ontology that represents this scope.
-     */
-    OWLOntology asOWLOntology();
-
-    /**
      * Adds a new ontology space to the list of user session spaces for this scope.
      * 
      * @param sessionSpace
@@ -55,6 +48,13 @@ public interface OntologyScope extends ScopeOntologyListenable {
      * @throws UnmodifiableOntologySpaceException
      */
     void addSessionSpace(OntologySpace sessionSpace, IRI sessionID) throws UnmodifiableOntologySpaceException;
+
+    /**
+     * Returns an ontological form of this scope.
+     * 
+     * @return an OWL ontology that represents this scope.
+     */
+    OWLOntology asOWLOntology();
 
     /**
      * Returns the core ontology space for this ontology scope. The core space should never be null for any
@@ -78,8 +78,10 @@ public interface OntologyScope extends ScopeOntologyListenable {
      * 
      * @return the unique identifier for this ontology scope
      */
-    IRI getID();
-
+    String getID();
+    
+    IRI getNamespace();
+    
     /**
      * Return the ontology space for this scope that is identified by the supplied IRI.
      * 
@@ -106,6 +108,8 @@ public interface OntologyScope extends ScopeOntologyListenable {
      *             if either the scope or the supplied space are locked.
      */
     void setCustomSpace(OntologySpace customSpace) throws UnmodifiableOntologySpaceException;
+
+    void setNamespace(IRI namespace);
 
     /**
      * Performs the operations required for activating the ontology scope. It should be possible to perform

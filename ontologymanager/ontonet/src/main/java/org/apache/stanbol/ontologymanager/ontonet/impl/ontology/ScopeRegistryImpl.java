@@ -35,15 +35,15 @@ import org.semanticweb.owlapi.model.IRI;
  */
 public class ScopeRegistryImpl implements ScopeRegistry {
 
-	private Set<IRI> activeScopeIRIs;
+	private Set<String> activeScopeIRIs;
 
 	private Set<ScopeEventListener> scopeListeners;
 
-	private Map<IRI, OntologyScope> scopeMap;
+	private Map<String, OntologyScope> scopeMap;
 
 	public ScopeRegistryImpl() {
-		scopeMap = new HashMap<IRI, OntologyScope>();
-		activeScopeIRIs = new HashSet<IRI>();
+		scopeMap = new HashMap<String, OntologyScope>();
+		activeScopeIRIs = new HashSet<String>();
 		scopeListeners = new HashSet<ScopeEventListener>();
 	}
 
@@ -72,7 +72,7 @@ public class ScopeRegistryImpl implements ScopeRegistry {
 	 * @see eu.iksproject.kres.api.manager.ontology.ScopeRegistry#containsScope(org.semanticweb.owlapi.model.IRI)
 	 */
 	@Override
-	public boolean containsScope(IRI scopeID) {
+	public boolean containsScope(String scopeID) {
 		// containsKey() is not reliable enough
 		return scopeMap.get(scopeID) != null;
 	}
@@ -83,7 +83,7 @@ public class ScopeRegistryImpl implements ScopeRegistry {
 	 */
 	@Override
 	public synchronized void deregisterScope(OntologyScope scope) {
-		IRI id = scope.getID();
+	    String id = scope.getID();
 		if (!containsScope(id))
 			throw new NoSuchScopeException(id);
 		// For sure it is deactivated...
@@ -93,7 +93,7 @@ public class ScopeRegistryImpl implements ScopeRegistry {
 		fireScopeDeregistered(scope);
 	}
 
-	protected void fireScopeActivationChange(IRI scopeID, boolean activated) {
+	protected void fireScopeActivationChange(String scopeID, boolean activated) {
 		OntologyScope scope = scopeMap.get(scopeID);
 		if (activated)
 			for (ScopeEventListener l : scopeListeners)
@@ -134,7 +134,7 @@ public class ScopeRegistryImpl implements ScopeRegistry {
 	@Override
 	public Set<OntologyScope> getActiveScopes() {
 		Set<OntologyScope> scopes = new HashSet<OntologyScope>();
-		for (IRI id : activeScopeIRIs)
+		for (String id : activeScopeIRIs)
 			scopes.add(scopeMap.get(id));
 		return scopes;
 	}
@@ -153,7 +153,7 @@ public class ScopeRegistryImpl implements ScopeRegistry {
 	 * @see eu.iksproject.kres.api.manager.ontology.ScopeRegistry#getScope(org.semanticweb.owlapi.model.IRI)
 	 */
 	@Override
-	public OntologyScope getScope(IRI scopeID) {
+	public OntologyScope getScope(String scopeID) {
 		return scopeMap.get(scopeID);
 	}
 
@@ -171,7 +171,7 @@ public class ScopeRegistryImpl implements ScopeRegistry {
 	 * @see eu.iksproject.kres.api.manager.ontology.ScopeRegistry#isScopeActive(org.semanticweb.owlapi.model.IRI)
 	 */
 	@Override
-	public boolean isScopeActive(IRI scopeID) {
+	public boolean isScopeActive(String scopeID) {
 		if (!containsScope(scopeID))
 			throw new NoSuchScopeException(scopeID);
 		return activeScopeIRIs.contains(scopeID);
@@ -211,7 +211,7 @@ public class ScopeRegistryImpl implements ScopeRegistry {
 	 * @see eu.iksproject.kres.api.manager.ontology.ScopeRegistry#setScopeActive(org.semanticweb.owlapi.model.IRI, boolean)
 	 */
 	@Override
-	public void setScopeActive(IRI scopeID, boolean active) {
+	public void setScopeActive(String scopeID, boolean active) {
 		if (!containsScope(scopeID))
 			throw new NoSuchScopeException(scopeID);
 		// Prevent no-changes from firing events.

@@ -35,5 +35,11 @@ public class StringUtils {
 		else
 			return iri;
 	}
+	
+	public static String stripNamespace(String fullIri, String namespace) {
+	    if (fullIri.startsWith(namespace))
+	        return fullIri.substring(namespace.length()-1);
+	    else return fullIri;
+	}
 
 }

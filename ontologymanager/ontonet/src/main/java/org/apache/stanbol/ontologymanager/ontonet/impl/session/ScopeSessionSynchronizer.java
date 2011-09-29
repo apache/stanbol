@@ -40,7 +40,8 @@ public class ScopeSessionSynchronizer implements SessionListener {
         OntologySpaceFactory factory = manager.getOntologySpaceFactory();
         for (OntologyScope scope : manager.getScopeRegistry().getActiveScopes()) {
             try {
-                scope.addSessionSpace(factory.createSessionOntologySpace(scope.getID()), sessionId);
+                String scopeId = scope.getID().toString().substring(scope.getID().toString().lastIndexOf("/")+1);
+                scope.addSessionSpace(factory.createSessionOntologySpace(scopeId), sessionId);
             } catch (UnmodifiableOntologySpaceException e) {
                 LoggerFactory.getLogger(getClass()).warn("Tried to add session to unmodifiable space ");
                 continue;

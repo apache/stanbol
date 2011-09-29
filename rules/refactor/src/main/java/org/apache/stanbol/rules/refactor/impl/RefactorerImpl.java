@@ -117,7 +117,7 @@ public class RefactorerImpl implements Refactorer {
     public static final String _HOST_NAME_AND_PORT_DEFAULT = "localhost:8080";
     public static final String _REFACTORING_SCOPE_DEFAULT = "refactoring";
     public static final String _REFACTORING_SESSION_ID_DEFAULT = "http://kres.iksproject.eu/session/refactoring";
-    public static final String _REFACTORING_SPACE_DEFAULT = "http://kres.iksproject.eu/space/refactoring";
+//    public static final String _REFACTORING_SPACE_DEFAULT = "http://kres.iksproject.eu/space/refactoring";
 
     @Property(value = _AUTO_GENERATED_ONTOLOGY_IRI_DEFAULT)
     public static final String AUTO_GENERATED_ONTOLOGY_IRI = "org.apache.stanbol.reengineer.default";
@@ -131,8 +131,8 @@ public class RefactorerImpl implements Refactorer {
     @Property(value = _REFACTORING_SESSION_ID_DEFAULT)
     public static final String REFACTORING_SESSION_ID = "org.apache.stanbol.ontlogymanager.session.refactoring";
 
-    @Property(value = _REFACTORING_SPACE_DEFAULT)
-    public static final String REFACTORING_SPACE = "org.apache.stanbol.reengineer.space.refactoring";
+//    @Property(value = _REFACTORING_SPACE_DEFAULT)
+//    public static final String REFACTORING_SPACE = "org.apache.stanbol.reengineer.space.refactoring";
 
     private IRI defaultRefactoringIRI;
 
@@ -143,9 +143,9 @@ public class RefactorerImpl implements Refactorer {
     @Reference
     protected ONManager onManager;
 
-    private IRI refactoringScopeIRI;
+    private String refactoringScopeID;
 
-    private IRI refactoringSpaceIRI;
+//    private IRI refactoringSpaceIRI;
 
     @Reference
     protected RuleStore ruleStore;
@@ -223,16 +223,16 @@ public class RefactorerImpl implements Refactorer {
         if (refactoringSessionID == null) refactoringSessionID = _REFACTORING_SESSION_ID_DEFAULT;
         String refactoringScopeID = (String) configuration.get(REFACTORING_SCOPE);
         if (refactoringScopeID == null) refactoringScopeID = _REFACTORING_SCOPE_DEFAULT;
-        String refactoringSpaceID = (String) configuration.get(REFACTORING_SPACE);
-        if (refactoringSpaceID == null) refactoringSpaceID = _REFACTORING_SPACE_DEFAULT;
+//        String refactoringSpaceID = (String) configuration.get(REFACTORING_SPACE);
+//        if (refactoringSpaceID == null) refactoringSpaceID = _REFACTORING_SPACE_DEFAULT;
         String defaultRefactoringID = (String) configuration.get(AUTO_GENERATED_ONTOLOGY_IRI);
         if (defaultRefactoringID == null) defaultRefactoringID = _AUTO_GENERATED_ONTOLOGY_IRI_DEFAULT;
         String hostPort = (String) configuration.get(HOST_NAME_AND_PORT);
         if (hostPort == null) hostPort = _HOST_NAME_AND_PORT_DEFAULT;
 
         kReSSessionID = IRI.create(refactoringSessionID);
-        refactoringScopeIRI = IRI.create("http://" + hostPort + "/kres/ontology/" + refactoringScopeID);
-        refactoringSpaceIRI = IRI.create(refactoringSpaceID);
+//        refactoringScopeID = IRI.create("http://" + hostPort + "/kres/ontology/" + refactoringScopeID);
+//        refactoringSpaceIRI = IRI.create(refactoringSpaceID);
         defaultRefactoringIRI = IRI.create(defaultRefactoringID);
 
         SessionManager kReSSessionManager = onManager.getSessionManager();
@@ -259,22 +259,22 @@ public class RefactorerImpl implements Refactorer {
         try {
             log.info("Semion DBExtractor : created scope with IRI " + REFACTORING_SCOPE);
 
-            scope = ontologyScopeFactory.createOntologyScope(refactoringScopeIRI, null);
+            scope = ontologyScopeFactory.createOntologyScope(refactoringScopeID, null);
 
             scopeRegistry.registerScope(scope);
         } catch (DuplicateIDException e) {
             log.info("Semion DBExtractor : already existing scope for IRI " + REFACTORING_SCOPE);
-            scope = onManager.getScopeRegistry().getScope(refactoringScopeIRI);
+            scope = onManager.getScopeRegistry().getScope(refactoringScopeID);
         }
 
         try {
-            scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(refactoringSpaceIRI),
+            scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(refactoringScopeID),
                 kReSSession.getID());
         } catch (UnmodifiableOntologySpaceException e) {
             log.error("Failed to create session space", e);
         }
 
-        scopeRegistry.setScopeActive(refactoringScopeIRI, true);
+        scopeRegistry.setScopeActive(refactoringScopeID, true);
 
         // semionManager.registerRefactorer(this);
 

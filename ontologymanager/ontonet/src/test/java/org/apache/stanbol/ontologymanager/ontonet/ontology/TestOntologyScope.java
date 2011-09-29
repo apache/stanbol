@@ -1,40 +1,39 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.ontonet.ontology;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
+import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.CoreOntologySpaceImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.CustomOntologySpaceImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OWLOntologyManagerFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFactoryImpl;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -46,10 +45,9 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 public class TestOntologyScope {
 
     public static IRI baseIri = IRI.create(Constants.PEANUTS_MAIN_BASE), baseIri2 = IRI
-            .create(Constants.PEANUTS_MINOR_BASE), scopeIriBlank = IRI
-            .create("http://kres.iks-project.eu/scope/WackyRaces"), scopeIri1 = IRI
-            .create("http://kres.iks-project.eu/scope/Peanuts"), scopeIri2 = IRI
-            .create("http://kres.iks-project.eu/scope/CalvinAndHobbes");
+            .create(Constants.PEANUTS_MINOR_BASE);
+
+    public static String scopeIdBlank = "WackyRaces", scopeId1 = "Peanuts", scopeId2 = "CalvinAndHobbes";
 
     /**
      * An ontology scope that initially contains no ontologies, and is rebuilt from scratch before each test
@@ -65,8 +63,11 @@ public class TestOntologyScope {
 
     @BeforeClass
     public static void setup() {
-        // An ONManagerImpl with no store and default settings
-        onm = new ONManagerImpl(null, null, new Hashtable<String,Object>());
+        // An ONManagerImpl with no store and a set namespace.
+        Dictionary<String,Object> onmconf = new Hashtable<String,Object>();
+        onmconf.put(ONManager.ONTOLOGY_NETWORK_NS, "http://stanbol.apache.org/scope/");
+        // The same hashtable can be recycled for the offline configuration.
+        onm = new ONManagerImpl(null, null, new OfflineConfigurationImpl(onmconf), onmconf);
         factory = onm.getOntologyScopeFactory();
         if (factory == null) fail("Could not instantiate ontology space factory");
         OWLOntologyManager mgr = onm.getOntologyManagerFactory().createOntologyManager(true);
@@ -79,8 +80,8 @@ public class TestOntologyScope {
     }
 
     @Before
-    public void cleaup() throws DuplicateIDException {
-        if (factory != null) blankScope = factory.createOntologyScope(scopeIriBlank, null);
+    public void cleanup() throws DuplicateIDException {
+        if (factory != null) blankScope = factory.createOntologyScope(scopeIdBlank, null);
     }
 
     /**
@@ -88,20 +89,88 @@ public class TestOntologyScope {
      * spaces.
      */
     @Test
-    public void testIdentifiers() {
-        OntologyScope scope = null;
+    public void testIdentifiers() throws Exception {
+
+        OntologyScope shouldBeNull = null, shouldBeNotNull = null;
+
+        /* First test scope identifiers. */
+
+        // Null identifier (invalid)
         try {
-            scope = factory.createOntologyScope(scopeIri1, src1, src2);
-            scope.setUp();
+            shouldBeNull = factory.createOntologyScope(null, new BlankOntologySource());
+            fail("Expected IllegalArgumentException not thrown despite null scope identifier.");
+        } catch (IllegalArgumentException ex) {}
+        assertNull(shouldBeNull);
+
+        // Slash in identifier (invalid)
+        try {
+            shouldBeNull = factory.createOntologyScope("a0/b1", new BlankOntologySource());
+            fail("Expected IllegalArgumentException not thrown despite slash in scope identifier.");
+        } catch (IllegalArgumentException ex) {}
+        assertNull(shouldBeNull);
+
+        /* Now test namespaces. */
+
+        // Null namespace (invalid).
+        factory.setNamespace(null);
+        try {
+            shouldBeNull = factory.createOntologyScope(scopeIdBlank, new BlankOntologySource());
+            fail("Expected IllegalArgumentException not thrown despite null OntoNet namespace.");
+        } catch (IllegalArgumentException ex) {}
+        assertNull(shouldBeNull);
+
+        // Namespace with query (invalid).
+        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology/?query=true"));
+        try {
+            shouldBeNull = factory.createOntologyScope(scopeIdBlank, new BlankOntologySource());
+            fail("Expected IllegalArgumentException not thrown despite query in OntoNet namespace.");
+        } catch (IllegalArgumentException ex) {}
+        assertNull(shouldBeNull);
+
+        // Namespace with fragment (invalid).
+        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology#fragment"));
+        try {
+            shouldBeNull = factory.createOntologyScope(scopeIdBlank, new BlankOntologySource());
+            fail("Expected IllegalArgumentException not thrown despite fragment in OntoNet namespace.");
+        } catch (IllegalArgumentException ex) {}
+        assertNull(shouldBeNull);
+
+        // Namespace ending with hash (invalid).
+        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology#"));
+        try {
+            shouldBeNull = factory.createOntologyScope(scopeIdBlank, new BlankOntologySource());
+            fail("Expected IllegalArgumentException not thrown despite fragment in OntoNet namespace.");
+        } catch (IllegalArgumentException ex) {}
+        assertNull(shouldBeNull);
+
+        // Namespace ending with slash (valid).
+        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology/"));
+        shouldBeNotNull = factory.createOntologyScope(scopeIdBlank, new BlankOntologySource());
+        assertNotNull(shouldBeNotNull);
+
+        shouldBeNotNull = null;
+
+        // Namespace ending with neither (valid, should automatically add slash).
+        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology"));
+        shouldBeNotNull = factory.createOntologyScope(scopeIdBlank, new BlankOntologySource());
+        assertNotNull(shouldBeNotNull);
+        assertTrue(shouldBeNotNull.getNamespace().toString().endsWith("/"));
+
+        // Now set again the correct namespace.
+        factory.setNamespace(IRI.create(onm.getOntologyNetworkNamespace()));
+        shouldBeNotNull = null;
+        try {
+            shouldBeNotNull = factory.createOntologyScope(scopeId1, src1, src2);
+            shouldBeNotNull.setUp();
         } catch (DuplicateIDException e) {
             fail("Unexpected DuplicateIDException caught when creating scope "
                  + "with non-null parameters in a non-registered environment.");
         }
-        boolean condition = scope.getID().equals(scopeIri1);
-        condition &= scope.getCoreSpace().getID()
-                .equals(IRI.create(scopeIri1 + "/" + CoreOntologySpaceImpl.SUFFIX));
-        condition &= scope.getCustomSpace().getID()
-                .equals(IRI.create(scopeIri1 + "/" + CustomOntologySpaceImpl.SUFFIX));
+        boolean condition = shouldBeNotNull.getID().equals(scopeId1);
+        condition &= shouldBeNotNull.getCoreSpace().getID()
+                .equals(scopeId1 + "/" + CoreOntologySpaceImpl.SUFFIX);
+        condition &= shouldBeNotNull.getCustomSpace().getID()
+                .equals(scopeId1 + "/" + CustomOntologySpaceImpl.SUFFIX);
         assertTrue(condition);
     }
 
@@ -116,7 +185,7 @@ public class TestOntologyScope {
         } catch (DuplicateIDException e) {
             fail("Unexpected DuplicateIDException caught while testing scope creation"
                  + " with null parameters.");
-        } catch (NullPointerException ex) {
+        } catch (IllegalArgumentException ex) {
             // Expected behaviour.
         }
         assertNull(scope);
@@ -130,7 +199,7 @@ public class TestOntologyScope {
     public void testScopeSetup() {
         OntologyScope scope = null;
         try {
-            scope = factory.createOntologyScope(scopeIri1, src1, src2);
+            scope = factory.createOntologyScope(scopeId1, src1, src2);
             scope.setUp();
         } catch (DuplicateIDException e) {
             fail("Unexpected DuplicateIDException was caught while testing scope " + e.getDulicateID());
@@ -146,7 +215,7 @@ public class TestOntologyScope {
     public void testScopeSetupNoCustom() {
         OntologyScope scope = null;
         try {
-            scope = factory.createOntologyScope(scopeIri2, src1);
+            scope = factory.createOntologyScope(scopeId2, src1);
             scope.setUp();
         } catch (DuplicateIDException e) {
             fail("Duplicate ID exception caught for scope iri " + src1);
@@ -158,11 +227,12 @@ public class TestOntologyScope {
     @Test
     public void testScopesRendering() {
         ScopeRegistry reg = onm.getScopeRegistry();
-        OntologyScopeFactoryImpl scf = new OntologyScopeFactoryImpl(reg, onm.getOntologySpaceFactory());
+        OntologyScopeFactoryImpl scf = new OntologyScopeFactoryImpl(reg, onm.getOntologyScopeFactory()
+                .getNamespace(), onm.getOntologySpaceFactory());
         OntologyScope scope = null, scope2 = null;
         try {
-            scope = scf.createOntologyScope(scopeIri1, src1, src2);
-            scope2 = scf.createOntologyScope(scopeIri2, src2);
+            scope = scf.createOntologyScope(scopeId1, src1, src2);
+            scope2 = scf.createOntologyScope(scopeId2, src2);
             scope.setUp();
             reg.registerScope(scope);
             scope2.setUp();

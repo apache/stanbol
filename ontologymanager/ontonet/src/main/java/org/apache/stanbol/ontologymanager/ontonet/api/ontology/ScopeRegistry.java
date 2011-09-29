@@ -49,7 +49,7 @@ public interface ScopeRegistry {
 	 * @return true iff an ontology scope with ID <code>scopeID</code> is
 	 *         registered.
 	 */
-    boolean containsScope(IRI scopeID);
+    boolean containsScope(String scopeID);
 
 	/**
 	 * Removes an ontology scope from this registry, thus deactivating the scope
@@ -76,11 +76,11 @@ public interface ScopeRegistry {
 	 * @return the ontology scope with that ID, or null if no scope with such ID
 	 *         is registered
 	 */
-    OntologyScope getScope(IRI scopeID);
+    OntologyScope getScope(String scopeID);
 
-	void setScopeActive(IRI scopeID, boolean active);
+	void setScopeActive(String scopeID, boolean active);
 
-	boolean isScopeActive(IRI scopeID);
+	boolean isScopeActive(String scopeID);
 
 	Set<OntologyScope> getActiveScopes();
 

@@ -91,7 +91,7 @@ public class SessionResource extends BaseStanbolResource {
 
             ScopeRegistry scopeRegistry = onm.getScopeRegistry();
 
-            OntologyScope ontologyScope = scopeRegistry.getScope(scopeIRI);
+            OntologyScope ontologyScope = scopeRegistry.getScope(scope);
             SessionOntologySpace sos = ontologyScope.getSessionSpace(sessionIRI);
             try {
                 sos.addOntology(new RootOntologySource(ontology));
@@ -134,7 +134,7 @@ public class SessionResource extends BaseStanbolResource {
             IRI ontologyIRI = IRI.create(location);
             ScopeRegistry scopeRegistry = onm.getScopeRegistry();
 
-            OntologyScope ontologyScope = scopeRegistry.getScope(scopeIRI);
+            OntologyScope ontologyScope = scopeRegistry.getScope(scope);
             SessionOntologySpace sos = ontologyScope.getSessionSpace(sessionIRI);
             try {
                 sos.addOntology(new RootOntologyIRISource(ontologyIRI));
@@ -176,13 +176,13 @@ public class SessionResource extends BaseStanbolResource {
          * Then retrieve the ontology scope.
          */
         IRI scopeIRI = IRI.create(scope);
-        OntologyScope ontologyScope = scopeRegistry.getScope(scopeIRI);
+        OntologyScope ontologyScope = scopeRegistry.getScope(scope);
 
         /*
          * Finally associate the KReS session to the scope.
          */
         OntologySpaceFactory ontologySpaceFactory = onm.getOntologySpaceFactory();
-        SessionOntologySpace sessionOntologySpace = ontologySpaceFactory.createSessionOntologySpace(scopeIRI);
+        SessionOntologySpace sessionOntologySpace = ontologySpaceFactory.createSessionOntologySpace(scope);
         try {
             ontologyScope.addSessionSpace(sessionOntologySpace, ses.getID());
         } catch (UnmodifiableOntologySpaceException e) {
@@ -218,7 +218,7 @@ public class SessionResource extends BaseStanbolResource {
 
             ScopeRegistry scopeRegistry = onm.getScopeRegistry();
 
-            OntologyScope ontologyScope = scopeRegistry.getScope(scopeID);
+            OntologyScope ontologyScope = scopeRegistry.getScope(scope);
             SessionOntologySpace sos = ontologyScope.getSessionSpace(sessionID);
 
             try {

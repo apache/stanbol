@@ -39,13 +39,13 @@ public class OntologyIndexImpl implements OntologyIndex {
     /*
      * We only use IRIs, so the actual scopes can get garbage-collected once they are deregistered.
      */
-    private Map<IRI,Set<IRI>> ontScopeMap;
+    private Map<IRI,Set<String>> ontScopeMap;
 
     private ScopeRegistry scopeRegistry;
 
     public OntologyIndexImpl(ONManager onm) {
 
-        ontScopeMap = new HashMap<IRI,Set<IRI>>();
+        ontScopeMap = new HashMap<IRI,Set<String>>();
         if (onm == null) this.scopeRegistry = new ScopeRegistryImpl();
         else {
             this.onm = onm;
@@ -62,8 +62,8 @@ public class OntologyIndexImpl implements OntologyIndex {
     private void addScopeOntologies(OntologyScope scope) {
         for (OWLOntology o : getOntologiesForScope(scope)) {
             IRI ontid = o.getOntologyID().getOntologyIRI();
-            Set<IRI> scopez = ontScopeMap.get(ontid);
-            if (scopez == null) scopez = new HashSet<IRI>();
+            Set<String> scopez = ontScopeMap.get(ontid);
+            if (scopez == null) scopez = new HashSet<String>();
             scopez.add(scope.getID());
             ontScopeMap.put(ontid, scopez);
         }
@@ -93,7 +93,7 @@ public class OntologyIndexImpl implements OntologyIndex {
 
     @Override
     public OWLOntology getOntology(IRI ontologyIri) {
-        Set<IRI> scopez = ontScopeMap.get(ontologyIri);
+        Set<String> scopez = ontScopeMap.get(ontologyIri);
         if (scopez == null || scopez.isEmpty()) return null;
         OWLOntology ont = null;
         OntologyScope scope = scopeRegistry.getScope(scopez.iterator().next());
@@ -109,7 +109,7 @@ public class OntologyIndexImpl implements OntologyIndex {
     }
 
     @Override
-    public OWLOntology getOntology(IRI ontologyIri, IRI scopeId) {
+    public OWLOntology getOntology(IRI ontologyIri, String scopeId) {
         OWLOntology ont = null;
         OntologyScope scope = scopeRegistry.getScope(scopeId);
         try {
@@ -124,37 +124,37 @@ public class OntologyIndexImpl implements OntologyIndex {
     }
 
     @Override
-    public Set<IRI> getReferencingScopes(IRI ontologyIRI, boolean includingSessionSpaces) {
+    public Set<String> getReferencingScopes(IRI ontologyIRI, boolean includingSessionSpaces) {
         return ontScopeMap.get(ontologyIRI);
     }
 
     @Override
     public boolean isOntologyLoaded(IRI ontologyIRI) {
-        Set<IRI> scopez = ontScopeMap.get(ontologyIRI);
+        Set<String> scopez = ontScopeMap.get(ontologyIRI);
         return scopez != null && !scopez.isEmpty();
     }
 
     @Override
-    public void onOntologyAdded(IRI scopeId, IRI addedOntology) {
+    public void onOntologyAdded(String scopeId, IRI addedOntology) {
         log.debug("Ontology " + addedOntology + " added to scope " + scopeId);
-        Set<IRI> scopez = ontScopeMap.get(addedOntology);
-        if (scopez == null) scopez = new HashSet<IRI>();
+        Set<String> scopez = ontScopeMap.get(addedOntology);
+        if (scopez == null) scopez = new HashSet<String>();
         scopez.add(scopeId);
         ontScopeMap.put(addedOntology, scopez);
-        Set<IRI> scopez2 = ontScopeMap.get(addedOntology);
+        Set<String> scopez2 = ontScopeMap.get(addedOntology);
         if (!scopez2.contains(scopeId)) log.warn("Addition was not reindexed!");
     }
 
     @Override
-    public void onOntologyRemoved(IRI scopeId, IRI removedOntology) {
+    public void onOntologyRemoved(String scopeId, IRI removedOntology) {
         log.debug("Removing ontology " + removedOntology + " from scope " + scopeId);
-        Set<IRI> scopez = ontScopeMap.get(removedOntology);
+        Set<String> scopez = ontScopeMap.get(removedOntology);
         if (scopez != null) {
             if (scopez.contains(scopeId)) scopez.remove(scopeId);
             else {
                 log.warn("The scope " + scopeId + " is not indexed");
             }
-            Set<IRI> scopez2 = ontScopeMap.get(removedOntology);
+            Set<String> scopez2 = ontScopeMap.get(removedOntology);
             if (scopez2.contains(scopeId))
             /**
              * FIXME This message is obscure
@@ -167,7 +167,7 @@ public class OntologyIndexImpl implements OntologyIndex {
         log.debug("Removing all ontologies from Scope " + scope);
         for (OWLOntology o : getOntologiesForScope(scope)) {
             IRI ontid = o.getOntologyID().getOntologyIRI();
-            Set<IRI> scopez = ontScopeMap.get(ontid);
+            Set<String> scopez = ontScopeMap.get(ontid);
             if (scopez != null) {
                 scopez.remove(scope.getID());
                 if (scopez.isEmpty()) ontScopeMap.remove(ontid);
@@ -211,7 +211,7 @@ public class OntologyIndexImpl implements OntologyIndex {
         Set<OntologyScope> scopez = scopeRegistry.getRegisteredScopes();
         for (String token : onm.getUrisToActivate()) {
             try {
-                IRI scopeId = IRI.create(token.trim());
+                String scopeId = token.trim();
                 scopeRegistry.setScopeActive(scopeId, true);
                 scopez.remove(scopeRegistry.getScope(scopeId));
                 log.info("KReS :: Ontology scope " + scopeId + " " + " activated.");

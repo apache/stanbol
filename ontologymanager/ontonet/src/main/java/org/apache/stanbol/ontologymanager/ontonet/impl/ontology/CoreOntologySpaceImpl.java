@@ -19,7 +19,6 @@ package org.apache.stanbol.ontologymanager.ontonet.impl.ontology;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
-import org.apache.stanbol.ontologymanager.ontonet.impl.util.StringUtils;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
@@ -30,17 +29,28 @@ public class CoreOntologySpaceImpl extends AbstractOntologySpaceImpl implements 
 
     public static final String SUFFIX = SpaceType.CORE.getIRISuffix();
 
-    public CoreOntologySpaceImpl(IRI scopeID, ClerezzaOntologyStorage storage) {
-
-        super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/" + SpaceType.CORE.getIRISuffix()),
+    public CoreOntologySpaceImpl(String scopeID, IRI namespace, ClerezzaOntologyStorage storage) {
+        super(/* IRI.create( */(scopeID!=null?scopeID:"") + "/" + SpaceType.CORE.getIRISuffix(), namespace/*
+                                                                                        * StringUtils.
+                                                                                        * stripIRITerminator
+                                                                                        * (namespace) + "/")
+                                                                                        */,
                 SpaceType.CORE/* , scopeID */, storage);
     }
 
-    public CoreOntologySpaceImpl(IRI scopeID,
+    public CoreOntologySpaceImpl(String scopeID,
+                                 IRI namespace,
                                  ClerezzaOntologyStorage storage,
                                  OWLOntologyManager ontologyManager) {
-        super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/" + SpaceType.CORE.getIRISuffix()),
-                SpaceType.CORE, /* scopeID, */storage, ontologyManager);
+        super(/* IRI.create( */(scopeID!=null?scopeID:"") + "/" + SpaceType.CORE.getIRISuffix(), namespace/*
+                                                                                        * StringUtils.
+                                                                                        * stripIRITerminator
+                                                                                        * (namespace) + "/")
+                                                                                        */, SpaceType.CORE, /*
+                                                                                                             * scopeID
+                                                                                                             * ,
+                                                                                                             */
+                storage, ontologyManager);
     }
 
     /**

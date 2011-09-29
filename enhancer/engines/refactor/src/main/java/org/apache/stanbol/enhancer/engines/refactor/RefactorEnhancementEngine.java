@@ -101,7 +101,7 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
      * will be configurable
      */
 
-    @Property(value = "http://incubator.apache.org/stanbol/enhancer/engines/refactor/scope")
+    @Property(value = "enhancer/engines/refactor")
     public static final String SCOPE = "engine.refactor.scope";
 
     @Property(value = "")
@@ -514,16 +514,17 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
             }
         };
 
-        IRI dulcifierScopeIRI = IRI.create((String) context.getProperties().get(SCOPE));
-
+//        IRI dulcifierScopeIRI = IRI.create((String) context.getProperties().get(SCOPE));
+String scopeId = (String) context.getProperties().get(SCOPE);
+        
         /*
          * The scope is created by the ScopeFactory or loaded from the scope registry of KReS
          */
         try {
-            scope = scopeFactory.createOntologyScope(dulcifierScopeIRI, oisbase);
+            scope = scopeFactory.createOntologyScope(scopeId/*dulcifierScopeIRI*/, oisbase);
         } catch (DuplicateIDException e) {
             ScopeRegistry scopeRegistry = onManager.getScopeRegistry();
-            scope = scopeRegistry.getScope(dulcifierScopeIRI);
+            scope = scopeRegistry.getScope(scopeId/*dulcifierScopeIRI*/);
         }
 
         /*

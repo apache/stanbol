@@ -18,15 +18,12 @@ package org.apache.stanbol.ontologymanager.ontonet.impl.ontology;
 
 import java.util.Random;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
-import org.apache.stanbol.ontologymanager.ontonet.impl.util.StringUtils;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
@@ -36,10 +33,17 @@ public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl implemen
 
     public static final String SUFFIX = SpaceType.SESSION.getIRISuffix();
 
-    public SessionOntologySpaceImpl(IRI scopeID, ClerezzaOntologyStorage store) {
+    private static String buildId(String scopeID) {
+        return (scopeID!=null?scopeID:"") + "/" + SpaceType.SESSION.getIRISuffix() + "-" + new Random().nextLong();
+    }
+
+    public SessionOntologySpaceImpl(String scopeID, IRI namespace, ClerezzaOntologyStorage store) {
         // FIXME : sync session id with session space ID
-        super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/" + SpaceType.SESSION.getIRISuffix()
-                         + "-" + new Random().nextLong()), SpaceType.SESSION, store/* , scopeID */);
+        super(buildId(scopeID), namespace
+        /*
+         * IRI.create(StringUtils.stripIRITerminator(scopeID) + "/" + SpaceType.SESSION.getIRISuffix() + "-" +
+         * new Random().nextLong())
+         */, SpaceType.SESSION, store/* , scopeID */);
 
         // IRI iri = IRI.create(StringUtils.stripIRITerminator(getID()) + "/root.owl");
         // try {
@@ -53,13 +57,17 @@ public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl implemen
         // }
     }
 
-    public SessionOntologySpaceImpl(IRI scopeID,
+    public SessionOntologySpaceImpl(String scopeID,
+                                    IRI namespace,
                                     ClerezzaOntologyStorage store,
                                     OWLOntologyManager ontologyManager) {
 
         // FIXME : sync session id with session space ID
-        super(IRI.create(StringUtils.stripIRITerminator(scopeID) + "/" + SpaceType.SESSION.getIRISuffix()
-                         + "-" + new Random().nextLong()), SpaceType.SESSION, store, /* scopeID, */
+        super(buildId(scopeID), namespace
+        /*
+         * IRI.create(StringUtils.stripIRITerminator(scopeID) + "/" + SpaceType.SESSION.getIRISuffix() + "-" +
+         * new Random().nextLong())
+         */, SpaceType.SESSION, store, /* scopeID, */
         ontologyManager);
 
         // Logger log = LoggerFactory.getLogger(getClass());
@@ -78,19 +86,19 @@ public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl implemen
     @Override
     public void attachSpace(OntologySpace space, boolean skipRoot) throws UnmodifiableOntologySpaceException {
         // FIXME re-implement!
-//        if (!(space instanceof SessionOntologySpace)) {
-//            OWLOntology o = space.getTopOntology();
-//            // This does the append thingy
-//            log.debug("Attaching " + o + " TO " + getTopOntology() + " ...");
-//            try {
-//                // It is in fact the addition of the core space top ontology to the
-//                // custom space, with import statements and all.
-//                addOntology(new RootOntologySource(o, null));
-//                // log.debug("ok");
-//            } catch (Exception ex) {
-//                log.error("FAILED", ex);
-//            }
-//        }
+        // if (!(space instanceof SessionOntologySpace)) {
+        // OWLOntology o = space.getTopOntology();
+        // // This does the append thingy
+        // log.debug("Attaching " + o + " TO " + getTopOntology() + " ...");
+        // try {
+        // // It is in fact the addition of the core space top ontology to the
+        // // custom space, with import statements and all.
+        // addOntology(new RootOntologySource(o, null));
+        // // log.debug("ok");
+        // } catch (Exception ex) {
+        // log.error("FAILED", ex);
+        // }
+        // }
     }
 
     @Override

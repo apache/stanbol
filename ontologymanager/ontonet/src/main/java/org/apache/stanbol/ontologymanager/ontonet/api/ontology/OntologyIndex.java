@@ -53,7 +53,7 @@ public interface OntologyIndex extends ScopeOntologyListener,
 	 * @param ontologyIri
 	 * @return
 	 */
-    OWLOntology getOntology(IRI ontologyIri, IRI scopeId);
+    OWLOntology getOntology(IRI ontologyIri, String scopeId);
 
 	/**
 	 * Returns the set of ontology scopes where an ontology with the specified
@@ -64,7 +64,7 @@ public interface OntologyIndex extends ScopeOntologyListener,
 	 * @param includingSessionSpaces
 	 * @return
 	 */
-    Set<IRI> getReferencingScopes(IRI ontologyIri,
+    Set<String> getReferencingScopes(IRI ontologyIri,
             boolean includingSessionSpaces);
 
 	/**

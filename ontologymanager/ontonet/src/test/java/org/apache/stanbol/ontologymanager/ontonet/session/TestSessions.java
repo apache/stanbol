@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.ontonet.session;
 
 import static org.junit.Assert.*;
@@ -42,149 +42,140 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-
 public class TestSessions {
 
-	public static IRI baseIri = IRI.create(Constants.PEANUTS_MAIN_BASE),
-			baseIri2 = IRI.create(Constants.PEANUTS_MINOR_BASE),
-			scopeIri1 = IRI.create("http://kres.iks-project.eu/scope/Ranma12"),
-			scopeIri2 = IRI
-					.create("http://kres.iks-project.eu/scope/HokutoNoKen"),
-			scopeIri3 = IRI.create("http://kres.iks-project.eu/scope/Doraemon");
+    public static IRI baseIri = IRI.create(Constants.PEANUTS_MAIN_BASE), baseIri2 = IRI
+            .create(Constants.PEANUTS_MINOR_BASE);
 
-	private static OntologyScopeFactory scopeFactory = null;
+    public static String scopeId1 = "Ranma12", scopeId2 = "HokutoNoKen", scopeId3 = "Doraemon";
 
-	private static ScopeRegistry scopeRegistry = null;
-	
-	private static SessionManager sesmgr = null;
+    private static OntologyScopeFactory scopeFactory = null;
 
-	private static OntologySpaceFactory spaceFactory = null;
+    private static ScopeRegistry scopeRegistry = null;
 
-	private static OntologyInputSource src1 = null, src2 = null;
+    private static SessionManager sesmgr = null;
 
-	@BeforeClass
-	public static void setup() {
-		// An ONManagerImpl with no store and default settings
-		ONManager onm = new ONManagerImpl(null,null, new Hashtable<String, Object>());
-		sesmgr = onm.getSessionManager();
-		scopeFactory = onm.getOntologyScopeFactory();
-		spaceFactory = onm.getOntologySpaceFactory();
-		scopeRegistry = onm.getScopeRegistry();
-		if (spaceFactory == null)
-			fail("Could not instantiate ontology space factory");
-		if (scopeFactory == null)
-			fail("Could not instantiate ontology scope factory");
-		OWLOntologyManager mgr = onm.getOntologyManagerFactory().createOntologyManager(true);
-		try {
-			src1 = new RootOntologySource(mgr.createOntology(baseIri), null);
-			src2 = new RootOntologySource(mgr.createOntology(baseIri2), null);
-		} catch (OWLOntologyCreationException e) {
-			fail("Could not setup ontology with base IRI " + Constants.PEANUTS_MAIN_BASE);
-		}
-	}
+    private static OntologySpaceFactory spaceFactory = null;
 
-	@Test
-	public void testCreateSessionSpaceManual() throws Exception {
-		OntologyScope scope = null;
-		try {
-			// we don't register it
-			scope = scopeFactory.createOntologyScope(scopeIri1, src1, src2);
-			scope.setUp();
-		} catch (DuplicateIDException e) {
-			fail("Unexpected DuplicateIDException was caught while testing scope "
-					+ e.getDulicateID());
-		}
-		assertNotNull(scope);
-		Session ses = sesmgr.createSession();
-		assertTrue(scope.getSessionSpaces().isEmpty());
-		scope.addSessionSpace(spaceFactory
-				.createSessionOntologySpace(scopeIri1), ses.getID());
-		assertFalse(scope.getSessionSpaces().isEmpty());
-	}
+    private static OntologyInputSource src1 = null, src2 = null;
 
-	@Test
-	public void testCreateSessionSpaceAutomatic() {
-		OntologyScope scope1 = null, scope2 = null, scope3 = null;
-		try {
-			scope1 = scopeFactory.createOntologyScope(scopeIri1, src1, src2);
-			scopeRegistry.registerScope(scope1);
-			scope2 = scopeFactory.createOntologyScope(scopeIri2, src2, src1);
-			scopeRegistry.registerScope(scope2);
-			scope3 = scopeFactory.createOntologyScope(scopeIri3, src2, src2);
-			scopeRegistry.registerScope(scope3);
-			// We do all activations after registering, otherwise the component
-			// property value will override these activations.
-			scopeRegistry.setScopeActive(scopeIri1, true);
-			scopeRegistry.setScopeActive(scopeIri2, false);
-			scopeRegistry.setScopeActive(scopeIri3, true);
-		} catch (DuplicateIDException e) {
-			fail("Unexpected DuplicateIDException was caught while testing scope "
-					+ e.getDulicateID());
-		}
-		Session ses = sesmgr.createSession();
-		IRI sesid = ses.getID();
-		assertFalse(scope1.getSessionSpaces().isEmpty());
-		assertNotNull(scope1.getSessionSpace(sesid));
-		assertFalse(scope3.getSessionSpaces().isEmpty());
-		assertNull(scope2.getSessionSpace(sesid));
-		assertNotNull(scope3.getSessionSpace(sesid));
-	}
+    @BeforeClass
+    public static void setup() {
+        // An ONManagerImpl with no store and default settings
+        ONManager onm = new ONManagerImpl(null, null, new Hashtable<String,Object>());
+        sesmgr = onm.getSessionManager();
+        scopeFactory = onm.getOntologyScopeFactory();
+        spaceFactory = onm.getOntologySpaceFactory();
+        scopeRegistry = onm.getScopeRegistry();
+        if (spaceFactory == null) fail("Could not instantiate ontology space factory");
+        if (scopeFactory == null) fail("Could not instantiate ontology scope factory");
+        OWLOntologyManager mgr = onm.getOntologyManagerFactory().createOntologyManager(true);
+        try {
+            src1 = new RootOntologySource(mgr.createOntology(baseIri), null);
+            src2 = new RootOntologySource(mgr.createOntology(baseIri2), null);
+        } catch (OWLOntologyCreationException e) {
+            fail("Could not setup ontology with base IRI " + Constants.PEANUTS_MAIN_BASE);
+        }
+    }
 
-	@Test
-	public void testRegisterSession() {
-		int before = sesmgr.getRegisteredSessionIDs().size();
-		Session ses = sesmgr.createSession();
-		assertNotNull(ses);
-		assertEquals(before + 1, sesmgr.getRegisteredSessionIDs().size());
-	}
+    @Test
+    public void testCreateSessionSpaceManual() throws Exception {
+        OntologyScope scope = null;
+        try {
+            // we don't register it
+            scope = scopeFactory.createOntologyScope(scopeId1, src1, src2);
+            scope.setUp();
+        } catch (DuplicateIDException e) {
+            fail("Unexpected DuplicateIDException was caught while testing scope " + e.getDulicateID());
+        }
+        assertNotNull(scope);
+        Session ses = sesmgr.createSession();
+        assertTrue(scope.getSessionSpaces().isEmpty());
+        scope.addSessionSpace(spaceFactory.createSessionOntologySpace(scopeId1), ses.getID());
+        assertFalse(scope.getSessionSpaces().isEmpty());
+    }
 
-	@Test
-	public void testSessionCreationDestruction() {
-		int size = 100;
-		int initialSize = sesmgr.getRegisteredSessionIDs().size();
-		Set<Session> sessions = new HashSet<Session>();
-		// Create and open many sessions.
-		synchronized (sesmgr) {
-			for (int i = 0; i < size; i++) {
-				Session ses = sesmgr.createSession();
-				try {
-					ses.open();
-				} catch (NonReferenceableSessionException e) {
-					fail("Test method tried to open nonreferenceable session.");
-				}
-				sessions.add(ses);
-			}
-			// Check that 500 sessions have been created
-			assertEquals(initialSize + size, sesmgr.getRegisteredSessionIDs()
-					.size());
-		}
-		boolean open = true;
-		for (Session ses : sessions)
-			open &= ses.getSessionState() == State.ACTIVE;
-		// Check that all created sessions have been opened
-		assertTrue(open);
-		// Kill 'em all, to quote Metallica
-		synchronized (sesmgr) {
-			for (Session ses : sessions)
-				sesmgr.destroySession(ses.getID());
-			assertEquals(initialSize, sesmgr.getRegisteredSessionIDs().size());
-		}
-		// Check that they are all zombies
-		boolean zombi = true;
-		for (Session ses : sessions)
-			zombi &= ses.getSessionState() == State.ZOMBIE;
-		assertTrue(zombi);
-		// Try to resurrect them (hopefully failing)
-		boolean resurrect = false;
-		for (Session ses : sessions)
-			try {
-				ses.open();
-				resurrect |= true;
-			} catch (NonReferenceableSessionException e) {
-				resurrect |= false;
-				continue;
-			}
-		assertFalse(resurrect);
-	}
+    @Test
+    public void testCreateSessionSpaceAutomatic() {
+        OntologyScope scope1 = null, scope2 = null, scope3 = null;
+        try {
+            scope1 = scopeFactory.createOntologyScope(scopeId1, src1, src2);
+            scopeRegistry.registerScope(scope1);
+            scope2 = scopeFactory.createOntologyScope(scopeId2, src2, src1);
+            scopeRegistry.registerScope(scope2);
+            scope3 = scopeFactory.createOntologyScope(scopeId3, src2, src2);
+            scopeRegistry.registerScope(scope3);
+            // We do all activations after registering, otherwise the component
+            // property value will override these activations.
+            scopeRegistry.setScopeActive(scopeId1, true);
+            scopeRegistry.setScopeActive(scopeId2, false);
+            scopeRegistry.setScopeActive(scopeId3, true);
+        } catch (DuplicateIDException e) {
+            fail("Unexpected DuplicateIDException was caught while testing scope " + e.getDulicateID());
+        }
+        Session ses = sesmgr.createSession();
+        IRI sesid = ses.getID();
+        assertFalse(scope1.getSessionSpaces().isEmpty());
+        assertNotNull(scope1.getSessionSpace(sesid));
+        assertFalse(scope3.getSessionSpaces().isEmpty());
+        assertNull(scope2.getSessionSpace(sesid));
+        assertNotNull(scope3.getSessionSpace(sesid));
+    }
+
+    @Test
+    public void testRegisterSession() {
+        int before = sesmgr.getRegisteredSessionIDs().size();
+        Session ses = sesmgr.createSession();
+        assertNotNull(ses);
+        assertEquals(before + 1, sesmgr.getRegisteredSessionIDs().size());
+    }
+
+    @Test
+    public void testSessionCreationDestruction() {
+        int size = 100;
+        int initialSize = sesmgr.getRegisteredSessionIDs().size();
+        Set<Session> sessions = new HashSet<Session>();
+        // Create and open many sessions.
+        synchronized (sesmgr) {
+            for (int i = 0; i < size; i++) {
+                Session ses = sesmgr.createSession();
+                try {
+                    ses.open();
+                } catch (NonReferenceableSessionException e) {
+                    fail("Test method tried to open nonreferenceable session.");
+                }
+                sessions.add(ses);
+            }
+            // Check that 500 sessions have been created
+            assertEquals(initialSize + size, sesmgr.getRegisteredSessionIDs().size());
+        }
+        boolean open = true;
+        for (Session ses : sessions)
+            open &= ses.getSessionState() == State.ACTIVE;
+        // Check that all created sessions have been opened
+        assertTrue(open);
+        // Kill 'em all, to quote Metallica
+        synchronized (sesmgr) {
+            for (Session ses : sessions)
+                sesmgr.destroySession(ses.getID());
+            assertEquals(initialSize, sesmgr.getRegisteredSessionIDs().size());
+        }
+        // Check that they are all zombies
+        boolean zombi = true;
+        for (Session ses : sessions)
+            zombi &= ses.getSessionState() == State.ZOMBIE;
+        assertTrue(zombi);
+        // Try to resurrect them (hopefully failing)
+        boolean resurrect = false;
+        for (Session ses : sessions)
+            try {
+                ses.open();
+                resurrect |= true;
+            } catch (NonReferenceableSessionException e) {
+                resurrect |= false;
+                continue;
+            }
+        assertFalse(resurrect);
+    }
 
 }

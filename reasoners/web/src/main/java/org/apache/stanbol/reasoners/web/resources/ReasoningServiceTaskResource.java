@@ -602,7 +602,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
             // We must know both scope and session
             IRI scopeIRI = IRI.create(scopeID);
 
-            OntologyScope scope = onm.getScopeRegistry().getScope(scopeIRI);
+            OntologyScope scope = onm.getScopeRegistry().getScope(scopeID);
             if (scope == null) {
                 log.error("Scope {} cannot be retrieved", sessionID);
                 throw new WebApplicationException(Response.Status.NOT_FOUND);

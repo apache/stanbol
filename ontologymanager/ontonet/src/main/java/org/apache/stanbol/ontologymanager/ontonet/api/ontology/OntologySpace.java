@@ -62,7 +62,15 @@ public interface OntologySpace {
      * 
      * @return the URI that identifies this ontology space
      */
-    IRI getID();
+    String getID();
+
+    /**
+     * The namespace can change dynamically (e.g. if the ontology network is relocated), so it is not part of
+     * the scope identifier (although its concatenation with the identifier will still be unique).
+     * 
+     * @param namespace
+     */
+    IRI getNamespace();
 
     /**
      * Returns the ontologies managed by this ontology space.
@@ -125,6 +133,16 @@ public interface OntologySpace {
     void removeOntology(OntologyInputSource src) throws OntologySpaceModificationException;
 
     void removeOntologySpaceListener(OntologySpaceListener listener);
+
+    /**
+     * The namespace can be changed dynamically (e.g. if the ontology network is relocated).
+     * 
+     * @param namespace
+     *            Must end with a slash character. If the IRI ends with a has, and
+     *            {@link IllegalArgumentException} will be thrown. If it ends with neither, a slash will be
+     *            added.
+     */
+    void setNamespace(IRI namespace);
 
     void setSilentMissingOntologyHandling(boolean silent);
 

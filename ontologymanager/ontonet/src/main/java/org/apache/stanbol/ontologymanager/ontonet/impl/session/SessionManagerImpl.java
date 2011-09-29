@@ -107,7 +107,7 @@ public class SessionManagerImpl implements SessionManager {
             try {
                 session = createSession(idgen.createSessionID(exclude));
             } catch (DuplicateSessionIDException e) {
-                exclude.add(e.getDulicateID());
+                exclude.add(IRI.create(e.getDulicateID()));
                 continue;
             }
         return session;
@@ -121,7 +121,7 @@ public class SessionManagerImpl implements SessionManager {
      */
     @Override
     public synchronized Session createSession(IRI sessionID) throws DuplicateSessionIDException {
-        if (sessionsByID.containsKey(sessionID)) throw new DuplicateSessionIDException(sessionID);
+        if (sessionsByID.containsKey(sessionID)) throw new DuplicateSessionIDException(sessionID.toString());
         Session session = new SessionImpl(sessionID);
         addSession(session);
         fireSessionCreated(session);

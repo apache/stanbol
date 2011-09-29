@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.ontonet.impl.ontology;
 
 import java.util.Collection;
@@ -28,6 +28,8 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeEventListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.semanticweb.owlapi.model.IRI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class that instantiates default implementations of ontology scope.
@@ -37,64 +39,80 @@ import org.semanticweb.owlapi.model.IRI;
  */
 public class OntologyScopeFactoryImpl implements OntologyScopeFactory {
 
-	private Set<ScopeEventListener> listeners = new HashSet<ScopeEventListener>();
+    private Set<ScopeEventListener> listeners = new HashSet<ScopeEventListener>();
 
-	protected ScopeRegistry registry;
-	protected OntologySpaceFactory spaceFactory;
-	
-	public OntologyScopeFactoryImpl(ScopeRegistry registry, OntologySpaceFactory spaceFactory) {
-		this.registry = registry;
-		this.spaceFactory = spaceFactory;
-	}
-	
-	@Override
-	public void addScopeEventListener(ScopeEventListener listener) {
-		listeners.add(listener);
-	}
+    private Logger log = LoggerFactory.getLogger(getClass());
 
-	@Override
-	public void clearScopeEventListeners() {
-		listeners.clear();
-	}
+    protected IRI namespace;
+    protected ScopeRegistry registry;
+    protected OntologySpaceFactory spaceFactory;
 
-	@Override
-	public OntologyScope createOntologyScope(IRI scopeID,
-			OntologyInputSource coreSource) throws DuplicateIDException {
+    public OntologyScopeFactoryImpl(ScopeRegistry registry, IRI namespace, OntologySpaceFactory spaceFactory) {
 
-		return createOntologyScope(scopeID, coreSource, null);
-	}
+        this.registry = registry;
+        this.spaceFactory = spaceFactory;
+        this.namespace = namespace;
 
-	@Override
-	public OntologyScope createOntologyScope(IRI scopeID,
-			OntologyInputSource coreSource, OntologyInputSource customSource)
-			throws DuplicateIDException {
+        if (!getNamespace().equals(spaceFactory.getNamespace())) log
+                .warn(
+                    "Scope factory namespace {} differs from space factory namespace {} . This is not illegal but strongly discouraged.",
+                    getNamespace(), spaceFactory.getNamespace());
+    }
 
-		if (registry.containsScope(scopeID))
-			throw new DuplicateIDException(scopeID,
-					"Scope registry already contains ontology scope with ID "
-							+ scopeID);
+    @Override
+    public void addScopeEventListener(ScopeEventListener listener) {
+        listeners.add(listener);
+    }
 
-		OntologyScope scope = new OntologyScopeImpl(scopeID,spaceFactory, coreSource,
-				customSource);
-		// scope.addOntologyScopeListener(ONManager.get().getOntologyIndex());
-		// TODO : manage scopes with null core ontologies
-		fireScopeCreated(scope);
-		return scope;
-	}
+    @Override
+    public void clearScopeEventListeners() {
+        listeners.clear();
+    }
 
-	protected void fireScopeCreated(OntologyScope scope) {
-		for (ScopeEventListener l : listeners)
-			l.scopeCreated(scope);
-	}
+    @Override
+    public OntologyScope createOntologyScope(String scopeID, OntologyInputSource coreSource) throws DuplicateIDException {
 
-	@Override
-	public Collection<ScopeEventListener> getScopeEventListeners() {
-		return listeners;
-	}
+        return createOntologyScope(scopeID, coreSource, null);
+    }
 
-	@Override
-	public void removeScopeEventListener(ScopeEventListener listener) {
-		listeners.remove(listener);
-	}
+    @Override
+    public OntologyScope createOntologyScope(String scopeID,
+                                             OntologyInputSource coreSource,
+                                             OntologyInputSource customSource) throws DuplicateIDException {
+
+        if (registry.containsScope(scopeID)) throw new DuplicateIDException(scopeID,
+                "Scope registry already contains ontology scope with ID " + scopeID);
+
+        OntologyScope scope = new OntologyScopeImpl(scopeID, getNamespace(),spaceFactory, coreSource, customSource);
+        // scope.addOntologyScopeListener(ONManager.get().getOntologyIndex());
+        // TODO : manage scopes with null core ontologies
+        fireScopeCreated(scope);
+        return scope;
+    }
+
+    protected void fireScopeCreated(OntologyScope scope) {
+        for (ScopeEventListener l : listeners)
+            l.scopeCreated(scope);
+    }
+
+    @Override
+    public Collection<ScopeEventListener> getScopeEventListeners() {
+        return listeners;
+    }
+
+    @Override
+    public void removeScopeEventListener(ScopeEventListener listener) {
+        listeners.remove(listener);
+    }
+
+    @Override
+    public IRI getNamespace() {
+        return this.namespace;
+    }
+
+    @Override
+    public void setNamespace(IRI namespace) {
+        this.namespace = namespace;
+    }
 
 }

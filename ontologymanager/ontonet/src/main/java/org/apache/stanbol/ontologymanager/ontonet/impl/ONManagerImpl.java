@@ -103,7 +103,7 @@ public class ONManagerImpl implements ONManager {
          * @param locationIri
          */
         public synchronized void addToCustomSpace(String scopeID, String[] locationIris) {
-            OntologyScope scope = getScopeRegistry().getScope(IRI.create(scopeID));
+            OntologyScope scope = getScopeRegistry().getScope(scopeID);
 
             scope.getCustomSpace().tearDown();
             for (String locationIri : locationIris) {
@@ -136,7 +136,7 @@ public class ONManagerImpl implements ONManager {
 
     public static final String _ID_DEFAULT = "ontonet";
 
-    public static final String _ONTOLOGY_NETWORK_NS_DEFAULT = "http://stanbol.apache.org/";
+    public static final String _ONTOLOGY_NETWORK_NS_DEFAULT = "http://localhost:8080/ontonet/ontology/";
 
     @Property(name = ONManager.CONFIG_ONTOLOGY_PATH, value = _CONFIG_ONTOLOGY_PATH_DEFAULT)
     private String configPath;
@@ -383,8 +383,8 @@ public class ONManagerImpl implements ONManager {
         // Now create everything that depends on the Storage object.
 
         // These may require the OWL cache manager
-        ontologySpaceFactory = new OntologySpaceFactoryImpl(scopeRegistry, storage, offline);
-        ontologyScopeFactory = new OntologyScopeFactoryImpl(scopeRegistry, ontologySpaceFactory);
+        ontologySpaceFactory = new OntologySpaceFactoryImpl(scopeRegistry, storage, offline,IRI.create(getOntologyNetworkNamespace()));
+        ontologyScopeFactory = new OntologyScopeFactoryImpl(scopeRegistry, IRI.create(getOntologyNetworkNamespace()),ontologySpaceFactory);
         ontologyScopeFactory.addScopeEventListener(oIndex);
 
         // // This requires the OWL cache manager
@@ -426,9 +426,8 @@ public class ONManagerImpl implements ONManager {
                 }
 
                 // Create the scope
-                IRI iri = IRI.create(scopeIRI);
                 OntologyScope sc = null;
-                sc = ontologyScopeFactory.createOntologyScope(iri, new BlankOntologySource());
+                sc = ontologyScopeFactory.createOntologyScope(scopeIRI, new BlankOntologySource());
 
                 // Populate the core space
                 if (cores.length > 0) {
@@ -461,8 +460,8 @@ public class ONManagerImpl implements ONManager {
 
             for (String scopeID : toActivate) {
                 try {
-                    IRI scopeId = IRI.create(scopeID.trim());
-                    scopeRegistry.setScopeActive(scopeId, true);
+                    scopeID = scopeID.trim();
+                    scopeRegistry.setScopeActive(scopeID, true);
                     log.info("Ontology scope " + scopeID + " activated.");
                 } catch (NoSuchScopeException ex) {
                     log.warn("Tried to activate unavailable scope " + scopeID + ".");

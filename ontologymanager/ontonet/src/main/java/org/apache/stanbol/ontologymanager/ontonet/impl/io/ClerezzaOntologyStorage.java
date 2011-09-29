@@ -116,22 +116,21 @@ public class ClerezzaOntologyStorage {
         // TODO Auto-generated method stub
     }
 
+    public MGraph getGraph(UriRef graphId) throws NoSuchStoreException {
+        if (tcManager != null) return tcManager.getMGraph(graphId);
+        else throw new NoSuchStoreException("No store registered or activated in the environment.");
+    }
+
     public OWLOntology getGraph(IRI ontologyID) throws NoSuchStoreException {
+        MGraph mGraph = getGraph(new UriRef(ontologyID.toString()));
         OWLOntology ontology = null;
-
-        if (tcManager != null) {
-            MGraph mGraph = tcManager.getMGraph(new UriRef(ontologyID.toString()));
-            JenaToOwlConvert jowl = new JenaToOwlConvert();
-            OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM, FileManager.get()
-                    .loadModel(URI));
-            ontModel.add(JenaToClerezzaConverter.clerezzaMGraphToJenaModel(mGraph));
-            ontology = jowl.ModelJenaToOwlConvert(ontModel, "RDF/XML");
-            // ontology =
-            // OWLAPIToClerezzaConverter.clerezzaMGraphToOWLOntology(mGraph);
-
-        } else {
-            throw new NoSuchStoreException("No store registered or activated in the environment.");
-        }
+        JenaToOwlConvert jowl = new JenaToOwlConvert();
+        OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM, FileManager.get()
+                .loadModel(URI));
+        ontModel.add(JenaToClerezzaConverter.clerezzaMGraphToJenaModel(mGraph));
+        ontology = jowl.ModelJenaToOwlConvert(ontModel, "RDF/XML");
+        // ontology =
+        // OWLAPIToClerezzaConverter.clerezzaMGraphToOWLOntology(mGraph);
         return ontology;
     }
 
@@ -141,9 +140,8 @@ public class ClerezzaOntologyStorage {
         Set<UriRef> uriRefs = tcManager.listTripleCollections();
         if (uriRefs != null) {
             iris = new HashSet<IRI>();
-            for (UriRef uriRef : uriRefs) {
+            for (UriRef uriRef : uriRefs)
                 iris.add(IRI.create(uriRef.toString()));
-            }
         }
         return iris;
 

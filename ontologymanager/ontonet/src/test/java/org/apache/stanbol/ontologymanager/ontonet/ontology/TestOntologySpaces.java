@@ -26,13 +26,16 @@ import java.util.Hashtable;
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.ParentPathInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CustomOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
@@ -52,8 +55,9 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 public class TestOntologySpaces {
 
     public static IRI baseIri = IRI.create(Constants.PEANUTS_MAIN_BASE), baseIri2 = IRI
-            .create(Constants.PEANUTS_MINOR_BASE), scopeIri = IRI
-            .create("http://stanbol.apache.org/scope/Comics");
+            .create(Constants.PEANUTS_MINOR_BASE);
+
+    String scopeId = "Comics";
 
     private static OWLAxiom linusIsHuman = null;
 
@@ -63,7 +67,7 @@ public class TestOntologySpaces {
 
     private static OntologyInputSource inMemorySrc, minorSrc, dropSrc, nonexSrc;
 
-    private static OntologySpaceFactory spaceFactory;
+    private static OntologySpaceFactory factory;
 
     private static OfflineConfiguration offline;
 
@@ -83,8 +87,8 @@ public class TestOntologySpaces {
 
         // An ONManagerImpl with no store and default settings
         onm = new ONManagerImpl(null, null, offline, new Hashtable<String,Object>());
-        spaceFactory = onm.getOntologySpaceFactory();
-        if (spaceFactory == null) fail("Could not instantiate ontology space factory");
+        factory = onm.getOntologySpaceFactory();
+        if (factory == null) fail("Could not instantiate ontology space factory");
 
         OWLOntologyManager mgr = OWLOntologyManagerFactory.createOWLOntologyManager(offline
                 .getOntologySourceLocations().toArray(new IRI[0]));
@@ -107,12 +111,87 @@ public class TestOntologySpaces {
 
     }
 
+    /**
+     * Checks whether attempting to create ontology spaces with invalid identifiers or namespaces results in
+     * the appropriate exceptions being thrown.
+     * 
+     * @throws Exception
+     *             if an unexpected error occurs.
+     */
+    @Test
+    public void testIdentifiers() throws Exception {
+        OntologySpace shouldBeNull = null, shouldBeNotNull = null;
+
+        /* First test space identifiers. */
+
+        // Null identifier (invalid).
+        try {
+            shouldBeNull = factory.createOntologySpace(null, SpaceType.CORE, new BlankOntologySource());
+            fail("Expected IllegalArgumentException not thrown despite null scope identifier.");
+        } catch (IllegalArgumentException ex) {}
+        assertNull(shouldBeNull);
+
+        // More than one slash in identifier (invalid).
+        try {
+            shouldBeNull = factory.createOntologySpace("Sc0/p3", SpaceType.CORE, new BlankOntologySource());
+            fail("Expected IllegalArgumentException not thrown despite null scope identifier.");
+        } catch (IllegalArgumentException ex) {}
+        assertNull(shouldBeNull);
+
+        /* Now test namespaces. */
+
+        // Null namespace (invalid).
+        factory.setNamespace(null);
+        try {
+            shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE, new BlankOntologySource());
+            fail("Expected IllegalArgumentException not thrown despite null OntoNet namespace.");
+        } catch (IllegalArgumentException ex) {}
+        assertNull(shouldBeNull);
+
+        // Namespace with query (invalid).
+        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology/?query=true"));
+        try {
+            shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE, new BlankOntologySource());
+            fail("Expected IllegalArgumentException not thrown despite query in OntoNet namespace.");
+        } catch (IllegalArgumentException ex) {}
+        assertNull(shouldBeNull);
+
+        // Namespace with fragment (invalid).
+        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology#fragment"));
+        try {
+            shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE, new BlankOntologySource());
+            fail("Expected IllegalArgumentException not thrown despite fragment in OntoNet namespace.");
+        } catch (IllegalArgumentException ex) {}
+        assertNull(shouldBeNull);
+
+        // Namespace ending with hash (invalid).
+        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology#"));
+        try {
+            shouldBeNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE, new BlankOntologySource());
+            fail("Expected IllegalArgumentException not thrown despite fragment in OntoNet namespace.");
+        } catch (IllegalArgumentException ex) {}
+        assertNull(shouldBeNull);
+
+        // Namespace ending with neither (valid, should automatically add slash).
+        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology"));
+        shouldBeNotNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE, new BlankOntologySource());
+        assertNotNull(shouldBeNotNull);
+        assertTrue(shouldBeNotNull.getNamespace().toString().endsWith("/"));
+
+        shouldBeNotNull = null;
+
+        // Namespace ending with slash (valid).
+        factory.setNamespace(IRI.create("http://stanbol.apache.org/ontology/"));
+        shouldBeNotNull = factory.createOntologySpace("Sc0p3", SpaceType.CORE, new BlankOntologySource());
+        assertNotNull(shouldBeNotNull);
+    }
+
     @Test
     public void testAddOntology() throws Exception {
         CustomOntologySpace space = null;
         IRI logicalId = nonexSrc.getRootOntology().getOntologyID().getOntologyIRI();
 
-        space = spaceFactory.createCustomOntologySpace(scopeIri, dropSrc);
+        space = factory.createCustomOntologySpace(scopeId, dropSrc);
         space.addOntology(minorSrc);
         space.addOntology(nonexSrc);
 
@@ -123,7 +202,7 @@ public class TestOntologySpaces {
 
     @Test
     public void testCoreLock() throws Exception {
-        CoreOntologySpace space = spaceFactory.createCoreOntologySpace(scopeIri, inMemorySrc);
+        CoreOntologySpace space = factory.createCoreOntologySpace(scopeId, inMemorySrc);
         space.setUp();
         try {
             space.addOntology(minorSrc);
@@ -135,14 +214,14 @@ public class TestOntologySpaces {
 
     @Test
     public void testCreateSpace() throws Exception {
-        CustomOntologySpace space = spaceFactory.createCustomOntologySpace(scopeIri, dropSrc);
+        CustomOntologySpace space = factory.createCustomOntologySpace(scopeId, dropSrc);
         IRI logicalId = dropSrc.getRootOntology().getOntologyID().getOntologyIRI();
         assertTrue(space.containsOntology(logicalId));
     }
 
     @Test
     public void testCustomLock() throws Exception {
-        CustomOntologySpace space = spaceFactory.createCustomOntologySpace(scopeIri, inMemorySrc);
+        CustomOntologySpace space = factory.createCustomOntologySpace(scopeId, inMemorySrc);
         space.setUp();
         try {
             space.addOntology(minorSrc);
@@ -155,7 +234,7 @@ public class TestOntologySpaces {
     @Test
     public void testRemoveCustomOntology() throws Exception {
         CustomOntologySpace space = null;
-        space = spaceFactory.createCustomOntologySpace(scopeIri, dropSrc);
+        space = factory.createCustomOntologySpace(scopeId, dropSrc);
         IRI dropId = dropSrc.getRootOntology().getOntologyID().getOntologyIRI();
         IRI nonexId = nonexSrc.getRootOntology().getOntologyID().getOntologyIRI();
 
@@ -174,7 +253,7 @@ public class TestOntologySpaces {
 
     @Test
     public void testSessionModification() throws Exception {
-        SessionOntologySpace space = spaceFactory.createSessionOntologySpace(scopeIri);
+        SessionOntologySpace space = factory.createSessionOntologySpace(scopeId);
         space.setUp();
         try {
             // First add an in-memory ontology with a few axioms.

@@ -35,15 +35,15 @@ public class DuplicateSessionIDException extends DuplicateIDException {
 	 */
 	private static final long serialVersionUID = 3548783975623103351L;
 
-	public DuplicateSessionIDException(IRI dupe) {
+	public DuplicateSessionIDException(String dupe) {
 		super(dupe);
 	}
 
-	public DuplicateSessionIDException(IRI dupe, String message) {
+	public DuplicateSessionIDException(String dupe, String message) {
 		super(dupe, message);
 	}
 
-	public DuplicateSessionIDException(IRI dupe, Throwable cause) {
+	public DuplicateSessionIDException(String dupe, Throwable cause) {
 		super(dupe, cause);
 	}
 

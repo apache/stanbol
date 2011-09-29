@@ -46,6 +46,8 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 
     protected ScopeRegistry registry;
 
+    protected IRI namespace;
+
     /*
      * The ClerezzaOntologyStorage (local to OntoNet) has been changed with PersistenceStore (general from
      * Stanbol)
@@ -54,10 +56,12 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 
     public OntologySpaceFactoryImpl(ScopeRegistry registry,
                                     ClerezzaOntologyStorage storage,
-                                    OfflineConfiguration offline) {
+                                    OfflineConfiguration offline,
+                                    IRI namespace) {
         this.registry = registry;
         this.storage = storage;
         this.offline = offline;
+        this.namespace = namespace;
     }
 
     /**
@@ -67,8 +71,8 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
      * @param scopeID
      * @param rootSource
      */
-    private void configureSpace(OntologySpace s, IRI scopeID, OntologyInputSource... ontologySources) {
-        // FIXME: ensure that this is not null
+    private void configureSpace(OntologySpace s, String scopeID, OntologyInputSource... ontologySources) {
+        // FIXME: ensure that this is not null AND convert to using Strings for scope IDs
         OntologyScope parentScope = registry.getScope(scopeID);
 
         if (parentScope != null && parentScope instanceof OntologySpaceListener) s
@@ -84,8 +88,8 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
     }
 
     @Override
-    public CoreOntologySpace createCoreOntologySpace(IRI scopeId, OntologyInputSource... coreSources) {
-        CoreOntologySpace s = new CoreOntologySpaceImpl(scopeId, storage,
+    public CoreOntologySpace createCoreOntologySpace(String scopeId, OntologyInputSource... coreSources) {
+        CoreOntologySpace s = new CoreOntologySpaceImpl(scopeId, namespace, storage,
                 OWLOntologyManagerFactory.createOWLOntologyManager(offline.getOntologySourceLocations()
                         .toArray(new IRI[0])));
         configureSpace(s, scopeId, coreSources);
@@ -93,8 +97,8 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
     }
 
     @Override
-    public CustomOntologySpace createCustomOntologySpace(IRI scopeId, OntologyInputSource... customSources) {
-        CustomOntologySpace s = new CustomOntologySpaceImpl(scopeId, storage,
+    public CustomOntologySpace createCustomOntologySpace(String scopeId, OntologyInputSource... customSources) {
+        CustomOntologySpace s = new CustomOntologySpaceImpl(scopeId, namespace, storage,
                 OWLOntologyManagerFactory.createOWLOntologyManager(offline.getOntologySourceLocations()
                         .toArray(new IRI[0])));
         configureSpace(s, scopeId, customSources);
@@ -102,7 +106,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
     }
 
     @Override
-    public OntologySpace createOntologySpace(IRI scopeId,
+    public OntologySpace createOntologySpace(String scopeId,
                                              SpaceType type,
                                              OntologyInputSource... ontologySources) {
         switch (type) {
@@ -118,8 +122,9 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
     }
 
     @Override
-    public SessionOntologySpace createSessionOntologySpace(IRI scopeId, OntologyInputSource... sessionSources) {
-        SessionOntologySpace s = new SessionOntologySpaceImpl(scopeId, storage,
+    public SessionOntologySpace createSessionOntologySpace(String scopeId,
+                                                           OntologyInputSource... sessionSources) {
+        SessionOntologySpace s = new SessionOntologySpaceImpl(scopeId, namespace, storage,
                 OWLOntologyManagerFactory.createOWLOntologyManager(offline.getOntologySourceLocations()
                         .toArray(new IRI[0])));
         for (OntologyInputSource src : sessionSources)
@@ -131,6 +136,16 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
             }
         // s.setUp();
         return s;
+    }
+
+    @Override
+    public IRI getNamespace() {
+        return this.namespace;
+    }
+
+    @Override
+    public void setNamespace(IRI namespace) {
+        this.namespace = namespace;
     }
 
 }

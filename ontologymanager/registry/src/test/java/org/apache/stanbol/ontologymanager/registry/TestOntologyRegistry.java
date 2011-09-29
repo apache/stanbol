@@ -43,7 +43,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
@@ -53,7 +52,7 @@ import org.semanticweb.owlapi.util.AutoIRIMapper;
  */
 public class TestOntologyRegistry {
 
-    private IRI scopeIri = IRI.create(Locations.__STANBOL_ONT_NAMESPACE + "Scope");
+    private String scopeIri = "Scope";
     private static RegistryIRISource ontologySource; // Null until the RegistryIRISource stays in place.
     private static ONManager onm;
     private static RegistryManager regman;

@@ -16,8 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.web.resources;
 
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.*;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -118,16 +117,17 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
             if (!ontiri.isAbsolute()) ontiri = IRI.create(absur);
 
             ScopeRegistry reg = onm.getScopeRegistry();
-            OntologyScope scope = reg.getScope(sciri);
+            OntologyScope scope = reg.getScope(scopeid);
             if (scope == null) return Response.status(NOT_FOUND).build();
 
             // First of all, it could be a simple request for the space root!
-            if (ontiri.equals(scope.getCoreSpace().getID())) {
+            String temp = scopeid + "/" + ontologyid;
+            if (temp.equals(scope.getCoreSpace().getID())) {
                 return Response.ok(scope.getCoreSpace().asOWLOntology()).build();
-            } else if (ontiri.equals(scope.getCustomSpace().getID())) {
+            } else if (temp.equals(scope.getCustomSpace().getID())) {
                 return Response.ok(scope.getCustomSpace().asOWLOntology()).build();
-            } else if (scope.getSessionSpace(ontiri) != null) {
-                return Response.ok(scope.getSessionSpace(ontiri).asOWLOntology()).build();
+            } else if (scope.getSessionSpace(IRI.create(temp)) != null) {
+                return Response.ok(scope.getSessionSpace(IRI.create(temp)).asOWLOntology()).build();
             }
 
             /*
@@ -189,7 +189,7 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
             ScopeRegistry reg = onm.getScopeRegistry();
             String scopeID = uriInfo.getAbsolutePath().toString();
             scopeID = scopeID.substring(0, scopeID.lastIndexOf("/"));
-            OntologyScope scope = reg.getScope(IRI.create(scopeID));
+            OntologyScope scope = reg.getScope(scopeID);
 
             if (scope == null) return Response.status(404).build();
 
@@ -314,15 +314,15 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
 
             IRI ontIri = IRI.create(ontologyid);
             ScopeRegistry reg = onm.getScopeRegistry();
-            OntologyScope scope = reg.getScope(scopeIri);
+            OntologyScope scope = reg.getScope(scopeId);
             OntologySpace cs = scope.getCustomSpace();
             if (cs.hasOntology(ontIri)) {
                 try {
-                    reg.setScopeActive(scopeIri, false);
+                    reg.setScopeActive(scopeId, false);
                     cs.removeOntology(new RootOntologySource(cs.getOntology(ontIri)));
-                    reg.setScopeActive(scopeIri, true);
+                    reg.setScopeActive(scopeId, true);
                 } catch (OntologySpaceModificationException e) {
-                    reg.setScopeActive(scopeIri, true);
+                    reg.setScopeActive(scopeId, true);
                     throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
                 }
             }

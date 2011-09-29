@@ -20,8 +20,8 @@ import org.semanticweb.owlapi.model.IRI;
 
 public interface ScopeOntologyListener {
 
-	void onOntologyAdded(IRI scopeId, IRI addedOntology);
+	void onOntologyAdded(String scopeId, IRI addedOntology);
 
-	void onOntologyRemoved(IRI scopeId, IRI removedOntology);
+	void onOntologyRemoved(String scopeId, IRI removedOntology);
 	
 }

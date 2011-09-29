@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 
-    protected IRI _id = null;
+    protected String _id = null;
 
     private Set<OntologySpaceListener> listeners = new HashSet<OntologySpaceListener>();
 
@@ -74,13 +74,13 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
      */
     protected Set<OWLOntology> managedOntologies;
 
+    protected IRI namespace = null;
+
     /**
      * Each ontology space comes with its OWL ontology manager. By default, it is not available to the outside
      * world, unless subclasses implement methods to return it.
      */
     protected OWLOntologyManager ontologyManager;
-
-    protected IRI parentID = null;
 
     protected boolean silent = false;
 
@@ -88,8 +88,11 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 
     protected SpaceType type;
 
-    protected AbstractOntologySpaceImpl(IRI spaceID, SpaceType type, ClerezzaOntologyStorage storage) {
-        this(spaceID, type, storage, OWLManager.createOWLOntologyManager());
+    protected AbstractOntologySpaceImpl(String spaceID,
+                                        IRI namespace,
+                                        SpaceType type,
+                                        ClerezzaOntologyStorage storage) {
+        this(spaceID, namespace, type, storage, OWLManager.createOWLOntologyManager());
     }
 
     /**
@@ -97,16 +100,16 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
      * 
      * @param spaceID
      *            the IRI that will uniquely identify this space.
-     * @param parentID
-     *            IRI of the parent scope (TODO: get rid of it).
      * @param ontologyManager
      *            the default ontology manager for this space.
      */
-    protected AbstractOntologySpaceImpl(IRI spaceID,
+    protected AbstractOntologySpaceImpl(String spaceID,
+                                        IRI namespace,
                                         SpaceType type,
                                         ClerezzaOntologyStorage storage,
                                         OWLOntologyManager ontologyManager) {
-        this._id = spaceID;
+        setID(spaceID);
+        setNamespace(namespace);
         this.type = type;
         this.storage = storage;
         if (ontologyManager != null) this.ontologyManager = ontologyManager;
@@ -136,16 +139,17 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     @Override
     public OWLOntology asOWLOntology() {
         OWLOntology root;
+        IRI iri = IRI.create(namespace + _id);
         try {
-            root = ontologyManager.createOntology(_id);
+            root = ontologyManager.createOntology(iri);
         } catch (OWLOntologyAlreadyExistsException e) {
-            ontologyManager.removeOntology(ontologyManager.getOntology(_id));
+            ontologyManager.removeOntology(ontologyManager.getOntology(iri));
             try {
-                root = ontologyManager.createOntology(_id);
+                root = ontologyManager.createOntology(iri);
             } catch (OWLOntologyAlreadyExistsException e1) {
-                root = ontologyManager.getOntology(_id);
+                root = ontologyManager.getOntology(iri);
             } catch (OWLOntologyCreationException e1) {
-                log.error("Failed to assemble root ontology for scope " + _id, e);
+                log.error("Failed to assemble root ontology for scope " + iri, e);
                 root = null;
             }
         } catch (OWLOntologyCreationException e) {
@@ -160,7 +164,7 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
             for (OWLOntology o : getOntologies(false)) {
                 if (o == null) continue;
 
-                String base = URIUtils.upOne(getID()) + "/";
+                String base = URIUtils.upOne(IRI.create(namespace + getID())) + "/";
 
                 IRI ontologyIri;
 
@@ -201,7 +205,7 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
      */
     protected void fireOntologyAdded(IRI ontologyIri) {
         for (OntologySpaceListener listener : listeners)
-            listener.onOntologyAdded(_id, ontologyIri);
+            listener.onOntologyAdded(IRI.create(namespace + _id), ontologyIri);
     }
 
     /**
@@ -212,12 +216,17 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
      */
     protected void fireOntologyRemoved(IRI ontologyIri) {
         for (OntologySpaceListener listener : listeners)
-            listener.onOntologyRemoved(_id, ontologyIri);
+            listener.onOntologyRemoved(IRI.create(namespace + _id), ontologyIri);
     }
 
     @Override
-    public IRI getID() {
+    public String getID() {
         return _id;
+    }
+
+    @Override
+    public IRI getNamespace() {
+        return this.namespace;
     }
 
     @Override
@@ -407,6 +416,46 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     @Override
     public void removeOntologySpaceListener(OntologySpaceListener listener) {
         listeners.remove(listener);
+    }
+
+    protected void setID(String id) {
+        if (id == null) throw new IllegalArgumentException("Space ID cannot be null.");
+        id = id.trim();
+        if (id.isEmpty()) throw new IllegalArgumentException("Space ID cannot be empty.");
+        if (id.matches("[\\w-]+")) log.warn(
+            "Space ID {} is a single alphanumeric sequence, with no separating slash."
+                    + " This is legal but strongly discouraged. Please consider using"
+                    + " space IDs of the form [scope_id]/[space_type], e.g. Users/core .", id);
+        else if (!id.matches("[\\w-]+/[\\w-]+")) throw new IllegalArgumentException(
+                "Illegal space ID " + id + " - Must be an alphanumeric sequence, (preferably two, "
+                        + " slash-separated), with optional underscores or dashes.");
+        this._id = id;
+    }
+
+    /**
+     * @param namespace
+     *            The OntoNet namespace that will prefix the space ID in Web references. This implementation
+     *            only allows non-null and non-empty IRIs, with no query or fragment. Hash URIs are not
+     *            allowed, slash URIs are preferred. If neither, a slash will be concatenated and a warning
+     *            will be logged.
+     * 
+     * @see OntologySpace#setNamespace(IRI)
+     */
+    @Override
+    public void setNamespace(IRI namespace) {
+        if (namespace == null) throw new IllegalArgumentException("Namespace cannot be null.");
+        if (namespace.toURI().getQuery() != null) throw new IllegalArgumentException(
+                "URI Query is not allowed in OntoNet namespaces.");
+        if (namespace.toURI().getFragment() != null) throw new IllegalArgumentException(
+                "URI Fragment is not allowed in OntoNet namespaces.");
+        if (namespace.toString().endsWith("#")) throw new IllegalArgumentException(
+                "OntoNet namespaces must not end with a hash ('#') character.");
+        if (!namespace.toString().endsWith("/")) {
+            log.warn("Namespace {} does not end with slash character ('/'). It will be added automatically.",
+                namespace);
+            namespace = IRI.create(namespace + "/");
+        }
+        this.namespace = namespace;
     }
 
     @Override

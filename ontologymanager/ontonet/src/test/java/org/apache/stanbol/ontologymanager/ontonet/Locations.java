@@ -55,6 +55,8 @@ public class Locations {
      */
     public static final IRI CHAR_MAIN = IRI.create(__STANBOL_ONT_NAMESPACE + "pcomics/maincharacters.owl");
 
+    public static final IRI CHAR_MINOR = IRI.create(__STANBOL_ONT_NAMESPACE + "pcomics/minorcharacters.owl");
+    
     /**
      * Identifier of test ontology library 1.
      */

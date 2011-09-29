@@ -51,6 +51,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
+import org.apache.stanbol.ontologymanager.ontonet.impl.util.StringUtils;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryLoader;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.impl.RegistryLoaderImpl;
@@ -97,8 +98,7 @@ public class ONMScopeResource extends BaseStanbolResource {
                                 @Context ServletContext servletContext) {
 
         ScopeRegistry reg = onm.getScopeRegistry();
-
-        OntologyScope scope = reg.getScope(IRI.create(uriInfo.getAbsolutePath()));
+        OntologyScope scope = reg.getScope(scopeid/* IRI.create(uriInfo.getAbsolutePath()) */);
         if (scope == null) return;
         reg.deregisterScope(scope);
     }
@@ -106,11 +106,12 @@ public class ONMScopeResource extends BaseStanbolResource {
     @GET
     @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
                        KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
-    public Response getTopOntology(@Context UriInfo uriInfo,
+    public Response getTopOntology(@PathParam("scopeid") String scopeid,
+                                   @Context UriInfo uriInfo,
                                    @Context HttpHeaders headers,
                                    @Context ServletContext servletContext) {
         ScopeRegistry reg = onm.getScopeRegistry();
-        OntologyScope scope = reg.getScope(IRI.create(uriInfo.getAbsolutePath()));
+    OntologyScope scope = reg.getScope(scopeid/* IRI.create(uriInfo.getAbsolutePath()) */);
         if (scope == null) return Response.status(NOT_FOUND).build();
         else return Response.ok(scope.asOWLOntology()).build();
     }
@@ -135,13 +136,13 @@ public class ONMScopeResource extends BaseStanbolResource {
             // Malformed IRI, throw bad request.
             throw new WebApplicationException(ex, BAD_REQUEST);
         }
-        if (reg.containsScope(scopeiri)) {
-            OntologyScope scope = reg.getScope(scopeiri);
+        if (reg.containsScope(scopeid)) {
+            OntologyScope scope = reg.getScope(scopeid);
             try {
                 OntologyInputSource src = new RootOntologyIRISource(ontoiri);
                 OntologySpace space = scope.getCustomSpace();
                 if (space == null) {
-                    space = onm.getOntologySpaceFactory().createCustomOntologySpace(scopeiri, src);
+                    space = onm.getOntologySpaceFactory().createCustomOntologySpace(scopeid, src);
 
                     scope.setCustomSpace(space);
                     // space.setUp();
@@ -227,8 +228,8 @@ public class ONMScopeResource extends BaseStanbolResource {
             IRI scopeId = IRI.create(uriInfo.getAbsolutePath());
             // Invoke the appropriate factory method depending on the
             // availability of a custom source.
-            scope = (custSrc != null) ? f.createOntologyScope(scopeId, coreSrc, custSrc) : f
-                    .createOntologyScope(scopeId, coreSrc);
+            scope = (custSrc != null) ? f.createOntologyScope(scopeid, coreSrc, custSrc) : f
+                    .createOntologyScope(scopeid, coreSrc);
             // Setup and register the scope. If no custom space was set, it will
             // still be open for modification.
             scope.setUp();
@@ -237,7 +238,7 @@ public class ONMScopeResource extends BaseStanbolResource {
             if (activate != null && !activate.equals("")) {
                 activateBool = Boolean.valueOf(activate);
             }
-            reg.setScopeActive(scopeId, activateBool);
+            reg.setScopeActive(scopeid, activateBool);
         } catch (DuplicateIDException e) {
             throw new WebApplicationException(e, CONFLICT);
         } catch (Exception ex) {

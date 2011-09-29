@@ -81,7 +81,7 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
 
     public static final String _HOST_NAME_AND_PORT_DEFAULT = "localhost:8080";
     public static final String _REENGINEERING_SCOPE_DEFAULT = "xml_reengineering";
-    public static final String _XML_REENGINEERING_SESSION_SPACE_DEFAULT = "/xml-reengineering-session-space";
+//    public static final String _XML_REENGINEERING_SESSION_SPACE_DEFAULT = "/xml-reengineering-session-space";
 
     @Property(value = _HOST_NAME_AND_PORT_DEFAULT)
     public static final String HOST_NAME_AND_PORT = "host.name.port";
@@ -89,10 +89,8 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
     @Property(value = _REENGINEERING_SCOPE_DEFAULT)
     public static final String REENGINEERING_SCOPE = "xml.reengineering.scope";
 
-    @Property(value = _XML_REENGINEERING_SESSION_SPACE_DEFAULT)
-    public static final String XML_REENGINEERING_SESSION_SPACE = "http://kres.iks-project.eu/space/reengineering/db";
-
-    private IRI kReSSessionID;
+//    @Property(value = _XML_REENGINEERING_SESSION_SPACE_DEFAULT)
+//    public static final String XML_REENGINEERING_SESSION_SPACE = "http://kres.iks-project.eu/space/reengineering/db";
 
     public final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -103,8 +101,8 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
     ReengineerManager reengineeringManager;
 
     private OntologyScope scope;
-    private IRI scopeIRI;
-    private IRI spaceIRI;
+    private String scopeID;
+//    private IRI spaceIRI;
 
     /**
      * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
@@ -143,21 +141,22 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
     }
 
     protected void activate(Dictionary<String,Object> configuration) {
-        String scopeID = (String) configuration.get(REENGINEERING_SCOPE);
+        /*String*/ 
+        scopeID = (String) configuration.get(REENGINEERING_SCOPE);
         if (scopeID == null) scopeID = _REENGINEERING_SCOPE_DEFAULT;
         String hostPort = (String) configuration.get(HOST_NAME_AND_PORT);
         if (hostPort == null) hostPort = _HOST_NAME_AND_PORT_DEFAULT;
         // TODO: Manage the other properties
 
-        spaceIRI = IRI.create(XML_REENGINEERING_SESSION_SPACE);
-        scopeIRI = IRI.create("http://" + hostPort + "/kres/ontology/" + scopeID);
+//        spaceIRI = IRI.create(XML_REENGINEERING_SESSION_SPACE);
+//        scopeID = IRI.create("http://" + hostPort + "/kres/ontology/" + scopeID);
 
         reengineeringManager.bindReengineer(this);
 
         SessionManager kReSSessionManager = onManager.getSessionManager();
         Session kReSSession = kReSSessionManager.createSession();
 
-        kReSSessionID = kReSSession.getID();
+//        sessionId = kReSSession.getID();
 
         OntologyScopeFactory ontologyScopeFactory = onManager.getOntologyScopeFactory();
 
@@ -173,7 +172,7 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
             OWLOntology owlOntology = ontologyManager.createOntology(iri);
             log.info("Ontology {} created.", iri);
 
-            scope = ontologyScopeFactory.createOntologyScope(scopeIRI,
+            scope = ontologyScopeFactory.createOntologyScope(scopeID,
                 new RootOntologyIRISource(IRI.create(XML_OWL.URI))
             /* new OntologyInputSourceOXML() */);
             // scope.setUp();
@@ -181,7 +180,7 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
             scopeRegistry.registerScope(scope);
         } catch (DuplicateIDException e) {
             log.info("Semion DBExtractor : already existing scope for IRI " + REENGINEERING_SCOPE);
-            scope = onManager.getScopeRegistry().getScope(scopeIRI);
+            scope = onManager.getScopeRegistry().getScope(scopeID);
         } catch (OWLOntologyCreationException e) {
             log.error("Failed to creare ontology " + XML_OWL.URI, e);
         } catch (Exception e) {
@@ -190,12 +189,12 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
 
         if (scope != null) {
             try {
-                scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(spaceIRI),
+                scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(scopeID),
                     kReSSession.getID());
 
-                scopeRegistry.setScopeActive(scopeIRI, true);
+                scopeRegistry.setScopeActive(scopeID, true);
             } catch (UnmodifiableOntologySpaceException ex) {
-                log.error("Cannot add session space " + spaceIRI + " to unmodifiable scope " + scope, ex);
+                log.error("Cannot add session space for " + scopeID + " to unmodifiable scope " + scope, ex);
             }
         }
 
@@ -516,8 +515,8 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
 
         ScopeRegistry scopeRegistry = onManager.getScopeRegistry();
 
-        if (scopeRegistry.isScopeActive(scopeIRI)) {
-            ontologyScope = scopeRegistry.getScope(scopeIRI);
+        if (scopeRegistry.isScopeActive(scopeID)) {
+            ontologyScope = scopeRegistry.getScope(scopeID);
         }
 
         return ontologyScope;

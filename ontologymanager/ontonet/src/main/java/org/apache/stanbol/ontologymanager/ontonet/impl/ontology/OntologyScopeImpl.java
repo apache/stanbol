@@ -67,7 +67,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
     /**
      * The unique identifier for this scope.
      */
-    protected IRI id = null;
+    protected String id = null;
 
     private Set<ScopeOntologyListener> listeners = new HashSet<ScopeOntologyListener>();
 
@@ -78,22 +78,28 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
+    protected IRI namespace = null;
+
     /**
      * Maps session IDs to ontology space. A single scope has at most one space per session.
      */
     protected Map<IRI,SessionOntologySpace> sessionSpaces;
 
-    public OntologyScopeImpl(IRI id, OntologySpaceFactory factory, OntologyInputSource coreRoot) {
-        this(id, factory, coreRoot, null);
+    public OntologyScopeImpl(String id,
+                             IRI namespace,
+                             OntologySpaceFactory factory,
+                             OntologyInputSource coreRoot) {
+        this(id, namespace, factory, coreRoot, null);
     }
 
-    public OntologyScopeImpl(IRI id,
+    public OntologyScopeImpl(String id,
+                             IRI namespace,
                              OntologySpaceFactory factory,
                              OntologyInputSource coreRoot,
                              OntologyInputSource customRoot) {
-        if (id == null) throw new NullPointerException("Ontology scope must be identified by a non-null IRI.");
+        setID(id);
+        setNamespace(namespace);
 
-        this.id = id;
         this.coreSpace = factory.createCoreOntologySpace(id, coreRoot);
         this.coreSpace.addOntologySpaceListener(this);
         // let's just lock it. Once the core space is done it's done.
@@ -140,14 +146,21 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
         OWLDataFactory df = mgr.getOWLDataFactory();
         OWLOntology ont;
         try {
-            ont = mgr.createOntology(getID());
+            // The root ontology ID is in the form [namespace][scopeId]
+            ont = mgr.createOntology(IRI.create(getNamespace() + getID()));
             List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
+            // Add the import statement for the custom space, if existing and not empty
             OntologySpace spc = getCustomSpace();
-            if (spc != null && !spc.getOntologies(false).isEmpty()) additions.add(new AddImport(ont, df
-                    .getOWLImportsDeclaration(spc.getID())));
+            if (spc != null && !spc.getOntologies(false).isEmpty()) {
+                IRI spaceIri = IRI.create(getNamespace() + spc.getID());
+                additions.add(new AddImport(ont, df.getOWLImportsDeclaration(spaceIri)));
+            }
+            // Add the import statement for the core space, if existing and not empty
             spc = getCoreSpace();
-            if (spc != null && !spc.getOntologies(false).isEmpty()) additions.add(new AddImport(ont, df
-                    .getOWLImportsDeclaration(spc.getID())));
+            if (spc != null && !spc.getOntologies(false).isEmpty()) {
+                IRI spaceIri = IRI.create(getNamespace() + spc.getID());
+                additions.add(new AddImport(ont, df.getOWLImportsDeclaration(spaceIri)));
+            }
             mgr.applyChanges(additions);
         } catch (OWLOntologyCreationException e) {
             log.error("Failed to generate an OWL form of scope " + getID(), e);
@@ -182,8 +195,13 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
     }
 
     @Override
-    public IRI getID() {
+    public String getID() {
         return id;
+    }
+
+    @Override
+    public IRI getNamespace() {
+        return this.namespace;
     }
 
     @Override
@@ -232,6 +250,42 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
 
     }
 
+    protected void setID(String id) {
+        if (id == null) throw new IllegalArgumentException("Scope ID cannot be null.");
+        id = id.trim();
+        if (id.isEmpty()) throw new IllegalArgumentException("Scope ID cannot be empty.");
+        if (!id.matches("[\\w-]+")) throw new IllegalArgumentException(
+                "Illegal scope ID " + id
+                        + " - Must be an alphanumeric sequence, with optional underscores or dashes.");
+        this.id = id;
+    }
+
+    /**
+     * @param namespace
+     *            The OntoNet namespace that will prefix the scope ID in Web references. This implementation
+     *            only allows non-null and non-empty IRIs, with no query or fragment. Hash URIs are not
+     *            allowed, slash URIs are preferred. If neither, a slash will be concatenated and a warning
+     *            will be logged.
+     * 
+     * @see OntologyScope#setNamespace(IRI)
+     */
+    @Override
+    public void setNamespace(IRI namespace) {
+        if (namespace == null) throw new IllegalArgumentException("Namespace cannot be null.");
+        if (namespace.toURI().getQuery() != null) throw new IllegalArgumentException(
+                "URI Query is not allowed in OntoNet namespaces.");
+        if (namespace.toURI().getFragment() != null) throw new IllegalArgumentException(
+                "URI Fragment is not allowed in OntoNet namespaces.");
+        if (namespace.toString().endsWith("#")) throw new IllegalArgumentException(
+                "OntoNet namespaces must not end with a hash ('#') character.");
+        if (!namespace.toString().endsWith("/")) {
+            log.warn("Namespace {} does not end with slash character ('/'). It will be added automatically.",
+                namespace);
+            namespace = IRI.create(namespace + "/");
+        }
+        this.namespace = namespace;
+    }
+
     @Override
     public synchronized void setUp() {
         if (locked || (customSpace != null && !customSpace.isLocked())) return;
@@ -263,7 +317,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
 
     @Override
     public String toString() {
-        return getID().toString();
+        return getNamespace() + getID();
     }
 
 }
