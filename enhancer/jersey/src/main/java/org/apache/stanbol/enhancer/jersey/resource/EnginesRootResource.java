@@ -98,7 +98,9 @@ public class EnginesRootResource extends BaseStanbolResource {
     @GET
     @Produces(TEXT_HTML)
     public Response get() {
-        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+        return Response.ok(new Viewable("index", this),TEXT_HTML).build();
+//        return Response.ok(new Viewable("index", this))
+//        .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
     }
 
     public List<EnhancementEngine> getActiveEngines() {
@@ -185,19 +187,27 @@ public class EnginesRootResource extends BaseStanbolResource {
                     tcManager, serializer, servletContext);
             contentItemResource.setRdfSerializationFormat(format);
             Viewable ajaxView = new Viewable("/ajax/contentitem", contentItemResource);
-            return Response.ok(ajaxView).type(TEXT_HTML).build();
+            return Response.ok(ajaxView,TEXT_HTML).build();
+//            return Response.ok(ajaxView)
+//            .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=UTF-8").build();
         }
         if (format != null) {
             // force mimetype from form params
-            return Response.ok(graph, format).build();
+            return Response.ok(graph,format).build();
+//            return Response.ok(graph)
+//            .header(HttpHeaders.CONTENT_TYPE, format+"; charset=UTF-8").build();
         }
         if (headers.getAcceptableMediaTypes().contains(APPLICATION_JSON_TYPE)) {
             // force RDF JSON media type (TODO: move this logic
-            return Response.ok(graph, RDF_JSON).build();
+            return Response.ok(graph,RDF_JSON).build();
+//            return Response.ok(graph)
+//            .header(HttpHeaders.CONTENT_TYPE, RDF_JSON+"; charset=UTF-8").build();
         } else if (headers.getAcceptableMediaTypes().isEmpty()) {
             // use RDF/XML as default format to keep compat with OpenCalais
             // clients
-            return Response.ok(graph, RDF_XML).build();
+            return Response.ok(graph,RDF_XML).build();
+//            return Response.ok(graph)
+//            .header(HttpHeaders.CONTENT_TYPE, RDF_XML+"; charset=UTF-8").build();
         }
 
         // traditional response lookup

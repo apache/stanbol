@@ -22,6 +22,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
@@ -31,6 +32,8 @@ import org.codehaus.jettison.json.JSONObject;
 
 public class JettisonWriter implements MessageBodyWriter<Object> {
 
+    public static final String DEFAULT_ENCODING = "UTF-8";
+ 
     @Override
     public long getSize(Object result, Class<?> type, Type genericType,
             Annotation[] annotations, MediaType mediaType) {
@@ -48,7 +51,11 @@ public class JettisonWriter implements MessageBodyWriter<Object> {
             Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
             throws IOException, WebApplicationException {
-        entityStream.write(value.toString().getBytes("UTF-8"));
+        String encoding = mediaType.getParameters().get("charset");
+        if(encoding == null){
+            encoding = DEFAULT_ENCODING;
+        }
+        entityStream.write(value.toString().getBytes(encoding));
     }
 
 }

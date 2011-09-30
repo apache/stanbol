@@ -112,7 +112,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
     @GET
     @Produces(TEXT_HTML)
     public Response get() {
-        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+        return Response.ok(new Viewable("index", this))
+        .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
     }
 
     @GET
@@ -127,7 +128,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
             APPLICATION_JSON_TYPE);
         if(acceptedMediaType.isCompatible(TEXT_HTML_TYPE) && symbolId == null){
             //return HTML docu
-            return Response.ok(new Viewable("entity", this), TEXT_HTML).build();
+            return Response.ok(new Viewable("entity", this))
+            .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
         }
         if (symbolId == null || symbolId.isEmpty()) {
             // TODO: how to parse an error message
@@ -143,7 +145,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
         if (entity == null) {
             throw new WebApplicationException(NOT_FOUND);
         } else {
-            return Response.ok(entity, acceptedMediaType).build();
+            return Response.ok(entity)
+            .header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8").build();
         }
     }
         
@@ -162,7 +165,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
             APPLICATION_JSON_TYPE);
         if(acceptedMediaType.isCompatible(TEXT_HTML_TYPE) && reference == null){
             //return docu
-            return Response.ok(new Viewable("lookup", this), TEXT_HTML).build();
+            return Response.ok(new Viewable("lookup", this))
+            .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
         } else {
             if (reference == null || reference.isEmpty()) {
                 // TODO: how to parse an error message
@@ -179,7 +183,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
                 return Response.status(Status.NOT_FOUND).entity("No symbol found for '" + reference + "'.")
                         .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
             } else {
-                return Response.ok(entity, acceptedMediaType).build();
+                return Response.ok(entity)
+                .header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8").build();
             }
         }
     }
@@ -243,7 +248,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
                     "parsed id "+id+" is not managed by the Entityhub")
                     .header(HttpHeaders.ACCEPT, accepted).build();
         } else {
-            return Response.ok(entity,accepted).build();
+            return Response.ok(entity)
+            .header(HttpHeaders.CONTENT_TYPE, accepted+"; charset=utf-8").build();
         }
     }
     /**
@@ -334,7 +340,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
             } else {
                 //return Response.noContent().build();
                 //As alternative return the modified entity
-                return Response.ok(entity, accepted).build();
+                return Response.ok(entity)
+                .header(HttpHeaders.CONTENT_TYPE, accepted+"; charset=utf-8").build();
                 
             }
 //            if (updated.size() == 1){
@@ -386,7 +393,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
         if(name == null || name.isEmpty()){
             if(acceptedMediaType.isCompatible(TEXT_HTML_TYPE)){
                 //return HTML docu
-                return Response.ok(new Viewable("find", this), TEXT_HTML).build();
+                return Response.ok(new Viewable("find", this))
+                .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
             } else {
                 return Response.status(Status.BAD_REQUEST)
                     .entity("The name must not be null nor empty for find requests. Missing parameter name.\n")
@@ -423,7 +431,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
     @GET
     @Path("/query")
     public Response getQueryDocumentation(){
-        return Response.ok(new Viewable("query", this), TEXT_HTML).build();        
+        return Response.ok(new Viewable("query", this))
+        .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();        
     }
     /**
      * Allows to parse any kind of {@link FieldQuery} in its JSON Representation.
@@ -461,7 +470,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
     private Response executeQuery(FieldQuery query, MediaType acceptedMediaType) throws WebApplicationException {
         Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
         try {
-            return Response.ok(entityhub.find(query), acceptedMediaType).build();
+            return Response.ok(entityhub.find(query))
+            .header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8").build();
         } catch (EntityhubException e) {
             log.error("Exception while performing the FieldQuery on the EntityHub", e);
             log.error("Query:\n" + query);
@@ -489,7 +499,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
         if (reference == null || reference.isEmpty()) {
             //if HTML -> print the docu of the restfull service
             if(TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
-              return Response.ok(new Viewable("mapping", this), TEXT_HTML).build();
+              return Response.ok(new Viewable("mapping", this))
+              .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
             } else {
                 return Response.status(Status.BAD_REQUEST).entity("The mapping id (URI) is missing.\n").header(
                     HttpHeaders.ACCEPT, acceptedMediaType).build();
@@ -507,7 +518,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
             return Response.status(Status.NOT_FOUND).entity("No mapping found for '" + reference + "'.\n")
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
         } else {
-            return Response.ok(mapping, acceptedMediaType).build();
+            return Response.ok(mapping)
+            .header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8").build();
         }
     }
 // see NOTE to RESTful Service Documentation in the header
@@ -515,7 +527,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
 //    @Path("/entity")
 //    @Produces(MediaType.TEXT_HTML)
 //    public Response getEntityMappingPage() {
-//        return Response.ok(new Viewable("entity", this), TEXT_HTML).build();
+//        return Response.ok(new Viewable("entity", this))
+//        .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
 //    }
 
     @GET
@@ -534,7 +547,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
         if (entity == null || entity.isEmpty()) {
             //if HTML -> print the docu of the restfull service
             if(TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
-                return Response.ok(new Viewable("mapping_entity", this), TEXT_HTML).build();
+                return Response.ok(new Viewable("mapping_entity", this))
+                .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
             } else {
                 return Response.status(Status.BAD_REQUEST).entity("No entity given. Missing parameter id.\n")
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
@@ -552,7 +566,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
             return Response.status(Status.NOT_FOUND).entity("No mapping found for entity '" + entity + "'.\n")
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
         } else {
-            return Response.ok(mapping, acceptedMediaType).build();
+            return Response.ok(mapping)
+            .header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8").build();
         }
     }
  // see NOTE to RESTful Service Documentation in the header
@@ -560,7 +575,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
 //    @Path("mapping/symbol")
 //    @Produces(MediaType.TEXT_HTML)
 //    public Response getSymbolMappingPage() {
-//        return Response.ok(new Viewable("symbol", this), TEXT_HTML).build();
+//        return Response.ok(new Viewable("symbol", this))
+//        .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
 //    }
     
     @GET
@@ -579,7 +595,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
         if (symbol == null || symbol.isEmpty()) {
             //if HTML -> print the docu of the restfull service
             if(TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
-                return Response.ok(new Viewable("mapping_symbol", this), TEXT_HTML).build();
+                return Response.ok(new Viewable("mapping_symbol", this))
+                .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
             } else {
                 return Response.status(Status.BAD_REQUEST).entity("No symbol given. Missing parameter id.\n")
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
@@ -600,7 +617,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
             // For now use a pseudo QueryResultList
             QueryResultList<Entity> mappingResultList = new QueryResultListImpl<Entity>(null,
                     mappings, Entity.class);
-            return Response.ok(mappingResultList, acceptedMediaType).build();
+            return Response.ok(mappingResultList)
+            .header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8").build();
         }
     }
 }

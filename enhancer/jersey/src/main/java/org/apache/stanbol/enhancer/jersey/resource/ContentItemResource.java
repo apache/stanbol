@@ -25,6 +25,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.GEO_LAT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.GEO_LONG;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -41,6 +42,7 @@ import java.util.TreeMap;
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -67,6 +69,7 @@ import org.apache.clerezza.rdf.core.sparql.SolutionMapping;
 import org.apache.clerezza.rdf.core.sparql.query.SelectQuery;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
@@ -513,13 +516,17 @@ public class ContentItemResource extends BaseStanbolResource {
         }
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         serializer.serialize(out, g, SupportedFormat.RDF_JSON);
-        return out.toString("utf-8");
+        
+        String rdfString = out.toString("utf-8");
+        return rdfString;
     }
 
     @GET
     @Produces(TEXT_HTML)
     public Response get() {
-        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+        return Response.ok(new Viewable("index", this),TEXT_HTML).build();
+//        return Response.ok(new Viewable("index", this))
+//        .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
     }
 
 }

@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
@@ -41,11 +44,17 @@ import com.hp.hpl.jena.rdf.model.Model;
 
 
 @Provider
-@Produces({"application/rdf+xml", "application/xml", "text/xml"})
-
+//@Produces({"application/rdf+xml", "application/xml", "text/xml"})
 public class JenaModelWriter implements MessageBodyWriter<Model> {
 
-	
+    public static final Set<String> supportedMediaTypes;
+    static {
+        Set<String> types = new HashSet<String>();
+        types.add("application/rdf+xml");
+        types.add("application/xml");
+        types.add("text/xml");
+        supportedMediaTypes = Collections.unmodifiableSet(types);
+    }
 	
 	public static final String ENCODING = "UTF-8";
 	
@@ -55,24 +64,27 @@ public class JenaModelWriter implements MessageBodyWriter<Model> {
 	}
 
 	public boolean isWriteable(Class<?> arg0, Type arg1, Annotation[] arg2,
-			MediaType arg3) {
-
-		return Model.class.isAssignableFrom(arg0);
+			MediaType mediaType) {
+	    String mediaTypeString = mediaType.getType()+'/'+mediaType.getSubtype();
+		return Model.class.isAssignableFrom(arg0) && supportedMediaTypes.contains(mediaTypeString);
 	}
 
 	public void writeTo(Model model, Class<?> arg1, Type arg2,
-			Annotation[] arg3, MediaType arg4,
+			Annotation[] arg3, MediaType mediaType,
 			MultivaluedMap<String, Object> arg5, OutputStream outputStream)
 	throws IOException, WebApplicationException {
 		Document doc = null;
-
+		String encoding = mediaType.getParameters().get("charset");
+		if(encoding == null){
+		    encoding = ENCODING;
+		}
 		try {
 			doc = new JenaModelTransformer().toDocument(model);
 			DOMSource domSource = new DOMSource(doc);
 			StreamResult streamResult = new StreamResult(outputStream);
 			TransformerFactory tf = TransformerFactory.newInstance();
 			Transformer serializer = tf.newTransformer();
-			serializer.setOutputProperty(OutputKeys.ENCODING,ENCODING);
+			serializer.setOutputProperty(OutputKeys.ENCODING,encoding);
 			serializer.setOutputProperty(OutputKeys.INDENT,"yes");
 			serializer.transform(domSource, streamResult);
 		} catch(TransformerException te) {

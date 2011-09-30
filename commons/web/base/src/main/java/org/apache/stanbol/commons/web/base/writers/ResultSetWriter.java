@@ -16,10 +16,22 @@
 */
 package org.apache.stanbol.commons.web.base.writers;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N3;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N_TRIPLE;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JSON;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
@@ -44,8 +56,16 @@ import org.w3c.dom.Document;
  * quite a lot of Clerezza dependencies that we don't really need.
  */
 @Provider
-@Produces({"application/sparql-results+xml", "application/xml", "text/xml"})
+//@Produces({"application/sparql-results+xml", "application/xml", "text/xml"})
 public class ResultSetWriter implements MessageBodyWriter<ResultSet> {
+    public static final Set<String> supportedMediaTypes;
+    static {
+        Set<String> types = new HashSet<String>();
+        types.add("application/sparql-results+xml");
+        types.add("application/xml");
+        types.add("text/xml");
+        supportedMediaTypes = Collections.unmodifiableSet(types);
+    }
 
     public static final String ENCODING = "UTF-8";
 
@@ -57,7 +77,8 @@ public class ResultSetWriter implements MessageBodyWriter<ResultSet> {
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return ResultSet.class.isAssignableFrom(type);
+        String mediaTypeString = mediaType.getType()+'/'+mediaType.getSubtype();
+        return ResultSet.class.isAssignableFrom(type) && supportedMediaTypes.contains(mediaTypeString);
     }
 
     @Override
@@ -65,14 +86,17 @@ public class ResultSetWriter implements MessageBodyWriter<ResultSet> {
             Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
             throws IOException, WebApplicationException {
-
+        String encoding = mediaType.getParameters().get("charset");
+        if(encoding == null){
+            encoding = ENCODING;
+        }
         try {
             Document doc = new ResultSetToXml().toDocument(resultSet);
             DOMSource domSource = new DOMSource(doc);
             StreamResult streamResult = new StreamResult(entityStream);
             TransformerFactory tf = TransformerFactory.newInstance();
             Transformer serializer = tf.newTransformer();
-            serializer.setOutputProperty(OutputKeys.ENCODING,ENCODING);
+            serializer.setOutputProperty(OutputKeys.ENCODING,encoding);
             serializer.setOutputProperty(OutputKeys.INDENT,"yes");
             serializer.transform(domSource, streamResult);
         } catch(TransformerException te) {

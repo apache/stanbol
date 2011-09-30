@@ -42,9 +42,9 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.codehaus.jettison.json.JSONException;
 
 @Provider
-@Produces( {MediaType.APPLICATION_JSON, SupportedFormat.N3, SupportedFormat.N_TRIPLE,
-            SupportedFormat.RDF_XML, SupportedFormat.TURTLE, SupportedFormat.X_TURTLE,
-            SupportedFormat.RDF_JSON})
+//@Produces( {MediaType.APPLICATION_JSON, SupportedFormat.N3, SupportedFormat.N_TRIPLE,
+//            SupportedFormat.RDF_XML, SupportedFormat.TURTLE, SupportedFormat.X_TURTLE,
+//            SupportedFormat.RDF_JSON})
 public class RepresentationWriter implements MessageBodyWriter<Representation> {
 
     public static final Set<String> supportedMediaTypes;
@@ -59,6 +59,7 @@ public class RepresentationWriter implements MessageBodyWriter<Representation> {
         types.add(SupportedFormat.X_TURTLE);
         supportedMediaTypes = Collections.unmodifiableSet(types);
     }
+    public static final String DEFAULT_ENCODING = "UTF-8";
     @Context
     protected ServletContext servletContext;
 
@@ -73,7 +74,8 @@ public class RepresentationWriter implements MessageBodyWriter<Representation> {
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return Representation.class.isAssignableFrom(type) && supportedMediaTypes.contains(mediaType.toString());
+        String mediaTypeString = mediaType.getType()+'/'+mediaType.getSubtype();
+        return Representation.class.isAssignableFrom(type) && supportedMediaTypes.contains(mediaTypeString);
     }
 
     @Override
@@ -84,15 +86,20 @@ public class RepresentationWriter implements MessageBodyWriter<Representation> {
                         MediaType mediaType,
                         MultivaluedMap<String,Object> httpHeaders,
                         OutputStream entityStream) throws IOException, WebApplicationException {
-        if (mediaType == null || MediaType.APPLICATION_JSON.equals(mediaType.toString())) {
+        String mediaTypeString = mediaType.getType()+'/'+mediaType.getSubtype();
+        String encoding = mediaType.getParameters().get("charset");
+        if(encoding == null){
+            encoding = DEFAULT_ENCODING;
+        }
+        if (MediaType.APPLICATION_JSON.equals(mediaTypeString)) {
             try {
-                IOUtils.write(EntityToJSON.toJSON(rep).toString(4), entityStream);
+                IOUtils.write(EntityToJSON.toJSON(rep).toString(4), entityStream,encoding);
             } catch (JSONException e) {
                 throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
             }
         } else { // RDF
             Serializer ser = ContextHelper.getServiceFromContext(Serializer.class, servletContext);
-            ser.serialize(entityStream, EntityToRDF.toRDF(rep), mediaType.toString());
+            ser.serialize(entityStream, EntityToRDF.toRDF(rep), mediaTypeString);
         }
         
     }

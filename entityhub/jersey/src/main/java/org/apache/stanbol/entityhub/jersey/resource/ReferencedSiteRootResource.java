@@ -143,7 +143,8 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     @GET
     @Produces(value=MediaType.TEXT_HTML)
     public Response getHtmlInfo(){
-        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+        return Response.ok(new Viewable("index", this))
+        .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
     }
     /**
      * Provides metadata about this referenced site as representation
@@ -156,7 +157,8 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     public Response getInfo(@Context HttpHeaders headers,
                             @Context UriInfo uriInfo) {
         MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, REPRESENTATION_SUPPORTED_MEDIA_TYPES,MediaType.APPLICATION_JSON_TYPE);
-        return Response.ok(site2Representation(uriInfo.getAbsolutePath().toString()), acceptedMediaType).build();
+        return Response.ok(site2Representation(uriInfo.getAbsolutePath().toString()))
+        .header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8").build();
     }
     @GET
     @Path(value=ReferencedSiteRootResource.LICENSE_PATH+"/{name}")
@@ -179,7 +181,8 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                             count++;
                         }
                         if(Integer.toString(count).equals(numberString)){
-                            return Response.ok(license2Representation(uriInfo.getAbsolutePath().toString(),license),acceptedMediaType).build();
+                            return Response.ok(license2Representation(uriInfo.getAbsolutePath().toString(),license))
+                            .header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8").build();
                         }
                     }
                 }
@@ -214,7 +217,8 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
             supported, MediaType.APPLICATION_JSON_TYPE);
         if (id == null || id.isEmpty()) {
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
-                return Response.ok(new Viewable("entity", this), TEXT_HTML).build();        
+                return Response.ok(new Viewable("entity", this))
+                .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();        
             } else {
                 return Response.status(Status.BAD_REQUEST)
                     .entity("No or empty ID was parsed. Missing parameter id.\n")
@@ -231,7 +235,8 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
             throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
         }
         if (entity != null) {
-            return Response.ok(entity, acceptedMediaType).build();
+            return Response.ok(entity)
+            .header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8").build();
         } else {
             // TODO: How to parse an ErrorMessage?
             // create an Response with the the Error?
@@ -272,7 +277,8 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
             headers, supported, MediaType.APPLICATION_JSON_TYPE);
         if(name == null || name.isEmpty()){
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
-                return Response.ok(new Viewable("find", this), TEXT_HTML).build();        
+                return Response.ok(new Viewable("find", this))
+                .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();        
             } else {
                 return Response.status(Status.BAD_REQUEST)
                     .entity("The name must not be null nor empty for find requests. Missing parameter name.\n")
@@ -317,7 +323,8 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     @Path("/query")
     @Produces(TEXT_HTML)
     public Response getQueryDocumentation(){
-        return Response.ok(new Viewable("query", this), TEXT_HTML).build();        
+        return Response.ok(new Viewable("query", this))
+        .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();        
     }
     
     /**
@@ -332,7 +339,8 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
      */
     private Response executeQuery(FieldQuery query, MediaType mediaType) throws WebApplicationException {
         try {
-            return Response.ok(site.find(query), mediaType).build();
+            return Response.ok(site.find(query))
+                .header(HttpHeaders.CONTENT_TYPE, mediaType+"; charset=utf-8").build();
         } catch (ReferencedSiteException e) {
             log.error("ReferencedSiteException while accessing Site " +
                 site.getConfiguration().getName() + " (id="

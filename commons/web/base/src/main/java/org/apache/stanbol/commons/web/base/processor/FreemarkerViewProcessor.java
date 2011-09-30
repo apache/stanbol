@@ -148,6 +148,8 @@ public class FreemarkerViewProcessor implements ViewProcessor<Template> {
 
         // don't cache for more that 2s
         config.setTemplateUpdateDelay(2);
+        config.setDefaultEncoding("utf-8");
+        config.setOutputEncoding("utf-8");
         log.info("Assigned default freemarker configuration");
     }
 
@@ -212,7 +214,7 @@ public class FreemarkerViewProcessor implements ViewProcessor<Template> {
         // override custom variables if any
         vars.putAll(getVariablesForTemplate(vars));
 
-        final OutputStreamWriter writer = new OutputStreamWriter(out);
+        final OutputStreamWriter writer = new OutputStreamWriter(out,"utf-8");
         try {
             template.process(vars, writer);
         } catch (Throwable t) {

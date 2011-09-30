@@ -29,6 +29,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Produces;
@@ -41,12 +44,26 @@ import javax.ws.rs.ext.Provider;
 
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
+import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 
 
 @Provider
-@Produces({TEXT_PLAIN, N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE, RDF_JSON, APPLICATION_JSON})
+//@Produces({TEXT_PLAIN, N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE, RDF_JSON, APPLICATION_JSON})
 public class GraphWriter implements MessageBodyWriter<TripleCollection> {
+    public static final Set<String> supportedMediaTypes;
+    static {
+        Set<String> types = new HashSet<String>();
+        types.add(TEXT_PLAIN);
+        types.add(N3);
+        types.add(N_TRIPLE);
+        types.add(RDF_XML);
+        types.add(TURTLE);
+        types.add(X_TURTLE);
+        types.add(RDF_JSON);
+        types.add(APPLICATION_JSON);
+        supportedMediaTypes = Collections.unmodifiableSet(types);
+    }
 
     @Context
     protected ServletContext servletContext;
@@ -57,7 +74,8 @@ public class GraphWriter implements MessageBodyWriter<TripleCollection> {
 
     public boolean isWriteable(Class<?> type, Type genericType,
             Annotation[] annotations, MediaType mediaType) {
-        return TripleCollection.class.isAssignableFrom(type);
+        String mediaTypeString = mediaType.getType()+'/'+mediaType.getSubtype();
+        return TripleCollection.class.isAssignableFrom(type) && supportedMediaTypes.contains(mediaTypeString);
     }
 
     public long getSize(TripleCollection t, Class<?> type, Type genericType,
@@ -70,11 +88,11 @@ public class GraphWriter implements MessageBodyWriter<TripleCollection> {
             MultivaluedMap<String, Object> httpHeaders,
             OutputStream entityStream) throws IOException,
             WebApplicationException {
-
-        if (mediaType == null || mediaType.isWildcardType() || TEXT_PLAIN.equals(mediaType.toString())) {
+        String mediaTypeString = mediaType.getType()+'/'+mediaType.getSubtype();
+        if (mediaType.isWildcardType() || TEXT_PLAIN.equals(mediaTypeString)) {
             getSerializer().serialize(entityStream, t, APPLICATION_JSON);
         } else {
-            getSerializer().serialize(entityStream, t, mediaType.toString());
+            getSerializer().serialize(entityStream, t, mediaTypeString);
         }
     }
 }
