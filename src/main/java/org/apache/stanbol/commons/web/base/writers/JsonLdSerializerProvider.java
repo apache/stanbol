@@ -36,6 +36,7 @@ import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.stanbol.commons.jsonld.JsonLd;
 import org.apache.stanbol.commons.jsonld.JsonLdResource;
+import org.apache.stanbol.commons.web.base.format.NamespaceEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,11 +44,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Implements a <a href="http://json-ld.org/">JSON-LD</a> serialization of a Clerezza
  * {@link TripleCollection}.<br>
- * <br>
- * Note: This implementation is based on <a href="http://json-ld.org/spec/">JSON-LD
- * specification</a> draft from 25 October 2010.
- *
- * @author Fabian Christ
  *
  * @scr.component immediate="true"
  * @scr.service
@@ -66,7 +62,7 @@ public class JsonLdSerializerProvider implements SerializingProvider {
     private Map<String, String> namespacePrefixMap = new HashMap<String, String>();
 
     private int indentation = 2;
-    private boolean useTypeCoercion = false;
+    private boolean useTypeCoercion = true;
 
     @Override
     public void serialize(OutputStream serializedGraph, TripleCollection tc, String formatIdentifier) {
@@ -76,7 +72,16 @@ public class JsonLdSerializerProvider implements SerializingProvider {
         }
 
         JsonLd jsonLd = new JsonLd();
+        // If there is no namespace prefix map set, we use the namespaces
+        // known from the NamespaceEnum
+        if (this.namespacePrefixMap.isEmpty()) {
+            for (NamespaceEnum ns : NamespaceEnum.values()) {
+                logger.debug("Adding JSON-LD namespace " + ns.getPrefix() + ":" + ns.getNamespace());
+                this.namespacePrefixMap.put(ns.getNamespace(), ns.getPrefix());
+            }
+        }
         jsonLd.setNamespacePrefixMap(this.namespacePrefixMap);
+        jsonLd.setUseTypeCoercion(this.useTypeCoercion);
 
         Map<NonLiteral, String> subjects = createSubjectsMap(tc);
         for (NonLiteral subject : subjects.keySet()) {
@@ -102,7 +107,7 @@ public class JsonLdSerializerProvider implements SerializingProvider {
                         TypedLiteral typedObject = (TypedLiteral) currentTriple.getObject();
                         String type = typedObject.getDataType().getUnicodeString();
                         strValue = typedObject.getLexicalForm();
-                        resource.putCoercionType(property, type);
+                        resource.putPropertyType(property, type);
                     }
                     
                     resource.putProperty(property, convertValueType(strValue));
@@ -114,7 +119,6 @@ public class JsonLdSerializerProvider implements SerializingProvider {
 
         try {
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(serializedGraph,"utf-8"));
-            jsonLd.setUseTypeCoercion(this.useTypeCoercion);
             writer.write(jsonLd.toString(this.indentation));
             writer.flush();
         } catch (IOException ioe) {
