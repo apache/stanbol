@@ -113,7 +113,7 @@ public class JsonLdSerializerProvider implements SerializingProvider {
         }
 
         try {
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(serializedGraph));
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(serializedGraph,"utf-8"));
             jsonLd.setUseTypeCoercion(this.useTypeCoercion);
             writer.write(jsonLd.toString(this.indentation));
             writer.flush();
