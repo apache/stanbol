@@ -6,5 +6,4 @@ http://s.opencalais.com/1/type/em/e/ProvinceOrState=http://dbpedia.org/ontology/
 http://s.opencalais.com/1/type/em/e/Region=http://dbpedia.org/ontology/Place
 http://s.opencalais.com/1/type/em/e/Company=http://dbpedia.org/ontology/Organisation
 http://s.opencalais.com/1/type/em/e/Facility=http://dbpedia.org/ontology/Organisation
-http://s.opencalais.com/1/type/em/e/rganization=http://dbpedia.org/ontology/Organisation
-
+http://s.opencalais.com/1/type/em/e/Organization=http://dbpedia.org/ontology/Organisation
