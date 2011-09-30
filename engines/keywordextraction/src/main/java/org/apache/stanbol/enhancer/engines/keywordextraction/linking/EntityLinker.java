@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +15,7 @@ import java.util.Set;
 import opennlp.tools.util.Span;
 
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText.Token;
 import org.apache.stanbol.enhancer.engines.keywordextraction.impl.ProcessingState;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntityLinkerConfig.RedirectProcessingMode;
@@ -101,12 +103,13 @@ public class EntityLinker {
                                 suggestion.getMatchCount() < config.getMinFoundTokens()){
                             it.remove();
                         } else { //calculate the score
+                            double suggestionMatchScore = suggestion.getMatchCount()*suggestion.getMatchScore();
                             //how good is the current match in relation to the best one
-                            double spanScore = ((double)suggestion.getMatchCount())/bestMatchCount;
+                            double spanScore = suggestionMatchScore/bestMatchCount;
                             //how good is the match to the span selected by this suggestion
-                            double textScore = ((double)suggestion.getMatchCount())/suggestion.getSpan();
+                            double textScore = suggestionMatchScore/suggestion.getSpan();
                             //how good is the match in relation to the tokens of the suggested label
-                            double labelScore = ((double)suggestion.getMatchCount()/suggestion.getLabelTokenCount());
+                            double labelScore = suggestionMatchScore/suggestion.getLabelTokenCount();
                             suggestion.setScore(spanScore*spanScore*textScore*labelScore);
                         }
                     }
@@ -289,88 +292,192 @@ public class EntityLinker {
 //            config.getDefaultLanguage()); //and the default language
         Iterator<Text> labels = rep.getText(config.getNameField());
         Suggestion match = new Suggestion(rep);
+        Collection<Text> defaultLabels = new ArrayList<Text>();
+        boolean matchedCurLangLabel = false;
         while(labels.hasNext()){
             Text label = labels.next();
             String lang = label.getLanguage();
-            //check the language of the current label
-            //NOTE: Stirng.startWith is used to match'en-GB' with 'en'
-            if((lang == null && ( //if lang is null
-                            defLang == null || //default lang is null
-                            curLang == null)) //or current lang is null
-                    || (lang != null && ( //if lang is not null
-                            //NOTE: starsWith does not like parsing NULL
-                            curLang != null && lang.startsWith(curLang) || //match with default
-                            defLang != null && lang.startsWith(defLang)) //or match with current
-                        ) //end or
-                    ){ //end if
-                String text = label.getText().toLowerCase();
-                List<String> labelTokens = Arrays.asList(content.tokenize(text));
-                int foundTokens = 0;
-                //ensure the correct order of the tokens in the suggested entity
-                int foundInLabelIndex = 0;
-                boolean search = true;
-                int lastFoundIndex = -1;
-                Token currentToken;
-                int maxNotFound = 1; //TODO make configureable
-                int notFound = 0;
-                for(int currentIndex = state.getTokenIndex();currentIndex < state.getSentence().getTokens().size() && search;currentIndex++){
-                    currentToken = state.getSentence().getTokens().get(currentIndex);
-                    boolean isProcessable = isProcessableToken(currentToken);
-                    int found = text.indexOf(currentToken.getText().toLowerCase());
-                    if(found>=foundInLabelIndex){ //found
-                        if(isProcessable){
-                            foundTokens++; //only count processable Tokens
-                        }
-                        //TODO: maybe move this also in the "isProcessable" ...
-                        foundInLabelIndex = found+currentToken.getText().length();
-                        lastFoundIndex = currentIndex;
-                    } else { //not found
-                        notFound++;
-                        if(isProcessable || notFound > maxNotFound){
-                            //stop as soon as a token that needs to be processed is
-                            //not found in the label or the maximum number of tokens
-                            //that are not processable are not found
-                            search = false; 
-                        }
-                    } //else it is OK if non processable tokens are not found
-                } 
-                MATCH labelMatch; 
-                int coveredTokens = lastFoundIndex-state.getTokenIndex()+1;
-                //Matching rules
-                // - if less than config#minTokenFound() than accept only EXACT
-                // - override PARTIAL matches with FULL/EXACT matches only if
-                //   foundTokens of the PARTIAL match is > than of the FULL/EXACT
-                //   match (this will be very rare
-                if(foundTokens > 0 && match.getMatchCount() <= foundTokens) {
-                    String currentText = state.getTokenText(coveredTokens);
-                    if(currentText.equalsIgnoreCase(label.getText())){ 
-                        labelMatch = MATCH.EXACT;
-                        //set found to covered: May be lower because only
-                        //processable tokens are counted, but Exact also checks
-                        //of non-processable!
-                        foundTokens = coveredTokens;
-                    } else if(foundTokens >= config.getMinFoundTokens()){
-                        if(foundTokens == coveredTokens){
-                            labelMatch = MATCH.FULL;
-                        } else {
-                            labelMatch = MATCH.PARTIAL;
-                        }
-                    } else {
-                        labelMatch = MATCH.NONE;
-                    }
-                    if(labelMatch != MATCH.NONE){
-                        if(match.getMatchCount() < foundTokens ||
-                                match.getMatchCount() < foundTokens && 
-                                labelMatch.ordinal() > match.getMatch().ordinal()){
-                            match.updateMatch(labelMatch, coveredTokens, foundTokens,label,labelTokens.size());
-                        } //else this match is not better as the existing one
-                    } //else ignore labels with MATCH.NONE
-                } //else NO tokens found -> nothing to do
-            } // else worng language
+            if((lang == null && curLang == null) ||
+                    (lang != null && curLang != null && lang.startsWith(curLang))){
+                matchLabel(match, label);
+                matchedCurLangLabel = true;
+            } else if((lang ==null && defLang == null) ||
+                    (lang != null && defLang != null && lang.startsWith(defLang))){
+                defaultLabels.add(label);
+            }
+        }
+        //use only labels in the default language if there is
+        // * no label in the current language or
+        if(!matchedCurLangLabel){// || match.getMatch() == MATCH.NONE){
+            for(Text defaultLangLabel : defaultLabels){
+                matchLabel(match, defaultLangLabel);
+            }
         }
         return match;
     }
 
+    /**
+     * The default value for the maximum number or non-processable tokens
+     * allowed to be not matching with a label of an entity before the matching
+     * is stopped.
+     */
+    private static int DEFAULT_MAX_NOT_FOUND = 1; 
+    /**
+    * The value for the maximum number or non-processable tokens
+    * allowed to be not matching with a label of an entity before the matching
+    * is stopped.
+     * TODO: make configurable!
+    */
+    private int maxNotFound = DEFAULT_MAX_NOT_FOUND;
+    /**
+     * @param match
+     * @param label
+     */
+    private void matchLabel(Suggestion match, Text label) {
+        String text = label.getText().toLowerCase();
+        String[] labelTokens = content.tokenize(text);
+        Set<String> labelTokenSet = new HashSet<String>(
+                Arrays.asList(labelTokens));
+        int foundTokens = 0;
+        float foundTokenMatch = 0;
+        //ensure the correct order of the tokens in the suggested entity
+        boolean search = true;
+        int lastFoundIndex = -1;
+        int lastfoundLabelIndex = -1;
+        Token currentToken;
+        String currentTokenText;
+        int currentTokenLength;
+        int notFound = 0;
+        //search for matches within the correct order
+        for(int currentIndex = state.getTokenIndex();currentIndex < state.getSentence().getTokens().size() && search;currentIndex++){
+            currentToken = state.getSentence().getTokens().get(currentIndex);
+            currentTokenText = currentToken.getText().toLowerCase();
+            currentTokenLength = currentTokenText.length();
+            boolean isProcessable = isProcessableToken(currentToken);
+            boolean found = false;
+            float matchFactor = 0f;
+            //iteration starts at the next token after the last matched one
+            //so it is OK to skip tokens in the label, but not within the text
+            for(int i = lastfoundLabelIndex+1;!found && i < labelTokens.length;i ++){
+                String labelTokenText = labelTokens[i];
+                int labelTokenLength = labelTokenText.length();
+                float maxLength = currentTokenLength > labelTokenLength ? currentTokenLength : labelTokenLength;
+                float lengthDif = Math.abs(currentTokenLength - labelTokenLength);
+                if((lengthDif/maxLength)<=0.3f){ //this prevents unnecessary string comparison 
+                    int matchCount = compairTokens(currentTokenText, labelTokens[i]);
+                    if(matchCount/maxLength >= 0.7f){
+                        lastfoundLabelIndex = i; //set the last found index to the current position
+                        found = true; //set found to true -> stops iteration
+                        matchFactor = matchCount/maxLength; //how good is the match
+                        //remove matched labels from the set to disable them for
+                        //a later random oder search
+                        labelTokenSet.remove(labelTokenText);
+                    }
+                }
+            }
+            if(!found){
+                //search for a match in the wrong order
+                //currently only exact matches (for testing)
+                if(found = labelTokenSet.remove(currentTokenText)){
+                    matchFactor = 0.7f;
+                }
+            }
+            //int found = text.indexOf(currentToken.getText().toLowerCase());
+            if(found){ //found
+                if(isProcessable){
+                    foundTokens++; //only count processable Tokens
+                    foundTokenMatch = foundTokenMatch + matchFactor; //sum up the matches
+                }
+                lastFoundIndex = currentIndex;
+            } else { //not found
+                notFound++;
+                if(isProcessable || notFound > maxNotFound){
+                    //stop as soon as a token that needs to be processed is
+                    //not found in the label or the maximum number of tokens
+                    //that are not processable are not found
+                    search = false; 
+                }
+            }
+        }
+        //Now we make a second round to search tokens that match in the wrong order
+        //e.g. if given and family name of persons are switched
+        MATCH labelMatch; 
+        int coveredTokens = lastFoundIndex-state.getTokenIndex()+1;
+        float labelMatchScore = (foundTokenMatch/(float)labelTokens.length);
+        //Matching rules
+        // - if less than config#minTokenFound() than accept only EXACT
+        // - override PARTIAL matches with FULL/EXACT matches only if
+        //   foundTokens of the PARTIAL match is > than of the FULL/EXACT
+        //   match (this will be very rare
+        if(foundTokens > 0 && match.getMatchCount() <= foundTokens) {
+            String currentText = state.getTokenText(coveredTokens);
+            if(currentText.equalsIgnoreCase(label.getText())){ 
+                labelMatch = MATCH.EXACT;
+                //set found to covered: May be lower because only
+                //processable tokens are counted, but Exact also checks
+                //of non-processable!
+                foundTokens = coveredTokens;
+            } else if(foundTokens >= config.getMinFoundTokens() && 
+                    labelMatchScore >= 0.6f){
+                if(foundTokens == coveredTokens){
+                    labelMatch = MATCH.FULL;
+                } else {
+                    labelMatch = MATCH.PARTIAL;
+                }
+            } else {
+                labelMatch = MATCH.NONE;
+            }
+            if(labelMatch != MATCH.NONE){
+                if(match.getMatchCount() < foundTokens ||
+                        match.getMatchCount() < foundTokens && 
+                        labelMatch.ordinal() > match.getMatch().ordinal()){
+                    match.updateMatch(labelMatch, coveredTokens, foundTokens,
+                        foundTokenMatch/foundTokens,label,labelTokens.length);
+                } //else this match is not better as the existing one
+            } //else ignore labels with MATCH.NONE
+        } //else NO tokens found -> nothing to do
+    }
+    /**
+     * Compares to token with each other and returns the longest match. The 
+     * tokens are compared from the beginning and from the end.
+     * @param token1 the first token
+     * @param token2 the second token
+     * @return the number of matching chars
+     */
+    private int compairTokens(String token1,String token2){
+        int l1 = token1.length(); //length of the first token
+        int l2 = token2.length(); //length of the second token
+        //in case of same length check for equals first
+        if(l1 == l2 && token1.equals(token2)){ 
+            return l1;
+        }
+        int ml = l1>l2?l2:l1; //minimum length of a token
+        if(ml == 0){
+            return ml;
+        }
+        int f = 0; //forward match count + 1
+        int b = 0; //backward match count + 1
+        boolean match = true; //still matches
+        while(match && f < ml){
+            match = token1.charAt(f) == token2.charAt(f);
+            f++;
+        }
+        if(!match){
+            f--;
+        }
+        if(f < ml){
+            match = true;
+            while(match && b < ml){
+                b++;
+                match = token1.charAt(l1-b) == token2.charAt(l2-b);
+            }
+            if(!match){
+                b--;
+            }
+        }
+        return f > b ? f : b;
+    }
+    
     /**
      * Checks if the current token of {@link #state} is processable. 
      * @param token the {@link Token} to check.

@@ -32,6 +32,12 @@ public class Suggestion implements Comparable<Suggestion>{
     private boolean redirectProcessed;
     
     private double score;
+    /**
+     * The score of the matches (e.g. when a match is based on stemming or some
+     * oder kind of fuzziness, than matchers might assign a match score than
+     * 1.0.
+     */
+    private float matchScore;
     public static enum MATCH {
         /**
          * No match (to less tokens, wrong oder ...)
@@ -65,16 +71,21 @@ public class Suggestion implements Comparable<Suggestion>{
      * @param match the math type
      * @param span the number of token this suggestion spans
      * @param count the number of token that match with the suggestion within the span
+     * @param matchScore the score of the match. MUST BE in the range between 
+     * <code>[0..1]</code>. For {@link MATCH#EXACT} and {@link MATCH#NONE} this
+     * parameter is ignored and the value is set to <code>1</code>, <code>0</code>
+     * respectively.
      * @param label the label that matches the tokens
      * @param labelTokenCount the number of tokens of the label
      */
-    protected void updateMatch(MATCH match,int span,int count,Text label,int labelTokenCount){
+    protected void updateMatch(MATCH match,int span,int count,float matchScore,Text label,int labelTokenCount){
         this.match = match;
         //check the validity of the parameters to avoid later errors that are
         //than hard to debug
         if(match == MATCH.NONE){
             this.span = 0;
             this.matchCount = 0;
+            this.matchScore = 0f;
             this.label = null;
         } else {
             if(span < 1 || count < 1){
@@ -91,9 +102,19 @@ public class Suggestion implements Comparable<Suggestion>{
             }
         }
         this.span = span;
-        this.matchCount = count;
         this.label = label;
-        this.labelTokenCount = labelTokenCount;
+        if(match == MATCH.EXACT){ //for exact matches the matchScore needs to be
+            this.matchScore = 1f; // ignored and set to 1.0f
+            this.matchCount = span; //and the match count needs to be equals to the span
+            this.labelTokenCount = span;
+        } else {
+            if(matchScore > 1f){
+                throw new IllegalArgumentException("The matchScore MUST NOT be greater than one (parsed value = "+matchScore+")");
+            }
+            this.matchScore = matchScore;
+            this.matchCount = count;
+            this.labelTokenCount = labelTokenCount;
+        }
     }
     /**
      * Getter for the number of Tokens of the label. Usually needed to calculate
@@ -117,6 +138,20 @@ public class Suggestion implements Comparable<Suggestion>{
      */
     public final MATCH getMatch() {
         return match;
+    }
+    /**
+     * Getter for the matching score. This is a modifier in the range
+     * between [0..1] that tells about the quality of the matches for the
+     * {@link #getMatchCount() matched} tokens. <p>
+     * As an example if a match is based on stemming a word a label matcher
+     * implementation might want to assign a matching score below <code>1</code>.
+     * Score calculations that use the {@link #getMatchCount()} should use
+     * <code>{@link #getMatchCount()} * {@link #getMatchScore()}</code> as a
+     * bases.
+     * @return the matchScore
+     */
+    public final float getMatchScore() {
+        return matchScore;
     }
     /**
      * Getter for the number of the token matched by this suggestion
