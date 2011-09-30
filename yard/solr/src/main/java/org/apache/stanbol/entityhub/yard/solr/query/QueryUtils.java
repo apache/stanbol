@@ -45,6 +45,9 @@ public final class QueryUtils {
      * 
      * @param value
      *            the index value
+     * @param escape if <code>true</code> all Solr special chars are escaped if
+     * <code>false</code> than '*' and '?' as used for wildcard searches are
+     * not escaped.
      * @return the (possible multiple) values that need to be connected with AND
      */
     public static String[] encodeQueryValue(IndexValue indexValue, boolean escape) {
@@ -55,6 +58,8 @@ public final class QueryUtils {
         String value = indexValue.getValue(); 
         if (escape) {
             value = SolrUtil.escapeSolrSpecialChars(value);
+        } else {
+            value = SolrUtil.escapeWildCardString(value);
         }
         if (IndexDataTypeEnum.TXT.getIndexType().equals(indexValue.getType())) {
         	value = value.toLowerCase();
