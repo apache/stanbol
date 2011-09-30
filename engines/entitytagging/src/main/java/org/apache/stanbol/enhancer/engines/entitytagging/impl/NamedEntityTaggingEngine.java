@@ -33,6 +33,7 @@ import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -54,6 +55,7 @@ import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
+import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
@@ -112,6 +114,13 @@ public class NamedEntityTaggingEngine implements EnhancementEngine, ServicePrope
     @Property(value = "rdfs:label")
     public static final String NAME_FIELD = "org.apache.stanbol.enhancer.engines.entitytagging.nameField";
 
+    /**
+     * Use the RDFS label as default
+     */
+    @Property(boolValue = true)
+    public static final String DEREFERENCE_ENTITIES = "org.apache.stanbol.enhancer.engines.entitytagging.dereference";
+
+    
     /**
      * Service of the Entityhub that manages all the active referenced Site. This Service is used to lookup the
      * configured Referenced Site when we need to enhance a content item.
@@ -182,6 +191,8 @@ public class NamedEntityTaggingEngine implements EnhancementEngine, ServicePrope
      * The number of Suggestions to be added
      */
     public Integer numSuggestions = 3;
+    
+    public boolean dereferenceEntities = true;
 
     /**
      * The {@link OfflineMode} is used by Stanbol to indicate that no external service should be referenced.
@@ -258,6 +269,9 @@ public class NamedEntityTaggingEngine implements EnhancementEngine, ServicePrope
         Object nameField = config.get(NAME_FIELD);
         this.nameField = nameField == null || nameField.toString().isEmpty() ? NamespaceEnum.rdfs + "label"
                 : NamespaceEnum.getFullName(nameField.toString());
+        Object dereferenceEntities = config.get(DEREFERENCE_ENTITIES);
+        this.dereferenceEntities = state == null ? true : Boolean
+                .parseBoolean(dereferenceEntities.toString());
     }
 
     @Deactivate
@@ -439,6 +453,7 @@ public class NamedEntityTaggingEngine implements EnhancementEngine, ServicePrope
                 matches.add(guess);
             }
         }
+        RdfValueFactory factory = RdfValueFactory.getInstance();
         //now write the results
         for(int i=0;i<matches.size();i++){
             Representation rep = matches.get(i).getRepresentation();
@@ -454,8 +469,11 @@ public class NamedEntityTaggingEngine implements EnhancementEngine, ServicePrope
             log.debug("Adding {} to ContentItem {}", rep.getId(), contentItemId);
             EnhancementRDFUtils.writeEntityAnnotation(this, literalFactory, graph, contentItemId,
                 annotationsToRelate, rep, nameField);
+
+            if (dereferenceEntities) {
+                graph.addAll(factory.toRdfRepresentation(rep).getRdfGraph());
+            }
         }
-        
         return results;
     }
 
