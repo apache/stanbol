@@ -418,6 +418,13 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
         listeners.remove(listener);
     }
 
+    /**
+     * 
+     * @param id
+     *            The ontology space identifier. This implementation only allows non-null and non-empty
+     *            alphanumeric sequences, case-sensitive and preferably separated by a single slash character,
+     *            with optional dashes or underscores.
+     */
     protected void setID(String id) {
         if (id == null) throw new IllegalArgumentException("Space ID cannot be null.");
         id = id.trim();

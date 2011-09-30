@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.net.URI;
 import java.net.URL;
+import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Set;
 
@@ -31,6 +32,8 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.ParentPathInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
+import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
@@ -52,7 +55,8 @@ public class TestOntologyInputSources {
 
     @BeforeClass
     public static void setUp() {
-        onm = new ONManagerImpl(null, null, new Hashtable<String,Object>());
+        Dictionary<String,Object> onmconf = new Hashtable<String,Object>();
+        onm = new ONManagerImpl(null, null, new OfflineConfigurationImpl(onmconf), onmconf);
         df = onm.getOwlFactory();
     }
 
@@ -73,7 +77,7 @@ public class TestOntologyInputSources {
         assertNull(mapper.getDocumentIRI(dummyiri));
 
         // Create a new ontology in the test resources.
-        OWLOntologyManager mgr = onm.getOntologyManagerFactory().createOntologyManager(false);
+        OWLOntologyManager mgr = OWLOntologyManagerFactory.createOWLOntologyManager(null);
         OWLOntology o = mgr.createOntology(dummyiri);
         File f = new File(URI.create(url.toString() + "/dummycharacters.owl"));
         mgr.saveOntology(o, new WriterDocumentTarget(new FileWriter(f)));

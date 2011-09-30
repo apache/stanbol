@@ -16,7 +16,10 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.ontology;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -35,6 +38,7 @@ import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.CoreOntologySpaceImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.CustomOntologySpaceImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFactoryImpl;
+import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -70,7 +74,7 @@ public class TestOntologyScope {
         onm = new ONManagerImpl(null, null, new OfflineConfigurationImpl(onmconf), onmconf);
         factory = onm.getOntologyScopeFactory();
         if (factory == null) fail("Could not instantiate ontology space factory");
-        OWLOntologyManager mgr = onm.getOntologyManagerFactory().createOntologyManager(true);
+        OWLOntologyManager mgr = OWLOntologyManagerFactory.createOWLOntologyManager(null);
         try {
             src1 = new RootOntologySource(mgr.createOntology(baseIri), null);
             src2 = new RootOntologySource(mgr.createOntology(baseIri2), null);

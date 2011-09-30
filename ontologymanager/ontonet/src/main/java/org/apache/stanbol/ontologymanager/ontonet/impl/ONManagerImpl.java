@@ -54,7 +54,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.conf.OntologyNetworkConfigurationUtils;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.InMemoryOntologyStorage;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OWLOntologyManagerFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyIndexImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologySpaceFactoryImpl;
@@ -160,8 +159,6 @@ public class ONManagerImpl implements ONManager {
     private OfflineMode offlineMode;
 
     private OntologyIndex oIndex;
-
-    private OWLOntologyManagerFactoryImpl omgrFactory;
 
     private OntologyScopeFactory ontologyScopeFactory;
 
@@ -294,7 +291,6 @@ public class ONManagerImpl implements ONManager {
             // Ok, go empty
         }
 
-        omgrFactory = new OWLOntologyManagerFactoryImpl(dirs);
         owlFactory = OWLManager.getOWLDataFactory();
         owlCacheManager = OWLOntologyManagerFactory.createOWLOntologyManager(offline
                 .getOntologySourceLocations().toArray(new IRI[0]));
@@ -320,7 +316,8 @@ public class ONManagerImpl implements ONManager {
 
         if (configPath != null && !configPath.trim().isEmpty()) {
             OWLOntology oConf = null;
-            OWLOntologyManager tempMgr = omgrFactory.createOntologyManager(true);
+            OWLOntologyManager tempMgr = OWLOntologyManagerFactory.createOWLOntologyManager(offline
+                    .getOntologySourceLocations().toArray(new IRI[0]));
             OWLOntologyDocumentSource oConfSrc = null;
 
             try {
@@ -383,8 +380,10 @@ public class ONManagerImpl implements ONManager {
         // Now create everything that depends on the Storage object.
 
         // These may require the OWL cache manager
-        ontologySpaceFactory = new OntologySpaceFactoryImpl(scopeRegistry, storage, offline,IRI.create(getOntologyNetworkNamespace()));
-        ontologyScopeFactory = new OntologyScopeFactoryImpl(scopeRegistry, IRI.create(getOntologyNetworkNamespace()),ontologySpaceFactory);
+        ontologySpaceFactory = new OntologySpaceFactoryImpl(scopeRegistry, storage, offline,
+                IRI.create(getOntologyNetworkNamespace()));
+        ontologyScopeFactory = new OntologyScopeFactoryImpl(scopeRegistry,
+                IRI.create(getOntologyNetworkNamespace()), ontologySpaceFactory);
         ontologyScopeFactory.addScopeEventListener(oIndex);
 
         // // This requires the OWL cache manager
@@ -514,10 +513,6 @@ public class ONManagerImpl implements ONManager {
 
     public OntologyIndex getOntologyIndex() {
         return oIndex;
-    }
-
-    public OWLOntologyManagerFactoryImpl getOntologyManagerFactory() {
-        return omgrFactory;
     }
 
     @Override

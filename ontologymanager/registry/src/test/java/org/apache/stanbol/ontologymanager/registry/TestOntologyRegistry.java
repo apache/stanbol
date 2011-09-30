@@ -16,7 +16,9 @@
  */
 package org.apache.stanbol.ontologymanager.registry;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.net.URL;
@@ -28,9 +30,6 @@ import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
@@ -38,7 +37,6 @@ import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryItem;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryOntology;
 import org.apache.stanbol.ontologymanager.registry.impl.RegistryManagerImpl;
-import org.apache.stanbol.ontologymanager.registry.io.RegistryIRISource;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -53,7 +51,6 @@ import org.semanticweb.owlapi.util.AutoIRIMapper;
 public class TestOntologyRegistry {
 
     private String scopeIri = "Scope";
-    private static RegistryIRISource ontologySource; // Null until the RegistryIRISource stays in place.
     private static ONManager onm;
     private static RegistryManager regman;
     private OWLOntologyManager virginOntologyManager;
@@ -151,45 +148,45 @@ public class TestOntologyRegistry {
         }
     }
 
-    /**
-     * Verifies that the addition of a null or valid registry source to a session space works.
-     */
-    @Test
-    public void testAddRegistryToSessionSpace() throws Exception {
-        SessionOntologySpace space = null;
-        space = onm.getOntologySpaceFactory().createSessionOntologySpace(scopeIri);
-        space.setUp();
-        // space.addOntology(new
-        // OntologyRegistryIRISource(testRegistryIri,onm.getOwlCacheManager(),onm.getRegistryLoader()));
-        space.addOntology(ontologySource);
-        // FIXME : no longer use the top ontology?
-        assertTrue(space.asOWLOntology() != null);
-        assertTrue(space.getOntologies(true).contains(space.asOWLOntology()));
-    }
-
-    /**
-     * Verifies that an ontology scope with a null or valid registry source is created correctly.
-     */
-    @Test
-    public void testScopeCreationWithRegistry() throws Exception {
-        OntologyScope scope = null;
-        // The input source instantiation automatically loads the entire content of a registry, no need to
-        // test loading methods individually.
-        scope = onm.getOntologyScopeFactory().createOntologyScope(scopeIri, ontologySource);
-        assertTrue(scope != null && scope.getCoreSpace().asOWLOntology() != null);
-    }
-
-    /**
-     * Verifies that an ontology space with a null or valid registry source is created correctly.
-     */
-    @Test
-    public void testSpaceCreationWithRegistry() throws Exception {
-        // setupOfflineMapper();
-        CoreOntologySpace space = null;
-        // The input source instantiation automatically loads the entire content of a registry, no need to
-        // test loading methods individually.
-        space = onm.getOntologySpaceFactory().createCoreOntologySpace(scopeIri, ontologySource);
-        assertTrue(space != null && space.asOWLOntology() != null);
-    }
+    // /**
+    // * Verifies that the addition of a null or valid registry source to a session space works.
+    // */
+    // @Test
+    // public void testAddRegistryToSessionSpace() throws Exception {
+    // SessionOntologySpace space = null;
+    // space = onm.getOntologySpaceFactory().createSessionOntologySpace(scopeIri);
+    // space.setUp();
+    // // space.addOntology(new
+    // // OntologyRegistryIRISource(testRegistryIri,onm.getOwlCacheManager(),onm.getRegistryLoader()));
+    // space.addOntology(ontologySource);
+    // // FIXME : no longer use the top ontology?
+    // assertTrue(space.asOWLOntology() != null);
+    // assertTrue(space.getOntologies(true).contains(space.asOWLOntology()));
+    // }
+    //
+    // /**
+    // * Verifies that an ontology scope with a null or valid registry source is created correctly.
+    // */
+    // @Test
+    // public void testScopeCreationWithRegistry() throws Exception {
+    // OntologyScope scope = null;
+    // // The input source instantiation automatically loads the entire content of a registry, no need to
+    // // test loading methods individually.
+    // scope = onm.getOntologyScopeFactory().createOntologyScope(scopeIri, ontologySource);
+    // assertTrue(scope != null && scope.getCoreSpace().asOWLOntology() != null);
+    // }
+    //
+    // /**
+    // * Verifies that an ontology space with a null or valid registry source is created correctly.
+    // */
+    // @Test
+    // public void testSpaceCreationWithRegistry() throws Exception {
+    // // setupOfflineMapper();
+    // CoreOntologySpace space = null;
+    // // The input source instantiation automatically loads the entire content of a registry, no need to
+    // // test loading methods individually.
+    // space = onm.getOntologySpaceFactory().createCoreOntologySpace(scopeIri, ontologySource);
+    // assertTrue(space != null && space.asOWLOntology() != null);
+    // }
 
 }

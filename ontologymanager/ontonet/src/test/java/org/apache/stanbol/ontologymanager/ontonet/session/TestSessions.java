@@ -18,6 +18,7 @@ package org.apache.stanbol.ontologymanager.ontonet.session;
 
 import static org.junit.Assert.*;
 
+import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
@@ -36,6 +37,8 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session.State;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
+import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
@@ -61,15 +64,16 @@ public class TestSessions {
 
     @BeforeClass
     public static void setup() {
+        Dictionary<String,Object> onmconf = new Hashtable<String,Object>();
         // An ONManagerImpl with no store and default settings
-        ONManager onm = new ONManagerImpl(null, null, new Hashtable<String,Object>());
+        ONManager onm = new ONManagerImpl(null, null, new OfflineConfigurationImpl(onmconf), onmconf);
         sesmgr = onm.getSessionManager();
         scopeFactory = onm.getOntologyScopeFactory();
         spaceFactory = onm.getOntologySpaceFactory();
         scopeRegistry = onm.getScopeRegistry();
-        if (spaceFactory == null) fail("Could not instantiate ontology space factory");
-        if (scopeFactory == null) fail("Could not instantiate ontology scope factory");
-        OWLOntologyManager mgr = onm.getOntologyManagerFactory().createOntologyManager(true);
+        assertNotNull(spaceFactory);
+        assertNotNull(scopeFactory);
+        OWLOntologyManager mgr = OWLOntologyManagerFactory.createOWLOntologyManager(null);
         try {
             src1 = new RootOntologySource(mgr.createOntology(baseIri), null);
             src2 = new RootOntologySource(mgr.createOntology(baseIri2), null);

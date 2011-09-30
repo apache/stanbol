@@ -27,6 +27,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.ParentPathInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
@@ -34,6 +35,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
+import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.junit.BeforeClass;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -57,10 +59,12 @@ public class TestIndexing {
     @BeforeClass
     public static void setup() {
         final Dictionary<String,Object> emptyConfig = new Hashtable<String,Object>();
-//        RegistryManager regman = new RegistryManagerImpl(emptyConfig);
+        final OfflineConfiguration offline = new OfflineConfigurationImpl(emptyConfig);
+        // RegistryManager regman = new RegistryManagerImpl(emptyConfig);
         // An ONManagerImpl with no store and default settings
-        onm = new ONManagerImpl(null, null, new OfflineConfigurationImpl(emptyConfig), emptyConfig);
-        mgr = onm.getOntologyManagerFactory().createOntologyManager(true);
+        onm = new ONManagerImpl(null, null, offline, emptyConfig);
+        mgr = OWLOntologyManagerFactory.createOWLOntologyManager(offline.getOntologySourceLocations()
+                .toArray(new IRI[0]));
 
         // Since it is registered, this scope must be unique, or subsequent
         // tests will fail on duplicate ID exceptions!
@@ -77,23 +81,23 @@ public class TestIndexing {
         }
         // The factory call also invokes loadRegistriesEager() and
         // gatherOntologies() so no need to test them individually.
-//        try {
-//            scope = onm.getOntologyScopeFactory().createOntologyScope(
-//                scopeIri,
-//                new RegistryIRISource(testRegistryIri, onm.getOwlCacheManager(), onm
-//                        .getRegistryLoader(), null
-//                // new RootOntologySource(oParent
-//                ));
-//
-//            onm.getScopeRegistry().registerScope(scope);
-//        } catch (DuplicateIDException e) {
-//            // Uncomment if annotated with @BeforeClass instead of @Before ,
-//            // comment otherwise.
-//            fail("DuplicateID exception caught when creating test scope.");
-//        }
+        // try {
+        // scope = onm.getOntologyScopeFactory().createOntologyScope(
+        // scopeIri,
+        // new RegistryIRISource(testRegistryIri, onm.getOwlCacheManager(), onm
+        // .getRegistryLoader(), null
+        // // new RootOntologySource(oParent
+        // ));
+        //
+        // onm.getScopeRegistry().registerScope(scope);
+        // } catch (DuplicateIDException e) {
+        // // Uncomment if annotated with @BeforeClass instead of @Before ,
+        // // comment otherwise.
+        // fail("DuplicateID exception caught when creating test scope.");
+        // }
     }
 
-//    @Test
+    // @Test
     public void testAddOntology() throws Exception {
         OntologyIndex index = onm.getOntologyIndex();
 
@@ -120,7 +124,7 @@ public class TestIndexing {
         assertFalse(index.isOntologyLoaded(iri_minor));
     }
 
-//    @Test
+    // @Test
     public void testGetOntology() throws Exception {
         // Load the original objectRole ODP
         OWLOntology oObjRole = mgr.loadOntology(iri_main);
@@ -133,7 +137,7 @@ public class TestIndexing {
         // assertEquals(index.getOntology(objrole), oObjRole);
     }
 
-//    @Test
+    // @Test
     public void testIsOntologyLoaded() {
         OntologyIndex index = onm.getOntologyIndex();
         IRI coreroot = IRI.create(scopeIri + "/core/root.owl");

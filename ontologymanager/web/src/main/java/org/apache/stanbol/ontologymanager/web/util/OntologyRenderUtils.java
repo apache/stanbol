@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxOntologyFormat;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.semanticweb.owlapi.io.OWLFunctionalSyntaxOntologyFormat;
@@ -60,7 +61,7 @@ public class OntologyRenderUtils {
 	public static String renderOntology(OWLOntology ont,
 			OWLOntologyFormat format, String rewritePrefix, ONManager onm)
 			throws OWLOntologyStorageException {
-		OWLOntologyManager tmpmgr = onm.getOntologyManagerFactory().createOntologyManager(true);
+		OWLOntologyManager tmpmgr = OWLOntologyManagerFactory.createOWLOntologyManager(null);
 		OWLDataFactory df = tmpmgr.getOWLDataFactory();
 
 		// Now the hack
@@ -111,7 +112,7 @@ public class OntologyRenderUtils {
 	public static String renderOntology(OWLOntology ont, String format,
 			String rewritePrefix, ONManager onm)
 			throws OWLOntologyStorageException {
-		OWLOntologyManager tmpmgr = onm.getOntologyManagerFactory().createOntologyManager(true);
+		OWLOntologyManager tmpmgr = OWLOntologyManagerFactory.createOWLOntologyManager(null);
 		OWLDataFactory df = tmpmgr.getOWLDataFactory();
 		StringDocumentTarget tgt = new StringDocumentTarget();
 

@@ -24,7 +24,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OWLOntologyManagerFactoryImpl;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -35,7 +34,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * therein.
  */
 public interface ONManager {
-    
+
     /**
      * The key used to configure the path of the ontology network configuration.
      */
@@ -64,8 +63,6 @@ public interface ONManager {
      * @return the default ontology index.
      */
     OntologyIndex getOntologyIndex();
-    
-    OWLOntologyManagerFactoryImpl getOntologyManagerFactory();
 
     /**
      * Implementations should be able to create a {@link File} object from this path.

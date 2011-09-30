@@ -51,11 +51,8 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
-import org.apache.stanbol.ontologymanager.ontonet.impl.util.StringUtils;
-import org.apache.stanbol.ontologymanager.registry.api.RegistryLoader;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
-import org.apache.stanbol.ontologymanager.registry.impl.RegistryLoaderImpl;
-import org.apache.stanbol.ontologymanager.registry.io.RegistryIRISource;
+import org.apache.stanbol.ontologymanager.registry.io.LibrarySource;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
@@ -77,8 +74,6 @@ public class ONMScopeResource extends BaseStanbolResource {
      */
     protected RegistryManager regMgr;
 
-    protected RegistryLoader loader;
-
     protected ClerezzaOntologyStorage storage;
 
     public ONMScopeResource(@Context ServletContext servletContext) {
@@ -86,7 +81,6 @@ public class ONMScopeResource extends BaseStanbolResource {
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
         this.regMgr = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
             servletContext);
-        loader = new RegistryLoaderImpl(regMgr, onm);
         this.storage = (ClerezzaOntologyStorage) ContextHelper.getServiceFromContext(
             ClerezzaOntologyStorage.class, servletContext);
     }
@@ -111,7 +105,7 @@ public class ONMScopeResource extends BaseStanbolResource {
                                    @Context HttpHeaders headers,
                                    @Context ServletContext servletContext) {
         ScopeRegistry reg = onm.getScopeRegistry();
-    OntologyScope scope = reg.getScope(scopeid/* IRI.create(uriInfo.getAbsolutePath()) */);
+        OntologyScope scope = reg.getScope(scopeid/* IRI.create(uriInfo.getAbsolutePath()) */);
         if (scope == null) return Response.status(NOT_FOUND).build();
         else return Response.ok(scope.asOWLOntology()).build();
     }
@@ -196,7 +190,8 @@ public class ONMScopeResource extends BaseStanbolResource {
 
         // First thing, check the core source.
         try {
-            coreSrc = new RegistryIRISource(IRI.create(coreRegistry), onm.getOwlCacheManager(), loader);
+            coreSrc = new LibrarySource(IRI.create(coreRegistry), regMgr, onm.getOwlCacheManager());
+            // coreSrc = new RegistryIRISource(IRI.create(coreRegistry), onm.getOwlCacheManager(), loader);
         } catch (Exception e1) {
             // Bad or not supplied core registry, try the ontology.
             try {
@@ -211,7 +206,9 @@ public class ONMScopeResource extends BaseStanbolResource {
         if (customOntology != null || customRegistry != null) {
             // ...but if it was, be prepared to throw exceptions.
             try {
-                custSrc = new RegistryIRISource(IRI.create(customRegistry), onm.getOwlCacheManager(), loader);
+                coreSrc = new LibrarySource(IRI.create(customRegistry), regMgr, onm.getOwlCacheManager());
+                // custSrc = new RegistryIRISource(IRI.create(customRegistry), onm.getOwlCacheManager(),
+                // loader);
             } catch (Exception e1) {
                 // Bad or not supplied custom registry, try the ontology.
                 try {
