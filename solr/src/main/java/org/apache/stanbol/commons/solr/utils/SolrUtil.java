@@ -21,8 +21,10 @@ import java.util.regex.Pattern;
 public final class SolrUtil {
     private SolrUtil() {}
 
-    private static final String LUCENE_ESCAPE_CHARS = "[\\\\+\\-\\!\\(\\)\\:\\^\\[\\]\\{\\}\\~\\*\\?]";
+    private static final String LUCENE_ESCAPE_CHARS = "[\\\\+\\-\\!\\(\\)\\:\\^\\[\\]\\{\\}\\~\\*\\?\\\"]";
     private static final Pattern LUCENE_PATTERN = Pattern.compile(LUCENE_ESCAPE_CHARS);
+    private static final String WILDCARD_ESCAPE_CHARS = "[\\\\+\\-\\!\\(\\)\\:\\^\\[\\]\\{\\}\\~\\\"]";
+    private static final Pattern WILDCARD_PATTERN = Pattern.compile(WILDCARD_ESCAPE_CHARS);
     private static final String REPLACEMENT_STRING = "\\\\$0";
 
     /**
@@ -33,6 +35,18 @@ public final class SolrUtil {
      * @return the escaped string
      */
     public static String escapeSolrSpecialChars(String string) {
-        return string != null ? LUCENE_PATTERN.matcher(string).replaceAll(REPLACEMENT_STRING) : null;
+        String escaped = string != null ? LUCENE_PATTERN.matcher(string).replaceAll(REPLACEMENT_STRING) : null;
+        return escaped;
+    }
+    /**
+     * Escapes all Solr special chars except the '*' and '?' as used for Wildcard
+     * searches
+     * @param string the string representing a wildcard search that needs to
+     * be escaped
+     * @return the escaped version of the wildcard search
+     */
+    public static String escapeWildCardString(String string){
+        String escaped = string != null ? WILDCARD_PATTERN.matcher(string).replaceAll(REPLACEMENT_STRING) : null;
+        return escaped;
     }
 }
