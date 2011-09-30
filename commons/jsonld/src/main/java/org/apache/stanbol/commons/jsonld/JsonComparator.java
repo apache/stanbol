@@ -31,29 +31,33 @@ public class JsonComparator implements Comparator<Object> {
         int value;
         if (arg0.equals(arg1)) {
             value = 0;
-        } else if (arg0.equals("#")) {
+        } else if (arg0.equals(JsonLdCommon.CONTEXT)) {
             value = -1;
-        } else if (arg1.equals("#")) {
+        } else if (arg1.equals(JsonLdCommon.CONTEXT)) {
             value = 1;
-        } else if (arg0.equals("@")) {
+        } else if (arg0.equals(JsonLdCommon.COERCE)) {
+            value = 1;
+        } else if (arg1.equals(JsonLdCommon.COERCE)) {
             value = -1;
-        } else if (arg1.equals("@")) {
+        } else if (arg0.equals(JsonLdCommon.TYPES)) {
             value = 1;
-        } else if (arg0.equals("a")) {
+        } else if (arg1.equals(JsonLdCommon.TYPES)) {
             value = -1;
-        } else if (arg1.equals("a")) {
-            value = 1;
-        } else if (arg0.equals("#base")) {
+        } else if (arg0.equals(JsonLdCommon.SUBJECT)) {
             value = -1;
-        } else if (arg1.equals("#base")) {
+        } else if (arg1.equals(JsonLdCommon.SUBJECT)) {
             value = 1;
-        } else if (arg0.equals("#vocab")) {
+        } else if (arg0.equals(JsonLdCommon.TYPE)) {
             value = -1;
-        } else if (arg1.equals("#vocab")) {
+        } else if (arg1.equals(JsonLdCommon.TYPE)) {
             value = 1;
-        } else if (arg0.equals("#types")) {
+        } else if (arg0.equals(JsonLdCommon.DATATYPE)) {
             value = 1;
-        } else if (arg1.equals("#types")) {
+        } else if (arg1.equals(JsonLdCommon.DATATYPE)) {
+            value = -1;
+        } else if (arg0.equals(JsonLdCommon.LITERAL)) {
+            value = 1;
+        } else if (arg1.equals(JsonLdCommon.LITERAL)) {
             value = -1;
         } else {
             value = String.valueOf(arg0).toLowerCase().compareTo(String.valueOf(arg1).toLowerCase());

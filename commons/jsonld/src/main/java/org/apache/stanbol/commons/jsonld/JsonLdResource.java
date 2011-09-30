@@ -31,7 +31,11 @@ public class JsonLdResource {
     private String subject;
     private String profile;
     private List<String> types = new ArrayList<String>();
-    private Map<String,String> coercionMap = new HashMap<String,String>();
+    
+    // maps properties to types
+    private Map<String,String> coerceMap = new HashMap<String,String>();
+    
+    // maps properties to values
     private Map<String,Object> propertyMap = new HashMap<String,Object>();
 
     public String getSubject() {
@@ -58,16 +62,16 @@ public class JsonLdResource {
         this.types.addAll(types);
     }
 
-    public void putCoercionType(String property, String type) {
-        this.coercionMap.put(property, type);
+    public void putPropertyType(String property, String type) {
+        this.coerceMap.put(property, type);
     }
 
-    public String getCoercionTypeOf(String property) {
-        return this.coercionMap.get(property);
+    public String getTypeOfProperty(String property) {
+        return this.coerceMap.get(property);
     }
 
-    public Map<String,String> getCoercionMap() {
-        return this.coercionMap;
+    public Map<String,String> getCoerceMap() {
+        return this.coerceMap;
     }
 
     public List<String> getTypes() {

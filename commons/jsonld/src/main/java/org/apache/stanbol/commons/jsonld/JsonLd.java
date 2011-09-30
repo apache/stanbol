@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,9 +48,11 @@ public class JsonLd extends JsonLdCommon {
 
     /**
      * Flag to control whether type coercion should be applied on serialization. Default value is
-     * <code>false</code>.
+     * <code>true</code>.
      */
-    private boolean useTypeCoercion = false;
+    private boolean useTypeCoercion = true;
+    
+    
 
     /**
      * Adds the given resource to this JsonLd object using the resource's subject as key. If the key is NULL
@@ -129,18 +132,6 @@ public class JsonLd extends JsonLdCommon {
                 Map<String,Object> subjectObject = new TreeMap<String,Object>(new JsonComparator());
                 JsonLdResource resource = resourceMap.get(subject);
 
-                // put the namespaces
-                if (!this.namespacePrefixMap.isEmpty() || this.useTypeCoercion) {
-                    Map<String,Object> nsObject = new TreeMap<String,Object>(new JsonComparator());
-                    for (String ns : this.namespacePrefixMap.keySet()) {
-                        nsObject.put(this.namespacePrefixMap.get(ns), ns);
-                    }
-                    if (this.useTypeCoercion) {
-                        putCoercionTypes(nsObject, resource.getCoercionMap());
-                    }
-                    subjectObject.put("#", nsObject);
-                }
-
                 // put subject
                 if (resource.getSubject() != null && !resource.getSubject().isEmpty()) {
                     subjectObject.put(SUBJECT, handleCURIEs(resource.getSubject()));
@@ -159,8 +150,23 @@ public class JsonLd extends JsonLdCommon {
 
                 // add to list of subjects
                 json.add(subjectObject);
-            }
+                
+                // put the used namespaces
+                if (!this.usedNamespaces.isEmpty() || this.useTypeCoercion) {
+                    Map<String,Object> nsObject = new TreeMap<String,Object>(new JsonComparator());
 
+                    if (this.useTypeCoercion) {
+                        putCoercedTypes(nsObject, resource.getCoerceMap());
+                    }
+                    
+                    for (String ns : this.usedNamespaces.keySet()) {
+                        nsObject.put(this.usedNamespaces.get(ns), ns);
+                    }
+                    this.usedNamespaces.clear();
+                    
+                    subjectObject.put(CONTEXT, nsObject);
+                }
+            }
         }
 
         return json;
@@ -194,7 +200,7 @@ public class JsonLd extends JsonLdCommon {
                 putTypes(subjectObject, resource);
 
                 if (this.useTypeCoercion) {
-                    coercionMap.putAll(resource.getCoercionMap());
+                    coercionMap.putAll(resource.getCoerceMap());
                 }
 
                 // put properties = objects
@@ -209,23 +215,24 @@ public class JsonLd extends JsonLdCommon {
                 if (subjects.size() == 1) {
                     json = (Map<String,Object>) subjects.get(0);
                 } else {
-                    json.put("@", subjects);
+                    json.put(SUBJECT, subjects);
                 }
             }
         }
 
         // put the namespaces
-        if (!this.namespacePrefixMap.isEmpty() || (!coercionMap.isEmpty() && this.useTypeCoercion)) {
-
+        if (!this.usedNamespaces.isEmpty() || (!coercionMap.isEmpty() && this.useTypeCoercion)) {
             Map<String,Object> nsObject = new TreeMap<String,Object>(new JsonComparator());
-            for (String ns : namespacePrefixMap.keySet()) {
-                nsObject.put(namespacePrefixMap.get(ns), ns);
-            }
 
             if (!coercionMap.isEmpty() && this.useTypeCoercion) {
-                putCoercionTypes(nsObject, coercionMap);
+                putCoercedTypes(nsObject, coercionMap);
             }
-            json.put("#", nsObject);
+
+            for (String ns : usedNamespaces.keySet()) {
+                nsObject.put(usedNamespaces.get(ns), ns);
+            }
+
+            json.put(CONTEXT, nsObject);
         }
 
         return json;
@@ -238,7 +245,7 @@ public class JsonLd extends JsonLdCommon {
                 types.add(handleCURIEs(type));
             }
             if (types.size() == 1) {
-                subjectObject.put("a", types.get(0));
+                subjectObject.put(TYPE, types.get(0));
             } else {
                 Collections.sort(types, new Comparator<String>() {
 
@@ -248,23 +255,30 @@ public class JsonLd extends JsonLdCommon {
                     }
 
                 });
-                subjectObject.put("a", types);
+                subjectObject.put(TYPE, types);
             }
         }
     }
 
-    private void putCoercionTypes(Map<String,Object> jsonObject, Map<String,String> coercionMap) {
+    private void putCoercedTypes(Map<String,Object> jsonObject, Map<String,String> coercionMap) {
         if (!coercionMap.isEmpty()) {
-            Map<String,String> nsCoercionMap = new TreeMap<String,String>(new JsonComparator());
+            Map<String,List<String>> nsCoercionMap = new TreeMap<String,List<String>>(new JsonComparator());
             for (String property : coercionMap.keySet()) {
-                nsCoercionMap.put(handleCURIEs(property), handleCURIEs(coercionMap.get(property)));
+                String prop = handleCURIEs(property);
+                String type = handleCURIEs(coercionMap.get(property));
+                
+                if (nsCoercionMap.get(type) == null) {
+                    nsCoercionMap.put(type, new LinkedList<String>());
+                }
+                List<String> propList = nsCoercionMap.get(type);
+                propList.add(prop);
             }
-            jsonObject.put("#types", nsCoercionMap);
+            jsonObject.put(COERCE, nsCoercionMap);
         }
     }
 
     private void putProperties(Map<String,Object> jsonObject, JsonLdResource resource) {
-        putProperties(jsonObject, resource.getPropertyMap(), resource.getCoercionMap());
+        putProperties(jsonObject, resource.getPropertyMap(), resource.getCoerceMap());
     }
 
     private void putProperties(Map<String,Object> outputObject,
@@ -272,6 +286,7 @@ public class JsonLd extends JsonLdCommon {
                                Map<String,String> coercionMap) {
         for (String property : inputMap.keySet()) {
             Object value = inputMap.get(property);
+            value = convertValueType(value);
             if (value instanceof String) {
                 String strValue = (String) value;
                 if (coercionMap != null) {
@@ -279,13 +294,19 @@ public class JsonLd extends JsonLdCommon {
                     if (type != null) {
                         if (this.useTypeCoercion) {
                             strValue = (String)doCoerce(strValue, type);
+                            outputObject.put(handleCURIEs(property), handleCURIEs(strValue));
                         } else {
-                            strValue = unCoerce(strValue, type);
+                            Object objValue = unCoerce(strValue, type);
+                            outputObject.put(handleCURIEs(property), objValue);
                         }
                     }
+                    else {
+                        outputObject.put(handleCURIEs(property), handleCURIEs(strValue));
+                    }
                 }
-                value = handleCURIEs(strValue);
-                outputObject.put(handleCURIEs(property), value);
+                else {
+                    outputObject.put(handleCURIEs(property), handleCURIEs(strValue));
+                }
             } else if (value instanceof Object[]) {
                 Object[] arrayValue = (Object[]) value;
                 putProperties(outputObject, property, arrayValue, coercionMap);
@@ -297,7 +318,7 @@ public class JsonLd extends JsonLdCommon {
             } else if (value instanceof JsonLdIRI) {
                 JsonLdIRI iriValue = (JsonLdIRI) value;
                 Map<String,Object> iriObject = new HashMap<String,Object>();
-                iriObject.put("@iri", handleCURIEs(iriValue.getIRI()));
+                iriObject.put(IRI, handleCURIEs(iriValue.getIRI()));
                 outputObject.put(handleCURIEs(property), iriObject);
             } else {
                 if (coercionMap != null) {
@@ -305,9 +326,9 @@ public class JsonLd extends JsonLdCommon {
                     if (type != null) {
                         Object objValue = null;
                         if (this.useTypeCoercion) {
-                            objValue = doCoerce(value.toString(), type);
+                            objValue = doCoerce(value, type);
                         } else {
-                            objValue = unCoerce(value.toString(), type);
+                            objValue = unCoerce(value, type);
                         }
                         
                         if (objValue instanceof String) {
@@ -331,65 +352,81 @@ public class JsonLd extends JsonLdCommon {
                                String property,
                                Object[] arrayValue,
                                Map<String,String> coercionMap) {
-        if (arrayValue instanceof String[]) {
-            String[] stringArray = (String[]) arrayValue;
-            List<String> valueList = new ArrayList<String>();
-            for (String uri : stringArray) {
-                valueList.add(handleCURIEs(uri));
-            }
-            outputObject.put(handleCURIEs(property), valueList);
-        } else {
-            List<Object> valueList = new ArrayList<Object>();
-            for (Object object : arrayValue) {
-                if (object instanceof Map<?,?>) {
-                    // The value of an array element is a Map. Handle maps recursively.
-                    Map<String,Object> inputMap = (Map<String,Object>) object;
-                    Map<String,Object> subOutputObject = new HashMap<String,Object>();
-                    valueList.add(subOutputObject);
-                    putProperties(subOutputObject, inputMap, coercionMap);
-                } else if (object instanceof JsonLdIRI) {
-                    JsonLdIRI iriValue = (JsonLdIRI) object;
-                    Map<String,Object> iriObject = new HashMap<String,Object>();
-                    iriObject.put("@iri", handleCURIEs(iriValue.getIRI()));
-                    valueList.add(iriObject);
-                } else {
-                    // Don't know what it is - just add it
-                    valueList.add(object);
-                }
-            }
 
-            // Add the converted values
-            outputObject.put(handleCURIEs(property), valueList);
+        String type = null;
+        if (coercionMap != null && !this.useTypeCoercion) {
+            type = coercionMap.get(property);
         }
+
+        List<Object> valueList = new ArrayList<Object>();
+        for (Object object : arrayValue) {
+            if (object instanceof Map<?,?>) {
+                // The value of an array element is a Map. Handle maps recursively.
+                Map<String,Object> inputMap = (Map<String,Object>) object;
+                Map<String,Object> subOutputObject = new HashMap<String,Object>();
+                valueList.add(subOutputObject);
+                putProperties(subOutputObject, inputMap, coercionMap);
+            } else if (object instanceof JsonLdIRI) {
+                JsonLdIRI iriValue = (JsonLdIRI) object;
+                if (this.useTypeCoercion) {
+                    valueList.add(iriValue.getIRI());
+                } else {
+                    Map<String,Object> iriObject = new HashMap<String,Object>();
+                    iriObject.put(IRI, handleCURIEs(iriValue.getIRI()));
+                    valueList.add(iriObject);
+                }
+            } else if (object instanceof String) {
+                String strValue = (String) object;
+                if (type != null) {
+                    valueList.add(unCoerce(handleCURIEs(strValue), type));
+                } else {
+                    valueList.add(handleCURIEs(strValue));
+                }
+            } else {
+                // Don't know what it is - just add it
+                valueList.add(object);
+            }
+        }
+
+        // Add the converted values
+        outputObject.put(handleCURIEs(property), valueList);
     }
 
     /**
-     * Appends the type to the Value if not present.
+     * Returns a map specifying the literal form and the datatype.
      * 
      * @param strValue
      * @param type
      * @return
      */
-    private String unCoerce(String strValue, String type) {
-        String typeSuffix = "^^" + unCURIE((type));
-        if (!strValue.endsWith(typeSuffix)) {
-            strValue = "\"" + strValue + "\"^^<" + type + ">";
-        }
-        return strValue;
+    private Map<String, Object> unCoerce(Object value, String type) {
+        Map<String, Object> typeDef = new TreeMap<String,Object>(new JsonComparator());
+        
+        typeDef.put(LITERAL, String.valueOf(value));
+        typeDef.put(DATATYPE, handleCURIEs(type));
+        
+        return typeDef;
     }
 
     /**
      * Removes the type from the value and handles conversion to Integer and Boolean.
      * 
+     * @FIXME Use @literal and @datatype notation when parsing typed literals
+     * 
      * @param strValue
      * @param type
      * @return
      */
-    private Object doCoerce(String strValue, String type) {
-        String typeSuffix = "^^" + unCURIE((type));
-        strValue = strValue.replace(typeSuffix, "");
-        strValue = strValue.replaceAll("\"", "");
-        return convertValueType(strValue);
+    private Object doCoerce(Object value, String type) {
+        if (value instanceof String) {
+            String strValue = (String) value;
+            String typeSuffix = "^^" + unCURIE((type));
+            strValue = strValue.replace(typeSuffix, "");
+            strValue = strValue.replaceAll("\"", "");
+            return strValue;            
+        }
+        
+        return value;
     }
 
     /**
@@ -398,19 +435,30 @@ public class JsonLd extends JsonLdCommon {
      * @param strValue
      * @return
      */
-    private Object convertValueType(String strValue) {
-        // check if value can be interpreted as integer
-        try {
-            return Integer.valueOf(strValue);
+    private Object convertValueType(Object value) {
+        if (value instanceof String) {
+            String strValue = (String) value;
+            // check if value can be interpreted as integer
+            try {
+                return Integer.valueOf(strValue);
+            }
+            catch (Throwable t) {};
+            
+            // check if it is a float value
+            try {
+                return Float.valueOf(strValue);
+            }
+            catch (Throwable t) {};
+            
+            // check if value can be interpreted as boolean
+            if (strValue.equalsIgnoreCase("true") || strValue.equalsIgnoreCase("false")) {
+                return Boolean.valueOf(strValue);
+            }
+            
+            return strValue;            
         }
-        catch (Throwable t) {};
         
-        // check if value can be interpreted as boolean
-        if (strValue.equalsIgnoreCase("true") || strValue.equalsIgnoreCase("false")) {
-            return Boolean.valueOf(strValue);
-        }
-        
-        return strValue;
+        return value;
     }
     
     /**

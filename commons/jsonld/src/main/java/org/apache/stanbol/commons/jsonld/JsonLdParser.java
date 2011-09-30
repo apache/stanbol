@@ -79,12 +79,12 @@ public class JsonLdParser extends JsonLdParserCommon {
 				JSONObject context = jo.getJSONObject(JsonLdCommon.CONTEXT);
 				for (int i = 0; i < context.names().length(); i++) {
 					String name = context.names().getString(i).toLowerCase();
-					if (name.equals(JsonLdCommon.TYPES)) {
+					if (name.equals(JsonLdCommon.COERCE)) {
 						JSONObject typeObject = context.getJSONObject(name);
 						for (int j = 0; j < typeObject.names().length(); j++) {
 							String property = typeObject.names().getString(j);
 							String type = typeObject.getString(property);
-							subject.putCoercionType(property, type);
+							subject.putPropertyType(property, type);
 						}
 					} else {
 						jld.addNamespacePrefix(context.getString(name), name);

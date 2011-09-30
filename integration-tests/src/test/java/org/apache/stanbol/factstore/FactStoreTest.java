@@ -55,7 +55,7 @@ public class FactStoreTest extends StanbolTestBase {
                                     .buildUrl("/factstore/facts/"
                                               + encodeURI("http://www.test.de/this/urn/is/a/bit/too/long/to/be/used/in/this/fact/store/implementation/with/derby"))))
                 .withContent(
-                    "{\"@context\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"#types\":{\"organization\":\"iks:organization\",\"person\":\"iks:person\"}}}")
+                    "{\"@context\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"@types\":{\"organization\":\"iks:organization\",\"person\":\"iks:person\"}}}")
                 .withHeader("Content-Type", "application/json");
 
         executor.execute(r).assertStatus(400);
@@ -66,7 +66,7 @@ public class FactStoreTest extends StanbolTestBase {
         Request r = builder
                 .buildOtherRequest(new HttpPut(builder.buildUrl("/factstore/facts/TestFactSchema")))
                 .withContent(
-                    "{\"@context\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"#types\":{\"organization\":\"iks:organization\",\"person\":\"iks:person\"}}}")
+                    "{\"@context\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"@types\":{\"organization\":\"iks:organization\",\"person\":\"iks:person\"}}}")
                 .withHeader("Content-Type", "application/json");
 
         executor.execute(r).assertStatus(201);
@@ -79,7 +79,7 @@ public class FactStoreTest extends StanbolTestBase {
                     new HttpPut(builder.buildUrl("/factstore/facts/"
                                                  + encodeURI("http://www.iks-project.eu/ont/test"))))
                 .withContent(
-                    "{\"@context\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"#types\":{\"organization\":\"iks:organization\",\"person\":\"iks:person\"}}}")
+                    "{\"@context\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"@types\":{\"organization\":\"iks:organization\",\"person\":\"iks:person\"}}}")
                 .withHeader("Content-Type", "application/json");
 
         executor.execute(r).assertStatus(201);
@@ -92,7 +92,7 @@ public class FactStoreTest extends StanbolTestBase {
                     new HttpPut(builder.buildUrl("/factstore/facts/"
                                                  + encodeURI("http://www.iks-project.eu/ont/test2"))))
                 .withContent(
-                    "{\"@context\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"#types\":{\"organization\":\"iks:organization\",\"person\":\"iks:person\"}}}")
+                    "{\"@context\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"@types\":{\"organization\":\"iks:organization\",\"person\":\"iks:person\"}}}")
                 .withHeader("Content-Type", "application/json");
 
         executor.execute(r1).assertStatus(201);
@@ -103,7 +103,7 @@ public class FactStoreTest extends StanbolTestBase {
             "Content-Type", "application/json");
 
         String actual = executor.execute(r2).assertStatus(200).getContent();
-        String expected = "{\"@context\":{\"#types\":{\"organization\":\"http:\\/\\/iks-project.eu\\/ont\\/organization\",\"person\":\"http:\\/\\/iks-project.eu\\/ont\\/person\"}}}";
+        String expected = "{\"@context\":{\"@types\":{\"organization\":\"http:\\/\\/iks-project.eu\\/ont\\/organization\",\"person\":\"http:\\/\\/iks-project.eu\\/ont\\/person\"}}}";
         Assert.assertEquals(expected, actual);
     }
 
@@ -114,7 +114,7 @@ public class FactStoreTest extends StanbolTestBase {
                     new HttpPut(builder.buildUrl("/factstore/facts/"
                                                  + encodeURI("http://www.iks-project.eu/ont/double"))))
                 .withContent(
-                    "{\"@context\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"#types\":{\"organization\":\"iks:organization\",\"person\":\"iks:person\"}}}")
+                    "{\"@context\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"@types\":{\"organization\":\"iks:organization\",\"person\":\"iks:person\"}}}")
                 .withHeader("Content-Type", "application/json");
 
         executor.execute(r).assertStatus(201);
@@ -128,7 +128,7 @@ public class FactStoreTest extends StanbolTestBase {
                     new HttpPut(builder.buildUrl("/factstore/facts/"
                                                  + encodeURI("http://www.schema.org/attendees"))))
                 .withContent(
-                    "{\"@context\":{\"#types\":{\"organization\":\"http:\\/\\/iks-project.eu\\/ont\\/organization\",\"person\":[\"http:\\/\\/iks-project.eu\\/ont\\/person\",\"http:\\/\\/www.schema.org\\/Person\"]}}}")
+                    "{\"@context\":{\"@types\":{\"organization\":\"http:\\/\\/iks-project.eu\\/ont\\/organization\",\"person\":[\"http:\\/\\/iks-project.eu\\/ont\\/person\",\"http:\\/\\/www.schema.org\\/Person\"]}}}")
                 .withHeader("Content-Type", "application/json");
 
         executor.execute(r).assertStatus(201);
@@ -141,7 +141,7 @@ public class FactStoreTest extends StanbolTestBase {
                     new HttpPut(builder.buildUrl("/factstore/facts/"
                                                  + encodeURI("http://www.schema.org/Event.attendees"))))
                 .withContent(
-                    "{\"@context\":{\"#types\":{\"organization\":\"http:\\/\\/iks-project.eu\\/ont\\/organization\",\"person\":[\"http:\\/\\/iks-project.eu\\/ont\\/person\",\"http:\\/\\/www.schema.org\\/Person\"]}}}")
+                    "{\"@context\":{\"@types\":{\"organization\":\"http:\\/\\/iks-project.eu\\/ont\\/organization\",\"person\":[\"http:\\/\\/iks-project.eu\\/ont\\/person\",\"http:\\/\\/www.schema.org\\/Person\"]}}}")
                 .withHeader("Content-Type", "application/json");
 
         executor.execute(r1).assertStatus(201);
@@ -152,7 +152,7 @@ public class FactStoreTest extends StanbolTestBase {
             "Accept", "application/json");
 
         String actual = executor.execute(r2).assertStatus(200).getContent();
-        String expected = "{\"@context\":{\"#types\":{\"organization\":\"http:\\/\\/iks-project.eu\\/ont\\/organization\",\"person\":[\"http:\\/\\/iks-project.eu\\/ont\\/person\",\"http:\\/\\/www.schema.org\\/Person\"]}}}";
+        String expected = "{\"@context\":{\"@types\":{\"organization\":\"http:\\/\\/iks-project.eu\\/ont\\/organization\",\"person\":[\"http:\\/\\/iks-project.eu\\/ont\\/person\",\"http:\\/\\/www.schema.org\\/Person\"]}}}";
         Assert.assertEquals(expected, actual);
     }
 
@@ -163,7 +163,7 @@ public class FactStoreTest extends StanbolTestBase {
                     new HttpPut(builder.buildUrl("/factstore/facts/"
                                                  + encodeURI("http://iks-project.eu/ont/employeeOf1"))))
                 .withContent(
-                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"#types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"@types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
                 .withHeader("Content-Type", "application/json");
 
         executor.execute(r1).assertStatus(201);
@@ -184,7 +184,7 @@ public class FactStoreTest extends StanbolTestBase {
                     new HttpPut(builder.buildUrl("/factstore/facts/"
                                                  + encodeURI("http://iks-project.eu/ont/employeeOf1Neg"))))
                 .withContent(
-                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"#types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"@types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
                 .withHeader("Content-Type", "application/json");
 
         executor.execute(r1).assertStatus(201);
@@ -205,7 +205,7 @@ public class FactStoreTest extends StanbolTestBase {
                     new HttpPut(builder.buildUrl("/factstore/facts/"
                                                  + encodeURI("http://iks-project.eu/ont/employeeOf2Neg"))))
                 .withContent(
-                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"#types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"@types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
                 .withHeader("Content-Type", "application/json");
 
         executor.execute(r1).assertStatus(201);
@@ -226,7 +226,7 @@ public class FactStoreTest extends StanbolTestBase {
                     new HttpPut(builder.buildUrl("/factstore/facts/"
                                                  + encodeURI("http://iks-project.eu/ont/employeeOf2"))))
                 .withContent(
-                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"#types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"@types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
                 .withHeader("Content-Type", "application/json");
         executor.execute(r1).assertStatus(201);
 
@@ -235,7 +235,7 @@ public class FactStoreTest extends StanbolTestBase {
                     new HttpPut(builder.buildUrl("/factstore/facts/"
                                                  + encodeURI("http://iks-project.eu/ont/friendOf2"))))
                 .withContent(
-                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"#types\":{\"person\":\"iks:person\",\"friend\":\"iks:person\"}}}")
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"@types\":{\"person\":\"iks:person\",\"friend\":\"iks:person\"}}}")
                 .withHeader("Content-Type", "application/json");
         executor.execute(r2).assertStatus(201);
 
@@ -254,7 +254,7 @@ public class FactStoreTest extends StanbolTestBase {
                     new HttpPut(builder.buildUrl("/factstore/facts/"
                                                  + encodeURI("http://iks-project.eu/ont/employeeOf3Neg"))))
                 .withContent(
-                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"#types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"@types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
                 .withHeader("Content-Type", "application/json");
         executor.execute(r1).assertStatus(201);
 
@@ -263,7 +263,7 @@ public class FactStoreTest extends StanbolTestBase {
                     new HttpPut(builder.buildUrl("/factstore/facts/"
                                                  + encodeURI("http://iks-project.eu/ont/friendOf3Neg"))))
                 .withContent(
-                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"#types\":{\"person\":\"iks:person\",\"friend\":\"iks:person\"}}}")
+                    "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"@types\":{\"person\":\"iks:person\",\"friend\":\"iks:person\"}}}")
                 .withHeader("Content-Type", "application/json");
         executor.execute(r2).assertStatus(201);
 
@@ -282,7 +282,7 @@ public class FactStoreTest extends StanbolTestBase {
             new HttpPut(builder.buildUrl("/factstore/facts/"
                                          + encodeURI("http://iks-project.eu/ont/employeeOf"))))
         .withContent(
-            "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"#types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
+            "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"@types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
         .withHeader("Content-Type", "application/json");
         executor.execute(r1).assertStatus(201);
 

@@ -32,7 +32,7 @@ public class JsonLdProfileTest {
         profile.addType("organization", "iks:organization");
         
         String actual = profile.toString();
-        String expected = "{\"@context\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"#types\":{\"organization\":\"iks:organization\",\"person\":\"iks:person\"}}}";
+        String expected = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"@types\":{\"organization\":\"iks:organization\",\"person\":\"iks:person\"}}}";
         assertEquals(expected, actual);
     }
     
@@ -44,7 +44,7 @@ public class JsonLdProfileTest {
         profile.addType("organization", "http://iks-project.eu/ont/organization");
         
         String actual = profile.toString();
-        String expected = "{\"@context\":{\"#types\":{\"organization\":\"http:\\/\\/iks-project.eu\\/ont\\/organization\",\"person\":\"http:\\/\\/iks-project.eu\\/ont\\/person\"}}}";
+        String expected = "{\"@context\":{\"@types\":{\"organization\":\"http://iks-project.eu/ont/organization\",\"person\":\"http://iks-project.eu/ont/person\"}}}";
         assertEquals(expected, actual);
     }
     
@@ -57,7 +57,7 @@ public class JsonLdProfileTest {
         profile.addType("organization", "http://iks-project.eu/ont/organization");
         
         String actual = profile.toString(0);
-        String expected = "{\"@context\":{\"#types\":{\"organization\":\"http:\\/\\/iks-project.eu\\/ont\\/organization\",\"person\":[\"http:\\/\\/iks-project.eu\\/ont\\/person\",\"http:\\/\\/www.schema.org\\/Person\"]}}}";
+        String expected = "{\"@context\":{\"@types\":{\"organization\":\"http://iks-project.eu/ont/organization\",\"person\":[\"http://iks-project.eu/ont/person\",\"http://www.schema.org/Person\"]}}}";
         assertEquals(expected, actual);
     }
     
