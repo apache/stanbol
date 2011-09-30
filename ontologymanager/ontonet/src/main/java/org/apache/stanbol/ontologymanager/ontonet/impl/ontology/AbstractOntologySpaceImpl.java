@@ -18,10 +18,12 @@ package org.apache.stanbol.ontologymanager.ontonet.impl.ontology;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
@@ -64,7 +66,7 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     /**
      * Indicates whether this ontology space is marked as read-only. Default value is false.
      */
-    protected boolean locked = false;
+    protected volatile boolean locked = false;
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
@@ -72,7 +74,7 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
      * The identifier of the ontologies directly managed by this space (i.e. that were directly added to this
      * space, hence not including those just pulled in via import statements).
      */
-    protected Set<OWLOntology> managedOntologies;
+    protected Map<IRI,OWLOntology> managedOntologies;
 
     protected IRI namespace = null;
 
@@ -115,12 +117,14 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
         if (ontologyManager != null) this.ontologyManager = ontologyManager;
         else this.ontologyManager = OWLManager.createOWLOntologyManager();
 
-        this.managedOntologies = new HashSet<OWLOntology>();
+        this.managedOntologies = new HashMap<IRI,OWLOntology>();
     }
 
     @Override
     public synchronized void addOntology(OntologyInputSource ontologySource) throws UnmodifiableOntologySpaceException {
         if (locked) throw new UnmodifiableOntologySpaceException(this);
+        log.debug("Trying to add ontology {} to space {}",
+            ontologySource != null ? ontologySource.getRootOntology() : "<NULL>", getNamespace() + getID());
         // Avoid adding the space top ontology itself.
         if (ontologySource != null && ontologySource.hasRootOntology()) {
             OWLOntology o = ontologySource.getRootOntology();
@@ -231,18 +235,19 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
 
     @Override
     public synchronized Set<OWLOntology> getOntologies(boolean withClosure) {
-        return withClosure ? ontologyManager.getOntologies() : managedOntologies;
+        return withClosure ? ontologyManager.getOntologies() : new HashSet<OWLOntology>(managedOntologies.values());
     }
 
     @Override
     public OWLOntology getOntology(IRI ontologyIri) {
-        OWLOntology o = null;
-        Iterator<OWLOntology> it = managedOntologies.iterator();
-        while (it.hasNext() && o == null) {
-            OWLOntology temp = it.next();
-            if (!temp.isAnonymous() && ontologyIri.equals(temp.getOntologyID().getOntologyIRI())) o = temp;
-        }
-        if (o == null) o = ontologyManager.getOntology(ontologyIri);
+        log.debug("Requesting ontology {} from space {}", ontologyIri, getNamespace() + getID());
+        OWLOntology o = managedOntologies.get(ontologyIri);
+//        Iterator<OWLOntology> it = managedOntologies.iterator();
+//        while (it.hasNext() && o == null) {
+//            OWLOntology temp = it.next();
+//            if (!temp.isAnonymous() && ontologyIri.equals(temp.getOntologyID().getOntologyIRI())) o = temp;
+//        }
+//        if (o == null) o = ontologyManager.getOntology(ontologyIri);
         return o;
     }
 
@@ -274,7 +279,7 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
         // TODO implement transaction control.
         // See to it that the ontology is copied to this manager.
         OWLOntology newOnt = reload(ontology, ontologyManager, true, false);
-        managedOntologies.add(newOnt);
+        managedOntologies.put(OWLUtils.getIdentifyingIRI(newOnt),newOnt);
 
         try {
             // Store the top ontology

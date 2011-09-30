@@ -31,25 +31,19 @@ public class CustomOntologySpaceImpl extends AbstractOntologySpaceImpl implement
 
     public static final String SUFFIX = SpaceType.CUSTOM.getIRISuffix();
 
+    protected static String buildId(String scopeID) {
+        return (scopeID != null ? scopeID : "") + "/" + SUFFIX;
+    }
+
     public CustomOntologySpaceImpl(String scopeID, IRI namespace, ClerezzaOntologyStorage storage) {
-        super(/* IRI.create( */(scopeID!=null?scopeID:"") + "/" + SpaceType.CUSTOM.getIRISuffix(), namespace/*
-                                                                                          * StringUtils.
-                                                                                          * stripIRITerminator
-                                                                                          * (namespace) + "/")
-                                                                                          */,
-                SpaceType.CUSTOM/* , scopeID */, storage);
+        super(buildId(scopeID), namespace, SpaceType.CUSTOM, storage);
     }
 
     public CustomOntologySpaceImpl(String scopeID,
                                    IRI namespace,
                                    ClerezzaOntologyStorage storage,
                                    OWLOntologyManager ontologyManager) {
-        super(/* IRI.create( */(scopeID!=null?scopeID:"") + "/" + SpaceType.CUSTOM.getIRISuffix(), namespace/*
-                                                                                          * StringUtils.
-                                                                                          * stripIRITerminator
-                                                                                          * (namespace) + "/")
-                                                                                          */,
-                SpaceType.CUSTOM, storage, ontologyManager);
+        super(buildId(scopeID), namespace, SpaceType.CUSTOM, storage, ontologyManager);
     }
 
     @Override

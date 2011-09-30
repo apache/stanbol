@@ -16,6 +16,9 @@
  */
 package org.apache.stanbol.owl.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -32,11 +35,23 @@ public class OWLUtils {
      * @return
      */
     public static IRI getIdentifyingIRI(OWLOntology o) {
+        String originalIri;
         if (o.isAnonymous()) {
-            return o.getOWLOntologyManager().getOntologyDocumentIRI(o);
+            originalIri = o.getOWLOntologyManager().getOntologyDocumentIRI(o).toString();
         } else {
-            return o.getOntologyID().getOntologyIRI();
+            originalIri = o.getOntologyID().getOntologyIRI().toString();
         }
+        while (originalIri.endsWith("#") || originalIri.endsWith("?"))
+            originalIri = originalIri.substring(0, originalIri.length() - 1);
+        // try {
+        // if (originalIri.endsWith("#")) originalIri = originalIri.substring(0,
+        // originalIri.length() - 1) + URLEncoder.encode("#", "UTF-8");
+        // else if (originalIri.endsWith("?")) originalIri = originalIri.substring(0,
+        // originalIri.length() - 1)
+        // + URLEncoder.encode("?", "UTF-8");
+        // } catch (UnsupportedEncodingException e) {
+        // // That cannot be.
+        // }
+        return IRI.create(originalIri);
     }
-
 }

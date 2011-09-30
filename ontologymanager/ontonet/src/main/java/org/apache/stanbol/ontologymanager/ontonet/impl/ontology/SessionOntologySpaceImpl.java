@@ -33,54 +33,22 @@ public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl implemen
 
     public static final String SUFFIX = SpaceType.SESSION.getIRISuffix();
 
-    private static String buildId(String scopeID) {
-        return (scopeID!=null?scopeID:"") + "/" + SpaceType.SESSION.getIRISuffix() + "-" + new Random().nextLong();
+    protected static String buildId(String scopeID) {
+        return (scopeID != null ? scopeID : "") + "/" + SpaceType.SESSION.getIRISuffix() + "-"
+               + new Random().nextLong();
     }
 
     public SessionOntologySpaceImpl(String scopeID, IRI namespace, ClerezzaOntologyStorage store) {
         // FIXME : sync session id with session space ID
-        super(buildId(scopeID), namespace
-        /*
-         * IRI.create(StringUtils.stripIRITerminator(scopeID) + "/" + SpaceType.SESSION.getIRISuffix() + "-" +
-         * new Random().nextLong())
-         */, SpaceType.SESSION, store/* , scopeID */);
-
-        // IRI iri = IRI.create(StringUtils.stripIRITerminator(getID()) + "/root.owl");
-        // try {
-        // setTopOntology(new RootOntologySource(ontologyManager.createOntology(iri), null), false);
-        // } catch (OWLOntologyCreationException e) {
-        // log.error("Could not create session space root ontology " + iri, e);
-        // } catch (UnmodifiableOntologySpaceException e) {
-        // // Should not happen...
-        // log.error("Session space ontology " + iri
-        // + " was denied modification by the space itself. This should not happen.", e);
-        // }
+        super(buildId(scopeID), namespace, SpaceType.SESSION, store);
     }
 
     public SessionOntologySpaceImpl(String scopeID,
                                     IRI namespace,
                                     ClerezzaOntologyStorage store,
                                     OWLOntologyManager ontologyManager) {
-
         // FIXME : sync session id with session space ID
-        super(buildId(scopeID), namespace
-        /*
-         * IRI.create(StringUtils.stripIRITerminator(scopeID) + "/" + SpaceType.SESSION.getIRISuffix() + "-" +
-         * new Random().nextLong())
-         */, SpaceType.SESSION, store, /* scopeID, */
-        ontologyManager);
-
-        // Logger log = LoggerFactory.getLogger(getClass());
-        // IRI iri = IRI.create(StringUtils.stripIRITerminator(getID()) + "/root.owl");
-        // try {
-        // setTopOntology(new RootOntologySource(ontologyManager.createOntology(iri), null), false);
-        // } catch (OWLOntologyCreationException e) {
-        // log.error("Could not create session space root ontology " + iri, e);
-        // } catch (UnmodifiableOntologySpaceException e) {
-        // // Should not happen...
-        // log.error("Session space ontology " + iri
-        // + " was denied modification by the space itself. This should not happen.", e);
-        // }
+        super(buildId(scopeID), namespace, SpaceType.SESSION, store, ontologyManager);
     }
 
     @Override
@@ -115,7 +83,8 @@ public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl implemen
 
     @Override
     public synchronized void tearDown() {
-        // TODO Auto-generated method stub
+        // TODO Do we really unlock?
+        locked = false;
     }
 
 }

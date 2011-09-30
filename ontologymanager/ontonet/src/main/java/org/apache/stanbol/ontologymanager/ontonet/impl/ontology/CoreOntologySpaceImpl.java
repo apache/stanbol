@@ -29,28 +29,19 @@ public class CoreOntologySpaceImpl extends AbstractOntologySpaceImpl implements 
 
     public static final String SUFFIX = SpaceType.CORE.getIRISuffix();
 
+    protected static String buildId(String scopeID) {
+        return (scopeID != null ? scopeID : "") + "/" + SUFFIX;
+    }
+
     public CoreOntologySpaceImpl(String scopeID, IRI namespace, ClerezzaOntologyStorage storage) {
-        super(/* IRI.create( */(scopeID!=null?scopeID:"") + "/" + SpaceType.CORE.getIRISuffix(), namespace/*
-                                                                                        * StringUtils.
-                                                                                        * stripIRITerminator
-                                                                                        * (namespace) + "/")
-                                                                                        */,
-                SpaceType.CORE/* , scopeID */, storage);
+        super(buildId(scopeID), namespace, SpaceType.CORE, storage);
     }
 
     public CoreOntologySpaceImpl(String scopeID,
                                  IRI namespace,
                                  ClerezzaOntologyStorage storage,
                                  OWLOntologyManager ontologyManager) {
-        super(/* IRI.create( */(scopeID!=null?scopeID:"") + "/" + SpaceType.CORE.getIRISuffix(), namespace/*
-                                                                                        * StringUtils.
-                                                                                        * stripIRITerminator
-                                                                                        * (namespace) + "/")
-                                                                                        */, SpaceType.CORE, /*
-                                                                                                             * scopeID
-                                                                                                             * ,
-                                                                                                             */
-                storage, ontologyManager);
+        super(buildId(scopeID), namespace, SpaceType.CORE, storage, ontologyManager);
     }
 
     /**

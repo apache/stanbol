@@ -103,11 +103,15 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
                                      @PathParam("uri") String ontologyid,
                                      @Context UriInfo uriInfo) {
 
+        log.info("Caught request for ontology {} in scope {}", ontologyid, scopeid);
+
         if (!ontologyid.equals("all")) {
 
             // First of all, it could be a simple request for the space root!
 
             String absur = uriInfo.getAbsolutePath().toString();
+            log.debug("Absolute URL Path {}", absur);
+            log.debug("Ontology ID {}", ontologyid);
             URI uri = URI.create(absur.substring(0, absur.lastIndexOf(ontologyid) - 1));
 
             IRI sciri = IRI.create(uri);
