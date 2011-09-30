@@ -25,7 +25,6 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.GEO_LAT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.GEO_LONG;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -42,7 +41,6 @@ import java.util.TreeMap;
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -69,7 +67,6 @@ import org.apache.clerezza.rdf.core.sparql.SolutionMapping;
 import org.apache.clerezza.rdf.core.sparql.query.SelectQuery;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
@@ -109,8 +106,6 @@ public class ContentItemResource extends BaseStanbolResource {
 
     protected String serializationFormat = SupportedFormat.RDF_XML;
 
-    protected final TripleCollection remoteEntityCache;
-
     protected Collection<EntityExtractionSummary> people;
 
     protected Collection<EntityExtractionSummary> organizations;
@@ -123,7 +118,6 @@ public class ContentItemResource extends BaseStanbolResource {
 
     public ContentItemResource(String localId,
                                ContentItem ci,
-                               TripleCollection remoteEntityCache,
                                UriInfo uriInfo,
                                TcManager tcManager,
                                Serializer serializer,
@@ -133,7 +127,6 @@ public class ContentItemResource extends BaseStanbolResource {
         this.uriInfo = uriInfo;
         this.tcManager = tcManager;
         this.serializer = serializer;
-        this.remoteEntityCache = remoteEntityCache;
         this.servletContext = servletContext;
 
         if (localId != null) {
@@ -277,7 +270,7 @@ public class ContentItemResource extends BaseStanbolResource {
             if (entityUri != null) {
                 String label = ((Literal) mapping.get("entity_label")).getLexicalForm();
                 Double confidence = lf.createObject(Double.class, (TypedLiteral) mapping.get("confidence"));
-                Graph properties = new GraphNode(entityUri, remoteEntityCache).getNodeContext();
+                Graph properties = new GraphNode(entityUri, contentItem.getMetadata()).getNodeContext();
                 entity.addSuggestion(entityUri, label, confidence, properties);
             }
         }
@@ -494,24 +487,22 @@ public class ContentItemResource extends BaseStanbolResource {
      */
     public String getPlacesAsJSON() throws ParseException, UnsupportedEncodingException {
         MGraph g = new SimpleMGraph();
-        if (remoteEntityCache != null) {
-            LiteralFactory lf = LiteralFactory.getInstance();
-            for (EntityExtractionSummary p : getPlaceOccurrences()) {
-                EntitySuggestion bestGuess = p.getBestGuess();
-                if (bestGuess == null) {
-                    continue;
-                }
-                UriRef uri = new UriRef(bestGuess.getUri());
-                Iterator<Triple> latitudes = remoteEntityCache.filter(uri, GEO_LAT, null);
-                if (latitudes.hasNext()) {
-                    g.add(latitudes.next());
-                }
-                Iterator<Triple> longitutes = remoteEntityCache.filter(uri, GEO_LONG, null);
-                if (longitutes.hasNext()) {
-                    g.add(longitutes.next());
-                    g.add(new TripleImpl(uri, Properties.RDFS_LABEL, lf.createTypedLiteral(bestGuess
-                            .getLabel())));
-                }
+        LiteralFactory lf = LiteralFactory.getInstance();
+        MGraph metadata = contentItem.getMetadata();
+        for (EntityExtractionSummary p : getPlaceOccurrences()) {
+            EntitySuggestion bestGuess = p.getBestGuess();
+            if (bestGuess == null) {
+                continue;
+            }
+            UriRef uri = new UriRef(bestGuess.getUri());
+            Iterator<Triple> latitudes = metadata.filter(uri, GEO_LAT, null);
+            if (latitudes.hasNext()) {
+                g.add(latitudes.next());
+            }
+            Iterator<Triple> longitutes = metadata.filter(uri, GEO_LONG, null);
+            if (longitutes.hasNext()) {
+                g.add(longitutes.next());
+                g.add(new TripleImpl(uri, Properties.RDFS_LABEL, lf.createTypedLiteral(bestGuess.getLabel())));
             }
         }
         ByteArrayOutputStream out = new ByteArrayOutputStream();
