@@ -17,7 +17,6 @@
 package org.apache.stanbol.contenthub.web.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
-import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
@@ -77,7 +76,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.enhancer.jersey.cache.EntityCacheProvider;
 import org.apache.stanbol.enhancer.jersey.resource.ContentItemResource;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -180,11 +178,6 @@ public class ContentHubRootResource extends BaseStanbolResource {
         jobManager = ContextHelper.getServiceFromContext(EnhancementJobManager.class, context);
         tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
         serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
-        EntityCacheProvider entityCacheProvider = ContextHelper.getServiceFromContext(
-            EntityCacheProvider.class, context);
-        if (entityCacheProvider != null) {
-            entityCache = entityCacheProvider.getEntityCache();
-        }
 
         if (store == null || tcManager == null) {
             log.error("Missing either store={} or tcManager={}", store, tcManager);
@@ -332,8 +325,7 @@ public class ContentHubRootResource extends BaseStanbolResource {
         if (ci == null) {
             throw new WebApplicationException(404);
         }
-        return new ContentItemResource(localId, ci, entityCache, uriInfo,
-                tcManager, serializer, servletContext);
+        return new ContentItemResource(localId, ci, uriInfo, tcManager, serializer, servletContext);
     }
 
     @GET
