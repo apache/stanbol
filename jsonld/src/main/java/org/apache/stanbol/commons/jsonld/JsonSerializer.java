@@ -16,8 +16,12 @@
 */
 package org.apache.stanbol.commons.jsonld;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
 
 /**
  * Class to serialize a JSON object structure whereby the JSON structure is defined by the basic data types
@@ -97,9 +101,27 @@ public class JsonSerializer {
             appendJsonMap(mapValue, sb, indent, level);
         } else if (object instanceof List<?>) {
             List<Object> lstValue = (List<Object>) object;
-            appendList(lstValue, sb, indent, level);
-            sb.append(',');
-            appendLinefeed(sb, indent);
+            if (lstValue.size() == 1) {
+                // if the list contains only 1 element, we can serialize it as a single value
+                appendValueOf(lstValue.get(0), sb, indent, level);
+            }
+            else {
+                // the list has more or no elements
+                appendList(lstValue, sb, indent, level);
+                sb.append(',');
+                appendLinefeed(sb, indent);
+            }
+        } else if (object instanceof JSONArray) {
+            JSONArray ja = (JSONArray) object;
+            List<Object> jsonList = new ArrayList<Object>();
+            try {
+                for (int i = 0; i < ja.length(); i++) {
+                    jsonList.add(ja.get(i));
+                }
+            } catch (JSONException e) {
+                // ignore
+            }
+            appendValueOf(jsonList, sb, indent, level);
         } else {
             sb.append(object.toString());
             sb.append(',');
@@ -130,10 +152,10 @@ public class JsonSerializer {
                     sb.append('\\');
                     sb.append(ch);
                     break;
-                case '/':
-                    sb.append('\\');
-                    sb.append(ch);
-                    break;
+//                case '/':
+//                    sb.append('\\');
+//                    sb.append(ch);
+//                    break;
                 case '\b':
                     sb.append("\\b");
                     break;

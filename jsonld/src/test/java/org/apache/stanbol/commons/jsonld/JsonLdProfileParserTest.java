@@ -26,24 +26,25 @@ public class JsonLdProfileParserTest {
 
     @Test
     public void testParseProfile() throws Exception {
-        String jsonldInput = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"#types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}";
+        String jsonldInput = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"@types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}";
         
         JsonLdProfile profile = JsonLdProfileParser.parseProfile(jsonldInput);
         
         String actual = profile.toString();
-        String expected = "{\"@context\":{\"iks\":\"http:\\/\\/iks-project.eu\\/ont\\/\",\"#types\":{\"organization\":\"iks:organization\",\"person\":\"iks:person\"}}}";
+        String expected = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"@types\":{\"organization\":\"iks:organization\",\"person\":\"iks:person\"}}}";
         assertEquals(expected, actual);
         assertNotNull(profile);
     }
     
     @Test
     public void testParseProfileMultiType() throws Exception {
-        String jsonldInput = "{\"@context\":{\"#types\":{\"organization\":\"http:\\/\\/iks-project.eu\\/ont\\/organization\",\"person\":[\"http:\\/\\/iks-project.eu\\/ont\\/person\",\"http:\\/\\/www.schema.org\\/Person\"]}}}";
+        String jsonldInput = "{\"@context\":{\"@types\":{\"organization\":\"http://iks-project.eu/ont/organization\",\"person\":[\"http://iks-project.eu/ont/person\",\"http://www.schema.org/Person\"]}}}";
         
         JsonLdProfile profile = JsonLdProfileParser.parseProfile(jsonldInput);
         
-        String expected = "{\"@context\":{\"#types\":{\"organization\":\"http:\\/\\/iks-project.eu\\/ont\\/organization\",\"person\":[\"http:\\/\\/iks-project.eu\\/ont\\/person\",\"http:\\/\\/www.schema.org\\/Person\"]}}}";
+        String expected = "{\"@context\":{\"@types\":{\"organization\":\"http://iks-project.eu/ont/organization\",\"person\":[\"http://iks-project.eu/ont/person\",\"http://www.schema.org/Person\"]}}}";
         String actual = profile.toString();
+        toConsole(actual);
         assertEquals(expected, actual);
         assertNotNull(profile);
     }
