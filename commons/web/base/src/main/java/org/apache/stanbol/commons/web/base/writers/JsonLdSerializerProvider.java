@@ -101,7 +101,7 @@ public class JsonLdSerializerProvider implements SerializingProvider {
                     if (logger.isDebugEnabled()) {
                         logger.debug("serialize() adding rdf:type: \"a\":" + currentTriple.getObject());
                     }
-                    resource.addType(currentTriple.getObject().toString());
+                    resource.addType(((UriRef) currentTriple.getObject()).getUnicodeString());
                 } else {
                     if (logger.isDebugEnabled()) {
                         logger.debug("serializer() adding predicate " + currentTriple.getPredicate().toString() + " with object " + currentTriple.getObject().toString());
