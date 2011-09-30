@@ -29,6 +29,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Produces;
@@ -51,14 +54,30 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import scala.actors.threadpool.Arrays;
+
 
 /**
  * TODO: Replace with Serializer infrastructure similar to {@link Serializer}
  */
 @Provider
-@Produces({APPLICATION_JSON, N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE, RDF_JSON})
+//@Produces({APPLICATION_JSON, N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE, RDF_JSON})
 public class QueryResultListWriter implements MessageBodyWriter<QueryResultList<?>> {
 
+    protected static final Set<String> produces;
+    static {
+        Set<String> p = new HashSet<String>();
+        p.add(APPLICATION_JSON);
+        p.add(N3);
+        p.add(N_TRIPLE);
+        p.add(RDF_XML);
+        p.add(TURTLE);
+        p.add(X_TURTLE);
+        p.add(RDF_JSON);
+        produces = Collections.unmodifiableSet(p);
+    }
+    public static final String DEFAULT_ENCODING = "UTF-8";
+    
     @SuppressWarnings("unused")
     private final Logger log = LoggerFactory.getLogger(QueryResultListWriter.class);
     
@@ -76,24 +95,31 @@ public class QueryResultListWriter implements MessageBodyWriter<QueryResultList<
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return QueryResultList.class.isAssignableFrom(type);
+        String mediaTypeString = mediaType.getType()+'/'+mediaType.getSubtype();
+        return QueryResultList.class.isAssignableFrom(type) &&
+            produces.contains(mediaTypeString);
+        
     }
 
     @Override
     public void writeTo(QueryResultList<?> resultList, Class<?> doNotUse, Type genericType,
             Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders,
             OutputStream entityStream) throws IOException, WebApplicationException {
-//        Class<?> genericClass = (Class<?>) genericType;
-        if (APPLICATION_JSON.equals(mediaType.toString())) {
+        String mediaTypeString = mediaType.getType()+'/'+mediaType.getSubtype();
+        String encoding = mediaType.getParameters().get("charset");
+        if(encoding == null){
+            encoding = DEFAULT_ENCODING;
+        }
+        if (APPLICATION_JSON.equals(mediaTypeString)) {
             try {
-                IOUtils.write(QueryResultsToJSON.toJSON(resultList).toString(4), entityStream,"UTF-8");
+                IOUtils.write(QueryResultsToJSON.toJSON(resultList).toString(4), entityStream,encoding);
             } catch (JSONException e) {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             }
         } else { //RDF
             MGraph resultGraph = QueryResultsToRDF.toRDF(resultList);
             addFieldQuery(resultList.getQuery(),resultGraph);
-            getSerializer().serialize(entityStream, resultGraph, mediaType.toString());
+            getSerializer().serialize(entityStream, resultGraph, mediaTypeString);
         }
     }
     private void addFieldQuery(FieldQuery query, MGraph resultGraph) {

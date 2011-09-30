@@ -93,7 +93,8 @@ public class SiteManagerRootResource extends BaseStanbolResource {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public Response getSitesPage() {
-        return Response.ok(new Viewable("index", this), TEXT_HTML).build();
+        return Response.ok(new Viewable("index", this))
+        .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
     }
 
 // removed to allow request with Accept headers other than text/html to return
@@ -102,7 +103,8 @@ public class SiteManagerRootResource extends BaseStanbolResource {
 //    @Path("/referenced")
 //    @Produces(MediaType.TEXT_HTML)
 //    public Response getReferencedSitesPage() {
-//        return Response.ok(new Viewable("referenced", this), TEXT_HTML).build();
+//        return Response.ok(new Viewable("referenced", this))
+//        .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
 //    }
     
     /**
@@ -119,7 +121,8 @@ public class SiteManagerRootResource extends BaseStanbolResource {
            Arrays.asList(MediaType.APPLICATION_JSON,MediaType.TEXT_HTML) ,
            MediaType.APPLICATION_JSON_TYPE);
         if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptable)){
-            return Response.ok(new Viewable("referenced", this), TEXT_HTML).build();
+            return Response.ok(new Viewable("referenced", this))
+            .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
         } else {
             JSONArray referencedSites = new JSONArray();
             ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
@@ -127,7 +130,8 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             for (String site : referencedSiteManager.getReferencedSiteIds()) {
                 referencedSites.put(String.format("%sentityhub/site/%s/", uriInfo.getBaseUri(), site));
             }
-            return Response.ok(referencedSites,acceptable).build();
+            return Response.ok(referencedSites)
+            .header(HttpHeaders.CONTENT_TYPE, acceptable+"; charset=utf-8").build();
         }
     }
     
@@ -152,7 +156,8 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             headers, supported, MediaType.APPLICATION_JSON_TYPE);
         if (id == null || id.isEmpty()) {
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
-                return Response.ok(new Viewable("entity", this), TEXT_HTML).build();        
+                return Response.ok(new Viewable("entity", this))
+                .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();        
             } else {
                 return Response.status(Status.BAD_REQUEST)
                     .entity("No or empty ID was parsed. Missing parameter id.\n")
@@ -169,7 +174,8 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         // throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
         // }
         if (sign != null) {
-            return Response.ok(sign, acceptedMediaType).build();
+            return Response.ok(sign)
+            .header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8").build();
         } else {
             // TODO: How to parse an ErrorMessage?
             // create an Response with the the Error?
@@ -184,7 +190,8 @@ public class SiteManagerRootResource extends BaseStanbolResource {
 //    @Path("/find")
 //    @Produces(MediaType.TEXT_HTML)
 //    public Response getFindPage() {
-//        return Response.ok(new Viewable("find", this), TEXT_HTML).build();
+//        return Response.ok(new Viewable("find", this))
+//        .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
 //    }
     
     @GET
@@ -215,7 +222,8 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             headers, supported, MediaType.APPLICATION_JSON_TYPE);
         if(name == null || name.isEmpty()){
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
-                return Response.ok(new Viewable("find", this), TEXT_HTML).build();        
+                return Response.ok(new Viewable("find", this))
+                .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();        
             } else {
                 return Response.status(Status.BAD_REQUEST)
                     .entity("The name must not be null nor empty for find requests. Missing parameter name.\n")
@@ -234,12 +242,14 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             ReferencedSiteManager.class, context);
         FieldQuery query = JerseyUtils.createFieldQueryForFindRequest(name, field, language,
             limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, offset);
-        return Response.ok(referencedSiteManager.find(query), acceptedMediaType).build();
+        return Response.ok(referencedSiteManager.find(query))
+        .header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8").build();
     }
     @GET
     @Path("/query")
     public Response getQueryDocumentation(){
-        return Response.ok(new Viewable("query", this), TEXT_HTML).build();        
+        return Response.ok(new Viewable("query", this))
+        .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();        
     }
     /**
      * Allows to parse any kind of {@link FieldQuery} in its JSON Representation.
@@ -276,7 +286,8 @@ public class SiteManagerRootResource extends BaseStanbolResource {
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
         } else {
-            return Response.ok(referencedSiteManager.find(query), acceptedMediaType).build();
+            return Response.ok(referencedSiteManager.find(query))
+            .header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8").build();
         }
     }
 
