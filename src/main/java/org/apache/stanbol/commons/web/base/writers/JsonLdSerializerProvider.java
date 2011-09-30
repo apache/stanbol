@@ -86,7 +86,13 @@ public class JsonLdSerializerProvider implements SerializingProvider {
         Map<NonLiteral, String> subjects = createSubjectsMap(tc);
         for (NonLiteral subject : subjects.keySet()) {
             JsonLdResource resource = new JsonLdResource();
-            resource.setSubject(subject.toString());
+            
+            String strSubject = subject.toString();
+            if (subject instanceof UriRef) {
+                UriRef uri = (UriRef) subject;
+                strSubject = uri.getUnicodeString();
+            }
+            resource.setSubject(strSubject);
 
             Iterator<Triple> triplesFromSubject = tc.filter(subject, null, null);
             while (triplesFromSubject.hasNext()) {
@@ -108,6 +114,12 @@ public class JsonLdSerializerProvider implements SerializingProvider {
                         String type = typedObject.getDataType().getUnicodeString();
                         strValue = typedObject.getLexicalForm();
                         resource.putPropertyType(property, type);
+                    }
+                    
+                    if (currentTriple.getObject() instanceof UriRef) {
+                        UriRef uriRef = (UriRef) currentTriple.getObject();
+                        resource.putPropertyType(property, "@iri");
+                        strValue = uriRef.getUnicodeString();
                     }
                     
                     resource.putProperty(property, convertValueType(strValue));
