@@ -18,7 +18,7 @@
 <#macro view>
 
 <div class="entitylistings">
-<#if it.personOccurrences?size != 0 || it.organizationOccurrences?size != 0 ||  it.placeOccurrences?size != 0>
+<#if it.personOccurrences?size != 0 || it.organizationOccurrences?size != 0 ||  it.placeOccurrences?size != 0 || it.conceptOccurrences != null || it.otherOccurrences != null>
 <h3>Extracted entities</h3>
 </#if>
 
