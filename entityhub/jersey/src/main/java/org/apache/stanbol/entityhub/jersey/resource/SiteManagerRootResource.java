@@ -16,6 +16,8 @@
  */
 package org.apache.stanbol.entityhub.jersey.resource;
 
+import static javax.ws.rs.HttpMethod.GET;
+import static javax.ws.rs.HttpMethod.OPTIONS;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N3;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N_TRIPLE;
@@ -23,6 +25,8 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JS
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,6 +39,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -44,6 +49,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.ontologies.RDFS;
@@ -90,11 +96,35 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         this.context = context;
     }
 
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers){
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+    @OPTIONS
+    @Path("/find")
+    public Response handleCorsPreflightFind(@Context HttpHeaders headers){
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+    
+    @OPTIONS
+    @Path("/query")
+    public Response handleCorsPreflightQuery(@Context HttpHeaders headers){
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers);
+        return res.build();
+    }
+
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public Response getSitesPage() {
-        return Response.ok(new Viewable("index", this))
-        .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
+    public Response getSitesPage(@Context HttpHeaders headers) {
+        ResponseBuilder rb =  Response.ok(new Viewable("index", this));
+        rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
 
 // removed to allow request with Accept headers other than text/html to return
@@ -121,8 +151,10 @@ public class SiteManagerRootResource extends BaseStanbolResource {
            Arrays.asList(MediaType.APPLICATION_JSON,MediaType.TEXT_HTML) ,
            MediaType.APPLICATION_JSON_TYPE);
         if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptable)){
-            return Response.ok(new Viewable("referenced", this))
-            .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
+            ResponseBuilder rb =  Response.ok(new Viewable("referenced", this));
+            rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
         } else {
             JSONArray referencedSites = new JSONArray();
             ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
@@ -130,11 +162,20 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             for (String site : referencedSiteManager.getReferencedSiteIds()) {
                 referencedSites.put(String.format("%sentityhub/site/%s/", uriInfo.getBaseUri(), site));
             }
-            return Response.ok(referencedSites)
-            .header(HttpHeaders.CONTENT_TYPE, acceptable+"; charset=utf-8").build();
+            ResponseBuilder rb =  Response.ok(referencedSites);
+            rb.header(HttpHeaders.CONTENT_TYPE, acceptable+"; charset=utf-8");
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
         }
     }
     
+    @OPTIONS
+    @Path("/entity")
+    public Response handleCorsPreflightEntity(@Context HttpHeaders headers){
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers,OPTIONS,GET);
+        return res.build();
+    }
     /**
      * Cool URI handler for Signs.
      * 
@@ -156,8 +197,10 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             headers, supported, MediaType.APPLICATION_JSON_TYPE);
         if (id == null || id.isEmpty()) {
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
-                return Response.ok(new Viewable("entity", this))
-                .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();        
+                ResponseBuilder rb =  Response.ok(new Viewable("entity", this));
+                rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
+                addCORSOrigin(servletContext, rb, headers);
+                return rb.build();
             } else {
                 return Response.status(Status.BAD_REQUEST)
                     .entity("No or empty ID was parsed. Missing parameter id.\n")
@@ -174,8 +217,10 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         // throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
         // }
         if (sign != null) {
-            return Response.ok(sign)
-            .header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8").build();
+            ResponseBuilder rb = Response.ok(sign);
+            rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
         } else {
             // TODO: How to parse an ErrorMessage?
             // create an Response with the the Error?
@@ -222,8 +267,10 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             headers, supported, MediaType.APPLICATION_JSON_TYPE);
         if(name == null || name.isEmpty()){
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
-                return Response.ok(new Viewable("find", this))
-                .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();        
+                ResponseBuilder rb =  Response.ok(new Viewable("find", this));
+                rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
+                addCORSOrigin(servletContext, rb, headers);
+                return rb.build();
             } else {
                 return Response.status(Status.BAD_REQUEST)
                     .entity("The name must not be null nor empty for find requests. Missing parameter name.\n")
@@ -242,14 +289,18 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             ReferencedSiteManager.class, context);
         FieldQuery query = JerseyUtils.createFieldQueryForFindRequest(name, field, language,
             limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, offset);
-        return Response.ok(referencedSiteManager.find(query))
-        .header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8").build();
+        ResponseBuilder rb = Response.ok(referencedSiteManager.find(query));
+        rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
     @GET
     @Path("/query")
-    public Response getQueryDocumentation(){
-        return Response.ok(new Viewable("query", this))
-        .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();        
+    public Response getQueryDocumentation(@Context HttpHeaders headers){
+        ResponseBuilder rb = Response.ok(new Viewable("query", this));
+        rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");  
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
     }
     /**
      * Allows to parse any kind of {@link FieldQuery} in its JSON Representation.
@@ -279,15 +330,17 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             //if query is null nd the mediaType is HTML we need to print the
             //Documentation of the RESTful API
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
-                return getQueryDocumentation();        
+                return getQueryDocumentation(headers);        
             } else {
                 return Response.status(Status.BAD_REQUEST)
                     .entity("The query must not be null nor empty for query requests. Missing parameter query.\n")
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
         } else {
-            return Response.ok(referencedSiteManager.find(query))
-            .header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8").build();
+            ResponseBuilder rb = Response.ok(referencedSiteManager.find(query));
+            rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
         }
     }
 

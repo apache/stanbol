@@ -54,8 +54,6 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import scala.actors.threadpool.Arrays;
-
 
 /**
  * TODO: Replace with Serializer infrastructure similar to {@link Serializer}

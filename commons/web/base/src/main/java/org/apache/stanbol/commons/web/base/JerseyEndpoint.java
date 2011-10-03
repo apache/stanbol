@@ -18,10 +18,13 @@ package org.apache.stanbol.commons.web.base;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -36,6 +39,7 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
@@ -43,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.spi.container.servlet.ServletContainer;
+
 
 /**
  * Jersey-based RESTful endpoint for the Stanbol Enhancer engines and store.
@@ -61,6 +66,12 @@ public class JerseyEndpoint {
 
     @Property(value = "/static")
     public static final String STATIC_RESOURCES_URL_ROOT_PROPERTY = "org.apache.stanbol.commons.web.static.url";
+    
+    /**
+     * The origins allowed for multi-host requests
+     */
+    @Property(cardinality=100,value = {"*"})
+    public static final String CORS_ORIGIN =  "org.apache.stanbol.commons.web.cors.origin";
 
     @Reference
     HttpService httpService;
@@ -72,6 +83,8 @@ public class JerseyEndpoint {
     protected final List<WebFragment> webFragments = new ArrayList<WebFragment>();
 
     protected final List<String> registeredAliases = new ArrayList<String>();
+    
+    protected Set<String> corsOrigins; 
 
     public Dictionary<String,String> getInitParams() {
         Dictionary<String,String> initParams = new Hashtable<String,String>();
@@ -82,9 +95,24 @@ public class JerseyEndpoint {
     }
 
     @Activate
-    protected void activate(ComponentContext ctx) throws IOException, ServletException, NamespaceException {
+    protected void activate(ComponentContext ctx) throws IOException, ServletException, NamespaceException, ConfigurationException {
         componentContext = ctx;
-        
+        //init corsOrigins
+        Object values = componentContext.getProperties().get(CORS_ORIGIN);
+        if(values instanceof String && !((String)values).isEmpty()){
+            corsOrigins = Collections.singleton((String)values);
+        } else if (values instanceof String[]){
+            corsOrigins = new HashSet<String>(Arrays.asList((String[])values));
+        } else if (values instanceof Iterable<?>){
+            corsOrigins = new HashSet<String>();
+            for(Object value : (Iterable<?>)values){
+                if(value != null && !value.toString().isEmpty()){
+                    corsOrigins.add(value.toString());
+                }
+            }
+        } else {
+            throw new ConfigurationException(CORS_ORIGIN,"CORS origin(s) MUST be a String, String[], Iterable<String> (value:"+values+")");
+        }
         if (!webFragments.isEmpty()) {
             initJersey();
         }
@@ -100,6 +128,7 @@ public class JerseyEndpoint {
         shutdownJersey();
         
         log.info("Initializing the Jersey subsystem");
+        
         
         // register all the JAX-RS resources into a a JAX-RS application and bind it to a configurable URL
         // prefix
@@ -146,6 +175,7 @@ public class JerseyEndpoint {
         servletContext.setAttribute(BaseStanbolResource.LINK_RESOURCES, linkResources);
         servletContext.setAttribute(BaseStanbolResource.SCRIPT_RESOURCES, scriptResources);
         servletContext.setAttribute(BaseStanbolResource.NAVIGATION_LINKS, navigationLinks);
+        servletContext.setAttribute(CORS_ORIGIN, corsOrigins);
         
         log.info("JerseyEndpoint servlet registered at {}", applicationAlias);
     }

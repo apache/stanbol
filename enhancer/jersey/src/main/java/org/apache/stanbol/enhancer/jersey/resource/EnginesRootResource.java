@@ -23,6 +23,8 @@ import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.MediaType.WILDCARD;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JSON;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
+import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -32,6 +34,7 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -39,6 +42,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.access.TcManager;
@@ -79,11 +83,20 @@ public class EnginesRootResource extends BaseStanbolResource {
         tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
         serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
     }
+    
+    @OPTIONS
+    public Response handleCorsPreflight(@Context HttpHeaders headers){
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext,res, headers);
+        return res.build();
+    }
 
     @GET
     @Produces(TEXT_HTML)
-    public Response get() {
-        return Response.ok(new Viewable("index", this),TEXT_HTML).build();
+    public Response get(@Context HttpHeaders headers) {
+        ResponseBuilder res = Response.ok(new Viewable("index", this),TEXT_HTML);
+        addCORSOrigin(servletContext,res, headers);
+        return res.build();
 //        return Response.ok(new Viewable("index", this))
 //        .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
     }
@@ -172,31 +185,26 @@ public class EnginesRootResource extends BaseStanbolResource {
                     serializer, servletContext);
             contentItemResource.setRdfSerializationFormat(format);
             Viewable ajaxView = new Viewable("/ajax/contentitem", contentItemResource);
-            return Response.ok(ajaxView,TEXT_HTML).build();
-//            return Response.ok(ajaxView)
-//            .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=UTF-8").build();
+            ResponseBuilder rb =  Response.ok(ajaxView);
+            rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=UTF-8");
+            addCORSOrigin(servletContext,rb, headers);
+            return rb.build();
         }
+        ResponseBuilder rb = Response.ok(graph);
         if (format != null) {
             // force mimetype from form params
-            return Response.ok(graph,format).build();
-//            return Response.ok(graph)
-//            .header(HttpHeaders.CONTENT_TYPE, format+"; charset=UTF-8").build();
+            rb.header(HttpHeaders.CONTENT_TYPE, format+"; charset=UTF-8");
         }
         if (headers.getAcceptableMediaTypes().contains(APPLICATION_JSON_TYPE)) {
             // force RDF JSON media type (TODO: move this logic
-            return Response.ok(graph,RDF_JSON).build();
-//            return Response.ok(graph)
-//            .header(HttpHeaders.CONTENT_TYPE, RDF_JSON+"; charset=UTF-8").build();
+            rb.header(HttpHeaders.CONTENT_TYPE, RDF_JSON+"; charset=UTF-8");
         } else if (headers.getAcceptableMediaTypes().isEmpty()) {
             // use RDF/XML as default format to keep compat with OpenCalais
             // clients
-            return Response.ok(graph,RDF_XML).build();
-//            return Response.ok(graph)
-//            .header(HttpHeaders.CONTENT_TYPE, RDF_XML+"; charset=UTF-8").build();
+            rb.header(HttpHeaders.CONTENT_TYPE, RDF_XML+"; charset=UTF-8");
         }
-
-        // traditional response lookup
-        return Response.ok(graph).build();
+        addCORSOrigin(servletContext,rb, headers);
+        return rb.build();
     }
 
 }
