@@ -6,39 +6,30 @@
       rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
       enhancer: 'http://fise.iks-project.eu/ontology/',
       dc: 'http://purl.org/dc/terms/',
-      rdfs: 'http://www.w3.org/2000/01/rdf-schema#'
+      rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
+      skos: 'http://www.w3.org/2004/02/skos/core#'
     };
     ANTT = ANTT || {};
     Stanbol = Stanbol || {};
-    Stanbol.getTextAnnotations = function(enhRdf) {
+    Stanbol.getTextAnnotations = function(enhList) {
       var res;
-      res = _(enhRdf).map(function(obj, key) {
-        obj.id = key;
-        return obj;
-      }).filter(function(e) {
-        return e["" + ns.rdf + "type"].map(function(x) {
-          return x.value;
-        }).indexOf("" + ns.enhancer + "TextAnnotation") !== -1;
+      res = _(enhList).filter(function(e) {
+        return e.isof("<" + ns.enhancer + "TextAnnotation>");
       });
       res = _(res).sortBy(function(e) {
         var conf;
-        if (e["" + ns.enhancer + "confidence"]) {
-          conf = Number(e["" + ns.enhancer + "confidence"][0].value);
+        if (e.get("enhancer:confidence")) {
+          conf = Number(e.get("enhancer:confidence"));
         }
         return -1 * conf;
       });
-      return _(res).map(function(s) {
-        return new Stanbol.TextEnhancement(s, enhRdf);
+      return _(res).map(function(enh) {
+        return new Stanbol.TextEnhancement(enh, enhList);
       });
     };
-    Stanbol.getEntityAnnotations = function(enhRdf) {
-      return _(enhRdf).map(function(obj, key) {
-        obj.id = key;
-        return obj;
-      }).filter(function(e) {
-        return e["" + ns.rdf + "type"].map(function(x) {
-          return x.value;
-        }).indexOf("" + ns.enhancer + "EntityAnnotation") !== -1;
+    Stanbol.getEntityAnnotations = function(enhList) {
+      return _(enhList).filter(function(e) {
+        return e.hasType("<" + ns.enhancer + "EntityAnnotation>");
       });
     };
     ANTT.getRightLabel = function(entity) {
@@ -48,7 +39,7 @@
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         label = _ref[_i];
         cleanLabel = label.value;
-        if (cleanLabel.lastIndexOf("@" === cleanLabel.length - 3)) {
+        if (cleanLabel.lastIndexOf("@") === cleanLabel.length - 3) {
           cleanLabel = cleanLabel.substring(0, cleanLabel.length - 3);
         }
         labelMap[label["xml:lang"] || "_"] = cleanLabel;
@@ -56,81 +47,123 @@
       userLang = window.navigator.language.split("-")[0];
       return labelMap[userLang] || labelMap["_"] || labelMap["en"];
     };
-    Stanbol.TextEnhancement = function(enhancement, enhRdf) {
+    Stanbol.TextEnhancement = function(enhancement, enhList) {
       this._enhancement = enhancement;
-      this._enhRdf = enhRdf;
-      return this.id = this._enhancement.id;
+      this._enhList = enhList;
+      return this.id = this._enhancement.getSubject();
     };
     Stanbol.TextEnhancement.prototype = {
       getSelectedText: function() {
-        return this._vals("" + ns.enhancer + "selected-text")[0];
+        return this._vals("enhancer:selected-text");
       },
       getConfidence: function() {
-        return this._vals("" + ns.enhancer + "confidence")[0];
+        return this._vals("enhancer:confidence");
       },
       getEntityEnhancements: function() {
         var rawList;
-        rawList = _(Stanbol.getEntityAnnotations(this._enhRdf)).filter(__bind(function(ann) {
-          var relations;
-          relations = _(ann["" + ns.dc + "relation"]).map(function(e) {
-            return e.value;
-          });
-          if ((relations.indexOf(this._enhancement.id)) !== -1) {
-            return true;
-          } else {
-            return false;
-          }
-        }, this));
+        rawList = this._enhancement.get("entityAnnotation");
+        if (!rawList) {
+          return [];
+        }
+        rawList = _.flatten([rawList]);
         return _(rawList).map(__bind(function(ee) {
           return new Stanbol.EntityEnhancement(ee, this);
         }, this));
       },
       getType: function() {
-        return this._vals("" + ns.dc + "type")[0];
+        return this._uriTrim(this._vals("dc:type"));
       },
       getContext: function() {
-        return this._vals("" + ns.enhancer + "selection-context")[0];
+        return this._vals("enhancer:selection-context");
       },
       getStart: function() {
-        return Number(this._vals("" + ns.enhancer + "start")[0]);
+        return Number(this._vals("enhancer:start"));
       },
       getEnd: function() {
-        return Number(this._vals("" + ns.enhancer + "end")[0]);
+        return Number(this._vals("enhancer:end"));
       },
       getOrigText: function() {
         var ciUri;
-        ciUri = this._vals("" + ns.enhancer + "extracted-from")[0];
-        return this._enhRdf[ciUri]["http://www.semanticdesktop.org/ontologies/2007/01/19/nie#plainTextContent"][0].value;
+        ciUri = this._vals("enhancer:extracted-from");
+        return this._enhList[ciUri]["http://www.semanticdesktop.org/ontologies/2007/01/19/nie#plainTextContent"][0].value;
       },
       _vals: function(key) {
-        return _(this._enhancement[key]).map(function(x) {
-          return x.value;
+        return this._enhancement.get(key);
+      },
+      _uriTrim: function(uriRef) {
+        var bbColl, mod, _i, _len, _ref, _results;
+        if (!uriRef) {
+          return [];
+        }
+        if (uriRef instanceof Backbone.Model || uriRef instanceof Backbone.Collection) {
+          bbColl = uriRef;
+          _ref = bbColl.models;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            mod = _ref[_i];
+            _results.push(mod.get("@subject").replace(/^<|>$/g, ""));
+          }
+          return _results;
+        } else {
+
+        }
+        return _(_.flatten([uriRef])).map(function(ur) {
+          return ur.replace(/^<|>$/g, "");
         });
       }
     };
     Stanbol.EntityEnhancement = function(ee, textEnh) {
+      this._enhancement = ee;
       this._textEnhancement = textEnh;
-      return $.extend(this, ee);
+      return this;
     };
     Stanbol.EntityEnhancement.prototype = {
       getLabel: function() {
-        return this._vals("" + ns.enhancer + "entity-label")[0];
+        return this._vals("enhancer:entity-label");
       },
       getUri: function() {
-        return this._vals("" + ns.enhancer + "entity-reference")[0];
+        return this._uriTrim(this._vals("enhancer:entity-reference"))[0];
       },
       getTextEnhancement: function() {
         return this._textEnhancement;
       },
       getTypes: function() {
-        return this._vals("" + ns.enhancer + "entity-type");
+        return this._uriTrim(this._vals("enhancer:entity-type"));
       },
       getConfidence: function() {
-        return Number(this._vals("" + ns.enhancer + "confidence")[0]);
+        return Number(this._vals("enhancer:confidence"));
       },
       _vals: function(key) {
-        return _(this[key]).map(function(x) {
-          return x.value;
+        var res;
+        res = this._enhancement.get(key);
+        if (!res) {
+          return [];
+        }
+        if (res.pluck) {
+          return res.pluck("@subject");
+        } else {
+          return res;
+        }
+      },
+      _uriTrim: function(uriRef) {
+        var bbColl, mod, _i, _len, _ref, _results;
+        if (!uriRef) {
+          return [];
+        }
+        if (uriRef instanceof Backbone.Collection) {
+          bbColl = uriRef;
+          _ref = bbColl.models;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            mod = _ref[_i];
+            _results.push(mod.getSubject().replace(/^<|>$/g, ""));
+          }
+          return _results;
+        } else if (uriRef instanceof Backbone.Model) {
+          uriRef = uriRef.getSubject();
+        }
+        return _(_.flatten([uriRef])).map(function(ur) {
+          return ur.replace(/^<|>$/g, "");
         });
       }
     };
@@ -219,7 +252,7 @@
       return res.substring(res.lastIndexOf("/") + 1);
     };
     ANTT.cloneCopyEvent = function(src, dest) {
-      var curData, events, internalKey, oldData;
+      var curData, events, i, internalKey, l, oldData, type;
       if (dest.nodeType !== 1 || !jQuery.hasData(src)) {
         return;
       }
@@ -232,11 +265,14 @@
         if (events) {
           delete curData.handle;
           curData.events = {};
-          for ( var type in events ) {
-                    for ( var i = 0, l = events[ type ].length; i < l; i++ ) {
-                        jQuery.event.add( dest, type + ( events[ type ][ i ].namespace ? "." : "" ) + events[ type ][ i ].namespace, events[ type ][ i ], events[ type ][ i ].data );
-                    }
-                };
+          for (type in events) {
+            i = 0;
+            l = events[type].length;
+            while (i < l) {
+              jQuery.event.add(dest, type + (events[type][i].namespace ? "." : "") + events[type][i].namespace, events[type][i], events[type][i].data);
+              i++;
+            }
+          }
         }
         return null;
       }
@@ -299,18 +335,17 @@
                 uri: uri
               };
               cache = this;
-              widget.options.connector.queryEntityHub(uri, function(entity) {
-                if (!entity.status) {
-                  if (entity.id !== uri) {
-                    widget._logger.warn("wrong callback", uri, entity.id);
-                  }
-                  cache._entities[uri].entity = entity;
-                  cache._entities[uri].status = "done";
-                  return $(cache._entities[uri]).trigger("done", entity);
-                } else {
-                  return widget._logger.warn("error getting entity", uri, entity);
-                }
-              });
+              /*
+                                      widget.options.vie.load({entity: uri}).using('stanbol').execute().success (entity) ->
+                                          if not entity.status
+                                              if entity.id isnt uri
+                                                  widget._logger.warn "wrong callback", uri, entity.id
+                                              cache._entities[uri].entity = entity
+                                              cache._entities[uri].status = "done"
+                                              $(cache._entities[uri]).trigger "done", entity
+                                          else
+                                              widget._logger.warn "error getting entity", uri, entity
+                                      */
             }
             if (this._entities[uri] && this._entities[uri].status === "pending") {
               return $(this._entities[uri]).bind("done", function(event, entity) {
@@ -326,11 +361,28 @@
       enable: function(cb) {
         var analyzedNode;
         analyzedNode = this.element;
-        return this.options.connector.analyze(this.element, {
-          success: __bind(function(rdf) {
-            var rdfJson, textAnnotations;
-            rdfJson = rdf.databank.dump();
-            textAnnotations = Stanbol.getTextAnnotations(rdfJson);
+        return this.options.vie.analyze({
+          element: this.element
+        }).using(this.options.vieServices).execute().success(__bind(function(enhancements) {
+          return _.defer(__bind(function() {
+            var entAnn, entityAnnotations, textAnn, textAnnotations, _i, _len;
+            entityAnnotations = Stanbol.getEntityAnnotations(enhancements);
+            for (_i = 0, _len = entityAnnotations.length; _i < _len; _i++) {
+              entAnn = entityAnnotations[_i];
+              textAnn = entAnn.get("dc:relation");
+              if (!(textAnn instanceof Backbone.Model)) {
+                textAnn = entAnn.vie.entities.get(textAnn);
+              }
+              if (!textAnn) {
+                continue;
+              }
+              _(_.flatten([textAnn])).each(function(ta) {
+                return ta.set({
+                  "entityAnnotation": entAnn.getSubject()
+                });
+              });
+            }
+            textAnnotations = Stanbol.getTextAnnotations(enhancements);
             textAnnotations = _(textAnnotations).filter(function(textEnh) {
               if (textEnh.getSelectedText && textEnh.getSelectedText()) {
                 return true;
@@ -346,7 +398,10 @@
             if (typeof cb === "function") {
               return cb(true);
             }
-          }, this)
+          }, this));
+        }, this)).fail(function(xhr) {
+          cb(false);
+          return console.error("analyze failed", xhr.responseText, xhr);
         });
       },
       disable: function() {
@@ -356,8 +411,26 @@
           }
         });
       },
+      acceptAll: function(reportCallback) {
+        var report;
+        report = {
+          updated: [],
+          accepted: 0
+        };
+        $(':IKS-annotationSelector', this.element).each(function() {
+          var res;
+          if ($(this).data().annotationSelector) {
+            res = $(this).annotationSelector('acceptBestCandidate');
+            if (res) {
+              report.updated.push(this);
+              return report.accepted++;
+            }
+          }
+        });
+        return reportCallback(report);
+      },
       processTextEnhancement: function(textEnh, parentEl) {
-        var eEnh, eEnhUri, el, options, sType, widget, _i, _len, _ref;
+        var eEnh, eEnhUri, el, options, sType, type, widget, _i, _j, _len, _len2, _ref;
         if (!textEnh.getSelectedText()) {
           console.warn("textEnh", textEnh, "doesn't have selected-text!");
           return;
@@ -371,13 +444,17 @@
         }));
         sType = textEnh.getType() || "Other";
         widget = this;
-        el.addClass('entity').addClass(ANTT.uriSuffix(sType).toLowerCase());
+        el.addClass('entity');
+        for (_i = 0, _len = sType.length; _i < _len; _i++) {
+          type = sType[_i];
+          el.addClass(ANTT.uriSuffix(type).toLowerCase());
+        }
         if (textEnh.getEntityEnhancements().length) {
           el.addClass("withSuggestions");
         }
         _ref = textEnh.getEntityEnhancements();
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          eEnh = _ref[_i];
+        for (_j = 0, _len2 = _ref.length; _j < _len2; _j++) {
+          eEnh = _ref[_j];
           eEnhUri = eEnh.getUri();
           this.entityCache.get(eEnhUri, eEnh, function(entity) {
             if (this.getUri() !== entity.id) {
@@ -429,35 +506,15 @@
         }
       },
       _create: function() {
-        this.element.click(__bind(function() {
-          var eEnhancements, enhancement, textEnh, _i, _j, _len, _len2, _ref, _ref2, _tempUris;
+        this.element.click(__bind(function(e) {
+          console.log("click", e, e.isDefaultPrevented());
+          e.preventDefault();
           if (!this.dialog) {
             this._createDialog();
             setTimeout((__bind(function() {
               return this.dialog.open();
             }, this)), 220);
-            eEnhancements = [];
-            _ref = this.textEnhancements;
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              textEnh = _ref[_i];
-              _ref2 = textEnh.getEntityEnhancements();
-              for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
-                enhancement = _ref2[_j];
-                eEnhancements.push(enhancement);
-              }
-            }
-            _tempUris = [];
-            eEnhancements = _(eEnhancements).filter(function(eEnh) {
-              var uri;
-              uri = eEnh.getUri();
-              if (_tempUris.indexOf(uri) === -1) {
-                _tempUris.push(uri);
-                return true;
-              } else {
-                return false;
-              }
-            });
-            this.entityEnhancements = eEnhancements;
+            this.entityEnhancements = this._getEntityEnhancements();
             this._createSearchbox();
             if (this.entityEnhancements.length > 0) {
               if (this.menu === void 0) {
@@ -487,6 +544,33 @@
           return delete this.dialog;
         }
       },
+      _getEntityEnhancements: function() {
+        var eEnhancements, enhancement, textEnh, _i, _j, _len, _len2, _ref, _ref2, _tempUris;
+        eEnhancements = [];
+        _ref = this.textEnhancements;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          textEnh = _ref[_i];
+          _ref2 = textEnh.getEntityEnhancements();
+          for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+            enhancement = _ref2[_j];
+            eEnhancements.push(enhancement);
+          }
+        }
+        _tempUris = [];
+        eEnhancements = _(eEnhancements).filter(function(eEnh) {
+          var uri;
+          uri = eEnh.getUri();
+          if (_tempUris.indexOf(uri) === -1) {
+            _tempUris.push(uri);
+            return true;
+          } else {
+            return false;
+          }
+        });
+        return _(eEnhancements).sortBy(function(e) {
+          return -1 * e.getConfidence();
+        });
+      },
       _typeLabels: function(types) {
         var allKnownPrefixes, knownMapping, knownPrefixes;
         knownMapping = this.options.getTypes();
@@ -504,6 +588,12 @@
       },
       _sourceLabel: function(src) {
         var sourceObj, sources;
+        if (!src) {
+          console.warn("No source");
+        }
+        if (!src) {
+          return "";
+        }
         sources = this.options.getSources();
         sourceObj = _(sources).detect(function(s) {
           return src.indexOf(s.uri) !== -1;
@@ -604,14 +694,18 @@
           return false;
         }
       },
-      annotate: function(entityEnhancement, styleClass) {
-        var entityClass, entityHtml, entityType, entityUri, newElement, sType;
+      annotate: function(entityEnhancement, options) {
+        var entityClass, entityHtml, entityType, entityUri, newElement, rel, sType;
         entityUri = entityEnhancement.getUri();
         entityType = entityEnhancement.getTextEnhancement().getType() || "";
         entityHtml = this.element.html();
-        sType = entityEnhancement.getTextEnhancement().getType() || "";
-        entityClass = 'entity ' + ANTT.uriSuffix(sType).toLowerCase();
-        newElement = $("<a href='" + entityUri + "'                about='" + entityUri + "'                typeof='" + entityType + "'                class='" + entityClass + "'>" + entityHtml + "</a>");
+        sType = entityEnhancement.getTextEnhancement().getType();
+        if (!sType.length) {
+          sType = ["Other"];
+        }
+        rel = options.rel || ("" + ns.skos + "related");
+        entityClass = 'entity ' + ANTT.uriSuffix(sType[0]).toLowerCase();
+        newElement = $("<a href='" + entityUri + "'                about='" + entityUri + "'                typeof='" + entityType + "'                rel='" + rel + "'                class='" + entityClass + "'>" + entityHtml + "</a>");
         ANTT.cloneCopyEvent(this.element[0], newElement[0]);
         this.linkedEntity = {
           uri: entityUri,
@@ -619,7 +713,7 @@
           label: entityEnhancement.getLabel()
         };
         this.element.replaceWith(newElement);
-        this.element = newElement.addClass(styleClass);
+        this.element = newElement.addClass(options.styleClass);
         this._logger.info("created annotation in", this.element);
         this._updateTitle();
         this._insertLink();
@@ -630,6 +724,20 @@
           textEnhancement: entityEnhancement.getTextEnhancement(),
           entityEnhancement: entityEnhancement
         });
+      },
+      acceptBestCandidate: function() {
+        var eEnhancements;
+        eEnhancements = this._getEntityEnhancements();
+        if (!eEnhancements.length) {
+          return;
+        }
+        if (this.isAnnotated()) {
+          return;
+        }
+        this.annotate(eEnhancements[0], {
+          styleClass: "acknowledged"
+        });
+        return eEnhancements[0];
       },
       close: function() {
         return this.destroy();
@@ -652,7 +760,9 @@
         return this.menu = ul.menu({
           select: __bind(function(event, ui) {
             this._logger.info("selected menu item", ui.item);
-            this.annotate(ui.item.data('enhancement'), 'acknowledged');
+            this.annotate(ui.item.data('enhancement'), {
+              styleClass: 'acknowledged'
+            });
             return this.close(event);
           }, this),
           blur: __bind(function(event, ui) {
@@ -695,17 +805,25 @@
         $('.search', this.searchEntryField).autocomplete({
           source: function(req, resp) {
             widget._logger.info("req:", req);
-            return widget.options.connector.findEntity("" + req.term + (req.term.length > 3 ? '*' : void 0), function(entityList) {
-              var entity, i, res;
-              widget._logger.info("resp:", _(entityList).map(function(ent) {
-                return ent.id;
-              }));
-              res = (function() {
-                var _results;
-                _results = [];
-                for (i in entityList) {
-                  entity = entityList[i];
-                  _results.push({
+            return widget.options.vie.find({
+              term: "" + req.term + (req.term.length > 3 ? '*' : '')
+            }).using('stanbol').execute().fail(function(e) {
+              return widget._logger.error("Something wrong happened at stanbol find:", e);
+            }).success(function(entityList) {
+              return _.defer(__bind(function() {
+                var limit, res;
+                widget._logger.info("resp:", _(entityList).map(function(ent) {
+                  return ent.id;
+                }));
+                limit = 10;
+                entityList = _(entityList).filter(function(ent) {
+                  if (ent.id === "http://www.iks-project.eu/ontology/rick/query/QueryResultSet") {
+                    return false;
+                  }
+                  return true;
+                });
+                res = _(entityList.slice(0, limit)).map(function(entity) {
+                  return {
                     key: entity.id,
                     label: "" + (ANTT.getRightLabel(entity)) + " @ " + (widget._sourceLabel(entity.id)),
                     _label: ANTT.getRightLabel(entity),
@@ -719,15 +837,16 @@
                     getTextEnhancement: function() {
                       return this._tEnh;
                     }
-                  });
-                }
-                return _results;
-              })();
-              return resp(res);
+                  };
+                });
+                return resp(res);
+              }, this));
             });
           },
           select: __bind(function(e, ui) {
-            this.annotate(ui.item, "acknowledged");
+            this.annotate(ui.item, {
+              styleClass: "acknowledged"
+            });
             return this._logger.info("autocomplete.select", e.target, ui);
           }, this),
           focus: __bind(function(e, ui) {
