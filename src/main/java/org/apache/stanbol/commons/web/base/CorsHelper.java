@@ -42,6 +42,7 @@ public final class CorsHelper {
      * The "Access-Control-Request-Headers" header
      */
     public static final String REQUEST_HEADERS = "Access-Control-Request-Headers";
+    
 
     /**
      * The default methods for the Access-Control-Request-Method header field.
@@ -131,7 +132,9 @@ public final class CorsHelper {
     public static boolean enableCORS(ServletContext context,ResponseBuilder responseBuilder, 
                                        HttpHeaders requestHeaders, 
                                        String...allowMethods) throws WebApplicationException {
+        //first check if the Origin is present
         if(addCORSOrigin(context,responseBuilder,requestHeaders)){
+            //now add the allowedMethods
             boolean added = false;
             StringBuilder methods = new StringBuilder();
             if(allowMethods != null){
@@ -152,6 +155,26 @@ public final class CorsHelper {
                 methods.append(CorsHelper.DEFAULT_REQUEST_METHODS);
             }
             responseBuilder.header(CorsHelper.REQUEST_METHOD, methods.toString());
+            //third replay parsed "Access-Control-Request-Headers" values
+            //currently there is no need to restrict such headers so the simplest
+            //way is to return them as they are parsed
+            List<String> requestHeaderValues = requestHeaders.getRequestHeader(REQUEST_HEADERS);
+            added = false;
+            if(requestHeaderValues != null && !requestHeaderValues.isEmpty()){
+                StringBuilder requestHeader = new StringBuilder();                
+                for(String header : requestHeaderValues){
+                    if(header != null && !header.isEmpty()){
+                        if(added){
+                            requestHeader.append(", ");
+                        }
+                        requestHeader.append(header);
+                        added = true;
+                    }
+                }
+                if(added){
+                    responseBuilder.header(REQUEST_HEADERS, requestHeader.toString());
+                }
+            }
             return true;
         } else {
             return false;
