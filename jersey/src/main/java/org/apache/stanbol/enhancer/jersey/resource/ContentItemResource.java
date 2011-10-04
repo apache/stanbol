@@ -89,6 +89,7 @@ public class ContentItemResource extends BaseStanbolResource {
 
     // TODO make this configurable trough a property
     public static final UriRef THUMBNAIL = new UriRef("http://dbpedia.org/ontology/thumbnail");
+    public static final UriRef DEPICTION = new UriRef("http://xmlns.com/foaf/0.1/depiction");
 
     public final Map<UriRef,String> defaultThumbnails = new HashMap<UriRef,String>();
 
@@ -430,9 +431,17 @@ public class ContentItemResource extends BaseStanbolResource {
         }
 
         public String getThumbnailSrc() {
-            Iterator<Triple> abstracts = entityProperties.filter(uri, THUMBNAIL, null);
-            while (abstracts.hasNext()) {
-                Resource object = abstracts.next().getObject();
+            Iterator<Triple> thumbnails = entityProperties.filter(uri, THUMBNAIL, null);
+            while (thumbnails.hasNext()) {
+                Resource object = thumbnails.next().getObject();
+                if (object instanceof UriRef) {
+                    return ((UriRef) object).getUnicodeString();
+                }
+            }
+            //if no dbpedia ontology thumbnail was found. try the same with foaf:depiction
+            thumbnails = entityProperties.filter(uri, DEPICTION, null);
+            while (thumbnails.hasNext()) {
+                Resource object = thumbnails.next().getObject();
                 if (object instanceof UriRef) {
                     return ((UriRef) object).getUnicodeString();
                 }
