@@ -64,7 +64,7 @@
     <module>enhancer/jersey</module>
     <module>enhancer/benchmark</module>
     
-<!--     <module>contenthub/web</module> -->
+    <module>contenthub</module>
     <module>ontologymanager/ontonet</module>
     <module>ontologymanager/registry</module>
     <module>ontologymanager/web</module>
