@@ -1,0 +1,67 @@
+.invisible{
+  display: none;	
+}
+
+.centerImage{
+  margin-left:30%;
+  margin-right:auto;	
+}
+
+.configure{
+  width: 17px;
+  height: 17px;
+  border: none;
+  display: inline;
+  background-image: url("/static/contenthub/images/configure_16.png");
+  background-repeat: no-repeat;
+  background-position: right;	
+}
+
+div .result{
+  display: block;
+	
+}
+
+.lined{
+  display: inline-block;
+	
+}
+
+div .keywords{
+  display: inline-block;
+  position: relative;
+  left: 1%;
+  width: 30%;
+}
+
+div .resources{
+  display: inline-block;
+  position: relative;
+  width: 69%;
+  float: right;
+}
+
+H3.ui-accordion-header{
+  padding-left: 2em;
+}
+
+.collapseItem{
+  padding-left: 3px;
+  float: right;
+  vertical-align: middle;
+}
+
+
+.collapseContent{
+  display: none;	
+}
+
+.bordered-bottom{
+   border-bottom: 1px solid #d1dfce;	
+}
+
+.spadded{
+	padding-left: 23px;
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
