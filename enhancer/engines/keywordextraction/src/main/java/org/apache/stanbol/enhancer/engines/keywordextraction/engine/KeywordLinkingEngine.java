@@ -1,6 +1,7 @@
 package org.apache.stanbol.enhancer.engines.keywordextraction.engine;
 
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
+import static org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum.getFullName;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,7 +56,9 @@ import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
+import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
@@ -90,7 +93,9 @@ import org.slf4j.LoggerFactory;
     @Property(name=KeywordLinkingEngine.MAX_SUGGESTIONS,
         intValue=EntityLinkerConfig.DEFAULT_SUGGESTIONS),
     @Property(name=KeywordLinkingEngine.PROCESSED_LANGUAGES,value=""),
-    @Property(name=KeywordLinkingEngine.DEFAULT_MATCHING_LANGUAGE,value="")
+    @Property(name=KeywordLinkingEngine.DEFAULT_MATCHING_LANGUAGE,value=""),
+    @Property(name=KeywordLinkingEngine.DEREFERENCE_ENTITIES,
+        boolValue=KeywordLinkingEngine.DEFAULT_DEREFERENCE_ENTITIES_STATE)
 })
 public class KeywordLinkingEngine implements EnhancementEngine, ServiceProperties{
 
@@ -122,6 +127,28 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
     public static final String MIN_POS_TAG_PROBABILITY = "org.apache.stanbol.enhancer.engines.keywordextraction.minPosTagProbability";
 //  public static final String SIMPLE_TOKENIZER = "org.apache.stanbol.enhancer.engines.keywordextraction.simpleTokenizer";
 //  public static final String ENABLE_CHUNKER = "org.apache.stanbol.enhancer.engines.keywordextraction.enableChunker";
+    /**
+     * Adds the dereference feature (STANBOL-333) also to this engine.
+     * This will be replaced by STANBOL-336. 
+     */
+    public static final String DEREFERENCE_ENTITIES = "org.apache.stanbol.enhancer.engines.keywordextraction.dereference";
+    /**
+     * The default state to dereference entities set to <code>true</code>.
+     */
+    public static final boolean DEFAULT_DEREFERENCE_ENTITIES_STATE = true;
+    /**
+     * Additional fields added for dereferenced entities
+     */
+    private static final Collection<String> DEREFERENCE_FIELDS = Arrays.asList(
+        getFullName("rdfs:comment"),
+        getFullName("geo:lat"),
+        getFullName("geo:long"),
+        getFullName("foaf:depiction"),
+        getFullName("dbp-ont:thumbnail"));
+    /**
+     * The dereferenceEntitiesState as set in {@link #activateEntityDereference(Dictionary)}
+     */
+    private boolean dereferenceEntitiesState;
     /**
      * Default set of languages. This is an empty set indicating that texts in any
      * language are processed. 
@@ -363,6 +390,13 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
                     metadata.add(new TripleImpl(entityAnnotation, 
                         Properties.DC_RELATION, textAnnotation));
                 }
+                //in case dereferencing of Entities is enabled we need also to
+                //add the RDF data for entities
+                if(dereferenceEntitiesState){
+                    metadata.addAll(
+                        RdfValueFactory.getInstance().toRdfRepresentation(
+                            suggestion.getRepresentation()).getRdfGraph());
+                }
             }
         }
     }
@@ -447,6 +481,8 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
      * <li> {@link #activateEntitySearcher(ComponentContext, Dictionary)}
      * <li> {@link #initEntityLinkerConfig(Dictionary, EntityLinkerConfig)} and
      * <li> {@link #activateTextAnalyzer(Dictionary)}
+     * <li> {@link #dereferenceEntitiesState} (needs to be called after 
+     * {@link #initEntityLinkerConfig(Dictionary, EntityLinkerConfig)})
      * </ul>
      * if applicable.
      * @param context the Component context
@@ -460,6 +496,26 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
         activateTextAnalyzer(properties);
         activateEntitySearcher(context, properties);
         activateEntityLinkerConfig(properties);
+        activateEntityDereference(properties);
+    }
+
+    /**
+     * Inits the {@link #dereferenceEntitiesState} based on the
+     * {@link #DEREFERENCE_ENTITIES} configuration.
+     * @param properties the configuration
+     */
+    protected final void activateEntityDereference(Dictionary<String,Object> properties) {
+        Object value = properties.get(DEREFERENCE_ENTITIES);
+        if(value instanceof Boolean){
+            dereferenceEntitiesState = ((Boolean)value).booleanValue();
+        } else if(value != null && !value.toString().isEmpty()){
+            dereferenceEntitiesState = Boolean.parseBoolean(value.toString());
+        } else {
+            dereferenceEntitiesState = DEFAULT_DEREFERENCE_ENTITIES_STATE;
+        }
+        if(dereferenceEntitiesState){
+            config.getSelectedFields().addAll(DEREFERENCE_FIELDS);
+        }
     }
 
     /**
@@ -688,6 +744,14 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
         deactivateEntitySearcher();
         deactivateTextAnalyzer();
         deactivateEntityLinkerConfig();
+        deactivateEntityDereference();
+    }
+    /**
+     * Resets the {@link #dereferenceEntitiesState} to 
+     * {@link #DEFAULT_DEREFERENCE_ENTITIES_STATE}
+     */
+    protected final void deactivateEntityDereference() {
+        dereferenceEntitiesState = DEFAULT_DEREFERENCE_ENTITIES_STATE;
     }
 
     /**
