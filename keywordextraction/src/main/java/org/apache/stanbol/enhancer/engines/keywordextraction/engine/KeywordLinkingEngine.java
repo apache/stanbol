@@ -127,7 +127,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
      * language are processed. 
      */
     public static final Set<String> DEFAULT_LANGUAGES = Collections.emptySet();
-    public static final double DEFAULT_MIN_POS_TAG_PROBABILITY = 0.75;
+    public static final double DEFAULT_MIN_POS_TAG_PROBABILITY = 0.8;
     /**
      * The languages this engine is configured to enhance. An empty List is
      * considered as active for any language
