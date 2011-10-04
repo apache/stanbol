@@ -71,6 +71,7 @@
             <id>prepare-package</id>
             <goals>
               <goal>prepare-package</goal>
+              <goal>attach-bundle-list</goal>
             </goals>
             <configuration>
               <includeDefaultBundles>false</includeDefaultBundles>
