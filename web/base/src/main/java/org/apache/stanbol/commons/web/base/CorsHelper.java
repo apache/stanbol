@@ -42,6 +42,11 @@ public final class CorsHelper {
      * The "Access-Control-Request-Headers" header
      */
     public static final String REQUEST_HEADERS = "Access-Control-Request-Headers";
+
+    /**
+     * The "Access-Control-Request-Headers" header
+     */
+    public static final String ALLOW_HEADERS = "Access-Control-Allow-Headers";
     
 
     /**
@@ -172,7 +177,7 @@ public final class CorsHelper {
                     }
                 }
                 if(added){
-                    responseBuilder.header(REQUEST_HEADERS, requestHeader.toString());
+                    responseBuilder.header(ALLOW_HEADERS, requestHeader.toString());
                 }
             }
             return true;
