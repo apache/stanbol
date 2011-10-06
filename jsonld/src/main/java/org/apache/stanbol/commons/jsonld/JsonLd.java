@@ -274,7 +274,7 @@ public class JsonLd extends JsonLdCommon {
         if (!resource.getTypes().isEmpty()) {
             List<String> types = new ArrayList<String>();
             for (String type : resource.getTypes()) {
-                types.add(shortenURIWithCuries(type));
+                types.add(shortenURI(type));
             }
             if (types.size() == 1) {
                 subjectObject.put(TYPE, types.get(0));
