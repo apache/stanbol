@@ -20,6 +20,8 @@ public enum NamespaceEnum {
 
     // TODO: change the namespace as soon as STANBOL-3 defines a namespace to be used for stanbol
     enhancer("http://fise.iks-project.eu/ontology/"),
+    rickModel("http://www.iks-project.eu/ontology/rick/model/"),
+    rickQuery("http://www.iks-project.eu/ontology/rick/query/"),
     
     atom("http://www.w3.org/2005/Atom"),
     bio("dc-bio","http://purl.org/vocab/bio/0.1/"),
