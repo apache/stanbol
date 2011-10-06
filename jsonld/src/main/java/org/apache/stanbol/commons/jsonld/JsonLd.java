@@ -51,8 +51,6 @@ public class JsonLd extends JsonLdCommon {
      * <code>true</code>.
      */
     private boolean useTypeCoercion = true;
-    
-    
 
     /**
      * Adds the given resource to this JsonLd object using the resource's subject as key. If the key is NULL
@@ -94,11 +92,11 @@ public class JsonLd extends JsonLdCommon {
     @Override
     public String toString() {
         if (useJointGraphs) {
-            Map<String,Object> json = createJointGraph();
+            Map<String,Object> json = createJsonMap();
 
             return JsonSerializer.toString(json);
         } else {
-            List<Object> json = createDisjointGraph();
+            List<Object> json = createJsonList();
 
             return JsonSerializer.toString(json);
         }
@@ -114,17 +112,51 @@ public class JsonLd extends JsonLdCommon {
      */
     public String toString(int indent) {
         if (useJointGraphs) {
-            Map<String,Object> json = createJointGraph();
+            Map<String,Object> json = createJsonMap();
 
             return JsonSerializer.toString(json, indent);
         } else {
-            List<Object> json = createDisjointGraph();
+            List<Object> json = createJsonList();
 
             return JsonSerializer.toString(json, indent);
         }
     }
+    
+    private Map<String,Object> createJsonMap() {
+        Map<String,Object> json = null;
+        try {
+            json = createJointGraph();
+        } catch (ShorteningException e) {
+            // problems while using the shortening algorithm
+            this.setUseCuries(true);
+            this.usedNamespaces.clear();
+            try {
+                json = createJointGraph();
+            } catch (ShorteningException e1) {
+                // ignore this
+            }
+        }
+        return json;
+    }
+    
+    private List<Object> createJsonList() {
+        List<Object> json = null;
+        try {
+            json = createDisjointGraph();
+        } catch (ShorteningException e) {
+            // problems while using the shortening algorithm
+            this.setUseCuries(true);
+            this.usedNamespaces.clear();
+            try {
+                json = createDisjointGraph();
+            } catch (ShorteningException e1) {
+                // ignore this
+            }
+        }
+        return json;
+    }
 
-    private List<Object> createDisjointGraph() {
+    private List<Object> createDisjointGraph() throws ShorteningException {
         List<Object> json = new ArrayList<Object>();
         if (!resourceMap.isEmpty()) {
 
@@ -134,12 +166,12 @@ public class JsonLd extends JsonLdCommon {
 
                 // put subject
                 if (resource.getSubject() != null && !resource.getSubject().isEmpty()) {
-                    subjectObject.put(SUBJECT, handleCURIEs(resource.getSubject()));
+                    subjectObject.put(SUBJECT, shortenURI(resource.getSubject()));
                 }
 
                 // put profile
                 if (resource.getProfile() != null && !resource.getProfile().isEmpty()) {
-                    subjectObject.put(PROFILE, handleCURIEs(resource.getProfile()));
+                    subjectObject.put(PROFILE, shortenURI(resource.getProfile()));
                 }
 
                 // put types
@@ -173,7 +205,7 @@ public class JsonLd extends JsonLdCommon {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String,Object> createJointGraph() {
+    private Map<String,Object> createJointGraph() throws ShorteningException {
         Map<String,Object> json = new TreeMap<String,Object>(new JsonComparator());
         Map<String,String> coercionMap = new TreeMap<String,String>(new JsonComparator());
 
@@ -188,12 +220,12 @@ public class JsonLd extends JsonLdCommon {
 
                 // put subject
                 if (resource.getSubject() != null && !resource.getSubject().isEmpty()) {
-                    subjectObject.put(SUBJECT, handleCURIEs(resource.getSubject()));
+                    subjectObject.put(SUBJECT, shortenURI(resource.getSubject()));
                 }
                 
                 // put profile
                 if (resource.getProfile() != null && !resource.getProfile().isEmpty()) {
-                    subjectObject.put(PROFILE, handleCURIEs(resource.getProfile()));
+                    subjectObject.put(PROFILE, shortenURI(resource.getProfile()));
                 }
 
                 // put types
@@ -238,11 +270,11 @@ public class JsonLd extends JsonLdCommon {
         return json;
     }
 
-    private void putTypes(Map<String,Object> subjectObject, JsonLdResource resource) {
+    private void putTypes(Map<String,Object> subjectObject, JsonLdResource resource) throws ShorteningException {
         if (!resource.getTypes().isEmpty()) {
             List<String> types = new ArrayList<String>();
             for (String type : resource.getTypes()) {
-                types.add(handleCURIEs(type));
+                types.add(shortenURIWithCuries(type));
             }
             if (types.size() == 1) {
                 subjectObject.put(TYPE, types.get(0));
@@ -260,12 +292,12 @@ public class JsonLd extends JsonLdCommon {
         }
     }
 
-    private void putCoercedTypes(Map<String,Object> jsonObject, Map<String,String> coercionMap) {
+    private void putCoercedTypes(Map<String,Object> jsonObject, Map<String,String> coercionMap) throws ShorteningException {
         if (!coercionMap.isEmpty()) {
             Map<String,List<String>> nsCoercionMap = new TreeMap<String,List<String>>(new JsonComparator());
             for (String property : coercionMap.keySet()) {
-                String prop = handleCURIEs(property);
-                String type = handleCURIEs(coercionMap.get(property));
+                String prop = shortenURIIgnoreDuplicates(property);
+                String type = shortenURIWithCuries(coercionMap.get(property));
                 
                 if (nsCoercionMap.get(type) == null) {
                     nsCoercionMap.put(type, new LinkedList<String>());
@@ -277,13 +309,13 @@ public class JsonLd extends JsonLdCommon {
         }
     }
 
-    private void putProperties(Map<String,Object> jsonObject, JsonLdResource resource) {
+    private void putProperties(Map<String,Object> jsonObject, JsonLdResource resource) throws ShorteningException {
         putProperties(jsonObject, resource.getPropertyMap(), resource.getCoerceMap());
     }
 
     private void putProperties(Map<String,Object> outputObject,
                                Map<String,Object> inputMap,
-                               Map<String,String> coercionMap) {
+                               Map<String,String> coercionMap) throws ShorteningException {
         for (String property : inputMap.keySet()) {
             Object value = inputMap.get(property);
             value = convertValueType(value);
@@ -294,18 +326,18 @@ public class JsonLd extends JsonLdCommon {
                     if (type != null) {
                         if (this.useTypeCoercion) {
                             strValue = (String)doCoerce(strValue, type);
-                            outputObject.put(handleCURIEs(property), handleCURIEs(strValue));
+                            outputObject.put(shortenURI(property), shortenURI(strValue));
                         } else {
                             Object objValue = unCoerce(strValue, type);
-                            outputObject.put(handleCURIEs(property), objValue);
+                            outputObject.put(shortenURI(property), objValue);
                         }
                     }
                     else {
-                        outputObject.put(handleCURIEs(property), handleCURIEs(strValue));
+                        outputObject.put(shortenURI(property), shortenURI(strValue));
                     }
                 }
                 else {
-                    outputObject.put(handleCURIEs(property), handleCURIEs(strValue));
+                    outputObject.put(shortenURI(property), shortenURI(strValue));
                 }
             } else if (value instanceof Object[]) {
                 Object[] arrayValue = (Object[]) value;
@@ -313,13 +345,13 @@ public class JsonLd extends JsonLdCommon {
             } else if (value instanceof Map<?,?>) {
                 Map<String,Object> valueMap = (Map<String,Object>) value;
                 Map<String,Object> subOutputObject = new HashMap<String,Object>();
-                outputObject.put(handleCURIEs(property), subOutputObject);
+                outputObject.put(shortenURI(property), subOutputObject);
                 putProperties(subOutputObject, valueMap, coercionMap);
             } else if (value instanceof JsonLdIRI) {
                 JsonLdIRI iriValue = (JsonLdIRI) value;
                 Map<String,Object> iriObject = new HashMap<String,Object>();
-                iriObject.put(IRI, handleCURIEs(iriValue.getIRI()));
-                outputObject.put(handleCURIEs(property), iriObject);
+                iriObject.put(IRI, shortenURI(iriValue.getIRI()));
+                outputObject.put(shortenURI(property), iriObject);
             } else {
                 if (coercionMap != null) {
                     String type = coercionMap.get(property);
@@ -333,16 +365,16 @@ public class JsonLd extends JsonLdCommon {
                         
                         if (objValue instanceof String) {
                             String strValue = (String) objValue;
-                            outputObject.put(handleCURIEs(property), handleCURIEs(strValue));
+                            outputObject.put(shortenURI(property), shortenURI(strValue));
                         }
                         else {
-                            outputObject.put(handleCURIEs(property), objValue);
+                            outputObject.put(shortenURI(property), objValue);
                         }
                     } else {
-                        outputObject.put(handleCURIEs(property), value);
+                        outputObject.put(shortenURI(property), value);
                     }
                 } else {
-                    outputObject.put(handleCURIEs(property), value);
+                    outputObject.put(shortenURI(property), value);
                 }
             }
         }
@@ -351,7 +383,7 @@ public class JsonLd extends JsonLdCommon {
     private void putProperties(Map<String,Object> outputObject,
                                String property,
                                Object[] arrayValue,
-                               Map<String,String> coercionMap) {
+                               Map<String,String> coercionMap) throws ShorteningException {
 
         String type = null;
         if (coercionMap != null && !this.useTypeCoercion) {
@@ -372,15 +404,15 @@ public class JsonLd extends JsonLdCommon {
                     valueList.add(iriValue.getIRI());
                 } else {
                     Map<String,Object> iriObject = new HashMap<String,Object>();
-                    iriObject.put(IRI, handleCURIEs(iriValue.getIRI()));
+                    iriObject.put(IRI, shortenURI(iriValue.getIRI()));
                     valueList.add(iriObject);
                 }
             } else if (object instanceof String) {
                 String strValue = (String) object;
                 if (type != null) {
-                    valueList.add(unCoerce(handleCURIEs(strValue), type));
+                    valueList.add(unCoerce(shortenURI(strValue), type));
                 } else {
-                    valueList.add(handleCURIEs(strValue));
+                    valueList.add(shortenURI(strValue));
                 }
             } else {
                 // Don't know what it is - just add it
@@ -389,7 +421,7 @@ public class JsonLd extends JsonLdCommon {
         }
 
         // Add the converted values
-        outputObject.put(handleCURIEs(property), valueList);
+        outputObject.put(shortenURI(property), valueList);
     }
 
     /**
@@ -398,12 +430,13 @@ public class JsonLd extends JsonLdCommon {
      * @param strValue
      * @param type
      * @return
+     * @throws ShorteningException 
      */
-    private Map<String, Object> unCoerce(Object value, String type) {
+    private Map<String, Object> unCoerce(Object value, String type) throws ShorteningException {
         Map<String, Object> typeDef = new TreeMap<String,Object>(new JsonComparator());
         
         typeDef.put(LITERAL, String.valueOf(value));
-        typeDef.put(DATATYPE, handleCURIEs(type));
+        typeDef.put(DATATYPE, shortenURI(type));
         
         return typeDef;
     }
@@ -438,9 +471,22 @@ public class JsonLd extends JsonLdCommon {
     private Object convertValueType(Object value) {
         if (value instanceof String) {
             String strValue = (String) value;
+            
+            // check if value can be interpreted as long
+            try {
+                return Long.valueOf(strValue);
+            }
+            catch (Throwable t) {};
+            
             // check if value can be interpreted as integer
             try {
                 return Integer.valueOf(strValue);
+            }
+            catch (Throwable t) {};
+
+            // check if it is a float double
+            try {
+                return Double.valueOf(strValue);
             }
             catch (Throwable t) {};
             

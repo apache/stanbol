@@ -40,6 +40,7 @@ public class JsonLdTest {
     public void testSpecExample1() {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setUseTypeCoercion(false);
+        jsonLd.setUseCuries(true);
         jsonLd.addNamespacePrefix("http://example.org/myvocab#", "myvocab");
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
         jsonLd.addNamespacePrefix("http://sioc.org/vocab/1/", "sioc");
@@ -60,12 +61,35 @@ public class JsonLdTest {
         String expectedIndent = "{\n    \"@context\": {\n        \"foaf\": \"http://xmlns.com/foaf/0.1/\",\n        \"myvocab\": \"http://example.org/myvocab#\",\n        \"sioc\": \"http://sioc.org/vocab/1/\"\n    },\n    \"@type\": \"foaf:Person\",\n    \"foaf:homepage\": \"<http://manu.sporny.org/>\",\n    \"foaf:name\": \"Manu Sporny\",\n    \"myvocab:credits\": 500,\n    \"sioc:avatar\": \"<http://twitter.com/account/profile_image/manusporny>\"\n}";
         assertEquals(expectedIndent, actualIndent);
     }
+    
+    @Test
+    public void testSpecExample1NoCuries() {
+        JsonLd jsonLd = new JsonLd();
+        jsonLd.setUseTypeCoercion(true);
+        jsonLd.setUseCuries(false);
+        jsonLd.addNamespacePrefix("http://example.org/myvocab#", "myvocab");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+        jsonLd.addNamespacePrefix("http://sioc.org/vocab/1/", "sioc");
+
+        JsonLdResource jsonLdResource = new JsonLdResource();
+        jsonLdResource.addType("foaf:Person");
+        jsonLdResource.putProperty("foaf:name", "Manu Sporny");
+        jsonLdResource.putProperty("foaf:homepage", "http://manu.sporny.org/");
+        jsonLdResource.putProperty("sioc:avatar", "http://twitter.com/account/profile_image/manusporny");
+        jsonLdResource.putProperty("myvocab:credits", 500);
+        jsonLd.put(jsonLdResource);
+
+        String actual = jsonLd.toString();
+        String expected = "{\"@context\":{\"avatar\":\"http://sioc.org/vocab/1/avatar\",\"credits\":\"http://example.org/myvocab#credits\",\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"homepage\":\"http://xmlns.com/foaf/0.1/homepage\",\"name\":\"http://xmlns.com/foaf/0.1/name\"},\"@type\":\"foaf:Person\",\"avatar\":\"http://twitter.com/account/profile_image/manusporny\",\"credits\":500,\"homepage\":\"http://manu.sporny.org/\",\"name\":\"Manu Sporny\"}";
+        assertEquals(expected, actual);        
+    }
 
     @Test
     public void testSpecExample2_JointGraph() {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setUseTypeCoercion(false);
         jsonLd.setUseJointGraphs(true);
+        jsonLd.setUseCuries(true);
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
 
         JsonLdResource r1 = new JsonLdResource();
@@ -97,11 +121,46 @@ public class JsonLdTest {
         String expectedIndent = "{\n    \"@context\": {\n        \"foaf\": \"http://xmlns.com/foaf/0.1/\"\n    },\n    \"@subject\": [\n        {\n            \"@subject\": \"_:bnode1\",\n            \"@type\": \"foaf:Person\",\n            \"foaf:homepage\": \"<http://example.com/bob>\",\n            \"foaf:name\": \"Bob\"\n        },\n        {\n            \"@subject\": \"_:bnode2\",\n            \"@type\": \"foaf:Person\",\n            \"foaf:homepage\": \"<http://example.com/eve>\",\n            \"foaf:name\": \"Eve\"\n        },\n        {\n            \"@subject\": \"_:bnode3\",\n            \"@type\": \"foaf:Person\",\n            \"foaf:homepage\": \"<http://example.com/bert>\",\n            \"foaf:name\": \"Bert\"\n        }\n    ]\n}";
         assertEquals(expectedIndent, actualIndent);
     }
+    
+    @Test
+    public void testSpecExample2_JointGraphNoCuries() {
+        JsonLd jsonLd = new JsonLd();
+        jsonLd.setUseTypeCoercion(true);
+        jsonLd.setUseJointGraphs(true);
+        jsonLd.setUseCuries(false);
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("_:bnode1");
+        r1.addType("http://xmlns.com/foaf/0.1/Person");
+        r1.putProperty("http://xmlns.com/foaf/0.1/homepage", "<http://example.com/bob>");
+        r1.putProperty("http://xmlns.com/foaf/0.1/name", "Bob");
+        jsonLd.put(r1.getSubject(), r1);
+
+        JsonLdResource r2 = new JsonLdResource();
+        r2.setSubject("_:bnode2");
+        r2.addType("http://xmlns.com/foaf/0.1/Person");
+        r2.putProperty("http://xmlns.com/foaf/0.1/homepage", "<http://example.com/eve>");
+        r2.putProperty("http://xmlns.com/foaf/0.1/name", "Eve");
+        jsonLd.put(r2.getSubject(), r2);
+
+        JsonLdResource r3 = new JsonLdResource();
+        r3.setSubject("_:bnode3");
+        r3.addType("http://xmlns.com/foaf/0.1/Person");
+        r3.putProperty("http://xmlns.com/foaf/0.1/homepage", "<http://example.com/bert>");
+        r3.putProperty("http://xmlns.com/foaf/0.1/name", "Bert");
+        jsonLd.put(r3.getSubject(), r3);
+
+        String actual = jsonLd.toString();
+        String expected = "{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"homepage\":\"http://xmlns.com/foaf/0.1/homepage\",\"name\":\"http://xmlns.com/foaf/0.1/name\"},\"@subject\":[{\"@subject\":\"_:bnode1\",\"@type\":\"foaf:Person\",\"homepage\":\"<http://example.com/bob>\",\"name\":\"Bob\"},{\"@subject\":\"_:bnode2\",\"@type\":\"foaf:Person\",\"homepage\":\"<http://example.com/eve>\",\"name\":\"Eve\"},{\"@subject\":\"_:bnode3\",\"@type\":\"foaf:Person\",\"homepage\":\"<http://example.com/bert>\",\"name\":\"Bert\"}]}";
+        assertEquals(expected, actual);
+    }
 
     @Test
     public void testSpecExample2_DisjointGraph() {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setUseTypeCoercion(false);
+        jsonLd.setUseCuries(true);
         jsonLd.setUseJointGraphs(false);
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
 
@@ -134,11 +193,46 @@ public class JsonLdTest {
         String expectedIndent = "[\n    {\n        \"@context\": {\n            \"foaf\": \"http://xmlns.com/foaf/0.1/\"\n        },\n        \"@subject\": \"_:bnode1\",\n        \"@type\": \"foaf:Person\",\n        \"foaf:homepage\": \"<http://example.com/bob>\",\n        \"foaf:name\": \"Bob\"\n    },\n    {\n        \"@context\": {\n            \"foaf\": \"http://xmlns.com/foaf/0.1/\"\n        },\n        \"@subject\": \"_:bnode2\",\n        \"@type\": \"foaf:Person\",\n        \"foaf:homepage\": \"<http://example.com/eve>\",\n        \"foaf:name\": \"Eve\"\n    },\n    {\n        \"@context\": {\n            \"foaf\": \"http://xmlns.com/foaf/0.1/\"\n        },\n        \"@subject\": \"_:bnode3\",\n        \"@type\": \"foaf:Person\",\n        \"foaf:homepage\": \"<http://example.com/eve>\",\n        \"foaf:name\": \"Eve\"\n    }\n]";
         assertEquals(expectedIndent, actualIndent);
     }
+    
+    @Test
+    public void testSpecExample2_DisjointGraphNoCuries() {
+        JsonLd jsonLd = new JsonLd();
+        jsonLd.setUseTypeCoercion(false);
+        jsonLd.setUseCuries(false);
+        jsonLd.setUseJointGraphs(false);
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("_:bnode1");
+        r1.addType("foaf:Person");
+        r1.putProperty("foaf:homepage", "<http://example.com/bob>");
+        r1.putProperty("foaf:name", "Bob");
+        jsonLd.put(r1.getSubject(), r1);
+
+        JsonLdResource r2 = new JsonLdResource();
+        r2.setSubject("_:bnode2");
+        r2.addType("foaf:Person");
+        r2.putProperty("foaf:homepage", "<http://example.com/eve>");
+        r2.putProperty("foaf:name", "Eve");
+        jsonLd.put(r2.getSubject(), r2);
+
+        JsonLdResource r3 = new JsonLdResource();
+        r3.setSubject("_:bnode3");
+        r3.addType("foaf:Person");
+        r3.putProperty("foaf:homepage", "<http://example.com/eve>");
+        r3.putProperty("foaf:name", "Eve");
+        jsonLd.put(r3.getSubject(), r3);
+
+        String actual = jsonLd.toString();
+        String expected = "[{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"homepage\":\"http://xmlns.com/foaf/0.1/homepage\",\"name\":\"http://xmlns.com/foaf/0.1/name\"},\"@subject\":\"_:bnode1\",\"@type\":\"foaf:Person\",\"homepage\":\"<http://example.com/bob>\",\"name\":\"Bob\"},{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"homepage\":\"http://xmlns.com/foaf/0.1/homepage\",\"name\":\"http://xmlns.com/foaf/0.1/name\"},\"@subject\":\"_:bnode2\",\"@type\":\"foaf:Person\",\"homepage\":\"<http://example.com/eve>\",\"name\":\"Eve\"},{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"homepage\":\"http://xmlns.com/foaf/0.1/homepage\",\"name\":\"http://xmlns.com/foaf/0.1/name\"},\"@subject\":\"_:bnode3\",\"@type\":\"foaf:Person\",\"homepage\":\"<http://example.com/eve>\",\"name\":\"Eve\"}]";
+        assertEquals(expected, actual);
+    }
 
     @Test
     public void testSpecExample3() {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setUseTypeCoercion(false);
+        jsonLd.setUseCuries(true);
         jsonLd.addNamespacePrefix("http://microformats.org/profile/hcard#vcard", "vcard");
         jsonLd.addNamespacePrefix("http://microformats.org/profile/hcard#url", "url");
         jsonLd.addNamespacePrefix("http://microformats.org/profile/hcard#fn", "fn");
@@ -185,6 +279,7 @@ public class JsonLdTest {
     public void testSpecExample4Microformats() {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setUseTypeCoercion(false);
+        jsonLd.setUseCuries(true);
         jsonLd.setUseJointGraphs(false);
 
         JsonLdResource r1 = new JsonLdResource();
@@ -221,6 +316,7 @@ public class JsonLdTest {
     public void testSpecExample5TypedLiterals() {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setUseTypeCoercion(false);
+        jsonLd.setUseCuries(true);
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://purl.org/dc/terms/", "dc");
 
@@ -259,6 +355,7 @@ public class JsonLdTest {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setApplyNamespaces(true);
         jsonLd.setUseTypeCoercion(true);
+        jsonLd.setUseCuries(true);
         
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
@@ -272,6 +369,28 @@ public class JsonLdTest {
 
         String actual = jsonLd.toString();
         String expected = "{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\",\"@coerce\":{\"xsd:string\":\"foaf:nick\"}},\"@subject\":\"<http://example.org/people#joebob>\",\"foaf:nick\":\"stu\"}";
+        assertEquals(expected, actual);
+    }
+    
+    @Test
+    public void testSpecExample5TypedLiteralsNsCoercionNoCuries() {
+        JsonLd jsonLd = new JsonLd();
+        jsonLd.setApplyNamespaces(true);
+        jsonLd.setUseTypeCoercion(true);
+        jsonLd.setUseCuries(false);
+        
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("http://example.org/people#joebob");
+        String nick = "\"stu\"^^http://www.w3.org/2001/XMLSchema#string";
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nick);
+        r1.putPropertyType("http://xmlns.com/foaf/0.1/nick", "xsd:string");
+        jsonLd.put(r1);
+
+        String actual = jsonLd.toString();
+        String expected = "{\"@context\":{\"nick\":\"http://xmlns.com/foaf/0.1/nick\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\",\"@coerce\":{\"xsd:string\":\"nick\"}},\"@subject\":\"http://example.org/people#joebob\",\"nick\":\"stu\"}";
         assertEquals(expected, actual);
     }
     
@@ -300,6 +419,7 @@ public class JsonLdTest {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setApplyNamespaces(true);
         jsonLd.setUseTypeCoercion(false);
+        jsonLd.setUseCuries(true);
         
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
@@ -319,6 +439,7 @@ public class JsonLdTest {
     public void testSpecExample6MultipleObjects() {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setUseTypeCoercion(false);
+        jsonLd.setUseCuries(true);
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
 
@@ -337,6 +458,7 @@ public class JsonLdTest {
     public void testSpecExample6MultipleTypedObjects() {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setUseTypeCoercion(false);
+        jsonLd.setUseCuries(true);
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
 
@@ -361,6 +483,7 @@ public class JsonLdTest {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setApplyNamespaces(false);
         jsonLd.setUseTypeCoercion(true);
+        jsonLd.setUseCuries(true);
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
 
@@ -375,11 +498,33 @@ public class JsonLdTest {
         String expected = "{\"@context\":{\"@coerce\":{\"http://www.w3.org/2001/XMLSchema#string\":\"http://xmlns.com/foaf/0.1/nick\"}},\"@subject\":\"<http://example.org/people#joebob>\",\"http://xmlns.com/foaf/0.1/nick\":[\"stu\",\"groknar\",\"radface\"]}";
         assertEquals(expected, actual);
     }
+    
+    @Test
+    public void testSpecExample6MultipleObjectsCoerceNoCuries() {
+        JsonLd jsonLd = new JsonLd();
+        jsonLd.setApplyNamespaces(true);
+        jsonLd.setUseTypeCoercion(true);
+        jsonLd.setUseCuries(false);
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("<http://example.org/people#joebob>");
+        String [] nicks = new String [] {"stu", "groknar", "radface"};
+        r1.putProperty("foaf:nick", nicks);
+        r1.putPropertyType("foaf:nick", "xsd:string");
+        jsonLd.put(r1);
+
+        String actual = jsonLd.toString();
+        String expected = "{\"@context\":{\"nick\":\"http://xmlns.com/foaf/0.1/nick\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\",\"@coerce\":{\"xsd:string\":\"nick\"}},\"@subject\":\"<http://example.org/people#joebob>\",\"nick\":[\"stu\",\"groknar\",\"radface\"]}";
+        assertEquals(expected, actual);
+    }
 
     @Test
     public void testSpecExample6MultipleObjectsNsCoerce() {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setUseTypeCoercion(true);
+        jsonLd.setUseCuries(true);
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
 
@@ -453,6 +598,7 @@ public class JsonLdTest {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setUseTypeCoercion(false);
         jsonLd.setApplyNamespaces(true);
+        jsonLd.setUseCuries(true);
 
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
@@ -479,6 +625,7 @@ public class JsonLdTest {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setUseTypeCoercion(true);
         jsonLd.setApplyNamespaces(true);
+        jsonLd.setUseCuries(true);
 
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
@@ -504,6 +651,7 @@ public class JsonLdTest {
     @Test
     public void testUseProfile() {
         JsonLd jsonLd = new JsonLd();
+        jsonLd.setUseCuries(true);
         
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
@@ -523,6 +671,7 @@ public class JsonLdTest {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setApplyNamespaces(true);
         jsonLd.setUseTypeCoercion(true);
+        jsonLd.setUseCuries(true);
         
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
@@ -547,6 +696,7 @@ public class JsonLdTest {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setApplyNamespaces(true);
         jsonLd.setUseTypeCoercion(false);
+        jsonLd.setUseCuries(true);
         
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
@@ -567,6 +717,7 @@ public class JsonLdTest {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setApplyNamespaces(true);
         jsonLd.setUseTypeCoercion(true);
+        jsonLd.setUseCuries(true);
         
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
@@ -583,10 +734,32 @@ public class JsonLdTest {
     }
     
     @Test
+    public void testFloatValueNoCuries() {
+        JsonLd jsonLd = new JsonLd();
+        jsonLd.setApplyNamespaces(true);
+        jsonLd.setUseTypeCoercion(true);
+        jsonLd.setUseCuries(false);
+        
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+        
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("_:bnode1");
+        r1.putProperty("http://xmlns.com/foaf/0.1/age", 31.533567);
+        r1.putPropertyType("http://xmlns.com/foaf/0.1/age", "http://www.w3.org/2001/XMLSchema#int");
+        jsonLd.put(r1);
+        
+        String actual = jsonLd.toString();
+        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\",\"@coerce\":{\"xsd:int\":\"age\"}},\"@subject\":\"_:bnode1\",\"age\":31.533567}";
+        assertEquals(expected, actual);        
+    }
+    
+    @Test
     public void testFloatValueNoCoerce() {
         JsonLd jsonLd = new JsonLd();
         jsonLd.setApplyNamespaces(true);
         jsonLd.setUseTypeCoercion(false);
+        jsonLd.setUseCuries(true);
         
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
@@ -600,6 +773,98 @@ public class JsonLdTest {
         String actual = jsonLd.toString();
         String expected = "{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"},\"@subject\":\"_:bnode1\",\"foaf:age\":{\"@literal\":\"31.533567\",\"@datatype\":\"xsd:int\"}}";
         assertEquals(expected, actual);        
+    }
+    
+    @Test
+    public void testDuplicateProperties() {
+        JsonLd jsonLd = new JsonLd();
+        
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+        jsonLd.addNamespacePrefix("http://onto.test.org/", "onto");
+        
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("_:bnode1");
+        r1.putProperty("http://xmlns.com/foaf/0.1/age", 31.533567);
+        r1.putPropertyType("http://xmlns.com/foaf/0.1/age", "http://www.w3.org/2001/XMLSchema#float");
+        r1.putProperty("http://onto.test.org/age", 456);
+        r1.putPropertyType("http://onto.test.org/age", "http://www.w3.org/2001/XMLSchema#int");
+        jsonLd.put(r1);
+        
+        String actual = jsonLd.toString();
+        String expected = "{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"onto\":\"http://onto.test.org/\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\",\"@coerce\":{\"xsd:float\":\"foaf:age\",\"xsd:int\":\"onto:age\"}},\"@subject\":\"_:bnode1\",\"foaf:age\":31.533567,\"onto:age\":456}";
+        assertEquals(expected, actual); 
+    }
+    
+    @Test
+    public void testSubjectWithSeveralTypes() {
+        JsonLd jsonLd = new JsonLd();
+        
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+        jsonLd.addNamespacePrefix("http://onto.test.org/", "onto");
+        
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("_:bnode1");
+        r1.addType("xsd:String");
+        r1.addType("foaf:name");
+        r1.putProperty("http://xmlns.com/foaf/0.1/age", 31.533567);
+        r1.putPropertyType("http://xmlns.com/foaf/0.1/age", "http://www.w3.org/2001/XMLSchema#float");
+        jsonLd.put(r1);
+        
+        String actual = jsonLd.toString();
+        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\",\"@coerce\":{\"xsd:float\":\"age\"}},\"@subject\":\"_:bnode1\",\"@type\":[\"foaf:name\",\"xsd:String\"],\"age\":31.533567}";
+        assertEquals(expected, actual); 
+    }
+    
+    @Test
+    public void testSubjectWithSeveralSameTypes() {
+        JsonLd jsonLd = new JsonLd();
+        
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+        jsonLd.addNamespacePrefix("http://onto.test.org/", "onto");
+        
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("_:bnode1");
+        r1.addType("xsd:String");
+        r1.addType("foaf:String");
+        r1.putProperty("http://xmlns.com/foaf/0.1/age", 31.533567);
+        r1.putPropertyType("http://xmlns.com/foaf/0.1/age", "http://www.w3.org/2001/XMLSchema#float");
+        jsonLd.put(r1);
+        
+        String actual = jsonLd.toString();
+        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\",\"@coerce\":{\"xsd:float\":\"age\"}},\"@subject\":\"_:bnode1\",\"@type\":[\"foaf:String\",\"xsd:String\"],\"age\":31.533567}";
+        assertEquals(expected, actual); 
+    }
+    
+    @Test
+    public void testSubjectsWithSeveralTypes() {
+        JsonLd jsonLd = new JsonLd();
+        
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+        jsonLd.addNamespacePrefix("http://onto.test.org/", "onto");
+        
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("_:bnode1");
+        r1.addType("xsd:String");
+        r1.addType("foaf:name");
+        r1.putProperty("http://xmlns.com/foaf/0.1/age", 31.533567);
+        r1.putPropertyType("http://xmlns.com/foaf/0.1/age", "http://www.w3.org/2001/XMLSchema#float");
+        jsonLd.put(r1);
+        
+        JsonLdResource r2 = new JsonLdResource();
+        r2.setSubject("_:bnode2");
+        r2.addType("xsd:String");
+        r2.addType("foaf:name");
+        r2.putProperty("http://xmlns.com/foaf/0.1/age", 31.533567);
+        r2.putPropertyType("http://xmlns.com/foaf/0.1/age", "http://www.w3.org/2001/XMLSchema#float");
+        jsonLd.put(r2);
+        
+        String actual = jsonLd.toString();
+        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\",\"@coerce\":{\"xsd:float\":\"age\"}},\"@subject\":[{\"@subject\":\"_:bnode1\",\"@type\":[\"foaf:name\",\"xsd:String\"],\"age\":31.533567},{\"@subject\":\"_:bnode2\",\"@type\":[\"foaf:name\",\"xsd:String\"],\"age\":31.533567}]}";
+        assertEquals(expected, actual); 
     }
     
     @SuppressWarnings("unused")

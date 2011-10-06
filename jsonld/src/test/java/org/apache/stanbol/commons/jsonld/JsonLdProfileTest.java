@@ -26,6 +26,7 @@ public class JsonLdProfileTest {
     @Test
     public void testDefineProfile() {
         JsonLdProfile profile = new JsonLdProfile();
+        profile.setUseCuries(true);
         profile.addNamespacePrefix("http://iks-project.eu/ont/", "iks");
         
         profile.addType("person", "iks:person");

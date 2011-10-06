@@ -29,6 +29,7 @@ public class JsonLdProfileParserTest {
         String jsonldInput = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"@types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}";
         
         JsonLdProfile profile = JsonLdProfileParser.parseProfile(jsonldInput);
+        profile.setUseCuries(true);
         
         String actual = profile.toString();
         String expected = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"@types\":{\"organization\":\"iks:organization\",\"person\":\"iks:person\"}}}";

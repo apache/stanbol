@@ -157,17 +157,38 @@ public class JsonLdSerializerProvider implements SerializingProvider {
     }
     
     private Object convertValueType(String strValue) {
-        // check if value can be interpreted as integer
+        String trimedValue = strValue.replaceAll("\"", "");
+        
+        // check if value can be interpreted as Long
         try {
-            return Integer.valueOf(strValue);
+            return Long.valueOf(trimedValue);
+        }
+        catch (Throwable t) {};
+        
+        // check if value can be interpreted as Integer
+        try {
+            return Integer.valueOf(trimedValue);
+        }
+        catch (Throwable t) {};
+        
+        // check if it is a Float value
+        try {
+            return Float.valueOf(trimedValue);
+        }
+        catch (Throwable t) {};
+        
+        // check if it is a Double value
+        try {
+            return Double.valueOf(trimedValue);
         }
         catch (Throwable t) {};
         
         // check if value can be interpreted as boolean
-        if (strValue.equalsIgnoreCase("true") || strValue.equalsIgnoreCase("false")) {
-            return Boolean.valueOf(strValue);
+        if (trimedValue.equalsIgnoreCase("true") || trimedValue.equalsIgnoreCase("false")) {
+            return Boolean.valueOf(trimedValue);
         }
         
+        // nothing matched - leave untouched
         return strValue;
     }    
 
