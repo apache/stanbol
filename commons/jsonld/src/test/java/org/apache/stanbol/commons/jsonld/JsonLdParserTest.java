@@ -28,6 +28,7 @@ public class JsonLdParserTest {
         
         JsonLd jsonLd = JsonLdParser.parse(jsonldInput);
         jsonLd.setUseTypeCoercion(true);
+        jsonLd.setUseCuries(true);
         
         String actual = jsonLd.toString();
         String expected = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@subject\":\"_:bnode1\",\"@profile\":\"iks:employeeOf\",\"organization\":{\"@iri\":\"http://uni-paderborn.de\"},\"person\":{\"@iri\":\"upb:bnagel\"}}";
@@ -58,7 +59,7 @@ public class JsonLdParserTest {
         jsonLd.setApplyNamespaces(true);
         
         String actual = jsonLd.toString();
-        String expected = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@subject\":[{\"@subject\":\"_:bnode1\",\"@profile\":\"iks:employeeOf\",\"organization\":{\"@iri\":\"http://uni-paderborn.de\"},\"person\":{\"@iri\":\"upb:bnagel\"}},{\"@subject\":\"_:bnode2\",\"@profile\":\"iks:employeeOf\",\"organization\":{\"@iri\":\"http://uni-paderborn.de\"},\"person\":{\"@iri\":\"upb:fchrist\"}}]}";
+        String expected = "{\"@context\":{\"bnagel\":\"http://upb.de/persons/bnagel\",\"employeeOf\":\"http://iks-project.eu/ont/employeeOf\",\"fchrist\":\"http://upb.de/persons/fchrist\"},\"@subject\":[{\"@subject\":\"_:bnode1\",\"@profile\":\"employeeOf\",\"organization\":{\"@iri\":\"http://uni-paderborn.de\"},\"person\":{\"@iri\":\"bnagel\"}},{\"@subject\":\"_:bnode2\",\"@profile\":\"employeeOf\",\"organization\":{\"@iri\":\"http://uni-paderborn.de\"},\"person\":{\"@iri\":\"fchrist\"}}]}";
         assertEquals(expected, actual);
         assertNotNull(jsonLd);
     }
@@ -71,6 +72,7 @@ public class JsonLdParserTest {
         jsonLd.setUseTypeCoercion(true);
         jsonLd.setApplyNamespaces(true);
         jsonLd.setUseJointGraphs(false);
+        jsonLd.setUseCuries(true);
         
         String actual = jsonLd.toString();
         String expected = "[{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@subject\":\"_:bnode1\",\"@profile\":\"iks:employeeOf\",\"organization\":{\"@iri\":\"http://uni-paderborn.de\"},\"person\":{\"@iri\":\"upb:bnagel\"}},{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@subject\":\"_:bnode2\",\"@profile\":\"iks:employeeOf\",\"organization\":{\"@iri\":\"http://uni-paderborn.de\"},\"person\":{\"@iri\":\"upb:fchrist\"}}]";
@@ -88,7 +90,7 @@ public class JsonLdParserTest {
         jsonLd.setUseJointGraphs(true);
         
         String actual = jsonLd.toString();
-        String expected = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@subject\":[{\"@subject\":\"_:bnode1\",\"@profile\":\"iks:employeeOf\",\"organization\":{\"@iri\":\"http://uni-paderborn.de\"},\"person\":{\"@iri\":\"upb:bnagel\"}},{\"@subject\":\"_:bnode2\",\"@profile\":\"iks:friendOf\",\"friend\":{\"@iri\":\"upb:fchrist\"},\"person\":{\"@iri\":\"upb:bnagel\"}}]}";
+        String expected = "{\"@context\":{\"bnagel\":\"http://upb.de/persons/bnagel\",\"employeeOf\":\"http://iks-project.eu/ont/employeeOf\",\"fchrist\":\"http://upb.de/persons/fchrist\",\"friendOf\":\"http://iks-project.eu/ont/friendOf\"},\"@subject\":[{\"@subject\":\"_:bnode1\",\"@profile\":\"employeeOf\",\"organization\":{\"@iri\":\"http://uni-paderborn.de\"},\"person\":{\"@iri\":\"bnagel\"}},{\"@subject\":\"_:bnode2\",\"@profile\":\"friendOf\",\"friend\":{\"@iri\":\"fchrist\"},\"person\":{\"@iri\":\"bnagel\"}}]}";
         assertEquals(expected, actual);
         assertNotNull(jsonLd);
     }
@@ -101,6 +103,7 @@ public class JsonLdParserTest {
         jsonLd.setUseTypeCoercion(true);
         jsonLd.setApplyNamespaces(true);
         jsonLd.setUseJointGraphs(true);
+        jsonLd.setUseCuries(true);
         
         String actual = jsonLd.toString();
         String expected = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\"},\"@subject\":\"_:bnode1\",\"@profile\":\"iks:employeeOf\",\"organization\":\"UniPaderborn\",\"person\":\"Benjamin\"}";

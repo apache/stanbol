@@ -53,18 +53,32 @@ public class JsonLdProfile extends JsonLdCommon {
     }
 
     public String toString() {
-        Map<String,Object> json = createJson();
-
-        return JsonSerializer.toString(json);
+        return JsonSerializer.toString(this.createJsonMap());
     }
 
     public String toString(int indent) {
-        Map<String,Object> json = createJson();
-
-        return JsonSerializer.toString(json, indent);
+        return JsonSerializer.toString(this.createJsonMap(), indent);
+    }
+    
+    private Map<String,Object> createJsonMap() {
+        Map<String,Object> json = null;
+        try {
+            json = createJson();
+        } catch (ShorteningException e) {
+            // problems while using the shortening algorithm
+            this.setUseCuries(true);
+            this.usedNamespaces.clear();
+            try {
+                json = createJson();
+            } catch (ShorteningException e1) {
+                // ignore this
+            }
+        }
+        
+        return json;
     }
 
-    private Map<String,Object> createJson() {
+    private Map<String,Object> createJson() throws ShorteningException {
         Map<String,Object> json = new TreeMap<String,Object>(new JsonComparator());
 
         // put the namespaces
@@ -78,13 +92,13 @@ public class JsonLdProfile extends JsonLdCommon {
         for (String property : this.typesMap.keySet()) {
             List<String> types = this.typesMap.get(property);
             if (types.size() == 1) {
-                typesObject.put(handleCURIEs(property), handleCURIEs(types.get(0)));
+                typesObject.put(shortenURI(property), shortenURI(types.get(0)));
             } else {
                 JSONArray typesArray = new JSONArray();
                 for (String type : types) {
-                    typesArray.put(handleCURIEs(type));
+                    typesArray.put(shortenURI(type));
                 }
-                typesObject.put(handleCURIEs(property), typesArray);
+                typesObject.put(shortenURI(property), typesArray);
             }
         }
         contextObject.put(JsonLdCommon.TYPES, typesObject);

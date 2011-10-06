@@ -19,6 +19,12 @@ package org.apache.stanbol.commons.jsonld;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ *
+ *
+ * @author Fabian Christ
+ *
+ */
 public abstract class JsonLdCommon {
 
     public static final String CONTEXT = "@context";
@@ -50,6 +56,8 @@ public abstract class JsonLdCommon {
      * serialization. Default value is <code>true</code>.
      */
     protected boolean applyNamespaces = true;
+    
+    protected boolean useCuries = false;
 
     /**
      * Get the known namespace to prefix mapping.
@@ -105,6 +113,20 @@ public abstract class JsonLdCommon {
     public void setApplyNamespaces(boolean applyNamespaces) {
         this.applyNamespaces = applyNamespaces;
     }
+    
+    /**
+     * @return
+     */
+    public boolean isUseCuries() {
+        return useCuries;
+    }
+
+    /**
+     * @param useCuries
+     */
+    public void setUseCuries(boolean useCuries) {
+        this.useCuries = useCuries;
+    }
 
     /**
      * Convert URI to CURIE if namespaces should be applied and CURIEs to URIs if namespaces should not be
@@ -113,10 +135,31 @@ public abstract class JsonLdCommon {
      * @param uri
      *            That may be in CURIE form.
      * @return
+     * @throws ShorteningException 
      */
-    protected String handleCURIEs(String uri) {
+    protected String shortenURI(String uri) throws ShorteningException {
         if (this.applyNamespaces) {
-            uri = doCURIE(uri);
+            uri = doCURIE(uri, this.useCuries, false);
+        } else {
+            uri = unCURIE(uri);
+        }
+
+        return uri;
+    }
+    
+    protected String shortenURIIgnoreDuplicates(String uri) throws ShorteningException {
+        if (this.applyNamespaces) {
+            uri = doCURIE(uri, this.useCuries, true);
+        } else {
+            uri = unCURIE(uri);
+        }
+
+        return uri;
+    }
+    
+    protected String shortenURIWithCuries(String uri) throws ShorteningException {
+        if (this.applyNamespaces) {
+            uri = doCURIE(uri, true, false);
         } else {
             uri = unCURIE(uri);
         }
@@ -124,9 +167,11 @@ public abstract class JsonLdCommon {
         return uri;
     }
 
-    public String doCURIE(String uri) {
-        String curie = uri;
+    private String doCURIE(String uri, boolean useCURIEs, boolean ignoreDuplicates) throws ShorteningException {
+        String shortened = uri;
         if (uri != null) {
+            String curie = uri;
+            String curieNamespace = null;
             for (String namespace : namespacePrefixMap.keySet()) {
                 String prefix = namespacePrefixMap.get(namespace);
                 String prefixEx = prefix + ":";
@@ -136,18 +181,52 @@ public abstract class JsonLdCommon {
                     
                     if (!uri.equals(curie)) {
                         // we mark this namespace as being used
-                        this.usedNamespaces.put(namespace, prefix);
+                        curieNamespace = namespace;
                         break;
                     }
                 }
                 else {
                     // we mark this namespace as being used
-                    this.usedNamespaces.put(namespace, prefix);
+                    curieNamespace = namespace;
                     break;
                 }
             }
+            
+            if (curieNamespace != null) {
+                String usedPrefix = this.namespacePrefixMap.get(curieNamespace);
+                if (useCURIEs) {
+                    shortened = curie;
+                    this.usedNamespaces.put(curieNamespace, usedPrefix);
+                }
+                else {
+                    String propName = curie.replace(usedPrefix + ":", "");
+                    String namespaceOfProp = null;
+                    for (String ns : this.usedNamespaces.keySet()) {
+                        if (propName.equals(this.usedNamespaces.get(ns))) {
+                            // this shortened version is already in use
+                            namespaceOfProp = ns;
+                            break;
+                        }
+                    }
+                    if (namespaceOfProp != null) {
+                        if (namespaceOfProp.equals(curieNamespace + propName)) {
+                            shortened = propName;
+                        }
+                        else if (ignoreDuplicates) {
+                            shortened = propName;
+                        } else {
+                            System.out.println("Fallback to CURIEs because of property " + propName + " with NS " + namespaceOfProp + " and other is " + curieNamespace + propName);
+                            throw new ShorteningException();
+                        }
+                    }
+                    else {
+                        shortened = propName;
+                        this.usedNamespaces.put(curieNamespace + propName, propName);
+                    }
+                }
+            }
         }
-        return curie;
+        return shortened;
     }
 
     public String unCURIE(String uri) {
