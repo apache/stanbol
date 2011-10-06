@@ -80,7 +80,7 @@ public class JsonLdTest {
         jsonLd.put(jsonLdResource);
 
         String actual = jsonLd.toString();
-        String expected = "{\"@context\":{\"avatar\":\"http://sioc.org/vocab/1/avatar\",\"credits\":\"http://example.org/myvocab#credits\",\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"homepage\":\"http://xmlns.com/foaf/0.1/homepage\",\"name\":\"http://xmlns.com/foaf/0.1/name\"},\"@type\":\"foaf:Person\",\"avatar\":\"http://twitter.com/account/profile_image/manusporny\",\"credits\":500,\"homepage\":\"http://manu.sporny.org/\",\"name\":\"Manu Sporny\"}";
+        String expected = "{\"@context\":{\"avatar\":\"http://sioc.org/vocab/1/avatar\",\"credits\":\"http://example.org/myvocab#credits\",\"homepage\":\"http://xmlns.com/foaf/0.1/homepage\",\"name\":\"http://xmlns.com/foaf/0.1/name\",\"Person\":\"http://xmlns.com/foaf/0.1/Person\"},\"@type\":\"Person\",\"avatar\":\"http://twitter.com/account/profile_image/manusporny\",\"credits\":500,\"homepage\":\"http://manu.sporny.org/\",\"name\":\"Manu Sporny\"}";
         assertEquals(expected, actual);        
     }
 
@@ -152,7 +152,7 @@ public class JsonLdTest {
         jsonLd.put(r3.getSubject(), r3);
 
         String actual = jsonLd.toString();
-        String expected = "{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"homepage\":\"http://xmlns.com/foaf/0.1/homepage\",\"name\":\"http://xmlns.com/foaf/0.1/name\"},\"@subject\":[{\"@subject\":\"_:bnode1\",\"@type\":\"foaf:Person\",\"homepage\":\"<http://example.com/bob>\",\"name\":\"Bob\"},{\"@subject\":\"_:bnode2\",\"@type\":\"foaf:Person\",\"homepage\":\"<http://example.com/eve>\",\"name\":\"Eve\"},{\"@subject\":\"_:bnode3\",\"@type\":\"foaf:Person\",\"homepage\":\"<http://example.com/bert>\",\"name\":\"Bert\"}]}";
+        String expected = "{\"@context\":{\"homepage\":\"http://xmlns.com/foaf/0.1/homepage\",\"name\":\"http://xmlns.com/foaf/0.1/name\",\"Person\":\"http://xmlns.com/foaf/0.1/Person\"},\"@subject\":[{\"@subject\":\"_:bnode1\",\"@type\":\"Person\",\"homepage\":\"<http://example.com/bob>\",\"name\":\"Bob\"},{\"@subject\":\"_:bnode2\",\"@type\":\"Person\",\"homepage\":\"<http://example.com/eve>\",\"name\":\"Eve\"},{\"@subject\":\"_:bnode3\",\"@type\":\"Person\",\"homepage\":\"<http://example.com/bert>\",\"name\":\"Bert\"}]}";
         assertEquals(expected, actual);
     }
 
@@ -224,7 +224,7 @@ public class JsonLdTest {
         jsonLd.put(r3.getSubject(), r3);
 
         String actual = jsonLd.toString();
-        String expected = "[{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"homepage\":\"http://xmlns.com/foaf/0.1/homepage\",\"name\":\"http://xmlns.com/foaf/0.1/name\"},\"@subject\":\"_:bnode1\",\"@type\":\"foaf:Person\",\"homepage\":\"<http://example.com/bob>\",\"name\":\"Bob\"},{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"homepage\":\"http://xmlns.com/foaf/0.1/homepage\",\"name\":\"http://xmlns.com/foaf/0.1/name\"},\"@subject\":\"_:bnode2\",\"@type\":\"foaf:Person\",\"homepage\":\"<http://example.com/eve>\",\"name\":\"Eve\"},{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"homepage\":\"http://xmlns.com/foaf/0.1/homepage\",\"name\":\"http://xmlns.com/foaf/0.1/name\"},\"@subject\":\"_:bnode3\",\"@type\":\"foaf:Person\",\"homepage\":\"<http://example.com/eve>\",\"name\":\"Eve\"}]";
+        String expected = "[{\"@context\":{\"homepage\":\"http://xmlns.com/foaf/0.1/homepage\",\"name\":\"http://xmlns.com/foaf/0.1/name\",\"Person\":\"http://xmlns.com/foaf/0.1/Person\"},\"@subject\":\"_:bnode1\",\"@type\":\"Person\",\"homepage\":\"<http://example.com/bob>\",\"name\":\"Bob\"},{\"@context\":{\"homepage\":\"http://xmlns.com/foaf/0.1/homepage\",\"name\":\"http://xmlns.com/foaf/0.1/name\",\"Person\":\"http://xmlns.com/foaf/0.1/Person\"},\"@subject\":\"_:bnode2\",\"@type\":\"Person\",\"homepage\":\"<http://example.com/eve>\",\"name\":\"Eve\"},{\"@context\":{\"homepage\":\"http://xmlns.com/foaf/0.1/homepage\",\"name\":\"http://xmlns.com/foaf/0.1/name\",\"Person\":\"http://xmlns.com/foaf/0.1/Person\"},\"@subject\":\"_:bnode3\",\"@type\":\"Person\",\"homepage\":\"<http://example.com/eve>\",\"name\":\"Eve\"}]";
         assertEquals(expected, actual);
     }
 
@@ -813,7 +813,7 @@ public class JsonLdTest {
         jsonLd.put(r1);
         
         String actual = jsonLd.toString();
-        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\",\"@coerce\":{\"xsd:float\":\"age\"}},\"@subject\":\"_:bnode1\",\"@type\":[\"foaf:name\",\"xsd:String\"],\"age\":31.533567}";
+        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"name\":\"http://xmlns.com/foaf/0.1/name\",\"String\":\"http://www.w3.org/2001/XMLSchema#String\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\",\"@coerce\":{\"xsd:float\":\"age\"}},\"@subject\":\"_:bnode1\",\"@type\":[\"String\",\"name\"],\"age\":31.533567}";
         assertEquals(expected, actual); 
     }
     
@@ -834,7 +834,7 @@ public class JsonLdTest {
         jsonLd.put(r1);
         
         String actual = jsonLd.toString();
-        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\",\"@coerce\":{\"xsd:float\":\"age\"}},\"@subject\":\"_:bnode1\",\"@type\":[\"foaf:String\",\"xsd:String\"],\"age\":31.533567}";
+        String expected = "{\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\",\"@coerce\":{\"xsd:float\":\"foaf:age\"}},\"@subject\":\"_:bnode1\",\"@type\":[\"foaf:String\",\"xsd:String\"],\"foaf:age\":31.533567}";
         assertEquals(expected, actual); 
     }
     
@@ -863,7 +863,7 @@ public class JsonLdTest {
         jsonLd.put(r2);
         
         String actual = jsonLd.toString();
-        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\",\"@coerce\":{\"xsd:float\":\"age\"}},\"@subject\":[{\"@subject\":\"_:bnode1\",\"@type\":[\"foaf:name\",\"xsd:String\"],\"age\":31.533567},{\"@subject\":\"_:bnode2\",\"@type\":[\"foaf:name\",\"xsd:String\"],\"age\":31.533567}]}";
+        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"name\":\"http://xmlns.com/foaf/0.1/name\",\"String\":\"http://www.w3.org/2001/XMLSchema#String\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\",\"@coerce\":{\"xsd:float\":\"age\"}},\"@subject\":[{\"@subject\":\"_:bnode1\",\"@type\":[\"String\",\"name\"],\"age\":31.533567},{\"@subject\":\"_:bnode2\",\"@type\":[\"String\",\"name\"],\"age\":31.533567}]}";
         assertEquals(expected, actual); 
     }
     
