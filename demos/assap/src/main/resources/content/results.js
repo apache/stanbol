@@ -14,19 +14,18 @@ var assap = {
     var persons = [];
     var organisations = [];
     var places = [];
-    for (var i = 0; i < data['@'].length; i++) {
-      var item = data['@'][i];
+    for (var i = 0; i < data['@subject'].length; i++) {
+      var item = data['@subject'][i];
       
-      var enhancementPattern = /\<urn:enhancement.*/i;
-      if (item['@'].match(enhancementPattern)) {
-        if (item['http://purl.org/dc/terms/type'] == '<http://dbpedia.org/ontology/Person>') {
-          persons.push(item['http://fise.iks-project.eu/ontology/selected-text']);
+      if (item['@subject'] == 'enhancement') {
+        if (item['type'] == 'Person') {
+          persons.push(item['selected-text']);
         }
-        if (item['http://purl.org/dc/terms/type'] == '<http://dbpedia.org/ontology/Organisation>') {
-          organisations.push(item['http://fise.iks-project.eu/ontology/selected-text']);
+        if (item['type'] == 'Organisation') {
+          organisations.push(item['selected-text']);
         }
-        if (item['http://purl.org/dc/terms/type'] == '<http://dbpedia.org/ontology/Place>') {
-          places.push(item['http://fise.iks-project.eu/ontology/selected-text']);
+        if (item['type'] == 'Place') {
+          places.push(item['selected-text']);
         }
       }
     }
