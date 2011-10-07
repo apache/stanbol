@@ -5,6 +5,7 @@ package org.apache.stanbol.enhancer.engines.keywordextraction.impl;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText;
@@ -35,16 +36,26 @@ public class ProcessingState {
      * The current {@link Chunk}
      */
     private Chunk chunk;
+    private static final int MAX_TEXT_CACHE_SIZE = 32;
     /**
-     * This is a cache over the exact labels over the following 'n' tokens
-     * relative {@link #tokenIndex}. It is cleared each time {@link #next()}
-     * is called. 
+     * This is a cache over the last {@link #MAX_TEXT_CACHE_SIZE} token texts
+     * requested by {@link #getTokenText(int, int)}
      */
-    private Map<Integer,String> textCache = new HashMap<Integer,String>();
+    private Map<String,String> textCache = new LinkedHashMap<String,String>(
+            MAX_TEXT_CACHE_SIZE, 0.75f, true){
+        private static final long serialVersionUID = 1L;
+        protected boolean removeEldestEntry(Map.Entry<String,String> eldest) {
+            return size() > MAX_TEXT_CACHE_SIZE;
+        };
+    };
     /**
      * The position for the next token
      */
     private int nextToken = -1;
+    /**
+     * The position of the last consumed position
+     */
+    private int consumedIndex = -1;
 
     public ProcessingState(Iterator<AnalysedText> sentences){
         this.sentences = sentences;
@@ -66,6 +77,13 @@ public class ProcessingState {
      */
     public final int getTokenIndex() {
         return tokenIndex;
+    }
+    /**
+     * Getter for the last consumed index
+     * @return the index of the last consumed token
+     */
+    public final int getConsumedIndex() {
+        return consumedIndex;
     }
     /**
      * The currently active token
@@ -103,21 +121,37 @@ public class ProcessingState {
     public final int getNextToken() {
         return nextToken;
     }
+//    /**
+//     * Allows to manually set to position of the next token to process.
+//     * This can be used to skip some tokens within (e.g. if a Concept
+//     * matching multiple Tokens where found.<p>
+//     * The set token may be greater than the number of tokens in 
+//     * {@link #sentence}. This will simple cause the next sentence to be
+//     * activated on the next call to {@link #next()}
+//     * @param pos the position of the next token to process. 
+//     */
+//    public void setNextToken(int pos){
+//        if(pos > tokenIndex){
+//            this.nextToken = pos;
+//        } else {
+//            throw new IllegalArgumentException("The nextTokenPos "+pos+
+//                " MUST BE greater than the current "+tokenIndex);
+//        }
+//    }
     /**
-     * Allows to manually set to position of the next token to process.
-     * This can be used to skip some tokens within (e.g. if a Concept
-     * matching multiple Tokens where found.<p>
-     * The set token may be greater than the number of tokens in 
-     * {@link #sentence}. This will simple cause the next sentence to be
-     * activated on the next call to {@link #next()}
-     * @param pos the position of the next token to process. 
+     * The index of an consumed Token. The consumed index MUST BE equals or
+     * greater as {@link #getTokenIndex()}. If the consumed index is set to a
+     * value greater that {@link #getTokenIndex()} than consumed tokens are
+     * skipped on the next call to {@link #next()}
+     * @param pos the position of the last consumed token.
      */
-    public void setNextToken(int pos){
-        if(pos > tokenIndex){
-            this.nextToken = pos;
+    public void setConsumed(int pos){
+        if(pos >= tokenIndex){
+            this.consumedIndex = pos;
+            this.nextToken = pos+1;
         } else {
-            throw new IllegalArgumentException("The nextTokenPos "+pos+
-                " MUST BE greater than the current "+tokenIndex);
+            throw new IllegalArgumentException("The lastConsumedPos "+pos+
+                " MUST BE equals or gerater than the current Pos "+tokenIndex);
         }
     }
     /**
@@ -127,8 +161,6 @@ public class ProcessingState {
      * <code>false</code> if there are no further elements to process.
      */
     public boolean next() {
-        //first clear caches for the current element
-        textCache.clear();
         //switch to the next token
         if(nextToken > tokenIndex){
             tokenIndex = nextToken;
@@ -144,6 +176,9 @@ public class ProcessingState {
             if(tokenIndex <= chunk.getEnd()){ //found valid chunk
                 if(chunk.getStart() > tokenIndex) { //skip tokens outside chunks
                     tokenIndex = chunk.getStart();
+                }
+                if(chunk.getStart() > consumedIndex){
+                    consumedIndex = chunk.getStart()-1;
                 }
                 hasNext = true;
             } else { //no more valid chunks in this sentence
@@ -172,6 +207,7 @@ public class ProcessingState {
      * {@link #chunks}, {@link #chunk} and {@link #tokenIndex} to <code>null</code>
      */
     private boolean initNextSentence() {
+        textCache.clear();
         sentence = null;
         while(sentence == null && sentences.hasNext()){
             sentence = sentences.next();
@@ -180,6 +216,7 @@ public class ProcessingState {
                 if(chunks.hasNext()){
                     chunk = chunks.next();
                     tokenIndex = chunk.getStart();
+                    consumedIndex = tokenIndex-1;
                     nextToken = tokenIndex;
                 } else { //no chunks in this sentence
                     sentence = null; //skip this sentence
@@ -191,6 +228,7 @@ public class ProcessingState {
                     chunks = null;
                     chunk = null;
                     tokenIndex = 0;
+                    consumedIndex = -1;
                     nextToken = 0;
                 }
             }
@@ -213,12 +251,13 @@ public class ProcessingState {
      * @return the text covered by the span start of {@link #token} to end of
      * token at <code>{@link #tokenIndex}+tokenCount</code>.
      */
-    public String getTokenText(int tokenCount){
-        Integer pos = Integer.valueOf(tokenCount-1);
-        String text = textCache.get(Integer.valueOf(tokenCount-1));
+    public String getTokenText(int start, int tokenCount){
+        String pos = start+","+tokenCount;
+        String text = textCache.get(pos);
         if(text == null){
-            text = sentence.getText().substring(token.getStart(),
-                sentence.getTokens().get(tokenIndex+pos.intValue()).getEnd());
+            text = sentence.getText().substring(
+                sentence.getTokens().get(start).getStart(),
+                sentence.getTokens().get(start+tokenCount-1).getEnd());
             textCache.put(pos, text);
         }
         return text;

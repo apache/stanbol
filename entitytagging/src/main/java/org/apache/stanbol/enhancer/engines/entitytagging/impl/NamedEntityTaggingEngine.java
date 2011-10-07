@@ -91,19 +91,19 @@ public class NamedEntityTaggingEngine implements EnhancementEngine, ServicePrope
     @Property//(value = "dbpedia")
     public static final String REFERENCED_SITE_ID = "org.apache.stanbol.enhancer.engines.entitytagging.referencedSiteId";
 
-    @Property//(boolValue = true)
+    @Property(boolValue = false)
     public static final String PERSON_STATE = "org.apache.stanbol.enhancer.engines.entitytagging.personState";
 
     @Property//(value = "dbp-ont:Person")
     public static final String PERSON_TYPE = "org.apache.stanbol.enhancer.engines.entitytagging.personType";
 
-    @Property//(boolValue = true)
+    @Property(boolValue = false)
     public static final String ORG_STATE = "org.apache.stanbol.enhancer.engines.entitytagging.organisationState";
 
     @Property//(value = "dbp-ont:Organisation")
     public static final String ORG_TYPE = "org.apache.stanbol.enhancer.engines.entitytagging.organisationType";
 
-    @Property//(boolValue = true)
+    @Property(boolValue = false)
     public static final String PLACE_STATE = "org.apache.stanbol.enhancer.engines.entitytagging.placeState";
 
     @Property//(value = "dbp-ont:Place")
