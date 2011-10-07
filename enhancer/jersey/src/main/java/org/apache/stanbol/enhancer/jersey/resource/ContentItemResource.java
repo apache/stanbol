@@ -18,13 +18,23 @@ package org.apache.stanbol.enhancer.jersey.resource;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getReference;
+import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getReferences;
+import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getString;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_ORGANISATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PERSON;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_PLACE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.SKOS_CONCEPT;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_LABEL;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.GEO_LAT;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.GEO_LONG;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_ENTITYANNOTATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,6 +43,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -48,16 +59,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
-import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
@@ -65,14 +75,11 @@ import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
-import org.apache.clerezza.rdf.core.sparql.QueryParser;
-import org.apache.clerezza.rdf.core.sparql.ResultSet;
-import org.apache.clerezza.rdf.core.sparql.SolutionMapping;
-import org.apache.clerezza.rdf.core.sparql.query.SelectQuery;
-import org.apache.clerezza.rdf.utils.GraphNode;
+import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,16 +118,15 @@ public class ContentItemResource extends BaseStanbolResource {
 
     protected String serializationFormat = SupportedFormat.RDF_XML;
 
-    protected Collection<EntityExtractionSummary> people;
 
-    protected Collection<EntityExtractionSummary> organizations;
-
-    protected Collection<EntityExtractionSummary> places;
-
-    protected Collection<EntityExtractionSummary> concepts;
+    /**
+     * Map holding the extraction mapped by {@link Properties#DC_TYPE} and the
+     * {@link Properties#ENHANCER_SELECTED_TEXT}.
+     * This map is initialised by {@link #initOccurrences()}.
+     */
+    protected Map<UriRef,Map<String,EntityExtractionSummary>> extractionsByTypeMap = 
+        new HashMap<UriRef,Map<String,EntityExtractionSummary>>();
     
-    protected Collection<EntityExtractionSummary> others;
-
     public ContentItemResource(String localId,
                                ContentItem ci,
                                UriInfo uriInfo,
@@ -155,6 +161,9 @@ public class ContentItemResource extends BaseStanbolResource {
         defaultThumbnails.put(DBPEDIA_PLACE, getStaticRootUrl() + "/home/images/compass_48.png");
         defaultThumbnails.put(SKOS_CONCEPT, getStaticRootUrl() + "/home/images/black_gear_48.png");
         defaultThumbnails.put(null, getStaticRootUrl() + "/home/images/unknown_48.png");
+        long start = System.currentTimeMillis();
+        initOccurrences();
+        log.info(" ... {}ms fro parsing Enhancement Reuslts",System.currentTimeMillis()-start);
     }
 
     public String getRdfMetadata(String mediatype) throws UnsupportedEncodingException {
@@ -191,95 +200,110 @@ public class ContentItemResource extends BaseStanbolResource {
         return metadataHref;
     }
 
-    public Collection<EntityExtractionSummary> getPersonOccurrences() throws ParseException {
-        if (people == null) {
-            people = getOccurrences(DBPEDIA_PERSON);
+    public Collection<EntityExtractionSummary> getOccurrences(UriRef type){
+        Map<String,EntityExtractionSummary> typeMap = extractionsByTypeMap.get(type);
+        Collection<EntityExtractionSummary> typeOccurrences;
+        if(typeMap != null){
+            typeOccurrences = typeMap.values();
+        } else {
+            typeOccurrences  = Collections.emptyList();
         }
-        return people;
+        return typeOccurrences;
+    }
+    
+    public Collection<EntityExtractionSummary> getPersonOccurrences() throws ParseException {
+        return getOccurrences(DBPEDIA_PERSON);
     }
     public Collection<EntityExtractionSummary> getOtherOccurrences() throws ParseException {
-        if(others == null){
-            others = getOccurrences(null);
-        }
-        return others;
+        return getOccurrences(null);
     }
 
     public Collection<EntityExtractionSummary> getOrganizationOccurrences() throws ParseException {
-        if (organizations == null) {
-            organizations = getOccurrences(DBPEDIA_ORGANISATION);
-        }
-        return organizations;
+        return getOccurrences(DBPEDIA_ORGANISATION);
     }
 
     public Collection<EntityExtractionSummary> getPlaceOccurrences() throws ParseException {
-        if (places == null) {
-            places = getOccurrences(DBPEDIA_PLACE);
-        }
-        return places;
+        return getOccurrences(DBPEDIA_PLACE);
     }
     public Collection<EntityExtractionSummary> getConceptOccurrences() throws ParseException {
-        if (concepts == null) {
-            concepts = getOccurrences(SKOS_CONCEPT);
-        }
-        return concepts;
+        return getOccurrences(SKOS_CONCEPT);
+    }
+    enum EAProps {
+        label,
+        entity,
+        confidence
     }
 
-    public Collection<EntityExtractionSummary> getOccurrences(UriRef type) throws ParseException {
+    private void initOccurrences() {
         MGraph graph = contentItem.getMetadata();
-        StringBuilder queryBuilder = new StringBuilder();
-        queryBuilder.append("PREFIX enhancer: <http://fise.iks-project.eu/ontology/> ");
-        queryBuilder.append("PREFIX dc:   <http://purl.org/dc/terms/> ");
-        queryBuilder.append("SELECT ?textAnnotation ?text ?entity ?entity_label ?confidence WHERE { ");
-        queryBuilder.append("  ?textAnnotation a enhancer:TextAnnotation ." );
-        if(type != null){
-            queryBuilder.append("  ?textAnnotation dc:type ").append(type).append(" . ");
-        } else {
-            //append a filter that this value needs to be non existent
-            queryBuilder.append(" OPTIONAL { ?textAnnotation dc:type ?type } . ");
-            queryBuilder.append(" FILTER(!bound(?type)) ");
-        }
-        queryBuilder.append("  ?textAnnotation enhancer:selected-text ?text ." );
-        queryBuilder.append(" OPTIONAL {");
-        queryBuilder.append("   ?entityAnnotation dc:relation ?textAnnotation .");
-        queryBuilder.append("   ?entityAnnotation a enhancer:EntityAnnotation . ");
-        queryBuilder.append("   ?entityAnnotation enhancer:entity-reference ?entity .");
-        queryBuilder.append("   ?entityAnnotation enhancer:entity-label ?entity_label .");
-        queryBuilder.append("   ?entityAnnotation enhancer:confidence ?confidence . }" );
-        queryBuilder.append("} ORDER BY ?text ");
-//        String queryString = String.format(queryBuilder.toString(), type);
-
-        SelectQuery query = (SelectQuery) QueryParser.getInstance().parse(queryBuilder.toString());
-        ResultSet result = tcManager.executeSparqlQuery(query, graph);
-        Map<String,EntityExtractionSummary> occurrenceMap = new TreeMap<String,EntityExtractionSummary>();
         LiteralFactory lf = LiteralFactory.getInstance();
-        while (result.hasNext()) {
-            SolutionMapping mapping = result.next();
-
-            UriRef textAnnotationUri = (UriRef) mapping.get("textAnnotation");
-            if (graph.filter(textAnnotationUri, Properties.DC_RELATION, null).hasNext()) {
+        Map<UriRef,Collection<NonLiteral>> suggestionMap = new HashMap<UriRef,Collection<NonLiteral>>();
+        // 1) get Entity Annotations
+        Map<NonLiteral,Map<EAProps,Object>> entitySuggestionMap = new HashMap<NonLiteral,Map<EAProps,Object>>();
+        Iterator<Triple> entityAnnotations = graph.filter(null, RDF.type, ENHANCER_ENTITYANNOTATION);
+        while(entityAnnotations.hasNext()){
+            NonLiteral entityAnnotation = entityAnnotations.next().getSubject();
+            //to avoid multiple lookups (e.g. if one entityAnnotation links to+
+            //several TextAnnotations) we cache the data in an intermediate Map
+            Map<EAProps,Object> eaData = new EnumMap<EAProps,Object>(EAProps.class);
+            eaData.put(EAProps.entity, getReference(graph, entityAnnotation, ENHANCER_ENTITY_REFERENCE));
+            eaData.put(EAProps.label, getString(graph, entityAnnotation, ENHANCER_ENTITY_LABEL));
+            eaData.put(EAProps.confidence, EnhancementEngineHelper.get(
+                graph, entityAnnotation, ENHANCER_CONFIDENCE, Double.class, lf));
+            entitySuggestionMap.put(entityAnnotation, eaData);
+            Iterator<UriRef> textAnnotations = getReferences(graph, entityAnnotation, DC_RELATION);
+            while(textAnnotations.hasNext()){
+                UriRef textAnnotation = textAnnotations.next();
+                Collection<NonLiteral> suggestions = suggestionMap.get(textAnnotation);
+                if(suggestions == null){
+                    suggestions = new ArrayList<NonLiteral>();
+                    suggestionMap.put(textAnnotation, suggestions);
+                }
+                suggestions.add(entityAnnotation);
+            }
+        }
+        // 2) get the TextAnnotations
+        Iterator<Triple> textAnnotations = graph.filter(null, RDF.type, ENHANCER_TEXTANNOTATION);
+        while(textAnnotations.hasNext()){
+            NonLiteral textAnnotation = textAnnotations.next().getSubject();
+            if (graph.filter(textAnnotation, DC_RELATION, null).hasNext()) {
                 // this is not the most specific occurrence of this name: skip
                 continue;
             }
-            // TODO: collect the selected text and contexts of subsumed
-            // annotations
-
-            Literal textLiteral = (Literal) mapping.get("text");
-            String text = textLiteral.getLexicalForm();
-
-            EntityExtractionSummary entity = occurrenceMap.get(text);
-            if (entity == null) {
-                entity = new EntityExtractionSummary(text, type, defaultThumbnails);
-                occurrenceMap.put(text, entity);
+            String text = getString(graph, textAnnotation, Properties.ENHANCER_SELECTED_TEXT);
+            if(text == null){
+                //ignore text annotations without text
+                continue;
             }
-            UriRef entityUri = (UriRef) mapping.get("entity");
-            if (entityUri != null) {
-                String label = ((Literal) mapping.get("entity_label")).getLexicalForm();
-                Double confidence = lf.createObject(Double.class, (TypedLiteral) mapping.get("confidence"));
-                Graph properties = new GraphNode(entityUri, contentItem.getMetadata()).getNodeContext();
-                entity.addSuggestion(entityUri, label, confidence, properties);
+            Iterator<UriRef> types = getReferences(graph, textAnnotation, DC_TYPE);
+            if(!types.hasNext()){ //create an iterator over null in case no types are present
+                types = Collections.singleton((UriRef)null).iterator();
+            }
+            while(types.hasNext()){
+                UriRef type = types.next();
+                Map<String,EntityExtractionSummary> occurrenceMap = extractionsByTypeMap.get(type);
+                if(occurrenceMap == null){
+                    occurrenceMap = new TreeMap<String,EntityExtractionSummary>(String.CASE_INSENSITIVE_ORDER);
+                    extractionsByTypeMap.put(type, occurrenceMap);
+                }
+                EntityExtractionSummary entity = occurrenceMap.get(text);
+                if(entity == null){
+                    entity = new EntityExtractionSummary(text, type, defaultThumbnails);
+                    occurrenceMap.put(text, entity);
+                }
+                Collection<NonLiteral> suggestions = suggestionMap.get(textAnnotation);
+                if(suggestions != null){
+                    for(NonLiteral entityAnnotation : suggestions){
+                        Map<EAProps,Object> eaData = entitySuggestionMap.get(entityAnnotation);
+                        entity.addSuggestion(
+                            (UriRef)eaData.get(EAProps.entity),
+                            (String)eaData.get(EAProps.label), 
+                            (Double)eaData.get(EAProps.confidence), 
+                            graph);
+                    }
+                }
             }
         }
-        return occurrenceMap.values();
     }
 
     public static class EntityExtractionSummary implements Comparable<EntityExtractionSummary> {
