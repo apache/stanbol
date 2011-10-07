@@ -1,0 +1,35 @@
+# Test 2
+Prefix: xsd: <http://www.w3.org/2001/XMLSchema#>
+Prefix: owl: <http://www.w3.org/2002/07/owl#>
+Prefix: vs: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+Prefix: foaf: <http://xmlns.com/foaf/0.1/>
+Prefix: xml: <http://www.w3.org/XML/1998/namespace>
+Prefix: rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+Prefix: dc: <http://purl.org/dc/elements/1.1/>
+Prefix: rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+Prefix: wot: <http://xmlns.com/wot/0.1/>
+Prefix: dbpedia: <http://dbpedia.org/ontology/>
+Prefix: test: <http://www.example.org/test/>
+
+Ontology: <http://www.example.org/test/2/>
+    Import: <http://xmlns.com/foaf/0.1/>
+
+AnnotationProperty: dc:title
+AnnotationProperty: dc:description
+
+Annotations: 
+    dc:title "This ontology is an example for testing the Stanbol Reasoners: HermiT reasoning service",
+    dc:description "We want to test here equivalency and disjointness"
+
+Class: dbpedia:Person
+Class: foaf:Organization
+Class: foaf:Person
+    EquivalentTo:
+        dbpedia:Person
+
+Individual: test:enridaga
+    Types:
+        dbpedia:Person, foaf:Organization 
+
+# In FOAF is said that Person and Organization are disjoint
+# This ontology is inconsistent

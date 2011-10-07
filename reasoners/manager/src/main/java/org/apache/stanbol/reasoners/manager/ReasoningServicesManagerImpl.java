@@ -1,0 +1,63 @@
+package org.apache.stanbol.reasoners.manager;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.stanbol.reasoners.servicesapi.ReasoningService;
+import org.apache.stanbol.reasoners.servicesapi.ReasoningServicesManager;
+import org.apache.stanbol.reasoners.servicesapi.UnboundReasoningServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * @scr.component immediate="true"
+ * @scr.service
+ * @scr.reference name="ReasoningService"
+ *                interface="org.apache.stanbol.reasoners.servicesapi.ReasoningService" cardinality="0..n"
+ *                policy="dynamic")
+ */
+public class ReasoningServicesManagerImpl implements ReasoningServicesManager {
+
+    private static final Logger log = LoggerFactory.getLogger(ReasoningServicesManagerImpl.class);
+
+    private Set<ReasoningService<?,?,?>> services = new HashSet<ReasoningService<?,?,?>>();
+
+    public void bindReasoningService(ReasoningService<?,?,?> service) {
+        services.add(service);
+        log.debug("Reasoning service {} added to path {}", service, service.getPath());
+        log.debug("{} services bound.", services.size());
+    }
+
+    public void unbindReasoningService(ReasoningService<?,?,?> service) {
+        services.remove(service);
+        log.debug("Reasoning service {} removed from path {}", service, service.getPath());
+        log.debug("{} services bound.", services.size());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.stanbol.reasoners.web.resources.ReasoningServices#size()
+     */
+    @Override
+    public int size() {
+        return services.size();
+    }
+
+    @Override
+    public ReasoningService<?,?,?> get(String path) throws UnboundReasoningServiceException {
+        for (ReasoningService<?,?,?> service : services) {
+            log.debug("Does service {} match path {}?", service, path);
+            if (service.getPath().equals(path)) {
+                return service;
+            }
+        }
+        throw new UnboundReasoningServiceException();
+    }
+
+    @Override
+    public Set<ReasoningService<?,?,?>> asUnmodifiableSet() {
+        return Collections.unmodifiableSet(services);
+    }
+}

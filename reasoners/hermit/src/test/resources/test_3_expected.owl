@@ -1,0 +1,45 @@
+# Test 3
+Prefix: xsd: <http://www.w3.org/2001/XMLSchema#>
+Prefix: owl: <http://www.w3.org/2002/07/owl#>
+Prefix: vs: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+Prefix: foaf: <http://xmlns.com/foaf/0.1/>
+Prefix: xml: <http://www.w3.org/XML/1998/namespace>
+Prefix: rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+Prefix: dc: <http://purl.org/dc/elements/1.1/>
+Prefix: rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+Prefix: wot: <http://xmlns.com/wot/0.1/>
+Prefix: dbpedia: <http://dbpedia.org/ontology/>
+Prefix: test: <http://www.example.org/test/>
+
+Ontology: <http://www.example.org/test/3/expected/>
+	Import: <http://www.example.org/test/3/>
+	
+Annotations: 
+    dc:title "This ontology is an example for testing the Stanbol Reasoners: HermiT reasoning service",
+    dc:description "We state here the set of expected axioms"
+
+AnnotationProperty: dc:title
+AnnotationProperty: dc:description
+
+Class: foaf:Person
+
+Individual: test:enridaga
+	Types:
+		foaf:Person
+	Facts:
+		test:isCollegueOf test:alexdma
+	    		
+Individual: test:anuzzolese
+	Types:
+		foaf:Person
+	Facts: 
+		test:isCollegueOf test:enridaga
+
+Individual: test:alexdma
+	Types:
+		foaf:Person
+	Facts:
+		test:isCollegueOf test:anuzzolese,
+		test:isCollegueOf test:enridaga
+
+ObjectProperty: test:isCollegueOf
