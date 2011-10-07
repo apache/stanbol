@@ -92,9 +92,12 @@ a[typeof][about].concept {background-color: #eef;}
         .button()
         .hide()
         .click(function(){
-            $('#content').annotate('acceptAll', function(report){
+            $('#content')
+            .annotate('acceptAll', function(report){
                 console.log('AcceptAll finished with the report:', report);
             });
+            $('.acceptAllButton')
+            .button('disable');
         });
 
         $('.enhanceButton')
@@ -115,6 +118,7 @@ a[typeof][about].concept {background-color: #eef;}
 
                             $('.acceptAllButton')
                             .show()
+                            .button('enable')
                         } else {
                             $('.enhanceButton')
                             .button('enable')
@@ -139,14 +143,14 @@ a[typeof][about].concept {background-color: #eef;}
     });
     </script>
     <button class="enhanceButton">Enhance!</button>
-	<button class="acceptAllButton" style="display:none;">Accept all</button>
+    <button class="acceptAllButton" style="display:none;">Accept all</button>
     <article typeof="schema:CreativeWork" about="http://stanbol.apache.org/enhancertest">
         <div property="sioc:content" id="content">
 Text here...
         </div>
     </article>
     <button class="enhanceButton">Enhance!</button>
-	<button class="acceptAllButton" style="display:none;">Accept all</button>
+    <button class="acceptAllButton" style="display:none;">Accept all</button>
     
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 

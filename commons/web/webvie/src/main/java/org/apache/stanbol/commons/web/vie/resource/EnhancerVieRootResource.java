@@ -1,4 +1,4 @@
-package org.apache.stanbol.enhancer.webvie.resource;
+package org.apache.stanbol.commons.web.vie.resource;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 
