@@ -89,6 +89,7 @@ public class EntityLinkerConfig {
 
         mappings.put(OntologicalClasses.DBPEDIA_PLACE.getUnicodeString(), OntologicalClasses.DBPEDIA_PLACE);
         mappings.put(NamespaceEnum.schema+"Place", OntologicalClasses.DBPEDIA_PLACE);
+        mappings.put(NamespaceEnum.gml+"_Feature", OntologicalClasses.DBPEDIA_PLACE);
 
         mappings.put(OntologicalClasses.SKOS_CONCEPT.getUnicodeString(), OntologicalClasses.SKOS_CONCEPT);
         DEFAULT_ENTITY_TYPE_MAPPINGS = Collections.unmodifiableMap(mappings);

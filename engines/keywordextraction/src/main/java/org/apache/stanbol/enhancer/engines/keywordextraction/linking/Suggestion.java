@@ -23,6 +23,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
  */
 public class Suggestion implements Comparable<Suggestion>{
     private MATCH match = MATCH.NONE;
+    private int start = 0;
     private int span = 0;
     private int matchCount = 0;
     private Text label;
@@ -69,6 +70,7 @@ public class Suggestion implements Comparable<Suggestion>{
     /**
      * Updates this suggestion 
      * @param match the math type
+     * @param start the start position of this suggestion
      * @param span the number of token this suggestion spans
      * @param count the number of token that match with the suggestion within the span
      * @param matchScore the score of the match. MUST BE in the range between 
@@ -78,7 +80,7 @@ public class Suggestion implements Comparable<Suggestion>{
      * @param label the label that matches the tokens
      * @param labelTokenCount the number of tokens of the label
      */
-    protected void updateMatch(MATCH match,int span,int count,float matchScore,Text label,int labelTokenCount){
+    protected void updateMatch(MATCH match,int start, int span,int count,float matchScore,Text label,int labelTokenCount){
         this.match = match;
         //check the validity of the parameters to avoid later errors that are
         //than hard to debug
@@ -101,6 +103,7 @@ public class Suggestion implements Comparable<Suggestion>{
                 }
             }
         }
+        this.start = start;
         this.span = span;
         this.label = label;
         if(match == MATCH.EXACT){ //for exact matches the matchScore needs to be
@@ -154,6 +157,13 @@ public class Suggestion implements Comparable<Suggestion>{
         return matchScore;
     }
     /**
+     * Getter for the start index of this Suggestion
+     * @return the start token index for this suggestion
+     */
+    public int getStart() {
+        return start;
+    }
+    /**
      * Getter for the number of the token matched by this suggestion
      * @return The number of the token matched by this suggestion
      */
@@ -186,7 +196,7 @@ public class Suggestion implements Comparable<Suggestion>{
      * @return the best match or {@link Suggestion#getMatchedLabel()} if non is found
      */
     public Text getBestLabel(String nameField, String language){
-        Representation rep = getRepresentation();
+        Representation rep = getRepresentation(); 
         // 1. check if the returned Entity does has a label -> if not return null
         // add labels (set only a single label. Use "en" if available!
         Text label = null;
