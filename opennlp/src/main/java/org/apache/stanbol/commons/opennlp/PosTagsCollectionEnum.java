@@ -20,9 +20,12 @@ public enum PosTagsCollectionEnum {
     /**
      * Nouns related POS types for English based on the 
      * <a href="http://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html">
-     * Penn Treebank</a> tag set
+     * Penn Treebank</a> tag set.
+     * <p>
+     * NOTE the "``" tag is also added as noun, because it can not be found in
+     * the official tag set and is sometimes used to tag nouns.
      */
-    EN_NOUN("en",PosTypeCollectionType.NOUN,"NN","NNP","NNPS","NNS","FW","CD"),
+    EN_NOUN("en",PosTypeCollectionType.NOUN,"NN","NNP","NNPS","NNS","FW","CD","``"),
     /**
      * Verb related POS types for English based on the 
      * <a href="http://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html">
@@ -36,7 +39,7 @@ public enum PosTagsCollectionEnum {
      * <a href="http://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html">
      * Penn Treebank</a> tag set
      */
-    EN_FOLLOW("en",PosTypeCollectionType.FOLLOW,"#","$"," ","(",")",",",".",":","``","POS","IN"),
+    EN_FOLLOW("en",PosTypeCollectionType.FOLLOW,"#","$"," ","(",")",",",".",":","POS","IN","JJ"),
     /**
      * Noun related POS types for German based on the 
      * <a href="http://www.ims.uni-stuttgart.de/projekte/corplex/TagSets/stts-table.html">
@@ -57,7 +60,7 @@ public enum PosTagsCollectionEnum {
      * <a href="http://www.ims.uni-stuttgart.de/projekte/corplex/TagSets/stts-table.html">
      * STTS Tag Set</a> 
      */
-    DE_FOLLOW("de",PosTypeCollectionType.FOLLOW,"$","$.","$("),
+    DE_FOLLOW("de",PosTypeCollectionType.FOLLOW,"$.","$,","$(","APPR"),
     /**
      * POS types representing Nouns for Danish based on the PAROLE Tagset as
      * described by <a href="http://korpus.dsl.dk/paroledoc_en.pdf">this paper</a>
