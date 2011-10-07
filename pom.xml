@@ -88,6 +88,7 @@
 
         <module>enhancer/engines</module>
         
+        <module>launchers/basebundlelist</module>
         <module>launchers/stable</module>
         <module>launchers/stateless</module>
         <module>launchers/full</module>
