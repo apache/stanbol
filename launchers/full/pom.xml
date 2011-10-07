@@ -84,7 +84,7 @@
               </jarWebSupport>
               <defaultBundleList>
 			    <groupId>org.apache.stanbol</groupId>
-			    <artifactId>org.apache.stanbol.launchers.stable</artifactId>
+			    <artifactId>org.apache.stanbol.launchers.basebundlelist</artifactId>
 			    <version>0.9.0-incubating-SNAPSHOT</version>
 			 </defaultBundleList> 
             </configuration>
