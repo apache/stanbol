@@ -22,9 +22,15 @@
   </description>
    
   <target name="download">
-    <copy todir="${target.directory}" flatten="true">
+   <!-- ensure the delition of the no longer used Danish tokenizer -->	
+   <delete dir="${target.directory}" includes="da-token.bin" />
+   <copy todir="${target.directory}" flatten="true">
       <resources>
+        <!-- 
+          After some testing the decision was to use the simple tokenizer
+          for the Danish language
         <url url="${model.url}/da-token.bin"/>
+        -->
         <url url="${model.url}/da-sent.bin"/>
         <url url="${model.url}/da-pos-perceptron.bin"/>
         <!-- no Chunker for german

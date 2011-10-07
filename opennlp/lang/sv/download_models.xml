@@ -24,14 +24,19 @@
        "se-*" to "sv-*"
    -->
   <mapper type="merge" />
+  <!-- ensure the delition of the no longer used Swedish tokenizer -->  
+  <delete dir="${target.directory}" includes="sv-token.bin" />
    
   <target name="download">
+<!-- Based on some testing the decision was to use the SimpleTokenizer for 
+     the Swidish language
       <copy toDir="${target.directory}/">
           <resources>
               <url url="${model.url}/se-token.bin"/>
           </resources>
           <mergemapper to="sv-token.bin"/>
       </copy>
+      -->
       <copy toDir="${target.directory}/">
           <resources>
               <url url="${model.url}/se-sent.bin"/>
