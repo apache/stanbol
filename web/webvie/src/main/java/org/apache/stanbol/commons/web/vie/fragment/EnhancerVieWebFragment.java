@@ -1,4 +1,4 @@
-package org.apache.stanbol.enhancer.webvie.fragment;
+package org.apache.stanbol.commons.web.vie.fragment;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,9 +16,9 @@ import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
+import org.apache.stanbol.commons.web.vie.resource.EnhancerVieRootResource;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.Store;
-import org.apache.stanbol.enhancer.webvie.resource.EnhancerVieRootResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -35,9 +35,9 @@ public class EnhancerVieWebFragment implements WebFragment {
 
     private static final String NAME = "enhancervie";
 
-    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/enhancer/webvie/static";
+    private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/commons/web/vie/static";
 
-    private static final String TEMPLATE_PATH = "/org/apache/stanbol/enhancer/webvie/templates";
+    private static final String TEMPLATE_PATH = "/org/apache/stanbol/commons/web/vie/templates";
 
     private BundleContext bundleContext;
     
