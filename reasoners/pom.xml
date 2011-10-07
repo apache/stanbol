@@ -40,6 +40,7 @@
     <module>../rules/manager</module-->
     <module>servicesapi</module>
     <module>manager</module>
+    <module>jobs/api</module>
     <module>owlapi</module>
     <module>jena</module>
     <!--module>hermit</module-->
