@@ -9,11 +9,12 @@
     <version>0.9.0-incubating-SNAPSHOT</version>
     <relativePath>../../parent/pom.xml</relativePath>
   </parent>
-  <artifactId>org.apache.stanbol.enhancer.webvie</artifactId>
+  <artifactId>org.apache.stanbol.commons.web.vie</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Editable Entity based Enhancer UI</name>
-  <description>VIE based user interface for Stanbol
+  <name>Apache Stanbol Commons Web Content Editable Enhancer UI</name>
+  <description>VIE (https://github.com/bergie/VIE) based user interface for 
+  Stanbol (Enhancer and Entityhub)
   </description>
 
   <build>
@@ -30,7 +31,7 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.enhancer.webvie.*
+              org.apache.stanbol.commons.web.vie.*
             </Export-Package>
             <Import-Package>*</Import-Package>
           </instructions>
