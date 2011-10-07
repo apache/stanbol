@@ -55,6 +55,7 @@ public enum NamespaceEnum {
     //Some well known Namespaces of Ontologies
     geo("http://www.w3.org/2003/01/geo/wgs84_pos#"),
     georss("http://www.georss.org/georss/"),
+    gml("http://www.opengis.net/gml/"),
     dcElements("dc-elements","http://purl.org/dc/elements/1.1/"),
     dcTerms("dc","http://purl.org/dc/terms/"), // Entityhub prefers DC-Terms, therefore use the "dc" prefix for the terms name space
     foaf("http://xmlns.com/foaf/0.1/"),
