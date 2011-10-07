@@ -92,12 +92,9 @@ a[typeof][about].concept {background-color: #eef;}
         .button()
         .hide()
         .click(function(){
-            $('#content')
-            .annotate('acceptAll', function(report){
+            $('#content').annotate('acceptAll', function(report){
                 console.log('AcceptAll finished with the report:', report);
             });
-            $('.acceptAllButton')
-            .button('disable');
         });
 
         $('.enhanceButton')
@@ -118,7 +115,6 @@ a[typeof][about].concept {background-color: #eef;}
 
                             $('.acceptAllButton')
                             .show()
-                            .button('enable')
                         } else {
                             $('.enhanceButton')
                             .button('enable')
