@@ -161,15 +161,14 @@ public class PosTypeChunker {
      * @return the chunks as spans over the parsed tokens
      */
     public Span[] chunkAsSpans(String[] tokens, String[] tags) {
-//      int consumed = -1;
+      int consumed = -1;
         List<Span> chunks = new ArrayList<Span>();
         for(int i=0;i<tokens.length;i++){
             if(includePOS(null,tags[i])){
                 int start = i;
-                //do not follow backwards!
-//                while(start-1 > consumed && followPOS(tags[start-1])){
-//                    start--; //follow backwards until consumed
-//                }
+                while(start-1 > consumed && followPOS(null,tags[start-1])){
+                    start--; //follow backwards until consumed
+                }
                 int followEnd = i;
                 int end = i;
                 while(followEnd+1 < tokens.length && followPOS(null,tags[followEnd+1])){
@@ -199,15 +198,15 @@ public class PosTypeChunker {
         //      used by this one :(
         //      If someone has a better Idea feel free to change!
         //      Rupert Westenthaler (28.Sep.2011)
-//        int consumed = -1;
+        int consumed = -1;
         List<Span> chunks = new ArrayList<Span>();
         for(int i=0;i<tokens.length;i++){
             if(includePOS(props[i],tags[i])){
                 int start = i;
                 //do not follow backwards!
-//                while(start-1 > consumed && followPOS(tags[start-1])){
-//                    start--; //follow backwards until consumed
-//                }
+                while(start-1 > consumed && followPOS(props[start-1],tags[start-1])){
+                    start--; //follow backwards until consumed
+                }
                 int followEnd = i;
                 int end = i;
                 while(followEnd+1 < tokens.length && followPOS(props[followEnd+1],tags[followEnd+1])){

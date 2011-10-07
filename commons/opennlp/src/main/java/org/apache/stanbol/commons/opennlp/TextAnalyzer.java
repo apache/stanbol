@@ -474,6 +474,7 @@ public class TextAnalyzer {
             protected String token;
             protected final String[] posTags;
             protected final double[] posProbabilities;
+            protected final boolean hasAlphaNumeric;
 
             private Token(Span span,String token,String pos,double posProbability){
                 this(span,token,new String[]{pos},new double[] {posProbability});
@@ -493,6 +494,11 @@ public class TextAnalyzer {
                 } else {
                     this.posProbabilities = posProbabilities;
                 }
+                boolean foundAlphaNumericCahr = false;
+                for(int i = 0;!foundAlphaNumericCahr &&i<token.length();i++){
+                    foundAlphaNumericCahr = Character.isLetterOrDigit(token.charAt(i));
+                }
+                hasAlphaNumeric = foundAlphaNumericCahr;
             }
 
             public int getStart(){
@@ -540,6 +546,9 @@ public class TextAnalyzer {
                     token = span.getCoveredText(sentence).toString();
                 }
                 return token;
+            }
+            public boolean hasAplhaNumericChar(){
+                return hasAlphaNumeric;
             }
             @Override
             public String toString() {
