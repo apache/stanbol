@@ -277,7 +277,7 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
                  * computeEnhancement is always called iff the former returns true.
                  */
                 OWLOntology fiseMetadataOntology = OWLAPIToClerezzaConverter
-                        .clerezzaMGraphToOWLOntology(mGraph);
+                        .clerezzaGraphToOWLOntology(mGraph);
                 ontologies.add(fiseMetadataOntology);
                 return ontologies;
             }
@@ -711,7 +711,7 @@ String scopeId = (String) context.getProperties().get(SCOPE);
              * manager.loadOntologyFromOntologyDocument(dereferencer.resolve(entityReferenceString));
              */
 
-            fetchedOntology = OWLAPIToClerezzaConverter.clerezzaMGraphToOWLOntology(entityMGraph);
+            fetchedOntology = OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(entityMGraph);
         }
 
         return fetchedOntology;
