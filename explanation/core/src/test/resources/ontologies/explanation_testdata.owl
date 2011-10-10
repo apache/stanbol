@@ -1,0 +1,217 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY org "http://www.w3.org/ns/org#" >
+    <!ENTITY foaf "http://xmlns.com/foaf/0.1/" >
+    <!ENTITY dbpedia "http://dbpedia.org/resource/" >
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY m "http://rdf.freebase.com/ns/m/0" >
+    <!ENTITY v1 "http://purl.org/goodrelations/v1#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY movie "http://data.linkedmdb.org/resource/movie/" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY sequence "http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.iks-project.eu/ontologies/explanation_testdata.owl#"
+     xml:base="http://www.iks-project.eu/ontologies/explanation_testdata.owl"
+     xmlns:v1="http://purl.org/goodrelations/v1#"
+     xmlns:foaf="http://xmlns.com/foaf/0.1/"
+     xmlns:movie="http://data.linkedmdb.org/resource/movie/"
+     xmlns:m="http://rdf.freebase.com/ns/m/0"
+     xmlns:org="http://www.w3.org/ns/org#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:sequence="http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:dbpedia="http://dbpedia.org/resource/"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://www.iks-project.eu/ontologies/explanation_testdata.owl">
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cp/demo/organizationalhierarchy_mappings.owl"/>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/sequence.owl"/>
+        <owl:imports rdf:resource="http://www.w3.org/ns/org#"/>
+        <owl:imports rdf:resource="http://xmlns.com/foaf/0.1/"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://data.linkedmdb.org/resource/movie/film -->
+
+    <owl:Class rdf:about="&movie;film"/>
+    
+
+
+    <!-- http://rdf.freebase.com/ns/m/0f5d2 -->
+
+    <owl:Class rdf:about="&m;f5d2">
+        <rdfs:label xml:lang="en">Creator deity</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://dbpedia.org/resource/The_Battleship_Potemkin -->
+
+    <owl:NamedIndividual rdf:about="&dbpedia;The_Battleship_Potemkin">
+        <rdf:type rdf:resource="&movie;film"/>
+        <rdfs:label xml:lang="en">The Battleship Potemkin</rdfs:label>
+        <rdfs:label xml:lang="it">La corazzata Potëmkin</rdfs:label>
+        <rdfs:label xml:lang="ru">Броненосец «Потёмкин»</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.iks-project.eu/ontologies/explanation_testdata.owl#Ducaconte_Balabam -->
+
+    <owl:NamedIndividual rdf:about="http://www.iks-project.eu/ontologies/explanation_testdata.owl#Ducaconte_Balabam">
+        <rdf:type rdf:resource="&m;f5d2"/>
+        <rdfs:label xml:lang="it">Dott. Ing. Gran Farabutt. Lup. Mann. Ducaconte Balabam</rdfs:label>
+        <org:headOf rdf:resource="http://www.iks-project.eu/ontologies/explanation_testdata.owl#Megaditta"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.iks-project.eu/ontologies/explanation_testdata.owl#Fantozzi_in_Megaditta -->
+
+    <org:Membership rdf:about="http://www.iks-project.eu/ontologies/explanation_testdata.owl#Fantozzi_in_Megaditta">
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+        <rdfs:label xml:lang="en">Fantozzi_in_Megaditta</rdfs:label>
+        <org:organization rdf:resource="http://www.iks-project.eu/ontologies/explanation_testdata.owl#Megaditta"/>
+        <org:role rdf:resource="http://www.iks-project.eu/ontologies/explanation_testdata.owl#stamp_licker"/>
+    </org:Membership>
+    
+
+
+    <!-- http://www.iks-project.eu/ontologies/explanation_testdata.owl#Guidobaldo_Maria_Riccardelli -->
+
+    <foaf:Person rdf:about="http://www.iks-project.eu/ontologies/explanation_testdata.owl#Guidobaldo_Maria_Riccardelli">
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+        <rdfs:label xml:lang="it">Prof. Guidobaldo Maria Riccardelli</rdfs:label>
+        <foaf:topic_interest rdf:resource="&dbpedia;The_Battleship_Potemkin"/>
+        <org:reportsTo rdf:resource="http://www.iks-project.eu/ontologies/explanation_testdata.owl#Ducaconte_Balabam"/>
+        <org:hasMembership rdf:resource="http://www.iks-project.eu/ontologies/explanation_testdata.owl#Riccardelli_in_Megaditta"/>
+    </foaf:Person>
+    
+
+
+    <!-- http://www.iks-project.eu/ontologies/explanation_testdata.owl#Megaditta -->
+
+    <org:FormalOrganization rdf:about="http://www.iks-project.eu/ontologies/explanation_testdata.owl#Megaditta">
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+        <rdfs:label xml:lang="it">Megaditta</rdfs:label>
+    </org:FormalOrganization>
+    
+
+
+    <!-- http://www.iks-project.eu/ontologies/explanation_testdata.owl#Riccardelli_in_Megaditta -->
+
+    <org:Membership rdf:about="http://www.iks-project.eu/ontologies/explanation_testdata.owl#Riccardelli_in_Megaditta">
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+        <rdfs:label xml:lang="en">Riccardelli_in_Megaditta</rdfs:label>
+        <org:organization rdf:resource="http://www.iks-project.eu/ontologies/explanation_testdata.owl#Megaditta"/>
+        <org:role rdf:resource="http://www.iks-project.eu/ontologies/explanation_testdata.owl#film_forum_manager"/>
+    </org:Membership>
+    
+
+
+    <!-- http://www.iks-project.eu/ontologies/explanation_testdata.owl#Ugo_Fantozzi -->
+
+    <foaf:Person rdf:about="http://www.iks-project.eu/ontologies/explanation_testdata.owl#Ugo_Fantozzi">
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+        <rdfs:label xml:lang="it">Ugo Fantozzi</rdfs:label>
+        <foaf:skypeID rdf:datatype="&xsd;string">ugo.fantocci1934</foaf:skypeID>
+        <foaf:name>Ugo Fantozzi</foaf:name>
+        <org:hasMembership rdf:resource="http://www.iks-project.eu/ontologies/explanation_testdata.owl#Fantozzi_in_Megaditta"/>
+        <org:reportsTo rdf:resource="http://www.iks-project.eu/ontologies/explanation_testdata.owl#Guidobaldo_Maria_Riccardelli"/>
+    </foaf:Person>
+    
+
+
+    <!-- http://www.iks-project.eu/ontologies/explanation_testdata.owl#film_forum_manager -->
+
+    <org:Role rdf:about="http://www.iks-project.eu/ontologies/explanation_testdata.owl#film_forum_manager">
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+        <rdfs:label xml:lang="en">film_forum_manager</rdfs:label>
+        <sequence:precedes rdf:resource="http://www.iks-project.eu/ontologies/explanation_testdata.owl#stamp_licker"/>
+    </org:Role>
+    
+
+
+    <!-- http://www.iks-project.eu/ontologies/explanation_testdata.owl#lightning_rod -->
+
+    <org:Role rdf:about="http://www.iks-project.eu/ontologies/explanation_testdata.owl#lightning_rod">
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+        <rdfs:label xml:lang="en">lightning_rod</rdfs:label>
+        <rdfs:label xml:lang="it">parafulmine</rdfs:label>
+        <sequence:directlyFollows rdf:resource="http://www.iks-project.eu/ontologies/explanation_testdata.owl#stamp_licker"/>
+    </org:Role>
+    
+
+
+    <!-- http://www.iks-project.eu/ontologies/explanation_testdata.owl#stamp_licker -->
+
+    <org:Role rdf:about="http://www.iks-project.eu/ontologies/explanation_testdata.owl#stamp_licker">
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+        <rdfs:label xml:lang="en">stamp licker</rdfs:label>
+        <rdfs:label xml:lang="it">leccafrancobolli</rdfs:label>
+    </org:Role>
+    
+
+
+    <!-- http://www.w3.org/ns/org#Head -->
+
+    <rdf:Description rdf:about="&org;Head">
+        <sequence:precedes rdf:resource="http://www.iks-project.eu/ontologies/explanation_testdata.owl#film_forum_manager"/>
+    </rdf:Description>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.2.3.22702) http://owlapi.sourceforge.net -->
+

@@ -129,6 +129,7 @@
         <module>ontologymanager/store</module>
         <module>reasoners</module>
         <module>reengineer</module>
+        <module>explanation</module>
         <module>launchers/kres</module>
       </modules>
     </profile>
