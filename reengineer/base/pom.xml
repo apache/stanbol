@@ -31,7 +31,7 @@
   <artifactId>org.apache.stanbol.reengineer.base</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Reengineer - Base API</name>
+  <name>Apache Stanbol Reengineer Services API</name>
   <description>
     Provides basic functionality for reengineering resources
     into ontologies.

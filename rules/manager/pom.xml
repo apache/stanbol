@@ -25,7 +25,7 @@
 	<artifactId>org.apache.stanbol.rules.manager</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>Apache Stanbol Rule Manager</name>
+	<name>Apache Stanbol Rules Manager</name>
 	<description>
     The set of functionalities for manipulating
     inference rules, complete with built-in atoms.

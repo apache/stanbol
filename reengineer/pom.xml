@@ -33,19 +33,16 @@
   <inceptionYear>2011</inceptionYear>
 
   <modules>
-    <!--module>../jersey</module>
-    <module>../ontologymanager/ontonet</module>    
-    <module>../owl</module-->
     <module>base</module>
     <module>db</module>
     <!--
     <module>mysql</module>
     -->
-    <module>web</module>
     <!--
     <module>xerces</module>
     -->
     <module>xml</module>
+    <module>web</module>
   </modules>
 
 </project>

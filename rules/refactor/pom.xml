@@ -25,7 +25,7 @@
 	<artifactId>org.apache.stanbol.rules.refactor</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>Apache Stanbol Refactorer</name>
+	<name>Apache Stanbol Rules Refactorer</name>
 	<description>
     Provides basic functionality for ontology refactoring.
   </description>
