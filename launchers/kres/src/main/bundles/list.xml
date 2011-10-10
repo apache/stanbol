@@ -389,6 +389,14 @@
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
+	
+	<startLevel level="25">
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.explanation.core</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+	</startLevel>
 
 	<startLevel level="28">
 		<bundle>
