@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.reengineer.xml;
 
 import java.io.BufferedReader;
@@ -23,6 +39,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
@@ -31,6 +48,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
+import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.Reengineer;
 import org.apache.stanbol.reengineer.base.api.ReengineerManager;
@@ -81,7 +99,8 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
 
     public static final String _HOST_NAME_AND_PORT_DEFAULT = "localhost:8080";
     public static final String _REENGINEERING_SCOPE_DEFAULT = "xml_reengineering";
-//    public static final String _XML_REENGINEERING_SESSION_SPACE_DEFAULT = "/xml-reengineering-session-space";
+    // public static final String _XML_REENGINEERING_SESSION_SPACE_DEFAULT =
+    // "/xml-reengineering-session-space";
 
     @Property(value = _HOST_NAME_AND_PORT_DEFAULT)
     public static final String HOST_NAME_AND_PORT = "host.name.port";
@@ -89,8 +108,9 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
     @Property(value = _REENGINEERING_SCOPE_DEFAULT)
     public static final String REENGINEERING_SCOPE = "xml.reengineering.scope";
 
-//    @Property(value = _XML_REENGINEERING_SESSION_SPACE_DEFAULT)
-//    public static final String XML_REENGINEERING_SESSION_SPACE = "http://kres.iks-project.eu/space/reengineering/db";
+    // @Property(value = _XML_REENGINEERING_SESSION_SPACE_DEFAULT)
+    // public static final String XML_REENGINEERING_SESSION_SPACE =
+    // "http://kres.iks-project.eu/space/reengineering/db";
 
     public final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -102,7 +122,8 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
 
     private OntologyScope scope;
     private String scopeID;
-//    private IRI spaceIRI;
+
+    // private IRI spaceIRI;
 
     /**
      * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
@@ -141,22 +162,22 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
     }
 
     protected void activate(Dictionary<String,Object> configuration) {
-        /*String*/ 
+        /* String */
         scopeID = (String) configuration.get(REENGINEERING_SCOPE);
         if (scopeID == null) scopeID = _REENGINEERING_SCOPE_DEFAULT;
         String hostPort = (String) configuration.get(HOST_NAME_AND_PORT);
         if (hostPort == null) hostPort = _HOST_NAME_AND_PORT_DEFAULT;
         // TODO: Manage the other properties
 
-//        spaceIRI = IRI.create(XML_REENGINEERING_SESSION_SPACE);
-//        scopeID = IRI.create("http://" + hostPort + "/kres/ontology/" + scopeID);
+        // spaceIRI = IRI.create(XML_REENGINEERING_SESSION_SPACE);
+        // scopeID = IRI.create("http://" + hostPort + "/kres/ontology/" + scopeID);
 
         reengineeringManager.bindReengineer(this);
 
         SessionManager kReSSessionManager = onManager.getSessionManager();
         Session kReSSession = kReSSessionManager.createSession();
 
-//        sessionId = kReSSession.getID();
+        // sessionId = kReSSession.getID();
 
         OntologyScopeFactory ontologyScopeFactory = onManager.getOntologyScopeFactory();
 
@@ -166,25 +187,29 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
 
         scope = null;
         try {
-            log.info("Semion XMLEtractor : created scope with IRI " + REENGINEERING_SCOPE);
-            IRI iri = IRI.create(XML_OWL.URI);
-            OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
-            OWLOntology owlOntology = ontologyManager.createOntology(iri);
-            log.info("Ontology {} created.", iri);
+            // // A che cacchio serviva 'sta robba?
+            // log.info("Semion XMLEtractor : created scope with IRI " + REENGINEERING_SCOPE);
+            // IRI iri = IRI.create(XML_OWL.URI);
+            // OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
+            // OWLOntology owlOntology = ontologyManager.createOntology(iri);
+            // log.info("Ontology {} created.", iri);
 
-            scope = ontologyScopeFactory.createOntologyScope(scopeID,
-                new RootOntologyIRISource(IRI.create(XML_OWL.URI))
+            IRI[] locations = onManager.getOfflineConfiguration().getOntologySourceLocations()
+                    .toArray(new IRI[0]);
+            OntologyInputSource xmlowlSrc = new RootOntologyIRISource(IRI.create(XML_OWL.URI),
+                    OWLOntologyManagerFactory.createOWLOntologyManager(locations));
+
+            scope = ontologyScopeFactory.createOntologyScope(scopeID, xmlowlSrc
             /* new OntologyInputSourceOXML() */);
             // scope.setUp();
 
             scopeRegistry.registerScope(scope);
         } catch (DuplicateIDException e) {
-            log.info("Semion DBExtractor : already existing scope for IRI " + REENGINEERING_SCOPE);
+            log.info("Will perform XML reengineering in already existing scope {}", scopeID);
             scope = onManager.getScopeRegistry().getScope(scopeID);
         } catch (OWLOntologyCreationException e) {
-            log.error("Failed to creare ontology " + XML_OWL.URI, e);
-        } catch (Exception e) {
-            log.error("Semion XMLExtractor : No OntologyInputSource for ONManager.", e);
+            throw new IllegalStateException("No valid schema was found in ontology " + XML_OWL.URI
+                                            + "for reengineer" + XMLExtractor.class, e);
         }
 
         if (scope != null) {
@@ -339,6 +364,9 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
                                          DataSource dataSource,
                                          final OWLOntology schemaOntology) throws ReengineeringException {
 
+        if (schemaOntology == null) throw new IllegalArgumentException(
+                "Cannot reengineer data with a null schema ontology.");
+
         OWLOntology ontology = null;
 
         log.info("Starting XML Reengineering");
@@ -349,88 +377,82 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
 
         OWLOntology localDataOntology = null;
 
-        log.debug("XML output IRI: " + outputIRI);
-        if (schemaOntology != null) {
-            if (outputIRI != null) {
-                try {
-                    localDataOntology = ontologyManager.createOntology(outputIRI);
-                } catch (OWLOntologyCreationException e) {
-                    e.printStackTrace();
-                    throw new ReengineeringException();
-                }
-            } else {
-                try {
-                    localDataOntology = ontologyManager.createOntology();
-                } catch (OWLOntologyCreationException e) {
-                    throw new ReengineeringException();
-                }
-            }
+        log.debug("XML output IRI: {}", outputIRI);
 
-            final OWLOntology dataOntology = localDataOntology;
-
-            OWLImportsDeclaration importsDeclaration = factory.getOWLImportsDeclaration(IRI
-                    .create(XML_OWL.URI));
-
-            ontologyManager.applyChange(new AddImport(dataOntology, importsDeclaration));
-
-            graphNS = graphNS.replace("#", "");
-            String schemaNS = graphNS + "/schema#";
-            String dataNS = graphNS + "#";
-
-            OWLClass dataSourceOwlClass = factory.getOWLClass(Reengineer_OWL.DataSource);
-
-            Set<OWLIndividual> individuals = dataSourceOwlClass.getIndividuals(schemaOntology);
-
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
-            DocumentBuilder db;
+        if (outputIRI != null) {
             try {
-                db = dbf.newDocumentBuilder();
-
-                InputStream xmlStream = (InputStream) dataSource.getDataSource();
-
-                Document dom = db.parse(xmlStream);
-
-                Element documentElement = dom.getDocumentElement();
-
-                String nodeName = documentElement.getNodeName();
-
-                IRI rootElementIRI = createElementResource(dataNS, schemaNS, documentElement, null, null,
-                    ontologyManager, factory, dataOntology);
-
-                iterateChildren(dataNS, schemaNS, rootElementIRI, documentElement, ontologyManager, factory,
-                    dataOntology);
-
-            } catch (ParserConfigurationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (SAXException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
-            OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-
-            OWLOntologySetProvider provider = new OWLOntologySetProvider() {
-
-                @Override
-                public Set<OWLOntology> getOntologies() {
-                    Set<OWLOntology> ontologies = new HashSet<OWLOntology>();
-                    ontologies.add(schemaOntology);
-                    ontologies.add(dataOntology);
-                    return ontologies;
-                }
-            };
-            OWLOntologyMerger merger = new OWLOntologyMerger(provider);
-
-            try {
-                ontology = merger.createMergedOntology(man, outputIRI);
+                localDataOntology = ontologyManager.createOntology(outputIRI);
             } catch (OWLOntologyCreationException e) {
-                e.printStackTrace();
+                throw new ReengineeringException("Failed to create local data ontology " + outputIRI);
             }
+        } else {
+            try {
+                localDataOntology = ontologyManager.createOntology();
+            } catch (OWLOntologyCreationException e) {
+                throw new ReengineeringException("Failed to create anonymous local data ontology.");
+            }
+        }
+
+        final OWLOntology dataOntology = localDataOntology;
+
+        OWLImportsDeclaration importsDeclaration = factory.getOWLImportsDeclaration(IRI.create(XML_OWL.URI));
+
+        ontologyManager.applyChange(new AddImport(dataOntology, importsDeclaration));
+
+        graphNS = graphNS.replace("#", "");
+        String schemaNS = graphNS + "/schema#";
+        String dataNS = graphNS + "#";
+
+        OWLClass dataSourceOwlClass = factory.getOWLClass(Reengineer_OWL.DataSource);
+
+        Set<OWLIndividual> individuals = dataSourceOwlClass.getIndividuals(schemaOntology);
+
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+        DocumentBuilder db;
+        try {
+            db = dbf.newDocumentBuilder();
+
+            InputStream xmlStream = (InputStream) dataSource.getDataSource();
+
+            Document dom = db.parse(xmlStream);
+
+            Element documentElement = dom.getDocumentElement();
+
+            String nodeName = documentElement.getNodeName();
+
+            IRI rootElementIRI = createElementResource(dataNS, schemaNS, documentElement, null, null,
+                ontologyManager, factory, dataOntology);
+
+            iterateChildren(dataNS, schemaNS, rootElementIRI, documentElement, ontologyManager, factory,
+                dataOntology);
+
+        } catch (ParserConfigurationException e) {
+            throw new ReengineeringException(e);
+        } catch (SAXException e) {
+            throw new ReengineeringException(e);
+        } catch (IOException e) {
+            throw new ReengineeringException(e);
+        }
+
+        OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+
+        OWLOntologySetProvider provider = new OWLOntologySetProvider() {
+
+            @Override
+            public Set<OWLOntology> getOntologies() {
+                Set<OWLOntology> ontologies = new HashSet<OWLOntology>();
+                ontologies.add(schemaOntology);
+                ontologies.add(dataOntology);
+                return ontologies;
+            }
+        };
+        OWLOntologyMerger merger = new OWLOntologyMerger(provider);
+
+        try {
+            ontology = merger.createMergedOntology(man, outputIRI);
+        } catch (OWLOntologyCreationException e) {
+            throw new ReengineeringException(e);
         }
 
         return ontology;
@@ -691,7 +713,7 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
     }
 
     @Override
-    public OWLOntology schemaReengineering(String graphNS, IRI outputIRI, DataSource dataSource) {
+    public OWLOntology schemaReengineering(String graphNS, IRI outputIRI, DataSource dataSource) throws ReengineeringException {
         XSDExtractor xsdExtractor = new XSDExtractor(onManager);
         return xsdExtractor.getOntologySchema(graphNS, outputIRI, dataSource);
     }

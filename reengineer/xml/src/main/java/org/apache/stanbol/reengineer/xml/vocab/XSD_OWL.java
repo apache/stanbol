@@ -5,7 +5,7 @@ import org.semanticweb.owlapi.model.IRI;
 public class XSD_OWL {
 
 	/** <p>The namespace of the vocabulary as a string</p> */
-    public static final String NS = "http://ontologydesignpatterns.org/ont/iks/oxsd.owl#";
+    public static final String NS = "http://www.ontologydesignpatterns.org/ont/iks/oxsd.owl#";
     
     /** <p>The namespace of the vocabulary as a string</p>
      *  @see #NS */

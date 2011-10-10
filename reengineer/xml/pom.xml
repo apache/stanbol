@@ -1,217 +1,126 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-    Licensed to the Apache Software Foundation (ASF) under one or more
-    contributor license agreements. See the NOTICE file distributed with
-    this work for additional information regarding copyright ownership.
-    The ASF licenses this file to You under the Apache License, Version
-    2.0 (the "License"); you may not use this file except in compliance
-    with the License. You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0 Unless required by
-    applicable law or agreed to in writing, software distributed under the
-    License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-    CONDITIONS OF ANY KIND, either express or implied. See the License for
-    the specific language governing permissions and limitations under the
-    License.
-  -->
+<!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor 
+	license agreements. See the NOTICE file distributed with this work for additional 
+	information regarding copyright ownership. The ASF licenses this file to 
+	You under the Apache License, Version 2.0 (the "License"); you may not use 
+	this file except in compliance with the License. You may obtain a copy of 
+	the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required 
+	by applicable law or agreed to in writing, software distributed under the 
+	License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
+	OF ANY KIND, either express or implied. See the License for the specific 
+	language governing permissions and limitations under the License. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.apache.stanbol</groupId>
-    <artifactId>stanbol-parent</artifactId>
-    <version>0.9.0-incubating-SNAPSHOT</version>
-    <relativePath>../../parent</relativePath>
-  </parent>
+	<parent>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>stanbol-parent</artifactId>
+		<version>0.9.0-incubating-SNAPSHOT</version>
+		<relativePath>../../parent</relativePath>
+	</parent>
 
-  <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.reengineer.xml</artifactId>
-  <packaging>bundle</packaging>
+	<groupId>org.apache.stanbol</groupId>
+	<artifactId>org.apache.stanbol.reengineer.xml</artifactId>
+	<packaging>bundle</packaging>
 
-  <name>Apache Stanbol XML Reegineer</name>
-  <description>
+	<name>Apache Stanbol XML Reegineer</name>
+	<description>
     Provides functionality for reengineering xml
     into ontologies.
   </description>
 
-  <inceptionYear>2010</inceptionYear>
+	<inceptionYear>2010</inceptionYear>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Bundle-ClassPath>
-              .,
-              xerces/xercesImpl-2.7.1.jar,
-              OSGI-INF
-            </Bundle-ClassPath>
-            <Export-Package>
-              org.apache.stanbol.reengineer.xml.*
-            </Export-Package>
-            <Import-Package>
-              !org.apache.xml.resolver.*,
-              !sun.io.*,
-              org.apache.xerces.*;version=2.7.1,
-              org.slf4j.*,
-              org.xml.sax.*,
-              *
-            </Import-Package>
-            <_nouses>true</_nouses>
-          </instructions>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-        <dependencies>
-          <dependency>
-            <groupId>com.hp.hpl.jena</groupId>
-            <artifactId>jena</artifactId>
-            <version>2.6.2</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>com.hp.hpl.jena</groupId>
-            <artifactId>jena</artifactId>
-            <version>2.6.2</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-    </plugins>
-  </build>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-ClassPath>
+							.,
+							<!-- xerces/xercesImpl-2.7.1.jar, -->
+							OSGI-INF
+						</Bundle-ClassPath>
+						<Export-Package>
+							org.apache.stanbol.reengineer.xml.*
+						</Export-Package>
+						<Import-Package>
+							!org.apache.xml.resolver.*,
+							!sun.io.*,
+							org.apache.xerces.*;version=2.7.1,
+							org.slf4j.*,
+							org.xml.sax.*,
+							*
+						</Import-Package>
+						<_nouses>true</_nouses>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-scr-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
-  <dependencies>
+	<dependencies>
 
-    <!-- OSGi deps -->
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr.annotations</artifactId>
-      <version>1.2.0</version>
-    </dependency>
+		<!-- OSGi deps -->
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.scr.annotations</artifactId>
+		</dependency>
 
-    <!-- Stanbol deps -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.reengineer.base</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
+		<!-- Stanbol deps -->
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.owl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.reengineer.base</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</dependency>
 
-    <!-- OWL deps -->
-    <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>iri</artifactId>
-      <version>0.8</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>jena</artifactId>
-      <version>2.6.2</version>
-      <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>slf4j-log4j12</artifactId>
-          <groupId>org.slf4j</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>arq</artifactId>
-      <version>2.8.3</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>tdb</artifactId>
-      <version>0.8.5</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-	  <artifactId>org.apache.stanbol.owl</artifactId>
-    </dependency>
-
-    <!-- Clerezza deps -->
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.core</artifactId>
-      <version>0.12-incubating-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.jena.serializer</artifactId>
-      <version>0.9-incubating-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.jena.sparql</artifactId>
-      <version>0.5-incubating-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.simple.storage</artifactId>
-      <version>0.7-incubating-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <!-- XML deps -->
-    <dependency>
-      <groupId>stax</groupId>
-      <artifactId>stax-api</artifactId>
-      <version>1.0.1</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.woodstox</groupId>
-      <artifactId>wstx-asl</artifactId>
-      <version>3.9.9-3</version>
-    </dependency>
-    <dependency>
-      <groupId>com.ibm.icu</groupId>
-      <artifactId>icu4j</artifactId>
-      <version>3.4.4</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>xerces</groupId>
-      <artifactId>xercesImpl</artifactId>
-      <version>2.7.1</version>
-      <scope>compile</scope>
-    </dependency>
+		<!-- XML deps -->
+		<dependency>
+			<groupId>stax</groupId>
+			<artifactId>stax-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.woodstox</groupId>
+			<artifactId>wstx-asl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.ibm.icu</groupId>
+			<artifactId>icu4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+		</dependency>
 
 		<!-- Diagnostics deps -->
-		<dependency> <!-- we use log4j 1.2 -->
+		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency> <!-- see also the log4j.properties in src/main/resources -->
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<scope>runtime</scope>
+			<artifactId>slf4j-api</artifactId>
 		</dependency>
 
 		<!-- Testing deps -->
@@ -221,30 +130,33 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.jena.parser</artifactId>
 			<scope>test</scope>
 		</dependency>
-    
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.jena.parser</artifactId>
-      <version>0.10-incubating-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
+		<dependency>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.jena.sparql</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.simple.storage</artifactId>
+			<scope>test</scope>
+		</dependency>
 
-  </dependencies>
+	</dependencies>
 
-  <repositories>
-    <repository>
-      <id>codehaus</id>
-      <name>Maven Codehaus repository</name>
-      <url>http://repository.codehaus.org/</url>
-    </repository>
-    <repository>
-    	<id>stlab-cnr-repo</id>
-        <url>http://stlab.istc.cnr.it/software/maven/repo</url>
-    </repository>
-  </repositories>
+	<repositories>
+		<repository>
+			<id>codehaus</id>
+			<name>Maven Codehaus repository</name>
+			<url>http://repository.codehaus.org/</url>
+		</repository>
+		<repository>
+			<id>stlab-cnr-repo</id>
+			<url>http://stlab.istc.cnr.it/software/maven/repo</url>
+		</repository>
+	</repositories>
 
 </project>

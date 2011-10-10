@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.reengineer.xml;
 
 import java.io.IOException;
@@ -9,6 +25,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.reengineer.base.api.DataSource;
+import org.apache.stanbol.reengineer.base.api.ReengineeringException;
 import org.apache.stanbol.reengineer.base.api.util.ReengineerUriRefGenerator;
 import org.apache.stanbol.reengineer.xml.vocab.XSD_OWL;
 import org.apache.xerces.dom.PSVIDocumentImpl;
@@ -38,6 +55,7 @@ import org.apache.xerces.xs.XSTypeDefinition;
 import org.apache.xerces.xs.datatypes.ObjectList;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
@@ -55,6 +73,8 @@ import org.w3c.dom.traversal.DocumentTraversal;
 import org.w3c.dom.traversal.NodeFilter;
 import org.w3c.dom.traversal.NodeIterator;
 import org.w3c.dom.traversal.TreeWalker;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class XSDExtractor extends ReengineerUriRefGenerator {
@@ -237,7 +257,7 @@ public class XSDExtractor extends ReengineerUriRefGenerator {
                 XSD_OWL.type, attrResourceIRI, simpleTypeIRI)));
 
             log.debug("ATTRIBUTE USES REQUIRED "
-                     + xsAttributeUseImpl.getAttrDeclaration().getTypeDefinition().getName());
+                      + xsAttributeUseImpl.getAttrDeclaration().getTypeDefinition().getName());
 
             manager.applyChange(new AddAxiom(schemaOntology, createOWLObjectPropertyAssertionAxiom(factory,
                 XSD_OWL.hasAttributeUse, complexType, attrResourceIRI)));
@@ -394,35 +414,29 @@ public class XSDExtractor extends ReengineerUriRefGenerator {
                 XSD_OWL.hasEnumeration, simpleType, enumerationIRI)));
         }
 
+        IRI option = null;
         try {
             // Whitepace
             /*
-             * This line, sometimes, generates an exception when try to get simple type definition for white
-             * space. However, even if there is the exception, the line returns the ZERO value, so in the
-             * catch block is perfomed the option with ZERO value that is WS_PRESERVE.
+             * This line, sometimes, generates an exception when trying to get simple type definition for
+             * white space. However, even if there is the exception, the line returns a zero value. In this
+             * case, the WS_PRESERVE option is set in the catch block.
              */
             short whitespace = xsSimpleTypeDefinition.getWhitespace();
-            if (whitespace == XSSimpleTypeDecl.WS_COLLAPSE) {
-                // Collapse
-                manager.applyChange(new AddAxiom(schemaOntology, createOWLObjectPropertyAssertionAxiom(
-                    factory, XSD_OWL.hasWhitespace, simpleType, XSD_OWL.COLLAPSE)));
-            } else if (whitespace == XSSimpleTypeDecl.WS_PRESERVE) {
-                // Preserve
-                manager.applyChange(new AddAxiom(schemaOntology, createOWLObjectPropertyAssertionAxiom(
-                    factory, XSD_OWL.hasWhitespace, simpleType, XSD_OWL.PRESERVE)));
-            } else if (whitespace == XSSimpleTypeDecl.WS_REPLACE) {
-                // Replace
-                manager.applyChange(new AddAxiom(schemaOntology, createOWLObjectPropertyAssertionAxiom(
-                    factory, XSD_OWL.hasWhitespace, simpleType, XSD_OWL.REPLACE)));
-            }
-
-            log.debug("WHITESPACE : " + whitespace);
+            if (whitespace == XSSimpleTypeDecl.WS_COLLAPSE) option = XSD_OWL.COLLAPSE; // Collapse
+            else if (whitespace == XSSimpleTypeDecl.WS_PRESERVE) option = XSD_OWL.PRESERVE; // Preserve
+            else if (whitespace == XSSimpleTypeDecl.WS_REPLACE) option = XSD_OWL.REPLACE; // Replace
+            log.debug("Whitespace facet value for XSD simple type definition is {}.", whitespace);
         } catch (DatatypeException e) {
-            // TODO Auto-generated catch block
-            /* In case of exception is run the option that preserves the simple type. */
-            manager.applyChange(new AddAxiom(schemaOntology, createOWLObjectPropertyAssertionAxiom(factory,
-                XSD_OWL.hasWhitespace, simpleType, XSD_OWL.PRESERVE)));
-            log.warn("PROBLEM TO GET WHITE SPACE FROM SIMPLE TYPE DEFINITION", e);
+            // Exception fallback is to preserve the simple type definition.
+            log.warn(
+                "Unable to obtain whitespace facet value for simple type definition. Defaulting to WS_PRESERVE."
+                        + "\n\tOriginal message follows :: {}", e.getMessage());
+            option = XSD_OWL.PRESERVE;
+        } finally {
+            OWLAxiom axiom = createOWLObjectPropertyAssertionAxiom(factory, XSD_OWL.hasWhitespace,
+                simpleType, option);
+            if (option != null) manager.applyChange(new AddAxiom(schemaOntology, axiom));
         }
 
         // ADD BASE TYPE
@@ -510,7 +524,9 @@ public class XSDExtractor extends ReengineerUriRefGenerator {
 
     }
 
-    public OWLOntology getOntologySchema(String graphNS, IRI outputIRI, DataSource dataSource) {
+    public OWLOntology getOntologySchema(String graphNS, IRI outputIRI, DataSource dataSource) throws ReengineeringException {
+
+        if (dataSource == null) throw new IllegalArgumentException("Data source cannot be null.");
 
         if (!graphNS.endsWith("#")) {
             graphNS += "#";
@@ -535,191 +551,204 @@ public class XSDExtractor extends ReengineerUriRefGenerator {
 
         PSVIDocumentImpl psviDocumentImpl = new PSVIDocumentImpl();
         XSSimpleTypeDecl m;
-        if (dataSource != null) {
 
-            OWLOntologyManager ontologyManager = onManager.getOwlCacheManager();
-            OWLDataFactory factory = onManager.getOwlFactory();
+        OWLOntologyManager ontologyManager = onManager.getOwlCacheManager();
+        OWLDataFactory factory = onManager.getOwlFactory();
 
-            log.debug("XSD output IRI : " + outputIRI);
+        log.debug("XSD output IRI : " + outputIRI);
 
-            if (outputIRI != null) {
-                try {
-                    dataSourceSchemaOntology = ontologyManager.createOntology(outputIRI);
-                } catch (OWLOntologyCreationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            } else {
-                try {
-                    dataSourceSchemaOntology = ontologyManager.createOntology();
-                } catch (OWLOntologyCreationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+        try {
+            if (outputIRI != null) dataSourceSchemaOntology = ontologyManager.createOntology(outputIRI);
+            else dataSourceSchemaOntology = ontologyManager.createOntology();
+        } catch (OWLOntologyCreationException e) {
+            throw new ReengineeringException(e);
+        }
+
+        if (dataSourceSchemaOntology != null) {
+
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+
+            dbf.setNamespaceAware(true);
+
+            String id = "http://apache.org/xml/properties/dom/document-class-name";
+            Object value = "org.apache.xerces.dom.PSVIDocumentImpl";
+            try {
+                dbf.setAttribute(id, value);
+                dbf.setNamespaceAware(true);
+                dbf.setValidating(true);
+                dbf.setAttribute("http://apache.org/xml/features/validation/schema", Boolean.TRUE);
+            } catch (IllegalArgumentException e) {
+                log.error("Could not set parser property", e);
             }
 
-            if (dataSourceSchemaOntology != null) {
+            DocumentBuilder db;
+            Document document;
 
-                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            try {
+                db = dbf.newDocumentBuilder();
 
-                dbf.setNamespaceAware(true);
+                // FIXME hack for unit tests, this should have a configurable offline mode!!!
+                db.setEntityResolver(new EntityResolver() {
+                    public InputSource resolveEntity(String publicId, String systemId) throws SAXException,
+                                                                                      IOException {
+                        if (systemId.endsWith("DWML.xsd")) {
+                            InputStream dtdStream = XSDExtractor.class.getResourceAsStream("/xml/DWML.xsd");
+                            return new InputSource(dtdStream);
+                        }
+                        // else
+                        // if (systemId.endsWith("ndfd_data.xsd"))
+                        // {
+                        // InputStream dtdStream = XSDExtractor.class
+                        // .getResourceAsStream("/xml/ndfd_data.xsd");
+                        // return new InputSource(dtdStream);
+                        // }
+                        // else
+                        // if (systemId.endsWith("meta_data.xsd"))
+                        // {
+                        // InputStream dtdStream = XSDExtractor.class
+                        // .getResourceAsStream("/xml/meta_data.xsd");
+                        // return new InputSource(dtdStream);
+                        // }
+                        else {
+                            return null;
+                        }
+                    }
+                });
 
-                String id = "http://apache.org/xml/properties/dom/document-class-name";
-                Object value = "org.apache.xerces.dom.PSVIDocumentImpl";
-                try {
-                    dbf.setAttribute(id, value);
-                    dbf.setNamespaceAware(true);
-                    dbf.setValidating(true);
-                    dbf.setAttribute("http://apache.org/xml/features/validation/schema", Boolean.TRUE);
-                } catch (IllegalArgumentException e) {
-                    log.error("Could not set parser property", e);
-                }
+                document = db.parse((InputStream) dataSource.getDataSource());
+                Element root = document.getDocumentElement();
 
-                DocumentBuilder db;
-                Document document;
+                log.debug("Root is : " + root.getNodeName());
 
-                try {
-                    db = dbf.newDocumentBuilder();
+                ElementPSVI rootPsvi = (ElementPSVI) root;
 
-                    document = db.parse((InputStream) dataSource.getDataSource());
-                    Element root = document.getDocumentElement();
+                XSModelImpl xsModel = (XSModelImpl) rootPsvi.getSchemaInformation();
 
-                    log.debug("Root is : " + root.getNodeName());
+                log.debug("Schema model : " + xsModel.getClass().getCanonicalName());
 
-                    ElementPSVI rootPsvi = (ElementPSVI) root;
+                XSNamedMap xsNamedMap = xsModel.getComponents(XSConstants.ELEMENT_DECLARATION);
+                for (int i = 0, j = xsNamedMap.getLength(); i < j; i++) {
+                    XSObject xsObject = xsNamedMap.item(i);
+                    if (xsObject instanceof XSElementDeclaration) {
 
-                    XSModelImpl xsModel = (XSModelImpl) rootPsvi.getSchemaInformation();
+                        XSElementDeclaration xsElementDeclaration = (XSElementDeclaration) xsObject;
 
-                    log.debug("Schema model : " + xsModel.getClass().getCanonicalName());
+                        String name = xsElementDeclaration.getName();
+                        if (name != null && !name.equals("")) {
 
-                    XSNamedMap xsNamedMap = xsModel.getComponents(XSConstants.ELEMENT_DECLARATION);
-                    for (int i = 0, j = xsNamedMap.getLength(); i < j; i++) {
-                        XSObject xsObject = xsNamedMap.item(i);
-                        if (xsObject instanceof XSElementDeclaration) {
+                            IRI elementIndividual = IRI.create(graphNS + name);
 
-                            XSElementDeclaration xsElementDeclaration = (XSElementDeclaration) xsObject;
+                            OWLClassAssertionAxiom element = createOWLClassAssertionAxiom(factory,
+                                XSD_OWL.Element, elementIndividual);
+                            ontologyManager.applyChange(new AddAxiom(dataSourceSchemaOntology, element));
 
-                            String name = xsElementDeclaration.getName();
-                            if (name != null && !name.equals("")) {
+                            OWLDataPropertyAssertionAxiom data = createOWLDataPropertyAssertionAxiom(factory,
+                                XSD_OWL.name, elementIndividual, name);
+                            ontologyManager.applyChange(new AddAxiom(dataSourceSchemaOntology, data));
 
-                                IRI elementIndividual = IRI.create(graphNS + name);
+                            boolean boolValue = xsElementDeclaration.getAbstract();
+                            data = createOWLDataPropertyAssertionAxiom(factory, XSD_OWL.abstractProperty,
+                                elementIndividual, boolValue);
+                            ontologyManager.applyChange(new AddAxiom(dataSourceSchemaOntology, data));
 
-                                OWLClassAssertionAxiom element = createOWLClassAssertionAxiom(factory,
-                                    XSD_OWL.Element, elementIndividual);
-                                ontologyManager.applyChange(new AddAxiom(dataSourceSchemaOntology, element));
+                            XSTypeDefinition xsTypeDefinition = xsElementDeclaration.getTypeDefinition();
+                            String type = graphNS + xsTypeDefinition.getName();
 
-                                OWLDataPropertyAssertionAxiom data = createOWLDataPropertyAssertionAxiom(
-                                    factory, XSD_OWL.name, elementIndividual, name);
-                                ontologyManager.applyChange(new AddAxiom(dataSourceSchemaOntology, data));
+                            XSTypeDefinition baseTypeDefinition = xsTypeDefinition.getBaseType();
+                            short baseType = baseTypeDefinition.getTypeCategory();
 
-                                boolean boolValue = xsElementDeclaration.getAbstract();
-                                data = createOWLDataPropertyAssertionAxiom(factory, XSD_OWL.abstractProperty,
-                                    elementIndividual, boolValue);
-                                ontologyManager.applyChange(new AddAxiom(dataSourceSchemaOntology, data));
+                            OWLClassAssertionAxiom typeResource;
+                            log.debug("SIMPLE TYPE PRINT " + XSTypeDefinition.SIMPLE_TYPE);
+                            log.debug("COMPLEX TYPE PRINT " + XSTypeDefinition.COMPLEX_TYPE);
 
-                                XSTypeDefinition xsTypeDefinition = xsElementDeclaration.getTypeDefinition();
-                                String type = graphNS + xsTypeDefinition.getName();
+                            IRI typeIRI = IRI.create(type);
 
-                                XSTypeDefinition baseTypeDefinition = xsTypeDefinition.getBaseType();
-                                short baseType = baseTypeDefinition.getTypeCategory();
+                            if (baseType == XSTypeDefinition.SIMPLE_TYPE) {
+                                log.debug("SIMPLE TYPE");
+                                typeResource = createOWLClassAssertionAxiom(factory, XSD_OWL.SimpleType,
+                                    typeIRI);
+                                addSimpleType(graphNS, ontologyManager, factory, dataSourceSchemaOntology,
+                                    typeIRI, (XSSimpleTypeDecl) xsTypeDefinition);
 
-                                OWLClassAssertionAxiom typeResource;
-                                log.debug("SIMPLE TYPE PRINT " + XSTypeDefinition.SIMPLE_TYPE);
-                                log.debug("COMPLEX TYPE PRINT " + XSTypeDefinition.COMPLEX_TYPE);
+                            } else {
+                                log.debug("COMPLEX TYPE");
+                                typeResource = createOWLClassAssertionAxiom(factory, XSD_OWL.ComplexType,
+                                    typeIRI);
 
-                                IRI typeIRI = IRI.create(type);
+                                addComplexType(graphNS, ontologyManager, factory, dataSourceSchemaOntology,
+                                    typeIRI, (XSComplexTypeDecl) xsTypeDefinition);
+                            }
 
-                                if (baseType == XSTypeDefinition.SIMPLE_TYPE) {
-                                    log.debug("SIMPLE TYPE");
-                                    typeResource = createOWLClassAssertionAxiom(factory, XSD_OWL.SimpleType,
-                                        typeIRI);
-                                    addSimpleType(graphNS, ontologyManager, factory,
-                                        dataSourceSchemaOntology, typeIRI,
-                                        (XSSimpleTypeDecl) xsTypeDefinition);
+                            ontologyManager.applyChange(new AddAxiom(dataSourceSchemaOntology, typeResource));
 
-                                } else {
-                                    log.debug("COMPLEX TYPE");
-                                    typeResource = createOWLClassAssertionAxiom(factory, XSD_OWL.ComplexType,
-                                        typeIRI);
+                            // add the type property to the element declaration
 
-                                    addComplexType(graphNS, ontologyManager, factory,
-                                        dataSourceSchemaOntology, typeIRI,
-                                        (XSComplexTypeDecl) xsTypeDefinition);
-                                }
+                            log.debug("---- graph NS : " + graphNS);
+                            log.debug("---- type IRI : " + typeIRI.toString());
+                            OWLObjectPropertyAssertionAxiom hasType = createOWLObjectPropertyAssertionAxiom(
+                                factory, XSD_OWL.type, elementIndividual, typeIRI);
+                            ontologyManager.applyChange(new AddAxiom(dataSourceSchemaOntology, hasType));
+
+                            // add the scope property to the element declaration
+                            short scope = xsElementDeclaration.getScope();
+
+                            OWLObjectPropertyAssertionAxiom scopeAxiom;
+                            if (scope == XSConstants.SCOPE_ABSENT) {
+                                // Scope absent
+                                scopeAxiom = createOWLObjectPropertyAssertionAxiom(factory, XSD_OWL.hasScope,
+                                    elementIndividual, XSD_OWL.ScopeAbsent);
+                            } else if (scope == XSConstants.SCOPE_LOCAL) {
+                                scopeAxiom = createOWLObjectPropertyAssertionAxiom(factory, XSD_OWL.hasScope,
+                                    elementIndividual, XSD_OWL.ScopeLocal);
+                            } else {
+                                scopeAxiom = createOWLObjectPropertyAssertionAxiom(factory, XSD_OWL.hasScope,
+                                    elementIndividual, XSD_OWL.ScopeGlobal);
+                            }
+
+                            ontologyManager.applyChange(new AddAxiom(dataSourceSchemaOntology, scopeAxiom));
+
+                            // add the constraint type property to the element declaration
+                            short constraingType = xsElementDeclaration.getConstraintType();
+                            OWLObjectPropertyAssertionAxiom constraintAxiom;
+                            if (constraingType == XSConstants.VC_NONE) {
+                                // Value constraint none
+                                constraintAxiom = createOWLObjectPropertyAssertionAxiom(factory,
+                                    XSD_OWL.hasConstraintType, elementIndividual, XSD_OWL.VC_NONE);
+                            } else if (constraingType == XSConstants.VC_DEFAULT) {
+                                constraintAxiom = createOWLObjectPropertyAssertionAxiom(factory,
+                                    XSD_OWL.hasConstraintType, elementIndividual, XSD_OWL.VC_DEFAULT);
+                            } else {
+                                // Value constraint fixed
+                                constraintAxiom = createOWLObjectPropertyAssertionAxiom(factory,
+                                    XSD_OWL.hasConstraintType, elementIndividual, XSD_OWL.VC_FIXED);
+                            }
+
+                            ontologyManager.applyChange(new AddAxiom(dataSourceSchemaOntology,
+                                    constraintAxiom));
+
+                            // add the constraint value literal to the element delcaration
+                            String contstraintValue = xsElementDeclaration.getConstraintValue();
+                            if (contstraintValue != null) {
 
                                 ontologyManager.applyChange(new AddAxiom(dataSourceSchemaOntology,
-                                        typeResource));
-
-                                // add the type property to the element declaration
-
-                                log.debug("---- graph NS : " + graphNS);
-                                log.debug("---- type IRI : " + typeIRI.toString());
-                                OWLObjectPropertyAssertionAxiom hasType = createOWLObjectPropertyAssertionAxiom(
-                                    factory, XSD_OWL.type, elementIndividual, typeIRI);
-                                ontologyManager.applyChange(new AddAxiom(dataSourceSchemaOntology, hasType));
-
-                                // add the scope property to the element declaration
-                                short scope = xsElementDeclaration.getScope();
-
-                                OWLObjectPropertyAssertionAxiom scopeAxiom;
-                                if (scope == XSConstants.SCOPE_ABSENT) {
-                                    // Scope absent
-                                    scopeAxiom = createOWLObjectPropertyAssertionAxiom(factory,
-                                        XSD_OWL.hasScope, elementIndividual, XSD_OWL.ScopeAbsent);
-                                } else if (scope == XSConstants.SCOPE_LOCAL) {
-                                    scopeAxiom = createOWLObjectPropertyAssertionAxiom(factory,
-                                        XSD_OWL.hasScope, elementIndividual, XSD_OWL.ScopeLocal);
-                                } else {
-                                    scopeAxiom = createOWLObjectPropertyAssertionAxiom(factory,
-                                        XSD_OWL.hasScope, elementIndividual, XSD_OWL.ScopeGlobal);
-                                }
-
-                                ontologyManager
-                                        .applyChange(new AddAxiom(dataSourceSchemaOntology, scopeAxiom));
-
-                                // add the constraint type property to the element declaration
-                                short constraingType = xsElementDeclaration.getConstraintType();
-                                OWLObjectPropertyAssertionAxiom constraintAxiom;
-                                if (constraingType == XSConstants.VC_NONE) {
-                                    // Value constraint none
-                                    constraintAxiom = createOWLObjectPropertyAssertionAxiom(factory,
-                                        XSD_OWL.hasConstraintType, elementIndividual, XSD_OWL.VC_NONE);
-                                } else if (constraingType == XSConstants.VC_DEFAULT) {
-                                    constraintAxiom = createOWLObjectPropertyAssertionAxiom(factory,
-                                        XSD_OWL.hasConstraintType, elementIndividual, XSD_OWL.VC_DEFAULT);
-                                } else {
-                                    // Value constraint fixed
-                                    constraintAxiom = createOWLObjectPropertyAssertionAxiom(factory,
-                                        XSD_OWL.hasConstraintType, elementIndividual, XSD_OWL.VC_FIXED);
-                                }
-
-                                ontologyManager.applyChange(new AddAxiom(dataSourceSchemaOntology,
-                                        constraintAxiom));
-
-                                // add the constraint value literal to the element delcaration
-                                String contstraintValue = xsElementDeclaration.getConstraintValue();
-                                if (contstraintValue != null) {
-
-                                    ontologyManager.applyChange(new AddAxiom(dataSourceSchemaOntology,
-                                            createOWLDataPropertyAssertionAxiom(factory, XSD_OWL.constraint,
-                                                elementIndividual, contstraintValue)));
-                                }
-
+                                        createOWLDataPropertyAssertionAxiom(factory, XSD_OWL.constraint,
+                                            elementIndividual, contstraintValue)));
                             }
 
                         }
-                    }
 
-                } catch (ParserConfigurationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (SAXException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    }
                 }
+
+            } catch (ParserConfigurationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (SAXException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
         }
 

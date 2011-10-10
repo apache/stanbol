@@ -36,8 +36,9 @@ public class OWLOntologyManagerFactory {
      */
     public static OWLOntologyManager createOWLOntologyManager(IRI[] locations) {
         OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
-        for (OWLOntologyIRIMapper mapper : getMappers(locations))
+        for (OWLOntologyIRIMapper mapper : getMappers(locations)) {
             mgr.addIRIMapper(mapper);
+        }
         return mgr;
     }
 
@@ -53,6 +54,7 @@ public class OWLOntologyManagerFactory {
                 }
                 if (dir != null) {
                     if (dir.isDirectory()) mappers.add(new AutoIRIMapper(dir, true));
+                    // We might want to construct other IRI mappers for regular files in the future...
                 }
             }
         }
