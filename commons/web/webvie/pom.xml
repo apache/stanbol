@@ -7,7 +7,7 @@
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
     <version>0.9.0-incubating-SNAPSHOT</version>
-    <relativePath>../../parent/pom.xml</relativePath>
+    <relativePath>../../../parent</relativePath>
   </parent>
   <artifactId>org.apache.stanbol.commons.web.vie</artifactId>
   <packaging>bundle</packaging>
