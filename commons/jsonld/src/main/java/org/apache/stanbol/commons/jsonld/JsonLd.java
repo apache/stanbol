@@ -26,18 +26,26 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The JsonLd class provides an API to create a JSON-LD object structure and to serialize this structure.
  * 
  * <p>
- * This implementation is based on the JSON-LD specification version 20110201. Available online at <a
- * href="http://www.json-ld.org/spec/ED/20110201/">http://www.json-ld.org/spec/ED/20110201/</a>.
+ * This implementation is based on the JSON-LD 1.0 specification version 20110911. Available online at <a
+ * href="http://json-ld.org/spec/ED/20110911/">http://json-ld.org/spec/ED/20110911/</a>.
  * 
  * @author Fabian Christ
  */
 public class JsonLd extends JsonLdCommon {
+    
+    @SuppressWarnings("unused")
+    private static final Logger logger = LoggerFactory.getLogger(JsonLd.class);
 
-    // Map Subject -> Resource
+    /**
+     *  Map Subject -> Resource
+     */
     private Map<String,JsonLdResource> resourceMap = new TreeMap<String,JsonLdResource>(new JsonComparator());
 
     /**
