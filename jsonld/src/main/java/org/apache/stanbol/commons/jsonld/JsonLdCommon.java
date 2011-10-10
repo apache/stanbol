@@ -19,25 +19,30 @@ package org.apache.stanbol.commons.jsonld;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- *
- *
+ * 
+ * 
  * @author Fabian Christ
- *
+ * 
  */
 public abstract class JsonLdCommon {
 
+    private static final Logger logger = LoggerFactory.getLogger(JsonLdCommon.class);
+
     public static final String CONTEXT = "@context";
     public static final String COERCE = "@coerce";
-    
+
     public static final String LITERAL = "@literal";
     public static final String DATATYPE = "@datatype";
-    
+
     public static final String IRI = "@iri";
-    
+
     public static final String SUBJECT = "@subject";
     public static final String TYPE = "@type";
-    
+
     public static final String PROFILE = "@profile";
     public static final String TYPES = "@types";
 
@@ -45,18 +50,18 @@ public abstract class JsonLdCommon {
      * Maps URIs to namespace prefixes.
      */
     protected Map<String,String> namespacePrefixMap = new HashMap<String,String>();
-    
+
     /**
      * Internal map to hold the namespaces and prefixes that were actually used.
      */
-    protected Map<String, String> usedNamespaces = new HashMap<String, String>();
-    
+    protected Map<String,String> usedNamespaces = new HashMap<String,String>();
+
     /**
      * Flag to control whether the namespace prefix map should be used to shorten URIs to CURIEs during
      * serialization. Default value is <code>true</code>.
      */
     protected boolean applyNamespaces = true;
-    
+
     protected boolean useCuries = false;
 
     /**
@@ -113,7 +118,7 @@ public abstract class JsonLdCommon {
     public void setApplyNamespaces(boolean applyNamespaces) {
         this.applyNamespaces = applyNamespaces;
     }
-    
+
     /**
      * @return
      */
@@ -135,7 +140,7 @@ public abstract class JsonLdCommon {
      * @param uri
      *            That may be in CURIE form.
      * @return
-     * @throws ShorteningException 
+     * @throws ShorteningException
      */
     protected String shortenURI(String uri) throws ShorteningException {
         if (this.applyNamespaces) {
@@ -146,7 +151,7 @@ public abstract class JsonLdCommon {
 
         return uri;
     }
-    
+
     protected String shortenURIIgnoreDuplicates(String uri) throws ShorteningException {
         if (this.applyNamespaces) {
             uri = doCURIE(uri, this.useCuries, true);
@@ -156,7 +161,7 @@ public abstract class JsonLdCommon {
 
         return uri;
     }
-    
+
     protected String shortenURIWithCuries(String uri) throws ShorteningException {
         if (this.applyNamespaces) {
             uri = doCURIE(uri, true, false);
@@ -175,30 +180,28 @@ public abstract class JsonLdCommon {
             for (String namespace : namespacePrefixMap.keySet()) {
                 String prefix = namespacePrefixMap.get(namespace);
                 String prefixEx = prefix + ":";
-                
+
                 if (!uri.startsWith(prefix)) {
                     curie = curie.replace(namespace, prefixEx);
-                    
+
                     if (!uri.equals(curie)) {
                         // we mark this namespace as being used
                         curieNamespace = namespace;
                         break;
                     }
-                }
-                else {
+                } else {
                     // we mark this namespace as being used
                     curieNamespace = namespace;
                     break;
                 }
             }
-            
+
             if (curieNamespace != null) {
                 String usedPrefix = this.namespacePrefixMap.get(curieNamespace);
                 if (useCURIEs) {
                     shortened = curie;
                     this.usedNamespaces.put(curieNamespace, usedPrefix);
-                }
-                else {
+                } else {
                     String propName = curie.replace(usedPrefix + ":", "");
                     String namespaceOfProp = null;
                     for (String ns : this.usedNamespaces.keySet()) {
@@ -211,15 +214,17 @@ public abstract class JsonLdCommon {
                     if (namespaceOfProp != null) {
                         if (namespaceOfProp.equals(curieNamespace + propName)) {
                             shortened = propName;
-                        }
-                        else if (ignoreDuplicates) {
+                        } else if (ignoreDuplicates) {
                             shortened = propName;
                         } else {
-                            System.out.println("Fallback to CURIEs because of property " + propName + " with NS " + namespaceOfProp + " and other is " + curieNamespace + propName);
+                            if (logger.isInfoEnabled()) {
+                                logger.info("Fallback to CURIEs because of duplicate property " + propName
+                                            + " from " + namespaceOfProp + " and " + curieNamespace
+                                            + propName);
+                            }
                             throw new ShorteningException();
                         }
-                    }
-                    else {
+                    } else {
                         shortened = propName;
                         this.usedNamespaces.put(curieNamespace + propName, propName);
                     }
@@ -233,8 +238,8 @@ public abstract class JsonLdCommon {
         if (uri != null) {
             for (String namespace : namespacePrefixMap.keySet()) {
                 String prefix = namespacePrefixMap.get(namespace);
-                String prefixEx = prefix + ":";                
-                
+                String prefixEx = prefix + ":";
+
                 if (uri.startsWith(prefixEx)) {
                     uri = uri.replace(prefixEx, namespace);
                 }
