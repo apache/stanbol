@@ -41,7 +41,7 @@ public class DuplicateIDException extends Exception {
      * 
      * @return the duplicate identifier
      */
-    public String getDulicateID() {
+    public String getDuplicateID() {
         return dupe;
     }
 

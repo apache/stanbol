@@ -44,6 +44,7 @@
 							org.apache.stanbol.rules.refactor.*
             </Export-Package>
 						<Import-Package>
+						org.apache.xerces.*;version=2.7.1,
 							org.slf4j.*,
 							*
             </Import-Package>

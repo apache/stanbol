@@ -169,26 +169,6 @@ public interface RegistryItem {
     boolean hasParents();
 
     /**
-     * Determines if this registry item is a library.
-     * 
-     * @return
-     * @deprecated This method will be removed to make room for possible extensions of the registry metamodel.
-     *             Use {@link #getType()} or <code>instanceof</code> instead, and check for
-     *             {@link Type#LIBRARY}.
-     */
-    boolean isLibrary();
-
-    /**
-     * Determines if this registry item is an ontology.
-     * 
-     * @return
-     * @deprecated This method will be removed to make room for possible extensions of the registry metamodel.
-     *             Use {@link #getType()} or <code>instanceof</code> instead, and check for
-     *             {@link Type#ONTOLOGY}.
-     */
-    boolean isOntology();
-
-    /**
      * Releases all the parent and child references of this item. If no objects other than the former parents
      * and children are referencing it, this object is left stranded for garbage collection.
      */
@@ -220,15 +200,6 @@ public interface RegistryItem {
      *            the listener to be removed.
      */
     void removeRegistryContentListener(RegistryContentListener listener);
-
-    /**
-     * Sets the unique identifier of this registry item.
-     * 
-     * @param iri
-     *            the identifier of this registry item.
-     * @deprecated This method is set for removal, as the unique identifier should not be set after creation.
-     */
-    void setIRI(IRI iri);
 
     /**
      * Sets the name of this registry item.

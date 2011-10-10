@@ -23,6 +23,7 @@ import java.util.Dictionary;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
@@ -117,7 +118,7 @@ public class RefactorerImpl implements Refactorer {
     public static final String _HOST_NAME_AND_PORT_DEFAULT = "localhost:8080";
     public static final String _REFACTORING_SCOPE_DEFAULT = "refactoring";
     public static final String _REFACTORING_SESSION_ID_DEFAULT = "http://kres.iksproject.eu/session/refactoring";
-//    public static final String _REFACTORING_SPACE_DEFAULT = "http://kres.iksproject.eu/space/refactoring";
+    // public static final String _REFACTORING_SPACE_DEFAULT = "http://kres.iksproject.eu/space/refactoring";
 
     @Property(value = _AUTO_GENERATED_ONTOLOGY_IRI_DEFAULT)
     public static final String AUTO_GENERATED_ONTOLOGY_IRI = "org.apache.stanbol.reengineer.default";
@@ -131,8 +132,8 @@ public class RefactorerImpl implements Refactorer {
     @Property(value = _REFACTORING_SESSION_ID_DEFAULT)
     public static final String REFACTORING_SESSION_ID = "org.apache.stanbol.ontlogymanager.session.refactoring";
 
-//    @Property(value = _REFACTORING_SPACE_DEFAULT)
-//    public static final String REFACTORING_SPACE = "org.apache.stanbol.reengineer.space.refactoring";
+    // @Property(value = _REFACTORING_SPACE_DEFAULT)
+    // public static final String REFACTORING_SPACE = "org.apache.stanbol.reengineer.space.refactoring";
 
     private IRI defaultRefactoringIRI;
 
@@ -145,7 +146,7 @@ public class RefactorerImpl implements Refactorer {
 
     private String refactoringScopeID;
 
-//    private IRI refactoringSpaceIRI;
+    // private IRI refactoringSpaceIRI;
 
     @Reference
     protected RuleStore ruleStore;
@@ -223,16 +224,16 @@ public class RefactorerImpl implements Refactorer {
         if (refactoringSessionID == null) refactoringSessionID = _REFACTORING_SESSION_ID_DEFAULT;
         String refactoringScopeID = (String) configuration.get(REFACTORING_SCOPE);
         if (refactoringScopeID == null) refactoringScopeID = _REFACTORING_SCOPE_DEFAULT;
-//        String refactoringSpaceID = (String) configuration.get(REFACTORING_SPACE);
-//        if (refactoringSpaceID == null) refactoringSpaceID = _REFACTORING_SPACE_DEFAULT;
+        // String refactoringSpaceID = (String) configuration.get(REFACTORING_SPACE);
+        // if (refactoringSpaceID == null) refactoringSpaceID = _REFACTORING_SPACE_DEFAULT;
         String defaultRefactoringID = (String) configuration.get(AUTO_GENERATED_ONTOLOGY_IRI);
         if (defaultRefactoringID == null) defaultRefactoringID = _AUTO_GENERATED_ONTOLOGY_IRI_DEFAULT;
         String hostPort = (String) configuration.get(HOST_NAME_AND_PORT);
         if (hostPort == null) hostPort = _HOST_NAME_AND_PORT_DEFAULT;
 
         kReSSessionID = IRI.create(refactoringSessionID);
-//        refactoringScopeID = IRI.create("http://" + hostPort + "/kres/ontology/" + refactoringScopeID);
-//        refactoringSpaceIRI = IRI.create(refactoringSpaceID);
+        // refactoringScopeID = IRI.create("http://" + hostPort + "/kres/ontology/" + refactoringScopeID);
+        // refactoringSpaceIRI = IRI.create(refactoringSpaceID);
         defaultRefactoringIRI = IRI.create(defaultRefactoringID);
 
         SessionManager kReSSessionManager = onManager.getSessionManager();
@@ -431,7 +432,7 @@ public class RefactorerImpl implements Refactorer {
 
             MGraph unionMGraph = new SimpleMGraph();
 
-            MGraph mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(inputOntology);
+            TripleCollection mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(inputOntology);
 
             for (Rule kReSRule : kReSRuleList) {
                 String sparql = kReSRule.toSPARQL();
@@ -441,19 +442,23 @@ public class RefactorerImpl implements Refactorer {
 
                 switch (kReSRule.getExpressiveness()) {
                     case KReSCore:
-                        constructedGraph = kReSCoreOperation(sparql, mGraph);
+                        if (mGraph instanceof MGraph) constructedGraph = kReSCoreOperation(sparql,
+                            (MGraph) mGraph);
                         break;
                     case ForwardChaining:
-                        ForwardChainingRefactoringGraph forwardChainingRefactoringGraph = forwardChainingOperation(
-                            sparql, mGraph);
-                        constructedGraph = forwardChainingRefactoringGraph.getOutputGraph();
-                        mGraph = forwardChainingRefactoringGraph.getInputGraph();
+                        if (mGraph instanceof MGraph) {
+                            ForwardChainingRefactoringGraph forwardChainingRefactoringGraph = forwardChainingOperation(
+                                sparql, (MGraph) mGraph);
+                            constructedGraph = forwardChainingRefactoringGraph.getOutputGraph();
+                            mGraph = forwardChainingRefactoringGraph.getInputGraph();
+                        }
                         break;
                     case Reflexive:
                         constructedGraph = kReSCoreOperation(sparql, unionMGraph);
                         break;
                     case SPARQLConstruct:
-                        constructedGraph = kReSCoreOperation(sparql, mGraph);
+                        if (mGraph instanceof MGraph) constructedGraph = kReSCoreOperation(sparql,
+                            (MGraph) mGraph);
                         break;
                     case SPARQLDelete:
                         constructedGraph = sparqlUpdateOperation(sparql, unionMGraph);
@@ -471,7 +476,7 @@ public class RefactorerImpl implements Refactorer {
 
             }
 
-            refactoredOntology = OWLAPIToClerezzaConverter.clerezzaMGraphToOWLOntology(unionMGraph);
+            refactoredOntology = OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(unionMGraph);
 
         } catch (NoSuchRecipeException e1) {
             e1.printStackTrace();
@@ -505,7 +510,7 @@ public class RefactorerImpl implements Refactorer {
 
         MGraph unionMGraph = new SimpleMGraph();
 
-        MGraph mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(inputOntology);
+        TripleCollection mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(inputOntology);
 
         for (Rule kReSRule : ruleList) {
             String sparql = kReSRule.toSPARQL();
@@ -515,19 +520,23 @@ public class RefactorerImpl implements Refactorer {
 
             switch (kReSRule.getExpressiveness()) {
                 case KReSCore:
-                    constructedGraph = kReSCoreOperation(sparql, mGraph);
+                    if (mGraph instanceof MGraph) constructedGraph = kReSCoreOperation(sparql,
+                        (MGraph) mGraph);
                     break;
                 case ForwardChaining:
-                    ForwardChainingRefactoringGraph forwardChainingRefactoringGraph = forwardChainingOperation(
-                        sparql, mGraph);
-                    constructedGraph = forwardChainingRefactoringGraph.getOutputGraph();
-                    mGraph = forwardChainingRefactoringGraph.getInputGraph();
+                    if (mGraph instanceof MGraph) {
+                        ForwardChainingRefactoringGraph forwardChainingRefactoringGraph = forwardChainingOperation(
+                            sparql, (MGraph) mGraph);
+                        constructedGraph = forwardChainingRefactoringGraph.getOutputGraph();
+                        mGraph = forwardChainingRefactoringGraph.getInputGraph();
+                    }
                     break;
                 case Reflexive:
                     constructedGraph = kReSCoreOperation(sparql, unionMGraph);
                     break;
                 case SPARQLConstruct:
-                    constructedGraph = kReSCoreOperation(sparql, mGraph);
+                    if (mGraph instanceof MGraph) constructedGraph = kReSCoreOperation(sparql,
+                        (MGraph) mGraph);
                     break;
                 case SPARQLDelete:
                     constructedGraph = sparqlUpdateOperation(sparql, unionMGraph);
@@ -545,7 +554,7 @@ public class RefactorerImpl implements Refactorer {
 
         }
 
-        refactoredOntology = OWLAPIToClerezzaConverter.clerezzaMGraphToOWLOntology(unionMGraph);
+        refactoredOntology = OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(unionMGraph);
 
         if (refactoredOntology == null) {
             throw new RefactoringException();

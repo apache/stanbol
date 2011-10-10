@@ -404,7 +404,8 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
                     riFactory.createLibrary(df.getOWLNamedIndividual(iri)));
                 else if (scores[0] == 0 && scores[1] > 0) population.put(iri,
                     riFactory.createRegistryOntology(df.getOWLNamedIndividual(iri)));
-            } else log.warn("Unable to determine type for registry item {}", iri);
+            }
+            // else log.warn("Unable to determine type for registry item {}", iri);
         }
 
         for (OWLOntology oReg : registryOntologies) {

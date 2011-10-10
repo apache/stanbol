@@ -90,7 +90,7 @@ public class TestSessions {
             scope = scopeFactory.createOntologyScope(scopeId1, src1, src2);
             scope.setUp();
         } catch (DuplicateIDException e) {
-            fail("Unexpected DuplicateIDException was caught while testing scope " + e.getDulicateID());
+            fail("Unexpected DuplicateIDException was caught while testing scope " + e.getDuplicateID());
         }
         assertNotNull(scope);
         Session ses = sesmgr.createSession();
@@ -115,7 +115,7 @@ public class TestSessions {
             scopeRegistry.setScopeActive(scopeId2, false);
             scopeRegistry.setScopeActive(scopeId3, true);
         } catch (DuplicateIDException e) {
-            fail("Unexpected DuplicateIDException was caught while testing scope " + e.getDulicateID());
+            fail("Unexpected DuplicateIDException was caught while testing scope " + e.getDuplicateID());
         }
         Session ses = sesmgr.createSession();
         IRI sesid = ses.getID();

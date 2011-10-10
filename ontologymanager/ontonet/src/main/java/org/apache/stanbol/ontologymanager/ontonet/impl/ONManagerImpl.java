@@ -594,4 +594,9 @@ public class ONManagerImpl implements ONManager {
         return offlineMode != null;
     }
 
+    @Override
+    public OfflineConfiguration getOfflineConfiguration() {
+        return offline;
+    }
+
 }

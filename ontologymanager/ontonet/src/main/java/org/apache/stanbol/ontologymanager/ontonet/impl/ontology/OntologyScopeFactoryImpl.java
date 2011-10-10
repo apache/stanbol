@@ -71,7 +71,6 @@ public class OntologyScopeFactoryImpl implements OntologyScopeFactory {
 
     @Override
     public OntologyScope createOntologyScope(String scopeID, OntologyInputSource coreSource) throws DuplicateIDException {
-
         return createOntologyScope(scopeID, coreSource, null);
     }
 
@@ -82,8 +81,8 @@ public class OntologyScopeFactoryImpl implements OntologyScopeFactory {
 
         if (registry.containsScope(scopeID)) throw new DuplicateIDException(scopeID,
                 "Scope registry already contains ontology scope with ID " + scopeID);
-
-        OntologyScope scope = new OntologyScopeImpl(scopeID, getNamespace(),spaceFactory, coreSource, customSource);
+        OntologyScope scope = new OntologyScopeImpl(scopeID, getNamespace(), spaceFactory, coreSource,
+                customSource);
         // scope.addOntologyScopeListener(ONManager.get().getOntologyIndex());
         // TODO : manage scopes with null core ontologies
         fireScopeCreated(scope);

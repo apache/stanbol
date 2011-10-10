@@ -45,18 +45,4 @@ public class RegistryImpl extends AbstractRegistryItem implements Registry {
         return type;
     }
 
-    @Deprecated
-    public boolean isError() {
-        return !isOK();
-    }
-
-    @Deprecated
-    public boolean isOK() {
-        return this.getError().equals("");
-    }
-
-    @Deprecated
-    public void setError(String message) {
-        this.message = message;
-    }
 }

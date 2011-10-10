@@ -20,6 +20,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.LockableMGraph;
 import org.apache.clerezza.rdf.core.access.NoSuchEntityException;
@@ -326,7 +327,7 @@ public class ReasoningServiceExecutor {
 			saved = mGraph.addAll(m);
 			writeLock.unlock();
 		} else if (data instanceof OWLOntology) {
-			MGraph m = OWLAPIToClerezzaConverter
+			TripleCollection m = OWLAPIToClerezzaConverter
 					.owlOntologyToClerezzaMGraph((OWLOntology) data);
 			writeLock.lock();
 			saved = mGraph.addAll(m);

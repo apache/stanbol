@@ -206,7 +206,7 @@ public class TestOntologyScope {
             scope = factory.createOntologyScope(scopeId1, src1, src2);
             scope.setUp();
         } catch (DuplicateIDException e) {
-            fail("Unexpected DuplicateIDException was caught while testing scope " + e.getDulicateID());
+            fail("Unexpected DuplicateIDException was caught while testing scope " + e.getDuplicateID());
         }
         assertNotNull(scope);
     }
@@ -242,7 +242,7 @@ public class TestOntologyScope {
             scope2.setUp();
             reg.registerScope(scope2);
         } catch (DuplicateIDException e) {
-            fail("Duplicate ID exception caught on " + e.getDulicateID());
+            fail("Duplicate ID exception caught on " + e.getDuplicateID());
         }
         // System.err.println(new ScopeSetRenderer().getScopesAsRDF(reg
         // .getRegisteredScopes()));

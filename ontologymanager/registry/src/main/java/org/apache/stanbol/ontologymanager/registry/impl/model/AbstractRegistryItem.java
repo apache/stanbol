@@ -41,7 +41,7 @@ public abstract class AbstractRegistryItem implements RegistryItem {
     private String name;
 
     public AbstractRegistryItem(IRI iri) {
-        setIRI(iri);
+        this.iri = iri;
     }
 
     public AbstractRegistryItem(IRI iri, String name) {
@@ -149,16 +149,6 @@ public abstract class AbstractRegistryItem implements RegistryItem {
     }
 
     @Override
-    public boolean isLibrary() {
-        return Type.LIBRARY.equals(getType());
-    }
-
-    @Override
-    public boolean isOntology() {
-        return Type.ONTOLOGY.equals(getType());
-    }
-
-    @Override
     public void prune() {
         clearChildren();
         clearParents();
@@ -183,11 +173,6 @@ public abstract class AbstractRegistryItem implements RegistryItem {
     @Override
     public void removeRegistryContentListener(RegistryContentListener listener) {
         listeners.remove(listener);
-    }
-
-    @Override
-    public void setIRI(IRI iri) {
-        this.iri = iri;
     }
 
     @Override

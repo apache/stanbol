@@ -107,7 +107,7 @@ public class SessionManagerImpl implements SessionManager {
             try {
                 session = createSession(idgen.createSessionID(exclude));
             } catch (DuplicateSessionIDException e) {
-                exclude.add(IRI.create(e.getDulicateID()));
+                exclude.add(IRI.create(e.getDuplicateID()));
                 continue;
             }
         return session;

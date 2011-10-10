@@ -58,6 +58,13 @@ public interface ONManager {
     String getID();
 
     /**
+     * Returns the offline configuration set for this ontology network manager, if any.
+     * 
+     * @return the offline configuration, or null if none was set.
+     */
+    OfflineConfiguration getOfflineConfiguration();
+
+    /**
      * Returns the default object that automatically indexes ontologies as they are loaded within scopes.
      * 
      * @return the default ontology index.

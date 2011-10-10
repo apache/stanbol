@@ -22,6 +22,7 @@ import java.util.Hashtable;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.EntityAlreadyExistsException;
 import org.apache.clerezza.rdf.core.access.TcManager;
@@ -31,6 +32,11 @@ import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
 import org.apache.clerezza.rdf.core.sparql.QueryParser;
 import org.apache.clerezza.rdf.core.sparql.query.Query;
+import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.NoSuchStoreException;
+import org.apache.stanbol.owl.transformation.JenaToClerezzaConverter;
+import org.apache.stanbol.owl.transformation.JenaToOwlConvert;
+import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
+import org.apache.stanbol.owl.util.OWLUtils;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -42,11 +48,6 @@ import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.util.FileManager;
-
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.NoSuchStoreException;
-import org.apache.stanbol.owl.transformation.JenaToClerezzaConverter;
-import org.apache.stanbol.owl.transformation.JenaToOwlConvert;
-import org.apache.stanbol.owl.util.OWLUtils;
 
 public class ClerezzaOntologyStorage {
 
@@ -174,11 +175,11 @@ public class ClerezzaOntologyStorage {
     }
 
     public void store(OWLOntology o) {
-
-        JenaToOwlConvert converter = new JenaToOwlConvert();
-        OntModel om = converter.ModelOwlToJenaConvert(o, "RDF/XML");
-        MGraph mg = JenaToClerezzaConverter.jenaModelToClerezzaMGraph(om);
-        // MGraph mg = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(o);
+        // // Why was it using two converters earlier?
+        // JenaToOwlConvert converter = new JenaToOwlConvert();
+        // OntModel om = converter.ModelOwlToJenaConvert(o, "RDF/XML");
+        // MGraph mg = JenaToClerezzaConverter.jenaModelToClerezzaMGraph(om);
+        TripleCollection mg = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(o);
         MGraph mg2 = null;
         IRI iri = OWLUtils.getIdentifyingIRI(o);
         UriRef ref = new UriRef(iri.toString());

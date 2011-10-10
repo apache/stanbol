@@ -32,20 +32,20 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  */
 public class RootOntologyIRISource extends AbstractOntologyInputSource {
 
-    public RootOntologyIRISource(IRI rootPhysicalIri) throws OWLOntologyCreationException {
-        this(rootPhysicalIri, OWLManager.createOWLOntologyManager());
+    public RootOntologyIRISource(IRI rootOntologyIri) throws OWLOntologyCreationException {
+        this(rootOntologyIri, OWLManager.createOWLOntologyManager());
     }
 
     public RootOntologyIRISource(IRI rootPhysicalIri, OWLOntologyManager manager) throws OWLOntologyCreationException {
-        bindPhysicalIri(rootPhysicalIri);
-        bindRootOntology(manager.loadOntologyFromOntologyDocument(rootPhysicalIri));
+        this(rootPhysicalIri, manager, false);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.manager.io.AbstractOntologyInputSource#toString()
-     */
+    public RootOntologyIRISource(IRI rootPhysicalIri, OWLOntologyManager manager, boolean ignoreIriMappers) throws OWLOntologyCreationException {
+        bindPhysicalIri(rootPhysicalIri);
+        bindRootOntology(ignoreIriMappers ? manager.loadOntologyFromOntologyDocument(rootPhysicalIri)
+                : manager.loadOntology(rootPhysicalIri));
+    }
+
     @Override
     public String toString() {
         return "ROOT_ONT_IRI<" + getPhysicalIRI() + ">";

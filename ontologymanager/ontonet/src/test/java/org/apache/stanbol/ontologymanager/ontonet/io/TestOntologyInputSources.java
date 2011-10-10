@@ -64,8 +64,11 @@ public class TestOntologyInputSources {
     public void testAutoIRIMapper() throws Exception {
 
         URL url = getClass().getResource("/ontologies");
-        OWLOntologyIRIMapper mapper = new AutoIRIMapper(new File(url.toURI()), true);
         assertNotNull(url);
+        File file = new File(url.toURI());
+        assertTrue(file.exists());
+        assertTrue(file.isDirectory());
+        OWLOntologyIRIMapper mapper = new AutoIRIMapper(file, true);
 
         IRI dummyiri = IRI.create("http://stanbol.apache.org/ontologies/peanuts/dummycharacters.owl");
 
@@ -74,7 +77,7 @@ public class TestOntologyInputSources {
             new File(mapper.getDocumentIRI(dummyiri).toURI()).delete();
             ((AutoIRIMapper) mapper).update();
         }
-        assertNull(mapper.getDocumentIRI(dummyiri));
+        assertFalse(dummyiri.equals(mapper.getDocumentIRI(dummyiri)));
 
         // Create a new ontology in the test resources.
         OWLOntologyManager mgr = OWLOntologyManagerFactory.createOWLOntologyManager(null);
@@ -85,11 +88,11 @@ public class TestOntologyInputSources {
 
         ((AutoIRIMapper) mapper).update();
         // The old mapper should be able to locate the new ontology.
-        assertNotNull(mapper.getDocumentIRI(dummyiri));
+        assertFalse(dummyiri.equals(mapper.getDocumentIRI(dummyiri)));
 
         // A new mapper too
         OWLOntologyIRIMapper mapper2 = new AutoIRIMapper(new File(url.toURI()), true);
-        assertNotNull(mapper2.getDocumentIRI(dummyiri));
+        assertFalse(dummyiri.equals(mapper2.getDocumentIRI(dummyiri)));
 
         // cleanup
         f.delete();
