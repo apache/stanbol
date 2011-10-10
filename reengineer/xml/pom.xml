@@ -116,9 +116,16 @@
 			<groupId>xerces</groupId>
 			<artifactId>xercesImpl</artifactId>
 		</dependency>
+		
+		<!-- Persistence deps -->
+		<dependency> <!-- Required by maven2 -->
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.core</artifactId>
+			<scope>compile</scope>
+		</dependency>
 
 		<!-- Diagnostics deps -->
-		<dependency>
+		<dependency> <!-- Required by maven2 -->
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
