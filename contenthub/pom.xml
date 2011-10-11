@@ -55,8 +55,6 @@
 		<module>helper/cnn-importer</module>
 		<module>enhancementlistener</module>
 		<module>web</module>
-		<!-- 
-		<module>launchers/full</module>
-		-->
+		<module>bundlelist</module>
 	</modules>
 </project>

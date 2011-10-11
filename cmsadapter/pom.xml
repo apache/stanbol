@@ -35,7 +35,7 @@
 		<module>cmis</module>
 		<module>web</module>
 		<module>rest-client</module>
-		<!--<module>launchers/lite</module>-->
+		<module>bundlelist</module>
 	</modules>
 </project>
 

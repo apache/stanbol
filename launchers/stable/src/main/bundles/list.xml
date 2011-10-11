@@ -21,29 +21,6 @@
 <bundles>
 
   <!-- *********************************************************************
-          start level 10 TO 19 reserved for required libraries
-          (internal and external)
-       ********************************************************************* -->
-  <!-- The default data expected by the default configuration of Stanbol -->
-  <startLevel level="19">
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.data.opennlp.ner.en</artifactId>
-      <version>1.0.0-incubating</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
-      <version>1.0.0-incubating</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.data.sites.dbpedia.default</artifactId>
-      <version>1.0.2-incubating</version>
-    </bundle>
-  </startLevel>
-
-  <!-- *********************************************************************
           start level 20 TO 24 reserved for Stanbol Framework
           (Enhancer, Entityhub, Contenthub, Factstore ... incl. Web Fragments)
        ********************************************************************* -->
@@ -75,44 +52,6 @@
     </bundle>
   </startLevel> -->
 
-  <!-- Stanbol Entityhub infrastructure and required libraries-->
-  <startLevel level="20">
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.query.clerezza</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.site.linkeddata</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.yard.clerezza</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-  </startLevel>
   <!-- FactStore
   <startLevel level="20">
     <bundle>
@@ -127,16 +66,6 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-    <!--  bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.contenthub.web</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle -->
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.jersey</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>

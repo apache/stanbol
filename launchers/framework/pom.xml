@@ -85,10 +85,10 @@
                 <version>2.2.0</version>
               </jarWebSupport>
               <defaultBundleList>
-			    <groupId>org.apache.stanbol</groupId>
-			    <artifactId>org.apache.stanbol.launchers.basebundlelist</artifactId>
-			    <version>0.9.0-incubating-SNAPSHOT</version>
-			 </defaultBundleList>
+						    <groupId>org.apache.stanbol</groupId>
+						    <artifactId>org.apache.stanbol.launchers.basebundlelist</artifactId>
+						    <version>0.9.0-incubating-SNAPSHOT</version>
+						  </defaultBundleList>
             </configuration>
           </execution>
         </executions>
@@ -116,6 +116,24 @@
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.launchpad.base</artifactId>
       <classifier>app</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.bundlelist</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.ontologymanager.bundlelist</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.rules.bundlelist</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+      <type>partialbundlelist</type>
     </dependency>
   </dependencies>
 </project>

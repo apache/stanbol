@@ -1,0 +1,25 @@
+<bundles>
+	<startLevel level="22">
+		<!-- Stanbol Rules -->
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.rules.base</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.rules.manager</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.rules.refactor</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.rules.web</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+	</startLevel>
+</bundles>  

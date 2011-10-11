@@ -81,45 +81,6 @@
     </bundle>
   </startLevel>
 
-  <!-- Stanbol Entityhub infrastructure and required libraries-->
-  <startLevel level="20">
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.query.clerezza</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.site.linkeddata</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.yard.clerezza</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-  </startLevel>  
-  
   <!-- FactStore -->
   <startLevel level="20">
     <bundle>
@@ -136,11 +97,6 @@
       <artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.jersey</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
   </startLevel>
   <!-- Benchmarks for the Stanbol Enhancer -->
   <startLevel level="21">
@@ -153,49 +109,12 @@
  
   <!-- KReS -->
   <startLevel level="22">
-	<bundle>
-		<groupId>org.apache.stanbol</groupId>
-		<artifactId>org.apache.stanbol.owl</artifactId>
-		<version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-	<!-- Stanbol OntoNet -->
-	<bundle>
-		<groupId>org.apache.stanbol</groupId>
-		<artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
-		<version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-    <bundle>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.ontologymanager.registry</artifactId>
-        <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-	<!-- Stanbol Rules -->
-	<bundle>
-		<groupId>org.apache.stanbol</groupId>
-		<artifactId>org.apache.stanbol.rules.base</artifactId>
-		<version>0.9.0-incubating-SNAPSHOT</version>
-	</bundle>
-	<bundle>
-		<groupId>org.apache.stanbol</groupId>
-		<artifactId>org.apache.stanbol.rules.manager</artifactId>
-		<version>0.9.0-incubating-SNAPSHOT</version>
-	</bundle>
-	<bundle>
-		<groupId>org.apache.stanbol</groupId>
-		<artifactId>org.apache.stanbol.rules.refactor</artifactId>
-		<version>0.9.0-incubating-SNAPSHOT</version>
-	</bundle>
-	<bundle>
-   	  <groupId>org.apache.stanbol</groupId>
-	  <artifactId>org.apache.stanbol.ontologymanager.web</artifactId>
-	  <version>0.9.0-incubating-SNAPSHOT</version>
-	</bundle>
-	<bundle>
-		<groupId>org.apache.stanbol</groupId>
-		<artifactId>org.apache.stanbol.rules.web</artifactId>
-		<version>0.9.0-incubating-SNAPSHOT</version>
-	</bundle>
- </startLevel>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.owl</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+	  </bundle>
+  </startLevel>
 
   <!-- *********************************************************************
           start level 25 TO 29 reserved for Stanbol plug-ins
