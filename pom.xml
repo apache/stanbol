@@ -52,5 +52,6 @@
     <module>benchmark</module>
 
     <module>engines</module>
+    <module>bundlelist</module>
   </modules>
 </project>
