@@ -60,15 +60,12 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Import-Package>
-							!org.apache.xml.resolver.*,
-							!sun.io.*,
-							org.semanticweb.owlapi.*,
-							org.slf4j.*,
-							*
-						</Import-Package>
+						<Embed-Dependency>*;scope=compile;artifactId=!slf4j-api</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
 						<Export-Package>
-							org.apache.stanbol.owl.*,
+							org.apache.stanbol.owl.*
+						</Export-Package>
+						<_exportcontents> <!-- used instead of Export-Package to preserve the owlapi jar -->
 							org.semanticweb.owlapi.*,
 							com.clarkparsia.owlapi.*,
 							de.uulm.ecs.ai.owlapi.*,
@@ -77,13 +74,14 @@
 							org.coode.string,
 							org.coode.xml,
 							uk.ac.manchester.cs.bhig.util,
-							uk.ac.manchester.cs.owl.*,
-							!org.apache.xerces.util,
-							org.apache.xerces.*;version=2.7.1
-						</Export-Package>
-						<Private-Package>
-							org.apache.xml.serialize
-						</Private-Package>
+							uk.ac.manchester.cs.owl.*
+						</_exportcontents>
+						<Import-Package>
+							org.semanticweb.owlapi.*,
+							org.slf4j.*,
+							*
+						</Import-Package>
+						<Private-Package />
 						<_nouses>true</_nouses>
 					</instructions>
 				</configuration>
@@ -144,10 +142,7 @@
 		<dependency>
 			<groupId>owlapi</groupId>
 			<artifactId>owlapi</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>xerces</groupId>
-			<artifactId>xercesImpl</artifactId>
+			<scope>compile</scope>
 		</dependency>
 
 		<!-- Persistence deps -->

@@ -33,9 +33,8 @@
 
 	<name>Apache Stanbol Reengineer : Relational Database</name>
 	<description>
-    Provides functionality for reengineering database
-    into ontologies.
-  </description>
+		Provides functionalities for reengineering databases and database schemas into ontologies.
+	</description>
 
 	<inceptionYear>2010</inceptionYear>
 
@@ -49,20 +48,22 @@
 					<instructions>
 						<Bundle-ClassPath>
 							.,
-							mysql-connector-java-5.1.10.jar,
+							<!-- mysql-connector-java-5.1.10.jar, -->
 							OSGI-INF
-            </Bundle-ClassPath>
+						</Bundle-ClassPath>
+						<Embed-Dependency>*;scope=compile;artifactId=!slf4j-api</Embed-Dependency>
+						<Embed-Transitive>false</Embed-Transitive>
 						<Export-Package>
 							org.apache.stanbol.reengineer.db.*
-            </Export-Package>
+						</Export-Package>
 						<Import-Package>
 							!org.jboss.resource.adapter.jdbc.*,
 							!com.mchange.*,
 							com.hp.hpl.jena.*,
-							org.slf4j.*,
 							org.xml.sax.*,
+							org.slf4j.*,
 							*
-            </Import-Package>
+						</Import-Package>
 						<_nouses>true</_nouses>
 					</instructions>
 				</configuration>
@@ -74,24 +75,10 @@
 					<source>1.6</source>
 					<target>1.6</target>
 				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>com.hp.hpl.jena</groupId>
-						<artifactId>jena</artifactId>
-						<version>2.6.2</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-scr-plugin</artifactId>
-				<dependencies>
-					<dependency>
-						<groupId>com.hp.hpl.jena</groupId>
-						<artifactId>jena</artifactId>
-						<version>2.6.2</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 		</plugins>
 	</build>
@@ -102,7 +89,6 @@
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.scr.annotations</artifactId>
-			<version>1.2.0</version>
 		</dependency>
 
 		<!-- Stanbol deps -->
@@ -112,81 +98,34 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.reengineer.base</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
+			<artifactId>org.apache.stanbol.owl</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.owl</artifactId>
-		</dependency>
-
-		<!-- OWL deps -->
-		<dependency>
-			<groupId>com.hp.hpl.jena</groupId>
-			<artifactId>iri</artifactId>
-			<version>0.8</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.hp.hpl.jena</groupId>
-			<artifactId>jena</artifactId>
-			<version>2.6.2</version>
-			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>slf4j-log4j12</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.hp.hpl.jena</groupId>
-			<artifactId>arq</artifactId>
-			<version>2.8.3</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.hp.hpl.jena</groupId>
-			<artifactId>tdb</artifactId>
-			<version>0.8.5</version>
+			<artifactId>org.apache.stanbol.reengineer.base</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- Clerezza deps -->
+		<!-- DB deps -->
 		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.10</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- Persistence deps -->
+		<dependency> <!-- Required by maven2 -->
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>rdf.core</artifactId>
-			<version>0.12-incubating-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>rdf.jena.serializer</artifactId>
-			<version>0.9-incubating-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>rdf.jena.sparql</artifactId>
-			<version>0.5-incubating-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.clerezza</groupId>
-			<artifactId>rdf.simple.storage</artifactId>
-			<version>0.7-incubating-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<!-- Diagnostics deps -->
-		<dependency> <!-- we use log4j 1.2 -->
+		<dependency> <!-- Required by maven2 -->
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency> <!-- see also the log4j.properties in src/main/resources -->
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<scope>runtime</scope>
+			<artifactId>slf4j-api</artifactId>
 		</dependency>
 
 		<!-- Testing deps -->
@@ -196,16 +135,19 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<scope>test</scope>
-		</dependency>
-		
-		<dependency>
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>rdf.jena.parser</artifactId>
-			<version>0.10-incubating-SNAPSHOT</version>
-			<scope>provided</scope>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.jena.sparql</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.simple.storage</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
@@ -214,8 +156,8 @@
 	<repositories>
 		<repository>
 			<id>stlab-cnr-repo</id>
-           <url>http://stlab.istc.cnr.it/software/maven/repo</url>
+			<url>http://stlab.istc.cnr.it/software/maven/repo</url>
 		</repository>
-	</repositories>	
+	</repositories>
 
 </project>

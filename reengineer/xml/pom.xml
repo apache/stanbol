@@ -52,15 +52,21 @@
 							<!-- xerces/xercesImpl-2.7.1.jar, -->
 							OSGI-INF
 						</Bundle-ClassPath>
+						<Embed-Dependency>*;scope=compile;artifactId=!slf4j-api</Embed-Dependency>
+						<Embed-Transitive>false</Embed-Transitive>
 						<Export-Package>
 							org.apache.stanbol.reengineer.xml.*
 						</Export-Package>
 						<Import-Package>
 							!org.apache.xml.resolver.*,
 							!sun.io.*,
+							<!-- 
 							org.apache.xerces.*;version=2.7.1,
+							 -->
 							org.slf4j.*,
+							<!--  
 							org.xml.sax.*,
+							-->
 							*
 						</Import-Package>
 						<_nouses>true</_nouses>
@@ -103,6 +109,7 @@
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.reengineer.base</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- XML deps -->
@@ -121,13 +128,15 @@
 		<dependency>
 			<groupId>xerces</groupId>
 			<artifactId>xercesImpl</artifactId>
+			<version>2.7.1</version>
+			<scope>compile</scope>
 		</dependency>
 		
 		<!-- Persistence deps -->
 		<dependency> <!-- Required by maven2 -->
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>rdf.core</artifactId>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Diagnostics deps -->
