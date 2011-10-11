@@ -36,6 +36,7 @@
     </scm>
     <modules>
         <module>parent</module>
+        <module>bundlelist</module>
     </modules>
   <profiles>
     <profile>
