@@ -1,0 +1,45 @@
+<bundles>
+  <startLevel level="23">
+  <bundle>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.contenthub.servicesapi</artifactId>
+    <version>0.9.0-incubating-SNAPSHOT</version>
+  </bundle>
+  <bundle>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.contenthub.core</artifactId>
+    <version>0.9.0-incubating-SNAPSHOT</version>
+  </bundle>
+  <bundle>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.contenthub.search.engines.solr</artifactId>
+    <version>0.9.0-incubating-SNAPSHOT</version>
+  </bundle>
+  <bundle>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.contenthub.search.engines.ontologyresource</artifactId>
+    <version>0.9.0-incubating-SNAPSHOT</version>
+  </bundle>
+  <bundle>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.contenthub.search.engines.enhancer</artifactId>
+    <version>0.9.0-incubating-SNAPSHOT</version>
+  </bundle>
+  <bundle>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.contenthub.web</artifactId>
+    <version>0.9.0-incubating-SNAPSHOT</version>
+  </bundle>
+  <bundle>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.contenthub.helper.cnn</artifactId>
+    <version>0.9.0-incubating-SNAPSHOT</version>
+  </bundle>
+  <bundle>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.contenthub.enhancementlistener
+    </artifactId>
+    <version>0.9.0-incubating-SNAPSHOT</version>
+  </bundle>
+  </startLevel>
+</bundles>
