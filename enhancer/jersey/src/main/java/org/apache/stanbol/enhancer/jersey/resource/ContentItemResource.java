@@ -431,7 +431,7 @@ public class ContentItemResource extends BaseStanbolResource {
             this.uri = uri;
             this.label = label;
             this.type = type;
-            this.confidence = confidence;
+            this.confidence = confidence != null ? confidence : 0.0;
             this.entityProperties = entityProperties;
             this.defaultThumbnails = defaultThumbnails;
         }
