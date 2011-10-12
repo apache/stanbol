@@ -373,7 +373,7 @@ li.moreRecent a {
 }
 
 #enginesOuput pre {
-  max-height: 200px;
+  max-height: 50em;
 }
 
 .enginelisting {
