@@ -921,6 +921,12 @@
         <version>3.2.0</version>
         <scope>provided</scope>
     </dependency>
+    <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-analysis-extras</artifactId>
+        <version>3.2.0</version>
+        <scope>provided</scope>
+    </dependency>
     <!-- other Solr bundles currently not used
     <dependency>
         <groupId>org.apache.solr</groupId>
@@ -937,12 +943,6 @@
     <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-carrot2-core</artifactId>
-        <version>3.2.0</version>
-        <scope>provided</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.apache.solr</groupId>
-        <artifactId>solr-analysis-extras</artifactId>
         <version>3.2.0</version>
         <scope>provided</scope>
     </dependency>   -->

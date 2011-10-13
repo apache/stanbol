@@ -24,6 +24,7 @@ import java.util.List;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText;
+import org.apache.stanbol.commons.opennlp.TextAnalyzer.TextAnalyzerConfig;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText.Chunk;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText.Token;
 import org.junit.BeforeClass;
@@ -68,65 +69,68 @@ public class TextAnalyzerTest {
 
     @Test
     public void testSingleSentenceDefaultConfig(){
-        TextAnalyzer analyzer = new TextAnalyzer(openNLP);
-        AnalysedText analysed = analyzer.analyseSentence(SINGLE_SENTENCE,LANGUAGE);
+        TextAnalyzer analyzer = new TextAnalyzer(openNLP,LANGUAGE);
+        AnalysedText analysed = analyzer.analyseSentence(SINGLE_SENTENCE);
         assertNotNull(analysed);
         //check the default config
-        assertFalse(analyzer.isSimpleTokenizerForced());
-        assertTrue(analyzer.isPosTaggerEnable());
-        assertTrue(analyzer.isPosTypeChunkerEnabled());
-        assertTrue(analyzer.isChunkerEnabled());
-        assertTrue(analyzer.isPosTypeChunkerForced());
+        assertFalse(analyzer.getConfig().isSimpleTokenizerForced());
+        assertTrue(analyzer.getConfig().isPosTaggerEnable());
+        assertTrue(analyzer.getConfig().isPosTypeChunkerEnabled());
+        assertTrue(analyzer.getConfig().isChunkerEnabled());
+        assertTrue(analyzer.getConfig().isPosTypeChunkerForced());
         checkSingleSentence(analysed,SINGLE_SENTENCE_TOKENS,true,true);
     }
     @Test
     public void testSingleSentenceChunkerConfig(){
-        TextAnalyzer analyzer = new TextAnalyzer(openNLP);
-        analyzer.forcePosTypeChunker(false);
-        AnalysedText analysed = analyzer.analyseSentence(SINGLE_SENTENCE,LANGUAGE);
+        TextAnalyzerConfig config = new TextAnalyzerConfig();
+        config.forcePosTypeChunker(false);
+        TextAnalyzer analyzer = new TextAnalyzer(openNLP,LANGUAGE,config);
+        AnalysedText analysed = analyzer.analyseSentence(SINGLE_SENTENCE);
         assertNotNull(analysed);
         //check the default config
-        assertFalse(analyzer.isSimpleTokenizerForced());
-        assertTrue(analyzer.isPosTaggerEnable());
-        assertTrue(analyzer.isChunkerEnabled());
-        assertTrue(analyzer.isPosTypeChunkerEnabled());
-        assertFalse(analyzer.isPosTypeChunkerForced());
+        assertFalse(analyzer.getConfig().isSimpleTokenizerForced());
+        assertTrue(analyzer.getConfig().isPosTaggerEnable());
+        assertTrue(analyzer.getConfig().isChunkerEnabled());
+        assertTrue(analyzer.getConfig().isPosTypeChunkerEnabled());
+        assertFalse(analyzer.getConfig().isPosTypeChunkerForced());
         checkSingleSentence(analysed,SINGLE_SENTENCE_TOKENS,true,true);
     }
     @Test
     public void testSingleSentenceNoChunkerConfig(){
-        TextAnalyzer analyzer = new TextAnalyzer(openNLP);
-        analyzer.enableChunker(false);
-        AnalysedText analysed = analyzer.analyseSentence(SINGLE_SENTENCE,LANGUAGE);
+        TextAnalyzerConfig config = new TextAnalyzerConfig();
+        config.enableChunker(false);
+        TextAnalyzer analyzer = new TextAnalyzer(openNLP,LANGUAGE,config);
+        AnalysedText analysed = analyzer.analyseSentence(SINGLE_SENTENCE);
         assertNotNull(analysed);
         //check the default config
-        assertFalse(analyzer.isSimpleTokenizerForced());
-        assertTrue(analyzer.isPosTaggerEnable());
-        assertFalse(analyzer.isChunkerEnabled());
-        assertTrue(analyzer.isPosTypeChunkerEnabled());
-        assertTrue(analyzer.isPosTypeChunkerForced());
+        assertFalse(analyzer.getConfig().isSimpleTokenizerForced());
+        assertTrue(analyzer.getConfig().isPosTaggerEnable());
+        assertFalse(analyzer.getConfig().isChunkerEnabled());
+        assertTrue(analyzer.getConfig().isPosTypeChunkerEnabled());
+        assertTrue(analyzer.getConfig().isPosTypeChunkerForced());
         checkSingleSentence(analysed,SINGLE_SENTENCE_TOKENS,true,false);
     }
     @Test
     public void testSingleSentenceNoChunkerNoPosConfig(){
-        TextAnalyzer analyzer = new TextAnalyzer(openNLP);
-        analyzer.enablePosTagger(false);
-        analyzer.enableChunker(true);//must be ignored for Chunks if no Pos
-        AnalysedText analysed = analyzer.analyseSentence(SINGLE_SENTENCE,LANGUAGE);
+        TextAnalyzerConfig config = new TextAnalyzerConfig();
+        config.enablePosTagger(false);
+        config.enableChunker(true);//must be ignored for Chunks if no Pos
+        TextAnalyzer analyzer = new TextAnalyzer(openNLP,LANGUAGE,config);
+        AnalysedText analysed = analyzer.analyseSentence(SINGLE_SENTENCE);
         assertNotNull(analysed);
         //check the default config
-        assertFalse(analyzer.isSimpleTokenizerForced());
-        assertFalse(analyzer.isPosTaggerEnable());
-        assertTrue(analyzer.isChunkerEnabled());
-        assertTrue(analyzer.isPosTypeChunkerEnabled());
-        assertTrue(analyzer.isPosTypeChunkerForced());
+        assertFalse(analyzer.getConfig().isSimpleTokenizerForced());
+        assertFalse(analyzer.getConfig().isPosTaggerEnable());
+        assertTrue(analyzer.getConfig().isChunkerEnabled());
+        assertTrue(analyzer.getConfig().isPosTypeChunkerEnabled());
+        assertTrue(analyzer.getConfig().isPosTypeChunkerForced());
         checkSingleSentence(analysed,SINGLE_SENTENCE_TOKENS,false,false);
     }
 
     @Test
     public void testMultipleSentenceDefaultConfig(){
-        TextAnalyzer analyzer = new TextAnalyzer(openNLP);
-        Iterator<AnalysedText> analysedSentences = analyzer.analyse(MULTI_SENTENCES,LANGUAGE);
+        TextAnalyzer analyzer = new TextAnalyzer(openNLP,LANGUAGE);
+        Iterator<AnalysedText> analysedSentences = analyzer.analyse(MULTI_SENTENCES);
         assertNotNull(analysedSentences);
         int sentenceCount = 0;
         while(analysedSentences.hasNext()){

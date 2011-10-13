@@ -34,7 +34,7 @@ import opennlp.tools.tokenize.SimpleTokenizer;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
-import org.apache.stanbol.commons.opennlp.TextAnalyzer;
+import org.apache.stanbol.commons.opennlp.TextAnalyzer.TextAnalyzerConfig;
 import org.apache.stanbol.enhancer.engines.keywordextraction.impl.ClasspathDataFileProvider;
 import org.apache.stanbol.enhancer.engines.keywordextraction.impl.TestSearcherImpl;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntityLinker;
@@ -152,8 +152,8 @@ public class TestTaxonomyLinker {
 
     @Test
     public void testTaxonomyLinker() throws Exception{
-        TextAnalyzer textAnalyzer = new TextAnalyzer(openNLP);
-        OpenNlpAnalysedContentFactory acf = OpenNlpAnalysedContentFactory.getInstance(textAnalyzer);
+        OpenNlpAnalysedContentFactory acf = OpenNlpAnalysedContentFactory.getInstance(openNLP,
+            new TextAnalyzerConfig());
         EntityLinkerConfig config = new EntityLinkerConfig();
         config.setRedirectProcessingMode(RedirectProcessingMode.FOLLOW);
         EntityLinker linker = new EntityLinker(

@@ -224,15 +224,19 @@ public class EnhancementEngineHelper {
             LiteralFactory literalFactory){
         Iterator<Triple> results = graph.filter(resource, property, null);
         if(results.hasNext()){
-            Triple result = results.next();
-            if(result.getObject() instanceof TypedLiteral){
-                return literalFactory.createObject(type, (TypedLiteral)result.getObject());
-            } else {
-                log.warn("Triple "+result+" does not have a TypedLiteral as object! -> return null");
-                return null;
+            while(results.hasNext()){
+                Triple result = results.next();
+                if(result.getObject() instanceof TypedLiteral){
+                    return literalFactory.createObject(type, (TypedLiteral)result.getObject());
+                } else {
+                    log.debug("Triple {} does not have a TypedLiteral as object! -> ignore",result);
+                }
             }
+            log.info("No value for {} and property {} had the requested Type {} -> return null",
+                new Object[]{resource,property,type});
+            return null;
         } else {
-            log.info("No Triple found for "+resource+" and property "+property+"! -> return null");
+            log.debug("No Triple found for {} and property {}! -> return null",resource,property);
             return null;
         }
     }
@@ -272,15 +276,19 @@ public class EnhancementEngineHelper {
     public static String getString(TripleCollection graph, NonLiteral resource, UriRef property){
         Iterator<Triple> results = graph.filter(resource, property, null);
         if(results.hasNext()){
-            Triple result = results.next();
-            if(result.getObject() instanceof Literal){
-                return ((Literal)result.getObject()).getLexicalForm();
-            } else {
-                log.warn("Triple "+result+" does not have a literal as object! -> return null");
-                return null;
+            while (results.hasNext()){
+                Triple result = results.next();
+                if(result.getObject() instanceof Literal){
+                    return ((Literal)result.getObject()).getLexicalForm();
+                } else {
+                    log.debug("Triple {} does not have a literal as object! -> ignore",result);
+                }
             }
+            log.info("No Literal value for {} and property {} -> return null",
+                resource,property);
+            return null;
         } else {
-            log.info("No Triple found for "+resource+" and property "+property+"! -> return null");
+            log.debug("No Triple found for "+resource+" and property "+property+"! -> return null");
             return null;
         }
     }
@@ -315,15 +323,18 @@ public class EnhancementEngineHelper {
     public static UriRef getReference(MGraph graph, NonLiteral resource, UriRef property){
         Iterator<Triple> results = graph.filter(resource, property, null);
         if(results.hasNext()){
+            while(results.hasNext()){
             Triple result = results.next();
-            if(result.getObject() instanceof UriRef){
-                return (UriRef)result.getObject();
-            } else {
-                log.warn("Triple "+result+" does not have a UriRef as object! -> return null");
-                return null;
+                if(result.getObject() instanceof UriRef){
+                    return (UriRef)result.getObject();
+                } else {
+                    log.debug("Triple "+result+" does not have a UriRef as object! -> ignore");
+                }
             }
+            log.info("No UriRef value for {} and property {} -> return null",resource,property);
+            return null;
         } else {
-            log.info("No Triple found for "+resource+" and property "+property+"! -> return null");
+            log.debug("No Triple found for {} and property {}! -> return null",resource,property);
             return null;
         }
     }

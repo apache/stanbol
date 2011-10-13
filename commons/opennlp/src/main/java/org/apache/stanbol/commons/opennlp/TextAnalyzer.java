@@ -47,56 +47,184 @@ public class TextAnalyzer {
     private static final Logger log = LoggerFactory.getLogger(TextAnalyzer.class);
     @Reference
     private final OpenNLP openNLP;
-    /**
-     * The language of the analysed text
-     */
-    //protected final String language; //protected to speed up access by internal classes
-    private boolean forceSimpleTokenizer = false; //default to false
-    private boolean enablePosTagger = true;
-    private boolean enableChunker = true;
-    private boolean enableSentenceDetector = true;
-    private boolean enablePosTypeChunker = true;
-    private boolean forcePosTypeChunker = true;
-    /**
-     * The minimum POS type probability used by the PosTypeChunker
-     */
-    private double minPosTagProbability = 0.75;
     
-    //private POSTaggerME posTagger;
-    //private SentenceDetector sentenceDetector;
-    //private ChunkerME chunker;
-    //private PosTypeChunker posTypeChunker;
-    //private Tokenizer tokenizer;
+    private final TextAnalyzerConfig config;
+    
+    public static final class TextAnalyzerConfig {
+        protected boolean forceSimpleTokenizer = false; //default to false
+        protected boolean enablePosTagger = true;
+        protected boolean enableChunker = true;
+        protected boolean enableSentenceDetector = true;
+        protected boolean enablePosTypeChunker = true;
+        protected boolean forcePosTypeChunker = true;
+        /**
+         * The minimum POS type probability used by the PosTypeChunker
+         */
+        private double minPosTagProbability = 0.75;
+        public final boolean isSimpleTokenizerForced() {
+            return forceSimpleTokenizer;
+        }
+    
+        public final void forceSimpleTokenizer(boolean useSimpleTokenizer) {
+            this.forceSimpleTokenizer = useSimpleTokenizer;
+        }
+    
+        public final boolean isPosTaggerEnable() {
+            return enablePosTagger;
+        }
+    
+        public final void enablePosTagger(boolean enablePosTagger) {
+            this.enablePosTagger = enablePosTagger;
+        }
+    
+        public final boolean isChunkerEnabled() {
+            return enableChunker;
+        }
+    
+        public final void enableChunker(boolean enableChunker) {
+            this.enableChunker = enableChunker;
+        }
+    
+        public final boolean isSentenceDetectorEnabled() {
+            return enableSentenceDetector;
+        }
+    
+        public final void enableSentenceDetector(boolean enableSentenceDetector) {
+            this.enableSentenceDetector = enableSentenceDetector;
+        }
+        public final boolean isPosTypeChunkerEnabled() {
+            return enablePosTypeChunker;
+        }
+        /**
+         * Enables the used of the {@link PosTypeChunker} if no {@link Chunker} for
+         * the current {@link #getLanguage() language} is available.
+         * @param enablePosTypeChunker
+         */
+        public final void enablePosTypeChunker(boolean enablePosTypeChunker) {
+            this.enablePosTypeChunker = enablePosTypeChunker;
+            if(!enablePosTypeChunker){
+                forcePosTypeChunker(enablePosTypeChunker);
+            }
+        }
+    
+        public final boolean isPosTypeChunkerForced() {
+            return forcePosTypeChunker;
+        }
+        /**
+         * Forces the use of the {@link PosTypeChunker} even if a {@link Chunker}
+         * for the current language would be available
+         * @param forcePosTypeChunker
+         */
+        public final void forcePosTypeChunker(boolean forcePosTypeChunker) {
+            this.forcePosTypeChunker = forcePosTypeChunker;
+            if(forcePosTypeChunker) {
+                enablePosTypeChunker(true);
+            }
+        }
+    
+        /**
+         * Getter for the minimum POS tag probability so that the
+         * {@link PosTypeChunker} processes a POS tag.
+         * @return the minPosTypeProbability
+         */
+        public final double getMinPosTypeProbability() {
+            return minPosTagProbability;
+        }
+    
+        /**
+         * Setter for the minimum POS tag probability so that the
+         * {@link PosTypeChunker} processes a POS tag.
+         * @param minPosTagProbability The probability [0..1] or value < 0 to 
+         * deactivate this feature
+         * @throws IllegalArgumentException if values > 1 are parsed as probability
+         */
+        public final void setMinPosTagProbability(double probability) {
+            if(probability > 1){
+                throw new IllegalArgumentException("The minimum POS tag probability MUST be set to a value <= 1 (parsed:"+minPosTagProbability+"");
+            }
+            this.minPosTagProbability = probability;
+        }
+
+    }
+    
+    private POSTaggerME posTagger;
     /**
-     * PosTypeChunkers for the different languages
+     * used to ensure that {@link #openNLP} is only ask once for the {@link POSTaggerME}
+     * of the parsed {@link #language}
      */
-    private Map<String,PosTypeChunker> posTypeChunkers = new HashMap<String,PosTypeChunker>();
+    private boolean posTaggerNotAvailable;
+    private SentenceDetector sentenceDetector;
+    /**
+     * used to ensure that {@link #openNLP} is only ask once for the {@link SentenceDetector}
+     * of the parsed {@link #language}
+     */
+    private boolean sentenceDetectorNotAvailable;
+    private ChunkerME chunker;
+    /**
+     * used to ensure that {@link #openNLP} is only ask once for the {@link ChunkerME}
+     * of the parsed {@link #language}
+     */
+    private boolean chunkerNotAvailable;
+    private PosTypeChunker posTypeChunker;
+    /**
+     * used to ensure only a single try to init a {@link PosTypeChunker} for 
+     * the parsed {@link #language}
+     */
+    private boolean posTypeChunkerNotAvailable;
+    /**
+     * The Tokenizer
+     */
+    private Tokenizer tokenizer;
+    /**
+     * The language
+     */
+    private final String language;
 
 
-    
-    public TextAnalyzer(OpenNLP openNLP){
+    /**
+     * Creates a TextAnalyzer based on the OpenNLP and the given language and the
+     * default {@link TextAnalyzerConfig configuration}.<p>
+     * If <code>null</code> is parsed as language, than a minimal configuration
+     * that tokenizes the text using the {@link SimpleTokenizer} is used. 
+     * @param openNLP The openNLP configuration to be used to analyze the text
+     * @param language the language or <code>null</code> if not known.
+     */
+    public TextAnalyzer(OpenNLP openNLP,String language){
+        this(openNLP,language,null);
+    }
+    /**
+     * Creates a TextAnalyzer based on the OpenNLP and the given language.<p>
+     * If <code>null</code> is parsed as language, than a minimal configuration
+     * that tokenizes the text using the {@link SimpleTokenizer} is used. 
+     * @param openNLP The openNLP configuration to be used to analyze the text
+     * @param language the language or <code>null</code> if not known.
+     */
+    public TextAnalyzer(OpenNLP openNLP,String language, TextAnalyzerConfig config){
         if(openNLP == null){
             throw new IllegalArgumentException("The OpenNLP component MUST NOT be NULL");
         }
+        this.config = config == null ? new TextAnalyzerConfig() : config;
         this.openNLP = openNLP;
+        this.language = language;
     }
 
-    protected final POSTaggerME getPosTagger(String language) {
-        if(!enablePosTagger){
+    protected final POSTaggerME getPosTagger() {
+        if(!config.enablePosTagger){
             return null;
         }
-        POSTaggerME posTagger;
-        try {
-            POSModel posModel = openNLP.getPartOfSpeachModel(language);
-            if(posModel != null){
-                posTagger = new POSTaggerME(posModel);
-            } else {
-                log.debug("No POS Model for language {}",language);
-                posTagger = null;
+        if(posTagger == null && !posTaggerNotAvailable){
+            try {
+                POSModel posModel = openNLP.getPartOfSpeachModel(language);
+                if(posModel != null){
+                    posTagger = new POSTaggerME(posModel);
+                } else {
+                    log.debug("No POS Model for language '{}'",language);
+                    posTaggerNotAvailable = true;
+                }
+            } catch (IOException e) {
+                log.info("Unable to load POS Model for language '"+language+"'",e);
+                posTaggerNotAvailable = true;
             }
-        } catch (IOException e) {
-            log.info("Unable to load POS Model for language "+language,e);
-            posTagger = null;
         }
         return posTagger;
     }
@@ -105,162 +233,95 @@ public class TextAnalyzer {
      * @param language the language
      * @return the Tolenizer
      */
-    public final Tokenizer getTokenizer(String language){
-        Tokenizer tokenizer;
-        if(forceSimpleTokenizer){
-            tokenizer = SimpleTokenizer.INSTANCE;
-        } else {
-            tokenizer = openNLP.getTokenizer(language);
+    public final Tokenizer getTokenizer(){
+        if(tokenizer == null){
+            if(config.forceSimpleTokenizer){
+                tokenizer = SimpleTokenizer.INSTANCE;
+            } else {
+                tokenizer = openNLP.getTokenizer(language);
+                if(tokenizer == null){
+                    log.debug("No Tokenizer for Language '{}': fall back to SimpleTokenizer!",language);
+                    tokenizer = SimpleTokenizer.INSTANCE;
+                }
+            }
         }
         return tokenizer;
     }
-    protected final ChunkerME getChunker(String language){
-        if(!enableChunker || forcePosTypeChunker){
+    protected final ChunkerME getChunker(){
+        if(!config.enableChunker || config.forcePosTypeChunker){
             return null;
         }
-        ChunkerME chunker;
-        try {
-            ChunkerModel chunkerModel = openNLP.getChunkerModel(language);
-            if(chunkerModel != null){
-                chunker = new ChunkerME(chunkerModel);
-            } else {
-                log.debug("No Chunker Model for language {}",language);
-                chunker = null;
+        if(chunker == null && !chunkerNotAvailable) {
+            try {
+                ChunkerModel chunkerModel = openNLP.getChunkerModel(language);
+                if(chunkerModel != null){
+                    chunker = new ChunkerME(chunkerModel);
+                } else {
+                    log.debug("No Chunker Model for language {}",language);
+                    chunkerNotAvailable = true;
+                }
+            } catch (IOException e) {
+                log.info("Unable to load Chunker Model for language "+language,e);
+                chunkerNotAvailable = true;
             }
-        } catch (IOException e) {
-            log.info("Unable to load Chunker Model for language "+language,e);
-            chunker = null;
         }
         return chunker;
     }
-    protected final PosTypeChunker getPosTypeChunker(String language){
-        if(!enableChunker || !enablePosTagger){
+    protected final PosTypeChunker getPosTypeChunker(){
+        if(!config.enableChunker || !config.enablePosTagger){
             return null;
         }
-        PosTypeChunker ptc = posTypeChunkers.get(language);
-        if(ptc == null){
-            ptc = PosTypeChunker.getInstance(language,minPosTagProbability);
-            if(ptc != null){
-                posTypeChunkers.put(language, ptc);
-            }
+        if(posTypeChunker == null && !posTypeChunkerNotAvailable){
+            posTypeChunker = PosTypeChunker.getInstance(language,config.minPosTagProbability);
+            posTypeChunkerNotAvailable = posTypeChunker == null;
         }
-        return ptc;
+        return posTypeChunker;
     }
 
-    protected final SentenceDetector getSentenceDetector(String language) {
-        if(!enableSentenceDetector){
+    protected final SentenceDetector getSentenceDetector() {
+        if(!config.enableSentenceDetector){
             return null;
         }
-        SentenceDetector sentDetect;
-        try {
-            SentenceModel sentModel = openNLP.getSentenceModel(language);
-            if(sentModel != null){
-                sentDetect = new SentenceDetectorME(sentModel);
-            } else {
-                log.debug("No Sentence Detection Model for language {}",language);
-                sentDetect = null;
+        if(sentenceDetector == null && !sentenceDetectorNotAvailable){
+            try {
+                SentenceModel sentModel = openNLP.getSentenceModel(language);
+                if(sentModel != null){
+                    sentenceDetector = new SentenceDetectorME(sentModel);
+                } else {
+                    log.debug("No Sentence Detection Model for language '{}'",language);
+                    sentenceDetectorNotAvailable = true;
+                }
+            } catch (IOException e) {
+                log.info("Unable to load Sentence Detection Model for language '"+language+"'",e);
+                sentenceDetectorNotAvailable = true;
             }
-        } catch (IOException e) {
-            log.info("Unable to load Sentence Detection Model for language "+language,e);
-            sentDetect = null;
         }
-        return sentDetect;
-    }
-
-    public final boolean isSimpleTokenizerForced() {
-        return forceSimpleTokenizer;
-    }
-
-    public final void forceSimpleTokenizer(boolean useSimpleTokenizer) {
-        this.forceSimpleTokenizer = useSimpleTokenizer;
-    }
-
-    public final boolean isPosTaggerEnable() {
-        return enablePosTagger;
-    }
-
-    public final void enablePosTagger(boolean enablePosTagger) {
-        this.enablePosTagger = enablePosTagger;
-    }
-
-    public final boolean isChunkerEnabled() {
-        return enableChunker;
-    }
-
-    public final void enableChunker(boolean enableChunker) {
-        this.enableChunker = enableChunker;
-    }
-
-    public final boolean isSentenceDetectorEnabled() {
-        return enableSentenceDetector;
-    }
-
-    public final void enableSentenceDetector(boolean enableSentenceDetector) {
-        this.enableSentenceDetector = enableSentenceDetector;
+        return sentenceDetector;
     }
 
     public final OpenNLP getOpenNLP() {
         return openNLP;
     }
-    public final boolean isPosTypeChunkerEnabled() {
-        return enablePosTypeChunker;
+    /**
+     * @return the config
+     */
+    public final TextAnalyzerConfig getConfig() {
+        return config;
     }
     /**
-     * Enables the used of the {@link PosTypeChunker} if no {@link Chunker} for
-     * the current {@link #getLanguage() language} is available.
-     * @param enablePosTypeChunker
+     * @return the language
      */
-    public final void enablePosTypeChunker(boolean enablePosTypeChunker) {
-        this.enablePosTypeChunker = enablePosTypeChunker;
-        if(!enablePosTypeChunker){
-            forcePosTypeChunker(enablePosTypeChunker);
-        }
+    public final String getLanguage() {
+        return language;
     }
 
-    public final boolean isPosTypeChunkerForced() {
-        return forcePosTypeChunker;
-    }
-    /**
-     * Forces the use of the {@link PosTypeChunker} even if a {@link Chunker}
-     * for the current language would be available
-     * @param forcePosTypeChunker
-     */
-    public final void forcePosTypeChunker(boolean forcePosTypeChunker) {
-        this.forcePosTypeChunker = forcePosTypeChunker;
-        if(forcePosTypeChunker) {
-            enablePosTypeChunker(true);
-        }
-    }
-
-    /**
-     * Getter for the minimum POS tag probability so that the
-     * {@link PosTypeChunker} processes a POS tag.
-     * @return the minPosTypeProbability
-     */
-    public final double getMinPosTypeProbability() {
-        return minPosTagProbability;
-    }
-
-    /**
-     * Setter for the minimum POS tag probability so that the
-     * {@link PosTypeChunker} processes a POS tag.
-     * @param minPosTagProbability The probability [0..1] or value < 0 to 
-     * deactivate this feature
-     * @throws IllegalArgumentException if values > 1 are parsed as probability
-     */
-    public final void setMinPosTagProbability(double probability) {
-        if(probability > 1){
-            throw new IllegalArgumentException("The minimum POS tag probability MUST be set to a value <= 1 (parsed:"+minPosTagProbability+"");
-        }
-        this.minPosTagProbability = probability;
-    }
 
     /**
      * Analyses the parsed text in a single chunk. No sentence detector is used
      * @param sentence the sentence (text) to analyse
      * @return the Analysed text
      */
-    public AnalysedText analyseSentence(String sentence,String language){
+    public AnalysedText analyseSentence(String sentence){
         return new AnalysedText(sentence,language);
     }
     /**
@@ -269,11 +330,10 @@ public class TextAnalyzer {
      * have an effect on the analysis results of this iterator.<p>
      * if no sentence detector is available the whole text is parsed at once. 
      * @param text The text to analyse
-     * @param language The language of the parsed text
      * @return Iterator the analyses the parsed text sentence by sentence on
      * calls to {@link Iterator#next()}.
      */
-    public Iterator<AnalysedText> analyse(String text,String language){
+    public Iterator<AnalysedText> analyse(String text){
         return new TextAnalysisIterator(text, language);
     }
     
@@ -288,7 +348,7 @@ public class TextAnalyzer {
             if(text == null || text.isEmpty()){
                 sentenceSpans = new Span[]{};
             } else {
-                SentenceDetector sd = getSentenceDetector(language);
+                SentenceDetector sd = getSentenceDetector();
                 if(sd != null){
                     sentenceSpans = sd.sentPosDetect(text);
                 } else {
@@ -364,10 +424,10 @@ public class TextAnalyzer {
                     "The parsed offset MUST NOT be a negative number (offset="+offset+")");
             }
             this.offset = offset;
-            Span[] tokenSpans = getTokenizer(language).tokenizePos(sentence);
-            POSTaggerME tagger = getPosTagger(language);
-            ChunkerME chunker = getChunker(language);
-            PosTypeChunker posTypeChunker = getPosTypeChunker(language);
+            Span[] tokenSpans = getTokenizer().tokenizePos(sentence);
+            POSTaggerME tagger = getPosTagger();
+            ChunkerME chunker = getChunker();
+            PosTypeChunker posTypeChunker = getPosTypeChunker();
             String[] tokens = new String[tokenSpans.length];
             for(int ti = 0; ti<tokenSpans.length;ti++) {
                 tokens[ti] = tokenSpans[ti].getCoveredText(sentence).toString();
