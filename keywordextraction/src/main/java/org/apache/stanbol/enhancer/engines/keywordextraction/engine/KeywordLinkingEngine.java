@@ -36,6 +36,7 @@ import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer;
+import org.apache.stanbol.commons.opennlp.TextAnalyzer.TextAnalyzerConfig;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.AnalysedContent;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntityLinker;
@@ -166,17 +167,17 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
     public static final Literal LANG_ID_ENGINE_NAME = LiteralFactory.getInstance().createTypedLiteral("org.apache.stanbol.enhancer.engines.langid.LangIdEnhancementEngine");
     
     private EntitySearcher entitySearcher;
-    private EntityLinkerConfig config;
+    private EntityLinkerConfig linkerConfig;
+    private TextAnalyzerConfig nlpConfig;
     
     /**
      * The reference to the OpenNLP component
      */
     @org.apache.felix.scr.annotations.Reference
     private OpenNLP openNLP;
-    /**
-     * Used for natural language processing of parsed content
-     */
-    private TextAnalyzer textAnalyser;
+    //TextAnalyzer was changed to have a scope of a single request ( call to
+    //#computeEnhancement!
+    //private TextAnalyzer textAnalyser;
     /**
      * Used to create {@link AnalysedContent} instances for parsed content items
      */
@@ -242,12 +243,12 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
      * @param config
      */
     protected KeywordLinkingEngine(OpenNLP openNLP,EntitySearcher entitySearcher,
-                                     EntityLinkerConfig config){
+                                   TextAnalyzerConfig nlpConfig,EntityLinkerConfig linkingConfig){
         this.openNLP = openNLP;
-        this.textAnalyser = new TextAnalyzer(openNLP);
-        this.analysedContentFactory = OpenNlpAnalysedContentFactory.getInstance(textAnalyser);
+        this.linkerConfig = linkingConfig != null ? linkingConfig : new EntityLinkerConfig();
+        this.nlpConfig = nlpConfig != null ? nlpConfig : new TextAnalyzerConfig();
+        this.analysedContentFactory = OpenNlpAnalysedContentFactory.getInstance(openNLP,nlpConfig);
         this.entitySearcher = entitySearcher;
-        this.config = config != null ? config : new EntityLinkerConfig();
     }
     /**
      * Allows to create an instance that can be used outside of an OSGI
@@ -258,9 +259,10 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
      * @return the created engine instance
      */
     public static KeywordLinkingEngine createInstance(OpenNLP openNLP,
-                                                        EntitySearcher entitySearcher,
-                                                        EntityLinkerConfig config){
-        return new KeywordLinkingEngine(openNLP,entitySearcher,config);
+                                                      EntitySearcher entitySearcher,
+                                                      TextAnalyzerConfig nlpConfig,
+                                                      EntityLinkerConfig linkingConfig){
+        return new KeywordLinkingEngine(openNLP,entitySearcher,nlpConfig,linkingConfig);
     }
 
 
@@ -317,7 +319,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
             
             EntityLinker taxonomyLinker = new EntityLinker(
                 analysedContentFactory.create(text, language),
-                entitySearcher, config);
+                entitySearcher, linkerConfig);
             //process
             taxonomyLinker.process();
             //write results
@@ -369,7 +371,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
                 UriRef entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(ci, this);
                 //should we use the label used for the match, or search the
                 //representation for the best label ... currently its the matched one
-                Text label = suggestion.getBestLabel(config.getNameField(),language);
+                Text label = suggestion.getBestLabel(linkerConfig.getNameField(),language);
                 metadata.add(new TripleImpl(entityAnnotation, 
                     Properties.ENHANCER_ENTITY_LABEL, 
                     label.getLanguage() == null ?
@@ -379,7 +381,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
                 metadata.add(new TripleImpl(entityAnnotation, 
                     Properties.ENHANCER_ENTITY_REFERENCE, 
                     new UriRef(suggestion.getRepresentation().getId())));
-                Iterator<Reference> suggestionTypes = suggestion.getRepresentation().getReferences(config.getTypeField());
+                Iterator<Reference> suggestionTypes = suggestion.getRepresentation().getReferences(linkerConfig.getTypeField());
                 while(suggestionTypes.hasNext()){
                     metadata.add(new TripleImpl(entityAnnotation, 
                         Properties.ENHANCER_ENTITY_TYPE, new UriRef(suggestionTypes.next().getReference())));
@@ -480,7 +482,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
      * call<ul>
      * <li> {@link #activateEntitySearcher(ComponentContext, Dictionary)}
      * <li> {@link #initEntityLinkerConfig(Dictionary, EntityLinkerConfig)} and
-     * <li> {@link #activateTextAnalyzer(Dictionary)}
+     * <li> {@link #activateTextAnalyzerConfig(Dictionary)}
      * <li> {@link #dereferenceEntitiesState} (needs to be called after 
      * {@link #initEntityLinkerConfig(Dictionary, EntityLinkerConfig)})
      * </ul>
@@ -493,7 +495,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
     @SuppressWarnings("unchecked")
     protected void activate(ComponentContext context) throws ConfigurationException {
         Dictionary<String,Object> properties = context.getProperties();
-        activateTextAnalyzer(properties);
+        activateTextAnalyzerConfig(properties);
         activateEntitySearcher(context, properties);
         activateEntityLinkerConfig(properties);
         activateEntityDereference(properties);
@@ -514,7 +516,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
             dereferenceEntitiesState = DEFAULT_DEREFERENCE_ENTITIES_STATE;
         }
         if(dereferenceEntitiesState){
-            config.getSelectedFields().addAll(DEREFERENCE_FIELDS);
+            linkerConfig.getSelectedFields().addAll(DEREFERENCE_FIELDS);
         }
     }
 
@@ -529,9 +531,8 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
      * 
      * @param configuration the OSGI component configuration
      */
-    protected final void activateTextAnalyzer(Dictionary<String,Object> configuration) throws ConfigurationException {
-        textAnalyser = new TextAnalyzer(openNLP);
-        analysedContentFactory = OpenNlpAnalysedContentFactory.getInstance(textAnalyser);
+    protected final void activateTextAnalyzerConfig(Dictionary<String,Object> configuration) throws ConfigurationException {
+        nlpConfig = new TextAnalyzerConfig();
         Object value;
         value = configuration.get(PROCESSED_LANGUAGES);
         if(value == null){
@@ -569,7 +570,8 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
                 "The configured min POS tag probability MUST BE in the range [0..1] " +
                 "or < 0 to deactivate this feature (parsed value "+value+")!");
         }
-        textAnalyser.setMinPosTagProbability(minPosTagProb);
+        nlpConfig.setMinPosTagProbability(minPosTagProb);
+        analysedContentFactory = OpenNlpAnalysedContentFactory.getInstance(openNLP,nlpConfig);
     }
 
     /**
@@ -584,7 +586,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
      * <li>{@link #MIN_FOUND_TOKENS}
      * </ul>
      * This Method create an new {@link EntityLinkerConfig} instance only if
-     * <code>{@link #config} == null</code>. If the instance is already initialised
+     * <code>{@link #linkerConfig} == null</code>. If the instance is already initialised
      * that all current values for keys missing in the parsed configuration are
      * preserved.
      * @param configuration the configuration
@@ -593,8 +595,8 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
      * case a ConfigurationException.
      */
     protected void activateEntityLinkerConfig(Dictionary<String,Object> configuration) throws ConfigurationException {
-        if(config == null){
-            this.config = new EntityLinkerConfig();
+        if(linkerConfig == null){
+            this.linkerConfig = new EntityLinkerConfig();
         }
         Object value;
         value = configuration.get(NAME_FIELD);
@@ -602,7 +604,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
             if(value.toString().isEmpty()){
                 throw new ConfigurationException(NAME_FIELD,"The configured name field MUST NOT be empty");
             }
-            config.setNameField(value.toString());
+            linkerConfig.setNameField(value.toString());
         }
         //init TYPE_FIELD
         value = configuration.get(TYPE_FIELD);
@@ -610,7 +612,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
             if(value.toString().isEmpty()){
                 throw new ConfigurationException(TYPE_FIELD,"The configured name field MUST NOT be empty");
             }
-            config.setTypeField(value.toString());
+            linkerConfig.setTypeField(value.toString());
         }
         //init REDIRECT_FIELD
         value = configuration.get(REDIRECT_FIELD);
@@ -618,7 +620,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
             if(value.toString().isEmpty()){
                 throw new ConfigurationException(NAME_FIELD,"The configured name field MUST NOT be empty");
             }
-            config.setRedirectField(value.toString());
+            linkerConfig.setRedirectField(value.toString());
         }
         //init MAX_SUGGESTIONS
         value = configuration.get(MAX_SUGGESTIONS);
@@ -638,7 +640,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
             if(maxSuggestions < 1){
                 throw new ConfigurationException(MAX_SUGGESTIONS, "Values MUST be valid Integer values > 0");
             }
-            config.setMaxSuggestions(maxSuggestions);
+            linkerConfig.setMaxSuggestions(maxSuggestions);
         }
         //init MIN_FOUND_TOKENS
         value = configuration.get(MIN_FOUND_TOKENS);
@@ -658,7 +660,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
             if(minFoundTokens < 1){
                 throw new ConfigurationException(MIN_FOUND_TOKENS, "Values MUST be valid Integer values > 0");
             }
-            config.setMinFoundTokens(minFoundTokens);
+            linkerConfig.setMinFoundTokens(minFoundTokens);
         }
         // init MIN_SEARCH_TOKEN_LENGTH
         value = configuration.get(MIN_SEARCH_TOKEN_LENGTH);
@@ -678,13 +680,13 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
             if(minSearchTokenLength < 1){
                 throw new ConfigurationException(MIN_SEARCH_TOKEN_LENGTH, "Values MUST be valid Integer values > 0");
             }
-            config.setMaxSuggestions(minSearchTokenLength);
+            linkerConfig.setMaxSuggestions(minSearchTokenLength);
         }
         //init the REDIRECT_PROCESSING_MODE
         value = configuration.get(REDIRECT_PROCESSING_MODE);
         if(value != null){
             try {
-                config.setRedirectProcessingMode(RedirectProcessingMode.valueOf(value.toString()));
+                linkerConfig.setRedirectProcessingMode(RedirectProcessingMode.valueOf(value.toString()));
             } catch (IllegalArgumentException e) {
                 throw new ConfigurationException(REDIRECT_PROCESSING_MODE, "Values MUST be one of "+
                     Arrays.toString(RedirectProcessingMode.values()));
@@ -695,12 +697,12 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
         if(value != null){
             String defaultLang = value.toString().trim();
             if(defaultLang.isEmpty()){
-                config.setDefaultLanguage(null);
+                linkerConfig.setDefaultLanguage(null);
             } else if(defaultLang.length() == 1){
                 throw new ConfigurationException(DEFAULT_MATCHING_LANGUAGE, "Illegal language code '"+
                     defaultLang+"'! Language Codes MUST BE at least 2 chars long.");
             } else {
-                config.setDefaultLanguage(defaultLang);
+                linkerConfig.setDefaultLanguage(defaultLang);
             }
         }
     }
@@ -742,7 +744,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
     @Deactivate
     protected void deactivate(ComponentContext context) {
         deactivateEntitySearcher();
-        deactivateTextAnalyzer();
+        deactivateTextAnalyzerConfig();
         deactivateEntityLinkerConfig();
         deactivateEntityDereference();
     }
@@ -758,8 +760,8 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
      * Deactivates the {@link TextAnalyzer} as well as resets the set of languages
      * to process to {@link #DEFAULT_LANGUAGES}
      */
-    protected void deactivateTextAnalyzer() {
-        this.textAnalyser = null;
+    protected void deactivateTextAnalyzerConfig() {
+        this.nlpConfig = null;
         this.analysedContentFactory = null;
         languages = DEFAULT_LANGUAGES;
     }
@@ -768,7 +770,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
      * sets the {@link EntityLinkerConfig} to <code>null</code>
      */
     protected void deactivateEntityLinkerConfig() {
-        config = null;
+        linkerConfig = null;
     }
 
     /**
