@@ -113,7 +113,7 @@ public class BundleDataFileProvider implements DataFileProvider {
             String resourceName = path != null ? path + filename : filename ;
             resource = bundle.getEntry(resourceName);
         }
-        log.info("Resource {} found: {}", (resource == null ? "NOT" : ""), filename);
+        log.debug("Resource {} found: {}", (resource == null ? "NOT" : ""), filename);
         return resource != null ? resource.openStream() : null;
     }
     /**

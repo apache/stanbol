@@ -46,11 +46,15 @@ import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 @Provider
 //@Produces({TEXT_PLAIN, N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE, RDF_JSON, APPLICATION_JSON})
 public class GraphWriter implements MessageBodyWriter<TripleCollection> {
+    
+    private final Logger log = LoggerFactory.getLogger(GraphWriter.class);
     public static final Set<String> supportedMediaTypes;
     static {
         Set<String> types = new HashSet<String>();
@@ -88,11 +92,13 @@ public class GraphWriter implements MessageBodyWriter<TripleCollection> {
             MultivaluedMap<String, Object> httpHeaders,
             OutputStream entityStream) throws IOException,
             WebApplicationException {
+        long start = System.currentTimeMillis();
         String mediaTypeString = mediaType.getType()+'/'+mediaType.getSubtype();
         if (mediaType.isWildcardType() || TEXT_PLAIN.equals(mediaTypeString)) {
             getSerializer().serialize(entityStream, t, APPLICATION_JSON);
         } else {
             getSerializer().serialize(entityStream, t, mediaTypeString);
         }
+        log.debug("Serialized {} in {}ms",t.size(),System.currentTimeMillis()-start);
     }
 }
