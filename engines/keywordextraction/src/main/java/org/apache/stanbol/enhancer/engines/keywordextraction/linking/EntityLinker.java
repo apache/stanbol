@@ -21,8 +21,12 @@ import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EntityLinker {
+    
+    private final Logger log = LoggerFactory.getLogger(EntityLinker.class);
 
     private final EntityLinkerConfig config;
     private final AnalysedContent content;
@@ -101,7 +105,7 @@ public class EntityLinker {
                         } else { //calculate the score
                             double suggestionMatchScore = suggestion.getMatchCount()*suggestion.getMatchScore();
                             //how good is the current match in relation to the best one
-                            double spanScore = suggestionMatchScore/bestMatchCount;
+                            double spanScore = suggestion.getMatchCount()/bestMatchCount;
                             //how good is the match to the span selected by this suggestion
                             double textScore = suggestionMatchScore/suggestion.getSpan();
                             //how good is the match in relation to the tokens of the suggested label
@@ -116,11 +120,12 @@ public class EntityLinker {
                     //matchcount of the best match MUST NOT change
                     //after the sort by score!
                     if(bestMatchCount != suggestions.get(0).getMatchCount()){
-                        //TODO: change this to a warning (like to have exceptions during debugging)
-                        throw new IllegalStateException(String.format(
-                            "The match count for the top Ranked Suggestion for %s changed after resorting based on Scores! (original: %s, currnet %s)",
-                            state.getTokenText(suggestions.get(0).getStart(),bestMatchCount),
-                            oldBestRanked,suggestions));
+                        log.warn("The match count for the top Ranked Suggestion for {} " +
+                        		"changed after resorting based on Scores!",
+                            state.getTokenText(suggestions.get(0).getStart(),bestMatchCount));
+                        log.warn("  originalbest   : {}",oldBestRanked);
+                        log.warn(" currnet ranking : {}",suggestions);
+                        log.warn("  ... this will result in worng confidence values relative to the best match");
                     }
                     //remove all suggestions > config.maxSuggestions
                     if(suggestions.size() > config.getMaxSuggestions()){
@@ -145,7 +150,7 @@ public class EntityLinker {
                         linkedEntities.put(selectedText, linkedEntity);
                     }
                     linkedEntity.addOccurrence(
-                        state.getSentence(), state.getTokenIndex(), span);
+                        state.getSentence(), start, span);
                     //set the next token to process to the next word after the
                     //currently found suggestion
                     state.setConsumed(start+span-1);
@@ -488,7 +493,8 @@ public class EntityLinker {
                 //processable tokens are counted, but Exact also checks
                 //of non-processable!
                 foundTokens = coveredTokens;
-            } else if(foundProcessableTokens >= config.getMinFoundTokens() && 
+            } else if((foundProcessableTokens >= config.getMinFoundTokens() ||
+                    foundTokens == coveredTokens) && 
                     labelMatchScore >= 0.6f){
                 if(foundTokens == coveredTokens){
                     labelMatch = MATCH.FULL;

@@ -68,18 +68,21 @@ public class InMemoryJobManager implements EnhancementJobManager {
         synchronized (sortedEngineList) {
             engines = sortedEngineList.iterator();
         }
+        long start = System.currentTimeMillis();
         while (engines.hasNext()) {
             EnhancementEngine engine = engines.next();
+            long startEngine = System.currentTimeMillis();
             if (engine.canEnhance(ci) == EnhancementEngine.CANNOT_ENHANCE) {
                 log.debug("[{}] cannot be enhanced by engine [{}], skipping",
                         ci.getId(), engine);
             } else {
                 // TODO should handle sync/async enhancing. All sync for now.
                 engine.computeEnhancements(ci);
-                log.debug("ContentItem [{}] enhanced by engine [{}]",
-                        ci.getId(), engine);
+                log.debug("ContentItem [{}] enhanced by engine [{}] in {}ms",
+                        new Object[]{ci.getId(), engine,System.currentTimeMillis()-startEngine});
             }
         }
+        log.debug("ContentItem [{}] enhanced in {}ms",ci.getId(),(System.currentTimeMillis()-start));
     }
 
     public void bindEnhancementEngine(EnhancementEngine e) {

@@ -9,11 +9,13 @@ import java.util.Set;
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.util.Span;
 
+import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.commons.opennlp.PosTagsCollectionEnum;
 import org.apache.stanbol.commons.opennlp.PosTypeChunker;
 import org.apache.stanbol.commons.opennlp.PosTypeCollectionType;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText;
+import org.apache.stanbol.commons.opennlp.TextAnalyzer.TextAnalyzerConfig;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText.Token;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.AnalysedContent;
 /**
@@ -33,7 +35,9 @@ import org.apache.stanbol.enhancer.engines.keywordextraction.linking.AnalysedCon
 public class OpenNlpAnalysedContentFactory {
     
 
-    private final TextAnalyzer textAnalyzer;
+    private final OpenNLP openNLP;
+    
+    private final TextAnalyzerConfig config;
     
     private final Map<String,Set<String>> languagePosTags = new HashMap<String,Set<String>>();
     /**
@@ -46,8 +50,8 @@ public class OpenNlpAnalysedContentFactory {
     public final Set<String> DEFAULT_POS_TAGS = PosTagsCollectionEnum.EN_NOUN.getTags();
         
     
-    public static OpenNlpAnalysedContentFactory getInstance(TextAnalyzer textAnalyzer){
-        return new OpenNlpAnalysedContentFactory(textAnalyzer);
+    public static OpenNlpAnalysedContentFactory getInstance(OpenNLP openNLP, TextAnalyzerConfig config){
+        return new OpenNlpAnalysedContentFactory(openNLP,config);
     }
     /**
      * Setter for the POS tags used to process Words in the given language.
@@ -70,16 +74,18 @@ public class OpenNlpAnalysedContentFactory {
         }
     }
     
-    protected OpenNlpAnalysedContentFactory(TextAnalyzer textAnalyzer){
-        if(textAnalyzer == null){
-            throw new IllegalArgumentException("The parsed TextAnalyzer MUST NOT be NULL!");
+    protected OpenNlpAnalysedContentFactory(OpenNLP openNLP,TextAnalyzerConfig config){
+        if(openNLP == null){
+            throw new IllegalArgumentException("The parsed OpenNLP instance MUST NOT be NULL!");
         }
-        this.textAnalyzer = textAnalyzer;
+        this.openNLP = openNLP;
+        this.config = config;
         setLanguagePosTags(null, DEFAULT_POS_TAGS);
     }
     
     public AnalysedContent create(String text,String language){
-        return new OpenNlpAnalysedContent(text, language);
+        TextAnalyzer analyzer = new TextAnalyzer(openNLP, language,config);
+        return new OpenNlpAnalysedContent(text, analyzer);
     }
 
     /**
@@ -89,18 +95,19 @@ public class OpenNlpAnalysedContentFactory {
      *
      */
     private class OpenNlpAnalysedContent implements AnalysedContent{
+        private final TextAnalyzer analyzer;
         private final double minPosTagProbability;
-        private final String language;
         private final Iterator<AnalysedText> sentences;
         private final Set<String> posTags;
         private final Tokenizer tokenizer;
 
-        private OpenNlpAnalysedContent(String text, String lang){
-            this.language = lang;
-            this.sentences = textAnalyzer.analyse(text, lang);
-            this.posTags = PosTagsCollectionEnum.getPosTagCollection(lang, PosTypeCollectionType.NOUN);
-            this.tokenizer = textAnalyzer.getTokenizer(lang);
-            minPosTagProbability = textAnalyzer.getMinPosTypeProbability();
+        private OpenNlpAnalysedContent(String text, TextAnalyzer analyzer){
+            this.analyzer = analyzer;
+            this.sentences = analyzer.analyse(text);
+            this.posTags = PosTagsCollectionEnum.getPosTagCollection(
+                analyzer.getLanguage(), PosTypeCollectionType.NOUN);
+            this.tokenizer = analyzer.getTokenizer();
+            this.minPosTagProbability = analyzer.getConfig().getMinPosTypeProbability();
         }
         
         /**
