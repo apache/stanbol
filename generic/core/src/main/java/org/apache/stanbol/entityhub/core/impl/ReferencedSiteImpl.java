@@ -265,7 +265,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
     }
     protected ReferencedSiteImpl(Logger log){
         this.log = log;
-           log.info("create instance of "+this.getClass().getName());
+           log.info("create instance of {}",this.getClass().getName());
     }
     public String getId(){
         return siteConfiguration.getId();
@@ -506,7 +506,7 @@ public class ReferencedSiteImpl implements ReferencedSite {
                         //return the the cached version
                         rep = cache.store(rep);
                         cachedVersion = Boolean.TRUE;
-                        log.info(String.format("  - cached Representation %s in %d ms",    id, (System.currentTimeMillis() - start)));
+                        log.debug("  - cached Representation {} in {} ms",    id, (System.currentTimeMillis() - start));
                     } catch (YardException e) {
                         log.warn(String.format("Unable to cache Represetnation %s in Cache %s! Representation not cached!",
                             id, siteConfiguration.getCacheId()), e);
@@ -516,8 +516,8 @@ public class ReferencedSiteImpl implements ReferencedSite {
                 entity.getMetadata().set(RdfResourceEnum.isChached.getUri(), cachedVersion);
             }
         } else {
-            log.info(String.format("  - loaded Representation %s from Cache in %d ms",
-                    id, (System.currentTimeMillis() - start)));
+            log.debug("  - loaded Representation {} from Cache in {} ms",
+                    id, (System.currentTimeMillis() - start));
         }
         return entity;
     }
@@ -779,8 +779,8 @@ public class ReferencedSiteImpl implements ReferencedSite {
         public void serviceChanged(ServiceEvent event) {
             Object eventComponentName = event.getServiceReference().getProperty("component.name");
             if(event.getType() == ServiceEvent.REGISTERED){
-                log.info(String.format("Process ServceEvent for ComponentFactory %s and State REGISTERED",
-                        eventComponentName));
+                log.info("Process ServiceEvent for ComponentFactory {} and State REGISTERED",
+                        eventComponentName);
                 ComponentFactory factory = (ComponentFactory)bundleContext.getService(event.getServiceReference());
                 if(siteConfiguration.getEntityDereferencerType() != null &&
                         siteConfiguration.getEntityDereferencerType().equals(eventComponentName)){
@@ -791,9 +791,9 @@ public class ReferencedSiteImpl implements ReferencedSite {
                     createEntitySearcherComponent(factory);
                 }
             } else {
-                log.info(String.format("Ignore ServiceEvent for ComponentFactory %s and state %s",
+                log.info("Ignore ServiceEvent for ComponentFactory {} and state {}",
                         eventComponentName,
-                        event.getType()==ServiceEvent.MODIFIED?"MODIFIED":event.getType()==ServiceEvent.UNREGISTERING?"UNREGISTERING":"MODIFIED_ENDMATCH"));
+                        event.getType()==ServiceEvent.MODIFIED?"MODIFIED":event.getType()==ServiceEvent.UNREGISTERING?"UNREGISTERING":"MODIFIED_ENDMATCH");
             }
         }
 
