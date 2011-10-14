@@ -152,7 +152,8 @@ public class RdfIndexingSource implements EntityDataIterable,EntityDataProvider 
         }
         //init the store
         this.indexingDataset = createRdfModel(modelLocation);
-        this.loader =  new ResourceLoader(new RdfResourceImporter(indexingDataset), true);
+        //use a ResourceLoader that fails on the first invalid RDF file (STANBOL-328)
+        this.loader =  new ResourceLoader(new RdfResourceImporter(indexingDataset), true,true);
         loader.addResource(sourceFileOrDirectory);
     }
     @Override
