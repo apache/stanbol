@@ -113,7 +113,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-war-plugin</artifactId>
-          <version>2.1-beta-1</version>
+          <version>2.1.1</version>
         </plugin>
         <plugin>
           <groupId>org.mortbay.jetty</groupId>
@@ -500,6 +500,57 @@
         <scope>provided</scope>
       </dependency>
 
+      <!-- Partial bundle list dependencies -->
+	    <dependency>
+	      <groupId>org.apache.stanbol</groupId>
+	      <artifactId>org.apache.stanbol.cmsadapter.bundlelist</artifactId>
+	      <version>0.9.0-incubating-SNAPSHOT</version>
+	      <type>partialbundlelist</type>
+	      <scope>provided</scope>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.apache.stanbol</groupId>
+	      <artifactId>org.apache.stanbol.contenthub.bundlelist</artifactId>
+	      <version>0.9.0-incubating-SNAPSHOT</version>
+	      <type>partialbundlelist</type>
+	      <scope>provided</scope>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.apache.stanbol</groupId>
+	      <artifactId>org.apache.stanbol.data.bundlelist</artifactId>
+	      <version>0.9.0-incubating-SNAPSHOT</version>
+	      <type>partialbundlelist</type>
+	      <scope>provided</scope>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.apache.stanbol</groupId>
+	      <artifactId>org.apache.stanbol.enhancer.bundlelist</artifactId>
+	      <version>0.9.0-incubating-SNAPSHOT</version>
+	      <type>partialbundlelist</type>
+	      <scope>provided</scope>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.apache.stanbol</groupId>
+	      <artifactId>org.apache.stanbol.entityhub.bundlelist</artifactId>
+	      <version>0.9.0-incubating-SNAPSHOT</version>
+	      <type>partialbundlelist</type>
+	      <scope>provided</scope>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.apache.stanbol</groupId>
+	      <artifactId>org.apache.stanbol.ontologymanager.bundlelist</artifactId>
+	      <version>0.9.0-incubating-SNAPSHOT</version>
+	      <type>partialbundlelist</type>
+	      <scope>provided</scope>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.apache.stanbol</groupId>
+	      <artifactId>org.apache.stanbol.rules.bundlelist</artifactId>
+	      <version>0.9.0-incubating-SNAPSHOT</version>
+	      <type>partialbundlelist</type>
+	      <scope>provided</scope>
+	    </dependency>
+      
 
       <!-- OSGi -->
       <dependency>
