@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ResourceLoader {
+    private final boolean failOnError;
     
     private static final Logger log = LoggerFactory.getLogger(ResourceLoader.class);
     private final ResourceImporter resourceImporter;
@@ -50,10 +51,10 @@ public class ResourceLoader {
      * parsed to the resource handler.
      */
     private boolean loadEntriesWithinZipArchives = true;
-    public ResourceLoader(ResourceImporter resourceImporter) {
-        this(resourceImporter,true);
+    public ResourceLoader(ResourceImporter resourceImporter,boolean failOnError) {
+        this(resourceImporter,true,failOnError);
     }
-    public ResourceLoader(ResourceImporter resourceImporter, boolean processEntriesWithinArchives) {
+    public ResourceLoader(ResourceImporter resourceImporter, boolean processEntriesWithinArchives,boolean failOnError) {
         if(resourceImporter == null){
             throw new IllegalStateException("The parsed ResourceProcessor instance MUST NOT be NULL!");
         }
@@ -61,6 +62,7 @@ public class ResourceLoader {
         this.loadEntriesWithinZipArchives = processEntriesWithinArchives;
         //use a tree map to have the files sorted
         this.files = new TreeMap<String,ResourceState>();
+        this.failOnError = failOnError;
     }
 
     /**
@@ -263,6 +265,16 @@ public class ResourceLoader {
             if(files.containsKey(file)){
                 log.debug("File {} now in state {}",file,state);
                 files.put(file, state);
+                //if failOnError is activated we stop the loading on the first
+                //error!
+                if(failOnError && ResourceState.ERROR == state){
+                    String msg = "Error while loading Resource "+file;
+                    if(e != null){
+                        throw new IllegalStateException(msg,e);
+                    } else {
+                        throw new IllegalStateException(msg);
+                    }
+                }
             } else {
                 log.info("Ignore Error for File {} because it is no longer registered with this RdfLoader",
                     file);
