@@ -82,13 +82,15 @@ function getEntityForUri() {
     </tr>
     <tr>
         <th>Request</th>
-        <td>POST /entityhub/entity?[id={uri}]</td>
+        <td>POST /entityhub/entity?[id={uri}]&[update=true/false]</td>
     </tr>
     <tr>
         <th>Parameter</th>
-        <td>id: optional the id of the Entity to add. If an id is parsed it is
+        <td><b>id:</b> optional the id of the Entity to add. If an id is parsed it is
         ensured that regardless of the included data only the entity with the
-        parsed id is created. Information for other ids will be ignored.</th>
+        parsed id is created. Information for other ids will be ignored.<br>
+        <b>update:</b> Switch that allows to allow updates to existing entities
+        for POST requests. Default is <code>false</code>
     </tr>
     <tr>
         <th>Produces</th>
@@ -96,6 +98,17 @@ function getEntityForUri() {
     </tr>
 </tbody>
 </table>
+<h5>Examples:</h5>
+<p> The following request would create all Entities defines within {file.rdf} in
+the entityhub. If any of such Entities already exists within the Entityhub the
+request would fail with BAD REQUEST</p>
+<pre>curl -i -X POST -H "Content-Type:application/rdf+xml" -T {file.rdf} "${it.publicBaseUri}entityhub/entity</pre>
+<p> Here the same request, but now it would be also allowed to update existing
+Entities</p>
+<pre>curl -i -X POST -H "Content-Type:application/rdf+xml" -T {file.rdf} "${it.publicBaseUri}entityhub/entity?update=true</pre>
+<p>This request would only import the Entity with the id {id} while ignoring
+all triples with a subject other that {id} contained within {file.rdf}</p>
+<pre>curl -i -X POST -H "Content-Type:application/rdf+xml" -T {file.rdf} "${it.publicBaseUri}entityhub/entity?id={id}</pre>
 
 <h4> Update an Entity</h4>
 <table>
@@ -106,13 +119,17 @@ function getEntityForUri() {
     </tr>
     <tr>
         <th>Request</th>
-        <td>POST /entityhub/entity?[id={uri}]</td>
+        <td>PUT /entityhub/entity?[id={uri}]&[create=true/false]</td>
     </tr>
     <tr>
         <th>Parameter</th>
-        <td>id: optional the id of the Entity to update. If an id is parsed it is
+        <td><b>id:</b> optional the id of the Entity to update. If an id is parsed it is
         ensured that regardless of the parsed data only information of this entity
-        are updated</th>
+        are updated.<br>
+        <b>create:</b> Switch that allows to enable/disable the creation of new
+        Entities for update (PUT) requests. The default <code>true</code>.
+        </td>
+        <td>
     </tr>
     <tr>
         <th>Produces</th>
@@ -121,6 +138,20 @@ function getEntityForUri() {
     </tr>
 </tbody>
 </table>
+<h5>Examples:</h5>
+<p> The following request would update/create all Entities defines within {file.rdf} in
+the entityhub. Non existent Entities will be created and already existing one will be
+updated (replaced with the submitted version).</p>
+<pre>curl -i -X PUT -H "Content-Type:application/rdf+xml" -T {file.rdf} "${it.publicBaseUri}entityhub/entity</pre>
+<p> This request would only update Entities. If any of the Entities in {file.rdf}
+would not already be present within the Entityhub this request would return a
+BAD REQUEST.</p>
+<pre>curl -i -X PUT -H "Content-Type:application/rdf+xml" -T {file.rdf} "${it.publicBaseUri}entityhub/entity?create=false</pre>
+<p>This request would update the Entity with the id {id} while ignoring
+all triples with a subject other that {id} contained within {file}. If an
+entity with {id} is not yet present within the Entityhub, than a BAD REQUEST would
+be returned</p>
+<pre>curl -i -X POST -H "Content-Type:application/rdf+xml" -T {file.rdf} "${it.publicBaseUri}entityhub/entity?id={id}&create=false</pre>
 
 <h4> Delete an Entity  entityhub/entity</h4>
 <table>

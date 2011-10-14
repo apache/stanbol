@@ -50,8 +50,10 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -225,7 +227,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
     @POST
     @Path("entity/")
     @Consumes(MediaType.WILDCARD)
-    public Response createEntity(@QueryParam(value = "id") String id, 
+    public Response createEntity(@QueryParam(value = "id") String id,
+                                 @QueryParam(value = "update") boolean allowUpdate,
                                Set<Representation> parsed,
                                @Context HttpHeaders headers){
         //Set<Representation> representations = Collections.emptySet();
@@ -233,13 +236,14 @@ public class EntityhubRootResource extends BaseStanbolResource {
         log.info("Headers: "+headers.getRequestHeaders());
         log.info("Entity: "+id);
         log.info("Representations : "+parsed);
-        return updateOrCreateEntity(id, parsed, true,headers);
+        return updateOrCreateEntity(id, parsed, HttpMethod.POST, true,allowUpdate,headers);
     }
 
     @PUT
     @Path("entity/")
     @Consumes(MediaType.WILDCARD)
     public Response updateEntity(@QueryParam(value = "id") String id, 
+                                 @QueryParam(value = "create") @DefaultValue("true") boolean allowCreate,
                                Set<Representation> parsed,
                                @Context HttpHeaders headers){
         //Set<Representation> representations = Collections.emptySet();
@@ -247,7 +251,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
         log.info("Headers: "+headers.getRequestHeaders());
         log.info("Entity: "+id);
         log.info("Representations : "+parsed);
-        return updateOrCreateEntity(id, parsed, false,  headers);
+        return updateOrCreateEntity(id, parsed, HttpMethod.PUT, allowCreate, true, headers);
     }
     
     @DELETE
@@ -287,12 +291,18 @@ public class EntityhubRootResource extends BaseStanbolResource {
      * <code>null</code> all parsed Representations with other
      * ids will be ignored.
      * @param parsed the parsed representation(s)
-     * @param createState create or update request
+     * @param method the {@link HttpMethod} used by the reuqest. Needed to create
+     * the correct response.
+     * @param create allow to create new Entities
+     * @param update allow to update existing Entities
      * @param headers the HTTP headers of the request
      * @return the created/updated representation as response
      */
     private Response updateOrCreateEntity(String id,Set<Representation> parsed, 
-                                          boolean createState, HttpHeaders headers){
+                                          String method,
+                                          boolean create, 
+                                          boolean update,
+                                          HttpHeaders headers){
         MediaType accepted = JerseyUtils.getAcceptableMediaType(headers,
             JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES, 
             MediaType.APPLICATION_JSON_TYPE);
@@ -314,27 +324,34 @@ public class EntityhubRootResource extends BaseStanbolResource {
             }
         }
         //First check if all parsed Representation can be created/updated
-        for(Representation representation : parsed){
-            boolean exists;
-            try {
-                exists = entityhub.isRepresentation(representation.getId());
-            } catch (EntityhubException e) {
-                log.error(String.format("Exception while checking the existance " +
-                    "of an Entity with id  %s in the Entityhub.",
-                    representation.getId()),e);
-                return Response.status(Status.INTERNAL_SERVER_ERROR)
-                .entity(String.format("Unable to %s Entity %s because of" +
-                        "an Error while checking the current version of that" +
-                        "Entity within the Entityhub (Message: %s)",
-                        createState?"create":"update", representation.getId(),e.getMessage()))
+        if(!(create && update)){ //if both create and update are enabled skip this
+            for(Representation representation : parsed){
+                boolean exists;
+                try {
+                    exists = entityhub.isRepresentation(representation.getId());
+                } catch (EntityhubException e) {
+                    log.error(String.format("Exception while checking the existance " +
+                        "of an Entity with id  %s in the Entityhub.",
+                        representation.getId()),e);
+                    return Response.status(Status.INTERNAL_SERVER_ERROR)
+                    .entity(String.format("Unable to process Entity %s because of" +
+                            "an Error while checking the current version of that" +
+                            "Entity within the Entityhub (Message: %s)",
+                            representation.getId(),e.getMessage()))
+                            .header(HttpHeaders.ACCEPT, accepted).build();
+                }
+                if((exists && !update) || (!exists && !create)){
+                    return Response.status(Status.BAD_REQUEST).entity(String.format(
+                        "Unable to %s an Entity %s becuase it %s and %s is deactivated. " +
+                        " You might want to set the '%s' parameter to TRUE in your Request",
+                        exists ? "update" : "create",
+                        representation.getId(),
+                        exists ? "does already exists " : "does not",
+                        exists ? "updateing existing" : "creating new",
+                        exists ? "does already" : "does not exists",
+                        exists ? "update" : "create"))
                         .header(HttpHeaders.ACCEPT, accepted).build();
-            }
-            if(createState == exists){
-                return Response.status(Status.BAD_REQUEST).entity(String.format(
-                    "Unable to %s an Entity that %s exist",
-                    createState?"create":"update",
-                    exists?"does already":"does not"))
-                    .header(HttpHeaders.ACCEPT, accepted).build();
+                }
             }
         }
         //store the Representations
@@ -351,9 +368,8 @@ public class EntityhubRootResource extends BaseStanbolResource {
                 Entity entity = entityhub.store(representation);
                 updated.put(entity.getId(), entity);
             }catch (EntityhubException e) {
-                log.error(String.format("Exception while %s representation %s" +
-                        "in the Entityhub.",
-                        createState?"create":"update",representation),e);
+                log.error(String.format("Exception while storing Entity %s" +
+                        "in the Entityhub.",representation),e);
             }
         }
         //create the response for the Entity
@@ -367,7 +383,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
             return rb.build();
         } else {
             Entity entity = updated.values().iterator().next();
-            if(createState){
+            if(method.equals(HttpMethod.POST)){
                 ResponseBuilder rb = Response.created(uriInfo.getAbsolutePathBuilder()
                     .queryParam("id", "{entityId}")
                     .build(entity.getId()));
