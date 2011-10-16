@@ -94,6 +94,7 @@
         <module>launchers/stable</module>
         <module>launchers/stateless</module>
         <module>launchers/full</module>
+        <module>launchers/full-war</module>
         <module>integration-tests</module>
       </modules>
     </profile>
