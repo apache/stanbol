@@ -19,7 +19,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
 /**
  * Placeholder for a wrapper of events that affect ontology spaces.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public class OntologySpaceEvent {

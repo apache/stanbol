@@ -21,11 +21,14 @@ import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
+import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
+import org.apache.stanbol.owl.util.OWLUtils;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
@@ -146,9 +149,12 @@ public class ClerezzaSchemaMatcherImpl implements ClerezzaSchemaMatcher {
         try {
             cs = scopeSchemaMatching.getCustomSpace();
             cs.tearDown();
-            scopeSchemaMatching.getCustomSpace().addOntology(new GraphSource(knowledgeBase));
-        } catch (UnmodifiableOntologySpaceException e) {
-            log.error("Failed to change knowledge base in unmodifiable ontolgy space {}", e.getSpace());
+            // FIXME Ugly
+            scopeSchemaMatching.getCustomSpace().addOntology(
+                new RootOntologySource(OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(new GraphSource(
+                        knowledgeBase).getRootOntology())));
+        } catch (UnmodifiableOntologyCollectorException e) {
+            log.error("Failed to change knowledge base in unmodifiable ontolgy space {}", e.getOntologyCollector());
         } finally {
             cs.setUp();
         }

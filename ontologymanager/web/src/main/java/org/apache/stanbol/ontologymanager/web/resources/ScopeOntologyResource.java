@@ -16,7 +16,8 @@
  */
 package org.apache.stanbol.ontologymanager.web.resources;
 
-import static javax.ws.rs.core.Response.Status.*;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -39,10 +40,9 @@ import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceModificationException;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorModificationException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.web.util.OntologyRenderUtils;
@@ -64,11 +64,11 @@ import org.slf4j.LoggerFactory;
 /**
  * This resource represents ontologies loaded within a scope.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 @Path("/ontonet/ontology/{scopeid}/{uri:.+}")
-public class ONMScopeOntologyResource extends BaseStanbolResource {
+public class ScopeOntologyResource extends BaseStanbolResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -79,7 +79,7 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
 
     protected ClerezzaOntologyStorage storage;
 
-    public ONMScopeOntologyResource(@Context ServletContext servletContext) {
+    public ScopeOntologyResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
         this.storage = (ClerezzaOntologyStorage) ContextHelper.getServiceFromContext(
@@ -130,8 +130,8 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
                 return Response.ok(scope.getCoreSpace().asOWLOntology()).build();
             } else if (temp.equals(scope.getCustomSpace().getID())) {
                 return Response.ok(scope.getCustomSpace().asOWLOntology()).build();
-            } else if (scope.getSessionSpace(IRI.create(temp)) != null) {
-                return Response.ok(scope.getSessionSpace(IRI.create(temp)).asOWLOntology()).build();
+//            } else if (scope.getSessionSpace(IRI.create(temp)) != null) {
+//                return Response.ok(scope.getSessionSpace(IRI.create(temp)).asOWLOntology()).build();
             }
 
             /*
@@ -162,7 +162,8 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
                 else tmpmgr = OWLOntologyManagerFactory.createOWLOntologyManager(offline
                         .getOntologySourceLocations().toArray(new IRI[0]));
 
-                final Set<OWLOntology> ontologies = scope.getSessionSpace(ontiri).getOntologies(true);
+                final Set<OWLOntology> ontologies = scope.getCustomSpace().getOntologies(true);
+//                        scope.getSessionSpace(ontiri).getOntologies(true);
 
                 OWLOntologySetProvider provider = new OWLOntologySetProvider() {
                     @Override
@@ -323,9 +324,9 @@ public class ONMScopeOntologyResource extends BaseStanbolResource {
             if (cs.hasOntology(ontIri)) {
                 try {
                     reg.setScopeActive(scopeId, false);
-                    cs.removeOntology(new RootOntologySource(cs.getOntology(ontIri)));
+                    cs.removeOntology(ontIri);
                     reg.setScopeActive(scopeId, true);
-                } catch (OntologySpaceModificationException e) {
+                } catch (OntologyCollectorModificationException e) {
                     reg.setScopeActive(scopeId, true);
                     throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
                 }

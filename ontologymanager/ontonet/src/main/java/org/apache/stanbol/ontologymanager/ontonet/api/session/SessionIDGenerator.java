@@ -25,7 +25,7 @@ import org.semanticweb.owlapi.model.IRI;
  * identifiers for KReS sessions. These algorithms should take into account the
  * need for excluding existing session IDs.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public interface SessionIDGenerator {
@@ -37,7 +37,7 @@ public interface SessionIDGenerator {
 	 * 
 	 * @return the newly generated session ID.
 	 */
-    IRI createSessionID();
+    String createSessionID();
 
 	/**
 	 * Generates a new session ID that is different from any IRI in the
@@ -50,7 +50,7 @@ public interface SessionIDGenerator {
 	 *            to.
 	 * @return the newly generated session ID.
 	 */
-    IRI createSessionID(Set<IRI> exclude);
+    String createSessionID(Set<String> exclude);
 
 	/**
 	 * Returns the base IRI for all generated IDs to start with. It should be

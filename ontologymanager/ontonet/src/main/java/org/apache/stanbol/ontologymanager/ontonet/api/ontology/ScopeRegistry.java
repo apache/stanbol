@@ -24,7 +24,7 @@ import org.semanticweb.owlapi.model.IRI;
  * A registry that keeps track of the active ontology scopes in a running KReS
  * instance.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public interface ScopeRegistry {

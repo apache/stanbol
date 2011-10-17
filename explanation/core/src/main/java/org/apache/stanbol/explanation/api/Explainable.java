@@ -3,7 +3,7 @@ package org.apache.stanbol.explanation.api;
 /**
  * An umbrella and wrapper type for any object that may be backed up by a user-sensitive explanation.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public interface Explainable<T> {

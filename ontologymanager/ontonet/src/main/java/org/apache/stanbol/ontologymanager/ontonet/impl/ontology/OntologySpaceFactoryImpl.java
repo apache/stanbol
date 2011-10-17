@@ -23,11 +23,11 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CustomOntologySpa
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceListener;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.semanticweb.owlapi.model.IRI;
@@ -75,13 +75,13 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
         // FIXME: ensure that this is not null AND convert to using Strings for scope IDs
         OntologyScope parentScope = registry.getScope(scopeID);
 
-        if (parentScope != null && parentScope instanceof OntologySpaceListener) s
-                .addOntologySpaceListener((OntologySpaceListener) parentScope);
+        if (parentScope != null && parentScope instanceof OntologyCollectorListener) s
+                .addListener((OntologyCollectorListener) parentScope);
         // Set the supplied ontology's parent as the root for this space.
-        try {
+        if (ontologySources != null) try {
             for (OntologyInputSource src : ontologySources)
                 s.addOntology(src);
-        } catch (UnmodifiableOntologySpaceException e) {
+        } catch (UnmodifiableOntologyCollectorException e) {
             log.error("Ontology space " + s.getID() + " was found locked at creation time!", e);
         }
         // s.setUp();
@@ -130,7 +130,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
         for (OntologyInputSource src : sessionSources)
             try {
                 s.addOntology(src);
-            } catch (UnmodifiableOntologySpaceException e) {
+            } catch (UnmodifiableOntologyCollectorException e) {
                 // Should never happen anyway...
                 continue;
             }

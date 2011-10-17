@@ -7,7 +7,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
  * should be the primary object referenced by service components and passed as an argument to non-default
  * constructors.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public interface Configuration {

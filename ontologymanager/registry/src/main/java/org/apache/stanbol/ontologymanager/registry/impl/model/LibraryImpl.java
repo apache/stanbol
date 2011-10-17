@@ -26,12 +26,14 @@ import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryItem;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryOntology;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.OWLOntologyCreationIOException;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyDocumentAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.UnloadableImportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -148,6 +150,11 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
                     o.setRawOntology(getIRI(), mgr.getOntology(e.getOntologyID()));
                 } catch (OWLOntologyDocumentAlreadyExistsException e) {
                     o.setRawOntology(getIRI(), mgr.getOntology(e.getOntologyDocumentIRI()));
+                } catch (UnloadableImportException e) {
+                    log.warn("Import {} failed. Reason: {}", e.getImportsDeclaration().getURI(), e.getCause()
+                            .getLocalizedMessage());
+                } catch (OWLOntologyCreationIOException e) {
+                    log.error("I/O error when loading ontology {}. Reason: {}", id, e.getCause().getClass());
                 } catch (OWLOntologyCreationException e) {
                     log.error("Failed to load ontology " + id, e);
                 }

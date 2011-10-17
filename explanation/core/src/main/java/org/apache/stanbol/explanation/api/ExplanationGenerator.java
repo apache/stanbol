@@ -7,7 +7,7 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 /**
  * A factory for explanation information objects.
  * 
- * @author alessandro
+ * @author alexdma
  *
  */
 public interface ExplanationGenerator {

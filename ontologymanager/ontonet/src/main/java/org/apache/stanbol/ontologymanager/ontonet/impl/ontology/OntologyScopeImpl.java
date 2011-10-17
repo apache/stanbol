@@ -27,13 +27,14 @@ import java.util.Set;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CustomOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeOntologyListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
@@ -48,10 +49,10 @@ import org.slf4j.LoggerFactory;
 /**
  * The default implementation of an ontology scope.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
-public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
+public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListener {
 
     /**
      * The core ontology space for this scope, always set as default.
@@ -83,31 +84,23 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
     /**
      * Maps session IDs to ontology space. A single scope has at most one space per session.
      */
-    protected Map<IRI,SessionOntologySpace> sessionSpaces;
+    protected Map<String,SessionOntologySpace> sessionSpaces;
 
     public OntologyScopeImpl(String id,
                              IRI namespace,
                              OntologySpaceFactory factory,
-                             OntologyInputSource coreRoot) {
-        this(id, namespace, factory, coreRoot, null);
-    }
-
-    public OntologyScopeImpl(String id,
-                             IRI namespace,
-                             OntologySpaceFactory factory,
-                             OntologyInputSource coreRoot,
-                             OntologyInputSource customRoot) {
+                             OntologyInputSource<?>... coreOntologies) {
         setID(id);
         setNamespace(namespace);
 
-        this.coreSpace = factory.createCoreOntologySpace(id, coreRoot);
-        this.coreSpace.addOntologySpaceListener(this);
+        this.coreSpace = factory.createCoreOntologySpace(id, coreOntologies);
+        this.coreSpace.addListener(this);
         // let's just lock it. Once the core space is done it's done.
         this.coreSpace.setUp();
         // if (customRoot != null) {
         try {
-            setCustomSpace(factory.createCustomOntologySpace(id, customRoot));
-        } catch (UnmodifiableOntologySpaceException e) {
+            setCustomSpace(factory.createCustomOntologySpace(id/* , coreOntologies */));
+        } catch (UnmodifiableOntologyCollectorException e) {
             // Can't happen unless the factory or space implementations are
             // really naughty.
             log.warn(
@@ -116,9 +109,9 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
                         + " was denied creation of its own custom space upon initialization! This should not happen.",
                 e);
         }
-        this.customSpace.addOntologySpaceListener(this);
+        this.customSpace.addListener(this);
         // }
-        sessionSpaces = new HashMap<IRI,SessionOntologySpace>();
+        sessionSpaces = new HashMap<String,SessionOntologySpace>();
     }
 
     @Override
@@ -127,10 +120,10 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
     }
 
     @Override
-    public synchronized void addSessionSpace(OntologySpace sessionSpace, IRI sessionId) throws UnmodifiableOntologySpaceException {
+    public synchronized void addSessionSpace(OntologySpace sessionSpace, String sessionId) throws UnmodifiableOntologyCollectorException {
         if (sessionSpace instanceof SessionOntologySpace) {
             sessionSpaces.put(sessionId, (SessionOntologySpace) sessionSpace);
-            sessionSpace.addOntologySpaceListener(this);
+            sessionSpace.addListener(this);
 
             if (this.getCustomSpace() != null) ((SessionOntologySpace) sessionSpace).attachSpace(
                 this.getCustomSpace(), true);
@@ -141,6 +134,16 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
 
     @Override
     public OWLOntology asOWLOntology() {
+        return this.asOWLOntology(false);
+    }
+
+    /**
+     * FIXME not merging yet
+     * 
+     * @see OWLExportable#asOWLOntology(boolean)
+     */
+    @Override
+    public OWLOntology asOWLOntology(boolean merge) {
         // Create an ontology manager on the fly. We don't really need a permanent one.
         OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
         OWLDataFactory df = mgr.getOWLDataFactory();
@@ -210,7 +213,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
     }
 
     @Override
-    public SessionOntologySpace getSessionSpace(IRI sessionID) {
+    public SessionOntologySpace getSessionSpace(String sessionID) {
         return sessionSpaces.get(sessionID);
     }
 
@@ -237,14 +240,14 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
     }
 
     @Override
-    public synchronized void setCustomSpace(OntologySpace customSpace) throws UnmodifiableOntologySpaceException {
-        if (this.customSpace != null && this.customSpace.isLocked()) throw new UnmodifiableOntologySpaceException(
+    public synchronized void setCustomSpace(OntologySpace customSpace) throws UnmodifiableOntologyCollectorException {
+        if (this.customSpace != null && this.customSpace.isLocked()) throw new UnmodifiableOntologyCollectorException(
                 getCustomSpace());
         else if (!(customSpace instanceof CustomOntologySpace)) throw new ClassCastException(
                 "supplied object is not a CustomOntologySpace instance.");
         else {
             this.customSpace = (CustomOntologySpace) customSpace;
-            this.customSpace.addOntologySpaceListener(this);
+            this.customSpace.addListener(this);
             this.customSpace.attachCoreSpace(this.coreSpace, true);
         }
 
@@ -289,10 +292,10 @@ public class OntologyScopeImpl implements OntologyScope, OntologySpaceListener {
     @Override
     public synchronized void setUp() {
         if (locked || (customSpace != null && !customSpace.isLocked())) return;
-        this.coreSpace.addOntologySpaceListener(this);
+        this.coreSpace.addListener(this);
         this.coreSpace.setUp();
         if (this.customSpace != null) {
-            this.customSpace.addOntologySpaceListener(this);
+            this.customSpace.addListener(this);
             this.customSpace.setUp();
         }
         locked = true;

@@ -2,9 +2,9 @@ package org.apache.stanbol.ontologymanager.ontonet.api.io;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
 
 /**
  * An {@link OntologyInputSource} that gets ontologies from either a Clerezza {@link Graph} (or {@link MGraph}
@@ -13,16 +13,20 @@ import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
  * @author alexdma
  * 
  */
-public class GraphSource extends AbstractOntologyInputSource {
+public class GraphSource extends AbstractClerezzaGraphInputSource {
 
     public GraphSource(UriRef graphId) {
         this(graphId, TcManager.getInstance());
     }
 
-    public GraphSource(Graph graph) {
-        bindRootOntology(OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(graph));
+    public GraphSource(TripleCollection graph) {
+        if (graph instanceof Graph) bindRootOntology((Graph) graph);
+        else if (graph instanceof MGraph) bindRootOntology(((MGraph) graph).getGraph());
+        else throw new IllegalArgumentException("GraphSource supports only Graph and MGraph types. "
+                                                + graph.getClass() + " is not supported.");
         try {
-            bindPhysicalIri(rootOntology.getOntologyID().getDefaultDocumentIRI());
+            // TODO how can I know the physical iri?
+            // bindPhysicalIri(rootOntology.getOntologyID().getDefaultDocumentIRI());
         } catch (Exception e) {
             // Ontology might be anonymous, no physical IRI then...
             bindPhysicalIri(null);
@@ -36,12 +40,12 @@ public class GraphSource extends AbstractOntologyInputSource {
      * @param phyicalIRI
      */
     public GraphSource(UriRef graphId, TcManager tcManager) {
-        this(tcManager.getGraph(graphId));
+        this(tcManager.getTriples(graphId));
     }
 
     @Override
     public String toString() {
-        return "GRAPH<" + rootOntology.getOntologyID() + ">";
+        return "GRAPH<" + rootOntology + ">";
     }
 
 }

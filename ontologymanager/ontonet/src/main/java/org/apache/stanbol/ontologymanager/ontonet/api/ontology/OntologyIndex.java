@@ -25,7 +25,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
  * Provides an interface to the ontologies provided by registered scopes in the
  * ontology manager.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public interface OntologyIndex extends ScopeOntologyListener,

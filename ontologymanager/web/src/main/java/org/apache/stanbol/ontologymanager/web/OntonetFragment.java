@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.web;
 
 import java.util.ArrayList;
@@ -34,32 +34,31 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.web.resources.DocumentationResource;
-import org.apache.stanbol.ontologymanager.web.resources.GraphsResource;
-import org.apache.stanbol.ontologymanager.web.resources.ONMOntResource;
-import org.apache.stanbol.ontologymanager.web.resources.ONMRootResource;
-import org.apache.stanbol.ontologymanager.web.resources.ONMScopeOntologyResource;
-import org.apache.stanbol.ontologymanager.web.resources.ONMScopeResource;
-import org.apache.stanbol.ontologymanager.web.resources.RESTfulResource;
-import org.apache.stanbol.ontologymanager.web.resources.RootResource;
-import org.apache.stanbol.ontologymanager.web.resources.SessionIDResource;
-import org.apache.stanbol.ontologymanager.web.resources.SessionResource;
+import org.apache.stanbol.ontologymanager.web.resources.OntoNetRootResource;
+import org.apache.stanbol.ontologymanager.web.resources.OntologyIndexResource;
+import org.apache.stanbol.ontologymanager.web.resources.OntologyNetworkResource;
+import org.apache.stanbol.ontologymanager.web.resources.RegistryManagerResource;
+import org.apache.stanbol.ontologymanager.web.resources.ScopeOntologyResource;
+import org.apache.stanbol.ontologymanager.web.resources.ScopeResource;
+import org.apache.stanbol.ontologymanager.web.resources.SessionByIdResource;
+import org.apache.stanbol.ontologymanager.web.resources.SessionsResource;
+import org.apache.stanbol.ontologymanager.web.resources.StoredGraphsResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.TemplateLoader;
 
-
 /**
  * Implementation of WebFragment for the Stanbol Ontonet end-point.
  * 
  * @author alberto musetti
- *
+ * 
  */
 
 @Component(immediate = true, metatype = true)
 @Service(WebFragment.class)
-public class OntonetFragment implements WebFragment{
+public class OntonetFragment implements WebFragment {
 
     private static final String NAME = "ontonet";
 
@@ -71,10 +70,10 @@ public class OntonetFragment implements WebFragment{
 
     @Reference
     ONManager onm;
-    
+
     @Reference
     OfflineConfiguration offline;
-    
+
     @Reference
     RegistryManager regMgr;
 
@@ -87,19 +86,21 @@ public class OntonetFragment implements WebFragment{
     public Set<Class<?>> getJaxrsResourceClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         // Temporary resources
-        classes.add(RootResource.class);
+        classes.add(OntoNetRootResource.class);
         classes.add(DocumentationResource.class);
-        classes.add(RESTfulResource.class);
+        // classes.add(RESTfulResource.class);
 
-        classes.add(GraphsResource.class);
+        classes.add(StoredGraphsResource.class);
 
-        classes.add(ONMRootResource.class);
-        classes.add(ONMScopeResource.class);
-        classes.add(ONMScopeOntologyResource.class);
-        classes.add(ONMOntResource.class);
+        classes.add(OntologyNetworkResource.class);
+        classes.add(ScopeResource.class);
+        classes.add(ScopeOntologyResource.class);
+        classes.add(OntologyIndexResource.class);
 
-        classes.add(SessionResource.class);
-        classes.add(SessionIDResource.class);
+        classes.add(SessionsResource.class);
+        classes.add(SessionByIdResource.class);
+        
+        classes.add(RegistryManagerResource.class);
 
         return classes;
     }
@@ -124,7 +125,7 @@ public class OntonetFragment implements WebFragment{
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> links = new ArrayList<NavigationLink>();
-        links.add(new NavigationLink("ontonet", "/ontonet", "/imports/ontonetDescription.ftl", 50));
+        links.add(new NavigationLink(NAME, "/" + NAME, "/imports/ontonetDescription.ftl", 50));
         return links;
     }
 

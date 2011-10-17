@@ -21,7 +21,7 @@ import java.util.Random;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -52,7 +52,7 @@ public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl implemen
     }
 
     @Override
-    public void attachSpace(OntologySpace space, boolean skipRoot) throws UnmodifiableOntologySpaceException {
+    public void attachSpace(OntologySpace space, boolean skipRoot) throws UnmodifiableOntologyCollectorException {
         // FIXME re-implement!
         // if (!(space instanceof SessionOntologySpace)) {
         // OWLOntology o = space.getTopOntology();

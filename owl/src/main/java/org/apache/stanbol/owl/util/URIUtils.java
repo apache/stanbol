@@ -18,6 +18,7 @@ package org.apache.stanbol.owl.util;
 
 import java.net.URI;
 
+import org.apache.clerezza.rdf.core.UriRef;
 import org.semanticweb.owlapi.model.IRI;
 
 public class URIUtils {
@@ -30,6 +31,14 @@ public class URIUtils {
      */
     public static IRI upOne(IRI iri) {
         return upOne(iri.toURI());
+    }
+    
+    public static IRI createIRI(UriRef uri) {
+        return IRI.create(uri.getUnicodeString());
+    }
+    
+    public static UriRef createUriRef(IRI iri) {
+        return new UriRef(iri.toString());
     }
 
     /**

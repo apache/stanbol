@@ -38,6 +38,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public class SessionRenderer {
 
     private static OWLDataFactory __factory = OWLManager.getOWLDataFactory();
@@ -64,7 +65,7 @@ public class SessionRenderer {
 
         List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
 
-        OWLNamedIndividual iSes = __factory.getOWLNamedIndividual(session.getID());
+        OWLNamedIndividual iSes = __factory.getOWLNamedIndividual(IRI.create(session.getID()));
         additions.add(new AddAxiom(ont, __factory.getOWLClassAssertionAxiom(cSession, iSes)));
         OWLDatatype anyURI = __factory.getOWLDatatype(IRI.create("http://www.w3.org/2001/XMLSchema#anyURI"));
         OWLLiteral hasIdValue = __factory.getOWLTypedLiteral(session.getID().toString(), anyURI);

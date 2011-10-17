@@ -18,7 +18,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
 
 import org.semanticweb.owlapi.model.IRI;
 
-public interface OntologySpaceListener {
+public interface OntologyCollectorListener {
 
 	void onOntologyAdded(IRI spaceId, IRI addedOntology);
 

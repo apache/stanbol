@@ -30,7 +30,7 @@ import org.semanticweb.owlapi.model.IRI;
 /**
  * Default implementation of an ontology scope registry.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public class ScopeRegistryImpl implements ScopeRegistry {

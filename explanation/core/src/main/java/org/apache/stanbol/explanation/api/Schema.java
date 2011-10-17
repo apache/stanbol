@@ -5,7 +5,7 @@ import org.semanticweb.owlapi.model.IRI;
 /**
  * A cognitive schema, linguistic frame or knowledge pattern.
  * 
- * @author alessandro
+ * @author alexdma
  *
  */
 public interface Schema {

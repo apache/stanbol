@@ -18,6 +18,8 @@ package org.apache.stanbol.ontologymanager.ontonet;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
+import org.apache.clerezza.rdf.rdfjson.parser.RdfJsonParsingProvider;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 
 public class MockOsgiContext {
@@ -33,6 +35,10 @@ public class MockOsgiContext {
     public static void reset() {
         tcManager = new TcManager();
         tcManager.addWeightedTcProvider(new SimpleTcProvider());
+
+        parser = new Parser();
+        parser.bindParsingProvider(new JenaParserProvider());
+        parser.bindParsingProvider(new RdfJsonParsingProvider());
     }
 
 }

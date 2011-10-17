@@ -48,7 +48,7 @@ import com.hp.hpl.jena.util.FileManager;
 /**
  * Copied to avoid cross-dependencies
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public class OntologyStorage {

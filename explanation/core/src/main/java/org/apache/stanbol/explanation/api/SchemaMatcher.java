@@ -4,7 +4,7 @@ import java.util.Set;
 
 /**
  * 
- * @author alessandro
+ * @author alexdma
  * 
  * @param <E>
  *            the entity to be matched against, or <i><explainable/i>

@@ -52,11 +52,11 @@ import com.sun.jersey.api.view.Viewable;
  * This resource allows a GET method for obtaining an RDF representation of the set of registered scopes and a
  * DELETE method for clearing the scope set and ontology store accordingly.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 @Path("/ontonet/ontology")
-public class ONMRootResource extends BaseStanbolResource {
+public class OntologyNetworkResource extends BaseStanbolResource {
 
     @SuppressWarnings("unused")
     private Logger log = LoggerFactory.getLogger(getClass());
@@ -69,7 +69,7 @@ public class ONMRootResource extends BaseStanbolResource {
     protected ServletContext servletContext;
     protected ClerezzaOntologyStorage storage;
 
-    public ONMRootResource(@Context ServletContext servletContext) {
+    public OntologyNetworkResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
 		this.storage = (ClerezzaOntologyStorage) ContextHelper.getServiceFromContext(ClerezzaOntologyStorage.class, servletContext);

@@ -7,6 +7,7 @@ import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
+import org.apache.clerezza.rdf.rdfjson.parser.RdfJsonParsingProvider;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.apache.stanbol.explanation.impl.TestSchemaMatchers;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
@@ -24,6 +25,9 @@ public class MockOsgiContext {
     public static ONManager onManager;
 
     static {
+        parser = new Parser();
+        parser.bindParsingProvider(new JenaParserProvider());
+        parser.bindParsingProvider(new RdfJsonParsingProvider());
         reset();
     }
 
@@ -42,12 +46,10 @@ public class MockOsgiContext {
                                   .toString()});
         OfflineConfiguration offline = new OfflineConfigurationImpl(configuration);
 
-        tcManager = TcManager.getInstance();
+        tcManager = new TcManager();
         WeightedTcProvider wtcp = new SimpleTcProvider();
         tcManager.addWeightedTcProvider(wtcp);
         onManager = new ONManagerImpl(tcManager, wtcp, offline, configuration);
-        parser = Parser.getInstance();
-        parser.bindParsingProvider(new JenaParserProvider());
     }
 
 }

@@ -16,7 +16,13 @@
  */
 package org.apache.stanbol.ontologymanager.web.resources;
 
-import static javax.ws.rs.core.Response.Status.*;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.CONFLICT;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -44,22 +50,25 @@ import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologySetInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.io.LibrarySource;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Path("/ontonet/ontology/{scopeid}")
-public class ONMScopeResource extends BaseStanbolResource {
+public class ScopeResource extends BaseStanbolResource {
 
     @SuppressWarnings("unused")
     private Logger log = LoggerFactory.getLogger(getClass());
@@ -76,7 +85,7 @@ public class ONMScopeResource extends BaseStanbolResource {
 
     protected ClerezzaOntologyStorage storage;
 
-    public ONMScopeResource(@Context ServletContext servletContext) {
+    public ScopeResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
         this.regMgr = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
@@ -143,7 +152,7 @@ public class ONMScopeResource extends BaseStanbolResource {
                 } else space.addOntology(src);
             } catch (OWLOntologyCreationException e) {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
-            } catch (UnmodifiableOntologySpaceException e) {
+            } catch (UnmodifiableOntologyCollectorException e) {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             }
         } else throw new WebApplicationException(NOT_FOUND);
@@ -181,6 +190,8 @@ public class ONMScopeResource extends BaseStanbolResource {
         ScopeRegistry reg = onm.getScopeRegistry();
         OntologyScopeFactory f = onm.getOntologyScopeFactory();
 
+        log.debug("Request URI {}", uriInfo.getRequestUri());
+
         OntologyScope scope;
         OntologyInputSource coreSrc = null, custSrc = null;
 
@@ -190,8 +201,9 @@ public class ONMScopeResource extends BaseStanbolResource {
 
         // First thing, check the core source.
         try {
-            coreSrc = new LibrarySource(IRI.create(coreRegistry), regMgr, onm.getOwlCacheManager());
-            // coreSrc = new RegistryIRISource(IRI.create(coreRegistry), onm.getOwlCacheManager(), loader);
+            coreSrc = new LibrarySource(IRI.create(coreRegistry.replace("%23", "#")), regMgr);
+            System.out.println("DIOPORCO");
+            System.out.println(coreSrc);
         } catch (Exception e1) {
             // Bad or not supplied core registry, try the ontology.
             try {
@@ -206,9 +218,7 @@ public class ONMScopeResource extends BaseStanbolResource {
         if (customOntology != null || customRegistry != null) {
             // ...but if it was, be prepared to throw exceptions.
             try {
-                coreSrc = new LibrarySource(IRI.create(customRegistry), regMgr, onm.getOwlCacheManager());
-                // custSrc = new RegistryIRISource(IRI.create(customRegistry), onm.getOwlCacheManager(),
-                // loader);
+                coreSrc = new LibrarySource(IRI.create(customRegistry.replace("%23", "#")), regMgr);
             } catch (Exception e1) {
                 // Bad or not supplied custom registry, try the ontology.
                 try {
@@ -222,11 +232,35 @@ public class ONMScopeResource extends BaseStanbolResource {
 
         // Now the creation.
         try {
-            IRI scopeId = IRI.create(uriInfo.getAbsolutePath());
+            // Expand core sources
+            List<OntologyInputSource> expanded = new ArrayList<OntologyInputSource>();
+            if (coreSrc != null) {
+                System.out.println("CORRE " + coreSrc.getClass() + " " + coreSrc);
+                if (coreSrc instanceof OntologySetInputSource) {
+                    System.out.println("Root ontology " + coreSrc.getRootOntology());
+                    for (OWLOntology o : ((OntologySetInputSource) coreSrc).getOntologies()) {
+
+                        System.out.println("\t" + o);
+                        expanded.add(new RootOntologySource(o));
+                    }
+                } else expanded.add(coreSrc);
+            }
+            if (custSrc != null) {
+                System.out.println("CUSST " + custSrc.getClass());
+                if (custSrc instanceof OntologySetInputSource) for (OWLOntology o : ((OntologySetInputSource) custSrc)
+                        .getOntologies())
+                    expanded.add(new RootOntologySource(o));
+                else expanded.add(custSrc);
+            }
+
+            for (OntologyInputSource s : expanded)
+                System.out.println("Expanded Core Source " + s);
+
             // Invoke the appropriate factory method depending on the
             // availability of a custom source.
-            scope = (custSrc != null) ? f.createOntologyScope(scopeid, coreSrc, custSrc) : f
-                    .createOntologyScope(scopeid, coreSrc);
+            // scope = (custSrc != null) ? f.createOntologyScope(scopeid, coreSrc, custSrc) : f
+            // .createOntologyScope(scopeid, coreSrc);
+            scope = f.createOntologyScope(scopeid, expanded.toArray(new OntologyInputSource[0]));
             // Setup and register the scope. If no custom space was set, it will
             // still be open for modification.
             scope.setUp();

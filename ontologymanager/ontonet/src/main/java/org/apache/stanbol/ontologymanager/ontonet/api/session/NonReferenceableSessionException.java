@@ -20,7 +20,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api.session;
  * Thrown whenever an attempt to access a KReS session that is bound for removal
  * is detected.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public class NonReferenceableSessionException extends Exception {

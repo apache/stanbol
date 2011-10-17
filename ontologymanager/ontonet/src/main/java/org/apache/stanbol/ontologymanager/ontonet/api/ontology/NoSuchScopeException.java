@@ -21,7 +21,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
  * Thrown whenever an operation on a scope that has not been registered is
  * thrown.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public class NoSuchScopeException extends RuntimeException {

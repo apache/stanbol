@@ -25,7 +25,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * Generates new instances of {@link OWLOntologyManager} with optional offline support already enabled for
  * each of them.
  * 
- * @author alessandro
+ * @author alexdma
  * @deprecated use the static methods of {@link org.apache.stanbol.owl.OWLOntologyManagerFactory} instead.
  */
 public interface OWLOntologyManagerFactory {

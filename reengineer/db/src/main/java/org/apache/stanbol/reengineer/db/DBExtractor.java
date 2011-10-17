@@ -19,7 +19,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.reengineer.base.api.DataSource;
@@ -224,14 +224,14 @@ public class DBExtractor implements Reengineer {
         }
 
         if (scope != null) {
-            try {
-                scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(this.reengineeringScopeID),
-                    kReSSession.getID());
+//            try {
+//                scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(this.reengineeringScopeID),
+//                    kReSSession.getID());
                 scopeRegistry.setScopeActive(reengineeringScopeID, true);
-            } catch (UnmodifiableOntologySpaceException ex) {
-                log.error("Cannot add session space for scope " + reengineeringScopeID + " to unmodifiable scope "
-                          + scope, ex);
-            }
+//            } catch (UnmodifiableOntologySpaceException ex) {
+//                log.error("Cannot add session space for scope " + reengineeringScopeID + " to unmodifiable scope "
+//                          + scope, ex);
+//            }
         }
 
         log.info("Activated KReS Semion RDB Reengineer");

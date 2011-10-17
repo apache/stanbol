@@ -4,11 +4,14 @@ import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import static org.apache.stanbol.explanation.MockOsgiContext.*;
+
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.apache.stanbol.explanation.Data;
 import org.apache.stanbol.explanation.MockOsgiContext;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
@@ -70,14 +73,11 @@ public class TestSchemaMatchers {
 
     @Test
     public void testClerezzaMatcher() throws Exception {
-        TcManager tcm = MockOsgiContext.tcManager;
-        MGraph kb = tcm.createMGraph(new UriRef(kbId));
+        MGraph kb = tcManager.createMGraph(new UriRef(kbId));
 
         InputStream inputStream = getClass().getResourceAsStream("/ontologies/explanation_testdata.owl");
 
         // get the singleton instance of Parser
-        final Parser parser = MockOsgiContext.parser;
-
         Graph deserializedGraph = parser.parse(inputStream, "application/rdf+xml");
 
         kb.addAll(deserializedGraph);

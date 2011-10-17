@@ -27,10 +27,10 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * <br>
  * For convenience, an existing OWL ontology manager can be supplied for loading the ontology.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
-public class RootOntologyIRISource extends AbstractOntologyInputSource {
+public class RootOntologyIRISource extends AbstractOWLOntologyInputSource {
 
     public RootOntologyIRISource(IRI rootOntologyIri) throws OWLOntologyCreationException {
         this(rootOntologyIri, OWLManager.createOWLOntologyManager());

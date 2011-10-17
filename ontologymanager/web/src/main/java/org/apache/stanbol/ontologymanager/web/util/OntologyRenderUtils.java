@@ -44,7 +44,7 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 /**
  * Contains hacks to regular ontology renderers with replacements for input statements.
  * 
- * @author alessandro
+ * @author alexdma
  *
  */
 public class OntologyRenderUtils {

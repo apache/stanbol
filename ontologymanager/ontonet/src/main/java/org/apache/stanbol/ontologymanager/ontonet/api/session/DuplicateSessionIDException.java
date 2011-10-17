@@ -25,7 +25,7 @@ import org.semanticweb.owlapi.model.IRI;
  * is already registered, even if it used to be associated to a session that has
  * been destroyed.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public class DuplicateSessionIDException extends DuplicateIDException {

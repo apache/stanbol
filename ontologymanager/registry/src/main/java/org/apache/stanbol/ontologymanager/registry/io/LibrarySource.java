@@ -20,8 +20,9 @@ import java.util.Hashtable;
 import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.AbstractOntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.AbstractOWLOntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologySetInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
@@ -42,8 +43,14 @@ import org.slf4j.LoggerFactory;
  * ontology, either new or supplied by the developer. This input source can either accept an already built
  * {@link LibraryImpl} object, or parse a library OWL file from its logical URI.
  */
-public class LibrarySource extends AbstractOntologyInputSource {
+public class LibrarySource extends AbstractOWLOntologyInputSource implements OntologySetInputSource {
 
+    /**
+     * Creates a new ontology manager that shares the same offline configuration as the registry manager.
+     * 
+     * @param registryManager
+     * @return
+     */
     private static OWLOntologyManager checkOntologyManager(RegistryManager registryManager) {
         OfflineConfiguration offline = registryManager.getOfflineConfiguration();
         if (offline == null) return OWLManager.createOWLOntologyManager();
@@ -148,14 +155,21 @@ public class LibrarySource extends AbstractOntologyInputSource {
         if (registryManager == null) throw new IllegalArgumentException(
                 "A null registry manager is not allowed");
 
+        this.libraryID = libraryID;
+        
         // The ontology that imports the whole network is created in-memory, therefore it has no physical IRI
         // unless it is borrowed from the supplied parent.
         bindPhysicalIri(parentSrc != null ? parentSrc.getPhysicalIRI() : null);
 
         Library lib = registryManager.getLibrary(libraryID);
+        log.debug("Got library {}, expected {}", lib, libraryID);
         // If the manager is set to
         if (lib != null) {
             Set<OWLOntology> subtrees = lib.getOntologies();
+            this.ontologies = subtrees;
+
+            for (OWLOntology o : subtrees)
+                log.debug("\tGot ontology {}", o);
 
             // We always construct a new root now, even if there's just one subtree.
 
@@ -177,6 +191,13 @@ public class LibrarySource extends AbstractOntologyInputSource {
     @Override
     public String toString() {
         return "LIBRARY<" + libraryID + ">";
+    }
+    
+    private Set<OWLOntology> ontologies;
+
+    @Override
+    public Set<OWLOntology> getOntologies() {
+        return ontologies;
     }
 
 }

@@ -181,7 +181,7 @@ public class ClerezzaOntologyStorage {
         // MGraph mg = JenaToClerezzaConverter.jenaModelToClerezzaMGraph(om);
         TripleCollection mg = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(o);
         MGraph mg2 = null;
-        IRI iri = OWLUtils.getIdentifyingIRI(o);
+        IRI iri = OWLUtils.guessOntologyIdentifier(o);
         UriRef ref = new UriRef(iri.toString());
         try {
             mg2 = tcManager.createMGraph(ref);

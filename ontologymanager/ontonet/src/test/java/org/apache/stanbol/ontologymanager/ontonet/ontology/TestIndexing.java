@@ -16,10 +16,8 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.ontology;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.*;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.net.URL;
@@ -33,9 +31,10 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.ParentPathInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -44,18 +43,16 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class TestIndexing {
 
-    private static ONManager onm;
-
-    private static OWLOntologyManager mgr;
-
     private static IRI iri_minor = IRI
             .create("http://stanbol.apache.org/ontologies/pcomics/minorcharacters.owl"), iri_main = IRI
             .create("http://stanbol.apache.org/ontologies/pcomics/maincharacters.owl"), scopeIri = IRI
             .create("http://stanbol.apache.org/scope/IndexingTest"), testRegistryIri = IRI
             .create("http://stanbol.apache.org/ontologies/registries/onmtest.owl");
 
-    private static OntologyScope scope = null;
+    private static OWLOntologyManager mgr;
 
+    private static ONManager onm;
+    private static OntologyScope scope = null;
     @BeforeClass
     public static void setup() {
         final Dictionary<String,Object> emptyConfig = new Hashtable<String,Object>();
@@ -97,6 +94,11 @@ public class TestIndexing {
         // }
     }
 
+    @After
+    public void cleanup() {
+        reset();
+    }
+
     // @Test
     public void testAddOntology() throws Exception {
         OntologyIndex index = onm.getOntologyIndex();
@@ -118,7 +120,7 @@ public class TestIndexing {
         f = new File(url.toURI());
         assertNotNull(f);
 
-        cust.removeOntology(new ParentPathInputSource(f));
+        cust.removeOntology(iri_minor);
         // cust.removeOntology(commSrc);
 
         assertFalse(index.isOntologyLoaded(iri_minor));

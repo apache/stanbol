@@ -22,7 +22,7 @@ import java.util.Collection;
  * Implementations of this interface are able to fire events related to the
  * modification of ontologies within an ontology scope.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public interface ScopeOntologyListenable {

@@ -28,7 +28,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
  * A hack that stores ontologies in volatile memory (e.g. for unit tests) but prevents the incessant logging
  * of related error messages.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public class InMemoryOntologyStorage extends ClerezzaOntologyStorage {

@@ -1,25 +1,24 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.ontonet.api.io;
 
 import java.util.Set;
 
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntology;
 
 /**
  * An ontology input source provides a point for loading an ontology. Currently it provides two ways of
@@ -35,10 +34,10 @@ import org.semanticweb.owlapi.model.OWLOntology;
  * provide the OWLOntology, or directly provide the physical IRI for other classes to dereference.
  * Implementations should allow multiple attempts at loading an ontology.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
-public interface OntologyInputSource {
+public interface OntologyInputSource<O> {
 
     /**
      * Gets the ontology network resulting from the transitive closure of import statements on the root
@@ -46,7 +45,7 @@ public interface OntologyInputSource {
      * 
      * @return the import closure of the root ontology.
      */
-    Set<OWLOntology> getClosure();
+    Set<O> getImports(boolean recursive);
 
     /**
      * Returns the IRI by dereferencing which it should be possible to obtain the ontology. This method is
@@ -62,7 +61,7 @@ public interface OntologyInputSource {
      * 
      * @return the ontology network root.
      */
-    OWLOntology getRootOntology();
+    O getRootOntology();
 
     /**
      * Determines if a physical IRI is known for this ontology source. Note that an anonymous ontology may

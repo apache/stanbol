@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Just an attempt. If we like it, make an API out of it.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public class ScopeSetRenderer {

@@ -25,10 +25,10 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * a {@link NullPointerException} to be thrown when an {@link OntologyInputSource} is to be passed to a
  * method, but we are not actually interested in the ontology to pass.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
-public class BlankOntologySource extends AbstractOntologyInputSource {
+public class BlankOntologySource extends AbstractOWLOntologyInputSource {
 
     /**
      * Creates a new input source with an unnamed, empty ontology.

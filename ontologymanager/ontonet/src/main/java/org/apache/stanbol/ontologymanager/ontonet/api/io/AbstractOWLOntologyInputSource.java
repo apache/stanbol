@@ -16,31 +16,26 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.io;
 
+import java.util.Set;
+
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.slf4j.LoggerFactory;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
- * An ontology source that rewrites the physical IRI by appending the logical one to the scope ID. If the
- * ontology is anonymous, the original physical IRI is retained.
- * 
- * @author alessandro
+ * Abstract OWL API implementation of {@link OntologyInputSource} with the basic methods for obtaining root
+ * ontologies and their physical IRIs where applicable.<br/>
+ * </br> Implementations should either invoke abstract methods {@link #bindPhysicalIri(IRI)} and
+ * {@link #bindRootOntology(OWLOntology)} in their constructors, or override them.
  * 
  */
-public class ScopeOntologySource extends AbstractOntologyInputSource {
-
-    public ScopeOntologySource(IRI scopeIri, OWLOntology ontology, IRI origin) {
-        bindRootOntology(ontology);
-        LoggerFactory.getLogger(ScopeOntologySource.class).debug("Rewriting {} to {}/{}",
-            new IRI[] {origin, scopeIri, ontology.getOntologyID().getOntologyIRI()});
-        IRI iri = !ontology.isAnonymous() ? IRI.create(scopeIri + "/"
-                                                       + ontology.getOntologyID().getOntologyIRI()) : origin;
-        bindPhysicalIri(iri);
-    }
+public abstract class AbstractOWLOntologyInputSource extends AbstractGenericInputSource<OWLOntology> {
 
     @Override
-    public String toString() {
-        return "SCOPE_ONT_IRI<" + getPhysicalIRI() + ">";
+    public Set<OWLOntology> getImports(boolean recursive) {
+        OWLOntologyManager mgr = rootOntology.getOWLOntologyManager();
+        return (recursive ? mgr.getImportsClosure(rootOntology) : mgr.getDirectImports(rootOntology));
+        // return rootOntology.getOWLOntologyManager().getImportsClosure(rootOntology);
     }
 
 }

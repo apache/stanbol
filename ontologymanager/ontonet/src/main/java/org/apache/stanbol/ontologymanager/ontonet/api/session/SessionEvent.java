@@ -19,7 +19,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api.session;
 /**
  * An event that encompasses a change in the state of a KReS session.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public class SessionEvent {

@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Utility class that instantiates default implementations of ontology scope.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public class OntologyScopeFactoryImpl implements OntologyScopeFactory {
@@ -69,20 +69,18 @@ public class OntologyScopeFactoryImpl implements OntologyScopeFactory {
         listeners.clear();
     }
 
-    @Override
-    public OntologyScope createOntologyScope(String scopeID, OntologyInputSource coreSource) throws DuplicateIDException {
-        return createOntologyScope(scopeID, coreSource, null);
-    }
+    // @Override
+    // public OntologyScope createOntologyScope(String scopeID, OntologyInputSource coreSource) throws
+    // DuplicateIDException {
+    // return createOntologyScope(scopeID, coreSource, null);
+    // }
 
     @Override
-    public OntologyScope createOntologyScope(String scopeID,
-                                             OntologyInputSource coreSource,
-                                             OntologyInputSource customSource) throws DuplicateIDException {
+    public OntologyScope createOntologyScope(String scopeID, OntologyInputSource... coreSources) throws DuplicateIDException {
 
         if (registry.containsScope(scopeID)) throw new DuplicateIDException(scopeID,
                 "Scope registry already contains ontology scope with ID " + scopeID);
-        OntologyScope scope = new OntologyScopeImpl(scopeID, getNamespace(), spaceFactory, coreSource,
-                customSource);
+        OntologyScope scope = new OntologyScopeImpl(scopeID, getNamespace(), spaceFactory, coreSources);
         // scope.addOntologyScopeListener(ONManager.get().getOntologyIndex());
         // TODO : manage scopes with null core ontologies
         fireScopeCreated(scope);

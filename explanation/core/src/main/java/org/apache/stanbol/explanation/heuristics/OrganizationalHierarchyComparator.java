@@ -7,7 +7,7 @@ import org.semanticweb.owlapi.model.OWLIndividual;
  * Transitive comparator for determining if one social person is another person's boss in a hierarchical
  * organization.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public class OrganizationalHierarchyComparator implements Comparator {

@@ -24,7 +24,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
  * from the default document IRI in the ontology, or supplied manually using the appropriate constructor (e.g.
  * retrieved from the ontology manager that actually loaded the ontology).
  */
-public class RootOntologySource extends AbstractOntologyInputSource {
+public class RootOntologySource extends AbstractOWLOntologyInputSource {
 
     public RootOntologySource(OWLOntology rootOntology) {
         bindRootOntology(rootOntology);

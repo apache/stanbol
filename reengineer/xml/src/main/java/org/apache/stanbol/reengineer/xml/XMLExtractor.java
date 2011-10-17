@@ -45,7 +45,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
@@ -213,14 +212,14 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
         }
 
         if (scope != null) {
-            try {
-                scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(scopeID),
-                    kReSSession.getID());
+            // try {
+            // scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(scopeID),
+            // kReSSession.getID());
 
-                scopeRegistry.setScopeActive(scopeID, true);
-            } catch (UnmodifiableOntologySpaceException ex) {
-                log.error("Cannot add session space for " + scopeID + " to unmodifiable scope " + scope, ex);
-            }
+            scopeRegistry.setScopeActive(scopeID, true);
+            // } catch (UnmodifiableOntologySpaceException ex) {
+            // log.error("Cannot add session space for " + scopeID + " to unmodifiable scope " + scope, ex);
+            // }
         }
 
         log.info("Stanbol XML Reengineer active.");

@@ -67,7 +67,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
  * relate a library to an ontology</li>
  * </ul>
  * 
- * @author alessandro
+ * @author alexdma
  * @author enridaga
  */
 public class OntologyNetworkConfigurationUtils {

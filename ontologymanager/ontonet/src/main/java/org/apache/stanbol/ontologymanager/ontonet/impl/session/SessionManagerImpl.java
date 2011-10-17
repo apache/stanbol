@@ -48,12 +48,12 @@ import org.slf4j.LoggerFactory;
  * 
  * TODO: implement storage (using persistence layer).
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public class SessionManagerImpl implements SessionManager {
 
-    private Map<IRI,Session> sessionsByID;
+    private Map<String,Session> sessionsByID;
 
     protected Set<SessionListener> listeners;
 
@@ -68,7 +68,7 @@ public class SessionManagerImpl implements SessionManager {
     public SessionManagerImpl(IRI baseIri, ScopeRegistry scopeRegistry, ClerezzaOntologyStorage store) {
         idgen = new TimestampedSessionIDGenerator(baseIri);
         listeners = new HashSet<SessionListener>();
-        sessionsByID = new HashMap<IRI,Session>();
+        sessionsByID = new HashMap<String,Session>();
         this.scopeRegistry = scopeRegistry;
         this.store = store;
     }
@@ -101,13 +101,13 @@ public class SessionManagerImpl implements SessionManager {
      */
     @Override
     public Session createSession() {
-        Set<IRI> exclude = getRegisteredSessionIDs();
+        Set<String> exclude = getRegisteredSessionIDs();
         Session session = null;
         while (session == null)
             try {
                 session = createSession(idgen.createSessionID(exclude));
             } catch (DuplicateSessionIDException e) {
-                exclude.add(IRI.create(e.getDuplicateID()));
+                exclude.add(e.getDuplicateID());
                 continue;
             }
         return session;
@@ -120,7 +120,7 @@ public class SessionManagerImpl implements SessionManager {
      * .semanticweb.owlapi.model.IRI)
      */
     @Override
-    public synchronized Session createSession(IRI sessionID) throws DuplicateSessionIDException {
+    public synchronized Session createSession(String sessionID) throws DuplicateSessionIDException {
         if (sessionsByID.containsKey(sessionID)) throw new DuplicateSessionIDException(sessionID.toString());
         Session session = new SessionImpl(sessionID);
         addSession(session);
@@ -135,7 +135,7 @@ public class SessionManagerImpl implements SessionManager {
      * org.semanticweb.owlapi.model.IRI)
      */
     @Override
-    public synchronized void destroySession(IRI sessionID) {
+    public synchronized void destroySession(String sessionID) {
         try {
             Session ses = sessionsByID.get(sessionID);
             if (ses == null) log.warn(
@@ -161,12 +161,12 @@ public class SessionManagerImpl implements SessionManager {
      * semanticweb.owlapi.model.IRI)
      */
     @Override
-    public Session getSession(IRI sessionID) {
+    public Session getSession(String sessionID) {
         return sessionsByID.get(sessionID);
     }
 
     @Override
-    public Set<IRI> getRegisteredSessionIDs() {
+    public Set<String> getRegisteredSessionIDs() {
         return sessionsByID.keySet();
     }
 
@@ -205,7 +205,7 @@ public class SessionManagerImpl implements SessionManager {
     }
 
     protected synchronized void removeSession(Session session) {
-        IRI id = session.getID();
+        String id = session.getID();
         Session s2 = sessionsByID.get(id);
         if (session == s2) sessionsByID.remove(id);
     }
@@ -229,7 +229,7 @@ public class SessionManagerImpl implements SessionManager {
      * (org.semanticweb.owlapi.model.IRI)
      */
     @Override
-    public Set<SessionOntologySpace> getSessionSpaces(IRI sessionID) throws NonReferenceableSessionException {
+    public Set<SessionOntologySpace> getSessionSpaces(String sessionID) throws NonReferenceableSessionException {
         Set<SessionOntologySpace> result = new HashSet<SessionOntologySpace>();
         // Brute force search
         for (OntologyScope scope : scopeRegistry.getRegisteredScopes()) {
@@ -259,7 +259,7 @@ public class SessionManagerImpl implements SessionManager {
      * .semanticweb.owlapi.model.IRI, java.io.OutputStream)
      */
     @Override
-    public void storeSession(IRI sessionID, OutputStream out) throws NonReferenceableSessionException,
+    public void storeSession(String sessionID, OutputStream out) throws NonReferenceableSessionException,
                                                              OWLOntologyStorageException {
         /*
          * For each gession space in the session save all the ontologies contained in the space.

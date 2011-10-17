@@ -16,7 +16,11 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.io;
 
-import static org.junit.Assert.*;
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.reset;
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.tcManager;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -28,7 +32,6 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
-import org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
@@ -52,10 +55,10 @@ public class TestStorage {
 
     @BeforeClass
     public static void setup() {
+        reset();
         // Empty configurations are fine, but this time we provide a Clerezza context.
-        onm = new ONManagerImpl(MockOsgiContext.tcManager, MockOsgiContext.tcManager.getProviderList()
-                .first(), new OfflineConfigurationImpl(new Hashtable<String,Object>()),
-                new Hashtable<String,Object>());
+        onm = new ONManagerImpl(tcManager, tcManager.getProviderList().first(), new OfflineConfigurationImpl(
+                new Hashtable<String,Object>()), new Hashtable<String,Object>());
     }
 
     @Test
@@ -83,8 +86,8 @@ public class TestStorage {
     }
 
     @After
-    public void reset() {
-        MockOsgiContext.reset();
+    public void cleanup() {
+        reset();
     }
 
 }

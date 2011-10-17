@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.ontology;
 
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -36,10 +37,11 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.AddAxiom;
@@ -57,22 +59,18 @@ public class TestOntologySpaces {
     public static IRI baseIri = IRI.create(Constants.PEANUTS_MAIN_BASE), baseIri2 = IRI
             .create(Constants.PEANUTS_MINOR_BASE);
 
-    String scopeId = "Comics";
-
+    private static OntologySpaceFactory factory;
+    private static OntologyInputSource<OWLOntology> inMemorySrc, minorSrc, dropSrc, nonexSrc;
     private static OWLAxiom linusIsHuman = null;
+
+    private static OfflineConfiguration offline;
 
     private static ONManager onm;
 
     private static OWLOntology ont = null, ont2 = null;
 
-    private static OntologyInputSource inMemorySrc, minorSrc, dropSrc, nonexSrc;
-
-    private static OntologySpaceFactory factory;
-
-    private static OfflineConfiguration offline;
-
-    private static OntologyInputSource getLocalSource(String resourcePath, OWLOntologyManager mgr) throws OWLOntologyCreationException,
-                                                                                                  URISyntaxException {
+    private static OntologyInputSource<OWLOntology> getLocalSource(String resourcePath, OWLOntologyManager mgr) throws OWLOntologyCreationException,
+                                                                                                               URISyntaxException {
         URL url = TestOntologySpaces.class.getResource(resourcePath);
         File f = new File(url.toURI());
         return new ParentPathInputSource(f, mgr != null ? mgr
@@ -109,6 +107,58 @@ public class TestOntologySpaces {
         nonexSrc = getLocalSource("/ontologies/nonexistentcharacters.owl", mgr);
         minorSrc = new RootOntologySource(ont2, null);
 
+    }
+
+    String scopeId = "Comics";
+
+    @After
+    public void cleanup() {
+        reset();
+    }
+
+    @Test
+    public void testAddOntology() throws Exception {
+        CustomOntologySpace space = null;
+        IRI logicalId = nonexSrc.getRootOntology().getOntologyID().getOntologyIRI();
+
+        space = factory.createCustomOntologySpace(scopeId, dropSrc);
+        space.addOntology(minorSrc);
+        space.addOntology(nonexSrc);
+
+        assertTrue(space.hasOntology(logicalId));
+        logicalId = dropSrc.getRootOntology().getOntologyID().getOntologyIRI();
+        assertTrue(space.hasOntology(logicalId));
+    }
+
+    @Test
+    public void testCoreLock() throws Exception {
+        CoreOntologySpace space = factory.createCoreOntologySpace(scopeId, inMemorySrc);
+        space.setUp();
+        try {
+            space.addOntology(minorSrc);
+            fail("Modification was permitted on locked ontology space.");
+        } catch (UnmodifiableOntologyCollectorException e) {
+            assertSame(space, e.getOntologyCollector());
+        }
+    }
+
+    @Test
+    public void testCreateSpace() throws Exception {
+        CustomOntologySpace space = factory.createCustomOntologySpace(scopeId, dropSrc);
+        IRI logicalId = dropSrc.getRootOntology().getOntologyID().getOntologyIRI();
+        assertTrue(space.hasOntology(logicalId));
+    }
+
+    @Test
+    public void testCustomLock() throws Exception {
+        CustomOntologySpace space = factory.createCustomOntologySpace(scopeId, inMemorySrc);
+        space.setUp();
+        try {
+            space.addOntology(minorSrc);
+            fail("Modification was permitted on locked ontology space.");
+        } catch (UnmodifiableOntologyCollectorException e) {
+            assertSame(space, e.getOntologyCollector());
+        }
     }
 
     /**
@@ -187,51 +237,6 @@ public class TestOntologySpaces {
     }
 
     @Test
-    public void testAddOntology() throws Exception {
-        CustomOntologySpace space = null;
-        IRI logicalId = nonexSrc.getRootOntology().getOntologyID().getOntologyIRI();
-
-        space = factory.createCustomOntologySpace(scopeId, dropSrc);
-        space.addOntology(minorSrc);
-        space.addOntology(nonexSrc);
-
-        assertTrue(space.containsOntology(logicalId));
-        logicalId = dropSrc.getRootOntology().getOntologyID().getOntologyIRI();
-        assertTrue(space.containsOntology(logicalId));
-    }
-
-    @Test
-    public void testCoreLock() throws Exception {
-        CoreOntologySpace space = factory.createCoreOntologySpace(scopeId, inMemorySrc);
-        space.setUp();
-        try {
-            space.addOntology(minorSrc);
-            fail("Modification was permitted on locked ontology space.");
-        } catch (UnmodifiableOntologySpaceException e) {
-            assertSame(space, e.getSpace());
-        }
-    }
-
-    @Test
-    public void testCreateSpace() throws Exception {
-        CustomOntologySpace space = factory.createCustomOntologySpace(scopeId, dropSrc);
-        IRI logicalId = dropSrc.getRootOntology().getOntologyID().getOntologyIRI();
-        assertTrue(space.containsOntology(logicalId));
-    }
-
-    @Test
-    public void testCustomLock() throws Exception {
-        CustomOntologySpace space = factory.createCustomOntologySpace(scopeId, inMemorySrc);
-        space.setUp();
-        try {
-            space.addOntology(minorSrc);
-            fail("Modification was permitted on locked ontology space.");
-        } catch (UnmodifiableOntologySpaceException e) {
-            assertSame(space, e.getSpace());
-        }
-    }
-
-    @Test
     public void testRemoveCustomOntology() throws Exception {
         CustomOntologySpace space = null;
         space = factory.createCustomOntologySpace(scopeId, dropSrc);
@@ -241,12 +246,12 @@ public class TestOntologySpaces {
         space.addOntology(inMemorySrc);
         space.addOntology(nonexSrc);
         // The other remote ontologies may change base IRI...
-        assertTrue(space.containsOntology(ont.getOntologyID().getOntologyIRI())
-                   && space.containsOntology(dropId) && space.containsOntology(nonexId));
-        space.removeOntology(dropSrc);
-        assertFalse(space.containsOntology(dropId));
-        space.removeOntology(nonexSrc);
-        assertFalse(space.containsOntology(nonexId));
+        assertTrue(space.hasOntology(ont.getOntologyID().getOntologyIRI())
+                   && space.hasOntology(dropId) && space.hasOntology(nonexId));
+        space.removeOntology(dropId);
+        assertFalse(space.hasOntology(dropId));
+        space.removeOntology(nonexId);
+        assertFalse(space.hasOntology(nonexId));
         // OntologyUtils.printOntology(space.getTopOntology(), System.err);
 
     }
@@ -268,7 +273,7 @@ public class TestOntologySpaces {
             // // The top ontology must still have axioms from in-memory
             // // ontologies. NO LONGER
             // assertTrue(space.getTopOntology().containsAxiom(linusIsHuman));
-        } catch (UnmodifiableOntologySpaceException e) {
+        } catch (UnmodifiableOntologyCollectorException e) {
             fail("Modification was denied on unlocked ontology space.");
         }
     }

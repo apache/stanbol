@@ -61,7 +61,7 @@
 				<configuration>
 					<instructions>
 						<Embed-Dependency>*;scope=compile;artifactId=!slf4j-api</Embed-Dependency>
-						<Embed-Transitive>true</Embed-Transitive>
+						<Embed-Transitive>false</Embed-Transitive>
 						<Export-Package>
 							org.apache.stanbol.owl.*
 						</Export-Package>
@@ -161,6 +161,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.ontologies</artifactId>
+			<version>0.11-incubating-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.clerezza</groupId>
 			<artifactId>rdf.rdfjson</artifactId>
 		</dependency>
 
@@ -188,6 +194,11 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.simple.storage</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>

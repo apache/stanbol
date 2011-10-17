@@ -1,24 +1,32 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.web.resources;
 
-import static javax.ws.rs.core.MediaType.*;
-import static javax.ws.rs.core.Response.Status.*;
-import static org.apache.stanbol.commons.web.base.format.KRFormat.*;
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.OWL_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_JSON;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
+import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
 
 import java.io.InputStream;
 
@@ -41,13 +49,12 @@ import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorModificationException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceModificationException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.renderers.SessionRenderer;
@@ -59,7 +66,7 @@ import com.sun.jersey.api.view.Viewable;
 import com.sun.jersey.multipart.FormDataParam;
 
 @Path("/ontonet/session")
-public class SessionResource extends BaseStanbolResource {
+public class SessionsResource extends BaseStanbolResource {
 
     /*
      * Placeholder for the ONManager to be fetched from the servlet context.
@@ -68,7 +75,7 @@ public class SessionResource extends BaseStanbolResource {
 
     protected ServletContext servletContext;
 
-    public SessionResource(@Context ServletContext servletContext) {
+    public SessionsResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
     }
@@ -91,14 +98,14 @@ public class SessionResource extends BaseStanbolResource {
 
             ScopeRegistry scopeRegistry = onm.getScopeRegistry();
 
-            OntologyScope ontologyScope = scopeRegistry.getScope(scope);
-            SessionOntologySpace sos = ontologyScope.getSessionSpace(sessionIRI);
-            try {
-                sos.addOntology(new RootOntologySource(ontology));
-                return Response.ok().build();
-            } catch (UnmodifiableOntologySpaceException e) {
-                return Response.status(INTERNAL_SERVER_ERROR).build();
-            }
+            // OntologyScope ontologyScope = scopeRegistry.getScope(scope);
+            // SessionOntologySpace sos = ontologyScope.getSessionSpace(sessionIRI);
+            // try {
+            // sos.addOntology(new RootOntologySource(ontology));
+            return Response.ok().build();
+            // } catch (UnmodifiableOntologySpaceException e) {
+            // return Response.status(INTERNAL_SERVER_ERROR).build();
+            // }
         } catch (OWLOntologyCreationException e1) {
             return Response.status(NOT_FOUND).build();
         }
@@ -130,16 +137,15 @@ public class SessionResource extends BaseStanbolResource {
             return createSession(scope, uriInfo, headers);
         } else {
             IRI scopeIRI = IRI.create(scope);
-            IRI sessionIRI = IRI.create(session);
             IRI ontologyIRI = IRI.create(location);
             ScopeRegistry scopeRegistry = onm.getScopeRegistry();
 
             OntologyScope ontologyScope = scopeRegistry.getScope(scope);
-            SessionOntologySpace sos = ontologyScope.getSessionSpace(sessionIRI);
+            SessionOntologySpace sos = ontologyScope.getSessionSpace(session);
             try {
                 sos.addOntology(new RootOntologyIRISource(ontologyIRI));
                 return Response.ok().build();
-            } catch (UnmodifiableOntologySpaceException e) {
+            } catch (UnmodifiableOntologyCollectorException e) {
                 return Response.status(INTERNAL_SERVER_ERROR).build();
             } catch (OWLOntologyCreationException e) {
                 return Response.status(INTERNAL_SERVER_ERROR).build();
@@ -185,7 +191,7 @@ public class SessionResource extends BaseStanbolResource {
         SessionOntologySpace sessionOntologySpace = ontologySpaceFactory.createSessionOntologySpace(scope);
         try {
             ontologyScope.addSessionSpace(sessionOntologySpace, ses.getID());
-        } catch (UnmodifiableOntologySpaceException e) {
+        } catch (UnmodifiableOntologyCollectorException e) {
             throw new WebApplicationException(e);
         }
 
@@ -211,7 +217,6 @@ public class SessionResource extends BaseStanbolResource {
                                   @Context HttpHeaders headers) {
 
         IRI scopeID = IRI.create(scope);
-        IRI sessionID = IRI.create(session);
 
         if (deleteOntology != null) {
             IRI ontologyIRI = IRI.create(deleteOntology);
@@ -219,7 +224,7 @@ public class SessionResource extends BaseStanbolResource {
             ScopeRegistry scopeRegistry = onm.getScopeRegistry();
 
             OntologyScope ontologyScope = scopeRegistry.getScope(scope);
-            SessionOntologySpace sos = ontologyScope.getSessionSpace(sessionID);
+            SessionOntologySpace sos = ontologyScope.getSessionSpace(session);
 
             try {
                 /*
@@ -227,13 +232,13 @@ public class SessionResource extends BaseStanbolResource {
                  * treating this as a physical IRI. See if it still works this way
                  */
                 OWLOntology o = sos.getOntology(ontologyIRI);
-                if (o != null) sos.removeOntology(new RootOntologySource(o));
+                if (o != null) sos.removeOntology(ontologyIRI);
                 return Response.ok().build();
-            } catch (OntologySpaceModificationException e) {
+            } catch (OntologyCollectorModificationException e) {
                 return Response.status(INTERNAL_SERVER_ERROR).build();
             }
         } else {
-            onm.getSessionManager().destroySession(sessionID);
+            onm.getSessionManager().destroySession(session);
             return Response.ok().build();
         }
 

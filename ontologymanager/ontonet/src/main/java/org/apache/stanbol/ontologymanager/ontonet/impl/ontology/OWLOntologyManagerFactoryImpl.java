@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 
- * @author alessandro
+ * @author alexdma
  * @deprecated use the static methods of {@link org.apache.stanbol.owl.OWLOntologyManagerFactory} instead.
  */
 public class OWLOntologyManagerFactoryImpl implements OWLOntologyManagerFactory {

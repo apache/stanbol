@@ -66,7 +66,7 @@ import com.sun.jersey.multipart.FormDataParam;
 
 @Path("/ontonet/graphs")
 @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
-public class GraphsResource extends BaseStanbolResource {
+public class StoredGraphsResource extends BaseStanbolResource {
 
     @SuppressWarnings("unused")
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -76,7 +76,7 @@ public class GraphsResource extends BaseStanbolResource {
 
     protected TcManager tcManager;
 
-    public GraphsResource(@Context ServletContext servletContext) {
+    public StoredGraphsResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
         storage = (ClerezzaOntologyStorage) (servletContext.getAttribute(ClerezzaOntologyStorage.class
                 .getName()));

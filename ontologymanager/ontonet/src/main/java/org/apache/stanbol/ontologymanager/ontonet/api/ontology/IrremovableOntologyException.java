@@ -23,11 +23,11 @@ import org.semanticweb.owlapi.model.IRI;
  * space is detected. This can happen e.g. if the ontology is the space root or
  * not a direct child thereof.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public class IrremovableOntologyException extends
-		OntologySpaceModificationException {
+		OntologyCollectorModificationException {
 
 	protected IRI ontologyId;
 

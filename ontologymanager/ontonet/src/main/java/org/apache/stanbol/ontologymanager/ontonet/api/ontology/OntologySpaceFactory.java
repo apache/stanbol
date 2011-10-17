@@ -25,6 +25,8 @@ import org.semanticweb.owlapi.model.IRI;
  * 
  * Implementations should not call the setup method of the ontology space once it is created, so that it is
  * not locked from editing since creation time.
+ * 
+ * @author alexdma
  */
 public interface OntologySpaceFactory {
 
@@ -39,7 +41,7 @@ public interface OntologySpaceFactory {
      *            the sources of the optional ontologies to be immediately loaded upon space creation.
      * @return the generated ontology space.
      */
-    CoreOntologySpace createCoreOntologySpace(String scopeId, OntologyInputSource... coreSources);
+    CoreOntologySpace createCoreOntologySpace(String scopeId, OntologyInputSource<?>... coreSources);
 
     /**
      * Creates and sets up a default custom ontology space. Equivalent to calling
@@ -52,7 +54,7 @@ public interface OntologySpaceFactory {
      *            the sources of the optional ontologies to be immediately loaded upon space creation.
      * @return the generated ontology space.
      */
-    CustomOntologySpace createCustomOntologySpace(String scopeId, OntologyInputSource... customSources);
+    CustomOntologySpace createCustomOntologySpace(String scopeId, OntologyInputSource<?>... customSources);
 
     /**
      * Creates an ontology space of the specified type.
@@ -66,11 +68,15 @@ public interface OntologySpaceFactory {
      *            the sources of the optional ontologies to be immediately loaded upon space creation.
      * @return the generated ontology space.
      */
-    OntologySpace createOntologySpace(String scopeId, SpaceType type, OntologyInputSource... ontologySources);
+    OntologySpace createOntologySpace(String scopeId,
+                                      SpaceType type,
+                                      OntologyInputSource<?>... ontologySources);
 
     /**
      * Creates and sets up a default session ontology space. Equivalent to calling
      * <code>createOntologySpace(IRI, SpaceTypes.SESSION, OntologyInputSource...)</code>.
+     * 
+     * @deprecated session spaces should no longer exist, as session data shold be loaded in Session objects.
      * 
      * @param scopeId
      *            the unique identifier of the ontology scope that will reference this space. It can be used
@@ -79,7 +85,7 @@ public interface OntologySpaceFactory {
      *            the sources of the optional ontologies to be immediately loaded upon space creation.
      * @return the generated ontology space.
      */
-    SessionOntologySpace createSessionOntologySpace(String scopeId, OntologyInputSource... sessionSources);
+    SessionOntologySpace createSessionOntologySpace(String scopeId, OntologyInputSource<?>... sessionSources);
 
     IRI getNamespace();
 

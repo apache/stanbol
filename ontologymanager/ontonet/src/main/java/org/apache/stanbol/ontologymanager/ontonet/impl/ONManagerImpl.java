@@ -49,7 +49,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.conf.OntologyNetworkConfigurationUtils;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
@@ -109,7 +109,7 @@ public class ONManagerImpl implements ONManager {
                 try {
                     scope.getCustomSpace().addOntology(createOntologyInputSource(locationIri));
                     log.debug("Added " + locationIri + " to scope " + scopeID + " in the custom space.", this);
-                } catch (UnmodifiableOntologySpaceException e) {
+                } catch (UnmodifiableOntologyCollectorException e) {
                     log.error("An error occurred while trying to add the ontology from location: "
                               + locationIri, e);
                 }
@@ -359,7 +359,7 @@ public class ONManagerImpl implements ONManager {
             bootstrapOntologyNetwork(oConf);
 
         }
-        log.debug("ONManager activated.");
+        log.debug(ONManager.class + "activated.");
 
     }
 

@@ -35,23 +35,25 @@ import org.semanticweb.owlapi.model.OWLOntology;
  * An ontology scope can thus be seen as a fa&ccedil;ade for ontology spaces.
  * 
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
-public interface OntologyScope extends ScopeOntologyListenable {
+public interface OntologyScope extends ScopeOntologyListenable, OWLExportable {
 
     /**
      * Adds a new ontology space to the list of user session spaces for this scope.
      * 
      * @param sessionSpace
      *            the ontology space to be added.
-     * @throws UnmodifiableOntologySpaceException
+     * @throws UnmodifiableOntologyCollectorException
      */
-    void addSessionSpace(OntologySpace sessionSpace, IRI sessionID) throws UnmodifiableOntologySpaceException;
+    void addSessionSpace(OntologySpace sessionSpace, String sessionID) throws UnmodifiableOntologyCollectorException;
 
     /**
      * Returns an ontological form of this scope.
      * 
+     * @deprecated Please use the inherited method {@link OWLExportable#asOWLOntology(boolean)}. Calls to the
+     *             current method are equivalent to asOWLOntology(false).
      * @return an OWL ontology that represents this scope.
      */
     OWLOntology asOWLOntology();
@@ -79,9 +81,9 @@ public interface OntologyScope extends ScopeOntologyListenable {
      * @return the unique identifier for this ontology scope
      */
     String getID();
-    
+
     IRI getNamespace();
-    
+
     /**
      * Return the ontology space for this scope that is identified by the supplied IRI.
      * 
@@ -90,7 +92,7 @@ public interface OntologyScope extends ScopeOntologyListenable {
      * @return the ontology space identified by <code>sessionID</code>, or null if no such space is registered
      *         for this scope and session.
      */
-    SessionOntologySpace getSessionSpace(IRI sessionID);
+    SessionOntologySpace getSessionSpace(String sessionID);
 
     /**
      * Returns all the active ontology spaces for this scope.
@@ -104,10 +106,10 @@ public interface OntologyScope extends ScopeOntologyListenable {
      * 
      * @param customSpace
      *            the custom ontology space.
-     * @throws UnmodifiableOntologySpaceException
+     * @throws UnmodifiableOntologyCollectorException
      *             if either the scope or the supplied space are locked.
      */
-    void setCustomSpace(OntologySpace customSpace) throws UnmodifiableOntologySpaceException;
+    void setCustomSpace(OntologySpace customSpace) throws UnmodifiableOntologyCollectorException;
 
     void setNamespace(IRI namespace);
 

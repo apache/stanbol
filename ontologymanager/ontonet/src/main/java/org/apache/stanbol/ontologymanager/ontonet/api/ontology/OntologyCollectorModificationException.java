@@ -19,14 +19,14 @@ package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
 /**
  * Thrown whenever an illegal operation that modifies an ontology space is detected and denied.
  */
-public class OntologySpaceModificationException extends Exception {
+public class OntologyCollectorModificationException extends Exception {
 
     /**
 	 * 
 	 */
     private static final long serialVersionUID = -5147080356192253724L;
 
-    protected OntologySpace space;
+    protected OntologyCollector collector;
 
     /**
      * Creates a new instance of OntologySpaceModificationException.
@@ -34,8 +34,8 @@ public class OntologySpaceModificationException extends Exception {
      * @param space
      *            the ontology space whose modification was attempted.
      */
-    public OntologySpaceModificationException(OntologySpace space) {
-        this.space = space;
+    public OntologyCollectorModificationException(OntologyCollector collector) {
+        this.collector = collector;
     }
 
     /**
@@ -44,8 +44,8 @@ public class OntologySpaceModificationException extends Exception {
      * @param space
      *            the ontology space whose modification was attempted.
      */
-    public OntologySpaceModificationException(OntologySpace space, Throwable cause) {
-        this(space);
+    public OntologyCollectorModificationException(OntologyCollector collector, Throwable cause) {
+        this(collector);
         initCause(cause);
     }
 
@@ -54,8 +54,8 @@ public class OntologySpaceModificationException extends Exception {
      * 
      * @return the ontology space on which the exception was thrown.
      */
-    public OntologySpace getSpace() {
-        return space;
+    public OntologyCollector getOntologyCollector() {
+        return collector;
     }
 
 }

@@ -574,6 +574,7 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
 
     protected Registry populateRegistry(OWLOntology registry) throws RegistryContentException {
 
+        log.debug("Populating registry content from ontology {}", registry);
         Registry reg = riFactory.createRegistry(registry);
         Set<OWLOntology> closure = registry.getOWLOntologyManager().getImportsClosure(registry);
 
@@ -590,12 +591,14 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
             }
             switch (t) {
                 case LIBRARY:
+                    log.debug("Found library for individual {}", ind);
                     // Create the library and attach to parent and children
                     item = populateLibrary(ind.asOWLNamedIndividual(), closure);
                     reg.addChild(item);
                     item.addRegistryContentListener(this);
                     break;
                 case ONTOLOGY:
+                    log.debug("Found ontology for individual {}", ind);
                     // Create the ontology and attach to parent
                     item = populateOntology(ind.asOWLNamedIndividual(), closure);
                     item.addRegistryContentListener(this);
@@ -607,6 +610,7 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         }
         try {
             reg.addRegistryContentListener(this);
+            log.info("Registry {} added.", reg.getIRI());
             population.put(reg.getIRI(), reg);
         } catch (Exception e) {
             log.error("Invalid identifier for library item " + reg, e);

@@ -3,7 +3,7 @@ package org.apache.stanbol.explanation.api;
 /**
  * Interaction patterns known or supported for explanation;
  * 
- * @author alessandro
+ * @author alexdma
  *
  */
 public enum InteractionPatterns {

@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Default implementation of a knowledge schema.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 @Component(metatype = true, immediate = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE, specVersion = "1.1")

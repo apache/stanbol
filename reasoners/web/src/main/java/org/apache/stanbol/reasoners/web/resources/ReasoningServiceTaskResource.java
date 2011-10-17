@@ -73,7 +73,6 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyLoaderListener;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLOntologyManagerProperties;
 import org.semanticweb.owlapi.model.OWLOntologySetProvider;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.model.SWRLRule;
@@ -238,7 +237,8 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
                         @QueryParam("session") String session,
                         @QueryParam("recipe") String recipe,
                         @QueryParam("target") String targetGraphID) {
-        log.info("Called {} with parameters: {} ",httpContext.getRequest().getMethod(), parameters.keySet().toArray(new String[parameters.keySet().size()]));
+        log.info("Called {} with parameters: {} ", httpContext.getRequest().getMethod(), parameters.keySet()
+                .toArray(new String[parameters.keySet().size()]));
         // If all parameters are missing we produce the service/task welcome
         // page
         if (this.parameters.isEmpty()) {
@@ -284,7 +284,8 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
             // Prepare rules
             List<SWRLRule> rules = prepareOWLApiRules(recipe);
             return executor.executeOWLApiReasoningService(getCurrentTask(),
-                (OWLApiReasoningService) getCurrentService(), input, rules, targetGraphID, false, this.parameters);
+                (OWLApiReasoningService) getCurrentService(), input, rules, targetGraphID, false,
+                this.parameters);
         }
         throw new WebApplicationException(new Exception("Unsupported implementation"),
                 Response.Status.INTERNAL_SERVER_ERROR);
@@ -347,7 +348,8 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
      * @return
      */
     private Response postData(File file, String scope, String session, String recipe, String targetGraphID) {
-        log.info("Called {} with parameters: {} ",httpContext.getRequest().getMethod(), parameters.keySet().toArray(new String[parameters.keySet().size()]));
+        log.info("Called {} with parameters: {} ", httpContext.getRequest().getMethod(), parameters.keySet()
+                .toArray(new String[parameters.keySet().size()]));
         if (file.exists() && file.canRead()) {
             // The service executor
             ReasoningServiceExecutor executor = new ReasoningServiceExecutor(tcManager, headers,
@@ -399,7 +401,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         // instead of trying on the web
         // directly
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-       
+
         // FIXME Which is the other way of doing this?
         // Maybe -> OWLOntologyManagerProperties();
         manager.setSilentMissingImportsHandling(true);
@@ -410,18 +412,19 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
                 log.warn("Missing import {} ", arg0.getImportedOntologyURI());
             }
         });
-        manager.addOntologyLoaderListener(new OWLOntologyLoaderListener(){
+        manager.addOntologyLoaderListener(new OWLOntologyLoaderListener() {
 
             @Override
             public void finishedLoadingOntology(LoadingFinishedEvent arg0) {
-                log.info("Finished loading {} (imported: {})",arg0.getOntologyID(),arg0.isImported());
+                log.info("Finished loading {} (imported: {})", arg0.getOntologyID(), arg0.isImported());
             }
 
             @Override
             public void startedLoadingOntology(LoadingStartedEvent arg0) {
-                log.info("Started loading {} (imported: {}) ...",arg0.getOntologyID(),arg0.isImported());
-                log.info(" ... from {}",arg0.getDocumentIRI().toString());
-            }});
+                log.info("Started loading {} (imported: {}) ...", arg0.getOntologyID(), arg0.isImported());
+                log.info(" ... from {}", arg0.getDocumentIRI().toString());
+            }
+        });
         return manager;
     }
 
@@ -609,18 +612,18 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
             }
             OntologySpace sessionSpace = null;
             if (sessionID != null) {
-                IRI sessionIRI = IRI.create(sessionID);
-                sessionSpace = scope.getSessionSpace(sessionIRI);
+                // IRI sessionIRI = IRI.create(sessionID);
+                sessionSpace = scope.getSessionSpace(sessionID);
             }
             OntologySpace coreSpace = scope.getCoreSpace();
             Set<OWLOntology> coreOntologies = coreSpace.getOntologies(true);
-            log.info("Found {} ontologies in core space",coreOntologies.size());
+            log.info("Found {} ontologies in core space", coreOntologies.size());
             OntologySpace customSpace = scope.getCustomSpace();
             Set<OWLOntology> customOntologies = customSpace.getOntologies(true);
-            log.info("Found {} ontologies in custom space",coreOntologies.size());
+            log.info("Found {} ontologies in custom space", coreOntologies.size());
 
             Set<OWLOntology> sessionOntologies = new HashSet<OWLOntology>();
-            log.info("Found {} ontologies in session space",coreOntologies.size());
+            log.info("Found {} ontologies in session space", coreOntologies.size());
 
             if (sessionSpace != null) {
                 // We collect all the ontologies in session (here we use
@@ -806,15 +809,15 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
             } else if (type.isAssignableFrom(OWLOntology.class)) {
                 OWLOntology ready = decantOntology(merged, createOWLOntologyManager());
                 output = ready;
-                //output = merged;
+                // output = merged;
             } else throw new IllegalArgumentException(new Exception(
                     "Only Model.class and OWLOntology.class are allowed"));
             return output;
         } catch (OWLOntologyCreationException e) {
-            log.error("The network for scope/session cannot be retrieved:",e);
+            log.error("The network for scope/session cannot be retrieved:", e);
             throw new IllegalArgumentException();
         } catch (OWLOntologyStorageException e) {
-            log.error("The network for scope/session cannot be retrieved:",e);
+            log.error("The network for scope/session cannot be retrieved:", e);
             throw new IllegalArgumentException("The network for scope/session cannot be retrieved");
         }
     }
@@ -946,7 +949,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
             OWLOntology fromUrl = input.getOWLOntologyManager().loadOntologyFromOntologyDocument(
                 IRI.create(url));
             Set<OWLOntology> all = fromUrl.getImportsClosure();
-            for(OWLOntology o : all){
+            for (OWLOntology o : all) {
                 for (OWLAxiom a : o.getAxioms()) {
                     input.getOWLOntologyManager().addAxiom(input, a);
                 }
@@ -961,7 +964,8 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
             throw new OWLOntologyCreationException();
         }
         long end = System.currentTimeMillis();
-        log.info("[end] Prepared input for OWLApi in {} ms. Size is: {}", (end - start), input.getAxiomCount());
+        log.info("[end] Prepared input for OWLApi in {} ms. Size is: {}", (end - start),
+            input.getAxiomCount());
         return input;
     }
 
@@ -978,7 +982,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
             // We add additional axioms
             OWLOntology fromUrl = input.getOWLOntologyManager().loadOntologyFromOntologyDocument(file);
             Set<OWLOntology> all = fromUrl.getImportsClosure();
-            for(OWLOntology o : all){
+            for (OWLOntology o : all) {
                 for (OWLAxiom a : o.getAxioms()) {
                     input.getOWLOntologyManager().addAxiom(input, a);
                 }
@@ -993,7 +997,8 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
             throw new OWLOntologyCreationException();
         }
         long end = System.currentTimeMillis();
-        log.info("[end] Prepared input for OWLApi in {} ms. Size is: {}", (end - start), input.getAxiomCount());
+        log.info("[end] Prepared input for OWLApi in {} ms. Size is: {}", (end - start),
+            input.getAxiomCount());
         return input;
     }
 
@@ -1015,26 +1020,26 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
             long start = System.currentTimeMillis();
             log.info("[start] Prepare rules for OWLApi ");
 
-         // If recipe exists, return it as a list of SWRL rules
+            // If recipe exists, return it as a list of SWRL rules
             rules = new ArrayList<SWRLRule>();
             try {
                 Recipe rec = ruleStore.getRecipe(IRI.create(recipe));
-                log.debug("Recipe is: {}",rec);
+                log.debug("Recipe is: {}", rec);
                 RuleList ruleList = rec.getkReSRuleList();
-                log.debug("RuleList is: {}",ruleList);
-                for(org.apache.stanbol.rules.base.api.Rule r : ruleList ){
+                log.debug("RuleList is: {}", ruleList);
+                for (org.apache.stanbol.rules.base.api.Rule r : ruleList) {
                     SWRLRule swrl = r.toSWRL(OWLManager.getOWLDataFactory());
-                    log.debug("Prepared rule: {}",swrl);
+                    log.debug("Prepared rule: {}", swrl);
                     rules.add(swrl);
                 }
             } catch (NoSuchRecipeException e) {
-                log.error("Recipe {} does not exists",recipe);
-                throw new WebApplicationException(e,Status.NOT_FOUND);
+                log.error("Recipe {} does not exists", recipe);
+                throw new WebApplicationException(e, Status.NOT_FOUND);
             }
 
             long end = System.currentTimeMillis();
             log.info("[end] Prepared {} rules for OWLApi in {} ms.", rules.size(), (end - start));
-            
+
         }
         return rules;
     }

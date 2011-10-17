@@ -46,7 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Path("/ontonet/ontology/get")
-public class ONMOntResource extends BaseStanbolResource {
+public class OntologyIndexResource extends BaseStanbolResource {
 
     @SuppressWarnings("unused")
     private Logger log = LoggerFactory.getLogger(getClass());
@@ -60,7 +60,7 @@ public class ONMOntResource extends BaseStanbolResource {
 
     protected ClerezzaOntologyStorage storage;
 
-    public ONMOntResource(@Context ServletContext servletContext) {
+    public OntologyIndexResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
         this.storage = (ClerezzaOntologyStorage) ContextHelper.getServiceFromContext(

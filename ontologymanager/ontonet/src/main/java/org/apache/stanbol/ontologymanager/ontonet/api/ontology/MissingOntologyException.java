@@ -22,11 +22,11 @@ import org.semanticweb.owlapi.model.IRI;
  * Thrown whenever an attempt to modify an ontology within an ontology space
  * that does not contain it is detected.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public class MissingOntologyException extends
-		OntologySpaceModificationException {
+		OntologyCollectorModificationException {
 
 	public MissingOntologyException(OntologySpace space, IRI ontologyId) {
 		super(space);

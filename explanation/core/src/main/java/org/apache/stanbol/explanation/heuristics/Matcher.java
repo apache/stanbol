@@ -3,7 +3,7 @@ package org.apache.stanbol.explanation.heuristics;
 /**
  * Any entity that can be compared to another one using Description Logic constructs.
  * 
- * @author alessandro
+ * @author alexdma
  *
  */
 public interface Matcher {

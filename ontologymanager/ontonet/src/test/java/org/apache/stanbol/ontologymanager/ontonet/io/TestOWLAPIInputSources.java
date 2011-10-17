@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.io;
 
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.reset;
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -34,6 +35,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
@@ -47,7 +49,7 @@ import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
 
-public class TestOntologyInputSources {
+public class TestOWLAPIInputSources {
 
     private static OWLDataFactory df;
 
@@ -110,10 +112,10 @@ public class TestOntologyInputSources {
         assertNotNull(url);
         File f = new File(url.toURI());
         assertNotNull(f);
-        OntologyInputSource coreSource = new ParentPathInputSource(f);
+        OntologyInputSource<OWLOntology> coreSource = new ParentPathInputSource(f);
 
         // Check that all the imports closure is made of local files
-        Set<OWLOntology> closure = coreSource.getClosure();
+        Set<OWLOntology> closure = coreSource.getImports(true);
         for (OWLOntology o : closure)
             assertEquals("file", o.getOWLOntologyManager().getOntologyDocumentIRI(o).getScheme());
 
@@ -140,7 +142,7 @@ public class TestOntologyInputSources {
     public void testOfflineSingleton() throws Exception {
         URL url = getClass().getResource("/ontologies/mockfoaf.rdf");
         assertNotNull(url);
-        OntologyInputSource coreSource = new RootOntologyIRISource(IRI.create(url));
+        OntologyInputSource<OWLOntology> coreSource = new RootOntologyIRISource(IRI.create(url));
         assertNotNull(df);
         /*
          * To check it fetched the correct ontology, we look for a declaration of the bogus class foaf:Perzon
@@ -148,6 +150,11 @@ public class TestOntologyInputSources {
          */
         OWLClass cPerzon = df.getOWLClass(IRI.create("http://xmlns.com/foaf/0.1/Perzon"));
         assertTrue(coreSource.getRootOntology().getClassesInSignature().contains(cPerzon));
+    }
+    
+    @After
+    public void cleanup() {
+        reset();
     }
 
 }

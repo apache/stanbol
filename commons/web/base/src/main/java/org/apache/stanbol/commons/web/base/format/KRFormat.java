@@ -22,7 +22,7 @@ import javax.ws.rs.core.MediaType;
  * Additional MIME types for knowledge representation formats.
  * 
  * @author andrea.nuzzolese
- * @author alessandro
+ * @author alexdma
  * 
  */
 public class KRFormat extends MediaType {

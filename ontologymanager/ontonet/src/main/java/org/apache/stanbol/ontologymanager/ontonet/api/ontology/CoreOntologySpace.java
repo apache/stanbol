@@ -21,7 +21,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
  * modeling a given scope. For example, it may define metamodels or essential
  * concepts and rules in a domain.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public interface CoreOntologySpace extends OntologySpace {

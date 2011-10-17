@@ -24,6 +24,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
  * Default implementation of the core ontology space.
+ * 
+ * @author alexdma
  */
 public class CoreOntologySpaceImpl extends AbstractOntologySpaceImpl implements CoreOntologySpace {
 

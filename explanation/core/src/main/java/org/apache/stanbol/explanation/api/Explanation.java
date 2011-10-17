@@ -6,7 +6,7 @@ import java.util.Collection;
  * A knowledge object that incorporates a description, or justification, for another knowledge object, be it a
  * content item, fact, event or collection thereof.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public interface Explanation {

@@ -33,10 +33,10 @@ import org.semanticweb.owlapi.util.AutoIRIMapper;
  * The behaviour of this class is inherited from the {@link AutoIRIMapper} in the OWL API, and so are its
  * limitations and fallback policies.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
-public class ParentPathInputSource extends AbstractOntologyInputSource {
+public class ParentPathInputSource extends AbstractOWLOntologyInputSource {
 
     /**
      * Creates a new parent path ontology input source. When created using this constructor, the only active

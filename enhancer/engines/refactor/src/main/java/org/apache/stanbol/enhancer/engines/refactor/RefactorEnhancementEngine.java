@@ -54,9 +54,8 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
@@ -167,7 +166,7 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
         /*
          * Now we prepare the OntoNet environment. First we create the OntoNet session in which run the whole
          */
-        final IRI sessionIRI = createAndAddSessionSpaceToScope();
+        final String sessionIRI = createAndAddSessionSpaceToScope();
 
         /*
          * We retrieve the session space
@@ -236,10 +235,11 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
                         }
 
                         @Override
-                        public Set<OWLOntology> getClosure() {
+                        public Set<OWLOntology> getImports(boolean direct) {
                             // TODO Auto-generated method stub
                             return null;
                         }
+
                     };
                     sessionSpace.addOntology(ontologySource);
                 }
@@ -247,7 +247,7 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
                 log.debug("Added " + entityReferenceString + " to the session space of scope "
                           + scope.getID().toString(), this);
 
-            } catch (UnmodifiableOntologySpaceException e) {
+            } catch (UnmodifiableOntologyCollectorException e) {
                 log.error("Cannot load the entity", e);
             }
 
@@ -338,7 +338,7 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
             /*
              * The session needs to be destroyed, as it is no more useful.
              */
-            onManager.getSessionManager().destroySession(sessionIRI);
+            onManager.getSessionManager().destroySession(sessionIRI.toString());
 
         } catch (OWLOntologyCreationException e) {
             log.error("Cannot create the ontology for the refactoring", e);
@@ -350,7 +350,7 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
      * 
      * @return
      */
-    private IRI createAndAddSessionSpaceToScope() {
+    private String createAndAddSessionSpaceToScope() {
         /*
          * Retrieve the session manager
          */
@@ -362,13 +362,13 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
          * developers to do through the API
          */
         Session session = sessionManager.createSession();
-        OntologySpaceFactory ontologySpaceFactory = onManager.getOntologySpaceFactory();
-        OntologySpace sessionSpace = ontologySpaceFactory.createSessionOntologySpace(scope.getID());
-        try {
-            scope.addSessionSpace(sessionSpace, session.getID());
-        } catch (UnmodifiableOntologySpaceException e) {
-            log.error("Failed to add session space to unmodifiable scope " + scope, e);
-        }
+        // OntologySpaceFactory ontologySpaceFactory = onManager.getOntologySpaceFactory();
+        // OntologySpace sessionSpace = ontologySpaceFactory.createSessionOntologySpace(scope.getID());
+        // try {
+        // scope.addSessionSpace(sessionSpace, session.getID());
+        // } catch (UnmodifiableOntologySpaceException e) {
+        // log.error("Failed to add session space to unmodifiable scope " + scope, e);
+        // }
 
         /*
          * Finally, we return the session ID to be used by the caller
@@ -425,10 +425,11 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
             }
 
             @Override
-            public Set<OWLOntology> getClosure() {
+            public Set<OWLOntology> getImports(boolean direct) {
                 // TODO Auto-generated method stub
                 return null;
             }
+
         };
 
         return ois;
@@ -508,23 +509,24 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
             }
 
             @Override
-            public Set<OWLOntology> getClosure() {
+            public Set<OWLOntology> getImports(boolean direct) {
                 // TODO Auto-generated method stub
                 return null;
             }
+
         };
 
-//        IRI dulcifierScopeIRI = IRI.create((String) context.getProperties().get(SCOPE));
-String scopeId = (String) context.getProperties().get(SCOPE);
-        
+        // IRI dulcifierScopeIRI = IRI.create((String) context.getProperties().get(SCOPE));
+        String scopeId = (String) context.getProperties().get(SCOPE);
+
         /*
          * The scope is created by the ScopeFactory or loaded from the scope registry of KReS
          */
         try {
-            scope = scopeFactory.createOntologyScope(scopeId/*dulcifierScopeIRI*/, oisbase);
+            scope = scopeFactory.createOntologyScope(scopeId/* dulcifierScopeIRI */, oisbase);
         } catch (DuplicateIDException e) {
             ScopeRegistry scopeRegistry = onManager.getScopeRegistry();
-            scope = scopeRegistry.getScope(scopeId/*dulcifierScopeIRI*/);
+            scope = scopeRegistry.getScope(scopeId/* dulcifierScopeIRI */);
         }
 
         /*
@@ -540,7 +542,7 @@ String scopeId = (String) context.getProperties().get(SCOPE);
             OntologyInputSource ois = oisForScope(coreScopeOntologySet[o]);
             try {
                 ontologySpace.addOntology(ois);
-            } catch (UnmodifiableOntologySpaceException ex) {
+            } catch (UnmodifiableOntologyCollectorException ex) {
                 log.error("Unmodifiable Ontology SpaceException.", ex);
             }
         }

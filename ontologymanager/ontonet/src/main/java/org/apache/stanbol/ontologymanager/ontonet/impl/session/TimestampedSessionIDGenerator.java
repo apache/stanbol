@@ -23,6 +23,12 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionIDGenerator
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.StringUtils;
 import org.semanticweb.owlapi.model.IRI;
 
+/**
+ * FIXME make sure to manage namespaces independently!
+ * 
+ * @author alexdma
+ * 
+ */
 public class TimestampedSessionIDGenerator implements SessionIDGenerator {
 
     private IRI baseIRI;
@@ -32,13 +38,13 @@ public class TimestampedSessionIDGenerator implements SessionIDGenerator {
     }
 
     @Override
-    public IRI createSessionID() {
-        return IRI.create(StringUtils.stripIRITerminator(baseIRI) + "/session/" + new Date().getTime());
+    public String createSessionID() {
+        return StringUtils.stripIRITerminator(baseIRI) + "/session/" + new Date().getTime();
     }
 
     @Override
-    public IRI createSessionID(Set<IRI> exclude) {
-        IRI id = null;
+    public String createSessionID(Set<String> exclude) {
+        String id = null;
         do {
             id = createSessionID();
         } while (exclude.contains(id));

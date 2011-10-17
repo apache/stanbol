@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.ontonet.impl.util;
 
 import java.io.PrintStream;
@@ -22,7 +22,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologySpaceSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.io.StringDocumentTarget;
@@ -44,7 +47,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A set of static utility methods for managing ontologies in KReS.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public class OntologyUtils {
@@ -78,18 +81,19 @@ public class OntologyUtils {
     // return buildImportTree(root, subtrees, mgr);
     // }
 
-    public static OWLOntology appendOntology(OntologyInputSource parentSrc,
-                                             OntologyInputSource childSrc,
+    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology> parentSrc,
+                                             OntologyInputSource<OWLOntology> childSrc,
                                              OWLOntologyManager ontologyManager) {
         return appendOntology(parentSrc, childSrc, ontologyManager, null);
     }
 
-    public static OWLOntology appendOntology(OntologyInputSource parentSrc, OntologyInputSource childSrc) {
+    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology> parentSrc,
+                                             OntologyInputSource<OWLOntology> childSrc) {
         return appendOntology(parentSrc, childSrc, null, null);
     }
 
-    public static OWLOntology appendOntology(OntologyInputSource parentSrc,
-                                             OntologyInputSource childSrc,
+    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology> parentSrc,
+                                             OntologyInputSource<OWLOntology> childSrc,
                                              IRI rewritePrefix) {
         return appendOntology(parentSrc, childSrc, null, rewritePrefix);
     }
@@ -113,8 +117,8 @@ public class OntologyUtils {
      *            ontology document file elsewhere.
      * @return the parent with the appended child
      */
-    public static OWLOntology appendOntology(OntologyInputSource parentSrc,
-                                             OntologyInputSource childSrc,
+    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology> parentSrc,
+                                             OntologyInputSource<OWLOntology> childSrc,
                                              OWLOntologyManager ontologyManager,
                                              IRI rewritePrefix) {
 
@@ -148,7 +152,8 @@ public class OntologyUtils {
         return oParent;
     }
 
-    public static OWLOntology buildImportTree(OntologyInputSource rootSrc, Set<OWLOntology> subtrees) {
+    public static OWLOntology buildImportTree(OntologyInputSource<OWLOntology> rootSrc,
+                                              Set<OWLOntology> subtrees) {
 
         return buildImportTree(rootSrc.getRootOntology(), subtrees, OWLManager.createOWLOntologyManager());
 
@@ -161,9 +166,20 @@ public class OntologyUtils {
      * @param mgr
      * @return
      */
-    public static OWLOntology buildImportTree(OntologyInputSource rootSrc,
+    public static OWLOntology buildImportTree(OntologyInputSource<OWLOntology> rootSrc,
                                               Set<OWLOntology> subtrees,
                                               OWLOntologyManager mgr) {
+
+        if (rootSrc instanceof OntologySpaceSource) {
+            OntologySpace spc = ((OntologySpaceSource) rootSrc).asOntologySpace();
+            for (OWLOntology o : subtrees)
+                try {
+                    spc.addOntology(new RootOntologySource(o));
+                } catch (UnmodifiableOntologyCollectorException e) {
+                    logger.error("Cannot add ontology {} to unmodifiable space {}", o, spc);
+                    continue;
+                }
+        }
 
         return buildImportTree(rootSrc.getRootOntology(), subtrees, mgr);
 

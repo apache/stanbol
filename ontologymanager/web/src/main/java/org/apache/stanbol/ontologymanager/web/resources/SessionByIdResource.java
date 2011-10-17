@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.web.resources;
 
 import javax.servlet.ServletContext;
@@ -33,10 +33,9 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.renderers.SessionRenderer;
-import org.semanticweb.owlapi.model.IRI;
 
 @Path("/ontonet/session/{id:.+}")
-public class SessionIDResource extends BaseStanbolResource {
+public class SessionByIdResource extends BaseStanbolResource {
 
     /*
      * Placeholder for the ONManager to be fetched from the servlet context.
@@ -45,7 +44,7 @@ public class SessionIDResource extends BaseStanbolResource {
 
     protected ServletContext servletContext;
 
-    public SessionIDResource(@Context ServletContext servletContext) {
+    public SessionByIdResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
     }
@@ -58,7 +57,7 @@ public class SessionIDResource extends BaseStanbolResource {
 
         Session ses = null;
         SessionManager mgr = onm.getSessionManager();
-        ses = mgr.getSession(IRI.create(sessionId));
+        ses = mgr.getSession(sessionId);
         if (ses == null) return Response.status(Status.NO_CONTENT).build();
 
         return Response.ok(SessionRenderer.getSessionMetadataRDFasOntology(ses)).build();

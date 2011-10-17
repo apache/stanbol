@@ -20,7 +20,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api.session;
  * Objects that want to listen to events affecting KReS sessions should
  * implement this interface and add themselves as listener to a manager.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public interface SessionListener {

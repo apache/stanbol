@@ -8,7 +8,7 @@ import org.semanticweb.owlapi.model.IRI;
  * A registry of knowledge schemas to be matched against in order to filter relevant statements for
  * explanations.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public interface SchemaCatalog {

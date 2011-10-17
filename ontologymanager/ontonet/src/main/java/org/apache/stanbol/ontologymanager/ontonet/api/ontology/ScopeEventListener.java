@@ -20,7 +20,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
  * Objects that want to listen to the registration of ontology scopes should
  * implement this interface and add themselves as listener to a scope registry.
  * 
- * @author alessandro
+ * @author alexdma
  * 
  */
 public interface ScopeEventListener {

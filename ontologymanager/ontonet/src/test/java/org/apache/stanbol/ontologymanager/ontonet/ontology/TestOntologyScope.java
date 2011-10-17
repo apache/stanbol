@@ -16,10 +16,8 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.ontology;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.*;
+import static org.junit.Assert.*;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -39,6 +37,7 @@ import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.CoreOntologySpac
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.CustomOntologySpaceImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFactoryImpl;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -51,8 +50,6 @@ public class TestOntologyScope {
     public static IRI baseIri = IRI.create(Constants.PEANUTS_MAIN_BASE), baseIri2 = IRI
             .create(Constants.PEANUTS_MINOR_BASE);
 
-    public static String scopeIdBlank = "WackyRaces", scopeId1 = "Peanuts", scopeId2 = "CalvinAndHobbes";
-
     /**
      * An ontology scope that initially contains no ontologies, and is rebuilt from scratch before each test
      * method.
@@ -62,6 +59,8 @@ public class TestOntologyScope {
     private static OntologyScopeFactory factory = null;
 
     private static ONManager onm;
+
+    public static String scopeIdBlank = "WackyRaces", scopeId1 = "Peanuts", scopeId2 = "CalvinAndHobbes";
 
     private static OntologyInputSource src1 = null, src2 = null;
 
@@ -83,9 +82,14 @@ public class TestOntologyScope {
         }
     }
 
+    @After
+    public void cleanup() {
+        reset();
+    }
+    
     @Before
-    public void cleanup() throws DuplicateIDException {
-        if (factory != null) blankScope = factory.createOntologyScope(scopeIdBlank, null);
+    public void cleanupScope() throws DuplicateIDException {
+        if (factory != null) blankScope = factory.createOntologyScope(scopeIdBlank);
     }
 
     /**
@@ -185,7 +189,7 @@ public class TestOntologyScope {
     public void testNullScopeCreation() {
         OntologyScope scope = null;
         try {
-            scope = factory.createOntologyScope(null, null);
+            scope = factory.createOntologyScope(null, (OntologyInputSource) null);
         } catch (DuplicateIDException e) {
             fail("Unexpected DuplicateIDException caught while testing scope creation"
                  + " with null parameters.");

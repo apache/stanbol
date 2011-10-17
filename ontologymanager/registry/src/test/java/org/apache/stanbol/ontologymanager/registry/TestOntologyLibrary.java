@@ -159,7 +159,7 @@ public class TestOntologyLibrary {
         assertNotNull(regMgr);
 
         // Now use this registry manager to instantiate an input source.
-        OntologyInputSource src = new LibrarySource(Locations.LIBRARY_TEST1, regMgr, virginOntologyManager);
+        OntologyInputSource<OWLOntology> src = new LibrarySource(Locations.LIBRARY_TEST1, regMgr, virginOntologyManager);
         OWLOntology o = src.getRootOntology();
         boolean hasImporting = false, hasImported = false;
         for (OWLImportsDeclaration ax : o.getImportsDeclarations()) {

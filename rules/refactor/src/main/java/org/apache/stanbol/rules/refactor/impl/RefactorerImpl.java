@@ -37,11 +37,11 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologySpaceException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
@@ -137,7 +137,7 @@ public class RefactorerImpl implements Refactorer {
 
     private IRI defaultRefactoringIRI;
 
-    private IRI kReSSessionID;
+    private String sessionId;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -231,24 +231,24 @@ public class RefactorerImpl implements Refactorer {
         String hostPort = (String) configuration.get(HOST_NAME_AND_PORT);
         if (hostPort == null) hostPort = _HOST_NAME_AND_PORT_DEFAULT;
 
-        kReSSessionID = IRI.create(refactoringSessionID);
+        sessionId = refactoringSessionID;
         // refactoringScopeID = IRI.create("http://" + hostPort + "/kres/ontology/" + refactoringScopeID);
         // refactoringSpaceIRI = IRI.create(refactoringSpaceID);
         defaultRefactoringIRI = IRI.create(defaultRefactoringID);
 
         SessionManager kReSSessionManager = onManager.getSessionManager();
 
-        Session kReSSession = kReSSessionManager.getSession(kReSSessionID);
+        Session kReSSession = kReSSessionManager.getSession(sessionId);
 
         if (kReSSession == null) {
             try {
-                kReSSession = kReSSessionManager.createSession(kReSSessionID);
+                kReSSession = kReSSessionManager.createSession(sessionId);
             } catch (DuplicateSessionIDException e) {
                 log.error("SemionRefactorer : a KReS session for reengineering seems already existing", e);
             }
         }
 
-        kReSSessionID = kReSSession.getID();
+        sessionId = kReSSession.getID();
 
         OntologyScopeFactory ontologyScopeFactory = onManager.getOntologyScopeFactory();
 
@@ -258,22 +258,20 @@ public class RefactorerImpl implements Refactorer {
 
         scope = null;
         try {
-            log.info("Semion DBExtractor : created scope with IRI " + REFACTORING_SCOPE);
-
-            scope = ontologyScopeFactory.createOntologyScope(refactoringScopeID, null);
-
+            scope = ontologyScopeFactory.createOntologyScope(refactoringScopeID, (OntologyInputSource) null);
+            log.info("Created scope with IRI " + REFACTORING_SCOPE);
             scopeRegistry.registerScope(scope);
         } catch (DuplicateIDException e) {
-            log.info("Semion DBExtractor : already existing scope for IRI " + REFACTORING_SCOPE);
+            log.info("Reusing already existing scope for IRI " + REFACTORING_SCOPE);
             scope = onManager.getScopeRegistry().getScope(refactoringScopeID);
         }
-
-        try {
-            scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(refactoringScopeID),
-                kReSSession.getID());
-        } catch (UnmodifiableOntologySpaceException e) {
-            log.error("Failed to create session space", e);
-        }
+        //
+        // try {
+        // scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(refactoringScopeID),
+        // kReSSession.getID());
+        // } catch (UnmodifiableOntologySpaceException e) {
+        // log.error("Failed to create session space", e);
+        // }
 
         scopeRegistry.setScopeActive(refactoringScopeID, true);
 
@@ -286,7 +284,7 @@ public class RefactorerImpl implements Refactorer {
         FunctionRegistry.get().put("http://www.stlab.istc.cnr.it/semion/function#propString",
             CreatePropertyURIStringFromLabel.class);
 
-        log.info("Activated KReS Semion Refactorer");
+        log.debug(Refactorer.class + "activated.");
     }
 
     @Deactivate
@@ -294,7 +292,7 @@ public class RefactorerImpl implements Refactorer {
         log.info("in " + getClass() + " deactivate with context " + context);
 
         SessionManager kReSSessionManager = onManager.getSessionManager();
-        kReSSessionManager.destroySession(kReSSessionID);
+        kReSSessionManager.destroySession(sessionId);
         // semionManager.unregisterRefactorer();
         this.weightedTcProvider = null;
         this.serializer = null;
