@@ -36,9 +36,9 @@
      <#list it.activeServices as service>
       <li><b>${service.path}</b>:
         <#list service.supportedTasks as task> 
-        	<a href="/${it.currentPath}/${service.path}/${task}" title="${service.class.name} Task: ${task}">${task}</a> |
+        	<a href="${it.publicBaseUri}${it.currentPath}/${service.path}/${task}" title="${service.class.name} Task: ${task}">${task}</a> |
         </#list>
-        <a href="/${it.currentPath}/${service.path}/check" title="${service.class.name} Task: check">check</a>
+        <a href="${it.publicBaseUri}${it.currentPath}/${service.path}/check" title="${service.class.name} Task: check">check</a>
       </li>
      </#list>
     </ul>
