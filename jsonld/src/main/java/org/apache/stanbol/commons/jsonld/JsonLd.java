@@ -318,77 +318,232 @@ public class JsonLd extends JsonLdCommon {
     }
 
     private void putProperties(Map<String,Object> jsonObject, JsonLdResource resource) throws ShorteningException {
-        putProperties(jsonObject, resource.getPropertyMap(), resource.getCoerceMap());
-    }
+        for (String property : resource.getPropertyMap().keySet()) {
+            JsonLdProperty jldProperty = resource.getPropertyMap().get(property);
 
-    private void putProperties(Map<String,Object> outputObject,
-                               Map<String,Object> inputMap,
-                               Map<String,String> coercionMap) throws ShorteningException {
-        for (String property : inputMap.keySet()) {
-            Object value = inputMap.get(property);
-            value = convertValueType(value);
-            if (value instanceof String) {
-                String strValue = (String) value;
-                if (coercionMap != null) {
-                    String type = coercionMap.get(property);
-                    if (type != null) {
-                        if (this.useTypeCoercion) {
-                            strValue = (String)doCoerce(strValue, type);
-                            outputObject.put(shortenURI(property), shortenURI(strValue));
-                        } else {
-                            Object objValue = unCoerce(strValue, type);
-                            outputObject.put(shortenURI(property), objValue);
-                        }
-                    }
-                    else {
-                        outputObject.put(shortenURI(property), shortenURI(strValue));
-                    }
-                }
-                else {
-                    outputObject.put(shortenURI(property), shortenURI(strValue));
-                }
-            } else if (value instanceof Object[]) {
-                Object[] arrayValue = (Object[]) value;
-                putProperties(outputObject, property, arrayValue, coercionMap);
-            } else if (value instanceof Map<?,?>) {
-                Map<String,Object> valueMap = (Map<String,Object>) value;
-                Map<String,Object> subOutputObject = new HashMap<String,Object>();
-                outputObject.put(shortenURI(property), subOutputObject);
-                putProperties(subOutputObject, valueMap, coercionMap);
-            } else if (value instanceof JsonLdIRI) {
-                JsonLdIRI iriValue = (JsonLdIRI) value;
-                Map<String,Object> iriObject = new HashMap<String,Object>();
-                iriObject.put(IRI, shortenURI(iriValue.getIRI()));
-                outputObject.put(shortenURI(property), iriObject);
-            } else {
-                if (coercionMap != null) {
-                    String type = coercionMap.get(property);
-                    if (type != null) {
-                        Object objValue = null;
-                        if (this.useTypeCoercion) {
-                            objValue = doCoerce(value, type);
-                        } else {
-                            objValue = unCoerce(value, type);
-                        }
-                        
-                        if (objValue instanceof String) {
-                            String strValue = (String) objValue;
-                            outputObject.put(shortenURI(property), shortenURI(strValue));
-                        }
-                        else {
-                            outputObject.put(shortenURI(property), objValue);
-                        }
-                    } else {
-                        outputObject.put(shortenURI(property), value);
-                    }
-                } else {
-                    outputObject.put(shortenURI(property), value);
-                }
+            if (jldProperty.isSingleValued()) {
+                putSingleValuedProperty(jsonObject, resource, property, jldProperty);
+            }
+            else {
+                putMultiValuedProperty(jsonObject, resource, property, jldProperty);
+                
             }
         }
     }
 
-    private void putProperties(Map<String,Object> outputObject,
+    private void putSingleValuedProperty(Map<String,Object> jsonObject,
+                                         JsonLdResource resource,
+                                         String property,
+                                         JsonLdProperty jldProperty) throws ShorteningException {
+        // This is a single value property but it may have
+        // a datatype and a language.
+        Object value = jldProperty.getValues().get(0);
+        Map<String,Object> valueObject = new HashMap<String,Object>();
+        putProperty(valueObject, resource.getCoerceMap(), property, value);
+        
+        if (valueObject.containsKey(DATATYPE)) {
+            putTypedValue(jsonObject, resource, property, valueObject);
+        }
+        else if (valueObject.size() == 1 && valueObject.containsKey(LITERAL)) {
+            // If the returned value object contains only one @literal value,
+            // we can simplify the value by admitting the @literal.
+            putSimplifiedValue(jsonObject, property, valueObject, resource.getCoerceMap());
+        }
+        else {
+            // Value object has no type but a language
+            jsonObject.put(shortenURI(property),valueObject);
+        }
+    }
+    
+    private void putSimplifiedValue(Map<String,Object> jsonObject,
+                                    String property,
+                                    Map<String,Object> valueObject,
+                                    Map<String,String> coercionMap) throws ShorteningException {
+        Object convertedValue = convertValueType(valueObject.get(LITERAL));
+        if (convertedValue instanceof String) {
+            String strValue = (String) convertedValue;
+            String type = coercionMap.get(property);
+            if (type != null) {
+                if (this.useTypeCoercion) {
+                    strValue = (String)doCoerce(strValue, type);
+                    jsonObject.put(shortenURI(property), shortenURI(strValue));
+                } else {
+                    Object objValue = unCoerce(strValue, type);
+                    jsonObject.put(shortenURI(property), objValue);
+                }
+            }
+            else {
+                jsonObject.put(shortenURI(property), shortenURI(strValue));
+            }
+        }
+        else {
+            jsonObject.put(shortenURI(property), convertedValue);
+        }
+    }
+
+    private void putTypedValue(Map<String,Object> jsonObject,
+                               JsonLdResource resource,
+                               String property,
+                               Map<String,Object> valueObject) throws ShorteningException {
+        if (this.useTypeCoercion) {
+            // In case of type coercion we just add the value. The datatype is already
+            // set through the coercion map.
+            if (resource.getCoerceMap().get(property) != null) {
+                putSimplifiedValue(jsonObject, property, valueObject, resource.getCoerceMap());
+            }
+            else {
+                // No type defined through coercion - use the value as it is
+                simplifyIRI(valueObject);
+                jsonObject.put(shortenURI(property),valueObject);
+            }
+        }
+        else {
+            // No type coercion but value has type - so we add value object
+            simplifyIRI(valueObject);
+            jsonObject.put(shortenURI(property),valueObject);
+        }
+    }
+    
+    private void putMultiValuedProperty(Map<String,Object> jsonObject,
+                                        JsonLdResource resource,
+                                        String property,
+                                        JsonLdProperty jldProperty) throws ShorteningException {
+        List<Object> valueList = new ArrayList<Object>();
+        
+        for (JsonLdPropertyValue value : jldProperty.getValues()) {
+            Map<String,Object> valueObject = new HashMap<String,Object>();
+            putProperty(valueObject, resource.getCoerceMap(), property, value);
+            
+            if (valueObject.containsKey(DATATYPE)) {
+                if (this.useTypeCoercion) {
+                    if (resource.getCoerceMap().get(property) != null) {
+                        // Type already defined by coercion. We add the simplified value.
+                        addSimplifiedValue(valueList, valueObject);
+                    }
+                    else {
+                        // No type defined by coercion - so we use the value object
+                        simplifyIRI(valueObject);
+                        valueList.add(valueObject);
+                    }
+                }
+                else {
+                    simplifyIRI(valueObject);
+                    valueList.add(valueObject);
+                }
+            }
+            else if (valueObject.size() == 1 && valueObject.containsKey(LITERAL)) {
+                // If the returned value object contains only one @literal value,
+                // we can simplify the value by admitting the @literal.
+                addSimplifiedValue(valueList, valueObject);
+            }
+            else {
+                valueList.add(valueObject);
+            }
+            
+        }
+        
+        jsonObject.put(shortenURI(property), valueList);
+    }
+
+    private void simplifyIRI(Map<String,Object> valueObject) throws ShorteningException {
+        // No type coercion but value has type - maybe it's an IRI
+        if (valueObject.get(DATATYPE).equals(IRI)) {
+            String iri = (String)valueObject.get(LITERAL);
+            valueObject.clear();
+            valueObject.put(IRI, shortenURI(iri));
+        }
+    }
+
+    private void addSimplifiedValue(List<Object> valueList, Map<String,Object> valueObject) throws ShorteningException {
+        Object convertedValue = convertValueType(valueObject.get(LITERAL));
+        if (convertedValue instanceof String) {
+            String strValue = (String) convertedValue;
+            valueList.add(shortenURI(strValue));
+        }
+        else {
+            valueList.add(convertedValue);
+        }
+    }
+
+    private void putProperty(Map<String,Object> jsonObject,
+                               Map<String,String> coercionMap,
+                               String property,
+                               Object value) throws ShorteningException {
+        value = convertValueType(value);
+        if (value instanceof String) {
+            String strValue = (String) value;
+            if (coercionMap != null) {
+                String type = coercionMap.get(property);
+                if (type != null) {
+                    if (this.useTypeCoercion) {
+                        strValue = (String)doCoerce(strValue, type);
+                        jsonObject.put(shortenURI(property), shortenURI(strValue));
+                    } else {
+                        Object objValue = unCoerce(strValue, type);
+                        jsonObject.put(shortenURI(property), objValue);
+                    }
+                }
+                else {
+                    jsonObject.put(shortenURI(property), shortenURI(strValue));
+                }
+            }
+            else {
+                jsonObject.put(shortenURI(property), shortenURI(strValue));
+            }
+        } else if (value instanceof Object[]) {
+            Object[] arrayValue = (Object[]) value;
+            putPropertyArray(jsonObject, property, arrayValue, coercionMap);
+        } else if (value instanceof Map<?,?>) {
+            Map<String,Object> valueMap = (Map<String,Object>) value;
+            Map<String,Object> subOutputObject = new HashMap<String,Object>();
+            jsonObject.put(shortenURI(property), subOutputObject);
+            putPropertyMap(subOutputObject, valueMap, coercionMap);
+        } else if (value instanceof JsonLdIRI) {
+            JsonLdIRI iriValue = (JsonLdIRI) value;
+            Map<String,Object> iriObject = new HashMap<String,Object>();
+            iriObject.put(IRI, shortenURI(iriValue.getIRI()));
+            jsonObject.put(shortenURI(property), iriObject);
+        } else if (value instanceof JsonLdPropertyValue) {
+            JsonLdPropertyValue jldPropertyValue = (JsonLdPropertyValue)value;
+            jsonObject.put(LITERAL, jldPropertyValue.getLiteralValue());
+            String type = coercionMap.get(property);
+            if (type != null) {
+                jldPropertyValue.setType(type);
+            }
+            if (jldPropertyValue.getType() != null) {
+                jsonObject.put(DATATYPE, shortenURIWithCuries(jldPropertyValue.getType()));
+            }
+            if (jldPropertyValue.getLanguage() != null) {
+                jsonObject.put(LANGUAGE, jldPropertyValue.getLanguage());
+            }
+        } else {
+            if (coercionMap != null) {
+                String type = coercionMap.get(property);
+                if (type != null) {
+                    Object objValue = null;
+                    if (this.useTypeCoercion) {
+                        objValue = doCoerce(value, type);
+                    } else {
+                        objValue = unCoerce(value, type);
+                    }
+                    
+                    if (objValue instanceof String) {
+                        String strValue = (String) objValue;
+                        jsonObject.put(shortenURI(property), shortenURI(strValue));
+                    }
+                    else {
+                        jsonObject.put(shortenURI(property), objValue);
+                    }
+                } else {
+                    jsonObject.put(shortenURI(property), value);
+                }
+            } else {
+                jsonObject.put(shortenURI(property), value);
+            }
+        }
+    }
+
+    private void putPropertyArray(Map<String,Object> jsonObject,
                                String property,
                                Object[] arrayValue,
                                Map<String,String> coercionMap) throws ShorteningException {
@@ -405,7 +560,7 @@ public class JsonLd extends JsonLdCommon {
                 Map<String,Object> inputMap = (Map<String,Object>) object;
                 Map<String,Object> subOutputObject = new HashMap<String,Object>();
                 valueList.add(subOutputObject);
-                putProperties(subOutputObject, inputMap, coercionMap);
+                putPropertyMap(subOutputObject, inputMap, coercionMap);
             } else if (object instanceof JsonLdIRI) {
                 JsonLdIRI iriValue = (JsonLdIRI) object;
                 if (this.useTypeCoercion) {
@@ -429,8 +584,17 @@ public class JsonLd extends JsonLdCommon {
         }
 
         // Add the converted values
-        outputObject.put(shortenURI(property), valueList);
+        jsonObject.put(shortenURI(property), valueList);
     }
+    
+    private void putPropertyMap(Map<String,Object> outputObject,
+                                Map<String,Object> inputMap,
+                                Map<String,String> coercionMap) throws ShorteningException {
+         for (String property : inputMap.keySet()) {
+             Object value = inputMap.get(property);
+             putProperty(outputObject, coercionMap, property, value);
+         }
+     }
 
     /**
      * Returns a map specifying the literal form and the datatype.
@@ -443,7 +607,12 @@ public class JsonLd extends JsonLdCommon {
     private Map<String, Object> unCoerce(Object value, String type) throws ShorteningException {
         Map<String, Object> typeDef = new TreeMap<String,Object>(new JsonComparator());
         
-        typeDef.put(LITERAL, String.valueOf(value));
+        if (type.equals(IRI)) {
+            typeDef.put(LITERAL, String.valueOf(value));
+        }
+        else {
+            typeDef.put(LITERAL, String.valueOf(value));
+        }
         typeDef.put(DATATYPE, shortenURI(type));
         
         return typeDef;
