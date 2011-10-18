@@ -27,7 +27,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.clerezza.rdf.core.BNode;
+import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.NonLiteral;
+import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.TypedLiteral;
@@ -35,6 +37,9 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.stanbol.commons.jsonld.JsonLd;
+import org.apache.stanbol.commons.jsonld.JsonLdCommon;
+import org.apache.stanbol.commons.jsonld.JsonLdProperty;
+import org.apache.stanbol.commons.jsonld.JsonLdPropertyValue;
 import org.apache.stanbol.commons.jsonld.JsonLdResource;
 import org.apache.stanbol.commons.web.base.format.NamespaceEnum;
 import org.slf4j.Logger;
@@ -108,21 +113,36 @@ public class JsonLdSerializerProvider implements SerializingProvider {
                     }
 
                     String property = currentTriple.getPredicate().getUnicodeString();
-                    String strValue = currentTriple.getObject().toString();
-                    if (currentTriple.getObject() instanceof TypedLiteral) {
-                        TypedLiteral typedObject = (TypedLiteral) currentTriple.getObject();
-                        String type = typedObject.getDataType().getUnicodeString();
-                        strValue = typedObject.getLexicalForm();
-                        resource.putPropertyType(property, type);
+                    JsonLdProperty jldProperty = resource.getProperty(property);
+                    if (jldProperty == null) {
+                        jldProperty = new JsonLdProperty(property);
                     }
                     
-                    if (currentTriple.getObject() instanceof UriRef) {
+                    String strValue = currentTriple.getObject().toString();
+                    JsonLdPropertyValue jldValue = new JsonLdPropertyValue();
+
+                    if (currentTriple.getObject() instanceof PlainLiteral) {
+                        PlainLiteral plain = (PlainLiteral) currentTriple.getObject();
+                        if (plain.getLanguage() != null) {
+                            jldValue.setLanguage(plain.getLanguage().toString());
+                        }
+                        strValue = plain.getLexicalForm();
+                    } 
+                    else if (currentTriple.getObject() instanceof TypedLiteral) {
+                        TypedLiteral typedObject = (TypedLiteral) currentTriple.getObject();
+                        String type = typedObject.getDataType().getUnicodeString();
+                        jldValue.setType(type);
+                        strValue = typedObject.getLexicalForm();
+                    }
+                    else if (currentTriple.getObject() instanceof UriRef) {
                         UriRef uriRef = (UriRef) currentTriple.getObject();
-                        resource.putPropertyType(property, "@iri");
+                        jldValue.setType(JsonLdCommon.IRI);
                         strValue = uriRef.getUnicodeString();
                     }
                     
-                    resource.putProperty(property, convertValueType(strValue));
+                    jldValue.setValue(convertValueType(strValue));
+                    jldProperty.addValue(jldValue);
+                    resource.putProperty(jldProperty);
                 }
             }
 
