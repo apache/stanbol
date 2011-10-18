@@ -111,8 +111,7 @@ public class BaseStanbolResource {
     }
 
     public String getStaticRootUrl() {
-        String baseURIStr = uriInfo.getBaseUri().toString();
-        return baseURIStr.substring(0, baseURIStr.length()-1) + (String) servletContext.getAttribute(STATIC_RESOURCES_ROOT_URL); 
+        return (String) servletContext.getAttribute(STATIC_RESOURCES_ROOT_URL); 
     }
 
     @SuppressWarnings("unchecked")
