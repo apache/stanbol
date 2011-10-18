@@ -22,8 +22,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.stanbol.commons.jsonld.JsonLd;
+import org.apache.stanbol.commons.jsonld.JsonLdCommon;
 import org.apache.stanbol.commons.jsonld.JsonLdIRI;
+import org.apache.stanbol.commons.jsonld.JsonLdProperty;
+import org.apache.stanbol.commons.jsonld.JsonLdPropertyValue;
 import org.apache.stanbol.commons.jsonld.JsonLdResource;
+
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class Fact {
 
@@ -90,21 +95,27 @@ public class Fact {
         String schemaURN = jsonLd.unCURIE(resource.getProfile());
         
         if (schemaURN != null && !schemaURN.isEmpty()) {
-            Map<String, Object> propMap = resource.getPropertyMap();
+            Map<String, JsonLdProperty> propMap = resource.getPropertyMap();
             if (propMap.size() > 1) {
                 fact = new Fact();
                 fact.setFactSchemaURN(schemaURN);
                 for (String role : propMap.keySet()) {
-                    if (propMap.get(role) instanceof String) {
-                        String strType = (String) propMap.get(role);
-                        fact.addRole(role, strType);
-                    }
-                    else if (propMap.get(role) instanceof JsonLdIRI) {
-                        JsonLdIRI iriType = (JsonLdIRI) propMap.get(role);
-                        fact.addRole(role, jsonLd.unCURIE(iriType.getIRI()));
+                    JsonLdProperty jldProperty = propMap.get(role);
+                    if (jldProperty.isSingleValued()) {
+                        JsonLdPropertyValue jldValue = jldProperty.getValues().get(0);
+                        if (jldValue.getType().equals(JsonLdCommon.IRI)) {
+                            fact.addRole(role, jsonLd.unCURIE(jldValue.getLiteralValue()));
+                        }
+                        else if (jldValue.getValue() instanceof String) {
+                            String strType = (String) jldValue.getValue();
+                            fact.addRole(role, strType);
+                        }
+                        else {
+                            fact.addRole(role, propMap.get(role).toString());
+                        }
                     }
                     else {
-                        fact.addRole(role, propMap.get(role).toString());
+                        throw new NotImplementedException();
                     }
                 }
             }

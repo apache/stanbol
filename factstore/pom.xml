@@ -59,6 +59,7 @@
             </Export-Package>
             <Import-Package>
               <!-- apache derby -->
+              !sun.reflect.generics.reflectiveObjects,
               org.apache.derby.jdbc,
               *
             </Import-Package>

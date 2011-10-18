@@ -37,6 +37,7 @@ public abstract class JsonLdCommon {
 
     public static final String LITERAL = "@literal";
     public static final String DATATYPE = "@datatype";
+    public static final String LANGUAGE = "@language";
 
     public static final String IRI = "@iri";
 
@@ -218,7 +219,7 @@ public abstract class JsonLdCommon {
                             shortened = propName;
                         } else {
                             if (logger.isInfoEnabled()) {
-                                logger.info("Fallback to CURIEs because of duplicate property " + propName
+                                logger.info("Fallback to use CURIEs because of duplicate property " + propName
                                             + " from " + namespaceOfProp + " and " + curieNamespace
                                             + propName);
                             }

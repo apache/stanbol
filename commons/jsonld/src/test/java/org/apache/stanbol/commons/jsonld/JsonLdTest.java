@@ -287,8 +287,9 @@ public class JsonLdTest {
         r1.addType("http://purl.org/vocab/frbr/core#Work");
         r1.putProperty("http://purl.org/dc/terms/title", "Just a Geek");
         r1.putProperty("http://purl.org/dc/terms/creator", "Whil Wheaton");
-        String [] realizationValues = {"<http://purl.oreilly.com/products/9780596007683.BOOK>", "<http://purl.oreilly.com/products/9780596802189.EBOOK>"};
-        r1.putProperty("http://purl.org/vocab/frbr/core#realization", realizationValues);
+        r1.putProperty("http://purl.org/vocab/frbr/core#realization", "<http://purl.oreilly.com/products/9780596007683.BOOK>");
+        r1.putProperty("http://purl.org/vocab/frbr/core#realization", "<http://purl.oreilly.com/products/9780596802189.EBOOK>");
+        
         jsonLd.put(r1.getSubject(), r1);
 
         JsonLdResource r2 = new JsonLdResource();
@@ -445,8 +446,9 @@ public class JsonLdTest {
 
         JsonLdResource r1 = new JsonLdResource();
         r1.setSubject("<http://example.org/people#joebob>");
-        String [] nicks = new String [] {"stu", "groknar", "radface"};
-        r1.putProperty("foaf:nick", nicks);
+        r1.putProperty("foaf:nick", "stu");
+        r1.putProperty("foaf:nick", "groknar");
+        r1.putProperty("foaf:nick", "radface");
         jsonLd.put(r1);
 
         String actual = jsonLd.toString();
@@ -464,8 +466,9 @@ public class JsonLdTest {
 
         JsonLdResource r1 = new JsonLdResource();
         r1.setSubject("<http://example.org/people#joebob>");
-        String [] nicks = new String [] {"stu", "groknar", "radface"};
-        r1.putProperty("foaf:nick", nicks);
+        r1.putProperty("foaf:nick", "stu");
+        r1.putProperty("foaf:nick", "groknar");
+        r1.putProperty("foaf:nick", "radface");
         r1.putPropertyType("foaf:nick", "xsd:string");
         jsonLd.put(r1);
 
@@ -489,8 +492,9 @@ public class JsonLdTest {
 
         JsonLdResource r1 = new JsonLdResource();
         r1.setSubject("<http://example.org/people#joebob>");
-        String [] nicks = new String [] {"stu", "groknar", "radface"};
-        r1.putProperty("foaf:nick", nicks);
+        r1.putProperty("foaf:nick", "stu");
+        r1.putProperty("foaf:nick", "groknar");
+        r1.putProperty("foaf:nick", "radface");
         r1.putPropertyType("foaf:nick", "xsd:string");
         jsonLd.put(r1);
 
@@ -510,8 +514,9 @@ public class JsonLdTest {
 
         JsonLdResource r1 = new JsonLdResource();
         r1.setSubject("<http://example.org/people#joebob>");
-        String [] nicks = new String [] {"stu", "groknar", "radface"};
-        r1.putProperty("foaf:nick", nicks);
+        r1.putProperty("foaf:nick", "stu");
+        r1.putProperty("foaf:nick", "groknar");
+        r1.putProperty("foaf:nick", "radface");
         r1.putPropertyType("foaf:nick", "xsd:string");
         jsonLd.put(r1);
 
@@ -530,8 +535,9 @@ public class JsonLdTest {
 
         JsonLdResource r1 = new JsonLdResource();
         r1.setSubject("<http://example.org/people#joebob>");
-        String [] nicks = new String [] {"stu", "groknar", "radface"};
-        r1.putProperty("foaf:nick", nicks);
+        r1.putProperty("foaf:nick", "stu");
+        r1.putProperty("foaf:nick", "groknar");
+        r1.putProperty("foaf:nick", "radface");
         r1.putPropertyType("foaf:nick", "xsd:string");
         jsonLd.put(r1);
 
@@ -553,8 +559,9 @@ public class JsonLdTest {
         JsonLdResource r1 = new JsonLdResource();
         r1.setSubject("<http://example.org/people#joebob>");
         
-        Object [] nicks = new Object [] {"nick:stu", "nick:pet", "nick:flo"};
-        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nicks);
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", "nick:stu");
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", "nick:pet");
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", "nick:flo");
         r1.putPropertyType("http://xmlns.com/foaf/0.1/nick", "@iri");
         jsonLd.put(r1);
 
@@ -584,8 +591,9 @@ public class JsonLdTest {
         JsonLdIRI nick2 = new JsonLdIRI("nick:pet");
         JsonLdIRI nick3 = new JsonLdIRI("nick:flo");
         
-        Object [] nicks = new Object [] {nick1, nick2, nick3};
-        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nicks);
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nick1);
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nick2);
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nick3);
         jsonLd.put(r1);
 
         String actual = jsonLd.toString();
@@ -611,8 +619,9 @@ public class JsonLdTest {
         JsonLdIRI nick2 = new JsonLdIRI("nick:pet");
         JsonLdIRI nick3 = new JsonLdIRI("nick:flo");
         
-        Object [] nicks = new Object [] {nick1, nick2, nick3};
-        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nicks);
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nick1);
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nick2);
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nick3);
         jsonLd.put(r1);
 
         String actual = jsonLd.toString();
@@ -629,7 +638,7 @@ public class JsonLdTest {
 
         jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
         jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
-        jsonLd.addNamespacePrefix("http://nickworld.com/nicks/", "nick");
+        jsonLd.addNamespacePrefix("http://nickworld.com/nicks/", "nickw");
         
         JsonLdResource r1 = new JsonLdResource();
         r1.setSubject("<http://example.org/people#joebob>");
@@ -638,8 +647,9 @@ public class JsonLdTest {
         JsonLdIRI nick2 = new JsonLdIRI("nick:pet");
         JsonLdIRI nick3 = new JsonLdIRI("nick:flo");
         
-        Object [] nicks = new Object [] {nick1, nick2, nick3};
-        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nicks);
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nick1);
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nick2);
+        r1.putProperty("http://xmlns.com/foaf/0.1/nick", nick3);
         r1.putPropertyType("http://xmlns.com/foaf/0.1/nick", "@iri");
         jsonLd.put(r1);
 
@@ -867,6 +877,124 @@ public class JsonLdTest {
         assertEquals(expected, actual); 
     }
     
+    @Test
+    public void testMultivaluedProperty() {
+        JsonLd jsonLd = new JsonLd();
+        
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+        jsonLd.addNamespacePrefix("http://onto.test.org/", "onto");
+        
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("_:bnode1");
+        r1.addType("xsd:String");
+        r1.addType("foaf:name");
+        r1.putProperty("http://xmlns.com/foaf/0.1/age", 31.533567);
+        r1.putProperty("http://xmlns.com/foaf/0.1/age", "de");
+        jsonLd.put(r1);
+        
+        String actual = jsonLd.toString();
+        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"name\":\"http://xmlns.com/foaf/0.1/name\",\"String\":\"http://www.w3.org/2001/XMLSchema#String\"},\"@subject\":\"_:bnode1\",\"@type\":[\"String\",\"name\"],\"age\":[31.533567,\"de\"]}";
+        assertEquals(expected, actual); 
+    }
+
+    @Test
+    public void testMultivaluedTypedProperty() {
+        JsonLd jsonLd = new JsonLd();
+        
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+        jsonLd.addNamespacePrefix("http://onto.test.org/", "onto");
+        
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("_:bnode1");
+        r1.addType("xsd:String");
+        r1.addType("foaf:name");
+        
+        JsonLdProperty ageProperty = new JsonLdProperty("http://xmlns.com/foaf/0.1/age");
+        
+        JsonLdPropertyValue v1 = new JsonLdPropertyValue(31.533567);
+        v1.setType("xsd:Float");
+        ageProperty.addValue(v1);
+
+        JsonLdPropertyValue v2 = new JsonLdPropertyValue("test");
+        v2.setType("xsd:String");
+        ageProperty.addValue(v2);
+
+        r1.putProperty(ageProperty);
+        jsonLd.put(r1);
+        
+        String actual = jsonLd.toString();
+        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"name\":\"http://xmlns.com/foaf/0.1/name\",\"String\":\"http://www.w3.org/2001/XMLSchema#String\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"},\"@subject\":\"_:bnode1\",\"@type\":[\"String\",\"name\"],\"age\":[{\"@literal\":\"31.533567\",\"@datatype\":\"xsd:Float\"},{\"@literal\":\"test\",\"@datatype\":\"xsd:String\"}]}";
+        toConsole(actual);
+
+        assertEquals(expected, actual); 
+    }
+    
+    @Test
+    public void testMultivaluedTypedLangProperty() {
+        JsonLd jsonLd = new JsonLd();
+        
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+        jsonLd.addNamespacePrefix("http://onto.test.org/", "onto");
+        
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("_:bnode1");
+        r1.addType("xsd:String");
+        r1.addType("foaf:name");
+        
+        JsonLdProperty ageProperty = new JsonLdProperty("http://xmlns.com/foaf/0.1/age");
+        JsonLdPropertyValue v1 = new JsonLdPropertyValue(31.533567);
+        v1.setType("xsd:Float");
+        ageProperty.addValue(v1);
+
+        JsonLdPropertyValue v2 = new JsonLdPropertyValue("test");
+        v2.setType("xsd:String");
+        v2.setLanguage("en");
+        ageProperty.addValue(v2);
+
+        r1.putProperty(ageProperty);
+        jsonLd.put(r1);
+        
+        String actual = jsonLd.toString();
+        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"name\":\"http://xmlns.com/foaf/0.1/name\",\"String\":\"http://www.w3.org/2001/XMLSchema#String\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"},\"@subject\":\"_:bnode1\",\"@type\":[\"String\",\"name\"],\"age\":[{\"@literal\":\"31.533567\",\"@datatype\":\"xsd:Float\"},{\"@literal\":\"test\",\"@language\":\"en\",\"@datatype\":\"xsd:String\"}]}";
+        assertEquals(expected, actual); 
+    }
+    
+    
+    @Test
+    public void testMultivaluedMixedTypedLangProperty() {
+        JsonLd jsonLd = new JsonLd();
+        
+        jsonLd.addNamespacePrefix("http://www.w3.org/2001/XMLSchema#", "xsd");
+        jsonLd.addNamespacePrefix("http://xmlns.com/foaf/0.1/", "foaf");
+        jsonLd.addNamespacePrefix("http://onto.test.org/", "onto");
+        
+        JsonLdResource r1 = new JsonLdResource();
+        r1.setSubject("_:bnode1");
+        r1.addType("xsd:String");
+        r1.addType("foaf:name");
+        
+        JsonLdProperty ageProperty = new JsonLdProperty("http://xmlns.com/foaf/0.1/age");
+        JsonLdPropertyValue v1 = new JsonLdPropertyValue(31.533567);
+        v1.setType("xsd:Float");
+        ageProperty.addValue(v1);
+
+        JsonLdPropertyValue v2 = new JsonLdPropertyValue("test");
+        v2.setType("xsd:String");
+        v2.setLanguage("en");
+        ageProperty.addValue(v2);
+
+        r1.putProperty(ageProperty);
+        r1.putProperty("http://xmlns.com/foaf/0.1/age", "On more untyped value");
+        jsonLd.put(r1);
+        
+        String actual = jsonLd.toString();
+        String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"name\":\"http://xmlns.com/foaf/0.1/name\",\"String\":\"http://www.w3.org/2001/XMLSchema#String\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"},\"@subject\":\"_:bnode1\",\"@type\":[\"String\",\"name\"],\"age\":[{\"@literal\":\"31.533567\",\"@datatype\":\"xsd:Float\"},{\"@literal\":\"test\",\"@language\":\"en\",\"@datatype\":\"xsd:String\"},\"On more untyped value\"]}";
+        assertEquals(expected, actual); 
+    }
+
     @SuppressWarnings("unused")
     private void toConsole(String actual) {
         System.out.println(actual);

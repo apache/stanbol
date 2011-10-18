@@ -84,19 +84,19 @@ public class Query {
     }
 
     private static void handleSelect(JsonLdResource subject, Query query) throws Exception {
-        List<String> selects = (List<String>)subject.getPropertyValueIgnoreCase(SELECT);
+        List<String> selects = (List<String>)subject.getPropertyValueIgnoreCase(SELECT).getValues().get(0).getValue();
         for (String role : selects) {
             query.roles.add(role);
         }
     }
 
     private static void handleFrom(JsonLd jsonLd, JsonLdResource subject, Query query) {
-        query.fromSchemaURN = (String)subject.getPropertyValueIgnoreCase(FROM);
+        query.fromSchemaURN = (String)subject.getPropertyValueIgnoreCase(FROM).getValues().get(0).getValue();;
         query.fromSchemaURN = jsonLd.unCURIE(query.fromSchemaURN);
     }
 
     private static void handleWhere(JsonLd jsonLd, JsonLdResource subject, Query query) throws Exception {
-        List<Map<String,Map<String,Object>>> wheres = (List)subject.getPropertyValueIgnoreCase(WHERE);
+        List<Map<String,Map<String,Object>>> wheres = (List)subject.getPropertyValueIgnoreCase(WHERE).getValues().get(0).getValue();;
         for (Map<String,Map<String,Object>> whereObj : wheres) {
             for (String operator : whereObj.keySet()) {
                 if (operator.equalsIgnoreCase(CompareOperator.EQ.getLiteral())) {

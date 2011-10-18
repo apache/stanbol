@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Fabian Christ
@@ -32,11 +31,11 @@ public class JsonLdResource {
     private String profile;
     private List<String> types = new ArrayList<String>();
     
-    // maps properties to types
-    private Map<String,String> coerceMap = new HashMap<String,String>();
+    // maps property names to JsonLD property objects
+    private Map<String,JsonLdProperty> propertyMap = new HashMap<String,JsonLdProperty>();
     
-    // maps properties to values
-    private Map<String,Object> propertyMap = new HashMap<String,Object>();
+    // map property names to types in case of singlevalued properties
+    private Map<String,String> coercionMap = new HashMap<String,String>();
 
     public String getSubject() {
         return subject;
@@ -61,32 +60,52 @@ public class JsonLdResource {
     public void addAllTypes(List<String> types) {
         this.types.addAll(types);
     }
-
-    public void putPropertyType(String property, String type) {
-        this.coerceMap.put(property, type);
-    }
-
-    public String getTypeOfProperty(String property) {
-        return this.coerceMap.get(property);
-    }
-
-    public Map<String,String> getCoerceMap() {
-        return this.coerceMap;
-    }
-
+    
     public List<String> getTypes() {
         return types;
     }
 
-    public void putAllProperties(Map<String,Object> propertyMap) {
-        this.propertyMap.putAll(propertyMap);
+    public void putPropertyType(String property, String type) {
+        JsonLdProperty p = this.propertyMap.get(property);
+        if (p != null) {
+            p.setType(type);
+        }
+        this.coercionMap.put(property, type);
+    }
+
+    public String getTypeOfProperty(String property) {
+        return this.propertyMap.get(property).getType();
+    }
+
+    public Map<String,String> getCoerceMap() {
+        return this.coercionMap;
     }
 
     public void putProperty(String property, Object value) {
-        propertyMap.put(property, value);
+        JsonLdProperty jldProperty = this.propertyMap.get(property);
+        if (jldProperty == null) {
+            jldProperty = new JsonLdProperty(property, value);
+            String coercedType = this.coercionMap.get(property);
+            jldProperty.setType(coercedType);
+            propertyMap.put(property, jldProperty);
+        }
+        else {
+            jldProperty.addSingleValue(value);
+        }
+    }
+    
+    public void putProperty(JsonLdProperty property) {
+        String type = property.getType();
+        if (type != null) {
+            this.coercionMap.put(property.getName(), type);
+        }
+        else {
+            this.coercionMap.remove(property.getName());
+        }
+        this.propertyMap.put(property.getName(), property);
     }
 
-    public Object getPropertyValueIgnoreCase(String property) {
+    public JsonLdProperty getPropertyValueIgnoreCase(String property) {
         for (String p : this.propertyMap.keySet()) {
             if (p.equalsIgnoreCase(property)) {
                 return this.propertyMap.get(p);
@@ -95,11 +114,11 @@ public class JsonLdResource {
         return null;
     }
     
-    public Set<String> getProperties() {
-        return this.propertyMap.keySet();
+    public JsonLdProperty getProperty(String property) {
+        return this.propertyMap.get(property);
     }
-   
-    public Map<String,Object> getPropertyMap() {
+    
+    public Map<String,JsonLdProperty> getPropertyMap() {
         return this.propertyMap;
     }
 
