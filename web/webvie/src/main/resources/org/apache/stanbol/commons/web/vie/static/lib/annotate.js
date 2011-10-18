@@ -1,7 +1,12 @@
 (function() {
-  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __indexOf = Array.prototype.indexOf || function(item) {
+    for (var i = 0, l = this.length; i < l; i++) {
+      if (this[i] === item) return i;
+    }
+    return -1;
+  };
   (function(jQuery) {
-    var ANTT, Stanbol, ns;
+    var ANTT, Stanbol, ns, vie;
     ns = {
       rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
       enhancer: 'http://fise.iks-project.eu/ontology/',
@@ -9,8 +14,14 @@
       rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
       skos: 'http://www.w3.org/2004/02/skos/core#'
     };
+    vie = new VIE();
+    vie.use(new vie.StanbolService({
+      url: "http://dev.iks-project.eu:8080",
+      proxyDisabled: true
+    }));
     ANTT = ANTT || {};
     Stanbol = Stanbol || {};
+    window.entityCache = {};
     Stanbol.getTextAnnotations = function(enhList) {
       var res;
       res = _(enhList).filter(function(e) {
@@ -29,7 +40,7 @@
     };
     Stanbol.getEntityAnnotations = function(enhList) {
       return _(enhList).filter(function(e) {
-        return e.hasType("<" + ns.enhancer + "EntityAnnotation>");
+        return e.isof("<" + ns.enhancer + "EntityAnnotation>");
       });
     };
     ANTT.getRightLabel = function(entity) {
@@ -42,7 +53,7 @@
         if (cleanLabel.lastIndexOf("@") === cleanLabel.length - 3) {
           cleanLabel = cleanLabel.substring(0, cleanLabel.length - 3);
         }
-        labelMap[label["xml:lang"] || "_"] = cleanLabel;
+        labelMap[label["lang"] || "_"] = cleanLabel;
       }
       userLang = window.navigator.language.split("-")[0];
       return labelMap[userLang] || labelMap["_"] || labelMap["en"];
@@ -119,7 +130,7 @@
     };
     Stanbol.EntityEnhancement.prototype = {
       getLabel: function() {
-        return this._vals("enhancer:entity-label");
+        return this._vals("enhancer:entity-label").replace(/(^\"*|\"*@..$)/g, "");
       },
       getUri: function() {
         return this._uriTrim(this._vals("enhancer:entity-reference"))[0];
@@ -211,7 +222,7 @@
         return $(element).text().replace(/\n/g, " ");
       };
       if (textContentOf(element).indexOf(text) === -1) {
-        throw "'" + text + "' doesn't appear in the text block.";
+        console.error("'" + text + "' doesn't appear in the text block.");
         return $();
       }
       start = options.start + textContentOf(element).indexOf(textContentOf(element).trim());
@@ -280,12 +291,16 @@
     jQuery.widget('IKS.annotate', {
       __widgetName: "IKS.annotate",
       options: {
+        vie: vie,
+        vieServices: ["stanbol"],
         autoAnalyze: false,
+        showTooltip: true,
         debug: false,
         ns: {
           dbpedia: "http://dbpedia.org/ontology/",
           skos: "http://www.w3.org/2004/02/skos/core#"
         },
+        typeFilter: null,
         getTypes: function() {
           return [
             {
@@ -323,33 +338,65 @@
           warn: function() {},
           error: function() {}
         };
-        this.entityCache = window.entityCache = {
-          _entities: {},
-          get: function(uri, scope, cb) {
+        this.entityCache = {
+          _entities: function() {
+            return window.entityCache;
+          },
+          get: function(uri, scope, success, error) {
             var cache;
-            if (this._entities[uri] && this._entities[uri].status === "done") {
-              cb.apply(scope, [this._entities[uri].entity]);
-            } else if (!this._entities[uri]) {
-              this._entities[uri] = {
+            if (this._entities()[uri] && this._entities()[uri].status === "done") {
+              if (typeof success === "function") {
+                success.apply(scope, [this._entities()[uri].entity]);
+              }
+            } else if (this._entities()[uri] && this._entities()[uri].status === "error") {
+              if (typeof error === "function") {
+                error.apply(scope, ["error"]);
+              }
+            } else if (!this._entities()[uri]) {
+              this._entities()[uri] = {
                 status: "pending",
                 uri: uri
               };
               cache = this;
-              /*
-                                      widget.options.vie.load({entity: uri}).using('stanbol').execute().success (entity) ->
-                                          if not entity.status
-                                              if entity.id isnt uri
-                                                  widget._logger.warn "wrong callback", uri, entity.id
-                                              cache._entities[uri].entity = entity
-                                              cache._entities[uri].status = "done"
-                                              $(cache._entities[uri]).trigger "done", entity
-                                          else
-                                              widget._logger.warn "error getting entity", uri, entity
-                                      */
+              widget.options.vie.load({
+                entity: uri
+              }).using('stanbol').execute().success(__bind(function(entityArr) {
+                return _.defer(__bind(function() {
+                  var cacheEntry, entity;
+                  cacheEntry = this._entities()[uri];
+                  entity = _.detect(entityArr, function(e) {
+                    if (e.getSubject() === ("<" + uri + ">")) {
+                      return true;
+                    }
+                  });
+                  if (entity) {
+                    cacheEntry.entity = entity;
+                    cacheEntry.status = "done";
+                    return $(cacheEntry).trigger("done", entity);
+                  } else {
+                    widget._logger.warn("couldn''t load " + uri, entityArr);
+                    return cacheEntry.status = "not found";
+                  }
+                }, this));
+              }, this)).fail(__bind(function(e) {
+                return _.defer(__bind(function() {
+                  var cacheEntry;
+                  widget._logger.error("couldn't load " + uri);
+                  cacheEntry = this._entities()[uri];
+                  cacheEntry.status = "error";
+                  return $(cacheEntry).trigger("fail", e);
+                }, this));
+              }, this));
             }
-            if (this._entities[uri] && this._entities[uri].status === "pending") {
-              return $(this._entities[uri]).bind("done", function(event, entity) {
-                return cb.apply(scope, [entity]);
+            if (this._entities()[uri] && this._entities()[uri].status === "pending") {
+              return $(this._entities()[uri]).bind("done", function(event, entity) {
+                if (typeof success === "function") {
+                  return success.apply(scope, [entity]);
+                }
+              }).bind("fail", function(event, error) {
+                if (typeof error === "function") {
+                  return error.apply(scope, [error]);
+                }
               });
             }
           }
@@ -365,24 +412,29 @@
           element: this.element
         }).using(this.options.vieServices).execute().success(__bind(function(enhancements) {
           return _.defer(__bind(function() {
-            var entAnn, entityAnnotations, textAnn, textAnnotations, _i, _len;
+            var entAnn, entityAnnotations, textAnn, textAnnotations, textAnns, _i, _j, _len, _len2, _ref;
             entityAnnotations = Stanbol.getEntityAnnotations(enhancements);
             for (_i = 0, _len = entityAnnotations.length; _i < _len; _i++) {
               entAnn = entityAnnotations[_i];
-              textAnn = entAnn.get("dc:relation");
-              if (!(textAnn instanceof Backbone.Model)) {
-                textAnn = entAnn.vie.entities.get(textAnn);
-              }
-              if (!textAnn) {
-                continue;
-              }
-              _(_.flatten([textAnn])).each(function(ta) {
-                return ta.set({
-                  "entityAnnotation": entAnn.getSubject()
+              textAnns = entAnn.get("dc:relation");
+              _ref = _.flatten([textAnns]);
+              for (_j = 0, _len2 = _ref.length; _j < _len2; _j++) {
+                textAnn = _ref[_j];
+                if (!(textAnn instanceof Backbone.Model)) {
+                  textAnn = entAnn.vie.entities.get(textAnn);
+                }
+                if (!textAnn) {
+                  continue;
+                }
+                _(_.flatten([textAnn])).each(function(ta) {
+                  return ta.setOrAdd({
+                    "entityAnnotation": entAnn.getSubject()
+                  });
                 });
-              });
+              }
             }
             textAnnotations = Stanbol.getTextAnnotations(enhancements);
+            textAnnotations = this._filterByType(textAnnotations);
             textAnnotations = _(textAnnotations).filter(function(textEnh) {
               if (textEnh.getSelectedText && textEnh.getSelectedText()) {
                 return true;
@@ -394,15 +446,18 @@
               this._logger.info(s._enhancement, 'confidence', s.getConfidence(), 'selectedText', s.getSelectedText(), 'type', s.getType(), 'EntityEnhancements', s.getEntityEnhancements());
               return this.processTextEnhancement(s, analyzedNode);
             }, this));
-            this._trigger("done", true);
+            this._trigger("success", true);
             if (typeof cb === "function") {
               return cb(true);
             }
           }, this));
-        }, this)).fail(function(xhr) {
-          cb(false);
-          return console.error("analyze failed", xhr.responseText, xhr);
-        });
+        }, this)).fail(__bind(function(xhr) {
+          if (typeof cb === "function") {
+            cb(false, xhr);
+          }
+          this._trigger('error', xhr);
+          return this._logger.error("analyze failed", xhr.responseText, xhr);
+        }, this));
       },
       disable: function() {
         return $(':IKS-annotationSelector', this.element).each(function() {
@@ -432,7 +487,7 @@
       processTextEnhancement: function(textEnh, parentEl) {
         var eEnh, eEnhUri, el, options, sType, type, widget, _i, _j, _len, _len2, _ref;
         if (!textEnh.getSelectedText()) {
-          console.warn("textEnh", textEnh, "doesn't have selected-text!");
+          this._logger.warn("textEnh", textEnh, "doesn't have selected-text!");
           return;
         }
         el = $(ANTT.getOrCreateDomElement(parentEl[0], textEnh.getSelectedText(), {
@@ -456,17 +511,35 @@
         for (_j = 0, _len2 = _ref.length; _j < _len2; _j++) {
           eEnh = _ref[_j];
           eEnhUri = eEnh.getUri();
-          this.entityCache.get(eEnhUri, eEnh, function(entity) {
-            if (this.getUri() !== entity.id) {
-              return widget._logger.warn("wrong callback", entity.id, this.getUri());
+          this.entityCache.get(eEnhUri, eEnh, __bind(function(entity) {
+            if (("<" + eEnhUri + ">") === entity.getSubject()) {
+              return this._logger.info("entity " + eEnhUri + " is loaded:", entity.as("JSON"));
+            } else {
+              return widget._logger.warn("wrong callback", entity.getSubject(), eEnhUri);
             }
-          });
+          }, this));
         }
-        options = {
-          cache: this.entityCache
-        };
-        $.extend(options, this.options);
+        options = this.options;
+        options.cache = this.entityCache;
         return el.annotationSelector(options).annotationSelector('addTextEnhancement', textEnh);
+      },
+      _filterByType: function(textAnnotations) {
+        if (!this.options.typeFilter) {
+          return textAnnotations;
+        }
+        return _.filter(textAnnotations, __bind(function(ta) {
+          var type, _i, _len, _ref, _ref2;
+          if (_ref = this.options.typeFilter, __indexOf.call(ta.getType(), _ref) >= 0) {
+            return true;
+          }
+          _ref2 = this.options.typeFilter;
+          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+            type = _ref2[_i];
+            if (__indexOf.call(ta.getType(), type) >= 0) {
+              return true;
+            }
+          }
+        }, this));
       }
     });
     ANTT.annotationSelector = jQuery.widget('IKS.annotationSelector', {
@@ -507,7 +580,7 @@
       },
       _create: function() {
         this.element.click(__bind(function(e) {
-          console.log("click", e, e.isDefaultPrevented());
+          this._logger.log("click", e, e.isDefaultPrevented());
           e.preventDefault();
           if (!this.dialog) {
             this._createDialog();
@@ -525,11 +598,14 @@
             return this.searchEntryField.find('.search').focus(100);
           }
         }, this));
-        return this._logger = this.options.debug ? console : {
+        this._logger = this.options.debug ? console : {
           info: function() {},
           warn: function() {},
           error: function() {}
         };
+        if (this.isAnnotated()) {
+          return this._initTooltip();
+        }
       },
       _destroy: function() {
         if (this.menu) {
@@ -542,6 +618,30 @@
           this.dialog.element.remove();
           this.dialog.uiDialogTitlebar.remove();
           return delete this.dialog;
+        }
+      },
+      _initTooltip: function() {
+        var widget;
+        widget = this;
+        if (this.options.showTooltip) {
+          return jQuery(this.element).tooltip({
+            items: "[about]",
+            hide: {
+              effect: "hide",
+              delay: 50
+            },
+            show: {
+              effect: "show",
+              delay: 50
+            },
+            content: __bind(function(response) {
+              var uri;
+              uri = this.linkedEntity.uri;
+              this._logger.info("ttooltip uri:", uri);
+              widget._createPreview(uri, response);
+              return "loading...";
+            }, this)
+          });
         }
       },
       _getEntityEnhancements: function() {
@@ -666,6 +766,7 @@
       remove: function(event) {
         var el;
         el = this.element.parent();
+        this.element.toolbar("destroy");
         if (!this.isAnnotated() && this.textEnhancements) {
           this._trigger('decline', event, {
             textEnhancements: this.textEnhancements
@@ -719,11 +820,12 @@
         this._insertLink();
         this._acceptedTextEnhancement = entityEnhancement.getTextEnhancement();
         this._acceptedEntityEnhancement = entityEnhancement;
-        return this._trigger('select', null, {
+        this._trigger('select', null, {
           linkedEntity: this.linkedEntity,
           textEnhancement: entityEnhancement.getTextEnhancement(),
           entityEnhancement: entityEnhancement
         });
+        return this._initTooltip();
       },
       acceptBestCandidate: function() {
         var eEnhancements;
@@ -740,7 +842,8 @@
         return eEnhancements[0];
       },
       close: function() {
-        return this.destroy();
+        this.destroy();
+        return jQuery(".ui-tooltip").remove();
       },
       _updateTitle: function() {
         var title;
@@ -754,10 +857,11 @@
         }
       },
       _createMenu: function() {
-        var ul;
+        var ul, widget;
+        widget = this;
         ul = $('<ul></ul>').appendTo(this.dialog.element);
         this._renderMenu(ul, this.entityEnhancements);
-        return this.menu = ul.menu({
+        this.menu = ul.menu({
           select: __bind(function(event, ui) {
             this._logger.info("selected menu item", ui.item);
             this.annotate(ui.item.data('enhancement'), {
@@ -767,16 +871,61 @@
           }, this),
           blur: __bind(function(event, ui) {
             return this._logger.info('menu.blur()', ui.item);
-          }, this),
-          focus: __bind(function(event, ui) {
-            this._logger.info('menu.focus()', ui.item);
-            return this._entityPreview(ui.item);
           }, this)
         }).bind('blur', function(event, ui) {
           return this._logger.info('menu blur', ui);
         }).bind('menublur', function(event, ui) {
           return this._logger.info('menu menublur', ui.item);
-        }).focus(150).data('menu');
+        }).focus(150);
+        if (this.options.showTooltip) {
+          this.menu.tooltip({
+            items: ".ui-menu-item",
+            hide: {
+              effect: "hide",
+              delay: 50
+            },
+            show: {
+              effect: "show",
+              delay: 50
+            },
+            content: function(response) {
+              var uri;
+              uri = jQuery(this).attr("entityuri");
+              widget._createPreview(uri, response);
+              return "loading...";
+            }
+          });
+        }
+        return this.menu = this.menu.data('menu');
+      },
+      _createPreview: function(uri, response) {
+        var fail, success;
+        success = __bind(function(cacheEntity) {
+          var depictionUrl, descr, html;
+          html = "";
+          if (cacheEntity.get('foaf:depiction')) {
+            depictionUrl = _(cacheEntity.get('foaf:depiction')).detect(function(uri) {
+              if (uri.indexOf("thumb") !== -1) {
+                return true;
+              }
+            });
+            html += "<img style='float:left;padding: 5px;width: 200px' src='" + (depictionUrl.substring(1, depictionUrl.length - 1)) + "'/>";
+          }
+          if (cacheEntity.get('rdfs:comment')) {
+            descr = cacheEntity.get('rdfs:comment').replace(/(^\"*|\"*@..$)/g, "");
+            html += "<div style='padding 5px;width:300px;float:left;'><small>" + descr + "</small></div>";
+          }
+          this._logger.info("tooltip for " + uri + ": cacheEntry loaded", cacheEntity);
+          return setTimeout(function() {
+            return response(html);
+          }, 200);
+        }, this);
+        fail = __bind(function(e) {
+          this._logger.error("error loading " + uri, e);
+          return response("error loading entity for " + uri);
+        }, this);
+        jQuery(".ui-tooltip").remove();
+        return this.options.cache.get(uri, this, success, fail);
       },
       _renderMenu: function(ul, entityEnhancements) {
         var enhancement, _i, _len;
@@ -790,12 +939,12 @@
         return this._logger.info('rendered menu for the elements', entityEnhancements);
       },
       _renderItem: function(ul, eEnhancement) {
-        var active, label, source, type;
+        var active, item, label, source, type;
         label = eEnhancement.getLabel().replace(/^\"|\"$/g, "");
         type = this._typeLabels(eEnhancement.getTypes()).toString() || "Other";
         source = this._sourceLabel(eEnhancement.getUri());
         active = this.linkedEntity && eEnhancement.getUri() === this.linkedEntity.uri ? " class='ui-state-active'" : "";
-        return $("<li" + active + "><a href='#'>" + label + " <small>(" + type + " from " + source + ")</small></a></li>").data('enhancement', eEnhancement).appendTo(ul);
+        return item = $("<li" + active + " entityuri='" + (eEnhancement.getUri()) + "'><a>" + label + " <small>(" + type + " from " + source + ")</small></a></li>").data('enhancement', eEnhancement).appendTo(ul);
       },
       _createSearchbox: function() {
         var sugg, widget;
@@ -843,15 +992,33 @@
               }, this));
             });
           },
+          open: function(e, ui) {
+            widget._logger.info("autocomplete.open", e, ui);
+            if (widget.options.showTooltip) {
+              return $(this).data().autocomplete.menu.activeMenu.tooltip({
+                items: ".ui-menu-item",
+                hide: {
+                  effect: "hide",
+                  delay: 50
+                },
+                show: {
+                  effect: "show",
+                  delay: 50
+                },
+                content: function(response) {
+                  var uri;
+                  uri = $(this).data()["item.autocomplete"].getUri();
+                  widget._createPreview(uri, response);
+                  return "loading...";
+                }
+              });
+            }
+          },
           select: __bind(function(e, ui) {
             this.annotate(ui.item, {
               styleClass: "acknowledged"
             });
             return this._logger.info("autocomplete.select", e.target, ui);
-          }, this),
-          focus: __bind(function(e, ui) {
-            this._logger.info("autocomplete.focus", e.target, ui);
-            return this._entityPreview(ui.item);
           }, this)
         }).focus(200).blur(__bind(function(e, ui) {
           return this._dialogCloseTimeout = setTimeout((__bind(function() {
@@ -860,9 +1027,6 @@
         }, this));
         return this._logger.info("show searchbox");
       },
-      _entityPreview: _.throttle((function(item) {
-        return this._logger.info("Show preview for", item);
-      }), 1500),
       addTextEnhancement: function(textEnh) {
         this.options.textEnhancements = this.options.textEnhancements || [];
         this.options.textEnhancements.push(textEnh);
