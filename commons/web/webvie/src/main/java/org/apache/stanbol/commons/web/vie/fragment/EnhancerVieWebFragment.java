@@ -89,7 +89,9 @@ public class EnhancerVieWebFragment implements WebFragment {
     public List<LinkResource> getLinkResources() {
     	List<LinkResource> resources = new ArrayList<LinkResource>();
 //    	resources.add(new LinkResource("stylesheet", "lib/Aristo/jquery-ui-1.8.7.custom.css", this, 10));
-    	resources.add(new LinkResource("stylesheet", "lib/Smoothness/jquery.ui.all.css", this, 10)); // version 1.8.13
+    	resources.add(new LinkResource("stylesheet", "lib/jquery/jquery-ui.min.css", this, 10));
+    	resources.add(new LinkResource("stylesheet", "lib/Smoothness/jquery.ui.all.css", this, 10));
+    	resources.add(new LinkResource("stylesheet", "annotate.css", this, 10));
 //    	resources.add(new LinkResource("stylesheet", "lib/Aristo/jquery.ui.menu.css", this, 10));
         return resources;
     }
