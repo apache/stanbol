@@ -50,7 +50,7 @@ import freemarker.cache.TemplateLoader;
 @Service
 public class FactStoreWebFragment implements WebFragment {
 
-    private static final String NAME = "factstore";
+    public static final String NAME = "factstore";
     
     private static final String STATIC_RESOURCE_PATH = "/org/apache/stanbol/factstore/web/static";
 

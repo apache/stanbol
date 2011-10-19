@@ -23,12 +23,16 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.Viewable;
 
 @Path("/factstore")
-public class FactStoreRootResource extends BaseStanbolResource {
+public class FactStoreRootResource extends BaseFactStoreResource {
+    
+    @SuppressWarnings("unused")
+    private static Logger logger = LoggerFactory.getLogger(FactStoreRootResource.class);
     
     @GET
     @Produces(TEXT_HTML)

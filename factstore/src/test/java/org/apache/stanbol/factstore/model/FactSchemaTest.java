@@ -31,7 +31,6 @@ public class FactSchemaTest {
         
         String expected = "{\n  \"@context\": {\n    \"@types\": {\n      \"friend\": \"http://my.ontology.net/person\",\n      \"person\": \"http://my.ontology.net/person\"\n    }\n  }\n}";
         String actual = factSchema.toJsonLdProfile().toString(2);
-        toConsole(actual);
         Assert.assertEquals(expected, actual);
     }
     

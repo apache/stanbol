@@ -38,7 +38,6 @@ import org.apache.stanbol.commons.jsonld.JsonLdParser;
 import org.apache.stanbol.commons.jsonld.JsonLdProfile;
 import org.apache.stanbol.commons.jsonld.JsonLdProfileParser;
 import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.factstore.api.FactStore;
 import org.apache.stanbol.factstore.model.Fact;
 import org.apache.stanbol.factstore.model.FactSchema;
@@ -48,7 +47,7 @@ import org.slf4j.LoggerFactory;
 import com.sun.jersey.api.view.Viewable;
 
 @Path("/factstore/facts")
-public class FactsResource extends BaseStanbolResource {
+public class FactsResource extends BaseFactStoreResource {
 
     private static Logger logger = LoggerFactory.getLogger(FactsResource.class);
 
@@ -57,7 +56,7 @@ public class FactsResource extends BaseStanbolResource {
     public FactsResource(@Context ServletContext context) {
         this.factStore = ContextHelper.getServiceFromContext(FactStore.class, context);
     }
-
+    
     @GET
     @Produces(MediaType.TEXT_HTML)
     public Response get() {

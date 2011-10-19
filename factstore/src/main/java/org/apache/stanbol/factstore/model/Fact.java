@@ -23,12 +23,9 @@ import java.util.Set;
 
 import org.apache.stanbol.commons.jsonld.JsonLd;
 import org.apache.stanbol.commons.jsonld.JsonLdCommon;
-import org.apache.stanbol.commons.jsonld.JsonLdIRI;
 import org.apache.stanbol.commons.jsonld.JsonLdProperty;
 import org.apache.stanbol.commons.jsonld.JsonLdPropertyValue;
 import org.apache.stanbol.commons.jsonld.JsonLdResource;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class Fact {
 
@@ -115,7 +112,8 @@ public class Fact {
                         }
                     }
                     else {
-                        throw new NotImplementedException();
+                        // TODO Implement Me!
+                        throw new RuntimeException("Sorry, this is not implemented yet!");
                     }
                 }
             }

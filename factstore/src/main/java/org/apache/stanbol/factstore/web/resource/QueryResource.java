@@ -29,7 +29,6 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.stanbol.commons.jsonld.JsonLd;
 import org.apache.stanbol.commons.jsonld.JsonLdParser;
 import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.factstore.api.FactStore;
 import org.apache.stanbol.factstore.model.FactResultSet;
 import org.apache.stanbol.factstore.model.Query;
@@ -37,17 +36,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Path("factstore/query")
-public class QueryResource extends BaseStanbolResource {
+public class QueryResource extends BaseFactStoreResource {
 
 	private static Logger logger = LoggerFactory.getLogger(QueryResource.class);
 
-	private final FactStore factStore;
+    private final FactStore factStore;
 
-	public QueryResource(@Context ServletContext context) {
-		this.factStore = ContextHelper.getServiceFromContext(FactStore.class,
-				context);
-	}
-
+    public QueryResource(@Context ServletContext context) {
+        this.factStore = ContextHelper.getServiceFromContext(FactStore.class, context);
+    }
+    
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)

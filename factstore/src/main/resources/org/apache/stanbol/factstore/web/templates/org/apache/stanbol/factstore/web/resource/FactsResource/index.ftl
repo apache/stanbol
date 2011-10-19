@@ -52,7 +52,7 @@
 	<tr>
 		<th valign="top">Data:</th>
 		<td>The fact schema is sent as the PUT payload in JSON-LD format as a JSON-LD profile. The name of the
-		fact is given by the URL. The elements of the schema are defined in the "#types" section of the
+		fact is given by the URL. The elements of the schema are defined in the "@types" section of the
 		JSON-LD "#context". Each element is specified using a unique role name for that entity plus the entity
 		type specified by an URN.</td>
 	</tr>
@@ -64,7 +64,7 @@
  "@context" :
  {
   "iks"     : "http://iks-project.eu/ont/",
-  "#types"  :
+  "@types"  :
   {
     "person"       : "iks:person",
     "organization" : "iks:organization"
@@ -75,7 +75,7 @@
 		   representation: /factstore/facts/http://iks-project.eu/ont/employeeOf</p>
 		<p>Instead one can use the cURL tool for this. Store the fact schema in a JSON file and then use this
 		   command.</p>
-<pre>curl http://localhost:8080/factstore/facts/http%3A%2F%2Fiks-project.eu%2Font%2FemployeeOf -T spec-example1.json</pre>
+<pre>curl ${it.publicBaseUri}factstore/facts/http%3A%2F%2Fiks-project.eu%2Font%2FemployeeOf -T spec-example1.json</pre>
 		</td>
 	</tr>
 	<tr>
@@ -86,7 +86,7 @@
  "@context" :
  {
   "sorg"       : "http://www.schema.org/",
-  "#types"     :
+  "@types"     :
   {
     "event"    : "sorg:Event",
     "attendee" : ["sorg:Person","sorg:Organization"]
@@ -176,7 +176,7 @@ function putNewFactSchema() {
 <pre> {
  "@context" :
  {
-  "#types"  :
+  "@types"  :
   {
     "person"       : "http://iks-project.eu/ont/person",
     "organization" : "http://iks-project.eu/ont/organization"
@@ -281,7 +281,7 @@ function getFactSchema() {
 		http://uni-paderborn.de.</p>
 		<p>You can store the facts in a JSON file and use the cURL tool like this:</p>
 <pre>
-curl -d @fact-example1.json -H "Content-Type: application/json" http://localhost:8080/factstore/facts
+curl -d @fact-example1.json -H "Content-Type: application/json" ${it.publicBaseUri}factstore/facts
 </pre>		
 		</td>
 	</tr>
@@ -295,7 +295,7 @@ curl -d @fact-example1.json -H "Content-Type: application/json" http://localhost
    "upb" : "http://upb.de/persons/"
  },
  "@profile"     : "iks:employeeOf",
- "@" : [
+ "@subject" : [
    { "person"       : { "@iri" : "upb:bnagel" },
      "organization" : { "@iri" : "http://uni-paderborn.de" }
    },
@@ -318,7 +318,7 @@ curl -d @fact-example1.json -H "Content-Type: application/json" http://localhost
    "iks" : "http://iks-project.eu/ont/",
    "upb" : "http://upb.de/persons/"
  },
- "@" : [
+ "@subject" : [
    { "@profile"     : "iks:employeeOf",
      "person"       : { "@iri" : "upb:bnagel" },
      "organization" : { "@iri" : "http://uni-paderborn.de" }
