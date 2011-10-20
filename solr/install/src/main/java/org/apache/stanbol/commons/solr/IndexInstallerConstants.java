@@ -14,7 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.commons.solr.impl.install;
+package org.apache.stanbol.commons.solr;
+
+import org.apache.stanbol.commons.solr.install.impl.SolrIndexInstaller;
 
 /**
  * Constants and static configuration used by the {@link SolrIndexInstaller}

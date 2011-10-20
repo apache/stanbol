@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -38,14 +40,18 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.solr.ManagedSolrServer;
 import org.apache.stanbol.commons.solr.SolrDirectoryManager;
 import org.apache.stanbol.commons.solr.utils.ConfigUtils;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
+import org.apache.stanbol.commons.solr.ManagedSolrServer.SolrCoreProperties;
+import org.apache.stanbol.commons.solr.ManagedSolrServer.SolrServerProperties;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 /**
  * Implementation of the {@link SolrDirectoryManager} interface that supports the dynamic initialisation of
@@ -120,6 +126,10 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
      * method 
      */
     private ServiceRegistration dfpServiceRegistration;
+    /**
+     * The internally managed Solr server
+     */
+    private ManagedSolrServer managedSolrServer;
     
     public DefaultSolrDirectoryManager() {}
 
@@ -361,8 +371,7 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
                     }
                     try {
                         String symbolicName = context != null ? context.getBundleContext().getBundle()
-                                .getSymbolicName() :
-                                    null;
+                                .getSymbolicName() : null;
                         ais = lookupIndexArchive(symbolicName, solrIndexName, uninitialisedProperties);
                         //we need to parse the name of the source index
                         String indexArchiveName = uninitialisedProperties.getProperty(UNINITIALISED_INDEX_ARCHIVE_NAME_KEY);
@@ -386,6 +395,12 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
                     ConfigUtils.copyCore(ais, coreDir, indexConfigurationName, false);
                     // try to remove from uninitialised
                     removeUninitialisedIndex(solrIndexName);
+                    //register the S0lrCore
+                    if(withinOSGI){
+                        SolrCoreProperties coreConfig = new SolrCoreProperties(solrIndexName);
+                        coreConfig.setCoreDir(coreDir);
+                        managedSolrServer.registerCore(coreConfig);
+                    }
                 }
             } catch (Exception e) {
                 throw new IllegalStateException(String.format(
@@ -653,18 +668,40 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
     }
 
     @Activate
-    protected void activate(ComponentContext context) throws IOException {
+    protected void activate(ComponentContext context) throws IOException, ParserConfigurationException, SAXException {
         componentContext = context;
         withinOSGI = true;
+        //lookup/init the managed SolrDir
+        File managedDir = lookupManagedSolrDir(componentContext);
+        log.info("... activate {} with Directory {}",this.getClass(),managedDir.getAbsolutePath());
+        SolrServerProperties solrServerConfig = new SolrServerProperties(managedDir);
+        solrServerConfig.setServerName("default");//TODO make configurable
+        managedSolrServer = new ManagedSolrServer(
+            context.getBundleContext(), solrServerConfig);
+        log.info("Managed Indices:");
+        for(Entry<String,File> entry : getManagedIndices().entrySet()){
+            /*
+             * NOTE: Managed SolrCores may be already registered in the solr.xml.
+             * In that case they are initialised when creating the ManagedSolrServer.
+             * If not we need to add them manually. The following if(..) prevents
+             * that cores are registered (and therefore initialised) twice!.
+             */
+            if(!managedSolrServer.isCore(entry.getKey())){
+                SolrCoreProperties coreProperties = new SolrCoreProperties(entry.getKey());
+                coreProperties.setCoreDir(entry.getValue());
+                managedSolrServer.registerCore(coreProperties);
+            }
+            log.info("  {}: {}",entry.getKey(),entry.getValue().getAbsolutePath());
+        }
         synchronized (uninitialisedCores) {
             uninitialisedCores.putAll(loadUninitialisedIndexConfigs(componentContext));
         }
+        log.info("Uninitialised Indices: {}",uninitialisedCores.keySet());
         // Need our DataFileProvider before building the models
         dfpServiceRegistration = context.getBundleContext().registerService(
                 DataFileProvider.class.getName(), 
                 new ClassPathSolrIndexConfigProvider(
                     context.getBundleContext().getBundle().getSymbolicName()), null);
-
     }
 
     @Deactivate
@@ -676,6 +713,8 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
         synchronized (uninitialisedCores) {
             uninitialisedCores.clear();
         }
+        managedSolrServer.shutdown();
+        managedSolrServer = null;
         componentContext = null;
 
     }

@@ -43,7 +43,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.stanbol.commons.solr.impl.EmbeddedSolrPorovider;
-import org.apache.stanbol.commons.solr.impl.install.IndexInstallerConstants;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,9 +121,7 @@ public final class ConfigUtils {
             } else if ("bz2".equals(archiveFormat)) {
                 is = new BZip2CompressorInputStream(is);
             } else {
-                throw new IllegalStateException("Unsupported compression format " + archiveFormat + " "
-                                                + "(implementation out of sync with Constants defined in "
-                                                + IndexInstallerConstants.class.getName() + "). "
+                throw new IllegalStateException("Unsupported compression format " + archiveFormat + "!. "
                                                 + "Please report this to stanbol-dev mailing list!");
             }
             ais = new TarArchiveInputStream(is);

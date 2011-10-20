@@ -22,7 +22,7 @@
  By default no cores are defined by this configuration because they are added
  at runtime via the Java API
 -->
-<solr persistent="true">
+<solr persistent="false">
   <cores adminPath="/admin/cores">
     <!-- Cores are added dynamically at runtime -->
   </cores>
