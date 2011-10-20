@@ -98,7 +98,7 @@
     </dependency>
     <dependency> <!-- provides Solr and OSGI utilities for Solr -->
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr</artifactId>
+      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
     </dependency>
 
     <!-- Stanbol Entityhub internal dependencies -->
