@@ -29,6 +29,10 @@ import org.apache.commons.io.filefilter.NameFileFilter;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
@@ -37,8 +41,14 @@ import org.apache.solr.core.CoreDescriptor;
 import org.apache.solr.core.SolrCore;
 import org.apache.stanbol.commons.solr.SolrServerProvider;
 import org.apache.stanbol.commons.solr.SolrServerTypeEnum;
+import org.apache.stanbol.commons.solr.SolrConstants;
 import org.apache.stanbol.commons.solr.utils.ConfigUtils;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -68,13 +78,14 @@ public class EmbeddedSolrPorovider implements SolrServerProvider {
      */
     @SuppressWarnings("unchecked")
     private Map<String,CoreContainer> coreContainers = new ReferenceMap();
+    /**
+     * The {@link ComponentContext} as set in the {@link #activate(ComponentContext)}
+     * method
+     */
+    private ComponentContext context;
+    private ServiceTracker defaultSolrServerTracker;
 
-//    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY,
-//        policy=ReferencePolicy.DYNAMIC,
-//        strategy=ReferenceStrategy.EVENT,
-//        bind="bindSolrDirectoryManager",
-//        unbind="unbindSolrDirectoryManager")
-//    private SolrDirectoryManager solrDirectoryManager;
+    private static String filter = "("+SolrConstants.PROPERTY_SERVER_NAME+"=embedded)";
 
     public EmbeddedSolrPorovider() {}
 
@@ -98,10 +109,26 @@ public class EmbeddedSolrPorovider implements SolrServerProvider {
         log.info("parsed solr server location " + uriOrPath);
         // first try as file (but keep in mind it could also be an URI)
         File index = ConfigUtils.toFile(uriOrPath);
+        if(!index.isAbsolute()){
+            CoreContainer defaultServer = defaultSolrServerTracker == null ? null : (CoreContainer)defaultSolrServerTracker.getService();
+            if(defaultServer != null){
+                if(defaultServer.getCoreNames().contains(index.getName())){
+                    //create an EmbeddedSolrServer
+                    return new EmbeddedSolrServer(defaultServer, index.getName());
+                } else {
+                    log.info("Internally Managed SolrServer does not know a SolrCore with the name '{}'",uriOrPath);
+                }
+            } else if(context != null){
+                log.warn("Internally Managed SolrServer not available: Unable to lookup SolrCore '{}'!",uriOrPath);
+            }
+        } 
         if (!index.exists()) {
-            throw new IllegalArgumentException(String.format("The parsed Index Path %s does not exist",
+            throw new IllegalArgumentException(String.format("The parsed Index Path '%s' does not " +
+            		"refer to an internally managed SolrServer nor to a Directory on the FileSystem",
                 uriOrPath));
         }
+        //TODO: refactor that so that also external SolrServer are initialised
+        //      using ManagedSsolrServerImpl
         log.info("get solr server for location " + index);
         File coreDir = null;
         if (index.isDirectory()) {
@@ -172,7 +199,7 @@ public class EmbeddedSolrPorovider implements SolrServerProvider {
     }
 
     protected final CoreContainer getCoreContainer(String solrDir, File solrConf) throws IllegalArgumentException,
-                                                                                 IllegalStateException {
+                                                                                         IllegalStateException {
         CoreContainer container = coreContainers.get(solrDir);
         if (container == null) {
             container = new CoreContainer(solrDir);
@@ -206,16 +233,26 @@ public class EmbeddedSolrPorovider implements SolrServerProvider {
     }
 
     @Activate
-    protected void activate(ComponentContext context) {
+    protected void activate(ComponentContext context) throws InvalidSyntaxException {
         log.debug("activating" + EmbeddedSolrPorovider.class.getSimpleName());
-        // currently not used
+        this.context = context;
+        String filterString = String.format("(&(%s=%s)(%s=%s))",
+            Constants.OBJECTCLASS,CoreContainer.class.getName(),
+            SolrConstants.PROPERTY_SERVER_NAME,"default");
+
+        Filter filter = context.getBundleContext().createFilter(filterString);
+        defaultSolrServerTracker = new ServiceTracker(
+            context.getBundleContext(), filter, null);
+        defaultSolrServerTracker.open();
 
     }
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
         log.debug("deactivating" + EmbeddedSolrPorovider.class.getSimpleName());
-        // currently not used
+        defaultSolrServerTracker.close();
+        defaultSolrServerTracker = null;
+        this.context = null;
     }
 
     // Keeping for now because this might be useful when checking for required files

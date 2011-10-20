@@ -176,7 +176,7 @@
 	    </dependency>
 	    <dependency>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.solr</artifactId>
+			<artifactId>org.apache.stanbol.commons.solr.core</artifactId>
 		</dependency>
 		<!-- for tests -->
 		<dependency>
