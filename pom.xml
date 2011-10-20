@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <version>0.9.0-incubating-SNAPSHOT</version>
+    <relativePath>../../../parent</relativePath>
+  </parent>
+
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
+  <packaging>bundle</packaging>
+
+  <name>Apache Stanbol Solr Bundle</name>
+  <description>This bundle provides an OSGI bundle for Solr. This also includes
+  an utility that registers CoreContainer and SolrCores as OSGI services.
+  </description>
+
+  <inceptionYear>2010</inceptionYear>
+
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/solr
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/solr
+    </developerConnection>
+    <url>http://incubator.apache.org/stanbol</url>
+  </scm>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>
+              org.apache.stanbol.commons.solr;version=${project.version},
+              org.apache.stanbol.commons.solr.utils;version=${project.version},
+              org.apache.solr.client.solrj,
+              org.apache.solr.client.solrj.beans,
+              org.apache.solr.client.solrj.impl,
+              org.apache.solr.client.solrj.request,
+              org.apache.solr.client.solrj.response,
+              org.apache.solr.client.solrj.util,
+              org.apache.solr.common,
+              org.apache.solr.common.luke,
+              org.apache.solr.common.params,
+              org.apache.solr.common.util
+            </Export-Package>
+            <!-- NOTE: 
+               * The exclusion of javax.xml.stream assumes that only serialised
+                 java objects are used as serialisation to and from the SolrServer
+                 and therefore no XML API is needed
+               * The exclusion of some  "org.apache.lucene.analysis." is to
+                 avoid the inclusion of big dependencies (other than ICU) for
+                 the "solr-analysis-extras" bundle -->
+            <Import-Package>
+              !org.mortbay.jetty.*,
+              !org.mortbay.log,
+              !com.sun.msv.*,
+              !org.relaxng.datatype,
+              !org.apache.tika.*,
+              !javax.servlet.jsp.*,  
+              !org.apache.commons.digester.*, 
+              !org.apache.commons.validator.*,
+              !org.apache.log.*,
+              !org.apache.struts.*,
+              !org.apache.tools.ant.*,
+              !org.dom4j.*, 
+              !org.jdom.*, 
+              !antlr.*, 
+              !com.werken.*,
+              !org.apache.oro.*,
+              !org.apache.lucene.analysis.cn.smart.*,
+              !org.apache.lucene.analysis.pl.*,
+              !org.apache.lucene.analysis.stempel.*,
+              !org.egothor.stemmer.*,
+              *
+            </Import-Package>
+            <Private-Package>
+              org.apache.stanbol.commons.solr.impl;version=${project.version},
+              org.apache.stanbol.commons.solr.impl.install;version=${project.version}
+            </Private-Package>
+            <Embed-Dependency>
+              solr-solrj, solr-core, solr-noggit, solr-dataimporthandler,
+              solr-analysis-extras,
+              lucene-core, lucene-analyzers, lucene-highlighter, lucene-memory,
+              lucene-spatial, lucene-spellchecker, lucene-misc, lucene-queries,
+              lucene-icu, lucene-icu4j,
+              xalan, lucene-xercesImpl, serializer, xml-apis, 
+              commons-codec, commons-httpclient, commons-beanutils, 
+              solr-commons-csv, commons-collections, commons-fileupload, 
+              commons-io, commons-lang, 
+              stax-api,wstx-asl, jakarta-regexp, xml-resolver, portlet-api,
+              velocity, velocity-tools
+            </Embed-Dependency>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <!-- Stanbol Commomns dependencies -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
+    </dependency>
+
+    <!-- SolrJ dependencies (needed for using remote Solr servers) -->
+    <dependency>
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-solrj</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-httpclient</groupId>
+      <artifactId>commons-httpclient</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-xercesImpl</artifactId>
+    </dependency>
+
+    <!-- Solr/Lucene dependencies (needed for using embedded Solr servers) -->
+    <dependency>
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-core</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-dataimporthandler</artifactId>
+    </dependency>
+    <!-- <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-dataimporthandler-extras</artifactId>
+    </dependency>  -->
+    <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-noggit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-commons-csv</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-analysis-extras</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-highlighter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-memory</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-misc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-queries</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-spellchecker</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-spatial</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-icu</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-icu4j</artifactId>
+    </dependency>
+
+    <!-- additional Solr Dependencies -->
+    <dependency>
+        <groupId>jakarta-regexp</groupId>
+        <artifactId>jakarta-regexp</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>javax.portlet</groupId>
+        <artifactId>portlet-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>xml-resolver</groupId>
+      <artifactId>xml-resolver</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>stax</groupId>
+      <artifactId>stax-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.woodstox</groupId>
+      <artifactId>wstx-asl</artifactId>
+    </dependency>
+<!-- Lucene comes with an own Xerces version and Solr uses xPath. This results
+     in the usage of the Xalan version of Java with the Xerxes version of lucene.
+     If this is a problem we need also to provide xalan and a compatible version
+     of the xml-apis -->
+     <dependency>
+        <groupId>xalan</groupId>
+        <artifactId>xalan</artifactId>
+        <version>2.7.1</version>
+    </dependency>
+    <dependency>
+        <groupId>xalan</groupId>
+        <artifactId>serializer</artifactId>
+        <version>2.7.1</version>
+    </dependency>
+    <dependency>
+        <groupId>xml-apis</groupId>
+        <artifactId>xml-apis</artifactId>
+        <version>1.3.04</version>
+    </dependency>
+    <!-- The Solr-Core depends on the Servlet API and in case of running an
+         EmbeddedSolrServer the servlet-api is not available -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency>
+
+    <!-- Solr has support of velocity templating (respone writer). This is not
+         used by the Entityhub, but the related classes are direct part of the
+         solr distribution. SolrCores can not be initialised without velocity!
+         Because of this the velocity and velocity-tools jars need to be
+         included however all additional dependencies are excluded. This allows
+         to init Solr, but this will not allow to use the velocity related
+         Response writer.
+         To enable velocity one would need to add another 10+ dependencies. -->
+    <dependency>
+        <groupId>org.apache.velocity</groupId>
+        <artifactId>velocity</artifactId>
+        <version>1.6.2</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.velocity</groupId>
+        <artifactId>velocity-tools</artifactId>
+        <version>2.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
+    <!-- for the Solr Index Installer -->
+    <dependency>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.installer.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+    </dependency>
+    <!-- Logging -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <!-- for tests -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+</project>
