@@ -327,11 +327,22 @@
       <artifactId>org.apache.stanbol.commons.opennlp</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
+    <!-- Apache Solr as bundle + utilities -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr</artifactId>
+      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr.install</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <!-- bundle> See progress of STANBOL-353
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr.web</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle -->
     <!-- support for JSON-LD -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
