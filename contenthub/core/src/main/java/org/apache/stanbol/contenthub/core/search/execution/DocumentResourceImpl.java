@@ -52,9 +52,9 @@ public class DocumentResourceImpl extends AbstractKeywordRelatedResource impleme
     public String getDocumentURI() {
         return this.getPropertyValue(SearchVocabulary.RELATED_DOCUMENT).asLiteral().getLexicalForm();
     }
-    
-    public String getLocalId(){
-    	return ContentItemIDOrganizer.detachBaseURI(this.getDocumentURI());
+
+    public String getLocalId() {
+        return ContentItemIDOrganizer.detachBaseURI(this.getDocumentURI());
     }
 
     @Override

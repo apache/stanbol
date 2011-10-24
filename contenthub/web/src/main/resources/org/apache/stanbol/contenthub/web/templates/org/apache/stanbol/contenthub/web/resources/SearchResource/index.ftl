@@ -104,9 +104,9 @@
 						$("#busyIcon").addClass("invisible");
 						$("#search").addClass("invisible");
 		       	 
-		       	  
 						$("#resultContainer > div").replaceWith(result.substr(result.indexOf("</div>")));
 						$(".keywords").accordion({collapsible: true, autoHeight: false });
+						$(".keywords").removeClass("ui-widget");
 						$(".resources > div").tabs({fx: { height: 'toggle', opacity: 'toggle' } });
 						$("#resultContainer").fadeIn("slow");
 		       	 
@@ -115,25 +115,6 @@
 							e.preventDefault();
 							$(this).next(".collapseContent").slideToggle(500);
 						}); 
-		       	 
-						//Make all tabs invisible
-						$(".keywordTabs").each(function(){$(this).fadeOut(0)});
-						$(".keywordTabs").first().fadeIn("slow");
-				   
-						//register function for making tabs visible
-						$(".keywordClickable").click(function(e){
-							e.preventDefault();
-							var elid ="";
-							if($(this).hasClass("keywordItem")){
-								elid = $(this).attr('id')
-							} else{
-								elid = $(this).parent().attr('id');
-							}
-							elid += "_tabs";
-							$(".keywordTabs").each(function(){$(this).fadeOut(0)});
-							$("#"+ elid).fadeIn("slow");
-			     
-						});
 					},
 					error: function(result) {
 						$("#busyIcon").addClass("invisible");
@@ -157,8 +138,8 @@
 		
 
 		function getResults(jsonCons,facetName,facetValue){
+
 			var JSONObject = JSON.parse(jsonCons);
-			
 			
 			if(JSONObject[facetName] != null)
 			{
@@ -189,32 +170,15 @@
 				success: function(result) {
 					$("#resultContainer > div").replaceWith(result.substr(result.indexOf("</div>")));
 					$(".keywords").accordion({collapsible: true, autoHeight: false });
+					$(".keywords").removeClass("ui-widget");
 					$(".resources > div").tabs({fx: { height: 'toggle', opacity: 'toggle' } });
 					$("#resultContainer").fadeIn("slow");
-		       	 
+	       	 
 					//collapsible content
 					$(".collapseItem").click(function(e){
 						e.preventDefault();
 						$(this).next(".collapseContent").slideToggle(500);
 					}); 
-	       	 
-					//Make all tabs invisible
-					$(".keywordTabs").each(function(){$(this).fadeOut(0)});
-					$(".keywordTabs").first().fadeIn("slow");
-			   
-					//register function for making tabs visible
-					$(".keywordClickable").click(function(e){
-						e.preventDefault();
-						var elid ="";
-						if($(this).hasClass("keywordItem")){
-							elid = $(this).attr('id')
-						} else{
-							elid = $(this).parent().attr('id');
-						}
-						elid += "_tabs";
-						$(".keywordTabs").each(function(){$(this).fadeOut(0)});
-						$("#"+ elid).fadeIn("slow");
-					});
 					
 	   				setChosenFacet(JSONObject);
 				},
@@ -227,16 +191,19 @@
 	
 		function setChosenFacet(JSONObject)	{
 			var resultString = "";
-			var chosenCons = document.getElementById('chosenFacetsHidden');
+			var chosenCons = document.getElementById('chosenFacetsHidden').innerHTML;
+				
 			if(JSONObject != null) {
 				for(var p in JSONObject) {
 					if(JSONObject.hasOwnProperty(p)) {
 						for(var value in p) {
 							if(p.hasOwnProperty(value) && typeof(JSONObject[p][value]) != "undefined") {
+								var escapedFacetName = encodeURI(p.toString());
+								var escapedFacetValue = encodeURI(JSONObject[p][value]);
 								var lastindex = p.toString().lastIndexOf("_");
 								var href = "<a href=javascript:deleteCons("; 
-								href += 	escape(chosenCons.innerHTML.replace(/^\s+|\s+$/g,"")) + ",'";
-								href +=		escape(p.toString()) + "','" + escape(JSONObject[p][value]) + "') title='Remove'>";
+								href += 	encodeURI(chosenCons) + ",\"";
+								href +=		escapedFacetName + "\",\"" + escapedFacetValue + "\") title='Remove'>";
 								href +=     "<img src='${it.staticRootUrl}/contenthub/images/delete_icon_16.png'></a>";
 								href +=		p.toString().substring(0, lastindex) + " : " + JSONObject[p][value] + "<br/>";
 								resultString += href;
@@ -265,14 +232,15 @@
 					}
 				}
 			}
-		
+			
+			
 			if(length == 1) {
 				delete JSONObject[facetName];
 			} else {
 				<#-- TODO: change -->
 				delete JSONObject[facetName][index];
 			}
-					
+			
 			//accumulate all selected engines in an array
 			var engines_selected = [];
 			$(".searchengine ").each(function(){
@@ -293,32 +261,15 @@
 				 
 					$("#resultContainer > div").replaceWith(result.substr(result.indexOf("</div>")));
 					$(".keywords").accordion({collapsible: true, autoHeight: false });
+					$(".keywords").removeClass("ui-widget");
 					$(".resources > div").tabs({fx: { height: 'toggle', opacity: 'toggle' } });
 					$("#resultContainer").fadeIn("slow");
-		       	 
+	       	 
 					//collapsible content
 					$(".collapseItem").click(function(e){
 						e.preventDefault();
 						$(this).next(".collapseContent").slideToggle(500);
 					}); 
-	       	 
-					//Make all tabs invisible
-					$(".keywordTabs").each(function(){$(this).fadeOut(0)});
-					$(".keywordTabs").first().fadeIn("slow");
-			   
-					//register function for making tabs visible
-					$(".keywordClickable").click(function(e){
-						e.preventDefault();
-						var elid ="";
-						if($(this).hasClass("keywordItem")){
-							elid = $(this).attr('id')
-						} else{
-							elid = $(this).parent().attr('id');
-						}
-						elid += "_tabs";
-						$(".keywordTabs").each(function(){$(this).fadeOut(0)});
-						$("#"+ elid).fadeIn("slow");
-					});
 					
 					setChosenFacet(JSONObject);
 				},

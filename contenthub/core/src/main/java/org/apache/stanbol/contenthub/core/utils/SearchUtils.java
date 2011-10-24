@@ -15,31 +15,25 @@
  * limitations under the License.
  */
 
-package org.apache.stanbol.contenthub.web.search.model;
+package org.apache.stanbol.contenthub.core.utils;
 
-import org.apache.stanbol.contenthub.core.utils.JSONUtils;
-import org.apache.stanbol.contenthub.servicesapi.search.execution.SearchContext;
+import org.apache.stanbol.contenthub.servicesapi.enhancements.vocabulary.EnhancementGraphVocabulary;
 
 /**
  * 
- * @author anil.pacaci
- * @author cihan
+ * @author anil.sinaci
  * 
  */
-// TODO Will be deleted and replaced by SearchContext
-public class TempSearchResult {
+public class SearchUtils {
 
-    private SearchContext context;
+    public static final String ENHANCER_ENTITIY_CACHE_GRAPH_URI = "enhancerEntityCache";
+    public static final String[] RESERVED_GRAPH_URIs = {ENHANCER_ENTITIY_CACHE_GRAPH_URI,
+                                                        EnhancementGraphVocabulary.ENHANCEMENTS_GRAPH_URI};
 
-    public TempSearchResult(SearchContext context) {
-        this.context = context;
-    }
-
-    public SearchContext getContext() {
-        return context;
-    }
-
-    public String getConstraints() {
-        return JSONUtils.convertToString(context.getConstraints());
+    public static boolean isGraphReserved(String graphURI) {
+        for (String uri : RESERVED_GRAPH_URIs) {
+            if (uri.equals(graphURI)) return true;
+        }
+        return false;
     }
 }

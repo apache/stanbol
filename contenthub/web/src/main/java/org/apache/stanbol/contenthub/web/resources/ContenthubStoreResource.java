@@ -29,7 +29,10 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XM
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -40,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,32 +65,35 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
+import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
-import org.apache.clerezza.rdf.core.sparql.QueryParser;
-import org.apache.clerezza.rdf.core.sparql.ResultSet;
-import org.apache.clerezza.rdf.core.sparql.SolutionMapping;
-import org.apache.clerezza.rdf.core.sparql.query.SelectQuery;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.stanbol.commons.solr.SolrDirectoryManager;
+import org.apache.stanbol.commons.solr.SolrServerProviderManager;
+import org.apache.stanbol.commons.solr.SolrServerTypeEnum;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.contenthub.core.store.SolrContentItemImpl;
 import org.apache.stanbol.contenthub.core.utils.ContentItemIDOrganizer;
-import org.apache.stanbol.contenthub.core.utils.sparql.QueryGenerator;
+import org.apache.stanbol.contenthub.core.utils.JSONUtils;
 import org.apache.stanbol.contenthub.servicesapi.store.SolrContentItem;
 import org.apache.stanbol.contenthub.servicesapi.store.SolrStore;
-import org.apache.stanbol.contenthub.web.utils.JSONUtils;
+import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 import org.apache.stanbol.enhancer.jersey.resource.ContentItemResource;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
-import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,8 +112,6 @@ import eu.medsea.mimeutil.MimeUtil2;
  * Retrieval is achieved using simple GET requests on the content item or enhancement public URIs.
  * <p>
  * Update is achieved by issue a PUT request on an existing content item public URI.
- * <p>
- * The Delete operation is not implemented yet.
  */
 @Path("/contenthub")
 public class ContenthubStoreResource extends BaseStanbolResource {
@@ -117,6 +120,10 @@ public class ContenthubStoreResource extends BaseStanbolResource {
         RDF_XML, TURTLE, X_TURTLE, RDF_JSON));
 
     private static final Logger log = LoggerFactory.getLogger(ContenthubStoreResource.class);
+
+    private SolrDirectoryManager solrDirectoryManager;
+
+    private SolrServerProviderManager solrServerProviderManager;
 
     protected TcManager tcManager;
 
@@ -169,7 +176,9 @@ public class ContenthubStoreResource extends BaseStanbolResource {
     public ContenthubStoreResource(@Context ServletContext context,
                                    @Context UriInfo uriInfo,
                                    @QueryParam(value = "offset") int offset,
-                                   @QueryParam(value = "pageSize") @DefaultValue("5") int pageSize) throws ParseException {
+                                   @QueryParam(value = "pageSize") @DefaultValue("5") int pageSize) throws ParseException,
+                                                                                                   IllegalArgumentException,
+                                                                                                   IOException {
 
         store = ContextHelper.getServiceFromContext(SolrStore.class, context);
         tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
@@ -191,40 +200,55 @@ public class ContenthubStoreResource extends BaseStanbolResource {
         this.offset = offset;
         this.pageSize = pageSize;
 
-        String queryString = QueryGenerator.getRecentlyEnhancedDocuments(pageSize, offset);
-        SelectQuery query = (SelectQuery) QueryParser.getInstance().parse(queryString);
-        ResultSet result = tcManager.executeSparqlQuery(query, store.getEnhancementGraph());
+        solrServerProviderManager = ContextHelper.getServiceFromContext(SolrServerProviderManager.class,
+            context);
+        solrDirectoryManager = ContextHelper.getServiceFromContext(SolrDirectoryManager.class, context);
+        SolrServer solrServer = null;
+        if (solrDirectoryManager != null) {
+            File indexDirectory = solrDirectoryManager.getSolrIndexDirectory("contenthub");
+            if (indexDirectory == null) {
+                indexDirectory = solrDirectoryManager.createSolrDirectory("contenthub", "contenthub", null);
+            }
+            String serverLocation = indexDirectory.toString();
+            solrServer = solrServerProviderManager.getSolrServer(SolrServerTypeEnum.EMBEDDED, serverLocation);
+        }
+
+        ModifiableSolrParams params = new ModifiableSolrParams();
+
+        params.set("q", "*:*");
+        params.set("sort", SolrFieldName.CREATIONDATE.toString() + " desc");
+        params.set("start", offset);
+        // always request 1 more to arrange the "Prev-Next" links correctly
+        params.set("rows", pageSize + 1);
+
+        QueryResponse res = null;
+        try {
+            res = solrServer.query(params);
+        } catch (SolrServerException e) {
+            e.printStackTrace();
+        }
 
         recentlyEnhanced = new ArrayList<RecentlyEnhanced>();
 
-        while (result.hasNext()) {
-            SolutionMapping mapping = result.next();
-            UriRef content = (UriRef) mapping.get("content");
+        for (SolrDocument result : res.getResults()) {
             ContentItem ci = null;
-            try {
-                ci = store.get(content.getUnicodeString());
-            } catch (Exception e) {
-                log.error("Content Item's enhancements exist, but it does not live in Solr any more. ID: {}", content.getUnicodeString(), e);
-            }
-            if(ci == null) continue;
-            // String mimetype = null;
-            long enhancements = 0;
-            if (ci != null) {
-                // mimetype = ci.getMimeType();
-                Iterator<Triple> it = ci.getMetadata().filter(null, Properties.ENHANCER_EXTRACTED_FROM,
-                    content);
-                while (it.hasNext()) {
-                    it.next();
-                    enhancements++;
-                }
-                recentlyEnhanced.add(new RecentlyEnhanced(ci, uriInfo.getBaseUri().toString(), enhancements));
-            }
+            String id = (String) result.getFieldValue(SolrFieldName.ID.toString());
+            String content = (String) result.getFieldValue(SolrFieldName.CONTENT.toString());
+            String mimeType = (String) result.getFieldValue(SolrFieldName.MIMETYPE.toString());
+            Long enhancementCount = (Long) result.getFieldValue(SolrFieldName.ENHANCEMENTCOUNT.toString());
+            ci = new SolrContentItemImpl(id, content.getBytes(), mimeType, null, null);
+            recentlyEnhanced.add(new RecentlyEnhanced(ci, uriInfo.getBaseUri().toString(), enhancementCount
+                    .longValue()));
         }
-
     }
 
     public List<RecentlyEnhanced> getRecentlyEnhancedItems() throws ParseException {
-        return recentlyEnhanced;
+        if(recentlyEnhanced.size() > pageSize) {
+            return recentlyEnhanced.subList(0, pageSize);
+        }
+        else {
+            return recentlyEnhanced;
+        }
     }
 
     public URI getMoreRecentItemsUri() {
@@ -237,14 +261,14 @@ public class ContenthubStoreResource extends BaseStanbolResource {
     }
 
     public URI getOlderItemsUri() {
-        if (recentlyEnhanced.size() < pageSize) {
+        if (recentlyEnhanced.size() <= pageSize) {
             return null;
         } else {
             return uriInfo.getBaseUriBuilder().path(getClass()).queryParam("offset", offset + pageSize)
                     .build();
         }
     }
-
+    
     @GET
     @Produces(TEXT_HTML + ";qs=2")
     public Viewable getView() {
@@ -260,7 +284,7 @@ public class ContenthubStoreResource extends BaseStanbolResource {
      * @return a redirection to either a browser view, the RDF metadata or the raw binary content
      */
     @GET
-    @Path("/content/{localId}")
+    @Path("/content/{localId:.+}")
     public Response getContent(@PathParam(value = "localId") String localId, @Context HttpHeaders headers) {
 
         ContentItem ci = store.get(localId);
@@ -288,17 +312,7 @@ public class ContenthubStoreResource extends BaseStanbolResource {
         return Response.temporaryRedirect(rawUri).build();
     }
 
-    @GET
-    @Path("/raw/{localId}")
-    public Response getRawContent(@PathParam(value = "localId") String localId) throws IOException {
-        ContentItem ci = store.get(localId);
-        if (ci == null) {
-            throw new WebApplicationException(404);
-        }
-        return Response.ok(ci.getStream(), ci.getMimeType()).build();
-    }
-
-    @Path("/page/{localId}")
+    @Path("/page/{localId:.+}")
     @Produces(TEXT_HTML)
     public ContentItemResource getContentItemView(@PathParam(value = "localId") String localId) throws IOException {
         ContentItem ci = store.get(localId);
@@ -309,15 +323,92 @@ public class ContenthubStoreResource extends BaseStanbolResource {
     }
 
     @GET
-    @Path("/metadata/{localId}")
-    public MGraph getContentItemMetaData(@PathParam(value = "localId") String localId) {
-        // TODO: rewrite me to perform a CONSTRUCT query on the TcManager
-        // instead
+    @Path("/store/{type}/{localId:.+}")
+    public Response downloadContentItem(@PathParam(value = "type") String type,
+                                        @PathParam(value = "localId") String localId) throws IOException {
+
         ContentItem ci = store.get(localId);
         if (ci == null) {
             throw new WebApplicationException(404);
         }
-        return ci.getMetadata();
+        if (type.equals("metadata")) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            serializer.serialize(out, ci.getMetadata(), SupportedFormat.RDF_XML);
+            String fileName = localId + "-metadata";
+            File file = new File(fileName);
+            boolean success = file.createNewFile();
+            if (success) {
+                BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(fileName));
+                bufferedWriter.write(out.toString());
+                bufferedWriter.close();
+            } else {
+                log.error("File already exists");
+            }
+
+            ResponseBuilder response = Response.ok((Object) file);
+            response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+            response.type("text/plain");
+            return response.build();
+        } else if (type.equals("raw")) {
+            // TODO: It is only for text content
+            String fileName = localId + "-raw";
+            File file = new File(fileName);
+            boolean success = file.createNewFile();
+            if (success) {
+                BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(fileName));
+                bufferedWriter.write(IOUtils.toString(ci.getStream(), "UTF-8"));
+                bufferedWriter.close();
+            } else {
+                log.error("File already exists");
+            }
+
+            ResponseBuilder response = Response.ok((Object) file);
+            response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+            response.type(ci.getMimeType());
+            return response.build();
+        } else {
+            throw new WebApplicationException(404);
+        }
+
+    }
+
+    @GET
+    @Path("/metadata/{localId:.+}")
+    public Response getContentItemMetaData(@PathParam(value = "localId") String localId) throws IOException {
+        // TODO: rewrite me to perform a CONSTRUCT query on the TcManager
+        // instead
+
+        ContentItem ci = store.get(localId);
+        if (ci == null) {
+            throw new WebApplicationException(404);
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        serializer.serialize(out, ci.getMetadata(), SupportedFormat.RDF_XML);
+
+        return Response.ok(out.toString(), "text/plain").build();
+    }
+
+    @GET
+    @Path("/raw/{localId:.+}")
+    public Response getRawContent(@PathParam(value = "localId") String localId) throws IOException {
+        ContentItem ci = store.get(localId);
+        if (ci == null) {
+            throw new WebApplicationException(404);
+        }
+
+        return Response.ok(ci.getStream(), ci.getMimeType()).build();
+    }
+
+    @GET
+    @Path("/update/{localid:.+}")
+    public String editContentItem(@PathParam(value = "localid") String localid) {
+        SolrContentItem sci = (SolrContentItem) store.get(localid);
+        if (sci == null) {
+            throw new WebApplicationException(404);
+        }
+
+        return JSONUtils.createJSONString(sci);
     }
 
     @POST
@@ -333,6 +424,7 @@ public class ContenthubStoreResource extends BaseStanbolResource {
     public Response createContentItemFromForm(@FormParam("content") String content,
                                               @FormParam("url") String url,
                                               @FormParam("constraints") String jsonCons,
+                                              @FormParam("contentId") String contentId,
                                               @Context HttpHeaders headers) throws URISyntaxException,
                                                                            EngineException,
                                                                            MalformedURLException,
@@ -341,7 +433,7 @@ public class ContenthubStoreResource extends BaseStanbolResource {
         if (jsonCons != null) {
             constraints = JSONUtils.convertToMap(jsonCons);
         }
-        return createContentItemFromForm(content, url, null, null, headers, constraints);
+        return createContentItemFromForm(content, contentId, url, null, null, headers, constraints);
     }
 
     @POST
@@ -357,10 +449,11 @@ public class ContenthubStoreResource extends BaseStanbolResource {
         if (jsonCons != null) {
             constraints = JSONUtils.convertToMap(jsonCons);
         }
-        return createContentItemFromForm(null, null, file, disposition, headers, constraints);
+        return createContentItemFromForm(null, null, null, file, disposition, headers, constraints);
     }
 
     private Response createContentItemFromForm(String content,
+                                               String contentId,
                                                String url,
                                                File file,
                                                FormDataContentDisposition disposition,
@@ -392,6 +485,9 @@ public class ContenthubStoreResource extends BaseStanbolResource {
         }
         if (data != null && mt != null) {
             String uri = ContentItemHelper.makeDefaultUrn(data).getUnicodeString();
+            if (contentId != null && !contentId.isEmpty() && !uri.equals(contentId)) {
+                deleteContentItem(contentId);
+            }
             return createEnhanceAndRedirect(data, mt, uri, true, constraints);
         } else {
             // TODO: add user-friendly feedback on empty requests from a form
@@ -400,7 +496,7 @@ public class ContenthubStoreResource extends BaseStanbolResource {
     }
 
     @PUT
-    @Path("/content/{localId}")
+    @Path("/content/{localId:.+}")
     @Consumes(WILDCARD)
     public Response createContentItemWithId(@PathParam(value = "localId") String localId,
                                             byte[] data,
@@ -408,20 +504,14 @@ public class ContenthubStoreResource extends BaseStanbolResource {
                                                                          EngineException {
         return createEnhanceAndRedirect(data, headers.getMediaType(), localId);
     }
-    
+
     @DELETE
-    @Path("/content/{localid}")
+    @Path("/content/{localid:.+}")
     public Response deleteContentItem(@PathParam(value = "localid") String localid) {
         store.deleteById(localid);
-        
-        for(int i=0 ; i < recentlyEnhanced.size() ; i++){
-        	if(recentlyEnhanced.get(i).getLocalId().equals(localid)){
-        		recentlyEnhanced.remove(i);
-        	}
-        }
-        return Response.ok(new Viewable("index", this)).build();
+        return Response.ok().build();
     }
-    
+
     protected Response createEnhanceAndRedirect(byte[] data, MediaType mediaType, String uri) throws EngineException,
                                                                                              URISyntaxException {
         return createEnhanceAndRedirect(data, mediaType, uri, false, null);

@@ -43,20 +43,21 @@ public class SolrSearchEngineHelper {
     public static SolrQuery keywordQueryWithFacets(String keyword, Map<String,List<Object>> constraints) {
         SolrQuery query = new SolrQuery();
         String queryString = keyword;
-        
-        if(constraints != null) {
-        	try {
+
+        if (constraints != null) {
+            try {
                 for (Entry<String,List<Object>> entry : constraints.entrySet()) {
                     String fieldName = ClientUtils.escapeQueryChars(entry.getKey());
                     for (Object value : entry.getValue()) {
-                        queryString = queryString + and + fieldName + queryDelimiter + ClientUtils.escapeQueryChars((String) value);
+                        queryString = queryString + and + fieldName + queryDelimiter
+                                      + ClientUtils.escapeQueryChars((String) value);
                     }
                 }
             } catch (Exception e) {
                 logger.warn("Facet constraints could not be added to Query", e);
             }
         }
-        
+
         query.setQuery(queryString);
         query.setFields("*", "score");
         return query;

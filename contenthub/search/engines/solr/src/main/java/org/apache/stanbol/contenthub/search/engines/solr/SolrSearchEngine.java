@@ -47,7 +47,7 @@ import org.apache.stanbol.contenthub.servicesapi.search.execution.QueryKeyword;
 import org.apache.stanbol.contenthub.servicesapi.search.execution.SearchContext;
 import org.apache.stanbol.contenthub.servicesapi.search.execution.SearchContextFactory;
 import org.apache.stanbol.contenthub.servicesapi.search.vocabulary.SearchVocabulary;
-import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary;
+import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,9 +130,11 @@ public class SolrSearchEngine implements SearchEngine, EngineProperties {
                     searchForKeyword(kw, searchContext);
                 }
             }
-            if(searchContext.getConstraints() != null && !searchContext.getConstraints().isEmpty()) {
-            	omitNonMatchingResult(searchContext);
-            }
+            
+            /*
+             * if (searchContext.getConstraints() != null && !searchContext.getConstraints().isEmpty()) {
+             * omitNonMatchingResult(searchContext); }
+             */
         }
     }
 
@@ -211,13 +213,13 @@ public class SolrSearchEngine implements SearchEngine, EngineProperties {
                     .toString()) / maxScore;
             score = score > 1.0 ? 1.0 : score;
 
-            String contenthubId = (String) resultDoc.getFieldValue(SolrVocabulary.SOLR_FIELD_NAME_ID);
+            String contenthubId = (String) resultDoc.getFieldValue(SolrFieldName.ID.toString());
             /*
              * String cmsId = (String) resultDoc.getFieldValue(SolrSearchEngineHelper.CMSID_FIELD); cmsId =
              * cmsId == null ? "" : cmsId;
              */
 
-            String selectionText = (String) resultDoc.getFieldValue(SolrVocabulary.SOLR_FIELD_NAME_CONTENT);
+            String selectionText = (String) resultDoc.getFieldValue(SolrFieldName.CONTENT.toString());
 
             // score of the keyword is used as a weight for newly found document
             factory.createDocumentResource(contenthubId, 1.0, keyword.getScore() * score, keyword,
@@ -225,6 +227,7 @@ public class SolrSearchEngine implements SearchEngine, EngineProperties {
         }
     }
 
+    @SuppressWarnings("unused")
     private void omitNonMatchingResult(SearchContext searchContext) {
         OntModel contextModel = (SearchContextImpl) searchContext;
         ResIterator docResources = contextModel.listResourcesWithProperty(RDF.type,

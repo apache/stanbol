@@ -16,86 +16,29 @@
 -->
 
 <#macro keywordTab kw>
-<#assign qk=kw/>
-<#assign baseID="kw_"+qk.keyword?replace("*","_")?replace(" ", "_")?replace("'", "_")?replace("~", "_")?replace(".", "_")+"_"/>
-<div class="keywordTabs" id="${baseID}tabs">
-	<legend>Results for ${qk.keyword}:</legend>
-	<br/>
-				<ul class="spadded">
-					<li><a href="#${baseID}document_resources" onClick="javascript:showDiv();">Documents (${qk.relatedDocumentResources?size})</a></li>
-					<li><a href="#${baseID}external_resources" onClick="javascript:hideDiv();">External Resources (${qk.relatedExternalResources?size})</a></li>
-					<li><a href="#${baseID}class_resources" onClick="javascript:hideDiv();">Classes (${qk.relatedClassResources?size})</a></li>
-					<li><a href="#${baseID}individual_resources" onClick="javascript:hideDiv();">Individuals (${qk.relatedIndividualResources?size})</a></li>
-				</ul>
-				<div id="${baseID}document_resources" >
-					<ul class="spadded">
-					<#list qk.relatedDocumentResources?sort_by("scoreString")?reverse as docRes>
-						<div class="bordered-bottom">
-							<li class="lined"><a href="${it.publicBaseUri}contenthub/page/${docRes.localId}">${docRes.localId}</a></li>
-							<a class="collapseItem lined" href="/">
-								<img  src="/static/home/images/foldable_folded.png"/>
-							</a>
-							<div class="collapseContent">
-							<textarea readonly="readonly">${docRes.relatedText}</textarea>
-							<#if docRes.relatedContentRepositoryItem?has_content>
-								<p>Generated from CMS document at:${docRes.relatedContentRepositoryItem}</p>
-							</#if>
-							
-							</div>
-						</div>	
-					</#list>
-					</ul>
-				</div>
-				
-				<div id="${baseID}external_resources">
-					<ul class="spadded">
-					<#list qk.relatedExternalResources?sort_by("scoreString")?reverse as extRes>
-						<div class="bordered-bottom">
-						<li>
-							<a href="${extRes.dereferenceableURI}" target="_blank">${extRes.reference}</a>
-							: ${extRes.scoreString}
-							<a class="collapseItem" href="/">
-								<img  src="/static/home/images/foldable_folded.png"/>
-							</a>
-							<div class="collapseContent">
-								<fieldset>
-								<legend>Types</legend>
-								<ul class="spadded">
-									<#list extRes.types as type>
-										<li>${type}</li>
-									</#list>
-								<ul class="spadded">
-								</fieldset>
-								<fieldset>
-								<legend>Mentioned In Documents</legend>
-								<ul class="spadded">
-									<#list extRes.relatedDocuments as doc>
-										<li><a href="${doc.documentURI}">${doc.documentURI}</a></li>
-									</#list>
-								<ul class="spadded">
-								</fieldset>
-							</div>							
-						</li>
-						</div>
-					</#list>
-					</ul>
-				</div>				
-				
-				<div id="${baseID}class_resources" >
-					<ul class="spadded">
-					<#list qk.relatedClassResources?sort_by("scoreString")?reverse as clsRes>
-						<li><a href="${clsRes.dereferenceableURI}" target="_blank">${clsRes.classURI}</a>: ${clsRes.scoreString}</li>
-					</#list>
-					</ul>
-				</div>
-				
-				<div id="${baseID}individual_resources" >
-					<ul class="spadded">
-					<#list qk.relatedIndividualResources?sort_by("scoreString")?reverse as indRes>
-						<li><a href="${indRes.dereferenceableURI}" target="_blank">${indRes.individualURI}</a>: ${indRes.scoreString}</li>
-					</#list>
-					</ul>
-				</div>
-				
-			</div>
+	<#assign qk=kw/>
+	<#assign baseID="kw_"+qk.keyword?replace("*","_")?replace(" ", "_")?replace("'", "_")?replace("~", "_")?replace(".", "_")+"_"/>
+	<legend><h3>Results for ${qk.keyword}:</h3></legend>
+	<div>
+		<ul class="spadded">
+		<#if qk.relatedDocumentResources?size == 0>
+			Your search did not match any documents
+		<#else>	
+			<#list qk.relatedDocumentResources?sort_by("scoreString")?reverse as docRes>
+				<div class="bordered-bottom">
+					<li class="lined"><a href="${it.publicBaseUri}contenthub/page/${docRes.localId}">${docRes.localId}</a></li>
+					<a class="collapseItem lined" href="/">
+						<img  src="/static/home/images/foldable_folded.png"/>
+					</a>
+					<div class="collapseContent">
+						<textarea readonly="readonly">${docRes.relatedText}</textarea>
+						<#if docRes.relatedContentRepositoryItem?has_content>
+							<p>Generated from CMS document at:${docRes.relatedContentRepositoryItem}</p>
+						</#if>
+					</div>
+				</div>	
+			</#list>
+		</#if>
+		</ul>
+	</div>
 </#macro>

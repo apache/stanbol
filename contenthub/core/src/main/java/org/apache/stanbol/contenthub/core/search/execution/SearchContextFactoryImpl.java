@@ -214,22 +214,22 @@ public class SearchContextFactoryImpl implements SearchContextFactory {
                                              Keyword relatedKeyword) {
 
         try {
-			if (inverseClassResources.containsKey(classURI)) {
-			    ClassResource cr = inverseClassResources.get(classURI);
-			    cr.updateScore(score, weight);
-			    return cr;
-			} else {
-			    Node n = Node.createURI(className());
-			    ClassResourceImpl cri = new ClassResourceImpl(n, (EnhGraph) searchContext, weight, score,
-			            relatedKeyword, classURI, this);
-			    cri.setDereferenceableURI(resolveReference(classURI));
-			    inverseClassResources.put(classURI, cri);
-			    return cri;
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+            if (inverseClassResources.containsKey(classURI)) {
+                ClassResource cr = inverseClassResources.get(classURI);
+                cr.updateScore(score, weight);
+                return cr;
+            } else {
+                Node n = Node.createURI(className());
+                ClassResourceImpl cri = new ClassResourceImpl(n, (EnhGraph) searchContext, weight, score,
+                        relatedKeyword, classURI, this);
+                cri.setDereferenceableURI(resolveReference(classURI));
+                inverseClassResources.put(classURI, cri);
+                return cri;
+            }
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -299,9 +299,8 @@ public class SearchContextFactoryImpl implements SearchContextFactory {
     private String resolveReference(String uri) {
         return uri;
         /*
-         String path = null;
-         * if (resourceManager != null && uri != null) { path = resourceManager.getResourceFullPath(uri); } if
-         * (path == null || path.isEmpty()) { path = uri; }
+         * String path = null; if (resourceManager != null && uri != null) { path =
+         * resourceManager.getResourceFullPath(uri); } if (path == null || path.isEmpty()) { path = uri; }
          */
         // TODO : that should return the dereferenceable uri of resource in ontology store
     }

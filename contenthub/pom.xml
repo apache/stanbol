@@ -53,7 +53,6 @@
 		<module>core</module>
 		<module>search</module>
 		<module>helper/cnn-importer</module>
-		<module>enhancementlistener</module>
 		<module>web</module>
 		<module>bundlelist</module>
 	</modules>

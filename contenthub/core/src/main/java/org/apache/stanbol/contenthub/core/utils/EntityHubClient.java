@@ -21,6 +21,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
 import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
@@ -125,6 +130,62 @@ public final class EntityHubClient {
                 .post(String.class, form);
 
         return rdfUtil.getOntModel(response);
+
+    }
+
+    public OntModel referencedSiteFind(String name, String language, String... selects) {
+        OntModel model = ModelFactory.createOntologyModel();
+        String field = "http://www.w3.org/2000/01/rdf-schema#label";
+        try {
+            nullCheck(name, PARAM_NAME);
+            StringBuilder path = new StringBuilder(entityhubEndpoint);
+            path.append("sites/find");
+
+            // Form parameters
+            MultivaluedMap<String,String> form = new MultivaluedMapImpl();
+            if (name != null && !name.isEmpty()) {
+                form.add(PARAM_NAME, name);
+            }
+            if (field != null && !field.isEmpty()) {
+                form.add(PARAM_FIELD, field);
+            }
+            if (language != null && !language.isEmpty()) {
+                form.add(PARAM_LANGUAGE, language);
+            }
+            // to get only one result
+            form.add("limit", "1");
+
+            String selectStr = "";
+            for (String select : selects) {
+                if (select != null && !select.isEmpty()) {
+                    selectStr += select;
+                    selectStr += " ";
+                }
+            }
+            form.add(PARAM_SELECT, selectStr);
+
+            WebResource wr = client.resource(path.toString());
+            String response = wr.type(MediaType.APPLICATION_FORM_URLENCODED).accept(MEDIA_TYPE_RDF)
+                    .post(String.class, form);
+
+            OntModel ResultModel = rdfUtil.getOntModel(response);
+            ResourceFactory.createResource("http://www.iks-project.eu/ontology/rick/query/QueryResultSet");
+            Property property = ResourceFactory.createProperty("http://www.w3.org/2000/01/rdf-schema#label");
+            StmtIterator statements = ResultModel.listStatements(null, property, (String) null);
+            String dbpediaId = null;
+            while (statements.hasNext()) {
+                Statement res = statements.next();
+                dbpediaId = res.getSubject().getURI();
+            }
+            // means can not find any dbpedia entity with given name
+            if (dbpediaId == null) {
+                model = null;
+            }
+            model = symbolLookup(dbpediaId, true);
+
+        } catch (Exception e) {}
+
+        return model;
 
     }
 

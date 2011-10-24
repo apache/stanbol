@@ -23,33 +23,38 @@
 	<#assign con=it.templateData.context>
 	<!--General Divs for layout  -->
 	<div class="keywords">
-		<#list con.queryKeyWords?sort_by("scoreString")?reverse as qk>
-			<h3  class="keywordItem keywordClickable" id="kw_${qk.keyword?replace("*","_")?replace(" ", "_")?replace("'", "_")}">${qk.scoreString}:${qk.keyword}</h3>
-			<div>
-			<#if qk.relatedKeywords?exists && qk.relatedKeywords?size != 0>
-				<fieldset>
-					<legend>Related Keywords</legend>
-					<ul class="spadded"> 
-					<#list qk.relatedKeywords?sort_by("scoreString")?reverse as kw>
-						<li class="keywordItem" id="kw_${kw.keyword?replace("*","_")?replace(" ", "_")?replace("'", "_")}"><a class="keywordClickable" href="">${kw.scoreString}:${kw.keyword}</a></li>
-					</#list>
-					<ul>
-				</fieldset>
-			
-			<#else>
-				<p><i>No related keywords</i></p>
-			</#if>
-			</div>
-		</#list>
+			<#list con.queryKeyWords?sort_by("scoreString")?reverse as qk>
+
+				<h3  class="keywordItem keywordClickable" id="kw_${qk.keyword?replace("*","_")?replace(" ", "_")?replace("'", "_")}">${qk.scoreString}:${qk.keyword}</h3>
+
+				<#if qk.relatedKeywords?exists && qk.relatedKeywords?size != 0>
+				
+					<div>
+						<legend>Related Keywords</legend>
+						<ul class="spadded"> 
+						<#list qk.relatedKeywords?sort_by("scoreString")?reverse as kw>
+							<li class="keywordItem" id="kw_${kw.keyword?replace("*","_")?replace(" ", "_")?replace("'", "_")}"><a class="keywordClickable" href="">${kw.scoreString}:${kw.keyword}</a></li>
+						</#list>
+						<ul>
+					</div>
+						
+				<#else>
+					<div><p><i>No related keywords</i></p></div>
+				</#if>
+
+			</#list>
+	
 	</div>
 	
 	<div class="resources">
-		<#list con.queryKeyWords?sort_by("score") as qk>
-			<@keywordTab.keywordTab kw=qk/>
-			<#list qk.relatedKeywords?sort_by("score") as kw1>
-				<@keywordTab.keywordTab kw=kw1/>
+		<fieldset>
+			<#list con.queryKeyWords?sort_by("score") as qk>
+				<@keywordTab.keywordTab kw=qk/>
+				<#list qk.relatedKeywords?sort_by("score") as kw1>
+					<@keywordTab.keywordTab kw=kw1/>
+				</#list>
 			</#list>
-		</#list>
+		</fieldset>
 	</div>
 	
 	<div id="facets">
@@ -57,9 +62,7 @@
 		<#if it.facets?exists && it.facets?size != 0>
 			<fieldset>
 				<div id="chosenFacets"></div>
-				<div id="chosenFacetsHidden" class="invisible">
-					'${it.templateData.constraints}'
-				</div>
+				<div id="chosenFacetsHidden" class="invisible">'${it.templateData.constraints?js_string}'</div>
 				<br/>
 				<#list it.facets as facet>
 					${facet.name?substring(0,facet.name?last_index_of("_"))}
@@ -67,7 +70,7 @@
 						<ul>
 							<#list facet.values as value>
 								<#assign consLink = it.templateData.constraints>
-								<li><a href=javascript:getResults('${consLink?url}','${facet.name?url}','${value.name?url}')>${value.name} (${value.count})</a></li>
+								<li><a href=javascript:getResults('${consLink?url('UTF-8')?js_string}','${facet.name?url('UTF-8')?js_string}','${value.name?url('UTF-8')?js_string}')>${value.name} (${value.count})</a></li>
 								
 							</#list>
 						</ul>
