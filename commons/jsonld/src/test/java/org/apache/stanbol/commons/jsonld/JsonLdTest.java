@@ -926,8 +926,6 @@ public class JsonLdTest {
         
         String actual = jsonLd.toString();
         String expected = "{\"@context\":{\"age\":\"http://xmlns.com/foaf/0.1/age\",\"name\":\"http://xmlns.com/foaf/0.1/name\",\"String\":\"http://www.w3.org/2001/XMLSchema#String\",\"xsd\":\"http://www.w3.org/2001/XMLSchema#\"},\"@subject\":\"_:bnode1\",\"@type\":[\"String\",\"name\"],\"age\":[{\"@literal\":\"31.533567\",\"@datatype\":\"xsd:Float\"},{\"@literal\":\"test\",\"@datatype\":\"xsd:String\"}]}";
-        toConsole(actual);
-
         assertEquals(expected, actual); 
     }
     
