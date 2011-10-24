@@ -32,24 +32,27 @@
 			</p>
 				<input id="submitIn" type="submit" value="Import News"><br/>
 			</p>
+			<img id="busyIcon" class="invisible centerImage" src="${it.staticRootUrl}/contenthub/images/ajax-loader.gif"/>
 		</fieldset>
 	</form>
 	
-	<#if it.templateData?exists>
-		<fieldset>
-			<legend>Articles found for topic: ${it.templateData.topic}</legend>
-			<#if it.templateData.uris?exists && it.templateData.uris?size != 0>
-				<ul>
-				<#list it.templateData.uris as uri>
-					<li><a href="${uri}">${uri}</a></li>
-				</#list>
-				</ul>
-			<#else>
-				<p>No articles found for this topic<p>
-			</#if>
-		</fieldset>
-	</#if>
-	
+	<!-- if you change this div, look out success function -->
+	<div id="results">
+		<#if it.templateData?exists>
+			<fieldset>
+				<legend>Articles found for topic: ${it.templateData.topic}</legend>
+				<#if it.templateData.uris?exists && it.templateData.uris?size != 0>
+					<ul>
+					<#list it.templateData.uris as uri>
+						<li><a href="${uri}">${uri}</a></li>
+					</#list>
+					</ul>
+				<#else>
+					<p>No articles found for this topic<p>
+				</#if>
+			</fieldset>
+		</#if>
+	</div>
 	
 	<script language="javascript">
 	
@@ -58,17 +61,19 @@
 	     // disable regular form click
 	     e.preventDefault();
 	     
-	     
+		 $("#busyIcon").removeClass("invisible");
+
 	     $.ajax({
 	       type: "POST",
-	       async: false,
+	       async: true,
 	       data: {topic: $("#topicIn").val(), max: $("#maxIn").val(), full: $("#fullIn").attr('checked')},
 	       dataType: "html",
 	       cache: false,
 	       success: function(result) {
-	       	 // since post does not create any resource, there is no possibility to redirect
-	         document.clear();
-	         document.write(result);
+	       	 var startIndex = result.indexOf('<div id="results">');
+			 var endIndex = result.indexOf('</div>',startIndex)+6;
+			 $("#results").replaceWith(result.substring(startIndex,endIndex));
+	       	 $("#busyIcon").addClass("invisible");
 	       },
 	       error: function(result) {
 	         alert(result.status + " " + result.statusText);

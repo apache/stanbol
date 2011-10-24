@@ -34,6 +34,13 @@ div .keywords{
   width: 30%;
 }
 
+div #facets{
+  display: inline-block;
+  position: relative;
+  left: 1%;
+  width: 30%;
+}
+
 div .resources{
   display: inline-block;
   position: relative;

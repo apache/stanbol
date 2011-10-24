@@ -20,6 +20,9 @@ package org.apache.stanbol.contenthub.core.store;
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,7 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.NoSuchEntityException;
@@ -38,6 +43,7 @@ import org.apache.clerezza.rdf.core.sparql.QueryParser;
 import org.apache.clerezza.rdf.core.sparql.ResultSet;
 import org.apache.clerezza.rdf.core.sparql.SolutionMapping;
 import org.apache.clerezza.rdf.core.sparql.query.SelectQuery;
+import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -53,16 +59,17 @@ import org.apache.stanbol.commons.solr.SolrDirectoryManager;
 import org.apache.stanbol.commons.solr.SolrServerProviderManager;
 import org.apache.stanbol.commons.solr.SolrServerTypeEnum;
 import org.apache.stanbol.contenthub.core.utils.ContentItemIDOrganizer;
-import org.apache.stanbol.contenthub.core.utils.indexing.EnhancementLARQ;
 import org.apache.stanbol.contenthub.core.utils.sparql.QueryGenerator;
 import org.apache.stanbol.contenthub.servicesapi.enhancements.vocabulary.EnhancementGraphVocabulary;
 import org.apache.stanbol.contenthub.servicesapi.store.SolrContentItem;
 import org.apache.stanbol.contenthub.servicesapi.store.SolrStore;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary;
+import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
+import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,16 +83,16 @@ import org.slf4j.LoggerFactory;
 @Service
 public class SolrStoreImpl implements SolrStore {
 
-    private final Logger logger = LoggerFactory.getLogger(SolrStoreImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(SolrStoreImpl.class);
 
     @Reference
     SolrServerProviderManager solrServerProviderManager;
 
     @Reference
-    private TcManager tcManager;
+    private SolrDirectoryManager solrDirectoryManager;
 
     @Reference
-    private SolrDirectoryManager solrDirectoryManager;
+    private TcManager tcManager;
 
     @Reference
     private EnhancementJobManager jobManager;
@@ -118,12 +125,14 @@ public class SolrStoreImpl implements SolrStore {
     @Override
     public MGraph getEnhancementGraph() {
         final UriRef graphUri = new UriRef(EnhancementGraphVocabulary.ENHANCEMENTS_GRAPH_URI);
+        MGraph enhancementGraph = null;
         try {
-            return tcManager.getMGraph(graphUri);
+            enhancementGraph = tcManager.getMGraph(graphUri);
         } catch (NoSuchEntityException e) {
-            logger.debug("Should never reach here: SolrStoreImpl.getEnhancementGraph()", e);
-            return tcManager.createMGraph(graphUri);
+            logger.debug("Creating the enhancement graph!");
+            enhancementGraph = tcManager.createMGraph(graphUri);
         }
+        return enhancementGraph;
     }
 
     @Override
@@ -189,7 +198,38 @@ public class SolrStoreImpl implements SolrStore {
         } catch (EngineException e) {
             logger.error("Cannot enhance content with id: {}", sci.getId(), e);
         }
+
+        updateEnhancementGraph(sci);
+
         return put(sci);
+    }
+
+    private void updateEnhancementGraph(SolrContentItem sci) {
+        MGraph enhancementGraph = getEnhancementGraph();
+        // Delete old enhancements which belong to this content item from the global enhancements graph.
+        removeEnhancements(sci.getId());
+        // Add new enhancements of this content item to the global enhancements graph.
+        Iterator<Triple> it = sci.getMetadata().iterator();
+        while (it.hasNext()) {
+            Triple triple = null;
+            try {
+                triple = it.next();
+                enhancementGraph.add(triple);
+            } catch (Exception e) {
+                logger.warn("Cannot add triple {} to the TCManager.enhancementgraph", triple, e);
+                continue;
+            }
+        }
+    }
+
+    private void removeEnhancements(String id) {
+        MGraph enhancementGraph = getEnhancementGraph();
+        Iterator<Triple> it = enhancementGraph.filter(new UriRef(id), null, null);
+        List<Triple> willBeRemoved = new ArrayList<Triple>();
+        while (it.hasNext()) {
+            willBeRemoved.add(it.next());
+        }
+        enhancementGraph.removeAll(willBeRemoved);
     }
 
     @Override
@@ -203,20 +243,35 @@ public class SolrStoreImpl implements SolrStore {
 
         String content = null;
         try {
-            byte[] bytes = new byte[ci.getStream().available()];
-            ci.getStream().read(bytes);
-            content = new String(bytes);
+            content = IOUtils.toString(ci.getStream(), "UTF-8");
         } catch (IOException ex) {
             logger.error("Cannot read the content.", ex);
         }
 
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String creationDate = sdf.format(cal.getTime());
+
         SolrInputDocument doc = new SolrInputDocument();
-        doc.addField(SolrVocabulary.SOLR_FIELD_NAME_ID, ci.getId());
-        doc.addField(SolrVocabulary.SOLR_FIELD_NAME_CONTENT, content);
-        doc.addField(SolrVocabulary.SOLR_FIELD_NAME_MIMETYPE, ci.getMimeType());
+        doc.addField(SolrFieldName.ID.toString(), ci.getId());
+        doc.addField(SolrFieldName.CONTENT.toString(), content);
+        doc.addField(SolrFieldName.MIMETYPE.toString(), ci.getMimeType());
+        doc.addField(SolrFieldName.CREATIONDATE.toString(), creationDate);
+
+        // add the number of enhancemets to the content item
+        long enhancementCount = 0;
+        Iterator<Triple> it = ci.getMetadata().filter(null, Properties.ENHANCER_EXTRACTED_FROM,
+            new UriRef(ci.getId()));
+        while (it.hasNext()) {
+            it.next();
+            enhancementCount++;
+        }
+        doc.addField(SolrFieldName.ENHANCEMENTCOUNT.toString(), enhancementCount);
 
         if (ci instanceof SolrContentItem) {
             SolrContentItem sci = (SolrContentItem) ci;
+
+            // add the constraints
             if (sci.getConstraints() != null) {
                 for (Entry<String,List<Object>> constraint : sci.getConstraints().entrySet()) {
                     Object[] values = constraint.getValue().toArray();
@@ -224,6 +279,13 @@ public class SolrStoreImpl implements SolrStore {
                     String dynamicFieldName = addSolrDynamicFieldProperties(constraint.getKey(), values);
                     doc.addField(dynamicFieldName, values);
                 }
+            }
+
+            if (sci.getMetadata() != null) {
+                addSemanticFields(sci, doc);
+                addFacetFields(sci, doc);
+            } else {
+                logger.debug("There are no enhancements for the content item {}", sci.getId());
             }
         }
 
@@ -237,11 +299,47 @@ public class SolrStoreImpl implements SolrStore {
             logger.error("IOException", e);
         }
 
-        // Delete old enhancements which belong to this content item.
-        EnhancementLARQ.getInstance().deleteEnhancements(ci.getId());
-        getEnhancementGraph().addAll(ci.getMetadata());
-
         return ci.getId();
+    }
+
+    private void addSemanticFields(SolrContentItem sci, SolrInputDocument doc) {
+        for (SolrFieldName fn : SolrFieldName.getSemanticFieldNames()) {
+            addField(sci, doc, fn);
+        }
+    }
+
+    private void addFacetFields(SolrContentItem sci, SolrInputDocument doc) {
+        for (SolrFieldName fn : SolrFieldName.getAnnotatedEntityFieldNames()) {
+            addField(sci, doc, fn);
+        }
+    }
+
+    private void addField(SolrContentItem sci, SolrInputDocument doc, SolrFieldName fieldName) {
+        SelectQuery query = null;
+        try {
+            query = (SelectQuery) QueryParser.getInstance().parse(QueryGenerator.getFieldQuery(fieldName));
+        } catch (ParseException e) {
+            logger.debug("Should never reach here!");
+            logger.error("Cannot parse the query generated by QueryGenerator: {}",
+                QueryGenerator.getFieldQuery(fieldName), e);
+            return;
+        }
+
+        sci.getMetadata();
+        ResultSet result = tcManager.executeSparqlQuery(query, sci.getMetadata());
+        List<String> values = new ArrayList<String>();
+        while (result.hasNext()) {
+            SolutionMapping sol = result.next();
+            Resource res = sol.get(fieldName.toString());
+            if (res == null) continue;
+            String value = res.toString();
+            if (res instanceof Literal) {
+                value = ((Literal) res).getLexicalForm();
+            }
+            value = value.replaceAll("_", " ");
+            values.add(value);
+        }
+        if (!values.isEmpty()) doc.addField(fieldName.toString(), values.toArray());
     }
 
     // TODO: we can use cache for "Recently uploaded Content Items"..
@@ -255,7 +353,7 @@ public class SolrStoreImpl implements SolrStore {
 
         SolrQuery query = new SolrQuery();
         StringBuilder queryString = new StringBuilder();
-        queryString.append(SolrVocabulary.SOLR_FIELD_NAME_ID);
+        queryString.append(SolrFieldName.ID.toString());
         queryString.append(":\"");
         queryString.append(id);
         queryString.append('\"');
@@ -266,16 +364,14 @@ public class SolrStoreImpl implements SolrStore {
             SolrDocumentList results = response.getResults();
             if (results != null && results.size() > 0) {
                 SolrDocument result = results.get(0);
-                content = (String) result.getFieldValue(SolrVocabulary.SOLR_FIELD_NAME_CONTENT);
-                mimeType = (String) result.getFieldValue(SolrVocabulary.SOLR_FIELD_NAME_MIMETYPE);
+                content = (String) result.getFieldValue(SolrFieldName.CONTENT.toString());
+                mimeType = (String) result.getFieldValue(SolrFieldName.MIMETYPE.toString());
 
                 Iterator<Entry<String,Object>> itr = result.iterator();
                 while (itr.hasNext()) {
                     Entry<String,Object> entry = itr.next();
                     String key = entry.getKey();
-                    if (!key.equalsIgnoreCase(SolrVocabulary.SOLR_FIELD_NAME_ID)
-                        && !key.equalsIgnoreCase(SolrVocabulary.SOLR_FIELD_NAME_CONTENT)
-                        && !key.equalsIgnoreCase(SolrVocabulary.SOLR_FIELD_NAME_MIMETYPE)) {
+                    if (!SolrFieldName.isNameReserved(key)) {
                         List<Object> values = (List<Object>) result.getFieldValues(key);
                         constraints.put(key, values);
                     }
@@ -312,8 +408,9 @@ public class SolrStoreImpl implements SolrStore {
 
     @Override
     public void deleteById(String id) {
+		if(id == null || id.isEmpty()) return;
         id = ContentItemIDOrganizer.attachBaseURI(id);
-        EnhancementLARQ.getInstance().deleteEnhancements(id);
+        removeEnhancements(id);
         try {
             server.deleteById(id);
             server.commit();

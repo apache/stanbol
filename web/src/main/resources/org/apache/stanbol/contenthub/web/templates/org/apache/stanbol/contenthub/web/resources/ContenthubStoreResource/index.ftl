@@ -28,7 +28,8 @@ on the disk, just in memory.</em>
 
 <h3>Recently uploaded Content Items</h3>
 
-<div class="storeContents">
+<div id="storeContents" class="storeContents">
+<div>
 <table id="recentlyEnhancedTable">
 	<div>
 	  <tr>
@@ -39,7 +40,10 @@ on the disk, just in memory.</em>
 	  </tr>
 	  <#list it.recentlyEnhancedItems as item>
 	  <tr>
-		<td><img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" onClick="javascript:deleteContentItem('${item.localId}');" title="Delete this item"></td>
+		<td>
+			<img src="${it.staticRootUrl}/contenthub/images/edit_icon_16.png" onClick="javascript:editContentItem('${item.localId}');" title="Edit this item">
+			<img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" onClick="javascript:deleteContentItem('${item.localId}');" title="Delete this item">
+		</td>
 	    <td><a href="${item.uri}" title="${item.uri}">${item.localId}</a></td>
 	    <td>${item.mimetype}</td>
 	    <td><a href="${it.publicBaseUri}contenthub/metadata/${item.localId}">${item.enhancements}</a></td>
@@ -57,12 +61,17 @@ on the disk, just in memory.</em>
   </#if>
 </ul>
 </div>
+</div>
+
+
+<div id="editingDiv"> </div>
+
 
 <h3>Submit Constraints to Content Item for analysis</h3>
 
 <fieldset>
 	<legend>Give Field:Value for your content</legend>
-	<div id="constraintsDiv">
+	<div id="constraintsDiv" style="max-height:190px;overflow:auto">
 		<div id="textDiv1">
 			<br><input type="text" name="fieldText1"> : <input type="text" name="valueText1">
 		</div>
@@ -74,31 +83,33 @@ on the disk, just in memory.</em>
 <h3>Submit a new Content Item for analysis</h3>
 
 
-
 <form method="POST" accept-charset="utf-8">
   <fieldset>
-  <input type="hidden" id="hidden1" name="constraints" value="">
+  <input type="hidden" id="constraintsHidden" name="constraints" value="">
+  <input type="hidden" id="hiddenId" name="contentId" value="">
   <legend>Submit raw text content</legend>
-  <p><textarea rows="15" name="content"></textarea></p>
-  <p><input type="submit" onClick="javascript:setConstraints(1);" value="Submit text"></p>
+  <p><textarea rows="15" id="contentTextArea" name="content"></textarea></p>
+  <p><input type="submit" onClick="javascript:setConstraints();" value="Submit text"></p>
   </fieldset>
 </form>
 
 <form method="POST" accept-charset="utf-8">
   <fieldset>
-  <input type="hidden" id="hidden2" name="constraints" value="">
+  <input type="hidden" id="constraintsHidden" name="constraints" value="">
+  <input type="hidden" id="hiddenId" name="contentId" value="">
   <legend>Submit a remote public resource by URL</legend>
   <p><input name="url" type="text" class="url" />
-     <input type="submit" onClick="javascript:setConstraints(2);" value="Submit URL"></p>
+     <input type="submit" onClick="javascript:setConstraints();" value="Submit URL"></p>
   </fieldset>
 </form>
 
 <form method="POST" accept-charset="utf-8"  enctype="multipart/form-data">
   <fieldset>
-  <input type="hidden" id="hidden3" name="constraints" value="">
+  <input type="hidden" id="constraintsHidden" name="constraints" value="">
+  <input type="hidden" id="hiddenId" name="contentId" value="">
   <legend>Upload a local file</legend>
   <p><input name="file" type="file"/>
-     <input type="submit" onClick="javascript:setConstraints(3);" value="Submit file"></p>
+     <input type="submit" onClick="javascript:setConstraints();" value="Submit file"></p>
   </fieldset>
 </form>
 
@@ -191,19 +202,24 @@ Server: Jetty(6.1.x)
 
 	var counter = 1;
 	
-	function setConstraints(hiddenNo){
-	
-		var i=1;
-		var result="{";
+	function setConstraints(){
+		var i;
+		var result = JSON.parse("{}");
 		for(i=0 ; i<=counter ; i++){
 			if (document.getElementById("textDiv" + i)) {
-				var field = "\""+document.getElementsByName("fieldText"+i)[0].value+"\"";
-				var value = ("[\""+document.getElementsByName("valueText"+i)[0].value+"\"]").replace(/,/g,'\",\"');
-				result += field + ":" + value + ",";
+				var field = jQuery.trim(document.getElementsByName("fieldText"+i)[0].value);
+				var value = document.getElementsByName("valueText"+i)[0].value;
+				
+				if(result[field] == null) {
+					result[field] = new Array();
+				}
+				var values = value.split(",");
+				for(j=0 ; j<values.length ; j++){
+					result[field].push(jQuery.trim(values[j]));
+				}
 			}
 		}
-		result = result.substring(0, result.length-1) + "}";
-		document.getElementById("hidden"+hiddenNo).value = result;
+		document.getElementById("constraintsHidden").value = JSON.stringify(result);	
 	}
 	
 	function addConstraint(){
@@ -228,6 +244,48 @@ Server: Jetty(6.1.x)
 		var constraintsDiv = document.getElementById('constraintsDiv');
 		constraintsDiv.removeChild(document.getElementById('textDiv'+divNo));
 	}
+
+	function cancelEditing(){
+		document.getElementById("hiddenId").value = "";
+		document.getElementById("editingDiv").innerHTML = "";
+	}
+
+	function editContentItem(vlocalid) {
+		var lurl = "${it.publicBaseUri}contenthub/update/" + vlocalid;
+		document.getElementById("constraintsDiv").innerHTML = "";
+		counter=0;
+		$.ajax({
+			url: lurl,
+			type: "GET",
+			async: true,
+			cache: false,
+			success: function(jsonCons) {
+			
+				var JSONObject = JSON.parse(jsonCons);
+				var count=1;
+				if(JSONObject != null) {
+					document.getElementById("contentTextArea").value = JSONObject["content"];
+					document.getElementById("hiddenId").value = JSONObject["id"];
+					document.getElementById("editingDiv").innerHTML = 	'<img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" title="Cancel Editing" onClick="javascript:cancelEditing()">'
+																		+"You are editing Content Item "+JSONObject["id"];
+					delete JSONObject["content"];
+					delete JSONObject["id"];
+					
+					for(var p in JSONObject) {
+						if(JSONObject.hasOwnProperty(p)) {
+							var lastindex = p.toString().lastIndexOf("_");	
+							addConstraint();
+							document.getElementsByName("fieldText"+counter)[0].value = p.toString().substring(0, lastindex);
+							document.getElementsByName("valueText"+counter)[0].value = JSONObject[p].substring(1, JSONObject[p].length-1);
+						}
+					}
+				}	
+			},
+			error: function(content) {
+				alert(result.status + ' ' + result.statusText);
+			}
+		});
+	}	
 	
 	function deleteContentItem(vlocalid) {
 		var lurl = "${it.publicBaseUri}contenthub/content/" + vlocalid;
@@ -236,12 +294,10 @@ Server: Jetty(6.1.x)
 			type: "DELETE",
 			async: true,
 			cache: false,
-			success: function(ind) {
-				var startIndex = ind.indexOf('<table id="recentlyEnhancedTable">');
-				var endIndex = ind.indexOf('</table>',startIndex)+8;
-				$("#recentlyEnhancedTable").replaceWith(ind.substring(startIndex,endIndex));
+			success: function() {
+				$("#storeContents").load("${it.publicBaseUri}contenthub #storeContents>div");
 			},
-			error: function(ind) {
+			error: function() {
 				alert(result.status + ' ' + result.statusText);
 			}
 		});

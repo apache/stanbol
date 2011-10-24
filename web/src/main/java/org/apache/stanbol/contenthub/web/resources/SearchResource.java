@@ -19,7 +19,6 @@ package org.apache.stanbol.contenthub.web.resources;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -53,6 +52,8 @@ import org.apache.stanbol.commons.solr.SolrServerProviderManager;
 import org.apache.stanbol.commons.solr.SolrServerTypeEnum;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.contenthub.core.utils.JSONUtils;
+import org.apache.stanbol.contenthub.core.utils.SearchUtils;
 import org.apache.stanbol.contenthub.servicesapi.search.Search;
 import org.apache.stanbol.contenthub.servicesapi.search.engine.SearchEngine;
 import org.apache.stanbol.contenthub.servicesapi.search.execution.DocumentResource;
@@ -60,11 +61,10 @@ import org.apache.stanbol.contenthub.servicesapi.search.execution.QueryKeyword;
 import org.apache.stanbol.contenthub.servicesapi.search.execution.SearchContext;
 import org.apache.stanbol.contenthub.servicesapi.search.processor.SearchProcessor;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary;
+import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 import org.apache.stanbol.contenthub.web.search.model.EngineInfo;
 import org.apache.stanbol.contenthub.web.search.model.SearchInfo;
 import org.apache.stanbol.contenthub.web.search.model.TempSearchResult;
-import org.apache.stanbol.contenthub.web.utils.JSONUtils;
-import org.apache.stanbol.contenthub.web.utils.SearchUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,7 +107,7 @@ public class SearchResource extends BaseStanbolResource {
             Iterator<UriRef> it = mGraphs.iterator();
             while (it.hasNext()) {
                 String graphURI = it.next().getUnicodeString();
-                if(SearchUtils.isGraphReserved(graphURI)) continue;
+                if (SearchUtils.isGraphReserved(graphURI)) continue;
                 si.getOntologies().add(graphURI);
             }
 
@@ -133,7 +133,6 @@ public class SearchResource extends BaseStanbolResource {
                                                                            IllegalAccessException,
                                                                            SolrServerException,
                                                                            IOException {
-
         Map<String,List<Object>> facetMap = JSONUtils.convertToMap(jsonCons);
         String[] keywordArray = null;
         if (keywords.startsWith("\"") && keywords.endsWith("\"")) {
@@ -158,10 +157,6 @@ public class SearchResource extends BaseStanbolResource {
                                                    IllegalArgumentException,
                                                    IOException {
 
-        List<String> reserved = new ArrayList<String>();
-        reserved.add(SolrVocabulary.SOLR_FIELD_NAME_ID);
-        reserved.add(SolrVocabulary.SOLR_FIELD_NAME_CONTENT);
-        reserved.add(SolrVocabulary.SOLR_FIELD_NAME_MIMETYPE);
         SolrServer server = null;
         if (solrDirectoryManager != null) {
             File indexDirectory = solrDirectoryManager.getSolrIndexDirectory("contenthub");
@@ -176,7 +171,7 @@ public class SearchResource extends BaseStanbolResource {
         List<DocumentResource> docList = queryKeywords.getRelatedDocumentResources();
         StringBuilder queryBuilder = new StringBuilder();
         for (DocumentResource doc : docList) {
-            queryBuilder.append(SolrVocabulary.SOLR_FIELD_NAME_ID);
+            queryBuilder.append(SolrFieldName.ID.toString());
             queryBuilder.append(":\"");
             queryBuilder.append(doc.getDocumentURI());
             queryBuilder.append("\"");
@@ -202,10 +197,11 @@ public class SearchResource extends BaseStanbolResource {
         }
         solrQuery.setFacet(true);
         for (String field : fields) {
-            if (!reserved.contains(field)) {
+            if (!SolrFieldName.isNameReserved(field) && !SolrVocabulary.isNameExcluded(field)) {
                 solrQuery.addFacetField(field);
             }
         }
+        solrQuery.setRows(0);
 
         QueryResponse result = server.query(solrQuery);
         List<FacetField> facets = result.getFacetFields();
@@ -220,4 +216,23 @@ public class SearchResource extends BaseStanbolResource {
     public Object getFacets() {
         return facets;
     }
+
+    // TODO: This method SHOULD be written again, maybe as a SEPERATE class
+    /**
+     * this method is written just to see that we can explore from search keyword using entityhub
+     * 
+     * @param queryKeywords
+     *            is the all keywords seperated by " " that has been entered in search interface
+     * @return is the List of all related entity names
+     */
+    /*
+     * public void exploreFromKeyword(String queryKeywords) { EntityHubClient ehc =
+     * EntityHubClient.getInstance("http://localhost:8080/entityhub"); String keyword =
+     * queryKeywords.replaceAll(" ","_"); List<String> types = new ArrayList<String>();
+     * 
+     * OntModel resultModel = ehc.referencedSiteFind(keyword, "en"); if(resultModel != null) { ExploreHelper
+     * explorer = new ExploreHelper(resultModel);
+     * 
+     * Map<String, List<String>> resultMap = explorer.getSuggestedKeywords(); } }
+     */
 }

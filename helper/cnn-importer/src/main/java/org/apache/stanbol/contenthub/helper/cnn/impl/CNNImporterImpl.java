@@ -54,7 +54,7 @@ import org.w3c.tidy.Tidy;
 @Service
 public class CNNImporterImpl implements CNNImporter {
     private static final Logger logger = LoggerFactory.getLogger(CNNImporterImpl.class);
-    
+
     private static final String CNN_URL = "http://topics.cnn.com/topics/";
     private static final String TEXT_CLASS = "cnn_strycntntlft";
 
@@ -63,8 +63,8 @@ public class CNNImporterImpl implements CNNImporter {
 
     @Activate
     public void activate(ComponentContext cc) {
-        if(solrStore == null) {
-        	logger.error("Cannot activate CNNImporter. There is no SolrStore to be binded.");
+        if (solrStore == null) {
+            logger.error("Cannot activate CNNImporter. There is no SolrStore to be binded.");
         }
     }
 
@@ -83,13 +83,14 @@ public class CNNImporterImpl implements CNNImporter {
 
         for (NewsSummary summary : summaries) {
             try {
-            	SolrContentItem sci = solrStore.create(null, summary.getContent().getBytes(), "text/plain", null);
+                SolrContentItem sci = solrStore.create(null, summary.getContent().getBytes(), "text/plain",
+                    null);
                 URI uri = new URI(solrStore.enhanceAndPut(sci));
                 if (uri != null) {
                     uris.add(uri);
                 }
             } catch (Exception e) {
-            	logger.error("", e);
+                logger.error("", e);
                 logger.warn("Error storing content {}. Skipping ...", summary.getContent());
             }
         }
