@@ -167,8 +167,7 @@ public class ServletContextMock implements ServletContext {
     }
 
     public void setAttribute(String name, Object object) {
-    // TODO Auto-generated method stub
-
+        this.putAttribute(name, object);
     }
 
 }

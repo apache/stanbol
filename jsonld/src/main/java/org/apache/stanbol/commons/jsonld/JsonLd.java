@@ -326,7 +326,6 @@ public class JsonLd extends JsonLdCommon {
             }
             else {
                 putMultiValuedProperty(jsonObject, resource, property, jldProperty);
-                
             }
         }
     }
