@@ -108,6 +108,14 @@
 				<scope>provided</scope>
 			</dependency>
 
+			<!-- Contenthub -->
+			<dependency>
+				<groupId>org.apache.stanbol</groupId>
+				<artifactId>org.apache.stanbol.contenthub.servicesapi</artifactId>
+				<version>0.9.0-incubating-SNAPSHOT</version>
+				<scope>provided</scope>
+			</dependency>
+
 			<!-- Jersey -->
 			<dependency>
 				<groupId>com.sun.jersey</groupId>

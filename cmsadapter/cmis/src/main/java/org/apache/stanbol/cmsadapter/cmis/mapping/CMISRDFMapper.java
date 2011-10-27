@@ -14,14 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.cmsadapter.cmis.repository;
+package org.apache.stanbol.cmsadapter.cmis.mapping;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -52,6 +51,7 @@ import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.cmsadapter.cmis.utils.CMISUtils;
 import org.apache.stanbol.cmsadapter.core.mapping.BaseRDFMapper;
 import org.apache.stanbol.cmsadapter.core.mapping.RDFBridgeHelper;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.CMSAdapterVocabulary;
@@ -81,8 +81,6 @@ import org.slf4j.LoggerFactory;
 @Service
 public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
     private static final Logger log = LoggerFactory.getLogger(CMISRDFMapper.class);
-
-    private static final String DOCUMENT_RDF = "_metadata";
 
     private static final String DOCUMENT_RDF_MIME_TYPE = "text/plain";
 
@@ -144,14 +142,16 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
                 CMSAdapterVocabulary.CMS_OBJECT_NAME, graph);
             createObject(containerFolder, childSubject, documentURI, childName, graph, session);
         }
+        // Log level may be set as 'debug'
+        log.info(String.format("Created object: %s,  Object parent: %s", documentName, parent.getPath()));
     }
 
     /**
      * This method creates the actual object in the content repository. The type of the object to be created
      * is determined by following conditions:
      * <p>
-     * First if its base type is set by {@link CMSAdapterVocabulary#CMIS_BASE_TYPE_ID} predicate and it is set as
-     * <b>cmis:folder</b> or <b>cmis:document</b>.
+     * First if its base type is set by {@link CMSAdapterVocabulary#CMIS_BASE_TYPE_ID} predicate and it is set
+     * as <b>cmis:folder</b> or <b>cmis:document</b>.
      * <p>
      * If the base type of the object is not set, its parent assertion is checked. If it has a parent
      * assertion through {@link CMSAdapterVocabulary#CMS_OBJECT_PARENT_REF}, is rdf:type assertion is checked.
@@ -166,9 +166,9 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
      * {@link Document}.
      * <p>
      * For any object created an additional metadata document is created. This document has the name <b>
-     * <code>objectName + {@link #DOCUMENT_RDF}</code></b>. This document is created so that content
-     * management systems would manage semantic information content repository object within their own
-     * systems.
+     * <code>objectName + {@link #RDF_METADATA_DOCUMENT_EXTENSION}</code></b>. This document is created so
+     * that content management systems would manage semantic information content repository object within
+     * their own systems.
      * 
      * @param objectName
      * @param documentURI
@@ -223,11 +223,11 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
             createdObject = createDocumentByPath(parentFolder, objectName, objectPath, null, session);
         }
 
-        String rdfDocumentName = objectName + DOCUMENT_RDF;
-        String rdfDocumentPath = objectPath + DOCUMENT_RDF;
+        String rdfDocumentName = objectName + CMISUtils.RDF_METADATA_DOCUMENT_EXTENSION;
+        String rdfDocumentPath = objectPath + CMISUtils.RDF_METADATA_DOCUMENT_EXTENSION;
 
         createDocumentByPath(parentFolder, rdfDocumentName, rdfDocumentPath,
-            getDocumentContentStream(createdObject, rdfDocumentName, documentURI, graph), session);
+            createDocumentContentStream(createdObject, rdfDocumentName, documentURI, graph), session);
         return createdFolder;
     }
 
@@ -259,11 +259,11 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
         return it.hasNext();
     }
 
-    private ContentStream getDocumentContentStream(CmisObject createdObject,
-                                                   String documentName,
-                                                   NonLiteral documentURI,
-                                                   MGraph graph) {
-        MGraph documentMGraph = collectedDocumentResources(createdObject, documentURI, graph);
+    private ContentStream createDocumentContentStream(CmisObject createdObject,
+                                                      String documentName,
+                                                      NonLiteral documentURI,
+                                                      MGraph graph) {
+        MGraph documentMGraph = collectDocumentResources(createdObject, documentURI, graph);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serializer.serialize(baos, documentMGraph, SupportedFormat.RDF_XML);
         byte[] serializedGraph = baos.toByteArray();
@@ -274,7 +274,7 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
         return contentStream;
     }
 
-    private MGraph collectedDocumentResources(CmisObject createdObject, NonLiteral subject, MGraph graph) {
+    private MGraph collectDocumentResources(CmisObject createdObject, NonLiteral subject, MGraph graph) {
         boolean sameObject = true;
         if (createdObject.getId().contentEquals(RDFBridgeHelper.removeEndCharacters(subject.toString()))) {
             sameObject = false;
@@ -407,7 +407,7 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
     private MGraph getGraphForObject(CmisObject o, Folder parentFolder, NonLiteral parentURI) {
         MGraph graph = new SimpleMGraph();
         // check metadata
-        if (o.getName().endsWith(DOCUMENT_RDF)) {
+        if (o.getName().endsWith(CMISUtils.RDF_METADATA_DOCUMENT_EXTENSION)) {
             return graph;
         }
 
@@ -456,9 +456,9 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
 
             List<Object> values = new ArrayList<Object>();
             if (p.isMultiValued()) {
-                values.addAll(getTypedPropertyValues(t, p.getValues()));
+                values.addAll(CMISUtils.getTypedPropertyValues(t, p.getValues()));
             } else {
-                values.add(getTypedPropertyValue(t, p.getValue()));
+                values.add(CMISUtils.getTypedPropertyValue(t, p.getValue()));
             }
 
             for (Object val : values) {
@@ -482,44 +482,6 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
             path = ((Document) o).getPaths().get(0);
         }
         RDFBridgeHelper.createDefaultPropertiesForRDF(subject, g, path, o.getName());
-    }
-
-    private List<Object> getTypedPropertyValues(PropertyType property, List<?> values) {
-        List<Object> typedValues = new ArrayList<Object>();
-        if (values != null) {
-            for (Object v : values) {
-                typedValues.add(getTypedPropertyValue(property, v));
-            }
-        }
-        return typedValues;
-    }
-
-    private Object getTypedPropertyValue(PropertyType propertyType, Object value) {
-        if (value == null) {
-            return value;
-        }
-        switch (propertyType) {
-            case BOOLEAN:
-                return (Boolean) value;
-            case DECIMAL:
-                return (Integer) value;
-            case DATETIME:
-                return ((Calendar) value).getTime();
-            case HTML:
-                // not meet with this property
-                return null;
-            case ID:
-                return value.toString();
-            case INTEGER:
-                return ((BigInteger) value).intValue();
-            case STRING:
-                return value;
-            case URI:
-                // not meet with this property
-                return new UriRef(value.toString());
-            default:
-                return value.toString();
-        }
     }
 
     private NonLiteral getObjectURI(CmisObject o, MGraph metadata) {
@@ -551,7 +513,7 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
         while (it.hasNext()) {
             CmisObject o = it.next();
             if (o instanceof Document) {
-                if (o.getName().contentEquals(object.getName() + DOCUMENT_RDF)) {
+                if (o.getName().contentEquals(object.getName() + CMISUtils.RDF_METADATA_DOCUMENT_EXTENSION)) {
                     ContentStream cs = ((Document) o).getContentStream();
                     parser.parse(metadata, cs.getStream(), SupportedFormat.RDF_XML);
                 }

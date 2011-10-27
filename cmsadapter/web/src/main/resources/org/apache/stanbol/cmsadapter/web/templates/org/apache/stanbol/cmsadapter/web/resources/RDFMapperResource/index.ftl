@@ -118,6 +118,11 @@
 		<p><a href="#" onclick="$('#postMapRepositoryToRDFResult').hide(); return false;">Hide results</a>
 		</p><pre id="postMapRepositoryToRDFResultText"></pre>
 	</div>
+	
+	<p>
+		<input id="storeCheck" type="checkbox"/>
+		Store generated RDF persistently
+	</p>
 </div>
 
 <div class="panel" id="restapi" style="display: none;">
@@ -133,7 +138,7 @@
 	<table>
 		<tbody>
 			<tr>
-				<th>Description</th>
+				<th valign="top">Description</th>
 				<td>Allows clients to map specified RDF to the content repository. In the first step the RDF data is annotated according to
 					RDF Bridges loaded in the OSGI environment. Additional annotations provide selection of certain resources from RDF data and 
 					creation/update of related content repository object. Either a raw RDF can be given in <code>serializedGraph</code> parameter
@@ -142,11 +147,11 @@
 				</td>
 			</tr>
 			<tr>
-				<th>Request</th>
+				<th valign="top">Request</th>
 				<td>POST /cmsadapter/map/rdf</td>
 			</tr>
 			<tr>
-				<th>Parameters</th>
+				<th valign="top">Parameters</th>
 				<td>
 					<ul>
 						<li>@FormParam repositoryURL: URL of the content repository. For JCR repositories <b>RMI protocol</b>, for CMIS repositories
@@ -164,11 +169,11 @@
 			    </td>
 			</tr>
 			<tr>
-				<th>Produces</th>
+				<th valign="top">Produces</th>
 				<td>HTTP 200 in case of successful execution.</td>
 			</tr>
 			<tr>
-				<th>Example</th>
+				<th valign="top">Example</th>
 				<td><pre>curl -i -X POST -d "repositoryURL=rmi://localhost:1099/crx&workspaceName=test&username=admin&password=admin&connectionType=JCR&url=http://www.externalrdf.data" http://localhost:8080/cmsadapter/map/rdf</pre></td>
 			</tr>
 		</tbody>
@@ -177,17 +182,17 @@
 	<table>
 		<tbody>
 			<tr>
-				<th>Description</th>
+				<th valign="top">Description</th>
 				<td>This is service does the same job with the previous one except that this service provides users to submit an RDF file from his local
 					file system. So it takes connection parameters as query parameters in the service URL.
 				</td>
 			</tr>
 			<tr>
-				<th>Request</th>
+				<th valign="top">Request</th>
 				<td>POST /cmsadapter/map/rdf?repositoryURL={repositoryURL}&workspaceName={workspaceName}&username={username}&password={password}"&connectionType={connectionType}</td>
 			</tr>
 			<tr>
-				<th>Parameters</th>
+				<th valign="top">Parameters</th>
 				<td>
 					<ul>
 						<li>@QueryParam repositoryURL: URL of the content repository</li>
@@ -204,11 +209,11 @@
 			    </td>
 			</tr>
 			<tr>
-				<th>Produces</th>
+				<th valign="top">Produces</th>
 				<td>HTTP 200 together with entry page of <b>/cmsadapter/map</b> endpoint, in case of successful execution.</td>
 			</tr>
 			<tr>
-				<th>Example</th>
+				<th valign="top">Example</th>
 				<td><pre>curl -i -X POST -F "rdfFile=@localRDFFile" "http://localhost:8080/cmsadapter/map/rdf?repositoryURL=http://localhost:8083/nuxeo/atom/cmis&workspaceName=test&username=admin&password=admin&connectionType=CMIS"</pre></td>
 			</tr>
 		</tbody>
@@ -219,7 +224,7 @@
 	<table>
 		<tbody>
 			<tr>
-				<th>Description</th>
+				<th valign="top">Description</th>
 				<td>
 					This service allows clients to map content repository to RDF. In the first step, structure of the content repository is converted into an RDF. 
 					For this process detailed documentation can be found in javadoc of <a href="http://svn.apache.org/repos/asf/incubator/stanbol/trunk/cmsadapter/servicesapi/src/main/java/org/apache/stanbol/cmsadapter/servicesapi/mapping/RDFMapper.java">RDFMapper</a> interface. 
@@ -230,11 +235,11 @@
 				</td>
 			</tr>
 			<tr>
-				<th>Request</th>
+				<th valign="top">Request</th>
 				<td>POST /cmsadapter/map/cms</td>
 			</tr>
 			<tr>
-				<th>Parameters</th>
+				<th valign="top">Parameters</th>
 				<td>
 					<ul>
 						<li>@FormParam repositoryURL: URL of the content repository</li>
@@ -249,11 +254,11 @@
 			    </td>
 			</tr>
 			<tr>
-				<th>Produces</th>
+				<th valign="top">Produces</th>
 				<td>Mapped RDF from content repository in <b>application/rdf+xml</b> format</td>.
 			</tr>
 			<tr>
-				<th>Example</th>
+				<th valign="top">Example</th>
 				<td><pre>curl -i -X POST -d "repositoryURL=rmi://localhost:1099/crx&workspaceName=test&username=admin&password=admin&connectionType=JCR" http://localhost:8080/cmsadapter/map/cms</pre></td>
 			</tr>
 		</tbody>
@@ -272,7 +277,6 @@ function postRawRDF() {
 	data.password = $("#password").val();
 	data.connectionType = $("#connectionType").val();
 	data.serializedGraph = $("#rawRDF").val();
-	$.post("${it.publicBaseUri}cmsadapter/map/rdf", data);
 	$.ajax({
 	  	type: 'POST',
 	  	url: '${it.publicBaseUri}cmsadapter/map/rdf',
@@ -329,6 +333,7 @@ function postMapRepositoryToRDF(){
 	data.username = $("#username").val();
 	data.password = $("#password").val();
 	data.connectionType = $("#connectionType").val();
+	data.store = $("#storeCheck").is(':checked') ? "true" : "false";
 	$.ajax({
 	  	type: 'POST',
 	  	url: '${it.publicBaseUri}cmsadapter/map/cms',

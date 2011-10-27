@@ -1,4 +1,20 @@
-package org.apache.stanbol.cmsadapter.jcr.repository;
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.stanbol.cmsadapter.jcr.mapping;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +27,6 @@ import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Property;
 import javax.jcr.PropertyIterator;
-import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Value;
@@ -22,7 +37,6 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
@@ -30,6 +44,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.cmsadapter.core.mapping.BaseRDFMapper;
 import org.apache.stanbol.cmsadapter.core.mapping.RDFBridgeHelper;
+import org.apache.stanbol.cmsadapter.jcr.utils.JCRUtils;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.CMSAdapterVocabulary;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.NamespaceEnum;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFBridgeException;
@@ -396,9 +411,9 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
                 }
                 List<Object> values = new ArrayList<Object>();
                 if (p.isMultiple()) {
-                    values.addAll(getTypedPropertyValues(p.getType(), p.getValues()));
+                    values.addAll(JCRUtils.getTypedPropertyValues(p.getType(), p.getValues()));
                 } else {
-                    values.add(getTypedPropertyValue(p.getType(), p.getValue()));
+                    values.add(JCRUtils.getTypedPropertyValue(p.getType(), p.getValue()));
                 }
                 for (Object val : values) {
                     /*
@@ -480,89 +495,6 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
         }
     }
 
-    private static List<Object> getTypedPropertyValues(int propertyType, Value[] values) throws RepositoryException {
-        List<Object> typedValues = new ArrayList<Object>();
-        for (Value val : values) {
-            typedValues.add(getTypedPropertyValue(propertyType, val));
-        }
-        return typedValues;
-    }
-
-    private static Object getTypedPropertyValue(int propertyType, Value value) throws RepositoryException {
-        switch (propertyType) {
-            case PropertyType.STRING:
-                return value.getString();
-            case PropertyType.BINARY:
-                return value.getString();
-            case PropertyType.BOOLEAN:
-                return value.getBoolean();
-            case PropertyType.DATE:
-                return value.getDate().getTime();
-            case PropertyType.URI:
-                return value.getString();
-            case PropertyType.DOUBLE:
-                return value.getDouble();
-            case PropertyType.DECIMAL:
-                return value.getDecimal().toBigInteger();
-            case PropertyType.LONG:
-                return value.getLong();
-            case PropertyType.PATH:
-                return value.getString();
-            default:
-                return value.getString();
-        }
-    }
-
-    /**
-     * Return related {@link PropertyType} according to data type of a {@link Resource} if it is an instance
-     * of {@link TypedLiteral} ot {@link UriRef}, otherwise it return {@code PropertyType#STRING} as default
-     * type.
-     * 
-     * @param r
-     * @link {@link Resource} instance of which property type is demanded
-     * @return related {@link PropertyType}
-     */
-    public static int getPropertyTypeByResource(Resource r) {
-        if (r instanceof TypedLiteral) {
-            UriRef type = ((TypedLiteral) r).getDataType();
-            if (type.equals(RDFBridgeHelper.stringUri)) {
-                return PropertyType.STRING;
-            } else if (type.equals(RDFBridgeHelper.base64Uri)) {
-                return PropertyType.BINARY;
-            } else if (type.equals(RDFBridgeHelper.booleanUri)) {
-                return PropertyType.BOOLEAN;
-            } else if (type.equals(RDFBridgeHelper.dateTimeUri)) {
-                return PropertyType.DATE;
-            } else if (type.equals(RDFBridgeHelper.xsdAnyURI)) {
-                /*
-                 * Normally this case should return PropertyType.URI, but JCR API seems to fail when
-                 * retrieving values of URI typed properties.
-                 */
-                return PropertyType.STRING;
-            } else if (type.equals(RDFBridgeHelper.xsdDouble)) {
-                return PropertyType.DOUBLE;
-            } else if (type.equals(RDFBridgeHelper.xsdInt)) {
-                return PropertyType.DECIMAL;
-            } else if (type.equals(RDFBridgeHelper.xsdInteger)) {
-                return PropertyType.DECIMAL;
-            } else if (type.equals(RDFBridgeHelper.xsdLong)) {
-                return PropertyType.LONG;
-            } else if (type.equals(RDFBridgeHelper.xsdShort)) {
-                return PropertyType.DECIMAL;
-            } else {
-                return PropertyType.STRING;
-            }
-        } else if (r instanceof UriRef) {
-            /*
-             * Normally this case should return PropertyType.URI, but JCR API seems to fail when retrieving
-             * values of URI typed properties.
-             */
-            return PropertyType.STRING;
-        } else {
-            return PropertyType.STRING;
-        }
-    }
-
     private void checkNamespaceForShortURI(Session session, String shortURI) throws NamespaceException,
                                                                             RepositoryException {
         String prefix = shortURI.split(":")[0];
@@ -595,7 +527,7 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
         }
 
         public void setPropertyType(Resource r) {
-            type = getPropertyTypeByResource(r);
+            type = JCRUtils.getPropertyTypeByResource(r);
         }
 
         public int getPropertyType() {

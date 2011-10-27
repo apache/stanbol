@@ -28,6 +28,7 @@
 <p>The CMS Adapter supports the following service end points:</p>
 <ul>
 	<li>RDF Map @ <a href="${it.publicBaseUri}cmsadapter/map">/cmsadapter/map</a></li>
+	<li>Contenthub Feed @ <a href="${it.publicBaseUri}cmsadapter/contenthubfeed">/cmsadapter/contenthubfeed</a></li>
 </ul>
 </div>
 

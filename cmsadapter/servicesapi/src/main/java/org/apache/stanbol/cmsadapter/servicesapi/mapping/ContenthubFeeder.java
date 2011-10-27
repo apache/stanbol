@@ -1,0 +1,138 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.stanbol.cmsadapter.servicesapi.mapping;
+
+/**
+ * This interface provides methods to submit and delete content items to/from Contenthub.
+ * 
+ * Stanbol provides default implementations of this interface for JCR and CMIS content repositories. However,
+ * it is also possible to provide custom implementations based on the needs of content repository. It is still
+ * possible to provide new implementations for JCR or CMIS repositories. <code>ContenthubFeederManager</code>
+ * gives higher priority to custom implementations when selecting the appropriate {@link ContenthubFeeder}
+ * instance.
+ * 
+ * While submitting content items to Contenthub properties of content repository objects are provided as
+ * metadata of the content items. Supplied metadata is used to provide faceted search feature in the
+ * Contenthub.
+ * 
+ * @author suat
+ * 
+ */
+public interface ContenthubFeeder {
+    /**
+     * Name of the factory for JCR Contenthub Feeder
+     */
+    public static final String JCR_CONTENTHUB_FEEDER_FACTORY = "org.apache.stanbol.cmsadapter.jcr.mapping.JCRContenthubFeederFactory";
+
+    /**
+     * Name of the factory for CMIS Contenthub Feeder
+     */
+    public static final String CMIS_CONTENTUB_FEEDER_FACTORY = "org.apache.stanbol.cmsadapter.cmis.mapping.CMISContenthubFeederFactory";
+
+    /**
+     * Session property for default JCR and CMIS Contenthub Feeder implementations
+     */
+    public static final String PROP_SESSION = "org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeeder.session";
+
+    /**
+     * Content properties property. It indicates the fields that holds the actual content in the content
+     * repository item.
+     */
+    public static final String PROP_CONTENT_PROPERTIES = "org.apache.stanbol.cmsadapter.servicesapi.mappingçContenthubFeeder.contentFields";
+
+    /**
+     * Submits content item by its ID to the Contenthub. If there is an already existing content item in the
+     * Contenthub with the same id, the existing content item should be deleted first.
+     * 
+     * @param contentItemID
+     *            ID of the content item in the repository
+     */
+    void submitContentItemByID(String contentItemID);
+
+    /**
+     * Submits content item by its path to the Contenthub. If there is an already existing content item in the
+     * Contenthub with the same id, the existing content item should be deleted first.
+     * 
+     * @param contentItemPath
+     *            path of the content item in the repository
+     */
+    void submitContentItemByPath(String contentItemPath);
+
+    /**
+     * Submits all of the content items under the specified path to the Contenthub. If there are already
+     * existing content items in the Contenthub with same ids of submitted content items, the existing content
+     * items should be deleted first.
+     * 
+     * @param rootPath
+     *            root path in the content repository
+     */
+    void submitContentItemsUnderPath(String rootPath);
+
+    /**
+     * Filters content items from content repository via the specific {@link ContentItemFilter} implementation
+     * passed as a parameter and submits the filtered content items to the Contenthub. If there are already
+     * existing content items in the Contenthub with same ids of submitted content items, the existing content
+     * items should be deleted first.
+     * 
+     * @param customContentItemFilter
+     *            custom {@link ContentItemFilter} implementation
+     */
+    void submitContentItemsByCustomFilter(ContentItemFilter customContentItemFilter);
+
+    /**
+     * Deletes content item by its ID from the Contenthub
+     * 
+     * @param contentItemID
+     *            ID of the content item in the repository
+     */
+    void deleteContentItemByID(String contentItemID);
+
+    /**
+     * Deletes content item by its path from the Contenthub
+     * 
+     * @param contentItemPath
+     *            path of the content item in the repository
+     */
+    void deleteContentItemByPath(String contentItemPath);
+
+    /**
+     * Deletes all of the content items under the specified path to Contenthub
+     * 
+     * @param rootPath
+     *            root path in the content repository
+     */
+    void deleteContentItemsUnderPath(String rootPath);
+
+    /**
+     * Filters content items from content repository via the specific {@link ContentItemFilter} implementation
+     * passed as a parameter and deletes the filtered content items from the Contenthub
+     * 
+     * @param customContentItemFilter
+     *            custom {@link ContentItemFilter} implementation
+     */
+    void deleteContentItemsByCustomFilter(ContentItemFilter customContentItemFilter);
+
+    /**
+     * Determines the specific implementation of {@link ContenthubFeeder} supports for the specified
+     * <connectionType>.
+     * 
+     * @param connectionType
+     *            connection type for which an {@link RDFMapper} is requested
+     * @return whether certain implementation can handle specified connection type
+     */
+    boolean canFeed(String connectionType);
+}
