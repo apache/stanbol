@@ -279,8 +279,7 @@ public class DerbyFactStore implements FactStore {
 		createTableSQL.append("id INT GENERATED ALWAYS AS IDENTITY");
 		createTableSQL.append(", context_id INT CONSTRAINT ");
 		createTableSQL.append(factSchemaB64).append("_CFK");
-		createTableSQL
-				.append(" REFERENCES factcontexts ON DELETE CASCADE ON UPDATE RESTRICT");
+		createTableSQL.append(" REFERENCES factcontexts ON DELETE CASCADE ON UPDATE RESTRICT");
 
 		for (String role : factSchema.getRoles()) {
 			createTableSQL.append(", ");
@@ -380,11 +379,12 @@ public class DerbyFactStore implements FactStore {
 	}
 
 	@Override
-	public void addFact(Fact fact) throws Exception {
-		Connection con = null;
+	public int addFact(Fact fact) throws Exception {
+		int factId = -1; 
+	    Connection con = null;
 		try {
 			con = DriverManager.getConnection(DB_URL);
-			this.addFact(fact, con);
+			factId = this.addFact(fact, con);
 		} catch (Exception e) {
 			throw e;
 		} finally {
@@ -394,85 +394,79 @@ public class DerbyFactStore implements FactStore {
 			}
 		}
 
-		logger.info("Fact created for {}", fact.getFactSchemaURN());
+		logger.info("Fact {} created for {}", factId, fact.getFactSchemaURN());
+		return factId;
 	}
 
-	private void addFact(Fact fact, Connection con) throws Exception {
-		FactSchema factSchema = this.loadFactSchema(fact.getFactSchemaURN(),
-				con);
-		if (factSchema != null) {
-			if (fact.getContext() != null) {
-				// TODO Create the context if present
-			}
+	private int addFact(Fact fact, Connection con) throws Exception {
+        int factId = -1;
+        FactSchema factSchema = this.loadFactSchema(fact.getFactSchemaURN(), con);
+        if (factSchema != null) {
+            if (fact.getContext() != null) {
+                // TODO Create the context if present
+            }
 
-			// Create the fact
-			String factSchemaB64 = Base64.encodeBase64URLSafeString(fact
-					.getFactSchemaURN().getBytes());
+            // Create the fact
+            String factSchemaB64 = Base64.encodeBase64URLSafeString(fact.getFactSchemaURN().getBytes());
 
-			StringBuilder insertFact = new StringBuilder("INSERT INTO ")
-					.append(factSchemaB64).append('(');
-			StringBuilder valueSB = new StringBuilder(" VALUES (");
-			Map<String, Integer> roleIndexMap = new HashMap<String, Integer>();
-			boolean firstRole = true;
-			int roleIndex = 0;
-			for (String role : factSchema.getRoles()) {
-				if (!firstRole) {
-					insertFact.append(',');
-					valueSB.append(',');
-				}
-				insertFact.append(role);
-				valueSB.append('?');
-				firstRole = false;
+            StringBuilder insertFact = new StringBuilder("INSERT INTO ").append(factSchemaB64).append('(');
+            StringBuilder valueSB = new StringBuilder(" VALUES (");
+            Map<String,Integer> roleIndexMap = new HashMap<String,Integer>();
+            boolean firstRole = true;
+            int roleIndex = 0;
+            for (String role : factSchema.getRoles()) {
+                if (!firstRole) {
+                    insertFact.append(',');
+                    valueSB.append(',');
+                }
+                insertFact.append(role);
+                valueSB.append('?');
+                firstRole = false;
 
-				roleIndex++;
-				roleIndexMap.put(role, roleIndex);
-			}
-			insertFact.append(')').append(valueSB).append(')');
+                roleIndex++;
+                roleIndexMap.put(role, roleIndex);
+            }
+            insertFact.append(')').append(valueSB).append(')');
 
-			PreparedStatement ps = null;
-			try {
-				ps = con.prepareStatement(insertFact.toString(),
-						PreparedStatement.RETURN_GENERATED_KEYS);
-				for (String role : fact.getRoles()) {
-					Integer roleIdx = roleIndexMap.get(role);
-					if (roleIdx == null) {
-						throw new Exception("Unknown role '" + role
-								+ "' for fact schema "
-								+ fact.getFactSchemaURN());
-					} else {
-						ps.setString(roleIdx, fact.getValueOfRole(role));
-					}
-				}
-				ps.executeUpdate();
-				ResultSet rs = ps.getGeneratedKeys();
-				int factId = -1;
-				if (rs.next()) {
-					factId = rs.getInt(1);
-				}
-				if (factId < 0) {
-					throw new Exception("Could not obtain fact ID after insert");
-				}
+            PreparedStatement ps = null;
+            try {
+                ps = con.prepareStatement(insertFact.toString(), PreparedStatement.RETURN_GENERATED_KEYS);
+                for (String role : fact.getRoles()) {
+                    Integer roleIdx = roleIndexMap.get(role);
+                    if (roleIdx == null) {
+                        throw new Exception("Unknown role '" + role + "' for fact schema "
+                                            + fact.getFactSchemaURN());
+                    } else {
+                        ps.setString(roleIdx, fact.getValueOfRole(role));
+                    }
+                }
+                ps.executeUpdate();
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    factId = rs.getInt(1);
+                }
+                if (factId < 0) {
+                    throw new Exception("Could not obtain fact ID after insert");
+                }
 
-				logger
-						.info(
-								"Inserted new fact with ID {} into fact schema table {}",
-								factId, factSchemaB64);
-			} catch (SQLException e) {
-				throw new Exception("Error while writing fact into database", e);
-			} finally {
-				if (ps != null) {
-					try {
-						ps.close();
-					} catch (SQLException e) {
-						/* ignore */
-					}
-				}
-			}
+                logger.info("Inserted new fact with ID {} into fact schema table {}", factId, factSchemaB64);
+            } catch (SQLException e) {
+                throw new Exception("Error while writing fact into database", e);
+            } finally {
+                if (ps != null) {
+                    try {
+                        ps.close();
+                    } catch (SQLException e) {
+                        /* ignore */
+                    }
+                }
+            }
 
-		} else {
-			throw new Exception("Unknown fact schema "
-					+ fact.getFactSchemaURN());
-		}
+        } else {
+            throw new Exception("Unknown fact schema " + fact.getFactSchemaURN());
+        }
+
+        return factId;
 	}
 
 	@Override

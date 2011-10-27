@@ -165,7 +165,6 @@
           <excludes>
             <!-- TODO: remove before commit -->
             <exclude>**/enhancer/it/*.java</exclude>
-            <exclude>**/factstore/*.java</exclude>
             <exclude>**/ontologymanager/web/it/*.java</exclude>
           </excludes>
         </configuration>

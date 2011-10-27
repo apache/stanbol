@@ -21,9 +21,6 @@ import java.util.List;
 
 import org.apache.stanbol.commons.jsonld.JsonLd;
 import org.apache.stanbol.commons.jsonld.JsonLdResource;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,27 +51,15 @@ public class FactResultSet {
 
 	public String toJSON() {
 		JsonLd root = new JsonLd();
-
-		JsonLdResource subject = new JsonLdResource();
-		JSONArray resultset = new JSONArray();
-
 		if (rows != null && !rows.isEmpty()) {
 			for (FactResult result : rows) {
-				JSONObject value = new JSONObject();
+			    JsonLdResource subject = new JsonLdResource();
 				for (int i = 0; i < header.size(); i++) {
-					try {
-						value.put(header.get(i), result.getValues().get(i));
-					} catch (JSONException e) {
-						logger.warn("Error creating JSON from FactResultSet. {}", e
-								.getMessage());
-					}
+					subject.putProperty(header.get(i), result.getValues().get(i));
 				}
-				resultset.put(value);
+				root.put(subject);
 			}
 		}
-
-		subject.putProperty("resultset", resultset);
-		root.put(subject);
 
 		return root.toString();
 	}

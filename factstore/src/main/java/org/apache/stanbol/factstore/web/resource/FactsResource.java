@@ -169,13 +169,14 @@ public class FactsResource extends BaseFactStoreResource {
                     .type(MediaType.TEXT_PLAIN).build();
         }
 
+        int factId = -1;
         if (jsonLd.getResourceSubjects().size() < 2) {
             // post a single fact
             Fact fact = Fact.factFromJsonLd(jsonLd);
             if (fact != null) {
                 logger.info("Request for posting new fact for {}", fact.getFactSchemaURN());
                 try {
-                    this.factStore.addFact(fact);
+                    factId = this.factStore.addFact(fact);
                 } catch (Exception e) {
                     logger.error("Error adding new fact", e);
                     return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).type(
@@ -185,6 +186,8 @@ public class FactsResource extends BaseFactStoreResource {
                 return Response.status(Status.BAD_REQUEST).entity(
                     "Could not extract fact from JSON-LD input.").type(MediaType.TEXT_PLAIN).build();
             }
+            
+            return Response.status(Status.OK).entity(this.getPublicBaseUri() + "factstore/facts/" + factId).type(MediaType.TEXT_PLAIN).build();
         } else {
             // post multiple facts
             Set<Fact> facts = Fact.factsFromJsonLd(jsonLd);
@@ -201,9 +204,10 @@ public class FactsResource extends BaseFactStoreResource {
                 return Response.status(Status.BAD_REQUEST).entity(
                     "Could not extract facts from JSON-LD input.").type(MediaType.TEXT_PLAIN).build();
             }
+            
+            return Response.status(Status.OK).type(MediaType.TEXT_PLAIN).build();
         }
 
-        return Response.status(Status.OK).type(MediaType.TEXT_PLAIN).build();
     }
 
     private Response standardValidation(String factSchemaURN) {

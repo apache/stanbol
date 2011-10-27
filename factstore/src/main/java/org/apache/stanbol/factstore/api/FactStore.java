@@ -33,7 +33,7 @@ public interface FactStore {
 
     public void createFactSchema(FactSchema factSchema) throws Exception;
     
-    public void addFact(Fact fact) throws Exception;
+    public int addFact(Fact fact) throws Exception;
     
     public void addFacts(Set<Fact> factSet) throws Exception;
 

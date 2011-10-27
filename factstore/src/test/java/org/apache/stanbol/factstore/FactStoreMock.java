@@ -51,9 +51,8 @@ public class FactStoreMock implements FactStore {
     }
 
     @Override
-    public void addFact(Fact fact) throws Exception {
-        // TODO Auto-generated method stub
-        
+    public int addFact(Fact fact) throws Exception {
+        return 99;
     }
 
     @Override
