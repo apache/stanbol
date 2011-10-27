@@ -118,6 +118,7 @@ public class RDFMapperResource extends BaseStanbolResource {
         ConnectionInfo connectionInfo = formConnectionInfo(repositoryURL, workspaceName, username, password,
             connectionType);
 
+        long start = System.currentTimeMillis();
         Graph g;
         if (serializedGraph != null && !serializedGraph.trim().isEmpty()) {
             g = clerezzaParser.parse(new ByteArrayInputStream(serializedGraph.getBytes()),
@@ -131,7 +132,9 @@ public class RDFMapperResource extends BaseStanbolResource {
                     .build();
         }
 
-        return mapRDF(g, connectionInfo);
+        Response r = mapRDF(g, connectionInfo);
+        logger.info("RDF mapping finished in: {} seconds", ((System.currentTimeMillis() - start) / 1000));
+        return r;
     }
 
     /**
@@ -182,7 +185,7 @@ public class RDFMapperResource extends BaseStanbolResource {
         }
         ConnectionInfo connectionInfo = formConnectionInfo(repositoryURL, workspaceName, username, password,
             connectionType);
-
+        long start = System.currentTimeMillis();
         Graph g;
         if (rdfFile != null) {
             InputStream is = new ByteArrayInputStream(FileUtils.readFileToByteArray(rdfFile));
@@ -191,7 +194,9 @@ public class RDFMapperResource extends BaseStanbolResource {
             logger.warn("There is RDF file specified");
             return Response.status(Status.BAD_REQUEST).entity("There is no RDF file specified").build();
         }
+
         Response r = mapRDF(g, connectionInfo);
+        logger.info("RDF mapping finished in: {} miliseconds", ((System.currentTimeMillis() - start) / 1000));
         if (r.getStatus() == Response.Status.OK.getStatusCode()) {
             return get();
         } else {
@@ -248,7 +253,9 @@ public class RDFMapperResource extends BaseStanbolResource {
             connectionType);
 
         try {
+            long start = System.currentTimeMillis();
             MGraph generatedGraph = bridgeManager.generateRDFFromRepository(connectionInfo);
+            logger.info("CMS mapping finished in: {} seconds", ((System.currentTimeMillis() - start) / 1000));
             return Response.ok(generatedGraph, SupportedFormat.RDF_XML).build();
         } catch (RepositoryAccessException e) {
             logger.warn("Failed to obtain a session from repository", e);

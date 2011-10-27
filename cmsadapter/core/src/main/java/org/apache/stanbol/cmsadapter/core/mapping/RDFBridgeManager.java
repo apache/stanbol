@@ -92,13 +92,20 @@ public class RDFBridgeManager {
         Object session = repositoryAccess.getSession(connectionInfo);
 
         // Annotate raw RDF with CMS vocabulary annotations according to bridges
+        log.info("Graph annotation starting...");
         MGraph annotatedGraph = new SimpleMGraph();
         for (RDFBridge bridge : rdfBridges) {
+            long startAnnotation = System.currentTimeMillis();
             annotatedGraph.addAll(bridge.annotateGraph(rawRDFData));
+            log.info("Graph annotated in: " + (System.currentTimeMillis() - startAnnotation) + "ms");
         }
+        log.info("Graph annotation finished");
 
         // Store annotated RDF in repository
+        log.info("Annotated graph mapping started...");
+        long startMap = System.currentTimeMillis();
         mapper.storeRDFinRepository(session, annotatedGraph);
+        log.info("Annotated graph mapped in: " + (System.currentTimeMillis() - startMap) + "ms");
     }
 
     /**
