@@ -56,6 +56,16 @@
 				<artifactId>maven-bundle-plugin</artifactId>
 				<extensions>true</extensions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.rat</groupId>
+				<artifactId>apache-rat-plugin</artifactId>
+				<configuration>
+			  		<excludes>
+			    		<!-- BSD License mentioned in header -->
+			    		<exclude>src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jit.js</exclude>
+					</excludes>
+				</configuration>
+			</plugin>				
 		</plugins>
 	</build>
 
