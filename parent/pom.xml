@@ -1429,7 +1429,7 @@
               <licenses>
                 <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
                   <licenseFamilyCategory>PublicDomain</licenseFamilyCategory>
-                  <licenseFamilyName>Public Domain licensed files.</licenseFamilyName>
+                  <licenseFamilyName>Public Domain License</licenseFamilyName>
                   <notes></notes>
                   <patterns>
                     <pattern>Public Domain.</pattern>
@@ -1437,7 +1437,7 @@
                 </license>
                 <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
                   <licenseFamilyCategory>DualMIT</licenseFamilyCategory>
-                  <licenseFamilyName>Dual licensed files with MIT</licenseFamilyName>
+                  <licenseFamilyName>Dual License</licenseFamilyName>
                   <notes>jQuery uses this.</notes>
                   <patterns>
                     <pattern>Dual licensed under the MIT</pattern>
@@ -1445,13 +1445,25 @@
                 </license>
                 <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
                   <licenseFamilyCategory>MIT</licenseFamilyCategory>
-                  <licenseFamilyName>MIT licensed files</licenseFamilyName>
+                  <licenseFamilyName>MIT License</licenseFamilyName>
                   <notes>RDFQuery uses this.</notes>
                   <patterns>
                     <pattern>Licensed under the MIT</pattern>
                   </patterns>
                 </license>                
               </licenses>
+              <licenseFamilies>
+                <licenseFamily implementation="org.apache.rat.license.Apache20LicenseFamily" />
+                <licenseFamily implementation="org.apache.rat.license.SimpleLicenseFamily">
+                  <familyName>Public Domain License</familyName>
+                </licenseFamily>
+                <licenseFamily implementation="org.apache.rat.license.SimpleLicenseFamily">
+                  <familyName>Dual License</familyName>
+                </licenseFamily>
+                <licenseFamily implementation="org.apache.rat.license.SimpleLicenseFamily">
+                  <familyName>MIT License</familyName>
+                </licenseFamily>
+              </licenseFamilies>
             </configuration>
           </plugin>
         </plugins>
