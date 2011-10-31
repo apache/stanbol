@@ -132,7 +132,7 @@ public class ResourceLoader {
         do { //to support adding of new files while loading
             fileToLoad = getResources(ResourceState.REGISTERED);
             long start=System.currentTimeMillis();
-            log.info("Loding RDF {} File{} ...",fileToLoad.size(),fileToLoad.size()>1?"s":"");
+            log.info("Loding {} File{} ...",fileToLoad.size(),fileToLoad.size()>1?"s":"");
             for (String file : fileToLoad) {
                 loadResource(file);
             }

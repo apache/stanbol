@@ -16,8 +16,6 @@
 */
 package org.apache.stanbol.entityhub.indexing.core;
 
-import java.util.Dictionary;
-
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 
 
