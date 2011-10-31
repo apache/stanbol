@@ -16,6 +16,7 @@ limitations under the License.
 The following files are provided under the Apache License, Version 2.0:
 
 resources/config/org.apache.stanbol.commons.solr.impl.DefaultSolrDirectoryManager.cfg
+resources/config/org.apache.stanbol.commons.solr.web.impl.SolrDispatchFilterComponent-default.config
 resources/config/org.apache.stanbol.examples.ExampleBootstrapConfig.cfg
 resources/config/org.apache.stanbol.entityhub.core.impl.EntityhubConfigurationImpl.config
 resources/config/org.apache.stanbol.enhancer.engines.entitytagging.impl.NamedEntityTaggingEngine-local.config
