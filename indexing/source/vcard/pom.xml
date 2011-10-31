@@ -108,6 +108,11 @@
 	  <artifactId>tagsoup</artifactId>
       <version>1.2.1</version>
 	</dependency>
+	<!-- logging framework -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
     <!-- dependencies for testing -->
     <dependency>
       <groupId>org.slf4j</groupId>
