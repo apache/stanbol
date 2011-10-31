@@ -20,6 +20,7 @@ import static org.apache.stanbol.commons.solr.SolrConstants.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -204,13 +205,14 @@ public class ManagedSolrServer {
      * this instance. This will also cause all OSGI services to be unregistered
      */
     public void shutdown(){
+        Collection<CoreRegistration> coreRegistrations;
         synchronized (registrations) {
-            for(Iterator<Entry<String,CoreRegistration>> it = registrations.entrySet().iterator();it.hasNext();){
-                Entry<String,CoreRegistration> entry = it.next();
-                entry.getValue().unregister();
-                it.remove();
-                log.debug("removed Registration for SolrCore {}",entry.getKey());
-            }
+            coreRegistrations = new ArrayList<CoreRegistration>(registrations.values());
+        }
+        for(CoreRegistration reg : coreRegistrations){
+            reg.unregister();
+            registrations.remove(reg.getName());
+            log.debug("removed Registration for SolrCore {}",reg.getName());
         }
         //unregister the serviceRegistration for the CoreContainer
         serverRegistration.unregister();
