@@ -68,7 +68,17 @@
               org.apache.solr.common,
               org.apache.solr.common.luke,
               org.apache.solr.common.params,
-              org.apache.solr.common.util
+              org.apache.solr.common.util,
+              org.apache.solr.servlet,
+              org.apache.solr.core,
+              org.apache.solr.handler.*,
+              org.apache.solr.request,
+              org.apache.solr.response,
+              org.apache.solr.schema,
+              org.apache.solr.search.*,
+              org.apache.solr.update .*,
+              org.apache.solr.util.*,
+              org.apache.solr.analysis
             </Export-Package>
             <!-- NOTE: 
                * The exclusion of javax.xml.stream assumes that only serialised

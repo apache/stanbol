@@ -252,6 +252,10 @@ public class EmbeddedSolrPorovider implements SolrServerProvider {
         log.debug("deactivating" + EmbeddedSolrPorovider.class.getSimpleName());
         defaultSolrServerTracker.close();
         defaultSolrServerTracker = null;
+        //shutdown externally managed CoreContainers
+        for(CoreContainer coreContainer : coreContainers.values()){
+            coreContainer.shutdown();
+        }
         this.context = null;
     }
 
