@@ -114,15 +114,14 @@
 	</p>
 	<h5>Test</h5>
 	<a onclick="javascript:postMapRepositoryToRDF()" href="javascript:void(0);">Map content repository to RDF</a>
+	<p>Base URI:
+		<input id="baseURIText" type="text" value="http://www.apache.org/stanbol/cms" class="url"/><br>
+		Store generated RDF persistently: <input id="storeCheck" type="checkbox"/>
+	</p>
 	<div id="postMapRepositoryToRDFResult" style="display: none; ">
 		<p><a href="#" onclick="$('#postMapRepositoryToRDFResult').hide(); return false;">Hide results</a>
 		</p><pre id="postMapRepositoryToRDFResultText"></pre>
 	</div>
-	
-	<p>
-		<input id="storeCheck" type="checkbox"/>
-		Store generated RDF persistently
-	</p>
 </div>
 
 <div class="panel" id="restapi" style="display: none;">
@@ -250,6 +249,8 @@
 			    		<li>@FormParam username: Username to connect to content repository</li>
 			    		<li>@FormParam password: Password to connect to content repository</li>
 			    		<li>@FormParam connectionType: Connection type; either <b>JCR</b> or <b>CMIS</b></li>
+			    		<li>@FormParam store: A boolean value indicating whether the generated will be stored persistently or not.</li>
+			    		<li>@FormParam baseURI: Base URI for the RDF to be generated.</li>
 			    	</ul>
 			    </td>
 			</tr>
@@ -259,7 +260,7 @@
 			</tr>
 			<tr>
 				<th valign="top">Example</th>
-				<td><pre>curl -i -X POST -d "repositoryURL=rmi://localhost:1099/crx&workspaceName=test&username=admin&password=admin&connectionType=JCR" http://localhost:8080/cmsadapter/map/cms</pre></td>
+				<td><pre>curl -i -X POST -d "repositoryURL=rmi://localhost:1099/crx&workspaceName=test&username=admin&password=admin&connectionType=JCR&baseURI=http://www.apache.org/stanbol/cms&store=true" http://localhost:8080/cmsadapter/map/cms</pre></td>
 			</tr>
 		</tbody>
 	</table>
@@ -334,6 +335,9 @@ function postMapRepositoryToRDF(){
 	data.password = $("#password").val();
 	data.connectionType = $("#connectionType").val();
 	data.store = $("#storeCheck").is(':checked') ? "true" : "false";
+	data.baseURI = $("#baseURIText").val();
+	$("#postMapRepositoryToRDFResultText").text("Mapping CMS to RDF...");
+	$("#postMapRepositoryToRDFResult").show();
 	$.ajax({
 	  	type: 'POST',
 	  	url: '${it.publicBaseUri}cmsadapter/map/cms',

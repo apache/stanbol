@@ -253,28 +253,22 @@ public class DefaultRDFBridgeImpl implements RDFBridge {
         Iterator<Triple> children = graph.filter(null, CMSAdapterVocabulary.CMS_OBJECT_PARENT_REF, parentURI);
         while (children.hasNext()) {
             NonLiteral childURI = children.next().getSubject();
-            /*
-             * If parent has already a property referencing child, do not add a new subsumption relation.
-             * Otherwise, if children configurations has a single item use that property, if there are more
-             * than one children configuration use the default child predicate.
-             */
-            Iterator<Triple> childParentRelations = graph.filter(parentURI, null, childURI);
-            if (!childParentRelations.hasNext()) {
-                UriRef childPredicate;
-                if (targetChildrenMappings.size() == 1) {
-                    childPredicate = targetChildrenMappings.keySet().iterator().next();
-                } else {
-                    childPredicate = defaultChildPredicate;
-                }
-                graph.add(new TripleImpl(parentURI, childPredicate, childURI));
-                applyReverseBridgeSettings(childURI, graph);
-                addChildrenAnnotations(childURI, graph);
+            UriRef childPredicate;
+            if (targetChildrenMappings.size() == 1) {
+                childPredicate = targetChildrenMappings.keySet().iterator().next();
+            } else {
+                childPredicate = defaultChildPredicate;
             }
+            graph.add(new TripleImpl(parentURI, childPredicate, childURI));
+            applyReverseBridgeSettings(childURI, graph);
+            addChildrenAnnotations(childURI, graph);
         }
     }
 
     private void applyReverseBridgeSettings(NonLiteral subject, MGraph graph) {
+        // add subsumption assertion
         graph.add(new TripleImpl(subject, targetResourcePredicate, targetResourceValue));
+        // add name assertion
         revertObjectName(subject, graph);
     }
 
@@ -284,7 +278,6 @@ public class DefaultRDFBridgeImpl implements RDFBridge {
             if (it.hasNext()) {
                 Triple nameProp = it.next();
                 Resource name = nameProp.getObject();
-                graph.remove(nameProp);
                 graph.add(new TripleImpl(objectURI, nameResource, name));
             } else {
                 log.warn("Failed to find name property for URI: {}", objectURI);

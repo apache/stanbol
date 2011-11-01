@@ -379,7 +379,7 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
     }
 
     @Override
-    public MGraph generateRDFFromRepository(Object session, String rootPath) throws RDFBridgeException {
+    public MGraph generateRDFFromRepository(String baseURI, Object session, String rootPath) throws RDFBridgeException {
         MGraph cmsGraph = new SimpleMGraph();
         Session cmisSession = (Session) session;
 
@@ -399,12 +399,12 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
 
         while (cmisObjectIt.hasNext()) {
             CmisObject o = cmisObjectIt.next();
-            cmsGraph.addAll(getGraphForObject(o, (Folder) rootObject, null));
+            cmsGraph.addAll(getGraphForObject(baseURI, o, (Folder) rootObject, null));
         }
         return cmsGraph;
     }
 
-    private MGraph getGraphForObject(CmisObject o, Folder parentFolder, NonLiteral parentURI) {
+    private MGraph getGraphForObject(String baseURI, CmisObject o, Folder parentFolder, NonLiteral parentURI) {
         MGraph graph = new SimpleMGraph();
         // check metadata
         if (o.getName().endsWith(CMISUtils.RDF_METADATA_DOCUMENT_EXTENSION)) {
@@ -415,7 +415,7 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
         metadata = checkMetadata(parentFolder, o);
 
         // create CMS Object annotation
-        NonLiteral subject = getObjectURI(o, metadata);
+        NonLiteral subject = getObjectURI(baseURI, o, metadata);
         graph.add(new TripleImpl(subject, RDFBridgeHelper.RDF_TYPE, CMSAdapterVocabulary.CMS_OBJECT));
 
         // add parent assertion
@@ -431,7 +431,7 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
             Iterator<CmisObject> childIt = f.getChildren().iterator();
             while (childIt.hasNext()) {
                 CmisObject child = childIt.next();
-                graph.addAll(getGraphForObject(child, f, subject));
+                graph.addAll(getGraphForObject(baseURI, child, f, subject));
             }
         } else if (hasType(o, BaseTypeId.CMIS_DOCUMENT)) {
             putObjectPropertiesIntoGraph(o, subject, metadata, graph);
@@ -484,12 +484,12 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
         RDFBridgeHelper.createDefaultPropertiesForRDF(subject, g, path, o.getName());
     }
 
-    private NonLiteral getObjectURI(CmisObject o, MGraph metadata) {
+    private NonLiteral getObjectURI(String baseURI, CmisObject o, MGraph metadata) {
         Iterator<Triple> it = metadata.filter(null, null, null);
         if (it.hasNext()) {
             return it.next().getSubject();
         }
-        String baseURI = CMSAdapterVocabulary.CMS_ADAPTER_VOCABULARY_URI;
+
         String nodeURI = RDFBridgeHelper.appendLocalName(baseURI, o.getId());
         return new UriRef(nodeURI);
     }

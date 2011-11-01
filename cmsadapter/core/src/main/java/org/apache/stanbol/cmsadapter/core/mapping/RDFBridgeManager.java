@@ -112,14 +112,16 @@ public class RDFBridgeManager {
      * This method gets the RDF from the content repository based on the path configurations of
      * {@link RDFBridge}s and annotate them using {@link RDFBridge#annotateCMSGraph(MGraph)}.
      * 
+     * @param baseURI
+     *            Base URI for the RDF to be generated
      * @param connectionInfo
      *            is the object that holds all necessary information to connect repository.
      * @return {@link MGraph} formed by the aggregation of generated RDF for each RDF bridge
      * @throws RepositoryAccessException
      * @throws RDFBridgeException
      */
-    public MGraph generateRDFFromRepository(ConnectionInfo connectionInfo) throws RepositoryAccessException,
-                                                                          RDFBridgeException {
+    public MGraph generateRDFFromRepository(String baseURI, ConnectionInfo connectionInfo) throws RepositoryAccessException,
+                                                                                          RDFBridgeException {
         if (rdfBridges.size() == 0) {
             log.info("There is no RDF Bridge to execute");
             return new SimpleMGraph();
@@ -129,11 +131,15 @@ public class RDFBridgeManager {
         // session
         RDFMapper mapper = getRDFMapper(connectionInfo);
         RepositoryAccess repositoryAccess = accessManager.getRepositoryAccessor(connectionInfo);
+        if (repositoryAccess == null) {
+            throw new RepositoryAccessException(
+                    "Failed to obtain a RepositoryAccess for the provided connection information");
+        }
         Object session = repositoryAccess.getSession(connectionInfo);
 
         MGraph cmsGraph = new SimpleMGraph();
         for (RDFBridge bridge : rdfBridges) {
-            MGraph generatedGraph = mapper.generateRDFFromRepository(session, bridge.getCMSPath());
+            MGraph generatedGraph = mapper.generateRDFFromRepository(baseURI, session, bridge.getCMSPath());
             bridge.annotateCMSGraph(generatedGraph);
             cmsGraph.addAll(generatedGraph);
         }

@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.cmsadapter.web.resources;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
@@ -41,9 +41,12 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.commons.io.FileUtils;
+import org.apache.stanbol.cmsadapter.core.helper.TcManagerClient;
 import org.apache.stanbol.cmsadapter.core.mapping.RDFBridgeManager;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFBridge;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFBridgeException;
@@ -70,10 +73,12 @@ public class RDFMapperResource extends BaseStanbolResource {
     private static final Logger logger = LoggerFactory.getLogger(RDFMapperResource.class);
     private Parser clerezzaParser;
     private RDFBridgeManager bridgeManager;
+    private TcManager tcManager;
 
     public RDFMapperResource(@Context ServletContext context) {
         clerezzaParser = ContextHelper.getServiceFromContext(Parser.class, context);
         bridgeManager = ContextHelper.getServiceFromContext(RDFBridgeManager.class, context);
+        tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
     }
 
     @GET
@@ -255,7 +260,9 @@ public class RDFMapperResource extends BaseStanbolResource {
                            @FormParam("workspaceName") String workspaceName,
                            @FormParam("username") String username,
                            @FormParam("password") String password,
-                           @FormParam("connectionType") String connectionType) {
+                           @FormParam("connectionType") String connectionType,
+                           @FormParam("baseURI") String baseURI,
+                           @FormParam("store") boolean store) {
 
         if (repositoryURL == null || username == null || password == null || connectionType == null) {
             logger.warn("Repository URL, username, password and connection type parameters should not be null");
@@ -270,8 +277,20 @@ public class RDFMapperResource extends BaseStanbolResource {
 
         try {
             long start = System.currentTimeMillis();
-            MGraph generatedGraph = bridgeManager.generateRDFFromRepository(connectionInfo);
+            MGraph generatedGraph = bridgeManager.generateRDFFromRepository(baseURI, connectionInfo);
             logger.info("CMS mapping finished in: {} seconds", ((System.currentTimeMillis() - start) / 1000));
+
+            TcManagerClient tcManagerClient = new TcManagerClient(tcManager);
+            if (store) {
+                if (tcManagerClient.modelExists(baseURI)) {
+                    logger.info("Deleting the triple collection having base URI: {}", baseURI);
+                    tcManager.deleteTripleCollection(new UriRef(baseURI));
+                }
+                logger.info("Saving the triple collection having base URI: {}", baseURI);
+                MGraph persistentGraph = tcManager.createMGraph(new UriRef(baseURI));
+                persistentGraph.addAll(generatedGraph);
+            }
+
             return Response.ok(generatedGraph, SupportedFormat.RDF_XML).build();
         } catch (RepositoryAccessException e) {
             logger.warn("Failed to obtain a session from repository", e);

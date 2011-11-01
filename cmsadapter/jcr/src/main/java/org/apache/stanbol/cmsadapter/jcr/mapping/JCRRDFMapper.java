@@ -318,7 +318,7 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
     }
 
     @Override
-    public MGraph generateRDFFromRepository(Object session, String rootPath) throws RDFBridgeException {
+    public MGraph generateRDFFromRepository(String baseURI, Object session, String rootPath) throws RDFBridgeException {
         MGraph cmsGraph = new SimpleMGraph();
         Session jcrSession = (Session) session;
 
@@ -339,7 +339,7 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
             String name = "";
             try {
                 name = n.getName();
-                cmsGraph.addAll(getGraphForNode(n));
+                cmsGraph.addAll(getGraphForNode(baseURI, n));
             } catch (RepositoryException e) {
                 log.warn("Repository exception while processing node having name: {}", name, e);
             }
@@ -356,11 +356,11 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
      * @param n
      * @return
      */
-    MGraph getGraphForNode(Node n) {
+    MGraph getGraphForNode(String baseURI, Node n) {
         MGraph graph = new SimpleMGraph();
 
         // create CMS Object annotation
-        NonLiteral subject = getNodeURI(n);
+        NonLiteral subject = getNodeURI(baseURI, n);
         if (subject == null) {
             return graph;
         }
@@ -386,12 +386,12 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
             nit = n.getNodes();
             while (nit.hasNext()) {
                 Node child = nit.nextNode();
-                NonLiteral childURI = getNodeURI(child);
+                NonLiteral childURI = getNodeURI(baseURI, child);
                 if (childURI == null) {
                     continue;
                 }
                 graph.add(new TripleImpl(childURI, CMSAdapterVocabulary.CMS_OBJECT_PARENT_REF, subject));
-                graph.addAll(getGraphForNode(child));
+                graph.addAll(getGraphForNode(baseURI, child));
             }
         } catch (RepositoryException e) {
             log.warn("Error while processing children of node: {}", nodeName, e);
@@ -458,7 +458,7 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
         RDFBridgeHelper.createDefaultPropertiesForRDF(subject, graph, path, name);
     }
 
-    private UriRef getNodeURI(Node n) {
+    private UriRef getNodeURI(String baseURI, Node n) {
         String uriPropShortURI = NamespaceEnum.getShortName(RDFBridgeHelper
                 .removeEndCharacters(CMSAdapterVocabulary.CMS_OBJECT_HAS_URI.toString()));
         String nodeName = "";
@@ -473,7 +473,6 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
         }
 
         try {
-            String baseURI = CMSAdapterVocabulary.CMS_ADAPTER_VOCABULARY_URI;
             nodeURI = RDFBridgeHelper.appendLocalName(baseURI, n.getIdentifier());
             return new UriRef(nodeURI);
         } catch (RepositoryException e) {
