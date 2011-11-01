@@ -28,7 +28,7 @@
 	</parent>
 
 	<groupId>org.apache.stanbol</groupId>
-	<artifactId>org.apache.stanbol.enhancer.jobmanager</artifactId>
+	<artifactId>org.apache.stanbol.enhancer.inMemoryJobManager</artifactId>
 	<packaging>bundle</packaging>
 
 	<name>Apache Stanbol Enhancer Enhancement Job Manager</name>
@@ -38,10 +38,10 @@
 
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/generic/jobmanager/
+            scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/jobmanager/inMemoryJobManager/
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/generic/jobmanager/
+            scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/jobmanager/inMemoryJobManager/
         </developerConnection>
         <url>http://incubator.apache.org/stanbol/</url>
     </scm>

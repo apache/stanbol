@@ -45,9 +45,10 @@
     <module>parent</module>
 
     <module>generic/servicesapi</module>
-    <module>generic/jobmanager</module>
     <module>generic/standalone</module>
 
+    <module>jobmanager</module>
+    
     <module>jersey</module>
     <module>benchmark</module>
 
