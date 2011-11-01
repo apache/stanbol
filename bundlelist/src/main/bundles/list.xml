@@ -31,7 +31,7 @@
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.jobmanager</artifactId>
+			<artifactId>org.apache.stanbol.enhancer.inMemoryJobManager</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 	</startLevel>
