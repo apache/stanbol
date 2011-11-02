@@ -30,6 +30,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.core.site.CacheUtils;
@@ -591,8 +592,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         //The default values for the following parameters are OK 
         //solrYardConfig.getMaxBooleanClauses();
         //solrYardConfig.getMaxQueryResultNumber();
-        
-        yardConfig.put(SolrYard.SOLR_SERVER_LOCATION, solrYardConfig.getSolrServerLocation());
+        yardConfig.put(SolrYard.SOLR_SERVER_LOCATION, FilenameUtils.getName(solrYardConfig.getSolrServerLocation()));
         //the server type needs not to be set. It is automatically detected by
         //the value of the server location
         //solrYardConfig.getSolrServerType();
