@@ -34,12 +34,15 @@ import org.ontoware.aifbcommons.collection.ClosableIterator;
 import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.Statement;
 import org.ontoware.rdf2go.model.node.BlankNode;
+import org.ontoware.rdf2go.model.node.Variable;
 import org.semanticdesktop.aperture.extractor.ExtractorException;
+import org.semanticdesktop.aperture.vocabulary.NMO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -159,6 +162,16 @@ public class TestMetaxaCore {
         // show triples
         int tripleCounter = this.printTriples(m);
         assertEquals(10, tripleCounter);
+    }
+    
+    @Test
+    public void testMailExtraction() throws Exception {
+      String testFile = "mail-multipart-test.eml";
+      InputStream in = getResourceAsStream(testFile);
+      assertNotNull("failed to load resource " + testFile, in);
+      Model m = extractor.extract(in, "file://" + testFile, "message/rfc822");
+      boolean textContained = m.contains(Variable.ANY, NMO.plainTextMessageContent, Variable.ANY);
+      assertTrue(textContained);
     }
 
     /**
