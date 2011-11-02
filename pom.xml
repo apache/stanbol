@@ -20,15 +20,9 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.apache.stanbol</groupId>
-    <artifactId>stanbol-parent</artifactId>
-    <version>0.9.0-incubating-SNAPSHOT</version>
-    <relativePath>parent</relativePath>
-  </parent>
-
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-reactor</artifactId>
+  <version>0.9.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Reactor</name>
@@ -86,6 +80,7 @@
       </build>      
       <modules>
         <module>commons/opennlp</module>
+        <module>commons/web/webvie</module>
         <module>data</module>
 
         <module>enhancer/engines</module>

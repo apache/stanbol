@@ -45,7 +45,8 @@
     <module>web/base</module>
     <module>web/home</module>
     <module>web/sparql</module>
-    <module>web/webvie</module>
+    <!-- License issues STANBOL-366, therefore not included in framework build.
+    <module>web/webvie</module> -->
     <module>testing/jarexec</module>
     <module>testing/http</module>
     <module>testing/stanbol</module>
