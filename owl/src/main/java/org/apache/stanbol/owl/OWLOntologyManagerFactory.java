@@ -42,7 +42,7 @@ public class OWLOntologyManagerFactory {
         return mgr;
     }
 
-    private static List<OWLOntologyIRIMapper> getMappers(IRI[] dirs) {
+    public static List<OWLOntologyIRIMapper> getMappers(IRI[] dirs) {
         List<OWLOntologyIRIMapper> mappers = new ArrayList<OWLOntologyIRIMapper>();
         if (dirs != null) {
             for (IRI path : dirs) {

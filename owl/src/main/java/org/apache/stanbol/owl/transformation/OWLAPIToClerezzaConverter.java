@@ -19,6 +19,7 @@ package org.apache.stanbol.owl.transformation;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 import org.apache.clerezza.rdf.core.MGraph;
@@ -30,9 +31,12 @@ import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
+import org.apache.stanbol.owl.PhonyIRIMapper;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
@@ -115,13 +119,23 @@ public class OWLAPIToClerezzaConverter {
      * @return the equivalent OWL API {@link OWLOntology}.
      */
     public static OWLOntology clerezzaGraphToOWLOntology(TripleCollection graph) {
+        OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
+        // Never try to import
+        mgr.addIRIMapper(new PhonyIRIMapper(Collections.<IRI> emptySet()));
+        return clerezzaGraphToOWLOntology(graph, mgr);
+    }
+
+    public static OWLOntology clerezzaGraphToOWLOntology(TripleCollection graph,
+                                                         OWLOntologyManager ontologyManager) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         SerializingProvider serializingProvider = new JenaSerializerProvider();
         serializingProvider.serialize(out, graph, SupportedFormat.RDF_XML);
         ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
         OWLOntology ontology = null;
         try {
-            ontology = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(in);
+            ontology = ontologyManager.loadOntologyFromOntologyDocument(in);
+        } catch (OWLOntologyAlreadyExistsException e) {
+            ontology = ontologyManager.getOntology(e.getOntologyID());
         } catch (OWLOntologyCreationException e) {
             log.error("Failed to serialize OWL Ontology " + ontology + "for conversion", e);
         }
