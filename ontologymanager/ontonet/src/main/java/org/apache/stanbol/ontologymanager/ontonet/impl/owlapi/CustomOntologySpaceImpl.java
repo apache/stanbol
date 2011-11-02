@@ -14,12 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.ontologymanager.ontonet.impl.ontology;
+package org.apache.stanbol.ontologymanager.ontonet.impl.owlapi;
 
-import java.util.Random;
-
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CustomOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
@@ -27,35 +25,31 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
- * Default implementation of the session ontology space.
+ * Default implementation of the custom ontology space.
  */
-public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl implements SessionOntologySpace {
+public class CustomOntologySpaceImpl extends AbstractOntologySpaceImpl implements CustomOntologySpace {
 
-    public static final String SUFFIX = SpaceType.SESSION.getIRISuffix();
+    public static final String SUFFIX = SpaceType.CUSTOM.getIRISuffix();
 
     protected static String buildId(String scopeID) {
-        return (scopeID != null ? scopeID : "") + "/" + SpaceType.SESSION.getIRISuffix() + "-"
-               + new Random().nextLong();
+        return (scopeID != null ? scopeID : "") + "/" + SUFFIX;
     }
 
-    public SessionOntologySpaceImpl(String scopeID, IRI namespace, ClerezzaOntologyStorage store) {
-        // FIXME : sync session id with session space ID
-        super(buildId(scopeID), namespace, SpaceType.SESSION, store);
+    public CustomOntologySpaceImpl(String scopeID, IRI namespace, ClerezzaOntologyStorage storage) {
+        super(buildId(scopeID), namespace, SpaceType.CUSTOM, storage);
     }
 
-    public SessionOntologySpaceImpl(String scopeID,
-                                    IRI namespace,
-                                    ClerezzaOntologyStorage store,
-                                    OWLOntologyManager ontologyManager) {
-        // FIXME : sync session id with session space ID
-        super(buildId(scopeID), namespace, SpaceType.SESSION, store, ontologyManager);
+    public CustomOntologySpaceImpl(String scopeID,
+                                   IRI namespace,
+                                   ClerezzaOntologyStorage storage,
+                                   OWLOntologyManager ontologyManager) {
+        super(buildId(scopeID), namespace, SpaceType.CUSTOM, storage, ontologyManager);
     }
 
     @Override
-    public void attachSpace(OntologySpace space, boolean skipRoot) throws UnmodifiableOntologyCollectorException {
+    public void attachCoreSpace(CoreOntologySpace coreSpace, boolean skipRoot) throws UnmodifiableOntologyCollectorException {
         // FIXME re-implement!
-        // if (!(space instanceof SessionOntologySpace)) {
-        // OWLOntology o = space.getTopOntology();
+        // OWLOntology o = coreSpace.getTopOntology();
         // // This does the append thingy
         // log.debug("Attaching " + o + " TO " + getTopOntology() + " ...");
         // try {
@@ -66,24 +60,19 @@ public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl implemen
         // } catch (Exception ex) {
         // log.error("FAILED", ex);
         // }
-        // }
+
     }
 
-    @Override
-    public OWLOntologyManager getOntologyManager() {
-        // Session spaces do expose their ontology managers.
-        return ontologyManager;
-    }
-
+    /**
+     * Once it is set up, a custom space is write-locked.
+     */
     @Override
     public synchronized void setUp() {
-        // Once it is set up, a session space is write-enabled.
-        locked = false;
+        locked = true;
     }
 
     @Override
     public synchronized void tearDown() {
-        // TODO Do we really unlock?
         locked = false;
     }
 

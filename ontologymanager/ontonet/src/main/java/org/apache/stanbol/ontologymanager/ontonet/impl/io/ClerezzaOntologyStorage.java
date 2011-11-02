@@ -49,6 +49,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.util.FileManager;
 
+@Deprecated
 public class ClerezzaOntologyStorage {
 
     private static Logger log = LoggerFactory.getLogger(ClerezzaOntologyStorage.class);

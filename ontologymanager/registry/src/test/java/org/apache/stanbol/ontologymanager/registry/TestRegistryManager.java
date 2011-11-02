@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.registry;
 
+import static org.apache.stanbol.ontologymanager.registry.MockOsgiContext.*;
 import static org.junit.Assert.*;
 
 import java.util.Dictionary;
@@ -23,17 +24,19 @@ import java.util.Hashtable;
 import java.util.Iterator;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.CachingPolicy;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryItem;
 import org.apache.stanbol.ontologymanager.registry.impl.RegistryManagerImpl;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
  * Test the correct creation and setup of {@link RegistryManager} implementations.
@@ -57,6 +60,7 @@ public class TestRegistryManager {
      */
     @BeforeClass
     public static void setup() throws Exception {
+
         configuration = new Hashtable<String,Object>();
         // We need this to make sure the local meta.owl (which does not import codolight) is loaded.
         configuration.put(OfflineConfiguration.ONTOLOGY_PATHS, new String[] {"/ontologies",
@@ -69,12 +73,23 @@ public class TestRegistryManager {
                           TestRegistryManager.class.getResource("/ontologies/registry/onmtest_additions.owl")
                                   .toString()});
         offline = new OfflineConfigurationImpl(configuration);
+
+        reset();
+
     }
 
     private RegistryManager regman;
 
+    private OntologyProvider<?> provider;
+
     @Before
     public void setupTests() throws Exception {}
+
+    @After
+    public void cleanup() throws Exception {
+        reset();
+        provider = new ClerezzaOntologyProvider(tcManager, offline, parser);
+    }
 
     /**
      * Verifies that by instantiating a new {@link RegistryManager} with a centralised caching policy and
@@ -86,13 +101,13 @@ public class TestRegistryManager {
     public void testCachingCentralised() throws Exception {
         // Change the caching policy and setup a new registry manager.
         configuration.put(RegistryManager.CACHING_POLICY, CachingPolicy.CENTRALISED);
-        regman = new RegistryManagerImpl(offline, configuration);
+        regman = new RegistryManagerImpl(offline, provider, configuration);
         // Check that the configuration was set.
         assertNotNull(regman);
         assertSame(CachingPolicy.CENTRALISED, regman.getCachingPolicy());
         // All registries must have the same cache.
         Iterator<Library> it = regman.getLibraries().iterator();
-        OWLOntologyManager cache = it.next().getCache();
+        OntologyProvider<?> cache = it.next().getCache();
         while (it.hasNext())
             assertSame(cache, it.next().getCache());
 
@@ -124,13 +139,13 @@ public class TestRegistryManager {
     public void testCachingDistributed() throws Exception {
         // Change the caching policy and setup a new registry manager.
         configuration.put(RegistryManager.CACHING_POLICY, CachingPolicy.DISTRIBUTED);
-        regman = new RegistryManagerImpl(offline, configuration);
+        regman = new RegistryManagerImpl(offline, provider, configuration);
         // Check that the configuration was set.
         assertNotNull(regman);
         assertSame(CachingPolicy.DISTRIBUTED, regman.getCachingPolicy());
         // Each registry must have its own distinct cache.
         Iterator<Library> it = regman.getLibraries().iterator();
-        OWLOntologyManager cache = it.next().getCache();
+        OntologyProvider<?> cache = it.next().getCache();
         // Just checking against the first in the list.
         while (it.hasNext()) {
             assertNotSame(cache, it.next().getCache());
@@ -148,7 +163,7 @@ public class TestRegistryManager {
         // Change the caching policy and setup a new registry manager.
         configuration.put(RegistryManager.CACHING_POLICY, CachingPolicy.DISTRIBUTED);
         configuration.put(RegistryManager.LAZY_LOADING, false);
-        regman = new RegistryManagerImpl(offline, configuration);
+        regman = new RegistryManagerImpl(offline, provider, configuration);
         // Check that the configuration was set.
         assertNotNull(regman);
 
@@ -181,13 +196,13 @@ public class TestRegistryManager {
         // Change the caching policy and setup a new registry manager.
         configuration.put(RegistryManager.CACHING_POLICY, CachingPolicy.CENTRALISED);
         configuration.put(RegistryManager.LAZY_LOADING, true);
-        regman = new RegistryManagerImpl(offline, configuration);
+        regman = new RegistryManagerImpl(offline, provider, configuration);
         // Check that the configuration was set.
         assertNotNull(regman);
 
         // Now pick a library.
         Registry reg;
-        Iterator<Registry> it =regman.getRegistries().iterator();
+        Iterator<Registry> it = regman.getRegistries().iterator();
         do
             reg = it.next();
         // We need a registry with at least 2 libraries to check that only one will be loaded.
@@ -202,7 +217,7 @@ public class TestRegistryManager {
             if (children[i] instanceof Library) lib1 = (Library) (children[i]);
             if (children[i + 1] instanceof Library) lib2 = (Library) (children[i + 1]);
         }
-        assertFalse(lib1==lib2);
+        assertFalse(lib1 == lib2);
         assertNotNull(lib1);
         // ...but its ontologies must not be loaded yet.
         assertFalse(lib1.isLoaded());

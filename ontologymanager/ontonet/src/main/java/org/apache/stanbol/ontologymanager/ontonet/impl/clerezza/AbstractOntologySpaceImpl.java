@@ -19,7 +19,7 @@ package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
@@ -51,8 +51,8 @@ public abstract class AbstractOntologySpaceImpl extends AbstractOntologyCollecto
 
     protected SpaceType type;
 
-    public AbstractOntologySpaceImpl(String spaceID, IRI namespace, SpaceType type, TcManager tcManager) {
-        super(spaceID, namespace, tcManager);
+    public AbstractOntologySpaceImpl(String spaceID, IRI namespace, SpaceType type, TcProvider tcProvider) {
+        super(spaceID, namespace, tcProvider);
         this.type = type;
     }
 

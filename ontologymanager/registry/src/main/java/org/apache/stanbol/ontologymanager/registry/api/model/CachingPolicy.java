@@ -18,6 +18,8 @@ package org.apache.stanbol.ontologymanager.registry.api.model;
 
 /**
  * The possible policies a registry manager can adopt for distributed caching.
+ * 
+ * @author alexdma
  */
 public enum CachingPolicy {
 

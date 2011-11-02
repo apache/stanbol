@@ -16,6 +16,7 @@ import org.apache.stanbol.explanation.Data;
 import org.apache.stanbol.explanation.MockOsgiContext;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.impl.RegistryManagerImpl;
@@ -50,13 +51,13 @@ public class TestSchemaMatchers {
                           TestSchemaMatchers.class.getResource("/schemas/registry/explanation-mappings.owl")
                                   .toString()});
         OfflineConfiguration offline = new OfflineConfigurationImpl(configuration);
-        regman = new RegistryManagerImpl(offline, configuration);
+        regman = new RegistryManagerImpl(offline, new ClerezzaOntologyProvider(tcManager, offline, parser),configuration);
 
         // The model should be created by now.
 
-        for (Library lib : regman.getLibraries()) {
-            System.out.println(lib.getIRI() + " : " + lib.getName());
-        }
+//        for (Library lib : regman.getLibraries()) {
+//            System.out.println(lib.getIRI() + " : " + lib.getName());
+//        }
 
         // IRI id =
         // IRI.create("http://www.ontologydesignpatterns.org/registry/explanation.owl#ExplanationSchemaCatalog");

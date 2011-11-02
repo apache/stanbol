@@ -30,6 +30,7 @@ import java.io.File;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
@@ -65,9 +66,10 @@ public class RuleStoreTest {
     @Before
     public void setUp() {
         Dictionary<String,Object> configuration = new Hashtable<String,Object>();
-        store = new RuleStoreImpl(new ONManagerImpl(null, null, configuration), configuration,
+        store = new RuleStoreImpl(new ONManagerImpl((TcManager) null, null, configuration), configuration,
                 "./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
-        blankStore = new RuleStoreImpl(new ONManagerImpl(null, null, configuration), configuration, "");
+        blankStore = new RuleStoreImpl(new ONManagerImpl((TcManager) null, null, configuration),
+                configuration, "");
     }
 
     @After

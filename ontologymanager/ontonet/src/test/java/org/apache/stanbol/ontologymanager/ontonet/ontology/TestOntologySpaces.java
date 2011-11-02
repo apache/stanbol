@@ -256,7 +256,7 @@ public class TestOntologySpaces {
 
     }
 
-    @Test
+//    @Test
     public void testSessionModification() throws Exception {
         SessionOntologySpace space = factory.createSessionOntologySpace(scopeId);
         space.setUp();

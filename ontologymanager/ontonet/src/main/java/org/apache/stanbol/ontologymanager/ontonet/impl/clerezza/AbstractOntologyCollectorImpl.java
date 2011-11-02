@@ -26,7 +26,7 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.EntityAlreadyExistsException;
-import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.LockableOntologyCollector;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorListener;
@@ -71,16 +71,16 @@ public abstract class AbstractOntologyCollectorImpl implements LockableOntologyC
 
     protected Set<Class<?>> supportedTypes;
 
-    private TcManager tcManager;
+    private TcProvider tcProvider;
 
-    public AbstractOntologyCollectorImpl(String id, IRI namespace, TcManager tcManager) {
+    public AbstractOntologyCollectorImpl(String id, IRI namespace, TcProvider tcProvider) {
         // Supports OWL API and Clerezza
         supportedTypes = new HashSet<Class<?>>();
         supportedTypes.add(OWLOntology.class);
         supportedTypes.add(TripleCollection.class);
         setID(id);
         setNamespace(namespace);
-        this.tcManager = tcManager;
+        this.tcProvider = tcProvider;
         this.managedOntologies = new HashSet<IRI>();
     }
 
@@ -107,9 +107,9 @@ public abstract class AbstractOntologyCollectorImpl implements LockableOntologyC
         // create/get the graph and add the triples.
         MGraph mg;
         try {
-            mg = tcManager.createMGraph(uri);
+            mg = tcProvider.createMGraph(uri);
         } catch (EntityAlreadyExistsException e) {
-            mg = tcManager.getMGraph(uri);
+            mg = tcProvider.getMGraph(uri);
             mg.clear();
         }
         if (o instanceof TripleCollection) mg.addAll((TripleCollection) o);
@@ -197,7 +197,7 @@ public abstract class AbstractOntologyCollectorImpl implements LockableOntologyC
     @Override
     public OWLOntology getOntology(IRI ontologyIri) {
         if (!managedOntologies.contains(ontologyIri)) return null;
-        TripleCollection g = tcManager.getTriples(new UriRef(ontologyIri.toString()));
+        TripleCollection g = tcProvider.getTriples(new UriRef(ontologyIri.toString()));
         return OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(g);
     }
 
@@ -206,8 +206,8 @@ public abstract class AbstractOntologyCollectorImpl implements LockableOntologyC
         return Collections.unmodifiableSet(supportedTypes);
     }
 
-    public TcManager getTcManager() {
-        return tcManager;
+    public TcProvider getTcProvider() {
+        return tcProvider;
     }
 
     @Override

@@ -24,6 +24,8 @@ import org.semanticweb.owlapi.model.IRI;
 
 /**
  * A member of an ontology registry, possibly even the registry itself.
+ * 
+ * @author alexdma
  */
 public interface RegistryItem {
 

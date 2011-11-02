@@ -32,6 +32,8 @@ import org.semanticweb.owlapi.model.OWLOntology;
  * create and/or append the parents and children of any generated object. Refer to
  * {@link RegistryManager#createModel(Set)} to recursively populate a registry item starting from a set of
  * registries.
+ * 
+ * @author alexdma
  */
 public interface RegistryItemFactory {
 

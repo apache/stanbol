@@ -16,7 +16,12 @@
  */
 package org.apache.stanbol.ontologymanager.registry;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import static org.apache.stanbol.ontologymanager.registry.MockOsgiContext.*;
 
 import java.io.File;
 import java.net.URL;
@@ -24,9 +29,12 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
@@ -64,6 +72,7 @@ public class TestOntologyLibrary {
         final Dictionary<String,Object> config = new Hashtable<String,Object>();
         config.put(OfflineConfiguration.ONTOLOGY_PATHS, new String[] {"/ontologies", "/ontologies/registry"});
         offline = new OfflineConfigurationImpl(config);
+        reset();
     }
 
     private String registryResourcePath = "/ontologies/registry/onmtest.owl";
@@ -76,7 +85,8 @@ public class TestOntologyLibrary {
      * Resets the registry manager, which each unit test needs to reconfigure individually.
      */
     @After
-    public void reset() {
+    public void cleanup() {
+        reset();
         regMgr = null;
     }
 
@@ -115,7 +125,8 @@ public class TestOntologyLibrary {
         Dictionary<String,Object> regmanConf = new Hashtable<String,Object>();
         regmanConf.put(RegistryManager.REGISTRY_LOCATIONS, new String[] {localTestRegistry.toString()});
         // Instantiating the registry manager will also load the registry data.
-        regMgr = new RegistryManagerImpl(offline, regmanConf);
+        regMgr = new RegistryManagerImpl(offline, new ClerezzaOntologyProvider(tcManager, offline, parser),
+                regmanConf);
 
         // The resulting manager must exist and have exactly one registry.
         assertNotNull(regMgr);
@@ -155,11 +166,13 @@ public class TestOntologyLibrary {
         Dictionary<String,Object> regmanConf = new Hashtable<String,Object>();
         regmanConf.put(RegistryManager.REGISTRY_LOCATIONS, new String[] {localTestRegistry.toString()});
         // Instantiating the registry manager will also load the registry data.
-        regMgr = new RegistryManagerImpl(offline, regmanConf);
+        regMgr = new RegistryManagerImpl(offline, new ClerezzaOntologyProvider(tcManager,
+                offline, parser), regmanConf);
         assertNotNull(regMgr);
 
         // Now use this registry manager to instantiate an input source.
-        OntologyInputSource<OWLOntology> src = new LibrarySource(Locations.LIBRARY_TEST1, regMgr, virginOntologyManager);
+        OntologyInputSource<OWLOntology> src = new LibrarySource(Locations.LIBRARY_TEST1, regMgr,
+                virginOntologyManager);
         OWLOntology o = src.getRootOntology();
         boolean hasImporting = false, hasImported = false;
         for (OWLImportsDeclaration ax : o.getImportsDeclarations()) {

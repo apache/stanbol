@@ -19,7 +19,9 @@ package org.apache.stanbol.ontologymanager.registry.api;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryItem;
 
 /**
- * Object that react to direct content requests to ontology registry items will implement this interface.
+ * Objects that react to direct content requests to ontology registry items will implement this interface.
+ * 
+ * @author alexdma
  */
 public interface RegistryContentListener {
 

@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.io;
 
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.parser;
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.reset;
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.tcManager;
 import static org.junit.Assert.assertEquals;
@@ -30,14 +31,18 @@ import java.util.Set;
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -53,17 +58,20 @@ public class TestStorage {
 
     private String scopeId = "StorageTest";
 
+    private static OntologyProvider<TcProvider> provider;
+
     @BeforeClass
     public static void setup() {
         reset();
+        OfflineConfiguration offline = new OfflineConfigurationImpl(new Hashtable<String,Object>());
+        provider = new ClerezzaOntologyProvider(tcManager, offline, parser);
         // Empty configurations are fine, but this time we provide a Clerezza context.
-        onm = new ONManagerImpl(tcManager, tcManager.getProviderList().first(), new OfflineConfigurationImpl(
-                new Hashtable<String,Object>()), new Hashtable<String,Object>());
+        onm = new ONManagerImpl(provider, offline, new Hashtable<String,Object>());
     }
 
     @Test
     public void storageOnScopeCreation() throws Exception {
-        assertTrue(onm.getOntologyStore().listGraphs().isEmpty());
+        assertTrue(provider.getStore().listTripleCollections().isEmpty());
         OntologyInputSource ois = new RootOntologyIRISource(IRI.create(getClass().getResource(
             "/ontologies/minorcharacters.owl")));
 
@@ -71,17 +79,16 @@ public class TestStorage {
 
         Set<Triple> triples = new HashSet<Triple>();
 
-        for (IRI iri : onm.getOntologyStore().listGraphs()) {
+        for (UriRef iri : provider.getStore().listTripleCollections()) {
             log.info("{}", iri.toString());
             UriRef entity = new UriRef(Constants.PEANUTS_MINOR_BASE + "#" + Constants.truffles);
-            Graph ctx = new GraphNode(entity, onm.getOntologyStore().getGraph(
-                new UriRef(iri.toString().substring(1, iri.toString().length() - 1)))).getNodeContext();
+            Graph ctx = new GraphNode(entity, provider.getStore().getTriples(iri)).getNodeContext();
             Iterator<Triple> it = ctx.iterator();
             while (it.hasNext())
                 triples.add(it.next());
         }
 
-        assertFalse(onm.getOntologyStore().listGraphs().isEmpty());
+        assertFalse(provider.getStore().listTripleCollections().isEmpty());
         assertEquals(3, triples.size());
     }
 

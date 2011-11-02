@@ -73,7 +73,7 @@ public class LibrarySource extends AbstractOWLOntologyInputSource implements Ont
      *            the identifier of the ontology library.
      */
     public LibrarySource(IRI libraryID) throws RegistryContentException {
-        this(libraryID, new RegistryManagerImpl(null, new Hashtable<String,Object>()));
+        this(libraryID, new RegistryManagerImpl(null, null, new Hashtable<String,Object>()));
     }
 
     /**
@@ -156,7 +156,7 @@ public class LibrarySource extends AbstractOWLOntologyInputSource implements Ont
                 "A null registry manager is not allowed");
 
         this.libraryID = libraryID;
-        
+
         // The ontology that imports the whole network is created in-memory, therefore it has no physical IRI
         // unless it is borrowed from the supplied parent.
         bindPhysicalIri(parentSrc != null ? parentSrc.getPhysicalIRI() : null);
@@ -192,7 +192,7 @@ public class LibrarySource extends AbstractOWLOntologyInputSource implements Ont
     public String toString() {
         return "LIBRARY<" + libraryID + ">";
     }
-    
+
     private Set<OWLOntology> ontologies;
 
     @Override

@@ -31,7 +31,10 @@ import org.semanticweb.owlapi.model.OWLOntology;
  */
 public class RegistryOntologyImpl extends AbstractRegistryItem implements RegistryOntology {
 
-    private Map<IRI,OWLOntology> owl = new HashMap<IRI,OWLOntology>();
+    @Deprecated
+    private Map<IRI,OWLOntology> ontologies = new HashMap<IRI,OWLOntology>();
+
+    private Map<IRI,String> references = new HashMap<IRI,String>();
 
     public RegistryOntologyImpl(IRI iri) {
         super(iri);
@@ -42,14 +45,20 @@ public class RegistryOntologyImpl extends AbstractRegistryItem implements Regist
     }
 
     @Override
-    public Map<IRI,OWLOntology> getRawOntologies() throws RegistryOntologyNotLoadedException {
-        return owl;
+    public OWLOntology getRawOntology(IRI libraryID) throws RegistryOntologyNotLoadedException {
+        fireContentRequested(this);
+        return ontologies.get(libraryID);
     }
 
     @Override
-    public OWLOntology getRawOntology(IRI libraryID) throws RegistryOntologyNotLoadedException {
+    public String getReference(IRI libraryID) throws RegistryOntologyNotLoadedException {
         fireContentRequested(this);
-        return owl.get(libraryID);
+        return references.get(libraryID);
+    }
+
+    @Override
+    public Map<IRI,String> getReferenceMap() throws RegistryOntologyNotLoadedException {
+        return references;
     }
 
     @Override
@@ -59,8 +68,15 @@ public class RegistryOntologyImpl extends AbstractRegistryItem implements Regist
 
     @Override
     public void setRawOntology(IRI libraryID, OWLOntology owl) {
-        if (owl == null) this.owl.remove(libraryID);
-        this.owl.put(libraryID, owl);
+        if (owl == null) this.ontologies.remove(libraryID);
+        this.ontologies.put(libraryID, owl);
+        setReference(libraryID, owl.getOntologyID().getOntologyIRI().toString());
+    }
+
+    @Override
+    public void setReference(IRI libraryID, String reference) {
+        if (reference == null) this.references.remove(libraryID);
+        this.references.put(libraryID, reference);
     }
 
 }

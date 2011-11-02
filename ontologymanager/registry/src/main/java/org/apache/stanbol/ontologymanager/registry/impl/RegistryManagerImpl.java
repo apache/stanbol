@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -33,6 +35,8 @@ import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
+import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentListener;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryItemFactory;
@@ -71,6 +75,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Default implementation of the registry manager, that listens to requests on its referenced resources and
  * issues loading requests accordingly.
+ * 
+ * @author alexdma
  */
 @Component(immediate = true, metatype = true)
 @Service(RegistryManager.class)
@@ -94,7 +100,8 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         hasOntology = factory.getOWLObjectProperty(IRI.create(CODOVocabulary.ODPM_HasOntology));
     }
 
-    private OWLOntologyManager cache = null;
+    @Reference
+    private OntologyProvider<?> cache = null;
 
     @Property(name = RegistryManager.CACHING_POLICY, options = {
                                                                 @PropertyOption(value = '%'
@@ -136,18 +143,20 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
      * YOU NEED TO USE {@link #RegistryManagerImpl(Dictionary)} or its overloads, to parse the configuration
      * and then initialise the rule store if running outside an OSGI environment.
      */
-    public RegistryManagerImpl() {
-        riFactory = new RegistryItemFactoryImpl();
-    }
+    public RegistryManagerImpl() {}
 
     /**
      * To be invoked by non-OSGi environments.
      * 
-     * @param configuration
+     * @param the
+     *            configuration registry manager-specific configuration
      */
-    public RegistryManagerImpl(OfflineConfiguration offline, Dictionary<String,Object> configuration) {
+    public RegistryManagerImpl(OfflineConfiguration offline,
+                               OntologyProvider<?> cache,
+                               Dictionary<String,Object> configuration) {
         this();
         this.offline = offline;
+        this.cache = cache;
         activate(configuration);
     }
 
@@ -206,24 +215,32 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
             }
         }
 
-        // Build the model.
-        createModel(regOnts);
-
         // Create and set the cache.
         if (cachingPolicyString.equals(CachingPolicy.CENTRALISED.name())) {
-            this.cache = OWLOntologyManagerFactory.createOWLOntologyManager(offlineResources);
+            // this.cache = OWLOntologyManagerFactory.createOWLOntologyManager(offlineResources);
+            if (cache == null) {
+                log.warn("Caching policy is set as Centralised, but no ontology provider is supplied. Will use new in-memory tcProvider.");
+                cache = new ClerezzaOntologyProvider(TcManager.getInstance(), offline, Parser.getInstance());
+            }
+            // else sta bene cosi'
         } else if (cachingPolicyString.equals(CachingPolicy.DISTRIBUTED.name())) {
             this.cache = null;
         }
 
+        riFactory = new RegistryItemFactoryImpl(cache);
+
+        // Build the model.
+        createModel(regOnts);
+
+        // Set the cache on libraries.
         Set<RegistryItem> visited = new HashSet<RegistryItem>();
         for (Registry reg : getRegistries())
             for (RegistryItem child : reg.getChildren())
                 if (!visited.contains(child)) {
                     if (child instanceof Library) {
                         if (this.cache != null) ((Library) child).setCache(this.cache);
-                        else ((Library) child).setCache(OWLOntologyManagerFactory
-                                .createOWLOntologyManager(offlineResources));
+                        else ((Library) child).setCache(new ClerezzaOntologyProvider(TcManager.getInstance(),
+                                offline, Parser.getInstance()));
                     }
                     visited.add(child);
                 }

@@ -27,7 +27,10 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 /**
- * Replacement for {@link RegistryLoader}. Also indexes libraries (and ontologies?).
+ * An object responsible for the retrieval, loading and unloading of ontology registries and libraries. Also
+ * works as an indexer for registry items.
+ * 
+ * @author alexdma
  */
 public interface RegistryManager extends RegistryItemIndex {
 
@@ -70,13 +73,13 @@ public interface RegistryManager extends RegistryItemIndex {
      * Depending on implementations, this method may or may not be automatically invoked after a call to
      * methods that determine changes to the model.
      * 
-     * @param registryOntologies
+     * @param registryDescriptors
      *            the source OWL ontologies that describe the registries. If any of these denotes an invalid
      *            registry, a {@link RegistryContentException} will be thrown. If it does not denote a
      *            registry at all, it will be skipped.
      * @return the ontology registries that are the parent items of the entire model.
      */
-    Set<Registry> createModel(Set<OWLOntology> registryOntologies);
+    Set<Registry> createModel(Set<OWLOntology> registryDescriptors);
 
     /**
      * Returns the ontology caching policy currently adopted by the registry manager.

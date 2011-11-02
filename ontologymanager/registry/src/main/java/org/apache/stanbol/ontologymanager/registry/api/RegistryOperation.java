@@ -18,6 +18,8 @@ package org.apache.stanbol.ontologymanager.registry.api;
 
 /**
  * The possible types of operations that can be performed with registry items.
+ * 
+ * @author alexdma
  */
 public enum RegistryOperation {
 

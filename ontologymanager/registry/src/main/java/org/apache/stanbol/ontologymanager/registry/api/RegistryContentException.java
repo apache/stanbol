@@ -19,6 +19,8 @@ package org.apache.stanbol.ontologymanager.registry.api;
 /**
  * Thrown when trying to process an invalid registry item. The reason why it is invalid can be specified by
  * the cause, message or subclasses of this exception.
+ * 
+ * @author alexdma
  */
 public class RegistryContentException extends Exception {
 

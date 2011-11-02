@@ -51,6 +51,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySp
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaUtils;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.OntologySpaceFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.ScopeRegistryImpl;
@@ -114,8 +115,8 @@ public class TestClerezzaSpaces {
         OWLIndividual iLinus = df.getOWLNamedIndividual(IRI.create(baseIri + "/" + Constants.linus));
         linusIsHuman = df.getOWLClassAssertionAxiom(cHuman, iLinus);
 
-        factory = new OntologySpaceFactoryImpl(reg, tcManager, offline,
-                IRI.create("http://stanbol.apache.org/ontology/"));
+        factory = new OntologySpaceFactoryImpl(reg, new ClerezzaOntologyProvider(tcManager, offline, parser),
+                offline, IRI.create("http://stanbol.apache.org/ontology/"));
     }
 
     String scopeId = "Comics";
@@ -270,7 +271,7 @@ public class TestClerezzaSpaces {
 
     }
 
-//    @Test
+    // @Test
     public void testSessionModification() throws Exception {
         SessionOntologySpace space = factory.createSessionOntologySpace(scopeId);
         space.setUp();

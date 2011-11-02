@@ -18,11 +18,12 @@ package org.apache.stanbol.ontologymanager.registry.api;
 
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 
-
 /**
  * Thrown whenever there is a request for the contents of an ontology library which have not been loaded yet
  * (e.g. due to lazy loading policies). Developers who catch this exception may, for example, decide to load
  * the library contents.
+ * 
+ * @author alexdma
  */
 public class LibraryContentNotLoadedException extends RegistryContentException {
 

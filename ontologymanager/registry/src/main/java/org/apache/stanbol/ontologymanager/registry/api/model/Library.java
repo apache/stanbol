@@ -18,13 +18,15 @@ package org.apache.stanbol.ontologymanager.registry.api.model;
 
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
  * An ontology library references one or more ontologies.
+ * 
+ * @author alexdma
  */
 public interface Library extends RegistryItem {
 
@@ -38,7 +40,7 @@ public interface Library extends RegistryItem {
      * 
      * @return the ontology manager that is used as a cache.
      */
-    OWLOntologyManager getCache();
+    OntologyProvider<?> getCache();
 
     /**
      * Returns the OWL ontologies that have been loaded in this library, if any, otherwise an exception is
@@ -54,6 +56,16 @@ public interface Library extends RegistryItem {
      *             if the requested ontologies have not been loaded.
      */
     Set<OWLOntology> getOntologies() throws RegistryContentException;
+
+    OWLOntology getOntology(IRI id) throws RegistryContentException;
+
+    /**
+     * Returns a string that can be encoded as a IRI/URI/UriRef etc. for retrieving the raw ontology.
+     * 
+     * @param ontologyId
+     * @return
+     */
+    String getOntologyReference(IRI ontologyId) throws RegistryContentException;
 
     /**
      * Determines if the contents of this library have been loaded and are up-to-date.
@@ -71,7 +83,7 @@ public interface Library extends RegistryItem {
      *            the OWL ontology manager to use for loading the ontologies in the library. It must not be
      *            null, lest an {@link IllegalArgumentException} be thrown.
      */
-    void loadOntologies(OWLOntologyManager mgr);
+    void loadOntologies(OntologyProvider<?> cache);
 
     /**
      * Sets the OWL ontology manager that this library will use as a cache of its ontologies. If null, if will
@@ -80,6 +92,6 @@ public interface Library extends RegistryItem {
      * @param cache
      *            the ontology manager to be used as a cache.
      */
-    void setCache(OWLOntologyManager cache);
+    void setCache(OntologyProvider<?> cache);
 
 }

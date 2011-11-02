@@ -202,8 +202,6 @@ public class ScopeResource extends BaseStanbolResource {
         // First thing, check the core source.
         try {
             coreSrc = new LibrarySource(IRI.create(coreRegistry.replace("%23", "#")), regMgr);
-            System.out.println("DIOPORCO");
-            System.out.println(coreSrc);
         } catch (Exception e1) {
             // Bad or not supplied core registry, try the ontology.
             try {
@@ -235,26 +233,18 @@ public class ScopeResource extends BaseStanbolResource {
             // Expand core sources
             List<OntologyInputSource> expanded = new ArrayList<OntologyInputSource>();
             if (coreSrc != null) {
-                System.out.println("CORRE " + coreSrc.getClass() + " " + coreSrc);
                 if (coreSrc instanceof OntologySetInputSource) {
-                    System.out.println("Root ontology " + coreSrc.getRootOntology());
                     for (OWLOntology o : ((OntologySetInputSource) coreSrc).getOntologies()) {
-
-                        System.out.println("\t" + o);
                         expanded.add(new RootOntologySource(o));
                     }
                 } else expanded.add(coreSrc);
             }
             if (custSrc != null) {
-                System.out.println("CUSST " + custSrc.getClass());
                 if (custSrc instanceof OntologySetInputSource) for (OWLOntology o : ((OntologySetInputSource) custSrc)
                         .getOntologies())
                     expanded.add(new RootOntologySource(o));
                 else expanded.add(custSrc);
             }
-
-            for (OntologyInputSource s : expanded)
-                System.out.println("Expanded Core Source " + s);
 
             // Invoke the appropriate factory method depending on the
             // availability of a custom source.

@@ -18,6 +18,8 @@ package org.apache.stanbol.ontologymanager.registry.api.model;
 
 /**
  * An ontology registry can reference zero or more ontology libraries.
+ * 
+ * @author alexdma
  */
 public interface Registry extends RegistryItem {
 

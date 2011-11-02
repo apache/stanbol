@@ -22,6 +22,12 @@ import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
 import org.semanticweb.owlapi.model.IRI;
 
+/**
+ * Objects that keep track of known libraries, registries and ontologies can implement this interface.
+ * 
+ * @author alexdma
+ * 
+ */
 public interface RegistryItemIndex {
 
     /**

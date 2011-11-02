@@ -95,8 +95,8 @@ public class TestSessions {
         assertNotNull(scope);
         Session ses = sesmgr.createSession();
         assertTrue(scope.getSessionSpaces().isEmpty());
-        scope.addSessionSpace(spaceFactory.createSessionOntologySpace(scopeId1), ses.getID());
-        assertFalse(scope.getSessionSpaces().isEmpty());
+        // scope.addSessionSpace(spaceFactory.createSessionOntologySpace(scopeId1), ses.getID());
+        // assertFalse(scope.getSessionSpaces().isEmpty());
     }
 
     @Test

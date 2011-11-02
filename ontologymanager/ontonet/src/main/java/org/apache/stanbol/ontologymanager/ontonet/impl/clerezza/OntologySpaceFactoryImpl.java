@@ -16,15 +16,16 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 
-import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CustomOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorListener;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
@@ -49,14 +50,14 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 
     protected ScopeRegistry registry;
 
-    protected TcManager tcManager;
+    protected OntologyProvider<TcProvider> provider;
 
     public OntologySpaceFactoryImpl(ScopeRegistry registry,
-                                    TcManager tcManager,
+                                    OntologyProvider<TcProvider> provider,
                                     OfflineConfiguration offline,
                                     IRI namespace) {
         this.registry = registry;
-        this.tcManager = tcManager;
+        this.provider = provider;
         this.offline = offline;
         this.namespace = namespace;
     }
@@ -86,7 +87,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 
     @Override
     public CoreOntologySpace createCoreOntologySpace(String scopeId, OntologyInputSource<?>... coreSources) {
-        CoreOntologySpace s = new CoreOntologySpaceImpl(scopeId, namespace, tcManager);
+        CoreOntologySpace s = new CoreOntologySpaceImpl(scopeId, namespace, provider.getStore());
         configureSpace(s, scopeId, coreSources);
         return s;
     }
@@ -94,7 +95,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
     @Override
     public CustomOntologySpace createCustomOntologySpace(String scopeId,
                                                          OntologyInputSource<?>... customSources) {
-        CustomOntologySpace s = new CustomOntologySpaceImpl(scopeId, namespace, tcManager);
+        CustomOntologySpace s = new CustomOntologySpaceImpl(scopeId, namespace, provider.getStore());
         configureSpace(s, scopeId, customSources);
         return s;
     }

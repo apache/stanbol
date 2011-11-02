@@ -24,7 +24,9 @@ import java.util.Dictionary;
 import java.util.List;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
+import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -44,6 +46,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CustomOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.NoSuchScopeException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
@@ -52,11 +55,12 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.conf.OntologyNetworkConfigurationUtils;
+import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
+import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.OntologySpaceFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.io.InMemoryOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyIndexImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFactoryImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologySpaceFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.ScopeRegistryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.session.ScopeSessionSynchronizer;
 import org.apache.stanbol.ontologymanager.ontonet.impl.session.SessionManagerImpl;
@@ -147,6 +151,9 @@ public class ONManagerImpl implements ONManager {
     @Reference
     private OfflineConfiguration offline;
 
+    @Reference
+    private OntologyProvider<?> ontologyProvider;
+
     /**
      * The {@link OfflineMode} is used by Stanbol to indicate that no external service should be referenced.
      * For this engine that means it is necessary to check if the used {@link ReferencedSite} can operate
@@ -222,6 +229,9 @@ public class ONManagerImpl implements ONManager {
     /**
      * Constructor to be invoked by non-OSGi environments.
      * 
+     * @deprecated tcm and wctp are no longer to be supplied directly to the ONManager object. Use
+     *             {@link #ONManagerImpl(OntologyProvider, OfflineConfiguration, Dictionary)} instead.
+     * 
      * @param tcm
      *            the triple collection manager to be used for storing ontologies.
      * @param wtcp
@@ -231,15 +241,24 @@ public class ONManagerImpl implements ONManager {
      * @param configuration
      *            additional parameters for the ONManager not included in {@link OfflineConfiguration}.
      */
+    @Deprecated
     public ONManagerImpl(TcManager tcm,
                          WeightedTcProvider wtcp,
-                         OfflineConfiguration onmconfig,
+                         OfflineConfiguration offline,
+                         Dictionary<String,Object> configuration) {
+        /*
+         * Assume this.tcm this.wtcp and this.wtcp were not filled in by OSGi-DS. As a matter of fact,
+         * WeightedTcProvider is now ignored as we assume to use those bound with the TcManager.
+         */
+        this(new ClerezzaOntologyProvider(tcm, offline, new Parser()), offline, configuration);
+    }
+
+    public ONManagerImpl(OntologyProvider<?> ontologyProvider,
+                         OfflineConfiguration offline,
                          Dictionary<String,Object> configuration) {
         this();
-        // Assume this.tcm this.wtcp and this.wtcp were not filled in by OSGi-DS.
-        this.tcm = tcm;
-        this.wtcp = wtcp;
-        this.offline = onmconfig;
+        this.ontologyProvider = ontologyProvider;
+        this.offline = offline;
         try {
             activate(configuration);
         } catch (IOException e) {
@@ -380,8 +399,13 @@ public class ONManagerImpl implements ONManager {
         // Now create everything that depends on the Storage object.
 
         // These may require the OWL cache manager
-        ontologySpaceFactory = new OntologySpaceFactoryImpl(scopeRegistry, storage, offline,
+
+        if (ontologyProvider.getStore() instanceof TcManager) ontologySpaceFactory = new OntologySpaceFactoryImpl(
+                scopeRegistry, (OntologyProvider<TcProvider>) ontologyProvider, offline,
                 IRI.create(getOntologyNetworkNamespace()));
+        else ontologySpaceFactory = new org.apache.stanbol.ontologymanager.ontonet.impl.owlapi.OntologySpaceFactoryImpl(
+                scopeRegistry, storage, offline, IRI.create(getOntologyNetworkNamespace()));
+
         ontologyScopeFactory = new OntologyScopeFactoryImpl(scopeRegistry,
                 IRI.create(getOntologyNetworkNamespace()), ontologySpaceFactory);
         ontologyScopeFactory.addScopeEventListener(oIndex);

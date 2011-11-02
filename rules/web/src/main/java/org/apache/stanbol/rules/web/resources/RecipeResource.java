@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -22,7 +22,6 @@
 package org.apache.stanbol.rules.web.resources;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,13 +44,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.manager.changes.AddRecipe;
 import org.apache.stanbol.rules.manager.changes.GetRecipe;
@@ -85,7 +81,6 @@ public class RecipeResource extends BaseStanbolResource {
     private Logger log = LoggerFactory.getLogger(getClass());
 
     private RuleStoreImpl kresRuleStore;
-    private ClerezzaOntologyStorage storage;
 
     /**
      * To get the RuleStoreImpl where are stored the rules and the recipes
@@ -94,9 +89,9 @@ public class RecipeResource extends BaseStanbolResource {
      *            {To get the context where the REST service is running.}
      */
     public RecipeResource(@Context ServletContext servletContext) {
-    	this.kresRuleStore = (RuleStoreImpl) ContextHelper.getServiceFromContext(RuleStore.class, servletContext);
+        this.kresRuleStore = (RuleStoreImpl) ContextHelper.getServiceFromContext(RuleStore.class,
+            servletContext);
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
-        this.storage = onm.getOntologyStore();
     }
 
     /**
@@ -113,11 +108,13 @@ public class RecipeResource extends BaseStanbolResource {
      */
     @GET
     @Path("/{uri:.+}")
-    @Produces(value = {KRFormat.RDF_XML, KRFormat.RDF_JSON, KRFormat.OWL_XML, KRFormat.FUNCTIONAL_OWL,KRFormat.MANCHESTER_OWL, KRFormat.TURTLE})
+    @Produces(value = {KRFormat.RDF_XML, KRFormat.RDF_JSON, KRFormat.OWL_XML, KRFormat.FUNCTIONAL_OWL,
+                       KRFormat.MANCHESTER_OWL, KRFormat.TURTLE})
     public Response getRecipe(@PathParam("uri") String uri) throws OWLOntologyCreationException {
         try {
-        
-            GetRecipe rule = new GetRecipe(kresRuleStore);;    
+
+            GetRecipe rule = new GetRecipe(kresRuleStore);
+            ;
             // String ID =
             // kresRuleStore.getOntology().getOntologyID().toString().replace(">","").replace("<","")+"#";
 
@@ -248,8 +245,10 @@ public class RecipeResource extends BaseStanbolResource {
      */
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(value = {KRFormat.RDF_XML, KRFormat.TURTLE, KRFormat.OWL_XML, KRFormat.FUNCTIONAL_OWL,KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
-    public Response addRecipe(@FormParam(value = "recipe") String recipe, @FormParam(value = "description") String description) {
+    @Produces(value = {KRFormat.RDF_XML, KRFormat.TURTLE, KRFormat.OWL_XML, KRFormat.FUNCTIONAL_OWL,
+                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
+    public Response addRecipe(@FormParam(value = "recipe") String recipe,
+                              @FormParam(value = "description") String description) {
 
         try {
 

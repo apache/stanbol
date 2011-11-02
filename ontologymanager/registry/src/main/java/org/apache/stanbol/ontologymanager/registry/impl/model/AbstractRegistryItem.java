@@ -28,6 +28,12 @@ import org.apache.stanbol.ontologymanager.registry.api.RegistryOperation;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryItem;
 import org.semanticweb.owlapi.model.IRI;
 
+/**
+ * Abstract default implementation of registry items.
+ * 
+ * @author alexdma
+ * 
+ */
 public abstract class AbstractRegistryItem implements RegistryItem {
 
     /* Two-way adjacency index TODO use maps instead? */

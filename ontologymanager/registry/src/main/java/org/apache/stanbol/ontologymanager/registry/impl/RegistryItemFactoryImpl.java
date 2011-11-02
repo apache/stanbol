@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.registry.impl;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryItemFactory;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
@@ -28,17 +29,23 @@ import org.semanticweb.owlapi.model.OWLOntology;
 
 /**
  * Default implementation of a registry item factory.
+ * 
+ * @author alexdma
  */
 public class RegistryItemFactoryImpl implements RegistryItemFactory {
+
+    private OntologyProvider<?> cache;
 
     /**
      * Creates a new instance of {@link RegistryItemFactoryImpl}.
      */
-    public RegistryItemFactoryImpl() {}
+    public RegistryItemFactoryImpl(OntologyProvider<?> provider) {
+        this.cache = provider;
+    }
 
     @Override
     public Library createLibrary(OWLNamedIndividual ind) {
-        return new LibraryImpl(ind.getIRI(), ind.getIRI().getFragment());
+        return new LibraryImpl(ind.getIRI(), ind.getIRI().getFragment(), cache);
     }
 
     @Override
