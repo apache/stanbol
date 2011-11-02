@@ -104,6 +104,15 @@ foaf:logo | d=xsd:anyURI
 foaf:page | d=xsd:anyURI
 
 
+# --- Schema.org --
+
+# Defines an Ontology used by search engines (Google, Yahoo and Bing) for 
+# indexing websites.
+
+schema:*
+# Copy all names of schema instances over to rdfs:label
+schema:name > rdfs:label
+
 # --- Simple Knowledge Organization System (SKOS) ---
 
 # A common data model for sharing and linking knowledge organization systems 
