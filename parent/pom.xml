@@ -24,7 +24,7 @@
   <packaging>pom</packaging>
   <version>0.9.0-incubating-SNAPSHOT</version>
 
-  <name>Apache Stanbol : Parent POM</name>
+  <name>Apache Stanbol Parent POM</name>
   <description>Parent POM for the Apache Stanbol project</description>
 
   <inceptionYear>2010</inceptionYear>
@@ -43,10 +43,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jersey-version>1.7</jersey-version>
-    <pax-exam-version>1.2.0</pax-exam-version>
-    
-    <!-- Defines the source release packaging when using apache-release profile -->
-    <sourceReleaseAssemblyDescriptor>source-release-zip-tar</sourceReleaseAssemblyDescriptor>
+    <pax-exam-version>1.2.0</pax-exam-version>    
   </properties>
 
   <build>

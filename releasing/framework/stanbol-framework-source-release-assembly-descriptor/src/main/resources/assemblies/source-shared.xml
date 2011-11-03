@@ -25,21 +25,43 @@
       <directory>.</directory>
       <outputDirectory>/</outputDirectory>
       <useDefaultExcludes>true</useDefaultExcludes>
+      <includes>
+        <include>DISCLAIMER</include>
+        <include>pom.xml</include>
+        <include>README.md</include>
+        
+        <include>parent/**</include>
+        <include>parent/**</include>
+        <include>frameworkfragment/**</include>
+        <include>commons/**</include>
+        <include>owl/**</include>
+        <include>entityhub/**</include>
+        <include>factstore/**</include>
+        
+        <include>enhancer/parent/**</include>
+        <include>enhancer/generic/servicesapi/**</include>
+        <include>enhancer/jobmanager/**</include>
+        <include>enhancer/generic/standalone/**</include>
+        <include>enhancer/jersey/**</include>
+        <include>enhancer/benchmark/**</include>
+        <include>enhancer/bundlelist/**</include>
+        
+        <include>contenthub/**</include>
+        <include>ontologymanager/ontonet/**</include>
+        <include>ontologymanager/registry/**</include>
+        <include>ontologymanager/web/**</include>
+        <include>ontologymanager/bundlelist/**</include>
+        <include>rules/**</include>
+
+        <include>cmsadapter/**</include>
+
+        <include>launchers/framework/**</include>
+        <include>releasing/**</include>
+      </includes>
       <excludes>
         <!-- exclude non Stanbol Framework folders -->
-        <exclude>cmsadapter/**</exclude>
         <exclude>commons/opennlp/**</exclude>
-        <exclude>data/**</exclude>
-        <exclude>demos</exclude>
-        <exclude>enhancer/engines/**</exclude>
-        <exclude>integration-tests/**</exclude>
-        <exclude>launchers/full/**</exclude>
-        <exclude>launchers/kres/**</exclude>
-        <exclude>launchers/stable/**</exclude>
-        <exclude>launchers/stateless/**</exclude>
-        <exclude>reasoners/**</exclude>
-        <exclude>reengineer/**</exclude>
-        <exclude>releasing/**</exclude>
+        <exclude>commons/webvie/**</exclude>
         
         <!-- build output -->
         <exclude>%regex[(?!((?!${project.build.directory}/)[^/]+/)*src/).*${project.build.directory}.*]</exclude>
@@ -66,7 +88,7 @@
         <exclude>%regex[(?!((?!${project.build.directory}/)[^/]+/)*src/)(.*/)?\.settings(/.*)?]</exclude>
         <exclude>%regex[(?!((?!${project.build.directory}/)[^/]+/)*src/)(.*/)?\.externalToolBuilders(/.*)?]</exclude>
         <exclude>%regex[(?!((?!${project.build.directory}/)[^/]+/)*src/)(.*/)?\.deployables(/.*)?]</exclude>
-        <exclude>%regex[(?!((?!${project.build.directory}/)[^/]+/)*src/)(.*/)?\.wtpmodules(/.*)?]</exclude>
+        <exclude>%regex[(?!((?!${project.build.directory}/)[^/]+/)*src/)(.*/)?\.wtpincludes(/.*)?]</exclude>
         
         <!-- misc -->
         <exclude>%regex[(?!((?!${project.build.directory}/)[^/]+/)*src/)(.*/)?cobertura\.ser]</exclude>

@@ -140,6 +140,25 @@ out the sources from [1] and build it locally.
 
 [1] http://incubator.apache.org/rat/
 
+## Release Apache Stanbol
+
+You should read [1,2] before doing any release related actions.
+
+To do a release test build, you have to activate the 'apache-release' profile.
+For building the framework plus signing the artifacts as it would be done during
+a release you can use
+
+    $ mvn install -Pframework,apache-release
+
+The 'apache-release' profile will be automatically activated when the Maven
+release plugin [3] is used. For doing official release you start with
+
+    $ mvn release:prepare
+
+[1] http://www.apache.org/dev/#releases
+[2] http://incubator.apache.org/guides/releasemanagement.html
+[3] http://maven.apache.org/plugins/maven-release-plugin/
+
 ## Useful links
 
   - Documentation will be published and mailing lists info on [the official

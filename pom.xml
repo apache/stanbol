@@ -19,6 +19,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <version>0.9.0-incubating-SNAPSHOT</version>
+    <relativePath>parent</relativePath>
+  </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-reactor</artifactId>
@@ -116,6 +122,15 @@
       </build>
       <modules>
         <module>launchers/framework</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>apache-release</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>releasing/framework/stanbol-framework-source-release-assembly-descriptor</module>
       </modules>
     </profile>
     <profile>
