@@ -54,33 +54,6 @@ public class OntologyUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(OntologyUtils.class);
 
-    // /**
-    // * Creates an ontology with the specified IRI and only the import
-    // statements
-    // * for linking to all the ontologies in the subtrees set. Useful for
-    // running
-    // * reasoners on an ontology set, as reasoners are instantiated on a single
-    // * ontology.
-    // *
-    // * @param rootIri
-    // * @param subtrees
-    // * @return
-    // */
-    // public static OWLOntology buildImportTree(IRI rootIri,
-    // Set<OWLOntology> subtrees, OWLOntologyManager mgr) {
-    // OWLOntology root = null;
-    // try {
-    // root = rootIri != null ? mgr.createOntology(rootIri) : mgr
-    // .createOntology();
-    // } catch (OWLOntologyAlreadyExistsException e) {
-    // root = mgr.getOntology(rootIri);
-    // } catch (OWLOntologyCreationException e) {
-    // e.printStackTrace();
-    // return root;
-    // }
-    // return buildImportTree(root, subtrees, mgr);
-    // }
-
     public static OWLOntology appendOntology(OntologyInputSource<OWLOntology> parentSrc,
                                              OntologyInputSource<OWLOntology> childSrc,
                                              OWLOntologyManager ontologyManager) {

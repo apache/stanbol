@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -76,6 +77,9 @@ public class OntonetFragment implements WebFragment {
 
     @Reference
     RegistryManager regMgr;
+    
+    @Reference
+    TcManager tcManager;
 
     @Override
     public BundleContext getBundleContext() {

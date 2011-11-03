@@ -136,4 +136,9 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
         this.namespace = namespace;
     }
 
+    @Override
+    public String getID() {
+        return this.toString();
+    }
+
 }

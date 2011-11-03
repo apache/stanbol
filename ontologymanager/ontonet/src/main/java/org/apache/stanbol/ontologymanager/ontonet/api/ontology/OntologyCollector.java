@@ -19,6 +19,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
 import java.util.Collection;
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -31,7 +32,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
  * @author alexdma
  * 
  */
-public interface OntologyCollector extends OntologyInputSourceHandler {
+public interface OntologyCollector extends NamedResource, OntologyInputSourceHandler {
 
     /**
      * Registers a new listener for changes in this ontology space. Has no effect if the same listener is
@@ -56,17 +57,6 @@ public interface OntologyCollector extends OntologyInputSourceHandler {
      * Removes all ontology space listeners registered with this space.
      */
     void clearListeners();
-
-    /**
-     * Returns a Unique Resource Identifier (URI) that identifies this ontology space. For instance, this URI
-     * could be the parent of (some/most of) the base URIs for the ontologies within this space.<br/>
-     * <br/>
-     * A possible way to construct these IDs is by concatenating <code>/{spacetype}</code> (e.g.
-     * <code>/custom</code>) to the scope IRI. However, this is implementation-dependent.
-     * 
-     * @return the URI that identifies this ontology space
-     */
-    String getID();
 
     /**
      * Returns all the listeners registered with this ontology space. Whether the collection reflects or not

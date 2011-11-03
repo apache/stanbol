@@ -73,33 +73,16 @@ public class SessionImpl implements Session {
         else setActive(initialState == State.ACTIVE);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.session.SessionListenable#addSessionListener
-     * (eu.iksproject.kres.api.manager.session.SessionListener)
-     */
     @Override
     public void addSessionListener(SessionListener listener) {
         listeners.add(listener);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seeeu.iksproject.kres.api.manager.session.SessionListenable# clearSessionListeners()
-     */
     @Override
     public void clearSessionListeners() {
         listeners.clear();
-
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.session.Session#close()
-     */
     @Override
     public void close() throws NonReferenceableSessionException {
         // if (getSessionState() == State.ZOMBIE)
@@ -108,41 +91,21 @@ public class SessionImpl implements Session {
         this.setActive(false);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.session.Session#getID()
-     */
     @Override
     public String getID() {
         return id.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.session.SessionListenable#getSessionListeners ()
-     */
     @Override
     public Collection<SessionListener> getSessionListeners() {
         return listeners;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.session.Session#getSessionState()
-     */
     @Override
     public State getSessionState() {
         return state;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.session.Session#isActive()
-     */
     @Override
     public boolean isActive() {
         return state == State.ACTIVE;
@@ -153,11 +116,6 @@ public class SessionImpl implements Session {
         listeners.remove(listener);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.session.Session#setActive(boolean)
-     */
     @Override
     public State setActive(boolean active) throws NonReferenceableSessionException {
         if (getSessionState() == State.ZOMBIE) throw new NonReferenceableSessionException();
@@ -165,11 +123,6 @@ public class SessionImpl implements Session {
         return getSessionState();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return getID().toString();

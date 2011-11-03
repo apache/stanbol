@@ -33,6 +33,8 @@ public enum SpaceType {
 
     /**
      * Denotes a session space (0..n).
+     * 
+     * @deprecated no session spaces should created anymore.
      */
     SESSION("session");
 

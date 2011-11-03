@@ -19,12 +19,13 @@ package org.apache.stanbol.ontologymanager.ontonet.api;
 import java.io.File;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
-import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.apache.stanbol.owl.OWLOntologyManagerFactory;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
@@ -32,6 +33,9 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * An Ontology Network Manager holds all references and tools for creating, modifying and deleting the logical
  * realms that store Web Ontologies, as well as offer facilities for handling the ontologies contained
  * therein.
+ * 
+ * @author alexdma, anuzzolese
+ * 
  */
 public interface ONManager {
 
@@ -49,13 +53,6 @@ public interface ONManager {
      * The key used to configure the base namespace of the ontology network.
      */
     String ONTOLOGY_NETWORK_NS = "org.apache.stanbol.ontologymanager.ontonet.ns";
-
-    /**
-     * Returns the ID of the ontology network manager.
-     * 
-     * @return the ID of the ontology network manager.
-     */
-    String getID();
 
     /**
      * Returns the offline configuration set for this ontology network manager, if any.
@@ -101,28 +98,18 @@ public interface ONManager {
     OntologySpaceFactory getOntologySpaceFactory();
 
     /**
-     * Returns the default ontology storage system for this KReS instance.
-     * 
-     * @return the default ontology store.
-     */
-
-    ClerezzaOntologyStorage getOntologyStore();
-
-    /**
      * Returns an OWL Ontology Manager that is never cleared of its ontologies, so it can be used for caching
      * ontologies without having to reload them using other managers. It is sufficient to catch
      * {@link OWLOntologyAlreadyExistsException}s and obtain the ontology with that same ID from this manager.
      * 
+     * @deprecated the ONManager will soon stop providing a cache manager, as it will gradually be replaced by
+     *             {@link OntologyProvider}. Implementations that need to use an OWLOntologyManager which
+     *             avoids reloading stored ontologies can either call {@link OntologyProvider#getStore()} on
+     *             an {@link OWLOntologyManager}-based implementation, or create a new one by calling
+     *             {@link OWLOntologyManagerFactory#createOWLOntologyManager(IRI[])} or OWL API methods.
      * @return the OWL Ontology Manager used for caching ontologies.
      */
     OWLOntologyManager getOwlCacheManager();
-
-    /**
-     * Returns a factory object that can be used for obtaining OWL API objects.
-     * 
-     * @return the default OWL data factory
-     */
-    OWLDataFactory getOwlFactory();
 
     /**
      * Returns the unique ontology scope registry for this context.
@@ -132,9 +119,9 @@ public interface ONManager {
     ScopeRegistry getScopeRegistry();
 
     /**
-     * Returns the unique KReS session manager for this context.
+     * Returns the unique session manager for this context.
      * 
-     * @return the KreS session manager.
+     * @return the session manager.
      */
     SessionManager getSessionManager();
 

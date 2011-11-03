@@ -22,16 +22,31 @@ import java.util.Set;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 
+/**
+ * An ontology IRI mapper that can be used to trick an OWLOntologyManager into believing all imports are
+ * loaded except for those indicated in the exclusions set. It can be used when imported ontologies have to be
+ * provided in other ways than by dereferencing URLs, for example when we want to load the same ontology from
+ * a triple store programmatically.
+ * 
+ * @author alexdma
+ * 
+ */
 public class PhonyIRIMapper implements OWLOntologyIRIMapper {
 
-    private Set<IRI> notMapped;
+    private Set<IRI> exclusions;
 
     private IRI blankIri = null;
 
     private String blankResourcePath = "/ontologies/blank.owl";
 
-    public PhonyIRIMapper(Set<IRI> notMapped) {
-        this.notMapped = notMapped;
+    /**
+     * 
+     * @param notMapped
+     *            the set of IRIs that will not be mapped by this object, so that the ontology manager will
+     *            only try to load from these IRIs, unless another attached IRI mapper specifies otherwise.
+     */
+    public PhonyIRIMapper(Set<IRI> exclusions) {
+        this.exclusions = exclusions;
         try {
             blankIri = IRI.create(this.getClass().getResource(blankResourcePath));
         } catch (URISyntaxException e) {
@@ -41,7 +56,7 @@ public class PhonyIRIMapper implements OWLOntologyIRIMapper {
 
     @Override
     public IRI getDocumentIRI(IRI arg0) {
-        if (notMapped.contains(arg0)) return null;
+        if (exclusions.contains(arg0)) return null;
         else return blankIri;
     }
 

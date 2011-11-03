@@ -16,8 +16,8 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.semanticweb.owlapi.model.IRI;
 
 /**
  * An ontology space factory is responsible for the creation of new, readily specialized ontology spaces from
@@ -28,7 +28,7 @@ import org.semanticweb.owlapi.model.IRI;
  * 
  * @author alexdma
  */
-public interface OntologySpaceFactory {
+public interface OntologySpaceFactory extends NamedResource {
 
     /**
      * Creates and sets up a default core ontology space. Equivalent to calling
@@ -86,9 +86,5 @@ public interface OntologySpaceFactory {
      * @return the generated ontology space.
      */
     SessionOntologySpace createSessionOntologySpace(String scopeId, OntologyInputSource<?>... sessionSources);
-
-    IRI getNamespace();
-
-    void setNamespace(IRI namespace);
 
 }

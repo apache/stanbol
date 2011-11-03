@@ -20,12 +20,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
  * A system responsible for maintaining registry ontologies. Depending on the implementation, it can be
- * volatile or persistent, centralised or distributed.
+ * volatile or persistent, centralised or distributed.<br>
+ * <br>
+ * TODO see if full CRUD operation support is necessary.
  * 
  * @author alexdma
  * 
@@ -47,7 +51,8 @@ public interface OntologyProvider<S> {
     Set<String> getOntologyReferences();
 
     /**
-     * Returns the storage system used by this ontology provider.
+     * Returns the storage system used by this ontology provider (e.g. a {@link TcProvider} or an
+     * {@link OWLOntologyManager}).
      * 
      * @return the ontology store.
      */
@@ -60,7 +65,7 @@ public interface OntologyProvider<S> {
      *            The expected type for the returned ontology object. If null, the provider will arbitrarily
      *            select a supported return type. If the supplied type is not supported (i.e. not assignable
      *            to any type contained in the result of {@link #getSupportedReturnTypes()}) an
-     *            {@link UnsupportedOperationException} will be thrown.
+     *            {@link UnsupportedOperationException} should be thrown.
      * @return
      */
     Object getStoredOntology(String identifier, Class<?> returnType);
@@ -73,9 +78,53 @@ public interface OntologyProvider<S> {
      */
     Class<?>[] getSupportedReturnTypes();
 
+    /**
+     * Retrieves an ontology by reading its content from a data stream and stores it using the storage system
+     * attached to this provider. A key that can be used to identify the ontology in this provider is returned
+     * if successful.
+     * 
+     * @param data
+     *            the ontology content.
+     * @param formatIdentifier
+     *            the MIME type of the expected serialization format of this ontology. If null, all supported
+     *            formats will be tried until all parsers fail or one succeeds.
+     * @param force
+     *            if true, all mappings provided by the offline configuration will be ignored (both for the
+     *            root ontology and its recursive imports) and the provider will forcibly try to resolve the
+     *            location IRI. If some remote import is found, the import policy is aggressive and Stanbol is
+     *            set on offline mode, this method will fail.
+     * @return a key that can be used to retrieve the stored ontology afterwards, or null if loading/storage
+     *         failed.
+     * @throws IOException
+     *             if all attempts to load the ontology failed.
+     * @throws UnsupportedFormatException
+     *             if no parsers are able to parse the supplied format (or the actual file format).
+     */
     String loadInStore(InputStream data, String formatIdentifier, boolean force) throws IOException,
                                                                                 UnsupportedFormatException;
 
+    /**
+     * Retrieves an ontology physically located at <code>location</code> (unless mapped otherwise by the
+     * offline configuration) and stores it using the storage system attached to this provider. A key that can
+     * be used to identify the ontology in this provider is returned if successful.
+     * 
+     * @param location
+     *            the physical IRI where the ontology is located.
+     * @param formatIdentifier
+     *            the MIME type of the expected serialization format of this ontology. If null, all supported
+     *            formats will be tried until all parsers fail or one succeeds.
+     * @param force
+     *            if true, all mappings provided by the offline configuration will be ignored (both for the
+     *            root ontology and its recursive imports) and the provider will forcibly try to resolve the
+     *            location IRI. If the IRI is not local and Stanbol is set on offline mode, this method will
+     *            fail.
+     * @return a key that can be used to retrieve the stored ontology afterwards, or null if loading/storage
+     *         failed.
+     * @throws IOException
+     *             if all attempts to load the ontology failed.
+     * @throws UnsupportedFormatException
+     *             if no parsers are able to parse the supplied format (or the actual file format).
+     */
     String loadInStore(IRI location, String formatIdentifier, boolean force) throws IOException,
                                                                             UnsupportedFormatException;
 

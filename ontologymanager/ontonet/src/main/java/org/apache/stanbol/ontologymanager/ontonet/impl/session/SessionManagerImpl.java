@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.ontologymanager.ontonet.impl.session;
 
 import java.io.OutputStream;
@@ -27,15 +27,14 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionIDException;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionIDGenerator;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session.State;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent.OperationType;
-import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionIDGenerator;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
@@ -63,14 +62,14 @@ public class SessionManagerImpl implements SessionManager {
 
     protected ScopeRegistry scopeRegistry;
 
-    protected ClerezzaOntologyStorage store;
+    // protected ClerezzaOntologyStorage store;
 
-    public SessionManagerImpl(IRI baseIri, ScopeRegistry scopeRegistry, ClerezzaOntologyStorage store) {
+    public SessionManagerImpl(IRI baseIri, ScopeRegistry scopeRegistry/* , ClerezzaOntologyStorage store */) {
         idgen = new TimestampedSessionIDGenerator(baseIri);
         listeners = new HashSet<SessionListener>();
         sessionsByID = new HashMap<String,Session>();
         this.scopeRegistry = scopeRegistry;
-        this.store = store;
+        // this.store = store;
     }
 
     /*
@@ -260,14 +259,14 @@ public class SessionManagerImpl implements SessionManager {
      */
     @Override
     public void storeSession(String sessionID, OutputStream out) throws NonReferenceableSessionException,
-                                                             OWLOntologyStorageException {
+                                                                OWLOntologyStorageException {
         /*
          * For each gession space in the session save all the ontologies contained in the space.
          */
         for (SessionOntologySpace so : getSessionSpaces(sessionID)) {
             for (OWLOntology owlOntology : so.getOntologies(true)) {
 
-                store.store(owlOntology);
+                // store.store(owlOntology);
 
             }
         }

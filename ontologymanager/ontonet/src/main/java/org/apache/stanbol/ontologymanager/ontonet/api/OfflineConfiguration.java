@@ -23,6 +23,9 @@ import org.semanticweb.owlapi.model.IRI;
 /**
  * Provides the configuration needed for the {@link ONManager}. A configuration should only be handled
  * internally by the {@link ONManager} implementation.
+ * 
+ * @author alexdma
+ * 
  */
 public interface OfflineConfiguration {
 

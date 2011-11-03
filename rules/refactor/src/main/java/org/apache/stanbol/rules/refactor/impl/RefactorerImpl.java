@@ -25,10 +25,14 @@ import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.access.EntityAlreadyExistsException;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
+import org.apache.clerezza.rdf.core.impl.SimpleGraph;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
+import org.apache.clerezza.rdf.core.sparql.ParseException;
+import org.apache.clerezza.rdf.core.sparql.QueryParser;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -45,9 +49,10 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.owl.transformation.JenaToClerezzaConverter;
+import org.apache.stanbol.owl.transformation.JenaToOwlConvert;
 import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
+import org.apache.stanbol.owl.util.OWLUtils;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.Rule;
@@ -339,13 +344,39 @@ public class RefactorerImpl implements Refactorer {
 
     }
 
+    /**
+     * Method borrowed from the old ontonet ClerezzaStorage
+     * 
+     * @param sparql
+     * @param datasetURI
+     * @return
+     */
+    private OWLOntology sparqlConstruct(String sparql, String datasetURI) {
+
+        org.apache.clerezza.rdf.core.sparql.query.Query query;
+        MGraph mGraph = new SimpleMGraph();
+        try {
+            query = QueryParser.getInstance().parse(sparql);
+            UriRef datasetUriRef = new UriRef(datasetURI);
+            MGraph dataset = weightedTcProvider.getMGraph(datasetUriRef);
+            mGraph.addAll((SimpleGraph) tcManager.executeSparqlQuery(query, dataset));
+        } catch (ParseException e) {
+            log.error("Unable to execute SPARQL. ", e);
+        }
+
+        Model om = JenaToClerezzaConverter.clerezzaMGraphToJenaModel(mGraph);
+        JenaToOwlConvert converter = new JenaToOwlConvert();
+
+        return converter.ModelJenaToOwlConvert(om, "RDF/XML");
+    }
+
     @Override
     public void ontologyRefactoring(IRI refactoredOntologyIRI, IRI datasetURI, IRI recipeIRI) throws RefactoringException,
                                                                                              NoSuchRecipeException {
 
         OWLOntology refactoredOntology = null;
 
-        ClerezzaOntologyStorage ontologyStorage = onManager.getOntologyStore();
+        // ClerezzaOntologyStorage ontologyStorage = onManager.getOntologyStore();
 
         Recipe recipe;
         try {
@@ -358,8 +389,8 @@ public class RefactorerImpl implements Refactorer {
             String fingerPrint = "";
             for (Rule kReSRule : kReSRuleList) {
                 String sparql = kReSRule.toSPARQL();
-                OWLOntology refactoredDataSet = ontologyStorage
-                        .sparqlConstruct(sparql, datasetURI.toString());
+                OWLOntology refactoredDataSet = /* ontologyStorage */this.sparqlConstruct(sparql,
+                    datasetURI.toString());
 
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 try {
@@ -394,7 +425,7 @@ public class RefactorerImpl implements Refactorer {
 
                 refactoredOntology = merger.createMergedOntology(ontologyManager, refactoredOntologyIRI);
 
-                ontologyStorage.store(refactoredOntology);
+                /* ontologyStorage. */store(refactoredOntology);
 
             } catch (OWLOntologyCreationException e) {
                 // TODO Auto-generated catch block
@@ -409,6 +440,30 @@ public class RefactorerImpl implements Refactorer {
         if (refactoredOntology == null) {
             throw new RefactoringException();
         }
+    }
+
+    /**
+     * Method borrowed from the old ontonet ClerezzaStorage
+     * 
+     * @param o
+     */
+    private void store(OWLOntology o) {
+        // // Why was it using two converters earlier?
+        // JenaToOwlConvert converter = new JenaToOwlConvert();
+        // OntModel om = converter.ModelOwlToJenaConvert(o, "RDF/XML");
+        // MGraph mg = JenaToClerezzaConverter.jenaModelToClerezzaMGraph(om);
+        TripleCollection mg = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(o);
+        MGraph mg2 = null;
+        IRI iri = OWLUtils.guessOntologyIdentifier(o);
+        UriRef ref = new UriRef(iri.toString());
+        try {
+            mg2 = tcManager.createMGraph(ref);
+        } catch (EntityAlreadyExistsException ex) {
+            log.info("Entity " + ref + " already exists in store. Replacing...");
+            mg2 = tcManager.getMGraph(ref);
+        }
+
+        mg2.addAll(mg);
     }
 
     @Override

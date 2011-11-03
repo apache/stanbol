@@ -40,11 +40,10 @@ import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorModificationException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorModificationException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.web.util.OntologyRenderUtils;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -77,13 +76,9 @@ public class ScopeOntologyResource extends BaseStanbolResource {
      */
     protected ONManager onm;
 
-    protected ClerezzaOntologyStorage storage;
-
     public ScopeOntologyResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
-        this.storage = (ClerezzaOntologyStorage) ContextHelper.getServiceFromContext(
-            ClerezzaOntologyStorage.class, servletContext);
     }
 
     /**
@@ -130,8 +125,8 @@ public class ScopeOntologyResource extends BaseStanbolResource {
                 return Response.ok(scope.getCoreSpace().asOWLOntology()).build();
             } else if (temp.equals(scope.getCustomSpace().getID())) {
                 return Response.ok(scope.getCustomSpace().asOWLOntology()).build();
-//            } else if (scope.getSessionSpace(IRI.create(temp)) != null) {
-//                return Response.ok(scope.getSessionSpace(IRI.create(temp)).asOWLOntology()).build();
+                // } else if (scope.getSessionSpace(IRI.create(temp)) != null) {
+                // return Response.ok(scope.getSessionSpace(IRI.create(temp)).asOWLOntology()).build();
             }
 
             /*
@@ -163,7 +158,7 @@ public class ScopeOntologyResource extends BaseStanbolResource {
                         .getOntologySourceLocations().toArray(new IRI[0]));
 
                 final Set<OWLOntology> ontologies = scope.getCustomSpace().getOntologies(true);
-//                        scope.getSessionSpace(ontiri).getOntologies(true);
+                // scope.getSessionSpace(ontiri).getOntologies(true);
 
                 OWLOntologySetProvider provider = new OWLOntologySetProvider() {
                     @Override

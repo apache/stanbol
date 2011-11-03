@@ -17,7 +17,10 @@
 package org.apache.stanbol.ontologymanager.ontonet.io;
 
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.reset;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -38,6 +41,7 @@ import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -59,7 +63,7 @@ public class TestOWLAPIInputSources {
     public static void setUp() {
         Dictionary<String,Object> onmconf = new Hashtable<String,Object>();
         onm = new ONManagerImpl(null, null, new OfflineConfigurationImpl(onmconf), onmconf);
-        df = onm.getOwlFactory();
+        df = OWLManager.getOWLDataFactory();
     }
 
     @Test
@@ -151,7 +155,7 @@ public class TestOWLAPIInputSources {
         OWLClass cPerzon = df.getOWLClass(IRI.create("http://xmlns.com/foaf/0.1/Perzon"));
         assertTrue(coreSource.getRootOntology().getClassesInSignature().contains(cPerzon));
     }
-    
+
     @After
     public void cleanup() {
         reset();

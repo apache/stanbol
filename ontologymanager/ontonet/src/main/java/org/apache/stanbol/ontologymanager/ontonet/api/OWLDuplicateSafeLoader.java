@@ -44,7 +44,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * then the loading of the network will fail if there are duplicate owl:import
  * statements in different places.</p>
  * 
- * @author enrico daga
+ * @author enridaga
  * 
  */
 public class OWLDuplicateSafeLoader {

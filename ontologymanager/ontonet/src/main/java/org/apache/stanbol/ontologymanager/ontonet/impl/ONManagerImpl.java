@@ -42,8 +42,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CustomOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.NoSuchScopeException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
@@ -57,8 +55,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.conf.OntologyNetworkConfigurationUtils;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.OntologySpaceFactoryImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
-import org.apache.stanbol.ontologymanager.ontonet.impl.io.InMemoryOntologyStorage;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyIndexImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.ScopeRegistryImpl;
@@ -66,13 +62,11 @@ import org.apache.stanbol.ontologymanager.ontonet.impl.session.ScopeSessionSynch
 import org.apache.stanbol.ontologymanager.ontonet.impl.session.SessionManagerImpl;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.osgi.service.component.ComponentContext;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.FileDocumentSource;
 import org.semanticweb.owlapi.io.IRIDocumentSource;
 import org.semanticweb.owlapi.io.OWLOntologyDocumentSource;
 import org.semanticweb.owlapi.io.StreamDocumentSource;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -179,13 +173,11 @@ public class ONManagerImpl implements ONManager {
 
     private OWLOntologyManager owlCacheManager;
 
-    private OWLDataFactory owlFactory;
-
     private ScopeRegistry scopeRegistry;
 
     private SessionManager sessionManager;
 
-    private ClerezzaOntologyStorage storage;
+    // private ClerezzaOntologyStorage storage;
 
     @Reference
     private TcManager tcm;
@@ -310,7 +302,6 @@ public class ONManagerImpl implements ONManager {
             // Ok, go empty
         }
 
-        owlFactory = OWLManager.getOWLDataFactory();
         owlCacheManager = OWLOntologyManagerFactory.createOWLOntologyManager(offline
                 .getOntologySourceLocations().toArray(new IRI[0]));
 
@@ -318,7 +309,7 @@ public class ONManagerImpl implements ONManager {
         scopeRegistry = new ScopeRegistryImpl();
         oIndex = new OntologyIndexImpl(this);
 
-        bindResources(this.tcm, this.wtcp);
+        bindResources();
 
         // String tfile = (String) configuration.get(CONFIG_FILE_PATH);
         // if (tfile != null) this.configPath = tfile;
@@ -382,43 +373,19 @@ public class ONManagerImpl implements ONManager {
 
     }
 
-    protected void bindResources(TcManager tcm, WeightedTcProvider wtcp) {
-        // At this stage we know if tcm and wtcp have been provided or not.
-
-        /*
-         * With the current implementation of OntologyStorage, we cannot live with either component being
-         * null. So create the object only if both are not null.
-         */
-
-        if (tcm != null && wtcp != null) storage = new ClerezzaOntologyStorage(tcm, wtcp);
-        // Manage this in-memory, so it won't have to be null.
-        else {
-            storage = new InMemoryOntologyStorage();
-        }
-
-        // Now create everything that depends on the Storage object.
-
-        // These may require the OWL cache manager
+    protected void bindResources() {
 
         if (ontologyProvider.getStore() instanceof TcManager) ontologySpaceFactory = new OntologySpaceFactoryImpl(
                 scopeRegistry, (OntologyProvider<TcProvider>) ontologyProvider, offline,
                 IRI.create(getOntologyNetworkNamespace()));
         else ontologySpaceFactory = new org.apache.stanbol.ontologymanager.ontonet.impl.owlapi.OntologySpaceFactoryImpl(
-                scopeRegistry, storage, offline, IRI.create(getOntologyNetworkNamespace()));
+                scopeRegistry, offline, IRI.create(getOntologyNetworkNamespace()));
 
         ontologyScopeFactory = new OntologyScopeFactoryImpl(scopeRegistry,
                 IRI.create(getOntologyNetworkNamespace()), ontologySpaceFactory);
         ontologyScopeFactory.addScopeEventListener(oIndex);
 
-        // // This requires the OWL cache manager
-        // registryLoader = new RegistryLoaderImpl(this);
-
-        // TODO : assign dynamically in case the FISE persistence store is not
-        // available.
-        // storage = new FISEPersistenceStorage();
-
-        sessionManager = new SessionManagerImpl(IRI.create("http://kres.iks-project.eu/"),
-                getScopeRegistry(), storage);
+        sessionManager = new SessionManagerImpl(IRI.create("http://kres.iks-project.eu/"), getScopeRegistry());
         sessionManager.addSessionListener(new ScopeSessionSynchronizer(this));
     }
 
@@ -460,12 +427,11 @@ public class ONManagerImpl implements ONManager {
                         try {
                             corespc.addOntology(new RootOntologyIRISource(IRI.create(cores[i])));
                         } catch (Exception ex) {
-                            log.warn("KReS :: failed to import ontology " + cores[i], ex);
+                            log.warn("Failed to import ontology " + cores[i], ex);
                             continue;
                         }
-                    // TODO: this call should be automatic
-                    ((CustomOntologySpace) sc.getCustomSpace()).attachCoreSpace((CoreOntologySpace) corespc,
-                        false);
+                    // ((CustomOntologySpace) sc.getCustomSpace()).attachCoreSpace((CoreOntologySpace)
+                    // corespc, false);
                 }
 
                 sc.setUp();
@@ -529,12 +495,6 @@ public class ONManagerImpl implements ONManager {
         this.offlineMode = mode;
     }
 
-    @Override
-    public String getID() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     public OntologyIndex getOntologyIndex() {
         return oIndex;
     }
@@ -567,22 +527,14 @@ public class ONManagerImpl implements ONManager {
         return ontologySpaceFactory;
     }
 
-    public ClerezzaOntologyStorage getOntologyStore() {
-        return storage;
-    }
+    // public ClerezzaOntologyStorage getOntologyStore() {
+    // // return storage;
+    // return null;
+    // }
 
     public OWLOntologyManager getOwlCacheManager() {
         // return OWLManager.createOWLOntologyManager();
         return owlCacheManager;
-    }
-
-    /**
-     * Returns a factory object that can be used for obtaining OWL API objects.
-     * 
-     * @return the default OWL data factory
-     */
-    public OWLDataFactory getOwlFactory() {
-        return owlFactory;
     }
 
     public Helper getScopeHelper() {

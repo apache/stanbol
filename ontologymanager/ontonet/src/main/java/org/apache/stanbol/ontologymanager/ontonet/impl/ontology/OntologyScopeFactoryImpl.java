@@ -40,10 +40,9 @@ import org.slf4j.LoggerFactory;
 public class OntologyScopeFactoryImpl implements OntologyScopeFactory {
 
     private Set<ScopeEventListener> listeners = new HashSet<ScopeEventListener>();
-
     private Logger log = LoggerFactory.getLogger(getClass());
-
     protected IRI namespace;
+
     protected ScopeRegistry registry;
     protected OntologySpaceFactory spaceFactory;
 
@@ -69,14 +68,8 @@ public class OntologyScopeFactoryImpl implements OntologyScopeFactory {
         listeners.clear();
     }
 
-    // @Override
-    // public OntologyScope createOntologyScope(String scopeID, OntologyInputSource coreSource) throws
-    // DuplicateIDException {
-    // return createOntologyScope(scopeID, coreSource, null);
-    // }
-
     @Override
-    public OntologyScope createOntologyScope(String scopeID, OntologyInputSource... coreSources) throws DuplicateIDException {
+    public OntologyScope createOntologyScope(String scopeID, OntologyInputSource<?>... coreSources) throws DuplicateIDException {
 
         if (registry.containsScope(scopeID)) throw new DuplicateIDException(scopeID,
                 "Scope registry already contains ontology scope with ID " + scopeID);
@@ -93,6 +86,16 @@ public class OntologyScopeFactoryImpl implements OntologyScopeFactory {
     }
 
     @Override
+    public String getID() {
+        return this.toString();
+    }
+
+    @Override
+    public IRI getNamespace() {
+        return this.namespace;
+    }
+
+    @Override
     public Collection<ScopeEventListener> getScopeEventListeners() {
         return listeners;
     }
@@ -100,11 +103,6 @@ public class OntologyScopeFactoryImpl implements OntologyScopeFactory {
     @Override
     public void removeScopeEventListener(ScopeEventListener listener) {
         listeners.remove(listener);
-    }
-
-    @Override
-    public IRI getNamespace() {
-        return this.namespace;
     }
 
     @Override

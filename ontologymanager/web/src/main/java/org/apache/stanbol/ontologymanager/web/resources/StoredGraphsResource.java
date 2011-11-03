@@ -18,7 +18,6 @@ package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -39,15 +38,17 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
-import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.NoSuchStoreException;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
+import org.apache.stanbol.owl.transformation.JenaToClerezzaConverter;
+import org.apache.stanbol.owl.transformation.JenaToOwlConvert;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
@@ -61,6 +62,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.ontology.OntModel;
 import com.sun.jersey.api.view.ImplicitProduces;
 import com.sun.jersey.multipart.FormDataParam;
 
@@ -72,23 +74,13 @@ public class StoredGraphsResource extends BaseStanbolResource {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     protected ONManager onManager;
-    protected ClerezzaOntologyStorage storage;
 
     protected TcManager tcManager;
 
     public StoredGraphsResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
-        storage = (ClerezzaOntologyStorage) (servletContext.getAttribute(ClerezzaOntologyStorage.class
-                .getName()));
         tcManager = (TcManager) servletContext.getAttribute(TcManager.class.getName());
-
         onManager = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
-        // onManager = (ONManager) (servletContext.getAttribute(ONManager.class.getName()));
-        if (onManager == null) {
-            throw new IllegalStateException("OntologyStorage missing in ServletContext");
-        } else {
-            storage = onManager.getOntologyStore();
-        }
     }
 
     @GET
@@ -98,14 +90,7 @@ public class StoredGraphsResource extends BaseStanbolResource {
                              @Context HttpHeaders headers) {
 
         IRI ontologyID = IRI.create(graphid);
-
-        // return Response.ok(tcManager.getMGraph(new UriRef(graphid))).build();
-        try {
-            return Response.ok(storage.getGraph(ontologyID)).build();
-        } catch (NoSuchStoreException e) {
-            return Response.status(NO_CONTENT).build();
-        }
-
+        return Response.ok(tcManager.getGraph(new UriRef(ontologyID.toString()))).build();
     }
 
     public String getNamespace() {
@@ -113,11 +98,11 @@ public class StoredGraphsResource extends BaseStanbolResource {
     }
 
     public List<String> getStoredGraphs() {
-        Set<IRI> iris = storage.listGraphs();
+        Set<UriRef> iris = tcManager.listGraphs();
 
         ArrayList<String> graphs = new ArrayList<String>();
-        for (IRI iri : iris) {
-            graphs.add(iri.toString());
+        for (UriRef iri : iris) {
+            graphs.add(iri.getUnicodeString());
         }
         return graphs;
     }
@@ -127,7 +112,7 @@ public class StoredGraphsResource extends BaseStanbolResource {
     @Produces({KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.OWL_XML, KRFormat.RDF_XML,
                KRFormat.TURTLE, KRFormat.RDF_JSON})
     public Response graphs(@Context HttpHeaders headers, @Context ServletContext servletContext) {
-        Set<IRI> iris = storage.listGraphs();
+        Set<UriRef> iris = tcManager.listGraphs();
         if (iris != null) {
 
             // OWLOntologyManager manager = onManager.getOntologyManagerFactory().createOntologyManager(true);
@@ -151,9 +136,11 @@ public class StoredGraphsResource extends BaseStanbolResource {
 
                 OWLObjectProperty p = factory.getOWLObjectProperty(IRI.create(ns + "hasGraph"));
 
-                for (IRI iri : iris) {
-                    iri = IRI.create(iri.toString().replace("<", "").replace(">", ""));
-                    OWLNamedIndividual graph = factory.getOWLNamedIndividual(iri);
+                for (UriRef iri : iris) {
+                    // iri = IRI.create(iri.toString().replace("<", "").replace(">", ""));
+                    // This should remove quotes
+                    OWLNamedIndividual graph = factory.getOWLNamedIndividual(IRI.create(iri
+                            .getUnicodeString()));
                     OWLObjectPropertyAssertionAxiom axiom = factory.getOWLObjectPropertyAssertionAxiom(p,
                         storage, graph);
                     manager.applyChange(new AddAxiom(ontology, axiom));
@@ -182,10 +169,20 @@ public class StoredGraphsResource extends BaseStanbolResource {
 
         try {
             OWLOntology ontology = manager.loadOntologyFromOntologyDocument(graph);
-            storage.store(ontology, IRI.create(id));
+            /* storage. */store(ontology, IRI.create(id));
             return Response.ok().build();
         } catch (OWLOntologyCreationException e) {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private void store(OWLOntology o, IRI ontologyID) {
+
+        JenaToOwlConvert converter = new JenaToOwlConvert();
+        OntModel om = converter.ModelOwlToJenaConvert(o, "RDF/XML");
+        MGraph mg = JenaToClerezzaConverter.jenaModelToClerezzaMGraph(om);
+        // MGraph mg = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(o);
+        MGraph mg2 = tcManager.createMGraph(new UriRef(ontologyID.toString()));
+        mg2.addAll(mg);
     }
 }

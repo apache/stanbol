@@ -144,6 +144,8 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
      */
     @Override
     public OWLOntology asOWLOntology(boolean merge) {
+        if (merge) throw new UnsupportedOperationException(
+                "Ontology merging not implemented yet. Please set merge parameter to false.");
         // Create an ontology manager on the fly. We don't really need a permanent one.
         OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
         OWLDataFactory df = mgr.getOWLDataFactory();
@@ -223,13 +225,13 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     }
 
     @Override
-    public void onOntologyAdded(IRI spaceId, IRI addedOntology) {
+    public void onOntologyAdded(String collectorId, IRI addedOntology) {
         // Propagate events to scope listeners
         fireOntologyAdded(addedOntology);
     }
 
     @Override
-    public void onOntologyRemoved(IRI spaceId, IRI removedOntology) {
+    public void onOntologyRemoved(String collectorId, IRI removedOntology) {
         // Propagate events to scope listeners
         fireOntologyRemoved(removedOntology);
     }
@@ -248,7 +250,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
         else {
             this.customSpace = (CustomOntologySpace) customSpace;
             this.customSpace.addListener(this);
-            this.customSpace.attachCoreSpace(this.coreSpace, true);
+            // this.customSpace.attachCoreSpace(this.coreSpace, true);
         }
 
     }
@@ -304,7 +306,6 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     @Override
     public void synchronizeSpaces() {
         // TODO Auto-generated method stub
-
     }
 
     @Override

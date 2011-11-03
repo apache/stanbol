@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package org.apache.stanbol.reengineer.web.resources;
 
@@ -39,13 +39,16 @@ import javax.ws.rs.core.Response;
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.access.EntityAlreadyExistsException;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
+import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
+import org.apache.stanbol.owl.util.OWLUtils;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.Reengineer;
 import org.apache.stanbol.reengineer.base.api.ReengineerManager;
@@ -67,26 +70,29 @@ import com.sun.jersey.api.view.ImplicitProduces;
 import com.sun.jersey.api.view.Viewable;
 import com.sun.jersey.multipart.FormDataParam;
 
-
 @Path("/reengineer")
 @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
 public class ReengineerResource extends BaseStanbolResource {
 
-    protected ReengineerManager reengineeringManager;
-    protected TcManager tcManager;
-    protected ClerezzaOntologyStorage storage;
-
     private final Logger log = LoggerFactory.getLogger(getClass());
+    protected ReengineerManager reengineeringManager;
 
+    protected TcManager tcManager;
 
     public ReengineerResource(@Context ServletContext servletContext) {
         tcManager = (TcManager) ContextHelper.getServiceFromContext(TcManager.class, servletContext);
-        storage = (ClerezzaOntologyStorage) servletContext.getAttribute(ClerezzaOntologyStorage.class.getName());
-        reengineeringManager = (ReengineerManager) ContextHelper.getServiceFromContext(ReengineerManager.class, servletContext);
+        reengineeringManager = (ReengineerManager) ContextHelper.getServiceFromContext(
+            ReengineerManager.class, servletContext);
         if (reengineeringManager == null) {
-            throw new IllegalStateException(
-            "ReengineeringManager missing in ServletContext");
+            throw new IllegalStateException("ReengineeringManager missing in ServletContext");
         }
+    }
+
+    @GET
+    @Path("/reengineers/count")
+    public Response countReengineers(@Context HttpHeaders headers) {
+
+        return Response.ok(reengineeringManager.countReengineers()).build();
     }
 
     @GET
@@ -95,16 +101,31 @@ public class ReengineerResource extends BaseStanbolResource {
         return Response.ok(new Viewable("index", this), TEXT_HTML).build();
     }
 
+    @GET
+    @Path("/reengineers")
+    public Response listReengineers(@Context HttpHeaders headers) {
+        Collection<Reengineer> reengineers = reengineeringManager.listReengineers();
+        MGraph mGraph = new SimpleMGraph();
+        UriRef semionRef = new UriRef("http://semion.kres.iksproject.eu#Semion");
+        for (Reengineer semionReengineer : reengineers) {
+            UriRef hasReengineer = new UriRef("http://semion.kres.iksproject.eu#hasReengineer");
+            Literal reenginnerLiteral = LiteralFactory.getInstance().createTypedLiteral(
+                semionReengineer.getClass().getCanonicalName());
+            mGraph.add(new TripleImpl(semionRef, hasReengineer, reenginnerLiteral));
+        }
+
+        return Response.ok(mGraph).build();
+    }
+
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response reengineering(
-                                  @FormDataParam("output-graph") String outputGraph,
-                                  @FormDataParam("input-type") String inputType, 
+    public Response reengineering(@FormDataParam("output-graph") String outputGraph,
+                                  @FormDataParam("input-type") String inputType,
                                   @FormDataParam("input") InputStream input,
-                                  @Context HttpHeaders headers, @Context HttpServletRequest httpServletRequest){
+                                  @Context HttpHeaders headers,
+                                  @Context HttpServletRequest httpServletRequest) {
 
-
-        System.out.println("Reengineering: "+inputType);
+        System.out.println("Reengineering: " + inputType);
         int reengineerType = -1;
         try {
             reengineerType = ReengineerType.getType(inputType);
@@ -117,19 +138,20 @@ public class ReengineerResource extends BaseStanbolResource {
 
             try {
                 OWLOntology ontology;
-                System.out.println("STORE PROVIDER : "+storage);
-                System.out.println("OUTGRAPH: "+outputGraph);
+                // System.out.println("STORE PROVIDER : "+storage);
+                // System.out.println("OUTGRAPH: "+outputGraph);
                 String servletPath = httpServletRequest.getLocalAddr();
-                System.out.println("SERVER PATH : "+servletPath);
-                servletPath = "http://"+servletPath+"/kres/graphs/"+outputGraph+":"+httpServletRequest.getLocalPort();
-                if(outputGraph == null || outputGraph.equals("")){
+                // System.out.println("SERVER PATH : "+servletPath);
+                servletPath = "http://" + servletPath + "/kres/graphs/" + outputGraph + ":"
+                              + httpServletRequest.getLocalPort();
+                if (outputGraph == null || outputGraph.equals("")) {
                     ontology = reengineeringManager.performReengineering(servletPath, null, dataSource);
                     return Response.ok().build();
-                }
-                else{
-                    ontology = reengineeringManager.performReengineering(servletPath, IRI.create(outputGraph), dataSource);
+                } else {
+                    ontology = reengineeringManager.performReengineering(servletPath,
+                        IRI.create(outputGraph), dataSource);
 
-                    storage.store(ontology);
+                    store(ontology);
                     return Response.ok(ontology).build();
                 }
             } catch (ReengineeringException e) {
@@ -145,16 +167,110 @@ public class ReengineerResource extends BaseStanbolResource {
 
     }
 
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Path("/db")
+    public Response reengineeringDB(@QueryParam("db") String physicalDBName,
+                                    @QueryParam("jdbc") String jdbcDriver,
+                                    @QueryParam("protocol") String protocol,
+                                    @QueryParam("host") String host,
+                                    @QueryParam("port") String port,
+                                    @QueryParam("username") String username,
+                                    @QueryParam("password") String password,
+                                    @QueryParam("output-graph") String outputGraph,
+                                    @Context HttpHeaders headers,
+                                    @Context HttpServletRequest httpServletRequest) {
+
+        log.info("There are " + tcManager.listMGraphs().size() + " mGraphs");
+        System.out.println("There are " + tcManager.listMGraphs().size() + " mGraphs");
+
+        // UriRef uri = ContentItemHelper.makeDefaultUri(databaseURI, databaseURI.getBytes());
+        ConnectionSettings connectionSettings = new DBConnectionSettings(protocol, host, port,
+                physicalDBName, username, password, null, jdbcDriver);
+        DataSource dataSource = new RDB(connectionSettings);
+
+        String servletPath = httpServletRequest.getLocalAddr();
+        servletPath = "http://" + servletPath + "/kres/graphs/" + outputGraph + ":"
+                      + httpServletRequest.getLocalPort();
+
+        if (outputGraph != null && !outputGraph.equals("")) {
+            OWLOntology ontology;
+            try {
+                ontology = reengineeringManager.performReengineering(servletPath, IRI.create(outputGraph),
+                    dataSource);
+                return Response.ok(ontology).build();
+            } catch (ReengineeringException e) {
+                return Response.status(500).build();
+            }
+
+        } else {
+            try {
+                reengineeringManager.performReengineering(servletPath, null, dataSource);
+                return Response.ok().build();
+            } catch (ReengineeringException e) {
+                return Response.status(500).build();
+            }
+        }
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Path("/db/schema")
+    public Response reengineeringDBSchema(@FormParam("output-graph") String outputGraph,
+                                          @FormParam("db") String physicalDBName,
+                                          @FormParam("jdbc") String jdbcDriver,
+                                          @FormParam("protocol") String protocol,
+                                          @FormParam("host") String host,
+                                          @FormParam("port") String port,
+                                          @FormParam("username") String username,
+                                          @FormParam("password") String password,
+                                          @Context HttpHeaders headers,
+                                          @Context HttpServletRequest httpServletRequest) {
+
+        log.info("There are " + tcManager.listMGraphs().size() + " mGraphs");
+        System.out.println("There are " + tcManager.listMGraphs().size() + " mGraphs");
+
+        // UriRef uri = ContentItemHelper.makeDefaultUri(databaseURI, databaseURI.getBytes());
+        ConnectionSettings connectionSettings = new DBConnectionSettings(protocol, host, port,
+                physicalDBName, username, password, null, jdbcDriver);
+        DataSource dataSource = new RDB(connectionSettings);
+
+        String servletPath = httpServletRequest.getLocalAddr();
+        servletPath = "http://" + servletPath + "/kres/graphs/" + outputGraph + ":"
+                      + httpServletRequest.getLocalPort();
+
+        if (outputGraph != null && !outputGraph.equals("")) {
+            OWLOntology ontology;
+            try {
+                ontology = reengineeringManager.performSchemaReengineering(servletPath,
+                    IRI.create(outputGraph), dataSource);
+                /*
+                 * MediaType mediaType = headers.getMediaType(); String res =
+                 * OntologyRenderUtils.renderOntology(ontology, mediaType.getType());
+                 */
+                return Response.ok(ontology).build();
+            } catch (ReengineeringException e) {
+                return Response.status(500).build();
+            }
+        } else {
+            try {
+                reengineeringManager.performSchemaReengineering(servletPath, null, dataSource);
+                return Response.ok().build();
+            } catch (ReengineeringException e) {
+                return Response.status(500).build();
+            }
+        }
+
+    }
 
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Path("/schema")
-    public Response schemaReengineering(
-                                        @FormDataParam("output-graph") String outputGraph,
-                                        @FormDataParam("input-type") String inputType, 
-                                        @FormDataParam("input") InputStream input, 
-                                        @Context HttpHeaders headers, 
-                                        @Context HttpServletRequest httpServletRequest){
+    public Response schemaReengineering(@FormDataParam("output-graph") String outputGraph,
+                                        @FormDataParam("input-type") String inputType,
+                                        @FormDataParam("input") InputStream input,
+                                        @Context HttpHeaders headers,
+                                        @Context HttpServletRequest httpServletRequest) {
 
         int reengineerType = -1;
         try {
@@ -170,13 +286,14 @@ public class ReengineerResource extends BaseStanbolResource {
                 OWLOntology ontology;
 
                 String servletPath = httpServletRequest.getLocalAddr();
-                servletPath = "http://"+servletPath+"/kres/graphs/"+outputGraph+":"+httpServletRequest.getLocalPort();
-                if(outputGraph == null){
+                servletPath = "http://" + servletPath + "/kres/graphs/" + outputGraph + ":"
+                              + httpServletRequest.getLocalPort();
+                if (outputGraph == null) {
                     ontology = reengineeringManager.performSchemaReengineering(servletPath, null, dataSource);
                     return Response.ok().build();
-                }
-                else{
-                    ontology = reengineeringManager.performSchemaReengineering(servletPath, IRI.create(outputGraph), dataSource);
+                } else {
+                    ontology = reengineeringManager.performSchemaReengineering(servletPath,
+                        IRI.create(outputGraph), dataSource);
                     return Response.ok(ontology).build();
                 }
             } catch (ReengineeringException e) {
@@ -191,120 +308,28 @@ public class ReengineerResource extends BaseStanbolResource {
 
     }
 
-
-
-    @GET
-    @Path("/reengineers")
-    public Response listReengineers(@Context HttpHeaders headers){
-        Collection<Reengineer> reengineers = reengineeringManager.listReengineers();
-        MGraph mGraph = new SimpleMGraph();
-        UriRef semionRef = new UriRef("http://semion.kres.iksproject.eu#Semion");
-        for(Reengineer semionReengineer : reengineers){
-            UriRef hasReengineer = new UriRef("http://semion.kres.iksproject.eu#hasReengineer");
-            Literal reenginnerLiteral = LiteralFactory.getInstance().createTypedLiteral(semionReengineer.getClass().getCanonicalName());
-            mGraph.add(new TripleImpl(semionRef, hasReengineer, reenginnerLiteral));
+    /**
+     * Borrowed from ontonet. TODO avoid explicitly storing from the Web resource
+     * 
+     * @param o
+     */
+    private void store(OWLOntology o) {
+        // // Why was it using two converters earlier?
+        // JenaToOwlConvert converter = new JenaToOwlConvert();
+        // OntModel om = converter.ModelOwlToJenaConvert(o, "RDF/XML");
+        // MGraph mg = JenaToClerezzaConverter.jenaModelToClerezzaMGraph(om);
+        TripleCollection mg = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(o);
+        MGraph mg2 = null;
+        IRI iri = OWLUtils.guessOntologyIdentifier(o);
+        UriRef ref = new UriRef(iri.toString());
+        try {
+            mg2 = tcManager.createMGraph(ref);
+        } catch (EntityAlreadyExistsException ex) {
+            log.info("Entity " + ref + " already exists in store. Replacing...");
+            mg2 = tcManager.getMGraph(ref);
         }
 
-        return Response.ok(mGraph).build();
+        mg2.addAll(mg);
     }
-
-
-    @GET
-    @Path("/reengineers/count")
-    public Response countReengineers(@Context HttpHeaders headers){
-
-        return Response.ok(reengineeringManager.countReengineers()).build();
-    }
-
-
-
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Path("/db/schema")
-    public Response reengineeringDBSchema(  
-                                          @FormParam("output-graph") String outputGraph,
-                                          @FormParam("db") String physicalDBName, @FormParam("jdbc") String jdbcDriver,
-                                          @FormParam("protocol") String protocol, @FormParam("host") String host,
-                                          @FormParam("port") String port, @FormParam("username") String username, @FormParam("password") String password,
-                                          @Context HttpHeaders headers, 
-                                          @Context HttpServletRequest httpServletRequest){
-
-
-        log.info("There are " + tcManager.listMGraphs().size() + " mGraphs");
-        System.out.println("There are " + tcManager.listMGraphs().size() + " mGraphs");
-
-        //UriRef uri = ContentItemHelper.makeDefaultUri(databaseURI, databaseURI.getBytes());
-        ConnectionSettings connectionSettings = new DBConnectionSettings(protocol, host, port, physicalDBName, username, password, null, jdbcDriver);
-        DataSource dataSource = new RDB(connectionSettings);
-
-        String servletPath = httpServletRequest.getLocalAddr();
-        servletPath = "http://"+servletPath+"/kres/graphs/"+outputGraph+":"+httpServletRequest.getLocalPort();
-
-        if(outputGraph != null && !outputGraph.equals("")){
-            OWLOntology ontology;
-            try {
-                ontology = reengineeringManager.performSchemaReengineering(servletPath, IRI.create(outputGraph), dataSource);
-                /*MediaType mediaType = headers.getMediaType();
-              String res = OntologyRenderUtils.renderOntology(ontology, mediaType.getType());*/
-                return Response.ok(ontology).build();
-            } catch (ReengineeringException e) {
-                return Response.status(500).build();
-            }
-        }
-        else{
-            try {
-                reengineeringManager.performSchemaReengineering(servletPath, null, dataSource);
-                return Response.ok().build();
-            } catch (ReengineeringException e) {
-                return Response.status(500).build();
-            }
-        }
-
-
-    }
-
-
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Path("/db")
-    public Response reengineeringDB(  
-                                    @QueryParam("db") String physicalDBName, @QueryParam("jdbc") String jdbcDriver,
-                                    @QueryParam("protocol") String protocol, @QueryParam("host") String host,
-                                    @QueryParam("port") String port, @QueryParam("username") String username, @QueryParam("password") String password,
-                                    @QueryParam("output-graph") String outputGraph, 
-                                    @Context HttpHeaders headers,
-                                    @Context HttpServletRequest httpServletRequest){
-
-
-        log.info("There are " + tcManager.listMGraphs().size() + " mGraphs");
-        System.out.println("There are " + tcManager.listMGraphs().size() + " mGraphs");
-
-        //UriRef uri = ContentItemHelper.makeDefaultUri(databaseURI, databaseURI.getBytes());
-        ConnectionSettings connectionSettings = new DBConnectionSettings(protocol, host, port, physicalDBName, username, password, null, jdbcDriver);
-        DataSource dataSource = new RDB(connectionSettings);
-
-        String servletPath = httpServletRequest.getLocalAddr();
-        servletPath = "http://"+servletPath+"/kres/graphs/"+outputGraph+":"+httpServletRequest.getLocalPort();
-
-        if(outputGraph != null && !outputGraph.equals("")){
-            OWLOntology ontology;
-            try {
-                ontology = reengineeringManager.performReengineering(servletPath, IRI.create(outputGraph), dataSource);
-                return Response.ok(ontology).build();
-            } catch (ReengineeringException e) {
-                return Response.status(500).build();
-            }
-
-        }
-        else{
-            try {
-                reengineeringManager.performReengineering(servletPath, null, dataSource);
-                return Response.ok().build();
-            } catch (ReengineeringException e) {
-                return Response.status(500).build();
-            }
-        }
-    }
-
 
 }

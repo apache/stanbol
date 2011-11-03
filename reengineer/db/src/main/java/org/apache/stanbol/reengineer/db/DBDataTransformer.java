@@ -12,6 +12,7 @@ import org.apache.stanbol.reengineer.base.api.util.ReengineerUriRefGenerator;
 import org.apache.stanbol.reengineer.db.connection.DatabaseConnection;
 import org.apache.stanbol.reengineer.db.vocab.DBS_L1;
 import org.apache.stanbol.reengineer.db.vocab.DBS_L1_OWL;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -56,7 +57,7 @@ public class DBDataTransformer extends ReengineerUriRefGenerator {
 		if(schemaOntology != null){
 		
 			OWLOntologyManager manager = onManager.getOwlCacheManager();
-			OWLDataFactory factory = onManager.getOwlFactory();
+			OWLDataFactory factory = OWLManager.getOWLDataFactory();
 			
 			graphNS = graphNS.replace("#", "");
 			String schemaNS = graphNS + "/schema#";

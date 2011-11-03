@@ -43,8 +43,7 @@ public class CustomOntologySpaceImpl extends AbstractOntologySpaceImpl implement
 
     @Override
     public void attachCoreSpace(CoreOntologySpace coreSpace, boolean skipRoot) throws UnmodifiableOntologyCollectorException {
-        // TODO Auto-generated method stub
-
+        // TODO deprecated, remove asap.
     }
 
     /**

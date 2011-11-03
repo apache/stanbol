@@ -76,6 +76,8 @@ public interface SessionManager extends SessionListenable {
     /**
      * Returns the ontology space associated with this session.
      * 
+     * @deprecated as session spaces are obsolete, so is this method.
+     * 
      * @return the session space
      */
     Set<SessionOntologySpace> getSessionSpaces(String sessionID) throws NonReferenceableSessionException;

@@ -58,7 +58,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
-import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.io.LibrarySource;
 import org.semanticweb.owlapi.model.IRI;
@@ -83,15 +82,11 @@ public class ScopeResource extends BaseStanbolResource {
      */
     protected RegistryManager regMgr;
 
-    protected ClerezzaOntologyStorage storage;
-
     public ScopeResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
         this.regMgr = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
             servletContext);
-        this.storage = (ClerezzaOntologyStorage) ContextHelper.getServiceFromContext(
-            ClerezzaOntologyStorage.class, servletContext);
     }
 
     @DELETE

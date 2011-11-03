@@ -35,6 +35,8 @@ import org.slf4j.LoggerFactory;
 /**
  * OWLAPI-based (in-memory) ontology cache implementation.
  * 
+ * TODO re-introduce SCR annotations, just avoid loading the component
+ * 
  * @author alexdma
  * 
  */

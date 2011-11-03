@@ -515,7 +515,7 @@ public class RuleStoreImpl implements RuleStore {
         Recipe recipe = null;
 
         if (onManager != null && recipeIRI != null) {
-            OWLDataFactory factory = onManager.getOwlFactory();
+            OWLDataFactory factory = OWLManager.getOWLDataFactory();
             OWLIndividual recipeIndividual = factory.getOWLNamedIndividual(recipeIRI);
             if (recipeIndividual != null) {
                 // String ruleNS =
@@ -609,7 +609,7 @@ public class RuleStoreImpl implements RuleStore {
         Set<IRI> recipeIRIs = null;
         String ruleNS = owlmodel.getOntologyID().toString().replace("<", "").replace(">", "") + "#";
 
-        OWLDataFactory factory = onManager.getOwlFactory();
+        OWLDataFactory factory = OWLManager.getOWLDataFactory();
         OWLClass recipeOWLClass = factory.getOWLClass(IRI.create(ruleNS + "Recipe"));
         Set<OWLIndividual> recipeIndividuals = recipeOWLClass.getIndividuals(owlmodel);
 

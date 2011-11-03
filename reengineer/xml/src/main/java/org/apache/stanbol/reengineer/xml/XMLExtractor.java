@@ -243,7 +243,7 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
     @Override
     public boolean canPerformReengineering(OWLOntology schemaOntology) {
 
-        OWLDataFactory factory = onManager.getOwlFactory();
+        OWLDataFactory factory = OWLManager.getOWLDataFactory();
 
         OWLClass dataSourceClass = factory.getOWLClass(Reengineer_OWL.DataSource);
         Set<OWLIndividual> individuals = dataSourceClass.getIndividuals(schemaOntology);
@@ -370,7 +370,7 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
 
         log.info("Starting XML Reengineering");
         OWLOntologyManager ontologyManager = onManager.getOwlCacheManager();
-        OWLDataFactory factory = onManager.getOwlFactory();
+        OWLDataFactory factory = OWLManager.getOWLDataFactory();
 
         IRI schemaOntologyIRI = schemaOntology.getOntologyID().getOntologyIRI();
 
@@ -463,7 +463,7 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
                                           OWLOntology schemaOntology) throws ReengineeringException {
 
         OWLOntologyManager ontologyManager = onManager.getOwlCacheManager();
-        OWLDataFactory factory = onManager.getOwlFactory();
+        OWLDataFactory factory = OWLManager.getOWLDataFactory();
 
         IRI schemaOntologyIRI = schemaOntology.getOntologyID().getOntologyIRI();
 

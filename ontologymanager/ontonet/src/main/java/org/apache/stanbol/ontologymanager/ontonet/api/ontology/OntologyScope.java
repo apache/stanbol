@@ -18,12 +18,13 @@ package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
 
 import java.util.Set;
 
-import org.semanticweb.owlapi.model.IRI;
+import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 /**
- * Represents an ontology network that is used by KReS for modelling a given knowledge component or domain,
- * e.g. workflows, organisations, devices, content or business domain.<br>
+ * Represents an ontology network that is used for modelling a given knowledge component or domain, e.g.
+ * workflows, organisations, devices, content or business domain.<br>
  * <br>
  * Each ontology scope comprises in turn a number of ontology spaces of three kinds.
  * <ul>
@@ -38,7 +39,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
  * @author alexdma
  * 
  */
-public interface OntologyScope extends ScopeOntologyListenable, OWLExportable {
+public interface OntologyScope extends NamedResource, ScopeOntologyListenable, OWLExportable {
 
     /**
      * Adds a new ontology space to the list of user session spaces for this scope.
@@ -74,18 +75,10 @@ public interface OntologyScope extends ScopeOntologyListenable, OWLExportable {
     OntologySpace getCustomSpace();
 
     /**
-     * Returns an object that uniquely identifies this ontology scope.
+     * Returns the ontology space for this scope that is identified by the supplied IRI.
      * 
-     * TODO : check if we'd rather use another class for identifiers.
-     * 
-     * @return the unique identifier for this ontology scope
-     */
-    String getID();
-
-    IRI getNamespace();
-
-    /**
-     * Return the ontology space for this scope that is identified by the supplied IRI.
+     * @deprecated as session ontology spaces are obsolete, so is this method. Please refer directly to the
+     *             session identified by <code>sessionID</code>.
      * 
      * @param sessionID
      *            the unique identifier of the KReS session.
@@ -96,6 +89,9 @@ public interface OntologyScope extends ScopeOntologyListenable, OWLExportable {
 
     /**
      * Returns all the active ontology spaces for this scope.
+     * 
+     * @deprecated as session ontology spaces are obsolete, so is this method. Please reroute all
+     *             session-related queries to {@link Session} objects directly.
      * 
      * @return a set of active ontology spaces for this scope.
      */
@@ -110,8 +106,6 @@ public interface OntologyScope extends ScopeOntologyListenable, OWLExportable {
      *             if either the scope or the supplied space are locked.
      */
     void setCustomSpace(OntologySpace customSpace) throws UnmodifiableOntologyCollectorException;
-
-    void setNamespace(IRI namespace);
 
     /**
      * Performs the operations required for activating the ontology scope. It should be possible to perform
@@ -132,6 +126,8 @@ public interface OntologyScope extends ScopeOntologyListenable, OWLExportable {
      * automatic, it should be invoked by whatever classes are responsible for listening to changes in an
      * ontology scope/space. In the default implementation, it is the scope itself, yet the method is left
      * public in order to allow for external controllers.
+     * 
+     * @deprecated synchronization is managed internally, therefore this method has no effect.
      */
     void synchronizeSpaces();
 

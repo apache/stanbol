@@ -20,12 +20,14 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CustomOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
-import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
  * Default implementation of the custom ontology space.
+ * 
+ * @author alexdma
+ * 
  */
 public class CustomOntologySpaceImpl extends AbstractOntologySpaceImpl implements CustomOntologySpace {
 
@@ -35,20 +37,16 @@ public class CustomOntologySpaceImpl extends AbstractOntologySpaceImpl implement
         return (scopeID != null ? scopeID : "") + "/" + SUFFIX;
     }
 
-    public CustomOntologySpaceImpl(String scopeID, IRI namespace, ClerezzaOntologyStorage storage) {
-        super(buildId(scopeID), namespace, SpaceType.CUSTOM, storage);
+    public CustomOntologySpaceImpl(String scopeID, IRI namespace) {
+        super(buildId(scopeID), namespace, SpaceType.CUSTOM);
     }
 
-    public CustomOntologySpaceImpl(String scopeID,
-                                   IRI namespace,
-                                   ClerezzaOntologyStorage storage,
-                                   OWLOntologyManager ontologyManager) {
-        super(buildId(scopeID), namespace, SpaceType.CUSTOM, storage, ontologyManager);
+    public CustomOntologySpaceImpl(String scopeID, IRI namespace, OWLOntologyManager ontologyManager) {
+        super(buildId(scopeID), namespace, SpaceType.CUSTOM, ontologyManager);
     }
 
     @Override
     public void attachCoreSpace(CoreOntologySpace coreSpace, boolean skipRoot) throws UnmodifiableOntologyCollectorException {
-        // FIXME re-implement!
         // OWLOntology o = coreSpace.getTopOntology();
         // // This does the append thingy
         // log.debug("Attaching " + o + " TO " + getTopOntology() + " ...");
@@ -60,7 +58,6 @@ public class CustomOntologySpaceImpl extends AbstractOntologySpaceImpl implement
         // } catch (Exception ex) {
         // log.error("FAILED", ex);
         // }
-
     }
 
     /**
@@ -71,6 +68,9 @@ public class CustomOntologySpaceImpl extends AbstractOntologySpaceImpl implement
         locked = true;
     }
 
+    /**
+     * Once it is torn down, a custom space is write-unlocked.
+     */
     @Override
     public synchronized void tearDown() {
         locked = false;

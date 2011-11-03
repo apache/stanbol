@@ -55,16 +55,16 @@ public interface Session extends LockableOntologyCollector, SessionListenable, O
 
     void attachScope(OntologyScope scope);
 
-    void detachScope(String scopeId);
-
     void clearScopes();
-
-    Set<String> getAttachedScopes();
 
     /**
      * Closes this Session irreversibly. Most likely includes setting the state to ZOMBIE.
      */
     void close() throws NonReferenceableSessionException;
+
+    void detachScope(String scopeId);
+
+    Set<String> getAttachedScopes();
 
     /**
      * Returns the unique Internationalized Resource Identifier (IRI) that identifies this KReS session.<br>

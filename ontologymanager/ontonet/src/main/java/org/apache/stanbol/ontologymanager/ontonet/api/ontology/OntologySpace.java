@@ -34,8 +34,4 @@ public interface OntologySpace extends LockableOntologyCollector, OWLExportable 
      */
     OWLOntology asOWLOntology();
 
-    boolean isSilentMissingOntologyHandling();
-
-    void setSilentMissingOntologyHandling(boolean silent);
-
 }

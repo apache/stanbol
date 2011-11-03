@@ -138,7 +138,7 @@ public abstract class AbstractOntologyCollectorImpl implements LockableOntologyC
      */
     protected void fireOntologyAdded(IRI ontologyIri) {
         for (OntologyCollectorListener listener : listeners)
-            listener.onOntologyAdded(IRI.create(namespace + _id), ontologyIri);
+            listener.onOntologyAdded(this.getID(), ontologyIri);
     }
 
     /**
@@ -159,7 +159,7 @@ public abstract class AbstractOntologyCollectorImpl implements LockableOntologyC
      */
     protected void fireOntologyRemoved(IRI ontologyIri) {
         for (OntologyCollectorListener listener : listeners)
-            listener.onOntologyRemoved(IRI.create(namespace + _id), ontologyIri);
+            listener.onOntologyRemoved(this.getID(), ontologyIri);
     }
 
     protected void fireOntologyRemoved(UriRef ontologyIri) {

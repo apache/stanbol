@@ -47,8 +47,6 @@ public abstract class AbstractOntologySpaceImpl extends AbstractOntologyCollecto
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
-    protected boolean silent = false;
-
     protected SpaceType type;
 
     public AbstractOntologySpaceImpl(String spaceID, IRI namespace, SpaceType type, TcProvider tcProvider) {
@@ -68,6 +66,8 @@ public abstract class AbstractOntologySpaceImpl extends AbstractOntologyCollecto
      */
     @Override
     public OWLOntology asOWLOntology(boolean merge) {
+        if (merge) throw new UnsupportedOperationException(
+                "Ontology merging not implemented yet. Please set merge parameter to false.");
         OWLOntology root;
         OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
         IRI iri = IRI.create(namespace + _id);
@@ -117,11 +117,6 @@ public abstract class AbstractOntologySpaceImpl extends AbstractOntologyCollecto
         return root;
     }
 
-    @Override
-    public boolean isSilentMissingOntologyHandling() {
-        return silent;
-    }
-
     /**
      * 
      * @param id
@@ -142,11 +137,6 @@ public abstract class AbstractOntologySpaceImpl extends AbstractOntologyCollecto
                 "Illegal space ID " + id + " - Must be an alphanumeric sequence, (preferably two, "
                         + " slash-separated), with optional underscores or dashes.");
         this._id = id;
-    }
-
-    @Override
-    public void setSilentMissingOntologyHandling(boolean silent) {
-        this.silent = silent;
     }
 
 }

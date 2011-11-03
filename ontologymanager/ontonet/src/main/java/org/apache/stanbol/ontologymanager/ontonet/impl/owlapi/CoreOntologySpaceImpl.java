@@ -18,7 +18,6 @@ package org.apache.stanbol.ontologymanager.ontonet.impl.owlapi;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
-import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
@@ -35,15 +34,12 @@ public class CoreOntologySpaceImpl extends AbstractOntologySpaceImpl implements 
         return (scopeID != null ? scopeID : "") + "/" + SUFFIX;
     }
 
-    public CoreOntologySpaceImpl(String scopeID, IRI namespace, ClerezzaOntologyStorage storage) {
-        super(buildId(scopeID), namespace, SpaceType.CORE, storage);
+    public CoreOntologySpaceImpl(String scopeID, IRI namespace) {
+        super(buildId(scopeID), namespace, SpaceType.CORE);
     }
 
-    public CoreOntologySpaceImpl(String scopeID,
-                                 IRI namespace,
-                                 ClerezzaOntologyStorage storage,
-                                 OWLOntologyManager ontologyManager) {
-        super(buildId(scopeID), namespace, SpaceType.CORE, storage, ontologyManager);
+    public CoreOntologySpaceImpl(String scopeID, IRI namespace, OWLOntologyManager ontologyManager) {
+        super(buildId(scopeID), namespace, SpaceType.CORE, ontologyManager);
     }
 
     /**

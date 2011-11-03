@@ -16,6 +16,16 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
 
+/**
+ * An ontology collector that supports locking mechanisms, thus allowing/preventing modifications of the
+ * ontologies contained therein. Lock management is assumed to occur in methods inherited from
+ * {@link OntologyCollector}.<br>
+ * 
+ * TODO add public lock handling methods as well?
+ * 
+ * @author alexdma
+ * 
+ */
 public interface LockableOntologyCollector extends OntologyCollector {
 
     /**

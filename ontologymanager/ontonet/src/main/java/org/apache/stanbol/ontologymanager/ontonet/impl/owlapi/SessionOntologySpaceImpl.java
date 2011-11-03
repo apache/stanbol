@@ -22,12 +22,13 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
-import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
  * Default implementation of the session ontology space.
+ * 
+ * @deprecated obsolete, as is its implemented type {@link SessionOntologySpace}.
  */
 public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl implements SessionOntologySpace {
 
@@ -38,17 +39,18 @@ public class SessionOntologySpaceImpl extends AbstractOntologySpaceImpl implemen
                + new Random().nextLong();
     }
 
-    public SessionOntologySpaceImpl(String scopeID, IRI namespace, ClerezzaOntologyStorage store) {
+    public SessionOntologySpaceImpl(String scopeID, IRI namespace
+    // , ClerezzaOntologyStorage store
+    ) {
         // FIXME : sync session id with session space ID
-        super(buildId(scopeID), namespace, SpaceType.SESSION, store);
+        super(buildId(scopeID), namespace, SpaceType.SESSION/* , store */);
     }
 
-    public SessionOntologySpaceImpl(String scopeID,
-                                    IRI namespace,
-                                    ClerezzaOntologyStorage store,
+    public SessionOntologySpaceImpl(String scopeID, IRI namespace,
+    // ClerezzaOntologyStorage store,
                                     OWLOntologyManager ontologyManager) {
         // FIXME : sync session id with session space ID
-        super(buildId(scopeID), namespace, SpaceType.SESSION, store, ontologyManager);
+        super(buildId(scopeID), namespace, SpaceType.SESSION, /* store, */ontologyManager);
     }
 
     @Override

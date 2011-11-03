@@ -53,6 +53,7 @@ import org.apache.xerces.xs.XSParticle;
 import org.apache.xerces.xs.XSTerm;
 import org.apache.xerces.xs.XSTypeDefinition;
 import org.apache.xerces.xs.datatypes.ObjectList;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -553,7 +554,7 @@ public class XSDExtractor extends ReengineerUriRefGenerator {
         XSSimpleTypeDecl m;
 
         OWLOntologyManager ontologyManager = onManager.getOwlCacheManager();
-        OWLDataFactory factory = onManager.getOwlFactory();
+        OWLDataFactory factory = OWLManager.getOWLDataFactory();
 
         log.debug("XSD output IRI : " + outputIRI);
 

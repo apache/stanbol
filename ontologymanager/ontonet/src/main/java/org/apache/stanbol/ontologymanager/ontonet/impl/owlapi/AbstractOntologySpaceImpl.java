@@ -33,7 +33,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
-import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.owl.util.OWLUtils;
 import org.apache.stanbol.owl.util.URIUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -88,19 +87,14 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
      */
     protected OWLOntologyManager ontologyManager;
 
-    protected boolean silent = false;
-
-    protected ClerezzaOntologyStorage storage;
-
     protected Set<Class<?>> supportedTypes;
 
     protected SpaceType type;
 
-    protected AbstractOntologySpaceImpl(String spaceID,
-                                        IRI namespace,
-                                        SpaceType type,
-                                        ClerezzaOntologyStorage storage) {
-        this(spaceID, namespace, type, storage, OWLManager.createOWLOntologyManager());
+    protected AbstractOntologySpaceImpl(String spaceID, IRI namespace, SpaceType type
+
+    ) {
+        this(spaceID, namespace, type, OWLManager.createOWLOntologyManager());
     }
 
     /**
@@ -114,7 +108,6 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     protected AbstractOntologySpaceImpl(String spaceID,
                                         IRI namespace,
                                         SpaceType type,
-                                        ClerezzaOntologyStorage storage,
                                         OWLOntologyManager ontologyManager) {
 
         supportedTypes = new HashSet<Class<?>>();
@@ -123,7 +116,7 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
         setID(spaceID);
         setNamespace(namespace);
         this.type = type;
-        this.storage = storage;
+        // this.storage = storage;
         if (ontologyManager != null) this.ontologyManager = ontologyManager;
         else this.ontologyManager = OWLManager.createOWLOntologyManager();
 
@@ -168,6 +161,8 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
      */
     @Override
     public OWLOntology asOWLOntology(boolean merge) {
+        if (merge) throw new UnsupportedOperationException(
+                "Ontology merging not implemented yet. Please set merge parameter to false.");
         OWLOntology root;
         IRI iri = IRI.create(namespace + _id);
         try {
@@ -230,7 +225,7 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
      */
     protected void fireOntologyAdded(IRI ontologyIri) {
         for (OntologyCollectorListener listener : listeners)
-            listener.onOntologyAdded(IRI.create(namespace + _id), ontologyIri);
+            listener.onOntologyAdded(this.getID(), ontologyIri);
     }
 
     /**
@@ -241,7 +236,7 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
      */
     protected void fireOntologyRemoved(IRI ontologyIri) {
         for (OntologyCollectorListener listener : listeners)
-            listener.onOntologyRemoved(IRI.create(namespace + _id), ontologyIri);
+            listener.onOntologyRemoved(this.getID(), ontologyIri);
     }
 
     @Override
@@ -293,11 +288,6 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
         return locked;
     }
 
-    @Override
-    public boolean isSilentMissingOntologyHandling() {
-        return silent;
-    }
-
     private void performAdd(OntologyInputSource<?> ontSrc) {
 
         Object obj = ontSrc.getRootOntology();
@@ -313,12 +303,13 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
         try {
             // Store the top ontology
             if (!(this instanceof SessionOntologySpace)) {
-                if (storage == null) log.warn(
-                    "No ontology storage found. Ontology {} will be stored in-memory only.", ontology);
-                else {
-                    // storage = new ClerezzaOntologyStorage(tcManager, wtcProvider)
-                    storage.store(ontology);
-                }
+                // No longer storing in OWLAPI implementation!
+                // if (storage == null) log.warn(
+                // "No ontology storage found. Ontology {} will be stored in-memory only.", ontology);
+                // else {
+                // // storage = new ClerezzaOntologyStorage(tcManager, wtcProvider)
+                // storage.store(ontology);
+                // }
             }
             // ONManager.get().getOntologyStore().load(rootOntology.getOntologyID().getOntologyIRI());
         } catch (Exception ex) {
@@ -549,11 +540,6 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
             namespace = IRI.create(namespace + "/");
         }
         this.namespace = namespace;
-    }
-
-    @Override
-    public void setSilentMissingOntologyHandling(boolean silent) {
-        this.silent = silent;
     }
 
 }

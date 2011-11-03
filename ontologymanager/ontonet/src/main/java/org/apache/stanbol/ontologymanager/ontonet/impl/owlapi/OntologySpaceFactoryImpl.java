@@ -20,15 +20,14 @@ import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CustomOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
-import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.semanticweb.owlapi.model.IRI;
 import org.slf4j.Logger;
@@ -42,24 +41,17 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
+    protected IRI namespace;
+
     protected OfflineConfiguration offline;
 
     protected ScopeRegistry registry;
 
-    protected IRI namespace;
-
-    /*
-     * The ClerezzaOntologyStorage (local to OntoNet) has been changed with PersistenceStore (general from
-     * Stanbol)
-     */
-    protected ClerezzaOntologyStorage storage;
-
     public OntologySpaceFactoryImpl(ScopeRegistry registry,
-                                    ClerezzaOntologyStorage storage,
-                                    OfflineConfiguration offline,
-                                    IRI namespace) {
+
+    OfflineConfiguration offline, IRI namespace) {
         this.registry = registry;
-        this.storage = storage;
+
         this.offline = offline;
         this.namespace = namespace;
     }
@@ -71,7 +63,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
      * @param scopeID
      * @param rootSource
      */
-    private void configureSpace(OntologySpace s, String scopeID, OntologyInputSource... ontologySources) {
+    private void configureSpace(OntologySpace s, String scopeID, OntologyInputSource<?>... ontologySources) {
         // FIXME: ensure that this is not null AND convert to using Strings for scope IDs
         OntologyScope parentScope = registry.getScope(scopeID);
 
@@ -79,7 +71,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
                 .addListener((OntologyCollectorListener) parentScope);
         // Set the supplied ontology's parent as the root for this space.
         if (ontologySources != null) try {
-            for (OntologyInputSource src : ontologySources)
+            for (OntologyInputSource<?> src : ontologySources)
                 s.addOntology(src);
         } catch (UnmodifiableOntologyCollectorException e) {
             log.error("Ontology space " + s.getID() + " was found locked at creation time!", e);
@@ -88,19 +80,20 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
     }
 
     @Override
-    public CoreOntologySpace createCoreOntologySpace(String scopeId, OntologyInputSource... coreSources) {
-        CoreOntologySpace s = new CoreOntologySpaceImpl(scopeId, namespace, storage,
-                OWLOntologyManagerFactory.createOWLOntologyManager(offline.getOntologySourceLocations()
-                        .toArray(new IRI[0])));
+    public CoreOntologySpace createCoreOntologySpace(String scopeId, OntologyInputSource<?>... coreSources) {
+        CoreOntologySpace s = new CoreOntologySpaceImpl(scopeId, namespace, /* storage, */
+        OWLOntologyManagerFactory.createOWLOntologyManager(offline.getOntologySourceLocations().toArray(
+            new IRI[0])));
         configureSpace(s, scopeId, coreSources);
         return s;
     }
 
     @Override
-    public CustomOntologySpace createCustomOntologySpace(String scopeId, OntologyInputSource... customSources) {
-        CustomOntologySpace s = new CustomOntologySpaceImpl(scopeId, namespace, storage,
-                OWLOntologyManagerFactory.createOWLOntologyManager(offline.getOntologySourceLocations()
-                        .toArray(new IRI[0])));
+    public CustomOntologySpace createCustomOntologySpace(String scopeId,
+                                                         OntologyInputSource<?>... customSources) {
+        CustomOntologySpace s = new CustomOntologySpaceImpl(scopeId, namespace, /* storage, */
+        OWLOntologyManagerFactory.createOWLOntologyManager(offline.getOntologySourceLocations().toArray(
+            new IRI[0])));
         configureSpace(s, scopeId, customSources);
         return s;
     }
@@ -108,7 +101,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
     @Override
     public OntologySpace createOntologySpace(String scopeId,
                                              SpaceType type,
-                                             OntologyInputSource... ontologySources) {
+                                             OntologyInputSource<?>... ontologySources) {
         switch (type) {
             case CORE:
                 return createCoreOntologySpace(scopeId, ontologySources);
@@ -123,11 +116,11 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 
     @Override
     public SessionOntologySpace createSessionOntologySpace(String scopeId,
-                                                           OntologyInputSource... sessionSources) {
-        SessionOntologySpace s = new SessionOntologySpaceImpl(scopeId, namespace, storage,
-                OWLOntologyManagerFactory.createOWLOntologyManager(offline.getOntologySourceLocations()
-                        .toArray(new IRI[0])));
-        for (OntologyInputSource src : sessionSources)
+                                                           OntologyInputSource<?>... sessionSources) {
+        SessionOntologySpace s = new SessionOntologySpaceImpl(scopeId, namespace, /* storage, */
+        OWLOntologyManagerFactory.createOWLOntologyManager(offline.getOntologySourceLocations().toArray(
+            new IRI[0])));
+        for (OntologyInputSource<?> src : sessionSources)
             try {
                 s.addOntology(src);
             } catch (UnmodifiableOntologyCollectorException e) {
@@ -136,6 +129,11 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
             }
         // s.setUp();
         return s;
+    }
+
+    @Override
+    public String getID() {
+        return this.toString();
     }
 
     @Override

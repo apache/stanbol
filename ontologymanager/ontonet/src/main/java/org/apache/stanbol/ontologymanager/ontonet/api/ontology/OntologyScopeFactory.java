@@ -17,8 +17,8 @@
 package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
+import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.semanticweb.owlapi.model.IRI;
 
 /**
  * An ontology scope factory is responsible for the creation of new ontology scopes from supplied ontology
@@ -30,7 +30,7 @@ import org.semanticweb.owlapi.model.IRI;
  * @author alexdma
  * 
  */
-public interface OntologyScopeFactory extends ScopeEventListenable {
+public interface OntologyScopeFactory extends NamedResource, ScopeEventListenable {
 
     /**
      * Creates and returns a new ontology scope with the core space ontologies obtained from
@@ -46,9 +46,5 @@ public interface OntologyScopeFactory extends ScopeEventListenable {
      *             is not thrown if another scope with the same ID has been created but not registered.
      */
     OntologyScope createOntologyScope(String scopeID, OntologyInputSource<?>... coreSources) throws DuplicateIDException;
-
-    IRI getNamespace();
-
-    void setNamespace(IRI namespace);
 
 }

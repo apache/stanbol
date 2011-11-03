@@ -16,7 +16,8 @@
  */
 package org.apache.stanbol.ontologymanager.web.resources;
 
-import static javax.ws.rs.core.Response.Status.*;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
@@ -33,7 +34,6 @@ import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
-import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
@@ -58,13 +58,9 @@ public class OntologyIndexResource extends BaseStanbolResource {
 
     protected Serializer serializer;
 
-    protected ClerezzaOntologyStorage storage;
-
     public OntologyIndexResource(@Context ServletContext servletContext) {
         this.servletContext = servletContext;
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
-        this.storage = (ClerezzaOntologyStorage) ContextHelper.getServiceFromContext(
-            ClerezzaOntologyStorage.class, servletContext);
         this.serializer = (Serializer) ContextHelper.getServiceFromContext(Serializer.class, servletContext);
     }
 
@@ -75,11 +71,10 @@ public class OntologyIndexResource extends BaseStanbolResource {
         OWLOntologyManager tmpmgr;
         OfflineConfiguration offline = (OfflineConfiguration) ContextHelper.getServiceFromContext(
             OfflineConfiguration.class, servletContext);
-        if (offline == null) throw new IllegalStateException(
-                "OfflineConfiguration missing in ServletContext");
-        else tmpmgr = OWLOntologyManagerFactory.createOWLOntologyManager(offline
-                .getOntologySourceLocations().toArray(new IRI[0]));
-        
+        if (offline == null) throw new IllegalStateException("OfflineConfiguration missing in ServletContext");
+        else tmpmgr = OWLOntologyManagerFactory.createOWLOntologyManager(offline.getOntologySourceLocations()
+                .toArray(new IRI[0]));
+
         IRI iri = null;
         try {
             iri = IRI.create(ontologyIri);
@@ -109,11 +104,10 @@ public class OntologyIndexResource extends BaseStanbolResource {
         OWLOntologyManager tmpmgr;
         OfflineConfiguration offline = (OfflineConfiguration) ContextHelper.getServiceFromContext(
             OfflineConfiguration.class, servletContext);
-        if (offline == null) throw new IllegalStateException(
-                "OfflineConfiguration missing in ServletContext");
-        else tmpmgr = OWLOntologyManagerFactory.createOWLOntologyManager(offline
-                .getOntologySourceLocations().toArray(new IRI[0]));
-        
+        if (offline == null) throw new IllegalStateException("OfflineConfiguration missing in ServletContext");
+        else tmpmgr = OWLOntologyManagerFactory.createOWLOntologyManager(offline.getOntologySourceLocations()
+                .toArray(new IRI[0]));
+
         IRI iri = null;
         try {
             iri = IRI.create(ontologyIri);
