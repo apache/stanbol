@@ -109,6 +109,7 @@ public class EntityPersisterRunnable extends IndexingDaemon<Representation,Repre
             errorMsg = "Entity %s was not indexed by the Yard %s";
         } catch (YardException e) {
             errorMsg = "Unable to store Entity %s to Yard %s because of an YardException";
+            yardException = e;
         }
         //the remaining Items in to store have some errors
         for(QueueItem<Representation> entry : toStore.values()){
