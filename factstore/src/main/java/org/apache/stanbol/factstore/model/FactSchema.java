@@ -87,5 +87,15 @@ public class FactSchema {
 	public boolean hasRole(String role) {
 		return this.roleMap.keySet().contains(role);
 	}
+
+    public String fixSpellingOfRole(String role) {
+        for (String correctSpelledRole : this.roleMap.keySet()) {
+            if (role.equalsIgnoreCase(correctSpelledRole)) {
+                return correctSpelledRole;
+            }
+        }
+        
+        return role;
+    }
     
 }

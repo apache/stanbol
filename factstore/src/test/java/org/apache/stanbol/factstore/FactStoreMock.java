@@ -67,4 +67,10 @@ public class FactStoreMock implements FactStore {
         return null;
     }
 
+    @Override
+    public Fact getFact(int factId, String factSchemaURN) throws Exception {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

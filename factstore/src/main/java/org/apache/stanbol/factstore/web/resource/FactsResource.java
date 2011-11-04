@@ -152,6 +152,38 @@ public class FactsResource extends BaseFactStoreResource {
 
         return Response.status(Status.CREATED).type(MediaType.TEXT_PLAIN).build();
     }
+    
+    @GET
+    @Path("/{factSchemaURN}/{factId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getFact(@PathParam("factId") int factId, @PathParam("factSchemaURN") String factSchemaURN) {
+        Response validationResponse = standardValidation(factSchemaURN);
+        if (validationResponse != null) {
+            return validationResponse;
+        }
+
+        logger.info("Request for getting fact {} of schema {}", factId, factSchemaURN);
+        
+        Fact fact = null;
+        try {
+            fact = this.factStore.getFact(factId, factSchemaURN);
+        } catch (Exception e) {
+            logger.error("Error while loading fact {}", factId, e);
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(
+                "Error while loading fact " + factId + " of fact schema " + factSchemaURN + " from database")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+        if (fact == null) {
+            logger.debug("Fact {} for fact schema {} not found", factId, factSchemaURN);
+            return Response.status(Status.NOT_FOUND).entity(
+                "Could not find fact with ID " + factId + " for fact schema " + factSchemaURN).build();
+        }
+        else {
+            JsonLd factAsJsonLd = fact.factToJsonLd();
+            return Response.status(Status.OK).entity(factAsJsonLd.toString())
+                    .type(MediaType.APPLICATION_JSON).build();
+        }
+    }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)

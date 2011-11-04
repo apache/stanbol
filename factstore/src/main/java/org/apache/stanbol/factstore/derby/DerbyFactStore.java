@@ -377,8 +377,85 @@ public class DerbyFactStore implements FactStore {
 			}
 		}
 	}
+	
+    @Override
+    public Fact getFact(int factId, String factSchemaURN) throws Exception {
+        Fact fact = null;
+        Connection con = null;
+        try {
+            con = DriverManager.getConnection(DB_URL);
+            FactSchema factSchema = this.loadFactSchema(factSchemaURN, con);
+            
+            if (factSchema != null) {
+                fact = this.getFact(factId, factSchema, con);
+            }
+            
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            try {
+                con.close();
+            } catch (Throwable t) { /* ignore */
+            }
+        }
+        
+        return fact;
+    }
 
-	@Override
+	private Fact getFact(int factId, FactSchema factSchema, Connection con) throws Exception {
+	    Fact fact = null;
+	    
+	    String factSchemaB64 = Base64.encodeBase64URLSafeString(factSchema.getFactSchemaURN().getBytes());
+	    logger.info("Loading fact {} from fact table {}", factId, factSchemaB64);
+	    
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            StringBuilder selectBuilder = new StringBuilder("SELECT ");
+            boolean firstRole = true;
+            for (String role : factSchema.getRoles()) {
+                if (!firstRole) {
+                    selectBuilder.append(",");
+                }
+                selectBuilder.append(role);
+                firstRole = false;
+            }
+            selectBuilder.append(" FROM " + factSchemaB64 + " WHERE id=?");
+            ps = con.prepareStatement(selectBuilder.toString());
+            ps.setInt(1, factId);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                fact = new Fact();
+                fact.setFactSchemaURN(factSchema.getFactSchemaURN());
+                for (int col=1; col<=rs.getMetaData().getColumnCount(); col++) {
+                    String role = factSchema.fixSpellingOfRole(rs.getMetaData().getColumnName(col));
+                    fact.addRole(role, rs.getString(col));
+                }
+            }
+        } catch (SQLException e) {
+            throw new Exception("Error while selecting fact", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    /* ignore */
+                }
+            }
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    /* ignore */
+                }
+            }
+        }	    
+	    
+        return fact;
+    }
+
+    @Override
 	public int addFact(Fact fact) throws Exception {
 		int factId = -1; 
 	    Connection con = null;
@@ -411,20 +488,23 @@ public class DerbyFactStore implements FactStore {
 
             StringBuilder insertFact = new StringBuilder("INSERT INTO ").append(factSchemaB64).append('(');
             StringBuilder valueSB = new StringBuilder(" VALUES (");
+            
             Map<String,Integer> roleIndexMap = new HashMap<String,Integer>();
             boolean firstRole = true;
             int roleIndex = 0;
             for (String role : factSchema.getRoles()) {
-                if (!firstRole) {
-                    insertFact.append(',');
-                    valueSB.append(',');
+                if (fact.getRoles().contains(role)) {
+                    if (!firstRole) {
+                        insertFact.append(',');
+                        valueSB.append(',');
+                    }
+                    insertFact.append(role);
+                    valueSB.append('?');
+                    firstRole = false;
+                    
+                    roleIndex++;
+                    roleIndexMap.put(role, roleIndex);
                 }
-                insertFact.append(role);
-                valueSB.append('?');
-                firstRole = false;
-
-                roleIndex++;
-                roleIndexMap.put(role, roleIndex);
             }
             insertFact.append(')').append(valueSB).append(')');
 
@@ -503,7 +583,7 @@ public class DerbyFactStore implements FactStore {
 			try {
 				con = DriverManager.getConnection(DB_URL);
 
-				validateQuery(query, con);
+				FactSchema schema = validateQuery(query, con);
 
 				// from here on we have valid data
 
@@ -549,7 +629,7 @@ public class DerbyFactStore implements FactStore {
 				if (rs != null) {
 					List<String> header = new ArrayList<String>();
 					for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-						header.add(rs.getMetaData().getColumnName(i));
+						header.add(schema.fixSpellingOfRole(rs.getMetaData().getColumnName(i)));
 					}
 
 					frs = new FactResultSet();
@@ -598,7 +678,7 @@ public class DerbyFactStore implements FactStore {
 		return frs;
 	}
 
-	private void validateQuery(Query query, Connection con) throws Exception {
+	private FactSchema validateQuery(Query query, Connection con) throws Exception {
 		FactSchema schema = this.loadFactSchema(query.getFromSchemaURN(), con);
 
 		if (schema == null) {
@@ -621,6 +701,8 @@ public class DerbyFactStore implements FactStore {
 							+ query.getFromSchemaURN() + "': "
 							+ unknownRoles.toString());
 		}
+		
+		return schema;
 	}
 
 }

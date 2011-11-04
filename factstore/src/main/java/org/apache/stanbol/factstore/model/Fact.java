@@ -100,15 +100,10 @@ public class Fact {
                     JsonLdProperty jldProperty = propMap.get(role);
                     if (jldProperty.isSingleValued()) {
                         JsonLdPropertyValue jldValue = jldProperty.getValues().get(0);
-                        if (jldValue.getType().equals(JsonLdCommon.IRI)) {
+                        if (jldValue.getType() != null && jldValue.getType().equals(JsonLdCommon.IRI)) {
                             fact.addRole(role, jsonLd.unCURIE(jldValue.getLiteralValue()));
-                        }
-                        else if (jldValue.getValue() instanceof String) {
-                            String strType = (String) jldValue.getValue();
-                            fact.addRole(role, strType);
-                        }
-                        else {
-                            fact.addRole(role, propMap.get(role).toString());
+                        } else {
+                            fact.addRole(role, jldValue.getValue().toString());
                         }
                     }
                     else {
@@ -120,6 +115,19 @@ public class Fact {
         }
         
         return fact;
+    }
+
+    public JsonLd factToJsonLd() {
+        JsonLd jsonLd = new JsonLd();
+        
+        JsonLdResource subject = new JsonLdResource();
+        subject.setProfile(this.factSchemaURN);
+        for (String role : this.roleMap.keySet()) {
+            subject.putProperty(role, this.roleMap.get(role));
+        }
+        jsonLd.put(subject);
+        
+        return jsonLd;
     }
     
 }
