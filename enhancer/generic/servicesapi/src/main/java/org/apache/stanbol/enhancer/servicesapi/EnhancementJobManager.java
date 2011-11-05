@@ -40,6 +40,14 @@ public interface EnhancementJobManager {
      * @throws EngineException if the enhancement process failed
      */
     void enhanceContent(ContentItem ci) throws EngineException;
+    
+    /**
+     * 
+     * @param ci : ContentItem to be enhanced
+     * @param chain : enhancement chain Name
+     * @throws EngineException : if the enhancement process failed
+     */
+    void enhanceContent(ContentItem ci, String chain) throws EngineException;
 
     /**
      * Return the unmodifiable list of active registered engine instance that
