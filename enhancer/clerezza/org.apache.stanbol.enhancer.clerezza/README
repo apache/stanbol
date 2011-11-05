@@ -12,7 +12,7 @@
         start mvn:org.apache.commons/commons-compress/1.0
                 
         start mvn:org.apache.stanbol/org.apache.stanbol.enhancer.servicesapi/0.9-SNAPSHOT
-        start mvn:org.apache.stanbol/org.apache.stanbol.enhancer.inMemoryJobManager/0.9-SNAPSHOT
+        start mvn:org.apache.stanbol/org.apache.stanbol.enhancer.weightedjobmanager/0.9-SNAPSHOT
         start mvn:org.apache.stanbol/org.apache.stanbol.enhancer.clerezza/0.1-SNAPSHOT
         
         # additional engines

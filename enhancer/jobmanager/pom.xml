@@ -42,11 +42,6 @@
   </scm>
 
   <modules>
-    <module>inMemoryJobManager</module>
-    <!-- TODO : add the camels ones in comment for now, see how to manage them...
-	 maybe with creation of a jobmanager that set up the default jobmanager -->
-   <!-- <module>opennlp-ner</module>
-    <module>langid</module>
-    <module>metaxa</module>-->
+    <module>weightedjobmanager</module>
   </modules>
 </project>

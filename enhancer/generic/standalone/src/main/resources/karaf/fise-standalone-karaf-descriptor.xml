@@ -34,7 +34,7 @@
 
         <bundle>mvn:org.apache.stanbol/org.apache.stanbol.enhancer.servicesapi/0.9.0-incubating-SNAPSHOT</bundle>
         <bundle>mvn:org.apache.stanbol/org.apache.stanbol.enhancer.standalone/0.9.0-incubating-SNAPSHOT</bundle>
-        <bundle>mvn:org.apache.stanbol/org.apache.stanbol.enhancer.inMemoryJobManager/0.9.0-incubating-SNAPSHOT</bundle>
+        <bundle>mvn:org.apache.stanbol/org.apache.stanbol.enhancer.weightedjobmanager/0.9.0-incubating-SNAPSHOT</bundle>
 
         <!-- additional engines -->
         <!-- autotagging -->

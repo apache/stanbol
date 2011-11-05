@@ -42,8 +42,8 @@ import org.slf4j.LoggerFactory;
  *                cardinality="0..n" policy="dynamic"
  *
  */
-public class InMemoryJobManager implements EnhancementJobManager {
-    private static final Logger log = LoggerFactory.getLogger(InMemoryJobManager.class);
+public class WeightedJobManager implements EnhancementJobManager {
+    private static final Logger log = LoggerFactory.getLogger(WeightedJobManager.class);
 
     // handle thread safety efficiently when traversals (e.g. when calling
     // #enhanceContent) are expected to be much more frequent than mutable
@@ -84,7 +84,13 @@ public class InMemoryJobManager implements EnhancementJobManager {
         }
         log.debug("ContentItem [{}] enhanced in {}ms",ci.getId(),(System.currentTimeMillis()-start));
     }
-
+    
+    @Override
+	public void enhanceContent(ContentItem ci, String chain) throws EngineException {
+		//This implementation don't take "chain" in account.
+    	enhanceContent(ci);
+	}
+    
     public void bindEnhancementEngine(EnhancementEngine e) {
         synchronized (sortedEngineList) {
             List<EnhancementEngine> newList = new ArrayList<EnhancementEngine>(sortedEngineList);
@@ -131,4 +137,5 @@ public class InMemoryJobManager implements EnhancementJobManager {
             return ServiceProperties.ORDERING_DEFAULT;
         }
     }
+    
 }
