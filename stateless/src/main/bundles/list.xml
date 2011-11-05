@@ -88,7 +88,7 @@
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.inMemoryJobManager</artifactId>
+      <artifactId>org.apache.stanbol.enhancer.weightedjobmanager</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
 	<bundle>
