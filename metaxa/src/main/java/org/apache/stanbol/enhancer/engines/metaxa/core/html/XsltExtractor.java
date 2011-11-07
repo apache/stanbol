@@ -60,7 +60,7 @@ public class XsltExtractor implements HtmlExtractionComponent {
     private Transformer transformer;
     private String id;
     private URI source;
-    private Syntax syntax = XsltExtractor.N3;
+    private Syntax syntax = Syntax.RdfXml;
 
 
     public XsltExtractor() {
@@ -134,7 +134,6 @@ public class XsltExtractor implements HtmlExtractionComponent {
         StreamResult output = new StreamResult(writer);
         try {
             this.transformer.transform(source, output);
-            // TODO put results into the RDFContainer
             String rdf = writer.toString();
             LOG.debug(rdf);
             StringReader reader = new StringReader(rdf);
