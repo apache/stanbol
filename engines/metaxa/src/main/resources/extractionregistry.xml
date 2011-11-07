@@ -74,6 +74,6 @@
 		<name>org.apache.stanbol.enhancer.engines.metaxa.core.mp3.MP3FileExtractorFactory</name>
 	</extractorFactory>	
 	<extractorFactory>
-		<name>org.semanticdesktop.aperture.extractor.mime.MimeExtractorFactory</name>
+		<name>org.apache.stanbol.enhancer.engines.metaxa.core.mail.simple.SimpleMailExtractorFactory</name>
 	</extractorFactory>
 </extractorFactories>
