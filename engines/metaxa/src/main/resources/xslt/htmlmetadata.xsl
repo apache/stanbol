@@ -54,13 +54,13 @@
   </xsl:template>
 
   <xsl:template match="meta[@name='author']">  
-  	<nie:creator>
+  	<nco:creator>
   		<nco:Contact>
   			<nco:fullname>
   				<xsl:value-of select="normalize-space(@content)"/>
   			</nco:fullname>
   		</nco:Contact>
-  	</nie:creator>
+  	</nco:creator>
   </xsl:template>
 
   <xsl:template match="meta[@name='keywords']">
@@ -94,7 +94,16 @@
 		<xsl:text>
 </xsl:text>
 	</xsl:template>
-	
+
+  <xsl:template match="br" mode="textextract">
+    <xsl:text>
+</xsl:text>
+  </xsl:template>
+  
+  <xsl:template match="pre" mode="textextract">
+    <xsl:value-of select="."/>
+  </xsl:template>
+  	
 	<xsl:template match="*" mode="textextract">
 		<xsl:apply-templates mode="textextract"/>
 	</xsl:template>
