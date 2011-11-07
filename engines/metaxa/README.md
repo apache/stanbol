@@ -155,6 +155,7 @@ following set of document formats:
  *    RTF
  *    Plain Text
  *    XML
+ *		Mail
   
 ### Textual Content
 
@@ -181,7 +182,11 @@ The most important ones with respect to top-level document properties are
 
 * NFO (Nepomuk File Object):
 
-    http://www.semanticdesktop.org/ontologies/2007/01/19/nfo# 
+    http://www.semanticdesktop.org/ontologies/2007/01/19/nfo#
+    
+* NMO (Nepomuk Message Ontology):
+
+    http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#
 
 Documentation of Aperture's core ontologies is provided in Aperture's Javadoc [http://aperture.sourceforge.net/doc/javadoc/1.5.0/index.html](http://aperture.sourceforge.net/doc/javadoc/1.5.0/index.html) for the packages in 
 
