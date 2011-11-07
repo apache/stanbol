@@ -57,6 +57,15 @@
 </xsl:text>
 	</xsl:template>
 	
+	<xsl:template match="br" mode="textextract">
+    <xsl:text>
+</xsl:text>
+  </xsl:template>
+  
+  <xsl:template match="pre" mode="textextract">
+    <xsl:value-of select="."/>
+  </xsl:template>	
+	
 	<xsl:template match="*" mode="textextract">
 		<xsl:apply-templates mode="textextract"/>
 	</xsl:template>

@@ -83,7 +83,7 @@ public class CharsetRecognizer {
         }
         if (result != null) {
             result = result.toUpperCase();
-            LOG.info(format.toUpperCase() + " encoding: " + result);
+            LOG.debug(format.toUpperCase() + " encoding: " + result);
         }
         else {
             return defaultValue;
@@ -122,7 +122,7 @@ public class CharsetRecognizer {
         detector.setText(in);
         CharsetMatch found = detector.detect();
         result = found.getName();
-        LOG.info("Encoding: " + result);
+        LOG.debug("Encoding: " + result);
         return result;
     }
 

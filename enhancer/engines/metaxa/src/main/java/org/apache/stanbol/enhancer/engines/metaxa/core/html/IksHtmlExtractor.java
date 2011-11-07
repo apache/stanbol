@@ -115,7 +115,7 @@ public class IksHtmlExtractor implements Extractor {
         List<String> formats = new ArrayList<String>();
         long modelSize = result.getModel().size();
         for (String s : registry.getActiveExtractors()) {
-            LOG.info("Extractor: " + s);
+            LOG.debug("Extractor: {}", s);
             HtmlExtractionComponent extractor = extractors.get(s);
             // TODO: Handle dependencies between Microformat extractors, e.g.
             // formats used also in other formats
@@ -123,8 +123,7 @@ public class IksHtmlExtractor implements Extractor {
                 extractor.extract(id.toString(), doc, null, result);
                 long tmpSize = result.getModel().size();
                 if (modelSize < tmpSize) {
-                    LOG.info((tmpSize - modelSize) + " Statements added: "
-                        + s);
+                    LOG.debug("{} Statements added: {}",(tmpSize - modelSize),s);
                     modelSize = tmpSize;
                 }
             }
