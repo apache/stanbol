@@ -100,7 +100,7 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
      * will be configurable
      */
 
-    @Property(value = "enhancer/engines/refactor")
+    @Property(value = "refactor-engine")
     public static final String SCOPE = "engine.refactor.scope";
 
     @Property(value = "")
