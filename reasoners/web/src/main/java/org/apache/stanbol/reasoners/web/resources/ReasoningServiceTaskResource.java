@@ -50,10 +50,15 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.owl.transformation.JenaToOwlConvert;
 import org.apache.stanbol.reasoners.jena.JenaReasoningService;
 import org.apache.stanbol.reasoners.owlapi.OWLApiReasoningService;
+import org.apache.stanbol.reasoners.servicesapi.InconsistentInputException;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningService;
+import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceException;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServicesManager;
 import org.apache.stanbol.reasoners.servicesapi.UnboundReasoningServiceException;
+import org.apache.stanbol.reasoners.servicesapi.UnsupportedTaskException;
 import org.apache.stanbol.reasoners.web.utils.ReasoningServiceExecutor;
+import org.apache.stanbol.reasoners.web.utils.ReasoningServiceResult;
+import org.apache.stanbol.reasoners.web.utils.ResponseTaskBuilder;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.RuleStore;
@@ -252,39 +257,47 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         this.parameters.remove("target");
 
         // The service executor
-        ReasoningServiceExecutor executor = new ReasoningServiceExecutor(tcManager, headers, servletContext,
-                uriInfo);
-
-        /**
-         * Select the service implementation TODO Question: how this part could be decoupled?
-         */
-        if (getCurrentService() instanceof JenaReasoningService) {
-            // Prepare input data
-            Model input;
-            try {
-                input = prepareJenaInputFromGET(url, scope, session);
-            } catch (DoesNotExistException e) {
-                throw new WebApplicationException(e, Response.Status.NOT_FOUND);
-            }
-            // Prepare rules
-            // TODO (this is not implemented yet!)
-            List<Rule> rules = prepareJenaRules(recipe);
-            return executor.executeJenaReasoningService(getCurrentTask(),
-                (JenaReasoningService) getCurrentService(), input, rules, targetGraphID, false,
-                this.parameters);
-        } else if (getCurrentService() instanceof OWLApiReasoningService) {
-            OWLOntology input = null;
-            try {
-                input = prepareOWLApiInputFromGET(url, scope, session);
-            } catch (OWLOntologyCreationIOException e) {
-                throw new WebApplicationException(e, Response.Status.NOT_FOUND);
-            } catch (OWLOntologyCreationException e) {
-                throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-            }
-            // Prepare rules
-            List<SWRLRule> rules = prepareOWLApiRules(recipe);
-            return executor.executeOWLApiReasoningService(getCurrentTask(),
-                (OWLApiReasoningService) getCurrentService(), input, rules, targetGraphID, false, this.parameters);
+        ReasoningServiceExecutor executor = new ReasoningServiceExecutor(tcManager);
+        try {
+            /**
+             * Select the service implementation TODO Question: how this part could be decoupled?
+             */
+            if (getCurrentService() instanceof JenaReasoningService) {
+                // Prepare input data
+                Model input;
+                try {
+                    input = prepareJenaInputFromGET(url, scope, session);
+                } catch (DoesNotExistException e) {
+                    throw new WebApplicationException(e, Response.Status.NOT_FOUND);
+                }
+                // Prepare rules
+                // TODO (this is not implemented yet!)
+                List<Rule> rules = prepareJenaRules(recipe);
+                ReasoningServiceResult<Model> res = executor.executeJenaReasoningService(getCurrentTask(),
+                    (JenaReasoningService) getCurrentService(), input, rules, targetGraphID, false,
+                    this.parameters);
+                return new ResponseTaskBuilder(uriInfo,context,headers).build(res);
+            } else if (getCurrentService() instanceof OWLApiReasoningService) {
+                OWLOntology input = null;
+                try {
+                    input = prepareOWLApiInputFromGET(url, scope, session);
+                } catch (OWLOntologyCreationIOException e) {
+                    throw new WebApplicationException(e, Response.Status.NOT_FOUND);
+                } catch (OWLOntologyCreationException e) {
+                    throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+                }
+                // Prepare rules
+                List<SWRLRule> rules = prepareOWLApiRules(recipe);
+                ReasoningServiceResult<OWLOntology> res = executor.executeOWLApiReasoningService(getCurrentTask(),
+                    (OWLApiReasoningService) getCurrentService(), input, rules, targetGraphID, false, this.parameters);
+                return new ResponseTaskBuilder(uriInfo,context,headers).build(res);
+            }    
+        } catch (InconsistentInputException e) {
+            new WebApplicationException(e);
+        } catch (ReasoningServiceException e) {
+            new WebApplicationException(e);
+        } catch (UnsupportedTaskException e) {
+            new WebApplicationException(e);
         }
         throw new WebApplicationException(new Exception("Unsupported implementation"),
                 Response.Status.INTERNAL_SERVER_ERROR);
@@ -350,38 +363,46 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         log.info("Called {} with parameters: {} ",httpContext.getRequest().getMethod(), parameters.keySet().toArray(new String[parameters.keySet().size()]));
         if (file.exists() && file.canRead()) {
             // The service executor
-            ReasoningServiceExecutor executor = new ReasoningServiceExecutor(tcManager, headers,
-                    servletContext, uriInfo);
-
-            // Select the service implementation
-            if (getCurrentService() instanceof JenaReasoningService) {
-                // Prepare input data
-                Model input;
-                try {
-                    input = prepareJenaInputFromPOST(file, scope, session);
-                } catch (MalformedURLException e) {
-                    throw new WebApplicationException(new IllegalArgumentException("Cannot read file"),
-                            Response.Status.INTERNAL_SERVER_ERROR);
+            ReasoningServiceExecutor executor = new ReasoningServiceExecutor(tcManager);
+            try{
+                // Select the service implementation
+                if (getCurrentService() instanceof JenaReasoningService) {
+                    // Prepare input data
+                    Model input;
+                    try {
+                        input = prepareJenaInputFromPOST(file, scope, session);
+                    } catch (MalformedURLException e) {
+                        throw new WebApplicationException(new IllegalArgumentException("Cannot read file"),
+                                Response.Status.INTERNAL_SERVER_ERROR);
+                    }
+                    // Prepare rules
+                    List<Rule> rules = prepareJenaRules(recipe);
+                    ReasoningServiceResult<Model> result =  executor.executeJenaReasoningService(getCurrentTask(),
+                        (JenaReasoningService) getCurrentService(), input, rules, targetGraphID, false,
+                        this.parameters);
+                    return new ResponseTaskBuilder(uriInfo,context,headers).build(result);
+                } else if (getCurrentService() instanceof OWLApiReasoningService) {
+                    OWLOntology input = null;
+                    try {
+                        input = prepareOWLApiInputFromPOST(file, scope, session);
+                    } catch (OWLOntologyCreationIOException e) {
+                        throw new WebApplicationException(e, Response.Status.NOT_FOUND);
+                    } catch (OWLOntologyCreationException e) {
+                        throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+                    }
+                    // Prepare rules
+                    List<SWRLRule> rules = prepareOWLApiRules(recipe);
+                    ReasoningServiceResult<OWLOntology> result = executor.executeOWLApiReasoningService(getCurrentTask(),
+                        (OWLApiReasoningService) getCurrentService(), input, rules, targetGraphID, false,
+                        this.parameters);
+                    return new ResponseTaskBuilder(uriInfo,context,headers).build(result);
                 }
-                // Prepare rules
-                List<Rule> rules = prepareJenaRules(recipe);
-                return executor.executeJenaReasoningService(getCurrentTask(),
-                    (JenaReasoningService) getCurrentService(), input, rules, targetGraphID, false,
-                    this.parameters);
-            } else if (getCurrentService() instanceof OWLApiReasoningService) {
-                OWLOntology input = null;
-                try {
-                    input = prepareOWLApiInputFromPOST(file, scope, session);
-                } catch (OWLOntologyCreationIOException e) {
-                    throw new WebApplicationException(e, Response.Status.NOT_FOUND);
-                } catch (OWLOntologyCreationException e) {
-                    throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-                }
-                // Prepare rules
-                List<SWRLRule> rules = prepareOWLApiRules(recipe);
-                return executor.executeOWLApiReasoningService(getCurrentTask(),
-                    (OWLApiReasoningService) getCurrentService(), input, rules, targetGraphID, false,
-                    this.parameters);
+            } catch (InconsistentInputException e) {
+                new WebApplicationException(e);
+            } catch (ReasoningServiceException e) {
+                new WebApplicationException(e);
+            } catch (UnsupportedTaskException e) {
+                new WebApplicationException(e);
             }
             throw new WebApplicationException(new Exception("Unsupported implementation"),
                     Response.Status.INTERNAL_SERVER_ERROR);
@@ -610,7 +631,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
             OntologySpace sessionSpace = null;
             if (sessionID != null) {
                 IRI sessionIRI = IRI.create(sessionID);
-                sessionSpace = scope.getSessionSpace(sessionIRI);
+                sessionSpace = scope.getSessionSpace(sessionIRI.toString());
             }
             OntologySpace coreSpace = scope.getCoreSpace();
             Set<OWLOntology> coreOntologies = coreSpace.getOntologies(true);

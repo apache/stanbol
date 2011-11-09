@@ -1,7 +1,11 @@
 package org.apache.stanbol.reasoners.servicesapi;
 
 public class ReasoningServiceException extends Exception {
-
+    public ReasoningServiceException(Throwable t) {
+        super(t);
+    }
+    public ReasoningServiceException() {
+    }
     /**
 	 * 
 	 */
