@@ -1,18 +1,24 @@
 package org.apache.stanbol.reasoners.web.resources;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.reasoners.jobs.api.JobManager;
+import org.apache.stanbol.reasoners.web.utils.ReasoningServiceResult;
+import org.apache.stanbol.reasoners.web.utils.ResponseTaskBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,18 +28,20 @@ import org.slf4j.LoggerFactory;
  * @author mac
  * 
  */
-@Path("/jobs")
+@Path("/reasoners/jobs")
 public class JobsResource extends BaseStanbolResource {
     private Logger log = LoggerFactory.getLogger(getClass());
     private ServletContext context;
+    private HttpHeaders headers;
 
-    public JobsResource(@Context ServletContext servletContext) {
+    public JobsResource(@Context ServletContext servletContext,@Context HttpHeaders headers) {
         this.context = servletContext;
+        this.headers = headers;
     }
 
     @GET
-    @Path("ping")
-    public Response get(@QueryParam("id") String id) {
+    @Path("ping/{jid}")
+    public Response get(@PathParam("jid") String id) {
         log.info("Pinging job {}", id);
 
         // No id
@@ -52,7 +60,26 @@ public class JobsResource extends BaseStanbolResource {
                     // NOTE: In this case the job still remains in the JobManager list
                     return Response.ok("Job have been canceled!").build();                
                 }else{
-                    return Response.ok("Job is done!").build();
+                    Object o;
+                    try {
+                        o = f.get();
+                        if(o instanceof ReasoningServiceResult<?>){
+                            ReasoningServiceResult<?> result = (ReasoningServiceResult<?>) f.get();
+                            return new ResponseTaskBuilder(uriInfo,context,headers).build(result);
+                        }else if(o instanceof String){
+                            // FIXME We keep this for the moment, must remove later on
+                            return Response.ok("Test Job is done!\n " + (String) o).build();                        
+                        }else{
+                            log.error("Unsupported job result type: {}",o.getClass());
+                            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+                        }
+                    } catch (InterruptedException e) {
+                        log.error("Error: ",e);
+                        throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+                    } catch (ExecutionException e) {
+                        log.error("Error: ",e);
+                        throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+                    }
                 }
             }else{
                 // FIXME Change the HTTP Status code here!
@@ -97,7 +124,7 @@ public class JobsResource extends BaseStanbolResource {
      * @return
      */
     private JobManager getJobManager() {
-        log.debug("(getServicesManager()) ");
+        log.debug("(getJobManager()) ");
         return (JobManager) ContextHelper.getServiceFromContext(JobManager.class, this.context);
     }
 }

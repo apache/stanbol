@@ -1,6 +1,5 @@
 package org.apache.stanbol.reasoners.jena;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -58,9 +57,10 @@ public abstract class AbstractJenaReasoningService implements JenaReasoningServi
      */
     @Override
     public InfModel run(Model data) {
-        log.info("Called run(Model data)");
-        InfGraph inferredGraph = this.reasoner.bind(data.getGraph());
-        return ModelFactory.createInfModel(inferredGraph);
+        log.debug(" run(Model data)");
+        InfModel im = ModelFactory.createInfModel(this.reasoner, data);
+        im.prepare();
+        return im;
     }
 
     /**
@@ -73,6 +73,7 @@ public abstract class AbstractJenaReasoningService implements JenaReasoningServi
      */
     @Override
     public InfModel run(Model data, List<Rule> rules) {
+        log.debug(" run(Model data, List<Rule> rules)");
         InfGraph inferredGraph = customReasoner(rules).bind(data.getGraph());
         return ModelFactory.createInfModel(inferredGraph);
     }
@@ -91,7 +92,7 @@ public abstract class AbstractJenaReasoningService implements JenaReasoningServi
                                   Map<String,List<String>> parameters) throws UnsupportedTaskException,
                                                            ReasoningServiceException,
                                                            InconsistentInputException {
-        log.info("Called runTask(String taskID,Model data,List<Rule> rules,boolean filtered,Map<String,List<String>> parameters)");
+        log.debug(" runTask(String taskID,Model data,List<Rule> rules,boolean filtered,Map<String,List<String>> parameters)");
         if (taskID.equals(ReasoningService.Tasks.CLASSIFY)) {
             if (rules != null) {
                 return classify(data, rules);
@@ -118,6 +119,7 @@ public abstract class AbstractJenaReasoningService implements JenaReasoningServi
     public Set<Statement> runTask(String taskID, Model data) throws UnsupportedTaskException,
                                                             ReasoningServiceException,
                                                             InconsistentInputException {
+        log.debug(" runTask(String taskID, Model data)");
         if (taskID.equals(ReasoningService.Tasks.CLASSIFY)) {
             return classify(data);
         } else if (taskID.equals(ReasoningService.Tasks.ENRICH)) {
@@ -140,6 +142,7 @@ public abstract class AbstractJenaReasoningService implements JenaReasoningServi
      * @return
      */
     protected Reasoner customReasoner(List<Rule> customRules) {
+        log.debug(" customReasoner(List<Rule> customRules)");
         List<Rule> standardRules = ((FBRuleReasoner) this.reasoner).getRules();
         standardRules.addAll(customRules);
         return new GenericRuleReasoner(standardRules);
@@ -158,6 +161,7 @@ public abstract class AbstractJenaReasoningService implements JenaReasoningServi
      * @return
      */
     protected Set<Statement> classify(Model data) {
+        log.debug(" classify(Model data)");
         return run(data).listStatements().filterKeep(new PropertyFilter(RDF.type)).toSet();
     }
 
@@ -176,6 +180,7 @@ public abstract class AbstractJenaReasoningService implements JenaReasoningServi
      * @return
      */
     protected Set<Statement> classify(Model data, List<Rule> rules) {
+        log.debug(" classify(Model data, List<Rule> rules)");
         return run(data, rules).listStatements().filterKeep(new PropertyFilter(RDF.type)).toSet();
     }
 
@@ -191,11 +196,20 @@ public abstract class AbstractJenaReasoningService implements JenaReasoningServi
      * @return
      */
     protected Set<Statement> enrich(Model data, boolean filtered) {
-        Set<Statement> statements = run(data).listStatements().toSet();
-        if (filtered) {
-            return prune(data.listStatements().toSet(), statements);
+        log.debug(" enrich(Model data, boolean filtered)");
+        // Since the input model is modified by the reasoner,
+        // We keep the original list to prune the data after, if necessary
+        if(filtered){
+            Set<Statement> original = new HashSet<Statement>();
+            original.addAll(data.listStatements().toSet());
+            log.debug(" original statements are: {}",original.size());
+            InfModel i = run(data);
+            Set<Statement> inferred = i.listStatements().toSet();
+            log.debug(" inferred statements are: {}",inferred.size());
+            return prune(original, inferred);
+        }else{
+            return run(data).listStatements().toSet();
         }
-        return statements;
     }
 
     /**
@@ -206,12 +220,14 @@ public abstract class AbstractJenaReasoningService implements JenaReasoningServi
      * @return
      */
     protected final Set<Statement> prune(Set<Statement> first, Set<Statement> second) {
+        log.debug(" prune(Set<Statement> first[{}], Set<Statement> second[{}])",first.size(),second.size());
         Set<Statement> remove = new HashSet<Statement>();
         for (Statement s : second) {
             if (first.contains(s)) {
                 remove.add(s);
             }
         }
+        log.debug(" ---- removing {} statements from {}",first.size(),second.size());
         second.removeAll(remove);
         return second;
     }
@@ -227,6 +243,7 @@ public abstract class AbstractJenaReasoningService implements JenaReasoningServi
      * @return
      */
     public Set<Statement> enrich(Model data) {
+        log.debug(" enrich(Model data)");
         return enrich(data, true);
     }
 
@@ -243,11 +260,20 @@ public abstract class AbstractJenaReasoningService implements JenaReasoningServi
      * @return
      */
     protected Set<Statement> enrich(Model data, List<Rule> rules, boolean filtered) {
-        Set<Statement> statements = run(data, rules).listStatements().toSet();
-        if (filtered) {
-            return prune(data.listStatements().toSet(), statements);
+        log.debug(" enrich(Model data, List<Rule> rules, boolean filtered)");
+        // Since the input model is modified by the reasoner,
+        // We keep the original list to prune the data after, if necessary
+        if(filtered){
+            Set<Statement> original = new HashSet<Statement>();
+            original.addAll(data.listStatements().toSet());
+            log.debug(" original statements are: {}",original.size());
+            InfModel i = run(data, rules);
+            Set<Statement> inferred = i.listStatements().toSet();
+            log.debug(" inferred statements are: {}",inferred.size());
+            return prune(original, inferred);
+        }else{
+            return run(data, rules).listStatements().toSet();
         }
-        return statements;
     }
 
     /**
@@ -262,6 +288,7 @@ public abstract class AbstractJenaReasoningService implements JenaReasoningServi
      * @return
      */
     protected Set<Statement> enrich(Model data, List<Rule> rules) {
+        log.debug(" enrich(Model data, List<Rule> rules)");
         return enrich(data, rules, true);
     }
 
@@ -273,6 +300,7 @@ public abstract class AbstractJenaReasoningService implements JenaReasoningServi
      */
     @Override
     public boolean isConsistent(Model data) {
+        log.debug(" isConsistent(Model data)");
         return isConsistent(run(data).validate());
     }
 
@@ -288,6 +316,7 @@ public abstract class AbstractJenaReasoningService implements JenaReasoningServi
      */
     @Override
     public boolean isConsistent(Model data, List<Rule> rules) {
+        log.debug(" isConsistent(Model data, List<Rule> rules)");
         return isConsistent(run(data, rules).validate());
     }
 
@@ -303,9 +332,12 @@ public abstract class AbstractJenaReasoningService implements JenaReasoningServi
      * @return
      */
     protected boolean isConsistent(ValidityReport report) {
+        log.debug(" isConsistent(ValidityReport report)");
+        if(log.isDebugEnabled()){
         Iterator<Report> it = report.getReports();
-        while (it.hasNext()) {
-            log.info("Report: {}", it.next());
+            while (it.hasNext()) {
+                log.debug("Report: {}", it.next());
+            }
         }
         return report.isClean();
     }

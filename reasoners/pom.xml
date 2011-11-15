@@ -43,7 +43,8 @@
     <module>jobs/api</module>
     <module>owlapi</module>
     <module>jena</module>
-    <!--module>hermit</module-->
+    <module>test</module>
+    <module>hermit</module>
     <!--module>base</module-->
     <module>owllink</module>
     <module>web</module>
