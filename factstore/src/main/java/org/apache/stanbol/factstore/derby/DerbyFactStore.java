@@ -543,7 +543,7 @@ public class DerbyFactStore implements FactStore {
             }
 
         } else {
-            throw new Exception("Unknown fact schema " + fact.getFactSchemaURN());
+            throw new Exception("Unknown fact schema '" + fact.getFactSchemaURN() + "'");
         }
 
         return factId;

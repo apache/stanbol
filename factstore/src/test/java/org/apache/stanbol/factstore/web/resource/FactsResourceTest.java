@@ -108,7 +108,8 @@ public class FactsResourceTest {
                 .postFacts("{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:employeeOf\",\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}}");
 
         assertTrue(response.getStatus() == Status.OK.getStatusCode());
-        assertEquals("http://testhost:1234/factstore/facts/99", response.getEntity());
+        System.out.println(response.getMetadata().get("Location").get(0));
+        assertEquals("http://testhost:1234/factstore/facts/http%3A%2F%2Fiks-project.eu%2Font%2FemployeeOf/99", response.getMetadata().get("Location").get(0).toString());
     }
 
     @Test

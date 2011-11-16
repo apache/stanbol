@@ -16,6 +16,8 @@
  */
 package org.apache.stanbol.factstore.web.resource;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -184,6 +186,45 @@ public class FactsResource extends BaseFactStoreResource {
                     .type(MediaType.APPLICATION_JSON).build();
         }
     }
+    
+    @GET
+    @Path("/{factSchemaURN}/{factId}")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getFactAsHtml(@PathParam("factId") int factId, @PathParam("factSchemaURN") String factSchemaURN) {
+        Response validationResponse = standardValidation(factSchemaURN);
+        if (validationResponse != null) {
+            return validationResponse;
+        }
+
+        logger.info("Request for getting fact {} of schema {}", factId, factSchemaURN);
+        
+        Fact fact = null;
+        try {
+            fact = this.factStore.getFact(factId, factSchemaURN);
+        } catch (Exception e) {
+            logger.error("Error while loading fact {}", factId, e);
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(
+                "Error while loading fact " + factId + " of fact schema " + factSchemaURN + " from database")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+        if (fact == null) {
+            logger.debug("Fact {} for fact schema {} not found", factId, factSchemaURN);
+            return Response.status(Status.NOT_FOUND).entity(
+                "Could not find fact with ID " + factId + " for fact schema " + factSchemaURN).build();
+        }
+        else {
+            JsonLd factAsJsonLd = fact.factToJsonLd();
+            
+            StringBuilder sb = new StringBuilder();
+            sb.append("<html><body>");
+            sb.append("<pre>");
+            sb.append(factAsJsonLd.toString(2));
+            sb.append("</pre>");
+            sb.append("</body></html>");
+            
+            return Response.status(Status.OK).entity(sb.toString()).type(MediaType.TEXT_HTML).build();
+        }
+    }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -219,7 +260,14 @@ public class FactsResource extends BaseFactStoreResource {
                     "Could not extract fact from JSON-LD input.").type(MediaType.TEXT_PLAIN).build();
             }
             
-            return Response.status(Status.OK).entity(this.getPublicBaseUri() + "factstore/facts/" + factId).type(MediaType.TEXT_PLAIN).build();
+            String schemaEncoded = null;
+            try {
+                schemaEncoded = URLEncoder.encode(fact.getFactSchemaURN(), "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                logger.error("Could not encode fact schema URI", e);
+            }
+            
+            return Response.status(Status.OK).header("Location", this.getPublicBaseUri() + "factstore/facts/" + schemaEncoded + "/" + factId).type(MediaType.TEXT_PLAIN).build();
         } else {
             // post multiple facts
             Set<Fact> facts = Fact.factsFromJsonLd(jsonLd);
