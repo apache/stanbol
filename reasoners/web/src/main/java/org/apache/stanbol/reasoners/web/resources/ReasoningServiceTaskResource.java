@@ -73,7 +73,7 @@ import com.sun.jersey.multipart.FormDataMultiPart;
  * requested format or saved in the triple store).
  * 
  */
-@Path("/reasoners/{service}/{task}{job:.*}")
+@Path("/reasoners/{service}/{task: [^/]+}{job: (/job)?}")
 public class ReasoningServiceTaskResource extends BaseStanbolResource {
     private Logger log = LoggerFactory.getLogger(getClass());
     private ServletContext context;
@@ -141,8 +141,9 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
                     Response.Status.NOT_FOUND);
         }
         // Check for the job parameter
-        if(job!=null){
-            if(job.equals("job")){
+        if(!job.equals("")){
+            log.info("Job param is {}",job);
+            if(job.equals("/job")){
                 log.info("Ask for background job");
                 this.job  = true;
             }else{
