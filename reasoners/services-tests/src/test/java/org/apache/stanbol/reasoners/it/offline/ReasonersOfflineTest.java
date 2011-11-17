@@ -34,10 +34,10 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class ReasonersOfflineTest extends ReasonersTestBase {
-    private static String fileName = null;
-    private String fileParam = "file";
-    private static File file = null;
-    private MultipartEntity multiPart = null;
+    protected static String fileName = null;
+    protected String fileParam = "file";
+    protected static File file = null;
+    protected MultipartEntity multiPart = null;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -156,6 +156,7 @@ public class ReasonersOfflineTest extends ReasonersTestBase {
      */
     @Test
     public void testOutputFormats() throws Exception{
+        log.info("testOutputFormats()");
         final String[] formats = {
                                   // Each group of 3 elements is: Accept header, Expected content-type,
                                   // Expected regexp

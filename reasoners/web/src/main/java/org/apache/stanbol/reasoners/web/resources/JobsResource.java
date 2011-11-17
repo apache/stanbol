@@ -8,7 +8,6 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -63,8 +62,9 @@ public class JobsResource extends BaseStanbolResource {
                     Object o;
                     try {
                         o = f.get();
-                        if(o instanceof ReasoningServiceResult<?>){
-                            ReasoningServiceResult<?> result = (ReasoningServiceResult<?>) f.get();
+                        if(o instanceof ReasoningServiceResult){
+                            log.debug("Is a ReasoningServiceResult");
+                            ReasoningServiceResult<?> result = (ReasoningServiceResult<?>) o;
                             return new ResponseTaskBuilder(uriInfo,context,headers).build(result);
                         }else if(o instanceof String){
                             // FIXME We keep this for the moment, must remove later on

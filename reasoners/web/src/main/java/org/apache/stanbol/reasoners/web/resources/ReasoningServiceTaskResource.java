@@ -226,7 +226,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
     private Response processBackgroundRequest(){
         // If parameters is empty it's a bad request...
         if (this.parameters.isEmpty()) {
-            log.error("Cannot start job without input parameters...");
+            log.error("Cannot start job without input parameters... sending BAD REQUEST");
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
         String target = getTarget();
