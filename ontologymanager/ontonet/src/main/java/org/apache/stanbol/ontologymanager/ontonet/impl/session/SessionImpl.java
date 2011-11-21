@@ -17,21 +17,32 @@
 package org.apache.stanbol.ontologymanager.ontonet.impl.session;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorListener;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorModificationException;
+import org.apache.clerezza.rdf.core.access.TcProvider;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent.OperationType;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
+import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.AbstractOntologyCollectorImpl;
+import org.apache.stanbol.owl.util.URIUtils;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -41,17 +52,14 @@ import org.slf4j.LoggerFactory;
  * @author alexdma
  * 
  */
-public class SessionImpl implements Session {
+public class SessionImpl extends AbstractOntologyCollectorImpl implements Session {
 
-    /**
-     * A KReS session knows about its own ID.
-     */
-    protected String id = null;
+    protected Map<String,OntologyScope> attachedScopes;
 
     protected Set<SessionListener> listeners;
 
     /**
-     * A KReS session knows about its own state.
+     * A session knows its own state.
      */
     State state = State.HALTED;
 
@@ -62,20 +70,94 @@ public class SessionImpl implements Session {
      * @param sessionID
      *            the IRI to be set as unique identifier for this session
      */
-    public SessionImpl(String sessionID) {
-        this.id = sessionID;
+    public SessionImpl(String sessionID, IRI namespace, TcProvider tcProvider) {
+        super(sessionID, namespace, tcProvider);
+        attachedScopes = new HashMap<String,OntologyScope>();
         listeners = new HashSet<SessionListener>();
-    }
-
-    public SessionImpl(String sessionID, State initialState) throws NonReferenceableSessionException {
-        this(sessionID);
-        if (initialState == State.ZOMBIE) throw new NonReferenceableSessionException();
-        else setActive(initialState == State.ACTIVE);
     }
 
     @Override
     public void addSessionListener(SessionListener listener) {
         listeners.add(listener);
+    }
+
+    /**
+     * FIXME not merging yet
+     * 
+     * @see OWLExportable#asOWLOntology(boolean)
+     */
+    @Override
+    public OWLOntology asOWLOntology(boolean merge) {
+        if (merge) throw new UnsupportedOperationException(
+                "Merging not implemented yet. Please call asOWLOntology(false)");
+
+        OWLOntology root;
+        OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
+        IRI iri = IRI.create(namespace + _id);
+        try {
+            root = ontologyManager.createOntology(iri);
+        } catch (OWLOntologyAlreadyExistsException e) {
+            // It should be impossible, but just in case.
+            ontologyManager.removeOntology(ontologyManager.getOntology(iri));
+            try {
+                root = ontologyManager.createOntology(iri);
+            } catch (OWLOntologyAlreadyExistsException e1) {
+                root = ontologyManager.getOntology(iri);
+            } catch (OWLOntologyCreationException e1) {
+                log.error("Failed to assemble root ontology for session " + _id, e);
+                root = null;
+            }
+        } catch (OWLOntologyCreationException e) {
+            log.error("Failed to assemble root ontology for session " + _id, e);
+            root = null;
+        }
+
+        // Add the import declarations for directly managed ontologies.
+        if (root != null) {
+            List<OWLOntologyChange> changes = new LinkedList<OWLOntologyChange>();
+            OWLDataFactory df = ontologyManager.getOWLDataFactory();
+            for (OWLOntology o : getOntologies(false)) {
+                if (o == null) continue;
+
+                String base = URIUtils.upOne(IRI.create(namespace + getID())) + "/";
+
+                IRI ontologyIri;
+
+                if (o.isAnonymous()) try {
+                    ontologyIri = ontologyManager.getOntologyDocumentIRI(o);
+                } catch (Exception ex) {
+                    ontologyIri = o.getOWLOntologyManager().getOntologyDocumentIRI(o);
+                }
+                else {
+                    ontologyIri = o.getOntologyID().getDefaultDocumentIRI();
+                }
+
+                IRI physIRI = IRI.create(base + ontologyIri);
+
+                changes.add(new AddImport(root, df.getOWLImportsDeclaration(physIRI)));
+            }
+
+            // Add imports for attached scopes
+            for (String scopeID : getAttachedScopes()) {
+                IRI physIRI = IRI.create(namespace + scopeID);
+                changes.add(new AddImport(root, df.getOWLImportsDeclaration(physIRI)));
+            }
+
+            ontologyManager.applyChanges(changes);
+        }
+
+        return root;
+
+    }
+
+    @Override
+    public void attachScope(OntologyScope scope) {
+        attachedScopes.put(scope.getID(), scope);
+    }
+
+    @Override
+    public void clearScopes() {
+        attachedScopes.clear();
     }
 
     @Override
@@ -92,8 +174,25 @@ public class SessionImpl implements Session {
     }
 
     @Override
-    public String getID() {
-        return id.toString();
+    public void detachScope(String scopeId) {
+        attachedScopes.remove(scopeId);
+    }
+
+    protected void fireClosed() {
+        SessionEvent e = null;
+        try {
+            e = new SessionEvent(this, OperationType.CLOSE);
+        } catch (Exception e1) {
+            LoggerFactory.getLogger(getClass()).error("Could not close session " + getID(), e1);
+            return;
+        }
+        for (SessionListener l : listeners)
+            l.sessionChanged(e);
+    }
+
+    @Override
+    public Set<String> getAttachedScopes() {
+        return attachedScopes.keySet();
     }
 
     @Override
@@ -112,6 +211,11 @@ public class SessionImpl implements Session {
     }
 
     @Override
+    public void open() throws NonReferenceableSessionException {
+        setActive(true);
+    }
+
+    @Override
     public void removeSessionListener(SessionListener listener) {
         listeners.remove(listener);
     }
@@ -124,145 +228,14 @@ public class SessionImpl implements Session {
     }
 
     @Override
+    protected void setID(String id) {
+        // TODO check form of ID
+        this._id = id;
+    }
+
+    @Override
     public String toString() {
         return getID().toString();
-    }
-
-    protected void fireClosed() {
-        SessionEvent e = null;
-        try {
-            e = new SessionEvent(this, OperationType.CLOSE);
-        } catch (Exception e1) {
-            LoggerFactory.getLogger(getClass()).error("KReS :: Could not close session " + getID(), e1);
-            return;
-        }
-        for (SessionListener l : listeners)
-            l.sessionChanged(e);
-    }
-
-    @Override
-    public void open() throws NonReferenceableSessionException {
-        setActive(true);
-    }
-
-    @Override
-    public OWLOntology asOWLOntology(boolean merge) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void attachScope(OntologyScope scope) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void detachScope(String scopeId) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void clearScopes() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public Set<String> getAttachedScopes() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void addOntology(OntologyInputSource<?> ontologySource) throws UnmodifiableOntologyCollectorException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public Set<OWLOntology> getOntologies(boolean withClosure) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OWLOntology getOntology(IRI ontologyIri) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean hasOntology(IRI ontologyIri) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean isLocked() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public void removeOntology(IRI ontologyId) throws OntologyCollectorModificationException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void addListener(OntologyCollectorListener listener) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void clearListeners() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public Collection<OntologyCollectorListener> getListeners() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public IRI getNamespace() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void removeListener(OntologyCollectorListener listener) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void setNamespace(IRI namespace) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void setUp() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void tearDown() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public Set<Class<?>> getSupportedTypes() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }

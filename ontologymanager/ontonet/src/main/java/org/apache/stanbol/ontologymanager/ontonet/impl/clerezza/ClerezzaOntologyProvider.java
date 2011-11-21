@@ -156,6 +156,10 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
     }
 
     protected void activate(Dictionary<String,Object> configuration) {
+
+        // Check if the TcManager should be set as the store
+        if (store == null) store = tcManager;
+
         // Parse configuration.
         prefix = (String) (configuration.get(OntologyProvider.GRAPH_PREFIX));
         if (prefix == null) prefix = _GRAPH_PREFIX_DEFAULT; // Should be already assigned though

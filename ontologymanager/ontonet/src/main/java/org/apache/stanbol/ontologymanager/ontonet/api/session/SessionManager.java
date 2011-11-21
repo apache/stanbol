@@ -23,9 +23,9 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySp
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 /**
- * Manages KReS session objects via CRUD-like operations. A <code>SessionManager</code> maintains in-memory
- * storage of KReS sessions, creates new ones and either destroys or stores existing ones persistently. All
- * KReS sessions are managed via unique identifiers of the <code>org.semanticweb.owlapi.model.IRI</code> type.<br>
+ * Manages session objects via CRUD-like operations. A <code>SessionManager</code> maintains in-memory storage
+ * of sessions, creates new ones and either destroys or stores existing ones persistently. All sessions are
+ * managed via unique identifiers of the <code>org.semanticweb.owlapi.model.IRI</code> type.<br>
  * <br>
  * NOTE: implementations should be synchronized, or document whenever they are not.
  * 
@@ -34,30 +34,33 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
  */
 public interface SessionManager extends SessionListenable {
 
-    Set<String> getRegisteredSessionIDs();
+    /**
+     * The key used to configure the base namespace of the ontology network.
+     */
+    String SESSIONS_NS = "org.apache.stanbol.ontologymanager.session.ns";
 
     /**
-     * Generates AND REGISTERS a new KReS session and assigns a unique session ID generated internally.
+     * Generates AND REGISTERS a new session and assigns a unique session ID generated internally.
      * 
-     * @return the generated KReS session
+     * @return the generated session
      */
     Session createSession();
 
     /**
-     * Generates AND REGISTERS a new KReS session and tries to assign it the supplied session ID. If a session
-     * with that ID is already registered, the new session is <i>not</i> created and a
+     * Generates AND REGISTERS a new session and tries to assign it the supplied session ID. If a session with
+     * that ID is already registered, the new session is <i>not</i> created and a
      * <code>DuplicateSessionIDException</code> is thrown.
      * 
      * @param sessionID
      *            the IRI that uniquely identifies the session
-     * @return the generated KReS session
+     * @return the generated session
      * @throws DuplicateSessionIDException
-     *             if a KReS session with that sessionID is already registered
+     *             if a session with that sessionID is already registered
      */
     Session createSession(String sessionID) throws DuplicateSessionIDException;
 
     /**
-     * Deletes the KReS session identified by the supplied sessionID and releases its resources.
+     * Deletes the session identified by the supplied sessionID and releases its resources.
      * 
      * @param sessionID
      *            the IRI that uniquely identifies the session
@@ -65,13 +68,22 @@ public interface SessionManager extends SessionListenable {
     void destroySession(String sessionID);
 
     /**
-     * Retrieves the unique KReS session identified by <code>sessionID</code>.
+     * Returns the set of strings that identify registered sessions, whatever their state.
+     * 
+     * @return the IDs of all registered sessions.
+     */
+    Set<String> getRegisteredSessionIDs();
+
+    /**
+     * Retrieves the unique session identified by <code>sessionID</code>.
      * 
      * @param sessionID
      *            the IRI that uniquely identifies the session
-     * @return the unique KReS session identified by <code>sessionID</code>
+     * @return the unique session identified by <code>sessionID</code>
      */
     Session getSession(String sessionID);
+
+    String getSessionNamespace();
 
     /**
      * Returns the ontology space associated with this session.
@@ -82,8 +94,10 @@ public interface SessionManager extends SessionListenable {
      */
     Set<SessionOntologySpace> getSessionSpaces(String sessionID) throws NonReferenceableSessionException;
 
+    void setSessionNamespace(String namespace);
+
     /**
-     * Stores the KReS session identified by <code>sessionID</code> using the output stream <code>out</code>.
+     * Stores the session identified by <code>sessionID</code> using the output stream <code>out</code>.
      * 
      * @param sessionID
      *            the IRI that uniquely identifies the session

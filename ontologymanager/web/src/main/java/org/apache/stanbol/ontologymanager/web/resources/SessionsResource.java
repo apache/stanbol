@@ -29,6 +29,8 @@ import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -43,9 +45,11 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
@@ -58,9 +62,18 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntol
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.renderers.SessionRenderer;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.AddAxiom;
+import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import com.sun.jersey.api.view.Viewable;
 import com.sun.jersey.multipart.FormDataParam;
@@ -197,6 +210,31 @@ public class SessionsResource extends BaseStanbolResource {
 
         return Response.ok(SessionRenderer.getSessionMetadataRDFasOntology(ses)).build();
 
+    }
+
+    @GET
+    @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
+                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
+    public Response listSessions(@Context UriInfo uriInfo, @Context HttpHeaders headers) {
+
+        SessionManager sesMgr = onm.getSessionManager();
+        OWLOntologyManager ontMgr = OWLManager.createOWLOntologyManager();
+        OWLDataFactory df = ontMgr.getOWLDataFactory();
+        OWLClass cSession = df.getOWLClass(IRI.create("http://stanbol.apache.org/ontologies/meta/Session"));
+
+        OWLOntology o;
+        try {
+            o = ontMgr.createOntology(IRI.create(uriInfo.getRequestUri()));
+            List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+            for (String id : sesMgr.getRegisteredSessionIDs()) {
+                OWLNamedIndividual ind = df.getOWLNamedIndividual(IRI.create(sesMgr.getSessionNamespace() + id));
+                changes.add(new AddAxiom(o, df.getOWLClassAssertionAxiom(cSession, ind)));
+            }
+            ontMgr.applyChanges(changes);
+        } catch (OWLOntologyCreationException e) {
+            throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
+        }
+        return Response.ok(o).build();
     }
 
     /**

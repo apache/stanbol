@@ -16,80 +16,84 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.io;
 
-import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.parser;
-import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.reset;
-import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.tcManager;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.*;
+import static org.junit.Assert.*;
 
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TestStorage {
 
-    private static ONManager onm;
-
     private Logger log = LoggerFactory.getLogger(getClass());
 
     private String scopeId = "StorageTest";
 
-    private static OntologyProvider<TcProvider> provider;
-
     @BeforeClass
     public static void setup() {
         reset();
-        OfflineConfiguration offline = new OfflineConfigurationImpl(new Hashtable<String,Object>());
-        provider = new ClerezzaOntologyProvider(tcManager, offline, parser);
-        // Empty configurations are fine, but this time we provide a Clerezza context.
-        onm = new ONManagerImpl(provider, offline, new Hashtable<String,Object>());
     }
 
     @Test
     public void storageOnScopeCreation() throws Exception {
-        assertTrue(provider.getStore().listTripleCollections().isEmpty());
+
+        assertTrue(ontologyProvider.getStore().listTripleCollections().isEmpty());
         OntologyInputSource ois = new RootOntologyIRISource(IRI.create(getClass().getResource(
             "/ontologies/minorcharacters.owl")));
 
-        OntologyScope sc = onm.getOntologyScopeFactory().createOntologyScope(scopeId, ois);
+        OntologyScope sc = onManager.getOntologyScopeFactory().createOntologyScope(scopeId, ois);
 
         Set<Triple> triples = new HashSet<Triple>();
 
-        for (UriRef iri : provider.getStore().listTripleCollections()) {
+        for (UriRef iri : ontologyProvider.getStore().listTripleCollections()) {
             log.info("{}", iri.toString());
             UriRef entity = new UriRef(Constants.PEANUTS_MINOR_BASE + "#" + Constants.truffles);
-            Graph ctx = new GraphNode(entity, provider.getStore().getTriples(iri)).getNodeContext();
+            Graph ctx = new GraphNode(entity, ontologyProvider.getStore().getTriples(iri)).getNodeContext();
             Iterator<Triple> it = ctx.iterator();
             while (it.hasNext())
                 triples.add(it.next());
         }
 
-        assertFalse(provider.getStore().listTripleCollections().isEmpty());
+        assertFalse(ontologyProvider.getStore().listTripleCollections().isEmpty());
         assertEquals(3, triples.size());
+
+    }
+
+    /**
+     * If an ontology is removed from a scope, or the scope itself is torn down, this should not result in the
+     * deletion of that ontology in general.
+     */
+    @Test
+    public void storedOntologyOutlivesScope() throws Exception {
+        String ephemeralScopeId = "CaducousScope";
+        OntologyInputSource<OWLOntology> ois = new RootOntologyIRISource(IRI.create(getClass().getResource(
+            "/ontologies/nonexistentcharacters.owl")));
+        IRI ontologyId = ois.getRootOntology().getOntologyID().getOntologyIRI();
+        OntologyScope scope = onManager.getOntologyScopeFactory().createOntologyScope(ephemeralScopeId);
+        assertFalse(ontologyProvider.getOntologyReferences().contains(ontologyId.toString()));
+        scope.getCustomSpace().addOntology(ois);
+        assertTrue(ontologyProvider.getOntologyReferences().contains(ontologyId.toString()));
+        scope.getCustomSpace().removeOntology(ontologyId);
+        assertTrue(ontologyProvider.getOntologyReferences().contains(ontologyId.toString()));
+        // TODO find a more appropriate method to kill scopes?
+        scope.tearDown();
+        assertTrue(ontologyProvider.getOntologyReferences().contains(ontologyId.toString()));
     }
 
     @After

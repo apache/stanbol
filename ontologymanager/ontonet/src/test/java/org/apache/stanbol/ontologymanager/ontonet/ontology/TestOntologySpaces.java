@@ -22,11 +22,8 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Hashtable;
 
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.ParentPathInputSource;
@@ -38,8 +35,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.junit.After;
 import org.junit.BeforeClass;
@@ -63,10 +58,6 @@ public class TestOntologySpaces {
     private static OntologyInputSource<OWLOntology> inMemorySrc, minorSrc, dropSrc, nonexSrc;
     private static OWLAxiom linusIsHuman = null;
 
-    private static OfflineConfiguration offline;
-
-    private static ONManager onm;
-
     private static OWLOntology ont = null, ont2 = null;
 
     private static OntologyInputSource<OWLOntology> getLocalSource(String resourcePath, OWLOntologyManager mgr) throws OWLOntologyCreationException,
@@ -74,22 +65,17 @@ public class TestOntologySpaces {
         URL url = TestOntologySpaces.class.getResource(resourcePath);
         File f = new File(url.toURI());
         return new ParentPathInputSource(f, mgr != null ? mgr
-                : OWLOntologyManagerFactory.createOWLOntologyManager(offline.getOntologySourceLocations()
-                        .toArray(new IRI[0])));
+                : OWLOntologyManagerFactory.createOWLOntologyManager(onManager.getOfflineConfiguration()
+                        .getOntologySourceLocations().toArray(new IRI[0])));
     }
 
     @BeforeClass
     public static void setup() throws Exception {
-
-        offline = new OfflineConfigurationImpl(new Hashtable<String,Object>());
-
-        // An ONManagerImpl with no store and default settings
-        onm = new ONManagerImpl(null, null, offline, new Hashtable<String,Object>());
-        factory = onm.getOntologySpaceFactory();
+        factory = onManager.getOntologySpaceFactory();
         if (factory == null) fail("Could not instantiate ontology space factory");
 
-        OWLOntologyManager mgr = OWLOntologyManagerFactory.createOWLOntologyManager(offline
-                .getOntologySourceLocations().toArray(new IRI[0]));
+        OWLOntologyManager mgr = OWLOntologyManagerFactory.createOWLOntologyManager(onManager
+                .getOfflineConfiguration().getOntologySourceLocations().toArray(new IRI[0]));
         OWLDataFactory df = mgr.getOWLDataFactory();
 
         ont = mgr.createOntology(baseIri);
@@ -246,8 +232,8 @@ public class TestOntologySpaces {
         space.addOntology(inMemorySrc);
         space.addOntology(nonexSrc);
         // The other remote ontologies may change base IRI...
-        assertTrue(space.hasOntology(ont.getOntologyID().getOntologyIRI())
-                   && space.hasOntology(dropId) && space.hasOntology(nonexId));
+        assertTrue(space.hasOntology(ont.getOntologyID().getOntologyIRI()) && space.hasOntology(dropId)
+                   && space.hasOntology(nonexId));
         space.removeOntology(dropId);
         assertFalse(space.hasOntology(dropId));
         space.removeOntology(nonexId);
@@ -256,7 +242,7 @@ public class TestOntologySpaces {
 
     }
 
-//    @Test
+    // @Test
     public void testSessionModification() throws Exception {
         SessionOntologySpace space = factory.createSessionOntologySpace(scopeId);
         space.setUp();

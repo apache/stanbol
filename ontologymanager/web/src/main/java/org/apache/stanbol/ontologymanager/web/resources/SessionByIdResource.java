@@ -28,11 +28,11 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.renderers.SessionRenderer;
 
 @Path("/ontonet/session/{id:.+}")
 public class SessionByIdResource extends BaseStanbolResource {
@@ -50,7 +50,8 @@ public class SessionByIdResource extends BaseStanbolResource {
     }
 
     @GET
-    @Produces("application/rdf+xml")
+    @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
+                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
     public Response getSessionMetadataOntology(@PathParam("id") String sessionId,
                                                @Context UriInfo uriInfo,
                                                @Context HttpHeaders headers) {
@@ -58,10 +59,9 @@ public class SessionByIdResource extends BaseStanbolResource {
         Session ses = null;
         SessionManager mgr = onm.getSessionManager();
         ses = mgr.getSession(sessionId);
-        if (ses == null) return Response.status(Status.NO_CONTENT).build();
-
-        return Response.ok(SessionRenderer.getSessionMetadataRDFasOntology(ses)).build();
-
+        if (ses == null) return Response.status(Status.NOT_FOUND).build();
+        // return Response.ok(SessionRenderer.getSessionMetadataRDFasOntology(ses)).build();
+        return Response.ok(ses.asOWLOntology(false)).build();
     }
 
 }

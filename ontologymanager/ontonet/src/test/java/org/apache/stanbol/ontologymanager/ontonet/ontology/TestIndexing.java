@@ -16,8 +16,11 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.ontology;
 
-import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.*;
-import static org.junit.Assert.*;
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.reset;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.net.URL;
@@ -36,6 +39,7 @@ import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.junit.After;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -53,6 +57,7 @@ public class TestIndexing {
 
     private static ONManager onm;
     private static OntologyScope scope = null;
+
     @BeforeClass
     public static void setup() {
         final Dictionary<String,Object> emptyConfig = new Hashtable<String,Object>();
@@ -126,7 +131,7 @@ public class TestIndexing {
         assertFalse(index.isOntologyLoaded(iri_minor));
     }
 
-    // @Test
+    @Test
     public void testGetOntology() throws Exception {
         // Load the original objectRole ODP
         OWLOntology oObjRole = mgr.loadOntology(iri_main);
@@ -139,7 +144,7 @@ public class TestIndexing {
         // assertEquals(index.getOntology(objrole), oObjRole);
     }
 
-    // @Test
+    @Test
     public void testIsOntologyLoaded() {
         OntologyIndex index = onm.getOntologyIndex();
         IRI coreroot = IRI.create(scopeIri + "/core/root.owl");

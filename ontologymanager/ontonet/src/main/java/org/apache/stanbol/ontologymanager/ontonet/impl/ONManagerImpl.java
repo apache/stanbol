@@ -61,6 +61,7 @@ import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.ScopeRegistryImp
 import org.apache.stanbol.ontologymanager.ontonet.impl.session.ScopeSessionSynchronizer;
 import org.apache.stanbol.ontologymanager.ontonet.impl.session.SessionManagerImpl;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
+import org.apache.stanbol.owl.util.URIUtils;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.io.FileDocumentSource;
 import org.semanticweb.owlapi.io.IRIDocumentSource;
@@ -145,9 +146,6 @@ public class ONManagerImpl implements ONManager {
     @Reference
     private OfflineConfiguration offline;
 
-    @Reference
-    private OntologyProvider<?> ontologyProvider;
-
     /**
      * The {@link OfflineMode} is used by Stanbol to indicate that no external service should be referenced.
      * For this engine that means it is necessary to check if the used {@link ReferencedSite} can operate
@@ -160,6 +158,9 @@ public class ONManagerImpl implements ONManager {
     private OfflineMode offlineMode;
 
     private OntologyIndex oIndex;
+
+    @Reference
+    private OntologyProvider<?> ontologyProvider;
 
     private OntologyScopeFactory ontologyScopeFactory;
 
@@ -177,18 +178,10 @@ public class ONManagerImpl implements ONManager {
 
     private SessionManager sessionManager;
 
-    // private ClerezzaOntologyStorage storage;
-
-    @Reference
-    private TcManager tcm;
-
     /*
      * The identifiers (not yet parsed as IRIs) of the ontology scopes that should be activated.
      */
     private String[] toActivate = new String[] {};
-
-    @Reference
-    private WeightedTcProvider wtcp;
 
     /**
      * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
@@ -202,6 +195,19 @@ public class ONManagerImpl implements ONManager {
     public ONManagerImpl() {
         super();
         // All bindings are deferred to the activator
+    }
+
+    public ONManagerImpl(OntologyProvider<?> ontologyProvider,
+                         OfflineConfiguration offline,
+                         Dictionary<String,Object> configuration) {
+        this();
+        this.ontologyProvider = ontologyProvider;
+        this.offline = offline;
+        try {
+            activate(configuration);
+        } catch (IOException e) {
+            log.error("Unable to access servlet context.", e);
+        }
     }
 
     /**
@@ -243,19 +249,6 @@ public class ONManagerImpl implements ONManager {
          * WeightedTcProvider is now ignored as we assume to use those bound with the TcManager.
          */
         this(new ClerezzaOntologyProvider(tcm, offline, new Parser()), offline, configuration);
-    }
-
-    public ONManagerImpl(OntologyProvider<?> ontologyProvider,
-                         OfflineConfiguration offline,
-                         Dictionary<String,Object> configuration) {
-        this();
-        this.ontologyProvider = ontologyProvider;
-        this.offline = offline;
-        try {
-            activate(configuration);
-        } catch (IOException e) {
-            log.error("Unable to access servlet context.", e);
-        }
     }
 
     /**
@@ -374,18 +367,17 @@ public class ONManagerImpl implements ONManager {
     }
 
     protected void bindResources() {
-
-        if (ontologyProvider.getStore() instanceof TcManager) ontologySpaceFactory = new OntologySpaceFactoryImpl(
-                scopeRegistry, (OntologyProvider<TcProvider>) ontologyProvider, offline,
-                IRI.create(getOntologyNetworkNamespace()));
+        IRI ns = IRI.create(URIUtils.upOne(IRI.create(getOntologyNetworkNamespace())) + "/session/");
+        if (ontologyProvider.getStore() instanceof TcProvider) ontologySpaceFactory = new OntologySpaceFactoryImpl(
+                scopeRegistry, (OntologyProvider<TcProvider>) ontologyProvider, offline, ns);
         else ontologySpaceFactory = new org.apache.stanbol.ontologymanager.ontonet.impl.owlapi.OntologySpaceFactoryImpl(
-                scopeRegistry, offline, IRI.create(getOntologyNetworkNamespace()));
+                scopeRegistry, offline, ns);
 
         ontologyScopeFactory = new OntologyScopeFactoryImpl(scopeRegistry,
                 IRI.create(getOntologyNetworkNamespace()), ontologySpaceFactory);
         ontologyScopeFactory.addScopeEventListener(oIndex);
 
-        sessionManager = new SessionManagerImpl(IRI.create("http://kres.iks-project.eu/"), getScopeRegistry());
+        sessionManager = new SessionManagerImpl(ns, getScopeRegistry(), ontologyProvider);
         sessionManager.addSessionListener(new ScopeSessionSynchronizer(this));
     }
 
@@ -430,8 +422,6 @@ public class ONManagerImpl implements ONManager {
                             log.warn("Failed to import ontology " + cores[i], ex);
                             continue;
                         }
-                    // ((CustomOntologySpace) sc.getCustomSpace()).attachCoreSpace((CoreOntologySpace)
-                    // corespc, false);
                 }
 
                 sc.setUp();
@@ -495,6 +485,11 @@ public class ONManagerImpl implements ONManager {
         this.offlineMode = mode;
     }
 
+    @Override
+    public OfflineConfiguration getOfflineConfiguration() {
+        return offline;
+    }
+
     public OntologyIndex getOntologyIndex() {
         return oIndex;
     }
@@ -527,13 +522,7 @@ public class ONManagerImpl implements ONManager {
         return ontologySpaceFactory;
     }
 
-    // public ClerezzaOntologyStorage getOntologyStore() {
-    // // return storage;
-    // return null;
-    // }
-
     public OWLOntologyManager getOwlCacheManager() {
-        // return OWLManager.createOWLOntologyManager();
         return owlCacheManager;
     }
 
@@ -568,11 +557,6 @@ public class ONManagerImpl implements ONManager {
      */
     protected final boolean isOfflineMode() {
         return offlineMode != null;
-    }
-
-    @Override
-    public OfflineConfiguration getOfflineConfiguration() {
-        return offline;
     }
 
 }

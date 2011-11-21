@@ -53,8 +53,18 @@ public interface Session extends LockableOntologyCollector, SessionListenable, O
         ZOMBIE
     }
 
+    /**
+     * Instructs the session to reference the supplied ontology scope. This way, whenever session data are
+     * processed, scope data will be considered as well.
+     * 
+     * @param scope
+     *            the ontology scope to be referenced.
+     */
     void attachScope(OntologyScope scope);
 
+    /**
+     * Removes all references to ontology scopes, thus leaving the session data as standalone.
+     */
     void clearScopes();
 
     /**
@@ -62,19 +72,21 @@ public interface Session extends LockableOntologyCollector, SessionListenable, O
      */
     void close() throws NonReferenceableSessionException;
 
+    /**
+     * Instructs the session to no longer reference the supplied ontology scope. If a scope with the supplied
+     * identifier was not attached, this method has no effect.
+     * 
+     * @param scope
+     *            the identifer of the ontology scope to be detached.
+     */
     void detachScope(String scopeId);
 
-    Set<String> getAttachedScopes();
-
     /**
-     * Returns the unique Internationalized Resource Identifier (IRI) that identifies this KReS session.<br>
-     * <br>
-     * NOTE: There is no set method for the session ID as it is assumed to be set in its constructor once and
-     * for all.
+     * Gets the identifiers of the scopes currently attached to this session.
      * 
-     * @return the IRI that identifies this session
+     * @return the attached scope identifiers
      */
-    String getID();
+    Set<String> getAttachedScopes();
 
     /**
      * Returns the current state of this KReS session.
@@ -98,7 +110,7 @@ public interface Session extends LockableOntologyCollector, SessionListenable, O
     void open() throws NonReferenceableSessionException;
 
     /**
-     * Sets the KReS session as ACTIVE if <code>active</code> is true, INACTIVE otherwise. The state set is
+     * Sets the session as ACTIVE if <code>active</code> is true, INACTIVE otherwise. The state set is
      * returned, which should match the input state unless an error occurs.<br>
      * <br>
      * Should throw an exception if this session is in a ZOMBIE state.

@@ -23,6 +23,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.access.TcProvider;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
@@ -50,6 +52,8 @@ import org.slf4j.LoggerFactory;
  * @author alexdma
  * 
  */
+// @Component(immediate = true, metatype = true)
+// @Service(SessionManager.class)
 public class SessionManagerImpl implements SessionManager {
 
     private Map<String,Session> sessionsByID;
@@ -62,42 +66,29 @@ public class SessionManagerImpl implements SessionManager {
 
     protected ScopeRegistry scopeRegistry;
 
-    // protected ClerezzaOntologyStorage store;
+    private IRI namespace;
 
-    public SessionManagerImpl(IRI baseIri, ScopeRegistry scopeRegistry/* , ClerezzaOntologyStorage store */) {
+    private OntologyProvider<?> ontologyProvider;
+
+    public SessionManagerImpl(IRI baseIri, ScopeRegistry scopeRegistry, OntologyProvider<?> ontologyProvider) {
+        this.namespace = baseIri;
+        this.ontologyProvider = ontologyProvider;
         idgen = new TimestampedSessionIDGenerator(baseIri);
         listeners = new HashSet<SessionListener>();
         sessionsByID = new HashMap<String,Session>();
         this.scopeRegistry = scopeRegistry;
-        // this.store = store;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.session.SessionManager#addSessionListener
-     * (eu.iksproject.kres.api.manager.session.SessionListener)
-     */
     @Override
     public void addSessionListener(SessionListener listener) {
         listeners.add(listener);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.session.SessionManager#clearSessionListeners ()
-     */
     @Override
     public void clearSessionListeners() {
         listeners.clear();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.session.SessionManager#createSession()
-     */
     @Override
     public Session createSession() {
         Set<String> exclude = getRegisteredSessionIDs();
@@ -112,27 +103,20 @@ public class SessionManagerImpl implements SessionManager {
         return session;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.session.SessionManager#createSession(org
-     * .semanticweb.owlapi.model.IRI)
-     */
     @Override
     public synchronized Session createSession(String sessionID) throws DuplicateSessionIDException {
         if (sessionsByID.containsKey(sessionID)) throw new DuplicateSessionIDException(sessionID.toString());
-        Session session = new SessionImpl(sessionID);
+        TcProvider tcp = null;
+        if (ontologyProvider.getStore() instanceof TcProvider) tcp = (TcProvider) ontologyProvider.getStore();
+        else throw new UnsupportedOperationException(
+                "Session manager does not support ontology providers based on "
+                        + ontologyProvider.getStore().getClass() + ", only on " + TcProvider.class);
+        Session session = new SessionImpl(sessionID, namespace, tcp);
         addSession(session);
         fireSessionCreated(session);
         return session;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.session.SessionManager#destroySession(
-     * org.semanticweb.owlapi.model.IRI)
-     */
     @Override
     public synchronized void destroySession(String sessionID) {
         try {
@@ -148,17 +132,11 @@ public class SessionManagerImpl implements SessionManager {
                 fireSessionDestroyed(ses);
             }
         } catch (NonReferenceableSessionException e) {
-            log.warn("KReS :: tried to kick a dead horse on session " + sessionID
+            log.warn("Tried to kick a dead horse on session " + sessionID
                      + " which was already in a zombie state.", e);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.session.SessionManager#getSession(org.
-     * semanticweb.owlapi.model.IRI)
-     */
     @Override
     public Session getSession(String sessionID) {
         return sessionsByID.get(sessionID);
@@ -209,24 +187,11 @@ public class SessionManagerImpl implements SessionManager {
         if (session == s2) sessionsByID.remove(id);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.session.SessionManager#getSessionListeners ()
-     */
     @Override
     public Collection<SessionListener> getSessionListeners() {
         return listeners;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * TODO : optimize with indexing.
-     * 
-     * @see eu.iksproject.kres.api.manager.session.SessionManager#getSessionSpaces
-     * (org.semanticweb.owlapi.model.IRI)
-     */
     @Override
     public Set<SessionOntologySpace> getSessionSpaces(String sessionID) throws NonReferenceableSessionException {
         Set<SessionOntologySpace> result = new HashSet<SessionOntologySpace>();
@@ -238,25 +203,11 @@ public class SessionManagerImpl implements SessionManager {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.iksproject.kres.api.manager.session.SessionManager#removeSessionListener
-     * (eu.iksproject.kres.api.manager.session.SessionListener)
-     */
     @Override
     public void removeSessionListener(SessionListener listener) {
         listeners.remove(listener);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * TODO : storage not implemented yet
-     * 
-     * @see eu.iksproject.kres.api.manager.session.SessionManager#storeSession(org
-     * .semanticweb.owlapi.model.IRI, java.io.OutputStream)
-     */
     @Override
     public void storeSession(String sessionID, OutputStream out) throws NonReferenceableSessionException,
                                                                 OWLOntologyStorageException {
@@ -271,6 +222,16 @@ public class SessionManagerImpl implements SessionManager {
             }
         }
 
+    }
+
+    @Override
+    public String getSessionNamespace() {
+        return namespace.toString();
+    }
+
+    @Override
+    public void setSessionNamespace(String namespace) {
+        this.namespace = IRI.create(namespace);
     }
 
 }

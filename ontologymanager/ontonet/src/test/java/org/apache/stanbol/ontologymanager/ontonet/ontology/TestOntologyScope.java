@@ -19,20 +19,14 @@ package org.apache.stanbol.ontologymanager.ontonet.ontology;
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.*;
 import static org.junit.Assert.*;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.owlapi.CoreOntologySpaceImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.owlapi.CustomOntologySpaceImpl;
@@ -58,20 +52,13 @@ public class TestOntologyScope {
 
     private static OntologyScopeFactory factory = null;
 
-    private static ONManager onm;
-
     public static String scopeIdBlank = "WackyRaces", scopeId1 = "Peanuts", scopeId2 = "CalvinAndHobbes";
 
     private static OntologyInputSource src1 = null, src2 = null;
 
     @BeforeClass
     public static void setup() {
-        // An ONManagerImpl with no store and a set namespace.
-        Dictionary<String,Object> onmconf = new Hashtable<String,Object>();
-        onmconf.put(ONManager.ONTOLOGY_NETWORK_NS, "http://stanbol.apache.org/scope/");
-        // The same hashtable can be recycled for the offline configuration.
-        onm = new ONManagerImpl(null, null, new OfflineConfigurationImpl(onmconf), onmconf);
-        factory = onm.getOntologyScopeFactory();
+        factory = onManager.getOntologyScopeFactory();
         if (factory == null) fail("Could not instantiate ontology space factory");
         OWLOntologyManager mgr = OWLOntologyManagerFactory.createOWLOntologyManager(null);
         try {
@@ -86,7 +73,7 @@ public class TestOntologyScope {
     public void cleanup() {
         reset();
     }
-    
+
     @Before
     public void cleanupScope() throws DuplicateIDException {
         if (factory != null) blankScope = factory.createOntologyScope(scopeIdBlank);
@@ -165,7 +152,7 @@ public class TestOntologyScope {
         assertTrue(shouldBeNotNull.getNamespace().toString().endsWith("/"));
 
         // Now set again the correct namespace.
-        factory.setNamespace(IRI.create(onm.getOntologyNetworkNamespace()));
+        factory.setNamespace(IRI.create(onManager.getOntologyNetworkNamespace()));
         shouldBeNotNull = null;
         try {
             shouldBeNotNull = factory.createOntologyScope(scopeId1, src1, src2);
@@ -234,9 +221,9 @@ public class TestOntologyScope {
 
     @Test
     public void testScopesRendering() {
-        ScopeRegistry reg = onm.getScopeRegistry();
-        OntologyScopeFactoryImpl scf = new OntologyScopeFactoryImpl(reg, onm.getOntologyScopeFactory()
-                .getNamespace(), onm.getOntologySpaceFactory());
+        ScopeRegistry reg = onManager.getScopeRegistry();
+        OntologyScopeFactoryImpl scf = new OntologyScopeFactoryImpl(reg, onManager.getOntologyScopeFactory()
+                .getNamespace(), onManager.getOntologySpaceFactory());
         OntologyScope scope = null, scope2 = null;
         try {
             scope = scf.createOntologyScope(scopeId1, src1, src2);
