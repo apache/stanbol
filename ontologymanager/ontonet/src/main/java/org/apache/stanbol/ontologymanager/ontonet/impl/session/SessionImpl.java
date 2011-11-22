@@ -33,7 +33,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent.OperationType;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.AbstractOntologyCollectorImpl;
-import org.apache.stanbol.owl.util.URIUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
@@ -72,6 +71,7 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
      */
     public SessionImpl(String sessionID, IRI namespace, TcProvider tcProvider) {
         super(sessionID, namespace, tcProvider);
+        // setNamespace(namespace);
         attachedScopes = new HashMap<String,OntologyScope>();
         listeners = new HashSet<SessionListener>();
     }
@@ -83,6 +83,7 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
 
     /**
      * FIXME not merging yet
+     * FIXME not including imported ontologies
      * 
      * @see OWLExportable#asOWLOntology(boolean)
      */
@@ -119,7 +120,7 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
             for (OWLOntology o : getOntologies(false)) {
                 if (o == null) continue;
 
-                String base = URIUtils.upOne(IRI.create(namespace + getID())) + "/";
+                String base = /* URIUtils.upOne( */IRI.create(namespace + getID())/* ) */+ "/";
 
                 IRI ontologyIri;
 

@@ -367,7 +367,7 @@ public class ONManagerImpl implements ONManager {
     }
 
     protected void bindResources() {
-        IRI ns = IRI.create(URIUtils.upOne(IRI.create(getOntologyNetworkNamespace())) + "/session/");
+        IRI ns = IRI.create(getOntologyNetworkNamespace());
         if (ontologyProvider.getStore() instanceof TcProvider) ontologySpaceFactory = new OntologySpaceFactoryImpl(
                 scopeRegistry, (OntologyProvider<TcProvider>) ontologyProvider, offline, ns);
         else ontologySpaceFactory = new org.apache.stanbol.ontologymanager.ontonet.impl.owlapi.OntologySpaceFactoryImpl(
@@ -377,6 +377,7 @@ public class ONManagerImpl implements ONManager {
                 IRI.create(getOntologyNetworkNamespace()), ontologySpaceFactory);
         ontologyScopeFactory.addScopeEventListener(oIndex);
 
+        ns = IRI.create(URIUtils.upOne(ns) + "/session/");
         sessionManager = new SessionManagerImpl(ns, getScopeRegistry(), ontologyProvider);
         sessionManager.addSessionListener(new ScopeSessionSynchronizer(this));
     }

@@ -67,14 +67,6 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
     Collection<OntologyCollectorListener> getListeners();
 
     /**
-     * The namespace can change dynamically (e.g. if the ontology network is relocated), so it is not part of
-     * the scope identifier (although its concatenation with the identifier will still be unique).
-     * 
-     * @param namespace
-     */
-    IRI getNamespace();
-
-    /**
      * Returns the ontologies managed by this ontology space.
      * 
      * @param withClosure
@@ -131,16 +123,6 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
      *            the identifier of this ontology.
      */
     void removeOntology(IRI ontologyId) throws OntologyCollectorModificationException;
-
-    /**
-     * The namespace can be changed dynamically (e.g. if the ontology network is relocated).
-     * 
-     * @param namespace
-     *            Must end with a slash character. If the IRI ends with a has, and
-     *            {@link IllegalArgumentException} will be thrown. If it ends with neither, a slash will be
-     *            added.
-     */
-    void setNamespace(IRI namespace);
 
     /**
      * Bootstraps the ontology space. In some cases (such as with core and custom spaces) this also implies
