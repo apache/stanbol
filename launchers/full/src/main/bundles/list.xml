@@ -36,13 +36,6 @@
 			<artifactId>tika-core</artifactId>
 			<version>0.9</version>
 		</bundle>
-    <!-- only used by the Factstore 
-		<bundle>
-			<groupId>org.apache.derby</groupId>
-			<artifactId>derby</artifactId>
-			<version>10.7.1.1</version>
-		</bundle>
-    -->
   </startLevel>
 
   <!-- Jersey -->
@@ -68,16 +61,6 @@
           start level 20 TO 24 reserved for Stanbol Framework
           (Enhancer, Entityhub, Contenthub, Factstore ... incl. Web Fragments)
        ********************************************************************* -->
-
-  <!-- FactStore 
-  <startLevel level="20">
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.factstore</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-  </startLevel>
-  -->
 
   <!-- KReS -->
   <startLevel level="22">
