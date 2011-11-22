@@ -18,9 +18,12 @@ package org.apache.stanbol.ontologymanager.web.resources;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.CONFLICT;
+import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.OK;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +44,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
@@ -49,6 +53,7 @@ import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyContentInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologySetInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
@@ -69,7 +74,6 @@ import org.slf4j.LoggerFactory;
 @Path("/ontonet/ontology/{scopeid}")
 public class ScopeResource extends BaseStanbolResource {
 
-    @SuppressWarnings("unused")
     private Logger log = LoggerFactory.getLogger(getClass());
 
     /*
@@ -78,15 +82,32 @@ public class ScopeResource extends BaseStanbolResource {
     protected ONManager onm;
 
     /*
-     * Placeholder for the ONManager to be fetched from the servlet context.
+     * Placeholder for the RegistryManager to be fetched from the servlet context.
      */
     protected RegistryManager regMgr;
 
-    public ScopeResource(@Context ServletContext servletContext) {
+    protected OntologyScope scope;
+
+    public ScopeResource(@PathParam(value = "scopeid") String scopeId, @Context ServletContext servletContext) {
+        super();
+        log.info("<init> with scope {}", scopeId);
+
         this.servletContext = servletContext;
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
         this.regMgr = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
             servletContext);
+
+        if (scopeId == null || scopeId.isEmpty()) {
+            log.error("Missing path parameter scopeid={}", scopeId);
+            throw new WebApplicationException(NOT_FOUND);
+        }
+        scope = onm.getScopeRegistry().getScope(scopeId);
+        
+        // // Skip null checks: the scope might be created with a PUT
+        // if (scope == null) {
+        // log.error("Scope {} not found", scopeId);
+        // throw new WebApplicationException(NOT_FOUND);
+        // }
     }
 
     @DELETE
@@ -96,9 +117,8 @@ public class ScopeResource extends BaseStanbolResource {
                                 @Context ServletContext servletContext) {
 
         ScopeRegistry reg = onm.getScopeRegistry();
-        OntologyScope scope = reg.getScope(scopeid/* IRI.create(uriInfo.getAbsolutePath()) */);
-        if (scope == null) return;
         reg.deregisterScope(scope);
+        scope = null;
     }
 
     @GET
@@ -108,13 +128,66 @@ public class ScopeResource extends BaseStanbolResource {
                                    @Context UriInfo uriInfo,
                                    @Context HttpHeaders headers,
                                    @Context ServletContext servletContext) {
-        ScopeRegistry reg = onm.getScopeRegistry();
-        OntologyScope scope = reg.getScope(scopeid/* IRI.create(uriInfo.getAbsolutePath()) */);
         if (scope == null) return Response.status(NOT_FOUND).build();
         else return Response.ok(scope.asOWLOntology()).build();
     }
 
+    /**
+     * Tells the session that it should manage the ontology obtained by parsing the supplied content.<br>
+     * <br>
+     * Note that the PUT method cannot be used, as it is not possible to predict what ID the ontology will
+     * have until it is parsed.
+     * 
+     * @param content
+     *            the ontology content
+     * @return {@link Status#OK} if the addition was successful, {@link Status#NOT_FOUND} if there is no such
+     *         session at all, {@link Status#FORBIDDEN} if the session is locked or cannot modified for some
+     *         other reason, {@link Status#INTERNAL_SERVER_ERROR} if some other error occurs.
+     */
     @POST
+    @Consumes(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
+                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response manageOntology(InputStream content) {
+        if (scope == null) return Response.status(NOT_FOUND).build();
+        try {
+            scope.getCustomSpace().addOntology(new OntologyContentInputSource(content));
+        } catch (UnmodifiableOntologyCollectorException e) {
+            throw new WebApplicationException(e, FORBIDDEN);
+        } catch (OWLOntologyCreationException e) {
+            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+        }
+        return Response.status(OK).type(MediaType.TEXT_PLAIN).build();
+    }
+
+    /**
+     * Tells the session that it should manage the ontology obtained by dereferencing the supplied IRI.<br>
+     * <br>
+     * Note that the PUT method cannot be used, as it is not possible to predict what ID the ontology will
+     * have until it is parsed.
+     * 
+     * @param content
+     *            the ontology physical IRI
+     * @return {@link Status#OK} if the addition was successful, {@link Status#NOT_FOUND} if there is no such
+     *         session at all, {@link Status#FORBIDDEN} if the session is locked or cannot modified for some
+     *         other reason, {@link Status#INTERNAL_SERVER_ERROR} if some other error occurs.
+     */
+    @POST
+    @Consumes(value = MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response manageOntology(String iri) {
+        if (scope == null) return Response.status(NOT_FOUND).build();
+        try {
+            scope.getCustomSpace().addOntology(new RootOntologyIRISource(IRI.create(iri)));
+        } catch (UnmodifiableOntologyCollectorException e) {
+            throw new WebApplicationException(e, FORBIDDEN);
+        } catch (OWLOntologyCreationException e) {
+            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+        }
+        return Response.status(OK).type(MediaType.TEXT_PLAIN).build();
+    }
+
+    // @POST
     // @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response loadCustomOntology(@PathParam("scopeid") String scopeid,
                                        @FormParam("location") String physIri,
