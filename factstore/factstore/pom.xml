@@ -38,10 +38,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/factstore
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/factstore/factstore
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/factstore
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/factstore/factstore
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>

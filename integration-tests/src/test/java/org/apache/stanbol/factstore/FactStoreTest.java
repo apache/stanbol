@@ -174,7 +174,7 @@ public class FactStoreTest extends StanbolTestBase {
                     "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:employeeOf1\",\"person\":{\"@iri\":\"upb:bnagel\"},\"organization\":{\"@iri\":\"http://uni-paderborn.de\"}}")
                 .withHeader("Content-Type", "application/json");
 
-        executor.execute(r2).assertStatus(200).assertContentContains(builder.buildUrl("/factstore/facts"));
+        executor.execute(r2).assertStatus(200).assertHeader("Location", builder.buildUrl("/factstore/facts/http%3A%2F%2Fiks-project.eu%2Font%2FemployeeOf1/1"));
     }
     
     @Test
