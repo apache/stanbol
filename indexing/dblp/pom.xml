@@ -152,6 +152,11 @@
             <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 		<dependency>
 			<!-- needed because the SolrYard uses ConfigurationExceptions -->
 			<groupId>org.osgi</groupId>

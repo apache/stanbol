@@ -70,7 +70,7 @@ function startTestSearch() {
  var data = "name=" + $("#testSearchValue").val() + "&limit=10&offset=0";
  $.ajax({
    type: "POST",
-   url: "find",
+   url: window.location.href.replace(/\/$/, "") + "/find", //normalise trailing '/'
    data: data,
    dataType: "text",
    cache: false,

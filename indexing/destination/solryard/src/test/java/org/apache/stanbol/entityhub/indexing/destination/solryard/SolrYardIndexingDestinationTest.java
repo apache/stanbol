@@ -28,11 +28,14 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
+import org.apache.stanbol.commons.solr.managed.standalone.StandaloneManagedSolrServer;
 import org.apache.stanbol.entityhub.indexing.core.IndexingDestination;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
 import org.apache.stanbol.entityhub.indexing.core.destination.OsgiConfigurationUtil;
@@ -42,6 +45,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYard;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -109,6 +113,13 @@ public class SolrYardIndexingDestinationTest {
     @AfterClass
     public static void cleanup(){
         System.setProperty("user.dir", userDir);
+    }
+    @After
+    public void close(){
+        //after each test we need ensure to shutdown the default ManagedSolrServer
+        //because different tests use different Directories and therefore a new
+        //instance needs to be created
+        StandaloneManagedSolrServer.shutdownManagedServer();
     }
     @Test(expected=IllegalArgumentException.class)
     public void testMissingBoostConfig(){
@@ -187,6 +198,7 @@ public class SolrYardIndexingDestinationTest {
         Set<String> expected = new HashSet<String>(EXPECTED_INDEX_ARCHIVE_FILE_NAMES);
         for(Enumeration<? extends ZipEntry> entries = archive.entries();entries.hasMoreElements();){
             ZipEntry entry = entries.nextElement();
+            log.info("Validate Entry : "+entry.getName());
             //the name of the index MUST be the root folder within the Archive!
             assertTrue(entry.getName().startsWith(config.getName()));
             expected.remove(FilenameUtils.getName(entry.getName()));

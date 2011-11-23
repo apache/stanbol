@@ -38,7 +38,9 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
@@ -51,7 +53,9 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
-import org.apache.stanbol.commons.solr.SolrDirectoryManager;
+import org.apache.stanbol.commons.solr.managed.IndexMetadata;
+import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
+import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.SolrServerProviderManager;
 import org.apache.stanbol.commons.solr.SolrServerTypeEnum;
 import org.apache.stanbol.commons.solr.utils.ConfigUtils;
@@ -78,6 +82,7 @@ import org.apache.stanbol.entityhub.yard.solr.model.IndexValueFactory;
 import org.apache.stanbol.entityhub.yard.solr.query.IndexConstraintTypeEnum;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,11 +138,7 @@ import org.slf4j.LoggerFactory;
          @Property(name = AbstractYard.MAX_QUERY_RESULT_NUMBER, intValue = -1),
          // BEGIN SolrYard specific Properties
          @Property(name = SolrYard.SOLR_SERVER_LOCATION),
-         @Property(name = SolrYard.MULTI_YARD_INDEX_LAYOUT, 
-             options = {
-                   @PropertyOption(name = "true", value = "true"),
-                   @PropertyOption(name = "false", value = "false")}, 
-                   boolValue = false),
+         @Property(name = SolrYard.MULTI_YARD_INDEX_LAYOUT,boolValue=false),
          @Property(name = SolrYard.MAX_BOOLEAN_CLAUSES, intValue = SolrYard.defaultMaxBooleanClauses)})
 public class SolrYard extends AbstractYard implements Yard {
     /**
@@ -287,20 +288,22 @@ public class SolrYard extends AbstractYard implements Yard {
      * commons http one for all other requests. This would provide performance advantages when updating
      * {@link Representation}s stored in a SolrYard using an remote SolrServer.
      */
-    @Reference(policy=ReferencePolicy.DYNAMIC,
+    @Reference(cardinality=ReferenceCardinality.MANDATORY_UNARY,
         bind="bindSolrServerProviderManager",
-        unbind="unbindSolrServerProviderManager")
+        unbind="unbindSolrServerProviderManager",
+        strategy=ReferenceStrategy.EVENT,
+        policy=ReferencePolicy.DYNAMIC)
     private SolrServerProviderManager solrServerProviderManager;
     /**
-     * Used to retrieve (and init if not already present) the Solr Index directory for relative paths parsed
-     * for {@link SolrYardConfig#getSolrServerLocation()}. Note that the {@link SolrDirectoryManager} only
-     * provides the path to the files. The {@link SolrServer} instance is created by the
-     * {@link SolrServerProviderManager}!
+     * Optionally a {@link ManagedSolrServer} that is used to create new 
+     * Solr indexes based on parsed configurations.
      */
-    @Reference(policy=ReferencePolicy.DYNAMIC,
-        bind="bindSolrDirectoryManager",
-        unbind="unbindSolrDirectoryManager")
-    private SolrDirectoryManager solrDirectoryManager;
+    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY,
+        bind="bindManagedSolrServer",
+        unbind="unbindManagedSolrServer",
+        strategy=ReferenceStrategy.EVENT,
+        policy=ReferencePolicy.DYNAMIC)
+    private ManagedSolrServer managedSolrServer;
     /**
      * If update(..) and store(..) calls should be immediately committed.
      */
@@ -339,10 +342,10 @@ public class SolrYard extends AbstractYard implements Yard {
     public SolrYard(SolrYardConfig config) throws IllegalArgumentException, YardException {
         solrServerProviderManager = SolrServerProviderManager.getInstance();
         // init via java.util.ServiceLoader
-        Iterator<SolrDirectoryManager> providerIt = ServiceLoader.load(SolrDirectoryManager.class,
-            SolrDirectoryManager.class.getClassLoader()).iterator();
+        Iterator<ManagedSolrServer> providerIt = ServiceLoader.load(ManagedSolrServer.class,
+            ManagedSolrServer.class.getClassLoader()).iterator();
         if (providerIt.hasNext()) {
-            solrDirectoryManager = providerIt.next();
+            managedSolrServer = providerIt.next();
 //            if(config.getSolrServerType() == SolrServerTypeEnum.EMBEDDED){
 //                File location = ConfigUtils.toFile(config.getSolrServerLocation());
 //                if(!location.isAbsolute()){
@@ -352,7 +355,7 @@ public class SolrYard extends AbstractYard implements Yard {
 //            }
         } else {
             throw new IllegalStateException("Unable to instantiate "
-                                            + SolrDirectoryManager.class.getSimpleName()
+                                            + ManagedSolrServer.class.getSimpleName()
                                             + " service by using " + ServiceLoader.class.getName() + "!");
         }
         // we need to change the exceptions, because this will be called outside
@@ -374,12 +377,25 @@ public class SolrYard extends AbstractYard implements Yard {
     protected void unbindSolrServerProviderManager(SolrServerProviderManager manager){
         this.solrServerProviderManager = null;
     }
-    protected void bindSolrDirectoryManager(SolrDirectoryManager manager){
-        this.solrDirectoryManager = manager;
+    protected void bindManagedSolrServer(ManagedSolrServer manager){
+        SolrYardConfig config = (SolrYardConfig) this.getConfig();
+        log.info(" ... bind ManagedSolrServer '{}' to SolrYard '{}'",
+            manager.getServerName(),config != null ? config.getId() : "<not yet activated>");
+        this.managedSolrServer = manager;
+        if(config != null){ //if activated
+            try {
+                checkManagedSolrIndex(manager, config);
+            } catch (Exception e) {
+                log.error("Exception while checking SolrIndex '"+ config.getSolrServerLocation()
+                    +"' on ManagedSolrServer '"+manager.getServerName()+"'!",e);
+            }
+        }
     }
     
-    protected void unbindSolrDirectoryManager(SolrDirectoryManager manager){
-        this.solrDirectoryManager = null;
+    protected void unbindManagedSolrServer(ManagedSolrServer manager){
+        log.info(" ... unbind ManagedSolrServer '{}' from SolrYard '{}'",
+            manager.getServerName(),getConfig() != null ? getConfig().getId() : "<not yet activated>");
+        this.managedSolrServer = null;
     }
     /**
      * Builds an {@link SolrYardConfig} instance based on the parsed {@link ComponentContext} and forwards to
@@ -444,6 +460,18 @@ public class SolrYard extends AbstractYard implements Yard {
         this.indexValueFactory = IndexValueFactory.getInstance();
         this.documentBoostFieldName = config.getDocumentBoostFieldName();
         this.fieldBoostMap = config.getFieldBoosts();
+        //try to initialise the SolrServer
+        ManagedSolrServer managedSolrServer = this.managedSolrServer;
+        if(managedSolrServer != null){ 
+            //check also if we need to create/init an SolrServer on startup
+            try {
+                checkManagedSolrIndex(managedSolrServer, config);
+            } catch (Exception e) {
+                log.error("Exception while checking SolrIndex '"+ config.getSolrServerLocation()
+                    +"' on ManagedSolrServer '"+managedSolrServer.getServerName()+"'!",e);
+            }
+        }
+        log.info("Activated SolrYard {}",config.getId());
     }
 
     /**
@@ -480,58 +508,59 @@ public class SolrYard extends AbstractYard implements Yard {
     private void initSolrServer() throws YardException {
         SolrYardConfig config = (SolrYardConfig) this.getConfig();
         if (config.getSolrServerType() == SolrServerTypeEnum.EMBEDDED) {
-            File indexDirectory = ConfigUtils.toFile(config.getSolrServerLocation());
-            if (!indexDirectory.isAbsolute()) { // relative paths
-                if(solrDirectoryManager == null){
-                    throw new YardException(String.format(
-                        "Unable to init SolrServer because %s service is not present",
-                        SolrDirectoryManager.class.getSimpleName()));
-                }
-                File solrIndexLocation = null;
-                if(!solrDirectoryManager.isManagedIndex(config.getSolrServerLocation())){
-                    // try to create a new index
-                    solrIndexLocation = createSolrIndex(config, config.getSolrServerLocation());
-                } else if(!withinOSGI){ //we need only the solrIndexLocation
-                    //when running outside an OSGI environment
-                    solrIndexLocation = solrDirectoryManager.getSolrIndexDirectory(config.getSolrServerLocation());
-                }
-                if(!withinOSGI){
-                    //in that case we need to replace the parse SolrServerLocation
-                    //with the absolute path to the managed Dir
-                    config.setSolrServerLocation(solrIndexLocation.getAbsolutePath());
-                } // else (in OSGI Environment) the index will be found by using it's
-                //name (the relative path)
+            //TODO: add support for the creation of indexes on ManagedSolrServers other than the
+            //      default server!
+            checkManagedSolrIndex(managedSolrServer,config);
+        }
+        SolrServerProviderManager provider = solrServerProviderManager;
+        if(provider != null){
+            try {
+                _server = provider.getSolrServer(config.getSolrServerType(), config.getSolrServerLocation());
+            } catch (RuntimeException e) {
+                throw new YardException("Unable to init SolrServer "+config.getSolrServerLocation() +
+                    "because of "+e.getMessage(),e);
             }
-        }
-        if(solrServerProviderManager == null){
-            throw new YardException(String.format(
-                "Unable to init SolrServer because %s service is not present",
-                SolrServerProviderManager.class.getSimpleName()));
-        }
-        try {
-            _server = solrServerProviderManager.getSolrServer(config.getSolrServerType(), config.getSolrServerLocation());
-            // test the server
-            SolrPingResponse pingResponse = _server.ping();
-            log.info(String.format("Successful ping for SolrServer %s ( %d ms) Details: %s",
-                config.getSolrServerLocation(), pingResponse.getElapsedTime(), pingResponse));
-        } catch (IOException e) {
-            throw new YardException("Unable to ping created SolrServer "+config.getSolrServerLocation(),e);
-        } catch (SolrServerException e) {
-            throw new YardException("Unable to ping created SolrServer "+config.getSolrServerLocation(),e);
-        } catch (RuntimeException e) {
-            throw new YardException("Unable to init SolrServer "+config.getSolrServerLocation() +
-                "because of "+e.getMessage(),e);
+        } else {
+            throw new YardException("Unable to init SolrServer because the '"+
+                SolrServerProviderManager.class.getSimpleName()+"' service is currently not active!");
         }
     }
 
     /**
+     * @param config
+     * @param indexReference
+     * @throws YardException
+     */
+    private void checkManagedSolrIndex(ManagedSolrServer managedSolrServer, SolrYardConfig config) throws YardException {
+        if(managedSolrServer == null){
+            return; //no managed server available ... can not check
+        }
+        IndexReference indexReference = IndexReference.parse(config.getSolrServerLocation());
+        if(indexReference.isName() && managedSolrServer != null &&
+                (indexReference.getServer() == null || 
+                        indexReference.getServer().equals(managedSolrServer.getServerName()))){
+            //config is a name and the server is the default server
+            // -> look if index is already managed and if not create!
+            if(!managedSolrServer.isManagedIndex(indexReference.getIndex())){
+                // try to create a new index
+                IndexReference createdIndexRef = createSolrIndex(managedSolrServer,config, indexReference.getIndex());
+                if(!withinOSGI){
+                    //in that case we need to replace the parse SolrServerLocation
+                    //with the name of the created solr index
+                    config.setSolrServerLocation(createdIndexRef.getIndex());
+                }
+            } //already managed -> nothing to do
+        } // absolute path or other server than the default server -> can not create!
+    }
+
+    /**
      * Creates a new SolrIndex based on this Yards configuration by using the
-     * {@link SolrDirectoryManager} service
+     * {@link ManagedSolrServer} service
      * @param config the configuration of this SolrYard
      * @param solrIndexLocation the name of the index to create
      * @throws YardException On any Exception while creating the index
      */
-    private File createSolrIndex(SolrYardConfig config, final String solrIndexLocation) throws YardException {
+    private IndexReference createSolrIndex(ManagedSolrServer managedServer, SolrYardConfig config, final String solrIndexLocation) throws YardException {
         String configName;
         if(config.isDefaultInitialisation()){
             configName = SolrYard.DEFAULT_SOLR_INDEX_CONFIGURATION_NAME;
@@ -541,17 +570,17 @@ public class SolrYard extends AbstractYard implements Yard {
         log.info(" ... initialise new SolrDirectory Index with name {} by using Index Configuration {}",
             solrIndexLocation,configName);
         try {
-            File createdIndexDir = solrDirectoryManager.createSolrDirectory(solrIndexLocation,configName,null);
-            if (createdIndexDir == null) {
+            IndexMetadata metadata = managedServer.createSolrIndex(solrIndexLocation,configName,null);
+            if (metadata == null) {
                 throw new YardException("SolrIndex "+ config.getSolrServerLocation() + 
                         " is not available" + (config.isDefaultInitialisation() ? 
                                 " and could not be initialised!" : 
                                     ". The necessary Index is not yet installed."));
             } else {
                 log.info(" ... created IndexDirectory {} for SolrIndex {} by using config {}",
-                    new Object[]{createdIndexDir,solrIndexLocation,configName});
+                    new Object[]{metadata.getDirectory(),solrIndexLocation,configName});
             }
-            return createdIndexDir;
+            return metadata.getIndexReference();
         } catch (IOException e) {
             throw new YardException("SolrIndex "+ config.getSolrServerLocation() + 
                     " could not be initialised!",e);
@@ -574,21 +603,24 @@ public class SolrYard extends AbstractYard implements Yard {
     protected final void deactivate(ComponentContext context) {
         SolrYardConfig config = (SolrYardConfig) getConfig();
         log.info("... deactivating SolrYard " + config.getName() + " (id=" + config.getId() + ")");
-        try {
-            SolrServer server;
-            server = getServer();
-            server.commit();
-        } catch (YardException e) {
-            log.debug("Deactivate SolrYard with SolrServer that was never initialised");
-        } catch (SolrServerException e) {
-            log.error(
-                String.format("Unable to commit unsaved changes to SolrServer %s during deactivate!",
-                    config.getSolrServerLocation()), e);
-        } catch (IOException e) {
-            log.error(
-                String.format("Unable to commit unsaved changes to SolrServer %s during deactivate!",
-                    config.getSolrServerLocation()), e);
-        }
+        //Commit in deactivate is not necessary, because either changes are 
+        //committed within add/update/remove, or the commitWithin parameter takes
+        //care of missing commites of the SolrCore shuts down.
+//        try {
+//            SolrServer server;
+//            server = getServer();
+//            server.commit();
+//        } catch (YardException e) {
+//            log.debug("Deactivate SolrYard with SolrServer that was never initialised");
+//        } catch (SolrServerException e) {
+//            log.error(
+//                String.format("Unable to commit unsaved changes to SolrServer %s during deactivate!",
+//                    config.getSolrServerLocation()), e);
+//        } catch (IOException e) {
+//            log.error(
+//                String.format("Unable to commit unsaved changes to SolrServer %s during deactivate!",
+//                    config.getSolrServerLocation()), e);
+//        }
         this._server = null;
         this._fieldMapper = null; //in this case we can directly access the lazy field
         this.indexValueFactory = null;
