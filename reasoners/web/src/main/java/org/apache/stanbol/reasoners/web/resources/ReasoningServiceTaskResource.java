@@ -241,7 +241,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
          * If everything went well, we return 201 Created
          * We include the header Location: with the Job URL
          */
-        return Response.created(URI.create(getPublicBaseUri() + "reasoners/job/"+jid)).build();   
+        return Response.created(URI.create(getPublicBaseUri() + "jobs/"+jid)).build();   
     }
     
     private Response processRealTimeRequest(){
