@@ -36,6 +36,8 @@ import org.apache.stanbol.reasoners.web.utils.ResponseTaskBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.jersey.api.view.Viewable;
+
 /**
  * Return the result of a reasoners background job
  * 
@@ -48,6 +50,8 @@ public class JobsResource extends BaseStanbolResource {
     private ServletContext context;
     private HttpHeaders headers;
 
+    private String jobLocation = "";
+    
     public JobsResource(@Context ServletContext servletContext,@Context HttpHeaders headers) {
         this.context = servletContext;
         this.headers = headers;
@@ -102,11 +106,10 @@ public class JobsResource extends BaseStanbolResource {
                 /**
                  * We return 404 with additional info
                  */
-                String jobService = new StringBuilder().append(getPublicBaseUri()).append("/jobs/").append(id).toString();
-                StringBuilder b = new StringBuilder();
-                b.append("Result not ready.\n");
-                b.append("See: ").append(jobService);
-                return Response.status(404).header("Content-Location", jobService).entity( b.toString() ).build();
+                String jobService = new StringBuilder().append(getPublicBaseUri()).append("jobs/").append(id).toString();
+                this.jobLocation = jobService;
+                Viewable viewable = new Viewable("404.ftl",this);
+                return Response.status(404).header("Content-Location", jobService).header("Content-type","text/html").entity( viewable ).build();
             }
         } else {
             log.info("No job found with id {}", id);
@@ -114,6 +117,15 @@ public class JobsResource extends BaseStanbolResource {
         }
     }
 
+    /**
+     * If the output is not ready, this field contains the location of the job to be rendered in the viewable.
+     * 
+     * @return
+     */
+    public String getJobLocation(){
+        return this.jobLocation;
+    }
+    
     /**
      * Gets the job manager
      * 

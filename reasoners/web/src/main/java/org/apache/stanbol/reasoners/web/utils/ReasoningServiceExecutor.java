@@ -361,7 +361,7 @@ public class ReasoningServiceExecutor implements Job {
 
     @Override
     public String buildResultLocation(String jobId) {
-        return "/reasoners/jobs/" + jobId;
+        return "reasoners/jobs/" + jobId;
     }
 
 }

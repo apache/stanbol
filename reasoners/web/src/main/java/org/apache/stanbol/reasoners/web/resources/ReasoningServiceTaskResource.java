@@ -105,7 +105,8 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
     private ONManager onm;
     private RuleStore ruleStore;
     private boolean job = false;
-
+    private String jobLocation="";
+    
     public ReasoningServiceTaskResource(@PathParam(value = "service") String serviceID,
                                         @PathParam(value = "task") String taskID,
                                         @PathParam(value = "job") String job,
@@ -255,11 +256,14 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         ReasoningServiceExecutor executor = new ReasoningServiceExecutor(tcManager, imngr,
                 getCurrentService(), getCurrentTask(), target, parameters);
         String jid = getJobManager().execute(executor);
+        URI location = URI.create(getPublicBaseUri() + "jobs/"+jid);
+        this.jobLocation = location.toString();
         /**
          * If everything went well, we return 201 Created
          * We include the header Location: with the Job URL
          */
-        return Response.created(URI.create(getPublicBaseUri() + "jobs/"+jid)).build();   
+        Viewable view = new Viewable("created", this);
+        return Response.created(location).entity(view).build();   
     }
     
     private Response processRealTimeRequest(){
@@ -468,6 +472,15 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         return this.taskID;
     }
 
+    /**
+     * If this resource created a job, this field contains the location to be rendered in the viewable.
+     * 
+     * @return
+     */
+    public String getJobLocation(){
+       return this.jobLocation; 
+    }
+    
     /**
      * The list of supported tasks. We include CHECK, which is managed directly by the endpoint.
      */

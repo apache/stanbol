@@ -16,12 +16,9 @@
 -->
 <#import "/imports/common.ftl" as common>
 <#escape x as x?html>
-<@common.page title="Reasoners: Job output" hasrestapi=false>	
- <div class="panel">
-	<pre>
-	${it.result}
-	</pre>
- </div>
-
+<@common.page title="Reasoners: Job output not ready yet" hasrestapi=false> 	
+    <div class="panel">
+<p>See: <a href="${it.jobLocation}">${it.jobLocation}</a></p>
+    </div>
   </@common.page>
 </#escape>
