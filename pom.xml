@@ -65,6 +65,7 @@
               org.apache.solr.client.solrj.request,
               org.apache.solr.client.solrj.response,
               org.apache.solr.client.solrj.util,
+              org.apache.solr.client.solrj.embedded,
               org.apache.solr.common,
               org.apache.solr.common.luke,
               org.apache.solr.common.params,

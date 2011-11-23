@@ -17,10 +17,13 @@
 package org.apache.stanbol.commons.solr;
 
 import static org.apache.stanbol.commons.solr.SolrConstants.*;
+import static org.osgi.framework.Constants.SERVICE_ID;
+import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -28,13 +31,14 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.core.CloseHook;
 import org.apache.solr.core.CoreContainer;
@@ -49,10 +53,12 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /**
- * This Class wraps a Solr {@link CoreContainer} (representing a SolrServer)
- * with one ore more {@link SolrCore}s and takes care that the 
- * {@link CoreContainer} and all its {@link SolrCore}s are registered as OSGI 
- * services.<p>
+ * This Class 'wraps' a Solr {@link CoreContainer} with all its registered 
+ * {@link SolrCore}s and registers them as OSGI services. It therefore adapts
+ * the components framework as used by Apache Solr to the OSGI.<p>
+ * This class itself is no OSGI component, but is intended to be used by
+ * other classes that allow to register/manage Solr {@link CoreContainer}
+ * running within the same JVM.<p>
  * Properties set for CoreContainers are: <ul>
  * <li> {@link SolrConstants#PROPERTY_SERVER_NAME}: The name assigned to
  * the SolrServer as parsed by {@link SolrServerProperties#getServerName()}. If
@@ -99,9 +105,9 @@ import org.xml.sax.SAXException;
  * @author Rupert Westenthaler
  *
  */
-public class ManagedSolrServer {
+public class SolrServerAdapter {
 
-    private final Logger log = LoggerFactory.getLogger(ManagedSolrServer.class);
+    private final Logger log = LoggerFactory.getLogger(SolrServerAdapter.class);
     
     private final Map<String,CoreRegistration> registrations;
     protected final CoreContainer server;
@@ -157,7 +163,7 @@ public class ManagedSolrServer {
      * valid value for the {@link SolrConstants#PROPERTY_SERVER_DIR} 
      * property.
      */
-    public ManagedSolrServer(BundleContext context,SolrServerProperties parsedServerProperties) throws ParserConfigurationException, IOException, SAXException{
+    public SolrServerAdapter(BundleContext context,SolrServerProperties parsedServerProperties) throws ParserConfigurationException, IOException, SAXException{
         if(parsedServerProperties == null){
             throw new IllegalArgumentException("The prsed Server Properties MUST NOT be NULL!");
         }
@@ -194,7 +200,7 @@ public class ManagedSolrServer {
         Set<String> coreNames = updateCoreNamesInServerProperties();
         //register the SolrServer
         this.serverRegistration = context.registerService(
-            CoreContainer.class.getName(), server, parsedServerProperties);
+            CoreContainer.class.getName(), server, serverProperties);
         //now register the cores
         for(String name : coreNames){
             registerCoreService(name,null);
@@ -219,7 +225,6 @@ public class ManagedSolrServer {
         //shutdown the CoreContainer itself
         server.shutdown();
     }
-
     /**
      * Removes the SolrCore for with the given name. This will also unregister
      * the according OSGI service. Note that SolrCores can be registerd with
@@ -234,10 +239,10 @@ public class ManagedSolrServer {
                 reg.unregister();
             }
             cleanupSolrCore(core);
-        }
-        //server.persist();
-        //update the OSGI service for the CoreContainer
-        updateServerRegistration();
+            //server.persist();
+            //update the OSGI service for the CoreContainer
+            updateServerRegistration();
+        } //else core already removed -> nothing to do
 
     }
     /**
@@ -252,6 +257,7 @@ public class ManagedSolrServer {
         //try to reload
         ClassLoader classLoader = updateContextClassLoader();
         try {
+            //TODO: what happens if the core with 'name' is no longer present?
             server.reload(name);
         } finally {
             Thread.currentThread().setContextClassLoader(classLoader);
@@ -264,7 +270,7 @@ public class ManagedSolrServer {
     }
     /**
      * Sets the {@link ClassLoader} of the {@link Thread#currentThread()} to the
-     * ClassLoader of {@link ManagedSolrServer} to ensure that all needed
+     * ClassLoader of {@link SolrServerAdapter} to ensure that all needed
      * Solr dependencies are loaded via the Bundle Classpath of the
      * <code>org.apache.commons.solr</code> bundle.<p>
      * Make sure that the ClassLoader is reset to the original value - as
@@ -278,7 +284,7 @@ public class ManagedSolrServer {
      *     }
      * </code></pre><p>
      * <b>TODO:</b><p>
-     * This currently sets the ClassLoader of {@link ManagedSolrServer}
+     * This currently sets the ClassLoader of {@link SolrServerAdapter}
      * to set the {@link Thread#setContextClassLoader(ClassLoader)}. It would 
      * be better to explicitly get the ClassLoader of the Bundle providing the
      * Solr Classes.
@@ -293,11 +299,17 @@ public class ManagedSolrServer {
          * (Rupert Westenthaler 20010209)
          */
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(ManagedSolrServer.class.getClassLoader());
+        Thread.currentThread().setContextClassLoader(SolrServerAdapter.class.getClassLoader());
         return classLoader;
     }
-    protected void swap(String core1,String core2){
+    /**
+     * Swaps two cores
+     * @param core1 the first core to swap
+     * @param core2 the second core to swap
+     */
+    public void swap(String core1,String core2){
         //swap the cores
+        //TODO: what happens if one/both cores are no longer present?
         server.swap(core1, core2);
         //(re-)register the two cores
         registerCoreService(core1,null);
@@ -406,15 +418,38 @@ public class ManagedSolrServer {
     }
     
     /**
-     * Returns the ServiceReference for the {@link SolrServer} of the core
+     * Returns the ServiceReference for the {@link SolrCore} of the core
      * with the parsed name
      * @param name the name of the core
-     * @return the reference to the {@link SolrServer} or <code>null</code> if
+     * @return the reference to the {@link SolrCore} or <code>null</code> if
      * not managed.
      */
     public ServiceReference getCore(String name) {
         CoreRegistration reg = registrations.get(name);
         return reg != null ? reg.getServiceReference() : null;
+    }
+    /**
+     * Returns the ServiceReference for the {@link SolrCore} of the parsed
+     * directory
+     * @param directory the directory
+     * @return the reference of <code>null</code> if no {@link SolrCore} for the
+     * parsed directory is registered for this {@link CoreContainer}.
+     */
+    public ServiceReference getCoreForDir(String directory){
+        //solr always uses ending '/'
+        if(directory.charAt(directory.length()-1) != File.separatorChar){
+            directory = directory+File.separatorChar;
+        }
+        synchronized (registrations) {
+            for(CoreRegistration reg : registrations.values()){
+                ServiceReference ref = reg.getServiceReference();
+                if(FilenameUtils.equalsNormalizedOnSystem(
+                    directory,(String)ref.getProperty(PROPERTY_CORE_DIR))){
+                    return ref;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -424,7 +459,8 @@ public class ManagedSolrServer {
      */
     @SuppressWarnings("unchecked")
     public Collection<String> getCores() {
-        return (Collection<String>)serverProperties.get(PROPERTY_SERVER_CORES);
+        return Collections.unmodifiableCollection(
+            (Collection<String>)serverProperties.get(PROPERTY_SERVER_CORES));
     }
 
     /**
@@ -441,6 +477,14 @@ public class ManagedSolrServer {
         Object value = serverRegistration.getReference().getProperty(PROPERTY_SERVER_NAME);
         return value == null ? null : value.toString();
     }
+    /**
+     * Getter for the {@link ServiceReference} for the {@link CoreContainer}
+     * managed by this instance
+     * @return the {@link ServiceReference}
+     */
+    public ServiceReference getServerReference(){
+        return serverRegistration.getReference();
+    }
     
     @Override
     public int hashCode() {
@@ -448,10 +492,10 @@ public class ManagedSolrServer {
     }
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof ManagedSolrServer && 
-            ((ManagedSolrServer)obj).server.equals(server) &&
-            ((ManagedSolrServer)obj).context.equals(context) &&
-            ((ManagedSolrServer)obj).serverProperties.equals(serverProperties);
+        return obj instanceof SolrServerAdapter && 
+            ((SolrServerAdapter)obj).server.equals(server) &&
+            ((SolrServerAdapter)obj).context.equals(context) &&
+            ((SolrServerAdapter)obj).serverProperties.equals(serverProperties);
     }
     
     @Override
@@ -479,7 +523,7 @@ public class ManagedSolrServer {
     /**
      * Internally used to manage the OSGI service registration for
      * {@link SolrCore}s of the {@link CoreContainer} managed by this
-     * {@link ManagedSolrServer} instance
+     * {@link SolrServerAdapter} instance
      * @author Rupert Westenthaler
      *
      */
@@ -492,8 +536,8 @@ public class ManagedSolrServer {
          * @param name the name used to register the core
          * @param parsedCore the SolrCore to register
          * @throws IllegalStateException if the parsed name is <code>null</code>
-         * or empty; if the {@link ManagedSolrServer#server} does not know a
-         * SolrCore with the parsed name or if the {@link ManagedSolrServer#context}
+         * or empty; if the {@link SolrServerAdapter#server} does not know a
+         * SolrCore with the parsed name or if the {@link SolrServerAdapter#context}
          * is no longer valid
          */
         protected CoreRegistration(String name, SolrCore parsedCore) {
@@ -514,6 +558,11 @@ public class ManagedSolrServer {
             props.put(PROPERTY_CORE_SOLR_CONF, core.getConfigResource());
             props.put(PROPERTY_SERVER_NAME, serverProperties.get(PROPERTY_SERVER_NAME));
             props.put(PROPERTY_SERVER_DIR, serverProperties.get(PROPERTY_SERVER_DIR));
+            //looks like the SERVICE_PID property is not present within the metadata
+            //so we use SERVICE_ID instead. However keep on mind that SERVIVE_ID
+            //values change if a service is restarted.
+//            props.put(PROPERTY_CORE_SERVER_PID, serverRegistration.getReference().getProperty(SERVICE_PID));
+            props.put(PROPERTY_CORE_SERVER_ID, serverRegistration.getReference().getProperty(SERVICE_ID));
             Object ranking = serverProperties.get(PROPERTY_SERVER_RANKING);
             if(ranking != null)
                 props.put(PROPERTY_CORE_RANKING, ranking);
@@ -601,7 +650,7 @@ public class ManagedSolrServer {
     }
     /**
      * {@link Dictionary} implementation that provides getter and setter for
-     * typical properties configured for a {@link ManagedSolrServer}.<p>
+     * typical properties configured for a {@link SolrServerAdapter}.<p>
      * Stores its state in the {@link Dictionary} and implements {@link Cloneable}
      * @author Rupert Westenthaler
      */
@@ -691,6 +740,26 @@ public class ManagedSolrServer {
         public void setServerRanking(Integer ranking){
             properties.put(PROPERTY_SERVER_RANKING, ranking);
         }
+        
+        public boolean isPublishREST(){
+            Object value = properties.get(PROPERTY_SERVER_PUBLISH_REST);
+            if(value instanceof Boolean){
+                return ((Boolean)value).booleanValue();
+            } else if (value != null){
+                return Boolean.parseBoolean(value.toString());
+            } else {
+                return SolrConstants.DEFAULT_PUBLISH_REST;
+            }
+        }
+        
+        public void setPublishREST(Boolean state){
+            if(state == null){
+                properties.remove(PROPERTY_SERVER_PUBLISH_REST);
+            } else {
+                properties.put(PROPERTY_SERVER_PUBLISH_REST, state);
+            }
+        }
+        
         @Override
         public Enumeration<Object> elements() {
             return properties.elements();
@@ -728,7 +797,7 @@ public class ManagedSolrServer {
     /**
      * {@link Dictionary} implementation that provides getter and setter for
      * typical properties configured for a {@link SolrCore} registered to a 
-     * {@link ManagedSolrServer}.<p>
+     * {@link SolrServerAdapter}.<p>
      * Stores its state in the {@link Dictionary} and implements {@link Cloneable}
      * @author Rupert Westenthaler
      */
@@ -779,7 +848,8 @@ public class ManagedSolrServer {
             } else if(directory.isDirectory()){
                 coreProperties.put(PROPERTY_CORE_DIR, directory);
             } else {
-                throw new IllegalArgumentException("The parsed File MUST represent a Directory!");
+                throw new IllegalArgumentException("The parsed File '"+
+                    directory+"' MUST represent a Directory!");
             }
         }
         public String getCoreName(){

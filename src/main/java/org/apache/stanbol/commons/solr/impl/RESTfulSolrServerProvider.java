@@ -37,7 +37,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of the {@link SolrServerProvider} interface supporting all the types directly supported by
- * the SolrJ library. This includes all Clients using an remote SolrServer.
+ * the SolrJ library. This includes all Clients using the RESTful API of a 
+ * SolrServer.
  * <p>
  * This does not support an embedded SolrServer
  * 
@@ -46,9 +47,9 @@ import org.slf4j.LoggerFactory;
  */
 @Component(immediate = true)
 @Service
-public class DefaultSolrServerProvider implements SolrServerProvider {
+public class RESTfulSolrServerProvider implements SolrServerProvider {
 
-    private final Logger log = LoggerFactory.getLogger(DefaultSolrServerProvider.class);
+    private final Logger log = LoggerFactory.getLogger(RESTfulSolrServerProvider.class);
 
     @Override
     public SolrServer getSolrServer(SolrServerTypeEnum type, String uriOrPath, String... additional) throws NullPointerException,
