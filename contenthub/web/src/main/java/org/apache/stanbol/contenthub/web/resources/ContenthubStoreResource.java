@@ -79,9 +79,10 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.params.ModifiableSolrParams;
-import org.apache.stanbol.commons.solr.SolrDirectoryManager;
 import org.apache.stanbol.commons.solr.SolrServerProviderManager;
 import org.apache.stanbol.commons.solr.SolrServerTypeEnum;
+import org.apache.stanbol.commons.solr.managed.IndexMetadata;
+import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.contenthub.core.store.SolrContentItemImpl;
@@ -121,7 +122,7 @@ public class ContenthubStoreResource extends BaseStanbolResource {
 
     private static final Logger log = LoggerFactory.getLogger(ContenthubStoreResource.class);
 
-    private SolrDirectoryManager solrDirectoryManager;
+    private ManagedSolrServer solrDirectoryManager;
 
     private SolrServerProviderManager solrServerProviderManager;
 
@@ -202,15 +203,13 @@ public class ContenthubStoreResource extends BaseStanbolResource {
 
         solrServerProviderManager = ContextHelper.getServiceFromContext(SolrServerProviderManager.class,
             context);
-        solrDirectoryManager = ContextHelper.getServiceFromContext(SolrDirectoryManager.class, context);
+        solrDirectoryManager = ContextHelper.getServiceFromContext(ManagedSolrServer.class, context);
         SolrServer solrServer = null;
         if (solrDirectoryManager != null) {
-            File indexDirectory = solrDirectoryManager.getSolrIndexDirectory("contenthub");
-            if (indexDirectory == null) {
-                indexDirectory = solrDirectoryManager.createSolrDirectory("contenthub", "contenthub", null);
+            if (!solrDirectoryManager.isManagedIndex("contenthub")) {
+                solrDirectoryManager.createSolrIndex("contenthub", "contenthub", null);
             }
-            String serverLocation = indexDirectory.toString();
-            solrServer = solrServerProviderManager.getSolrServer(SolrServerTypeEnum.EMBEDDED, serverLocation);
+            solrServer = solrServerProviderManager.getSolrServer(SolrServerTypeEnum.EMBEDDED, "contenthub");
         }
 
         ModifiableSolrParams params = new ModifiableSolrParams();

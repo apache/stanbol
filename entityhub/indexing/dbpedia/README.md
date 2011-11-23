@@ -201,8 +201,36 @@ will contain two files
    Provider after installing the Bundle described above. To install the
    data you need copy this file to the "/sling/datafiles" folder within
    the working directory of your Stanbol Server.
+   
+   If you are currently using the default data for DBPedia.org (as included in
+   the Stanbol launchers) copying this file to the datafiles directory will
+   automatically trigger the replacement of the default data. The new data will
+   be available as soon as the copying of the data and the initialisation of the
+   index completes. In the meantime queries will still use the old data.
+   
+   To update from one "dbpedia.solrindex.zip" to an other you need first to delete
+   the existing dbpedia.solrindex.zip from the datafiles folder.
+   Secondly you need to stop the "org.apache.stanbol.data.site.dbpedia-{version}"
+   bundle. This should trigger the deletion of the current dbpedia index.
+   After the deletion you need to reactivate the bundle and copy the new 
+   "dbpedia.solrindex.zip" into the "datafiles" folder. You can already copy the
+   new "dbpedia.solrindex.zip" to the datafile folder while the bundle is
+   deactivated.
+   
+   *TODO:* updating from one dbpedia.solrindex.zip to an other one is currently
+   to complex! This could be simplified if we set "Synchronized=true" also for
+   DBPedia.org, or by providing a management user interface for the
+   ManagedSolrServer (e.g. Tab within the Apache Felix Web Console).
+   
+   
+2. `org.apache.stanbol.data.site.dbpedia-{version}.jar`: 
 
-2. `org.apache.stanbol.data.site.dbpedia-{version}.jar`: This is a Bundle
+   NOTE: The installation of this bundle is no longer required, because all
+   current Stanbol launchers do already include this bundle. If you are using
+   an launcher configuration that does not include this bundle the steps as
+   described below are still required.
+   
+   This is a Bundle
    that can be installed to any OSGI environment running the Apache Stanbol
    Entityhub (for instance using the Apache Felix web console under
    http://server:port/system/console - with account admin / admin by default).

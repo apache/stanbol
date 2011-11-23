@@ -94,7 +94,7 @@ public class WebConsolePlugin extends HttpServlet {
             cell(pw, null, e.getBundleSymbolicName(), "b", e.getFilename());
 
             final StringBuilder sb = new StringBuilder();
-            for(Map.Entry<String, String> comment : e.getComments().entrySet()) {
+            for(Map.Entry<?, ?> comment : e.getComments().entrySet()) {
                 if (sb.length() > 0) {
                     sb.append("<br/>");
                 }

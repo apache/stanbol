@@ -106,10 +106,6 @@
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
     </dependency>
@@ -124,6 +120,10 @@
     <dependency>
       <groupId>org.codehaus.jettison</groupId>
       <artifactId>jettison</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
     </dependency>
     <dependency>
       <!-- required for ExtHttpService that supports Servlet Filters within Felix -->

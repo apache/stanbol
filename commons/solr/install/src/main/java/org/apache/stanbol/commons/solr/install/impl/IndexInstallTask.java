@@ -17,10 +17,9 @@
 package org.apache.stanbol.commons.solr.install.impl;
 
 import static org.apache.stanbol.commons.solr.IndexInstallerConstants.PROPERTY_ARCHIVE_FORMAT;
-import static org.apache.stanbol.commons.solr.IndexInstallerConstants.PROPERTY_INDEX_ARCHIVE;
-import static org.apache.stanbol.commons.solr.IndexInstallerConstants.PROPERTY_INDEX_NAME;
+import static org.apache.stanbol.commons.solr.managed.ManagedIndexConstants.INDEX_ARCHIVES;
+import static org.apache.stanbol.commons.solr.managed.ManagedIndexConstants.INDEX_NAME;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
@@ -32,7 +31,8 @@ import org.apache.sling.installer.api.tasks.InstallTask;
 import org.apache.sling.installer.api.tasks.InstallationContext;
 import org.apache.sling.installer.api.tasks.ResourceState;
 import org.apache.sling.installer.api.tasks.TaskResourceGroup;
-import org.apache.stanbol.commons.solr.SolrDirectoryManager;
+import org.apache.stanbol.commons.solr.managed.ManagedIndexConstants;
+import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.commons.solr.utils.ConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,71 +46,86 @@ public class IndexInstallTask extends InstallTask {
      */
     private static final String CONFIG_INSTALL_ORDER = "19-";
 
-    private final SolrDirectoryManager solrDirectoryManager;
+    /**
+     * Mapping for the managed servers. The default server uses the <code>null</code>
+     * key!
+     */
+    private final Map<String,ManagedSolrServer> managedServers;
 
-    public IndexInstallTask(TaskResourceGroup trg, SolrDirectoryManager solrDirectoryManager) {
+    public IndexInstallTask(TaskResourceGroup trg, Map<String,ManagedSolrServer> managedServers) {
         super(trg);
-        this.solrDirectoryManager = solrDirectoryManager;
+        if(managedServers == null){
+            throw new IllegalArgumentException("The parsed map with the ManagedSolrServer MUST NOT be NULL!");
+        }
+        this.managedServers = managedServers;
     }
 
     @Override
     public void execute(InstallationContext ctx) {
-        String indexName = (String) getResource().getAttribute(PROPERTY_INDEX_NAME);
-        Map<String,File> existingIndexes = solrDirectoryManager.getManagedIndices();
-        if (existingIndexes.containsKey(indexName)) {
-            // an Index with that name already exists -> ignore
-            ctx.log(
-                "Unable to install the Index with the name \"%s\" becuase an index with that name is already managed by the the SolrYard "
-                        + "(resource %s | location of the existing index %s)!", indexName, getResource()
-                        .getURL(), existingIndexes.get(indexName));
+        String indexName = (String) getResource().getAttribute(INDEX_NAME);
+        if(indexName == null){
+            log.error("Unable to remove Managed Index because the required Property '{}'" +
+                    "used to define the name of the Index is missing",INDEX_NAME);
             setFinishedState(ResourceState.IGNORED);
-        } else { // this index does not exist
-            String archiveFormat = (String) getResource().getAttribute(PROPERTY_ARCHIVE_FORMAT);
-            InputStream is = null;
-            try {
-                is = getResource().getInputStream();
-                if ("properties".equals(archiveFormat)) {
-                    InputStreamReader reader = new InputStreamReader(is, "UTF-8");
-                    Properties props = new Properties();
-                    try {
-                        props.load(reader);
-                    } finally {
-                        IOUtils.closeQuietly(reader);
-                    }
-                    String indexPath = props.getProperty(PROPERTY_INDEX_ARCHIVE);
-                    if (indexPath == null) {
-                        indexPath = indexName + '.' + ConfigUtils.SOLR_INDEX_ARCHIVE_EXTENSION;
-                        log.info("Property \""
-                                 + PROPERTY_INDEX_ARCHIVE
-                                 + "\" not present within the SolrIndex references file. Will use the default name \""
-                                 + indexPath + "\"");
-                    }
-                    solrDirectoryManager.createSolrDirectory(indexName, indexPath, props);
-                    setFinishedState(ResourceState.INSTALLED);
-                } else {
-                    ArchiveInputStream ais = null;
-                    try {
-                        ais = ConfigUtils.getArchiveInputStream(archiveFormat, is);
-                        solrDirectoryManager.createSolrIndex(indexName, ais);
-                        // we are done ... set the state to installed!
-                        setFinishedState(ResourceState.INSTALLED);
-                    } finally {
-                        IOUtils.closeQuietly(ais);
-                    }
-                }
-                // now we can copy the core!
-            } catch (Exception e) {
-                String message = String
-                        .format(
-                            "Unable to install SolrIndexArchive for index name \"%s\"! (resource=%s, arviceFormat=%s)",
-                            indexName, getResource().getURL(), archiveFormat);
-                log.error(message, e);
-                ctx.log("%s! Reason: %s", message, e.getMessage());
+        } else {
+            String serverName = (String) getResource().getAttribute(ManagedIndexConstants.SERVER_NAME);
+            ManagedSolrServer server = managedServers.get(serverName);
+            if(server == null){
+                log.warn("Unable to remove Managed Solr Index {} because the {} " +
+                        "Server {} is currently not active!", 
+                        new Object[]{indexName,serverName == null ? "default" : "",
+                                serverName != null ? serverName : ""});
                 setFinishedState(ResourceState.IGNORED);
-            } finally {
-                IOUtils.closeQuietly(is);
+            } else {
+                //we have an index name and a server to in stall it ... 
+                //  ... let's do the work
+                String archiveFormat = (String) getResource().getAttribute(PROPERTY_ARCHIVE_FORMAT);
+                InputStream is = null;
+                try {
+                    is = getResource().getInputStream();
+                    if ("properties".equals(archiveFormat)) {
+                        InputStreamReader reader = new InputStreamReader(is, "UTF-8");
+                        Properties props = new Properties();
+                        try {
+                            props.load(reader);
+                        } finally {
+                            IOUtils.closeQuietly(reader);
+                        }
+                        //TODO install to the right server!
+                        String indexPath = props.getProperty(INDEX_ARCHIVES);
+                        if (indexPath == null) {
+                            indexPath = indexName + '.' + ConfigUtils.SOLR_INDEX_ARCHIVE_EXTENSION;
+                            log.info("Property \""
+                                     + INDEX_ARCHIVES
+                                     + "\" not present within the SolrIndex references file. Will use the default name \""
+                                     + indexPath + "\"");
+                        }
+                        server.updateIndex(indexName, indexPath, props);
+                        setFinishedState(ResourceState.INSTALLED);
+                    } else {
+                        ArchiveInputStream ais = null;
+                        try {
+                            ais = ConfigUtils.getArchiveInputStream(archiveFormat, is);
+                            server.updateIndex(indexName, ais);
+                            // we are done ... set the state to installed!
+                            setFinishedState(ResourceState.INSTALLED);
+                        } finally {
+                            IOUtils.closeQuietly(ais);
+                        }
+                    }
+                    // now we can copy the core!
+                } catch (Exception e) {
+                    String message = String.format(
+                        "Unable to install SolrIndexArchive for index name '%s'!" +
+                        " (resource=%s, arviceFormat=%s)",
+                        indexName, getResource().getURL(), archiveFormat);
+                    log.error(message, e);
+                    ctx.log("%s! Reason: %s", message, e.getMessage());
+                    setFinishedState(ResourceState.IGNORED);
+                } finally {
+                    IOUtils.closeQuietly(is);
+                }
             }
-
         }
 
     }

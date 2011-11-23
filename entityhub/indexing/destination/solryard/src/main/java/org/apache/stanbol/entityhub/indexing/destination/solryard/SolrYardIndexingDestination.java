@@ -42,7 +42,9 @@ import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
-import org.apache.stanbol.commons.solr.SolrDirectoryManager;
+import org.apache.stanbol.commons.solr.SolrConstants;
+import org.apache.stanbol.commons.solr.managed.ManagedIndexConstants;
+import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYard;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig;
 import org.slf4j.Logger;
@@ -99,7 +101,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
      * {@link SolrDirectoryManager#DEFAULT_SOLR_DATA_DIR}
      */
     public static final String DEFAULT_SOLR_INDEX_DIRECTORY = 
-        SolrDirectoryManager.DEFAULT_SOLR_DATA_DIR;
+        ManagedSolrServer.DEFAULT_SOLR_DATA_DIR;
     /**
      * The field used to boost documents while indexing. This is set to
      * {@link RdfResourceEnum#entityRank}
@@ -117,6 +119,17 @@ public class SolrYardIndexingDestination implements IndexingDestination {
      * The ID of the OSGI component used by the SolrYard implementation
      */
     public static final String SOLR_YARD_COMPONENT_ID = "org.apache.stanbol.entityhub.yard.solr.impl.SolrYard";
+
+    /**
+     * The default value for the {@link ManagedIndexConstants#SYNCHRONIZED}
+     * property added to the SorlIndex reference file. The default is set to
+     * <code>true</code>. This will users allow to update the data for the
+     * ReferencedSite by simple replacing the solrindex Archive in the
+     * <code>/datafile</code> folder.<p>
+     * This property can be configured by using the main "indexing.properties"
+     * file.
+     */
+    public static final boolean DEFAULT_SYNCHRONIZED_STATE = true;
     
     /**
      * The location of the SolrIndex. This MUST BE an absolute Path in case it 
@@ -288,10 +301,12 @@ public class SolrYardIndexingDestination implements IndexingDestination {
                     throw new IllegalStateException("In case the Solr index location"+
                         "is a relative path the parsed managed directory MUST NOT be NULL!");
                 }
-                System.setProperty(SolrDirectoryManager.MANAGED_SOLR_DIR_PROPERTY, 
+                System.setProperty(ManagedSolrServer.MANAGED_SOLR_DIR_PROPERTY, 
                     managedDirectory.getAbsolutePath());
                 //add the name of the core and save it to solrLocation
-                solrIndexLocation = new File(managedDirectory,parsedSolrLocation);
+                //TODO: get the name of the default server somehow ...
+                File serverLocation = new File(managedDirectory,"default");
+                solrIndexLocation = new File(serverLocation,parsedSolrLocation);
                 //check if there is a special SolrLocation
                 if(solrConfig != null){
                     solrConfigLocation = new File(solrConfig);
@@ -538,6 +553,14 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         properties.setProperty("Name", solrYardConfig.getName());
         if(solrYardConfig.getDescription() != null){
             properties.setProperty("Description", solrYardConfig.getDescription());
+        }
+        Object syncronizedConfig = indexingConfig.getProperty(ManagedIndexConstants.SYNCHRONIZED);
+        if(syncronizedConfig != null){
+            properties.setProperty(ManagedIndexConstants.SYNCHRONIZED, 
+                Boolean.toString(Boolean.parseBoolean(syncronizedConfig.toString())));
+        } else {
+            properties.setProperty(ManagedIndexConstants.SYNCHRONIZED,
+                Boolean.toString(DEFAULT_SYNCHRONIZED_STATE));
         }
         File solrArchiveFile = new File(
             OsgiConfigurationUtil.getConfigDirectory(indexingConfig),solrArchiveRef.getName());

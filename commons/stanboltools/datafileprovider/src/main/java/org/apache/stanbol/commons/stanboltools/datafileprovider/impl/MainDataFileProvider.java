@@ -27,7 +27,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 // DO NOT REMOVE - workaround for FELIX-2906 
 import java.lang.Integer;
 
@@ -90,8 +89,8 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
         
         providersTracker = new ServiceTracker(ctx.getBundleContext(), DataFileProvider.class.getName(), null);
         providersTracker.open();
-        
-        log.info("Activated, max.events {}, data files folder {}", maxEvents, dataFilesFolder.getAbsolutePath());
+        log.info("Activated, max.events {}, data files folder {}", 
+            maxEvents, dataFilesFolder.getAbsolutePath());
     }
     
     @Deactivate
@@ -145,29 +144,10 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
             String filename, Map<String, String> comments) throws IOException {
         InputStream result = null;
         String fileUrl = null;
-        
-        // First look for the file in our data folder,
-        // with and without bundle symbolic name prefix
-        final String [] candidateNames = bundleSymbolicName == null ? 
-                new String[]{filename} : 
-                    new String[]{
-                        bundleSymbolicName + "-" + filename,
-                        filename
-                    };
-        for(String name : candidateNames) {
-            final File f = new File(dataFilesFolder, name);
-            log.debug("Looking for file {}", f.getAbsolutePath());
-            if(f.exists() && f.canRead()) {
-                log.debug("File found in data files folder: {}", filename);
-                result = new FileInputStream(f);
-                fileUrl = "file://" + f.getAbsolutePath();
-                break;
-            }
-        }
-        
+        File dataFile = getDataFile(bundleSymbolicName, filename);
         // Then, if not found, query other DataFileProviders,
         // ordered by service ranking
-        if(result == null) {
+        if(dataFile == null) {
             // Sort providers by service ranking
             final List<ServiceReference> refs = Arrays.asList(providersTracker.getServiceReferences());
             Collections.sort(refs);
@@ -192,6 +172,9 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
                     break; //break as soon as a resource was found
                 }
             }
+        } else {
+            result =  new FileInputStream(dataFile);
+            fileUrl = dataFile.toURI().toASCIIString();
         }
         
         // Add event
@@ -210,11 +193,87 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
             throw new IOException("File not found: " + filename);
         }
         
-        log.info("Successfully loaded file {}", event);
+        log.debug("Successfully loaded file {}", event);
         return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean isAvailable(String bundleSymbolicName, String filename, Map<String,String> comments) {
+        String fileUrl = null;
+        File dataFile = getDataFile(bundleSymbolicName, filename);
+        // Then, if not found, query other DataFileProviders,
+        // ordered by service ranking
+        if(dataFile == null) {
+            // Sort providers by service ranking
+            final List<ServiceReference> refs = Arrays.asList(providersTracker.getServiceReferences());
+            Collections.sort(refs);
+            for(ServiceReference ref: refs) {
+                final Object o = providersTracker.getService(ref);
+                if(o == this) {
+                    continue;
+                }
+                final DataFileProvider dfp = (DataFileProvider)o;
+                try {
+                    if(dfp.isAvailable(bundleSymbolicName, filename, comments)){
+                        log.debug("{} does provide file {}", dfp, filename);
+                        fileUrl = dfp.getClass().getName() + "://" + filename;
+                        break;
+                    }
+                } catch (RuntimeException e) {
+                    log.warn("Exception while checking availability of Datafile " +
+                    		"'{}' on DataFileProvider {}",filename,dfp);
+                }
+            }
+        } else {
+            log.debug("{} does provide file {}", this, filename);
+            fileUrl = dataFile.toURI().toASCIIString();
+        }
+        
+        // Add event
+        final DataFileProviderEvent event = new DataFileProviderEvent(
+                bundleSymbolicName, filename, 
+                comments, fileUrl);
+        
+        synchronized (events) {
+            if(events.size() >= maxEvents) {
+                events.remove(0);
+            }
+            events.add(event);
+        }
+
+        return fileUrl != null;
+    }
+    /**
+     * @param bundleSymbolicName
+     * @param filename
+     * @return
+     */
+    private File getDataFile(String bundleSymbolicName, String filename) {
+        File dataFile = null;
+        // First look for the file in our data folder,
+        // with and without bundle symbolic name prefix
+        final String [] candidateNames = bundleSymbolicName == null ? 
+                new String[]{filename} : 
+                    new String[]{
+                        bundleSymbolicName + "-" + filename,
+                        filename
+                    };
+        for(String name : candidateNames) {
+            dataFile = new File(dataFilesFolder, name);
+            log.debug("Looking for file {}", dataFile.getAbsolutePath());
+            if(dataFile.exists() && dataFile.canRead()) {
+                log.debug("File found in data files folder: {}", filename);
+                break;
+            } else {
+                dataFile = null;
+            }
+        }
+        return dataFile;
     }
     
     File getDataFilesFolder() {
         return dataFilesFolder;
     }
+
 }

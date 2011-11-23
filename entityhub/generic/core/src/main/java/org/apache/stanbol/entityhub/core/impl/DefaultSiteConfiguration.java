@@ -215,7 +215,7 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
      * @see #getAccessUri()
      */
     public final void setAccessUri(String uri) throws UnsupportedOperationException{
-        if(uri == null){
+        if(uri == null || uri.isEmpty()){
             config.remove(ACCESS_URI);
         } else {
             config.put(ACCESS_URI, uri);
@@ -235,7 +235,7 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
      * @see #getAttribution()
      */
     public final void setAttribution(String attribution) throws UnsupportedOperationException {
-        if(attribution == null){
+        if(attribution == null  || attribution.isEmpty()){
             config.remove(SITE_ATTRIBUTION);
         } else {
             config.put(SITE_ATTRIBUTION, attribution);
@@ -604,7 +604,7 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
      * @see #getName()
      */
     public final void setName(String name) throws UnsupportedOperationException {
-        if(name == null){
+        if(name == null || name.isEmpty()){
             config.remove(NAME);
         } else {
             config.put(NAME, name);
@@ -651,7 +651,7 @@ public class DefaultSiteConfiguration implements SiteConfiguration {
      * @see #getQueryUri()
      */
     public final void setQueryUri(String queryUri) throws UnsupportedOperationException {
-        if(queryUri == null){
+        if(queryUri == null  || queryUri.isEmpty()){
             config.remove(QUERY_URI);
         } else {
             config.put(QUERY_URI, queryUri);

@@ -157,8 +157,8 @@
             <server.ready.timeout.seconds>180</server.ready.timeout.seconds>
             <server.ready.path.1>/:stanbol.css</server.ready.path.1>
             <server.ready.path.2>/engines:There are currently</server.ready.path.2>
-            <server.ready.path.3>/contenthub:Recently uploaded Content Items</server.ready.path.3>
-            <server.ready.path.4>/factstore:The FactStore implements a store</server.ready.path.4>
+            <server.ready.path.3>/factstore:The FactStore implements a store</server.ready.path.3>
+            <server.ready.path.4>/contenthub:Recently uploaded Content Items</server.ready.path.4>
 			      <!-- server.ready.path.5>/ontonet:Apache Stanbol OntoNet</server.ready.path.5 -->
             <!-- server.ready.path.6>/reasoners:Apache Stanbol Reasoners</server.ready.path.6 -->
           </systemPropertyVariables>

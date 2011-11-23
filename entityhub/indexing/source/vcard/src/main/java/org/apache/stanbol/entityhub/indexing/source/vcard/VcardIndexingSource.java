@@ -630,7 +630,7 @@ public class VcardIndexingSource implements EntityDataIterable, ResourceImporter
                                     current = vf.createRepresentation(orgEntityId);
                                     initSubRepresentation(current, rep, mapping);
                                     representations.put(current.getId(), current);
-                                    current.add(orgNameMapping.uri, StringUtils.chomp(orgName).trim());
+                                    current.addNaturalText(orgNameMapping.uri, StringUtils.chomp(orgName).trim());
                                     //TODO: inverse relation form the ORG to the
                                     // Person can not be supported without caching
                                     // organisations. Therefore delete this relation for now

@@ -37,8 +37,8 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.servlet.SolrDispatchFilter;
 import org.apache.stanbol.commons.solr.SolrConstants;
+import org.apache.stanbol.commons.solr.utils.ServiceReferenceRankingComparator;
 import org.apache.stanbol.commons.solr.web.dispatch.DelegatingSolrDispatchFilter;
-import org.apache.stanbol.commons.solr.web.utils.ServiceReferenceRankingComparator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -51,8 +51,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Component that allows to configuer a {@link SolrDispatchFilter} for a 
- * Solr {@link CoreContainer} running as OSGI service.
+ * Component that allows to publishes a Solr {@link CoreContainer} with a given
+ * name at a given Path by using a {@link SolrDispatchFilter}.<p>
+ * This allows more customisation for publishing Solr {@link CoreContainer} as
+ * the {@link SolrServerPublishingComponent}, but also requires a specific
+ * configuration for earch {@link CoreContainer} to be published.
+ * @see SolrServerPublishingComponent
  * @author Rupert Westenthaler
  *
  */
@@ -61,7 +65,7 @@ import org.slf4j.LoggerFactory;
     policy=ConfigurationPolicy.REQUIRE, //this requires the CoreContainer name
     specVersion="1.1",
     metatype = true,
-    immediate = true
+    immediate = false
     )
 @Service(value=SolrDispatchFilterComponent.class)
 public class SolrDispatchFilterComponent {

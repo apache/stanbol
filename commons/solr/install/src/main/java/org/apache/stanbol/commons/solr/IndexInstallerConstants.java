@@ -32,17 +32,7 @@ public final class IndexInstallerConstants {
      */
     public static final String SOLR_INDEX_ARCHIVE_RESOURCE_TYPE = "solrarchive";
 
-    private static final String PROPERTY_PREFIX = "org.apache.stanbol.yard.solr.installer.";
-    /**
-     * The key used to configure the name of the Index-Archive The default name is
-     * \"&lt;indexName&gt;.solrarchive\".
-     */
-    public static final String PROPERTY_INDEX_ARCHIVE = "Index-Archive";
-
-    /**
-     * The key used for the name of the index
-     */
-    public static final String PROPERTY_INDEX_NAME = PROPERTY_PREFIX + "index.name";
+    private static final String PROPERTY_PREFIX = "org.apache.stanbol.commons.solr.install.";
     /**
      * The key used for the type of the archive
      */

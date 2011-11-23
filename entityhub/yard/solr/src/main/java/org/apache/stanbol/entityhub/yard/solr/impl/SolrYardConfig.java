@@ -22,7 +22,6 @@ import java.util.Map;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.stanbol.commons.solr.SolrServerTypeEnum;
 import org.apache.stanbol.entityhub.core.yard.AbstractYard.YardConfig;
-import org.apache.stanbol.commons.solr.SolrDirectoryManager;
 import org.osgi.service.cm.ConfigurationException;
 
 /**

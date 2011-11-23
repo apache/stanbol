@@ -47,9 +47,10 @@ import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
-import org.apache.stanbol.commons.solr.SolrDirectoryManager;
 import org.apache.stanbol.commons.solr.SolrServerProviderManager;
 import org.apache.stanbol.commons.solr.SolrServerTypeEnum;
+import org.apache.stanbol.commons.solr.managed.IndexMetadata;
+import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.contenthub.core.utils.JSONUtils;
@@ -86,7 +87,7 @@ public class SearchResource extends BaseStanbolResource {
     private Object templateData = null;
     private Object facets = null;
 
-    private SolrDirectoryManager solrDirectoryManager;
+    private ManagedSolrServer solrDirectoryManager;
     private SolrServerProviderManager solrServerProviderManager;
 
     public SearchResource(@Context ServletContext context) {
@@ -95,7 +96,7 @@ public class SearchResource extends BaseStanbolResource {
         processor = ContextHelper.getServiceFromContext(SearchProcessor.class, context);
         solrServerProviderManager = ContextHelper.getServiceFromContext(SolrServerProviderManager.class,
             context);
-        solrDirectoryManager = ContextHelper.getServiceFromContext(SolrDirectoryManager.class, context);
+        solrDirectoryManager = ContextHelper.getServiceFromContext(ManagedSolrServer.class, context);
     }
 
     @GET
@@ -159,12 +160,10 @@ public class SearchResource extends BaseStanbolResource {
 
         SolrServer server = null;
         if (solrDirectoryManager != null) {
-            File indexDirectory = solrDirectoryManager.getSolrIndexDirectory("contenthub");
-            if (indexDirectory == null) {
-                indexDirectory = solrDirectoryManager.createSolrDirectory("contenthub", "contenthub", null);
+            if (!solrDirectoryManager.isManagedIndex("contenthub")) {
+                solrDirectoryManager.createSolrIndex("contenthub", "contenthub", null);
             }
-            String serverLocation = indexDirectory.toString();
-            server = solrServerProviderManager.getSolrServer(SolrServerTypeEnum.EMBEDDED, serverLocation);
+            server = solrServerProviderManager.getSolrServer(SolrServerTypeEnum.EMBEDDED, "contenthub");
         }
 
         QueryKeyword queryKeywords = sc.getQueryKeyWords().get(0);

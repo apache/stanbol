@@ -33,11 +33,11 @@ public final class SolrConstants {
     /**
      * Used as prefix for all {@link CoreContainer} related properties
      */
-    private static final String PROPERTY_SOLR_SERVER = CoreContainer.class.getName();
+    private static final String PROPERTY_SOLR_SERVER = "org.apache.solr.core.CoreContainer";
     /**
      * Used as prefix for all {@link SolrCore} related properties
      */
-    private static final String PROPERTY_SOLR_CORE = SolrCore.class.getName();
+    private static final String PROPERTY_SOLR_CORE = "org.apache.solr.core.SolrCore";
     /**
      * Property used for the human readable name of a SolrServer. This will be used
      * as alternative to the absolute file path of the solr.xml file used for the
@@ -69,8 +69,18 @@ public final class SolrConstants {
      */
     public static final String PROPERTY_SERVER_RANKING = Constants.SERVICE_RANKING;
     /**
+     * Allows to enable/disable the publishing of the RESTful interface of Solr
+     * on the OSGI HttpService by using the value of the {@link #PROPERTY_SERVER_NAME}
+     * as path.
+     */
+    public static final String PROPERTY_SERVER_PUBLISH_REST = PROPERTY_SOLR_SERVER+".publishREST";
+    /**
+     * By default the RESTful API of a SolrServer is published
+     */
+    public static final boolean DEFAULT_PUBLISH_REST = true;
+    /**
      * Property used for the name of a solr core. This is typically set by the
-     * {@link ManagedSolrServer} implementation based on the name of the 
+     * {@link SolrServerAdapter} implementation based on the name of the 
      * cores registered with a SolrServer.
      */
     public static final String PROPERTY_CORE_NAME = PROPERTY_SOLR_CORE+".name";
@@ -81,12 +91,12 @@ public final class SolrConstants {
      */
     public static final String PROPERTY_CORE_DIR = PROPERTY_SOLR_CORE+".dir";
     /**
-     * The data directory of a core. Set by the {@link ManagedSolrServer} when
+     * The data directory of a core. Set by the {@link SolrServerAdapter} when
      * registering a SolrCore based on {@link SolrCore#getDataDir()}
      */
     public static final String PROPERTY_CORE_DATA_DIR = PROPERTY_SOLR_CORE+".dadadir";
     /**
-     * The index directory of a core. Set by the {@link ManagedSolrServer} when
+     * The index directory of a core. Set by the {@link SolrServerAdapter} when
      * registering a SolrCore based on {@link SolrCore#getIndexDir()}
      */
     public static final String PROPERTY_CORE_INDEX_DIR = PROPERTY_SOLR_CORE+".indexdir";
@@ -100,6 +110,11 @@ public final class SolrConstants {
      * core. If not defined {@link #SOLR_SCHEMA_NAME} is used as default.
      */
     public static final String PROPERTY_CORE_SOLR_CONF = PROPERTY_SOLR_CORE+".solrconf";
+    /**
+     * The {@link Constants#SERVICE_ID} of the {@link CoreContainer} this core
+     * is registered with
+     */
+    public static final String PROPERTY_CORE_SERVER_ID = PROPERTY_SOLR_CORE+".service.id";
     /**
      * The {@link Constants#SERVICE_RANKING service ranking} of the SolrCore. 
      * The ranking of the SolrServer is used as default if not defined. If also no 

@@ -169,14 +169,24 @@ public class BundleInstaller implements BundleListener {
         activated.put(bundle, path);
         if (path != null) {
             log.info(" ... process configuration within path {} for bundle {}",path,bundle.getSymbolicName());
-            ArrayList<InstallableResource> updated = new ArrayList<InstallableResource>();
-            for (Enumeration<URL> resources = (Enumeration<URL>) bundle.findEntries(path, null, true); resources.hasMoreElements();) {
-                InstallableResource resource = createInstallableResource(bundle, path, resources.nextElement());
-                if (resource != null) {
-                    updated.add(resource);
+            Enumeration<URL> resources = (Enumeration<URL>) bundle.findEntries(path, null, true);
+            if(resources != null){
+                ArrayList<InstallableResource> updated = new ArrayList<InstallableResource>();
+                while (resources.hasMoreElements()) {
+                    URL url = resources.nextElement();
+                    if(url != null){
+                        log.debug("  > installable Resource {}",url);
+                        InstallableResource resource = createInstallableResource(bundle, path, url);
+                        if (resource != null) {
+                            updated.add(resource);
+                        }
+                    }
                 }
+                installer.updateResources(PROVIDER_SCHEME, updated.toArray(new InstallableResource[updated.size()]), new String[]{});
+            } else {
+                log.warn(" ... no Entries found in path '{}' configured for Bundle '{}' with Manifest header field '{}'!",
+                    new Object[]{path,bundle.getSymbolicName(),BUNDLE_INSTALLER_HEADER});
             }
-            installer.updateResources(PROVIDER_SCHEME, updated.toArray(new InstallableResource[updated.size()]), new String[]{});
         } else {
             log.debug("  ... no Configuration to process");
         }

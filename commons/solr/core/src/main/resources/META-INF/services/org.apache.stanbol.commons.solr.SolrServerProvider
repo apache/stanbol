@@ -13,5 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-org.apache.stanbol.commons.solr.impl.DefaultSolrServerProvider
-org.apache.stanbol.commons.solr.impl.EmbeddedSolrPorovider
+org.apache.stanbol.commons.solr.impl.RESTfulSolrServerProvider
+
+# TODO: adding here the StandaloneEmbeddedSolrServerProvider of the 
+#       solr.managed bundle as workaround for the maven assembly plugin
+#       overriding multiple files with the same name
+org.apache.stanbol.commons.solr.managed.standalone.StandaloneEmbeddedSolrServerProvider
+

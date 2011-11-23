@@ -31,7 +31,7 @@ public class DefaultDataDispatchFilterTest extends SolrDispatchFilterComponentTe
     /**
      * the name of the default data index (part of the data.defaultdata bundle)
      */
-    private static final String CORE_NAME = "dbpedia_43k";
+    private static final String CORE_NAME = "dbpedia";
     
     
     public DefaultDataDispatchFilterTest() {

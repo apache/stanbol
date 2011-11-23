@@ -16,6 +16,8 @@
  */
 package org.apache.stanbol.commons.stanboltools.datafileprovider;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +28,9 @@ import java.util.Map;
  */
 public class DataFileProviderEvent {
 
-    private static final Map<String, String> EMPTY_COMMENTS = new HashMap<String, String>();
+    //replaced by Collections#emptyMap() to ensure that a shared instance
+    //between events is not changed!
+    private static final Map<String, String> EMPTY_COMMENTS = Collections.emptyMap();
 
     private final Date timestamp;
     private final String bundleSymbolicName;

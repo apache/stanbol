@@ -23,7 +23,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import org.apache.stanbol.commons.solr.SolrDirectoryManager;
+import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
@@ -60,7 +60,7 @@ public class SolrYardTest extends YardTest {
     public static final String TEST_YARD_ID = "testYard";
     public static final String TEST_SOLR_CORE_NAME = "test";
     protected static final String TEST_INDEX_REL_PATH = File.separatorChar + "target" + File.separatorChar
-                                                        + SolrDirectoryManager.DEFAULT_SOLR_DATA_DIR;
+                                                        + ManagedSolrServer.DEFAULT_SOLR_DATA_DIR;
     private static final Logger log = LoggerFactory.getLogger(SolrYardTest.class);
 
     @BeforeClass
@@ -70,7 +70,7 @@ public class SolrYardTest extends YardTest {
         String prefix = System.getProperty("basedir") == null ? "." : "${basedir}";
         String solrServerDir = prefix + TEST_INDEX_REL_PATH;
         log.info("Test Solr Server Directory: " + solrServerDir);
-        System.setProperty(SolrDirectoryManager.MANAGED_SOLR_DIR_PROPERTY, solrServerDir);
+        System.setProperty(ManagedSolrServer.MANAGED_SOLR_DIR_PROPERTY, solrServerDir);
         SolrYardConfig config = new SolrYardConfig(TEST_YARD_ID, TEST_SOLR_CORE_NAME);
         config.setName("Solr Yard Test");
         config.setDescription("The Solr Yard instance used to execute the Unit Tests defined for the Yard Interface");

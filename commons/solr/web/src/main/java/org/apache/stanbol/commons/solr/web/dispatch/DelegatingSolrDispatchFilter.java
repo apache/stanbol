@@ -24,7 +24,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreContainer.Initializer;
 import org.apache.solr.servlet.SolrDispatchFilter;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

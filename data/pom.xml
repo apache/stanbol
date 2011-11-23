@@ -52,7 +52,7 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
-        <module>sites/dbpediadefault</module>
+        <module>sites/dbpedia</module>
         <module>opennlp/lang/en</module>
         <module>opennlp/ner/en</module>
       </modules>
