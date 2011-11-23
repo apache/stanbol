@@ -28,7 +28,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
-  <version>1.0.0-incubating</version>
+  <version>1.0.1-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Data: OpenNLP Models for English</name>

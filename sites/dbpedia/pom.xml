@@ -28,17 +28,16 @@
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.data.sites.dbpedia.default</artifactId>
-  <version>1.0.2-incubating</version>
+  <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
+  <version>1.0.3-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Data: DBpedia.org defaultdata version</name>
+  <name>Apache Stanbol Data: DBpedia.org</name>
   <description>
-    This bundle installs DBpedia as Referenced Site with a small
-    local index. This bundle is typically distributed as default with
-    the different Stanbol Launchers.
-    Users that do not need DBPedia.org or want to upgrade to a more
-    complete local index will need to stop/uninstall this bundle.
+    This bundle allows to use DBpedia as Referenced Site. It also
+    includes a small local index that contains 43k entities.
+    This index can be upgrated to an bigger version by copying a
+    dbpedia.solrindex.zip file into the Stanbol /datafiles folder.
   </description>
 
   <inceptionYear>2011</inceptionYear>
