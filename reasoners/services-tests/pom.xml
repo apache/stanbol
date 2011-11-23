@@ -112,7 +112,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
-        <!-- why overriding here? -->
+        <!-- FIXME why overriding here? -->
         <version>2.2</version>
       </plugin>
       <plugin>

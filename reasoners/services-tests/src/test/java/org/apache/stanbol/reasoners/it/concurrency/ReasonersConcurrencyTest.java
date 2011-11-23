@@ -2,8 +2,10 @@ package org.apache.stanbol.reasoners.it.concurrency;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,11 +16,18 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
 import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
+import org.apache.stanbol.commons.jobs.api.JobInfo;
 import org.apache.stanbol.reasoners.test.ReasonersTestBase;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,25 +82,25 @@ public class ReasonersConcurrencyTest extends ReasonersTestBase{
         // We start in parallel a set of background jobs
         List<JobClient> tasks = buildStarters();
         
-        List<String> jids = new ArrayList<String>();
+        List<String> locations = new ArrayList<String>();
         List<Future<Result>> futures = executor.invokeAll(tasks);
         for (Future<Result> future : futures) {
-            String j = future.get().assertResult().getContentString();
-            log.info("Got job id: {}",j);
-            jids.add(j);
+            String location = future.get().assertResult().getResponse().getFirstHeader("Location").getValue();
+            log.info("job created: {}",location);
+            locations.add(location);
         }
         
         // We ping in parallel all jobs.
         // On each iteration, we prepare a new set of calls only on jobs
         // which are not terminated
         List<String> done = new ArrayList<String>();
-        while((done.size() < jids.size())){
+        while((done.size() < locations.size())){
             // List of calls
             tasks = new ArrayList<JobClient>();
             // Prepare a Pinger on each unfinished job
-            for(String j : jids){
-                if(!done.contains(j)){
-                    tasks.add(new Pinger(j));
+            for(String l : locations){
+                if(!done.contains(l)){
+                    tasks.add(new Pinger(l));
                 }
             }
             // Invoke all unfinished jobs in parallel
@@ -99,13 +108,18 @@ public class ReasonersConcurrencyTest extends ReasonersTestBase{
             // Query each response
             for (Future<Result> future : futures) {
                 PingerResult pr = (PingerResult) future.get();
-                String r = pr.assertResult().getContentString();
-                String jid = pr.jid();
-                if(!r.equals("Job is still working")){
-                    log.info("{} is done!", jid);
-                    done.add(jid);
+                String content = pr.assertResult().getContentString();
+                // Explore JSON here
+                log.info("Content:\n\n{}\n\n",content);
+                JSONObject json = new JSONObject(content);
+                String status = json.getString("status");
+                
+                String location = pr.location();
+                if(status.equals(JobInfo.FINISHED)){
+                    log.info("{} is done!", location);
+                    done.add(location);
                 }else{
-                    log.info("{} is still working ... ",jid);
+                    log.info("{} is still working ... ", location);
                 }
             }
         }
@@ -135,6 +149,12 @@ public class ReasonersConcurrencyTest extends ReasonersTestBase{
      ***********************************************************/
     private abstract class JobClient implements Callable<Result> {
         abstract URI uri(String queryString);
+        
+        private List<Header> headers = new ArrayList<Header>();
+        
+        protected void addHeader(String key, String value){
+            headers.add(new BasicHeader(key,value));
+        }
         
         protected HttpResponse get() throws Exception{
             return get(new String[0]);
@@ -171,18 +191,20 @@ public class ReasonersConcurrencyTest extends ReasonersTestBase{
     }
     
     private class Pinger extends JobClient {
-        String jid = null;
+        String location = null;
         
-        Pinger(String jid){
-            this.jid = jid;
+        Pinger(String location){
+            this.location = location;
         }
         
         URI uri(String queryString){
-            return URI.create(ReasonersConcurrencyTest.this.builder.buildUrl(REASONERS_PATH+"/jobs/ping/"+jid+queryString));
+            return URI.create(location + queryString);
         }
         
         public PingerResult call() throws Exception {
-            return new PingerResult(jid, get());
+            // We ping the Job service with mime type application/json
+            this.addHeader("Accept", "application/json");
+            return new PingerResult(location, get());
         }
     }
 
@@ -225,20 +247,28 @@ public class ReasonersConcurrencyTest extends ReasonersTestBase{
     }
 
     private class PingerResult extends Result {
-        private String jid= null;
-        PingerResult(String jid, HttpResponse response){
+        
+        private String location= null;
+        
+        PingerResult(String location, HttpResponse response){
             super(response);
-            this.jid = jid;
+            this.location = location;
         }
         
-        String jid(){
-            return jid;
+        String location(){
+            return location;
         }
+        
+        /**
+         * We assert that: 
+         * - The job must exists (response code 200) 
+         * - The Content-type header returns JSON 
+         */
         @Override
         public Result assertResult() {
-            // Result of a ping request must be 200
-            assertNotNull(this.toString(), response);
-            assertEquals(200, response.getStatusLine().getStatusCode());
+            assertNotNull("Response cannot be null", response);
+            assertEquals("Result of a ping request must be 200 (Job must exists)", 200, response.getStatusLine().getStatusCode());
+            assertEquals("Content type must be application/json", "application/json", response.getFirstHeader("Content-type").getValue());
             return this;
         }
     }
@@ -251,9 +281,19 @@ public class ReasonersConcurrencyTest extends ReasonersTestBase{
         
         @Override
         public Result assertResult() {
-            // Result of a start request must be 200
-            assertNotNull(this.toString(), response);
-            assertEquals(200, response.getStatusLine().getStatusCode());
+            assertNotNull("Response cannot be null", response);
+            // Response of a start request must be 201
+            assertEquals(201, response.getStatusLine().getStatusCode());
+            // Response must contain the Location header
+            assertNotNull(response.getFirstHeader("Location"));
+            // The location header must be unique
+            assertTrue(response.getHeaders("Location").length == 1);
+            // The location value must be a valid URL
+            try {
+                URI.create(response.getFirstHeader("Location").getValue()).toURL();
+            } catch (MalformedURLException e) {
+                assertTrue("Malformed url in location header",false);
+            }
             return this;
         }
     }

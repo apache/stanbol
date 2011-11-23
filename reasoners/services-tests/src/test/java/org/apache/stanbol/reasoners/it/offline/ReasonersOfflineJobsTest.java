@@ -33,7 +33,7 @@ public class ReasonersOfflineJobsTest extends ReasonersOfflineTest {
     
     @Test
     public void testSubsequentJobs() throws Exception{
-        log.info("testSimpleJob()");
+        log.info("testSubsequentJobs()");
         // We send a file to a job then we ping it, we do this for all services and tasks
         
         for(String s : allServices() ){
@@ -51,21 +51,21 @@ public class ReasonersOfflineJobsTest extends ReasonersOfflineTest {
         log.info("testSubsequentJobs2()");
         
         // We start all jobs and the we ping all
-        List<String> jids = new ArrayList<String>();
+        List<String> locations = new ArrayList<String>();
         for(String s : allServices() ){
             for(String t : TASKS){
                 StringBuilder sb = new StringBuilder(REASONERS_PATH);
                 sb.append(s).append(t).append("/job");
                 Request request = buildMultipartRequest(sb.toString(), multiPart);
-                String jid = job(request);
-                log.info("Started job {}", jid);
-                jids.add(jid);
+                String location = createJob(request);
+                log.info("Started job {}", location);
+                locations.add(location);
             }
         }
         
         // We ping all in sequence
-        for(String jid : jids){
-            pingSingleJob(jid);
+        for(String l : locations){
+            pingSingleJob(l);
         }
     }
 }
