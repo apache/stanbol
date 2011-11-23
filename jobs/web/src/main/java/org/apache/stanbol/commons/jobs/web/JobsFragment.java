@@ -9,6 +9,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.jobs.web.resources.JobsResource;
+import org.apache.stanbol.commons.jobs.web.writers.JobInfoWriter;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
@@ -43,6 +44,8 @@ public class JobsFragment implements WebFragment{
     public Set<Class<?>> getJaxrsResourceClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         classes.add(JobsResource.class);
+        // Writer
+        classes.add(JobInfoWriter.class);
         return classes;
     }
 

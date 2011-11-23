@@ -14,7 +14,8 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.stanbol.commons.jobs.web.utils.JobInfo;
+import org.apache.stanbol.commons.jobs.api.JobInfo;
+import org.apache.stanbol.commons.jobs.impl.JobInfoImpl;
 
 /**
  * Writer for job info
@@ -34,14 +35,14 @@ public class JobInfoWriter implements MessageBodyWriter<JobInfo> {
             // Json
             StringBuilder b = new StringBuilder()
             .append("{")
-            .append("\n\t").append("\"status\": ").append("\"").append(t.getStatus()).append("\"").append(",")
-            .append("\n\t").append("\"outputLocation\": ").append("\"").append(t.getOutputLocation()).append("\"")
-            .append("\n\t").append("\"messages\": ").append("{");
+            .append("\n\t").append("\"status\": ").append("\"").append(t.getStatus()).append("\"")
+            .append(",\n\t").append("\"outputLocation\": ").append("\"").append(t.getOutputLocation()).append("\"")
+            .append(",\n\t").append("\"messages\": ").append("[");
             for(String m : t.getMessages()){
                 b.append("\n\t\t\"").append(m).append("\",");
             }
-            b.append("\n\t\t}\n}")
-            .toString();
+            b.append("\n\t\t]\n}");
+            IOUtils.write(b.toString(), stream);
         } else if (mediaType.equals("text/plain")) {
             // Plain text
             StringBuilder b = new StringBuilder()
@@ -59,7 +60,7 @@ public class JobInfoWriter implements MessageBodyWriter<JobInfo> {
     
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return JobInfo.class.isAssignableFrom(type);
+        return JobInfoImpl.class.isAssignableFrom(type);
     }
 
     @Override

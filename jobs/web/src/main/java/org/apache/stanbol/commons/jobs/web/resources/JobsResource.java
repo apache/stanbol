@@ -23,9 +23,10 @@ import javax.ws.rs.core.Response;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.jobs.api.Job;
+import org.apache.stanbol.commons.jobs.api.JobInfo;
 import org.apache.stanbol.commons.jobs.api.JobManager;
 import org.apache.stanbol.commons.jobs.api.JobResult;
-import org.apache.stanbol.commons.jobs.web.utils.JobInfo;
+import org.apache.stanbol.commons.jobs.impl.JobInfoImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +70,7 @@ public class JobsResource extends BaseStanbolResource {
     @GET
     @Path("/{jid}")
     public Response get(@PathParam("jid") String id) {
-        log.info("Job {}", id);
+        log.info("Called get() with id {}", id);
 
         // No id
         if(id == null || id.equals("")){
@@ -82,7 +83,7 @@ public class JobsResource extends BaseStanbolResource {
         if (m.hasJob(id)) {
             log.info("Found job with id {}", id);
             Future<?> f = m.ping(id);
-            this.info = new JobInfo();
+            this.info = new JobInfoImpl();
             if(f.isDone()){
                 // The job is finished
                 if(f.isCancelled()){
@@ -106,8 +107,10 @@ public class JobsResource extends BaseStanbolResource {
             info.setOutputLocation(getPublicBaseUri() + m.getResultLocation(id));
 
             if(isHTML()){
+                // Result as HTML
                 return Response.ok(new Viewable("info", this)).build();
             }else{
+                // Result as application/json, text/plain
                 return Response.ok(info).build();
             }
         } else {
