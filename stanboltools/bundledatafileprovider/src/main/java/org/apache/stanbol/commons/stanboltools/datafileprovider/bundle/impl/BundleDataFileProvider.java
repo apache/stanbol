@@ -97,6 +97,17 @@ public class BundleDataFileProvider implements DataFileProvider {
     @Override
     public InputStream getInputStream(String bundleSymbolicName,
             String filename, Map<String, String> comments) throws IOException {
+        URL resource = getDataFile(bundleSymbolicName, filename);
+        log.debug("Resource {} found: {}", (resource == null ? "NOT" : ""), filename);
+        return resource != null ? resource.openStream() : null;
+    }
+
+    /**
+     * @param bundleSymbolicName
+     * @param filename
+     * @return
+     */
+    private URL getDataFile(String bundleSymbolicName, String filename) {
         //If the symbolic name is not null check that is equals to the symbolic
         //name used to create this classpath data file provider
         if(bundleSymbolicName != null && 
@@ -105,7 +116,6 @@ public class BundleDataFileProvider implements DataFileProvider {
                     bundleSymbolicName, bundle.getSymbolicName());
             return null;
         }
-        
         URL resource = null;
         Iterator<String> relativePathIterator = searchPaths.iterator();
         while(resource == null && relativePathIterator.hasNext()){
@@ -113,8 +123,11 @@ public class BundleDataFileProvider implements DataFileProvider {
             String resourceName = path != null ? path + filename : filename ;
             resource = bundle.getEntry(resourceName);
         }
-        log.debug("Resource {} found: {}", (resource == null ? "NOT" : ""), filename);
-        return resource != null ? resource.openStream() : null;
+        return resource;
+    }
+    @Override
+    public boolean isAvailable(String bundleSymbolicName, String filename, Map<String,String> comments) {
+        return getDataFile(bundleSymbolicName, filename) != null;
     }
     /**
      * Getter for the search paths

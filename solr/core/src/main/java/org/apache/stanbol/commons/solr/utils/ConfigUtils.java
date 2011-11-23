@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -42,15 +43,16 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
-import org.apache.stanbol.commons.solr.impl.EmbeddedSolrPorovider;
+import org.apache.stanbol.commons.solr.impl.RegisteredSolrServerProvider;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This Utility provides Methods that copy a configuration from a {@link Bundle} and copy it to a directory.
  * <p>
- * This is currently used by the {@link EmbeddedSolrPorovider} to initialise the internally managed
+ * This is currently used by the {@link RegisteredSolrServerProvider} to initialise the internally managed
  * {@link EmbeddedSolrServer} and/or to add additional cores. There are always two variants of the methods.
  * The one taking a bundle as parameter is supposed to be used when running within an OSGI environment. The
  * variant taking a Class object works outside of an OSGI environment.
@@ -637,5 +639,71 @@ public final class ConfigUtils {
         }
         return file;
     }
-
+    /**
+     * Parses the SolrServer name and the Core name form the parsed reference.<p>
+     * The following values are supported:<ol>
+     * <li> file URLs to the Core directory
+     * <li> file paths to the Core directory
+     * <li> [{server-name}:]{core-name} where both the server-name and the
+     *      core-name MUST NOT contain '/' and '\' (on windows) chars. If the 
+     *      server-name is not specified the server with the highest 
+     *      {@link Constants#SERVICE_RANKING} is assumed.
+     * </ol><p>
+     * @param uriOrPath the reference to the core
+     * @return the name of the server (or <code>null</code>) at index [0] and 
+     * the name of the core (or <code>null</code> if not parsed) at index [1].
+     */
+//    public static String[] parseSolrServerReference(String uriOrPath) {
+//        String[] referencedCore = new String[2];
+//        if(uriOrPath.startsWith("file:")){ //file
+//            File file = null; 
+//            try {
+//                file = FileUtils.toFile(new URL(uriOrPath));
+//            }catch (MalformedURLException e) {
+//                log.error("Unable to parse file URL '"+uriOrPath+"'!",e);
+//                file = null;
+//            }
+//            referencedCore[0] = null; //no server name for such values
+//            if(file != null){
+//                file = file.getAbsoluteFile(); 
+//                try {
+//                    referencedCore[1] = file.getCanonicalPath();
+//                } catch (IOException e) {
+//                    log.warn("Unable to create canonical path for the SolrCore reference '"+
+//                        file+"' -> will use this value instead!");
+//                    referencedCore[1] = file.getAbsolutePath();
+//                }
+//            } else {
+//                referencedCore[1] = null;
+//            }
+//        } else if(uriOrPath.indexOf(File.pathSeparatorChar) >=0 ||
+//                uriOrPath.indexOf('/') >=0){ //also support UNIX style on Windows
+//            //we assume a File Reference
+//            File file = new File(FilenameUtils.separatorsToSystem(uriOrPath));
+//            referencedCore[0] = null;
+//            file = file.getAbsoluteFile(); 
+//            try {
+//                referencedCore[1] = file.getCanonicalPath();
+//            } catch (IOException e) {
+//                log.warn("Unable to create canonical path for the SolrCore reference '"+
+//                    file+"' -> will use this value instead!");
+//                referencedCore[1] = file.getAbsolutePath();
+//            }
+//        } else { //reference in the style [{server-name}:]{core-name}
+//            int index = uriOrPath.indexOf(':');
+//            if(index < 0){
+//                referencedCore[0] = "";
+//                referencedCore[1] = uriOrPath;
+//            } else {
+//                referencedCore[0] = uriOrPath.substring(0,index);
+//                if(index+2 >= uriOrPath.length()){
+//                    throw new IllegalArgumentException("The parsed SolrCore name '"+
+//                        uriOrPath+"' MUST NOT end with ':'" +
+//                            "used as separator between the SolrServer and the CoreName!");
+//                }
+//                referencedCore[1] = uriOrPath.substring(index+1);
+//            }
+//        }
+//        return referencedCore;
+//    }
 }

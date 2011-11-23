@@ -14,7 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.commons.solr.impl;
+package org.apache.stanbol.commons.solr.managed.impl;
+
+import static org.apache.stanbol.commons.solr.managed.impl.ManagementUtils.substituteProperty;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,23 +32,20 @@ import java.util.Map.Entry;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.solr.ManagedSolrServer;
-import org.apache.stanbol.commons.solr.SolrDirectoryManager;
+import org.apache.stanbol.commons.solr.SolrServerAdapter;
+import org.apache.stanbol.commons.solr.SolrServerAdapter.SolrCoreProperties;
+import org.apache.stanbol.commons.solr.SolrServerAdapter.SolrServerProperties;
+import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
+import org.apache.stanbol.commons.solr.managed.standalone.StandaloneManagedSolrServer;
 import org.apache.stanbol.commons.solr.utils.ConfigUtils;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
-import org.apache.stanbol.commons.solr.ManagedSolrServer.SolrCoreProperties;
-import org.apache.stanbol.commons.solr.ManagedSolrServer.SolrServerProperties;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -54,16 +53,25 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /**
- * Implementation of the {@link SolrDirectoryManager} interface that supports the dynamic initialisation of
- * new cores based on the default core configuration contained within the SolrYard bundle.
+ * Historical. Just kept to be able to lookup the original code while debugging
+ * the new {@link ManagedSolrServerImpl} and {@link StandaloneManagedSolrServer}
+ * implementations.<p>
+ * Hopefully I do never commit this class again. If you find it feel free to
+ * create a JIRA issue for its removal!
  * 
  * @author Rupert Westenthaler
- * 
+ * @deprecated replaced by {@link ManagedSolrServerImpl} when running within an
+ * OSGI environment and the {@link StandaloneManagedSolrServer} if outside
+ * of an OSGI environment
  */
-@Component(immediate = true, metatype = true)
-@Service
-@Properties(value = {@Property(name = SolrDirectoryManager.MANAGED_SOLR_DIR_PROPERTY, value = SolrDirectoryManager.DEFAULT_SOLR_DATA_DIR)})
-public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
+//@Component(immediate = true, metatype = true)
+//@Service
+//@Properties(value = {
+//    @Property(name = ManagedSolrServer.MANAGED_SOLR_DIR_PROPERTY, 
+//        value = ManagedSolrServer.DEFAULT_SOLR_DATA_DIR)
+//})
+@Deprecated
+public class DefaultSolrDirectoryManager {//implements ManagedSolrServer {
     /**
      * The logger
      */
@@ -110,7 +118,7 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
     private Set<String> initCores = new HashSet<String>();
     /**
      * Holds the list of cores that where installed by using
-     * {@link #createSolrDirectory(String, String, java.util.Properties)} but the {@link DataFileProvider}
+     * {@link #createSolrIndex(String, String, java.util.Properties)} but the {@link DataFileProvider}
      * could not yet provide the necessary data for the initialisation.
      * <p>
      * The list of uninitialised cores is stored within the data folder of the bundle under
@@ -129,7 +137,7 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
     /**
      * The internally managed Solr server
      */
-    private ManagedSolrServer managedSolrServer;
+    private SolrServerAdapter managedSolrServer;
     
     public DefaultSolrDirectoryManager() {}
 
@@ -150,7 +158,7 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
      * 
      * @see org.apache.stanbol.entityhub.yard.solr.impl.ManagedSolrDirectory#isSolrDir(java.lang.String)
      */
-    @Override
+//    @Override
     public final boolean isManagedIndex(String solrIndexName) throws IllegalStateException {
         if (solrIndexName == null) {
             throw new IllegalArgumentException("The parsed name of the Solr index MUST NOT be NULL");
@@ -171,7 +179,7 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
      * 
      * @see org.apache.stanbol.entityhub.yard.solr.impl.ManagedSolrDirectory#getManagedIndices()
      */
-    @Override
+//    @Override
     public final Map<String,File> getManagedIndices() throws IllegalStateException {
         File solrDir = lookupManagedSolrDir(componentContext);
         String[] indexNames = solrDir.list(DirectoryFileFilter.INSTANCE);
@@ -195,7 +203,7 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
         }
         return indexes;
     }
-    @Override
+//    @Override
     public boolean isInitialisedIndex(String solrIndexName) {
         if (solrIndexName == null) {
             throw new IllegalArgumentException("The parsed name of the Solr index MUST NOT be NULL");
@@ -216,18 +224,18 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
      * @see
      * org.apache.stanbol.entityhub.yard.solr.impl.ManagedSolrDirectory#getSolrDirectory(java.lang.String)
      */
-    @Override
+//    @Override
     public final File getSolrIndexDirectory(final String solrIndexName) throws IllegalArgumentException {
         return initSolrDirectory(solrIndexName, null, componentContext);
     }
 
-    @Override
+//    @Override
     public final File createSolrIndex(final String solrIndexName, ArchiveInputStream ais) {
         return initSolrDirectory(solrIndexName, ais, componentContext);
     }
 
-    @Override
-    public final File createSolrDirectory(String solrIndexName,
+//    @Override
+    public final File createSolrIndex(String solrIndexName,
                                           String indexArchiveName,
                                           java.util.Properties properties) throws IllegalArgumentException,
                                                                           IOException {
@@ -444,7 +452,7 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
      * 
      * @see org.apache.stanbol.entityhub.yard.solr.impl.ManagedSolrDirectory#getManagedSolrDir()
      */
-    @Override
+//    @Override
     public File getManagedDirectory() {
         return lookupManagedSolrDir(componentContext);
     }
@@ -466,18 +474,18 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
         if (managedSolrDir == null) {
             String configuredDataDir;
             if (context == null) { // load via system properties
-                configuredDataDir = System.getProperty(MANAGED_SOLR_DIR_PROPERTY, DEFAULT_SOLR_DATA_DIR);
+                configuredDataDir = System.getProperty(ManagedSolrServer.MANAGED_SOLR_DIR_PROPERTY, ManagedSolrServer.DEFAULT_SOLR_DATA_DIR);
             } else { // load via OSGI config
-                Object value = context.getProperties().get(MANAGED_SOLR_DIR_PROPERTY);
+                Object value = context.getProperties().get(ManagedSolrServer.MANAGED_SOLR_DIR_PROPERTY);
                 if (value != null) {
                     configuredDataDir = value.toString();
                 } else {
-                    configuredDataDir = DEFAULT_SOLR_DATA_DIR;
+                    configuredDataDir = ManagedSolrServer.DEFAULT_SOLR_DATA_DIR;
                 }
             }
             // property substitution
-            configuredDataDir = substituteProperty(configuredDataDir,
-                context != null ? context.getBundleContext() : null);
+            configuredDataDir = FilenameUtils.separatorsToSystem(
+                substituteProperty(configuredDataDir,context != null ? context.getBundleContext() : null));
             // determine the directory holding the SolrIndex
             /*
              * NOTE: In case the configuredDataDir.isAbsolute()==false this code will initialise the index
@@ -521,7 +529,7 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
     /**
      * The path to the directory used to store properties of uninitialised referenced sites.
      * <p>
-     * Such sites are one that are created by using {@link #createSolrDirectory(String, String, Map)} but the
+     * Such sites are one that are created by using {@link #createSolrIndex(String, String, Map)} but the
      * {@link DataFileProvider} does not yet provide the necessary data to initialise the index.
      * <p>
      * This directory will store properties files with the indexName as name, properties as extension and the
@@ -562,11 +570,9 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
     /**
      * Returns the directory used to store the configurations of uninitialised Solr Indexes
      * 
-     * @param init
-     *            if <code>true</code> the directory is created if needed
      * @return the directory
      */
-    private File getUninitialisedSiteDirectory(ComponentContext context, boolean init) {
+    private File getUninitialisedSiteDirectory(ComponentContext context,boolean init) {
         File uninstalledConfigDir;
         if (context == null) { //outside OSGI
             // use config directory relative to the the Managed Solr Directory
@@ -577,7 +583,7 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
         }
         log.info("SolrYard Config Directory: "+uninstalledConfigDir);
         if (!uninstalledConfigDir.exists()) {
-            if (init) {
+            if(init){
                 if (!uninstalledConfigDir.mkdirs()) {
                     throw new IllegalStateException("Unable to create Directory "
                                                     + UNINITIALISED_INDEX_DIRECTORY
@@ -632,40 +638,6 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
                 indexName + '.' + ConfigUtils.SOLR_INDEX_ARCHIVE_EXTENSION + ".ref");
         return configFile.delete();
     }
-    
-    /**
-     * Substitutes ${property.name} with the values retrieved via {@link System#getProperty(String, String)}.
-     * An empty string is used as default
-     * <p>
-     * Nested substitutions are NOTE supported. However multiple substitutions are supported.
-     * <p>
-     * If someone knows a default implementation feel free to replace!
-     * 
-     * @param value
-     *            the value to substitute
-     * @param bundleContext
-     *            If not <code>null</code> the {@link BundleContext#getProperty(String)} is used instead of
-     *            the {@link System#getProperty(String)}. By that it is possible to use OSGI only properties
-     *            for substitution.
-     * @return the substituted value
-     */
-    private static String substituteProperty(String value, BundleContext bundleContext) {
-        int prevAt = 0;
-        int foundAt = 0;
-        StringBuilder substitution = new StringBuilder();
-        while ((foundAt = value.indexOf("${", prevAt)) >= prevAt) {
-            substitution.append(value.substring(prevAt, foundAt));
-            String propertyName = value.substring(foundAt + 2, value.indexOf('}', foundAt));
-            String propertyValue = bundleContext == null ? // if no bundleContext is available
-            System.getProperty(propertyName)
-                    : // use the System properties
-                    bundleContext.getProperty(propertyName);
-            substitution.append(propertyValue == null ? "" : propertyValue);
-            prevAt = foundAt + propertyName.length() + 3; // +3 -> "${}".length
-        }
-        substitution.append(value.substring(prevAt, value.length()));
-        return substitution.toString();
-    }
 
     @Activate
     protected void activate(ComponentContext context) throws IOException, ParserConfigurationException, SAXException {
@@ -676,7 +648,7 @@ public class DefaultSolrDirectoryManager implements SolrDirectoryManager {
         log.info("... activate {} with Directory {}",this.getClass(),managedDir.getAbsolutePath());
         SolrServerProperties solrServerConfig = new SolrServerProperties(managedDir);
         solrServerConfig.setServerName("default");//TODO make configurable
-        managedSolrServer = new ManagedSolrServer(
+        managedSolrServer = new SolrServerAdapter(
             context.getBundleContext(), solrServerConfig);
         log.info("Managed Indices:");
         for(Entry<String,File> entry : getManagedIndices().entrySet()){

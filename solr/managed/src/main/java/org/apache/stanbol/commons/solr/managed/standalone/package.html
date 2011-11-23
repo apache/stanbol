@@ -1,0 +1,14 @@
+<body>
+<p>This package includes implementations for the 
+{@link org.apache.stanbol.commons.solr.managed.ManagedSolrServer} and
+{@link org.apache.stanbol.commons.solr.SolrServerProvider} interface supporting
+{@link org.apache.stanbol.commons.solr.SolrServerTypeEnum#EMBEDDED} that are
+intended to be used when running outside of an OSGI Environment.</p>
+<p>Also note the {@link org.apache.stanbol.commons.solr.managed.impl.StandaloneManagedSolrServerImpl.DefaultStandaloneManagedSolrServerWrapper}
+implementation that provides a wrapper that allows to use the 
+standalone implementation of the ManagedSolrServer together with the
+{@link java.util.ServiceLoader}.</p>
+<p>When running within an OSGI environment this implementations MUST NOT be
+used. 
+</p>
+</body>

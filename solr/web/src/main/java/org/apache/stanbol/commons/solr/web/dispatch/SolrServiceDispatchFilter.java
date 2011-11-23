@@ -23,8 +23,8 @@ import javax.naming.Context;
 
 import org.apache.solr.core.CoreContainer;
 import org.apache.stanbol.commons.solr.SolrConstants;
+import org.apache.stanbol.commons.solr.utils.ServiceReferenceRankingComparator;
 import org.apache.stanbol.commons.solr.web.impl.SolrDispatchFilterComponent;
-import org.apache.stanbol.commons.solr.web.utils.ServiceReferenceRankingComparator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;

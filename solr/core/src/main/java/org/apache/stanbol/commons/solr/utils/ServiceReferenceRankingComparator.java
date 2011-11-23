@@ -14,7 +14,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.apache.stanbol.commons.solr.web.utils;
+package org.apache.stanbol.commons.solr.utils;
 
 import java.util.Comparator;
 
@@ -32,13 +32,23 @@ public class ServiceReferenceRankingComparator implements Comparator<ServiceRefe
      */
     public static ServiceReferenceRankingComparator INSTANCE = new ServiceReferenceRankingComparator();
     @Override
-    public int compare(ServiceReference r1, ServiceReference r2) {
-        int ranking1,ranking2;
-        Integer tmp = (Integer)r1.getProperty(Constants.SERVICE_RANKING);
-        ranking1 = tmp != null ? tmp : 0;
-        tmp = (Integer)r2.getProperty(Constants.SERVICE_RANKING);
-        ranking2 = tmp != null ? tmp : 0;
-        return ranking2-ranking1; //highest rank first
+    public int compare(ServiceReference ref1, ServiceReference ref2) {
+        int r1,r2;
+        Object tmp = ref1.getProperty(Constants.SERVICE_RANKING);
+        r1 = tmp != null ? ((Integer)tmp).intValue() : 0;
+        tmp = (Integer)ref2.getProperty(Constants.SERVICE_RANKING);
+        r2 = tmp != null ? ((Integer)tmp).intValue() : 0;
+        if(r1 == r2){
+            tmp = (Long)ref1.getProperty(Constants.SERVICE_ID);
+            long id1 = tmp != null ? ((Long)tmp).longValue() : Long.MAX_VALUE;
+            tmp = (Long)ref2.getProperty(Constants.SERVICE_ID);
+            long id2 = tmp != null ? ((Long)tmp).longValue() : Long.MAX_VALUE;
+            //the lowest id must be first -> id1 < id2 -> [id1,id2] -> return -1
+            return id1 < id2 ? -1 : id2 == id1 ? 0 : 1; 
+        } else {
+            //the highest ranking MUST BE first -> r1 < r2 -> [r2,r1] -> return 1
+            return r1 < r2 ? 1:-1;
+        }
     }
 
 }

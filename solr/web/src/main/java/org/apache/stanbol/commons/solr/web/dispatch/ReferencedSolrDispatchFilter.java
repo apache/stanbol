@@ -24,7 +24,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreContainer.Initializer;
 import org.apache.solr.servlet.SolrDispatchFilter;
-import org.apache.stanbol.commons.solr.ManagedSolrServer;
+import org.apache.stanbol.commons.solr.SolrServerAdapter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
@@ -39,7 +39,7 @@ import org.xml.sax.SAXException;
  * {@link CoreContainer} but instead.
  * {@link BundleContext#ungetService(ServiceReference) releases} the reference.<p>
  * This does make is save to use this {@link Filter} in combination with a 
- * {@link CoreContainer} that is managed as a {@link ManagedSolrServer}.<p>
+ * {@link CoreContainer} that is managed as a {@link SolrServerAdapter}.<p>
  * See <a href="">TODO</a> to see how to use {@link Filter}s in combination with
  * the OSGI {@link HttpService}.
  * @author Rupert Westenthaler

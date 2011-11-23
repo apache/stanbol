@@ -36,7 +36,8 @@
 
   <modules>
     <module>core</module>
-    <module>install</module>
+    <module>managed</module>
     <module>web</module>
+    <module>install</module>
   </modules>
 </project>

@@ -16,15 +16,16 @@
  */
 package org.apache.stanbol.commons.solr.install.impl;
 
-import static org.apache.stanbol.commons.solr.IndexInstallerConstants.PROPERTY_INDEX_NAME;
+import static org.apache.stanbol.commons.solr.managed.ManagedIndexConstants.INDEX_NAME;
 
-import java.io.File;
+import java.util.Map;
 
 import org.apache.sling.installer.api.tasks.InstallTask;
 import org.apache.sling.installer.api.tasks.InstallationContext;
 import org.apache.sling.installer.api.tasks.ResourceState;
 import org.apache.sling.installer.api.tasks.TaskResourceGroup;
-import org.apache.stanbol.commons.solr.SolrDirectoryManager;
+import org.apache.stanbol.commons.solr.managed.ManagedIndexConstants;
+import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,29 +53,40 @@ public class IndexRemoveTask extends InstallTask {
      */
     private static final String CONFIG_INSTALL_ORDER = "11-";
     
-    private final SolrDirectoryManager solrDirectoryManager;
+    /**
+     * Mapping for the managed servers. The default server uses the <code>null</code>
+     * key!
+     */
+    private final Map<String,ManagedSolrServer> managedServers;
 
-    public IndexRemoveTask(TaskResourceGroup trg, SolrDirectoryManager solrDirectoryManager) {
+    public IndexRemoveTask(TaskResourceGroup trg, Map<String,ManagedSolrServer> managedServers) {
         super(trg);
-        if(solrDirectoryManager == null){
-            throw new IllegalArgumentException("The parsed SolrDirectoryManager MUST NOT be NULL");
+        if(managedServers == null){
+            throw new IllegalArgumentException("The parsed map with the ManagedSolrServer MUST NOT be NULL!");
         }
-        this.solrDirectoryManager = solrDirectoryManager;
+        this.managedServers = managedServers;
     }
 
     @Override
     public void execute(InstallationContext ctx) {
-        String indexName = (String) getResource().getAttribute(PROPERTY_INDEX_NAME);
-        File solrIndexDir = solrDirectoryManager.getSolrIndexDirectory(indexName);
-        if (solrIndexDir == null) {
-            // no index with that name installed -> nothing to do
-            ctx.log(String.format("SolrIndex '%s' not installed. Nothing to uninstall",
-                indexName));
+        String indexName = (String) getResource().getAttribute(INDEX_NAME);
+        if(indexName == null){
+            log.error("Unable to remove Managed Index because the required Property '{}'" +
+            		"used to define the name of the Index is missing",INDEX_NAME);
             setFinishedState(ResourceState.IGNORED);
-        } else { // this index does not exist
-            //solrDirectoryManager.removeSolrIndex()
-            log.warn("Uninstalling of SolrIndexes not yet Implemented -> marking as uninstalled (see STANBOL-287)");
-            setFinishedState(ResourceState.UNINSTALLED);
+        } else {
+            String serverName = (String) getResource().getAttribute(ManagedIndexConstants.SERVER_NAME);
+            ManagedSolrServer server = managedServers.get(serverName);
+            if(server == null){
+                log.warn("Unable to remove Managed Solr Index {} because the {} " +
+                		"Server {} is currently not active!", 
+                		new Object[]{indexName,serverName == null ? "default" : "",
+                		        serverName != null ? serverName : ""});
+                setFinishedState(ResourceState.IGNORED);
+            } else {
+                server.removeIndex(indexName, true);
+                setFinishedState(ResourceState.UNINSTALLED);
+            }
         }
     }
 

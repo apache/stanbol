@@ -50,5 +50,23 @@ public interface DataFileProvider {
     InputStream getInputStream(
             String bundleSymbolicName,
             String filename,
-            Map<String, String> comments) throws IOException;
+            Map<String,String> comments) throws IOException;
+    
+    /**
+     * Tests if a given DataFile is available without opening an InputStream
+     * @param bundleSymbolicName can be used to differentiate
+     *        between files which have the same name. It is also used by child
+     *        DataFileProvider to only process requests of there own bundle. 
+     *        If <code>null</code> any file with the requested name is accepted
+     *        and any DataFileProvider processes the request
+     * @param filename name of the file to open
+     * @param comments Optional - how to get a more complete version
+     *        of the data file, licensing information, etc.
+     * @return <code>true</code> if the requested Resource is available.
+     * Otherwise <code>false</code>
+     */
+    boolean isAvailable(String bundleSymbolicName,
+            String filename,
+            Map<String,String> comments);
+
 }

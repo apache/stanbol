@@ -17,18 +17,21 @@
 package org.apache.stanbol.commons.solr.install.impl;
 
 import static org.apache.stanbol.commons.solr.IndexInstallerConstants.PROPERTY_ARCHIVE_FORMAT;
-import static org.apache.stanbol.commons.solr.IndexInstallerConstants.PROPERTY_INDEX_NAME;
 import static org.apache.stanbol.commons.solr.IndexInstallerConstants.SOLR_INDEX_ARCHIVE_RESOURCE_TYPE;
+import static org.apache.stanbol.commons.solr.managed.ManagedIndexConstants.INDEX_NAME;
 import static org.apache.stanbol.commons.solr.utils.ConfigUtils.SOLR_INDEX_ARCHIVE_EXTENSION;
 import static org.apache.stanbol.commons.solr.utils.ConfigUtils.SUPPORTED_SOLR_ARCHIVE_FORMAT;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.scr.annotations.Services;
 import org.apache.sling.installer.api.InstallableResource;
@@ -41,9 +44,12 @@ import org.apache.sling.installer.api.tasks.TaskResource;
 import org.apache.sling.installer.api.tasks.TaskResourceGroup;
 import org.apache.sling.installer.api.tasks.TransformationResult;
 import org.apache.stanbol.commons.solr.IndexInstallerConstants;
-import org.apache.stanbol.commons.solr.SolrDirectoryManager;
-import org.apache.stanbol.commons.solr.SolrServerProviderManager;
+import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
+import org.apache.stanbol.commons.solr.utils.ServiceReferenceRankingComparator;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,14 +73,6 @@ import org.slf4j.LoggerFactory;
  * framework. If {@link #transform(RegisteredResource)} returns <code>null</code> the Sling Installer
  * framework will call the next registered {@link ResourceTransformer} instance. By returning a
  * {@link TransformationResult} no further {@link ResourceTransformer} will be called.
- * <p>
- * 
- * TODO: This package should move to an own bundle supporting Sling Install capabilities for Solr. Even the
- * current version only on the {@link SolrDirectoryManager}. The reason why it is still inside the SolrYard
- * Bundle is that the remove functionality would also need to stop currently running SolrServers. this is
- * currently not possible with the current architecture because {@link SolrServer} instances returned by the
- * {@link SolrServerProviderManager} are no OSGI components.
- * 
  * 
  * @author Rupert Westenthaler
  * 
@@ -87,20 +85,59 @@ public class SolrIndexInstaller implements InstallTaskFactory, ResourceTransform
 
     private static final Logger log = LoggerFactory.getLogger(SolrIndexInstaller.class);
 
-    /**
-     * This service manages the SolrIndex Directory of the SolrYard. It is needed by the
-     * {@link IndexInstallTask} and {@link IndexRemoveTask} to do there work.
-     */
-    @Reference
-    private SolrDirectoryManager solrDirectoryManager;
 
+    
+    private ServiceTracker serverTracker;
+    
+    @Activate
+    public void activate(ComponentContext context){
+        
+        serverTracker = new ServiceTracker(context.getBundleContext(), 
+            ManagedSolrServer.class.getName(), null);
+        serverTracker.open();
+    }
+    @Deactivate
+    public void deactivate(ComponentContext context){
+        if(serverTracker != null){
+            serverTracker.close();
+            serverTracker = null;
+        }
+    }
+    
+    private Map<String,ManagedSolrServer> getActiveServers(){
+        Map<String,ManagedSolrServer> map;
+        ServiceReference[] serverRefs = serverTracker.getServiceReferences();
+        if(serverRefs == null){
+            map = Collections.emptyMap();
+        } else {
+            map = new HashMap<String,ManagedSolrServer>();
+            if(serverRefs.length > 1){
+                Arrays.sort(serverRefs,ServiceReferenceRankingComparator.INSTANCE);
+            }
+            ManagedSolrServer defaultServer = null;
+            for(ServiceReference ref : serverRefs){
+                ManagedSolrServer server = (ManagedSolrServer)serverTracker.getService(ref);
+                if(server != null){ //may become inactive in the meantime
+                    map.put(server.getServerName(), server);
+                    if(defaultServer == null){
+                        defaultServer = server;
+                    }
+                }
+            }
+            if(defaultServer != null){
+                map.put(null, defaultServer);
+            }
+        }
+        return map;
+    }
+    
     public InstallTask createTask(TaskResourceGroup taskResourceGroup) {
         TaskResource toActivate = taskResourceGroup.getActiveResource();
         if (SOLR_INDEX_ARCHIVE_RESOURCE_TYPE.equals(toActivate.getType())) {
             if (toActivate.getState() == ResourceState.UNINSTALL) {
-                return new IndexRemoveTask(taskResourceGroup, solrDirectoryManager);
+                return new IndexRemoveTask(taskResourceGroup, getActiveServers());
             } else {
-                return new IndexInstallTask(taskResourceGroup, solrDirectoryManager);
+                return new IndexInstallTask(taskResourceGroup, getActiveServers());
             }
         } else {
             return null;
@@ -134,7 +171,7 @@ public class SolrIndexInstaller implements InstallTaskFactory, ResourceTransform
         String indexName = FilenameUtils.getBaseName(filePath);
         // only the String until the first '.' -> multiple endings (e.g. slrindex.zip) expected
         indexName = indexName.indexOf('.') > 0 ? indexName.substring(0, indexName.indexOf('.')) : indexName;
-        properties.put(PROPERTY_INDEX_NAME, indexName);
+        properties.put(INDEX_NAME, indexName);
         // now convert to lover case to ease the tests for file endings
         filePath = filePath.toLowerCase();
         if (!filePath.contains('.' + SOLR_INDEX_ARCHIVE_EXTENSION)) {
