@@ -26,27 +26,55 @@ import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputManager;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * 
+ * Simple implementation of {@see ReasoningServiceInputManager}.
+ * This class embeds a list of {@see ReasoningServiceInputProvider}s; 
+ * When the {@see #getInputData(Class)} method is called, it iterates over all 
+ * providers which support the given Class as type of the collection item.
+ * 
+ * @author enridaga
+ *
+ */
 public class SimpleInputManager implements ReasoningServiceInputManager {
 
     private Logger logger = LoggerFactory.getLogger(SimpleInputManager.class);
 
     private List<ReasoningServiceInputProvider> providers;
 
+    /**
+     * Constructor
+     */
     public SimpleInputManager() {
         this.providers = new ArrayList<ReasoningServiceInputProvider>();
     }
 
+    /**
+     * Adds a {@see ReasoningServiceInputProvider}
+     * 
+     * @param provider
+     */
     @Override
     public void addInputProvider(ReasoningServiceInputProvider provider) {
         providers.add(provider);
     }
 
+    /**
+     * Removes a {@see ReasoningServiceInputProvider}
+     * 
+     * @param provider
+     */
     @Override
     public void removeInputProvider(ReasoningServiceInputProvider provider) {
         providers.remove(provider);
     }
 
+    /**
+     * Returns the Iterator which will embed all available data to be processed.
+     * If a provider cannot adapt to "type", it is ignored.
+     * 
+     * @param type
+     */
     @Override
     public <T> Iterator<T> getInputData(final Class<T> type) {
         final List<ReasoningServiceInputProvider> fProviders = getProviders();
@@ -140,6 +168,11 @@ public class SimpleInputManager implements ReasoningServiceInputManager {
         };
     }
 
+    /**
+     * Get the unmodifiable list of {@see ReasoningServiceInputProvider}
+     * 
+     * @return List<ReasoningServiceInputProvider>
+     */
     @Override
     public List<ReasoningServiceInputProvider> getProviders() {
         return Collections.unmodifiableList(providers);

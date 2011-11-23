@@ -21,6 +21,12 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 
+/**
+ * This is a dummy resource to be used for human readable html output.
+ * 
+ * @author enridaga
+ *
+ */
 public class ReasoningPrettyResultResource extends BaseStanbolResource {
     private Object result;
 

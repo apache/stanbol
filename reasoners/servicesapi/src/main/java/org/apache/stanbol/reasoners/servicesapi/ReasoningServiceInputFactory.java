@@ -19,6 +19,12 @@ package org.apache.stanbol.reasoners.servicesapi;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Defines a factory to create a {@see ReasoningServiceInputManager}
+ * 
+ * @author enridaga
+ *
+ */
 public interface ReasoningServiceInputFactory {
 
     /**

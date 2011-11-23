@@ -18,12 +18,34 @@ package org.apache.stanbol.reasoners.servicesapi;
 
 import java.util.Set;
 
+/**
+ * Classes which implements this interface provide the {@see ReasoningService} mapped 
+ * to a given key string (generally used as path for a REST endpoint)
+ * 
+ * @author enridaga
+ *
+ */
 public interface ReasoningServicesManager {
 
+    /**
+     * The number of available {@see ReasoningService}s
+     * @return
+     */
     public abstract int size();
 
+    /**
+     * The {@see ReasoningService} mapped 
+     * to the given key string
+     * 
+     * @param path
+     * @return
+     * @throws UnboundReasoningServiceException
+     */
     public abstract ReasoningService<?,?,?> get(String path) throws UnboundReasoningServiceException;
 
+    /**
+     * The unmodifiable set of available {@see ReasoningService}s
+     */
     public abstract Set<ReasoningService<?,?,?>> asUnmodifiableSet();
 
 }

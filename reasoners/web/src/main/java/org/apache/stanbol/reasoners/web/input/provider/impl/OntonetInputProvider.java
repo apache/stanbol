@@ -44,6 +44,12 @@ import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
+/**
+ * An input provider which binds the reasoners input to Ontonet
+ * 
+ * @author enridaga
+ *
+ */
 public class OntonetInputProvider implements ReasoningServiceInputProvider {
 
     private final Logger log = LoggerFactory.getLogger(UrlInputProvider.class);
@@ -52,12 +58,25 @@ public class OntonetInputProvider implements ReasoningServiceInputProvider {
     private String sessionId;
     private ONManager onManager;
 
+    /**
+     * Contructor, if the input is a Scope
+     * 
+     * @param onManager
+     * @param scopeId
+     */
     public OntonetInputProvider(ONManager onManager, String scopeId) {
         this.onManager = onManager;
         this.scopeId = scopeId;
         this.sessionId = null;
     }
 
+    /**
+     * Constructor, if the input are a Scope and a Session
+     * 
+     * @param onManager
+     * @param scopeId
+     * @param sessionId
+     */
     public OntonetInputProvider(ONManager onManager, String scopeId, String sessionId) {
         this.onManager = onManager;
         this.scopeId = scopeId;

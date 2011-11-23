@@ -56,7 +56,13 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.reasoner.rulesys.Rule;
 
 /**
- * TODO Add comment
+ * This class executes the reasoning process, by delegating the actual work on the given {@see ReasoningService}.
+ * It can be used on real-time operations and as background {@see Job}
+ * 
+ * Actually this class supports OWLApi and Jena based services. 
+ * TODO In the future we may want to remove specific dependencies on service implementation from the executor.
+ * 
+ * @author enridaga
  */
 public class ReasoningServiceExecutor implements Job {
 	private Logger log = LoggerFactory.getLogger(getClass());
@@ -127,9 +133,9 @@ public class ReasoningServiceExecutor implements Job {
 			// If target is null, then get back results, elsewhere put it in
 			// target graph
 
-            log.info("Prepare output");
+            log.debug("Prepare output");
 			if (targetGraphID == null) {
-				log.info("Returning {} statements", result.size());
+				log.debug("Returning {} statements", result.size());
 				return new ReasoningServiceResult<Model>(task, true, outputModel);
 			} else {
 				save(outputModel, targetGraphID);
@@ -184,7 +190,7 @@ public class ReasoningServiceExecutor implements Job {
 			OWLOntology output = manager.createOntology();
 			Set<OWLAxiom> axioms = s.runTask(task, input, rules, filtered,
                 parameters);
-            log.info("Prepare output: {} axioms",axioms.size());
+            log.debug("Prepare output: {} axioms",axioms.size());
 			manager.addAxioms(output,axioms);
             if (targetGraphID == null) {
                 return new ReasoningServiceResult<OWLOntology>(task, true, manager.getOntology(output.getOntologyID()));
@@ -218,7 +224,7 @@ public class ReasoningServiceExecutor implements Job {
 	 * @throws IOException 
 	 */
 	protected void save(Object data, String targetGraphID) throws IOException {
-		log.info("Attempt saving in target graph {}", targetGraphID);
+		log.debug("Attempt saving in target graph {}", targetGraphID);
 		
 		final long startSave = System.currentTimeMillis();
 		LockableMGraph mGraph;
@@ -254,40 +260,51 @@ public class ReasoningServiceExecutor implements Job {
 			throw new IOException(
 					"Cannot save the result in clerezza!");
 		final long endSave = System.currentTimeMillis();
-		log.info("Saved in time: {}ms", (endSave - startSave));
+		log.debug("Saved in time: {}ms", (endSave - startSave));
 	}
 
-	
+	/**
+	 * General method for execution, delegates to specific implementations.
+	 * 
+	 * @param task
+	 * @param service
+	 * @param targetGraphID
+	 * @param parameters
+	 * @return
+	 * @throws ReasoningServiceException
+	 * @throws UnsupportedTaskException
+	 * @throws InconsistentInputException
+	 */
     private ReasoningServiceResult<?> execute(String task,
         ReasoningService<?,?,?> service,
         String targetGraphID,
         Map<String,List<String>> parameters) throws ReasoningServiceException,
                                             UnsupportedTaskException, InconsistentInputException {
-        
-
-        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         long start = System.currentTimeMillis();
-        log.info("[start] Execution: {}",service.getClass().getCanonicalName());
-        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-
-        log.info("-----------------------------------------------------");
-        log.info("execute()");
-        log.info(" > task: {}", task);
-        log.info(" > service: {}", service.getClass().getCanonicalName());
-        log.info(" > target: {}", targetGraphID);
-        log.info(" > parameters:");
-        for(Entry<String,List<String>> e : parameters.entrySet()){
-            log.info(" >> {}: {}",e.getKey());
-            for(String v: e.getValue()){
-                log.info(" >>> value: {}",v);
+        if(log.isDebugEnabled()){
+            log.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+           
+            log.debug("[start] Execution: {}",service.getClass().getCanonicalName());
+            log.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    
+            log.debug("-----------------------------------------------------");
+            log.debug("execute()");
+            log.debug(" > task: {}", task);
+            log.debug(" > service: {}", service.getClass().getCanonicalName());
+            log.debug(" > target: {}", targetGraphID);
+            log.debug(" > parameters:");
+            for(Entry<String,List<String>> e : parameters.entrySet()){
+                log.debug(" >> {}: {}",e.getKey());
+                for(String v: e.getValue()){
+                    log.debug(" >>> value: {}",v);
+                }
             }
+            log.debug(" > input providers:");
+            for(ReasoningServiceInputProvider p : inmgr.getProviders()){
+                log.debug(" >> {}", p.getClass().getCanonicalName());
+            }
+            log.debug("-----------------------------------------------------");
         }
-        log.info(" > input providers:");
-        for(ReasoningServiceInputProvider p : inmgr.getProviders()){
-            log.info(" >> {}", p.getClass().getCanonicalName());
-        }
-        log.info("-----------------------------------------------------");
-        
         ReasoningServiceResult<?> result = null;
         /**
          * TODO Switch this into the ReasoningService implementation
@@ -305,14 +322,16 @@ public class ReasoningServiceExecutor implements Job {
                 Iterator<Rule> rulesI = inmgr.getInputData(Rule.class);
                 while (rulesI.hasNext()) {
                     Rule o = rulesI.next();
-                    log.info(">>>>>RULE>>>>>>>>>> {}",o);
+                    log.debug("Rule: {}",o);
                     if(rules == null){
                         rules = new ArrayList<Rule>();
                     }
                     rules.add(o);
                 }
             }
-            log.info("Input size is {} statements",input.listStatements().toSet().size());
+            if(log.isDebugEnabled()){
+                log.debug("Input size is {} statements",input.listStatements().toSet().size());
+            }
             result = executeJenaReasoningService(task, (JenaReasoningService) service, input, rules,
                 targetGraphID, true, parameters);
         } else if (service instanceof OWLApiReasoningService) {
@@ -340,17 +359,20 @@ public class ReasoningServiceExecutor implements Job {
                     rules.add(rulesI.next());
                 }
             }
-            log.info("Input size is {} statements",input.getAxiomCount());
+            if(log.isDebugEnabled()){
+                log.debug("Input size is {} statements",input.getAxiomCount());
+            }
             result = executeOWLApiReasoningService(task, (OWLApiReasoningService) service, input, rules,
                 targetGraphID, true, parameters);
 
         } else throw new UnsupportedOperationException("Service implementation not supported!");
 
-        log.info("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-        long end = System.currentTimeMillis();
-        log.info("[end] In time: {}ms", (end - start));
-        log.info("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-        
+        if(log.isDebugEnabled()){
+            log.debug("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+            long end = System.currentTimeMillis();
+            log.debug("[end] In time: {}ms", (end - start));
+            log.debug("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+        }
         return result;
     }
 

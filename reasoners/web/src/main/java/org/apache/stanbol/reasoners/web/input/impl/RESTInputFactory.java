@@ -34,7 +34,16 @@ import org.apache.stanbol.reasoners.web.input.provider.impl.UrlInputProvider;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * Factory for a {@see ReasoningServiceInputManager}.
+ * It creates a {@see SimpleInputManager} collecting all known {@see ReasoningServiceInputProvider}s.
+ * 
+ * TODO
+ * In the future we may want to move this out of the /web module into a dedicated /input module.
+ * 
+ * @author enridaga
+ *
+ */
 public class RESTInputFactory implements ReasoningServiceInputFactory {
     ONManager onm;
     RuleStore rStore;

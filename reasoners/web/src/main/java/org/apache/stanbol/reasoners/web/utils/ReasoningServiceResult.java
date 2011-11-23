@@ -18,6 +18,13 @@ package org.apache.stanbol.reasoners.web.utils;
 
 import org.apache.stanbol.commons.jobs.api.JobResult;
 
+/**
+ * To represent a result of a reasoning service.
+ * 
+ * @author enridaga
+ *
+ * @param <T>
+ */
 public class ReasoningServiceResult<T extends Object> implements JobResult{
     private T resultObj;
     private boolean success;

@@ -57,6 +57,7 @@ import org.apache.stanbol.reasoners.servicesapi.InconsistentInputException;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningService;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceException;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputManager;
+import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputProvider;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServicesManager;
 import org.apache.stanbol.reasoners.servicesapi.UnboundReasoningServiceException;
 import org.apache.stanbol.reasoners.servicesapi.UnsupportedTaskException;
@@ -89,7 +90,7 @@ import com.sun.jersey.multipart.FormDataMultiPart;
  * This class includes methods to prepare the input and dispatch the output (back to the client in the
  * requested format or saved in the triple store).
  * 
- * Support for long term operations is provided by adding /job to the request URI
+ * Support for long term operations is provided by adding /job to the request URI.
  * 
  */
 @Path("/reasoners/{service}/{task: [^/]+}{job: (/job)?}")
@@ -107,6 +108,16 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
     private boolean job = false;
     private String jobLocation="";
     
+    /**
+     * Constructor
+     * 
+     * @param serviceID
+     * @param taskID
+     * @param job
+     * @param servletContext
+     * @param headers
+     * @param httpContext
+     */
     public ReasoningServiceTaskResource(@PathParam(value = "service") String serviceID,
                                         @PathParam(value = "task") String taskID,
                                         @PathParam(value = "job") String job,
@@ -114,7 +125,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
                                         @Context HttpHeaders headers,
                                         @Context HttpContext httpContext) {
         super();
-        log.info("Called service {} to perform task {}", serviceID, taskID);
+        log.debug("Called service {} to perform task {}", serviceID, taskID);
 
         // ServletContext
         this.context = servletContext;
@@ -151,7 +162,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
             log.error("Service not found: {}", serviceID);
             throw new WebApplicationException(e, Response.Status.NOT_FOUND);
         }
-        log.info("Service retrieved");
+        log.debug("Service retrieved");
         // Check if the task is allowed
         if (this.service.supportsTask(taskID) || taskID.equals(ReasoningServiceExecutor.TASK_CHECK)) {
             this.taskID = taskID;
@@ -162,9 +173,9 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         }
         // Check for the job parameter
         if(!job.equals("")){
-            log.info("Job param is {}",job);
+            log.debug("Job param is {}",job);
             if(job.equals("/job")){
-                log.info("Ask for background job");
+                log.debug("Ask for background job");
                 this.job  = true;
             }else{
                 log.error("Malformed request");
@@ -179,7 +190,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
                     "This implementation of ReasoningService is not supported: "
                             + getCurrentService().getClass()), Response.Status.INTERNAL_SERVER_ERROR);
         }
-        log.info("Implementation is supported");
+        log.debug("Implementation is supported");
     }
 
     /**
@@ -189,22 +200,22 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
     private Map<String,List<String>> prepareParameters() {
         Map<String,List<String>> parameters = new HashMap<String,List<String>>();
 
-        log.info("Preparing parameters...");
+        log.debug("Preparing parameters...");
         HttpRequestContext request = this.httpContext.getRequest();
         // Parameters for a GET request
         MultivaluedMap<String,String> queryParameters = request.getQueryParameters();
-        log.info("... {} query parameters found", queryParameters.size());
+        log.debug("... {} query parameters found", queryParameters.size());
         for (Entry<String,List<String>> e : queryParameters.entrySet()) {
             parameters.put(e.getKey(), e.getValue());
         }
         // Parameters for a POST request with content-type
         // application/x-www-form-urlencoded
         MultivaluedMap<String,String> formParameters = request.getFormParameters();
-        log.info("... {} form urlencoded parameters found", formParameters.size());
+        log.debug("... {} form urlencoded parameters found", formParameters.size());
         for (Entry<String,List<String>> e : formParameters.entrySet()) {
             parameters.put(e.getKey(), e.getValue());
         }
-        log.info("Parameters prepared");
+        log.debug("Parameters prepared");
         return parameters;
     }
 
@@ -239,10 +250,16 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
     @GET
     @Produces({TEXT_HTML, "text/plain", KRFormat.RDF_XML, KRFormat.TURTLE, "text/turtle", "text/n3"})
     public Response get(@QueryParam("target") String targetGraphID) {
-        log.info("Called {} with parameters: {} ",httpContext.getRequest().getMethod(), parameters.keySet().toArray(new String[parameters.keySet().size()]));
+        log.debug("Called {} with parameters: {} ",httpContext.getRequest().getMethod(), parameters.keySet().toArray(new String[parameters.keySet().size()]));
         return processRequest();
     }
 
+    /**
+     * Process a background request. This service use the Stanbol Commons Jobs API to start a background job.
+     * Returns 201 on success, with HTTP header Location pointing to the Job resource.
+     * 
+     * @return
+     */
     private Response processBackgroundRequest(){
         // If parameters is empty it's a bad request...
         if (this.parameters.isEmpty()) {
@@ -266,6 +283,12 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         return Response.created(location).entity(view).build();   
     }
     
+    /**
+     * Process a real-time operation.
+     * Returns 200 when the process is ready, 500 if some error occurs
+     * 
+     * @return
+     */
     private Response processRealTimeRequest(){
      // If all parameters are missing we produce the service/task welcome
         // page
@@ -328,11 +351,11 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
     @Consumes({MULTIPART_FORM_DATA})
     @Produces({TEXT_HTML, "text/plain", KRFormat.RDF_XML, KRFormat.TURTLE, "text/turtle", "text/n3"})
     public Response post(FormDataMultiPart data) {
-        log.info(" post(FormDataMultiPart data)");
+        log.debug(" post(FormDataMultiPart data)");
         // In this case we setup the parameter from a multipart request
         File file = null;
         for (BodyPart bpart : data.getBodyParts()) {
-            log.info("is a {}", bpart.getClass());
+            log.debug("is a {}", bpart.getClass());
             if (bpart instanceof FormDataBodyPart) {
                 FormDataBodyPart dbp = (FormDataBodyPart) bpart;
                 if (dbp.getName().equals("file")) {
@@ -373,6 +396,12 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         return processRequest();
     }
 
+    /**
+     * Binds the request parameters to a list of {@see ReasoningServiceInputProvider}s, and fed a {@see SimpleInputManager}.
+     * TODO In the future we may want to decouple this process from this resource/submodule.
+     * 
+     * @return
+     */
     private ReasoningServiceInputManager prepareInput(){
         ReasoningServiceInputManager inmgr = new SimpleInputManager();
         String scope = null;

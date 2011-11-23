@@ -27,6 +27,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Implementation of the standard {@see ReasoningServicesManager}
+ * This is only intended to be used in OSGi environments.
+ * 
+ * @author enridaga
+ * 
  * @scr.component immediate="true"
  * @scr.service
  * @scr.reference name="ReasoningService"
@@ -51,11 +56,6 @@ public class ReasoningServicesManagerImpl implements ReasoningServicesManager {
         log.debug("{} services bound.", services.size());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.stanbol.reasoners.web.resources.ReasoningServices#size()
-     */
     @Override
     public int size() {
         return services.size();

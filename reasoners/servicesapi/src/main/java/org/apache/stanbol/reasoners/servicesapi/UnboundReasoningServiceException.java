@@ -16,6 +16,12 @@
  */
 package org.apache.stanbol.reasoners.servicesapi;
 
+/**
+ * To be thrown when a missing reasoning service is requested
+ * 
+ * @author enridaga
+ *
+ */
 public class UnboundReasoningServiceException extends Exception {
 
     /**

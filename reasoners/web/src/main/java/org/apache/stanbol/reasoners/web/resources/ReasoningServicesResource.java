@@ -37,6 +37,12 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.Viewable;
 
+/**
+ * Home page of the /reasoners module
+ * 
+ * @author enridaga
+ *
+ */
 @Path("/reasoners")
 public class ReasoningServicesResource extends BaseStanbolResource {
     private Logger log = LoggerFactory.getLogger(getClass());

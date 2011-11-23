@@ -45,6 +45,12 @@ import uk.ac.manchester.cs.owl.owlapi.mansyntaxrenderer.ManchesterOWLSyntaxOntol
 import com.hp.hpl.jena.rdf.model.Model;
 import com.sun.jersey.api.view.Viewable;
 
+/**
+ * Builds a response according to the reasoning output.
+ * 
+ * @author enridaga
+ *
+ */
 public class ResponseTaskBuilder {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private UriInfo info;
@@ -71,6 +77,13 @@ public class ResponseTaskBuilder {
         return Response.ok().build();
     }
     
+    /**
+     * Process the given object (result content output),
+     * returning an HTML representation or delegating the rendering to jersey writers.
+     * 
+     * @param object
+     * @return
+     */
     private Response build(Object object){
         if (isHTML()) {
             OutputStream out = stream(object);
@@ -85,6 +98,10 @@ public class ResponseTaskBuilder {
     }
     
     /**
+     * This supports OWLOntology and jena Model objects.
+     * In the case of Jena the reuslt is printed as Turtle, 
+     * in case of OWLApi the result is in Manchester syntax (more readable).
+     * 
      * FIXME: Both should return the same format
      * 
      * @param object
@@ -129,7 +146,7 @@ public class ResponseTaskBuilder {
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         for (MediaType t : mediaTypes) {
             String strty = t.toString();
-            log.info("Acceptable is {}", t);
+            log.debug("Acceptable is {}", t);
             if (htmlformats.contains(strty)) {
                 log.debug("Requested format is HTML {}", t);
                 return true;
@@ -180,6 +197,12 @@ public class ResponseTaskBuilder {
         }
     }
     
+    /**
+     * Builds a response according to the given {@see ReasoningServiceResult}
+     * 
+     * @param result
+     * @return
+     */
     public Response build(ReasoningServiceResult<? extends Object> result){
         // If task is CHECK
         if(result.getTask().equals(ReasoningServiceExecutor.TASK_CHECK)){

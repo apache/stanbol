@@ -32,13 +32,26 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.SWRLRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * Input provider which binds the reasoners input to the Rule module.
+ * 
+ * TODO Waiting for STANBOL-186, this provider only supports OWLApi reasoning services.
+ * 
+ * @author enridaga
+ *
+ */
 public class RecipeInputProvider implements ReasoningServiceInputProvider {
     private final Logger log = LoggerFactory.getLogger(RecipeInputProvider.class);
 
     private RuleStore store;
     private String recipeId;
 
+    /**
+     * Constructor
+     * 
+     * @param store
+     * @param recipeId
+     */
     public RecipeInputProvider(RuleStore store,String recipeId){
         this.store = store;
         this.recipeId = recipeId;

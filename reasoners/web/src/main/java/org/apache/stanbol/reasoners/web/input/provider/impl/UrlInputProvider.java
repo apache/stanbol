@@ -40,10 +40,21 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
+/**
+ * Input provider which accept a url string as input.
+ * 
+ * @author enridaga
+ *
+ */
 public class UrlInputProvider implements ReasoningServiceInputProvider {
     private final Logger log = LoggerFactory.getLogger(UrlInputProvider.class);
     private String url;
     
+    /**
+     * Constructor
+     * 
+     * @param url
+     */
     public UrlInputProvider(String url) {
         this.url = url;
     }

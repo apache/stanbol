@@ -37,6 +37,12 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Mini framework for writing services tests for running services
+ * 
+ * @author enridaga
+ *
+ */
 public class ReasonersTestBase extends StanbolTestBase{
     protected final String REASONERS_PATH = "/reasoners";
     protected final String JOBS_PATH = "/jobs";

@@ -18,7 +18,13 @@ package org.apache.stanbol.reasoners.web.input.provider.impl;
 
 import java.io.File;
 
-
+/**
+ * This input provider accepts a {@see File} as 
+ * input and delegates all the rest to the parent class ({@see UrlInputProvider})
+ * 
+ * @author enridaga
+ *
+ */
 public class FileInputProvider extends UrlInputProvider {
 
     public FileInputProvider(File file) {

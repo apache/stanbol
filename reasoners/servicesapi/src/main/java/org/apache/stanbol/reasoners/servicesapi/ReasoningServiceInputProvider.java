@@ -19,6 +19,14 @@ package org.apache.stanbol.reasoners.servicesapi;
 import java.io.IOException;
 import java.util.Iterator;
 
+/**
+ * An input provider implements a method to return an iterator of 'atoms' to be processed by a reasoning service.
+ * The java type depends on the service implementation.
+ * Providers can adapt or not to the given type.
+ * 
+ * @author enridaga
+ *
+ */
 public interface ReasoningServiceInputProvider {
 
     /**

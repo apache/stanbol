@@ -16,6 +16,12 @@
  */
 package org.apache.stanbol.reasoners.servicesapi;
 
+/**
+ * Generic exception
+ * 
+ * @author enridaga
+ *
+ */
 public class ReasoningServiceException extends Exception {
     public ReasoningServiceException(Throwable t) {
         super(t);

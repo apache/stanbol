@@ -21,6 +21,14 @@ import java.util.List;
 
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputProvider;
 
+/**
+ * A {@see ReasoningServiceInputManager} must be able to collect {@see ReasoningServiceInputProvider}s and
+ * traverse the whole data on {@see #getInputData(Class<T> type)}. 
+ * Only input providers which support Type must be activated.
+ * 
+ * @author enridaga
+ *
+ */
 public interface ReasoningServiceInputManager {
 
     /**
