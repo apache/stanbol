@@ -31,6 +31,7 @@ import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
@@ -128,7 +129,6 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
         for (RegistryItem child : getChildren()) {
             if (child instanceof RegistryOntology) {
                 String ref = ((RegistryOntology) child).getReference(getIRI());
-
                 OWLOntology o = (OWLOntology) getCache().getStoredOntology(ref, OWLOntology.class);
 
                 // OWLOntology o = ((RegistryOntology) child).getRawOntology(this.getIRI());
@@ -254,7 +254,7 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
     @Override
     public void setCache(OntologyProvider<?> cache) {
         if (cache == null) cache = new ClerezzaOntologyProvider(TcManager.getInstance(), null,
-                Parser.getInstance());
+                Parser.getInstance(), Serializer.getInstance());
         else {
             Object store = cache.getStore();
             if (!(store instanceof TcProvider || store instanceof OWLOntologyManager)) throw new IllegalArgumentException(

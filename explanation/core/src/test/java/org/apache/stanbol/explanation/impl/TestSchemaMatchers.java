@@ -1,17 +1,16 @@
 package org.apache.stanbol.explanation.impl;
 
+import static org.apache.stanbol.explanation.MockOsgiContext.parser;
+import static org.apache.stanbol.explanation.MockOsgiContext.serializer;
+import static org.apache.stanbol.explanation.MockOsgiContext.tcManager;
+
 import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import static org.apache.stanbol.explanation.MockOsgiContext.*;
-
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.serializedform.Parser;
-import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.apache.stanbol.explanation.Data;
 import org.apache.stanbol.explanation.MockOsgiContext;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
@@ -51,13 +50,14 @@ public class TestSchemaMatchers {
                           TestSchemaMatchers.class.getResource("/schemas/registry/explanation-mappings.owl")
                                   .toString()});
         OfflineConfiguration offline = new OfflineConfigurationImpl(configuration);
-        regman = new RegistryManagerImpl(offline, new ClerezzaOntologyProvider(tcManager, offline, parser),configuration);
+        regman = new RegistryManagerImpl(offline, new ClerezzaOntologyProvider(tcManager, offline, parser,
+                serializer), configuration);
 
         // The model should be created by now.
 
-//        for (Library lib : regman.getLibraries()) {
-//            System.out.println(lib.getIRI() + " : " + lib.getName());
-//        }
+        // for (Library lib : regman.getLibraries()) {
+        // System.out.println(lib.getIRI() + " : " + lib.getName());
+        // }
 
         // IRI id =
         // IRI.create("http://www.ontologydesignpatterns.org/registry/explanation.owl#ExplanationSchemaCatalog");

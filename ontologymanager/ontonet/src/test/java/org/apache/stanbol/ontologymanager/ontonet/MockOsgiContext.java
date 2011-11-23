@@ -22,8 +22,11 @@ import java.util.Hashtable;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
+import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 import org.apache.clerezza.rdf.rdfjson.parser.RdfJsonParsingProvider;
+import org.apache.clerezza.rdf.rdfjson.serializer.RdfJsonSerializingProvider;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
@@ -39,7 +42,9 @@ public class MockOsgiContext {
     public static TcManager tcManager;
 
     public static ONManager onManager;
-    
+
+    public static Serializer serializer;
+
     public static OntologyProvider<TcProvider> ontologyProvider;
 
     private static OfflineConfiguration offline;
@@ -57,7 +62,11 @@ public class MockOsgiContext {
         parser.bindParsingProvider(new JenaParserProvider());
         parser.bindParsingProvider(new RdfJsonParsingProvider());
 
-        ontologyProvider = new ClerezzaOntologyProvider(tcManager, offline, parser);
+        serializer = new Serializer();
+        serializer.bindSerializingProvider(new JenaSerializerProvider());
+        serializer.bindSerializingProvider(new RdfJsonSerializingProvider());
+
+        ontologyProvider = new ClerezzaOntologyProvider(tcManager, offline, parser, serializer);
         Dictionary<String,Object> onmconf = new Hashtable<String,Object>();
         onmconf.put(ONManager.ONTOLOGY_NETWORK_NS, "http://stanbol.apache.org/scope/");
         onManager = new ONManagerImpl(ontologyProvider, offline, onmconf);

@@ -87,7 +87,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 
     @Override
     public CoreOntologySpace createCoreOntologySpace(String scopeId, OntologyInputSource<?>... coreSources) {
-        CoreOntologySpace s = new CoreOntologySpaceImpl(scopeId, namespace, provider.getStore());
+        CoreOntologySpace s = new CoreOntologySpaceImpl(scopeId, namespace, provider);
         configureSpace(s, scopeId, coreSources);
         return s;
     }
@@ -95,7 +95,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
     @Override
     public CustomOntologySpace createCustomOntologySpace(String scopeId,
                                                          OntologyInputSource<?>... customSources) {
-        CustomOntologySpace s = new CustomOntologySpaceImpl(scopeId, namespace, provider.getStore());
+        CustomOntologySpace s = new CustomOntologySpaceImpl(scopeId, namespace, provider);
         configureSpace(s, scopeId, customSources);
         return s;
     }

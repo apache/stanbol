@@ -22,10 +22,12 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -37,8 +39,8 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.EntityAlreadyExistsException;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.TcProvider;
-import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
@@ -57,18 +59,22 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.owl.PhonyIRIMapper;
 import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
+import org.apache.stanbol.owl.util.OWLUtils;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLOntologySetProvider;
+import org.semanticweb.owlapi.util.OWLOntologyMerger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Clerezza-based ontology cache implementation. Whether it is persistent or in-memory depends on the
- * {@link WeightedTcProvider} used.
+ * {@link TcProvider} used.
  * 
  * @author alexdma
  * 
@@ -116,8 +122,13 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
     private Class<?>[] supported = null;
 
+    private Map<IRI,String> ontologyIdsToKeys;
+
     @Reference
     private TcManager tcManager;
+
+    @Reference
+    private Serializer serializer;
 
     /**
      * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
@@ -129,9 +140,13 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
      */
     public ClerezzaOntologyProvider() {
         supported = new Class<?>[] {MGraph.class, OWLOntology.class};
+        ontologyIdsToKeys = new HashMap<IRI,String>();
     }
 
-    public ClerezzaOntologyProvider(TcProvider store, OfflineConfiguration offline, Parser parser) {
+    public ClerezzaOntologyProvider(TcProvider store,
+                                    OfflineConfiguration offline,
+                                    Parser parser,
+                                    Serializer serializer) {
         this();
 
         this.offline = offline;
@@ -141,6 +156,8 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         if (this.tcManager == null) this.tcManager = TcManager.getInstance();
         if (parser == null) this.parser = Parser.getInstance();
         else this.parser = parser;
+        if (serializer == null) this.parser = Parser.getInstance();
+        else this.serializer = serializer;
 
         activate(new Hashtable<String,Object>());
     }
@@ -222,11 +239,17 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
     }
 
     @Override
-    public Set<String> getOntologyReferences() {
-        Set<String> result = new HashSet<String>();
-        for (UriRef u : store.listTripleCollections())
-            result.add(u.getUnicodeString());
-        return result;
+    public String getKey(IRI ontologyIRI) {
+        return ontologyIdsToKeys.get(ontologyIRI);
+    }
+
+    @Override
+    public Set<String> getKeys() {
+        // Set<String> result = new HashSet<String>();
+        // for (UriRef u : store.listTripleCollections())
+        // result.add(u.getUnicodeString());
+        // return result;
+        return new HashSet<String>(ontologyIdsToKeys.values());
     }
 
     @Override
@@ -256,7 +279,11 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         if (MGraph.class.isAssignableFrom(returnType)) {
             return returnType.cast(tc);
         } else if (OWLOntology.class.isAssignableFrom(returnType)) {
-            return toOWLOntology(new UriRef(identifier));
+            try {
+                return toOWLOntology(new UriRef(identifier));
+            } catch (OWLOntologyCreationException e) {
+                log.error("Failed to return stored ontology " + identifier + " as type " + returnType, e);
+            }
         }
 
         return null;
@@ -278,47 +305,49 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
     @Override
     public String loadInStore(InputStream data, String formatIdentifier, boolean force) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+        // TODO Instead of copying the code, reuse it.
 
-    @Override
-    public String loadInStore(IRI ontologyIri, String formatIdentifier, boolean force) throws IOException,
-                                                                                      UnsupportedFormatException {
-        log.debug("Loading {}", ontologyIri);
-        if (ontologyIri == null) throw new IllegalArgumentException("Ontology IRI cannot be null.");
+        if (data == null) throw new IllegalArgumentException("No data to load ontologies from.");
 
-        String s = prefix + "::" + ontologyIri.toString();
+        // Force is ignored for the content, but the imports?
 
-        IRI location = null;
-        if (force) location = null;
-        else for (OWLOntologyIRIMapper mapper : mappers) {
-            location = mapper.getDocumentIRI(ontologyIri);
-            if (location != null) break;
-        }
-        if (location == null) {
-            if (isOfflineMode()) throw new IllegalStateException(
-                    "Cannot retrieve " + ontologyIri + " while Stanbol is in offline mode. "
-                            + "No resource with that identifier was found locally.");
-            else location = ontologyIri;
-        }
-
-        log.info("found {} in {}", ontologyIri, location);
+        String s = prefix + "::";
+        IRI ontologyIri = null;
+        //
+        // IRI location = null;
+        // if (force) location = null;
+        // else for (OWLOntologyIRIMapper mapper : mappers) {
+        // location = mapper.getDocumentIRI(ontologyIri);
+        // if (location != null) break;
+        // }
+        // if (location == null) {
+        // if (isOfflineMode()) throw new IllegalStateException(
+        // "Cannot retrieve " + ontologyIri + " while Stanbol is in offline mode. "
+        // + "No resource with that identifier was found locally.");
+        // else location = ontologyIri;
+        // }
+        //
+        // log.info("found {} in {}", ontologyIri, location);
 
         boolean loaded = false;
 
         Set<String> formats;
         if (formatIdentifier == null || "".equals(formatIdentifier.trim())) formats = parser
                 .getSupportedFormats();
+        // TODO reorder formats
         else formats = Collections.singleton(formatIdentifier);
         for (String format : formats) {
             try {
-                final URLConnection con = location.toURI().toURL().openConnection();
-                con.setRequestProperty("Accept", format);
-                final InputStream is = con.getInputStream();
-                if (is != null) {
+                // final URLConnection con = location.toURI().toURL().openConnection();
+                // con.setRequestProperty("Accept", format);
+                // final InputStream is = con.getInputStream();
+                if (data != null) {
                     MGraph graph;
-                    TripleCollection rdfData = parser.parse(is, format);
+                    TripleCollection rdfData = parser.parse(data, format);
+                    // FIXME are we getting rid of rdfData after adding its triples?
+                    String iri = OWLUtils.guessOntologyIdentifier(rdfData).getUnicodeString();
+                    ontologyIri = IRI.create(iri);
+                    s += iri;
                     if (rdfData instanceof MGraph) {
                         graph = (MGraph) rdfData;
                     } else {
@@ -356,11 +385,96 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
                 continue;
             }
         }
-        if (loaded) return s;
-        else return null;
+        if (loaded) {
+//            System.out.println("I am mapping "+ontologyIri+" to key "+s);
+            ontologyIdsToKeys.put(ontologyIri, s);
+            return s;
+        } else return null;
     }
 
-    protected OWLOntology toOWLOntology(UriRef graphName) {
+    @Override
+    public String loadInStore(IRI ontologyIri, String formatIdentifier, boolean force) throws IOException,
+                                                                                      UnsupportedFormatException {
+        log.debug("Loading {}", ontologyIri);
+        if (ontologyIri == null) throw new IllegalArgumentException("Ontology IRI cannot be null.");
+
+        String s = prefix + "::" + ontologyIri.toString();
+
+        IRI location = null;
+        if (force) location = null;
+        else for (OWLOntologyIRIMapper mapper : mappers) {
+            location = mapper.getDocumentIRI(ontologyIri);
+            if (location != null) break;
+        }
+        if (location == null) {
+            if (isOfflineMode()) throw new IllegalStateException(
+                    "Cannot retrieve " + ontologyIri + " while Stanbol is in offline mode. "
+                            + "No resource with that identifier was found locally.");
+            else location = ontologyIri;
+        }
+
+        log.info("found {} in {}", ontologyIri, location);
+
+        boolean loaded = false;
+
+        Set<String> formats;
+        if (formatIdentifier == null || "".equals(formatIdentifier.trim())) formats = parser
+                .getSupportedFormats();
+        // TODO reorder formats
+        else formats = Collections.singleton(formatIdentifier);
+        for (String format : formats) {
+            try {
+                final URLConnection con = location.toURI().toURL().openConnection();
+                con.setRequestProperty("Accept", format);
+                final InputStream is = con.getInputStream();
+                if (is != null) {
+                    MGraph graph;
+                    TripleCollection rdfData = parser.parse(is, format);
+                    // FIXME are we getting rid of rdfData after adding its triples?
+                    if (rdfData instanceof MGraph) {
+                        graph = (MGraph) rdfData;
+                    } else {
+                        UriRef uriref = new UriRef(s);
+                        try {
+                            graph = store.createMGraph(uriref);
+                            // graph = new SimpleMGraph();
+                        } catch (EntityAlreadyExistsException e) {
+                            if (uriref.equals(e.getEntityName())) graph = store.getMGraph(uriref);
+                            else graph = store.createMGraph(uriref);
+                        }
+                        graph.addAll(rdfData);
+                    }
+                    if (resolveImports) {
+                        Iterator<Triple> it = graph.filter(null, RDF.type, OWL.Ontology);
+                        if (it.hasNext()) {
+                            Iterator<Triple> it2 = graph.filter(it.next().getSubject(), OWL.imports, null);
+                            while (it2.hasNext()) {
+                                Resource obj = it2.next().getObject();
+                                if (obj instanceof UriRef) loadInStore(
+                                    IRI.create(((UriRef) obj).getUnicodeString()), null, false);
+                            }
+                        }
+                    }
+
+                    loaded = true;
+                    break;
+                }
+            } catch (UnsupportedFormatException e) {
+                log.debug("Parsing format {} failed.", format);
+                continue;
+            } catch (Exception e) {
+                log.debug("Parsing format {} failed.", format);
+                continue;
+            }
+        }
+        if (loaded) {
+//            System.out.println("I am mapping "+ontologyIri+" to key "+s);
+            ontologyIdsToKeys.put(ontologyIri, s);
+            return s;
+        } else return null;
+    }
+
+    protected OWLOntology toOWLOntology(UriRef graphName) throws OWLOntologyCreationException {
 
         OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
         // Never try to import
@@ -369,15 +483,38 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         fillImportsReverse(graphName, revImps);
         Set<UriRef> loaded = new HashSet<UriRef>();
 
+        final Set<OWLOntology> mergeUs = new HashSet<OWLOntology>();
+
         for (UriRef ref : revImps) {
             if (!loaded.contains(ref)) {
                 TripleCollection tc = store.getTriples(ref);
-                OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(tc, mgr);
+                mergeUs.add(OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(tc, mgr));
                 loaded.add(ref);
             }
         }
 
         TripleCollection graph = store.getTriples(graphName);
-        return OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(graph, mgr);
+        OWLOntology o = OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(graph, mgr);
+
+        mergeUs.add(o);
+
+        OWLOntologyMerger merger = new OWLOntologyMerger(new OWLOntologySetProvider() {
+
+            @Override
+            public Set<OWLOntology> getOntologies() {
+                return mergeUs;
+            }
+
+        });
+        OWLOntology merged = merger.createMergedOntology(OWLManager.createOWLOntologyManager(),
+            OWLUtils.guessOntologyIdentifier(o));
+        // return o;
+        return merged;
     }
+
+    @Override
+    public Serializer getSerializer() {
+        return serializer;
+    }
+
 }

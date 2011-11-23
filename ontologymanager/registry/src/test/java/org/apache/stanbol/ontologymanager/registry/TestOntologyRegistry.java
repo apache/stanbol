@@ -29,6 +29,7 @@ import java.util.Hashtable;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
@@ -68,7 +69,7 @@ public class TestOntologyRegistry {
         config.put(OfflineConfiguration.ONTOLOGY_PATHS, new String[] {"/ontologies", "/ontologies/registry"});
         OfflineConfiguration offline = new OfflineConfigurationImpl(config);
         // The registry manager can be updated via calls to createModel()
-        regman = new RegistryManagerImpl(offline, new ClerezzaOntologyProvider(new SimpleTcProvider(),offline,new Parser()), config);
+        regman = new RegistryManagerImpl(offline, new ClerezzaOntologyProvider(new SimpleTcProvider(),offline,new Parser(), new Serializer()), config);
         // An ONManager with no storage support and same offline settings as the registry manager.
         onm = new ONManagerImpl(null, null, offline, config);
     }

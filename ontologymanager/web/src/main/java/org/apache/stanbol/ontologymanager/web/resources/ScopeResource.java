@@ -68,6 +68,7 @@ import org.apache.stanbol.ontologymanager.registry.io.LibrarySource;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.UnloadableImportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +103,7 @@ public class ScopeResource extends BaseStanbolResource {
             throw new WebApplicationException(NOT_FOUND);
         }
         scope = onm.getScopeRegistry().getScope(scopeId);
-        
+
         // // Skip null checks: the scope might be created with a PUT
         // if (scope == null) {
         // log.error("Scope {} not found", scopeId);
@@ -154,6 +155,9 @@ public class ScopeResource extends BaseStanbolResource {
             scope.getCustomSpace().addOntology(new OntologyContentInputSource(content));
         } catch (UnmodifiableOntologyCollectorException e) {
             throw new WebApplicationException(e, FORBIDDEN);
+        } catch (UnloadableImportException e) {
+            // TODO how can I add a meaningful message to the 404 ?
+            throw new WebApplicationException(e, Status.NOT_FOUND);
         } catch (OWLOntologyCreationException e) {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }

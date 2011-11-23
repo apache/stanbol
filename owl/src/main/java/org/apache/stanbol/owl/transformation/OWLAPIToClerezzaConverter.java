@@ -127,6 +127,22 @@ public class OWLAPIToClerezzaConverter {
 
     public static OWLOntology clerezzaGraphToOWLOntology(TripleCollection graph,
                                                          OWLOntologyManager ontologyManager) {
+
+        /*
+         * The root graph can be serialized and de-serialized, but before that we should decide what to do
+         * with imports. We can proceed as follows:
+         * 
+         * for each import statement, - check if the ontology manager has (1) an ontology or (2) a mapping. -
+         * if (1), just get it and add it to the merge pool - if (2), do nothing. the ontology manager should
+         * handle it when loading the root, - if neither, fetch the graph and call the procideure on it
+         * 
+         * Alternatively, construct the whole reverse imports stack, then traverse it again, get the
+         * OWLOntology version for each (with the phony mapper set) and add it to the merge pool
+         * 
+         * If it works, just add all the triples to a TripleCollection, but no, we don't want to store that
+         * change.
+         */
+
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         SerializingProvider serializingProvider = new JenaSerializerProvider();
         serializingProvider.serialize(out, graph, SupportedFormat.RDF_XML);

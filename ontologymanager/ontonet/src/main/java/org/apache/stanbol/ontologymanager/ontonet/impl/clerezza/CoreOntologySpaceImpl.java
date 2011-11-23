@@ -16,8 +16,8 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 
-import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.semanticweb.owlapi.model.IRI;
 
@@ -35,8 +35,8 @@ public class CoreOntologySpaceImpl extends AbstractOntologySpaceImpl implements 
         return (scopeID != null ? scopeID : "") + "/" + SUFFIX;
     }
 
-    public CoreOntologySpaceImpl(String scopeID, IRI namespace, TcProvider tcProvider) {
-        super(buildId(scopeID), namespace, SpaceType.CORE, tcProvider);
+    public CoreOntologySpaceImpl(String scopeID, IRI namespace, OntologyProvider<?> ontologyProvider) {
+        super(buildId(scopeID), namespace, SpaceType.CORE, ontologyProvider);
     }
 
     /**

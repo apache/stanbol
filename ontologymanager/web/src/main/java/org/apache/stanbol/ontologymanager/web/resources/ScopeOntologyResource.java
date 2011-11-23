@@ -51,6 +51,7 @@ import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -179,12 +180,15 @@ public class ScopeOntologyResource extends BaseStanbolResource {
             }
             String res = null;
             try {
+//                for (OWLImportsDeclaration imp : ont.getImportsDeclarations())
+//                    System.out.println("DIOCALE "+imp);
                 res = OntologyRenderUtils.renderOntology(ont, new RDFXMLOntologyFormat(), sciri.toString(),
                     onm);
             } catch (OWLOntologyStorageException e) {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             }
-            return Response.ok(/* ont */res).build();
+            return Response.ok(res).build();
+            
         } else {
             ScopeRegistry reg = onm.getScopeRegistry();
             String scopeID = uriInfo.getAbsolutePath().toString();

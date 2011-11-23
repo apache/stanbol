@@ -56,6 +56,7 @@ public class PhonyIRIMapper implements OWLOntologyIRIMapper {
 
     @Override
     public IRI getDocumentIRI(IRI arg0) {
+        if (exclusions==null) return blankIri;
         if (exclusions.contains(arg0)) return null;
         else return blankIri;
     }

@@ -16,9 +16,9 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 
-import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CoreOntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.CustomOntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SpaceType;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.semanticweb.owlapi.model.IRI;
@@ -37,8 +37,8 @@ public class CustomOntologySpaceImpl extends AbstractOntologySpaceImpl implement
         return (scopeID != null ? scopeID : "") + "/" + SUFFIX;
     }
 
-    public CustomOntologySpaceImpl(String scopeID, IRI namespace, TcProvider tcProvider) {
-        super(buildId(scopeID), namespace, SpaceType.CUSTOM, tcProvider);
+    public CustomOntologySpaceImpl(String scopeID, IRI namespace, OntologyProvider<?> ontologyProvider) {
+        super(buildId(scopeID), namespace, SpaceType.CUSTOM, ontologyProvider);
     }
 
     @Override

@@ -27,6 +27,7 @@ import java.util.TreeMap;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -220,7 +221,8 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
             // this.cache = OWLOntologyManagerFactory.createOWLOntologyManager(offlineResources);
             if (cache == null) {
                 log.warn("Caching policy is set as Centralised, but no ontology provider is supplied. Will use new in-memory tcProvider.");
-                cache = new ClerezzaOntologyProvider(TcManager.getInstance(), offline, Parser.getInstance());
+                cache = new ClerezzaOntologyProvider(TcManager.getInstance(), offline, Parser.getInstance(),
+                        Serializer.getInstance());
             }
             // else sta bene cosi'
         } else if (cachingPolicyString.equals(CachingPolicy.DISTRIBUTED.name())) {
@@ -240,7 +242,7 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
                     if (child instanceof Library) {
                         if (this.cache != null) ((Library) child).setCache(this.cache);
                         else ((Library) child).setCache(new ClerezzaOntologyProvider(TcManager.getInstance(),
-                                offline, Parser.getInstance()));
+                                offline, Parser.getInstance(), Serializer.getInstance()));
                     }
                     visited.add(child);
                 }

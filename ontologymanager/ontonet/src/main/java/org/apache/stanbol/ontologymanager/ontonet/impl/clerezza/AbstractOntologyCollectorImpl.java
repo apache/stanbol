@@ -16,28 +16,35 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.access.EntityAlreadyExistsException;
-import org.apache.clerezza.rdf.core.access.TcProvider;
+import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
+import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.LockableOntologyCollector;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorModificationException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyInputSourceHandler;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
-import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
 import org.apache.stanbol.owl.util.OWLUtils;
+import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
+import org.semanticweb.owlapi.io.StreamDocumentTarget;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,24 +71,28 @@ public abstract class AbstractOntologyCollectorImpl implements LockableOntologyC
     /**
      * The identifier of the ontologies directly managed by this collector (i.e. that were directly added to
      * this space, hence not including those just pulled in via import statements).
+     * 
+     * TODO make it a set again and have the ontology provider manage the mapping?
      */
-    protected Set<IRI> managedOntologies;
+    protected Map<IRI,String> managedOntologies;
 
     protected IRI namespace = null;
 
     protected Set<Class<?>> supportedTypes;
 
-    private TcProvider tcProvider;
+    // private TcProvider tcProvider;
 
-    public AbstractOntologyCollectorImpl(String id, IRI namespace, TcProvider tcProvider) {
+    protected OntologyProvider<?> ontologyProvider;
+
+    public AbstractOntologyCollectorImpl(String id, IRI namespace, OntologyProvider<?> ontologyProvider) {
         // Supports OWL API and Clerezza
         supportedTypes = new HashSet<Class<?>>();
         supportedTypes.add(OWLOntology.class);
         supportedTypes.add(TripleCollection.class);
         setID(id);
         setNamespace(namespace);
-        this.tcProvider = tcProvider;
-        this.managedOntologies = new HashSet<IRI>();
+        this.ontologyProvider = ontologyProvider;
+        this.managedOntologies = new HashMap<IRI,String>();
     }
 
     @Override
@@ -98,31 +109,60 @@ public abstract class AbstractOntologyCollectorImpl implements LockableOntologyC
 
         Object o = ontologySource.getRootOntology();
         UriRef uri;
-        if (o instanceof Graph) {
-            uri = OWLUtils.guessOntologyIdentifier((Graph) o);
+        if (o instanceof TripleCollection) {
+            uri = OWLUtils.guessOntologyIdentifier((TripleCollection) o);
         } else if (o instanceof OWLOntology) {
             uri = new UriRef(OWLUtils.guessOntologyIdentifier((OWLOntology) o).toString());
         } else throw new UnsupportedOperationException("This ontology space implementation cannot handle "
                                                        + o.getClass() + " objects.");
-        // create/get the graph and add the triples.
-        MGraph mg;
+        // // create/get the graph and add the triples.
+        // MGraph mg;
+        // try {
+        // mg = tcProvider.createMGraph(uri);
+        // } catch (EntityAlreadyExistsException e) {
+        // mg = tcProvider.getMGraph(uri);
+        // mg.clear();
+        // }
+        // if (o instanceof TripleCollection) mg.addAll((TripleCollection) o);
+        // else if (o instanceof OWLOntology) {
+        // // FIXME there must be a better angle than using converters...
+        // mg.addAll(OWLAPIToClerezzaConverter.owlOntologyToClerezzaTriples((OWLOntology) o));
+        // }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        // serialize it
+        if (o instanceof TripleCollection) {
+            ontologyProvider.getSerializer().serialize(out, (TripleCollection) o, SupportedFormat.RDF_XML);
+            // in = new ByteArrayInputStream(out.toByteArray());
+        } else if (o instanceof OWLOntology) {
+            try {
+                ((OWLOntology) o).getOWLOntologyManager().saveOntology((OWLOntology) o,
+                    new RDFXMLOntologyFormat(), new StreamDocumentTarget(out));
+            } catch (OWLOntologyStorageException e) {
+                log.error("Could not serialize the ontology for storage", e);
+                return;
+            }
+        }
+
+        String key = null;
+
+        InputStream in = new ByteArrayInputStream(out.toByteArray());
         try {
-            mg = tcProvider.createMGraph(uri);
-        } catch (EntityAlreadyExistsException e) {
-            mg = tcProvider.getMGraph(uri);
-            mg.clear();
-        }
-        if (o instanceof TripleCollection) mg.addAll((TripleCollection) o);
-        else if (o instanceof OWLOntology) {
-            // FIXME there must be a better angle than using converters...
-            mg.addAll(OWLAPIToClerezzaConverter.owlOntologyToClerezzaTriples((OWLOntology) o));
+            key = ontologyProvider.loadInStore(in, SupportedFormat.RDF_XML, false);
+        } catch (UnsupportedFormatException e) {
+            // RDF/XML not supported is next to impossible...
+            log.error("Format {} not supported for deserialization.", SupportedFormat.RDF_XML);
+            return;
+        } catch (IOException e) {
+            log.error("Deserialization failed.", e);
+            return;
         }
 
-        // add to index
-        managedOntologies.add(IRI.create(uri.getUnicodeString()));
-
-        // fire the event
-        fireOntologyAdded(uri);
+        if (key != null && !key.isEmpty()) {
+            // add to index
+            managedOntologies.put(IRI.create(uri.getUnicodeString()), key);
+            // fire the event
+            fireOntologyAdded(uri);
+        }
     }
 
     @Override
@@ -189,16 +229,19 @@ public abstract class AbstractOntologyCollectorImpl implements LockableOntologyC
     @Override
     public Set<OWLOntology> getOntologies(boolean withClosure) {
         Set<OWLOntology> ontologies = new HashSet<OWLOntology>();
-        for (IRI id : managedOntologies)
+        for (IRI id : managedOntologies.keySet())
             ontologies.add(getOntology(id));
         return Collections.unmodifiableSet(ontologies);
     }
 
     @Override
     public OWLOntology getOntology(IRI ontologyIri) {
-        if (!managedOntologies.contains(ontologyIri)) return null;
-        TripleCollection g = tcProvider.getTriples(new UriRef(ontologyIri.toString()));
-        return OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(g);
+        if (!hasOntology(ontologyIri)) return null;
+        OWLOntology o;
+        o = (OWLOntology) ontologyProvider.getStoredOntology(ontologyProvider.getKey(ontologyIri), OWLOntology.class);
+        // TripleCollection g = tcProvider.getTriples(new UriRef(ontologyIri.toString()));
+        // o = OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(g);
+        return o;
     }
 
     @Override
@@ -206,13 +249,9 @@ public abstract class AbstractOntologyCollectorImpl implements LockableOntologyC
         return Collections.unmodifiableSet(supportedTypes);
     }
 
-    public TcProvider getTcProvider() {
-        return tcProvider;
-    }
-
     @Override
     public boolean hasOntology(IRI ontologyIri) {
-        return managedOntologies.contains(ontologyIri);
+        return managedOntologies.keySet().contains(ontologyIri);
     }
 
     @Override

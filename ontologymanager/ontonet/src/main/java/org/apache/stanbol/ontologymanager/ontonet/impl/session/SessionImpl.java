@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.NonReferenceableSessionException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
@@ -69,8 +70,8 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
      * @param sessionID
      *            the IRI to be set as unique identifier for this session
      */
-    public SessionImpl(String sessionID, IRI namespace, TcProvider tcProvider) {
-        super(sessionID, namespace, tcProvider);
+    public SessionImpl(String sessionID, IRI namespace, OntologyProvider<?> ontologyProvider) {
+        super(sessionID, namespace, ontologyProvider);
         // setNamespace(namespace);
         attachedScopes = new HashMap<String,OntologyScope>();
         listeners = new HashSet<SessionListener>();

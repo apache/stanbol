@@ -18,6 +18,7 @@ package org.apache.stanbol.ontologymanager.ontonet.ontology;
 
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.parser;
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.reset;
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.serializer;
 import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.tcManager;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -115,8 +116,8 @@ public class TestClerezzaSpaces {
         OWLIndividual iLinus = df.getOWLNamedIndividual(IRI.create(baseIri + "/" + Constants.linus));
         linusIsHuman = df.getOWLClassAssertionAxiom(cHuman, iLinus);
 
-        factory = new OntologySpaceFactoryImpl(reg, new ClerezzaOntologyProvider(tcManager, offline, parser),
-                offline, IRI.create("http://stanbol.apache.org/ontology/"));
+        factory = new OntologySpaceFactoryImpl(reg, new ClerezzaOntologyProvider(tcManager, offline, parser,
+                serializer), offline, IRI.create("http://stanbol.apache.org/ontology/"));
     }
 
     String scopeId = "Comics";

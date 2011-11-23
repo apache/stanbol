@@ -25,6 +25,7 @@ import java.util.Hashtable;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.sparql.QueryEngine;
 import org.apache.clerezza.rdf.jena.sparql.JenaSparqlEngine;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
@@ -122,7 +123,8 @@ public class XMLReengineerTest {
         TcManager tcm = new SpecialTcManager(qe, wtcp);
 
         // Two different ontology storages, the same sparql engine and tcprovider
-        ONManager onManager = new ONManagerImpl(new ClerezzaOntologyProvider(tcm, offline, new Parser()), offline, emptyConf);
+        ONManager onManager = new ONManagerImpl(new ClerezzaOntologyProvider(tcm, offline, new Parser(),
+                new Serializer()), offline, emptyConf);
         xmlExtractor = new XMLExtractor(new ReengineerManagerImpl(emptyConf), onManager, emptyConf);
     }
 

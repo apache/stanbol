@@ -6,8 +6,11 @@ import java.util.Hashtable;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
+import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 import org.apache.clerezza.rdf.rdfjson.parser.RdfJsonParsingProvider;
+import org.apache.clerezza.rdf.rdfjson.serializer.RdfJsonSerializingProvider;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.apache.stanbol.explanation.impl.TestSchemaMatchers;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
@@ -21,6 +24,8 @@ public class MockOsgiContext {
     public static Parser parser;
 
     public static TcManager tcManager;
+    
+    public static Serializer serializer;
 
     public static ONManager onManager;
 
@@ -28,6 +33,9 @@ public class MockOsgiContext {
         parser = new Parser();
         parser.bindParsingProvider(new JenaParserProvider());
         parser.bindParsingProvider(new RdfJsonParsingProvider());
+        serializer = new Serializer();
+        serializer.bindSerializingProvider(new JenaSerializerProvider());
+        serializer.bindSerializingProvider(new RdfJsonSerializingProvider());
         reset();
     }
 

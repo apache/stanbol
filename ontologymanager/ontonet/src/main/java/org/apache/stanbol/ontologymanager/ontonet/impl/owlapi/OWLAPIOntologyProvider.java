@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.owl.util.OWLUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -61,7 +62,12 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
     }
 
     @Override
-    public Set<String> getOntologyReferences() {
+    public String getKey(IRI ontologyIRI) {
+        return ontologyIRI.toString();
+    }
+
+    @Override
+    public Set<String> getKeys() {
         Set<String> result = new HashSet<String>();
         for (OWLOntology o : store.getOntologies())
             result.add(OWLUtils.guessOntologyIdentifier(o).toString());
@@ -120,6 +126,12 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
             throw new IllegalArgumentException(e);
         }
         return OWLUtils.guessOntologyIdentifier(o).toString();
+    }
+
+    @Override
+    public Serializer getSerializer() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

@@ -106,12 +106,12 @@ public class SessionManagerImpl implements SessionManager {
     @Override
     public synchronized Session createSession(String sessionID) throws DuplicateSessionIDException {
         if (sessionsByID.containsKey(sessionID)) throw new DuplicateSessionIDException(sessionID.toString());
-        TcProvider tcp = null;
-        if (ontologyProvider.getStore() instanceof TcProvider) tcp = (TcProvider) ontologyProvider.getStore();
-        else throw new UnsupportedOperationException(
-                "Session manager does not support ontology providers based on "
-                        + ontologyProvider.getStore().getClass() + ", only on " + TcProvider.class);
-        Session session = new SessionImpl(sessionID, namespace, tcp);
+//        TcProvider tcp = null;
+//        if (ontologyProvider.getStore() instanceof TcProvider) tcp = (TcProvider) ontologyProvider.getStore();
+//        else throw new UnsupportedOperationException(
+//                "Session manager does not support ontology providers based on "
+//                        + ontologyProvider.getStore().getClass() + ", only on " + TcProvider.class);
+        Session session = new SessionImpl(sessionID, namespace, ontologyProvider);
         addSession(session);
         fireSessionCreated(session);
         return session;

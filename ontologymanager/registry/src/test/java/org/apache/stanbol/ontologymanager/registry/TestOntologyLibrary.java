@@ -125,7 +125,7 @@ public class TestOntologyLibrary {
         Dictionary<String,Object> regmanConf = new Hashtable<String,Object>();
         regmanConf.put(RegistryManager.REGISTRY_LOCATIONS, new String[] {localTestRegistry.toString()});
         // Instantiating the registry manager will also load the registry data.
-        regMgr = new RegistryManagerImpl(offline, new ClerezzaOntologyProvider(tcManager, offline, parser),
+        regMgr = new RegistryManagerImpl(offline, new ClerezzaOntologyProvider(tcManager, offline, parser,serializer),
                 regmanConf);
 
         // The resulting manager must exist and have exactly one registry.
@@ -167,7 +167,7 @@ public class TestOntologyLibrary {
         regmanConf.put(RegistryManager.REGISTRY_LOCATIONS, new String[] {localTestRegistry.toString()});
         // Instantiating the registry manager will also load the registry data.
         regMgr = new RegistryManagerImpl(offline, new ClerezzaOntologyProvider(tcManager,
-                offline, parser), regmanConf);
+                offline, parser,serializer), regmanConf);
         assertNotNull(regMgr);
 
         // Now use this registry manager to instantiate an input source.

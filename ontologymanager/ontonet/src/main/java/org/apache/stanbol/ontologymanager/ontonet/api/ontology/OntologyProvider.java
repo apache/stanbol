@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.access.TcProvider;
+import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -37,6 +38,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  *            the storage system actually used by this provider.
  */
 public interface OntologyProvider<S> {
+    
+    Serializer getSerializer();
 
     /**
      * The key used to configure the prefix to be used for addressing ontologies stored by this provider.
@@ -48,7 +51,9 @@ public interface OntologyProvider<S> {
      */
     public String RESOLVE_IMPORTS = "org.apache.stanbol.ontologymanager.ontonet.resolveImports";
 
-    Set<String> getOntologyReferences();
+    String getKey(IRI ontologyIRI);
+
+    Set<String> getKeys();
 
     /**
      * Returns the storage system used by this ontology provider (e.g. a {@link TcProvider} or an
@@ -59,8 +64,11 @@ public interface OntologyProvider<S> {
     S getStore();
 
     /**
+     * Useful
      * 
-     * @param identifier
+     * @param key
+     *            the key used to identify the ontology in this provider. They can or cannot coincide with the
+     *            logical and/or physical IRI of the ontology.
      * @param returnType
      *            The expected type for the returned ontology object. If null, the provider will arbitrarily
      *            select a supported return type. If the supplied type is not supported (i.e. not assignable
@@ -68,7 +76,7 @@ public interface OntologyProvider<S> {
      *            {@link UnsupportedOperationException} should be thrown.
      * @return
      */
-    Object getStoredOntology(String identifier, Class<?> returnType);
+    Object getStoredOntology(String key, Class<?> returnType);
 
     /**
      * Returns an array containing the most specific types for ontology objects that this provider can manage

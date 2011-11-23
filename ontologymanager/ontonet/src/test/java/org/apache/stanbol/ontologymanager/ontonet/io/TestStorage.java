@@ -86,14 +86,18 @@ public class TestStorage {
             "/ontologies/nonexistentcharacters.owl")));
         IRI ontologyId = ois.getRootOntology().getOntologyID().getOntologyIRI();
         OntologyScope scope = onManager.getOntologyScopeFactory().createOntologyScope(ephemeralScopeId);
-        assertFalse(ontologyProvider.getOntologyReferences().contains(ontologyId.toString()));
+        // Initially, the ontology is not there
+        assertNull(ontologyProvider.getKey(ontologyId));
+        // Once added, the ontology is there
         scope.getCustomSpace().addOntology(ois);
-        assertTrue(ontologyProvider.getOntologyReferences().contains(ontologyId.toString()));
+        assertNotNull(ontologyProvider.getKey(ontologyId));
+        // Once removed from the scope, the ontology is still there
         scope.getCustomSpace().removeOntology(ontologyId);
-        assertTrue(ontologyProvider.getOntologyReferences().contains(ontologyId.toString()));
+        assertNotNull(ontologyProvider.getKey(ontologyId));
+        // Once the scope is killed, the ontology is still there
         // TODO find a more appropriate method to kill scopes?
         scope.tearDown();
-        assertTrue(ontologyProvider.getOntologyReferences().contains(ontologyId.toString()));
+        assertNotNull(ontologyProvider.getKey(ontologyId));
     }
 
     @After
