@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
 
 import org.apache.clerezza.rdf.core.MGraph;
@@ -18,6 +17,7 @@ import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.owl.transformation.JenaToClerezzaConverter;
 import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
 import org.apache.stanbol.reasoners.jena.JenaReasoningService;
+import org.apache.stanbol.commons.jobs.api.Job;
 import org.apache.stanbol.reasoners.owlapi.OWLApiReasoningService;
 import org.apache.stanbol.reasoners.servicesapi.InconsistentInputException;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningService;
@@ -42,7 +42,7 @@ import com.hp.hpl.jena.reasoner.rulesys.Rule;
 /**
  * TODO Add comment
  */
-public class ReasoningServiceExecutor implements Callable<ReasoningServiceResult<?>> {
+public class ReasoningServiceExecutor implements Job {
 	private Logger log = LoggerFactory.getLogger(getClass());
 	private TcManager tcManager;
 	private ReasoningServiceInputManager inmgr;
@@ -341,6 +341,11 @@ public class ReasoningServiceExecutor implements Callable<ReasoningServiceResult
     @Override
     public ReasoningServiceResult<?> call() throws Exception {
         return execute(task,service,targetGraph,parameters);
+    }
+
+    @Override
+    public String buildResultLocation(String jobId) {
+        return "/reasoners/jobs/" + jobId;
     }
 
 }

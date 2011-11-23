@@ -331,11 +331,6 @@
     </dependency>    
     <dependency>
     <groupId>org.apache.stanbol</groupId>
-    <artifactId>org.apache.stanbol.reasoners.jobs.api</artifactId>
-    <version>0.1</version>
-    </dependency>
-    <dependency>
-    <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.reasoners.jena</artifactId>
     <version>0.1</version>
     </dependency>
@@ -364,6 +359,11 @@
 		  <groupId>org.apache.stanbol</groupId>
 		  <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
 	  </dependency-->
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.jobs.api</artifactId>
+			<version>0.1</version>
+		</dependency>
   </dependencies>
 
 

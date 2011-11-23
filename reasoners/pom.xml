@@ -41,6 +41,7 @@
     <module>servicesapi</module>
     <module>manager</module>
     <module>jobs/api</module>
+    <module>jobs/web</module>
     <module>owlapi</module>
     <module>jena</module>
     <module>test</module>

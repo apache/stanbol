@@ -9,9 +9,9 @@
 		<relativePath>../../parent</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>org.apache.stanbol.reasoners.jobs.api</artifactId>
+	<artifactId>org.apache.stanbol.commons.jobs.api</artifactId>
 	<packaging>bundle</packaging>
-	<name>Apache Stanbol Reasoners: Jobs API</name>
+	<name>Apache Stanbol Commons Jobs API</name>
 	<version>0.1</version>
 
 	<description>Background jobs, API and Manager </description>
@@ -33,7 +33,7 @@
 						org.slf4j.*
 						</Import-Package>
 						<Export-Package>
-						org.apache.stanbol.reasoners.jobs.api.*
+						org.apache.stanbol.commons.jobs.api.*
 						</Export-Package>
 					</instructions>
 				</configuration>
@@ -83,11 +83,6 @@
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.owl</artifactId>
 		</dependency -->
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.reasoners.servicesapi</artifactId>
-			<version>0.1</version>
-		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>

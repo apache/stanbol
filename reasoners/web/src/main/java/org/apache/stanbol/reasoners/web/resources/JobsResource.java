@@ -1,6 +1,5 @@
 package org.apache.stanbol.reasoners.web.resources;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -15,16 +14,16 @@ import javax.ws.rs.core.Response;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.reasoners.jobs.api.JobManager;
+import org.apache.stanbol.commons.jobs.api.JobManager;
 import org.apache.stanbol.reasoners.web.utils.ReasoningServiceResult;
 import org.apache.stanbol.reasoners.web.utils.ResponseTaskBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * To ping Jobs
+ * Return the result of a reasoners background job
  * 
- * @author mac
+ * @author enridaga
  * 
  */
 @Path("/reasoners/jobs")
@@ -38,8 +37,14 @@ public class JobsResource extends BaseStanbolResource {
         this.headers = headers;
     }
 
+    /**
+     * To read a /reasoners job output.
+     * 
+     * @param id
+     * @return
+     */
     @GET
-    @Path("ping/{jid}")
+    @Path("/{jid}")
     public Response get(@PathParam("jid") String id) {
         log.info("Pinging job {}", id);
 
@@ -54,68 +59,43 @@ public class JobsResource extends BaseStanbolResource {
         if (m.hasJob(id)) {
             log.info("Found job with id {}", id);
             Future<?> f = m.ping(id);
-            if(f.isDone()){
-                if(f.isCancelled()){
-                    // NOTE: In this case the job still remains in the JobManager list
-                    return Response.ok("Job have been canceled!").build();                
-                }else{
-                    Object o;
-                    try {
-                        o = f.get();
-                        if(o instanceof ReasoningServiceResult){
-                            log.debug("Is a ReasoningServiceResult");
-                            ReasoningServiceResult<?> result = (ReasoningServiceResult<?>) o;
-                            return new ResponseTaskBuilder(uriInfo,context,headers).build(result);
-                        }else if(o instanceof String){
-                            // FIXME We keep this for the moment, must remove later on
-                            return Response.ok("Test Job is done!\n " + (String) o).build();                        
-                        }else{
-                            log.error("Unsupported job result type: {}",o.getClass());
-                            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
-                        }
-                    } catch (InterruptedException e) {
-                        log.error("Error: ",e);
-                        throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
-                    } catch (ExecutionException e) {
-                        log.error("Error: ",e);
-                        throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+            if(f.isDone() && (!f.isCancelled())){
+                /**
+                 * We return OK with the result
+                 */
+                Object o;
+                try {
+                    o = f.get();
+                    if(o instanceof ReasoningServiceResult){
+                        log.debug("Is a ReasoningServiceResult");
+                        ReasoningServiceResult<?> result = (ReasoningServiceResult<?>) o;
+                        return new ResponseTaskBuilder(uriInfo,context,headers).build(result);
+                    }else{
+                        log.error("Job {} does not belong to reasoners", id);
+                        throw new WebApplicationException(Response.Status.NOT_FOUND);
                     }
+                } catch (InterruptedException e) {
+                    log.error("Error: ",e);
+                    throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+                } catch (ExecutionException e) {
+                    log.error("Error: ",e);
+                    throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
                 }
+                
             }else{
-                // FIXME Change the HTTP Status code here!
-                return Response.ok("Job is still working").build();
+                /**
+                 * We return 404 with additional info
+                 */
+                String jobService = new StringBuilder().append(getPublicBaseUri()).append("/jobs/").append(id).toString();
+                StringBuilder b = new StringBuilder();
+                b.append("Result not ready.\n");
+                b.append("See: ").append(jobService);
+                return Response.status(404).header("Content-Location", jobService).entity( b.toString() ).build();
             }
         } else {
             log.info("No job found with id {}", id);
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-    }
-
-    /**
-     * Creates a new background job to be used to test
-     * 
-     * @return
-     */
-    @GET
-    @Path("test")
-    public Response test() {
-        log.info("Starting test job");
-
-        // No id
-        JobManager m = getJobManager();
-        String id = m.execute(new Callable<String>() {
-            @Override
-            public String call() throws Exception {
-                for (int i = 0; i < 10; i++) {
-                    try {
-                        log.info("Test Process is working");
-                        Thread.sleep(1000);
-                    } catch (InterruptedException ie) {}
-                }
-                return "This is the test job";
-            }
-        });
-        return Response.ok(id).build();
     }
 
     /**

@@ -6,13 +6,14 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.apache.stanbol.reasoners.jobs.api.JobManager;
-import org.apache.stanbol.reasoners.jobs.impl.JobManagerImpl;
+import org.apache.stanbol.commons.jobs.api.Job;
+import org.apache.stanbol.commons.jobs.api.JobManager;
+import org.apache.stanbol.commons.jobs.api.JobResult;
+import org.apache.stanbol.commons.jobs.impl.JobManagerImpl;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -62,10 +63,10 @@ public class TestJobManagerImpl {
         final int max = countUntil;
         final int number = jobs.size() + 1;
         final int jst = jobsleepTime;
-        jobs.add(jobManager.execute(new Callable<String>() {
+        jobs.add(jobManager.execute(new Job() {
 
             @Override
-            public String call() {
+            public JobResult call() {
                 final int num = number;
                 for (int i = 0; i < max; i++) {
                     try {
@@ -73,9 +74,25 @@ public class TestJobManagerImpl {
                         Thread.sleep(jst);
                     } catch (InterruptedException ie) {}
                 }
-                return "This is process " + Integer.toString(num);
+                JobResult r = new JobResult(){
+
+                    @Override
+                    public String getMessage() {
+                        return "This is process " + Integer.toString(num);
+                    }
+
+                    @Override
+                    public boolean isSuccess() {
+                        return true;
+                    }
+                };
+                return r;
             }
 
+            @Override
+            public String buildResultLocation(String jobId) {
+                return null;
+            }
         }));
     }
 

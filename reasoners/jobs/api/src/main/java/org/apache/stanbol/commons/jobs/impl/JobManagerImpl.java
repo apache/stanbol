@@ -1,17 +1,18 @@
-package org.apache.stanbol.reasoners.jobs.impl;
+package org.apache.stanbol.commons.jobs.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.stanbol.reasoners.jobs.api.JobManager;
+import org.apache.stanbol.commons.jobs.api.Job;
+import org.apache.stanbol.commons.jobs.api.JobManager;
 /**
  * Implementation of the {@JobManager} interface.
  * 
@@ -23,27 +24,40 @@ import org.apache.stanbol.reasoners.jobs.api.JobManager;
  *
  */
 public class JobManagerImpl implements JobManager {
-    ExecutorService pool;
-    Map<String,Future<?>> taskMap;
+    private ExecutorService pool;
+    private Map<String,Future<?>> taskMap;
+    private Map<String,String> locations;
 
     public JobManagerImpl() {
         this.pool = Executors.newCachedThreadPool();
         this.taskMap = new HashMap<String,Future<?>>();
+        this.locations = new HashMap<String,String>();
     }
 
     @Override
-    public String execute(Callable<?> callable) {
-        String id = JobManagerImpl.buildId(callable);
-        Future<?> future = this.pool.submit(callable);
+    public String execute(Job job) {
+        String id = JobManagerImpl.buildId(job);
+        Future<?> future = this.pool.submit(job);
         synchronized (taskMap) {
             taskMap.put(id, future);
+            locations.put(id, job.buildResultLocation(id));
             return id;
         }
     }
 
     @Override
     public Future<?> ping(String id) {
-        return taskMap.get(id);
+        synchronized (taskMap) {
+            return taskMap.get(id);            
+        }
+    }
+
+
+    @Override
+    public String getResultLocation(String id) {
+        synchronized (locations) {
+            return locations.get(id);            
+        }
     }
 
     @Override
@@ -63,11 +77,18 @@ public class JobManagerImpl implements JobManager {
     @Override
     public void remove(String id) {
         synchronized (taskMap) {
-            taskMap.get(id).cancel(true);
+            // If the job does not exists
+            Future<?> f = taskMap.get(id);
+            if(f==null) {
+                throw new IllegalArgumentException("Job does not exists");
+            }
+            f.cancel(true);
             taskMap.remove(id);
+            synchronized (locations) {
+                locations.remove(id);
+            }
         }
     }
-    
 
     /**
      * To build a unique string identifier for a background process
@@ -75,7 +96,7 @@ public class JobManagerImpl implements JobManager {
      * @param obj
      * @return
      */
-    private static String buildId(Object obj) {
+    public static String buildId(Object obj) {
         String str = obj.toString();
         byte[] thedigest = null;
         try {
@@ -90,6 +111,20 @@ public class JobManagerImpl implements JobManager {
             e.printStackTrace();
         }
         return Base64.encodeBase64URLSafeString(thedigest);
+    }
+
+    /**
+     * Removes all jobs
+     */
+    @Override
+    public void removeAll() {
+        String[] ids;
+        synchronized (taskMap) {
+            ids =  taskMap.keySet().toArray(new String[taskMap.keySet().size()]);
+        }
+        for(String j : ids){
+            remove(j);
+        }
     }
 
 }

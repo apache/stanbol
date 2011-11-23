@@ -1,6 +1,8 @@
 package org.apache.stanbol.reasoners.web.utils;
 
-public class ReasoningServiceResult<T extends Object> {
+import org.apache.stanbol.commons.jobs.api.JobResult;
+
+public class ReasoningServiceResult<T extends Object> implements JobResult{
     private T resultObj;
     private boolean success;
     private String task;
@@ -29,15 +31,26 @@ public class ReasoningServiceResult<T extends Object> {
         this.success = true;
     }
 
-    public Object get() {
+    public T get() {
         return this.resultObj;
     }
 
+    @Override
     public boolean isSuccess() {
         return success;
     }
 
     public String getTask() {
         return task;
+    }
+
+    @Override
+    public String getMessage() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Task: ").append(task).append(". Result: ").append(success).append(". ");
+        if(resultObj!=null){
+            sb.append("Result type is ").append(resultObj.getClass().getCanonicalName());
+        }
+        return sb.toString();
     }
 }

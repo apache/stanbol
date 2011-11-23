@@ -6,6 +6,7 @@ import static javax.ws.rs.core.MediaType.TEXT_HTML;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,7 +35,7 @@ import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.reasoners.jena.JenaReasoningService;
-import org.apache.stanbol.reasoners.jobs.api.JobManager;
+import org.apache.stanbol.commons.jobs.api.JobManager;
 import org.apache.stanbol.reasoners.owlapi.OWLApiReasoningService;
 import org.apache.stanbol.reasoners.servicesapi.InconsistentInputException;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningService;
@@ -236,9 +237,11 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         ReasoningServiceExecutor executor = new ReasoningServiceExecutor(tcManager, imngr,
                 getCurrentService(), getCurrentTask(), target, parameters);
         String jid = getJobManager().execute(executor);
-        // FIXME Represent this result better
-        // How to indicate another URI to ping for the actual response?
-        return Response.ok(jid).build();   
+        /**
+         * If everything went well, we return 201 Created
+         * We include the header Location: with the Job URL
+         */
+        return Response.created(URI.create(getPublicBaseUri() + "reasoners/job/"+jid)).build();   
     }
     
     private Response processRealTimeRequest(){
