@@ -56,7 +56,8 @@
 			com.sun.jersey.api.view.*, 
 			org.apache.commons.io.*,
 			org.apache.stanbol.commons.web.base.*,
-			org.apache.stanbol.commons.jobs.api.*
+			org.apache.stanbol.commons.jobs.api.*,
+			org.apache.stanbol.commons.jobs.impl.*
            </Import-Package>
          </instructions>
        </configuration>
