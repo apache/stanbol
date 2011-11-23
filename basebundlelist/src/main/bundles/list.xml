@@ -335,6 +335,11 @@
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.install</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
