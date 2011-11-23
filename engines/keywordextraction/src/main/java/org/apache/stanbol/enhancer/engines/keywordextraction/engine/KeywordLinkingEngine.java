@@ -68,8 +68,12 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(configurationFactory = true, policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
-    specVersion = "1.1", metatype = true, immediate = true)
+@Component(
+    configurationFactory = true, 
+    policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
+    specVersion = "1.1", 
+    metatype = true, 
+    immediate = true)
 @Service
 @org.apache.felix.scr.annotations.Properties(value={
     @Property(name=KeywordLinkingEngine.REFERENCED_SITE_ID),

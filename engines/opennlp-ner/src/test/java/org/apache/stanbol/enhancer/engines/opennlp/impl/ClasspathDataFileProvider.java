@@ -18,6 +18,7 @@ package org.apache.stanbol.enhancer.engines.opennlp.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Map;
 
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
@@ -46,6 +47,22 @@ public class ClasspathDataFileProvider implements DataFileProvider {
     public InputStream getInputStream(String bundleSymbolicName,
             String filename, Map<String, String> comments) 
     throws IOException {
+        final URL dataFile = getDataFile(bundleSymbolicName, filename);
+        
+        // Returning null is fine - if we don't have the data file, another
+        // provider might supply it
+        return dataFile != null ? dataFile.openStream() : null;
+    }
+    @Override
+    public boolean isAvailable(String bundleSymbolicName, String filename, Map<String,String> comments) {
+        return getDataFile(bundleSymbolicName, filename) != null;
+    }
+    /**
+     * @param bundleSymbolicName
+     * @param filename
+     * @return
+     */
+    private URL getDataFile(String bundleSymbolicName, String filename) {
         //If the symbolic name is not null check that is equals to the symbolic
         //name used to create this classpath data file provider
         if(bundleSymbolicName != null && !symbolicName.equals(bundleSymbolicName)) {
@@ -56,11 +73,8 @@ public class ClasspathDataFileProvider implements DataFileProvider {
         
         // load default OpenNLP models from classpath (embedded in the defaultdata bundle)
         final String resourcePath = RESOURCE_BASE_PATH + filename;
-        final InputStream in = getClass().getClassLoader().getResourceAsStream(resourcePath);
-        log.debug("Resource {} found: {}", (in == null ? "NOT" : ""), resourcePath);
-        
-        // Returning null is fine - if we don't have the data file, another
-        // provider might supply it
-        return in;
+        final URL dataFile = getClass().getClassLoader().getResource(resourcePath);
+        //log.debug("Resource {} found: {}", (in == null ? "NOT" : ""), resourcePath);
+        return dataFile;
     }
 }
