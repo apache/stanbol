@@ -33,7 +33,8 @@
 						org.slf4j.*
 						</Import-Package>
 						<Export-Package>
-						org.apache.stanbol.commons.jobs.api.*
+						org.apache.stanbol.commons.jobs.api.*,
+						org.apache.stanbol.commons.jobs.impl.*
 						</Export-Package>
 					</instructions>
 				</configuration>
