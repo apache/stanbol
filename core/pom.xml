@@ -119,14 +119,22 @@
 		</dependency>
 		
 		<!-- Solr/Lucene dependencies (needed for using embedded Solr servers) -->
-	    <dependency>
+ 	    <dependency>
 	    	<groupId>org.apache.solr</groupId>
 	    	<artifactId>solr-core</artifactId>
-	    </dependency>
+	    </dependency> 
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.solr.core</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>org.apache.stanbol</groupId>
+            <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+        </dependency>
 		
 		<!-- indirect dependency for freemarker -->
 		<dependency>

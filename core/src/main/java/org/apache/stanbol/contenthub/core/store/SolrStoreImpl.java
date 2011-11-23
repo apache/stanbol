@@ -55,9 +55,10 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
-import org.apache.stanbol.commons.solr.SolrDirectoryManager;
 import org.apache.stanbol.commons.solr.SolrServerProviderManager;
 import org.apache.stanbol.commons.solr.SolrServerTypeEnum;
+import org.apache.stanbol.commons.solr.managed.IndexMetadata;
+import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.core.utils.ContentItemIDOrganizer;
 import org.apache.stanbol.contenthub.core.utils.sparql.QueryGenerator;
 import org.apache.stanbol.contenthub.servicesapi.enhancements.vocabulary.EnhancementGraphVocabulary;
@@ -89,7 +90,7 @@ public class SolrStoreImpl implements SolrStore {
     SolrServerProviderManager solrServerProviderManager;
 
     @Reference
-    private SolrDirectoryManager solrDirectoryManager;
+    private ManagedSolrServer solrDirectoryManager;
 
     @Reference
     private TcManager tcManager;
@@ -103,18 +104,10 @@ public class SolrStoreImpl implements SolrStore {
 
     @Activate
     public void activate(ComponentContext context) throws IllegalArgumentException, IOException {
-        if (solrDirectoryManager != null) {
-            File indexDirectory = solrDirectoryManager.getSolrIndexDirectory(SOLR_SERVER_NAME);
-            if (indexDirectory == null) {
-                indexDirectory = solrDirectoryManager.createSolrDirectory(SOLR_SERVER_NAME, SOLR_SERVER_NAME,
-                    null);
-            }
-            String serverLocation = indexDirectory.toString();
-
-            server = solrServerProviderManager.getSolrServer(SolrServerTypeEnum.EMBEDDED, serverLocation);
-        } else {
-            logger.error("SolrDirectoryManager could not be obtained so could not connect to the Embedded Solr Instance");
+        if (!solrDirectoryManager.isManagedIndex(SOLR_SERVER_NAME)) {
+            solrDirectoryManager.createSolrIndex(SOLR_SERVER_NAME, SOLR_SERVER_NAME,null);
         }
+        server = solrServerProviderManager.getSolrServer(SolrServerTypeEnum.EMBEDDED, SOLR_SERVER_NAME);
     }
 
     @Override

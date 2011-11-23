@@ -33,9 +33,10 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
-import org.apache.stanbol.commons.solr.SolrDirectoryManager;
 import org.apache.stanbol.commons.solr.SolrServerProviderManager;
 import org.apache.stanbol.commons.solr.SolrServerTypeEnum;
+import org.apache.stanbol.commons.solr.managed.IndexMetadata;
+import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.core.search.execution.SearchContextImpl;
 import org.apache.stanbol.contenthub.servicesapi.search.engine.EngineProperties;
 import org.apache.stanbol.contenthub.servicesapi.search.engine.SearchEngine;
@@ -58,6 +59,7 @@ import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.impl.Util;
+import com.hp.hpl.jena.sparql.lib.Metadata;
 import com.hp.hpl.jena.util.iterator.Filter;
 import com.hp.hpl.jena.vocabulary.RDF;
 
@@ -89,7 +91,7 @@ public class SolrSearchEngine implements SearchEngine, EngineProperties {
     SolrServerProviderManager solrServerProviderManager;
 
     @Reference
-    SolrDirectoryManager solrDirectoryManager;
+    ManagedSolrServer solrDirectoryManager;
 
     @Activate
     /**
@@ -98,15 +100,10 @@ public class SolrSearchEngine implements SearchEngine, EngineProperties {
      */
     public void activate(ComponentContext cc) {
         try {
-            if (solrDirectoryManager != null) {
-                File indexDirectory = solrDirectoryManager.getSolrIndexDirectory(SERVER_NAME);
-                if (indexDirectory == null) {
-                    indexDirectory = solrDirectoryManager.createSolrDirectory(SERVER_NAME, SERVER_NAME, null);
-                }
-                String serverLocation = indexDirectory.toString();
-
-                server = solrServerProviderManager.getSolrServer(SolrServerTypeEnum.EMBEDDED, serverLocation);
+            if (!solrDirectoryManager.isManagedIndex(SERVER_NAME)) {
+                solrDirectoryManager.createSolrIndex(SERVER_NAME, SERVER_NAME, null);
             }
+            server = solrServerProviderManager.getSolrServer(SolrServerTypeEnum.EMBEDDED, SERVER_NAME);
             logger.warn("Could not get the EmbeddedSolr Instance since there is no SolrDirectoryManager");
         } catch (Exception e) {
             logger.warn("Could not get the EmbeddedSolr Instance at location : {}", SERVER_NAME, e);
