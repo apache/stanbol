@@ -23,7 +23,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +63,7 @@ public class DerbyFactStore implements FactStore {
 
 	private static final String CreateTableFactSchemata = "CREATE TABLE factschemata ( id INT GENERATED ALWAYS AS IDENTITY CONSTRAINT factschema_id PRIMARY KEY, name VARCHAR(128) NOT NULL )";
 	private static final String CreateTableFactRoles = "CREATE TABLE factroles ( id INT GENERATED ALWAYS AS IDENTITY CONSTRAINT factrole_id PRIMARY KEY, factschema_id INT NOT NULL CONSTRAINT factschema_foreign_key REFERENCES factschemata ON DELETE CASCADE ON UPDATE RESTRICT, name VARCHAR(128) NOT NULL, type VARCHAR(512) NOT NULL )";
-	private static final String CreateTableFactContexts = "CREATE TABLE factcontexts ( id INT GENERATED ALWAYS AS IDENTITY CONSTRAINT context_id PRIMARY KEY, validFrom TIMESTAMP, validTo TIMESTAMP, contextURN VARCHAR(1024) )";
+	private static final String CreateTableFactContexts = "CREATE TABLE factcontexts ( id INT GENERATED ALWAYS AS IDENTITY CONSTRAINT context_id PRIMARY KEY, created TIMESTAMP, updated TIMESTAMP, validFrom TIMESTAMP, validTo TIMESTAMP, contextURN VARCHAR(1024) )";
 
 	public static final String DB_URL = "jdbc:derby:factstore;create=true";
 
@@ -277,8 +279,8 @@ public class DerbyFactStore implements FactStore {
 		createTableSQL.append(factSchemaB64).append(' ');
 		createTableSQL.append('(');
 		createTableSQL.append("id INT GENERATED ALWAYS AS IDENTITY");
-		createTableSQL.append(", context_id INT CONSTRAINT ");
-		createTableSQL.append(factSchemaB64).append("_CFK");
+		createTableSQL.append(", context_id INT NOT NULL CONSTRAINT ");
+		createTableSQL.append(factSchemaB64).append("_foreign_key");
 		createTableSQL.append(" REFERENCES factcontexts ON DELETE CASCADE ON UPDATE RESTRICT");
 
 		for (String role : factSchema.getRoles()) {
@@ -288,21 +290,19 @@ public class DerbyFactStore implements FactStore {
 		}
 
 		// Append created time stamp
-		createTableSQL
-				.append(", created TIMESTAMP NOT NULL WITH DEFAULT CURRENT TIMESTAMP)");
+		//createTableSQL.append(", created TIMESTAMP NOT NULL WITH DEFAULT CURRENT TIMESTAMP");
+		createTableSQL.append(")");
 
 		sqls.add(createTableSQL.toString());
 
 		return sqls;
 	}
 
-	private void insertFactSchemaMetadata(FactSchema factSchema, Connection con)
-			throws Exception {
+	private void insertFactSchemaMetadata(FactSchema factSchema, Connection con) throws Exception {
 		PreparedStatement ps = null;
 		try {
 			String insertFactSchema = "INSERT INTO factschemata (name) VALUES ( ? )";
-			ps = con.prepareStatement(insertFactSchema,
-					PreparedStatement.RETURN_GENERATED_KEYS);
+			ps = con.prepareStatement(insertFactSchema,	PreparedStatement.RETURN_GENERATED_KEYS);
 			ps.setString(1, factSchema.getFactSchemaURN());
 			ps.executeUpdate();
 			ResultSet rs = ps.getGeneratedKeys();
@@ -312,12 +312,10 @@ public class DerbyFactStore implements FactStore {
 				factSchemaId = rs.getInt(1);
 			}
 			if (factSchemaId < 0) {
-				throw new Exception(
-						"Could not obtain fact schema ID after insert");
+				throw new Exception("Could not obtain fact schema ID after insert");
 			}
 
-			logger.info("Inserted new fact schema {} with ID {}", factSchema
-					.getFactSchemaURN(), factSchemaId);
+			logger.info("Inserted new fact schema {} with ID {}", factSchema.getFactSchemaURN(), factSchemaId);
 
 			String insertFactRoles = "INSERT INTO factroles (factschema_id, name, type) VALUES ( ?, ?, ? )";
 			ps = con.prepareStatement(insertFactRoles);
@@ -457,7 +455,7 @@ public class DerbyFactStore implements FactStore {
 
     @Override
 	public int addFact(Fact fact) throws Exception {
-		int factId = -1; 
+        int factId = -1; 
 	    Connection con = null;
 		try {
 			con = DriverManager.getConnection(DB_URL);
@@ -475,42 +473,94 @@ public class DerbyFactStore implements FactStore {
 		return factId;
 	}
 
-	private int addFact(Fact fact, Connection con) throws Exception {
+    private int addFact(Fact fact, Connection con) throws Exception {
         int factId = -1;
         FactSchema factSchema = this.loadFactSchema(fact.getFactSchemaURN(), con);
         if (factSchema != null) {
-            if (fact.getContext() != null) {
-                // TODO Create the context if present
-            }
-
+            StringBuilder insertContext = new StringBuilder("INSERT INTO factcontexts (created, updated, validFrom, validTo, contextURN) VALUES (?, ?, ?, ?, ?)");
+            
             // Create the fact
             String factSchemaB64 = Base64.encodeBase64URLSafeString(fact.getFactSchemaURN().getBytes());
 
-            StringBuilder insertFact = new StringBuilder("INSERT INTO ").append(factSchemaB64).append('(');
-            StringBuilder valueSB = new StringBuilder(" VALUES (");
+            StringBuilder insertFact = new StringBuilder("INSERT INTO ").append(factSchemaB64).append(" (context_id");
+            StringBuilder valueSB = new StringBuilder(" VALUES (?");
             
             Map<String,Integer> roleIndexMap = new HashMap<String,Integer>();
-            boolean firstRole = true;
-            int roleIndex = 0;
+            int roleIndex = 1;
             for (String role : factSchema.getRoles()) {
                 if (fact.getRoles().contains(role)) {
-                    if (!firstRole) {
-                        insertFact.append(',');
-                        valueSB.append(',');
-                    }
+                    insertFact.append(',');
+                    valueSB.append(',');
+
                     insertFact.append(role);
                     valueSB.append('?');
-                    firstRole = false;
                     
                     roleIndex++;
                     roleIndexMap.put(role, roleIndex);
                 }
             }
             insertFact.append(')').append(valueSB).append(')');
-
+            
             PreparedStatement ps = null;
             try {
+                ps = con.prepareStatement(insertContext.toString(), PreparedStatement.RETURN_GENERATED_KEYS);
+                long nowStamp = Calendar.getInstance().getTimeInMillis();
+                if (fact.getContext() != null) {
+                    if (fact.getContext().getCreated() != null) {
+                        ps.setTimestamp(1, new Timestamp(fact.getContext().getCreated().getTime()));
+                    }
+                    else {
+                        ps.setTimestamp(1, new Timestamp(nowStamp));
+                    }
+                    
+                    if (fact.getContext().getUpdated() != null) {
+                        ps.setTimestamp(2, new Timestamp(fact.getContext().getUpdated().getTime()));
+                    }
+                    else {
+                        ps.setTimestamp(2, new Timestamp(nowStamp));
+                    }
+                    
+                    if (fact.getContext().getValidFrom() != null) {
+                        ps.setTimestamp(3, new Timestamp(fact.getContext().getValidFrom().getTime()));
+                    }
+                    else {
+                        ps.setTimestamp(3, new Timestamp(nowStamp));
+                    }
+                    
+                    if (fact.getContext().getVaildTo() != null) {
+                        ps.setTimestamp(4, new Timestamp(fact.getContext().getVaildTo().getTime()));
+                    }
+                    else {
+                        ps.setTimestamp(4, null);
+                    }
+                    
+                    if (fact.getContext().getContextURN() != null) {
+                        ps.setString(5, fact.getContext().getContextURN());
+                    }
+                    else {
+                        ps.setTimestamp(5, null);
+                    }
+                }
+                else {
+                    ps.setTimestamp(1, new Timestamp(nowStamp));
+                    ps.setTimestamp(2, new Timestamp(nowStamp));
+                    ps.setTimestamp(3, new Timestamp(nowStamp));
+                    ps.setTimestamp(4, null);
+                    ps.setTimestamp(5, null);
+                }
+                ps.executeUpdate();
+                ResultSet rsContext = ps.getGeneratedKeys();
+                int contextId = -1;
+                if (rsContext.next()) {
+                    contextId = rsContext.getInt(1);
+                }
+                if (contextId < 0) {
+                    throw new Exception("Could not obtain context ID after insert");
+                }
+                logger.info("Inserted new context with ID {} into factcontexts table", contextId);
+                
                 ps = con.prepareStatement(insertFact.toString(), PreparedStatement.RETURN_GENERATED_KEYS);
+                ps.setInt(1, contextId);
                 for (String role : fact.getRoles()) {
                     Integer roleIdx = roleIndexMap.get(role);
                     if (roleIdx == null) {
@@ -521,9 +571,9 @@ public class DerbyFactStore implements FactStore {
                     }
                 }
                 ps.executeUpdate();
-                ResultSet rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    factId = rs.getInt(1);
+                ResultSet rsFact = ps.getGeneratedKeys();
+                if (rsFact.next()) {
+                    factId = rsFact.getInt(1);
                 }
                 if (factId < 0) {
                     throw new Exception("Could not obtain fact ID after insert");
