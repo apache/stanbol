@@ -42,10 +42,21 @@
     <module>manager</module>
     <module>owlapi</module>
     <module>jena</module>
-    <!--module>hermit</module-->
+    <module>test</module>
+    <module>hermit</module>
     <!--module>base</module-->
     <module>owllink</module>
     <module>web</module>
   </modules>
-
+  <profiles>
+  <profile>
+    <id>do-tests</id>
+    <activation>
+      <activeByDefault>false</activeByDefault>
+    </activation>
+    <modules>
+	<module>services-tests</module>
+    </modules>
+  </profile>
+</profiles>
 </project>

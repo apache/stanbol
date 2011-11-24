@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.reasoners.web.writers;
 
 import java.io.ByteArrayOutputStream;
@@ -19,6 +35,12 @@ import org.slf4j.LoggerFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFWriter;
 
+/**
+ * Writer for jena Model
+ * 
+ * @author enridaga
+ *
+ */
 @Provider
 @Produces({"application/rdf+xml", "text/turtle", "text/n3", "text/plain", "application/turtle"})
 public class JenaModelWriter implements MessageBodyWriter<Model> {
@@ -44,14 +66,14 @@ public class JenaModelWriter implements MessageBodyWriter<Model> {
     }
 
     public ByteArrayOutputStream toStream(Model t, String mediaType) {
-        log.info("Serializing model to {}. Statements are {}", mediaType, t.listStatements().toSet().size());
+        log.debug("Serializing model to {}. Statements are {}", mediaType, t.listStatements().toSet().size());
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         if (mediaType.equals("application/rdf+xml")) {
             t.write(stream);
         } else if (mediaType.equals("application/turtle")) {
             // t.write(stream, "TURTLE");
             RDFWriter writer = t.getWriter("TURTLE");
-            log.info("Writer for TURTLE: {}", writer);
+            log.debug("Writer for TURTLE: {}", writer);
             writer.write(t, stream, null);
         } else if (mediaType.equals("text/turtle")) {
             t.write(stream, "TURTLE");
@@ -60,7 +82,9 @@ public class JenaModelWriter implements MessageBodyWriter<Model> {
         } else if (mediaType.equals("text/n3")) {
             t.write(stream, "N3");
         }
-        log.info("Written {} bytes to stream", stream.toByteArray().length);
+        if(log.isDebugEnabled()){
+            log.debug("Written {} bytes to stream", stream.toByteArray().length);
+        }
         return stream;
     }
 

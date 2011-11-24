@@ -16,8 +16,7 @@
 -->
 <#import "/imports/common.ftl" as common>
 <#escape x as x?html>
-<@common.page title="Reasoners: Result" hasrestapi=false> 
-		
+<@common.page title="Reasoners: Result" hasrestapi=false>	
  <div class="panel">
 <pre>
 ${it.result}

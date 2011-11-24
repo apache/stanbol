@@ -31,6 +31,7 @@ import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.reasoners.web.resources.JobsResource;
 import org.apache.stanbol.reasoners.web.resources.ReasoningServiceTaskResource;
 import org.apache.stanbol.reasoners.web.resources.ReasoningServicesResource;
 import org.apache.stanbol.reasoners.web.writers.JenaModelWriter;
@@ -80,6 +81,7 @@ public class ReasonersFragment implements WebFragment {
         //classes.add(ReasonersResource.class);
         classes.add(ReasoningServicesResource.class);
         classes.add(ReasoningServiceTaskResource.class);
+        classes.add(JobsResource.class);
 
         // Writer
         classes.add(JenaModelWriter.class);

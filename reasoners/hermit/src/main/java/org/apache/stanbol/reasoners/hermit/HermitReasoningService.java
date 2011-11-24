@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class is the implementation of {@see OWLApiReasoningService} using the HermiT reasoner
+ * 
+ * @author enridaga
  */
 @Component(immediate = true, metatype = true)
 @Service

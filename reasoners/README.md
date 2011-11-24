@@ -82,16 +82,21 @@ These additional parameters can be sent:
 Supported output formats:
 Supported return formats are all classic RDF types (n3,turtle,rdf+xml) and HTML. For HTML the returned statements are provided in Turtle (Jena) or OWL Manchester syntax (OWLApi), wrapped in the stanbol layout. It would be nice to have all in the latter, which is very much readable (todo).
 
+Recently added
+=============
+
+* Support for long-term operations. This is crucial for reasoning tasks, since it can take some time with large graphs. This is needed in general for Stanbol, something like "Stanbol Jobs".
+
 Todo
 =============
+
 * Support for return types json and json-ld (need to write jersey writers)
 * The front service actually returns only inferred statements. It is useful also to have the complete set of input+inferred statements
-* Support for long-term operations. This is crucial for reasoning tasks, since it can take some time with large graphs. This is needed in general for Stanbol, something like "Stanbol Jobs".
 * Decouple input preparation from the rest endpoint resource, creating something like an InputProvider SCR api;  each InputProvider is bound to a set of additional parameters. 
 This have several benefits:
 ** Remove of additional optional parameters, bound to specific input sources from the default rest api (ex, session, scope, recipe)
 ** Remove dependencies to ontonet, rules and other modules which are not needed for standard usage. They could be implemented as InputProvider/s, bound to specific parameters.
-** Allow the addition of other input sources (for example 'graph', 'entity' or 'site')
+** Allow the addition of other input sources (for example 'graph', 'entity' or 'site') 
 * Implement a Custom Jena ReasoningService, to use a Jena rules file or a stanbol recipe (when implemented the toJena() functionality in the rules module) from configuration. This could be done as multiple SCR instance, as it is now for entityhub sites, for example.
 * Provide a validation report in case of task CHECK (validity check).
 * Implement a progress monitor, relying on the jena and owlapi apis, which have this feature, for debugging purpose
