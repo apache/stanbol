@@ -50,7 +50,7 @@ public class TestJobManagerImpl {
     // Each job counts until ...
     private static final int countUntil = 100;
     // Each count sleep ... ms
-    private static final int jobsleepTime = 100;
+    private static final int jobsleepTime = 10;
     
     private static JobManager jobManager;
     private static List<String> jobs;
