@@ -72,6 +72,8 @@ public class OWLUtils {
         return IRI.create(iri);
     }
 
+    public static final String NS_STANBOL = "http://stanbol.apache.org/";
+
     public static UriRef guessOntologyIdentifier(TripleCollection g) {
         Iterator<Triple> it = g.filter(null, RDF.type, OWL.Ontology);
         if (it.hasNext()) {
@@ -80,6 +82,6 @@ public class OWLUtils {
                 "RDF Graph {} has multiple OWL ontology definitions! Ignoring all but {}", g, subj);
             if (subj instanceof UriRef) return (UriRef) subj;
         }
-        return null;
+        return new UriRef(NS_STANBOL + System.currentTimeMillis());
     }
 }

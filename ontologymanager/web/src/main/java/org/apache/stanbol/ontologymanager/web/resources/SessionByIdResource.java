@@ -45,7 +45,7 @@ import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyContentInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphContentInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.IrremovableOntologyException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorModificationException;
@@ -56,6 +56,8 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The REST resource of an OntoNet {@link Session} whose identifier is known.
@@ -76,6 +78,8 @@ public class SessionByIdResource extends BaseStanbolResource {
     protected SessionManager sesMgr;
 
     protected Session session;
+
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     public SessionByIdResource(@PathParam(value = "id") String sessionId,
                                @Context ServletContext servletContext) {
@@ -192,14 +196,19 @@ public class SessionByIdResource extends BaseStanbolResource {
                        KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
     @Produces(MediaType.TEXT_PLAIN)
     public Response manageOntology(InputStream content) {
+        long before = System.currentTimeMillis();
         if (session == null) return Response.status(NOT_FOUND).build();
         try {
-            session.addOntology(new OntologyContentInputSource(content));
+            session.addOntology(new GraphContentInputSource(content)
+            // new OntologyContentInputSource(content)
+            );
         } catch (UnmodifiableOntologyCollectorException e) {
             throw new WebApplicationException(e, FORBIDDEN);
         } catch (OWLOntologyCreationException e) {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
+        log.debug("POST request for ontology addition completed in {} ms.",
+            (System.currentTimeMillis() - before));
         return Response.status(OK).type(MediaType.TEXT_PLAIN).build();
     }
 

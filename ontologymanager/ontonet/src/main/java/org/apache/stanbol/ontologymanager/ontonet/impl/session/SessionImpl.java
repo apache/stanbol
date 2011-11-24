@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
@@ -83,8 +82,7 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
     }
 
     /**
-     * FIXME not merging yet
-     * FIXME not including imported ontologies
+     * FIXME not merging yet FIXME not including imported ontologies
      * 
      * @see OWLExportable#asOWLOntology(boolean)
      */

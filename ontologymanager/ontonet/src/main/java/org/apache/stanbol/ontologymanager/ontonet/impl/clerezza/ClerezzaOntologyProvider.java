@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -56,6 +57,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
+import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.owl.PhonyIRIMapper;
 import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
@@ -306,7 +308,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
     @Override
     public String loadInStore(InputStream data, String formatIdentifier, boolean force) {
         // TODO Instead of copying the code, reuse it.
-
+        long before = System.currentTimeMillis();
         if (data == null) throw new IllegalArgumentException("No data to load ontologies from.");
 
         // Force is ignored for the content, but the imports?
@@ -331,10 +333,9 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
         boolean loaded = false;
 
-        Set<String> formats;
-        if (formatIdentifier == null || "".equals(formatIdentifier.trim())) formats = parser
-                .getSupportedFormats();
-        // TODO reorder formats
+        Collection<String> formats;
+        if (formatIdentifier == null || "".equals(formatIdentifier.trim())) formats = OntologyUtils
+                .getPreferredSupportedFormats(parser.getSupportedFormats());
         else formats = Collections.singleton(formatIdentifier);
         for (String format : formats) {
             try {
@@ -386,8 +387,9 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             }
         }
         if (loaded) {
-//            System.out.println("I am mapping "+ontologyIri+" to key "+s);
+            // System.out.println("I am mapping "+ontologyIri+" to key "+s);
             ontologyIdsToKeys.put(ontologyIri, s);
+            log.debug("Load and Store completed in {} ms", (System.currentTimeMillis() - before));
             return s;
         } else return null;
     }
@@ -417,10 +419,9 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
         boolean loaded = false;
 
-        Set<String> formats;
-        if (formatIdentifier == null || "".equals(formatIdentifier.trim())) formats = parser
-                .getSupportedFormats();
-        // TODO reorder formats
+        Collection<String> formats;
+        if (formatIdentifier == null || "".equals(formatIdentifier.trim())) formats = OntologyUtils
+                .getPreferredSupportedFormats(parser.getSupportedFormats());
         else formats = Collections.singleton(formatIdentifier);
         for (String format : formats) {
             try {
@@ -468,7 +469,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             }
         }
         if (loaded) {
-//            System.out.println("I am mapping "+ontologyIri+" to key "+s);
+            // System.out.println("I am mapping "+ontologyIri+" to key "+s);
             ontologyIdsToKeys.put(ontologyIri, s);
             return s;
         } else return null;
@@ -515,6 +516,78 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
     @Override
     public Serializer getSerializer() {
         return serializer;
+    }
+
+    @Override
+    public String loadInStore(Object ontology, boolean force) {
+
+        // TODO Instead of copying the code, reuse it.
+        long before = System.currentTimeMillis();
+        if (ontology == null) throw new IllegalArgumentException("No ontology supplied.");
+
+        MGraph graph;
+        TripleCollection rdfData;
+
+        if (ontology instanceof OWLOntology) {
+            rdfData = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph((OWLOntology) ontology);
+        } else if (ontology instanceof TripleCollection) {
+            rdfData = (TripleCollection) ontology;
+        } else throw new UnsupportedOperationException(
+                "This ontology provider can only accept objects assignable to " + TripleCollection.class
+                        + " or " + OWLOntology.class);
+
+        // Force is ignored for the content, but the imports?
+
+        String s = prefix + "::";
+        IRI ontologyIri = null;
+
+        boolean loaded = false;
+        
+        // FIXME are we getting rid of rdfData after adding its triples?
+        String iri = OWLUtils.guessOntologyIdentifier(rdfData).getUnicodeString();
+        ontologyIri = IRI.create(iri);
+        s += iri;
+        // Was most likely a SimpleMGraph
+//        if (rdfData instanceof MGraph) {
+//            graph = (MGraph) rdfData;
+//        } else 
+        {
+            UriRef uriref = new UriRef(s);
+            try {
+                graph = store.createMGraph(uriref);
+                // graph = new SimpleMGraph();
+            } catch (EntityAlreadyExistsException e) {
+                if (uriref.equals(e.getEntityName())) graph = store.getMGraph(uriref);
+                else graph = store.createMGraph(uriref);
+            }
+            graph.addAll(rdfData);
+        }
+        if (resolveImports) {
+            Iterator<Triple> it = graph.filter(null, RDF.type, OWL.Ontology);
+            if (it.hasNext()) {
+                Iterator<Triple> it2 = graph.filter(it.next().getSubject(), OWL.imports, null);
+                while (it2.hasNext()) {
+                    Resource obj = it2.next().getObject();
+                    if (obj instanceof UriRef) try {
+                        loadInStore(IRI.create(((UriRef) obj).getUnicodeString()), null, false);
+                    } catch (UnsupportedFormatException e) {
+                        log.warn("Failed to parse format for resource " + obj, e);
+                    } catch (IOException e) {
+                        log.warn("Failed to load ontology from resource " + obj, e);
+                    }
+                }
+            }
+
+        }
+
+        loaded = true;
+
+        if (loaded) {
+            // System.out.println("I am mapping "+ontologyIri+" to key "+s);
+            ontologyIdsToKeys.put(ontologyIri, s);
+            log.debug("Load and Store completed in {} ms", (System.currentTimeMillis() - before));
+            return s;
+        } else return null;
     }
 
 }

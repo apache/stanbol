@@ -53,7 +53,7 @@ import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyContentInputSource;
+import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphContentInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologySetInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
@@ -150,9 +150,12 @@ public class ScopeResource extends BaseStanbolResource {
                        KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
     @Produces(MediaType.TEXT_PLAIN)
     public Response manageOntology(InputStream content) {
+        long before = System.currentTimeMillis();
         if (scope == null) return Response.status(NOT_FOUND).build();
         try {
-            scope.getCustomSpace().addOntology(new OntologyContentInputSource(content));
+            scope.getCustomSpace().addOntology(new GraphContentInputSource(content)
+            // new OntologyContentInputSource(content)
+            );
         } catch (UnmodifiableOntologyCollectorException e) {
             throw new WebApplicationException(e, FORBIDDEN);
         } catch (UnloadableImportException e) {
@@ -161,6 +164,8 @@ public class ScopeResource extends BaseStanbolResource {
         } catch (OWLOntologyCreationException e) {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
+        log.debug("POST request for ontology addition completed in {} ms.",
+            (System.currentTimeMillis() - before));
         return Response.status(OK).type(MediaType.TEXT_PLAIN).build();
     }
 

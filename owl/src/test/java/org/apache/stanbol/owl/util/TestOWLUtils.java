@@ -54,7 +54,8 @@ public class TestOWLUtils {
         InputStream inputStream = getClass().getResourceAsStream("/owl/nameless_ontology.owl");
         MGraph mg = TcManager.getInstance().createMGraph(uri);
         pp.parse(mg, inputStream, "application/rdf+xml", uri);
-        assertNull(OWLUtils.guessOntologyIdentifier(mg.getGraph()));
+//        No longer null!
+        assertNotNull(OWLUtils.guessOntologyIdentifier(mg.getGraph()));
     }
 
     @After

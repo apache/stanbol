@@ -39,8 +39,6 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  */
 public interface OntologyProvider<S> {
     
-    Serializer getSerializer();
-
     /**
      * The key used to configure the prefix to be used for addressing ontologies stored by this provider.
      */
@@ -54,6 +52,8 @@ public interface OntologyProvider<S> {
     String getKey(IRI ontologyIRI);
 
     Set<String> getKeys();
+
+    Serializer getSerializer();
 
     /**
      * Returns the storage system used by this ontology provider (e.g. a {@link TcProvider} or an
@@ -136,4 +136,6 @@ public interface OntologyProvider<S> {
     String loadInStore(IRI location, String formatIdentifier, boolean force) throws IOException,
                                                                             UnsupportedFormatException;
 
+    String loadInStore(Object ontology, boolean force);
+    
 }

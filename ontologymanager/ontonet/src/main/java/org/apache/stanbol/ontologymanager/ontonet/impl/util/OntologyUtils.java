@@ -17,6 +17,8 @@
 package org.apache.stanbol.ontologymanager.ontonet.impl.util;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -286,6 +288,22 @@ public class OntologyUtils {
         }
         printer.println(tgt.toString());
 
+    }
+
+    private static String[] preferredFormats = {"application/rdf+xml", "application/rdf+json", "text/turtle",
+                                                "text/rdf+n3", "text/rdf+nt", "text/owl-manchester",
+                                                "application/owl+xml"};
+    
+    public static List<String> getPreferredSupportedFormats(Collection<String> supported) {
+        List<String> result = new ArrayList<String>();
+        for (String f : preferredFormats)
+            if (supported.contains(f))
+                result.add(f);
+        // The non-preferred supported formats on the tail in any order
+        for (String f : supported)
+            if (!result.contains(f))
+                result.add(f);
+        return result;
     }
 
 }

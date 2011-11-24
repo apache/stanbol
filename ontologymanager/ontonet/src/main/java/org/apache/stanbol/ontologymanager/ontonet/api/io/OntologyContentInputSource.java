@@ -22,16 +22,23 @@ import org.apache.stanbol.owl.util.OWLUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OntologyContentInputSource extends AbstractOWLOntologyInputSource {
 
+    private Logger log = LoggerFactory.getLogger(getClass());
+    
     public OntologyContentInputSource(InputStream content) throws OWLOntologyCreationException {
         this(content, OWLManager.createOWLOntologyManager());
     }
 
     public OntologyContentInputSource(InputStream content, OWLOntologyManager manager) throws OWLOntologyCreationException {
+        long before = System.currentTimeMillis();
         bindPhysicalIri(null);
         bindRootOntology(manager.loadOntologyFromOntologyDocument(content));
+        log.debug("Input source initialization completed in {} ms.",
+            (System.currentTimeMillis() - before));
     }
 
     @Override

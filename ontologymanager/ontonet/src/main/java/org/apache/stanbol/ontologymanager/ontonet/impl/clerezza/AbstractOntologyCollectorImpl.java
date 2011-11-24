@@ -102,8 +102,9 @@ public abstract class AbstractOntologyCollectorImpl implements LockableOntologyC
 
     @Override
     public synchronized void addOntology(OntologyInputSource<?> ontologySource) throws UnmodifiableOntologyCollectorException {
+        long before = System.currentTimeMillis();
         if (locked) throw new UnmodifiableOntologyCollectorException(this);
-        log.debug("Adding ontology {} to space {}", ontologySource != null ? ontologySource.getRootOntology()
+        log.debug("Adding ontology {} to space {}", ontologySource != null ? ontologySource
                 : "<NULL>", getNamespace() + getID());
         if (ontologySource == null || !ontologySource.hasRootOntology()) return; // No ontology to add
 
@@ -128,40 +129,43 @@ public abstract class AbstractOntologyCollectorImpl implements LockableOntologyC
         // // FIXME there must be a better angle than using converters...
         // mg.addAll(OWLAPIToClerezzaConverter.owlOntologyToClerezzaTriples((OWLOntology) o));
         // }
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        // serialize it
-        if (o instanceof TripleCollection) {
-            ontologyProvider.getSerializer().serialize(out, (TripleCollection) o, SupportedFormat.RDF_XML);
-            // in = new ByteArrayInputStream(out.toByteArray());
-        } else if (o instanceof OWLOntology) {
-            try {
-                ((OWLOntology) o).getOWLOntologyManager().saveOntology((OWLOntology) o,
-                    new RDFXMLOntologyFormat(), new StreamDocumentTarget(out));
-            } catch (OWLOntologyStorageException e) {
-                log.error("Could not serialize the ontology for storage", e);
-                return;
-            }
-        }
+//        ByteArrayOutputStream out = new ByteArrayOutputStream();
+//        // serialize it
+//        if (o instanceof TripleCollection) {
+//            ontologyProvider.getSerializer().serialize(out, (TripleCollection) o, SupportedFormat.RDF_XML);
+//            // in = new ByteArrayInputStream(out.toByteArray());
+//        } else if (o instanceof OWLOntology) {
+//            try {
+//                ((OWLOntology) o).getOWLOntologyManager().saveOntology((OWLOntology) o,
+//                    new RDFXMLOntologyFormat(), new StreamDocumentTarget(out));
+//            } catch (OWLOntologyStorageException e) {
+//                log.error("Could not serialize the ontology for storage", e);
+//                return;
+//            }
+//        }
 
         String key = null;
-
-        InputStream in = new ByteArrayInputStream(out.toByteArray());
-        try {
-            key = ontologyProvider.loadInStore(in, SupportedFormat.RDF_XML, false);
-        } catch (UnsupportedFormatException e) {
-            // RDF/XML not supported is next to impossible...
-            log.error("Format {} not supported for deserialization.", SupportedFormat.RDF_XML);
-            return;
-        } catch (IOException e) {
-            log.error("Deserialization failed.", e);
-            return;
-        }
+        key = ontologyProvider.loadInStore(o, false);
+        
+//        InputStream in = new ByteArrayInputStream(out.toByteArray());
+//        try {
+//            key = ontologyProvider.loadInStore(in, SupportedFormat.RDF_XML, false);
+//        } catch (UnsupportedFormatException e) {
+//            // RDF/XML not supported is next to impossible...
+//            log.error("Format {} not supported for deserialization.", SupportedFormat.RDF_XML);
+//            return;
+//        } catch (IOException e) {
+//            log.error("Deserialization failed.", e);
+//            return;
+//        }
 
         if (key != null && !key.isEmpty()) {
             // add to index
             managedOntologies.put(IRI.create(uri.getUnicodeString()), key);
+            log.debug("Add ontology completed in {} ms.", (System.currentTimeMillis() - before));
             // fire the event
             fireOntologyAdded(uri);
+
         }
     }
 
@@ -238,7 +242,8 @@ public abstract class AbstractOntologyCollectorImpl implements LockableOntologyC
     public OWLOntology getOntology(IRI ontologyIri) {
         if (!hasOntology(ontologyIri)) return null;
         OWLOntology o;
-        o = (OWLOntology) ontologyProvider.getStoredOntology(ontologyProvider.getKey(ontologyIri), OWLOntology.class);
+        o = (OWLOntology) ontologyProvider.getStoredOntology(ontologyProvider.getKey(ontologyIri),
+            OWLOntology.class);
         // TripleCollection g = tcProvider.getTriples(new UriRef(ontologyIri.toString()));
         // o = OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(g);
         return o;

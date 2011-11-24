@@ -134,4 +134,9 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
         return null;
     }
 
+    @Override
+    public String loadInStore(Object ontology, boolean force) {
+        throw new UnsupportedOperationException("Not implemented for OWL API version.");
+    }
+
 }
