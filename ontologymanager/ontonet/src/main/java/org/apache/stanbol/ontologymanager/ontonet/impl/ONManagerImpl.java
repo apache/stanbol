@@ -27,7 +27,6 @@ import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -249,8 +248,7 @@ public class ONManagerImpl implements ONManager {
          * Assume this.tcm this.wtcp and this.wtcp were not filled in by OSGi-DS. As a matter of fact,
          * WeightedTcProvider is now ignored as we assume to use those bound with the TcManager.
          */
-        this(new ClerezzaOntologyProvider(tcm, offline, new Parser(), new Serializer()), offline,
-                configuration);
+        this(new ClerezzaOntologyProvider(tcm, offline, new Parser()), offline, configuration);
     }
 
     /**
@@ -364,7 +362,7 @@ public class ONManagerImpl implements ONManager {
             bootstrapOntologyNetwork(oConf);
 
         }
-        log.debug(ONManager.class + "activated.");
+        log.debug(ONManager.class + " activated.");
 
     }
 

@@ -35,6 +35,13 @@ import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
 
+/**
+ * Utility class that provides some object that would be provided by SCR reference in an OSGi environment. Can
+ * be used to simulate OSGi in unit tests.
+ * 
+ * @author alexdma
+ * 
+ */
 public class MockOsgiContext {
 
     public static Parser parser;
@@ -66,7 +73,7 @@ public class MockOsgiContext {
         serializer.bindSerializingProvider(new JenaSerializerProvider());
         serializer.bindSerializingProvider(new RdfJsonSerializingProvider());
 
-        ontologyProvider = new ClerezzaOntologyProvider(tcManager, offline, parser, serializer);
+        ontologyProvider = new ClerezzaOntologyProvider(tcManager, offline, parser);
         Dictionary<String,Object> onmconf = new Hashtable<String,Object>();
         onmconf.put(ONManager.ONTOLOGY_NETWORK_NS, "http://stanbol.apache.org/scope/");
         onManager = new ONManagerImpl(ontologyProvider, offline, onmconf);

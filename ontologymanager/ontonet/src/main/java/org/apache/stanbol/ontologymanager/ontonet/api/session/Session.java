@@ -18,8 +18,9 @@ package org.apache.stanbol.ontologymanager.ontonet.api.session;
 
 import java.util.Set;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.LockableOntologyCollector;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.Lockable;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollector;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 
 /**
@@ -28,7 +29,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
  * @author alexdma
  * 
  */
-public interface Session extends LockableOntologyCollector, SessionListenable, OWLExportable {
+public interface Session extends OntologyCollector, OWLExportable, Lockable, SessionListenable {
 
     /**
      * The states a session can be in: ACTIVE (for running sessions), HALTED (for inactive sessions that may

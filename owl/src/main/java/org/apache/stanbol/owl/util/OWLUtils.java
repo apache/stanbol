@@ -22,6 +22,7 @@ import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.semanticweb.owlapi.model.IRI;
@@ -35,6 +36,8 @@ import org.slf4j.LoggerFactory;
 public class OWLUtils {
 
     private static Logger log = LoggerFactory.getLogger(OWLUtils.class);
+
+    public static final String NS_STANBOL = "http://stanbol.apache.org/";
 
     public static UriRef guessOntologyIdentifier(Object g) {
         if (g instanceof TripleCollection) return guessOntologyIdentifier((TripleCollection) g);
@@ -72,8 +75,6 @@ public class OWLUtils {
         return IRI.create(iri);
     }
 
-    public static final String NS_STANBOL = "http://stanbol.apache.org/";
-
     public static UriRef guessOntologyIdentifier(TripleCollection g) {
         Iterator<Triple> it = g.filter(null, RDF.type, OWL.Ontology);
         if (it.hasNext()) {
@@ -83,5 +84,9 @@ public class OWLUtils {
             if (subj instanceof UriRef) return (UriRef) subj;
         }
         return new UriRef(NS_STANBOL + System.currentTimeMillis());
+    }
+
+    public static IRI guessOntologyIdentifier(UriRef key, TcProvider store) {
+        return IRI.create(guessOntologyIdentifier(store.getTriples(key)).getUnicodeString());
     }
 }

@@ -52,7 +52,6 @@ import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphContentInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologySetInputSource;
@@ -155,7 +154,7 @@ public class ScopeResource extends BaseStanbolResource {
         try {
             scope.getCustomSpace().addOntology(new GraphContentInputSource(content)
             // new OntologyContentInputSource(content)
-            );
+                    );
         } catch (UnmodifiableOntologyCollectorException e) {
             throw new WebApplicationException(e, FORBIDDEN);
         } catch (UnloadableImportException e) {
@@ -207,10 +206,10 @@ public class ScopeResource extends BaseStanbolResource {
 
         ScopeRegistry reg = onm.getScopeRegistry();
 
-        IRI scopeiri = null;
+        // IRI scopeiri = null;
         IRI ontoiri = null;
         try {
-            scopeiri = IRI.create(uriInfo.getAbsolutePath());
+            // scopeiri = IRI.create(uriInfo.getAbsolutePath());
             ontoiri = IRI.create(physIri);
         } catch (Exception ex) {
             // Malformed IRI, throw bad request.
@@ -219,7 +218,7 @@ public class ScopeResource extends BaseStanbolResource {
         if (reg.containsScope(scopeid)) {
             OntologyScope scope = reg.getScope(scopeid);
             try {
-                OntologyInputSource src = new RootOntologyIRISource(ontoiri);
+                OntologyInputSource<?> src = new RootOntologyIRISource(ontoiri);
                 OntologySpace space = scope.getCustomSpace();
                 if (space == null) {
                     space = onm.getOntologySpaceFactory().createCustomOntologySpace(scopeid, src);
@@ -270,45 +269,42 @@ public class ScopeResource extends BaseStanbolResource {
         log.debug("Request URI {}", uriInfo.getRequestUri());
 
         OntologyScope scope;
-        OntologyInputSource coreSrc = null, custSrc = null;
-
-        if (coreOntology == null && coreRegistry == null) {
-            coreSrc = new BlankOntologySource();
-        }
+        OntologyInputSource<?> coreSrc = null, custSrc = null;
 
         // First thing, check the core source.
-        try {
+        if (coreRegistry != null && !coreRegistry.isEmpty()) try {
             coreSrc = new LibrarySource(IRI.create(coreRegistry.replace("%23", "#")), regMgr);
         } catch (Exception e1) {
+            throw new WebApplicationException(e1, BAD_REQUEST);
             // Bad or not supplied core registry, try the ontology.
-            try {
-                coreSrc = new RootOntologyIRISource(IRI.create(coreOntology));
-            } catch (Exception e2) {
-                // If this fails too, throw a bad request.
-                throw new WebApplicationException(e2, BAD_REQUEST);
-            }
+        }
+        else if (coreOntology != null && !coreOntology.isEmpty()) try {
+            coreSrc = new RootOntologyIRISource(IRI.create(coreOntology));
+        } catch (Exception e2) {
+            // If this fails too, throw a bad request.
+            throw new WebApplicationException(e2, BAD_REQUEST);
         }
 
         // Don't bother if no custom was supplied at all...
-        if (customOntology != null || customRegistry != null) {
-            // ...but if it was, be prepared to throw exceptions.
-            try {
-                coreSrc = new LibrarySource(IRI.create(customRegistry.replace("%23", "#")), regMgr);
-            } catch (Exception e1) {
-                // Bad or not supplied custom registry, try the ontology.
-                try {
-                    custSrc = new RootOntologyIRISource(IRI.create(customOntology));
-                } catch (Exception e2) {
-                    // If this fails too, throw a bad request.
-                    throw new WebApplicationException(e2, BAD_REQUEST);
-                }
-            }
+        if (customRegistry != null && !customRegistry.isEmpty())
+        // ...but if it was, be prepared to throw exceptions.
+        try {
+            coreSrc = new LibrarySource(IRI.create(customRegistry.replace("%23", "#")), regMgr);
+        } catch (Exception e1) {
+            throw new WebApplicationException(e1, BAD_REQUEST);
+            // Bad or not supplied custom registry, try the ontology.
+        }
+        if (customOntology != null && !customOntology.isEmpty()) try {
+            custSrc = new RootOntologyIRISource(IRI.create(customOntology));
+        } catch (Exception e2) {
+            // If this fails too, throw a bad request.
+            throw new WebApplicationException(e2, BAD_REQUEST);
         }
 
         // Now the creation.
         try {
             // Expand core sources
-            List<OntologyInputSource> expanded = new ArrayList<OntologyInputSource>();
+            List<OntologyInputSource<?>> expanded = new ArrayList<OntologyInputSource<?>>();
             if (coreSrc != null) {
                 if (coreSrc instanceof OntologySetInputSource) {
                     for (OWLOntology o : ((OntologySetInputSource) coreSrc).getOntologies()) {
@@ -322,7 +318,6 @@ public class ScopeResource extends BaseStanbolResource {
                     expanded.add(new RootOntologySource(o));
                 else expanded.add(custSrc);
             }
-
             // Invoke the appropriate factory method depending on the
             // availability of a custom source.
             // scope = (custSrc != null) ? f.createOntologyScope(scopeid, coreSrc, custSrc) : f

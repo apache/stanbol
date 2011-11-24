@@ -41,7 +41,6 @@ import org.apache.clerezza.rdf.core.access.EntityAlreadyExistsException;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
@@ -94,7 +93,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
     private List<OWLOntologyIRIMapper> mappers = new ArrayList<OWLOntologyIRIMapper>();
 
     @Reference
-    private OfflineConfiguration offline;
+    private OfflineConfiguration offlineConfig;
 
     /**
      * The {@link OfflineMode} is used by Stanbol to indicate that no external service should be referenced.
@@ -106,6 +105,12 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
      */
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC, bind = "enableOfflineMode", unbind = "disableOfflineMode", strategy = ReferenceStrategy.EVENT)
     private OfflineMode offlineMode;
+
+    /**
+     * Maps ontology IRIs (logical or physical if the ontology is anonymous) to Clerezza storage keys i.e.
+     * graph names.
+     */
+    private Map<IRI,String> ontologyIdsToKeys;
 
     @Reference
     private Parser parser;
@@ -124,13 +129,8 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
     private Class<?>[] supported = null;
 
-    private Map<IRI,String> ontologyIdsToKeys;
-
     @Reference
     private TcManager tcManager;
-
-    @Reference
-    private Serializer serializer;
 
     /**
      * This default constructor is <b>only</b> intended to be used by the OSGI environment with Service
@@ -145,21 +145,16 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         ontologyIdsToKeys = new HashMap<IRI,String>();
     }
 
-    public ClerezzaOntologyProvider(TcProvider store,
-                                    OfflineConfiguration offline,
-                                    Parser parser,
-                                    Serializer serializer) {
+    public ClerezzaOntologyProvider(TcProvider store, OfflineConfiguration offline, Parser parser) {
         this();
 
-        this.offline = offline;
+        this.offlineConfig = offline;
         // Re-assign the TcManager if no store is supplied
         if (store == null) store = TcManager.getInstance();
         this.store = store;
         if (this.tcManager == null) this.tcManager = TcManager.getInstance();
         if (parser == null) this.parser = Parser.getInstance();
         else this.parser = parser;
-        if (serializer == null) this.parser = Parser.getInstance();
-        else this.serializer = serializer;
 
         activate(new Hashtable<String,Object>());
     }
@@ -190,8 +185,8 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         }
 
         final IRI[] offlineResources;
-        if (this.offline != null) {
-            List<IRI> paths = offline.getOntologySourceLocations();
+        if (this.offlineConfig != null) {
+            List<IRI> paths = offlineConfig.getOntologySourceLocations();
             if (paths != null) offlineResources = paths.toArray(new IRI[0]);
             // There are no offline paths.
             else offlineResources = new IRI[0];
@@ -259,6 +254,9 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         return store;
     }
 
+    /**
+     * In this implementation the identifier is the Graph Name (e.g. ontonet::blabla)
+     */
     @Override
     public Object getStoredOntology(String identifier, Class<?> returnType) {
         if (returnType == null) {
@@ -306,101 +304,43 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
     }
 
     @Override
-    public String loadInStore(InputStream data, String formatIdentifier, boolean force) {
-        // TODO Instead of copying the code, reuse it.
-        long before = System.currentTimeMillis();
+    public String loadInStore(InputStream data, String formatIdentifier, String preferredKey, boolean force) {
+
         if (data == null) throw new IllegalArgumentException("No data to load ontologies from.");
 
         // Force is ignored for the content, but the imports?
 
-        String s = prefix + "::";
-        IRI ontologyIri = null;
-        //
-        // IRI location = null;
-        // if (force) location = null;
-        // else for (OWLOntologyIRIMapper mapper : mappers) {
-        // location = mapper.getDocumentIRI(ontologyIri);
-        // if (location != null) break;
-        // }
-        // if (location == null) {
-        // if (isOfflineMode()) throw new IllegalStateException(
-        // "Cannot retrieve " + ontologyIri + " while Stanbol is in offline mode. "
-        // + "No resource with that identifier was found locally.");
-        // else location = ontologyIri;
-        // }
-        //
-        // log.info("found {} in {}", ontologyIri, location);
-
-        boolean loaded = false;
-
+        // Get sorted list of supported formats, or use specified one.
         Collection<String> formats;
         if (formatIdentifier == null || "".equals(formatIdentifier.trim())) formats = OntologyUtils
                 .getPreferredSupportedFormats(parser.getSupportedFormats());
         else formats = Collections.singleton(formatIdentifier);
+
+        // Try each format, return on the first one that was parsed.
         for (String format : formats) {
             try {
-                // final URLConnection con = location.toURI().toURL().openConnection();
-                // con.setRequestProperty("Accept", format);
-                // final InputStream is = con.getInputStream();
-                if (data != null) {
-                    MGraph graph;
-                    TripleCollection rdfData = parser.parse(data, format);
-                    // FIXME are we getting rid of rdfData after adding its triples?
-                    String iri = OWLUtils.guessOntologyIdentifier(rdfData).getUnicodeString();
-                    ontologyIri = IRI.create(iri);
-                    s += iri;
-                    if (rdfData instanceof MGraph) {
-                        graph = (MGraph) rdfData;
-                    } else {
-                        UriRef uriref = new UriRef(s);
-                        try {
-                            graph = store.createMGraph(uriref);
-                            // graph = new SimpleMGraph();
-                        } catch (EntityAlreadyExistsException e) {
-                            if (uriref.equals(e.getEntityName())) graph = store.getMGraph(uriref);
-                            else graph = store.createMGraph(uriref);
-                        }
-                        graph.addAll(rdfData);
-                    }
-                    if (resolveImports) {
-                        Iterator<Triple> it = graph.filter(null, RDF.type, OWL.Ontology);
-                        if (it.hasNext()) {
-                            Iterator<Triple> it2 = graph.filter(it.next().getSubject(), OWL.imports, null);
-                            while (it2.hasNext()) {
-                                Resource obj = it2.next().getObject();
-                                if (obj instanceof UriRef) loadInStore(
-                                    IRI.create(((UriRef) obj).getUnicodeString()), null, false);
-                            }
-                        }
-
-                    }
-
-                    loaded = true;
-                    break;
-                }
+                TripleCollection rdfData = parser.parse(data, format);
+                return loadInStore(rdfData, preferredKey, force);
             } catch (UnsupportedFormatException e) {
-                log.debug("Parsing format {} failed.", format);
+                log.debug("Unsupported format format {}. Trying next one.", format);
                 continue;
             } catch (Exception e) {
-                log.debug("Parsing format {} failed.", format);
+                log.debug("Parsing format " + format + " failed. Trying next one.", e);
                 continue;
             }
         }
-        if (loaded) {
-            // System.out.println("I am mapping "+ontologyIri+" to key "+s);
-            ontologyIdsToKeys.put(ontologyIri, s);
-            log.debug("Load and Store completed in {} ms", (System.currentTimeMillis() - before));
-            return s;
-        } else return null;
+        // No parser worked, return null.
+        log.error("All parsers failed, giving up.");
+        return null;
     }
 
     @Override
-    public String loadInStore(IRI ontologyIri, String formatIdentifier, boolean force) throws IOException,
-                                                                                      UnsupportedFormatException {
+    public String loadInStore(final IRI ontologyIri,
+                              String formatIdentifier,
+                              String preferredKey,
+                              boolean force) throws IOException, UnsupportedFormatException {
         log.debug("Loading {}", ontologyIri);
         if (ontologyIri == null) throw new IllegalArgumentException("Ontology IRI cannot be null.");
-
-        String s = prefix + "::" + ontologyIri.toString();
 
         IRI location = null;
         if (force) location = null;
@@ -417,60 +357,110 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
         log.info("found {} in {}", ontologyIri, location);
 
-        boolean loaded = false;
-
         Collection<String> formats;
         if (formatIdentifier == null || "".equals(formatIdentifier.trim())) formats = OntologyUtils
                 .getPreferredSupportedFormats(parser.getSupportedFormats());
         else formats = Collections.singleton(formatIdentifier);
-        for (String format : formats) {
+        for (String currentFormat : formats) {
             try {
                 final URLConnection con = location.toURI().toURL().openConnection();
-                con.setRequestProperty("Accept", format);
+                con.setRequestProperty("Accept", currentFormat);
                 final InputStream is = con.getInputStream();
                 if (is != null) {
-                    MGraph graph;
-                    TripleCollection rdfData = parser.parse(is, format);
-                    // FIXME are we getting rid of rdfData after adding its triples?
-                    if (rdfData instanceof MGraph) {
-                        graph = (MGraph) rdfData;
-                    } else {
-                        UriRef uriref = new UriRef(s);
-                        try {
-                            graph = store.createMGraph(uriref);
-                            // graph = new SimpleMGraph();
-                        } catch (EntityAlreadyExistsException e) {
-                            if (uriref.equals(e.getEntityName())) graph = store.getMGraph(uriref);
-                            else graph = store.createMGraph(uriref);
-                        }
-                        graph.addAll(rdfData);
-                    }
-                    if (resolveImports) {
-                        Iterator<Triple> it = graph.filter(null, RDF.type, OWL.Ontology);
-                        if (it.hasNext()) {
-                            Iterator<Triple> it2 = graph.filter(it.next().getSubject(), OWL.imports, null);
-                            while (it2.hasNext()) {
-                                Resource obj = it2.next().getObject();
-                                if (obj instanceof UriRef) loadInStore(
-                                    IRI.create(((UriRef) obj).getUnicodeString()), null, false);
-                            }
-                        }
-                    }
-
-                    loaded = true;
-                    break;
+                    /*
+                     * We provide the current format, so the recursive call won't be trying to sort preferred
+                     * formats again. Also, we provide the ontologyIRI as the preferred key, since we already
+                     * know it.
+                     */
+                    return loadInStore(is, currentFormat, ontologyIri.toString(), force);
                 }
             } catch (UnsupportedFormatException e) {
-                log.debug("Parsing format {} failed.", format);
+                log.debug("Unsupported format format {}. Trying next one.", currentFormat);
                 continue;
             } catch (Exception e) {
-                log.debug("Parsing format {} failed.", format);
+                log.debug("Parsing format " + currentFormat + " failed. Trying next one.", e);
                 continue;
             }
         }
+
+        // No parser worked, return null.
+        log.error("All parsers failed, giving up.");
+        return null;
+    }
+
+    @Override
+    public String loadInStore(Object ontology, String preferredKey, boolean force) {
+
+        // TODO Instead of copying the code, reuse it.
+        if (ontology == null) throw new IllegalArgumentException("No ontology supplied.");
+
+        long before = System.currentTimeMillis();
+
+        MGraph graph;
+        TripleCollection rdfData;
+
+        if (ontology instanceof OWLOntology) {
+            rdfData = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph((OWLOntology) ontology);
+        } else if (ontology instanceof TripleCollection) {
+            rdfData = (TripleCollection) ontology;
+        } else throw new UnsupportedOperationException(
+                "This ontology provider can only accept objects assignable to " + TripleCollection.class
+                        + " or " + OWLOntology.class);
+
+        // Force is ignored for the content, but the imports?
+
+        String s = prefix + "::";
+        IRI ontologyIri = null;
+
+        boolean loaded = false;
+
+        // FIXME are we getting rid of rdfData after adding its triples?
+        String iri = preferredKey;
+        if (iri == null || iri.isEmpty()) iri = OWLUtils.guessOntologyIdentifier(rdfData).getUnicodeString();
+        else try {
+            new UriRef(iri);
+        } catch (Exception ex) {
+            iri = OWLUtils.guessOntologyIdentifier(rdfData).getUnicodeString();
+        }
+        ontologyIri = IRI.create(iri);
+        s += iri;
+        /*
+         * rdfData should be a SimpleGraph, so we shouldn't have a problem creating one with the TcProvider
+         * and adding triples there, so that the SimpleGraph is garbage-collected.
+         */
+        {
+            UriRef uriref = new UriRef(s);
+            try {
+                graph = store.createMGraph(uriref);
+            } catch (EntityAlreadyExistsException e) {
+                if (uriref.equals(e.getEntityName())) graph = store.getMGraph(uriref);
+                else graph = store.createMGraph(uriref);
+            }
+            graph.addAll(rdfData);
+        }
+        if (resolveImports) {
+            Iterator<Triple> it = graph.filter(null, RDF.type, OWL.Ontology);
+            if (it.hasNext()) {
+                Iterator<Triple> it2 = graph.filter(it.next().getSubject(), OWL.imports, null);
+                while (it2.hasNext()) {
+                    Resource obj = it2.next().getObject();
+                    if (obj instanceof UriRef) try {
+                        loadInStore(IRI.create(((UriRef) obj).getUnicodeString()), null, null, false);
+                    } catch (UnsupportedFormatException e) {
+                        log.warn("Failed to parse format for resource " + obj, e);
+                    } catch (IOException e) {
+                        log.warn("Failed to load ontology from resource " + obj, e);
+                    }
+                }
+            }
+
+        }
+
+        loaded = true;
+
         if (loaded) {
-            // System.out.println("I am mapping "+ontologyIri+" to key "+s);
             ontologyIdsToKeys.put(ontologyIri, s);
+            log.debug("Load and Store completed in {} ms", (System.currentTimeMillis() - before));
             return s;
         } else return null;
     }
@@ -511,83 +501,6 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             OWLUtils.guessOntologyIdentifier(o));
         // return o;
         return merged;
-    }
-
-    @Override
-    public Serializer getSerializer() {
-        return serializer;
-    }
-
-    @Override
-    public String loadInStore(Object ontology, boolean force) {
-
-        // TODO Instead of copying the code, reuse it.
-        long before = System.currentTimeMillis();
-        if (ontology == null) throw new IllegalArgumentException("No ontology supplied.");
-
-        MGraph graph;
-        TripleCollection rdfData;
-
-        if (ontology instanceof OWLOntology) {
-            rdfData = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph((OWLOntology) ontology);
-        } else if (ontology instanceof TripleCollection) {
-            rdfData = (TripleCollection) ontology;
-        } else throw new UnsupportedOperationException(
-                "This ontology provider can only accept objects assignable to " + TripleCollection.class
-                        + " or " + OWLOntology.class);
-
-        // Force is ignored for the content, but the imports?
-
-        String s = prefix + "::";
-        IRI ontologyIri = null;
-
-        boolean loaded = false;
-        
-        // FIXME are we getting rid of rdfData after adding its triples?
-        String iri = OWLUtils.guessOntologyIdentifier(rdfData).getUnicodeString();
-        ontologyIri = IRI.create(iri);
-        s += iri;
-        // Was most likely a SimpleMGraph
-//        if (rdfData instanceof MGraph) {
-//            graph = (MGraph) rdfData;
-//        } else 
-        {
-            UriRef uriref = new UriRef(s);
-            try {
-                graph = store.createMGraph(uriref);
-                // graph = new SimpleMGraph();
-            } catch (EntityAlreadyExistsException e) {
-                if (uriref.equals(e.getEntityName())) graph = store.getMGraph(uriref);
-                else graph = store.createMGraph(uriref);
-            }
-            graph.addAll(rdfData);
-        }
-        if (resolveImports) {
-            Iterator<Triple> it = graph.filter(null, RDF.type, OWL.Ontology);
-            if (it.hasNext()) {
-                Iterator<Triple> it2 = graph.filter(it.next().getSubject(), OWL.imports, null);
-                while (it2.hasNext()) {
-                    Resource obj = it2.next().getObject();
-                    if (obj instanceof UriRef) try {
-                        loadInStore(IRI.create(((UriRef) obj).getUnicodeString()), null, false);
-                    } catch (UnsupportedFormatException e) {
-                        log.warn("Failed to parse format for resource " + obj, e);
-                    } catch (IOException e) {
-                        log.warn("Failed to load ontology from resource " + obj, e);
-                    }
-                }
-            }
-
-        }
-
-        loaded = true;
-
-        if (loaded) {
-            // System.out.println("I am mapping "+ontologyIri+" to key "+s);
-            ontologyIdsToKeys.put(ontologyIri, s);
-            log.debug("Load and Store completed in {} ms", (System.currentTimeMillis() - before));
-            return s;
-        } else return null;
     }
 
 }

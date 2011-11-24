@@ -16,12 +16,13 @@
  */
 package org.apache.stanbol.ontologymanager.registry;
 
+import static org.apache.stanbol.ontologymanager.registry.MockOsgiContext.parser;
+import static org.apache.stanbol.ontologymanager.registry.MockOsgiContext.reset;
+import static org.apache.stanbol.ontologymanager.registry.MockOsgiContext.tcManager;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
-import static org.apache.stanbol.ontologymanager.registry.MockOsgiContext.*;
 
 import java.io.File;
 import java.net.URL;
@@ -29,8 +30,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.serializedform.Parser;
-import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
@@ -125,7 +124,7 @@ public class TestOntologyLibrary {
         Dictionary<String,Object> regmanConf = new Hashtable<String,Object>();
         regmanConf.put(RegistryManager.REGISTRY_LOCATIONS, new String[] {localTestRegistry.toString()});
         // Instantiating the registry manager will also load the registry data.
-        regMgr = new RegistryManagerImpl(offline, new ClerezzaOntologyProvider(tcManager, offline, parser,serializer),
+        regMgr = new RegistryManagerImpl(offline, new ClerezzaOntologyProvider(tcManager, offline, parser),
                 regmanConf);
 
         // The resulting manager must exist and have exactly one registry.
@@ -166,8 +165,8 @@ public class TestOntologyLibrary {
         Dictionary<String,Object> regmanConf = new Hashtable<String,Object>();
         regmanConf.put(RegistryManager.REGISTRY_LOCATIONS, new String[] {localTestRegistry.toString()});
         // Instantiating the registry manager will also load the registry data.
-        regMgr = new RegistryManagerImpl(offline, new ClerezzaOntologyProvider(tcManager,
-                offline, parser,serializer), regmanConf);
+        regMgr = new RegistryManagerImpl(offline, new ClerezzaOntologyProvider(tcManager, offline, parser),
+                regmanConf);
         assertNotNull(regMgr);
 
         // Now use this registry manager to instantiate an input source.

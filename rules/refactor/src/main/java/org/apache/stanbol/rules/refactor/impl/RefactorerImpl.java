@@ -41,10 +41,8 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
@@ -259,11 +257,11 @@ public class RefactorerImpl implements Refactorer {
 
         ScopeRegistry scopeRegistry = onManager.getScopeRegistry();
 
-        OntologySpaceFactory ontologySpaceFactory = onManager.getOntologySpaceFactory();
+        // OntologySpaceFactory ontologySpaceFactory = onManager.getOntologySpaceFactory();
 
         scope = null;
         try {
-            scope = ontologyScopeFactory.createOntologyScope(refactoringScopeID, (OntologyInputSource) null);
+            scope = ontologyScopeFactory.createOntologyScope(refactoringScopeID);
             log.info("Created scope with IRI " + REFACTORING_SCOPE);
             scopeRegistry.registerScope(scope);
         } catch (DuplicateIDException e) {

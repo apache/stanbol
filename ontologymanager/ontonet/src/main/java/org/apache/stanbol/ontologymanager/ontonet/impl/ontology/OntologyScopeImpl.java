@@ -75,7 +75,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     /**
      * An ontology scope knows whether it's write-locked or not. Initially it is not.
      */
-    protected boolean locked = false;
+    protected volatile boolean locked = false;
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -156,13 +156,13 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
             List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
             // Add the import statement for the custom space, if existing and not empty
             OntologySpace spc = getCustomSpace();
-            if (spc != null && !spc.getOntologies(false).isEmpty()) {
+            if (spc != null && spc.getOntologyCount(false) > 0) {
                 IRI spaceIri = IRI.create(getNamespace() + spc.getID());
                 additions.add(new AddImport(ont, df.getOWLImportsDeclaration(spaceIri)));
             }
             // Add the import statement for the core space, if existing and not empty
             spc = getCoreSpace();
-            if (spc != null && !spc.getOntologies(false).isEmpty()) {
+            if (spc != null && spc.getOntologyCount(false) > 0) {
                 IRI spaceIri = IRI.create(getNamespace() + spc.getID());
                 additions.add(new AddImport(ont, df.getOWLImportsDeclaration(spaceIri)));
             }
@@ -222,6 +222,11 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     @Override
     public Set<OntologySpace> getSessionSpaces() {
         return new HashSet<OntologySpace>(sessionSpaces.values());
+    }
+
+    @Override
+    public boolean isLocked() {
+        return locked;
     }
 
     @Override

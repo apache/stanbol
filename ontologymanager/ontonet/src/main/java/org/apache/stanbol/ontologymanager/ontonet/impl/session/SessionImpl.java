@@ -82,7 +82,7 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
     }
 
     /**
-     * FIXME not merging yet FIXME not including imported ontologies
+     * FIXME not merging yet FIXME not including imported ontologies unless they are merged *before* storage.
      * 
      * @see OWLExportable#asOWLOntology(boolean)
      */
@@ -91,6 +91,9 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
         if (merge) throw new UnsupportedOperationException(
                 "Merging not implemented yet. Please call asOWLOntology(false)");
 
+        long before = System.currentTimeMillis();
+
+        // Create a new ontology
         OWLOntology root;
         OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
         IRI iri = IRI.create(namespace + _id);
@@ -112,39 +115,31 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
             root = null;
         }
 
-        // Add the import declarations for directly managed ontologies.
         if (root != null) {
+
+            // Add the import declarations for directly managed ontologies.
             List<OWLOntologyChange> changes = new LinkedList<OWLOntologyChange>();
             OWLDataFactory df = ontologyManager.getOWLDataFactory();
-            for (OWLOntology o : getOntologies(false)) {
-                if (o == null) continue;
-
-                String base = /* URIUtils.upOne( */IRI.create(namespace + getID())/* ) */+ "/";
-
-                IRI ontologyIri;
-
-                if (o.isAnonymous()) try {
-                    ontologyIri = ontologyManager.getOntologyDocumentIRI(o);
-                } catch (Exception ex) {
-                    ontologyIri = o.getOWLOntologyManager().getOntologyDocumentIRI(o);
-                }
-                else {
-                    ontologyIri = o.getOntologyID().getDefaultDocumentIRI();
-                }
-
+            String base = IRI.create(namespace + getID()) + "/";
+            // The key set of managedOntologies contains the ontology IRIs, not their storage keys.
+            for (IRI ontologyIri : managedOntologies) {
                 IRI physIRI = IRI.create(base + ontologyIri);
-
                 changes.add(new AddImport(root, df.getOWLImportsDeclaration(physIRI)));
             }
 
-            // Add imports for attached scopes
+            // Add import declarations for attached scopes.
             for (String scopeID : getAttachedScopes()) {
                 IRI physIRI = IRI.create(namespace + scopeID);
                 changes.add(new AddImport(root, df.getOWLImportsDeclaration(physIRI)));
             }
 
+            // Commit
             ontologyManager.applyChanges(changes);
+
         }
+
+        log.debug("OWL export of session {} completed in {} ms.", getID(), System.currentTimeMillis()
+                                                                           - before);
 
         return root;
 

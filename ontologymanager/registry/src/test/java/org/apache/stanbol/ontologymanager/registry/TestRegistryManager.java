@@ -88,7 +88,7 @@ public class TestRegistryManager {
     @After
     public void cleanup() throws Exception {
         reset();
-        provider = new ClerezzaOntologyProvider(tcManager, offline, parser,serializer);
+        provider = new ClerezzaOntologyProvider(tcManager, offline, parser);
     }
 
     /**

@@ -50,8 +50,8 @@ public class TestSchemaMatchers {
                           TestSchemaMatchers.class.getResource("/schemas/registry/explanation-mappings.owl")
                                   .toString()});
         OfflineConfiguration offline = new OfflineConfigurationImpl(configuration);
-        regman = new RegistryManagerImpl(offline, new ClerezzaOntologyProvider(tcManager, offline, parser,
-                serializer), configuration);
+        regman = new RegistryManagerImpl(offline, new ClerezzaOntologyProvider(tcManager, offline, parser),
+                configuration);
 
         // The model should be created by now.
 

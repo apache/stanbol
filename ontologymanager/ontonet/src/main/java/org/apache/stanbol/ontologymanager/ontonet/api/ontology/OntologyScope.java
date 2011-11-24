@@ -39,7 +39,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
  * @author alexdma
  * 
  */
-public interface OntologyScope extends NamedResource, ScopeOntologyListenable, OWLExportable {
+public interface OntologyScope extends NamedResource, Lockable, ScopeOntologyListenable, OWLExportable {
 
     /**
      * Adds a new ontology space to the list of user session spaces for this scope.

@@ -23,7 +23,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
  * a certain user session or a specific reasoning service. Each ontology space has an ID and a top ontology
  * that can be used as a shared resource for mutual exclusion and locking strategies.
  */
-public interface OntologySpace extends LockableOntologyCollector, OWLExportable {
+public interface OntologySpace extends OntologyCollector, OWLExportable, Lockable {
 
     /**
      * Returns the ontology that serves as a root module for this ontology space.

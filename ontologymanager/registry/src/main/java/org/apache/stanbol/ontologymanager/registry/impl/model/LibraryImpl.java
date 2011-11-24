@@ -31,7 +31,6 @@ import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
@@ -185,7 +184,8 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
 
                 if (true) {
                     try {
-                        String key = loader.loadInStore(id, SupportedFormat.RDF_XML, false);
+                        // No preferred key, we don't have a prefix here.
+                        String key = loader.loadInStore(id, SupportedFormat.RDF_XML, null, false);
                         log.debug("Setting key {} for ontology {}", key, o);
                         o.setReference(getIRI(), key);
                     } catch (IOException ex) {
@@ -254,7 +254,7 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
     @Override
     public void setCache(OntologyProvider<?> cache) {
         if (cache == null) cache = new ClerezzaOntologyProvider(TcManager.getInstance(), null,
-                Parser.getInstance(), Serializer.getInstance());
+                Parser.getInstance());
         else {
             Object store = cache.getStore();
             if (!(store instanceof TcProvider || store instanceof OWLOntologyManager)) throw new IllegalArgumentException(

@@ -20,7 +20,6 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.owl.util.OWLUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -104,7 +103,7 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
     }
 
     @Override
-    public String loadInStore(InputStream data, String formatIdentifier, boolean force) {
+    public String loadInStore(InputStream data, String formatIdentifier, String preferredKey, boolean force) {
         try {
             OWLOntology o = store.loadOntologyFromOntologyDocument(data);
             return OWLUtils.guessOntologyIdentifier(o).toString();
@@ -114,7 +113,7 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
     }
 
     @Override
-    public String loadInStore(IRI location, String formatIdentifier, boolean force) {
+    public String loadInStore(IRI location, String formatIdentifier, String preferredKey, boolean force) {
         OWLOntology o = null;
         try {
             o = store.loadOntologyFromOntologyDocument(location);
@@ -129,13 +128,7 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
     }
 
     @Override
-    public Serializer getSerializer() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String loadInStore(Object ontology, boolean force) {
+    public String loadInStore(Object ontology, String preferredKey, boolean force) {
         throw new UnsupportedOperationException("Not implemented for OWL API version.");
     }
 

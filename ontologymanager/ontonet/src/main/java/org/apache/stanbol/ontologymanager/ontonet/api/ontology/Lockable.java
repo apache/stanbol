@@ -17,21 +17,20 @@
 package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
 
 /**
- * An ontology collector that supports locking mechanisms, thus allowing/preventing modifications of the
- * ontologies contained therein. Lock management is assumed to occur in methods inherited from
- * {@link OntologyCollector}.<br>
+ * An object that supports locking mechanisms, thus allowing/preventing modifications of the resources
+ * contained therein. Lock management is assumed to occur in methods inherited from implementations.<br>
  * 
  * TODO add public lock handling methods as well?
  * 
  * @author alexdma
  * 
  */
-public interface LockableOntologyCollector extends OntologyCollector {
+public interface Lockable {
 
     /**
-     * Determines if it is no longer possible to modify this space until it is torn down.
+     * Determines if it is no longer possible to modify this resource until it is torn down.
      * 
-     * @return true if this space is write-locked, false otherwise.
+     * @return true if this resource is write-locked, false otherwise.
      */
     boolean isLocked();
 

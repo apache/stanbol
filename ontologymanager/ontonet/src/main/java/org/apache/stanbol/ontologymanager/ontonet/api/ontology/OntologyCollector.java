@@ -91,6 +91,14 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
     OWLOntology getOntology(IRI ontologyIri);
 
     /**
+     * A shortcut method to avoid computing the ontologies themselves before counting them.
+     * 
+     * @param withClosure
+     * @return
+     */
+    int getOntologyCount(boolean withClosure);
+
+    /**
      * Determines if the ontology identified by the supplied <i>logical</i> IRI has been loaded in this space.<br>
      * <br>
      * Note that ontologies are not identified by physical IRI here. There's no need to ask KReS for

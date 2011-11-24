@@ -33,7 +33,7 @@ public class UnmodifiableOntologyCollectorException extends OntologyCollectorMod
      * @param space
      *            the ontology space whose modification was attempted.
      */
-    public UnmodifiableOntologyCollectorException(LockableOntologyCollector collector) {
+    public UnmodifiableOntologyCollectorException(OntologyCollector collector) {
         super(collector);
     }
 

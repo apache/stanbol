@@ -34,6 +34,6 @@ public interface OntologyInputSourceHandler {
      * 
      * @return the ontology types that can be handled by this object.
      */
-    Set<Class<?>> getSupportedTypes();
+    Set<Class<?>> getSupportedOntologyTypes();
 
 }

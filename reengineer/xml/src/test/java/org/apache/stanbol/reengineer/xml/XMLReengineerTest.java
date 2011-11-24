@@ -123,8 +123,8 @@ public class XMLReengineerTest {
         TcManager tcm = new SpecialTcManager(qe, wtcp);
 
         // Two different ontology storages, the same sparql engine and tcprovider
-        ONManager onManager = new ONManagerImpl(new ClerezzaOntologyProvider(tcm, offline, new Parser(),
-                new Serializer()), offline, emptyConf);
+        ONManager onManager = new ONManagerImpl(new ClerezzaOntologyProvider(tcm, offline, new Parser()),
+                offline, emptyConf);
         xmlExtractor = new XMLExtractor(new ReengineerManagerImpl(emptyConf), onManager, emptyConf);
     }
 

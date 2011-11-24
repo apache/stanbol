@@ -179,8 +179,6 @@ public class ScopeOntologyResource extends BaseStanbolResource {
             }
             String res = null;
             try {
-                // for (OWLImportsDeclaration imp : ont.getImportsDeclarations())
-                // System.out.println("DIOCALE "+imp);
                 res = OntologyRenderUtils.renderOntology(ont, new RDFXMLOntologyFormat(), sciri.toString(),
                     onm);
             } catch (OWLOntologyStorageException e) {

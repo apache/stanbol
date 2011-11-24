@@ -19,7 +19,6 @@ package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
@@ -50,7 +49,10 @@ public abstract class AbstractOntologySpaceImpl extends AbstractOntologyCollecto
 
     protected SpaceType type;
 
-    public AbstractOntologySpaceImpl(String spaceID, IRI namespace, SpaceType type, OntologyProvider<?> ontologyProvider) {
+    public AbstractOntologySpaceImpl(String spaceID,
+                                     IRI namespace,
+                                     SpaceType type,
+                                     OntologyProvider<?> ontologyProvider) {
         super(spaceID, namespace, ontologyProvider);
         this.type = type;
     }
@@ -69,6 +71,9 @@ public abstract class AbstractOntologySpaceImpl extends AbstractOntologyCollecto
     public OWLOntology asOWLOntology(boolean merge) {
         if (merge) throw new UnsupportedOperationException(
                 "Ontology merging not implemented yet. Please set merge parameter to false.");
+
+        long before = System.currentTimeMillis();
+
         OWLOntology root;
         OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
         IRI iri = IRI.create(namespace + _id);
@@ -93,28 +98,20 @@ public abstract class AbstractOntologySpaceImpl extends AbstractOntologyCollecto
         if (root != null) {
             List<OWLOntologyChange> changes = new LinkedList<OWLOntologyChange>();
             OWLDataFactory df = ontologyManager.getOWLDataFactory();
-            for (OWLOntology o : getOntologies(false)) {
-                if (o == null) continue;
 
-                String base = URIUtils.upOne(IRI.create(namespace + getID())) + "/";
+            String base = URIUtils.upOne(IRI.create(namespace + getID())) + "/";
 
-                IRI ontologyIri;
-
-                if (o.isAnonymous()) try {
-                    ontologyIri = ontologyManager.getOntologyDocumentIRI(o);
-                } catch (Exception ex) {
-                    ontologyIri = o.getOWLOntologyManager().getOntologyDocumentIRI(o);
-                }
-                else {
-                    ontologyIri = o.getOntologyID().getDefaultDocumentIRI();
-                }
-
+            // The key set of managedOntologies contains the ontology IRIs, not their storage keys.
+            for (IRI ontologyIri : managedOntologies) {
                 IRI physIRI = IRI.create(base + ontologyIri);
-
                 changes.add(new AddImport(root, df.getOWLImportsDeclaration(physIRI)));
             }
+
             ontologyManager.applyChanges(changes);
         }
+
+        log.debug("OWL export of space {} completed in {} ms.", getID(), System.currentTimeMillis() - before);
+
         return root;
     }
 

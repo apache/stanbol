@@ -124,6 +124,11 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     }
 
     @Override
+    public void addListener(OntologyCollectorListener listener) {
+        listeners.add(listener);
+    }
+
+    @Override
     public synchronized void addOntology(OntologyInputSource<?> ontologySource) throws UnmodifiableOntologyCollectorException {
         if (locked) throw new UnmodifiableOntologyCollectorException(this);
         log.debug("Trying to add ontology {} to space {}",
@@ -142,11 +147,6 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
                     "This ontology space implementation can only handle " + OWLOntology.class
                             + " input sources.");
         } else return; // No ontology to add
-    }
-
-    @Override
-    public void addListener(OntologyCollectorListener listener) {
-        listeners.add(listener);
     }
 
     @Override
@@ -245,6 +245,11 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     }
 
     @Override
+    public Collection<OntologyCollectorListener> getListeners() {
+        return listeners;
+    }
+
+    @Override
     public IRI getNamespace() {
         return this.namespace;
     }
@@ -269,12 +274,20 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     }
 
     @Override
-    public Collection<OntologyCollectorListener> getListeners() {
-        return listeners;
+    public int getOntologyCount(boolean withClosure) {
+        if (!withClosure) return managedOntologies.keySet().size();
+        else {
+            Set<OWLOntology> set = new HashSet<OWLOntology>();
+            for (OWLOntology o : managedOntologies.values()) {
+                set.add(o);
+                set.addAll(o.getImportsClosure());
+            }
+            return set.size();
+        }
     }
 
     @Override
-    public Set<Class<?>> getSupportedTypes() {
+    public Set<Class<?>> getSupportedOntologyTypes() {
         return Collections.unmodifiableSet(supportedTypes);
     }
 
@@ -447,6 +460,11 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     }
 
     @Override
+    public void removeListener(OntologyCollectorListener listener) {
+        listeners.remove(listener);
+    }
+
+    @Override
     public synchronized void removeOntology(IRI ontologyId) throws OntologyCollectorModificationException {
         if (locked) throw new UnmodifiableOntologyCollectorException(this);
 
@@ -488,11 +506,6 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
             throw new OntologyCollectorModificationException(this, ex);
         }
 
-    }
-
-    @Override
-    public void removeListener(OntologyCollectorListener listener) {
-        listeners.remove(listener);
     }
 
     /**

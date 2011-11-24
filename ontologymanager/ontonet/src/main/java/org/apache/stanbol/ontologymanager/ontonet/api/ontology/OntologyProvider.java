@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.access.TcProvider;
-import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -38,7 +37,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  *            the storage system actually used by this provider.
  */
 public interface OntologyProvider<S> {
-    
+
     /**
      * The key used to configure the prefix to be used for addressing ontologies stored by this provider.
      */
@@ -52,8 +51,6 @@ public interface OntologyProvider<S> {
     String getKey(IRI ontologyIRI);
 
     Set<String> getKeys();
-
-    Serializer getSerializer();
 
     /**
      * Returns the storage system used by this ontology provider (e.g. a {@link TcProvider} or an
@@ -108,8 +105,8 @@ public interface OntologyProvider<S> {
      * @throws UnsupportedFormatException
      *             if no parsers are able to parse the supplied format (or the actual file format).
      */
-    String loadInStore(InputStream data, String formatIdentifier, boolean force) throws IOException,
-                                                                                UnsupportedFormatException;
+    String loadInStore(InputStream data, String formatIdentifier, String preferredKey, boolean force) throws IOException,
+                                                                                                     UnsupportedFormatException;
 
     /**
      * Retrieves an ontology physically located at <code>location</code> (unless mapped otherwise by the
@@ -133,9 +130,9 @@ public interface OntologyProvider<S> {
      * @throws UnsupportedFormatException
      *             if no parsers are able to parse the supplied format (or the actual file format).
      */
-    String loadInStore(IRI location, String formatIdentifier, boolean force) throws IOException,
-                                                                            UnsupportedFormatException;
+    String loadInStore(IRI location, String formatIdentifier, String preferredKey, boolean force) throws IOException,
+                                                                                                 UnsupportedFormatException;
 
-    String loadInStore(Object ontology, boolean force);
-    
+    String loadInStore(Object ontology, String preferredKey, boolean force);
+
 }
