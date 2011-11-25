@@ -112,9 +112,9 @@ public final class SolrConstants {
     public static final String PROPERTY_CORE_SOLR_CONF = PROPERTY_SOLR_CORE+".solrconf";
     /**
      * The {@link Constants#SERVICE_ID} of the {@link CoreContainer} this core
-     * is registered with
+     * is registered with. Values are of type {@link Long}.
      */
-    public static final String PROPERTY_CORE_SERVER_ID = PROPERTY_SOLR_CORE+".service.id";
+    public static final String PROPERTY_CORE_SERVER_ID = PROPERTY_SOLR_SERVER+".id";
     /**
      * The {@link Constants#SERVICE_RANKING service ranking} of the SolrCore. 
      * The ranking of the SolrServer is used as default if not defined. If also no 
