@@ -20,7 +20,6 @@ import java.util.Dictionary;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrServer;
-import org.apache.stanbol.commons.solr.SolrServerTypeEnum;
 import org.apache.stanbol.entityhub.core.yard.AbstractYard.YardConfig;
 import org.osgi.service.cm.ConfigurationException;
 
@@ -72,45 +71,45 @@ public final class SolrYardConfig extends YardConfig {
         super(config);
     }
 
-    /**
-     * Setter for the type of the SolrServer client to by used by the SolrYard. Setting the type to
-     * <code>null</code> will activate the default value. The default is determined based on the configured
-     * {@link #getSolrServerLocation()}
-     * 
-     * @param type
-     *            The type to use
-     */
-    public void setSolrServerType(SolrServerTypeEnum type) {
-        if (type == null) {
-            config.remove(SolrYard.SOLR_SERVER_TYPE);
-        } else {
-            config.put(SolrYard.SOLR_SERVER_TYPE, type);
-        }
-    }
-
-    public SolrServerTypeEnum getSolrServerType() {
-        Object serverType = config.get(SolrYard.SOLR_SERVER_TYPE);
-        if (serverType != null) {
-            if (serverType instanceof SolrServerTypeEnum) {
-                return (SolrServerTypeEnum) serverType;
-            } else {
-                try {
-                    return SolrServerTypeEnum.valueOf(serverType.toString());
-                } catch (IllegalArgumentException e) {
-                    // invalid value set!
-                    config.remove(SolrYard.SOLR_SERVER_TYPE);
-                }
-            }
-        }
-        // guess type based on Server Location
-        String serverLocation = getSolrServerLocation();
-        // TODO: maybe we need to improve this detection code.
-        if (serverLocation.startsWith("http")) {
-            return SolrServerTypeEnum.HTTP;
-        } else {
-            return SolrServerTypeEnum.EMBEDDED;
-        }
-    }
+//    /**
+//     * Setter for the type of the SolrServer client to by used by the SolrYard. Setting the type to
+//     * <code>null</code> will activate the default value. The default is determined based on the configured
+//     * {@link #getSolrServerLocation()}
+//     * 
+//     * @param type
+//     *            The type to use
+//     */
+//    public void setSolrServerType(SolrServerTypeEnum type) {
+//        if (type == null) {
+//            config.remove(SolrYard.SOLR_SERVER_TYPE);
+//        } else {
+//            config.put(SolrYard.SOLR_SERVER_TYPE, type);
+//        }
+//    }
+//
+//    public SolrServerTypeEnum getSolrServerType() {
+//        Object serverType = config.get(SolrYard.SOLR_SERVER_TYPE);
+//        if (serverType != null) {
+//            if (serverType instanceof SolrServerTypeEnum) {
+//                return (SolrServerTypeEnum) serverType;
+//            } else {
+//                try {
+//                    return SolrServerTypeEnum.valueOf(serverType.toString());
+//                } catch (IllegalArgumentException e) {
+//                    // invalid value set!
+//                    config.remove(SolrYard.SOLR_SERVER_TYPE);
+//                }
+//            }
+//        }
+//        // guess type based on Server Location
+//        String serverLocation = getSolrServerLocation();
+//        // TODO: maybe we need to improve this detection code.
+//        if (serverLocation.startsWith("http")) {
+//            return SolrServerTypeEnum.HTTP;
+//        } else {
+//            return SolrServerTypeEnum.EMBEDDED;
+//        }
+//    }
 
     /**
      * Setter for the location of the SolrServer. Might be a URL or a file.
