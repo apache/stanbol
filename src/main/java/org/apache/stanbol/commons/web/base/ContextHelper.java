@@ -47,5 +47,14 @@ public class ContextHelper {
             return null;
         }
     }
+    /**
+     * Fetches the BundleContext
+     * @param context the {@link ServletContext}
+     * @return the BundleContext or <code>null</code> if not registered under
+     * <code>BundleContext.class.getName()</code>.
+     */
+    public static BundleContext getBundleContext(ServletContext context){
+        return (BundleContext) context.getAttribute(BundleContext.class.getName());
+    }
 
 }
