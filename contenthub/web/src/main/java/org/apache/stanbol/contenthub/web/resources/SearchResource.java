@@ -47,8 +47,8 @@ import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
-import org.apache.stanbol.commons.solr.SolrServerProviderManager;
-import org.apache.stanbol.commons.solr.SolrServerTypeEnum;
+import org.apache.stanbol.commons.solr.IndexReference;
+import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
 import org.apache.stanbol.commons.solr.managed.IndexMetadata;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.commons.web.base.ContextHelper;
@@ -66,6 +66,8 @@ import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary
 import org.apache.stanbol.contenthub.web.search.model.EngineInfo;
 import org.apache.stanbol.contenthub.web.search.model.SearchInfo;
 import org.apache.stanbol.contenthub.web.search.model.TempSearchResult;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,15 +90,27 @@ public class SearchResource extends BaseStanbolResource {
     private Object facets = null;
 
     private ManagedSolrServer solrDirectoryManager;
-    private SolrServerProviderManager solrServerProviderManager;
 
-    public SearchResource(@Context ServletContext context) {
+    private SolrServer solrServer;
+
+    public SearchResource(@Context ServletContext context) throws IOException, InvalidSyntaxException {
         searcher = ContextHelper.getServiceFromContext(Search.class, context);
         tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
         processor = ContextHelper.getServiceFromContext(SearchProcessor.class, context);
-        solrServerProviderManager = ContextHelper.getServiceFromContext(SolrServerProviderManager.class,
-            context);
         solrDirectoryManager = ContextHelper.getServiceFromContext(ManagedSolrServer.class, context);
+        BundleContext bundleContext = ContextHelper.getBundleContext(context);
+        if (solrDirectoryManager != null) {
+            if (!solrDirectoryManager.isManagedIndex("contenthub")) {
+                solrDirectoryManager.createSolrIndex("contenthub", "contenthub", null);
+            }
+            RegisteredSolrServerTracker tracker = new RegisteredSolrServerTracker(
+                bundleContext, new IndexReference(
+                    solrDirectoryManager.getServerName(), "contenthub"));
+            //TODO: this is currently done for each request
+            tracker.open();
+            solrServer = tracker.getService();
+            tracker.close();
+        }
     }
 
     @GET
@@ -158,14 +172,6 @@ public class SearchResource extends BaseStanbolResource {
                                                    IllegalArgumentException,
                                                    IOException {
 
-        SolrServer server = null;
-        if (solrDirectoryManager != null) {
-            if (!solrDirectoryManager.isManagedIndex("contenthub")) {
-                solrDirectoryManager.createSolrIndex("contenthub", "contenthub", null);
-            }
-            server = solrServerProviderManager.getSolrServer(SolrServerTypeEnum.EMBEDDED, "contenthub");
-        }
-
         QueryKeyword queryKeywords = sc.getQueryKeyWords().get(0);
         List<DocumentResource> docList = queryKeywords.getRelatedDocumentResources();
         StringBuilder queryBuilder = new StringBuilder();
@@ -184,7 +190,7 @@ public class SearchResource extends BaseStanbolResource {
         }
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.setQuery(query).setFacetMinCount(1);
-        SolrDocumentList sdl = server.query(solrQuery).getResults();
+        SolrDocumentList sdl = solrServer.query(solrQuery).getResults();
 
         Set<String> fields = new HashSet<String>();
         for (SolrDocument sd : sdl) {
@@ -202,7 +208,7 @@ public class SearchResource extends BaseStanbolResource {
         }
         solrQuery.setRows(0);
 
-        QueryResponse result = server.query(solrQuery);
+        QueryResponse result = solrServer.query(solrQuery);
         List<FacetField> facets = result.getFacetFields();
         logger.debug(facets.toString());
         return facets;

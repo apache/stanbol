@@ -79,8 +79,8 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.params.ModifiableSolrParams;
-import org.apache.stanbol.commons.solr.SolrServerProviderManager;
-import org.apache.stanbol.commons.solr.SolrServerTypeEnum;
+import org.apache.stanbol.commons.solr.IndexReference;
+import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
 import org.apache.stanbol.commons.solr.managed.IndexMetadata;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.commons.web.base.ContextHelper;
@@ -95,6 +95,8 @@ import org.apache.stanbol.enhancer.jersey.resource.ContentItemResource;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,8 +125,6 @@ public class ContenthubStoreResource extends BaseStanbolResource {
     private static final Logger log = LoggerFactory.getLogger(ContenthubStoreResource.class);
 
     private ManagedSolrServer solrDirectoryManager;
-
-    private SolrServerProviderManager solrServerProviderManager;
 
     protected TcManager tcManager;
 
@@ -179,8 +179,7 @@ public class ContenthubStoreResource extends BaseStanbolResource {
                                    @QueryParam(value = "offset") int offset,
                                    @QueryParam(value = "pageSize") @DefaultValue("5") int pageSize) throws ParseException,
                                                                                                    IllegalArgumentException,
-                                                                                                   IOException {
-
+                                                                                                   IOException, InvalidSyntaxException {
         store = ContextHelper.getServiceFromContext(SolrStore.class, context);
         tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
         serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
@@ -201,15 +200,21 @@ public class ContenthubStoreResource extends BaseStanbolResource {
         this.offset = offset;
         this.pageSize = pageSize;
 
-        solrServerProviderManager = ContextHelper.getServiceFromContext(SolrServerProviderManager.class,
-            context);
+        BundleContext bundleContext = (BundleContext) context.getAttribute(BundleContext.class.getName());
         solrDirectoryManager = ContextHelper.getServiceFromContext(ManagedSolrServer.class, context);
         SolrServer solrServer = null;
         if (solrDirectoryManager != null) {
+            //TODO: This should not be done on every single request
             if (!solrDirectoryManager.isManagedIndex("contenthub")) {
                 solrDirectoryManager.createSolrIndex("contenthub", "contenthub", null);
             }
-            solrServer = solrServerProviderManager.getSolrServer(SolrServerTypeEnum.EMBEDDED, "contenthub");
+            RegisteredSolrServerTracker tracker = new RegisteredSolrServerTracker(
+                bundleContext, new IndexReference(
+                    solrDirectoryManager.getServerName(), "contenthub"));
+            tracker.open();
+            solrServer = tracker.getService();
+            tracker.close();
+            tracker = null;
         }
 
         ModifiableSolrParams params = new ModifiableSolrParams();

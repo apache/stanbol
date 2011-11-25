@@ -38,6 +38,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProviderEvent;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProviderLog;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;

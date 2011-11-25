@@ -58,14 +58,14 @@
 				<configuration>
 					<instructions>
 						<Export-Package>
-							org.apache.stanbol.commons.solr.managed;version=${project.version}
+							org.apache.stanbol.commons.solr.managed;version=${project.version},
+                            org.apache.stanbol.commons.solr.managed.standalone;version=${project.version}
                         </Export-Package>
 						<Import-Package>
 							*
                         </Import-Package>
 						<Private-Package>
-							org.apache.stanbol.commons.solr.managed.impl;version=${project.version},
-							org.apache.stanbol.commons.solr.managed.standalone;version=${project.version}
+							org.apache.stanbol.commons.solr.managed.impl;version=${project.version}
                         </Private-Package>
 						<Embed-Dependency></Embed-Dependency>
 					</instructions>
