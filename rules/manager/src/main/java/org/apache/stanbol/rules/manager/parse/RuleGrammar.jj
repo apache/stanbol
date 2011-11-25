@@ -23,7 +23,7 @@ options
   static = false;
 }
 
-PARSER_BEGIN(RuleParserImpl)
+PARSER_BEGIN(RuleParser)
 package org.apache.stanbol.rules.manager.parse;
 
 import java.io.Reader;
@@ -82,7 +82,7 @@ import org.apache.stanbol.rules.manager.atoms.SPARQLdAtom;
 import org.apache.stanbol.rules.manager.atoms.StartsWithAtom;
 import org.apache.stanbol.rules.base.api.RuleExpressiveness;
 
-public class RuleParserImpl
+public class RuleParser
 {
 
   static KB kb;
@@ -91,7 +91,7 @@ public class RuleParserImpl
   {
   	kb = new KB();
   	Reader reader = new StringReader( inString ) ;
-    RuleParserImpl parser = new RuleParserImpl(reader);
+    RuleParser parser = new RuleParser(reader);
     StringBuffer buffer = new StringBuffer() ;
 	try {
 		parser.start( ) ; 
@@ -144,7 +144,7 @@ public class RuleParserImpl
         }
 }
 
-PARSER_END(RuleParserImpl)
+PARSER_END(RuleParser)
 
 SKIP : {" "}
 SKIP : {"\r" | "\t" | "\n"}
@@ -590,14 +590,14 @@ SameAtom sameAsAtom() :
 LessThanAtom lessThanAtom() :
 {Object obj1; Object obj2;}
 {
-	< LESSTHAN > < LPAR > obj1=iObject() < COMMA > obj2=dObject() < RPAR >
+	< LESSTHAN > < LPAR > obj1=dObject() < COMMA > obj2=dObject() < RPAR >
 	{ return new LessThanAtom(obj1, obj2); } 
 }
 
 GreaterThanAtom greaterThanAtom() :
 {Object obj1; Object obj2;}
 {
-	< GREATERTHAN > < LPAR > obj1=iObject() < COMMA > obj2=dObject() < RPAR >
+	< GREATERTHAN > < LPAR > obj1=dObject() < COMMA > obj2=dObject() < RPAR >
 	{ return new GreaterThanAtom(obj1, obj2); } 
 }
 

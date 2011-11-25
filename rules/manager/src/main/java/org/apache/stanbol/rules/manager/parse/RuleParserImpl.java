@@ -59,14 +59,13 @@ import com.hp.hpl.jena.rdf.model.Resource;
 public class RuleParserImpl implements RuleParserConstants {
 
   static KB kb;
-  
-  
+
   public static KB parse( String inString ) {
   {
         kb = new KB();
         Reader reader = new StringReader( inString ) ;
-        RuleParserImpl parser = new RuleParserImpl(reader);
-        StringBuffer buffer = new StringBuffer() ;
+    RuleParserImpl parser = new RuleParserImpl(reader);
+    StringBuffer buffer = new StringBuffer() ;
         try {
                 parser.start( ) ;
         } catch( TokenMgrError e ) {
@@ -731,7 +730,7 @@ public class RuleParserImpl implements RuleParserConstants {
  Object obj1; Object obj2;
     jj_consume_token(LESSTHAN);
     jj_consume_token(LPAR);
-    obj1 = iObject();
+    obj1 = dObject();
     jj_consume_token(COMMA);
     obj2 = dObject();
     jj_consume_token(RPAR);
@@ -743,7 +742,7 @@ public class RuleParserImpl implements RuleParserConstants {
  Object obj1; Object obj2;
     jj_consume_token(GREATERTHAN);
     jj_consume_token(LPAR);
-    obj1 = iObject();
+    obj1 = dObject();
     jj_consume_token(COMMA);
     obj2 = dObject();
     jj_consume_token(RPAR);
