@@ -9,12 +9,17 @@ import java.util.Arrays;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.solr.core.CoreContainer;
+import org.apache.solr.core.SolrCore;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IndexReference {
 
     private static final Logger log = LoggerFactory.getLogger(IndexReference.class);
+    private static final String CONSTRAINT = "(%s=%s)";
     
     public static IndexReference parse(String uriOrPathOrReference){
         String[] referencedCore = new String[2];
@@ -130,5 +135,52 @@ public class IndexReference {
     public boolean checkServer(String serverName) {
         return server == null || server.equals(serverName);
     }
-    
+ 
+    /**
+     * Getter for the {@link Filter} that can be used to track the
+     * {@link SolrCore} referenced by this IndexReference.
+     * @return the string representation of the OSGI {@link Filter}.
+     */
+    public String getIndexFilter(){
+        StringBuilder filterString = new StringBuilder("(&");
+        //first filter for the type
+        filterString.append(String.format(CONSTRAINT, Constants.OBJECTCLASS,SolrCore.class.getName()));
+        if(isFile){
+            filterString.append(String.format(CONSTRAINT, SolrConstants.PROPERTY_CORE_DIR,getIndex()));
+        } else { //isName
+            filterString.append(String.format(CONSTRAINT, SolrConstants.PROPERTY_CORE_NAME,getIndex()));
+        }
+        addServerFilterConstraint(filterString);
+        filterString.append(')');
+        return filterString.toString();
+    }
+    /**
+     * Getter for the {@link Filter} that can be used to track the
+     * {@link CoreContainer} referenced by this IndexReference. If no
+     * server is defined. This will track all {@link CoreContainer} instances.
+     * Note that the {@link CoreContainer} with the highest 
+     * {@link Constants#SERVICE_RANKING} is expected to be the default server
+     */
+    public String getServerFilter(){
+        StringBuilder filterString;
+        if(getServer() != null){ //add AND for class and name constraint
+            filterString = new StringBuilder("(&");
+        } else { //if no server is defined we have only one constraint
+            filterString = new StringBuilder();
+        }
+        filterString.append(String.format(CONSTRAINT, Constants.OBJECTCLASS,CoreContainer.class.getName()));
+        addServerFilterConstraint(filterString);
+        if(getServer() != null){
+            filterString.append(')');
+        }
+        return filterString.toString();
+    }
+    /**
+     * @param filterString
+     */
+    private void addServerFilterConstraint(StringBuilder filterString) {
+        if(getServer() != null){
+            filterString.append(String.format(CONSTRAINT, SolrConstants.PROPERTY_SERVER_NAME,getServer()));
+        }
+    }
 }

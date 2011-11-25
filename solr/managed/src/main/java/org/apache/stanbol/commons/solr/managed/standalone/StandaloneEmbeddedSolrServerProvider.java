@@ -1,16 +1,12 @@
 package org.apache.stanbol.commons.solr.managed.standalone;
 
-import java.util.Collections;
 import java.util.ServiceLoader;
-import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.SolrCore;
 import org.apache.stanbol.commons.solr.IndexReference;
-import org.apache.stanbol.commons.solr.SolrServerProvider;
-import org.apache.stanbol.commons.solr.SolrServerTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,25 +21,27 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  *
  */
-public class StandaloneEmbeddedSolrServerProvider implements SolrServerProvider {
+public class StandaloneEmbeddedSolrServerProvider {
+    
+    private static StandaloneEmbeddedSolrServerProvider instance;
+    
+    public static StandaloneEmbeddedSolrServerProvider getInstance(){
+        if(instance == null){
+            instance = new StandaloneEmbeddedSolrServerProvider();
+        }
+        return instance;
+    }
     
     private final Logger log = LoggerFactory.getLogger(StandaloneEmbeddedSolrServerProvider.class);
     /**
-     * Default constructor used by the {@link ServiceLoader} utility used
-     * outside of an OSGI environment to instantiate {@link SolrServerProvider}
-     * implementations for the different {@link SolrServerTypeEnum}. 
+     * Private constructor used to create the singleton.
      */
-    public StandaloneEmbeddedSolrServerProvider() {
-        
-    }
+    private StandaloneEmbeddedSolrServerProvider() {}
     
-    @Override
-    public SolrServer getSolrServer(SolrServerTypeEnum type, String uriOrPath, String... additional) throws IllegalArgumentException {
-        if(type != SolrServerTypeEnum.EMBEDDED){
-            throw new IllegalArgumentException("The parsed SolrServerType '"+
-                type+"' is not supported (supported: '"+SolrServerTypeEnum.EMBEDDED+"')");
+    public SolrServer getSolrServer(IndexReference indexRef){
+        if(indexRef == null){
+            throw new IllegalArgumentException("The parsed InexReference MUST NOT be NULL!");
         }
-        IndexReference indexRef = IndexReference.parse(uriOrPath);
         StandaloneManagedSolrServer server;
         log.debug("Create EmbeddedSolrServer for Server: {}, Index: {}",
             indexRef.getServer(),indexRef.getIndex());
@@ -72,15 +70,5 @@ public class StandaloneEmbeddedSolrServerProvider implements SolrServerProvider 
         } else {
             return null;
         }
-    }
-
-    /**
-     * Outside an OSGI environment this also is used as {@link SolrServerProvider}
-     * for the type {@link SolrServerTypeEnum#EMBEDDED}
-     * @see org.apache.stanbol.commons.solr.SolrServerProvider#supportedTypes()
-     */
-    @Override
-    public Set<SolrServerTypeEnum> supportedTypes() {
-        return Collections.singleton(SolrServerTypeEnum.EMBEDDED);
     }
 }
