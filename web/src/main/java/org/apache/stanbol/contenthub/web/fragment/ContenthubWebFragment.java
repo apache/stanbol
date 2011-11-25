@@ -119,8 +119,7 @@ public class ContenthubWebFragment implements WebFragment {
         resources.add(new ScriptResource("text/javascript", "scripts/prettify/prettify.js", this, 0));
         resources.add(new ScriptResource("text/javascript", "scripts/jit.js", this, 1));
         resources.add(new ScriptResource("text/javascript", "scripts/jquery-1.5.1.min.js", this, 2));
-        resources
-                .add(new ScriptResource("text/javascript", "scripts/jquery-ui-1.8.11.custom.min.js", this, 3));
+        resources.add(new ScriptResource("text/javascript", "scripts/jquery-ui-1.8.11.custom.min.js", this, 3));
         return resources;
     }
 

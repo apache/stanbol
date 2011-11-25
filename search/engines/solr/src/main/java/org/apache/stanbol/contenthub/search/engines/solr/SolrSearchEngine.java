@@ -17,7 +17,6 @@
 
 package org.apache.stanbol.contenthub.search.engines.solr;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +24,7 @@ import java.util.Map;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -33,9 +33,8 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
-import org.apache.stanbol.commons.solr.SolrServerProviderManager;
-import org.apache.stanbol.commons.solr.SolrServerTypeEnum;
-import org.apache.stanbol.commons.solr.managed.IndexMetadata;
+import org.apache.stanbol.commons.solr.IndexReference;
+import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.core.search.execution.SearchContextImpl;
 import org.apache.stanbol.contenthub.servicesapi.search.engine.EngineProperties;
@@ -59,7 +58,6 @@ import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.impl.Util;
-import com.hp.hpl.jena.sparql.lib.Metadata;
 import com.hp.hpl.jena.util.iterator.Filter;
 import com.hp.hpl.jena.vocabulary.RDF;
 
@@ -81,36 +79,40 @@ public class SolrSearchEngine implements SearchEngine, EngineProperties {
     }
 
     private final static String SERVER_NAME = "contenthub";
-    /**
-     * for EmbeddedSolr instance, it is tried to obtained EmbbeddedSolr at activator if it can get the
-     * instance, server becomes null and this SolrSearchEngine does not work
-     */
-    private SolrServer server;
 
-    @Reference
-    SolrServerProviderManager solrServerProviderManager;
-
+    protected RegisteredSolrServerTracker serverTracker;
     @Reference
     ManagedSolrServer solrDirectoryManager;
 
-    @Activate
     /**
      * Tries to connect EmbeddedSolr at startup, if can not, server becomes null and no query is executed on server
      * @param cc
      */
-    public void activate(ComponentContext cc) {
+    @Activate
+    protected void activate(ComponentContext cc) {
         try {
             if (!solrDirectoryManager.isManagedIndex(SERVER_NAME)) {
                 solrDirectoryManager.createSolrIndex(SERVER_NAME, SERVER_NAME, null);
             }
-            server = solrServerProviderManager.getSolrServer(SolrServerTypeEnum.EMBEDDED, SERVER_NAME);
-            logger.warn("Could not get the EmbeddedSolr Instance since there is no SolrDirectoryManager");
+            serverTracker = new RegisteredSolrServerTracker(cc.getBundleContext(),
+                new IndexReference(solrDirectoryManager.getServerName(), SERVER_NAME));
+            serverTracker.open();
         } catch (Exception e) {
             logger.warn("Could not get the EmbeddedSolr Instance at location : {}", SERVER_NAME, e);
-            server = null;
         }
     }
+    @Deactivate
+    protected void deactivate(ComponentContext cc) {
+        if(serverTracker != null){
+            serverTracker.close();
+            serverTracker = null;
+        }
+        solrDirectoryManager = null;
+    }
 
+    protected SolrServer getServer(){
+        return serverTracker != null ? serverTracker.getService() : null;
+    }
     @Override
     /**
      * gets the keywords from search context and then queries solr with these keywords and facet constraints,
@@ -118,13 +120,14 @@ public class SolrSearchEngine implements SearchEngine, EngineProperties {
      * After searching for all keywords, omits the results founded by other engines and having non matching field constraints 
      */
     public void search(SearchContext searchContext) throws SearchEngineException {
+        SolrServer server = getServer();
         if (server == null) {
             logger.warn("No EmbeddedSolr, so SolrSearchEngine does not work");
         } else {
             for (QueryKeyword qk : searchContext.getQueryKeyWords()) {
-                searchForKeyword(qk, searchContext);
+                searchForKeyword(server,qk, searchContext);
                 for (Keyword kw : qk.getRelatedKeywords()) {
-                    searchForKeyword(kw, searchContext);
+                    searchForKeyword(server, kw, searchContext);
                 }
             }
             
@@ -140,7 +143,7 @@ public class SolrSearchEngine implements SearchEngine, EngineProperties {
      *            the keyword to use in query
      * @param searchContext
      */
-    private void searchForKeyword(Keyword kw, SearchContext searchContext) {
+    private void searchForKeyword(SolrServer server, Keyword kw, SearchContext searchContext) {
         String keyword = kw.getKeyword();
         SolrQuery query = SolrSearchEngineHelper.keywordQueryWithFacets(keyword,
             searchContext.getConstraints());
@@ -225,7 +228,7 @@ public class SolrSearchEngine implements SearchEngine, EngineProperties {
     }
 
     @SuppressWarnings("unused")
-    private void omitNonMatchingResult(SearchContext searchContext) {
+    private void omitNonMatchingResult(SolrServer server, SearchContext searchContext) {
         OntModel contextModel = (SearchContextImpl) searchContext;
         ResIterator docResources = contextModel.listResourcesWithProperty(RDF.type,
             SearchVocabulary.DOCUMENT_RESOURCE);

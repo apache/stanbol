@@ -55,8 +55,8 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
-import org.apache.stanbol.commons.solr.SolrServerProviderManager;
-import org.apache.stanbol.commons.solr.SolrServerTypeEnum;
+import org.apache.stanbol.commons.solr.IndexReference;
+import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
 import org.apache.stanbol.commons.solr.managed.IndexMetadata;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.core.utils.ContentItemIDOrganizer;
@@ -71,6 +71,7 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,9 +88,6 @@ public class SolrStoreImpl implements SolrStore {
     private static final Logger logger = LoggerFactory.getLogger(SolrStoreImpl.class);
 
     @Reference
-    SolrServerProviderManager solrServerProviderManager;
-
-    @Reference
     private ManagedSolrServer solrDirectoryManager;
 
     @Reference
@@ -98,18 +96,37 @@ public class SolrStoreImpl implements SolrStore {
     @Reference
     private EnhancementJobManager jobManager;
 
-    private SolrServer server = null;
+    private RegisteredSolrServerTracker serverTracker = null;
 
     public static final String SOLR_SERVER_NAME = "contenthub";
 
     @Activate
-    public void activate(ComponentContext context) throws IllegalArgumentException, IOException {
+    protected void activate(ComponentContext context) throws IllegalArgumentException, IOException, InvalidSyntaxException {
         if (!solrDirectoryManager.isManagedIndex(SOLR_SERVER_NAME)) {
             solrDirectoryManager.createSolrIndex(SOLR_SERVER_NAME, SOLR_SERVER_NAME,null);
         }
-        server = solrServerProviderManager.getSolrServer(SolrServerTypeEnum.EMBEDDED, SOLR_SERVER_NAME);
+        serverTracker = new RegisteredSolrServerTracker(context.getBundleContext(), 
+            new IndexReference(solrDirectoryManager.getServerName(), SOLR_SERVER_NAME));
+        serverTracker.open();
     }
 
+    protected void deactivate(ComponentContext context) {
+        if(serverTracker != null){
+            serverTracker.close();
+            serverTracker = null;
+        }
+        solrDirectoryManager = null;
+    }
+    
+    protected SolrServer getServer(){
+        SolrServer server = serverTracker != null ? serverTracker.getService() : null;
+        if(server == null){
+            throw new IllegalStateException("The SolrServer for the Contenthub " +
+            		"is currently not available!");
+        } else {
+            return server;
+        }
+    }
     @Override
     public SolrContentItem create(String id, byte[] content, String contentType) {
         return create(id, content, contentType, null);
@@ -227,13 +244,13 @@ public class SolrStoreImpl implements SolrStore {
 
     @Override
     public String put(ContentItem ci) {
-
         if (ci.getId() == null || ci.getId().isEmpty()) {
             logger.debug("ID of the content item cannot be null while inserting to the SolrStore.");
             throw new IllegalArgumentException(
                     "ID of the content item cannot be null while inserting to the SolrStore.");
         }
 
+        SolrServer server = getServer();
         String content = null;
         try {
             content = IOUtils.toString(ci.getStream(), "UTF-8");
@@ -339,7 +356,7 @@ public class SolrStoreImpl implements SolrStore {
     @Override
     public SolrContentItem get(String id) {
         id = ContentItemIDOrganizer.attachBaseURI(id);
-
+        SolrServer server = getServer();
         String content = null;
         String mimeType = null;
         Map<String,List<Object>> constraints = new HashMap<String,List<Object>>();
@@ -402,6 +419,7 @@ public class SolrStoreImpl implements SolrStore {
     @Override
     public void deleteById(String id) {
 		if(id == null || id.isEmpty()) return;
+		SolrServer server = getServer();
         id = ContentItemIDOrganizer.attachBaseURI(id);
         removeEnhancements(id);
         try {
@@ -418,6 +436,7 @@ public class SolrStoreImpl implements SolrStore {
 
     @Override
     public void deleteById(List<String> idList) {
+        SolrServer server = getServer();
         for (int i = 0; i < idList.size(); i++) {
             String id = ContentItemIDOrganizer.attachBaseURI(idList.get(i));
             idList.remove(i);
