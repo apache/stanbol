@@ -12,7 +12,6 @@
 	<artifactId>org.apache.stanbol.commons.jobs.api</artifactId>
 	<packaging>bundle</packaging>
 	<name>Apache Stanbol Commons Jobs API</name>
-	<version>0.1</version>
 
 	<description>Background jobs, API and Manager </description>
 	<build>

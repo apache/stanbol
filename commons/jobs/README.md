@@ -26,16 +26,17 @@ and the location of the output. This service support the following formats: text
 Job output handling is demanded to the service which created the job.
 
 
-Creating jobs
+Creating a job
 ------------------
+
 Stanbol services can create a job accessing the `org.apache.stanbol.commons.jobs.api.JobManager` SCR component, 
 by providing an implementation of the `org.apache.stanbol.commons.jobs.api.Job` interface and obtaining the job identifier.
 The service **must** then return an HTTP response with status `201` including the 
-`Location` HTTP header pointing to the resource job (if exists). It **should** provide a human readable location of the job 
+`Location` HTTP header pointing to the created job. It **should** provide a human readable location of the job 
 resource in the body of the response.
 
 The job resource location can be
-derived by attaching the job identifier (retrieved by the manager) to the base /jobs resource path.
+derived by attaching the job identifier (retrieved by the manager) to the base *stanbol-base-url/*jobs/ resource path.
 
 For example:
 
@@ -43,12 +44,13 @@ For example:
 * Location: `http://localhost:8080/jobs/1234`
 
 The `org.apache.stanbol.commons.jobs.web.resources.JobsResource` class in /web includes a method to create a 'test' job, 
-it behaves as described above and returns a text/plain description with the job location.
+it behaves as described above and returns a text/plain description.
 It can be used as a reference implementation.
 
 
 Obtaining the job results
 ------------------
+
 A request to /jobs/*jobs-identifier* will include info about the status of the job and the location of the result output. 
 This service supports application/json response type. 
 The JSON object includes the following properties:
@@ -67,3 +69,4 @@ You can create a test job by invoking:
 which will create a dummy job, returning response code `201` and `Location` header pointing to the job resource.
 You can then follow the `Location` to check the status of the job. When it is `finished`, you can follow the Location provided
 to see the result.
+
