@@ -12,7 +12,6 @@
 	<artifactId>org.apache.stanbol.reasoners.servicesapi</artifactId>
 	<packaging>bundle</packaging>
 	<name>Apache Stanbol Reasoners: Services API</name>
-	<version>0.1</version>
 
 	<description>Services API of Stanbol Reasoners</description>
 	<build>
