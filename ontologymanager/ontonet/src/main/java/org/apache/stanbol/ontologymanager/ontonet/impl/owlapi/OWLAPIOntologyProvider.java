@@ -79,9 +79,21 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
     }
 
     @Override
-    public Object getStoredOntology(String identifier, Class<?> returnType) {
+    public <O> O getStoredOntology(IRI reference, Class<O> returnType) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public <O> O getStoredOntology(IRI reference, Class<O> returnType, boolean merge) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public <O> O getStoredOntology(String identifier, Class<O> returnType) {
         if (returnType == null) {
-            returnType = OWLOntology.class;
+            returnType = (Class<O>) OWLOntology.class;
             log.warn("No return type given for ontologies. Will return a {}", returnType);
         }
         boolean canDo = false;
@@ -94,6 +106,12 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
                 "Return type " + returnType
                         + " is not allowed in this implementation. Only allowed return types are "
                         + getSupportedReturnTypes());
+        return null;
+    }
+
+    @Override
+    public <O> O getStoredOntology(String key, Class<O> returnType, boolean merge) {
+        // TODO Auto-generated method stub
         return null;
     }
 
@@ -130,24 +148,6 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
     @Override
     public String loadInStore(Object ontology, String preferredKey, boolean force) {
         throw new UnsupportedOperationException("Not implemented for OWL API version.");
-    }
-
-    @Override
-    public Object getStoredOntology(IRI reference, Class<?> returnType) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Object getStoredOntology(IRI reference, Class<?> returnType, boolean merge) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Object getStoredOntology(String key, Class<?> returnType, boolean merge) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }

@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
@@ -40,6 +41,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.EntityAlreadyExistsException;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.TcProvider;
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.clerezza.rdf.ontologies.OWL;
@@ -72,8 +74,6 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLOntologySetProvider;
-import org.semanticweb.owlapi.util.OWLOntologyMerger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -260,17 +260,17 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
     }
 
     @Override
-    public Object getStoredOntology(IRI reference, Class<?> returnType) {
+    public <O> O getStoredOntology(IRI reference, Class<O> returnType) {
         return getStoredOntology(getKey(reference), returnType);
     }
 
     @Override
-    public Object getStoredOntology(IRI reference, Class<?> returnType, boolean merge) {
+    public <O> O getStoredOntology(IRI reference, Class<O> returnType, boolean merge) {
         return getStoredOntology(getKey(reference), returnType, merge);
     }
 
     @Override
-    public Object getStoredOntology(String key, Class<?> returnType) {
+    public <O> O getStoredOntology(String key, Class<O> returnType) {
         // TODO default to false? Or by set policy?
         return getStoredOntology(key, returnType, false);
     }
@@ -278,11 +278,12 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
     /**
      * In this implementation the identifier is the Graph Name (e.g. ontonet::blabla)
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public Object getStoredOntology(String identifier, Class<?> returnType, boolean merge) {
+    public <O> O getStoredOntology(String identifier, Class<O> returnType, boolean merge) {
         if (identifier == null) throw new IllegalArgumentException("Identifier cannot be null");
         if (returnType == null) {
-            returnType = OWLOntology.class;
+            returnType = (Class<O>) OWLOntology.class;
             log.warn("No return type given for ontologies. Will return a {}", returnType);
         }
         boolean canDo = false;
@@ -302,7 +303,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             return returnType.cast(tc);
         } else if (OWLOntology.class.isAssignableFrom(returnType)) {
             try {
-                return toOWLOntology(new UriRef(identifier), merge);
+                return (O) toOWLOntology(new UriRef(identifier), merge);
             } catch (OWLOntologyCreationException e) {
                 log.error("Failed to return stored ontology " + identifier + " as type " + returnType, e);
             }
@@ -311,6 +312,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Class<?>[] getSupportedReturnTypes() {
         return supported;
@@ -500,14 +502,21 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         Set<UriRef> loaded = new HashSet<UriRef>();
 
         TripleCollection graph = store.getTriples(graphName);
-        OWLOntology o = OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(graph, mgr);
 
+        UriRef ontologyId = null;
+
+        Iterator<Triple> itt = graph.filter(null, RDF.type, OWL.Ontology);
+        if (itt.hasNext()) {
+            NonLiteral nl = itt.next().getSubject();
+            if (nl instanceof UriRef) ontologyId = (UriRef) nl;
+        }
         List<UriRef> revImps = new Stack<UriRef>();
 
         fillImportsReverse(graphName, revImps);
 
         if (!merge) {
-            // FIXME rewrite import statements so that only the scope name needs to be added!
+            OWLOntology o = OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(graph, mgr);
+            // TODO make it not flat.
             // Examining the reverse imports stack will flatten all imports.
             List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
             OWLDataFactory df = OWLManager.getOWLDataFactory();
@@ -520,39 +529,65 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             o.getOWLOntologyManager().applyChanges(changes);
             return o;
         } else {
-            final Set<OWLOntology> mergeUs = new HashSet<OWLOntology>();
-
-            for (UriRef ref : revImps) {
-                if (!loaded.contains(ref)) {
-                    TripleCollection tc = store.getTriples(ref);
-                    mergeUs.add(OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(tc, mgr));
-                    loaded.add(ref);
-                }
-            }
-            mergeUs.add(o);
-            OWLOntologyMerger merger = new OWLOntologyMerger(new OWLOntologySetProvider() {
-
-                @Override
-                public Set<OWLOntology> getOntologies() {
-                    return mergeUs;
-                }
-
-            }, false);
-            OWLOntology merged = merger.createMergedOntology(OWLManager.createOWLOntologyManager(),
-                OWLUtils.guessOntologyIdentifier(o));
-
-            // // More concise / efficient / brutal implementation, but messes up ontology name.
-           
-            // TripleCollection tempGraph = new SimpleMGraph();
-            // for (UriRef ref : revImps)
+            // final Set<OWLOntology> mergeUs = new HashSet<OWLOntology>();
+            //
+            // for (UriRef ref : revImps) {
             // if (!loaded.contains(ref)) {
-            // tempGraph.addAll(store.getTriples(ref));
+            // TripleCollection tc = store.getTriples(ref);
+            // mergeUs.add(OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(tc, mgr));
             // loaded.add(ref);
             // }
-            // OWLOntology merged = OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(tempGraph, mgr);
+            // }
+            // mergeUs.add(o);
+            // OWLOntologyMerger merger = new OWLOntologyMerger(new OWLOntologySetProvider() {
+            //
+            // @Override
+            // public Set<OWLOntology> getOntologies() {
+            // return mergeUs;
+            // }
+            //
+            // }, false);
+            // OWLOntology merged = merger.createMergedOntology(OWLManager.createOWLOntologyManager(),
+            // OWLUtils.guessOntologyIdentifier(o));
 
-            return merged;
+            // More efficient / brutal implementation.
 
+            TripleCollection tempGraph = new SimpleMGraph();
+            // The set of triples that will be excluded from the merge
+            Set<Triple> exclusions = new HashSet<Triple>();
+            // Examine all reverse imports
+            for (UriRef ref : revImps)
+                if (!loaded.contains(ref)) {
+                    // Get the triples
+                    TripleCollection imported = store.getTriples(ref);
+                    // For each owl:Ontology
+                    Iterator<Triple> remove = imported.filter(null, RDF.type, OWL.Ontology);
+                    while (remove.hasNext()) {
+                        NonLiteral subj = remove.next().getSubject();
+                        /*
+                         * If it's not the root ontology, trash all its triples. If the root ontology is
+                         * anonymous, all ontology annotations are to be trashed without distinction.
+                         */
+                        if (ontologyId == null || !subj.equals(ontologyId)) {
+                            Iterator<Triple> it = imported.filter(subj, null, null);
+                            while (it.hasNext()) {
+                                Triple t = it.next();
+                                exclusions.add(t);
+                            }
+                        }
+                    }
+
+                    Iterator<Triple> it = imported.iterator();
+                    while (it.hasNext()) {
+                        Triple t = it.next();
+                        if (!exclusions.contains(t)) tempGraph.add(t);
+                    }
+
+                    loaded.add(ref);
+                }
+            // Since they are all merged and import statements removed, there should be no risk of going
+            // online.
+            return OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(tempGraph, mgr);
         }
     }
 

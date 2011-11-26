@@ -75,9 +75,9 @@ public interface OntologyProvider<S> {
      * @param returnType
      * @return
      */
-    Object getStoredOntology(IRI reference, Class<?> returnType);
+    <O> O getStoredOntology(IRI reference, Class<O> returnType);
 
-    Object getStoredOntology(IRI reference, Class<?> returnType, boolean merge);
+    <O> O getStoredOntology(IRI reference, Class<O> returnType, boolean merge);
 
     /**
      * 
@@ -92,9 +92,9 @@ public interface OntologyProvider<S> {
      *            {@link UnsupportedOperationException} should be thrown.
      * @return
      */
-    Object getStoredOntology(String key, Class<?> returnType);
+    <O> O getStoredOntology(String key, Class<O> returnType);
 
-    Object getStoredOntology(String key, Class<?> returnType, boolean merge);
+    <O> O getStoredOntology(String key, Class<O> returnType, boolean merge);
 
     /**
      * Returns an array containing the most specific types for ontology objects that this provider can manage
@@ -102,7 +102,7 @@ public interface OntologyProvider<S> {
      * 
      * @return the supported ontology return types.
      */
-    Class<?>[] getSupportedReturnTypes();
+    <O> Class<O>[] getSupportedReturnTypes();
 
     /**
      * Retrieves an ontology by reading its content from a data stream and stores it using the storage system

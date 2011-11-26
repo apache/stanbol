@@ -24,6 +24,7 @@ import java.util.Set;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.owl.transformation.JenaToOwlConvert;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputProvider;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -48,7 +49,7 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
  * An input provider which binds the reasoners input to Ontonet
  * 
  * @author enridaga
- *
+ * 
  */
 public class OntonetInputProvider implements ReasoningServiceInputProvider {
 
@@ -143,6 +144,55 @@ public class OntonetInputProvider implements ReasoningServiceInputProvider {
     }
 
     private OWLOntology getFromOntonet() throws IOException {
+        try {
+            OntologyScope scope = null;
+            synchronized (onManager) {
+                scope = onManager.getScopeRegistry().getScope(this.scopeId);
+            }
+            if (scope == null) {
+                log.error("Scope {} cannot be retrieved", this.scopeId);
+                throw new IOException("Scope " + this.scopeId + " cannot be retrieved");
+            }
+            Session session = null;
+            synchronized (onManager) {
+                session = onManager.getSessionManager().getSession(sessionId);
+            }
+            if (session == null) {
+                log.warn("Session {} cannot be retrieved. Ignoring.", this.sessionId);
+            }
+            final Set<OWLOntology> set = new HashSet<OWLOntology>();
+            set.add(scope.asOWLOntology(false));
+            for (OWLOntology o : scope.getCustomSpace().getOntologies(true)) {
+                set.add(o);
+                // set.addAll(o.getImportsClosure());
+            }
+            for (OWLOntology o : scope.getCoreSpace().getOntologies(true)) {
+                set.add(o);
+                // set.addAll(o.getImportsClosure());
+            }
+            if (session != null) {
+                set.add(session.asOWLOntology(false));
+                for (OWLOntology o : session.getOntologies(true)) {
+                    set.add(o);
+                    // set.addAll(o.getImportsClosure());
+                }
+            }
+            OWLOntologyMerger merger = new OWLOntologyMerger(new OWLOntologySetProvider() {
+                @Override
+                public Set<OWLOntology> getOntologies() {
+                    return set;
+                }
+            });
+            return merger.createMergedOntology(createOWLOntologyManager(),
+                IRI.create("reasoners:input-" + System.currentTimeMillis()));
+        } catch (OWLOntologyCreationException e) {
+            String message = "The network for scope/session cannot be retrieved";
+            log.error(message + ":", e);
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    private OWLOntology getFromOntonetOld() throws IOException {
         try {
             OntologyScope scope = null;
             synchronized (onManager) {

@@ -195,11 +195,13 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
      */
     @Override
     public Set<OWLOntology> getOntologies(boolean withClosure) {
-        if (withClosure) throw new UnsupportedOperationException(
-                "Closure support not implemented efficiently yet. Please call getOntologies(false) and compute the closure union for the OWLOntology objects in the set.");
+        // if (withClosure) throw new UnsupportedOperationException(
+        // "Closure support not implemented efficiently yet. Please call getOntologies(false) and compute the closure union for the OWLOntology objects in the set.");
         Set<OWLOntology> ontologies = new HashSet<OWLOntology>();
-        for (IRI id : managedOntologies)
-            ontologies.add(getOntology(id));
+        for (IRI id : managedOntologies) {
+            // FIXME temporary fix is to merge instead of including closure
+            ontologies.add(getOntology(id, withClosure));
+        }
         return Collections.unmodifiableSet(ontologies);
     }
 
