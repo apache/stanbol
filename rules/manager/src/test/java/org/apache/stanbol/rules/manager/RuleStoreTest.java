@@ -66,10 +66,8 @@ public class RuleStoreTest {
     @Before
     public void setUp() {
         Dictionary<String,Object> configuration = new Hashtable<String,Object>();
-        store = new RuleStoreImpl(new ONManagerImpl((TcManager) null, null, configuration), configuration,
-                "./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
-        blankStore = new RuleStoreImpl(new ONManagerImpl((TcManager) null, null, configuration),
-                configuration, "");
+        store = new RuleStoreImpl(configuration, "./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
+        blankStore = new RuleStoreImpl(configuration, "");
     }
 
     @After

@@ -77,11 +77,9 @@ import org.slf4j.LoggerFactory;
 @Path("/rule")
 public class RuleResource extends BaseStanbolResource {
 
-    protected ONManager onm;
-
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    private RuleStore kresRuleStore;
+    private RuleStore ruleStore;
     private HashMap<IRI,String> map;
     private String desc;
 
@@ -92,9 +90,8 @@ public class RuleResource extends BaseStanbolResource {
      *            {To get the context where the REST service is running.}
      */
     public RuleResource(@Context ServletContext servletContext) {
-        this.kresRuleStore = (RuleStoreImpl) ContextHelper.getServiceFromContext(RuleStore.class,
+        this.ruleStore = (RuleStoreImpl) ContextHelper.getServiceFromContext(RuleStore.class,
             servletContext);
-        this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
     }
 
     /**
@@ -117,7 +114,7 @@ public class RuleResource extends BaseStanbolResource {
 
         try {
 
-            GetRule recipe = new GetRule(kresRuleStore);
+            GetRule recipe = new GetRule(ruleStore);
             if (uri.equals("all")) {
 
                 HashMap<IRI,String> rule = recipe.getAllRules();
@@ -127,7 +124,7 @@ public class RuleResource extends BaseStanbolResource {
                     return Response.status(Status.NOT_FOUND).build();
                 } else {
 
-                    OWLOntology onto = kresRuleStore.getOntology();
+                    OWLOntology onto = ruleStore.getOntology();
                     OWLOntology newmodel = OWLManager.createOWLOntologyManager().createOntology(
                         onto.getOntologyID());
                     OWLDataFactory factory = onto.getOWLOntologyManager().getOWLDataFactory();
@@ -171,7 +168,7 @@ public class RuleResource extends BaseStanbolResource {
                 if (rule == null) {
                     return Response.status(Status.NOT_FOUND).build();
                 } else {
-                    OWLOntology onto = kresRuleStore.getOntology();
+                    OWLOntology onto = ruleStore.getOntology();
 
                     OWLDataFactory factory = onto.getOWLOntologyManager().getOWLDataFactory();
                     OWLNamedIndividual ind = factory.getOWLNamedIndividual(IRI.create(uri));
@@ -220,7 +217,7 @@ public class RuleResource extends BaseStanbolResource {
                        KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
     public Response getRulesOfRecipe(@PathParam("uri") String recipeURI) {
 
-        GetRule kReSGetRule = new GetRule(kresRuleStore);
+        GetRule kReSGetRule = new GetRule(ruleStore);
         String recipeURIEnc;
         try {
             recipeURIEnc = URLEncoder.encode(
@@ -289,7 +286,7 @@ public class RuleResource extends BaseStanbolResource {
             // The rule is already inside the rule store
             if ((kres_syntax == null)) {
                 // Get the rule
-                GetRule inrule = new GetRule(kresRuleStore);
+                GetRule inrule = new GetRule(ruleStore);
                 this.map = inrule.getRule(IRI.create(rule));
 
                 if (map == null) {
@@ -297,7 +294,7 @@ public class RuleResource extends BaseStanbolResource {
                 }
 
                 // Get the recipe
-                GetRecipe getrecipe = new GetRecipe(kresRuleStore);
+                GetRecipe getrecipe = new GetRecipe(ruleStore);
                 this.map = getrecipe.getRecipe(IRI.create(recipe));
                 if (map != null) {
                     this.desc = getrecipe.getDescription(IRI.create(recipe));
@@ -314,17 +311,17 @@ public class RuleResource extends BaseStanbolResource {
                 // Add the new rule to the end
                 ruleseq.add(IRI.create(rule));
                 // Remove the old recipe
-                RemoveRecipe remove = new RemoveRecipe(kresRuleStore);
+                RemoveRecipe remove = new RemoveRecipe(ruleStore);
                 boolean ok = remove.removeRecipe(IRI.create(recipe));
 
                 if (!ok) return Response.status(Status.CONFLICT).build();
 
                 // Add the recipe with the new rule
-                AddRecipe newadd = new AddRecipe(kresRuleStore);
+                AddRecipe newadd = new AddRecipe(ruleStore);
                 ok = newadd.addRecipe(IRI.create(recipe), ruleseq, desc);
 
                 if (ok) {
-                    kresRuleStore.saveOntology();
+                    ruleStore.saveOntology();
                     return Response.ok().build();
                 } else {
                     return Response.status(Status.NO_CONTENT).build();
@@ -334,7 +331,7 @@ public class RuleResource extends BaseStanbolResource {
             // The rule is added to the store and to the recipe
             if ((kres_syntax != null) & (description != null)) {
                 // Get the rule
-                AddRule inrule = new AddRule(kresRuleStore);
+                AddRule inrule = new AddRule(ruleStore);
                 boolean ok = inrule.addRule(IRI.create(rule), kres_syntax, description);
                 if (!ok) {
                     log.error("Problem to add: " + rule);
@@ -343,7 +340,7 @@ public class RuleResource extends BaseStanbolResource {
                 }
 
                 // Get the recipe
-                GetRecipe getrecipe = new GetRecipe(kresRuleStore);
+                GetRecipe getrecipe = new GetRecipe(ruleStore);
                 this.map = getrecipe.getRecipe(IRI.create(recipe));
                 if (map != null) {
                     this.desc = getrecipe.getDescription(IRI.create(recipe));
@@ -361,7 +358,7 @@ public class RuleResource extends BaseStanbolResource {
                 // Add the new rule to the end
                 ruleseq.add(IRI.create(rule));
                 // Remove the old recipe
-                RemoveRecipe remove = new RemoveRecipe(kresRuleStore);
+                RemoveRecipe remove = new RemoveRecipe(ruleStore);
                 ok = remove.removeRecipe(IRI.create(recipe));
                 if (!ok) {
                     System.err.println("ERROR TO REMOVE OLD RECIPE: " + recipe);
@@ -369,10 +366,10 @@ public class RuleResource extends BaseStanbolResource {
                 }
 
                 // Add the recipe with the new rule
-                AddRecipe newadd = new AddRecipe(kresRuleStore);
+                AddRecipe newadd = new AddRecipe(ruleStore);
                 ok = newadd.addRecipe(IRI.create(recipe), ruleseq, desc);
                 if (ok) {
-                    kresRuleStore.saveOntology();
+                    ruleStore.saveOntology();
                     return Response.ok().build();
                 } else {
                     return Response.status(Status.NO_CONTENT).build();
@@ -418,14 +415,14 @@ public class RuleResource extends BaseStanbolResource {
                 recipe = recipe.replace(" ", "").trim();
                 rule = rule.replace(" ", "").trim();
                 // Get the rule
-                GetRule getrule = new GetRule(kresRuleStore);
+                GetRule getrule = new GetRule(ruleStore);
                 this.map = getrule.getRule(IRI.create(rule));
                 if (map == null) {
                     return Response.status(Status.NOT_FOUND).build();
                 }
 
                 // Get the recipe
-                GetRecipe getrecipe = new GetRecipe(kresRuleStore);
+                GetRecipe getrecipe = new GetRecipe(ruleStore);
                 this.map = getrecipe.getRecipe(IRI.create(recipe));
                 if (map != null) {
                     this.desc = getrecipe.getDescription(IRI.create(recipe));
@@ -435,11 +432,11 @@ public class RuleResource extends BaseStanbolResource {
                 }
 
                 // Remove rule from recipe
-                RemoveRule remove = new RemoveRule(kresRuleStore);
+                RemoveRule remove = new RemoveRule(ruleStore);
                 ok = remove.removeRuleFromRecipe(IRI.create(rule), IRI.create(recipe));
 
                 if (ok) {
-                    kresRuleStore.saveOntology();
+                    ruleStore.saveOntology();
                     return Response.status(Status.OK).build();
                 } else {
                     return Response.status(Status.NO_CONTENT).build();
@@ -450,17 +447,17 @@ public class RuleResource extends BaseStanbolResource {
             if ((recipe == null) && (rule != null)) {
                 rule = rule.replace(" ", "").trim();
                 // Get the rule
-                GetRule getrule = new GetRule(kresRuleStore);
+                GetRule getrule = new GetRule(ruleStore);
                 this.map = getrule.getRule(IRI.create(rule));
                 if (map == null) {
                     return Response.status(Status.NOT_FOUND).build();
                 }
 
                 // Remove the old rule
-                RemoveRule remove = new RemoveRule(kresRuleStore);
+                RemoveRule remove = new RemoveRule(ruleStore);
                 ok = remove.removeRule(IRI.create(rule));
                 if (ok) {
-                    kresRuleStore.saveOntology();
+                    ruleStore.saveOntology();
                     return Response.status(Status.OK).build();
                 } else {
                     return Response.status(Status.NO_CONTENT).build();

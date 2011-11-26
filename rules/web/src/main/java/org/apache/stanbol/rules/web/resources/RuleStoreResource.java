@@ -38,7 +38,7 @@ import org.apache.stanbol.rules.manager.changes.RuleStoreImpl;
 @Path("/rulestore")
 public class RuleStoreResource extends BaseStanbolResource {
     
-    private RuleStoreImpl kresRuleStore;
+    private RuleStoreImpl ruleStore;
 
    /**
      * To get the RuleStoreImpl where are stored the rules and the recipes
@@ -46,8 +46,8 @@ public class RuleStoreResource extends BaseStanbolResource {
      * @param servletContext {To get the context where the REST service is running.}
      */
     public RuleStoreResource(@Context ServletContext servletContext){
-       this.kresRuleStore = (RuleStoreImpl) servletContext.getAttribute(RuleStoreImpl.class.getName());
-       if (kresRuleStore == null) {
+       this.ruleStore = (RuleStoreImpl) servletContext.getAttribute(RuleStoreImpl.class.getName());
+       if (ruleStore == null) {
             throw new IllegalStateException(
                     "KReSRuleStore with stored rules and recipes is missing in ServletContext");
         }
@@ -61,7 +61,7 @@ public class RuleStoreResource extends BaseStanbolResource {
     //@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("application/rdf+xml")
     public Response getRuleStore(){
-        return Response.ok(this.kresRuleStore).build();
+        return Response.ok(this.ruleStore).build();
     }
 
 }

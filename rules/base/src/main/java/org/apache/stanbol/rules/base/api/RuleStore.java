@@ -16,6 +16,7 @@
 */
 package org.apache.stanbol.rules.base.api;
 
+import java.io.InputStream;
 import java.util.Set;
 
 import org.apache.stanbol.rules.base.api.util.RecipeList;
@@ -37,9 +38,13 @@ public interface RuleStore {
 
     boolean addRecipe(IRI recipeIRI, String recipeDescription);
 
-    Recipe addRuleToRecipe(Recipe recipe, String kReSRuleInKReSSyntax);
+    Recipe addRuleToRecipe(Recipe recipe, String rRuleInKReSSyntax);
+    
+    Recipe addRuleToRecipe(Recipe recipe, InputStream ruleInKReSSyntax);
 
-    Recipe addRuleToRecipe(String recipeID, String kReSRuleInKReSSyntax) throws NoSuchRecipeException;
+    Recipe addRuleToRecipe(String recipeID, String ruleInKReSSyntax) throws NoSuchRecipeException;
+    
+    Recipe addRuleToRecipe(String recipeID, InputStream ruleInKReSSyntax) throws NoSuchRecipeException;
 
     void createRecipe(String recipeID, String rulesInKReSSyntax);
 

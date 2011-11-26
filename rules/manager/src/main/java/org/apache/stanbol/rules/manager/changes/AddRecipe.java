@@ -351,12 +351,13 @@ public class AddRecipe {
                 owlmanager.addAxiom(owlmodel, classAssertion);
 
                 //Add description
-                if ((recipeDescription != null) || !recipeDescription.isEmpty()) {
+                if (recipeDescription != null && !recipeDescription.isEmpty()) {
                     //Add the rule description
                     dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(description, ontoind, recipeDescription);
                     owlmanager.addAxiom(owlmodel, dataPropAssertion);
-                    ok = true;
                 }
+                
+                ok = true;
 
             } else {
                 System.err.println("The recipe with name " + recipeIRI + " already exists. Pleas check the name.");

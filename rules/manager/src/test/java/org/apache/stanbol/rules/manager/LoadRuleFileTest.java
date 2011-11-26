@@ -81,14 +81,12 @@ public class LoadRuleFileTest {
     @Test
     public void testKReSLoadRuleFile() throws OWLOntologyStorageException {
         Dictionary<String,Object> configuration = new Hashtable<String,Object>();
-        ONManager onm = new ONManagerImpl((TcManager) null, null, configuration);
         Dictionary<String,Object> configuration2 = new Hashtable<String,Object>();
         // configuration2.put(RuleStoreImpl.RULE_ONTOLOGY, "");
         configuration2.put(RuleStore.RULE_NAMESPACE, "http://kres.iks-project.eu/ontology/meta/rmi.owl#");
-        RuleStore store = new RuleStoreImpl(onm, configuration2,
+        RuleStore store = new RuleStoreImpl(configuration2,
                 "./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
-        RuleStore newstore = new RuleStoreImpl(new ONManagerImpl((TcManager) null, null, configuration),
-                configuration2, store.getOntology());
+        RuleStore newstore = new RuleStoreImpl(configuration2, store.getOntology());
         // Load the example file
         LoadRuleFile load = new LoadRuleFile("./src/main/resources/RuleOntology/TestRuleFileExample.txt",
                 store);

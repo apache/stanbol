@@ -61,19 +61,16 @@ public class AddRuleTest {
     @Before
     public void setUp() {
         Dictionary<String,Object> configuration = new Hashtable<String,Object>();
-        onm = new ONManagerImpl((TcManager) null, null, configuration);
-        store = new RuleStoreImpl(onm, configuration,
+        store = new RuleStoreImpl(configuration,
                 "./src/main/resources/RuleOntology/TestKReSOntologyRules.owl");
     }
 
     @After
     public void tearDown() {
         store = null;
-        onm = null;
     }
 
     public RuleStore store = null;
-    public ONManager onm = null;
 
     /**
      * Test of addRule method, of class AddRule.

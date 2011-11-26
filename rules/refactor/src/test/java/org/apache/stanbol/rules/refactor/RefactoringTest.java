@@ -235,6 +235,21 @@ public class RefactoringTest {
                 public boolean removeRule(Rule rule) {
                     throw new UnsupportedOperationException("Not supported yet.");
                 }
+
+				@Override
+				public Recipe addRuleToRecipe(Recipe recipe,
+						InputStream ruleInKReSSyntax) {
+					// TODO Auto-generated method stub
+					return null;
+				}
+
+				@Override
+				public Recipe addRuleToRecipe(String recipeID,
+						InputStream ruleInKReSSyntax)
+						throws NoSuchRecipeException {
+					// TODO Auto-generated method stub
+					return null;
+				}
             };
 
     }
@@ -256,6 +271,7 @@ public class RefactoringTest {
         TcManager tcm = new SpecialTcManager(qe, wtcp);
 
         ONManager onm = new ONManagerImpl(tcm, wtcp, emptyConfig);
+        
         Refactorer refactorer = new RefactorerImpl(null, new Serializer(), tcm, onm, ruleStore, emptyConfig);
         try {
             refactorer.ontologyRefactoring(ontology, recipeIRI);

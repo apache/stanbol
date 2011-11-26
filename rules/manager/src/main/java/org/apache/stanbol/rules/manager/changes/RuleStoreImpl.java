@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
@@ -38,7 +39,6 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
@@ -123,9 +123,6 @@ public class RuleStoreImpl implements RuleStore {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Reference
-    ONManager onManager;
-
     private OWLOntology owlmodel;
 
     @Property(name = RuleStore.RULE_NAMESPACE, value = _RULE_NAMESPACE_DEFAULT)
@@ -151,9 +148,9 @@ public class RuleStoreImpl implements RuleStore {
      * 
      * @param configuration
      */
-    public RuleStoreImpl(ONManager onm, Dictionary<String,Object> configuration) {
+    public RuleStoreImpl(Dictionary<String,Object> configuration) {
         // This recursive constructor call will also invoke activate()
-        this(onm, configuration, (OWLOntology) null);
+        this(configuration, (OWLOntology) null);
     }
 
     /**
@@ -162,10 +159,9 @@ public class RuleStoreImpl implements RuleStore {
      * @param owl
      *            {OWLOntology object contains rules and recipe}
      */
-    public RuleStoreImpl(ONManager onm, Dictionary<String,Object> configuration, OWLOntology owl) {
+    public RuleStoreImpl(Dictionary<String,Object> configuration, OWLOntology owl) {
         this();
 
-        this.onManager = onm;
         try {
             this.owlmodel = owl;
         } catch (Exception e) {
@@ -188,9 +184,8 @@ public class RuleStoreImpl implements RuleStore {
      * @param filepath
      *            {Ontology file path previously stored.}
      */
-    public RuleStoreImpl(ONManager onm, Dictionary<String,Object> configuration, String filepath) {
+    public RuleStoreImpl(Dictionary<String,Object> configuration, String filepath) {
         this();
-        this.onManager = onm;
         try {
             activate(_reconfigureLocation(configuration, filepath));
         } catch (IOException e) {
@@ -341,30 +336,29 @@ public class RuleStoreImpl implements RuleStore {
                 owlmanager.addAxiom(owlmodel, classAssertion);
 
                 // Add description
-                if ((recipeDescription != null) && !recipeDescription.isEmpty()) {
+                if (recipeDescription != null && !recipeDescription.isEmpty()) {
                     // Add the rule description
                     dataPropAssertion = factory.getOWLDataPropertyAssertionAxiom(description, ontoind,
                         recipeDescription);
                     owlmanager.addAxiom(owlmodel, dataPropAssertion);
-                    ok = true;
                 }
+                ok = true;
             } else {
                 log.error("The recipe with name " + recipeIRI + " already exists. Please check the name.");
-                ok = false;
-                return (ok);
+                
             }
 
         } else {
             log.error("The recipe with name and the set of rules cannot be empity or null.");
-            ok = false;
-            return (ok);
         }
 
         if (ok) {
             setStore(owlmodel);
+            
+            saveOntology();
         }
 
-        return (ok);
+        return ok;
     }
 
     /**
@@ -436,6 +430,77 @@ public class RuleStoreImpl implements RuleStore {
 
         return recipe;
     }
+    
+    
+    /**
+     * 
+     * @param recipe
+     *            the recipe
+     * @param rulesStream
+     *            the rule in Rule syntax
+     * 
+     * @return the recipe we the new rule.
+     */
+    @Override
+    public Recipe addRuleToRecipe(Recipe recipe, InputStream rulesStream) {
+        log.debug("Adding rule to recipe " + recipe);
+
+        /**
+         * Get the OWLDataFactory.
+         */
+        OWLDataFactory factory = OWLManager.getOWLDataFactory();
+
+        /**
+         * Add the rule to the recipe in the rule ontology managed by the RuleStore. First we define the
+         * object property hasRule and then we add the literal that contains the rule in Rule Syntax to the
+         * recipe individual.
+         */
+        String ruleNS = "http://kres.iks-project.eu/ontology/meta/rmi.owl#";
+        OWLObjectProperty hasRule = factory.getOWLObjectProperty(IRI.create(ruleNS + "hasRule"));
+        OWLDataProperty hasBodyAndHead = factory.getOWLDataProperty(IRI.create(ruleNS + "hasBodyAndHead"));
+
+        /**
+         * The IRI of the recipe is fetched from the recipe object itself. From that IRI is obtained the
+         * recipe owl individual.
+         */
+        IRI recipeIRI = recipe.getRecipeID();
+        OWLNamedIndividual reipeIndividual = factory.getOWLNamedIndividual(recipeIRI);
+
+        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+
+        /**
+         * Finally also the in-memory representation of the Recipe passed as input is modified.
+         */
+        KB kReSKB = RuleParserImpl.parse(rulesStream);
+        RuleList ruleList = kReSKB.getkReSRuleList();
+        for (Rule rule : ruleList) {
+
+            /**
+             * The rule must be added to the ontology, so 1. an IRI is created from its name 2. the KReS
+             * syntax is added to the rule as a literal through the hasBobyAndHe data property. 3. the rule is
+             * associated to the recipe by means of the hasRule object property, so that the triple <a_recipe
+             * hasRule a_rule> is added to the rule ontology.
+             * 
+             */
+            IRI ruleIRI = IRI.create(ruleNS + rule.getRuleName());
+            OWLNamedIndividual ruleIndividual = factory.getOWLNamedIndividual(ruleIRI);
+
+            OWLAxiom hasBodyAndHeadAxiom = factory.getOWLDataPropertyAssertionAxiom(hasBodyAndHead,
+                ruleIndividual, rule.toKReSSyntax());
+            manager.addAxiom(owlmodel, hasBodyAndHeadAxiom);
+
+            OWLAxiom hasRuleAxiom = factory.getOWLObjectPropertyAssertionAxiom(hasRule, reipeIndividual,
+                ruleIndividual);
+            manager.addAxiom(owlmodel, hasRuleAxiom);
+
+            /**
+             * The Rule is added to the Recipe in-memory object.
+             */
+            recipe.addKReSRule(rule);
+        }
+
+        return recipe;
+    }
 
     /**
      * 
@@ -449,6 +514,22 @@ public class RuleStoreImpl implements RuleStore {
 
         Recipe recipe = getRecipe(IRI.create(recipeID));
         return addRuleToRecipe(recipe, kReSRuleInKReSSyntax);
+
+    }
+    
+    
+    /**
+     * 
+     * @param recipeIRI
+     *            the IRI of the recipe
+     * @param rulesStream
+     *            the rule in Rule syntax
+     */
+    @Override
+    public Recipe addRuleToRecipe(String recipeID, InputStream rulesStream) throws NoSuchRecipeException {
+
+        Recipe recipe = getRecipe(IRI.create(recipeID));
+        return addRuleToRecipe(recipe, rulesStream);
 
     }
 
@@ -514,7 +595,7 @@ public class RuleStoreImpl implements RuleStore {
         log.debug("Called get recipe for id: " + recipeIRI.toString());
         Recipe recipe = null;
 
-        if (onManager != null && recipeIRI != null) {
+        if (recipeIRI != null) {
             OWLDataFactory factory = OWLManager.getOWLDataFactory();
             OWLIndividual recipeIndividual = factory.getOWLNamedIndividual(recipeIRI);
             if (recipeIndividual != null) {

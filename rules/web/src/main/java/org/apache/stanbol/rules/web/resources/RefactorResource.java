@@ -68,14 +68,10 @@ public class RefactorResource extends BaseStanbolResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    protected ONManager onManager;
     protected Refactorer refactorer;
-    protected TcManager tcManager;
-
+    
     public RefactorResource(@Context ServletContext servletContext) {
         refactorer = (Refactorer) ContextHelper.getServiceFromContext(Refactorer.class, servletContext);
-        onManager = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
-        tcManager = (TcManager) ContextHelper.getServiceFromContext(TcManager.class, servletContext);
         if (refactorer == null) {
             throw new IllegalStateException("SemionRefactorer missing in ServletContext");
         }
@@ -168,11 +164,7 @@ public class RefactorResource extends BaseStanbolResource {
         return refactorer.ontologyRefactoring(inputOntology, actualRecipe);
     }
 
-    public String getNamespace() {
-        return onManager.getOntologyNetworkNamespace();
-    }
-
-    @POST
+        @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(value = {KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_XML,
                        KRFormat.OWL_XML, KRFormat.RDF_JSON})

@@ -1,19 +1,19 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Licensed to the Apache Software Foundation (ASF) under one or more
+* contributor license agreements.  See the NOTICE file distributed with
+* this work for additional information regarding copyright ownership.
+* The ASF licenses this file to You under the Apache License, Version 2.0
+* (the "License"); you may not use this file except in compliance with
+* the License.  You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -21,6 +21,7 @@
 
 package org.apache.stanbol.rules.web.resources;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -48,6 +49,8 @@ import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.io.ClerezzaOntologyStorage;
+import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.manager.changes.AddRecipe;
 import org.apache.stanbol.rules.manager.changes.GetRecipe;
@@ -67,6 +70,8 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.jersey.multipart.FormDataParam;
+
 /**
  * 
  * @author elvio, andrea.nuzzolese
@@ -80,7 +85,8 @@ public class RecipeResource extends BaseStanbolResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    private RuleStoreImpl kresRuleStore;
+    private RuleStoreImpl ruleStore;
+    private ClerezzaOntologyStorage storage;
 
     /**
      * To get the RuleStoreImpl where are stored the rules and the recipes
@@ -89,9 +95,9 @@ public class RecipeResource extends BaseStanbolResource {
      *            {To get the context where the REST service is running.}
      */
     public RecipeResource(@Context ServletContext servletContext) {
-        this.kresRuleStore = (RuleStoreImpl) ContextHelper.getServiceFromContext(RuleStore.class,
-            servletContext);
+    	this.ruleStore = (RuleStoreImpl) ContextHelper.getServiceFromContext(RuleStore.class, servletContext);
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
+        this.storage = onm.getOntologyStore();
     }
 
     /**
@@ -108,13 +114,11 @@ public class RecipeResource extends BaseStanbolResource {
      */
     @GET
     @Path("/{uri:.+}")
-    @Produces(value = {KRFormat.RDF_XML, KRFormat.RDF_JSON, KRFormat.OWL_XML, KRFormat.FUNCTIONAL_OWL,
-                       KRFormat.MANCHESTER_OWL, KRFormat.TURTLE})
+    @Produces(value = {KRFormat.RDF_XML, KRFormat.RDF_JSON, KRFormat.OWL_XML, KRFormat.FUNCTIONAL_OWL,KRFormat.MANCHESTER_OWL, KRFormat.TURTLE})
     public Response getRecipe(@PathParam("uri") String uri) throws OWLOntologyCreationException {
         try {
-
-            GetRecipe rule = new GetRecipe(kresRuleStore);
-            ;
+        
+            GetRecipe rule = new GetRecipe(ruleStore);;    
             // String ID =
             // kresRuleStore.getOntology().getOntologyID().toString().replace(">","").replace("<","")+"#";
 
@@ -127,7 +131,7 @@ public class RecipeResource extends BaseStanbolResource {
 
                     // The recipe is retrieved (import declarations point to
                     // KReS Services)
-                    OWLOntology onto = kresRuleStore.getOntology();
+                    OWLOntology onto = ruleStore.getOntology();
                     OWLOntology newmodel = OWLManager.createOWLOntologyManager().createOntology(
                         onto.getOntologyID());
                     OWLDataFactory factory = onto.getOWLOntologyManager().getOWLDataFactory();
@@ -174,7 +178,7 @@ public class RecipeResource extends BaseStanbolResource {
                 } else {
                     // The recipe is retrieved (import declarations point to
                     // KReS Services)
-                    OWLOntology onto = kresRuleStore.getOntology();
+                    OWLOntology onto = ruleStore.getOntology();
 
                     OWLDataFactory factory = onto.getOWLOntologyManager().getOWLDataFactory();
                     OWLObjectProperty prop = factory.getOWLObjectProperty(IRI
@@ -245,14 +249,22 @@ public class RecipeResource extends BaseStanbolResource {
      */
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(value = {KRFormat.RDF_XML, KRFormat.TURTLE, KRFormat.OWL_XML, KRFormat.FUNCTIONAL_OWL,
-                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
-    public Response addRecipe(@FormParam(value = "recipe") String recipe,
-                              @FormParam(value = "description") String description) {
+    @Produces(value = {KRFormat.RDF_XML, KRFormat.TURTLE, KRFormat.OWL_XML, KRFormat.FUNCTIONAL_OWL,KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
+    public Response addRecipe(@FormParam(value = "recipe") String recipe, @FormParam(value = "description") String description) {
 
         try {
 
-            AddRecipe instance = new AddRecipe(kresRuleStore);
+        	boolean added = ruleStore.addRecipe(IRI.create(recipe), description);
+        	
+        	if(added){
+        		return Response.status(Status.OK).build();
+        	}
+        	else{
+        		return Response.status(Status.CONFLICT).build();
+        	}
+        	
+        	/*
+            AddRecipe instance = new AddRecipe(ruleStore);
 
             // String ID =
             // kresRuleStore.getOntology().getOntologyID().toString().replace(">","").replace("<","")+"#";
@@ -261,17 +273,61 @@ public class RecipeResource extends BaseStanbolResource {
 
             if (!ok) {
 
-                return Response.status(Status.CONFLICT).build();
+            	return Response.status(Status.CONFLICT).build();
 
             } else {
-                kresRuleStore.saveOntology();
+                ruleStore.saveOntology();
                 return Response.status(Status.OK).build();
             }
+            */
 
         } catch (Exception e) {
-            throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
+        	return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
     }
+    
+    
+    /**
+     * To add a recipe without rules.
+     * 
+     * @param recipe
+     *            {A string contains the IRI of the recipe to be added}
+     * @param description
+     *            {A string contains a description of the rule}
+     * @return Return: <br/>
+     *         200 The recipe has been added<br/>
+     *         409 The recipe has not been added<br/>
+     *         500 Some error occurred
+     */
+    
+    
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(value = {KRFormat.TEXT_PLAIN, KRFormat.RDF_JSON})
+    @Path("/{recipeID:.+}")
+    public Response addRulesToRecipe(@PathParam(value = "recipeID") String recipeID, @FormDataParam(value = "recipeText") InputStream rules) {
+
+        try {
+
+        	System.out.println(rules);
+        	
+        	Recipe recipe = ruleStore.addRuleToRecipe(recipeID, rules);
+        	
+        	if(recipe != null){
+        		return Response.ok().build();
+        	}
+        	else{
+        		return Response.status(Status.NO_CONTENT).build();	
+        	}
+        	
+            
+
+        } catch (Exception e) {
+        	log.error("Error while adding a rule to a recipe.", e);
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 
     /**
      * To delete a recipe
@@ -289,7 +345,7 @@ public class RecipeResource extends BaseStanbolResource {
 
         try {
 
-            RemoveRecipe instance = new RemoveRecipe(kresRuleStore);
+            RemoveRecipe instance = new RemoveRecipe(ruleStore);
 
             // String ID =
             // kresRuleStore.getOntology().getOntologyID().toString().replace(">","").replace("<","")+"#";
@@ -299,7 +355,7 @@ public class RecipeResource extends BaseStanbolResource {
             if (!ok) {
                 return Response.status(Status.CONFLICT).build();
             } else {
-                kresRuleStore.saveOntology();
+                ruleStore.saveOntology();
                 return Response.ok().build();
             }
 
