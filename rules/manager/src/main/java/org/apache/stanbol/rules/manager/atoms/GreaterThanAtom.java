@@ -16,15 +16,24 @@
 */
 package org.apache.stanbol.rules.manager.atoms;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.stanbol.rules.base.api.SPARQLObject;
+import org.apache.stanbol.rules.base.api.URIResource;
 import org.apache.stanbol.rules.manager.SPARQLComparison;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.SWRLAtom;
+import org.semanticweb.owlapi.model.SWRLBuiltInAtom;
+import org.semanticweb.owlapi.model.SWRLDArgument;
+import org.semanticweb.owlapi.vocab.SWRLBuiltInsVocabulary;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.vocabulary.XSD;
 
 
 public class GreaterThanAtom extends ComparisonAtom {
@@ -77,8 +86,94 @@ public class GreaterThanAtom extends ComparisonAtom {
 
 	@Override
 	public SWRLAtom toSWRL(OWLDataFactory factory) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		List<SWRLDArgument> swrldArguments = new ArrayList<SWRLDArgument>();
+		
+		SWRLDArgument swrldArgument1 = null;
+		
+		if(argument1.toString().startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
+			
+			swrldArgument1 = factory.getSWRLVariable(IRI.create(argument1.toString()));
+		}
+		else{
+			
+			OWLLiteral literal = null;
+			if(argument1 instanceof TypedLiteralAtom){
+				TypedLiteralAtom typedLiteralAtom = (TypedLiteralAtom) argument1;
+					
+				URIResource xsdType = typedLiteralAtom.getXsdType();
+				
+				if(xsdType.getURI().equals(XSD.xboolean)){
+					literal = factory.getOWLLiteral(Boolean.valueOf(argument1.toString()).booleanValue());
+				}
+				else if(xsdType.getURI().equals(XSD.xdouble)){
+					literal = factory.getOWLLiteral(Double.valueOf(argument1.toString()).doubleValue());
+				}
+				else if(xsdType.getURI().equals(XSD.xfloat)){
+					literal = factory.getOWLLiteral(Float.valueOf(argument1.toString()).floatValue());
+				}
+				else if(xsdType.getURI().equals(XSD.xint)){
+					literal = factory.getOWLLiteral(Integer.valueOf(argument1.toString()).intValue());
+				}
+				
+				else{
+					literal = factory.getOWLLiteral(argument1.toString());	
+				}
+				
+			}
+			else{
+				literal = factory.getOWLLiteral(argument1.toString());
+			}
+			
+			swrldArgument1 = factory.getSWRLLiteralArgument(literal);
+			
+		}
+		
+		SWRLDArgument swrldArgument2 = null;
+		
+		if(argument2.toString().startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
+			
+			swrldArgument2 = factory.getSWRLVariable(IRI.create(argument2.toString()));
+		}
+		else{
+			
+			OWLLiteral literal = null;
+			if(argument2 instanceof TypedLiteralAtom){
+				TypedLiteralAtom typedLiteralAtom = (TypedLiteralAtom) argument2;
+					
+				URIResource xsdType = typedLiteralAtom.getXsdType();
+				
+				if(xsdType.getURI().equals(XSD.xboolean)){
+					literal = factory.getOWLLiteral(Boolean.valueOf(argument2.toString()).booleanValue());
+				}
+				else if(xsdType.getURI().equals(XSD.xdouble)){
+					literal = factory.getOWLLiteral(Double.valueOf(argument2.toString()).doubleValue());
+				}
+				else if(xsdType.getURI().equals(XSD.xfloat)){
+					literal = factory.getOWLLiteral(Float.valueOf(argument2.toString()).floatValue());
+				}
+				else if(xsdType.getURI().equals(XSD.xint)){
+					literal = factory.getOWLLiteral(Integer.valueOf(argument2.toString()).intValue());
+				}
+				
+				else{
+					literal = factory.getOWLLiteral(argument2.toString());	
+				}
+				
+			}
+			else{
+				literal = factory.getOWLLiteral(argument2.toString());
+			}
+			
+			swrldArgument2 = factory.getSWRLLiteralArgument(literal);
+			
+		}
+		
+		swrldArguments.add(swrldArgument1);
+		swrldArguments.add(swrldArgument2);
+		
+		SWRLBuiltInAtom swrlBuiltInAtom = factory.getSWRLBuiltInAtom(SWRLBuiltInsVocabulary.GREATER_THAN.getIRI(), swrldArguments);
+		return swrlBuiltInAtom;
 	}
 
 	@Override
