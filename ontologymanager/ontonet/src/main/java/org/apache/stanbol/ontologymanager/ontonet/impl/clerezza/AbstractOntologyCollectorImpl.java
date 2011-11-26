@@ -205,11 +205,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
 
     @Override
     public OWLOntology getOntology(IRI ontologyIri) {
-        if (!hasOntology(ontologyIri)) return null;
-        OWLOntology o;
-        o = (OWLOntology) ontologyProvider.getStoredOntology(ontologyProvider.getKey(ontologyIri),
-            OWLOntology.class);
-        return o;
+        return getOntology(ontologyIri, false);
     }
 
     @Override

@@ -132,4 +132,22 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
         throw new UnsupportedOperationException("Not implemented for OWL API version.");
     }
 
+    @Override
+    public Object getStoredOntology(IRI reference, Class<?> returnType) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Object getStoredOntology(IRI reference, Class<?> returnType, boolean merge) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Object getStoredOntology(String key, Class<?> returnType, boolean merge) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

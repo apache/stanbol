@@ -88,6 +88,14 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
      * 
      * @return the requested ontology, or null if no ontology with this ID has been loaded.
      */
+    OWLOntology getOntology(IRI ontologyIri, boolean merge);
+    
+    /**
+     * Equivalent to calling <code>getOntology(IRI, false)</code>;
+     * 
+     * @param ontologyIri
+     * @return
+     */
     OWLOntology getOntology(IRI ontologyIri);
 
     /**

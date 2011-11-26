@@ -29,7 +29,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * A system responsible for maintaining registry ontologies. Depending on the implementation, it can be
  * volatile or persistent, centralised or distributed.<br>
  * <br>
- * TODO see if full CRUD operation support is necessary.
+ * TODO see if full CRUD operation support is necessary. TODO deprecate methods that expose keys. These should
+ * all be handled internally.
  * 
  * @author alexdma
  * 
@@ -61,7 +62,25 @@ public interface OntologyProvider<S> {
     S getStore();
 
     /**
-     * Useful
+     * Same as {@link OntologyProvider#getStoredOntology(String, Class)}, but instead of the internal key it
+     * uses an IRI that <i>publicly</i> identifies or references an ontology. This can be, ordered by
+     * preference most relevant first:
+     * <ol>
+     * <li>The version IRI
+     * <li>The ontology IRI
+     * <li>The physical IRI, if different from the above
+     * </ol>
+     * 
+     * @param reference
+     * @param returnType
+     * @return
+     */
+    Object getStoredOntology(IRI reference, Class<?> returnType);
+
+    Object getStoredOntology(IRI reference, Class<?> returnType, boolean merge);
+
+    /**
+     * 
      * 
      * @param key
      *            the key used to identify the ontology in this provider. They can or cannot coincide with the
@@ -74,6 +93,8 @@ public interface OntologyProvider<S> {
      * @return
      */
     Object getStoredOntology(String key, Class<?> returnType);
+
+    Object getStoredOntology(String key, Class<?> returnType, boolean merge);
 
     /**
      * Returns an array containing the most specific types for ontology objects that this provider can manage

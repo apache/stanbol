@@ -145,7 +145,8 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     @Override
     public OWLOntology asOWLOntology(boolean merge) {
         if (merge) throw new UnsupportedOperationException(
-                "Ontology merging not implemented yet. Please set merge parameter to false.");
+                "Ontology merging only implemented for managed ontologies, not for collectors. "
+                        + "Please set merge parameter to false.");
         // Create an ontology manager on the fly. We don't really need a permanent one.
         OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
         OWLDataFactory df = mgr.getOWLDataFactory();

@@ -60,14 +60,6 @@ public interface Library extends RegistryItem {
     OWLOntology getOntology(IRI id) throws RegistryContentException;
 
     /**
-     * Returns a string that can be encoded as a IRI/URI/UriRef etc. for retrieving the raw ontology.
-     * 
-     * @param ontologyId
-     * @return
-     */
-    String getOntologyReference(IRI ontologyId) throws RegistryContentException;
-
-    /**
      * Determines if the contents of this library have been loaded and are up-to-date.
      * 
      * @return true if the contents are loaded and up-to-date, false otherwise.

@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -28,11 +29,13 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.RemoveImport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +73,8 @@ public abstract class AbstractOntologySpaceImpl extends AbstractOntologyCollecto
     @Override
     public OWLOntology asOWLOntology(boolean merge) {
         if (merge) throw new UnsupportedOperationException(
-                "Ontology merging not implemented yet. Please set merge parameter to false.");
+                "Ontology merging only implemented for managed ontologies, not for collectors. "
+                        + "Please set merge parameter to false.");
 
         long before = System.currentTimeMillis();
 
@@ -113,6 +117,36 @@ public abstract class AbstractOntologySpaceImpl extends AbstractOntologyCollecto
         log.debug("OWL export of space {} completed in {} ms.", getID(), System.currentTimeMillis() - before);
 
         return root;
+    }
+
+    @Override
+    public OWLOntology getOntology(IRI ontologyIri, boolean merge) {
+        // Remove the check below. It might be an unmanaged dependency (TODO remove from collector and
+        // reintroduce check?).
+        // if (!hasOntology(ontologyIri)) return null;
+        OWLOntology o;
+        o = (OWLOntology) ontologyProvider.getStoredOntology(ontologyIri, OWLOntology.class, merge);
+        // Rewrite import statements
+        List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+        OWLDataFactory df = o.getOWLOntologyManager().getOWLDataFactory();
+        /*
+         * TODO manage import rewrites better once the container ID is fully configurable (i.e. instead of
+         * going upOne() add "session" or "ontology" if needed).
+         */
+        for (OWLImportsDeclaration oldImp : o.getImportsDeclarations()) {
+            changes.add(new RemoveImport(o, oldImp));
+            String s = oldImp.getIRI().toString();
+            s = s.substring(s.indexOf("::") + 2, s.length());
+            boolean managed = managedOntologies.contains(oldImp.getIRI());
+            // For space, always go up at least one
+            IRI ns = getNamespace();
+            IRI target = IRI.create((managed ? ns + "/" + getID().split("/")[0] + "/" : URIUtils.upOne(ns)
+                                                                                        + "/")
+                                    + s);
+            changes.add(new AddImport(o, df.getOWLImportsDeclaration(target)));
+        }
+        o.getOWLOntologyManager().applyChanges(changes);
+        return o;
     }
 
     /**

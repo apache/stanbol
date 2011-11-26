@@ -33,17 +33,17 @@ import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.web.resources.DocumentationResource;
 import org.apache.stanbol.ontologymanager.web.resources.OntoNetRootResource;
-import org.apache.stanbol.ontologymanager.web.resources.OntologyIndexResource;
 import org.apache.stanbol.ontologymanager.web.resources.OntologyNetworkResource;
 import org.apache.stanbol.ontologymanager.web.resources.RegistryManagerResource;
 import org.apache.stanbol.ontologymanager.web.resources.ScopeOntologyResource;
 import org.apache.stanbol.ontologymanager.web.resources.ScopeResource;
 import org.apache.stanbol.ontologymanager.web.resources.SessionByIdResource;
 import org.apache.stanbol.ontologymanager.web.resources.SessionsResource;
-import org.apache.stanbol.ontologymanager.web.resources.StoredGraphsResource;
+import org.apache.stanbol.ontologymanager.web.resources.StoredOntologyResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -76,8 +76,11 @@ public class OntonetFragment implements WebFragment {
     OfflineConfiguration offline;
 
     @Reference
+    OntologyProvider<?> ontologyProvider;
+
+    @Reference
     RegistryManager regMgr;
-    
+
     @Reference
     TcManager tcManager;
 
@@ -92,18 +95,18 @@ public class OntonetFragment implements WebFragment {
         // Temporary resources
         classes.add(OntoNetRootResource.class);
         classes.add(DocumentationResource.class);
-        // classes.add(RESTfulResource.class);
 
-        classes.add(StoredGraphsResource.class);
+        // classes.add(RESTfulResource.class);
+        // classes.add(StoredGraphsResource.class);
 
         classes.add(OntologyNetworkResource.class);
         classes.add(ScopeResource.class);
         classes.add(ScopeOntologyResource.class);
-        classes.add(OntologyIndexResource.class);
+        classes.add(StoredOntologyResource.class);
 
         classes.add(SessionsResource.class);
         classes.add(SessionByIdResource.class);
-        
+
         classes.add(RegistryManagerResource.class);
 
         return classes;

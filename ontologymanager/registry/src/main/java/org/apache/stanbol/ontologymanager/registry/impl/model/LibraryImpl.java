@@ -17,21 +17,15 @@
 package org.apache.stanbol.ontologymanager.registry.impl.model;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLConnection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.access.EntityAlreadyExistsException;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
-import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
 import org.apache.stanbol.ontologymanager.registry.api.IllegalRegistryCycleException;
@@ -44,14 +38,9 @@ import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryItem;
 import org.apache.stanbol.ontologymanager.registry.api.model.RegistryOntology;
 import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
-import org.semanticweb.owlapi.io.OWLOntologyCreationIOException;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyDocumentAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.UnloadableImportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,8 +116,8 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
         Set<OWLOntology> ontologies = new HashSet<OWLOntology>();
         for (RegistryItem child : getChildren()) {
             if (child instanceof RegistryOntology) {
-                String ref = ((RegistryOntology) child).getReference(getIRI());
-                OWLOntology o = (OWLOntology) getCache().getStoredOntology(ref, OWLOntology.class);
+                OWLOntology o = (OWLOntology) getCache().getStoredOntology(
+                    ((RegistryOntology) child).getIRI(), OWLOntology.class);
 
                 // OWLOntology o = ((RegistryOntology) child).getRawOntology(this.getIRI());
                 // Should never be null if the library was loaded correctly (an error should have already been
@@ -155,16 +144,6 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
     }
 
     @Override
-    public String getOntologyReference(IRI ontologyId) throws RegistryContentException {
-
-        RegistryItem ri = getChild(ontologyId);
-        if (ri instanceof RegistryOntology) {
-            return ((RegistryOntology) ri).getReference(getIRI());
-        }
-        return null;
-    }
-
-    @Override
     public Type getType() {
         return type;
     }
@@ -181,63 +160,13 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
             if (item instanceof RegistryOntology) {
                 RegistryOntology o = (RegistryOntology) item;
                 IRI id = o.getIRI();
-
-                if (true) {
-                    try {
-                        // No preferred key, we don't have a prefix here.
-                        String key = loader.loadInStore(id, SupportedFormat.RDF_XML, null, false);
-                        log.debug("Setting key {} for ontology {}", key, o);
-                        o.setReference(getIRI(), key);
-                    } catch (IOException ex) {
-                        log.error("I/O error occurred loading {}", id);
-                    }
-                } else {
-
-                    Object store = loader.getStore();
-                    if (store instanceof OWLOntologyManager) // Deprecated OWL API implementation.
-                    {
-                        OWLOntologyManager mgr = (OWLOntologyManager) store;
-                        try {
-                            o.setRawOntology(getIRI(), mgr.loadOntology(id));
-                        } catch (OWLOntologyAlreadyExistsException e) {
-                            o.setRawOntology(getIRI(), mgr.getOntology(e.getOntologyID()));
-                        } catch (OWLOntologyDocumentAlreadyExistsException e) {
-                            o.setRawOntology(getIRI(), mgr.getOntology(e.getOntologyDocumentIRI()));
-                        } catch (UnloadableImportException e) {
-                            log.warn("Import {} failed. Reason: {}", e.getImportsDeclaration().getURI(), e
-                                    .getCause().getLocalizedMessage());
-                        } catch (OWLOntologyCreationIOException e) {
-                            log.error("I/O error when loading ontology {}. Reason: {}", id, e.getCause()
-                                    .getClass());
-                        } catch (OWLOntologyCreationException e) {
-                            log.error("Failed to load ontology " + id, e);
-                        }
-                    } else if (store instanceof TcProvider) // Clerezza implementation
-                    {
-                        TcProvider wtcp = (TcProvider) store;
-                        MGraph mg = null;
-                        try {
-                            mg = wtcp.createMGraph(new UriRef(id.toString()));
-                        } catch (EntityAlreadyExistsException e) {
-                            mg = wtcp.getMGraph(new UriRef(id.toString()));
-                        }
-                        if (mg != null) try {
-                            // TODO use parser.getInstance() or something similar
-                            Parser parser = Parser.getInstance();
-                            final URLConnection con = id.toURI().toURL().openConnection();
-                            con.addRequestProperty("Accept", "application/rdf+xml");
-                            final InputStream is = con.getInputStream();
-                            Graph deserializedGraph = parser.parse(is, SupportedFormat.RDF_XML);
-                            mg.addAll(deserializedGraph);
-
-                            // TODO imports!
-
-                            o.setReference(getIRI(), id.toString());
-                        } catch (IOException e) {
-                            log.error("I/O error when loading ontology {}. Reason: {}", id, e);
-                        }
-                    } else throw new IllegalStateException(
-                            "Library implementation was assigned an unsupported cache type.");
+                try {
+                    // No preferred key, we don't have a prefix here.
+                    String key = loader.loadInStore(id, null, null, false);
+                    if (key == null || key.isEmpty()) log.error(
+                        "Empty storage key. Ontology {} was apparently not stored.", id);
+                } catch (IOException ex) {
+                    log.error("I/O error occurred loading {}", id);
                 }
             }
         }
@@ -248,7 +177,6 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
     public void removeChild(RegistryItem child) {
         super.removeChild(child);
         // Also unload the ontology version that comes from this library.
-        if (child instanceof RegistryOntology) ((RegistryOntology) child).setReference(getIRI(), null);
     }
 
     @Override

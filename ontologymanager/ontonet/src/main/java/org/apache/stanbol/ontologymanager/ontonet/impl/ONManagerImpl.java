@@ -61,7 +61,6 @@ import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.ScopeRegistryImp
 import org.apache.stanbol.ontologymanager.ontonet.impl.session.ScopeSessionSynchronizer;
 import org.apache.stanbol.ontologymanager.ontonet.impl.session.SessionManagerImpl;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
-import org.apache.stanbol.owl.util.URIUtils;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.io.FileDocumentSource;
 import org.semanticweb.owlapi.io.IRIDocumentSource;
@@ -131,10 +130,10 @@ public class ONManagerImpl implements ONManager {
     }
 
     public static final String _CONFIG_ONTOLOGY_PATH_DEFAULT = "";
-
     public static final String _ID_DEFAULT = "ontonet";
-
-    public static final String _ONTOLOGY_NETWORK_NS_DEFAULT = "http://localhost:8080/ontonet/ontology/";
+    public static final String _ID_SCOPE_REGISTRY_DEFAULT = "ontology";
+    public static final String _ID_SESSION_MANAGER_DEFAULT = "session";
+    public static final String _ONTOLOGY_NETWORK_NS_DEFAULT = "http://localhost:8080/ontonet/";
 
     @Property(name = ONManager.CONFIG_ONTOLOGY_PATH, value = _CONFIG_ONTOLOGY_PATH_DEFAULT)
     private String configPath;
@@ -168,6 +167,12 @@ public class ONManagerImpl implements ONManager {
 
     @Property(name = ONManager.ID, value = _ID_DEFAULT)
     private String ontonetID;
+
+    @Property(name = ONManager.ID_SESSION_MANAGER, value = _ID_SESSION_MANAGER_DEFAULT)
+    private String sessionManagerId;
+
+    @Property(name = ONManager.ID_SCOPE_REGISTRY, value = _ID_SCOPE_REGISTRY_DEFAULT)
+    private String scopeRegistryId;
 
     @Property(name = ONManager.ONTOLOGY_NETWORK_NS, value = _ONTOLOGY_NETWORK_NS_DEFAULT)
     private String ontonetNS;
@@ -279,6 +284,10 @@ public class ONManagerImpl implements ONManager {
         if (ontonetID == null) ontonetID = _ID_DEFAULT;
         ontonetNS = (String) configuration.get(ONManager.ONTOLOGY_NETWORK_NS);
         if (ontonetNS == null) ontonetNS = _ONTOLOGY_NETWORK_NS_DEFAULT;
+        scopeRegistryId = (String) configuration.get(ONManager.ID_SCOPE_REGISTRY);
+        if (scopeRegistryId == null) scopeRegistryId = _ID_SCOPE_REGISTRY_DEFAULT;
+        sessionManagerId = (String) configuration.get(ONManager.ID_SESSION_MANAGER);
+        if (sessionManagerId == null) sessionManagerId = _ID_SESSION_MANAGER_DEFAULT;
         configPath = (String) configuration.get(ONManager.CONFIG_ONTOLOGY_PATH);
         if (configPath == null) configPath = _CONFIG_ONTOLOGY_PATH_DEFAULT;
 
@@ -369,16 +378,19 @@ public class ONManagerImpl implements ONManager {
     protected void bindResources() {
         IRI ns = IRI.create(getOntologyNetworkNamespace());
         if (ontologyProvider.getStore() instanceof TcProvider) ontologySpaceFactory = new OntologySpaceFactoryImpl(
-                scopeRegistry, (OntologyProvider<TcProvider>) ontologyProvider, offline, ns);
+                scopeRegistry, (OntologyProvider<TcProvider>) ontologyProvider, offline,
+                IRI.create(ns + scopeRegistryId + "/"));
         else ontologySpaceFactory = new org.apache.stanbol.ontologymanager.ontonet.impl.owlapi.OntologySpaceFactoryImpl(
                 scopeRegistry, offline, ns);
 
-        ontologyScopeFactory = new OntologyScopeFactoryImpl(scopeRegistry,
-                IRI.create(getOntologyNetworkNamespace()), ontologySpaceFactory);
+        ontologyScopeFactory = new OntologyScopeFactoryImpl(scopeRegistry, IRI.create(ns + scopeRegistryId
+                                                                                      + "/"),
+                ontologySpaceFactory);
         ontologyScopeFactory.addScopeEventListener(oIndex);
 
-        ns = IRI.create(URIUtils.upOne(ns) + "/session/");
-        sessionManager = new SessionManagerImpl(ns, getScopeRegistry(), ontologyProvider);
+        // ns = IRI.create(URIUtils.upOne(ns) + "/" + sessionManagerId + "/");
+        sessionManager = new SessionManagerImpl(IRI.create(ns + sessionManagerId + "/"), getScopeRegistry(),
+                ontologyProvider);
         sessionManager.addSessionListener(new ScopeSessionSynchronizer(this));
     }
 

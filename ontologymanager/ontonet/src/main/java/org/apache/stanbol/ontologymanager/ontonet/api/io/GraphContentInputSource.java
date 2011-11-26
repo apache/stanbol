@@ -22,7 +22,6 @@ import java.util.Collections;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
-import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.owl.util.OWLUtils;
@@ -64,7 +63,7 @@ public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
                 log.debug("Parsing format {} failed.", format);
                 continue;
             } catch (Exception e) {
-                log.error("What the phukk "+format, e);
+                log.error("Error parsing " + format, e);
                 continue;
             }
         }

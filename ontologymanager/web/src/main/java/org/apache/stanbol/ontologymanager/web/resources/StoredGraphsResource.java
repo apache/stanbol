@@ -66,6 +66,7 @@ import com.hp.hpl.jena.ontology.OntModel;
 import com.sun.jersey.api.view.ImplicitProduces;
 import com.sun.jersey.multipart.FormDataParam;
 
+@Deprecated
 @Path("/ontonet/graphs")
 @ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
 public class StoredGraphsResource extends BaseStanbolResource {

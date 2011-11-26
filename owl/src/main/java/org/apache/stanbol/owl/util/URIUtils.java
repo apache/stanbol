@@ -32,13 +32,27 @@ public class URIUtils {
     public static IRI upOne(IRI iri) {
         return upOne(iri.toURI());
     }
-    
+
     public static IRI createIRI(UriRef uri) {
         return IRI.create(uri.getUnicodeString());
     }
-    
+
     public static UriRef createUriRef(IRI iri) {
         return new UriRef(iri.toString());
+    }
+
+    /**
+     * Strips terminating hashes.
+     * 
+     * @param iri
+     * @return
+     */
+    public static IRI sanitizeID(IRI iri) {
+        if (iri == null) throw new IllegalArgumentException("Cannot sanitize null IRI.");
+        String s = iri.toString();
+        while (s.endsWith("#"))
+            s = s.substring(0, s.length() - 1);
+        return IRI.create(s);
     }
 
     /**

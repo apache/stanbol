@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,15 +34,18 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionEvent.OperationType;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionListener;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.AbstractOntologyCollectorImpl;
+import org.apache.stanbol.owl.util.URIUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.RemoveImport;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -89,7 +93,8 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
     @Override
     public OWLOntology asOWLOntology(boolean merge) {
         if (merge) throw new UnsupportedOperationException(
-                "Merging not implemented yet. Please call asOWLOntology(false)");
+            "Ontology merging only implemented for managed ontologies, not for collectors. "
+                    + "Please set merge parameter to false.");
 
         long before = System.currentTimeMillis();
 
@@ -188,6 +193,34 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
     @Override
     public Set<String> getAttachedScopes() {
         return attachedScopes.keySet();
+    }
+
+    @Override
+    public OWLOntology getOntology(IRI ontologyIri, boolean merge) {
+        // Remove the check below. It might be an unmanaged dependency (TODO remove from collector and
+        // reintroduce check?).
+        // if (!hasOntology(ontologyIri)) return null;
+        OWLOntology o;
+        o = (OWLOntology) ontologyProvider.getStoredOntology(ontologyIri, OWLOntology.class, merge);
+        // Rewrite import statements
+        List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+        OWLDataFactory df = o.getOWLOntologyManager().getOWLDataFactory();
+        /*
+         * TODO manage import rewrites better once the container ID is fully configurable (i.e. instead of
+         * going upOne() add "session" or "ontology" if needed).
+         */
+        for (OWLImportsDeclaration oldImp : o.getImportsDeclarations()) {
+            changes.add(new RemoveImport(o, oldImp));
+            String s = oldImp.getIRI().toString();
+            s = s.substring(s.indexOf("::") + 2, s.length());
+            boolean managed = managedOntologies.contains(oldImp.getIRI());
+            IRI target = IRI.create((managed ? getNamespace() + getID() + "/" : URIUtils
+                    .upOne(getNamespace()) + "/")
+                                    + s);
+            changes.add(new AddImport(o, df.getOWLImportsDeclaration(target)));
+        }
+        o.getOWLOntologyManager().applyChanges(changes);
+        return o;
     }
 
     @Override

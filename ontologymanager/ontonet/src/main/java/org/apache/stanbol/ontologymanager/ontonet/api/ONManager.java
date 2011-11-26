@@ -52,6 +52,16 @@ public interface ONManager {
     /**
      * The key used to configure the base namespace of the ontology network.
      */
+    String ID_SCOPE_REGISTRY = "org.apache.stanbol.ontologymanager.ontonet.scopeRegistry.id";
+
+    /**
+     * The key used to configure the base namespace of the ontology network.
+     */
+    String ID_SESSION_MANAGER = "org.apache.stanbol.ontologymanager.ontonet.sessionManager.id";
+
+    /**
+     * The key used to configure the base namespace of the ontology network.
+     */
     String ONTOLOGY_NETWORK_NS = "org.apache.stanbol.ontologymanager.ontonet.ns";
 
     /**

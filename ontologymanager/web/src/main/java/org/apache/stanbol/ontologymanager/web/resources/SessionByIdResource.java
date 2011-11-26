@@ -27,12 +27,14 @@ import java.io.InputStream;
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -102,10 +104,11 @@ public class SessionByIdResource extends BaseStanbolResource {
     @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
                        KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
     public Response asOntology(@PathParam("id") String sessionId,
+                               @DefaultValue("false") @QueryParam("merge") boolean merge,
                                @Context UriInfo uriInfo,
                                @Context HttpHeaders headers) {
         if (session == null) return Response.status(NOT_FOUND).build();
-        return Response.ok(session.asOWLOntology(false)).build();
+        return Response.ok(session.asOWLOntology(merge)).build();
     }
 
     /**
@@ -171,10 +174,11 @@ public class SessionByIdResource extends BaseStanbolResource {
                        KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
     public Response getManagedOntology(@PathParam("id") String sessionId,
                                        @PathParam("ontologyId") String ontologyId,
+                                       @DefaultValue("false") @QueryParam("merge") boolean merge,
                                        @Context UriInfo uriInfo,
                                        @Context HttpHeaders headers) {
         if (session == null) return Response.status(NOT_FOUND).build();
-        OWLOntology o = session.getOntology(IRI.create(ontologyId));
+        OWLOntology o = session.getOntology(IRI.create(ontologyId), merge);
         if (o == null) return Response.status(NOT_FOUND).build();
         return Response.ok(o).build();
     }
@@ -193,7 +197,7 @@ public class SessionByIdResource extends BaseStanbolResource {
      */
     @POST
     @Consumes(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
-                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
+                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON, KRFormat.N3, KRFormat.N_TRIPLE})
     @Produces(MediaType.TEXT_PLAIN)
     public Response manageOntology(InputStream content) {
         long before = System.currentTimeMillis();

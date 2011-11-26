@@ -22,7 +22,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.registry.api.model.CachingPolicy;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.api.model.Registry;
-import org.apache.stanbol.ontologymanager.registry.api.model.RegistryOntology;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -97,8 +96,7 @@ public interface RegistryManager extends RegistryItemIndex {
 
     /**
      * Determines if the registry manager is set to load its resources only when a specific request for them
-     * (e.g. by a call to {@link RegistryOntology#getRawOntology(IRI)} or {@link Library#getOntologies()} is
-     * issued).
+     * (e.g. by a call to {@link Library#getOntologies()} is issued).
      * 
      * @return true if set to load resources only upon request, false if set to load all resources eagerly
      *         when the model has been built.

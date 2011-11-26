@@ -25,14 +25,17 @@ import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
@@ -66,7 +69,7 @@ import org.slf4j.LoggerFactory;
  * @author alexdma
  * 
  */
-@Path("/ontonet/ontology/{scopeid}/{uri:.+}")
+@Path("/ontonet/ontology/{scopeid}/{ontologyId:.+}")
 public class ScopeOntologyResource extends BaseStanbolResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
@@ -76,9 +79,69 @@ public class ScopeOntologyResource extends BaseStanbolResource {
      */
     protected ONManager onm;
 
-    public ScopeOntologyResource(@Context ServletContext servletContext) {
+    protected OntologyScope scope;
+
+    public ScopeOntologyResource(@PathParam(value = "scopeid") String scopeId,
+                                 @Context ServletContext servletContext) {
         this.servletContext = servletContext;
         this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
+        scope = onm.getScopeRegistry().getScope(scopeId);
+    }
+
+    /**
+     * Gets the ontology with the given identifier in its version managed by the session.
+     * 
+     * @param sessionId
+     *            the session identifier.
+     * @param ontologyId
+     *            the ontology identifier.
+     * @param uriInfo
+     * @param headers
+     * @return the requested managed ontology, or {@link Status#NOT_FOUND} if either the sessionn does not
+     *         exist, or the if the ontology either does not exist or is not managed.
+     */
+    @GET
+    @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
+                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
+    public Response getManagedOntology(@PathParam("scopeid") String scopeId,
+                                       @PathParam("ontologyId") String ontologyId,
+                                       @DefaultValue("false") @QueryParam("merge") boolean merge,
+                                       @Context UriInfo uriInfo,
+                                       @Context HttpHeaders headers) {
+        if (scope == null) return Response.status(NOT_FOUND).build();
+
+        // First of all, it could be a simple request for the space root!
+
+        String absur = uriInfo.getRequestUri().toString();
+        log.debug("Absolute URL Path {}", absur);
+        log.debug("Ontology ID {}", ontologyId);
+
+        IRI ontiri = IRI.create(ontologyId);
+
+        // TODO: hack (ma anche no)
+        if (!ontiri.isAbsolute()) ontiri = IRI.create(absur);
+
+        if (scope == null) return Response.status(NOT_FOUND).build();
+
+        // First of all, it could be a simple request for the space root!
+        String temp = scopeId + "/" + ontologyId;
+        if (temp.equals(scope.getCoreSpace().getID())) {
+            return Response.ok(scope.getCoreSpace().asOWLOntology(merge)).build();
+        } else if (temp.equals(scope.getCustomSpace().getID())) {
+            return Response.ok(scope.getCustomSpace().asOWLOntology(merge)).build();
+        }
+
+        OWLOntology o = null;
+        IRI ontologyIri = IRI.create(ontologyId);
+        OntologySpace spc = scope.getCustomSpace();
+        if (spc != null && spc.hasOntology(ontologyIri)) {
+            o = spc.getOntology(ontologyIri, merge);
+        } else {
+            spc = scope.getCoreSpace();
+            if (spc != null && spc.hasOntology(ontologyIri)) o = spc.getOntology(ontologyIri, merge);
+        }
+        if (o == null) return Response.status(NOT_FOUND).build();
+        return Response.ok(o).build();
     }
 
     /**
@@ -91,11 +154,11 @@ public class ScopeOntologyResource extends BaseStanbolResource {
      * @return, or a status 404 if either the scope is not registered or the ontology is not loaded within
      *          that scope.
      */
-    @GET
-    @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
-                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
+    // @GET
+    // @Produces(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
+    // KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
     public Response getScopeOntology(@PathParam("scopeid") String scopeid,
-                                     @PathParam("uri") String ontologyid,
+                                     @PathParam("ontologyId") String ontologyid,
                                      @Context UriInfo uriInfo) {
 
         log.info("Caught request for ontology {} in scope {}", ontologyid, scopeid);

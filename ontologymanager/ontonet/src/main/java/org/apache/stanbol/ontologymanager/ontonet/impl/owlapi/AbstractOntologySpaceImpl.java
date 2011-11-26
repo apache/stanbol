@@ -274,6 +274,13 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     }
 
     @Override
+    public OWLOntology getOntology(IRI ontologyIri, boolean merge) {
+        if (merge) throw new UnsupportedOperationException(
+                "Merge not implemented yet in OWLAPI version. Just a matter of time...");
+        return getOntology(ontologyIri);
+    }
+
+    @Override
     public int getOntologyCount(boolean withClosure) {
         if (!withClosure) return managedOntologies.keySet().size();
         else {

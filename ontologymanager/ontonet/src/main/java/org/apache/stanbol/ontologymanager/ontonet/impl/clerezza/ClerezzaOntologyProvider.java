@@ -61,10 +61,14 @@ import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.owl.PhonyIRIMapper;
 import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
 import org.apache.stanbol.owl.util.OWLUtils;
+import org.apache.stanbol.owl.util.URIUtils;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -222,6 +226,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
     }
 
     private void fillImportsReverse(UriRef importing, List<UriRef> reverseImports) {
+        log.debug("Filling reverse imports for {}", importing);
         reverseImports.add(importing);
         TripleCollection graph = store.getTriples(importing);
         Iterator<Triple> it = graph.filter(null, RDF.type, OWL.Ontology);
@@ -230,22 +235,22 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             while (it2.hasNext()) {
                 Resource obj = it2.next().getObject();
                 if (obj instanceof UriRef) fillImportsReverse(
-                    new UriRef(prefix + "::" + ((UriRef) obj).getUnicodeString()), reverseImports);
+                    new UriRef(getKey(IRI.create(((UriRef) obj).getUnicodeString()))
+                    // prefix + "::" + ((UriRef) obj).getUnicodeString()
+                    ), reverseImports);
             }
         }
     }
 
     @Override
-    public String getKey(IRI ontologyIRI) {
-        return ontologyIdsToKeys.get(ontologyIRI);
+    public String getKey(IRI ontologyIri) {
+        ontologyIri = URIUtils.sanitizeID(ontologyIri);
+        log.debug("key for {} is {}", ontologyIri, ontologyIdsToKeys.get(ontologyIri));
+        return ontologyIdsToKeys.get(ontologyIri);
     }
 
     @Override
     public Set<String> getKeys() {
-        // Set<String> result = new HashSet<String>();
-        // for (UriRef u : store.listTripleCollections())
-        // result.add(u.getUnicodeString());
-        // return result;
         return new HashSet<String>(ontologyIdsToKeys.values());
     }
 
@@ -254,11 +259,28 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         return store;
     }
 
+    @Override
+    public Object getStoredOntology(IRI reference, Class<?> returnType) {
+        return getStoredOntology(getKey(reference), returnType);
+    }
+
+    @Override
+    public Object getStoredOntology(IRI reference, Class<?> returnType, boolean merge) {
+        return getStoredOntology(getKey(reference), returnType, merge);
+    }
+
+    @Override
+    public Object getStoredOntology(String key, Class<?> returnType) {
+        // TODO default to false? Or by set policy?
+        return getStoredOntology(key, returnType, false);
+    }
+
     /**
      * In this implementation the identifier is the Graph Name (e.g. ontonet::blabla)
      */
     @Override
-    public Object getStoredOntology(String identifier, Class<?> returnType) {
+    public Object getStoredOntology(String identifier, Class<?> returnType, boolean merge) {
+        if (identifier == null) throw new IllegalArgumentException("Identifier cannot be null");
         if (returnType == null) {
             returnType = OWLOntology.class;
             log.warn("No return type given for ontologies. Will return a {}", returnType);
@@ -280,7 +302,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             return returnType.cast(tc);
         } else if (OWLOntology.class.isAssignableFrom(returnType)) {
             try {
-                return toOWLOntology(new UriRef(identifier));
+                return toOWLOntology(new UriRef(identifier), merge);
             } catch (OWLOntologyCreationException e) {
                 log.error("Failed to return stored ontology " + identifier + " as type " + returnType, e);
             }
@@ -391,7 +413,6 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
     @Override
     public String loadInStore(Object ontology, String preferredKey, boolean force) {
 
-        // TODO Instead of copying the code, reuse it.
         if (ontology == null) throw new IllegalArgumentException("No ontology supplied.");
 
         long before = System.currentTimeMillis();
@@ -422,8 +443,11 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         } catch (Exception ex) {
             iri = OWLUtils.guessOntologyIdentifier(rdfData).getUnicodeString();
         }
+
         ontologyIri = IRI.create(iri);
-        s += iri;
+        ontologyIri = URIUtils.sanitizeID(ontologyIri);
+        s += ontologyIri;
+        // if (s.endsWith("#")) s = s.substring(0, s.length() - 1);
         /*
          * rdfData should be a SimpleGraph, so we shouldn't have a problem creating one with the TcProvider
          * and adding triples there, so that the SimpleGraph is garbage-collected.
@@ -459,48 +483,77 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         loaded = true;
 
         if (loaded) {
+            // All is already sanitized by the time we get here.
             ontologyIdsToKeys.put(ontologyIri, s);
-            log.debug("Load and Store completed in {} ms", (System.currentTimeMillis() - before));
+            log.debug("Ontology \n\t\t{}\n\tstored with key\n\t\t{}", ontologyIri, s);
+            log.debug("Time: {} ms", (System.currentTimeMillis() - before));
             return s;
         } else return null;
     }
 
-    protected OWLOntology toOWLOntology(UriRef graphName) throws OWLOntologyCreationException {
+    protected OWLOntology toOWLOntology(UriRef graphName, boolean merge) throws OWLOntologyCreationException {
 
         OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
         // Never try to import
         mgr.addIRIMapper(new PhonyIRIMapper(Collections.<IRI> emptySet()));
-        List<UriRef> revImps = new Stack<UriRef>();
-        fillImportsReverse(graphName, revImps);
+
         Set<UriRef> loaded = new HashSet<UriRef>();
-
-        final Set<OWLOntology> mergeUs = new HashSet<OWLOntology>();
-
-        for (UriRef ref : revImps) {
-            if (!loaded.contains(ref)) {
-                TripleCollection tc = store.getTriples(ref);
-                mergeUs.add(OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(tc, mgr));
-                loaded.add(ref);
-            }
-        }
 
         TripleCollection graph = store.getTriples(graphName);
         OWLOntology o = OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(graph, mgr);
 
-        mergeUs.add(o);
+        List<UriRef> revImps = new Stack<UriRef>();
 
-        OWLOntologyMerger merger = new OWLOntologyMerger(new OWLOntologySetProvider() {
+        fillImportsReverse(graphName, revImps);
 
-            @Override
-            public Set<OWLOntology> getOntologies() {
-                return mergeUs;
+        if (!merge) {
+            // FIXME rewrite import statements so that only the scope name needs to be added!
+            // Examining the reverse imports stack will flatten all imports.
+            List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+            OWLDataFactory df = OWLManager.getOWLDataFactory();
+            for (UriRef ref : revImps)
+                if (!loaded.contains(ref) && !ref.equals(graphName)) {
+                    changes.add(new AddImport(o, df.getOWLImportsDeclaration(IRI.create(ref
+                            .getUnicodeString()))));
+                    loaded.add(ref);
+                }
+            o.getOWLOntologyManager().applyChanges(changes);
+            return o;
+        } else {
+            final Set<OWLOntology> mergeUs = new HashSet<OWLOntology>();
+
+            for (UriRef ref : revImps) {
+                if (!loaded.contains(ref)) {
+                    TripleCollection tc = store.getTriples(ref);
+                    mergeUs.add(OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(tc, mgr));
+                    loaded.add(ref);
+                }
             }
+            mergeUs.add(o);
+            OWLOntologyMerger merger = new OWLOntologyMerger(new OWLOntologySetProvider() {
 
-        });
-        OWLOntology merged = merger.createMergedOntology(OWLManager.createOWLOntologyManager(),
-            OWLUtils.guessOntologyIdentifier(o));
-        // return o;
-        return merged;
+                @Override
+                public Set<OWLOntology> getOntologies() {
+                    return mergeUs;
+                }
+
+            }, false);
+            OWLOntology merged = merger.createMergedOntology(OWLManager.createOWLOntologyManager(),
+                OWLUtils.guessOntologyIdentifier(o));
+
+            // // More concise / efficient / brutal implementation, but messes up ontology name.
+           
+            // TripleCollection tempGraph = new SimpleMGraph();
+            // for (UriRef ref : revImps)
+            // if (!loaded.contains(ref)) {
+            // tempGraph.addAll(store.getTriples(ref));
+            // loaded.add(ref);
+            // }
+            // OWLOntology merged = OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(tempGraph, mgr);
+
+            return merged;
+
+        }
     }
 
 }
