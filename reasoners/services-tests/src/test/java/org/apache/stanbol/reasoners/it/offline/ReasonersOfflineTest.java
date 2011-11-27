@@ -50,7 +50,8 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class ReasonersOfflineTest extends ReasonersTestBase {
-    protected static String fileName = null;
+	protected static String fileName = null;
+	protected static String inconsistentFileName = null;
     protected String fileParam = "file";
     protected static File file = null;
     protected MultipartEntity multiPart = null;
@@ -61,6 +62,9 @@ public class ReasonersOfflineTest extends ReasonersTestBase {
     public static void prepare() throws URISyntaxException {
         fileName = ReasonersOfflineTest.class.getResource(System.getProperty("file.separator") + "foaf.rdf")
                 .toString();
+        inconsistentFileName = ReasonersOfflineTest.class.getResource(System.getProperty("file.separator") + "inconsistent-types.rdf")
+                .toString(); 
+        // This is shared among all tests
         file = new File(URI.create(fileName));
         assertTrue(file.exists());
         assertTrue(file.canRead());
@@ -148,8 +152,7 @@ public class ReasonersOfflineTest extends ReasonersTestBase {
             buildMultipartRequest("/reasoners/rdfs/enrich", multiPart).withHeader("Accept", "text/n3"))
                 .assertStatus(200)
                 .assertContentType("text/n3")
-                .assertContentContains("<http://www.w3.org/2000/01/rdf-schema#ContainerMembershipProperty>",
-                    "()", "<http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate>");
+                .assertContentContains("<http://xmlns.com/foaf/0.1/>");
 
     }
      
@@ -165,6 +168,30 @@ public class ReasonersOfflineTest extends ReasonersTestBase {
                     "http://www.w3.org/2000/01/rdf-schema#subClassOf",
                     "http://www.w3.org/2002/07/owl#equivalentClass");
 
+    }
+    
+    @Test
+    public void testPostMultipartConsistency200() throws Exception{
+       	String[] services = {"/owl","/owlmini"};
+    	// Consistent
+    	for(String s : services){
+    		executor.execute(buildMultipartRequest("/reasoners" + s + "/check", multiPart)).assertStatus(200);
+    	}
+    }
+    
+    @Test
+    public void testPostMultipartConsistency409() throws Exception{
+    	
+        FileBody bin = new FileBody(new File(URI.create(inconsistentFileName)));
+        MultipartEntity incMultiPart = new MultipartEntity();
+        incMultiPart.addPart(fileParam, bin);
+
+    	String[] services = {"/owl","/owlmini"};
+   
+    	// Not consistent
+    	for(String s : services){
+    		executor.execute(buildMultipartRequest("/reasoners" + s + "/check", incMultiPart)).assertStatus(409);
+    	}
     }
     
     /**

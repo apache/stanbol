@@ -1,0 +1,41 @@
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:owl="http://www.w3.org/2002/07/owl#"
+	xmlns:ex="http://www.example.org/reasoners/" xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns="http://www.example.org/reasoners/">
+
+	<!-- This file is an OWL ontology -->
+	<owl:Ontology rdf:about="">
+		<!-- We want to make an example of an inconsistent ontology -->
+		<rdfs:comment>This is an example of an inconsistent type statement
+		</rdfs:comment>
+		<rdfs:comment>Persons and organizations are disjoint sets, so instances
+			of Person cannot be instances of Organization.</rdfs:comment>
+			<rdfs:comment>This example works with:
+			* /owl (the Jena OWL reasoner)
+			* /owlmini (the Jena OWLMini reasoner)
+			* /owl2 (the Hermit Reasoning Service)
+			</rdfs:comment>
+		<skos:note>Consider that such statement is perfectly legal at the
+			RDF(S) level.</skos:note>
+	</owl:Ontology>
+
+	<!-- enridaga is a person -->
+	<ex:Person rdf:about="http://www.example.org/reasoners/enridaga" />
+
+	<!-- Persons and Organizations are disjoint -->
+	<owl:Class rdf:about="http://www.example.org/reasoners/Person" />
+	<owl:Class rdf:about="http://www.example.org/reasoners/Organization">
+		<owl:disjointWith rdf:resource="http://www.example.org/reasoners/Person" />
+	</owl:Class>
+
+	<!-- A Public Limited Company is a kind of Company, which is a kind of Organization -->
+	<owl:Class rdf:about="http://www.example.org/reasoners/PublicLimitedCompany">
+		<rdfs:subClassOf rdf:resource="http://www.example.org/reasoners/Company" />
+	</owl:Class>
+	<owl:Class rdf:about="http://www.example.org/reasoners/Company">
+		<rdfs:subClassOf rdf:resource="http://www.example.org/reasoners/Organization" />
+	</owl:Class>
+
+	<!-- enridaga cannot be a Public Limited Company -->
+	<ex:PublicLimitedCompany rdf:about="http://www.example.org/reasoners/enridaga" />
+</rdf:RDF>

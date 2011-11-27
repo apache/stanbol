@@ -95,26 +95,7 @@ public class ReasonersOnlineTest extends StanbolTestBase{
             "http://xmlns.com/foaf/0.1/gender",
             "http://purl.org/dc/elements/1.1/title");
     }
-    
-    /**
-     * OWL2 + CLASSIFY + text/html
-     * 
-     * @throws Exception
-     */
-    @Test
-    public void testServiceOnlineOwl2ClassifyFoafHtml() throws Exception {
-        super.executor.execute(
-                this.builder.buildGetRequest("/reasoners/owl2/classify","url",FOAF)
-                .withHeader("Accept", "text/html")
-        )
-        .assertStatus(200)
-        .assertContentType("text/html")
-         .assertContentRegexp(
-             "&lt;http://purl.org/dc/terms/Agent&gt;",
-             "&lt;http://xmlns.com/foaf/0.1/Agent&gt;",
-             "owl:Thing"
-                 );
-    }
+
 
     /**
      * RDFS + ENRICH + text/n3
@@ -175,22 +156,5 @@ public class ReasonersOnlineTest extends StanbolTestBase{
             "<http://purl.org/dc/elements/1.1/title>",
             " a "
             );
-    }
-    
-    /**
-     * OWL2 + ENRICH + application/turtle
-     * @throws Exception
-     */
-    @Test
-    public void testServiceOnlineOwl2EnrichFoafTurtle() throws Exception {
-        super.executor.execute(
-                this.builder.buildGetRequest("/reasoners/owl2/enrich","url",FOAF)
-                .withHeader("Accept", "application/turtle")
-        )
-        .assertStatus(200)
-        .assertContentType("application/turtle")
-        .assertContentRegexp(
-            "rdfs:subClassOf\\s+<http://purl.org/dc/terms/Agent>",
-            "owl:disjointWith\\s+<http://xmlns.com/foaf/0.1/Project>");
     }
 }
