@@ -179,7 +179,7 @@ public class ResponseTaskBuilder {
             } else {
                 log.debug("The input is not consistent");
                 return Response
-                        .status(Status.NO_CONTENT)
+                        .status(Status.CONFLICT)
                         .entity(new Viewable("result",
                                 new ReasoningPrettyResultResource(
                                         context, info,
@@ -192,7 +192,7 @@ public class ResponseTaskBuilder {
                 return Response.ok("The input is consistent :)").build();
             } else {
                 log.debug("The input is not consistent");
-                return Response.status(Status.NO_CONTENT).build();
+                return Response.status(Status.CONFLICT).build();
             }
         }
     }

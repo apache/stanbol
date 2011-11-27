@@ -200,7 +200,7 @@ public class ReasoningServiceExecutor implements Job {
 			}
 		} catch (InconsistentInputException e) {
             log.warn("The input is not consistent");
-            throw e;
+			return new ReasoningServiceResult<OWLOntology>(ReasoningServiceExecutor.TASK_CHECK, false);
         } catch (ReasoningServiceException e) {
 			throw e;
 		} catch (OWLOntologyCreationException e) {

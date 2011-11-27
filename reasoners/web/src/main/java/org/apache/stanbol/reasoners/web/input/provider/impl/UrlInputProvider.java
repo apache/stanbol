@@ -56,6 +56,7 @@ public class UrlInputProvider implements ReasoningServiceInputProvider {
      * @param url
      */
     public UrlInputProvider(String url) {
+    	log.debug("Tesm file is {}", url);
         this.url = url;
     }
 

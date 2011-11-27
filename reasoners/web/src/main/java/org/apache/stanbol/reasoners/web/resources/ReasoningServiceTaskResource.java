@@ -424,7 +424,9 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
                 if(!entry.getValue().isEmpty()){
                     // We keep only the first value
                     // FIXME We create the file once again...
-                    inmgr.addInputProvider(new FileInputProvider(new File(entry.getValue().iterator().next())));
+                	String fv = entry.getValue().iterator().next();
+                	log.debug("File value is: {}",fv);
+                    inmgr.addInputProvider(new FileInputProvider(new File(URI.create(fv))));
                     // We remove it form the additional parameter list
                     this.parameters.remove("url");
                 }else{
