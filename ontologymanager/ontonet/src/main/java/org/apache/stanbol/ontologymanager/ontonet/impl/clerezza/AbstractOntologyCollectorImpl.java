@@ -295,11 +295,6 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     }
 
     @Override
-    public OWLOntology getOntology(IRI ontologyIri) {
-        return getOntology(ontologyIri, false);
-    }
-
-    @Override
     public int getOntologyCount(boolean withClosure) {
         if (withClosure) throw new UnsupportedOperationException(
                 "Closure support not implemented efficiently yet. Please call getOntologyCount(false).");

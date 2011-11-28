@@ -87,30 +87,31 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
         listeners.add(listener);
     }
 
-    @Override
-    public OWLOntology asOWLOntology(boolean merge) {
-        OWLOntology o = super.asOWLOntology(merge);
-        if (o != null && !merge) {
-            OWLOntologyManager ontologyManager = o.getOWLOntologyManager();
-            OWLDataFactory df = ontologyManager.getOWLDataFactory();
-            List<OWLOntologyChange> changes = new LinkedList<OWLOntologyChange>();
-            // Add import declarations for attached scopes.
-            for (String scopeID : getAttachedScopes()) {
-                IRI physIRI = IRI.create(namespace + scopeID);
-                changes.add(new AddImport(o, df.getOWLImportsDeclaration(physIRI)));
-            }
-            ontologyManager.applyChanges(changes);
-        }
-        return o;
-    }
+    // TODO reinstate this
+    // @Override
+    // public OWLOntology asOWLOntology(boolean merge) {
+    // OWLOntology o = super.asOWLOntology(merge);
+    // if (o != null && !merge) {
+    // OWLOntologyManager ontologyManager = o.getOWLOntologyManager();
+    // OWLDataFactory df = ontologyManager.getOWLDataFactory();
+    // List<OWLOntologyChange> changes = new LinkedList<OWLOntologyChange>();
+    // // Add import declarations for attached scopes.
+    // for (String scopeID : getAttachedScopes()) {
+    // IRI physIRI = IRI.create(namespace + scopeID);
+    // changes.add(new AddImport(o, df.getOWLImportsDeclaration(physIRI)));
+    // }
+    // ontologyManager.applyChanges(changes);
+    // }
+    // return o;
+    // }
 
     /**
      * FIXME not merging yet FIXME not including imported ontologies unless they are merged *before* storage.
      * 
      * @see OWLExportable#asOWLOntology(boolean)
      */
-    // @Override
-    public OWLOntology asOWLOntology2(boolean merge) {
+    @Override
+    public OWLOntology asOWLOntology(boolean merge) {
 
         long before = System.currentTimeMillis();
 
@@ -234,6 +235,11 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
     @Override
     public Set<String> getAttachedScopes() {
         return attachedScopes.keySet();
+    }
+
+    @Override
+    public OWLOntology getOntology(IRI ontologyIri) {
+        return getOntology(ontologyIri, false);
     }
 
     @Override

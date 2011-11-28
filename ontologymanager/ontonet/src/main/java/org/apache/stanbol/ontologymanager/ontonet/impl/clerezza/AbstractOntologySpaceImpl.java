@@ -55,6 +55,11 @@ public abstract class AbstractOntologySpaceImpl extends AbstractOntologyCollecto
     }
 
     @Override
+    public OWLOntology getOntology(IRI ontologyIri) {
+        return getOntology(ontologyIri, false);
+    }
+    
+    @Override
     public OWLOntology getOntology(IRI ontologyIri, boolean merge) {
         // Remove the check below. It might be an unmanaged dependency (TODO remove from collector and
         // reintroduce check?).
