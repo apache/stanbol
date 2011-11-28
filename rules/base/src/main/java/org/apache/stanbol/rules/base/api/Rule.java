@@ -120,4 +120,7 @@ public interface Rule {
 	
 	RuleExpressiveness getExpressiveness();
 	
+	
+	com.hp.hpl.jena.reasoner.rulesys.Rule toJenaRule();
+	
 }

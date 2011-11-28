@@ -24,6 +24,7 @@ import org.semanticweb.owlapi.model.SWRLAtom;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
 
 
 
@@ -61,6 +62,12 @@ public class BlankNodeAtom extends CoreAtom {
 	public String toKReSSyntax() {
 		
 		return "createBN(" + argument1.toString() + ", " + argument2.toString() + ")";
+	}
+
+	@Override
+	public ClauseEntry toJenaClauseEntry() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

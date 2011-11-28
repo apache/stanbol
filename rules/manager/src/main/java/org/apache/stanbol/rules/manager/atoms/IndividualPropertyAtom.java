@@ -29,8 +29,11 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.SWRLAtom;
 import org.semanticweb.owlapi.model.SWRLIArgument;
 
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.reasoner.TriplePattern;
+import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
 
 import org.apache.stanbol.rules.base.SWRL;
 
@@ -223,6 +226,28 @@ public class IndividualPropertyAtom extends CoreAtom {
 	@Override
 	public boolean isSPARQLDelete() {
 		return false;
+	}
+
+	@Override
+	public ClauseEntry toJenaClauseEntry() {
+		
+		String subject = argument1.toString();
+		if(subject.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
+			subject = "?" + subject.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+		}
+		
+		String object = argument2.toString();
+		if(object.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
+			object = "?" + subject.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+		}
+		
+		String predicate = objectProperty.toString();
+		if(predicate.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
+			predicate = "?" + predicate.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+		}
+		
+		ClauseEntry clauseEntry = new TriplePattern(Node.createURI(subject), Node.createURI(predicate), Node.createURI(object));
+		return clauseEntry;
 	}
 
 	

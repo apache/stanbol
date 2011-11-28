@@ -42,6 +42,9 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
+import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
+import com.hp.hpl.jena.reasoner.rulesys.Rule;
+
 /**
  * This class will add new rule to the KReSRuleStore used as input.<br/>
  * The KReSRuleStore object used as input is not changed and to get the new modified KReSRuleStore there is the method getStore().<br/>
@@ -65,6 +68,8 @@ public class AddRule {
      */
     private List<OWLOntologyChange> createImportList(OWLOntology inowl,OWLOntology toadd){
 
+    	
+    	
         Iterator<OWLOntology> importedonto = inowl.getDirectImports().iterator();
         List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
         OWLDataFactory auxfactory = inowl.getOWLOntologyManager().getOWLDataFactory();

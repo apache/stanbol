@@ -23,6 +23,7 @@ import org.semanticweb.owlapi.model.SWRLAtom;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
 
 
 public class LowerCaseAtom extends StringFunctionAtom {
@@ -70,6 +71,12 @@ public class LowerCaseAtom extends StringFunctionAtom {
 		}
 		
 		return "lowerCase(" + uriResourceString + ")";
+	}
+
+	@Override
+	public ClauseEntry toJenaClauseEntry() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	

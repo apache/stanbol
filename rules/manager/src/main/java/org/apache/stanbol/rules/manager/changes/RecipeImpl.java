@@ -18,7 +18,9 @@ package org.apache.stanbol.rules.manager.changes;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Set;
@@ -153,5 +155,17 @@ public class RecipeImpl extends Observable implements Recipe {
 		}
 		kReSRuleList.add(kReSRule);
 		
+	}
+
+
+	@Override
+	public List<com.hp.hpl.jena.reasoner.rulesys.Rule> toJenaRules() {
+		List<com.hp.hpl.jena.reasoner.rulesys.Rule> jenaRules = new ArrayList<com.hp.hpl.jena.reasoner.rulesys.Rule>();
+		
+		for(Rule rule : kReSRuleList){
+			jenaRules.add(rule.toJenaRule());
+		}
+		
+		return jenaRules;
 	}
 }

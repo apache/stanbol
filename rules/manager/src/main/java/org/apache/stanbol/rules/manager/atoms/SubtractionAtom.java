@@ -23,6 +23,7 @@ import org.semanticweb.owlapi.model.SWRLAtom;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
 
 
 public class SubtractionAtom extends NumericFunctionAtom {
@@ -59,6 +60,12 @@ public class SubtractionAtom extends NumericFunctionAtom {
 		String kReSFunction1 = numericFunctionAtom1.toKReSSyntax();
 		String kReSFunction2 = numericFunctionAtom2.toKReSSyntax();
 		return kReSFunction1 + " - " + kReSFunction2;
+	}
+
+	@Override
+	public ClauseEntry toJenaClauseEntry() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

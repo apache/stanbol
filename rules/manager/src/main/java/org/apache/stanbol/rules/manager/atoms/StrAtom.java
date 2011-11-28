@@ -24,6 +24,7 @@ import org.semanticweb.owlapi.model.SWRLAtom;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
 
 
 public class StrAtom extends StringFunctionAtom {
@@ -70,6 +71,12 @@ public class StrAtom extends StringFunctionAtom {
 		String kReSSyntax = "str(" + argument + ")";
 		
 		return kReSSyntax;
+	}
+
+	@Override
+	public ClauseEntry toJenaClauseEntry() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -23,6 +23,7 @@ import org.semanticweb.owlapi.model.SWRLAtom;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
 
 
 public class PropStringAtom extends StringFunctionAtom {
@@ -67,6 +68,13 @@ public class PropStringAtom extends StringFunctionAtom {
 		String label = labelArg.toKReSSyntax();
 		String kReS = "propString(" + ns + ", " + label + ")"; 
 		return kReS;
+	}
+
+
+	@Override
+	public ClauseEntry toJenaClauseEntry() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

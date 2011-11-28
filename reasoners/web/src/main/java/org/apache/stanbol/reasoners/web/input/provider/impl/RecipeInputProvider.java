@@ -32,6 +32,8 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.SWRLRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.hp.hpl.jena.reasoner.rulesys.Rule;
 /**
  * Input provider which binds the reasoners input to the Rule module.
  * 
@@ -59,69 +61,145 @@ public class RecipeInputProvider implements ReasoningServiceInputProvider {
     
     @Override
     public <T> Iterator<T> getInput(Class<T> type) throws IOException {
-        if(!type.isAssignableFrom(SWRLRule.class)){
+    	
+    	ReasoningProvider reasoningProvider = null;
+    	
+    	if(type.isAssignableFrom(SWRLRule.class)){
+    		reasoningProvider = ReasoningProvider.OWL2;
+    	}
+    	else if(type.isAssignableFrom(Rule.class)){
+    		reasoningProvider = ReasoningProvider.Jena;
+    	}
+    	else{
             log.error("Cannot adapt to this type {}", type.getCanonicalName());
             throw new UnsupportedOperationException("Cannot adapt to " + type.getCanonicalName());
         }
-        List<SWRLRule> rules = null;
-        if (recipeId != null) {
-            long start = System.currentTimeMillis();
-            log.info("[start] Prepare rules for OWLApi ");
+    	
+    	switch (reasoningProvider) {
+		case OWL2:
+			List<SWRLRule> rules = null;
+	        if (recipeId != null) {
+	            long start = System.currentTimeMillis();
+	            log.info("[start] Prepare rules for OWLApi ");
 
-         // If recipe exists, return it as a list of SWRL rules
-            rules = new ArrayList<SWRLRule>();
-            try {
-                Recipe recipe = null;
-                synchronized (store) {
-                    recipe = store.getRecipe(IRI.create(recipeId));                    
-                }
-                log.debug("Recipe is: {}", recipe);
-                RuleList ruleList = recipe.getkReSRuleList();
-                log.debug("RuleList is: {}",ruleList);
-                for(org.apache.stanbol.rules.base.api.Rule r : ruleList ){
-                    SWRLRule swrl = r.toSWRL(OWLManager.getOWLDataFactory());
-                    log.debug("Prepared rule: {}",swrl);
-                    rules.add(swrl);
-                }
-            } catch (NoSuchRecipeException e) {
-                log.error("Recipe {} does not exists", recipeId);
-                throw new IOException(e);
-            }
+	         // If recipe exists, return it as a list of SWRL rules
+	            rules = new ArrayList<SWRLRule>();
+	            try {
+	                Recipe recipe = null;
+	                synchronized (store) {
+	                    recipe = store.getRecipe(IRI.create(recipeId));                    
+	                }
+	                log.debug("Recipe is: {}", recipe);
+	                RuleList ruleList = recipe.getkReSRuleList();
+	                log.debug("RuleList is: {}",ruleList);
+	                for(org.apache.stanbol.rules.base.api.Rule r : ruleList ){
+	                    SWRLRule swrl = r.toSWRL(OWLManager.getOWLDataFactory());
+	                    log.debug("Prepared rule: {}",swrl);
+	                    rules.add(swrl);
+	                }
+	            } catch (NoSuchRecipeException e) {
+	                log.error("Recipe {} does not exists", recipeId);
+	                throw new IOException(e);
+	            }
 
-            long end = System.currentTimeMillis();
-            log.info("[end] Prepared {} rules for OWLApi in {} ms.", rules.size(), (end - start));
-            
-        }
-        if(rules == null){
-            log.error("No rules have been loaded");
-            throw new IOException("No rules loaded");
-        }
-        final Iterator<SWRLRule> iterator = Collections.unmodifiableList(rules).iterator();
-        return new Iterator<T>(){
+	            long end = System.currentTimeMillis();
+	            log.info("[end] Prepared {} rules for OWLApi in {} ms.", rules.size(), (end - start));
+	            
+	        }
+	        if(rules == null){
+	            log.error("No rules have been loaded");
+	            throw new IOException("No rules loaded");
+	        }
+	        final Iterator<SWRLRule> iterator = Collections.unmodifiableList(rules).iterator();
+	        return new Iterator<T>(){
 
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+	            @Override
+	            public boolean hasNext() {
+	                return iterator.hasNext();
+	            }
 
-            @SuppressWarnings("unchecked")
-            @Override
-            public T next() {
-                return (T) iterator.next();
-            }
+	            @SuppressWarnings("unchecked")
+	            @Override
+	            public T next() {
+	                return (T) iterator.next();
+	            }
 
-            @Override
-            public void remove() {
-                log.error("Cannot remove items from this iterator. This may be cused by an error in the program");
-                throw new UnsupportedOperationException("Cannot remove items from this iterator");
-            }
-            
-        };
+	            @Override
+	            public void remove() {
+	                log.error("Cannot remove items from this iterator. This may be cused by an error in the program");
+	                throw new UnsupportedOperationException("Cannot remove items from this iterator");
+	            }
+	            
+	        };
+			break;
+		case Jena:
+			List<Rule> jenaRules = null;
+	        if (recipeId != null) {
+	            long start = System.currentTimeMillis();
+	            log.info("[start] Prepare rules for Jena ");
+
+	            try {
+	                Recipe recipe = null;
+	                synchronized (store) {
+	                    recipe = store.getRecipe(IRI.create(recipeId));                    
+	                }
+	                log.debug("Recipe is: {}", recipe);
+	                
+	                
+	                jenaRules = recipe.toJenaRules();
+	            } catch (NoSuchRecipeException e) {
+	                log.error("Recipe {} does not exists", recipeId);
+	                throw new IOException(e);
+	            }
+	            
+	            
+	            long end = System.currentTimeMillis();
+	            log.info("[end] Prepared {} rules for Jena in {} ms.", jenaRules.size(), (end - start));
+	            
+	        }
+	        if(jenaRules == null){
+	            log.error("No rules have been loaded");
+	            throw new IOException("No rules loaded");
+	        }
+	        final Iterator<Rule> jRiterator = Collections.unmodifiableList(jenaRules).iterator();
+	        return new Iterator<T>(){
+
+	            @Override
+	            public boolean hasNext() {
+	                return iterator.hasNext();
+	            }
+
+	            @SuppressWarnings("unchecked")
+	            @Override
+	            public T next() {
+	                return (T) iterator.next();
+	            }
+
+	            @Override
+	            public void remove() {
+	                log.error("Cannot remove items from this iterator. This may be cused by an error in the program");
+	                throw new UnsupportedOperationException("Cannot remove items from this iterator");
+	            }
+	            
+	        };
+			break;
+		default:
+			
+			return null;
+			break;
+		}
+    	
+        
     }
 
     @Override
     public <T> boolean adaptTo(Class<T> type) {
-        if(type.isAssignableFrom(SWRLRule.class)) return true;
+        if(type.isAssignableFrom(SWRLRule.class)){
+        	return true;
+        }
+        else if(type.isAssignableFrom(Rule.class)){
+        	return true;
+        }
         return false;
     }
 

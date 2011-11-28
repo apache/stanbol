@@ -25,6 +25,7 @@ import org.semanticweb.owlapi.model.SWRLAtom;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
 
 
 public class NewNodeAtom implements RuleAtom {
@@ -97,5 +98,11 @@ public class NewNodeAtom implements RuleAtom {
 	@Override
 	public boolean isSPARQLDeleteData() {
 		return false;
+	}
+
+	@Override
+	public ClauseEntry toJenaClauseEntry() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -16,14 +16,19 @@
 */
 package org.apache.stanbol.rules.manager.atoms;
 
+import java.util.ArrayList;
+
 import org.apache.stanbol.rules.base.api.SPARQLObject;
 import org.apache.stanbol.rules.base.api.URIResource;
 import org.apache.stanbol.rules.manager.SPARQLComparison;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.SWRLAtom;
 
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
+import com.hp.hpl.jena.reasoner.rulesys.Functor;
 
 
 public class IsBlankAtom extends ComparisonAtom {
@@ -84,6 +89,22 @@ public class IsBlankAtom extends ComparisonAtom {
 	@Override
 	public boolean isSPARQLConstruct() {
 		return false;
+	}
+	
+	
+	@Override
+	public ClauseEntry toJenaClauseEntry() {
+		
+		String argument = uriResource.toString();
+		if(argument.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
+			argument = "?" + argument.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+		}
+		
+		java.util.List<Node> nodes = new ArrayList<Node>();
+		
+		nodes.add(Node.createURI(argument));
+		
+		return new Functor("isBNode", nodes);
 	}
 	
 }

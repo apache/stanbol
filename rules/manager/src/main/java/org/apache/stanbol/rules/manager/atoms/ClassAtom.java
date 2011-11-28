@@ -29,8 +29,12 @@ import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.SWRLAtom;
 import org.semanticweb.owlapi.model.SWRLIArgument;
 
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.reasoner.TriplePattern;
+import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
+import com.hp.hpl.jena.vocabulary.RDF;
 
 import org.apache.stanbol.rules.base.SWRL;
 
@@ -184,5 +188,20 @@ public class ClassAtom extends CoreAtom {
 	@Override
 	public boolean isSPARQLDeleteData() {
 		return false;
+	}
+
+	@Override
+	public ClauseEntry toJenaClauseEntry() {
+		String subject = argument1.toString();
+		if(subject.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
+			subject = "?" + subject.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+		}
+		
+		String object = classResource.toString();
+		if(object.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
+			object ="?" +  subject.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+		}
+		ClauseEntry clauseEntry = new TriplePattern(Node.createVariable(subject), RDF.type.asNode(), Node.createURI(object));
+		return clauseEntry;
 	}
 }

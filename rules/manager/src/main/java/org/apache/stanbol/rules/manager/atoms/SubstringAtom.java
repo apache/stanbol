@@ -23,6 +23,7 @@ import org.semanticweb.owlapi.model.SWRLAtom;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
 
 
 public class SubstringAtom extends StringFunctionAtom {
@@ -74,6 +75,12 @@ public class SubstringAtom extends StringFunctionAtom {
 		}
 		
 		return "substring(" + uriResourceString + ", " + start.toKReSSyntax() + ", " + length.toKReSSyntax() + ")";
+	}
+
+	@Override
+	public ClauseEntry toJenaClauseEntry() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	

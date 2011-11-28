@@ -16,6 +16,8 @@
 */
 package org.apache.stanbol.rules.base.api;
 
+import java.util.List;
+
 import org.apache.stanbol.rules.base.api.util.RuleList;
 import org.semanticweb.owlapi.model.IRI;
 
@@ -79,4 +81,12 @@ public interface Recipe {
 	 * @param kReSRule the {@link Rule}.
 	 */
     void addKReSRule(Rule kReSRule);
+    
+    
+    /**
+	 * Convert the recipe in a list of Jena Rules.
+	 * 
+	 * @return The list of Jena Rules which represents the Recipe.
+	 */
+    List<com.hp.hpl.jena.reasoner.rulesys.Rule> toJenaRules();
 }

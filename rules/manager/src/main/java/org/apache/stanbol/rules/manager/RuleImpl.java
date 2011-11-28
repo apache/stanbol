@@ -35,6 +35,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
 
 import org.apache.stanbol.rules.base.SWRL;
 
@@ -78,6 +79,32 @@ public class RuleImpl implements Rule {
 
 	public void setRule(String rule) {
 		this.rule = rule;
+	}
+	
+	
+	public com.hp.hpl.jena.reasoner.rulesys.Rule toJenaRule() {
+		com.hp.hpl.jena.reasoner.rulesys.Rule jenaRule = null;
+		
+		ClauseEntry[] head = new ClauseEntry[this.head.size()];
+		ClauseEntry[] body = new ClauseEntry[this.body.size()];
+		
+		Iterator<RuleAtom> it = this.head.iterator();
+		for(int i=0; it.hasNext(); i++){
+			RuleAtom atom = it.next();
+			head[i] = atom.toJenaClauseEntry();
+		}
+		
+		
+		it = this.body.iterator();
+		for(int i=0; it.hasNext(); i++){
+			RuleAtom atom = it.next();
+			body[i] = atom.toJenaClauseEntry();
+		}
+		
+		
+		jenaRule = new com.hp.hpl.jena.reasoner.rulesys.Rule(ruleName, head, body);
+		
+		return jenaRule;
 	}
 	
 	public String toSPARQL() {
@@ -396,4 +423,6 @@ public class RuleImpl implements Rule {
 	public RuleExpressiveness getExpressiveness() {
 		return expressiveness;
 	}
+	
+	
 }

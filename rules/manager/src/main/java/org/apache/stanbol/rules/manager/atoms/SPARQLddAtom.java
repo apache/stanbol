@@ -23,6 +23,7 @@ import org.semanticweb.owlapi.model.SWRLAtom;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
 
 
 public class SPARQLddAtom extends SPARQLDeleteDataAtomAbstract {
@@ -53,6 +54,12 @@ private String sparqlConstruct;
 	@Override
 	public String toKReSSyntax() {
 		return "sparql-dd(" + sparqlConstruct + ")";
+	}
+
+	@Override
+	public ClauseEntry toJenaClauseEntry() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

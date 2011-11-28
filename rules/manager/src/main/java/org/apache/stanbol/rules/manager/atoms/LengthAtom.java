@@ -23,6 +23,7 @@ import org.semanticweb.owlapi.model.SWRLAtom;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
 
 
 public class LengthAtom extends NumericFunctionAtom {
@@ -56,6 +57,12 @@ public class LengthAtom extends NumericFunctionAtom {
 	@Override
 	public String toKReSSyntax() {
 		return "length(" + stringFunctionAtom.toKReSSyntax() + ")";
+	}
+
+	@Override
+	public ClauseEntry toJenaClauseEntry() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
