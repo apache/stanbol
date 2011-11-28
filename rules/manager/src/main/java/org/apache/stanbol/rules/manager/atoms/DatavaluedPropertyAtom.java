@@ -314,9 +314,16 @@ public class DatavaluedPropertyAtom extends CoreAtom {
 			subject = "?" + subject.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
 		}
 		
+		
+		Node objectNode = null;
 		String object = argument2.toString();
 		if(object.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
-			object = "?" + object.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			object = object.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			
+			objectNode = Node.createVariable(object);
+		}
+		else{
+			objectNode = Node.createLiteral(object);
 		}
 		
 		String predicate = datatypeProperty.toString();
@@ -324,7 +331,7 @@ public class DatavaluedPropertyAtom extends CoreAtom {
 			predicate = "?" + predicate.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
 		}
 		
-		ClauseEntry clauseEntry = new TriplePattern(Node.createURI(subject), Node.createURI(predicate), Node.createLiteral(object));
+		ClauseEntry clauseEntry = new TriplePattern(Node.createURI(subject), Node.createURI(predicate), objectNode);
 		return clauseEntry;
 	}
 	

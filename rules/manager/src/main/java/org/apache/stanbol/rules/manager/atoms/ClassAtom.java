@@ -194,12 +194,12 @@ public class ClassAtom extends CoreAtom {
 	public ClauseEntry toJenaClauseEntry() {
 		String subject = argument1.toString();
 		if(subject.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
-			subject = "?" + subject.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			subject = subject.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
 		}
 		
 		String object = classResource.toString();
 		if(object.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
-			object ="?" +  subject.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			object = subject.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
 		}
 		ClauseEntry clauseEntry = new TriplePattern(Node.createVariable(subject), RDF.type.asNode(), Node.createURI(object));
 		return clauseEntry;

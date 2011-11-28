@@ -238,7 +238,7 @@ public class IndividualPropertyAtom extends CoreAtom {
 		
 		String object = argument2.toString();
 		if(object.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
-			object = "?" + subject.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			object = subject.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
 		}
 		
 		String predicate = objectProperty.toString();
