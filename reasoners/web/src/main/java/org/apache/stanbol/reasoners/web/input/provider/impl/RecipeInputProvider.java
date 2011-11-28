@@ -131,7 +131,6 @@ public class RecipeInputProvider implements ReasoningServiceInputProvider {
 	            }
 	            
 	        };
-			break;
 		case Jena:
 			List<Rule> jenaRules = null;
 	        if (recipeId != null) {
@@ -166,13 +165,13 @@ public class RecipeInputProvider implements ReasoningServiceInputProvider {
 
 	            @Override
 	            public boolean hasNext() {
-	                return iterator.hasNext();
+	                return jRiterator.hasNext();
 	            }
 
 	            @SuppressWarnings("unchecked")
 	            @Override
 	            public T next() {
-	                return (T) iterator.next();
+	                return (T) jRiterator.next();
 	            }
 
 	            @Override
@@ -182,14 +181,13 @@ public class RecipeInputProvider implements ReasoningServiceInputProvider {
 	            }
 	            
 	        };
-			break;
 		default:
 			
 			return null;
-			break;
+			
 		}
     	
-        
+    	return null;   
     }
 
     @Override
