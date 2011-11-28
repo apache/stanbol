@@ -505,6 +505,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
         UriRef ontologyId = null;
 
+        // Get the id of this ontology.
         Iterator<Triple> itt = graph.filter(null, RDF.type, OWL.Ontology);
         if (itt.hasNext()) {
             NonLiteral nl = itt.next().getSubject();
@@ -529,29 +530,15 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             o.getOWLOntologyManager().applyChanges(changes);
             return o;
         } else {
-            // final Set<OWLOntology> mergeUs = new HashSet<OWLOntology>();
-            //
-            // for (UriRef ref : revImps) {
-            // if (!loaded.contains(ref)) {
-            // TripleCollection tc = store.getTriples(ref);
-            // mergeUs.add(OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(tc, mgr));
-            // loaded.add(ref);
-            // }
-            // }
-            // mergeUs.add(o);
-            // OWLOntologyMerger merger = new OWLOntologyMerger(new OWLOntologySetProvider() {
-            //
-            // @Override
-            // public Set<OWLOntology> getOntologies() {
-            // return mergeUs;
-            // }
-            //
-            // }, false);
-            // OWLOntology merged = merger.createMergedOntology(OWLManager.createOWLOntologyManager(),
-            // OWLUtils.guessOntologyIdentifier(o));
-
             // More efficient / brutal implementation.
 
+            // If there is just the root ontology, convert it straight away.
+            if (revImps.size() == 1 && revImps.contains(graphName)) {
+                OWLOntology o = OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(graph, mgr);
+                return o;
+            }
+
+            // FIXME when there's more than one ontology, this way of merging them seems inefficient...
             TripleCollection tempGraph = new SimpleMGraph();
             // The set of triples that will be excluded from the merge
             Set<Triple> exclusions = new HashSet<Triple>();
@@ -590,5 +577,4 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             return OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(tempGraph, mgr);
         }
     }
-
 }

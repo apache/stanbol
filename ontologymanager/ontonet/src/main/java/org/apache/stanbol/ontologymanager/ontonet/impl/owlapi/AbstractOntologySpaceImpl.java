@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorModificationException;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
@@ -149,16 +148,6 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
         } else return; // No ontology to add
     }
 
-    @Override
-    public OWLOntology asOWLOntology() {
-        return this.asOWLOntology(false);
-    }
-
-    /**
-     * FIXME not merging yet
-     * 
-     * @see OWLExportable#asOWLOntology(boolean)
-     */
     @Override
     public OWLOntology asOWLOntology(boolean merge) {
         if (merge) throw new UnsupportedOperationException(

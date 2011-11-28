@@ -19,12 +19,15 @@ package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.Lockable;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollector;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorModificationException;
@@ -33,8 +36,18 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.owl.util.OWLUtils;
+import org.apache.stanbol.owl.util.URIUtils;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLOntologySetProvider;
+import org.semanticweb.owlapi.util.OWLOntologyMerger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +58,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public abstract class AbstractOntologyCollectorImpl implements OntologyCollector, Lockable,
-        OntologyInputSourceHandler {
+        OntologyInputSourceHandler, OWLExportable {
 
     protected String _id = null;
 
@@ -133,6 +146,82 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     }
 
     @Override
+    public OWLOntology asOWLOntology(boolean merge) {
+
+        long before = System.currentTimeMillis();
+
+        // Create a new ontology
+        OWLOntology root;
+        OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
+        IRI iri = IRI.create(namespace + _id);
+        try {
+            root = ontologyManager.createOntology(iri);
+        } catch (OWLOntologyAlreadyExistsException e) {
+            // It should be impossible, but just in case.
+            ontologyManager.removeOntology(ontologyManager.getOntology(iri));
+            try {
+                root = ontologyManager.createOntology(iri);
+            } catch (OWLOntologyAlreadyExistsException e1) {
+                root = ontologyManager.getOntology(iri);
+            } catch (OWLOntologyCreationException e1) {
+                log.error("Failed to assemble root ontology for scope " + iri, e);
+                root = null;
+            }
+        } catch (OWLOntologyCreationException e) {
+            log.error("Failed to assemble root ontology for scope " + _id, e);
+            root = null;
+        }
+
+        // Add the import declarations for directly managed ontologies.
+        if (root != null) {
+
+            if (merge) {
+                final Set<OWLOntology> set = new HashSet<OWLOntology>();
+                log.debug("Merging {} with its imports.", root);
+                set.add(root);
+
+                for (IRI ontologyIri : managedOntologies) {
+                    log.debug("Merging {} with {}.", ontologyIri, root);
+                    set.add(getOntology(ontologyIri, true));
+                }
+
+                OWLOntologySetProvider provider = new OWLOntologySetProvider() {
+                    @Override
+                    public Set<OWLOntology> getOntologies() {
+                        return set;
+                    }
+                };
+                OWLOntologyMerger merger = new OWLOntologyMerger(provider);
+                try {
+                    root = merger.createMergedOntology(OWLManager.createOWLOntologyManager(), iri);
+                } catch (OWLOntologyCreationException e) {
+                    log.error("Failed to merge imports for ontology " + iri, e);
+                    root = null;
+                }
+
+            } else {
+                // Add the import declarations for directly managed ontologies.
+                List<OWLOntologyChange> changes = new LinkedList<OWLOntologyChange>();
+                OWLDataFactory df = ontologyManager.getOWLDataFactory();
+
+                String base = URIUtils.upOne(IRI.create(namespace + getID())) + "/";
+
+                // The key set of managedOntologies contains the ontology IRIs, not their storage keys.
+                for (IRI ontologyIri : managedOntologies) {
+                    IRI physIRI = IRI.create(base + ontologyIri);
+                    changes.add(new AddImport(root, df.getOWLImportsDeclaration(physIRI)));
+                }
+
+                ontologyManager.applyChanges(changes);
+            }
+
+        }
+        log.debug("OWL export of {} completed in {} ms.", getID(), System.currentTimeMillis() - before);
+
+        return root;
+    }
+
+    @Override
     public void clearListeners() {
         listeners.clear();
     }
@@ -211,15 +300,15 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     }
 
     @Override
-    public Set<Class<?>> getSupportedOntologyTypes() {
-        return Collections.unmodifiableSet(supportedTypes);
-    }
-
-    @Override
     public int getOntologyCount(boolean withClosure) {
         if (withClosure) throw new UnsupportedOperationException(
                 "Closure support not implemented efficiently yet. Please call getOntologyCount(false).");
         return managedOntologies.size();
+    }
+
+    @Override
+    public Set<Class<?>> getSupportedOntologyTypes() {
+        return Collections.unmodifiableSet(supportedTypes);
     }
 
     @Override

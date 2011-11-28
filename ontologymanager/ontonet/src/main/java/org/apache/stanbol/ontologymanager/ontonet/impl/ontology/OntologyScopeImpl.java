@@ -43,6 +43,8 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLOntologySetProvider;
+import org.semanticweb.owlapi.util.OWLOntologyMerger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,11 +134,6 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
         }
     }
 
-    @Override
-    public OWLOntology asOWLOntology() {
-        return this.asOWLOntology(false);
-    }
-
     /**
      * FIXME not merging yet
      * 
@@ -144,30 +141,56 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
      */
     @Override
     public OWLOntology asOWLOntology(boolean merge) {
-        if (merge) throw new UnsupportedOperationException(
-                "Ontology merging only implemented for managed ontologies, not for collectors. "
-                        + "Please set merge parameter to false.");
+        // if (merge) throw new UnsupportedOperationException(
+        // "Ontology merging only implemented for managed ontologies, not for collectors. "
+        // + "Please set merge parameter to false.");
         // Create an ontology manager on the fly. We don't really need a permanent one.
         OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
         OWLDataFactory df = mgr.getOWLDataFactory();
-        OWLOntology ont;
+        OWLOntology ont = null;
         try {
-            // The root ontology ID is in the form [namespace][scopeId]
-            ont = mgr.createOntology(IRI.create(getNamespace() + getID()));
-            List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
-            // Add the import statement for the custom space, if existing and not empty
-            OntologySpace spc = getCustomSpace();
-            if (spc != null && spc.getOntologyCount(false) > 0) {
-                IRI spaceIri = IRI.create(getNamespace() + spc.getID());
-                additions.add(new AddImport(ont, df.getOWLImportsDeclaration(spaceIri)));
+
+            if (merge) {
+                final Set<OWLOntology> set = new HashSet<OWLOntology>();
+
+                log.debug("Merging custom space of {}.", getID());
+                set.add(this.getCustomSpace().asOWLOntology(merge));
+
+                log.debug("Merging core space of {}.", getID());
+                set.add(this.getCoreSpace().asOWLOntology(merge));
+
+                OWLOntologySetProvider provider = new OWLOntologySetProvider() {
+                    @Override
+                    public Set<OWLOntology> getOntologies() {
+                        return set;
+                    }
+                };
+                OWLOntologyMerger merger = new OWLOntologyMerger(provider);
+                try {
+                    ont = merger.createMergedOntology(OWLManager.createOWLOntologyManager(),
+                        IRI.create(getNamespace() + getID()));
+                } catch (OWLOntologyCreationException e) {
+                    log.error("Failed to merge imports for ontology.", e);
+                    ont = null;
+                }
+            } else {
+                // The root ontology ID is in the form [namespace][scopeId]
+                ont = mgr.createOntology(IRI.create(getNamespace() + getID()));
+                List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
+                // Add the import statement for the custom space, if existing and not empty
+                OntologySpace spc = getCustomSpace();
+                if (spc != null && spc.getOntologyCount(false) > 0) {
+                    IRI spaceIri = IRI.create(getNamespace() + spc.getID());
+                    additions.add(new AddImport(ont, df.getOWLImportsDeclaration(spaceIri)));
+                }
+                // Add the import statement for the core space, if existing and not empty
+                spc = getCoreSpace();
+                if (spc != null && spc.getOntologyCount(false) > 0) {
+                    IRI spaceIri = IRI.create(getNamespace() + spc.getID());
+                    additions.add(new AddImport(ont, df.getOWLImportsDeclaration(spaceIri)));
+                }
+                mgr.applyChanges(additions);
             }
-            // Add the import statement for the core space, if existing and not empty
-            spc = getCoreSpace();
-            if (spc != null && spc.getOntologyCount(false) > 0) {
-                IRI spaceIri = IRI.create(getNamespace() + spc.getID());
-                additions.add(new AddImport(ont, df.getOWLImportsDeclaration(spaceIri)));
-            }
-            mgr.applyChanges(additions);
         } catch (OWLOntologyCreationException e) {
             log.error("Failed to generate an OWL form of scope " + getID(), e);
             ont = null;

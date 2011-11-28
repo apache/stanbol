@@ -129,7 +129,7 @@ public class ScopeResource extends BaseStanbolResource {
                                    @Context HttpHeaders headers,
                                    @Context ServletContext servletContext) {
         if (scope == null) return Response.status(NOT_FOUND).build();
-        else return Response.ok(scope.asOWLOntology()).build();
+        else return Response.ok(scope.asOWLOntology(false)).build();
     }
 
     /**

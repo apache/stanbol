@@ -20,7 +20,6 @@ import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
-import org.semanticweb.owlapi.model.OWLOntology;
 
 /**
  * Represents an ontology network that is used for modelling a given knowledge component or domain, e.g.
@@ -44,20 +43,14 @@ public interface OntologyScope extends NamedResource, Lockable, ScopeOntologyLis
     /**
      * Adds a new ontology space to the list of user session spaces for this scope.
      * 
+     * @deprecated as session ontology spaces are obsolete, so is this method. Please refer directly to the
+     *             session identified by <code>sessionID</code>.
+     * 
      * @param sessionSpace
      *            the ontology space to be added.
      * @throws UnmodifiableOntologyCollectorException
      */
     void addSessionSpace(OntologySpace sessionSpace, String sessionID) throws UnmodifiableOntologyCollectorException;
-
-    /**
-     * Returns an ontological form of this scope.
-     * 
-     * @deprecated Please use the inherited method {@link OWLExportable#asOWLOntology(boolean)}. Calls to the
-     *             current method are equivalent to asOWLOntology(false).
-     * @return an OWL ontology that represents this scope.
-     */
-    OWLOntology asOWLOntology();
 
     /**
      * Returns the core ontology space for this ontology scope. The core space should never be null for any

@@ -185,9 +185,9 @@ public class ScopeOntologyResource extends BaseStanbolResource {
             // First of all, it could be a simple request for the space root!
             String temp = scopeid + "/" + ontologyid;
             if (temp.equals(scope.getCoreSpace().getID())) {
-                return Response.ok(scope.getCoreSpace().asOWLOntology()).build();
+                return Response.ok(scope.getCoreSpace().asOWLOntology(false)).build();
             } else if (temp.equals(scope.getCustomSpace().getID())) {
-                return Response.ok(scope.getCustomSpace().asOWLOntology()).build();
+                return Response.ok(scope.getCustomSpace().asOWLOntology(false)).build();
                 // } else if (scope.getSessionSpace(IRI.create(temp)) != null) {
                 // return Response.ok(scope.getSessionSpace(IRI.create(temp)).asOWLOntology()).build();
             }

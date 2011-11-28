@@ -16,22 +16,13 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
 
-import org.semanticweb.owlapi.model.OWLOntology;
-
 /**
  * An ontology space identifies the set of OWL ontologies that should be "active" in a given context, e.g. for
  * a certain user session or a specific reasoning service. Each ontology space has an ID and a top ontology
  * that can be used as a shared resource for mutual exclusion and locking strategies.
+ * 
+ * @author alexdma
  */
 public interface OntologySpace extends OntologyCollector, OWLExportable, Lockable {
-
-    /**
-     * Returns the ontology that serves as a root module for this ontology space.
-     * 
-     * @deprecated Please use the inherited method {@link OWLExportable#asOWLOntology(boolean)}. Calls to the
-     *             current method are equivalent to asOWLOntology(false).
-     * @return the OWL form of this ontology space.
-     */
-    OWLOntology asOWLOntology();
 
 }

@@ -161,22 +161,24 @@ public class OntonetInputProvider implements ReasoningServiceInputProvider {
                 log.warn("Session {} cannot be retrieved. Ignoring.", this.sessionId);
             }
             final Set<OWLOntology> set = new HashSet<OWLOntology>();
-            set.add(scope.asOWLOntology(false));
-            for (OWLOntology o : scope.getCustomSpace().getOntologies(true)) {
-                set.add(o);
-                // set.addAll(o.getImportsClosure());
-            }
-            for (OWLOntology o : scope.getCoreSpace().getOntologies(true)) {
-                set.add(o);
-                // set.addAll(o.getImportsClosure());
-            }
+            set.add(scope.asOWLOntology(true));
+
+            // for (OWLOntology o : scope.getCustomSpace().getOntologies(true)) {
+            // set.add(o);
+            // // set.addAll(o.getImportsClosure());
+            // }
+            // for (OWLOntology o : scope.getCoreSpace().getOntologies(true)) {
+            // set.add(o);
+            // // set.addAll(o.getImportsClosure());
+            // }
             if (session != null) {
-                set.add(session.asOWLOntology(false));
-                for (OWLOntology o : session.getOntologies(true)) {
-                    set.add(o);
-                    // set.addAll(o.getImportsClosure());
-                }
+                set.add(session.asOWLOntology(true));
+                // for (OWLOntology o : session.getOntologies(true)) {
+                // set.add(o);
+                // // set.addAll(o.getImportsClosure());
+                // }
             }
+            if (set.size() == 1) return set.iterator().next();
             OWLOntologyMerger merger = new OWLOntologyMerger(new OWLOntologySetProvider() {
                 @Override
                 public Set<OWLOntology> getOntologies() {

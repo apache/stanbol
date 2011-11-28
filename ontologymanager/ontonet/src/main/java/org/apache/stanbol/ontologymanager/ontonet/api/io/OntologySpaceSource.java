@@ -44,7 +44,7 @@ public class OntologySpaceSource extends AbstractOWLOntologyInputSource {
                 "Could not add subtrees to unmodifiable ontology space {}. Input source will have no additions.",
                 e.getOntologyCollector());
         }
-        bindRootOntology(space.asOWLOntology());
+        bindRootOntology(space.asOWLOntology(false));
     }
 
     protected void appendSubtree(OntologyInputSource subtree) throws UnmodifiableOntologyCollectorException {
