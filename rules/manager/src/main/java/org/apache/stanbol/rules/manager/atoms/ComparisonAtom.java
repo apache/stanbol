@@ -18,7 +18,7 @@ package org.apache.stanbol.rules.manager.atoms;
 
 import org.apache.stanbol.rules.base.api.RuleAtom;
 
-public abstract class ComparisonAtom implements RuleAtom {
+public abstract class ComparisonAtom extends AbstractRuleAtom {
 
 	
 	@Override

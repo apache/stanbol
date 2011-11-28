@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.stanbol.rules.base.api.JenaClauseEntry;
+import org.apache.stanbol.rules.base.api.JenaVariableMap;
 import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.RuleAtom;
 import org.apache.stanbol.rules.base.api.RuleExpressiveness;
@@ -88,17 +90,21 @@ public class RuleImpl implements Rule {
 		ClauseEntry[] head = new ClauseEntry[this.head.size()];
 		ClauseEntry[] body = new ClauseEntry[this.body.size()];
 		
+		
+		JenaVariableMap jenaVariableMap = new JenaVariableMapImpl();
 		Iterator<RuleAtom> it = this.head.iterator();
 		for(int i=0; it.hasNext(); i++){
 			RuleAtom atom = it.next();
-			head[i] = atom.toJenaClauseEntry();
+			JenaClauseEntry jenaClauseEntry = atom.toJenaClauseEntry(jenaVariableMap);
+			head[i] = jenaClauseEntry.getClauseEntry();
 		}
 		
 		
 		it = this.body.iterator();
 		for(int i=0; it.hasNext(); i++){
 			RuleAtom atom = it.next();
-			body[i] = atom.toJenaClauseEntry();
+			JenaClauseEntry jenaClauseEntry = atom.toJenaClauseEntry(jenaVariableMap);
+			body[i] = jenaClauseEntry.getClauseEntry();
 		}
 		
 		

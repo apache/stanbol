@@ -16,6 +16,8 @@
 */
 package org.apache.stanbol.rules.manager.atoms;
 
+import org.apache.stanbol.rules.base.api.JenaClauseEntry;
+import org.apache.stanbol.rules.base.api.JenaVariableMap;
 import org.apache.stanbol.rules.base.api.SPARQLObject;
 import org.apache.stanbol.rules.manager.SPARQLFunction;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -23,7 +25,6 @@ import org.semanticweb.owlapi.model.SWRLAtom;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
 
 
 public class LengthAtom extends NumericFunctionAtom {
@@ -60,7 +61,7 @@ public class LengthAtom extends NumericFunctionAtom {
 	}
 
 	@Override
-	public ClauseEntry toJenaClauseEntry() {
+	public JenaClauseEntry toJenaClauseEntry(JenaVariableMap jenaVariableMap) {
 		// TODO Auto-generated method stub
 		return null;
 	}

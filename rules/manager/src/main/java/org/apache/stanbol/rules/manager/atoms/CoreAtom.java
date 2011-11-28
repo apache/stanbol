@@ -16,11 +16,10 @@
 */
 package org.apache.stanbol.rules.manager.atoms;
 
-import org.apache.stanbol.rules.base.api.RuleAtom;
 
 
 
-public abstract class CoreAtom implements RuleAtom {
+public abstract class CoreAtom extends AbstractRuleAtom {
 
 	
 	@Override

@@ -18,6 +18,8 @@ package org.apache.stanbol.rules.manager.atoms;
 
 import java.util.ArrayList;
 
+import org.apache.stanbol.rules.base.api.JenaClauseEntry;
+import org.apache.stanbol.rules.base.api.JenaVariableMap;
 import org.apache.stanbol.rules.base.api.SPARQLObject;
 import org.apache.stanbol.rules.manager.SPARQLFunction;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -68,8 +70,9 @@ public class ConcatAtom extends StringFunctionAtom {
 	}
 	
 	@Override
-	public ClauseEntry toJenaClauseEntry() {
-		
+	public JenaClauseEntry toJenaClauseEntry(JenaVariableMap jenaVariableMap) {
+		/*
+		 * TODO
 		String arg1 = argument1.toString();
 		if(arg1.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			arg1 = "?" + arg1.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
@@ -87,6 +90,9 @@ public class ConcatAtom extends StringFunctionAtom {
 		nodes.add(Node.createURI("?t324"));
 		
 		return new Functor("strConcat", nodes);
+		*/
+		
+		return null;
 	}
 
 }

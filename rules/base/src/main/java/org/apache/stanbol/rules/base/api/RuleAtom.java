@@ -21,7 +21,6 @@ import org.semanticweb.owlapi.model.SWRLAtom;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
 
 public interface RuleAtom {
 
@@ -41,6 +40,6 @@ public interface RuleAtom {
 	
 	boolean isSPARQLDeleteData();
 	
-	ClauseEntry toJenaClauseEntry();
+	JenaClauseEntry toJenaClauseEntry(JenaVariableMap jenaVariableMap);
 	
 }

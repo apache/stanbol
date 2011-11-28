@@ -19,8 +19,11 @@ package org.apache.stanbol.rules.manager.atoms;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.stanbol.rules.base.api.JenaClauseEntry;
+import org.apache.stanbol.rules.base.api.JenaVariableMap;
 import org.apache.stanbol.rules.base.api.SPARQLObject;
 import org.apache.stanbol.rules.base.api.URIResource;
+import org.apache.stanbol.rules.manager.JenaClauseEntryImpl;
 import org.apache.stanbol.rules.manager.SPARQLComparison;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -31,13 +34,17 @@ import org.semanticweb.owlapi.model.SWRLBuiltInAtom;
 import org.semanticweb.owlapi.model.SWRLDArgument;
 import org.semanticweb.owlapi.vocab.SWRLBuiltInsVocabulary;
 
+import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.reasoner.rulesys.Builtin;
 import com.hp.hpl.jena.reasoner.rulesys.BuiltinRegistry;
 import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
 import com.hp.hpl.jena.reasoner.rulesys.Functor;
+import com.hp.hpl.jena.reasoner.rulesys.Node_RuleVariable;
 import com.hp.hpl.jena.reasoner.rulesys.builtins.GreaterThan;
 import com.hp.hpl.jena.vocabulary.XSD;
 
@@ -237,29 +244,40 @@ public class GreaterThanAtom extends ComparisonAtom {
 		return owlLiteral; 
 	}
 	
+	
 	@Override
-	public ClauseEntry toJenaClauseEntry() {
+	public JenaClauseEntry toJenaClauseEntry(JenaVariableMap jenaVariableMap) {
 		
-		GreaterThan gt = new GreaterThan();
+		Node arg1Node = null;
+		Node arg2Node = null;
 		
 		String arg1 = argument1.toString();
 		if(arg1.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			arg1 = "?" + arg1.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			//arg1Node = Node_RuleVariable.createVariable(arg1);
+			arg1Node = new Node_RuleVariable(arg1, jenaVariableMap.getVariableIndex(arg1));
+		}
+		else{
+			arg1Node = getTypedLiteral(argument1);
 		}
 		
 		String arg2 = argument2.toString();
 		if(arg2.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			arg2 = "?" + arg2.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			arg2Node = new Node_RuleVariable(arg2, jenaVariableMap.getVariableIndex(arg2));
+		}
+		else{
+			arg2Node = getTypedLiteral(argument2);
 		}
 		
 		java.util.List<Node> nodes = new ArrayList<Node>();
 		
-		nodes.add(Node.createURI(arg1));
-		nodes.add(Node.createURI(arg2));
+		nodes.add(arg1Node);
+		nodes.add(arg2Node);
 		
 		
 		
-		return new Functor("greaterThan", nodes, new BuiltinRegistry());
+		return new JenaClauseEntryImpl(new Functor("greaterThan", nodes, new BuiltinRegistry()), jenaVariableMap);
 		
 	}
 }
