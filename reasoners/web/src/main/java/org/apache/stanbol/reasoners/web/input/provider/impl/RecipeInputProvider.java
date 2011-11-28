@@ -187,7 +187,7 @@ public class RecipeInputProvider implements ReasoningServiceInputProvider {
 			
 		}
     	
-    	return null;   
+    	   
     }
 
     @Override
