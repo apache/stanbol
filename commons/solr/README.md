@@ -3,8 +3,8 @@ Stanbol Commons Solr
 
 Solr is used by several Apache Stanbol components. The Apache Stanbol Solr Commons artifacts provide a set of utilities that ease the use of Solr within OSGI, allow the initialization and management of Solr indexes as well as the publishing of Solrs RESTful interface on the OSGI HttpService.
 
-Although this utilities where implemented with the requirements of Apache Stanbol mind they say do not depend on other Stanbol components that are not themselves part of
-"stanbol.commons"
+Although this utilities where implemented with the requirements of Apache Stanbol in mind they do not depend on other Stanbol components that are not themselves part of
+"stanbol.commons".
 
 
 Solr OSGI Bundle
@@ -29,16 +29,15 @@ All CoreContainer and SolrCores initialized by the Stanbol Solr framework are re
     CoreContainer defaultSolrServer;
     ServiceReference ref = bundleContext.getServiceReference(
         CoreContainer.class.getName())
-    if(ref != null){
-        defaultSolrServer = (CoreContainer)bundleContext.getService(ref);
+    if(ref != null) {
+        defaultSolrServer = (CoreContainer) bundleContext.getService(ref);
     } else {
         defaultSolrServer = null; //no SolrServer available
     }
 
-It is also possible to track services by using the OSGI ServiceTracker utility.
+It is also possible to track service registration and unregistration events by using the OSGI ServiceTracker utility.
 
-The above Code snippet would always return the SolrServer with the highest priority (the highest value for the "service.ranking" property). However the OSGI Service Registry allows also to obtain/track service by the usage of filters. For specifying such filters
-it is important to know what metadata are provided when services are registered with the OSGI Service Registry.
+The above Code snippet would always return the SolrServer with the highest priority (the highest value for the "service.ranking" property). However the OSGI Service Registry allows also to obtain/track service by the usage of filters. For specifying such filters it is important to know what metadata are provided when services are registered with the OSGI Service Registry.
 
 #### Metadata for CoreContainer:
 
