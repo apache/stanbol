@@ -24,7 +24,7 @@ This section provides information how to managed and get access to the server si
 
 ### Accessing CoreContainers and SolrCores
 
-All CoreContainer and SolrCores initialized by the Stanbol Solr framework are registered with the OSGI Service Registry. This means that other Bundels can obtain them by using 
+All CoreContainer and SolrCores initialized by the Stanbol Solr framework are registered with the OSGI Service Registry. This means that other Bundels can obtain them by using
 
     CoreContainer defaultSolrServer;
     ServiceReference ref = bundleContext.getServiceReference(
@@ -41,37 +41,37 @@ The above Code snippet would always return the SolrServer with the highest prior
 
 #### Metadata for CoreContainer:
 
-* **org.apache.solr.core.CoreContainer.name**: The name of the SolrServer. The name MUST BE provided for each Solr CoreContainer registered with this framework. It is a required field for each configuration. If two CoreContainers are registered with the same name the "service.ranking" property shall be used to determine the current active CoreContainer for an request. However others registered for the same name may be used as fallbacks.
-* **org.apache.solr.core.CoreContainer.dir**: The directory of a CoreContainer. This is the directory containing the "solr.xml".
+* **org.apache.solr.core.CoreContainer.name**: The name of the SolrServer. The name MUST BE provided for each Solr CoreContainer registered with this framework. It is a required field for each configuration. If two CoreContainers are registered with the same name the "service.ranking" property shall be used to determine the current active CoreContainer for an request. However others registered for the same name may be used as fallbacks. The container name is used as a URL path component when the `publishREST` parameter is true. It is recommended to use lowercase names without non ASCII characters.
+* **org.apache.solr.core.CoreContainer.dir**: The directory of a CoreContainer. This is the directory containing the "solr.xml" file.
 * **org.apache.solr.core.CoreContainer.solrXml**: The name of the Solr CoreContainer configuration file. Currently always "sold.xml".
 * **org.apache.solr.core.CoreContainer.cores**: A read only collection of the names of all cores registered with the CoreContainer.
 * **service.ranking**: The OSGI "service.ranking" property is used to specify the ranking of a CoreContainer. The CoreContainer with the highest ranking is considered as the default server and will be returned by calls to bundleContext.getServiceReference(..) without the use of an filter.
-* **org.apache.solr.core.CoreContainer.publishREST**: Boolean switch that defines if the RESTful API of this CoreContainer should be published or not.
+* **org.apache.solr.core.CoreContainer.publishREST**: Boolean switch that allows to enable/disable the publishing of the Solr RESTful API on "http://{host}:{port}/solr/{server-name}". Requires the "SolrServerPublishingComponent" to be active.
 
 #### Metadata for SolrCores:
 
 * **org.apache.solr.core.SolrCore.name**: The name of the SolrCore as registered with the CoreContainer
 * **org.apache.solr.core.SolrCore.dir**: The instance directory of the SolrCore
-* **org.apache.solr.core.SolrCore.dadadir**: The data directory of the SolrCore
+* **org.apache.solr.core.SolrCore.datadir**: The data directory of the SolrCore
 * **org.apache.solr.core.SolrCore.indexdir**: The directory of the index used by this SolrCore
 * **org.apache.solr.core.SolrCore.schema**: The name (excluding the directory) of the Solr schema used by this core
 * **org.apache.solr.core.SolrCore.solrconf**: The name (excluding the directory) of the Solr core configuration file
 
 In addition the following metadata of the CoreContainer for this SolrCore are also available
 
-* **org.apache.solr.core.CoreContainer.id**: The SERVICE_ID of the CoreContainer this SolrCore is registered with. This is usually the easiest way to obtain the ServiceReference to the CoreContainer of an SolrCore.
-* **org.apache.solr.core.CoreContainer.name**: The name of the CoreContainer this SolrCore is registered with. Note that multiple CoreContainers may be registered for the same name. Therefore this property MUST NOT be used to filter for the ServiceReference to the CoreContainer of an SolrCore. 
+* **org.apache.solr.core.CoreContainer.id**: The `SERVICE_ID` of the CoreContainer this SolrCore is registered with. This is usually the easiest way to obtain the ServiceReference to the CoreContainer of an SolrCore.
+* **org.apache.solr.core.CoreContainer.name**: The name of the CoreContainer this SolrCore is registered with. Note that multiple CoreContainers may be registered for the same name. Therefore this property MUST NOT be used to filter for the ServiceReference to the CoreContainer of an SolrCore.
 * **org.apache.solr.core.CoreContainer.dir**: The Solr directory of the CoreContainer for this SolrCore.
 * **service.ranking**: The OSGI service.ranking of the CoreContainer this SolrCore is registered with. SolrCores do not define there own service.ranking but use the ranking of the CoreContainer they are registered with.
 
-The the mentioned keys used for metadata of registered CoreContainer and SolrCores are defined as public constants in the [SolrConstants](http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/solr/core/src/main/java/org/apache/stanbol/commons/solr/SolrConstants.java) class. 
+The the mentioned keys used for metadata of registered CoreContainer and SolrCores are defined as public constants in the [SolrConstants](http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/solr/core/src/main/java/org/apache/stanbol/commons/solr/SolrConstants.java) class.
 
 
 ### ReferencedSolrServer
 
-This component allows to initialize an Solr server running within the same JVM as Stanbol based on indexes provided by a directory on the local file system. This does not support management capabilities, but it initializes a Solr CoreContainer based on the data in the file system and registers it (including all SolrCores) with the OSIG Service Registry as described above.
+This component allows to initialize a Solr server running within the same JVM as Stanbol based on indexes provided by a directory on the local file system. This does not support management capabilities, but it initializes a Solr CoreContainer based on the data in the file system and registers it (including all SolrCores) with the OSGi Service Registry as described above.
 
-The ReferencedSolrServer uses the ManagedServiceFactory pattern. This means that instances are created by parsing configurations to the OSGI ConfigurationAdmin service. Practically this means that 
+The ReferencedSolrServer uses the ManagedServiceFactory pattern. This means that instances are created by parsing configurations to the OSGI ConfigurationAdmin service. Practically this means that:
 
 * users can create instances by using the Configuration tab of the Apache Felix Web Console
 * programmers can directly use the ConfigurationAdmin service to create/update and delete configurations
@@ -79,31 +79,31 @@ The ReferencedSolrServer uses the ManagedServiceFactory pattern. This means that
 
 Configurations need to include the following properties (see also section "Metadata for CoreContainer" for details about such properties)
 
-* **org.apache.solr.core.CoreContainer.name**: The name for the Solr Server 
+* **org.apache.solr.core.CoreContainer.name**: The name for the Solr Server
 * **org.apache.solr.core.CoreContainer.dir**: The path to the directory on the local file system that is used to initialize the CoreContainer
 * **service.ranking**: The OSGI service ranking used to register the CoreContainer and its SolrCores. If not specified '0' will be used as default. The value MUST BE an integer number.
-* **org.apache.solr.core.CoreContainer.publishREST**: Boolean switch that allows to enable/disable the publishing of the Solr RESTful API on "http://{host}:{port}/solr/{server-name}". Requires the "SolrServerPublishingComponent" to be active. 
+* **org.apache.solr.core.CoreContainer.publishREST**: Boolean switch that allows to enable/disable the publishing of the Solr RESTful API on "http://{host}:{port}/solr/{server-name}". Requires the "SolrServerPublishingComponent" to be active.
 
 **NOTE:** Keep in mind that of the RESTful API of the SolrServer is published users might use the Admin Request handler to manipulate the SolrConfiguration. In such cases the metadata provided by the ServiceReferences for the CoreContainer and SolrCores might get out of sync with the actual configuration of the Server.
 
 ### ManagedSolrServer
 
-This component allows to manage a multi core Solr server. It provides an API to create, update and remove SolrCores. In addition cores can be activated and deactivated. 
+This component allows to manage a multi core Solr server. It provides an API to create, update and remove SolrCores. In addition cores can be activated and deactivated.
 
 #### Creating ManagedServerInstances
 
-The ManagedSolrServer uses the ManagedServiceFactory pattern. This means that instances are created by parsing configurations to the OSGI ConfigurationAdmin service. Practically this means that 
+The ManagedSolrServer uses the ManagedServiceFactory pattern. This means that instances are created by parsing configurations to the OSGI ConfigurationAdmin service. Practically this means that:
 
 * users can create instances by using the Configuration tab of the Apache Felix Web Console
 * programmers can directly use the ConfigurationAdmin service to create/update and delete configurations
 * Configurations can also parsed via the Apache Sling [OSGI installer](http://sling.apache.org/site/osgi-installer.html) framework. Meaning configurations can be includes within the Stanbol launchers, Bundles or copied to a directory configured for the [File Provider](http://svn.apache.org/repos/asf/sling/trunk/installer/providers/file/)
 
-Configurations need to include the following properties (see also section "Metadata for CoreContainer" for details about such properties). Although the properties are the same as for the ReferencedSolrServer there semantics differs in some aspects.
+Configurations need to include the following properties (see also section "Metadata for CoreContainer" for details about such properties). Although the properties are the same as for the ReferencedSolrServer their semantics differs in some aspects.
 
-* **org.apache.solr.core.CoreContainer.name**: The name for the Solr Server 
+* **org.apache.solr.core.CoreContainer.name**: The name for the Solr Server
 * **org.apache.solr.core.CoreContainer.dir**: Optionally an directory to store the data. If not specified the data will be stored in an directory with the configured server-name at the default location (currently "${sling.home}/indexes/" or "indexes/" if the environment variable 'sling.home' is not present). Users that want to create multiple ManagedSolrServer with the same name need to specify the directory or servers will override each others data.
-* **service.ranking**: The OSGI service ranking used to register the CoreContainer and its SolrCores. If not specified '0' will be used as default. The value MUST BE an integer number. In scenarios where a single ManagedSolrServer is expected it is highly recommended to specify Integer.MAX_VALUE (2147483647) as service ranking. This will ensure that this server can not be overridden by others.
-* **org.apache.solr.core.CoreContainer.publishREST**: Boolean switch that allows to enable/disable the publishing of the Solr RESTful API on "http://{host}:{port}/solr/{server-name}". Requires the "SolrServerPublishingComponent" to be active. 
+* **service.ranking**: The OSGI service ranking used to register the CoreContainer and its SolrCores. If not specified '0' will be used as default. The value MUST BE an integer number. In scenarios where a single ManagedSolrServer is expected it is highly recommended to specify `Integer.MAX_VALUE` (2147483647) as service ranking. This will ensure that this server can not be overridden by others.
+* **org.apache.solr.core.CoreContainer.publishREST**: Boolean switch that allows to enable/disable the publishing of the Solr RESTful API on "http://{host}:{port}/solr/{server-name}". Requires the "SolrServerPublishingComponent" to be active.
 
 **NOTE:** Keep in mind that of the RESTful API of the SolrServer is published users might use the Admin Request handler to manipulate the SolrConfiguration. In such cases the metadata provided by the ServiceReferences for the CoreContainer and SolrCores might get out of sync with the actual configuration of the Server.
 
@@ -126,7 +126,7 @@ Solr-Index-Archives do use the following name pattern:
 
     {name}.solrindex[.zip|.gz|.bz2]
 
-* They are normal achieves starting with the instance directory of a Solr Core. 
+* They are normal achieves starting with the instance directory of a Solr Core.
 * The name of this instance directory MUST BE the same as the {name} of the archive.
 * The second extensions specifies the type of the archive. If no extension is specified the type of the Archive might still be detected by reading the first few bytes of the Archive.
 
@@ -145,7 +145,7 @@ The following keys are used (see also org.apache.stanbol.commons.solr.managed.Ma
 #### Other interesting Notes
 
 * SolrCore directory names created by the ManagedSolrServer use the current date as suffix. If a directory with that name already exists (e.g. because the same index was already updated on the very same day) than an additional "-{count}" suffix will be added to the end.
-* The Managed SolrServer stores its configuration within the persistent space of the Bundle provided by the OSGI environment. When using one of the default Stanbol launchers this is within "{sling.home}/felix/bundle{bundle-id}/data". The "{bundle-id}" of the "org.apache.stanbol.commons.solr.managed" bundle can be looked up the the [Bundle tab](http://localhost:8080/system/console/bundles) of the Apache Felix Webconsole. The actual configuration of a ManagedSolrServer is than in ".config/index-config/{service.pid}". The "{service.pid}" can be also looked up via the Apache Felix Web-console in the [Configuration Status tab](http://localhost:8080/system/console/config). Within this folder the Solr index reference files (normal java properties files) with all the information about the current state of the managed indexes are present. 
+* The Managed SolrServer stores its configuration within the persistent space of the Bundle provided by the OSGI environment. When using one of the default Stanbol launchers this is within "{sling.home}/felix/bundle{bundle-id}/data". The "{bundle-id}" of the "org.apache.stanbol.commons.solr.managed" bundle can be looked up the the [Bundle tab](http://localhost:8080/system/console/bundles) of the Apache Felix Webconsole. The actual configuration of a ManagedSolrServer is than in ".config/index-config/{service.pid}". The "{service.pid}" can be also looked up via the Apache Felix Web-console in the [Configuration Status tab](http://localhost:8080/system/console/config). Within this folder the Solr index reference files (normal java properties files) with all the information about the current state of the managed indexes are present.
 * Errors that occur during the asynchronous initialization of SolrCores are stored within the IndexingProperties. They can therefore be requested via the API of the ManagedSolrServer but also be looked up within the persistent state of the ManagedSolrServer (see above where such files are located).
 
 
@@ -191,7 +191,7 @@ This example shows how to lookup the default CoreContainer and create a SolrServ
 
     ComponentContext context; //typical parsed to the activate method
     BundleContext bc = context.getBundleContext();
-    ServiceReference coreContainerRef = 
+    ServiceReference coreContainerRef =
         bc.getServiceReference(CoreContainer.class.getName());
     CoreContainer coreContainer = (CoreContainer) bc.getService(coreContainerRef)
     SolrServer server = new EmbeddedSolrServer(coreContainer,"mydata");
@@ -209,7 +209,7 @@ Now there might be cases where several CoreContainers are available and "mydata"
     //Yes one can register several for the same name (e.g. to have fallbacks)
     //let get the one with the highest service.ranking
     Arrays.sort(coreContainerRefs,ServiceReferenceRankingComparator.INSTANCE);
-    
+
     //create the SolrServer (same as above)
     CoreContainer coreContainer = (CoreContainer) bc.getService(coreContainerRefs[0])
     SolrServer server = new EmbeddedSolrServer(coreContainer,indexRef.getIndex());
@@ -225,7 +225,7 @@ In cases where one only knows the name of the SolrCore (and not the CoreContaine
     //now we have all References to CoreContainer with a SolrCore "mydata"
     //let get the one with the highest service.ranking
     Arrays.sort(solrCoreRefs,ServiceReferenceRankingComparator.INSTANCE);
-    
+
     //now get the SolrCore and create the SolrServer
     SolrCore core = (SolrCore)bc.getService(solrCoreRefs[0]);
     //core.getCoreDescriptor() might be null if SolrCore is not
@@ -248,7 +248,7 @@ First during the activation we need to check if "mydata" is already create and c
         //Asynchronously init the index as soon as the solrindex archvive is available
         metadata = managedServer.createSolrIndex("mydata", "mydata.solrindex.zip",null);
     }
-    RegisteredSolrServerTracker indexTracker = 
+    RegisteredSolrServerTracker indexTracker =
         new RegisteredSolrServerTracker(bc, metadata.getIndexReference());
     //do not forget to close the tracker while deactivating
     indexTracker.open();
