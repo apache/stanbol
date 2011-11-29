@@ -189,16 +189,16 @@ To lookup the SolrCore for the referenced index:
 
 This example shows how to lookup the default CoreContainer and create a SolrServer for the core "mydata".
 
-    ComponentContext context; //typical parsed to the activate method
+    ComponentContext context; //typical passed to the activate method
     BundleContext bc = context.getBundleContext();
     ServiceReference coreContainerRef =
         bc.getServiceReference(CoreContainer.class.getName());
     CoreContainer coreContainer = (CoreContainer) bc.getService(coreContainerRef)
-    SolrServer server = new EmbeddedSolrServer(coreContainer,"mydata");
+    SolrServer server = new EmbeddedSolrServer(coreContainer, "mydata");
 
 Now there might be cases where several CoreContainers are available and "mydata" is not available on the default one. The "default" refers to the one with the highest "service.ranking" value. In this case we need to know a available property we can use to filter for the right CoreContainer. In this case we assume the index is on a CoreContainer registered with the name "myserver".
 
-    ComponentContext context; //typical parsed to the activate method
+    ComponentContext context; //typical passed to the activate method
     BundleContext bc = context.getBundleContext();
     //now lets use the IndexReference to create the filter
     IndexReference indexRef = new IndexReference("myserver","mydata");
@@ -216,7 +216,7 @@ Now there might be cases where several CoreContainers are available and "mydata"
 
 In cases where one only knows the name of the SolrCore (and not the CoreContainer) the initialization looks like this.
 
-    ComponentContext context; //typical parsed to the activate method
+    ComponentContext context; //typical passed to the activate method
     BundleContext bc = context.getBundleContext();
     String nameFilter = String.format("(%s=%s)",SolrConstants.PROPERTY_CORE_NAME,"mydata");
     ServiceReference[] solrCoreRefs = bc.getServiceReferences(
@@ -264,7 +264,7 @@ Now every time we need the SolrServer we can retrieve it from the indexTracker
         }
     }
 
-The RegisteredSolrServerTracker does take "service.ranking" into account. So if there are more Services available that match the parsed IndexReference the Methods will always return the one with the highest "service.ranking". In case arrays are returned such arrays are sorted accordingly.
+The RegisteredSolrServerTracker does take "service.ranking" into account. So if there are more Services available that match the passed IndexReference those methods will always return the one with the highest "service.ranking". In case arrays are returned such arrays are sorted accordingly.
 
 ### RESTful API
 
