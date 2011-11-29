@@ -136,7 +136,7 @@ Solr-Index-Archive-References are normal Java properties files and do use the fo
 
 The following keys are used (see also org.apache.stanbol.commons.solr.managed.ManagedIndexConstants):
 
-* **Index-Archive**: Comma separated list of Solr-Index-Archives that can be used for initializing this index. The first index archive in the list has the highest priority. Higher priority archives will replace the data of lower priority once as soon as they become available. This feature is intended to be used to allow the replacement of a small sample dataset (e.g. shipped within a Bundle or the Launcher) with the full dataset.
+* **Index-Archive**: Comma separated list of Solr-Index-Archives that can be used for initializing this index. The first index archive in the list has the highest priority. Higher priority archives will replace the data of lower priority once as soon as they become available. This feature is intended to be used to allow the replacement of a small sample dataset (e.g. shipped within a Bundle or the Launcher) with the full dataset download later from a remote Internet archive or pushed manually to the `sling/datafiles` folder of a previously installed Stanbol instance. For instance the `dbpedia.solrindex.ref` archive reference configuration provided in the default launcher has the line: `Index-Archive=dbpedia.solrindex.zip,dbpedia_43k.solrindex.zip` and only `dbpedia_43k.solrindex.zip` is shipped in the default launchers allowing for override by any archive named `dbpedia.solrindex.zip`.
 * **Index-Name**: The name of the Index. If not specified the {name} part of the first Index-Archive in the list will be used.
 * **Server-Name**: The name of the ManagedSolrServer this Solr index MUST BE deployed on. If not present it will be deployed on the default ManagedSolrServer (the ManagedSolrServer with the highest priority.
 * **Synchronized**: Boolean switch. If enabled the index will be synchronized with the referenced Solr-Index-Archives. That means the DataFileTracker service will be used to periodically track the states of referenced Solr-Index-Archives. This allows to initialize/update and uninitialise managed Solr indexes by simple making Solr-Index-Archives un-/available to the DataFileProvider infrastructure (such as Users copying/deleting files in the "/sling/datafiles" directory).
@@ -287,7 +287,7 @@ This Component provides the same functionality as the SolrServerPublishingCompon
 This component is configured by two properties
 
 * **org.apache.stanbl.commons.solr.web.dispatchfilter.name**: The {server-name} of the CoreContainer to publish ({server-name} refers to the value of the "org.apache.solr.core.CoreContainer.name" property).
-* **org.apache.stanbl.commons.solr.web.dispatchfilter.prefix**: The prefix path to publish the server. The {server-name} is NOT appended to the configured prefix. Note that a Servlet Filter with "{prefix}/.*" is registered with the OSGI HttpService.
+* **org.apache.stanbl.commons.solr.web.dispatchfilter.prefix**: The prefix path to publish the server. The {server-name} is NOT appended to the configured prefix. Note that a Servlet Filter with `{prefix}/.*` is registered with the OSGI HttpService.
 
 If two CoreContainers with the same {server-name} (the value of the "org.apache.solr.core.CoreContainer.name" property) are registered the one with the highest "service.ranking" is published.
 
