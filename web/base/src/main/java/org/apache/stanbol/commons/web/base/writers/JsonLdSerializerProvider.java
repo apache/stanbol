@@ -27,7 +27,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.clerezza.rdf.core.BNode;
-import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.Triple;
