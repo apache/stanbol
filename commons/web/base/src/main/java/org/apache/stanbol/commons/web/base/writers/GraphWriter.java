@@ -18,6 +18,7 @@ package org.apache.stanbol.commons.web.base.writers;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N3;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N_TRIPLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JSON;
@@ -66,9 +67,12 @@ public class GraphWriter implements MessageBodyWriter<TripleCollection> {
         types.add(X_TURTLE);
         types.add(RDF_JSON);
         types.add(APPLICATION_JSON);
+        types.add(APPLICATION_OCTET_STREAM);
         supportedMediaTypes = Collections.unmodifiableSet(types);
     }
 
+    public static final String ENCODING = "UTF-8";
+    
     @Context
     protected ServletContext servletContext;
 
@@ -92,13 +96,15 @@ public class GraphWriter implements MessageBodyWriter<TripleCollection> {
             MultivaluedMap<String, Object> httpHeaders,
             OutputStream entityStream) throws IOException,
             WebApplicationException {
+        
         long start = System.currentTimeMillis();
         String mediaTypeString = mediaType.getType()+'/'+mediaType.getSubtype();
-        if (mediaType.isWildcardType() || TEXT_PLAIN.equals(mediaTypeString)) {
+        if (mediaType.isWildcardType() || TEXT_PLAIN.equals(mediaTypeString) || APPLICATION_OCTET_STREAM.equals(mediaTypeString)) {
             getSerializer().serialize(entityStream, t, APPLICATION_JSON);
         } else {
             getSerializer().serialize(entityStream, t, mediaTypeString);
         }
+        
         log.debug("Serialized {} in {}ms",t.size(),System.currentTimeMillis()-start);
     }
 }

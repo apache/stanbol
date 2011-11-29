@@ -17,11 +17,9 @@
 package org.apache.stanbol.enhancer.jersey.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.MediaType.WILDCARD;
-import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JSON;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
@@ -77,8 +75,8 @@ public class EnginesRootResource extends BaseStanbolResource {
 
     protected Serializer serializer;
 
-    // bind the job manager by looking it up from the servlet request context
     public EnginesRootResource(@Context ServletContext context) {
+        // bind the job manager by looking it up from the servlet request context
         jobManager = ContextHelper.getServiceFromContext(EnhancementJobManager.class, context);
         tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
         serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
@@ -97,8 +95,6 @@ public class EnginesRootResource extends BaseStanbolResource {
         ResponseBuilder res = Response.ok(new Viewable("index", this),TEXT_HTML);
         addCORSOrigin(servletContext,res, headers);
         return res.build();
-//        return Response.ok(new Viewable("index", this))
-//        .header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8").build();
     }
 
     public List<EnhancementEngine> getActiveEngines() {
@@ -164,7 +160,7 @@ public class EnginesRootResource extends BaseStanbolResource {
             format = headers.getMediaType().toString();
         }
         if (uri != null && uri.isEmpty()) {
-            // let the store build an internal URI basted on the content
+            // let the store build an internal URI based on the content
             uri = null;
         }
         ContentItem ci = new InMemoryContentItem(uri, data, format);
@@ -178,7 +174,6 @@ public class EnginesRootResource extends BaseStanbolResource {
         if (jobManager != null) {
             jobManager.enhanceContent(ci);
         }
-        MGraph graph = ci.getMetadata();
 
         if (buildAjaxview) {
             ContentItemResource contentItemResource = new ContentItemResource(null, ci, uriInfo, tcManager,
@@ -190,19 +185,16 @@ public class EnginesRootResource extends BaseStanbolResource {
             addCORSOrigin(servletContext,rb, headers);
             return rb.build();
         }
+        
+        MGraph graph = ci.getMetadata();
         ResponseBuilder rb = Response.ok(graph);
-        if (format != null) {
-            // force mimetype from form params
-            rb.header(HttpHeaders.CONTENT_TYPE, format+"; charset=UTF-8");
-        }
-        if (headers.getAcceptableMediaTypes().contains(APPLICATION_JSON_TYPE)) {
-            // force RDF JSON media type (TODO: move this logic
-            rb.header(HttpHeaders.CONTENT_TYPE, RDF_JSON+"; charset=UTF-8");
-        } else if (headers.getAcceptableMediaTypes().isEmpty()) {
+        if (headers.getAcceptableMediaTypes().isEmpty()) {
             // use RDF/XML as default format to keep compat with OpenCalais
             // clients
+            System.out.println("NO ACCEPTABLE MEDIA TYPE");
             rb.header(HttpHeaders.CONTENT_TYPE, RDF_XML+"; charset=UTF-8");
         }
+        
         addCORSOrigin(servletContext,rb, headers);
         return rb.build();
     }
