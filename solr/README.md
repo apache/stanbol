@@ -1,5 +1,4 @@
-Stanbol Commons Solr
-====================
+# Stanbol Commons Solr
 
 Solr is used by several Apache Stanbol components. The Apache Stanbol Solr Commons artifacts provide a set of utilities that ease the use of Solr within OSGi, allow the initialization and management of Solr indexes as well as the publishing of Solrs RESTful interface on the OSGi HttpService.
 
@@ -7,8 +6,7 @@ Although this utilities where implemented with the requirements of Apache Stanbo
 "stanbol.commons".
 
 
-Solr OSGi Bundle
-----------------
+## Solr OSGi Bundle
 
 The "org.apache.commons.solr.core" bundle currently includes all dependencies required by Solr and also exports the client as well as the server API. For details please have a look at the pom file of the "solr.core" artifact.
 
@@ -17,10 +15,10 @@ Please note also the exclusion list, because some libraries currently not direct
 If you require an additional Library that is currently not included please give us a short notice on the stanbol-dev mailing list.
 
 
-Solr Server Components
-----------------------
+## Solr Server Components
 
 This section provides information how to managed and get access to the server side CoreContainer and SolrCore components of Solr.
+
 
 ### Accessing CoreContainers and SolrCores
 
@@ -29,7 +27,7 @@ All CoreContainer and SolrCores initialized by the Stanbol Solr framework are re
     CoreContainer defaultSolrServer;
     ServiceReference ref = bundleContext.getServiceReference(
         CoreContainer.class.getName())
-    if(ref != null) {
+    if (ref != null) {
         defaultSolrServer = (CoreContainer) bundleContext.getService(ref);
     } else {
         defaultSolrServer = null; //no SolrServer available
@@ -39,6 +37,7 @@ It is also possible to track service registration and unregistration events by u
 
 The above Code snippet would always return the SolrServer with the highest priority (the highest value for the "service.ranking" property). However the OSGi Service Registry allows also to obtain/track service by the usage of filters. For specifying such filters it is important to know what metadata are provided when services are registered with the OSGi Service Registry.
 
+
 #### Metadata for CoreContainer:
 
 * **org.apache.solr.core.CoreContainer.name**: The name of the SolrServer. The name MUST BE provided for each Solr CoreContainer registered with this framework. It is a required field for each configuration. If two CoreContainers are registered with the same name the "service.ranking" property shall be used to determine the current active CoreContainer for an request. However others registered for the same name may be used as fallbacks. The container name is used as a URL path component when the `publishREST` parameter is true. It is recommended to use lowercase names without non ASCII characters.
@@ -47,6 +46,7 @@ The above Code snippet would always return the SolrServer with the highest prior
 * **org.apache.solr.core.CoreContainer.cores**: A read only collection of the names of all cores registered with the CoreContainer.
 * **service.ranking**: The OSGi "service.ranking" property is used to specify the ranking of a CoreContainer. The CoreContainer with the highest ranking is considered as the default server and will be returned by calls to bundleContext.getServiceReference(..) without the use of an filter.
 * **org.apache.solr.core.CoreContainer.publishREST**: Boolean switch that allows to enable/disable the publishing of the Solr RESTful API on "http://{host}:{port}/solr/{server-name}". Requires the "SolrServerPublishingComponent" to be active.
+
 
 #### Metadata for SolrCores:
 
@@ -86,9 +86,11 @@ Configurations need to include the following properties (see also section "Metad
 
 **NOTE:** Keep in mind that of the RESTful API of the SolrServer is published users might use the Admin Request handler to manipulate the SolrConfiguration. In such cases the metadata provided by the ServiceReferences for the CoreContainer and SolrCores might get out of sync with the actual configuration of the Server.
 
+
 ### ManagedSolrServer
 
 This component allows to manage a multi core Solr server. It provides an API to create, update and remove SolrCores. In addition cores can be activated and deactivated.
+
 
 #### Creating ManagedServerInstances
 
@@ -106,6 +108,7 @@ Configurations need to include the following properties (see also section "Metad
 * **org.apache.solr.core.CoreContainer.publishREST**: Boolean switch that allows to enable/disable the publishing of the Solr RESTful API on "http://{host}:{port}/solr/{server-name}". Requires the "SolrServerPublishingComponent" to be active.
 
 **NOTE:** Keep in mind that of the RESTful API of the SolrServer is published users might use the Admin Request handler to manipulate the SolrConfiguration. In such cases the metadata provided by the ServiceReferences for the CoreContainer and SolrCores might get out of sync with the actual configuration of the Server.
+
 
 #### Managing Solr Indexes
 
@@ -142,6 +145,7 @@ The following keys are used (see also org.apache.stanbol.commons.solr.managed.Ma
 * **Synchronized**: Boolean switch. If enabled the index will be synchronized with the referenced Solr-Index-Archives. That means the DataFileTracker service will be used to periodically track the states of referenced Solr-Index-Archives. This allows to initialize/update and uninitialise managed Solr indexes by simple making Solr-Index-Archives un-/available to the DataFileProvider infrastructure (such as Users copying/deleting files in the "/sling/datafiles" directory).
 * **other Properties**: All parsed properties are forwarded to the DataFileProvider/DataFileTracker service when looking for the referenced Solr-Index-Archives. This components might also define some special keys associated with specific functionalities. Please look at the documentation of this services for details.
 
+
 #### Other interesting Notes
 
 * SolrCore directory names created by the ManagedSolrServer use the current date as suffix. If a directory with that name already exists (e.g. because the same index was already updated on the very same day) than an additional "-{count}" suffix will be added to the end.
@@ -149,13 +153,13 @@ The following keys are used (see also org.apache.stanbol.commons.solr.managed.Ma
 * Errors that occur during the asynchronous initialization of SolrCores are stored within the IndexingProperties. They can therefore be requested via the API of the ManagedSolrServer but also be looked up within the persistent state of the ManagedSolrServer (see above where such files are located).
 
 
-Solr Client Components
-----------------------
+## Solr Client Components
 
 This sections describes how to use Solr servers and indexes referenced and managed by the "org.apache.stanbol.commons.solr" framework.
 Principally there are two possibilities: (1) to directly access Solr indexes via the SolrServer Java API and (2) to publish locally managed index on the OSGi HttpService and than use such indexes via the Solr RESTful API.
 
 The Stanbol Solr framework does not provide utilities for accessing remote Solr servers, because this is already easily possible by using SolrJ.
+
 
 ### Java API
 
@@ -164,6 +168,7 @@ This describes how to lookup and access a Solr Server initialized by the "org.ap
 All Solr server (CoreContainer) and Solr indexes (SolrCore) initialized by the ReferencedSolrServer and/or ManagedSolrServer are registered with the OSGi service registry. More information about this can be found in the first part of the "Solr Server Components" of this documentation.
 
 OSGi already provides APIs and utilities to lookup and track registered services. In the following I will provide some examples how to lookup SolrServers registered as OSGi services.
+
 
 #### IndexReference
 
@@ -185,11 +190,12 @@ To lookup the SolrCore for the referenced index:
 
     bundleContext.getServiceReferences(null, indexReference.getIndexFilter());
 
+
 #### Lookup Solr Indexes
 
 This example shows how to lookup the default CoreContainer and create a SolrServer for the core "mydata".
 
-    ComponentContext context; //typical passed to the activate method
+    ComponentContext context; // typically passed to the activate method
     BundleContext bc = context.getBundleContext();
     ServiceReference coreContainerRef =
         bc.getServiceReference(CoreContainer.class.getName());
@@ -198,66 +204,75 @@ This example shows how to lookup the default CoreContainer and create a SolrServ
 
 Now there might be cases where several CoreContainers are available and "mydata" is not available on the default one. The "default" refers to the one with the highest "service.ranking" value. In this case we need to know a available property we can use to filter for the right CoreContainer. In this case we assume the index is on a CoreContainer registered with the name "myserver".
 
-    ComponentContext context; //typical passed to the activate method
+    ComponentContext context; // typically passed to the activate method
     BundleContext bc = context.getBundleContext();
-    //now lets use the IndexReference to create the filter
-    IndexReference indexRef = new IndexReference("myserver","mydata");
+
+    // Now let's use the IndexReference to create the filter
+    IndexReference indexRef = new IndexReference("myserver", "mydata");
     ServiceReference[] coreContainerRefs = bc.getServiceReferences(
         null, indexRef.getServerFilter());
-    //TODO: check that coreContainerRefs != null AND not empty!
-    //now we have all References to CoreContainers with the name "myserver"
-    //Yes one can register several for the same name (e.g. to have fallbacks)
-    //let get the one with the highest service.ranking
-    Arrays.sort(coreContainerRefs,ServiceReferenceRankingComparator.INSTANCE);
 
-    //create the SolrServer (same as above)
+    // TODO: check that coreContainerRefs != null AND not empty!
+    // Now we have all References to CoreContainers with the name "myserver"
+    // Yes one can register several for the same name (e.g. to have fallbacks)
+    // let get the one with the highest service.ranking
+    Arrays.sort(coreContainerRefs, ServiceReferenceRankingComparator.INSTANCE);
+
+    // Create the SolrServer (same as above)
     CoreContainer coreContainer = (CoreContainer) bc.getService(coreContainerRefs[0])
-    SolrServer server = new EmbeddedSolrServer(coreContainer,indexRef.getIndex());
+    SolrServer server = new EmbeddedSolrServer(coreContainer, indexRef.getIndex());
 
 In cases where one only knows the name of the SolrCore (and not the CoreContainer) the initialization looks like this.
 
-    ComponentContext context; //typical passed to the activate method
+    ComponentContext context; // typically passed to the activate method
     BundleContext bc = context.getBundleContext();
-    String nameFilter = String.format("(%s=%s)",SolrConstants.PROPERTY_CORE_NAME,"mydata");
+    String nameFilter = String.format("(%s=%s)", SolrConstants.PROPERTY_CORE_NAME, "mydata");
     ServiceReference[] solrCoreRefs = bc.getServiceReferences(
         SolrCore.class.getName(), nameFilter);
-    //TODO: check that != null AND not empty!
-    //now we have all References to CoreContainer with a SolrCore "mydata"
-    //let get the one with the highest service.ranking
-    Arrays.sort(solrCoreRefs,ServiceReferenceRankingComparator.INSTANCE);
 
-    //now get the SolrCore and create the SolrServer
-    SolrCore core = (SolrCore)bc.getService(solrCoreRefs[0]);
-    //core.getCoreDescriptor() might be null if SolrCore is not
-    //registered with a CoreContainer
+    // TODO: check that != null AND not empty!
+    // Now we have all References to CoreContainer with a SolrCore "mydata"
+    // let get the one with the highest service.ranking
+    Arrays.sort(solrCoreRefs, ServiceReferenceRankingComparator.INSTANCE);
+
+    // Now get the SolrCore and create the SolrServer
+    SolrCore core = (SolrCore) bc.getService(solrCoreRefs[0]);
+
+    // core.getCoreDescriptor() might be null if SolrCore is not
+    // registered with a CoreContainer
     SolrServer server = new EmbeddedSolrServer(
-        core.getCoreDescriptor().getCoreContainer(),
-        "mydata");
+        core.getCoreDescriptor().getCoreContainer(), "mydata");
+
 
 #### Tracking Solr Indexes
 
 The above examples do a lookup at a single point in time. However because OSGi is an dynamic environment where services can come the go at every time in most cases users might rather want to track services. To do this OSGi provides the ServiceTracker utility.
 
-To ease the tracking of SolrServers the "org.apache.stanbol.commons.solr.core" bundle provides the RegisteredSolrServerTracker. The following examples show how to create a Managed SolrIndex and than track the SolrServer
+To ease the tracking of SolrServers the "org.apache.stanbol.commons.solr.core" bundle provides the RegisteredSolrServerTracker. The following examples show how to create a Managed SolrIndex and than track the SolrServer.
 
-First during the activation we need to check if "mydata" is already create and create it if not. Than we can start tracking the index.
+First during the activation we need to check if "mydata" is already created and create it if not. Than we can start tracking the index:
 
     BundleContext bc;
+    // The ManagedSolrServer instance can be looked up manually using a service
+    // reference or using declarative services / SCR injection
     IndexMetadata metadata = managedServer.getIndexMetadata("mydata");
-    if(metadata == null){ //no index with that name
-        //Asynchronously init the index as soon as the solrindex archvive is available
-        metadata = managedServer.createSolrIndex("mydata", "mydata.solrindex.zip",null);
+    if (metadata == null) {
+        // No index with that name:
+        // Asynchronously init the index as soon as the solrindex archive is available
+        metadata = managedServer.createSolrIndex("mydata", "mydata.solrindex.zip", null);
     }
     RegisteredSolrServerTracker indexTracker =
         new RegisteredSolrServerTracker(bc, metadata.getIndexReference());
-    //do not forget to close the tracker while deactivating
+
+    // Do not forget to close the tracker while deactivating
     indexTracker.open();
 
 Now every time we need the SolrServer we can retrieve it from the indexTracker
 
-    private SolrServer getServer(){
+    private SolrServer getServer() {
         SolrServer server = indexTracker.getService();
-        if(server == null){ //report the missing server
+        if(server == null) {
+            // Report the missing server
             throw new IllegalStateException("Server 'mydata' not active");
         } else {
             return server;
@@ -266,9 +281,11 @@ Now every time we need the SolrServer we can retrieve it from the indexTracker
 
 The RegisteredSolrServerTracker does take "service.ranking" into account. So if there are more Services available that match the passed IndexReference those methods will always return the one with the highest "service.ranking". In case arrays are returned such arrays are sorted accordingly.
 
+
 ### RESTful API
 
-This describes how to publish the RESTful API of CoreContainer registered as OSGi services on the OSGi HttpService. The functionality described in this section is provided by the "org.apache.stanbol.commons.solr.web" artifact.
+The following describes how to publish the RESTful API of CoreContainer registered as OSGi services on the OSGi HttpService. The functionality described in this section is provided by the "org.apache.stanbol.commons.solr.web" artifact.
+
 
 #### SolrServerPublishingComponent
 
@@ -279,6 +296,7 @@ This is an OSGi component that starts immediate and does not require a configura
 If two CoreContainers with the same {server-name} (the value of the "org.apache.solr.core.CoreContainer.name" property) are registered the one with the highest "service.ranking" is published.
 
 The root-prefix ("/solr" by default) can be configured by setting the "org.apache.stanbol.commons.solr.web.dispatchfilter.prefix" property.
+
 
 #### SolrDispatchFilterComponent
 
