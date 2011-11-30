@@ -57,7 +57,7 @@
     </bundle>
   </startLevel>
 
-  <!-- HTTP service -->
+  <!-- HTTP service and Http related Utilities-->
   <startLevel level="5">
     <bundle>
       <groupId>org.apache.felix</groupId>
@@ -68,6 +68,12 @@
       <groupId>org.apache.felix</groupId>
       <artifactId>org.osgi.compendium</artifactId>
       <version>1.4.0</version>
+    </bundle>
+    <!-- Allows to parse Http Headers as QueryParameter -->
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.httpqueryheaders</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
 
@@ -92,7 +98,7 @@
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.installer.provider.file</artifactId>
       <version>1.0.0</version>
-    </bundle>
+    </bundle>    
   </startLevel>
 
   <!-- Felix web console and plugins -->

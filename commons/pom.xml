@@ -61,5 +61,6 @@
     <!-- not in a stable state right now 
     <module>installer/jarprovider</module>
     -->
+    <module>httpqueryheaders</module>
     </modules>
 </project>
