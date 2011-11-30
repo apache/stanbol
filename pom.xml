@@ -42,7 +42,6 @@
     opennlp bundle is only added when using the 'stack' profile.
     <module>opennlp</module>
     -->
-    <module>solr</module>
     <module>web/base</module>
     <module>web/home</module>
     <module>web/sparql</module>
@@ -55,6 +54,10 @@
     <module>stanboltools/datafileprovider</module>
     <module>stanboltools/bundledatafileprovider</module>
     <module>installer/bundleprovider</module>
+    <module>solr/core</module>
+    <module>solr/managed</module>
+    <module>solr/web</module>
+    <module>solr/install</module>
     <!-- not in a stable state right now 
     <module>installer/jarprovider</module>
     -->
