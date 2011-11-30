@@ -100,6 +100,7 @@ public class GraphWriter implements MessageBodyWriter<TripleCollection> {
         long start = System.currentTimeMillis();
         String mediaTypeString = mediaType.getType()+'/'+mediaType.getSubtype();
         if (mediaType.isWildcardType() || TEXT_PLAIN.equals(mediaTypeString) || APPLICATION_OCTET_STREAM.equals(mediaTypeString)) {
+            httpHeaders.putSingle("Content-Type", APPLICATION_JSON);
             getSerializer().serialize(entityStream, t, APPLICATION_JSON);
         } else {
             getSerializer().serialize(entityStream, t, mediaTypeString);

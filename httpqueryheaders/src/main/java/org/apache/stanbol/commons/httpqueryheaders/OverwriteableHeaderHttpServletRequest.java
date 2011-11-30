@@ -57,7 +57,7 @@ public class OverwriteableHeaderHttpServletRequest extends HttpServletRequestWra
             if(values[0] != null && !values[0].isEmpty()){
                 headerValues = Collections.singletonList(values[0]);
             } else { //no value found
-                return null; 
+                headerValues = Collections.emptyList(); 
             }
         }
         if(headerValues.isEmpty()){
