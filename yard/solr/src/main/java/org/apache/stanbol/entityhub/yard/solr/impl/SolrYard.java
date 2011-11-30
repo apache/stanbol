@@ -80,6 +80,7 @@ import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 /**
  * Implementation of the {@link Yard} interface based on a Solr Server.
@@ -470,26 +471,65 @@ public class SolrYard extends AbstractYard implements Yard {
     }
 
     /**
-     * @param config
-     * @throws ConfigurationException
-     * @throws YardException 
+     * Getter for the {@link SolrServer} used by this {@link SolrYard}.<p>
+     * This method tries to {@link #initSolrServer()} if both {@link #_server}
+     * and {@link #_registeredServerTracker} are <code>null</code>. The
+     * {@link #_server} is used for remote SolrServers or if the component is
+     * not running within an OSGI Environment. THe {@link #_registeredServerTracker}
+     * is used for tracking SolrServers that do run in the same JVM.
+     * @throws YardException if the {@link SolrServer} is currently not 
+     * active.
      */
     private SolrServer getServer() throws YardException {
+        SolrServer server = null;
         if(_server == null && _registeredServerTracker == null){
             initSolrServer();
         }
         //for remove servers and when running outside OSGI
         if(_server != null){
-            return _server;
+            server = _server;
         }
         //when an internally managed Solr server is used by this SolrYard
         //we dynamically return the tracked version
         if(_registeredServerTracker != null){
-            return _registeredServerTracker.getService();
+            server = _registeredServerTracker.getService();
+            //TODO: remove and replace with a setting where the SolrYard does not
+            //      not activate until the SolrServer is available.
+            if(server == null){
+                try {
+                    log.info(" ... waiting 1sec for SolrServer");
+                    server = (SolrServer)_registeredServerTracker.waitForService(1000);
+                } catch (InterruptedException e) {}
+            }
+        
         }
-        return null;
+        //the server is not available -> throw an exception!
+        if(server != null){
+            return server;
+        } else {
+            throw new YardException(String.format("The SolrIndex '%s' for SolrYard '%s' is currently not active!",
+                ((SolrYardConfig)getConfig()).getSolrServerLocation(),getName()));
+        }
     }
 
+    /**
+     * If the {@link SolrServer} of this SolrYard is managed on the
+     * {@link #managedSolrServer}, than this method deactivates it. If a
+     * remote server is used than calling this method does not have any effect. 
+     */
+    private void deactivateSolrServer(){
+        SolrYardConfig config = (SolrYardConfig) this.getConfig();
+        String indexLocation = config.getSolrServerLocation();
+        if(!(indexLocation.startsWith("http") && indexLocation.indexOf("://") > 0)){
+            IndexReference indexReference = IndexReference.parse(indexLocation);
+            ManagedSolrServer managedSolrServer = this.managedSolrServer;
+            if(indexReference.isName() && managedSolrServer != null
+                    && (indexReference.getServer() == null ||
+                            indexReference.getServer().equals(managedSolrServer.getServerName()))){
+                managedSolrServer.deactivateIndex(indexReference.getIndex());
+            } //else no managed index or index not managed on #managedSolrServer
+        }//an remote server
+    }
     /**
      * Assumes that this method is only called if {@link #_server} and 
      * {@link #_registeredServerTracker} is <code>null</code>
@@ -543,7 +583,7 @@ public class SolrYard extends AbstractYard implements Yard {
     }
 
     /**
-     * Checks if the SolrYard
+     * Checks if the SolrYard is active on the {@link #managedSolrServer}
      * @param config
      * @param indexReference
      * @throws YardException
@@ -558,7 +598,8 @@ public class SolrYard extends AbstractYard implements Yard {
             } else if(indexReference.getServer() == null || 
                         indexReference.getServer().equals(managedSolrServer.getServerName())){
                 //check if the referenced Index is Managed
-                if(!managedSolrServer.isManagedIndex(indexReference.getIndex())){
+                IndexMetadata indexMetadata = managedSolrServer.getIndexMetadata(indexReference.getIndex());
+                if(indexMetadata == null){
                     // not managed -> try to create
                     IndexReference createdIndexRef = createSolrIndex(managedSolrServer,config, indexReference.getIndex());
                     if(context == null){
@@ -568,7 +609,26 @@ public class SolrYard extends AbstractYard implements Yard {
                     }
                     //return the created IndexReference
                     return createdIndexRef;
-                } else { //already managed -> nothing to do
+                } else if(!indexMetadata.isActive()){ //already managed, but not active
+                    //try to activate
+                    try {
+                        IndexMetadata activatedMetadata = managedSolrServer.activateIndex(indexReference.getIndex());
+                        if(activatedMetadata == null){
+                            throw new YardException(String.format(
+                                "Unable to actiate SolrIndex '%s' for SolrYard '%s" +
+                                "on MnagedSolrServer '%s'!",indexReference,
+                                getConfig().getName(),managedSolrServer.getServerName()));
+                        } else {
+                            return activatedMetadata.getIndexReference();
+                        }
+                    } catch (IOException e) {
+                        throw new YardException("Unable to actiate SolrIndex for SolrYard "+getConfig().getName(),e);
+                    } catch (SAXException e) {
+                        throw new YardException("Unable to actiate SolrIndex for SolrYard "+getConfig().getName(),e);
+                    } catch (RuntimeException e){
+                        throw new YardException("Unable to actiate SolrIndex for SolrYard "+getConfig().getName(),e);
+                    }
+                } else{ //already active ... noting todo
                     return indexReference;
                 }
             } else { //indexReference.getServer() != managedSolrServer.getServerName
@@ -650,8 +710,10 @@ public class SolrYard extends AbstractYard implements Yard {
         // reset the commitWithin and immediateCommit to the defaults
         this.commitWithin = DEFAULT_COMMIT_WITHIN_DURATION;
         this.immediateCommit = DEFAULT_IMMEDIATE_COMMIT_STATE;
+        //deactivates the SolrCore used by this Yard if running in the local JVM
+        deactivateSolrServer();
         super.deactivate(); // deactivate the super implementation
-        context = null;
+        this.context = null;
     }
     /**
      * This will case the SolrIndex to be optimised
