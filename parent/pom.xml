@@ -13,11 +13,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-   	<groupId>org.apache</groupId>
-   	<artifactId>apache</artifactId>
+    <groupId>org.apache</groupId>
+    <artifactId>apache</artifactId>
     <version>9</version>
     <relativePath />
-  </parent> 
+  </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-parent</artifactId>
@@ -43,7 +43,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jersey-version>1.7</jersey-version>
-    <pax-exam-version>1.2.0</pax-exam-version>    
+    <pax-exam-version>1.2.0</pax-exam-version>
   </properties>
 
   <build>
@@ -133,14 +133,14 @@
               <Bundle-Vendor>Apache Stanbol (Incubating)</Bundle-Vendor>
               <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
               <_versionpolicy>$${version;===;${@}}</_versionpolicy>
-            </instructions>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>maven-scr-plugin</artifactId>
-          <version>1.4.4</version>
-          <!-- slf4j impl is needed when QDox inspects/loads classes that use a
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+        <version>1.4.4</version>
+        <!-- slf4j impl is needed when QDox inspects/loads classes that use a
              static field for the logger, so that those classes can be loaded. -->
           <dependencies>
             <dependency>
@@ -171,7 +171,7 @@
               https://svn.apache.org/repos/asf/incubator/stanbol/tags/
             </tagBase>
           </configuration>
-        </plugin>        
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
@@ -265,8 +265,8 @@
         <scope>provided</scope>
       </dependency>
       <dependency>
- 	    <groupId>org.apache.stanbol</groupId>
-	    <artifactId>org.apache.stanbol.commons.installer.bundleprovider</artifactId>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.commons.installer.bundleprovider</artifactId>
         <version>0.9.0-incubating-SNAPSHOT</version>
         <scope>provided</scope>
       </dependency>
@@ -318,7 +318,7 @@
         <version>0.9.0-incubating-SNAPSHOT</version>
         <scope>provided</scope>
       </dependency>
-      
+
       <!-- Data Bundles included in the standard Stanbol Distribution -->
       <dependency>
         <groupId>org.apache.stanbol</groupId>
@@ -396,18 +396,18 @@
         <scope>provided</scope>
       </dependency>
 
-	  <dependency>
-	    <groupId>org.apache.stanbol</groupId>
-	    <artifactId>org.apache.stanbol.entityhub.test</artifactId>
-	    <version>0.9.0-incubating-SNAPSHOT</version>
-	    <scope>provided</scope>
-	  </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.entityhub.test</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+        <scope>provided</scope>
+      </dependency>
       <dependency>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-	    <version>0.9.0-incubating-SNAPSHOT</version>
-	    <scope>provided</scope>
-	  </dependency>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+        <scope>provided</scope>
+      </dependency>
       <dependency>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.entityhub.core</artifactId>
@@ -469,7 +469,7 @@
         <version>0.9.0-incubating-SNAPSHOT</version>
         <scope>provided</scope>
       </dependency>
-      
+
       <dependency>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
@@ -489,37 +489,37 @@
         <scope>provided</scope>
       </dependency>
 
-		  <dependency>
-			  <groupId>org.apache.stanbol</groupId>
-			  <artifactId>org.apache.stanbol.rules.base</artifactId>
-			  <version>0.9.0-incubating-SNAPSHOT</version>
-			  <scope>provided</scope>
-		  </dependency>
-		  <dependency>
-			  <groupId>org.apache.stanbol</groupId>
-			  <artifactId>org.apache.stanbol.rules.manager</artifactId>
-			  <version>0.9.0-incubating-SNAPSHOT</version>
-			  <scope>provided</scope>
-		  </dependency>
-	    <dependency>
-		    <groupId>org.apache.stanbol</groupId>
-		    <artifactId>org.apache.stanbol.rules.refactor</artifactId>
-			  <version>0.9.0-incubating-SNAPSHOT</version>
-			  <scope>provided</scope>
-	    </dependency>		  
-		
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.rules.base</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.rules.manager</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.rules.refactor</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+        <scope>provided</scope>
+      </dependency>
+
       <dependency>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.commons.testing.http</artifactId>
         <version>0.9.0-incubating-SNAPSHOT</version>
         <scope>provided</scope>
       </dependency>
-		  <dependency>
-			  <groupId>org.apache.stanbol</groupId>
-			  <artifactId>org.apache.stanbol.commons.testing.jarexec</artifactId>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.commons.testing.jarexec</artifactId>
         <version>0.9.0-incubating-SNAPSHOT</version>
         <scope>provided</scope>
-		  </dependency>      
+      </dependency>
       <dependency>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
@@ -528,63 +528,63 @@
       </dependency>
 
       <!-- Partial bundle list dependencies -->
-	    <dependency>
-	      <groupId>org.apache.stanbol</groupId>
-	      <artifactId>org.apache.stanbol.cmsadapter.bundlelist</artifactId>
-	      <version>0.9.0-incubating-SNAPSHOT</version>
-	      <type>partialbundlelist</type>
-	      <scope>provided</scope>
-	    </dependency>
-	    <dependency>
-	      <groupId>org.apache.stanbol</groupId>
-	      <artifactId>org.apache.stanbol.contenthub.bundlelist</artifactId>
-	      <version>0.9.0-incubating-SNAPSHOT</version>
-	      <type>partialbundlelist</type>
-	      <scope>provided</scope>
-	    </dependency>
-	    <dependency>
-	      <groupId>org.apache.stanbol</groupId>
-	      <artifactId>org.apache.stanbol.data.bundlelist</artifactId>
-	      <version>0.9.0-incubating-SNAPSHOT</version>
-	      <type>partialbundlelist</type>
-	      <scope>provided</scope>
-	    </dependency>
-	    <dependency>
-	      <groupId>org.apache.stanbol</groupId>
-	      <artifactId>org.apache.stanbol.enhancer.bundlelist</artifactId>
-	      <version>0.9.0-incubating-SNAPSHOT</version>
-	      <type>partialbundlelist</type>
-	      <scope>provided</scope>
-	    </dependency>
-	    <dependency>
-	      <groupId>org.apache.stanbol</groupId>
-	      <artifactId>org.apache.stanbol.entityhub.bundlelist</artifactId>
-	      <version>0.9.0-incubating-SNAPSHOT</version>
-	      <type>partialbundlelist</type>
-	      <scope>provided</scope>
-	    </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.cmsadapter.bundlelist</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+        <type>partialbundlelist</type>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.contenthub.bundlelist</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+        <type>partialbundlelist</type>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.data.bundlelist</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+        <type>partialbundlelist</type>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.enhancer.bundlelist</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+        <type>partialbundlelist</type>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.entityhub.bundlelist</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+        <type>partialbundlelist</type>
+        <scope>provided</scope>
+      </dependency>
       <dependency>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.factstore.bundlelist</artifactId>
         <version>0.9.0-incubating-SNAPSHOT</version>
         <type>partialbundlelist</type>
         <scope>provided</scope>
-      </dependency>      
-	    <dependency>
-	      <groupId>org.apache.stanbol</groupId>
-	      <artifactId>org.apache.stanbol.ontologymanager.bundlelist</artifactId>
-	      <version>0.9.0-incubating-SNAPSHOT</version>
-	      <type>partialbundlelist</type>
-	      <scope>provided</scope>
-	    </dependency>
-	    <dependency>
-	      <groupId>org.apache.stanbol</groupId>
-	      <artifactId>org.apache.stanbol.rules.bundlelist</artifactId>
-	      <version>0.9.0-incubating-SNAPSHOT</version>
-	      <type>partialbundlelist</type>
-	      <scope>provided</scope>
-	    </dependency>
-      
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.ontologymanager.bundlelist</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+        <type>partialbundlelist</type>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.rules.bundlelist</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+        <type>partialbundlelist</type>
+        <scope>provided</scope>
+      </dependency>
+
 
       <!-- OSGi -->
       <dependency>
@@ -644,12 +644,12 @@
         <version>0.10-incubating-SNAPSHOT</version>
         <scope>provided</scope>
       </dependency>
-		  <dependency>
-			  <groupId>org.apache.clerezza</groupId>
-			  <artifactId>rdf.jena.sparql</artifactId>
-			  <version>0.5-incubating-SNAPSHOT</version>
-			  <scope>provided</scope>
-		  </dependency>      
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.jena.sparql</artifactId>
+        <version>0.5-incubating-SNAPSHOT</version>
+        <scope>provided</scope>
+      </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.rdfjson</artifactId>
@@ -700,10 +700,10 @@
         <version>1.7.0</version>
       </dependency>
       <dependency>
-	    <groupId>commons-collections</groupId>
-	    <artifactId>commons-collections</artifactId>
-	    <version>3.2.1</version>
-	  </dependency>
+        <groupId>commons-collections</groupId>
+        <artifactId>commons-collections</artifactId>
+        <version>3.2.1</version>
+      </dependency>
       <dependency>
         <groupId>commons-lang</groupId>
         <artifactId>commons-lang</artifactId>
@@ -728,27 +728,27 @@
         <version>1.1.1</version>
         <scope>provided</scope>
       </dependency>
-    <dependency>
+      <dependency>
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
         <version>1.5</version>
         <!-- <version>1.3</version>  -->
         <scope>provided</scope>
-    </dependency>
-    <dependency>
+      </dependency>
+      <dependency>
         <groupId>commons-fileupload</groupId>
         <artifactId>commons-fileupload</artifactId>
         <version>1.2.2</version>
         <scope>provided</scope>
-    </dependency>
-    <dependency>
+      </dependency>
+      <dependency>
         <groupId>commons-httpclient</groupId>
         <artifactId>commons-httpclient</artifactId>
         <version>3.1</version>
         <scope>provided</scope>
-    </dependency>
-      
-      
+      </dependency>
+
+
       <!-- Joda Time -->
       <dependency>
         <groupId>joda-time</groupId>
@@ -757,14 +757,14 @@
         <scope>provided</scope>
       </dependency>
 
-	  <!-- MimeUtil -->
-	  <dependency>
-		<groupId>eu.medsea.mimeutil</groupId>
-		<artifactId>mime-util</artifactId>
-		<version>2.1.3</version>
-		<scope>provided</scope>
-	  </dependency>
-	  
+      <!-- MimeUtil -->
+      <dependency>
+        <groupId>eu.medsea.mimeutil</groupId>
+        <artifactId>mime-util</artifactId>
+        <version>2.1.3</version>
+        <scope>provided</scope>
+      </dependency>
+
       <!-- SLF4J -->
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -796,7 +796,7 @@
         <version>1.2.16</version>
         <scope>provided</scope>
       </dependency>
-      
+
       <!-- Servlet API -->
       <dependency>
         <groupId>javax.servlet</groupId>
@@ -845,7 +845,7 @@
         <version>${jersey-version}</version>
         <scope>provided</scope>
       </dependency>
-         
+
 <!--  jersey-multipart now uses a different library allowing streaming of
       binary data (see http://mimepull.java.net/)
      <dependency>
@@ -854,21 +854,21 @@
           <version>1.4</version>
           <scope>provided</scope>
       </dependency>  -->
-        
+
       <!-- JAX-RS JSR311 -->
       <!-- NOTE that JAX-RS is included and exported by jersey-core
-          using Jersey in combination with this one might cause 
+          using Jersey in combination with this one might cause
           incompatibilities
-        -->   
-      <dependency>
-        <groupId>javax.ws.rs</groupId>
-        <artifactId>jsr311-api</artifactId>
-        <version>1.1.1</version>
-        <scope>provided</scope>
-      </dependency>  
+        -->
+        <dependency>
+          <groupId>javax.ws.rs</groupId>
+          <artifactId>jsr311-api</artifactId>
+          <version>1.1.1</version>
+          <scope>provided</scope>
+        </dependency>
 
-      <!-- JSON -->
-      <!-- use jettison instead
+        <!-- JSON -->
+        <!-- use jettison instead
       <dependency>
         <groupId>org.json</groupId>
         <artifactId>json</artifactId>
@@ -957,62 +957,62 @@
         <scope>provided</scope>
       </dependency>
 
-    <!-- OpenNLP -->
-    <dependency>
-      <groupId>org.apache.opennlp</groupId>
-      <artifactId>opennlp-maxent</artifactId>
-      <version>3.0.1-incubating</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.opennlp</groupId>
-      <artifactId>opennlp-tools</artifactId>
-      <version>1.5.1-incubating</version>
-    </dependency>
+      <!-- OpenNLP -->
+      <dependency>
+        <groupId>org.apache.opennlp</groupId>
+        <artifactId>opennlp-maxent</artifactId>
+        <version>3.0.1-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.opennlp</groupId>
+        <artifactId>opennlp-tools</artifactId>
+        <version>1.5.1-incubating</version>
+      </dependency>
 
-    <!-- Solr Bundles -->
-    <dependency>
+      <!-- Solr Bundles -->
+      <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-solrj</artifactId>
         <version>3.2.0</version>
         <scope>provided</scope>
-    </dependency>       
-    <dependency>
+      </dependency>
+      <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-core</artifactId>
         <version>3.2.0</version>
         <scope>provided</scope>
-    </dependency>
-    <dependency>
+      </dependency>
+      <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-commons-csv</artifactId>
         <version>3.2.0</version>
         <scope>provided</scope>
-    </dependency>
-    <dependency>
+      </dependency>
+      <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-noggit</artifactId>
         <version>3.2.0</version>
         <scope>provided</scope>
-    </dependency>
-    <dependency>
+      </dependency>
+      <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-dataimporthandler</artifactId>
         <version>3.2.0</version>
         <scope>provided</scope>
-    </dependency>
-    <dependency>
+      </dependency>
+      <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-dataimporthandler-extras</artifactId>
         <version>3.2.0</version>
         <scope>provided</scope>
-    </dependency>
-    <dependency>
+      </dependency>
+      <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-analysis-extras</artifactId>
         <version>3.2.0</version>
         <scope>provided</scope>
-    </dependency>
-    <!-- other Solr bundles currently not used
+      </dependency>
+      <!-- other Solr bundles currently not used
     <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-clustering</artifactId>
@@ -1031,43 +1031,43 @@
         <version>3.2.0</version>
         <scope>provided</scope>
     </dependency>   -->
-    
+
     <!--  Lucene Bundles -->
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-core</artifactId>
-        <version>3.2.0</version>
-        <scope>provided</scope>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>3.2.0</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-analyzers</artifactId>
-        <version>3.2.0</version>
-        <scope>provided</scope>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers</artifactId>
+      <version>3.2.0</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-highlighter</artifactId>
-        <version>3.2.0</version>
-        <scope>provided</scope>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-highlighter</artifactId>
+      <version>3.2.0</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-memory</artifactId>
-        <version>3.2.0</version>
-        <scope>provided</scope>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-memory</artifactId>
+      <version>3.2.0</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-misc</artifactId>
-        <version>3.2.0</version>
-        <scope>provided</scope>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-misc</artifactId>
+      <version>3.2.0</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-queries</artifactId>
-        <version>3.2.0</version>
-        <scope>provided</scope>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-queries</artifactId>
+      <version>3.2.0</version>
+      <scope>provided</scope>
     </dependency>
     <!-- Snowball moved to analyzer in 3.1<dependency>
         <groupId>org.apache.lucene</groupId>
@@ -1076,36 +1076,36 @@
         <scope>provided</scope>
     </dependency>  -->
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-spellchecker</artifactId>
-        <version>3.2.0</version>
-        <scope>provided</scope>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-spellchecker</artifactId>
+      <version>3.2.0</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-spatial</artifactId>
-        <version>3.2.0</version>
-        <scope>provided</scope>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-spatial</artifactId>
+      <version>3.2.0</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-icu</artifactId>
-        <version>3.2.0</version>
-        <scope>provided</scope>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-icu</artifactId>
+      <version>3.2.0</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-icu4j</artifactId>
-        <version>3.2.0</version>
-        <scope>provided</scope>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-icu4j</artifactId>
+      <version>3.2.0</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-xercesImpl</artifactId>
-        <version>3.2.0</version>
-        <scope>provided</scope>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-xercesImpl</artifactId>
+      <version>3.2.0</version>
+      <scope>provided</scope>
     </dependency>
-    <!-- other unused Lucene bundes 
+    <!-- other unused Lucene bundes
     <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-grouping</artifactId>
@@ -1134,272 +1134,272 @@
     <!-- Other Solr/Lucene dependendies -->
     <!-- StAX Parser (used by Solr/Lucene) -->
     <dependency>
-        <groupId>stax</groupId>
-        <artifactId>stax-api</artifactId>
-        <version>1.0.1</version>
-        <scope>runtime</scope>
+      <groupId>stax</groupId>
+      <artifactId>stax-api</artifactId>
+      <version>1.0.1</version>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
-        <groupId>org.codehaus.woodstox</groupId>
-        <artifactId>wstx-asl</artifactId>
-        <version>3.2.7</version>
-        <scope>provided</scope>
+      <groupId>org.codehaus.woodstox</groupId>
+      <artifactId>wstx-asl</artifactId>
+      <version>3.2.7</version>
+      <scope>provided</scope>
     </dependency>
     <dependency> <!-- required by Solr 3.2 -->
-        <groupId>jakarta-regexp</groupId>
-        <artifactId>jakarta-regexp</artifactId>
-        <version>1.4</version>
+      <groupId>jakarta-regexp</groupId>
+      <artifactId>jakarta-regexp</artifactId>
+      <version>1.4</version>
     </dependency>
     <dependency> <!--  required by Solr 3.2 -->
-        <groupId>xml-resolver</groupId>
-        <artifactId>xml-resolver</artifactId>
-        <version>1.2</version>
+      <groupId>xml-resolver</groupId>
+      <artifactId>xml-resolver</artifactId>
+      <version>1.2</version>
     </dependency>
-      <dependency> <!--  required by Solr 3.2 -->
-        <groupId>javax.portlet</groupId>
-        <artifactId>portlet-api</artifactId>
-        <version>2.0</version>
+    <dependency> <!--  required by Solr 3.2 -->
+      <groupId>javax.portlet</groupId>
+      <artifactId>portlet-api</artifactId>
+      <version>2.0</version>
     </dependency>
     <!-- END Solr/Lucene dependencies -->
-    
-      <!-- JDom -->
+
+    <!-- JDom -->
     <dependency>
-        <groupId>org.jdom</groupId>
-        <artifactId>jdom</artifactId>
-        <version>1.1</version>
+      <groupId>org.jdom</groupId>
+      <artifactId>jdom</artifactId>
+      <version>1.1</version>
     </dependency>
-	  <dependency>
-	      <groupId>org.jdom</groupId>
-	      <artifactId>jaxen-core</artifactId>
-	      <version>1.0-FCS</version>
-	  </dependency>    
-	  <dependency>
-	      <groupId>org.jdom</groupId>
-	      <artifactId>jaxen-jdom</artifactId>
-	      <version>1.0-FCS</version>
-	  </dependency>
-	  <dependency>
-	      <groupId>org.jdom</groupId>
-	      <artifactId>saxpath</artifactId>
-	      <version>1.0-FCS</version>
-	  </dependency>
+    <dependency>
+      <groupId>org.jdom</groupId>
+      <artifactId>jaxen-core</artifactId>
+      <version>1.0-FCS</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jdom</groupId>
+      <artifactId>jaxen-jdom</artifactId>
+      <version>1.0-FCS</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jdom</groupId>
+      <artifactId>saxpath</artifactId>
+      <version>1.0-FCS</version>
+    </dependency>
 
-      <!-- OpenNLP -->
-      <dependency>
-        <groupId>org.clojars.zaxtax</groupId>
-        <artifactId>opennlp-tools</artifactId>
-        <version>1.5.0</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.clojars.zaxtax</groupId>
-        <artifactId>maxent</artifactId>
-        <version>3.0.0</version>
-        <scope>provided</scope>
-      </dependency>
+    <!-- OpenNLP -->
+    <dependency>
+      <groupId>org.clojars.zaxtax</groupId>
+      <artifactId>opennlp-tools</artifactId>
+      <version>1.5.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.clojars.zaxtax</groupId>
+      <artifactId>maxent</artifactId>
+      <version>3.0.0</version>
+      <scope>provided</scope>
+    </dependency>
 
-      <!-- OWL -->
-      <dependency>
-        <groupId>owlapi</groupId>
-        <artifactId>owlapi</artifactId>
-        <version>3.2.3</version>
-      </dependency>      
-      <!-- see also lucene-xercesImpl -->
-      <dependency>
-        <groupId>xerces</groupId>
-        <artifactId>xercesImpl</artifactId>
-        <version>2.7.1</version>
-        <type>jar</type>
-        <scope>provided</scope>
-      </dependency>
+    <!-- OWL -->
+    <dependency>
+      <groupId>owlapi</groupId>
+      <artifactId>owlapi</artifactId>
+      <version>3.2.3</version>
+    </dependency>
+    <!-- see also lucene-xercesImpl -->
+    <dependency>
+      <groupId>xerces</groupId>
+      <artifactId>xercesImpl</artifactId>
+      <version>2.7.1</version>
+      <type>jar</type>
+      <scope>provided</scope>
+    </dependency>
 
-      <!-- Apache Tika core -->
-      <dependency>
-        <groupId>org.apache.tika</groupId>
-        <artifactId>tika-core</artifactId>
-        <version>0.9</version>
-        <scope>provided</scope>
-      </dependency>
+    <!-- Apache Tika core -->
+    <dependency>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-core</artifactId>
+      <version>0.9</version>
+      <scope>provided</scope>
+    </dependency>
 
-      <!-- Aperture -->
-      <dependency>
-        <groupId>org.semanticdesktop.aperture</groupId>
-        <artifactId>aperture-core</artifactId>
-        <version>1.5.0</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-          </exclusion>
-		  <!-- exclude LGPL libs -->
-		  <exclusion>
-			<groupId>ronaldhttpclient</groupId>
-			<artifactId>uncompressinputstream</artifactId>
-		  </exclusion>
-		  <exclusion>
-      		<groupId>org.htmlparser</groupId>
-      		<artifactId>htmlparser</artifactId>
-      	  </exclusion>
-      	  <exclusion>
-      		<groupId>net.sf.jacob-project</groupId>
-      		<artifactId>jacob</artifactId>
-      	  </exclusion>
-      	  <exclusion>
-      		<groupId>net.sf.jacob-project</groupId>
-      		<artifactId>jacob</artifactId>
-      	  </exclusion>
-      	  <exclusion>
-      		<groupId>org.bibsonomy</groupId>
-      		<artifactId>bibsonomy-rest-client</artifactId>
-      	  </exclusion>
-      	  <exclusion>
-      		<groupId>org.samba.jcifs</groupId>
-      		<artifactId>jcifs</artifactId>
-      	  </exclusion>
-      	  <exclusion>
-      		<groupId>org.jaudiotagger</groupId>
-      		<artifactId>jaudiotagger</artifactId>
-      	  </exclusion>
-		  <exclusion>
-		    <groupId>org.textmining</groupId>
-      		<artifactId>tm-extractors</artifactId>
-		  </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>org.semanticdesktop.aperture</groupId>
-        <artifactId>aperture-runtime-optional</artifactId>
-        <version>1.5.0</version>
-        <type>pom</type>
-        <exclusions>
-          <exclusion>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
+    <!-- Aperture -->
+    <dependency>
+      <groupId>org.semanticdesktop.aperture</groupId>
+      <artifactId>aperture-core</artifactId>
+      <version>1.5.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>jcl-over-slf4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-jdk14</artifactId>
+        </exclusion>
+        <!-- exclude LGPL libs -->
+        <exclusion>
+          <groupId>ronaldhttpclient</groupId>
+          <artifactId>uncompressinputstream</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.htmlparser</groupId>
+          <artifactId>htmlparser</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>net.sf.jacob-project</groupId>
+          <artifactId>jacob</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>net.sf.jacob-project</groupId>
+          <artifactId>jacob</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.bibsonomy</groupId>
+          <artifactId>bibsonomy-rest-client</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.samba.jcifs</groupId>
+          <artifactId>jcifs</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jaudiotagger</groupId>
+          <artifactId>jaudiotagger</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.textmining</groupId>
+          <artifactId>tm-extractors</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.semanticdesktop.aperture</groupId>
+      <artifactId>aperture-runtime-optional</artifactId>
+      <version>1.5.0</version>
+      <type>pom</type>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>jcl-over-slf4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-jdk14</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 
-      <dependency>
-        <groupId>net.sourceforge</groupId>
-        <artifactId>htmlcleaner</artifactId>
-        <version>2_1p</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.ibm.icu</groupId>
-        <artifactId>icu4j</artifactId>
-        <version>3.4.4</version>
-        <scope>provided</scope>
-      </dependency>
+    <dependency>
+      <groupId>net.sourceforge</groupId>
+      <artifactId>htmlcleaner</artifactId>
+      <version>2_1p</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.ibm.icu</groupId>
+      <artifactId>icu4j</artifactId>
+      <version>3.4.4</version>
+      <scope>provided</scope>
+    </dependency>
 
-      <!-- Sling -->
-      <dependency>
-        <groupId>org.apache.sling</groupId>
-        <artifactId>org.apache.sling.launchpad.base</artifactId>
-        <version>2.3.0</version>
-        <classifier>app</classifier>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.sling</groupId>
-        <artifactId>org.apache.sling.launchpad.installer</artifactId>
-        <version>1.0.0</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.sling</groupId>
-        <artifactId>org.apache.sling.launchpad.api</artifactId>
-        <version>1.0.0</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.sling</groupId>
-        <artifactId>org.apache.sling.installer.core</artifactId>
-        <version>3.2.0</version>
-      </dependency>
-      <!-- Testing Deps -->
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-simple</artifactId>
-        <version>1.6.1</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-nop</artifactId>
-        <version>1.6.1</version>
-      </dependency>
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.7</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.jmock</groupId>
-        <artifactId>jmock-junit4</artifactId>
-        <version>2.5.1</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-all</artifactId>
-        <version>1.6</version>
-        <scope>test</scope>
-      </dependency>
+    <!-- Sling -->
+    <dependency>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.launchpad.base</artifactId>
+      <version>2.3.0</version>
+      <classifier>app</classifier>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.launchpad.installer</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.launchpad.api</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.installer.core</artifactId>
+      <version>3.2.0</version>
+    </dependency>
+    <!-- Testing Deps -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.6.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-nop</artifactId>
+      <version>1.6.1</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.7</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmock</groupId>
+      <artifactId>jmock-junit4</artifactId>
+      <version>2.5.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.6</version>
+      <scope>test</scope>
+    </dependency>
 
-      <dependency>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>jetty</artifactId>
-        <version>6.1.22</version>
-        <scope>test</scope>
-      </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <version>6.1.22</version>
+      <scope>test</scope>
+    </dependency>
 
-      <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-client</artifactId>
-        <version>${jersey-version}</version>
-        <scope>test</scope>
-      </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-client</artifactId>
+      <version>${jersey-version}</version>
+      <scope>test</scope>
+    </dependency>
 
-      <dependency>
-        <groupId>org.ops4j.pax.exam</groupId>
-        <artifactId>pax-exam</artifactId>
-        <version>${pax-exam-version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.ops4j.pax.exam</groupId>
-        <artifactId>pax-exam-junit</artifactId>
-        <version>${pax-exam-version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.ops4j.pax.exam</groupId>
-        <artifactId>pax-exam-container-default</artifactId>
-        <version>${pax-exam-version}</version>
-        <scope>test</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam</artifactId>
+      <version>${pax-exam-version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-junit</artifactId>
+      <version>${pax-exam-version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-container-default</artifactId>
+      <version>${pax-exam-version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
 
-  <profiles>
-    <profile>
-      <!--
+<profiles>
+  <profile>
+    <!--
         This profile allows for installing/updating a bundle in a running
         Stanbol instance right after building it. Example: mvn clean install -P
         installBundle -Dsling.url=http://localhost:8080/system/console Or,
@@ -1472,7 +1472,7 @@
                   <patterns>
                     <pattern>Licensed under the MIT</pattern>
                   </patterns>
-                </license>                
+                </license>
               </licenses>
               <licenseFamilies>
                 <licenseFamily implementation="org.apache.rat.license.Apache20LicenseFamily" />
@@ -1489,7 +1489,7 @@
             </configuration>
           </plugin>
         </plugins>
-      </build>      
+      </build>
     </profile>
     <profile>
       <id>apache-release</id>
@@ -1499,18 +1499,18 @@
       <build>
         <plugins>
           <plugin>
-            <artifactId>maven-assembly-plugin</artifactId>      
+            <artifactId>maven-assembly-plugin</artifactId>
             <dependencies>
               <dependency>
                 <groupId>org.apache.stanbol.release</groupId>
                 <artifactId>stanbol-framework-source-release-assembly-descriptor</artifactId>
                 <version>0.9.0-incubating-SNAPSHOT</version>
-              </dependency>      
+              </dependency>
             </dependencies>
           </plugin>
         </plugins>
       </build>
-    </profile>    
+    </profile>
   </profiles>
 
   <repositories>
