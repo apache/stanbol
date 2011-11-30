@@ -67,7 +67,7 @@ public class RegisteredSolrServerTracker extends ServiceTracker {
         super(context,
             reference != null ? 
                     reference.isPath() ? context.createFilter(reference.getIndexFilter()) : 
-                        context.createFilter(reference.getServerFilter()) :
+                        context.createFilter(reference.getIndexFilter()) :
                             null ,null);
         if(reference == null){
             throw new IllegalArgumentException("The parsed IndexReference MUST NOT be NULL!");
@@ -76,7 +76,7 @@ public class RegisteredSolrServerTracker extends ServiceTracker {
             trackingSolrCore = true;
             coreName = null;
         } else {
-            trackingSolrCore = false;
+            trackingSolrCore = true;
             coreName = reference.getIndex();
         }
     }
@@ -138,6 +138,7 @@ public class RegisteredSolrServerTracker extends ServiceTracker {
         ServiceReference ref = getServiceReference();
         return ref == null ? null : (SolrServer)getService(ref);
     }
+    
     /**
      * Overrides to provide a {@link SolrServer} instead of {@link Object}
      * @see ServiceTracker#getService(ServiceReference)
