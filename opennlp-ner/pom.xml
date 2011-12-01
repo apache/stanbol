@@ -48,8 +48,8 @@
   <dependencies>
     <!-- The current opennlp version is exported by the commons.opennlp bundle -->
     <dependency>
-	  <groupId>org.apache.stanbol</groupId>
-	  <artifactId>org.apache.stanbol.commons.opennlp</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.opennlp</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
