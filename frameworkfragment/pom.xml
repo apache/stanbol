@@ -92,6 +92,11 @@
                     The OSGi framework does not check whether the packages
                      are actually available.  -->
                <Export-Package>
+                 com.sun.xml.bind.v2.model.runtime,
+                 com.sun.xml.bind.v2.model.core,
+                 com.sun.xml.bind.v2.runtime,
+                 com.sun.xml.bind.v2.runtime.property,
+                 com.sun.xml.bind.v2.runtime.unmarshaller,
                  com.sun.xml.ws,
                  com.sun.xml.ws.addressing,
                  com.sun.xml.ws.addressing.model,
