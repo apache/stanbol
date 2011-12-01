@@ -120,15 +120,6 @@
             <Private-Package>
               org.apache.stanbol.enhancer.engines.zemanta.impl.*
             </Private-Package>
-            <Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
-            <Import-Package>
-              !net.didion.*,
-              !gnu.getopt,
-              !org.apache.log.*,
-              !org.apache.avalon.framework.*,
-              *
-            </Import-Package>
           </instructions>
         </configuration>
       </plugin>
