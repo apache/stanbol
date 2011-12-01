@@ -57,13 +57,6 @@
             <Export-Package>
               org.apache.stanbol.enhancer.engines.opencalais;version=${project.version},
             </Export-Package>
-            <Embed-Dependency>
-              *;scope=compile
-            </Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
-            <Import-Package>
-              *
-            </Import-Package>
           </instructions>
         </configuration>
       </plugin>
@@ -91,7 +84,7 @@
             <exclude>src/main/resources/calaisTypeMap.txt</exclude>
           </excludes>
         </configuration>
-      </plugin>      
+      </plugin>
     </plugins>
   </build>
 
