@@ -89,27 +89,20 @@ public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProper
     private int probeLength = PROBE_LENGTH_DEFAULT;
 
     /**
-     * The activate method.
-     *
-     * @param ce the {@link ComponentContext}
+     * Initialize the language identifier model and load the prop length bound if
+     * provided as a property.
+     * 
+     * @param ce
+     *            the {@link ComponentContext}
      */
-    protected void activate(@SuppressWarnings("unused") ComponentContext ce) throws IOException {
-        String confFile = null;
+    protected void activate(ComponentContext ce) throws IOException {
         if (ce != null) {
+            @SuppressWarnings("unchecked")
             Dictionary<String, String> properties = ce.getProperties();
             String lengthVal = properties.get(PROBE_LENGTH_PROP);
             probeLength = lengthVal == null ? PROBE_LENGTH_DEFAULT : Integer.parseInt(lengthVal);
         }
         LanguageIdentifier.initProfiles();
-    }
-
-    /**
-     * The deactivate method.
-     *
-     * @param ce the {@link ComponentContext}
-     */
-    protected void deactivate(@SuppressWarnings("unused") ComponentContext ce) {
-      
     }
 
     public int canEnhance(ContentItem ci) throws EngineException {
