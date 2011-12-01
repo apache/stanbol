@@ -77,12 +77,12 @@
             <exclude>src/main/resources/META-INF/static/scripts/scout.js</exclude>
           </excludes>
         </configuration>
-      </plugin>      
+      </plugin>
     </plugins>
   </build>
 
   <dependencies>
-	<!-- dependencies on Clerezza modules -->
+    <!-- dependencies on Clerezza modules -->
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.core</artifactId>
@@ -99,8 +99,8 @@
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.serializer</artifactId>
     </dependency>
-	
-	<!-- specific deps for this project -->
+
+    <!-- specific deps for this project -->
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
@@ -136,20 +136,20 @@
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
     </dependency>
-	  <!-- indirect dependency for freemarker -->
+    <!-- indirect dependency for freemarker -->
     <dependency>
       <groupId>org.codehaus.jettison</groupId>
       <artifactId>jettison</artifactId>
     </dependency>
-	
-	 <!-- servlet container, most useful for the tests -->
+
+    <!-- servlet container, most useful for the tests -->
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
     </dependency>
 
     <!-- generic tax -->
-	<dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
@@ -161,7 +161,7 @@
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
     </dependency>
-	
+
     <!-- OSGi tax -->
     <dependency>
       <groupId>org.osgi</groupId>
@@ -175,9 +175,9 @@
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
     </dependency>
-        
-	  <!-- Stanbol deps -->
-	  <dependency>
+
+    <!-- Stanbol deps -->
+    <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
     </dependency>
@@ -193,18 +193,18 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.owl</artifactId>
     </dependency>
-	
-	  <dependency>
+
+    <dependency>
       <groupId>com.hp.hpl.jena</groupId>
       <artifactId>jena</artifactId>
     </dependency>
-		
-	  <!-- Testing deps -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+
+    <!-- Testing deps -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
       <scope>test</scope>
-		</dependency>
+    </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
@@ -232,11 +232,11 @@
     </dependency>
   </dependencies>
 
-	<repositories>
+  <repositories>
     <repository>
-    	<id>stlab-cnr-repo</id>
+      <id>stlab-cnr-repo</id>
       <url>http://stlab.istc.cnr.it/software/maven/repo</url>
     </repository>
-	</repositories>
+  </repositories>
 
 </project>
