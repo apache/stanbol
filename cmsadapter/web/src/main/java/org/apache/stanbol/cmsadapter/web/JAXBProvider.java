@@ -64,7 +64,7 @@ public class JAXBProvider implements MessageBodyReader, MessageBodyWriter {
 				"model/CR2OntologyMap.xsd" };
 		SchemaFactory schemaFactory = SchemaFactory
 				.newInstance(
-						XMLConstants.W3C_XML_SCHEMA_NS_URI,
+					    "http://www.w3.org/2001/XMLSchema",
 						"com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory",
 						JAXBProvider.class.getClassLoader());
 
