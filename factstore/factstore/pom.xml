@@ -58,8 +58,7 @@
               org.apache.stanbol.factstore.api.*
             </Export-Package>
             <Import-Package>
-              <!-- apache derby -->
-              org.apache.derby.jdbc,
+              javax.ws.rs.*; version="[0,2)",
               *
             </Import-Package>
           </instructions>
@@ -140,7 +139,6 @@
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
       <version>10.7.1.1</version>
-      <scope>provided</scope>
     </dependency>
 
     <dependency>
