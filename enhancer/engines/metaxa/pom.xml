@@ -62,6 +62,8 @@
             </Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>
+              !org.apache.log.*,
+              !org.apache.avalon.*,
               !com.jacob.*,
               !jcifs.*,
               !org.bibsonomy.*,
@@ -127,16 +129,11 @@
             <exclude>src/test/resources/pdf-res.txt</exclude>
           </excludes>
         </configuration>
-      </plugin>      
+      </plugin>
     </plugins>
   </build>
 
   <dependencies>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-    </dependency>
-
     <dependency>
       <groupId>org.semanticdesktop.aperture</groupId>
       <artifactId>aperture-core</artifactId>
@@ -154,41 +151,50 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-    	<groupId>mp3agic</groupId>
-    	<artifactId>mp3agic</artifactId>
-    	<version>0.6</version>
-    </dependency>
-    <dependency>
-      <groupId>com.ibm.icu</groupId>
-      <artifactId>icu4j</artifactId>
-      <scope>compile</scope>
+      <groupId>mp3agic</groupId>
+      <artifactId>mp3agic</artifactId>
+      <version>0.6</version>
     </dependency>
     <dependency>
       <groupId>commons-httpclient</groupId>
       <artifactId>commons-httpclient</artifactId>
-      <scope>compile</scope>
     </dependency>
 
     <dependency>
+      <groupId>com.ibm.icu</groupId>
+      <artifactId>icu4j</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.core</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-jdk14</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
