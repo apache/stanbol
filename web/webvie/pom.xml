@@ -33,7 +33,12 @@
             <Export-Package>
               org.apache.stanbol.commons.web.vie.*
             </Export-Package>
-            <Import-Package>*</Import-Package>
+            <!-- Accept any version of the JAX RS API as Jersey is exposing the
+             0.0.0 version -->
+            <Import-Package>
+              javax.ws.rs.*; version="[0,2)",
+              *
+            </Import-Package>
           </instructions>
         </configuration>
       </plugin>
