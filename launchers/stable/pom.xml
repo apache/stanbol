@@ -82,10 +82,10 @@
                 <version>2.2.0</version>
               </jarWebSupport>
               <defaultBundleList>
-						    <groupId>org.apache.stanbol</groupId>
-						    <artifactId>org.apache.stanbol.launchers.basebundlelist</artifactId>
-						    <version>0.9.0-incubating-SNAPSHOT</version>
-						  </defaultBundleList>
+                <groupId>org.apache.stanbol</groupId>
+                <artifactId>org.apache.stanbol.launchers.basebundlelist</artifactId>
+                <version>0.9.0-incubating-SNAPSHOT</version>
+              </defaultBundleList>
             </configuration>
           </execution>
         </executions>
@@ -118,7 +118,7 @@
             <exclude>src/main/resources/resources/config/org.apache.stanbol.commons.solr.web.impl.SolrDispatchFilterComponent-default.config</exclude>
           </excludes>
         </configuration>
-      </plugin>      
+      </plugin>
     </plugins>
   </build>
 
@@ -138,6 +138,6 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.bundlelist</artifactId>
       <type>partialbundlelist</type>
-    </dependency>    
+    </dependency>
   </dependencies>
 </project>
