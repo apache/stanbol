@@ -1,54 +1,43 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
-   Licensed to the Apache Software Foundation (ASF) under one or more
-   contributor license agreements.  See the NOTICE file distributed with
-   this work for additional information regarding copyright ownership.
-   The ASF licenses this file to You under the Apache License, Version 2.0
-   (the "License"); you may not use this file except in compliance with
-   the License.  You may obtain a copy of the License at
+<?xml version="1.0"?>
+  <!--
+    Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the
+    NOTICE file distributed with this work for additional information regarding copyright ownership. The ASF
+    licenses this file to You under the Apache License, Version 2.0 (the "License"); you may not use this file
+    except in compliance with the License. You may obtain a copy of the License at
 
-        http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+    http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+    CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing
+    permissions and limitations under the License.
+  -->
+<project>
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.entityhub.parent</artifactId>
     <version>0.9.0-incubating-SNAPSHOT</version>
-    <relativePath>../../parent</relativePath>
+    <relativePath>../parent/pom.xml</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
+  <artifactId>org.apache.stanbol.entityhub.ldpath</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Entityhub Yard implementation hased on Solr</name>
-  <description>This bundle provides implementation of the Entityhub Yard interface(s)
-    based on a Solr Search Server
-  </description>
-
-  <inceptionYear>2010</inceptionYear>
-
+  <name>Apache Stanbol Entityhub LDPath implementation</name>
+  <description>Implementation of the LDPath (http://code.google.com/p/ldpath/) API for the Entityhub</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/yard/solr
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/ldpath
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/yard/solr
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/ldpath
     </developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
 
   <build>
+    <!-- make it an OSGi bundle -->
     <plugins>
       <plugin>
         <groupId>org.apache.felix</groupId>
@@ -57,29 +46,11 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.entityhub.yard.solr.defaults;version=${project.version},
-              org.apache.stanbol.entityhub.yard.solr.model;version=${project.version},
-              org.apache.stanbol.entityhub.yard.solr.query;version=${project.version}
+              org.apache.stanbol.entityhub.ldpath;version=${project.version}
             </Export-Package>
-            <!-- NOTE: The exclusion of javax.xml.stream assumes that only serialised
-                 java objects are used as serialisation to and from the SolrServer
-                 and therefore no XML API is needed -->
-            <Import-Package>
-              *
-            </Import-Package>
             <Private-Package>
-              org.apache.stanbol.entityhub.yard.solr.impl;version=${project.version},
-              org.apache.stanbol.entityhub.yard.solr.impl.queryencoders;version=${project.version}
+              org.apache.stanbol.entityhub.ldpath.impl;version=${project.version}
             </Private-Package>
-            <Embed-Dependency>
-            </Embed-Dependency>
-            <!-- 
-              We need to provide the default SolrYard indexConfigurations to
-              the DataFileProvider infrastructure
-              -->
-            <Data-Files> 
-              solr/core
-            </Data-Files>
           </instructions>
         </configuration>
       </plugin>
@@ -90,22 +61,33 @@
     </plugins>
   </build>
 
+  <repositories>
+    <repository>
+      <id>kiwi-project_SNAPSHOTS</id> <!-- Hosts LDPath SNAPSHOT bundles for now -->
+      <name>Kiwi Project SNAPSHOTS Repository</name>
+      <url>http://devel.kiwi-project.eu:8080/nexus/content/repositories/snapshots/</url>
+    </repository>
+    <repository>
+      <id>kiwi-project</id> <!-- Hosts LDPath releases bundles for now -->
+      <name>Kiwi Project Repository</name>
+      <url>http://devel.kiwi-project.eu:8080/nexus/content/repositories/releases/</url>
+    </repository>
+  </repositories>
+
   <dependencies>
-    <!-- Stanbol Commomns dependencies -->
+    <!-- LD Path -->
     <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
+      <groupId>at.newmedialab.ldpath</groupId>
+      <artifactId>ldpath-api</artifactId>
+      <version>0.9.3-SNAPSHOT</version>
     </dependency>
-    <dependency> <!-- provides Solr and OSGI utilities for Solr -->
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
-    </dependency>
-    <dependency> <!-- provides managed Solr servers -->
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
+    <dependency>
+      <groupId>at.newmedialab.ldpath</groupId>
+      <artifactId>ldpath-core</artifactId>
+      <version>0.9.3-SNAPSHOT</version>
     </dependency>
 
-    <!-- Stanbol Entityhub internal dependencies -->
+    <!-- dependencies on other Entityhub modules -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
@@ -114,21 +96,19 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
     </dependency>
-
-   <!--  other (not Solr related) dependencies) -->
+    
+    <!-- generic tax -->
     <dependency>
-      <groupId>joda-time</groupId>
-      <artifactId>joda-time</artifactId>
-    </dependency>
-     <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-compress</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-    </dependency> 
+    </dependency>
 
+    <!-- OSGi tax -->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
@@ -143,15 +123,11 @@
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
     </dependency>
-    <!-- Logging -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
+
     <!-- for tests -->
     <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.test</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -159,12 +135,45 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- the SolrYard with the dbpedia default dataset is used for testing -->
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- Apache Stanbol Commons Solr and Solr Yard dependencies -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency> <!-- provides Solr and OSGI utilities for Solr -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency> <!-- provides managed Solr servers -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
+      <scope>test</scope>
+    </dependency>
+      <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
       <scope>test</scope>
     </dependency>
     
+
     <!-- We need also all the Solr/Lucene dependencies for testing -->
     <dependency>
       <groupId>org.apache.solr</groupId>
@@ -348,7 +357,7 @@
         <version>2.0</version>
        <scope>test</scope>
     </dependency>    
-   
+
   </dependencies>
 
 </project>

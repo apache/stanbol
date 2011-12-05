@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -50,13 +51,13 @@ public class QueryResultListImpl<T> implements Iterable<T>, QueryResultList<T>{
         }
         this.type = type;
         if(resultIterator == null || !resultIterator.hasNext()){
-            this.results = Collections.emptyList();
+            this.results = Collections.emptySet();
         } else {
-            List<T> resultList = new ArrayList<T>();
+            LinkedHashSet<T> resultList = new LinkedHashSet<T>();
             while(resultIterator.hasNext()){
                 resultList.add(resultIterator.next());
             }
-            this.results = Collections.unmodifiableList(resultList);
+            this.results = Collections.unmodifiableSet(resultList);
         }
     }
     @Override

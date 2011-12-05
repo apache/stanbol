@@ -19,6 +19,7 @@ package org.apache.stanbol.entityhub.query.clerezza;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.MGraph;
@@ -44,9 +45,10 @@ public class RdfQueryResultList implements QueryResultList<Representation> {
         }
         this.query = query;
         this.resultGraph = resultGraph;
-        this.results = Collections.unmodifiableCollection(
-                ModelUtils.asCollection(
-                        SparqlQueryUtils.parseQueryResultsFromMGraph(resultGraph)));
+        this.results = Collections.unmodifiableSet(
+                ModelUtils.addToSet(
+                    SparqlQueryUtils.parseQueryResultsFromMGraph(resultGraph),
+                    new LinkedHashSet<RdfRepresentation>()));
     }
     @Override
     public final FieldQuery getQuery() {

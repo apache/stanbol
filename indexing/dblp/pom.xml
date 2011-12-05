@@ -157,6 +157,11 @@
             <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency><!-- needed because the InvalidSyntax exceptions and Filter -->
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 		<dependency>
 			<!-- needed because the SolrYard uses ConfigurationExceptions -->
 			<groupId>org.osgi</groupId>

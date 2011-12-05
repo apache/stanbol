@@ -120,6 +120,12 @@ public final class ModelUtils {
             results.add(value);
         }
     }
+    /**
+     * String representation of the parsed Representation inteded for DEBUG level
+     * loggings.
+     * @param rep the representation
+     * @return the string
+     */
     public static String getRepresentationInfo(Representation rep) {
         StringBuilder info = new StringBuilder();
         info.append("Representation id=");
@@ -141,19 +147,72 @@ public final class ModelUtils {
         }
         return info.toString();
     }
+    /**
+     * Copies all elements of the parsed Iterator to a {@link ArrayList}.
+     * To use other Set implementations that {@link ArrayList} you can use 
+     * {@link #addToCollection(Iterator, Collection)
+     * @param <T> the generic type of the returned Collection
+     * @param it the Iterator with elements compatible to T
+     * @return the collection containing all elements of the iterator
+     * @throws IllegalArgumentException if the parsed {@link Iterator} is <code>null</code>
+     */
     public static <T> Collection<T> asCollection(Iterator<? extends T> it){
-        Collection<T> c = new ArrayList<T>();
+        return addToCollection(it, new ArrayList<T>());
+    }
+    /**
+     * Adds the elements of the {@link Iterator} to the parsed Collection
+     * @param <T> the type of the collection
+     * @param it the iterator over elements that are compatible to T
+     * @param c the collection to add the elements
+     * @return the parsed Collections with the added Elements
+     * @throws IllegalArgumentException if the parsed Collection is <code>null</code>.
+     */
+    public static <T> Collection<T> addToCollection(Iterator<? extends T> it, Collection<T> c){
+        if(it == null){
+            return c;
+        }
+        if(c == null){
+            throw new IllegalArgumentException("The parsed Collection MUST NOT be NULL!");
+        }
         while(it.hasNext()){
             c.add(it.next());
         }
         return c;
     }
-    public static <T> Set<T> asSet(Iterator<T> it){
-        Set<T> c = new HashSet<T>();
-        while(it.hasNext()){
-            c.add(it.next());
+    /**
+     * Copies all elements of the parsed Iterator to a {@link HashSet}.
+     * To use other Set implementations that {@link HashSet} you can use 
+     * {@link #addToSet(Iterator, Set)}
+     * @param <T> the generic type of the returned set
+     * @param it the Iterator with elements compatible to T
+     * @return the set containing all elements of the iterator
+     * @throws IllegalArgumentException if the parsed {@link Iterator} is <code>null</code>
+     */
+    public static <T> Set<T> asSet(Iterator<? extends T> it){
+        if(it == null){
+            throw new IllegalArgumentException("The parsed Iterator MUST NOT be NULL!");
         }
-        return c;
+        return addToSet(it, new HashSet<T>());
+    }
+    /**
+     * Adds the elements of the {@link Iterator} to the parsed {@link Set}
+     * @param <T> the type of the set
+     * @param it the iterator over elements that are compatible to T
+     * @param set the set to add the elements
+     * @return the parsed {@link Set} with the added Elements
+     * @throws IllegalArgumentException if the parsed Set is <code>null</code>.
+     */
+    public static <T> Set<T> addToSet(Iterator<? extends T> it,Set<T> set){
+        if(it == null){
+            return set;
+        }
+        if(set == null){
+            throw new IllegalArgumentException("The parsed Set MUST NOT be NULL!");
+        }
+        while(it.hasNext()){
+            set.add(it.next());
+        }
+        return set;
     }
 
     /**
