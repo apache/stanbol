@@ -56,7 +56,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionLimitException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
@@ -119,6 +119,9 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
     ONManager onManager;
 
     @Reference
+    SessionManager sessionManager;
+
+    @Reference
     ReferencedSiteManager referencedSiteManager;
 
     @Reference
@@ -166,12 +169,18 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
         /*
          * Now we prepare the OntoNet environment. First we create the OntoNet session in which run the whole
          */
-        final String sessionIRI = createAndAddSessionSpaceToScope();
+        final String sessionID;
+        try {
+            sessionID = // createAndAddSessionSpaceToScope();
+            sessionManager.createSession().getID();
+        } catch (SessionLimitException e1) {
+            throw new EngineException(e1);
+        }
 
         /*
          * We retrieve the session space
          */
-        OntologySpace sessionSpace = scope.getSessionSpace(sessionIRI);
+        OntologySpace sessionSpace = scope.getSessionSpace(sessionID);
 
         while (tripleIt.hasNext()) {
             Triple triple = tripleIt.next();
@@ -265,7 +274,7 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
             public Set<OWLOntology> getOntologies() {
 
                 Set<OWLOntology> ontologies = new HashSet<OWLOntology>();
-                OntologySpace sessionSpace = scope.getSessionSpace(sessionIRI);
+                OntologySpace sessionSpace = scope.getSessionSpace(sessionID);
                 ontologies.addAll(sessionSpace.getOntologies(true));
 
                 /*
@@ -338,44 +347,44 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
             /*
              * The session needs to be destroyed, as it is no more useful.
              */
-            onManager.getSessionManager().destroySession(sessionIRI.toString());
+            sessionManager.destroySession(sessionID.toString());
 
         } catch (OWLOntologyCreationException e) {
             log.error("Cannot create the ontology for the refactoring", e);
         }
     }
 
-    /**
-     * Setup the KReS session
-     * 
-     * @return
-     */
-    private String createAndAddSessionSpaceToScope() {
-        /*
-         * Retrieve the session manager
-         */
-        SessionManager sessionManager = onManager.getSessionManager();
-        log.debug("Starting create session for the dulcifier");
-
-        /*
-         * Create and setup the session. TODO FIXME This is an operation that should be made easier for
-         * developers to do through the API
-         */
-        Session session = sessionManager.createSession();
-        // OntologySpaceFactory ontologySpaceFactory = onManager.getOntologySpaceFactory();
-        // OntologySpace sessionSpace = ontologySpaceFactory.createSessionOntologySpace(scope.getID());
-        // try {
-        // scope.addSessionSpace(sessionSpace, session.getID());
-        // } catch (UnmodifiableOntologySpaceException e) {
-        // log.error("Failed to add session space to unmodifiable scope " + scope, e);
-        // }
-
-        /*
-         * Finally, we return the session ID to be used by the caller
-         */
-        log.debug("Session " + session.getID() + " created", this);
-        return session.getID();
-    }
+    // /**
+    // * Setup the KReS session
+    // *
+    // * @return
+    // */
+    // private String createAndAddSessionSpaceToScope() {
+    // /*
+    // * Retrieve the session manager
+    // */
+    // // SessionManager sessionManager = onManager.getSessionManager();
+    // log.debug("Starting create session for the dulcifier");
+    //
+    // /*
+    // * Create and setup the session. TODO FIXME This is an operation that should be made easier for
+    // * developers to do through the API
+    // */
+    // Session session = sessionManager.createSession();
+    // // OntologySpaceFactory ontologySpaceFactory = onManager.getOntologySpaceFactory();
+    // // OntologySpace sessionSpace = ontologySpaceFactory.createSessionOntologySpace(scope.getID());
+    // // try {
+    // // scope.addSessionSpace(sessionSpace, session.getID());
+    // // } catch (UnmodifiableOntologySpaceException e) {
+    // // log.error("Failed to add session space to unmodifiable scope " + scope, e);
+    // // }
+    //
+    // /*
+    // * Finally, we return the session ID to be used by the caller
+    // */
+    // log.debug("Session " + session.getID() + " created", this);
+    // return session.getID();
+    // }
 
     /**
      * To create the input source necesary to load the ontology inside the scope.
