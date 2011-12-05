@@ -136,6 +136,7 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.cmsadapter.bundlelist</artifactId>
       <type>partialbundlelist</type>
+      <scope>provided</scope>
     </dependency>
 
     <!-- Stanbol Contenthub Bundle List -->
@@ -143,6 +144,7 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.bundlelist</artifactId>
       <type>partialbundlelist</type>
+      <scope>provided</scope>
     </dependency>
 
     <!-- Stanbol Data Bundle List -->
@@ -150,6 +152,7 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.bundlelist</artifactId>
       <type>partialbundlelist</type>
+      <scope>provided</scope>
     </dependency>
 
     <!-- Stanbol Enhancer Bundle List -->
@@ -157,6 +160,7 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.bundlelist</artifactId>
       <type>partialbundlelist</type>
+      <scope>provided</scope>
     </dependency>
     
     <!-- Stanbol Entityhub Bundle List -->
@@ -164,6 +168,7 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.bundlelist</artifactId>
       <type>partialbundlelist</type>
+      <scope>provided</scope>
     </dependency>
 
     <!-- Stanbol FactStore Bundle List -->
@@ -171,6 +176,7 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.factstore.bundlelist</artifactId>
       <type>partialbundlelist</type>
+      <scope>provided</scope>
     </dependency>
     
     <!-- Stanbol Ontology Manager Bundle List -->
@@ -178,6 +184,7 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.ontologymanager.bundlelist</artifactId>
       <type>partialbundlelist</type>
+      <scope>provided</scope>
     </dependency>
     
     <!-- Stanbol Rules Bundle List -->
@@ -185,6 +192,7 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.bundlelist</artifactId>
       <type>partialbundlelist</type>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>

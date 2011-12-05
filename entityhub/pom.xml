@@ -54,6 +54,7 @@
     <module>yard/clerezza</module>
     <module>yard/solr</module>
     <module>jersey</module>
+    <module>ldpath</module>
     <!-- deleted use the Stanbol Full launcher instead 
     <module>launchers/sling</module>
     -->

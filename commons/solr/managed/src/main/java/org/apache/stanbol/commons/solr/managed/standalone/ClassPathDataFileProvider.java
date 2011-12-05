@@ -14,18 +14,39 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.apache.stanbol.commons.solr.managed.impl;
+package org.apache.stanbol.commons.solr.managed.standalone;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
+import java.util.ServiceLoader;
 
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
+import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClassPathSolrIndexConfigProvider implements DataFileProvider {
+/**
+ * Utility that allows to use the {@link DataFileProvider} to lookup 
+ * solrindex archives outside of OSGI.<p>
+ * Usage:<ul>
+ * <li> {@link ServiceLoader} is used to search for DataFileProviders outside of
+ * OSGI. So make sure to have a default constructor and provide the required
+ * "org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider" files
+ * within the "META-INF/services" within your jar.
+ * <li> An instance of this class will load datafiles found within 
+ * {@link #INDEX_BASE_PATH} ("solr/core/"). If you do not want to register an own
+ * {@link DataFileProvider} implementation with the {@link ServiceLoader} utility
+ * copy the files to this directory.
+ * <li> To register server our own datafile you might want to consider to extend
+ * this implementation by calling the protected constructor with two parameters.
+ * and parsing the path to your data files as second parameter. Do not forget to
+ * register your DataFileProvider with the {@link ServiceLoader} utility.
+ * @author Rupert Westenthaler
+ *
+ */
+public class ClassPathDataFileProvider implements DataFileProvider {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
     /**
@@ -33,15 +54,26 @@ public class ClassPathSolrIndexConfigProvider implements DataFileProvider {
      */
     public static final String INDEX_BASE_PATH = "solr/core/";
     
+    private final String path;
     private final String symbolicName;
+    /**
+     * Loads solr index configurations from "solr/core/" via the java classpath
+     */
+    public ClassPathDataFileProvider() {
+        this(null,null);
+    }
     /**
      * Creates a DataFileProvider that loads SolrIndexConfigurations via the
      * classpath relative to {@value #INDEX_BASE_PATH}.
      * @param bundleSymbolicName the symbolic name of the bundle to accept
      * requests from or <code>null</code> to accept any request.
      */
-    public ClassPathSolrIndexConfigProvider(String bundleSymbolicName) {
+    protected ClassPathDataFileProvider(String bundleSymbolicName,String path) {
         symbolicName = bundleSymbolicName;
+        this.path = path == null ? INDEX_BASE_PATH : //use default path
+            // else check if we need to add an '/' to the parsed path
+            (path.isEmpty() || path.charAt(path.length()-1) != '/') ? 
+                    path+'/' : path;
     }
     
     @Override
@@ -75,7 +107,7 @@ public class ClassPathSolrIndexConfigProvider implements DataFileProvider {
         }
         
         // load default OpenNLP models from classpath (embedded in the defaultdata bundle)
-        final String resourcePath = INDEX_BASE_PATH + filename;
+        final String resourcePath = path + filename;
         final URL dataFile = getClass().getClassLoader().getResource(resourcePath);
         //log.debug("Resource {} found: {}", (in == null ? "NOT" : ""), resourcePath);
         return dataFile;

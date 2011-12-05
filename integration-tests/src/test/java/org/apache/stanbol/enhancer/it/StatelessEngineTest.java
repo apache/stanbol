@@ -29,8 +29,8 @@ public class StatelessEngineTest extends EnhancerTestBase {
      */
     public final static String [] ACCEPT_FORMAT_TEST_DATA  = new String[] {
         "application/json",
-        "application/rdf+json", 
-        "\\{.*http.*ontology.*confidence.*:",
+        "application/json", //now JSON LD uses application/json
+        "\"creator\": \"org.apache.stanbol.enhancer.engines.langid.LangIdEnhancementEngine\",",
         
         "application/rdf+xml",
         "application/rdf+xml",

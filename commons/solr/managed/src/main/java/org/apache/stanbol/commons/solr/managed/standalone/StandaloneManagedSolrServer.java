@@ -28,8 +28,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -45,7 +47,6 @@ import org.apache.solr.core.SolrCore;
 import org.apache.stanbol.commons.solr.managed.IndexMetadata;
 import org.apache.stanbol.commons.solr.managed.ManagedIndexState;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
-import org.apache.stanbol.commons.solr.managed.impl.ClassPathSolrIndexConfigProvider;
 import org.apache.stanbol.commons.solr.managed.impl.ManagementUtils;
 import org.apache.stanbol.commons.solr.utils.ConfigUtils;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
@@ -56,6 +57,13 @@ import org.xml.sax.SAXException;
 /**
  * Basic implementation of the {@link ManagedSolrServer} interface that
  * can be used without an OSGI environment.
+ * <p>
+ * NOTE: {@link ServiceLoader} is used to search for DataFileProviders outside of
+ * OSGI. An instance of {@link ClassPathDataFileProvider} is registered by 
+ * default that loads Index-Archives form "solr/core/". if you want to load
+ * Data-Files form different locations you will need to provide your own 
+ * DataFileProvider. Extending {@link ClassPathDataFileProvider} might be the
+ * simplest way to do this.
  * 
  * @author Rupert Westenthaler
  *
@@ -68,7 +76,8 @@ public class StandaloneManagedSolrServer implements ManagedSolrServer {
      * Outside OSGI we need an instance of a data file provider that can load
      * Index Configuration via the classpath
      */
-    private static DataFileProvider dataFileProvider = new ClassPathSolrIndexConfigProvider(null);
+    private static ServiceLoader<DataFileProvider> dataFileProviders = ServiceLoader.load(DataFileProvider.class);
+    //private static DataFileProvider dataFileProvider = new ClassPathSolrIndexConfigProvider(null);
     /**
      * Initialising Solr Indexes with a lot of data may take some time. Especially if the data need to be
      * copied to the managed directory. Therefore it is important to wait for the initialisation to be
@@ -360,7 +369,15 @@ public class StandaloneManagedSolrServer implements ManagedSolrServer {
                 comments.put(prop.getKey().toString(),prop.getValue().toString());
             }
         }
-        InputStream is = dataFileProvider.getInputStream(null, resourceName, comments);
+        InputStream is = null;
+        for(Iterator<DataFileProvider> it = dataFileProviders.iterator();is == null && it.hasNext();){
+            DataFileProvider dfp = it.next();
+            try {
+                is = dfp.getInputStream(null, resourceName, comments);
+            }catch (IOException e) {
+                //not found
+            }
+        }
         if(is != null || new File(managedSolrDir,parsedResourceName).isDirectory()){
             ArchiveInputStream ais;
             try {
