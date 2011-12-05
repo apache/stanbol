@@ -101,7 +101,7 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
     }
 
     @Reference
-    private OntologyProvider<?> cache = null;
+    private OntologyProvider<?> cache;
 
     @Property(name = RegistryManager.CACHING_POLICY, options = {
                                                                 @PropertyOption(value = '%'
@@ -118,7 +118,7 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
     /* Maps registries to libraries */
     private Map<IRI,Set<IRI>> libraryIndex = new HashMap<IRI,Set<IRI>>();
 
-    @Property(name = RegistryManager.REGISTRY_LOCATIONS, cardinality = 1000)
+    @Property(name = RegistryManager.REGISTRY_LOCATIONS, cardinality = 1000, value = {"http://www.ontologydesignpatterns.org/registry/iksnetwork.owl"})
     private String[] locations;
 
     private Logger log = LoggerFactory.getLogger(getClass());
@@ -177,8 +177,10 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         } catch (Exception ex) {
             lazyLoading = _LAZY_LOADING_DEFAULT;
         }
-        locations = (String[]) configuration.get(RegistryManager.REGISTRY_LOCATIONS);
-        if (locations == null) locations = new String[] {};
+        Object obj = configuration.get(RegistryManager.REGISTRY_LOCATIONS);
+        if (obj instanceof String[]) locations = (String[]) obj;
+        else if (obj instanceof String) locations = new String[] {(String) obj};
+        if (locations == null) locations = new String[] {"http://www.ontologydesignpatterns.org/registry/iksnetwork.owl"};
         Object cachingPolicy = configuration.get(RegistryManager.CACHING_POLICY);
         if (cachingPolicy == null) {
             this.cachingPolicyString = _CACHING_POLICY_DEFAULT.name();

@@ -17,7 +17,7 @@
 package org.apache.stanbol.ontologymanager.ontonet.api.session;
 
 /**
- * Thrown whenever an attempt to access a KReS session that is bound for removal is detected.
+ * Thrown whenever an attempt to access a session that is bound for removal is detected.
  * 
  * @author alexdma
  * 

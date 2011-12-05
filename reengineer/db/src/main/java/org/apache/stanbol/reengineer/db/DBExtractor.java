@@ -19,9 +19,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.Reengineer;
 import org.apache.stanbol.reengineer.base.api.ReengineerManager;
@@ -51,9 +48,12 @@ import org.slf4j.LoggerFactory;
 public class DBExtractor implements Reengineer {
 
     public static final String _DB_DATA_REENGINEERING_SESSION_DEFAULT = "/db-data-reengineering-session";
-//    public static final String _DB_DATA_REENGINEERING_SESSION_SPACE_DEFAULT = "/db-data-reengineering-session-space";
-//    public static final String _DB_REENGINEERING_SESSION_SPACE_DEFAULT = "/db-schema-reengineering-session-space";
-//    public static final String _DB_SCHEMA_REENGINEERING_ONTOLOGY_SPACE_DEFAULT = "/db-schema-reengineering-ontology-space";
+    // public static final String _DB_DATA_REENGINEERING_SESSION_SPACE_DEFAULT =
+    // "/db-data-reengineering-session-space";
+    // public static final String _DB_REENGINEERING_SESSION_SPACE_DEFAULT =
+    // "/db-schema-reengineering-session-space";
+    // public static final String _DB_SCHEMA_REENGINEERING_ONTOLOGY_SPACE_DEFAULT =
+    // "/db-schema-reengineering-ontology-space";
     public static final String _DB_SCHEMA_REENGINEERING_SESSION_DEFAULT = "/db-schema-reengineering-session";
     public static final String _HOST_NAME_AND_PORT_DEFAULT = "localhost:8080";
     public static final String _REENGINEERING_SCOPE_DEFAULT = "db_reengineering";
@@ -61,14 +61,17 @@ public class DBExtractor implements Reengineer {
     @Property(value = _DB_DATA_REENGINEERING_SESSION_DEFAULT)
     public static final String DB_DATA_REENGINEERING_SESSION = "org.apache.stanbol.reengineer.db.data";
 
-//    @Property(value = _DB_DATA_REENGINEERING_SESSION_SPACE_DEFAULT)
-//    public static final String DB_DATA_REENGINEERING_SESSION_SPACE = "org.apache.stanbol.reengineer.space.db.data";
-//
-//    @Property(value = _DB_REENGINEERING_SESSION_SPACE_DEFAULT)
-//    public static final String DB_REENGINEERING_SESSION_SPACE = "http://kres.iks-project.eu/space/reengineering/db";
+    // @Property(value = _DB_DATA_REENGINEERING_SESSION_SPACE_DEFAULT)
+    // public static final String DB_DATA_REENGINEERING_SESSION_SPACE =
+    // "org.apache.stanbol.reengineer.space.db.data";
+    //
+    // @Property(value = _DB_REENGINEERING_SESSION_SPACE_DEFAULT)
+    // public static final String DB_REENGINEERING_SESSION_SPACE =
+    // "http://kres.iks-project.eu/space/reengineering/db";
 
-//    @Property(value = _DB_SCHEMA_REENGINEERING_ONTOLOGY_SPACE_DEFAULT)
-//    public static final String DB_SCHEMA_REENGINEERING_ONTOLOGY_SPACE = "org.apache.stanbol.reengineer.ontology.space.db";
+    // @Property(value = _DB_SCHEMA_REENGINEERING_ONTOLOGY_SPACE_DEFAULT)
+    // public static final String DB_SCHEMA_REENGINEERING_ONTOLOGY_SPACE =
+    // "org.apache.stanbol.reengineer.ontology.space.db";
 
     @Property(value = _DB_SCHEMA_REENGINEERING_SESSION_DEFAULT)
     public static final String DB_SCHEMA_REENGINEERING_SESSION = "org.apache.stanbol.reengineer.db.schema";
@@ -83,7 +86,7 @@ public class DBExtractor implements Reengineer {
 
     String databaseURI;
 
-//    private IRI kReSSessionID;
+    // private IRI kReSSessionID;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -173,8 +176,9 @@ public class DBExtractor implements Reengineer {
     }
 
     protected void activate(Dictionary<String,Object> configuration) {
-/*
-        String */reengineeringScopeID = (String) configuration.get(REENGINEERING_SCOPE);
+        /*
+         * String
+         */reengineeringScopeID = (String) configuration.get(REENGINEERING_SCOPE);
         if (reengineeringScopeID == null) reengineeringScopeID = _REENGINEERING_SCOPE_DEFAULT;
         String hostNameAndPort = (String) configuration.get(HOST_NAME_AND_PORT);
         if (hostNameAndPort == null) hostNameAndPort = _HOST_NAME_AND_PORT_DEFAULT;
@@ -182,16 +186,16 @@ public class DBExtractor implements Reengineer {
 
         hostNameAndPort = "http://" + hostNameAndPort;
 
-//        reengineeringScopeID = IRI.create(hostNameAndPort + "/kres/ontoman/ontology/ontology/"
-//                                           + reengineeringScopeID);
-//        reengineeringSpaceIRI = IRI.create(DB_REENGINEERING_SESSION_SPACE);
+        // reengineeringScopeID = IRI.create(hostNameAndPort + "/kres/ontoman/ontology/ontology/"
+        // + reengineeringScopeID);
+        // reengineeringSpaceIRI = IRI.create(DB_REENGINEERING_SESSION_SPACE);
 
         reengineeringManager.bindReengineer(this);
 
-        SessionManager kReSSessionManager = onManager.getSessionManager();
-        Session kReSSession = kReSSessionManager.createSession();
+        // SessionManager kReSSessionManager = onManager.getSessionManager();
+        // Session kReSSession = kReSSessionManager.createSession();
 
-//        kReSSessionID = kReSSession.getID();
+        // kReSSessionID = kReSSession.getID();
 
         OntologyScopeFactory ontologyScopeFactory = onManager.getOntologyScopeFactory();
 
@@ -207,8 +211,8 @@ public class DBExtractor implements Reengineer {
             OWLOntology owlOntology = ontologyManager.createOntology(iri);
             log.info("Ontology {} created.", iri);
 
-            scope = ontologyScopeFactory.createOntologyScope(reengineeringScopeID,
-                new RootOntologyIRISource(IRI.create(DBS_L1.URI)));
+            scope = ontologyScopeFactory.createOntologyScope(reengineeringScopeID, new RootOntologyIRISource(
+                    IRI.create(DBS_L1.URI)));
 
             // scope.setUp();
 
@@ -224,14 +228,15 @@ public class DBExtractor implements Reengineer {
         }
 
         if (scope != null) {
-//            try {
-//                scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(this.reengineeringScopeID),
-//                    kReSSession.getID());
-                scopeRegistry.setScopeActive(reengineeringScopeID, true);
-//            } catch (UnmodifiableOntologySpaceException ex) {
-//                log.error("Cannot add session space for scope " + reengineeringScopeID + " to unmodifiable scope "
-//                          + scope, ex);
-//            }
+            // try {
+            // scope.addSessionSpace(ontologySpaceFactory.createSessionOntologySpace(this.reengineeringScopeID),
+            // kReSSession.getID());
+            scopeRegistry.setScopeActive(reengineeringScopeID, true);
+            // } catch (UnmodifiableOntologySpaceException ex) {
+            // log.error("Cannot add session space for scope " + reengineeringScopeID +
+            // " to unmodifiable scope "
+            // + scope, ex);
+            // }
         }
 
         log.info("Activated KReS Semion RDB Reengineer");

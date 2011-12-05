@@ -18,12 +18,12 @@ package org.apache.stanbol.ontologymanager.ontonet.api;
 
 import java.io.File;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
+import org.apache.stanbol.ontologymanager.ontonet.impl.session.SessionManagerImpl;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
@@ -50,14 +50,10 @@ public interface ONManager {
     String ID = "org.apache.stanbol.ontologymanager.ontonet.id";
 
     /**
-     * The key used to configure the base namespace of the ontology network.
+     * The key used to configure the simple identifier of the scope registry (which should also be
+     * concatenated with the base namespace to obtain the registry's HTTP endpoint URI).
      */
     String ID_SCOPE_REGISTRY = "org.apache.stanbol.ontologymanager.ontonet.scopeRegistry.id";
-
-    /**
-     * The key used to configure the base namespace of the ontology network.
-     */
-    String ID_SESSION_MANAGER = "org.apache.stanbol.ontologymanager.ontonet.sessionManager.id";
 
     /**
      * The key used to configure the base namespace of the ontology network.
@@ -70,13 +66,6 @@ public interface ONManager {
      * @return the offline configuration, or null if none was set.
      */
     OfflineConfiguration getOfflineConfiguration();
-
-    /**
-     * Returns the default object that automatically indexes ontologies as they are loaded within scopes.
-     * 
-     * @return the default ontology index.
-     */
-    OntologyIndex getOntologyIndex();
 
     /**
      * Implementations should be able to create a {@link File} object from this path.
@@ -130,6 +119,10 @@ public interface ONManager {
 
     /**
      * Returns the unique session manager for this context.
+     * 
+     * @deprecated {@link SessionManager} is now a standalone component and should be accessed independently
+     *             from the ONManager (e.g. by instantiating a new {@link SessionManagerImpl} or by
+     *             referencing {@link SessionManager} in OSGi components).
      * 
      * @return the session manager.
      */

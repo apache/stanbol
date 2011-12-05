@@ -16,32 +16,37 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.session;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.DuplicateIDException;
-
 /**
- * Thrown when attempting to create a {@link Session} by forcing a session ID that is already registered, even
- * if it used to be associated to a session that has been destroyed.
+ * Thrown whenever there is an attempt to exceed the maximum allowed number of active sessions.
  * 
  * @author alexdma
  * 
  */
-public class DuplicateSessionIDException extends DuplicateIDException {
+public class SessionLimitException extends Exception {
 
     /**
-	 * 
-	 */
-    private static final long serialVersionUID = 3548783975623103351L;
+     * 
+     */
+    private static final long serialVersionUID = -7717192393787765332L;
 
-    public DuplicateSessionIDException(String dupe) {
-        super(dupe);
+    private int limit;
+
+    public SessionLimitException(int limit) {
+        this.limit = limit;
     }
 
-    public DuplicateSessionIDException(String dupe, String message) {
-        super(dupe, message);
+    public SessionLimitException(int limit, String message) {
+        super(message);
+        this.limit = limit;
     }
 
-    public DuplicateSessionIDException(String dupe, Throwable cause) {
-        super(dupe, cause);
+    public SessionLimitException(int limit, Throwable cause) {
+        this(limit);
+        initCause(cause);
+    }
+
+    public int getSessionLimit() {
+        return limit;
     }
 
 }

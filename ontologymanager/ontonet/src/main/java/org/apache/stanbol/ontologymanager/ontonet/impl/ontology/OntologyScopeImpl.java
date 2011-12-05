@@ -279,18 +279,16 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
         else {
             this.customSpace = (CustomOntologySpace) customSpace;
             this.customSpace.addListener(this);
-            // this.customSpace.attachCoreSpace(this.coreSpace, true);
         }
-
     }
 
     protected void setID(String id) {
         if (id == null) throw new IllegalArgumentException("Scope ID cannot be null.");
         id = id.trim();
         if (id.isEmpty()) throw new IllegalArgumentException("Scope ID cannot be empty.");
-        if (!id.matches("[\\w-]+")) throw new IllegalArgumentException(
+        if (!id.matches("[\\w-\\.]+")) throw new IllegalArgumentException(
                 "Illegal scope ID " + id
-                        + " - Must be an alphanumeric sequence, with optional underscores or dashes.");
+                        + " - Must be an alphanumeric sequence, with optional underscores, dots or dashes.");
         this.id = id;
     }
 

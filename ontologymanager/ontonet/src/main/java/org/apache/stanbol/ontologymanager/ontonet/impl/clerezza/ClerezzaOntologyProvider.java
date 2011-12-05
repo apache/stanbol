@@ -439,7 +439,8 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
         // FIXME are we getting rid of rdfData after adding its triples?
         String iri = preferredKey;
-        if (iri == null || iri.isEmpty()) iri = OWLUtils.guessOntologyIdentifier(rdfData).getUnicodeString();
+        String alternateId = OWLUtils.guessOntologyIdentifier(rdfData).getUnicodeString();
+        if (iri == null || iri.isEmpty()) iri = alternateId;
         else try {
             new UriRef(iri);
         } catch (Exception ex) {
@@ -487,7 +488,11 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         if (loaded) {
             // All is already sanitized by the time we get here.
             ontologyIdsToKeys.put(ontologyIri, s);
-            log.debug("Ontology \n\t\t{}\n\tstored with key\n\t\t{}", ontologyIri, s);
+            if (alternateId != null && !alternateId.equals(iri)) ontologyIdsToKeys.put(
+                IRI.create(alternateId), s);
+            log.debug("Ontology \n\t\t{}\n\tstored with keys\n\t\t{}",
+                ontologyIri + ((alternateId != null && !alternateId.equals(iri)) ? " , " + alternateId : ""),
+                s);
             log.debug("Time: {} ms", (System.currentTimeMillis() - before));
             return s;
         } else return null;

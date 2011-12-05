@@ -103,11 +103,11 @@ public abstract class AbstractOntologySpaceImpl extends AbstractOntologyCollecto
         if (id == null) throw new IllegalArgumentException("Space ID cannot be null.");
         id = id.trim();
         if (id.isEmpty()) throw new IllegalArgumentException("Space ID cannot be empty.");
-        if (id.matches("[\\w-]+")) log.warn(
+        if (id.matches("[\\w-\\.]+")) log.warn(
             "Space ID {} is a single alphanumeric sequence, with no separating slash."
                     + " This is legal but strongly discouraged. Please consider using"
                     + " space IDs of the form [scope_id]/[space_type], e.g. Users/core .", id);
-        else if (!id.matches("[\\w-]+/[\\w-]+")) throw new IllegalArgumentException(
+        else if (!id.matches("[\\w-\\.]+/[\\w-\\.]+")) throw new IllegalArgumentException(
                 "Illegal space ID " + id + " - Must be an alphanumeric sequence, (preferably two, "
                         + " slash-separated), with optional underscores or dashes.");
         this._id = id;

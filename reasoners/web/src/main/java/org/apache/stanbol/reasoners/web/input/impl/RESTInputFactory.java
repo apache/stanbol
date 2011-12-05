@@ -25,6 +25,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputFactory;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputManager;
 import org.apache.stanbol.reasoners.web.input.provider.impl.FileInputProvider;
@@ -34,88 +35,86 @@ import org.apache.stanbol.reasoners.web.input.provider.impl.UrlInputProvider;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
- * Factory for a {@see ReasoningServiceInputManager}.
- * It creates a {@see SimpleInputManager} collecting all known {@see ReasoningServiceInputProvider}s.
+ * Factory for a {@see ReasoningServiceInputManager}. It creates a {@see SimpleInputManager} collecting all
+ * known {@see ReasoningServiceInputProvider}s.
  * 
- * TODO
- * In the future we may want to move this out of the /web module into a dedicated /input module.
+ * TODO In the future we may want to move this out of the /web module into a dedicated /input module.
  * 
  * @author enridaga
- *
+ * 
  */
 public class RESTInputFactory implements ReasoningServiceInputFactory {
     ONManager onm;
+    SessionManager sessionManager;
     RuleStore rStore;
-    
+
     private Logger log = LoggerFactory.getLogger(getClass());
-    
-    public RESTInputFactory(ONManager onm,RuleStore rStore){
+
+    public RESTInputFactory(ONManager onm, SessionManager sm, RuleStore rStore) {
         this.onm = onm;
+        this.sessionManager = sm;
         this.rStore = rStore;
     }
-    
+
     @Override
     public ReasoningServiceInputManager createInputManager(Map<String,List<String>> parameters) {
         ReasoningServiceInputManager inmgr = new SimpleInputManager();
         String scope = null;
         String session = null;
-        for(Entry<String,List<String>> entry : parameters.entrySet()){
+        for (Entry<String,List<String>> entry : parameters.entrySet()) {
             if (entry.getKey().equals("url")) {
-                if(!entry.getValue().isEmpty()){
-                    // We keep only the first value 
+                if (!entry.getValue().isEmpty()) {
+                    // We keep only the first value
                     // XXX (make sense support multiple values?)
                     inmgr.addInputProvider(new UrlInputProvider(entry.getValue().iterator().next()));
-                }else{
+                } else {
                     // Parameter exists with no value
                     log.error("Parameter 'url' must have a value!");
                     throw new WebApplicationException(Response.Status.BAD_REQUEST);
                 }
-            }else
-            if (entry.getKey().equals("file")) {
-                if(!entry.getValue().isEmpty()){
+            } else if (entry.getKey().equals("file")) {
+                if (!entry.getValue().isEmpty()) {
                     // We keep only the first value
                     // FIXME We create the file once again...
                     inmgr.addInputProvider(new FileInputProvider(new File(entry.getValue().iterator().next())));
-                }else{
+                } else {
                     // Parameter exists with no value
                     log.error("Parameter 'url' must have a value!");
                     throw new WebApplicationException(Response.Status.BAD_REQUEST);
                 }
-            }else
-            if(entry.getKey().equals("scope")){
-                if(!entry.getValue().isEmpty()){
+            } else if (entry.getKey().equals("scope")) {
+                if (!entry.getValue().isEmpty()) {
                     scope = entry.getValue().iterator().next();
-                }else{
+                } else {
                     // Parameter exists with no value
                     log.error("Parameter 'scope' must have a value!");
                     throw new WebApplicationException(Response.Status.BAD_REQUEST);
                 }
-               
-            }else
-            if(entry.getKey().equals("session")){
-                if(!entry.getValue().isEmpty()){
+
+            } else if (entry.getKey().equals("session")) {
+                if (!entry.getValue().isEmpty()) {
                     session = entry.getValue().iterator().next();
-                }else{
+                } else {
                     // Parameter exists with no value
                     log.error("Parameter 'session' must have a value!");
                     throw new WebApplicationException(Response.Status.BAD_REQUEST);
                 }
-               
-            }else
-            if(entry.getKey().equals("recipe")){
-                if(!entry.getValue().isEmpty()){
+
+            } else if (entry.getKey().equals("recipe")) {
+                if (!entry.getValue().isEmpty()) {
                     inmgr.addInputProvider(new RecipeInputProvider(rStore, entry.getValue().iterator().next()));
-                }else{
+                } else {
                     // Parameter exists with no value
                     log.error("Parameter 'recipe' must have a value!");
                     throw new WebApplicationException(Response.Status.BAD_REQUEST);
                 }
-               
+
             }
         }
-        if(scope!=null){
-            inmgr.addInputProvider(new OntonetInputProvider(onm, scope, session));
+        if (scope != null) {
+            inmgr.addInputProvider(new OntonetInputProvider(onm, sessionManager, scope, session));
         }
         return inmgr;
     }

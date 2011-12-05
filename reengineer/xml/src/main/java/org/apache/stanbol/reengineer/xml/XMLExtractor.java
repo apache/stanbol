@@ -45,8 +45,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpaceFactory;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.apache.stanbol.reengineer.base.api.DataSource;
 import org.apache.stanbol.reengineer.base.api.Reengineer;
@@ -115,6 +113,9 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
 
     @Reference
     ONManager onManager;
+    //
+    // @Reference
+    // SessionManager sessionManager;
 
     @Reference
     ReengineerManager reengineeringManager;
@@ -173,8 +174,8 @@ public class XMLExtractor extends ReengineerUriRefGenerator implements Reenginee
 
         reengineeringManager.bindReengineer(this);
 
-        SessionManager kReSSessionManager = onManager.getSessionManager();
-        Session kReSSession = kReSSessionManager.createSession();
+        // SessionManager kReSSessionManager = onManager.getSessionManager();
+        // Session kReSSession = sessionManager.createSession();
 
         // sessionId = kReSSession.getID();
 

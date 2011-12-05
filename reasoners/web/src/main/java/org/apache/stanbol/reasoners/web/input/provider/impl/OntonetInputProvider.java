@@ -25,6 +25,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.owl.transformation.JenaToOwlConvert;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputProvider;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -58,6 +59,7 @@ public class OntonetInputProvider implements ReasoningServiceInputProvider {
     private String scopeId;
     private String sessionId;
     private ONManager onManager;
+    private SessionManager sessionManager;
 
     /**
      * Contructor, if the input is a Scope
@@ -66,9 +68,7 @@ public class OntonetInputProvider implements ReasoningServiceInputProvider {
      * @param scopeId
      */
     public OntonetInputProvider(ONManager onManager, String scopeId) {
-        this.onManager = onManager;
-        this.scopeId = scopeId;
-        this.sessionId = null;
+        this(onManager, null, scopeId, null);
     }
 
     /**
@@ -78,9 +78,13 @@ public class OntonetInputProvider implements ReasoningServiceInputProvider {
      * @param scopeId
      * @param sessionId
      */
-    public OntonetInputProvider(ONManager onManager, String scopeId, String sessionId) {
+    public OntonetInputProvider(ONManager onManager,
+                                SessionManager sessionManager,
+                                String scopeId,
+                                String sessionId) {
         this.onManager = onManager;
         this.scopeId = scopeId;
+        this.sessionManager = sessionManager;
         this.sessionId = sessionId;
     }
 
@@ -154,8 +158,8 @@ public class OntonetInputProvider implements ReasoningServiceInputProvider {
                 throw new IOException("Scope " + this.scopeId + " cannot be retrieved");
             }
             Session session = null;
-            synchronized (onManager) {
-                session = onManager.getSessionManager().getSession(sessionId);
+            if (sessionManager != null) synchronized (sessionManager) {
+                session = sessionManager.getSession(sessionId);
             }
             if (session == null) {
                 log.warn("Session {} cannot be retrieved. Ignoring.", this.sessionId);
@@ -178,6 +182,7 @@ public class OntonetInputProvider implements ReasoningServiceInputProvider {
                 // // set.addAll(o.getImportsClosure());
                 // }
             }
+
             if (set.size() == 1) return set.iterator().next();
             OWLOntologyMerger merger = new OWLOntologyMerger(new OWLOntologySetProvider() {
                 @Override

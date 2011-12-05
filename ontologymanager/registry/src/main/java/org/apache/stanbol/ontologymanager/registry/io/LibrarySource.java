@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.ontologymanager.registry.io;
 
-import java.util.Hashtable;
 import java.util.Set;
 
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
@@ -27,7 +26,6 @@ import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
-import org.apache.stanbol.ontologymanager.registry.impl.RegistryManagerImpl;
 import org.apache.stanbol.ontologymanager.registry.impl.model.LibraryImpl;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -62,19 +60,7 @@ public class LibrarySource extends AbstractOWLOntologyInputSource implements Ont
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    /**
-     * Creates a new ontology source from a library. The physical registry location is assumed to be the
-     * parent URL of <code>libraryID</code>. <br/>
-     * <br/>
-     * Example : if <code>libraryID</code> is <tt>http://foo.bar.baz/registry#library</tt>, the registry
-     * location will be <tt>http://foo.bar.baz/registry</tt>. Same goes for slash-URIs.
-     * 
-     * @param libraryID
-     *            the identifier of the ontology library.
-     */
-    public LibrarySource(IRI libraryID) throws RegistryContentException {
-        this(libraryID, new RegistryManagerImpl(null, null, new Hashtable<String,Object>()));
-    }
+    private Set<OWLOntology> ontologies;
 
     /**
      * Creates a new ontology source from a library. The physical registry location is assumed to be the
@@ -107,7 +93,9 @@ public class LibrarySource extends AbstractOWLOntologyInputSource implements Ont
      *            the source of the ontology that will import all the ontologies in the registry. If null, a
      *            new blank ontology will be used.
      */
-    public LibrarySource(IRI libraryID, RegistryManager registryManager, OntologyInputSource parentSrc) throws RegistryContentException {
+    public LibrarySource(IRI libraryID,
+                         RegistryManager registryManager,
+                         OntologyInputSource<OWLOntology> parentSrc) throws RegistryContentException {
         this(libraryID, registryManager, checkOntologyManager(registryManager), parentSrc);
     }
 
@@ -151,7 +139,7 @@ public class LibrarySource extends AbstractOWLOntologyInputSource implements Ont
     public LibrarySource(IRI libraryID,
                          RegistryManager registryManager,
                          OWLOntologyManager ontologyManager,
-                         OntologyInputSource parentSrc) throws RegistryContentException {
+                         OntologyInputSource<OWLOntology> parentSrc) throws RegistryContentException {
         if (registryManager == null) throw new IllegalArgumentException(
                 "A null registry manager is not allowed");
 
@@ -177,27 +165,26 @@ public class LibrarySource extends AbstractOWLOntologyInputSource implements Ont
             // rootOntology = subtrees.iterator().next();
             // else
             try {
-                if (parentSrc != null) bindRootOntology(OntologyUtils.buildImportTree(parentSrc, subtrees,
-                    ontologyManager));
-                else bindRootOntology(OntologyUtils.buildImportTree(subtrees, ontologyManager));
+                OWLOntology parent;
+                if (parentSrc != null) parent = OntologyUtils.buildImportTree(parentSrc, subtrees,
+                    ontologyManager);
+                else parent = OntologyUtils.buildImportTree(subtrees, ontologyManager);
+                bindRootOntology(parent);
             } catch (OWLOntologyCreationException e) {
                 log.error("Failed to build import tree for library source " + libraryID, e);
             }
-
         }
 
     }
 
     @Override
-    public String toString() {
-        return "LIBRARY<" + libraryID + ">";
-    }
-
-    private Set<OWLOntology> ontologies;
-
-    @Override
     public Set<OWLOntology> getOntologies() {
         return ontologies;
+    }
+
+    @Override
+    public String toString() {
+        return "LIBRARY<" + libraryID + ">";
     }
 
 }

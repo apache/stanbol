@@ -14,7 +14,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.apache.stanbol.ontologymanager.ontonet.api;
+package org.apache.stanbol.ontologymanager.ontonet.impl.util;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;

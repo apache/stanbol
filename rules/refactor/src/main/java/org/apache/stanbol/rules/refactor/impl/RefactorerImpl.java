@@ -46,6 +46,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionLimitException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.owl.transformation.JenaToClerezzaConverter;
 import org.apache.stanbol.owl.transformation.JenaToOwlConvert;
@@ -147,6 +148,9 @@ public class RefactorerImpl implements Refactorer {
     @Reference
     protected ONManager onManager;
 
+    @Reference
+    protected SessionManager sessionManager;
+
     private String refactoringScopeID;
 
     // private IRI refactoringSpaceIRI;
@@ -195,6 +199,7 @@ public class RefactorerImpl implements Refactorer {
                           Serializer serializer,
                           TcManager tcManager,
                           ONManager onManager, /* SemionManager semionManager, */
+                          SessionManager sessionManager,
                           RuleStore ruleStore,
                           Dictionary<String,Object> configuration) {
         this();
@@ -202,6 +207,7 @@ public class RefactorerImpl implements Refactorer {
         this.serializer = serializer;
         this.tcManager = tcManager;
         this.onManager = onManager;
+        this.sessionManager = sessionManager;
         // this.semionManager = semionManager;
         this.ruleStore = ruleStore;
         activate(configuration);
@@ -239,19 +245,23 @@ public class RefactorerImpl implements Refactorer {
         // refactoringSpaceIRI = IRI.create(refactoringSpaceID);
         defaultRefactoringIRI = IRI.create(defaultRefactoringID);
 
-        SessionManager kReSSessionManager = onManager.getSessionManager();
+        // SessionManager kReSSessionManager = onManager.getSessionManager();
 
-        Session kReSSession = kReSSessionManager.getSession(sessionId);
+        Session session = sessionManager.getSession(sessionId);
 
-        if (kReSSession == null) {
+        if (session == null) {
             try {
-                kReSSession = kReSSessionManager.createSession(sessionId);
+                session = sessionManager.createSession(sessionId);
             } catch (DuplicateSessionIDException e) {
-                log.error("SemionRefactorer : a KReS session for reengineering seems already existing", e);
+                log.warn("Session {} already active, will use that one for refactoring.", sessionId);
+                session = sessionManager.getSession(sessionId);
+            } catch (SessionLimitException e) {
+                log.error("Cannot create session {}. Limit of {} already reached.", sessionId,
+                    e.getSessionLimit());
             }
         }
 
-        sessionId = kReSSession.getID();
+        sessionId = session.getID();
 
         OntologyScopeFactory ontologyScopeFactory = onManager.getOntologyScopeFactory();
 
@@ -294,13 +304,14 @@ public class RefactorerImpl implements Refactorer {
     protected void deactivate(ComponentContext context) {
         log.info("in " + getClass() + " deactivate with context " + context);
 
-        SessionManager kReSSessionManager = onManager.getSessionManager();
-        kReSSessionManager.destroySession(sessionId);
+        // SessionManager kReSSessionManager = onManager.getSessionManager();
+        sessionManager.destroySession(sessionId);
         // semionManager.unregisterRefactorer();
         this.weightedTcProvider = null;
         this.serializer = null;
         this.tcManager = null;
         this.onManager = null;
+        this.sessionManager = null;
         this.ruleStore = null;
     }
 

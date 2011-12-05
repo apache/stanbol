@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.sql.rowset.spi.SyncResolver;
-
 /**
  * Interface to be used by Reasoning services. This interface defines also default task to be implemented by
  * all reasoning services: * CLASSIFY : Should return only rdfs:subClassOf and rdf:type statements * ENRICH :
@@ -106,8 +104,8 @@ public interface ReasoningService<M,R,S> {
                                    List<R> rules,
                                    boolean filtered,
                                    Map<String,List<String>> parameters) throws UnsupportedTaskException,
-                                                            ReasoningServiceException,
-                                                            InconsistentInputException;
+                                                                       ReasoningServiceException,
+                                                                       InconsistentInputException;
 
     /**
      * Execute the specified task with no additional configuration (keep defaults)

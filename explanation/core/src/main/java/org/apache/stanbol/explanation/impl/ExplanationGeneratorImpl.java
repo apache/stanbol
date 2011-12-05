@@ -1,6 +1,7 @@
 package org.apache.stanbol.explanation.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.Set;
 
@@ -119,12 +120,15 @@ public class ExplanationGeneratorImpl implements ExplanationGenerator {
             scope = onm.getOntologyScopeFactory().createOntologyScope(scopeid, coreSrc);
             onm.getScopeRegistry().registerScope(scope, true);
         } catch (DuplicateIDException e) {
-            log.error("Cannot create scope {}. A scope with this ID is already registered.", scopeid);
+            log.warn("Cannot create scope {}. A scope with this ID is already registered.", scopeid);
+            scope = onm.getScopeRegistry().getScope(scopeid);
         }
         if (scope != null) {
             try {
-                if (dataFileProvider != null) dataFileProvider.getInputStream(null,
-                    "organizationalhierarchy.owl", null);
+                if (dataFileProvider != null) {
+                    InputStream is = dataFileProvider.getInputStream(null, "organizationalhierarchy.owl",
+                        null);
+                }
             } catch (IOException ex) {
                 log.warn("FAiled to get file");
             }

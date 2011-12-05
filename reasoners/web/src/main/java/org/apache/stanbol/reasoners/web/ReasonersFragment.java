@@ -31,6 +31,7 @@ import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.reasoners.web.resources.JobsResource;
 import org.apache.stanbol.reasoners.web.resources.ReasoningServiceTaskResource;
 import org.apache.stanbol.reasoners.web.resources.ReasoningServicesResource;
@@ -59,10 +60,11 @@ public class ReasonersFragment implements WebFragment {
 
     private static final String TEMPLATE_PATH = "/org/apache/stanbol/reasoners/web/templates";
 
-
-
     @Reference
     ONManager onm;
+
+    @Reference
+    SessionManager sessionManager;
 
     @Reference
     RuleStore kresRuleStore;
@@ -78,7 +80,7 @@ public class ReasonersFragment implements WebFragment {
     public Set<Class<?>> getJaxrsResourceClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         // Reasoner
-        //classes.add(ReasonersResource.class);
+        // classes.add(ReasonersResource.class);
         classes.add(ReasoningServicesResource.class);
         classes.add(ReasoningServiceTaskResource.class);
         classes.add(JobsResource.class);

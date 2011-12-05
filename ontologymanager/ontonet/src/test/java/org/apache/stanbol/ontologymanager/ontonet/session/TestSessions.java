@@ -16,7 +16,11 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.session;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -38,6 +42,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.Session.State;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
+import org.apache.stanbol.ontologymanager.ontonet.impl.session.SessionManagerImpl;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -67,7 +72,7 @@ public class TestSessions {
         Dictionary<String,Object> onmconf = new Hashtable<String,Object>();
         // An ONManagerImpl with no store and default settings
         ONManager onm = new ONManagerImpl(null, null, new OfflineConfigurationImpl(onmconf), onmconf);
-        sesmgr = onm.getSessionManager();
+        sesmgr = new SessionManagerImpl(null, onmconf);
         scopeFactory = onm.getOntologyScopeFactory();
         spaceFactory = onm.getOntologySpaceFactory();
         scopeRegistry = onm.getScopeRegistry();
@@ -100,7 +105,7 @@ public class TestSessions {
     }
 
     @Test
-    public void testCreateSessionSpaceAutomatic() {
+    public void testCreateSessionSpaceAutomatic() throws Exception {
         OntologyScope scope1 = null, scope2 = null, scope3 = null;
         try {
             scope1 = scopeFactory.createOntologyScope(scopeId1, src1, src2);
@@ -128,7 +133,7 @@ public class TestSessions {
     }
 
     @Test
-    public void testRegisterSession() {
+    public void testRegisterSession() throws Exception {
         int before = sesmgr.getRegisteredSessionIDs().size();
         Session ses = sesmgr.createSession();
         assertNotNull(ses);
@@ -136,7 +141,7 @@ public class TestSessions {
     }
 
     @Test
-    public void testSessionCreationDestruction() {
+    public void testSessionCreationDestruction() throws Exception {
         int size = 100;
         int initialSize = sesmgr.getRegisteredSessionIDs().size();
         Set<Session> sessions = new HashSet<Session>();

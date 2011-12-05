@@ -34,6 +34,7 @@ import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.web.resources.DocumentationResource;
 import org.apache.stanbol.ontologymanager.web.resources.OntoNetRootResource;
@@ -71,6 +72,9 @@ public class OntonetFragment implements WebFragment {
 
     @Reference
     ONManager onm;
+
+    @Reference
+    SessionManager sessionManager;
 
     @Reference
     OfflineConfiguration offline;

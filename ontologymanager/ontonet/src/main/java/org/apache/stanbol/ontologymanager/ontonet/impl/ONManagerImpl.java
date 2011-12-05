@@ -43,7 +43,6 @@ import org.apache.stanbol.ontologymanager.ontonet.api.io.BlankOntologySource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.NoSuchScopeException;
-import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyIndex;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScope;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFactory;
@@ -55,11 +54,8 @@ import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.ontologymanager.ontonet.conf.OntologyNetworkConfigurationUtils;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.OntologySpaceFactoryImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyIndexImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.OntologyScopeFactoryImpl;
 import org.apache.stanbol.ontologymanager.ontonet.impl.ontology.ScopeRegistryImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.session.ScopeSessionSynchronizer;
-import org.apache.stanbol.ontologymanager.ontonet.impl.session.SessionManagerImpl;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
 import org.osgi.service.component.ComponentContext;
 import org.semanticweb.owlapi.io.FileDocumentSource;
@@ -132,7 +128,6 @@ public class ONManagerImpl implements ONManager {
     public static final String _CONFIG_ONTOLOGY_PATH_DEFAULT = "";
     public static final String _ID_DEFAULT = "ontonet";
     public static final String _ID_SCOPE_REGISTRY_DEFAULT = "ontology";
-    public static final String _ID_SESSION_MANAGER_DEFAULT = "session";
     public static final String _ONTOLOGY_NETWORK_NS_DEFAULT = "http://localhost:8080/ontonet/";
 
     @Property(name = ONManager.CONFIG_ONTOLOGY_PATH, value = _CONFIG_ONTOLOGY_PATH_DEFAULT)
@@ -156,8 +151,6 @@ public class ONManagerImpl implements ONManager {
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC, bind = "enableOfflineMode", unbind = "disableOfflineMode", strategy = ReferenceStrategy.EVENT)
     private OfflineMode offlineMode;
 
-    private OntologyIndex oIndex;
-
     @Reference
     private OntologyProvider<?> ontologyProvider;
 
@@ -168,12 +161,6 @@ public class ONManagerImpl implements ONManager {
     @Property(name = ONManager.ID, value = _ID_DEFAULT)
     private String ontonetID;
 
-    @Property(name = ONManager.ID_SESSION_MANAGER, value = _ID_SESSION_MANAGER_DEFAULT)
-    private String sessionManagerId;
-
-    @Property(name = ONManager.ID_SCOPE_REGISTRY, value = _ID_SCOPE_REGISTRY_DEFAULT)
-    private String scopeRegistryId;
-
     @Property(name = ONManager.ONTOLOGY_NETWORK_NS, value = _ONTOLOGY_NETWORK_NS_DEFAULT)
     private String ontonetNS;
 
@@ -181,7 +168,8 @@ public class ONManagerImpl implements ONManager {
 
     private ScopeRegistry scopeRegistry;
 
-    private SessionManager sessionManager;
+    @Property(name = ONManager.ID_SCOPE_REGISTRY, value = _ID_SCOPE_REGISTRY_DEFAULT)
+    private String scopeRegistryId;
 
     /*
      * The identifiers (not yet parsed as IRIs) of the ontology scopes that should be activated.
@@ -193,9 +181,9 @@ public class ONManagerImpl implements ONManager {
      * Component Runtime support.
      * <p>
      * DO NOT USE to manually create instances - the ReengineerManagerImpl instances do need to be configured!
-     * YOU NEED TO USE {@link #ONManagerImpl(TcManager, WeightedTcProvider, OfflineConfiguration, Dictionary)}
-     * or its overloads, to parse the configuration and then initialise the rule store if running outside an
-     * OSGI environment.
+     * YOU NEED TO USE {@link #ONManagerImpl(OntologyProvider, OfflineConfiguration, Dictionary)} or its
+     * overloads, to parse the configuration and then initialise the rule store if running outside an OSGI
+     * environment.
      */
     public ONManagerImpl() {
         super();
@@ -286,8 +274,6 @@ public class ONManagerImpl implements ONManager {
         if (ontonetNS == null) ontonetNS = _ONTOLOGY_NETWORK_NS_DEFAULT;
         scopeRegistryId = (String) configuration.get(ONManager.ID_SCOPE_REGISTRY);
         if (scopeRegistryId == null) scopeRegistryId = _ID_SCOPE_REGISTRY_DEFAULT;
-        sessionManagerId = (String) configuration.get(ONManager.ID_SESSION_MANAGER);
-        if (sessionManagerId == null) sessionManagerId = _ID_SESSION_MANAGER_DEFAULT;
         configPath = (String) configuration.get(ONManager.CONFIG_ONTOLOGY_PATH);
         if (configPath == null) configPath = _CONFIG_ONTOLOGY_PATH_DEFAULT;
 
@@ -309,7 +295,7 @@ public class ONManagerImpl implements ONManager {
 
         // These depend on one another
         scopeRegistry = new ScopeRegistryImpl();
-        oIndex = new OntologyIndexImpl(this);
+        // oIndex = new OntologyIndexImpl(this);
 
         bindResources();
 
@@ -382,16 +368,8 @@ public class ONManagerImpl implements ONManager {
                 IRI.create(ns + scopeRegistryId + "/"));
         else ontologySpaceFactory = new org.apache.stanbol.ontologymanager.ontonet.impl.owlapi.OntologySpaceFactoryImpl(
                 scopeRegistry, offline, ns);
-
-        ontologyScopeFactory = new OntologyScopeFactoryImpl(scopeRegistry, IRI.create(ns + scopeRegistryId
-                                                                                      + "/"),
-                ontologySpaceFactory);
-        ontologyScopeFactory.addScopeEventListener(oIndex);
-
-        // ns = IRI.create(URIUtils.upOne(ns) + "/" + sessionManagerId + "/");
-        sessionManager = new SessionManagerImpl(IRI.create(ns + sessionManagerId + "/"), getScopeRegistry(),
-                ontologyProvider);
-        sessionManager.addSessionListener(new ScopeSessionSynchronizer(this));
+        IRI iri = IRI.create(ns + scopeRegistryId + "/");
+        ontologyScopeFactory = new OntologyScopeFactoryImpl(scopeRegistry, iri, ontologySpaceFactory);
     }
 
     private void bootstrapOntologyNetwork(OWLOntology configOntology) {
@@ -503,10 +481,6 @@ public class ONManagerImpl implements ONManager {
         return offline;
     }
 
-    public OntologyIndex getOntologyIndex() {
-        return oIndex;
-    }
-
     @Override
     public String getOntologyNetworkConfigurationPath() {
         return configPath;
@@ -556,7 +530,9 @@ public class ONManagerImpl implements ONManager {
     }
 
     public SessionManager getSessionManager() {
-        return sessionManager;
+        throw new UnsupportedOperationException(
+                "ONManager no longer accesses session managers directly. Please create/reference SessionManager objects independently.");
+        // return sessionManager;
     }
 
     public String[] getUrisToActivate() {

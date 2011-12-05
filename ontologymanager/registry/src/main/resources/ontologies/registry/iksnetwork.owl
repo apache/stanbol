@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:meta="http://www.ontologydesignpatterns.org/schemas/meta.owl#"
+    xmlns="http://stanbol.apache.org/ontologies/registries/iksnetwork.owl#"
+  xml:base="http://stanbol.apache.org/ontologies/registries/iksnetwork.owl">
+  <owl:Ontology rdf:about="http://www.ontologydesignpatterns.org/registry/iksnetwork.owl">
+    <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >0.3.0</owl:versionInfo>
+    <owl:versionInfo xml:lang="en">Created by Alessandro Adamou</owl:versionInfo>
+    <owl:versionInfo xml:lang="en">Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the &quot;License&quot;); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+    </owl:versionInfo>
+    <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/schemas/meta.owl"/>
+  </owl:Ontology>
+  
+  <rdf:Description rdf:ID="SocialNetworks">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Social Network Models</rdfs:label>
+    <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#OntologyLibrary"/>
+    <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.1</owl:versionInfo>
+  </rdf:Description>
+  
+  <rdf:Description rdf:ID="W3C">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">W3C Ontology Recommendations</rdfs:label>
+    <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#OntologyLibrary"/>
+    <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.1</owl:versionInfo>
+    <meta:hasOntology rdf:resource="http://w3.org/ns/org"/>
+  </rdf:Description>
+  
+  <rdf:Description rdf:ID="GeneralPurposeOntologies">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">General Purpose Ontologies</rdfs:label>
+    <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#OntologyLibrary"/>
+    <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.1</owl:versionInfo>
+    <meta:hasOntology rdf:resource="http://schema.org/docs/schemaorg.owl"/>
+  </rdf:Description>
+  
+  <rdf:Description rdf:ID="Alignments">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Cross-vocabulary alignments</rdfs:label>
+    <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#OntologyLibrary"/>
+    <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.1</owl:versionInfo>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="http://www.ontologydesignpatterns.org/ont/alignments/schemaorg.owl">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Alignments to schema.org</rdfs:label>
+    <meta:isOntologyOf rdf:resource="#Alignments"/>
+    <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="http://xmlns.com/foaf/spec/index.rdf">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Friend-Of-A-Friend</rdfs:label>
+    <meta:isOntologyOf rdf:resource="#SocialNetworks"/>
+    <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="http://w3.org/ns/org">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Organisation Ontology</rdfs:label>
+    <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
+  </rdf:Description>
+  
+  <rdf:Description rdf:about="http://schema.org/docs/schemaorg.owl">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Schema.org</rdfs:label>
+    <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology"/>
+  </rdf:Description>
+  
+  
+</rdf:RDF>

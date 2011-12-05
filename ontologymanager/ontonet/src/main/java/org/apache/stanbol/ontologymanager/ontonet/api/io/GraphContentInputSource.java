@@ -25,27 +25,37 @@ import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.owl.util.OWLUtils;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * An ontology input source that returns a Clerezza {@link Graph} after parsing its serialized content from an
+ * input stream. <br>
+ * <br>
+ * Note that this implementation does not tamper with the triple store. The resulting graph is created
+ * in-memory, and its triples will have to be manually added to a stored graph if necessary.
+ * 
+ * @author alexdma
+ * 
+ */
 public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    public GraphContentInputSource(InputStream content) throws OWLOntologyCreationException {
+    public GraphContentInputSource(InputStream content) {
         this(content, null);
     }
 
-    public GraphContentInputSource(InputStream content, String formatIdentifier) throws OWLOntologyCreationException {
+    public GraphContentInputSource(InputStream content, String formatIdentifier) {
         this(content, formatIdentifier, Parser.getInstance());
     }
 
-    public GraphContentInputSource(InputStream content, String formatIdentifier, Parser parser) throws OWLOntologyCreationException {
+    public GraphContentInputSource(InputStream content, String formatIdentifier, Parser parser) {
         long before = System.currentTimeMillis();
 
         if (content == null) throw new IllegalArgumentException("No content supplied");
 
+        // No physical IRI
         bindPhysicalIri(null);
         boolean loaded = false;
 

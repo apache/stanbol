@@ -19,6 +19,7 @@ package org.apache.stanbol.ontologymanager.ontonet.api.session;
 import java.io.OutputStream;
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.NamedResource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.SessionOntologySpace;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
@@ -32,23 +33,34 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
  * @author alexdma
  * 
  */
-public interface SessionManager extends SessionListenable {
+public interface SessionManager extends NamedResource, SessionListenable {
 
     /**
      * The key used to configure the base namespace of the ontology network.
      */
-    String SESSIONS_NS = "org.apache.stanbol.ontologymanager.session.ns";
+    String ID = "org.apache.stanbol.ontologymanager.ontonet.session_mgr_id";
 
     /**
-     * Generates AND REGISTERS a new session and assigns a unique session ID generated internally.
+     * The key used to configure the base namespace of the ontology network.
+     */
+    String MAX_ACTIVE_SESSIONS = "org.apache.stanbol.ontologymanager.ontonet.session_limit";
+
+    /**
+     * The key used to configure the base namespace of the ontology network.
+     */
+    String SESSIONS_NS = "org.apache.stanbol.ontologymanager.ontonet.session_ns";
+
+    /**
+     * Generates <b>and registers</b> a new session and assigns a unique session ID generated internally. This
+     * will not cause {@link DuplicateSessionIDException}s to be thrown.
      * 
      * @return the generated session
      */
-    Session createSession();
+    Session createSession() throws SessionLimitException;
 
     /**
-     * Generates AND REGISTERS a new session and tries to assign it the supplied session ID. If a session with
-     * that ID is already registered, the new session is <i>not</i> created and a
+     * Generates <b>and registers</b> a new session and tries to assign it the supplied session ID. If a
+     * session with that ID is already registered, the new session is <i>not</i> created and a
      * <code>DuplicateSessionIDException</code> is thrown.
      * 
      * @param sessionID
@@ -57,7 +69,7 @@ public interface SessionManager extends SessionListenable {
      * @throws DuplicateSessionIDException
      *             if a session with that sessionID is already registered
      */
-    Session createSession(String sessionID) throws DuplicateSessionIDException;
+    Session createSession(String sessionID) throws DuplicateSessionIDException, SessionLimitException;
 
     /**
      * Deletes the session identified by the supplied sessionID and releases its resources.
@@ -66,6 +78,13 @@ public interface SessionManager extends SessionListenable {
      *            the IRI that uniquely identifies the session
      */
     void destroySession(String sessionID);
+
+    /**
+     * Gets the number of sessions that can be simultaneously active and managed by this session manager.
+     * 
+     * @return the session limit.
+     */
+    int getActiveSessionLimit();
 
     /**
      * Returns the set of strings that identify registered sessions, whatever their state.
@@ -83,18 +102,25 @@ public interface SessionManager extends SessionListenable {
      */
     Session getSession(String sessionID);
 
-    String getSessionNamespace();
-
     /**
-     * Returns the ontology space associated with this session.
+     * Returns the ontology spaces associated with this session.
      * 
-     * @deprecated as session spaces are obsolete, so is this method.
+     * @deprecated as session spaces are obsolete, so is this method. Do no use session spaces.
      * 
-     * @return the session space
+     * @return the session spaces
      */
     Set<SessionOntologySpace> getSessionSpaces(String sessionID) throws NonReferenceableSessionException;
 
-    void setSessionNamespace(String namespace);
+    /**
+     * Sets the maximum allowed number of active sessions managed by this manager simultaneously. A negative
+     * value denotes no limit.
+     * 
+     * Note that it is possible to set this value to zero, thus preventing Stanbol from creating session at
+     * all.
+     * 
+     * @param limit
+     */
+    void setActiveSessionLimit(int limit);
 
     /**
      * Stores the session identified by <code>sessionID</code> using the output stream <code>out</code>.

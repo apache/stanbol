@@ -46,7 +46,6 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphContentInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.RootOntologyIRISource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.IrremovableOntologyException;
@@ -54,6 +53,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollector
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.DuplicateSessionIDException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionLimitException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -70,10 +70,10 @@ import org.slf4j.LoggerFactory;
 @Path("/ontonet/session/{id}")
 public class SessionByIdResource extends BaseStanbolResource {
 
-    /*
-     * Placeholder for the ONManager to be fetched from the servlet context.
-     */
-    protected ONManager onm;
+    // /*
+    // * Placeholder for the ONManager to be fetched from the servlet context.
+    // */
+    // protected ONManager onm;
 
     protected ServletContext servletContext;
 
@@ -86,8 +86,9 @@ public class SessionByIdResource extends BaseStanbolResource {
     public SessionByIdResource(@PathParam(value = "id") String sessionId,
                                @Context ServletContext servletContext) {
         this.servletContext = servletContext;
-        this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
-        sesMgr = onm.getSessionManager();
+        this.sesMgr = (SessionManager) ContextHelper.getServiceFromContext(SessionManager.class,
+            servletContext);
+        // sesMgr = onm.getSessionManager();
         session = sesMgr.getSession(sessionId);
     }
 
@@ -130,6 +131,8 @@ public class SessionByIdResource extends BaseStanbolResource {
             session = sesMgr.createSession(sessionId);
         } catch (DuplicateSessionIDException e) {
             throw new WebApplicationException(e, CONFLICT);
+        } catch (SessionLimitException e) {
+            throw new WebApplicationException(e, FORBIDDEN);
         }
         return Response.status(OK).type(MediaType.TEXT_PLAIN).build();
     }
@@ -208,8 +211,6 @@ public class SessionByIdResource extends BaseStanbolResource {
             );
         } catch (UnmodifiableOntologyCollectorException e) {
             throw new WebApplicationException(e, FORBIDDEN);
-        } catch (OWLOntologyCreationException e) {
-            throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
         log.debug("POST request for ontology addition completed in {} ms.",
             (System.currentTimeMillis() - before));
