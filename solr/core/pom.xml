@@ -120,7 +120,7 @@
               solr-analysis-extras,
               lucene-core, lucene-analyzers, lucene-highlighter, lucene-memory,
               lucene-spatial, lucene-spellchecker, lucene-misc, lucene-queries,
-              lucene-icu, lucene-icu4j,
+              lucene-icu, icu4j,
               xalan, lucene-xercesImpl, serializer, xml-apis, 
               commons-codec, commons-httpclient, commons-beanutils, 
               solr-commons-csv, commons-collections, commons-fileupload, 
@@ -221,8 +221,8 @@
         <artifactId>lucene-icu</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-icu4j</artifactId>
+        <groupId>com.ibm.icu</groupId>
+        <artifactId>icu4j</artifactId>
     </dependency>
 
     <!-- additional Solr Dependencies -->

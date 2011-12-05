@@ -66,6 +66,7 @@ import org.apache.stanbol.commons.solr.SolrServerAdapter.SolrServerProperties;
 import org.apache.stanbol.commons.solr.managed.IndexMetadata;
 import org.apache.stanbol.commons.solr.managed.ManagedIndexState;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
+import org.apache.stanbol.commons.solr.managed.standalone.ClassPathDataFileProvider;
 import org.apache.stanbol.commons.solr.utils.ConfigUtils;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileListener;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
@@ -192,7 +193,7 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
      * {@link #deactivate(ComponentContext)}
      */
     private IndexUpdateDaemon updateDaemon;
-    private ServiceRegistration dfpServiceRegistration;
+//    private ServiceRegistration dfpServiceRegistration;
     /**
      * used to append suffixes to the core directories using the date of its
      * creation (patter: yyyy.MM.dd)
@@ -288,10 +289,10 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
                 "a SolrServer based on the Directory '"+serverProperties.getServerDir() +
                 "'!",e);
         }
-        dfpServiceRegistration = context.getBundleContext().registerService(
-            DataFileProvider.class.getName(), 
-            new ClassPathSolrIndexConfigProvider(
-                context.getBundleContext().getBundle().getSymbolicName()), null);
+//        dfpServiceRegistration = context.getBundleContext().registerService(
+//            DataFileProvider.class.getName(), 
+//            new ClassPathSolrIndexConfigProvider(
+//                context.getBundleContext().getBundle().getSymbolicName()), null);
 
         managedCores = new ManagedIndexMetadata(context);
         //After a restart of the CoreContainer we need to synchronise the state of
@@ -399,10 +400,10 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
             }
             server = null;
         }
-        if(dfpServiceRegistration != null) {
-            dfpServiceRegistration.unregister();
-            dfpServiceRegistration = null;
-        }
+//        if(dfpServiceRegistration != null) {
+//            dfpServiceRegistration.unregister();
+//            dfpServiceRegistration = null;
+//        }
         if(indexArchiveTracker != null){
             indexArchiveTracker.close();
             indexArchiveTracker = null;
