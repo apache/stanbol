@@ -56,7 +56,7 @@
     <module>owl</module>
     <module>entityhub</module>
     <module>factstore</module>
-    
+
     <module>enhancer/parent</module>
     <module>enhancer/generic/servicesapi</module>
     <module>enhancer/jobmanager</module>
@@ -64,7 +64,7 @@
     <module>enhancer/jersey</module>
     <module>enhancer/benchmark</module>
     <module>enhancer/bundlelist</module>
-    
+
     <module>contenthub</module>
     <module>ontologymanager/ontonet</module>
     <module>ontologymanager/registry</module>
@@ -80,17 +80,17 @@
       <id>stack</id>
       <activation>
         <activeByDefault>true</activeByDefault>
-      </activation>      
+      </activation>
       <build>
         <finalName>stanbol-stack-${project.version}</finalName>
-      </build>      
+      </build>
       <modules>
         <module>commons/opennlp</module>
         <module>commons/web/webvie</module>
         <module>data</module>
 
         <module>enhancer/engines</module>
-        
+
         <module>launchers/basebundlelist</module>
         <module>launchers/stable</module>
         <module>launchers/stateless</module>
@@ -108,7 +108,7 @@
              where the full launcher is not packaged. -->
         <file>
           <missing>launchers/full</missing>
-        </file>        
+        </file>
       </activation>
       <properties>
         <!-- Define the framework source release packaging descriptor for

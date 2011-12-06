@@ -43,10 +43,11 @@
 
   <modules>
     <module>../autotagging</module>
-  
+
     <module>autotagging</module>
     <module>opennlp-ner</module>
     <module>langid</module>
+    <module>topic</module>
     <module>metaxa</module>
     <module>geonames</module>
     <module>entitytagging</module>
@@ -55,7 +56,7 @@
     <!-- RICK based enhancement engine(s) -->
     <module>opencalais</module>
     <module>zemanta</module>
-    
+
     <module>../clerezza/org.apache.stanbol.enhancer.clerezza</module>
     <module>../clerezza/clerezza-sparql</module>
     <module>../SemiAutomaticContentEnhancer</module>
