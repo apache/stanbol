@@ -43,7 +43,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jersey-version>1.7</jersey-version>
-    <pax-exam-version>1.2.0</pax-exam-version>
+    <pax-exam-version>2.3.0.M1</pax-exam-version>
   </properties>
 
   <build>
@@ -240,6 +240,21 @@
           <artifactId>maven-launchpad-plugin</artifactId>
           <version>2.1.0</version>
           <extensions>true</extensions>
+        </plugin>
+        <!-- generates version number of dependencies suitable for introspection
+          in pax-exam based OSGi lightweight-integration tests -->
+        <plugin>
+          <groupId>org.apache.servicemix.tooling</groupId>
+          <artifactId>depends-maven-plugin</artifactId>
+          <version>1.0</version>
+          <executions>
+            <execution>
+              <id>generate-depends-file</id>
+              <goals>
+                <goal>generate-depends-file</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -482,6 +497,11 @@
         <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
         <version>0.9.0-incubating-SNAPSHOT</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.configadmin</artifactId>
+        <version>1.2.8</version>
+      </dependency>
 
       <!-- Partial bundle list dependencies -->
       <dependency>
@@ -557,8 +577,41 @@
         <artifactId>org.apache.felix.scr.annotations</artifactId>
         <version>1.4.0</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.osgi.compendium</artifactId>
+        <version>1.4.0</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.http.jetty</artifactId>
+        <version>2.2.0</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.http.whiteboard</artifactId>
+        <version>2.2.0</version>
+        <scope>test</scope>
+      </dependency>
 
-      <!-- Apache Clerezza -->
+      <!-- Apache Clerezza and runtime dependencies -->
+      <dependency>
+        <groupId>org.apache.clerezza.ext</groupId>
+        <artifactId>com.ibm.icu</artifactId>
+        <version>0.5-incubating-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.wymiwyg</groupId>
+        <artifactId>wymiwyg-commons-core</artifactId>
+        <version>0.7.5</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>utils</artifactId>
+        <version>0.1-incubating-SNAPSHOT</version>
+      </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.core</artifactId>
@@ -1220,7 +1273,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.7</version>
+      <version>4.8.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -1250,6 +1303,8 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- Test configuration to run a lightweight felix based OSGi container in
+    tests using JUnit4 annotation for the OSGi test setup -->
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
       <artifactId>pax-exam</artifactId>
@@ -1258,13 +1313,55 @@
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-junit</artifactId>
+      <artifactId>pax-exam-container-native</artifactId>
       <version>${pax-exam-version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-container-default</artifactId>
+      <artifactId>pax-exam-junit4</artifactId>
+      <version>${pax-exam-version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-spi</artifactId>
+      <version>${pax-exam-version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.framework</artifactId>
+      <version>3.2.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr</artifactId>
+      <version>1.6.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-container-paxrunner</artifactId>
+      <version>${pax-exam-version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.runner</groupId>
+      <artifactId>pax-runner-no-jcl</artifactId>
+      <version>1.7.4</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-link-assembly</artifactId>
+      <version>${pax-exam-version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-testforge</artifactId>
       <version>${pax-exam-version}</version>
       <scope>test</scope>
     </dependency>
