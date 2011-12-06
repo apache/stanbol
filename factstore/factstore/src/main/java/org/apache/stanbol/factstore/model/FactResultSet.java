@@ -52,8 +52,11 @@ public class FactResultSet {
 	public String toJSON() {
 		JsonLd root = new JsonLd();
 		if (rows != null && !rows.isEmpty()) {
+		    int rowCount = 0;
 			for (FactResult result : rows) {
+			    rowCount++;
 			    JsonLdResource subject = new JsonLdResource();
+			    subject.setSubject(String.valueOf(rowCount));
 				for (int i = 0; i < header.size(); i++) {
 					subject.putProperty(header.get(i), result.getValues().get(i));
 				}

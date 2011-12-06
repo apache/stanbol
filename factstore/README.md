@@ -1,17 +1,19 @@
-Licensed to the Apache Software Foundation (ASF) under one or more
-contributor license agreements.  See the NOTICE file distributed with
-this work for additional information regarding copyright ownership.
-The ASF licenses this file to You under the Apache License, Version 2.0
-(the "License"); you may not use this file except in compliance with
-the License.  You may obtain a copy of the License at
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
 
 # Apache Stanbol FactStore
 
@@ -22,7 +24,9 @@ store relations between N participating entities.
 
 ## Documentation
 
-To get the latest documentation you should start your copy of Apache Stanbol and navigate your browser to http://localhost:8080/factstore. There you will find more information and the documentation of the FactStore's REST API.
+To get the latest documentation you should start your copy of Apache Stanbol
+and navigate your browser to http://localhost:8080/factstore. There you will
+find more information and the documentation of the FactStore's REST API.
 
 ## Example
 
@@ -69,7 +73,9 @@ Now to PUT the `worksFor` fact schema we can use this cURL command.
 
     curl http://localhost:8080/factstore/facts/http%3A%2F%2Ffactschema.org%2FworksFor -T worksFor.json
 
-After creating the fact schema we can store the fact that John Doe works for Winzigweich by POSTing it to the FactStore. The fact is specified in JSON-LD syntax. The `@profile` defines the fact schema where this fact belongs to.
+After creating the fact schema we can store the fact that John Doe works for
+Winzigweich by POSTing it to the FactStore. The fact is specified in JSON-LD
+syntax. The `@profile` defines the fact schema where this fact belongs to.
 
     {
       "@profile"     : "http://factschema.org/worksFor",
@@ -82,4 +88,6 @@ Now we can POST this fact, e.g. stored in fact.json, to the FactStore at
 
     curl -d @fact.json -H "Content-Type: application/json" http://localhost:8080/factstore/facts
 
-On success this will return a 201 (Created) and the URI of the newly created fact in the location header of the response. To retrieve a fact you can GET it from the returned URI.
+On success this will return a 201 (Created) and the URI of the newly created
+fact in the location header of the response. To retrieve a fact you can GET it
+from the returned URI.

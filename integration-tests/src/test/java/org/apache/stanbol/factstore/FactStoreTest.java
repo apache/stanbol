@@ -300,7 +300,7 @@ public class FactStoreTest extends StanbolTestBase {
         .withHeader("Content-Type", "application/json")
         .withHeader("Accept", "application/json");
                 
-        String expected = "{\"person\":\"http://upb.de/persons/bnagel\"}";
+        String expected = "{\"@subject\":\"1\",\"person\":\"http://upb.de/persons/bnagel\"}";
         String actual = executor.execute(q).assertStatus(200).getContent();
         Assert.assertEquals(expected, actual);
     }

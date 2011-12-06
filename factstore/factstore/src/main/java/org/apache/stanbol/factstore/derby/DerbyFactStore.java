@@ -419,6 +419,9 @@ public class DerbyFactStore implements FactStore {
                 firstRole = false;
             }
             selectBuilder.append(" FROM " + factSchemaB64 + " WHERE id=?");
+            
+            // TODO Load the context, too
+            
             ps = con.prepareStatement(selectBuilder.toString());
             ps.setInt(1, factId);
             rs = ps.executeQuery();
@@ -637,8 +640,7 @@ public class DerbyFactStore implements FactStore {
 
 				// from here on we have valid data
 
-				String factSchemaB64 = Base64.encodeBase64URLSafeString(query
-						.getFromSchemaURN().getBytes());
+				String factSchemaB64 = Base64.encodeBase64URLSafeString(query.getFromSchemaURN().getBytes());
 
 				StringBuilder querySql = new StringBuilder("SELECT ");
 
@@ -667,6 +669,7 @@ public class DerbyFactStore implements FactStore {
 				}
 				querySql.append(')');
 
+				// TODO load context, too
 				
 				logger.info("performing query {}", querySql);
 
@@ -732,8 +735,7 @@ public class DerbyFactStore implements FactStore {
 		FactSchema schema = this.loadFactSchema(query.getFromSchemaURN(), con);
 
 		if (schema == null) {
-			throw new Exception("Fact schema " + query.getFromSchemaURN()
-					+ " does not exist.");
+			throw new Exception("Fact schema " + query.getFromSchemaURN() + " does not exist.");
 		}
 
 		StringBuilder unknownRoles = new StringBuilder();
