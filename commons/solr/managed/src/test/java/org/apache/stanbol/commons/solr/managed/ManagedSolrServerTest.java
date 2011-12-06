@@ -27,14 +27,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import junit.framework.Assert;
 
-import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
+import org.apache.commons.io.FileUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -65,9 +63,25 @@ public class ManagedSolrServerTest {
         // set to "${basedir}/some/rel/path" to test if property substitution works!
         String prefix = System.getProperty("basedir") == null ? "." : "${basedir}";
         String resolvedPrefix = System.getProperty("basedir") == null ? "." : System.getProperty("basedir");
-        String solrServerDir = prefix + TEST_INDEX_REL_PATH;
-        log.info("configured directory: " + solrServerDir);
-        System.setProperty(ManagedSolrServer.MANAGED_SOLR_DIR_PROPERTY, solrServerDir);
+        File serverDir = new File(resolvedPrefix + TEST_INDEX_REL_PATH);
+        log.info("check ServerDir: {}",serverDir);
+        if(serverDir.exists()){
+            if(serverDir.isDirectory()){
+                log.info("Data of a previouse Test are still present ... deleting");
+                FileUtils.deleteDirectory(serverDir);
+                if(serverDir.exists()){
+                    throw new IllegalStateException("Unable to delete Artifacts of a previouse " +
+                    		"Test execution (directory: "+serverDir+")!");
+                }
+            } else {
+                //.oO(The File exists and is not a directory ... something strange is going on!)
+                throw new IllegalStateException("The ManagedSolrServer directory '"+
+                    serverDir+"' as used by this test exists, but is NOT an directory!");
+            }
+        } //else the dir does not exist ... nothing to do
+        String solrServerLocation = prefix + TEST_INDEX_REL_PATH;
+        log.info("configured SolrServer Location: {}",solrServerLocation);
+        System.setProperty(ManagedSolrServer.MANAGED_SOLR_DIR_PROPERTY, solrServerLocation);
         // create the SolrDirectoryManager used for the tests
         Iterator<ManagedSolrServer> providerIt = ServiceLoader.load(ManagedSolrServer.class,
             ManagedSolrServer.class.getClassLoader()).iterator();
