@@ -219,7 +219,7 @@ public class TopicClassificationEngine implements EnhancementEngine, ServiceProp
     public void computeEnhancements(ContentItem ci) throws EngineException {
         String text = getTextFromContentItem(ci);
         suggestTopics(text);
-        
+
         // TODO: express the results as RDF.
     }
 
@@ -242,7 +242,12 @@ public class TopicClassificationEngine implements EnhancementEngine, ServiceProp
             QueryResponse response = request.process(solrServer);
             SolrDocumentList results = response.getResults();
             for (SolrDocument result : results.toArray(new SolrDocument[0])) {
-                suggestedTopics.add(new TopicSuggestion((String) result.getFirstValue(TOPIC_URI_FIELD), 0.0));
+                String uri = (String) result.getFirstValue(topicUriField);
+                if (uri == null) {
+                    throw new EngineException(String.format("Solr Core '%s' is missing required field '%s'.",
+                        solrCoreId, topicUriField));
+                }
+                suggestedTopics.add(new TopicSuggestion(uri, 0.0));
             }
         } catch (SolrServerException e) {
             if ("unknown handler: /mlt".equals(e.getCause().getMessage())) {
