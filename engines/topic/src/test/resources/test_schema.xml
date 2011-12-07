@@ -28,8 +28,8 @@
     <fieldType name="text" class="solr.TextField">
       <analyzer type="index">
         <tokenizer class="solr.StandardTokenizerFactory"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true"
-          words="stopwords_en.txt" enablePositionIncrements="false" />
+<!--         <filter class="solr.StopFilterFactory" ignoreCase="true" -->
+<!--           words="stopwords_en.txt" enablePositionIncrements="false" /> -->
         <filter class="solr.LowerCaseFilterFactory"/>
         <!-- The use of Shingle might help improve the quality but they increase
         the size of the index far too much. It would be better to use a
@@ -42,10 +42,10 @@
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.StandardTokenizerFactory"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true"
-          words="stopwords_en.txt" enablePositionIncrements="false" />
-        <filter class="solr.SynonymFilterFactory"
-          synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+<!--         <filter class="solr.StopFilterFactory" ignoreCase="true" -->
+<!--           words="stopwords_en.txt" enablePositionIncrements="false" /> -->
+<!--         <filter class="solr.SynonymFilterFactory" -->
+<!--           synonyms="synonyms.txt" ignoreCase="true" expand="true"/> -->
         <filter class="solr.LowerCaseFilterFactory"/>
         <!--
         <filter class="solr.ShingleFilterFactory" maxShingleSize="2"
@@ -57,7 +57,7 @@
  </types>
 
  <fields>
-   <field name="id" type="string" indexed="true" stored="true" required="true" /> 
+   <field name="topic" type="string" indexed="true" stored="true" required="true" /> 
    <field name="type" type="string" indexed="true" stored="true" multiValued="true" />
    <field name="paths" type="string" indexed="true" stored="true" multiValued="true" /> 
    <field name="text" type="text" indexed="true" stored="false"
@@ -65,7 +65,7 @@
    <field name="popularity" type="int" indexed="true" stored="true" />
  </fields>
 
- <uniqueKey>id</uniqueKey>
+ <uniqueKey>topic</uniqueKey>
  <defaultSearchField>text</defaultSearchField>
  <solrQueryParser defaultOperator="AND"/>
 </schema>
