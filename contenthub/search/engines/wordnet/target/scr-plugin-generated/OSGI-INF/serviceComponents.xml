@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component enabled="true" name="org.apache.stanbol.contenthub.search.engines.wordnet.WordnetEngine" activate="activate">
+        <implementation class="org.apache.stanbol.contenthub.search.engines.wordnet.WordnetEngine"/>
+        <service servicefactory="false">
+            <provide interface="org.apache.stanbol.contenthub.servicesapi.search.engine.SearchEngine"/>
+            <provide interface="org.apache.stanbol.contenthub.servicesapi.search.engine.EngineProperties"/>
+        </service>
+        <property name="org.apache.stanbol.contenthub.search.engines.wordnet.Wordnet.database" type="String" value=""/>
+        <property name="org.apache.stanbol.contenthub.search.engines.wordnet.Wordnet.expansionLevel" type="String" value="1"/>
+        <property name="org.apache.stanbol.contenthub.search.engines.wordnet.Wordnet.degradingFactor" type="String" value="1.0"/>
+        <property name="service.vendor" type="String" value="Apache Stanbol (incubating)"/>
+        <property name="service.pid" value="org.apache.stanbol.contenthub.search.engines.wordnet.WordnetEngine"/>
+    </scr:component>
+</components>

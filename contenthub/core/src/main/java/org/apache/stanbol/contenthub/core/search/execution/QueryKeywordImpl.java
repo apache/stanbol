@@ -19,7 +19,9 @@ package org.apache.stanbol.contenthub.core.search.execution;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.stanbol.contenthub.servicesapi.search.execution.Keyword;
 import org.apache.stanbol.contenthub.servicesapi.search.execution.QueryKeyword;
@@ -49,12 +51,21 @@ public class QueryKeywordImpl extends KeywordImpl implements QueryKeyword {
     }
 
     @Override
-    public List<Keyword> getRelatedKeywords() {
-        List<Keyword> keywords = new ArrayList<Keyword>();
+    public Map<String,List<Keyword>> getRelatedKeywords() {
+        Map<String,List<Keyword>> keywords = new HashMap<String,List<Keyword>>();
         for (RDFNode node : this.listPropertyValues(SearchVocabulary.RELATED_KEYWORD).toList()) {
-            keywords.add(factory.getKeyword(node.asResource().getURI()));
+            Keyword keyword = factory.getKeyword(node.asResource().getURI());
+            String keywordSource = keyword.getSource();
+            if (keywordSource != null) {
+                List<Keyword> keywordGroup = keywords.get(keywordSource);
+                if (keywordGroup == null) {
+                    keywordGroup = new ArrayList<Keyword>();
+                    keywords.put(keywordSource, keywordGroup);
+                }
+                keywordGroup.add(keyword);
+            }
         }
-        return Collections.unmodifiableList(keywords);
+        return Collections.unmodifiableMap(keywords);
     }
 
     @Override

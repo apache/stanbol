@@ -18,7 +18,7 @@
 package org.apache.stanbol.contenthub.helper.cnn;
 
 import java.net.URI;
-import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -27,6 +27,6 @@ import java.util.List;
  */
 public interface CNNImporter {
 
-    List<URI> importCNNNews(String topic, int maxNumber, boolean fullNews);
+    Map<URI, String> importCNNNews(String topic, int maxNumber, boolean fullNews);
 
 }

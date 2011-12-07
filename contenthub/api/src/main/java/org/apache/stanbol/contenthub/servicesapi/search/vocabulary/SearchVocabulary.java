@@ -154,6 +154,11 @@ public final class SearchVocabulary {
     public static final Property SELECTION_TEXT = property("selectionText");
 
     /**
+     * Represents the title of a {@link DocumentResource}.
+     */
+    public static final Property DOCUMENT_TITLE = property("documentTitle");
+
+    /**
      * Represents relationship between an {@link ExternalResource} and the entity which is externally
      * referenced.
      */

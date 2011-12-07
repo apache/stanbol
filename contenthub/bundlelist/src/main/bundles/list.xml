@@ -42,6 +42,18 @@
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.contenthub.search.engines.wordnet
+			</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>edu.smu.tspell.jaws
+			</artifactId>
+			<version>1.2</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.contenthub.web</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
@@ -50,5 +62,12 @@
 			<artifactId>org.apache.stanbol.contenthub.helper.cnn</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
+		
+		<!-- LDPath
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.contenthub.ldpath</artifactId>
+			<version>0.9.0-incubating-SNAPSHOT</version>
+		</bundle>-->
 	</startLevel>
 </bundles>

@@ -43,9 +43,12 @@
 				<legend>Articles found for topic: ${it.templateData.topic}</legend>
 				<#if it.templateData.uris?exists && it.templateData.uris?size != 0>
 					<ul>
-					<#list it.templateData.uris as uri>
-						<li><a href="${uri}">${uri}</a></li>
-					</#list>
+					<#assign x=it.templateData.uris?size>
+					<#list 0..x-1 as i>
+						<#assign uri = it.templateData.uris[i]>
+						<#assign title = it.templateData.titles[i]/>
+						<li><a href="${it.publicBaseUri}contenthub/content/${uri}">${title}</a></li>
+					</#list>  
 					</ul>
 				<#else>
 					<p>No articles found for this topic<p>

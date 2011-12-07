@@ -62,6 +62,10 @@ public class DocumentResourceImpl extends AbstractKeywordRelatedResource impleme
         return this.getPropertyValue(SearchVocabulary.SELECTION_TEXT).asLiteral().getLexicalForm();
     }
 
+    @Override
+    public String getDocumentTitle() {
+        return this.getPropertyValue(SearchVocabulary.DOCUMENT_TITLE).asLiteral().getLexicalForm();
+    }
     /*
      * @Override public String getRelatedContentRepositoryItem() { return
      * this.getPropertyValue(SearchVocabulary.CONTENT_REPOSITORY_ITEM).asLiteral().getLexicalForm(); }
@@ -73,6 +77,12 @@ public class DocumentResourceImpl extends AbstractKeywordRelatedResource impleme
             selectionText);
     }
 
+    @Override
+    public void setDocumentTitle(String documentTitle) {
+        this.removeAll(SearchVocabulary.DOCUMENT_TITLE).addProperty(SearchVocabulary.DOCUMENT_TITLE,
+        	documentTitle);
+    }
+    
     @Override
     public void addRelatedClass(ClassResource classResource) {
         throw new UnsupportedOperationException();

@@ -58,7 +58,7 @@ public interface SearchContextFactory {
      *            The {@link QueryKeyword} to be associated with.
      * @return The created {@link Keyword}.
      */
-    Keyword createKeyword(String keyword, double score, QueryKeyword queryKeyword);
+    Keyword createKeyword(String keyword, double score, QueryKeyword queryKeyword, String keywordSource);
 
     /**
      * Creates a {@link ClassResource} inside the {@link SearchContext} with the given classURI, weight, score
@@ -117,7 +117,8 @@ public interface SearchContextFactory {
                                             double weight,
                                             double score,
                                             Keyword relatedKeyword,
-                                            String selectionText);
+                                            String selectionText,
+                                            String documentTitle);
 
     /**
      * Creates an {@link ExternalResource} with the given parameters. The created {@link ExternalResource} is

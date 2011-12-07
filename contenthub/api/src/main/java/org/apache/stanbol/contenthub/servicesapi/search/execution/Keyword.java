@@ -30,6 +30,21 @@ import org.apache.stanbol.contenthub.servicesapi.search.engine.SearchEngine;
  */
 public interface Keyword extends Scored {
 
+    public enum RelatedKeywordSource {
+        WORDNET("Wordnet"),
+        ONTOLOGYRESOURCE("Ontology");
+
+        private final String name;
+
+        private RelatedKeywordSource(String n) {
+            this.name = n;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+    }
+
     /**
      * Getter function to retrieve the keyword string.
      * 
@@ -80,5 +95,28 @@ public interface Keyword extends Scored {
      * @return A list of {@link ExternalResource}s.
      */
     List<ExternalResource> getRelatedExternalResources();
+
+    /**
+     * Source is the name of the engine that creates this keyword
+     * 
+     * @return returns the spring representation of the engine name
+     */
+    String getSource();
+
+    /**
+     * Source is the name of the engine that creates this keyword
+     * 
+     * @param source
+     *            A {@link String} which defines the relevance the related keyword with the query keyword
+     */
+    void setSource(String source);
+
+    /**
+     * Override of Object.toString() method
+     * 
+     * @return the local name of the keywords resource
+     */
+    @Override
+    String toString();
 
 }

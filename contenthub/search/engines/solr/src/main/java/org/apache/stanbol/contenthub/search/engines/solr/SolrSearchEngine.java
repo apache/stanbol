@@ -37,6 +37,7 @@ import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.core.search.execution.SearchContextImpl;
+import org.apache.stanbol.contenthub.core.store.SolrStoreImpl;
 import org.apache.stanbol.contenthub.servicesapi.search.engine.EngineProperties;
 import org.apache.stanbol.contenthub.servicesapi.search.engine.SearchEngine;
 import org.apache.stanbol.contenthub.servicesapi.search.engine.SearchEngineException;
@@ -47,6 +48,7 @@ import org.apache.stanbol.contenthub.servicesapi.search.execution.QueryKeyword;
 import org.apache.stanbol.contenthub.servicesapi.search.execution.SearchContext;
 import org.apache.stanbol.contenthub.servicesapi.search.execution.SearchContextFactory;
 import org.apache.stanbol.contenthub.servicesapi.search.vocabulary.SearchVocabulary;
+import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -78,41 +80,42 @@ public class SolrSearchEngine implements SearchEngine, EngineProperties {
         properties.put(PROCESSING_ORDER, PROCESSING_POST);
     }
 
-    private final static String SERVER_NAME = "contenthub";
-
     protected RegisteredSolrServerTracker serverTracker;
+
     @Reference
-    ManagedSolrServer solrDirectoryManager;
+    ManagedSolrServer managedSolrServer;
 
     /**
-     * Tries to connect EmbeddedSolr at startup, if can not, server becomes null and no query is executed on server
+     * Tries to connect EmbeddedSolr at startup, if can not, server becomes null and no query is executed on
+     * server
+     * 
      * @param cc
      */
     @Activate
-    protected void activate(ComponentContext cc) {
+    public void activate(ComponentContext cc) {
         try {
-            if (!solrDirectoryManager.isManagedIndex(SERVER_NAME)) {
-                solrDirectoryManager.createSolrIndex(SERVER_NAME, SERVER_NAME, null);
-            }
-            serverTracker = new RegisteredSolrServerTracker(cc.getBundleContext(),
-                new IndexReference(solrDirectoryManager.getServerName(), SERVER_NAME));
+            serverTracker = new RegisteredSolrServerTracker(cc.getBundleContext(), new IndexReference(
+                    managedSolrServer.getServerName(), SolrStoreImpl.SOLR_SERVER_NAME));
             serverTracker.open();
         } catch (Exception e) {
-            logger.warn("Could not get the EmbeddedSolr Instance at location : {}", SERVER_NAME, e);
+            logger.warn("Could not get the EmbeddedSolr Instance at location : {}",
+                SolrStoreImpl.SOLR_SERVER_NAME, e);
         }
     }
+
     @Deactivate
     protected void deactivate(ComponentContext cc) {
-        if(serverTracker != null){
+        if (serverTracker != null) {
             serverTracker.close();
             serverTracker = null;
         }
-        solrDirectoryManager = null;
+        managedSolrServer = null;
     }
 
-    protected SolrServer getServer(){
+    protected SolrServer getServer() {
         return serverTracker != null ? serverTracker.getService() : null;
     }
+
     @Override
     /**
      * gets the keywords from search context and then queries solr with these keywords and facet constraints,
@@ -120,17 +123,14 @@ public class SolrSearchEngine implements SearchEngine, EngineProperties {
      * After searching for all keywords, omits the results founded by other engines and having non matching field constraints 
      */
     public void search(SearchContext searchContext) throws SearchEngineException {
-        SolrServer server = getServer();
-        if (server == null) {
+        SolrServer solrServer = getServer();
+        if (solrServer == null) {
             logger.warn("No EmbeddedSolr, so SolrSearchEngine does not work");
         } else {
             for (QueryKeyword qk : searchContext.getQueryKeyWords()) {
-                searchForKeyword(server,qk, searchContext);
-                for (Keyword kw : qk.getRelatedKeywords()) {
-                    searchForKeyword(server, kw, searchContext);
-                }
+                searchForKeyword(solrServer, qk, searchContext);
             }
-            
+
             /*
              * if (searchContext.getConstraints() != null && !searchContext.getConstraints().isEmpty()) {
              * omitNonMatchingResult(searchContext); }
@@ -143,14 +143,14 @@ public class SolrSearchEngine implements SearchEngine, EngineProperties {
      *            the keyword to use in query
      * @param searchContext
      */
-    private void searchForKeyword(SolrServer server, Keyword kw, SearchContext searchContext) {
+    private void searchForKeyword(SolrServer solrServer, Keyword kw, SearchContext searchContext) {
         String keyword = kw.getKeyword();
         SolrQuery query = SolrSearchEngineHelper.keywordQueryWithFacets(keyword,
             searchContext.getConstraints());
 
         // Finding document resources by querying keyword with the facets
         try {
-            QueryResponse solrResult = server.query(query);
+            QueryResponse solrResult = solrServer.query(query);
             processSolrResult(searchContext, kw, solrResult);
         } catch (SolrServerException e) {
             logger.warn("Server could not be queried", e);
@@ -167,7 +167,7 @@ public class SolrSearchEngine implements SearchEngine, EngineProperties {
                 if (className != null) {
                     query = SolrSearchEngineHelper.keywordQueryWithFacets(className,
                         searchContext.getConstraints());
-                    QueryResponse solrResult = server.query(query);
+                    QueryResponse solrResult = solrServer.query(query);
                     processSolrResult(searchContext, kw, solrResult);
                 } else {
                     logger.info("Name of class could not be extracted from from class Resource : ",
@@ -189,7 +189,7 @@ public class SolrSearchEngine implements SearchEngine, EngineProperties {
                 if (individualName != null) {
                     query = SolrSearchEngineHelper.keywordQueryWithFacets(individualName,
                         searchContext.getConstraints());
-                    QueryResponse solrResult = server.query(query);
+                    QueryResponse solrResult = solrServer.query(query);
                     processSolrResult(searchContext, kw, solrResult);
                 } else {
                     logger.info("Name of individual could not be extracted from individual Resource : ",
@@ -219,16 +219,27 @@ public class SolrSearchEngine implements SearchEngine, EngineProperties {
              * cmsId == null ? "" : cmsId;
              */
 
-            String selectionText = (String) resultDoc.getFieldValue(SolrFieldName.CONTENT.toString());
+            String contenthubContent = (String) resultDoc.getFieldValue(SolrFieldName.CONTENT.toString());
+            String creationDate = resultDoc.getFieldValue(SolrFieldName.CREATIONDATE.toString()).toString();
+            if (contenthubContent.length() > 50) {
+                contenthubContent = contenthubContent.substring(0, 50);
+            }
+
+            // TODO: This is not a good way of preparing html.
+            String selectionText = "id           : " + contenthubId + "\n" + "content      : "
+                                   + contenthubContent.replaceAll("\\n", "") + " ..." + "\n"
+                                   + "Creation Date: " + creationDate;
+
+            String documentTitle = getMeaningfulDocumentName(contenthubId, resultDoc);
 
             // score of the keyword is used as a weight for newly found document
             factory.createDocumentResource(contenthubId, 1.0, keyword.getScore() * score, keyword,
-                selectionText/* , cmsId */);
+                selectionText, documentTitle/* , cmsId */);
         }
     }
 
     @SuppressWarnings("unused")
-    private void omitNonMatchingResult(SolrServer server, SearchContext searchContext) {
+    private void omitNonMatchingResult(SolrServer solrServer, SearchContext searchContext) {
         OntModel contextModel = (SearchContextImpl) searchContext;
         ResIterator docResources = contextModel.listResourcesWithProperty(RDF.type,
             SearchVocabulary.DOCUMENT_RESOURCE);
@@ -238,7 +249,7 @@ public class SolrSearchEngine implements SearchEngine, EngineProperties {
                 .keywordQueryWithFacets("*:*", searchContext.getConstraints());
         QueryResponse solrResult = null;
         try {
-            solrResult = server.query(query);
+            solrResult = solrServer.query(query);
         } catch (SolrServerException e) {
             logger.warn("Error while querying with query : {} ", query, e);
         }
@@ -293,4 +304,19 @@ public class SolrSearchEngine implements SearchEngine, EngineProperties {
         return properties;
     }
 
+    private String getMeaningfulDocumentName(String docId, SolrDocument resultDoc) {
+        String titleField;
+        if (resultDoc.containsKey(SolrVocabulary.SolrFieldName.TITLE.toString())) {
+            return resultDoc.getFieldValue(SolrFieldName.TITLE.toString()).toString();
+        } else if (resultDoc.containsKey("name_t")) {
+            titleField = "name_t";
+        } else if (resultDoc.containsKey("subject_t")) {
+            titleField = "subject_t";
+        } else {
+            return docId;
+        }
+
+        String documentTitle = ((List<Object>) resultDoc.getFieldValues(titleField)).get(0).toString();
+        return documentTitle;
+    }
 }

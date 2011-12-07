@@ -210,4 +210,11 @@
 		</dependencies>
 	</dependencyManagement>
 
+	<repositories>
+		<repository>
+			<id>at.newmedialab</id>
+			<name>KiWi Project Snapshot Repository</name>
+			<url>http://devel.kiwi-project.eu:8080/nexus/content/repositories/snapshots/</url>
+		</repository>
+	</repositories>
 </project>

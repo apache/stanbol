@@ -17,8 +17,9 @@
 
 package org.apache.stanbol.contenthub.web.resources;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -32,6 +33,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -49,10 +51,11 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
-import org.apache.stanbol.commons.solr.managed.IndexMetadata;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.contenthub.core.utils.EntityHubClient;
+import org.apache.stanbol.contenthub.core.utils.ExploreHelper;
 import org.apache.stanbol.contenthub.core.utils.JSONUtils;
 import org.apache.stanbol.contenthub.core.utils.SearchUtils;
 import org.apache.stanbol.contenthub.servicesapi.search.Search;
@@ -71,6 +74,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.ontology.OntModel;
 import com.sun.jersey.api.view.Viewable;
 
 /**
@@ -88,8 +92,9 @@ public class SearchResource extends BaseStanbolResource {
     private TcManager tcManager;
     private Object templateData = null;
     private Object facets = null;
+    private Object suggestions = null;
 
-    private ManagedSolrServer solrDirectoryManager;
+    private ManagedSolrServer managedSolrServer;
 
     private SolrServer solrServer;
 
@@ -97,16 +102,15 @@ public class SearchResource extends BaseStanbolResource {
         searcher = ContextHelper.getServiceFromContext(Search.class, context);
         tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
         processor = ContextHelper.getServiceFromContext(SearchProcessor.class, context);
-        solrDirectoryManager = ContextHelper.getServiceFromContext(ManagedSolrServer.class, context);
+        managedSolrServer = ContextHelper.getServiceFromContext(ManagedSolrServer.class, context);
         BundleContext bundleContext = ContextHelper.getBundleContext(context);
-        if (solrDirectoryManager != null) {
-            if (!solrDirectoryManager.isManagedIndex("contenthub")) {
-                solrDirectoryManager.createSolrIndex("contenthub", "contenthub", null);
+        if (managedSolrServer != null) {
+            if (!managedSolrServer.isManagedIndex("contenthub")) {
+                managedSolrServer.createSolrIndex("contenthub", "contenthub", null);
             }
-            RegisteredSolrServerTracker tracker = new RegisteredSolrServerTracker(
-                bundleContext, new IndexReference(
-                    solrDirectoryManager.getServerName(), "contenthub"));
-            //TODO: this is currently done for each request
+            RegisteredSolrServerTracker tracker = new RegisteredSolrServerTracker(bundleContext,
+                    new IndexReference(managedSolrServer.getServerName(), "contenthub"));
+            // TODO: this is currently done for each request
             tracker.open();
             solrServer = tracker.getService();
             tracker.close();
@@ -115,26 +119,52 @@ public class SearchResource extends BaseStanbolResource {
 
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public final Response get() {
+    public final Response get(@QueryParam("kw") String keywords) {
         try {
-            SearchInfo si = new SearchInfo();
-            Set<UriRef> mGraphs = tcManager.listMGraphs();
-            Iterator<UriRef> it = mGraphs.iterator();
-            while (it.hasNext()) {
-                String graphURI = it.next().getUnicodeString();
-                if (SearchUtils.isGraphReserved(graphURI)) continue;
-                si.getOntologies().add(graphURI);
-            }
+            if (keywords != null && keywords.length() > 0) {
+                String[] keywordArray = getKeywordArray(keywords);
+                List<String> allowedEngines = new ArrayList<String>();
+                for (SearchEngine engine : processor.listEngines()) {
+                    allowedEngines.add(engine.toString());
+                }
+                SearchContext searchContext = (SearchContext) searcher.search(keywordArray, null,
+                    allowedEngines, null);
+                this.facets = getConstraints(searchContext);
+                this.templateData = new TempSearchResult(searchContext);
+                return Response.ok(new Viewable("result_full", this)).build();
+            } else {
+                SearchInfo si = new SearchInfo();
+                Set<UriRef> mGraphs = tcManager.listMGraphs();
+                Iterator<UriRef> it = mGraphs.iterator();
+                while (it.hasNext()) {
+                    String graphURI = it.next().getUnicodeString();
+                    if (SearchUtils.isGraphReserved(graphURI)) continue;
+                    si.getOntologies().add(graphURI);
+                }
 
-            for (SearchEngine engine : processor.listEngines()) {
-                si.getEngines().add(new EngineInfo(engine.toString(), engine.getClass().getCanonicalName()));
+                for (SearchEngine engine : processor.listEngines()) {
+                    si.getEngines().add(
+                        new EngineInfo(engine.toString(), engine.getClass().getCanonicalName()));
+                }
+                this.templateData = si;
+                return Response.ok(new Viewable("index", this), MediaType.TEXT_HTML).build();
             }
-            this.templateData = si;
-            return Response.ok(new Viewable("index", this), MediaType.TEXT_HTML).build();
 
         } catch (Exception e) {
             throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private String[] getKeywordArray(String keywords) {
+        String[] keywordArray = null;
+        if (keywords.startsWith("\"") && keywords.endsWith("\"")) {
+            keywordArray = new String[1];
+            keywordArray[0] = keywords;
+        } else {
+            // Separate the keywords only by space character.
+            keywordArray = keywords.split(" ");
+        }
+        return keywordArray;
     }
 
     @POST
@@ -149,14 +179,7 @@ public class SearchResource extends BaseStanbolResource {
                                                                            SolrServerException,
                                                                            IOException {
         Map<String,List<Object>> facetMap = JSONUtils.convertToMap(jsonCons);
-        String[] keywordArray = null;
-        if (keywords.startsWith("\"") && keywords.endsWith("\"")) {
-            keywordArray = new String[1];
-            keywordArray[0] = keywords;
-        } else {
-            // Separate the keywords only by space character.
-            keywordArray = keywords.split(" ");
-        }
+        String[] keywordArray = getKeywordArray(keywords);
 
         // FIXME A better implementation should be used instead of this casting.
         SearchContext searchContext = (SearchContext) searcher.search(keywordArray, graphURI, engines,
@@ -164,6 +187,15 @@ public class SearchResource extends BaseStanbolResource {
         this.facets = getConstraints(searchContext);
         this.templateData = new TempSearchResult(searchContext);
         return Response.ok(new Viewable("result", this)).build();
+    }
+
+    @POST
+    @Produces(MediaType.TEXT_HTML)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Path("/suggestion")
+    public final Response explorer(@FormParam("keyword") String keyword) {
+        this.suggestions = exploreFromKeyword(keyword);
+        return Response.ok(new Viewable("suggestionResult", this)).build();
     }
 
     private Object getConstraints(SearchContext sc) throws InstantiationException,
@@ -202,14 +234,15 @@ public class SearchResource extends BaseStanbolResource {
         }
         solrQuery.setFacet(true);
         for (String field : fields) {
-            if (!SolrFieldName.isNameReserved(field) && !SolrVocabulary.isNameExcluded(field)) {
+            if (SolrFieldName.CREATIONDATE.toString().equals(field)
+                || (!SolrFieldName.isNameReserved(field) && !SolrVocabulary.isNameExcluded(field))) {
                 solrQuery.addFacetField(field);
             }
         }
         solrQuery.setRows(0);
 
         QueryResponse result = solrServer.query(solrQuery);
-        List<FacetField> facets = result.getFacetFields();
+        List<FacetField> facets = bringAnnotatedFacetsForward(result.getFacetFields());
         logger.debug(facets.toString());
         return facets;
     }
@@ -222,22 +255,57 @@ public class SearchResource extends BaseStanbolResource {
         return facets;
     }
 
+    public Object getSuggestions() {
+        return suggestions;
+    }
+
     // TODO: This method SHOULD be written again, maybe as a SEPERATE class
     /**
      * this method is written just to see that we can explore from search keyword using entityhub
      * 
      * @param queryKeywords
      *            is the all keywords seperated by " " that has been entered in search interface
-     * @return is the List of all related entity names
+     * @return is the List of all related entity names, returns null if there is no element in hashmap
      */
-    /*
-     * public void exploreFromKeyword(String queryKeywords) { EntityHubClient ehc =
-     * EntityHubClient.getInstance("http://localhost:8080/entityhub"); String keyword =
-     * queryKeywords.replaceAll(" ","_"); List<String> types = new ArrayList<String>();
-     * 
-     * OntModel resultModel = ehc.referencedSiteFind(keyword, "en"); if(resultModel != null) { ExploreHelper
-     * explorer = new ExploreHelper(resultModel);
-     * 
-     * Map<String, List<String>> resultMap = explorer.getSuggestedKeywords(); } }
-     */
+    private Map<String,Set<String>> exploreFromKeyword(String queryKeywords) {
+        Map<String,Set<String>> resultMap = new HashMap<String,Set<String>>();
+        EntityHubClient ehc = EntityHubClient.getInstance(uriInfo.getBaseUri().toString() + "entityhub");
+        String keyword = queryKeywords.replaceAll(" ", "_");
+
+        OntModel resultModel = ehc.referencedSiteFind(keyword, "en");
+        if (resultModel != null) {
+            ExploreHelper explorer = new ExploreHelper(resultModel);
+
+            resultMap = explorer.getSuggestedKeywords();
+
+        }
+
+        return resultMap;
+    }
+
+    private List<FacetField> bringAnnotatedFacetsForward(List<FacetField> facets) {
+        List<FacetField> annotatedEntityFacets = new ArrayList<FacetField>();
+        for (FacetField ff : facets) {
+            String facetName = ff.getName();
+            if (isAnnotatedEntityFacet(facetName)) {
+                annotatedEntityFacets.add(ff);
+            }
+        }
+        for (FacetField ff : annotatedEntityFacets) {
+            facets.remove(ff);
+        }
+        for (FacetField ff : annotatedEntityFacets) {
+            facets.add(0, ff);
+        }
+        return facets;
+    }
+
+    private boolean isAnnotatedEntityFacet(String facetName) {
+        for (SolrFieldName sfn : SolrFieldName.getAnnotatedEntityFieldNames()) {
+            if (sfn.toString().equals(facetName)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

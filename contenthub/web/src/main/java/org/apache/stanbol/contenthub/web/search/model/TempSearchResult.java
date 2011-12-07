@@ -17,7 +17,10 @@
 
 package org.apache.stanbol.contenthub.web.search.model;
 
+import java.util.List;
+
 import org.apache.stanbol.contenthub.core.utils.JSONUtils;
+import org.apache.stanbol.contenthub.servicesapi.search.execution.QueryKeyword;
 import org.apache.stanbol.contenthub.servicesapi.search.execution.SearchContext;
 
 /**
@@ -41,5 +44,18 @@ public class TempSearchResult {
 
     public String getConstraints() {
         return JSONUtils.convertToString(context.getConstraints());
+    }
+    
+    public String getKeywords() {
+        StringBuilder sb = new StringBuilder();
+        for(QueryKeyword kw : context.getQueryKeyWords()) {
+            sb.append(kw.getKeyword());
+            sb.append(" ");
+        }
+        return sb.toString();
+    }
+    
+    public List<String> getEngines() {
+        return context.getAllowedEngines();
     }
 }

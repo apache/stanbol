@@ -237,7 +237,7 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
             log.debug("There is no constraint for the node having id: {}", id);
         }
 
-        SolrContentItem sci = solrStore.create(id, contentContext.getContent(),
+        SolrContentItem sci = solrStore.create(id, contentContext.getNodeName(), contentContext.getContent(),
             contentContext.getContentType(), constraints);
         solrStore.enhanceAndPut(sci);
         log.info("Document submitted to Contenthub.");

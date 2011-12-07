@@ -19,6 +19,8 @@ package org.apache.stanbol.contenthub.core.store;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +28,7 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.stanbol.contenthub.core.utils.ContentItemIDOrganizer;
 import org.apache.stanbol.contenthub.servicesapi.store.SolrContentItem;
+import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +47,7 @@ public class SolrContentItemImpl implements SolrContentItem {
     private final String mimeType;
     private final byte[] data;
     private final Map<String,List<Object>> constraints;
+    private String title;
 
     public SolrContentItemImpl(String id) {
         this(id, null, null, null, null);
@@ -58,6 +62,15 @@ public class SolrContentItemImpl implements SolrContentItem {
     }
 
     public SolrContentItemImpl(String id,
+                               byte[] content,
+                               String mimeType,
+                               MGraph metadata,
+                               Map<String,List<Object>> constraints) {
+        this(id, "", content, mimeType, metadata, constraints);
+    }
+
+    public SolrContentItemImpl(String id,
+                               String title,
                                byte[] content,
                                String mimeType,
                                MGraph metadata,
@@ -85,8 +98,12 @@ public class SolrContentItemImpl implements SolrContentItem {
         if (content == null) {
             content = new byte[0];
         }
+        if(constraints == null) {
+            constraints = new HashMap<String,List<Object>>();
+        }
 
         this.id = id;
+        this.title = determineTitle(title, id, constraints);
         this.data = content;
         this.mimeType = mimeType;
         this.metadata = metadata;
@@ -111,5 +128,34 @@ public class SolrContentItemImpl implements SolrContentItem {
 
     public Map<String,List<Object>> getConstraints() {
         return constraints;
+    }
+
+    @Override
+    public String getTitle() {
+        if (title != null && !title.trim().equals("")) {
+            return title;
+        }
+        return id;
+    }
+
+    private String determineTitle(String title, String id, Map<String,List<Object>> constraints) {
+        if (title != null && !title.trim().equals("")) {
+            title = title.trim();
+            List<Object> titleList = new ArrayList<Object>();
+            titleList.add(title);
+            constraints.put(SolrFieldName.TITLE.toString(), titleList);
+
+        } else {
+            List<Object> titleList = constraints.get(SolrFieldName.TITLE.toString());
+            if (titleList != null) {
+                title = titleList.get(0).toString();
+            } else {
+                title = id;
+                titleList = new ArrayList<Object>();
+                titleList.add(title);
+                constraints.put(SolrFieldName.TITLE.toString(), titleList);
+            }
+        }
+        return title;
     }
 }

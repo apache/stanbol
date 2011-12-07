@@ -145,7 +145,8 @@ public class SearchContextFactoryImpl implements SearchContextFactory {
             } else {
                 logger.info("Keyword {} not found in context factory. Creating an instance ...",
                     keyword.getKeyword());
-                createKeyword(keyword.getKeyword(), keyword.getScore(), keyword.getRelatedQueryKeyword());
+                createKeyword(keyword.getKeyword(), keyword.getScore(), keyword.getRelatedQueryKeyword(),
+                    keyword.getSource());
             }
             return inverseKeywords.get(keyword);
         }
@@ -196,9 +197,10 @@ public class SearchContextFactoryImpl implements SearchContextFactory {
     }
 
     @Override
-    public Keyword createKeyword(String keyword, double score, QueryKeyword queryKeyword) {
+    public Keyword createKeyword(String keyword, double score, QueryKeyword queryKeyword, String keywordSource) {
         Node n = Node.createURI(keywordName(keyword));
         KeywordImpl k = new KeywordImpl(n, (EnhGraph) searchContext, keyword, MAX_WEIGHT, score, this);
+        k.setSource(keywordSource);
         keywords.put(k.getURI(), k);
         inverseKeywords.put(k, k.getURI());
         if (queryKeyword != null) {
@@ -257,9 +259,10 @@ public class SearchContextFactoryImpl implements SearchContextFactory {
                                                    double weight,
                                                    double score,
                                                    Keyword relatedKeyword,
-                                                   String relatedText/*
-                                                                      * , String contentRepositoryItem
-                                                                      */) {
+                                                   String relatedText,
+                                                   String documentTitle/*
+                                                                        * , String contentRepositoryItem
+                                                                        */) {
         String key = documentName(documentURI, relatedKeyword);
         if (documents.containsKey(key)) {
             DocumentResource dr = documents.get(key);
@@ -270,6 +273,7 @@ public class SearchContextFactoryImpl implements SearchContextFactory {
             DocumentResourceImpl dri = new DocumentResourceImpl(n, (EnhGraph) searchContext, documentURI,
                     weight, score, relatedKeyword, this);
             dri.setRelatedText(relatedText);
+            dri.setDocumentTitle(documentTitle);
             /* dri.setRelatedContentRepositoryItem(contentRepositoryItem); */
             documents.put(key, dri);
             return dri;

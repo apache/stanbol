@@ -54,6 +54,7 @@
 		<module>search</module>
 		<module>helper/cnn-importer</module>
 		<module>web</module>
+		<!--<module>ldpath</module>-->
 		<module>bundlelist</module>
 	</modules>
 </project>

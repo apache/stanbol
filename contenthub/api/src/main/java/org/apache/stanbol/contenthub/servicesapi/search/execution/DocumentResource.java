@@ -39,6 +39,13 @@ public interface DocumentResource extends KeywordRelated {
     String getDocumentURI();
 
     /**
+     * Retrieves the title of this document.
+     * 
+     * @return The title of the document.
+     */    
+    String getDocumentTitle();
+    
+    /**
      * Retrieves the text of this document, if it has a text based content.
      * 
      * @return The text of the document.
@@ -52,5 +59,13 @@ public interface DocumentResource extends KeywordRelated {
      *            The text of this document.
      */
     void setRelatedText(String selectionText);
+
+    /**
+     * Sets the title of this document.
+     * 
+     * @param documentTitle
+     *            The title of this document.
+     */
+    void setDocumentTitle(String documentTitle);
 
 }

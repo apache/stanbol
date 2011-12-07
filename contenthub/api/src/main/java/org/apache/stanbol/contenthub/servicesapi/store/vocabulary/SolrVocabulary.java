@@ -33,22 +33,22 @@ public class SolrVocabulary {
     private static final String STANBOLRESERVED_PREFIX = "stanbolreserved_";
 
     public enum SolrFieldName {
-        
+
         /**
          * Name of the field which holds entities which carry the dbpedia Place property.
          */
-        PLACES ("places" + SOLR_DYNAMIC_FIELD_TEXT),
-        
+        PLACES("places" + SOLR_DYNAMIC_FIELD_TEXT),
+
         /**
          * Name of the field which holds entities which carry the dbpedia Person property.
          */
-        PEOPLE ("people" + SOLR_DYNAMIC_FIELD_TEXT),
-        
+        PEOPLE("people" + SOLR_DYNAMIC_FIELD_TEXT),
+
         /**
          * Name of the field which holds entities which carry the dbpedia Organization property.
          */
-        ORGANIZATIONS ("organizations" + SOLR_DYNAMIC_FIELD_TEXT),
-        
+        ORGANIZATIONS("organizations" + SOLR_DYNAMIC_FIELD_TEXT),
+
         /**
          * Name of the unique ID field.
          */
@@ -65,6 +65,11 @@ public class SolrVocabulary {
         MIMETYPE(STANBOLRESERVED_PREFIX + "mimetype"),
 
         /**
+         * Name of the field which holds the title of the content.
+         */
+        TITLE("title"),
+
+        /**
          * Name of the field which holds the creation date of the content.
          */
         CREATIONDATE(STANBOLRESERVED_PREFIX + "creationdate"),
@@ -73,7 +78,7 @@ public class SolrVocabulary {
          * Name of the field which holds the number of enhancements for the content.
          */
         ENHANCEMENTCOUNT(STANBOLRESERVED_PREFIX + "enhancementcount"),
-        
+
         /**
          * Name of the field which holds the countries of the cities mentioned in the content. This field is
          * populated by the semantic operations through the enhancements of the content.
@@ -177,13 +182,13 @@ public class SolrVocabulary {
         public static SolrFieldName[] getSemanticFieldNames() {
             // Semantic fields start from the 8th enumeration.
             SolrFieldName[] allFields = values();
-            SolrFieldName[] semanticFieldNames = new SolrFieldName[allFields.length-8];
-            for (int i=8; i<allFields.length; i++) {
-                semanticFieldNames[i-8] = allFields[i];
+            SolrFieldName[] semanticFieldNames = new SolrFieldName[allFields.length - 9];
+            for (int i = 9; i < allFields.length; i++) {
+                semanticFieldNames[i - 9] = allFields[i];
             }
             return semanticFieldNames;
         }
-        
+
         public static SolrFieldName[] getAnnotatedEntityFieldNames() {
             SolrFieldName[] annotatedEntityFieldNames = {PLACES, PEOPLE, ORGANIZATIONS};
             return annotatedEntityFieldNames;
@@ -192,13 +197,13 @@ public class SolrVocabulary {
         public static boolean isNameReserved(String name) {
             // Reserved keywords starts from the 3rd enumeration
             SolrFieldName[] allFields = values();
-            for(int i=3; i<allFields.length; i++) {
-                if(allFields[i].toString().equals(name)) return true;
+            for (int i = 3; i < allFields.length; i++) {
+                if (allFields[i].toString().equals(name)) return true;
             }
             return false;
         }
     }
-    
+
     /**
      * Ending characters for dynamic fields of {@link String} type.
      */
@@ -250,8 +255,29 @@ public class SolrVocabulary {
      */
     private static List<String> excludedFields = new ArrayList<String>();
     static {
-        excludedFields.add("cmis:name");
         excludedFields.add("skos:definition");
         excludedFields.add("rdfs:label");
+        excludedFields.add(SolrFieldName.TITLE.toString());
+    }
+
+    /**
+     * Checks whether the specified field is range field or not i.e whether the field will be used in range
+     * queries or not
+     * 
+     * @param name
+     *            field name
+     */
+    public static boolean isNameRangeField(String name) {
+
+        return rangeFields.contains(name) || name.endsWith(SOLR_DYNAMIC_FIELD_LONG);
+    }
+
+    /**
+     * Fields that will be used in range queries and will not be escaped in {@link SolrSearchEngineHelper}
+     * class
+     */
+    private static List<String> rangeFields = new ArrayList<String>();
+    static {
+        rangeFields.add(SolrFieldName.CREATIONDATE.toString());
     }
 }
