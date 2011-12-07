@@ -18,6 +18,7 @@
 package org.apache.stanbol.contenthub.servicesapi.search.execution;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.stanbol.contenthub.servicesapi.search.engine.SearchEngine;
 
@@ -37,7 +38,7 @@ public interface QueryKeyword extends Keyword {
      * 
      * @return A list of {@link Keyword}.
      */
-    List<Keyword> getRelatedKeywords();
+    Map<String, List<Keyword>> getRelatedKeywords();
 
     /**
      * Adds a {@link Keyword} as related with this {@link QueryKeyword}. A {@link SearchEngine}

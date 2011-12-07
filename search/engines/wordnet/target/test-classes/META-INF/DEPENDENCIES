@@ -1,0 +1,27 @@
+// ------------------------------------------------------------------
+// Transitive dependencies of this project determined from the
+// maven pom organized by organization.
+// ------------------------------------------------------------------
+
+Apache Stanbol Search Wordnet Engine
+
+
+From: 'an unknown organization'
+  - jaws  edu.smu.tspell:jaws:jar:1.2
+
+  - org.osgi.compendium  org.osgi:org.osgi.compendium:jar:4.1.0
+
+  - StAX API (http://stax.codehaus.org/) stax:stax-api:jar:1.0.1
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+From: 'QOS.ch' (http://www.qos.ch)
+  - SLF4J API Module (http://www.slf4j.org) org.slf4j:slf4j-api:jar:1.6.1
+    License: MIT License  (http://www.opensource.org/licenses/mit-license.php)
+
+From: 'The Apache Software Foundation' (http://www.apache.org/)
+  - Annotations for SCR (http://felix.apache.org/org.apache.felix.scr.annotations/) org.apache.felix:org.apache.felix.scr.annotations:jar:1.4.0
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+
+
+

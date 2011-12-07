@@ -49,11 +49,12 @@
 
 	<modules>
 		<module>engines/solr</module>
-		<!--<module>engines/wordnet</module>-->
+		<module>ext/edu.smu.tspell.jaws</module>
+		<module>engines/wordnet</module>
 		<module>engines/ontologyresource</module>
 		<!--
 		<module>engines/enhancement</module>
-		<module>engines/location</module>
-		<module>ext/edu.smu.tspell.jaws</module>-->
+		<module>engines/location</module>-->
+		
 	</modules>
 </project>

@@ -16,6 +16,11 @@
 -->
 <#setting url_escaping_charset='ISO-8859-1'>
 <#import "/imports/keyword_result_tab.ftl" as keywordTab>
+<#import "/imports/suggestedKeyword.ftl" as suggestedKeyword>
+<#import "/imports/facetResultMacro.ftl" as facetResultMacro>
+<#import "/imports/relatedKeywordMacro.ftl" as relatedKeywordMacro>
+<#-- limit for the more less button -->
+<#assign limit=4>
 <div id="text">
 </div>
 <div id="result" class="result">
@@ -23,58 +28,50 @@
 	<#assign con=it.templateData.context>
 	<!--General Divs for layout  -->
 	<div class="keywords">
-			<#list con.queryKeyWords?sort_by("scoreString")?reverse as qk>
-
-				<h3  class="keywordItem keywordClickable" id="kw_${qk.keyword?replace("*","_")?replace(" ", "_")?replace("'", "_")}">${qk.scoreString}:${qk.keyword}</h3>
-
+		<#list con.queryKeyWords?sort_by("scoreString")?reverse as qk>
+			<h3  class="keywordItem keywordClickable" id="kw_${qk.keyword?replace("*","_")?replace(" ", "_")?replace("'", "_")}">${qk.keyword}</h3>
+			<div id="allSuggestions">
 				<#if qk.relatedKeywords?exists && qk.relatedKeywords?size != 0>
-				
-					<div>
-						<legend>Related Keywords</legend>
-						<ul class="spadded"> 
-						<#list qk.relatedKeywords?sort_by("scoreString")?reverse as kw>
-							<li class="keywordItem" id="kw_${kw.keyword?replace("*","_")?replace(" ", "_")?replace("'", "_")}"><a class="keywordClickable" href="">${kw.scoreString}:${kw.keyword}</a></li>
-						</#list>
-						<ul>
-					</div>
-						
-				<#else>
-					<div><p><i>No related keywords</i></p></div>
+					<#list qk.relatedKeywords?keys as mapKey>
+						<#assign listOfKey = qk.relatedKeywords[mapKey]>
+						<#if listOfKey?size &gt; 0>
+							<@relatedKeywordMacro.relatedKeywordMacro relatedKeywordList = listOfKey source = mapKey/>
+						</#if>
+					</#list>
 				</#if>
-
-			</#list>
-	
+				<#-- this division includes the results coming from entityHub -->
+				<div id="entityHubSuggestionSubDiv"></div>
+				<#if (!qk.relatedKeywords?exists || qk.relatedKeywords?size == 0) && (!it.suggestions?exists || it.suggestions?size == 0)>
+					<div id="noRelatedKeywordDivision">No related keyword</div>
+				</#if>
+			</div>
+		</#list>
 	</div>
 	
 	<div class="resources">
 		<fieldset>
 			<#list con.queryKeyWords?sort_by("score") as qk>
 				<@keywordTab.keywordTab kw=qk/>
-				<#list qk.relatedKeywords?sort_by("score") as kw1>
-					<@keywordTab.keywordTab kw=kw1/>
-				</#list>
 			</#list>
 		</fieldset>
 	</div>
 	
-	<div id="facets">
+	<div class="chosenfacets">
+		<#if it.templateData.constraints != "{}">
+			<fieldset>
+				<div id="chosenFacets"></div>
+				<div id="chosenFacetsHidden" class="invisible">'${it.templateData.constraints?js_string}'</div>			
+			</fieldset>
+		</#if>
+	</div>
+	<br/>
+	<div class="facets" id="facets">
 
 		<#if it.facets?exists && it.facets?size != 0>
 			<fieldset>
-				<div id="chosenFacets"></div>
-				<div id="chosenFacetsHidden" class="invisible">'${it.templateData.constraints?js_string}'</div>
 				<br/>
 				<#list it.facets as facet>
-					${facet.name?substring(0,facet.name?last_index_of("_"))}
-					<#if facet.values?exists && facet.values?size != 0>
-						<ul>
-							<#list facet.values as value>
-								<#assign consLink = it.templateData.constraints>
-								<li><a href=javascript:getResults('${consLink?url('UTF-8')?js_string}','${facet.name?url('UTF-8')?js_string}','${value.name?url('UTF-8')?js_string}')>${value.name} (${value.count})</a></li>
-								
-							</#list>
-						</ul>
-					</#if>
+					<@facetResultMacro.facetResultMacro facetField=facet consLink=it.templateData.constraints/>
 				</#list>
 			</fieldset>
 		</#if>

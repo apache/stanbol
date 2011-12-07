@@ -18,10 +18,12 @@
 package org.apache.stanbol.contenthub.core.utils;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.stanbol.contenthub.servicesapi.search.execution.ClassResource;
 import org.apache.stanbol.contenthub.servicesapi.search.execution.IndividualResource;
 import org.apache.stanbol.contenthub.servicesapi.search.execution.Keyword;
+import org.apache.stanbol.contenthub.servicesapi.search.execution.Keyword.RelatedKeywordSource;
 import org.apache.stanbol.contenthub.servicesapi.search.execution.SearchContext;
 import org.apache.stanbol.contenthub.servicesapi.search.execution.SearchContextFactory;
 import org.slf4j.Logger;
@@ -31,6 +33,10 @@ import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntResource;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.OWL2;
 import com.hp.hpl.jena.vocabulary.RDF;
@@ -177,5 +183,74 @@ public final class ClosureHelper {
         String uri = klass.getURI();
         return uri.contains(RDF.getURI()) || uri.contains(RDFS.getURI()) || uri.contains(OWL.getURI())
                || uri.contains(OWL2.getURI());
+    }
+
+    public void computeClosureWithProperty(Resource sourceURI,
+                                           Property subsumptionProperty,
+                                           int maxDepth,
+                                           double initialScore,
+                                           double degradingCoefficient,
+                                           Keyword keyword) {
+
+        computeSubclosureWithProperty(sourceURI, subsumptionProperty, maxDepth, initialScore,
+            degradingCoefficient, keyword);
+        computeSuperclosureWithProperty(sourceURI, subsumptionProperty, maxDepth, initialScore,
+            degradingCoefficient, keyword);
+
+    }
+
+    private void computeSubclosureWithProperty(Resource uri,
+                                               Property subsumptionProperty,
+                                               int depth,
+                                               double initialScore,
+                                               double degradingCoefficient,
+                                               Keyword keyword) {
+
+        if (depth == 0) {
+            LOGGER.debug("Max depth reached not examining the resource {}", uri.getURI());
+            return;
+        } else {
+            LOGGER.debug("Computing sub concepts of {} ", uri);
+            Set<Statement> children = model.listStatements(null, subsumptionProperty, uri).toSet();
+            double score = initialScore / degradingCoefficient;
+            for (Statement childStatement : children) {
+                Resource subject = childStatement.getSubject();
+                String childName = IndexingUtil.getCMSObjectName(subject);
+                if (!childName.equals("")) {
+                    factory.createKeyword(childName, score, keyword.getRelatedQueryKeyword(),
+                        RelatedKeywordSource.ONTOLOGYRESOURCE.getName());
+                    LOGGER.debug("Added {} as related keyword to {} ", childName, keyword.getKeyword());
+                    computeSubclosureWithProperty(subject, subsumptionProperty, depth - 1, score,
+                        degradingCoefficient, keyword);
+                }
+            }
+        }
+    }
+
+    private void computeSuperclosureWithProperty(Resource uri,
+                                                 Property subsumptionProperty,
+                                                 int depth,
+                                                 double initialScore,
+                                                 double degradingCoefficient,
+                                                 Keyword keyword) {
+        if (depth == 0) {
+            LOGGER.debug("Max depth reached not examining the resource {}", uri.getURI());
+            return;
+        } else {
+            LOGGER.debug("Computing parent concepts of {} ", uri);
+            Set<Statement> parents = model.listStatements(uri, subsumptionProperty, (RDFNode) null).toSet();
+            double score = initialScore / degradingCoefficient;
+            for (Statement parentStatement : parents) {
+                Resource object = parentStatement.getResource();
+                String parentName = IndexingUtil.getCMSObjectName(object);
+                if (!parentName.equals("")) {
+                    factory.createKeyword(parentName, score, keyword.getRelatedQueryKeyword(),
+                        RelatedKeywordSource.ONTOLOGYRESOURCE.getName());
+                    LOGGER.debug("Added {} as related keyword to {} ", parentName, keyword.getKeyword());
+                    computeSuperclosureWithProperty(object, subsumptionProperty, depth - 1, score,
+                        degradingCoefficient, keyword);
+                }
+            }
+        }
     }
 }

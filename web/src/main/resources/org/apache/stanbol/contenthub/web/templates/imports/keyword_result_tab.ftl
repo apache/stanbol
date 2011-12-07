@@ -26,7 +26,7 @@
 		<#else>	
 			<#list qk.relatedDocumentResources?sort_by("scoreString")?reverse as docRes>
 				<div class="bordered-bottom">
-					<li class="lined"><a href="${it.publicBaseUri}contenthub/page/${docRes.localId}">${docRes.localId}</a></li>
+					<li class="lined"><a href="${it.publicBaseUri}contenthub/page/${docRes.localId}">${docRes.documentTitle}</a></li>
 					<a class="collapseItem lined" href="/">
 						<img  src="/static/home/images/foldable_folded.png"/>
 					</a>

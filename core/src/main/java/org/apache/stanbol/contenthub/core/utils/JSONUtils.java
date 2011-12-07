@@ -120,7 +120,8 @@ public class JSONUtils {
         JSONObject jObj = new JSONObject(sci.getConstraints());
         try {
             jObj.put("content", content);
-            jObj.put("id", sci.getId());
+            jObj.put("mimeType", sci.getMimeType());
+            jObj.put("id", ContentItemIDOrganizer.detachBaseURI(sci.getId()));
         } catch (JSONException e) {
             logger.error("Cannot create the JSON Object.", e);
         }

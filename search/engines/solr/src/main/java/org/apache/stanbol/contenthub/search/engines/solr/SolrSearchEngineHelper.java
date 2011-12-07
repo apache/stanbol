@@ -23,6 +23,7 @@ import java.util.Map.Entry;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.util.ClientUtils;
+import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +51,8 @@ public class SolrSearchEngineHelper {
                     String fieldName = ClientUtils.escapeQueryChars(entry.getKey());
                     for (Object value : entry.getValue()) {
                         queryString = queryString + and + fieldName + queryDelimiter
-                                      + ClientUtils.escapeQueryChars((String) value);
+                                      + (SolrVocabulary.isNameRangeField(fieldName)  ? 
+                                    	(String) value : ClientUtils.escapeQueryChars((String) value));
                     }
                 }
             } catch (Exception e) {

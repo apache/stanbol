@@ -40,4 +40,11 @@ public interface SolrContentItem extends ContentItem {
      * @return A map of constraints (facets).
      */
     Map<String,List<Object>> getConstraints();
+
+    /**
+     * Retrieves the title of this content item
+     * 
+     * @return title {@link String}
+     */
+    String getTitle();
 }

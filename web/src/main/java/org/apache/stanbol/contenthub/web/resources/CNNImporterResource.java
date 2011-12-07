@@ -20,7 +20,8 @@ package org.apache.stanbol.contenthub.web.resources;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 
 import java.net.URI;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.FormParam;
@@ -64,11 +65,11 @@ public class CNNImporterResource extends BaseStanbolResource {
             full = false;
         }
 
-        List<URI> uris = cnnImporter.importCNNNews(topic, max, full);
+        Map<URI,String> newsInfo = cnnImporter.importCNNNews(topic, max, full);
         TopicNews tn = new TopicNews();
         tn.setTopic(topic);
-        tn.setUris(uris);
-
+        tn.setUris(new ArrayList<URI>(newsInfo.keySet()));
+        tn.setTitles(new ArrayList<String>(newsInfo.values()));
         return tn;
     }
 

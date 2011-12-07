@@ -28,17 +28,15 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.contenthub.core.search.execution.SearchContextImpl;
+import org.apache.stanbol.contenthub.core.utils.IndexingUtil;
 import org.apache.stanbol.contenthub.servicesapi.search.Search;
 import org.apache.stanbol.contenthub.servicesapi.search.SearchResult;
 import org.apache.stanbol.contenthub.servicesapi.search.processor.SearchProcessor;
-import org.apache.stanbol.contenthub.servicesapi.search.vocabulary.SearchVocabulary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
@@ -169,7 +167,7 @@ public class SearchImpl implements Search {
             Model model = ModelFactory.createModelForGraph(jenaGraph);
             ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM_RDFS_INF);
             ontModel.add(model);
-            addIndexPropertyToOntResources(ontModel);
+            IndexingUtil.addIndexPropertyToOntResources(ontModel);
         }
 
         // Create search context
@@ -178,25 +176,4 @@ public class SearchImpl implements Search {
 
         return searchContext;
     }
-
-    private void addIndexPropertyToOntResources(OntModel model) {
-        // Add class names
-        for (OntClass klass : model.listClasses().toList()) {
-            if (klass == null || klass.isAnon()) continue;
-            klass.addProperty(SearchVocabulary.HAS_LOCAL_NAME, klass.getLocalName());
-        }
-        // Add individual names
-        for (OntResource ind : model.listIndividuals().toList()) {
-            if (ind == null || ind.isAnon()) continue;
-            ind.addProperty(SearchVocabulary.HAS_LOCAL_NAME, ind.getLocalName());
-        }
-
-    }
-
-    public static void main(String[] argsv) {
-        String id = "jcr:mahmut";
-        String escaped = id.replaceAll(":", "K");
-        System.out.println(escaped);
-    }
-
 }

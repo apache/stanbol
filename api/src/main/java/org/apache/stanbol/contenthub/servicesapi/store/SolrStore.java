@@ -40,6 +40,8 @@ public interface SolrStore extends Store {
      * @param id
      *            The unique ID for the item. If it is null, {@link SolrStore} should assign a unique ID for
      *            this item.
+     * @param title
+     *            The title for the content item.
      * @param content
      *            The content itself.
      * @param contentType
@@ -48,7 +50,11 @@ public interface SolrStore extends Store {
      *            The facets in <code>key:[value1,value2]</code> pairs.
      * @return Created {@link SolrContentItem}.
      */
-    SolrContentItem create(String id, byte[] content, String contentType, Map<String,List<Object>> constraints);
+    SolrContentItem create(String id,
+                           String title,
+                           byte[] content,
+                           String contentType,
+                           Map<String,List<Object>> constraints);
 
     /**
      * Sends the {@link SolrContentItem} to the {@link EnhancementJobManager} to enhance the content.

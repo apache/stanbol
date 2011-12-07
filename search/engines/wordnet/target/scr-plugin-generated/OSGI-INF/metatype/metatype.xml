@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0" localization="OSGI-INF/metatype/metatype">
+    <OCD id="org.apache.stanbol.contenthub.search.engines.wordnet.WordnetEngine" name="%org.apache.stanbol.contenthub.search.engines.wordnet.WordnetEngine.name" description="%org.apache.stanbol.contenthub.search.engines.wordnet.WordnetEngine.description">
+        <AD id="org.apache.stanbol.contenthub.search.engines.wordnet.Wordnet.database" type="String" default="" name="%org.apache.stanbol.contenthub.search.engines.wordnet.Wordnet.database.name" description="%org.apache.stanbol.contenthub.search.engines.wordnet.Wordnet.database.description"/>
+        <AD id="org.apache.stanbol.contenthub.search.engines.wordnet.Wordnet.expansionLevel" type="String" default="1" name="%org.apache.stanbol.contenthub.search.engines.wordnet.Wordnet.expansionLevel.name" description="%org.apache.stanbol.contenthub.search.engines.wordnet.Wordnet.expansionLevel.description">
+            <Option value="1" label="1"/>
+            <Option value="2" label="2"/>
+            <Option value="3" label="3"/>
+            <Option value="4" label="4"/>
+        </AD>
+        <AD id="org.apache.stanbol.contenthub.search.engines.wordnet.Wordnet.degradingFactor" type="String" default="1.0" name="%org.apache.stanbol.contenthub.search.engines.wordnet.Wordnet.degradingFactor.name" description="%org.apache.stanbol.contenthub.search.engines.wordnet.Wordnet.degradingFactor.description">
+            <Option value="1.0" label="1.0"/>
+            <Option value="1.9" label="1.9"/>
+            <Option value="2.0" label="2.0"/>
+        </AD>
+    </OCD>
+    <Designate pid="org.apache.stanbol.contenthub.search.engines.wordnet.WordnetEngine">
+        <Object ocdref="org.apache.stanbol.contenthub.search.engines.wordnet.WordnetEngine"/>
+    </Designate>
+</metatype:MetaData>

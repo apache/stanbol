@@ -29,7 +29,8 @@ public class TopicNews {
 
     private String topic;
     private List<URI> uris;
-
+    private List<String> titles;
+    
     public String getTopic() {
         return topic;
     }
@@ -38,11 +39,19 @@ public class TopicNews {
         return uris;
     }
 
+    public List<String> getTitles() {
+        return titles;
+    }
+    
     public void setTopic(String topic) {
         this.topic = topic;
     }
 
     public void setUris(List<URI> uris) {
         this.uris = uris;
+    }
+    
+    public void setTitles(List<String> titles) {
+        this.titles = titles;
     }
 }

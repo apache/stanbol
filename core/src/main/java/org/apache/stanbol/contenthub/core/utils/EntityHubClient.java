@@ -17,6 +17,8 @@
 
 package org.apache.stanbol.contenthub.core.utils;
 
+import java.net.URLDecoder;
+
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
@@ -133,6 +135,19 @@ public final class EntityHubClient {
 
     }
 
+    /**
+     * Queries the entity hub and tries to find an entity form referenced sites by <br>
+     * by text search over the entities' labels. When a matching label found, then gets the whole <br>
+     * dbpedia ontolgoy of the result entity
+     * 
+     * @param name
+     *            name of the entity that we will look for in entity labels
+     * @param language
+     *            is the language of the name
+     * @param selects
+     *            are the properties that we want in our results
+     * @return ontology of dbpedia of desired entity, if no entity found then return null
+     */
     public OntModel referencedSiteFind(String name, String language, String... selects) {
         OntModel model = ModelFactory.createOntologyModel();
         String field = "http://www.w3.org/2000/01/rdf-schema#label";
@@ -180,6 +195,8 @@ public final class EntityHubClient {
             // means can not find any dbpedia entity with given name
             if (dbpediaId == null) {
                 model = null;
+            } else {
+                dbpediaId = URLDecoder.decode(dbpediaId, "UTF-8");
             }
             model = symbolLookup(dbpediaId, true);
 

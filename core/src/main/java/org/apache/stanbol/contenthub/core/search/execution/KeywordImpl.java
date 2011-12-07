@@ -43,6 +43,8 @@ import com.hp.hpl.jena.vocabulary.RDF;
  */
 public class KeywordImpl extends AbstractScored implements Keyword {
 
+    private String source;
+
     protected final SearchContextFactoryImpl factory;
 
     KeywordImpl(Node n,
@@ -111,5 +113,20 @@ public class KeywordImpl extends AbstractScored implements Keyword {
             resources.add(factory.getExternalResource(res.getURI()));
         }
         return Collections.unmodifiableList(resources);
+    }
+
+    @Override
+    public String getSource() {
+        return this.source;
+    }
+
+    @Override
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    @Override
+    public String toString() {
+        return this.getLocalName();
     }
 }

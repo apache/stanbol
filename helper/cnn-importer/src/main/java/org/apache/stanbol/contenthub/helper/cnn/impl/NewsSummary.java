@@ -18,6 +18,12 @@
 package org.apache.stanbol.contenthub.helper.cnn.impl;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary;
 
 /**
  * 
@@ -27,6 +33,7 @@ import java.net.URI;
 public class NewsSummary {
 
     private URI newsURI;
+    private String title;
     private String content;
 
     public void setNewsURI(URI newsURI) {
@@ -43,6 +50,23 @@ public class NewsSummary {
 
     public String getContent() {
         return content;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+    
+    public Map<String, List<Object>> getTitleConstraint() {
+        if(title == null || title.isEmpty()) return null;
+        Map<String, List<Object>> titleConstraint = new HashMap<String,List<Object>>();
+        List<Object> titleList = new ArrayList<Object>(1);
+        titleList.add(title);
+        titleConstraint.put(SolrVocabulary.SolrFieldName.TITLE.toString(), titleList);
+        return titleConstraint;
     }
 
 }

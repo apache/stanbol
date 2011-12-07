@@ -20,6 +20,13 @@
 
 <div class="panel" id="webview">
 
+<div class="searchbox">
+<table><tr><td>
+<input type="text" id="searchKeywords" name="searchKeywords" onkeydown="if (event.keyCode == 13) document.getElementById('searchButton').click()" /><input id="searchButton" type="button" value="Search" onclick="performSearch()" />
+</td></tr><tr align="right"><td>
+<div><a href="contenthub/search" />Search Page</a></div></td></tr></table>
+</div>
+
 <#--
 <em><strong>Disclaimer</strong>: this endpoint is a proof of concept /
 <strong>experimental</strong> feature. It does not actually store the content
@@ -34,17 +41,17 @@ on the disk, just in memory.</em>
 	<div>
 	  <tr>
 	  	<th></th>
-	    <th>Local ID</th>
+	    <th>Title</th>
 	    <th>Media type</th>
 	    <th>Enhancements <#--TODO: fix image path  <img src="${it.staticRootUrl}/contenthub/images/rdf.png" alt="Format: RDF"/> --></th>
 	  </tr>
 	  <#list it.recentlyEnhancedItems as item>
 	  <tr>
 		<td>
-			<img src="${it.staticRootUrl}/contenthub/images/edit_icon_16.png" onClick="javascript:editContentItem('${item.localId}');" title="Edit this item">
-			<img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" onClick="javascript:deleteContentItem('${item.localId}');" title="Delete this item">
+			<img src="${it.staticRootUrl}/contenthub/images/edit_icon_16.png" onClick="javascript:editContentItem('${item.localId}');" title="Edit this item" />
+			<img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" onClick="javascript:deleteContentItem('${item.localId}');" title="Delete this item" />
 		</td>
-	    <td><a href="${item.uri}" title="${item.uri}">${item.localId}</a></td>
+	    <td><a href="${item.uri}" title="${item.uri}">${item.title}</a></td>
 	    <td>${item.mimetype}</td>
 	    <td><a href="${it.publicBaseUri}contenthub/metadata/${item.localId}">${item.enhancements}</a></td>
 	  </tr>
@@ -66,61 +73,61 @@ on the disk, just in memory.</em>
 
 <div id="editingDiv"> </div>
 
-
 <h3>Submit Constraints to Content Item for analysis</h3>
 
 <fieldset>
 	<legend>Give Field:Value for your content</legend>
 	<div id="constraintsDiv" style="max-height:190px;overflow:auto">
 		<div id="textDiv1">
-			<br><input type="text" name="fieldText1"> : <input type="text" name="valueText1">
+			<br><input type="text" name="fieldText1" value="${it.titleFieldName}" readonly="readonly" /> : <input type="text" name="valueText1" />
 		</div>
 	</div>
 	
-	<br><label onClick="javascript:addConstraint();"><img src="${it.staticRootUrl}/contenthub/images/add_icon_16.png" />  Add a new constraint</label>
+	<br><label onClick="javascript:addConstraint(null);"><img src="${it.staticRootUrl}/contenthub/images/add_icon_16.png" />  Add a new constraint</label>
 </fieldset>
 
 <h3>Submit a new Content Item for analysis</h3>
 
-
-<form method="POST" accept-charset="utf-8">
+<form method="POST" accept-charset="utf-8" onSubmit = "return setConstraints();">
   <fieldset>
-  <input type="hidden" id="constraintsHidden" name="constraints" value="">
-  <input type="hidden" id="hiddenId" name="contentId" value="">
-  <legend>Submit raw text content</legend>
-  <p><textarea rows="15" id="contentTextArea" name="content"></textarea></p>
-  <p><input type="submit" onClick="javascript:setConstraints();" value="Submit text"></p>
+	  <input type="hidden" id="constraintsContent" name="constraints" value="" />
+	  <input type="hidden" id="idContent" name="contentId" value="" />
+	  <legend>Submit raw text content</legend>
+	  <p><textarea rows="15" id="contentTextArea" name="content"></textarea></p>
+	  <p><input type="submit" value="Submit text" /></p>
   </fieldset>
 </form>
 
-<form method="POST" accept-charset="utf-8">
+<form method="POST" accept-charset="utf-8" onSubmit = "return setConstraints();">
   <fieldset>
-  <input type="hidden" id="constraintsHidden" name="constraints" value="">
-  <input type="hidden" id="hiddenId" name="contentId" value="">
-  <legend>Submit a remote public resource by URL</legend>
-  <p><input name="url" type="text" class="url" />
-     <input type="submit" onClick="javascript:setConstraints();" value="Submit URL"></p>
+	  <input type="hidden" id="constraintsURL" name="constraints" value="" />
+	  <input type="hidden" id="idURL" name="contentId" value="" />
+	  <legend>Submit a remote public resource by URL</legend>
+	  <p>
+	  	<input name="url" type="text" class="url" />
+	  	<input type="submit" value="Submit URL" />
+	  </p>
   </fieldset>
 </form>
 
-<form method="POST" accept-charset="utf-8"  enctype="multipart/form-data">
+<form method="POST" accept-charset="utf-8"  enctype="multipart/form-data" onSubmit = "return setConstraints();">
   <fieldset>
-  <input type="hidden" id="constraintsHidden" name="constraints" value="">
-  <input type="hidden" id="hiddenId" name="contentId" value="">
-  <legend>Upload a local file</legend>
-  <p><input name="file" type="file"/>
-     <input type="submit" onClick="javascript:setConstraints();" value="Submit file"></p>
+	  <input type="hidden" id="constraintsFile" name="constraints" value="" />
+	  <input type="hidden" id="idFile" name="contentId" value="" />
+	  <legend>Upload a local file</legend>
+	  <p>
+	  	<input name="file" type="file"/>
+	  	<input type="submit" value="Submit file" />
+	  </p>
   </fieldset>
 </form>
-
-
 </div>
 
 <div class="panel" id="restapi" style="display: none;">
 <h3>Uploading new content to the Content Hub</h3>
 
   <p>You can upload content to the Content Hub for analysis with or without providing the content
-   id at your option:<p>
+   id at your option:</p>
   <ol>
     <li><code>PUT</code> content to <code>${it.publicBaseUri}contenthub/content/<strong>content-id</strong></code>
      with <code>Content-Type: text/plain</code>.</li>
@@ -168,7 +175,7 @@ Server: Jetty(6.1.x)
 
 <p>Once the content is created in the Content Hub, you can fetch back either the original content, a HTML summary view or
 the extracted RDF metadata by dereferencing the URL using the <code>Accept</code> header
-as selection switch:<p>
+as selection switch:</p>
 
 <pre>
 curl -i <strong>-H "Accept: text/plain"</strong> ${it.publicBaseUri}contenthub/content/sha1-84854eb6802a601ca2349ba28cc55f0b930ac96d
@@ -205,39 +212,55 @@ Server: Jetty(6.1.x)
 	function setConstraints(){
 		var i;
 		var result = JSON.parse("{}");
-		for(i=0 ; i<=counter ; i++){
+		for(i=1; i<=counter; i++){
 			if (document.getElementById("textDiv" + i)) {
 				var field = jQuery.trim(document.getElementsByName("fieldText"+i)[0].value);
-				var value = document.getElementsByName("valueText"+i)[0].value;
+				var value = jQuery.trim(document.getElementsByName("valueText"+i)[0].value);
+				if(i == 1 && !value) {
+					// control for the title input... it must exist
+					alert('You should enter title for your content');
+					return false;
+				}
+				if(!field || !value) {
+					continue;
+				}
 				
 				if(result[field] == null) {
 					result[field] = new Array();
 				}
 				var values = value.split(",");
-				for(j=0 ; j<values.length ; j++){
+				for(j=0; j<values.length; j++){
 					result[field].push(jQuery.trim(values[j]));
 				}
 			}
 		}
-		document.getElementById("constraintsHidden").value = JSON.stringify(result);	
+		var constraints = document.getElementsByName('constraints');
+		for (var i in constraints) {
+			constraints[i].value = JSON.stringify(result);
+		}
+		return true;
 	}
 	
-	function addConstraint(){
+	function addConstraint(vfn){
 		counter++;
 		var newCons = document.createElement('div');
 		newCons.setAttribute('id','textDiv' + counter);
 		var fieldName = "fieldText"+counter;
 		var valueName = "valueText"+counter;
 		var url = "javascript:removeConstraint(" + counter + ");";
-		newCons.innerHTML = "<br><input type='text' name=" + fieldName + ">" 
+		if(vfn == '${it.titleFieldName}') {
+			newCons.innerHTML = "<br/><input type='text' name=" + fieldName + " readonly=\"readonly\" />" 
 		 					+ " : "
-		 					+ "<input type='text' name=" + valueName + ">"
-		 					+ "  <img src='${it.staticRootUrl}/contenthub/images/delete_icon_16.png' title='Remove' onClick=" + url + ">";
-		 		
+		 					+ "<input type='text' name=" + valueName + " />";
+		}
+		else {
+			newCons.innerHTML = "<br/><input type='text' name=" + fieldName + " />" 
+		 					+ " : "
+		 					+ "<input type='text' name=" + valueName + " />"
+		 					+ "  <img src='${it.staticRootUrl}/contenthub/images/delete_icon_16.png' title='Remove' onClick=" + url + " />";
+		}		 		
 		document.getElementById("constraintsDiv").appendChild(newCons);
-		
 		document.getElementsByName(fieldName)[0].focus();
-		
 	}
 	
 	function removeConstraint(divNo){
@@ -246,7 +269,10 @@ Server: Jetty(6.1.x)
 	}
 
 	function cancelEditing(){
-		document.getElementById("hiddenId").value = "";
+		var contentids = document.getElementsByName('contentId');
+		for (var i in contentids) {
+			contentids[i].value = "";
+		}
 		document.getElementById("editingDiv").innerHTML = "";
 	}
 
@@ -261,22 +287,35 @@ Server: Jetty(6.1.x)
 			cache: false,
 			success: function(jsonCons) {
 			
-				var JSONObject = JSON.parse(jsonCons);
+				var contentItem = JSON.parse(jsonCons);
 				var count=1;
-				if(JSONObject != null) {
-					document.getElementById("contentTextArea").value = JSONObject["content"];
-					document.getElementById("hiddenId").value = JSONObject["id"];
-					document.getElementById("editingDiv").innerHTML = 	'<img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" title="Cancel Editing" onClick="javascript:cancelEditing()">'
-																		+"You are editing Content Item "+JSONObject["id"];
-					delete JSONObject["content"];
-					delete JSONObject["id"];
+				if(contentItem != null) {
+					// TODO: use more mimeType
+					if(contentItem["mimeType"] == "text/plain"){
+						document.getElementById("contentTextArea").value = contentItem["content"];
+					} else {
+						document.getElementById("contentTextArea").value = "";
+					}
+					var contentids = document.getElementsByName('contentId');
+					for (var i in contentids) {
+						contentids[i].value = contentItem["id"];
+					}
+					document.getElementById("editingDiv").innerHTML = 	'<img src="${it.staticRootUrl}/contenthub/images/delete_icon_16.png" title="Cancel Editing" onClick="javascript:cancelEditing()" />'
+																		+ " You are editing Content Item " + contentItem["id"];
+					delete contentItem["content"];
+					delete contentItem["id"];
+					delete contentItem["mimeType"];
 					
-					for(var p in JSONObject) {
-						if(JSONObject.hasOwnProperty(p)) {
-							var lastindex = p.toString().lastIndexOf("_");	
-							addConstraint();
-							document.getElementsByName("fieldText"+counter)[0].value = p.toString().substring(0, lastindex);
-							document.getElementsByName("valueText"+counter)[0].value = JSONObject[p].substring(1, JSONObject[p].length-1);
+					for(var p in contentItem) {
+						if(contentItem.hasOwnProperty(p)) {
+							var fieldName = p.toString();
+							if(fieldName.indexOf("_") != -1) {
+								var lastindex = fieldName.lastIndexOf("_");
+								fieldName = fieldName.substring(0, lastindex);
+							}
+							addConstraint(fieldName);
+							document.getElementsByName("fieldText"+counter)[0].value = fieldName;
+							document.getElementsByName("valueText"+counter)[0].value = contentItem[p].substring(1, contentItem[p].length-1);
 						}
 					}
 				}	
@@ -301,6 +340,11 @@ Server: Jetty(6.1.x)
 				alert(result.status + ' ' + result.statusText);
 			}
 		});
+	}
+	
+	function performSearch() {
+		var lurl = "${it.publicBaseUri}contenthub/search?kw=" + $("#searchKeywords").val();
+		window.location.replace(lurl);
 	}
 	
 </script>

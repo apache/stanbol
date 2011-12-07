@@ -23,7 +23,9 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -69,9 +71,9 @@ public class CNNImporterImpl implements CNNImporter {
     }
 
     @Override
-    public List<URI> importCNNNews(String topic, int maxNumber, boolean fullNews) {
+    public Map<URI,String> importCNNNews(String topic, int maxNumber, boolean fullNews) {
         List<NewsSummary> summaries = getRelatedNews(topic, maxNumber);
-        List<URI> uris = new ArrayList<URI>();
+        Map<URI,String> newsInfo = new HashMap<URI, String>();
         if (fullNews) {
             for (NewsSummary summary : summaries) {
                 String realContent = getNewsContent(summary.getNewsURI());
@@ -83,18 +85,19 @@ public class CNNImporterImpl implements CNNImporter {
 
         for (NewsSummary summary : summaries) {
             try {
-                SolrContentItem sci = solrStore.create(null, summary.getContent().getBytes(), "text/plain",
-                    null);
+                SolrContentItem sci = solrStore.create(null, summary.getTitle(), summary.getContent()
+                        .getBytes(), "text/plain", summary.getTitleConstraint());
                 URI uri = new URI(solrStore.enhanceAndPut(sci));
+                String title = summary.getTitle();
                 if (uri != null) {
-                    uris.add(uri);
+                	newsInfo.put(uri, title);
                 }
             } catch (Exception e) {
                 logger.error("", e);
                 logger.warn("Error storing content {}. Skipping ...", summary.getContent());
             }
         }
-        return uris;
+        return newsInfo;
     }
 
     private String getNewsContent(URI newsURI) {
@@ -161,8 +164,10 @@ public class CNNImporterImpl implements CNNImporter {
         try {
             String summary = current.getElementsByTagName("p").item(0).getFirstChild().getNodeValue();
             String uri = ((Element) current.getElementsByTagName("a").item(0)).getAttribute("href");
+            String title = current.getElementsByTagName("a").item(0).getFirstChild().getNodeValue();
             newsSummary = new NewsSummary();
             newsSummary.setNewsURI(new URI(uri));
+            newsSummary.setTitle(title);
             newsSummary.setContent(summary);
         } catch (Exception e) {
             newsSummary = null;

@@ -40,6 +40,7 @@ public final class QueryFactory {
     // private static final String SKOS = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>";
     private static final String PF = "PREFIX pf: <http://jena.hpl.hp.com/ARQ/property#>";
     private static final String SEARCH = "PREFIX ss: <" + SearchVocabulary.getUri() + ">";
+    private static final String CMS = "PREFIX cms: <http://www.apache.org/stanbol/cms#>";
 
     public static final Query getClassQuery(String keyword) {
 
@@ -66,6 +67,21 @@ public final class QueryFactory {
         sb.append("\t?individual rdf:type ?type.\n");
         sb.append("\t?type  rdf:type owl:Class.\n");
         sb.append("\t?individual ss:hasLocalName ?name.\n");
+        sb.append("\t(?name ?score) pf:textMatch '+" + normalizeKeyword(keyword) + "'.\n");
+        sb.append("}");
+        return com.hp.hpl.jena.query.QueryFactory.create(sb.toString());
+    }
+    
+    public static final Query getCMSObjectQuery(String keyword) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(RDF).append("\n");
+        sb.append(OWL).append("\n");
+        sb.append(PF).append("\n");
+        sb.append(SEARCH).append("\n");
+        sb.append(CMS).append("\n");
+        sb.append("SELECT ?cmsobject ?score WHERE {\n");
+        sb.append("\t?cmsobject rdf:type cms:CMSObject.\n");
+        sb.append("\t?cmsobject ss:hasLocalName ?name.\n");
         sb.append("\t(?name ?score) pf:textMatch '+" + normalizeKeyword(keyword) + "'.\n");
         sb.append("}");
         return com.hp.hpl.jena.query.QueryFactory.create(sb.toString());

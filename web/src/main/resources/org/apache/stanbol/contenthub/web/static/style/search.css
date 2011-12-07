@@ -50,11 +50,19 @@ div .keywords{
   width: 30%;
 }
 
-div #facets{
+div .chosenfacets{
   display: inline-block;
   position: relative;
   left: 1%;
   width: 30%;
+}
+
+div .facets{
+  display: inline-block;
+  position: relative;
+  left: 1%;
+  width: 30%;
+  float: left;
 }
 
 div .resources{
@@ -62,6 +70,16 @@ div .resources{
   position: relative;
   width: 69%;
   float: right;
+}
+
+div .searchbox {
+  position: absolute;
+  top: 15%;
+  left: 65%;
+  margin-left: 0.5em;
+  border: 1px solid transparent;
+  padding: 0.5em 0.5em 0.5em 0.5em;
+  border-radius: 8px;
 }
 
 H3.ui-accordion-header{
@@ -87,4 +105,10 @@ H3.ui-accordion-header{
 	padding-left: 23px;
 	margin-top: 0px;
 	margin-bottom: 0px;
+}
+
+.facetText{
+	width: 72px;
+	font-size: 12px;
+	color: #C43187;
 }
