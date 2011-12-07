@@ -35,15 +35,26 @@ import junit.framework.TestCase;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.core.CoreContainer;
+import org.apache.stanbol.commons.solr.utils.StreamQueryRequest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 public class TopicEngineTest {
+
+    private static final Logger log = LoggerFactory.getLogger(TopicEngineTest.class);
+
+    public static final String TEST_SOLR_CORE_ID = "test";
 
     EmbeddedSolrServer solrServer;
 
@@ -62,7 +73,9 @@ public class TopicEngineTest {
         IOUtils.copy(is, new FileOutputStream(solrFile));
 
         // solr conf folder with schema
-        File solrConfFolder = new File(solrHome, "conf");
+        File solrCoreFolder = new File(solrHome, TEST_SOLR_CORE_ID);
+        solrCoreFolder.mkdir();
+        File solrConfFolder = new File(solrCoreFolder, "conf");
         solrConfFolder.mkdir();
         File schemaFile = new File(solrConfFolder, "schema.xml");
         is = getClass().getResourceAsStream("/test_schema.xml");
@@ -75,13 +88,38 @@ public class TopicEngineTest {
         IOUtils.copy(is, new FileOutputStream(solrConfigFile));
 
         // create the embedded server
-        CoreContainer coreContainer = new CoreContainer(solrHome.getAbsolutePath());
-        solrServer = new EmbeddedSolrServer(coreContainer, "test");
+        CoreContainer coreContainer = new CoreContainer(solrHome.getAbsolutePath(), solrFile);
+        solrServer = new EmbeddedSolrServer(coreContainer, TEST_SOLR_CORE_ID);
     }
 
     @After
     public void cleanupEmbeddedSolrServer() {
         FileUtils.deleteQuietly(solrHome);
+        solrHome = null;
+        solrServer = null;
+    }
+
+    protected void loadSampleTopicsFromTSV() throws IOException, SolrServerException {
+        assertNotNull(solrHome);
+        assertNotNull(solrServer);
+        String topicSnippetsPath = "/topics_abstracts_snippet.tsv";
+        InputStream is = getClass().getResourceAsStream(topicSnippetsPath);
+        assertNotNull("Could not find test resource: " + topicSnippetsPath, is);
+
+        // Build a query for the CSV importer
+        SolrQuery query = new SolrQuery();
+        query.setQueryType("/update/csv");
+        query.set("commit", true);
+        query.set("separator", "\t");
+        query.set("headers", false);
+        query.set("fieldnames", "topic,popularity,paths,text");
+        query.set(CommonParams.STREAM_CONTENTTYPE, "text/plan;charset=utf-8");
+        query.set(CommonParams.STREAM_BODY, IOUtils.toString(is, "utf-8"));
+
+        // Upload an index
+        QueryResponse response = new StreamQueryRequest(query).process(solrServer);
+        assertNotNull(response);
+        log.info(String.format("Indexed test topics in %dms", response.getElapsedTime()));
     }
 
     protected Hashtable<String,Object> getDefaultConfigParams() {
@@ -130,11 +168,26 @@ public class TopicEngineTest {
         assertEquals(engine.acceptedLanguages, Arrays.asList("en", "fr"));
     }
 
-    //@Test
-    public void testClassificationTest() throws Exception {
+    @Test
+    public void testEmptyIndexTopicClassification() throws Exception {
         TopicClassificationEngine engine = TopicClassificationEngine.fromParameters(getDefaultConfigParams());
         List<TopicSuggestion> suggestedTopics = engine.suggestTopics("This is a test.");
         assertNotNull(suggestedTopics);
-        // TODO implement me
+        assertEquals(suggestedTopics.size(), 0);
+    }
+
+    @Test
+    public void testTopicClassification() throws Exception {
+        loadSampleTopicsFromTSV();
+        TopicClassificationEngine engine = TopicClassificationEngine.fromParameters(getDefaultConfigParams());
+        List<TopicSuggestion> suggestedTopics = engine
+                .suggestTopics("The Man Who Shot Liberty Valance is a 1962"
+                               + " American Western film directed by John Ford,"
+                               + " narrated by Charlton Heston and starring James"
+                               + " Stewart, John Wayne and Vivien Leigh.");
+        assertNotNull(suggestedTopics);
+        assertEquals(suggestedTopics.size(), 10);
+        TopicSuggestion bestSuggestion = suggestedTopics.get(0);
+        assertEquals(bestSuggestion.uri, "Category:American_films");
     }
 }
