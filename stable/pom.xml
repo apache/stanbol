@@ -16,7 +16,7 @@
   limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.stanbol</groupId>
@@ -74,18 +74,13 @@
               <goal>attach-bundle-list</goal>
             </goals>
             <configuration>
-              <includeDefaultBundles>true</includeDefaultBundles>
+              <includeDefaultBundles>false</includeDefaultBundles>
               <!-- Standalone jar requires an OSGi http service implementation -->
               <jarWebSupport>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.http.jetty</artifactId>
                 <version>2.2.0</version>
               </jarWebSupport>
-              <defaultBundleList>
-                <groupId>org.apache.stanbol</groupId>
-                <artifactId>org.apache.stanbol.launchers.basebundlelist</artifactId>
-                <version>0.9.0-incubating-SNAPSHOT</version>
-              </defaultBundleList>
             </configuration>
           </execution>
         </executions>
@@ -129,6 +124,21 @@
       <artifactId>org.apache.sling.launchpad.base</artifactId>
       <classifier>app</classifier>
     </dependency>
+
+    <!-- OSGi Framemework Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.osgiframework</artifactId>
+      <type>partialbundlelist</type>
+    </dependency>
+
+    <!-- Stanbol Commons Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.stanbolcommons</artifactId>
+      <type>partialbundlelist</type>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.bundlelist</artifactId>

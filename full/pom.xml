@@ -16,7 +16,7 @@
   limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.stanbol</groupId>
@@ -64,10 +64,10 @@
         <groupId>org.apache.sling</groupId>
         <artifactId>maven-launchpad-plugin</artifactId>
         <!--
-            TODO the maven-launchpad-plugin can also generate a war file and
-            Karaf description, we could add this. See
-            http://sling.apache.org/site/maven-launchpad-plugin.html
-          -->
+          TODO the maven-launchpad-plugin can also generate a war file and
+          Karaf description, we could add this. See
+          http://sling.apache.org/site/maven-launchpad-plugin.html
+        -->
         <executions>
           <execution>
             <id>prepare-package</id>
@@ -75,18 +75,13 @@
               <goal>prepare-package</goal>
             </goals>
             <configuration>
-              <includeDefaultBundles>true</includeDefaultBundles>
+              <includeDefaultBundles>false</includeDefaultBundles>
               <!-- Standalone jar requires an OSGi http service implementation -->
               <jarWebSupport>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.http.jetty</artifactId>
                 <version>2.2.0</version>
               </jarWebSupport>
-              <defaultBundleList>
-						    <groupId>org.apache.stanbol</groupId>
-						    <artifactId>org.apache.stanbol.launchers.basebundlelist</artifactId>
-						    <version>0.9.0-incubating-SNAPSHOT</version>
-						  </defaultBundleList>  
             </configuration>
           </execution>
         </executions>
@@ -119,7 +114,7 @@
             <exclude>src/main/resources/resources/config/org.apache.stanbol.commons.solr.web.impl.SolrDispatchFilterComponent-default.config</exclude>
           </excludes>
         </configuration>
-      </plugin>      
+      </plugin>
     </plugins>
   </build>
 
@@ -131,6 +126,22 @@
       <classifier>app</classifier>
     </dependency>
     
+    <!-- OSGi Framemework Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.osgiframework</artifactId>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+    
+    <!-- Stanbol Commons Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.stanbolcommons</artifactId>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- Stanbol CMS Adapter Bundle List -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -162,7 +173,7 @@
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
-    
+
     <!-- Stanbol Entityhub Bundle List -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -178,7 +189,7 @@
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
-    
+
     <!-- Stanbol Ontology Manager Bundle List -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -186,7 +197,7 @@
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
-    
+
     <!-- Stanbol Rules Bundle List -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
