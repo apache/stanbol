@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.stanbol.commons.web.base;
 
 import java.io.IOException;
@@ -48,7 +48,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 
-
 /**
  * Jersey-based RESTful endpoint for the Stanbol Enhancer engines and store.
  * <p>
@@ -66,12 +65,12 @@ public class JerseyEndpoint {
 
     @Property(value = "/static")
     public static final String STATIC_RESOURCES_URL_ROOT_PROPERTY = "org.apache.stanbol.commons.web.static.url";
-    
+
     /**
      * The origins allowed for multi-host requests
      */
-    @Property(cardinality=100,value = {"*"})
-    public static final String CORS_ORIGIN =  "org.apache.stanbol.commons.web.cors.origin";
+    @Property(cardinality = 100, value = {"*"})
+    public static final String CORS_ORIGIN = "org.apache.stanbol.commons.web.cors.origin";
 
     @Reference
     HttpService httpService;
@@ -83,8 +82,8 @@ public class JerseyEndpoint {
     protected final List<WebFragment> webFragments = new ArrayList<WebFragment>();
 
     protected final List<String> registeredAliases = new ArrayList<String>();
-    
-    protected Set<String> corsOrigins; 
+
+    protected Set<String> corsOrigins;
 
     public Dictionary<String,String> getInitParams() {
         Dictionary<String,String> initParams = new Hashtable<String,String>();
@@ -95,45 +94,50 @@ public class JerseyEndpoint {
     }
 
     @Activate
-    protected void activate(ComponentContext ctx) throws IOException, ServletException, NamespaceException, ConfigurationException {
+    protected void activate(ComponentContext ctx) throws IOException,
+                                                 ServletException,
+                                                 NamespaceException,
+                                                 ConfigurationException {
         componentContext = ctx;
-        //init corsOrigins
+        // init corsOrigins
         Object values = componentContext.getProperties().get(CORS_ORIGIN);
-        if(values instanceof String && !((String)values).isEmpty()){
-            corsOrigins = Collections.singleton((String)values);
-        } else if (values instanceof String[]){
-            corsOrigins = new HashSet<String>(Arrays.asList((String[])values));
-        } else if (values instanceof Iterable<?>){
+        if (values instanceof String && !((String) values).isEmpty()) {
+            corsOrigins = Collections.singleton((String) values);
+        } else if (values instanceof String[]) {
+            corsOrigins = new HashSet<String>(Arrays.asList((String[]) values));
+        } else if (values instanceof Iterable<?>) {
             corsOrigins = new HashSet<String>();
-            for(Object value : (Iterable<?>)values){
-                if(value != null && !value.toString().isEmpty()){
+            for (Object value : (Iterable<?>) values) {
+                if (value != null && !value.toString().isEmpty()) {
                     corsOrigins.add(value.toString());
                 }
             }
         } else {
-            throw new ConfigurationException(CORS_ORIGIN,"CORS origin(s) MUST be a String, String[], Iterable<String> (value:"+values+")");
+            throw new ConfigurationException(CORS_ORIGIN,
+                    "CORS origin(s) MUST be a String, String[], Iterable<String> (value:" + values + ")");
         }
         if (!webFragments.isEmpty()) {
             initJersey();
         }
     }
-    
+
     /** Initialize the Jersey subsystem */
     private synchronized void initJersey() throws NamespaceException, ServletException {
-        
-        if(componentContext == null) {
+
+        if (componentContext == null) {
             throw new IllegalStateException("Null ComponentContext, not activated?");
         }
-        
+
         shutdownJersey();
-        
+
         log.info("Initializing the Jersey subsystem");
-        
-        
+
         // register all the JAX-RS resources into a a JAX-RS application and bind it to a configurable URL
         // prefix
         JerseyEndpointApplication app = new JerseyEndpointApplication();
-        String staticUrlRoot = (String) componentContext.getProperties().get(STATIC_RESOURCES_URL_ROOT_PROPERTY);
+        String staticUrlRoot = (String) componentContext.getProperties().get(
+            STATIC_RESOURCES_URL_ROOT_PROPERTY);
+        String applicationAlias = (String) componentContext.getProperties().get(ALIAS_PROPERTY);
 
         // incrementally contribute fragment resources
         List<LinkResource> linkResources = new ArrayList<LinkResource>();
@@ -149,7 +153,11 @@ public class JerseyEndpoint {
             app.contributeTemplateLoader(fragment.getTemplateLoader());
             String staticPath = fragment.getStaticResourceClassPath();
             if (staticPath != null) {
-                String resourceAlias = staticUrlRoot + '/' + fragment.getName();
+                String resourceAlias = (applicationAlias.endsWith("/") ? applicationAlias.substring(0,
+                    applicationAlias.length() - 1) : applicationAlias)
+                                       + staticUrlRoot
+                                       + '/'
+                                       + fragment.getName();
                 httpService.registerResources(resourceAlias, staticPath, new BundleHttpContext(fragment));
                 registeredAliases.add(resourceAlias);
             }
@@ -160,7 +168,6 @@ public class JerseyEndpoint {
 
         // bind the aggregate JAX-RS application to a dedicated servlet
         ServletContainer container = new ServletContainer(app);
-        String applicationAlias = (String) componentContext.getProperties().get(ALIAS_PROPERTY);
         Bundle appBundle = componentContext.getBundleContext().getBundle();
         httpService.registerServlet(applicationAlias, container, getInitParams(), new BundleHttpContext(
                 appBundle));
@@ -176,10 +183,10 @@ public class JerseyEndpoint {
         servletContext.setAttribute(BaseStanbolResource.SCRIPT_RESOURCES, scriptResources);
         servletContext.setAttribute(BaseStanbolResource.NAVIGATION_LINKS, navigationLinks);
         servletContext.setAttribute(CORS_ORIGIN, corsOrigins);
-        
+
         log.info("JerseyEndpoint servlet registered at {}", applicationAlias);
     }
-    
+
     /** Shutdown Jersey, if there's anything to do */
     private synchronized void shutdownJersey() {
         log.info("Unregistering aliases {}", registeredAliases);
