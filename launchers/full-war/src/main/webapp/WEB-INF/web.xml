@@ -27,6 +27,7 @@
 		<display-name>Sling Servlet</display-name>
 		<servlet-name>sling</servlet-name>
 		<servlet-class>org.apache.sling.launchpad.webapp.SlingServlet</servlet-class>
+        <load-on-startup>100</load-on-startup>
 	</servlet>
 
 	<!-- Default Mapping for the Context -->
