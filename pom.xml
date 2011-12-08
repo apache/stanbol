@@ -506,6 +506,18 @@
       <!-- Partial bundle list dependencies -->
       <dependency>
         <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.launchers.bundlelists.osgiframework</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+        <type>partialbundlelist</type>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.launchers.bundlelists.stanbolcommons</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+        <type>partialbundlelist</type>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.cmsadapter.bundlelist</artifactId>
         <version>0.9.0-incubating-SNAPSHOT</version>
         <type>partialbundlelist</type>
