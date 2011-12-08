@@ -62,21 +62,6 @@
     </bundle>
   </startLevel>
 
-  <!-- Felix web console and plugins -->
-  <startLevel level="9">
-    <bundle>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.webconsole</artifactId>
-      <version>3.1.8</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.webconsole.plugins.memoryusage
-      </artifactId>
-      <version>1.0.2</version>
-    </bundle>
-  </startLevel>
-
   <!-- Sling launchpad -->
   <startLevel level="9">
     <bundle>
