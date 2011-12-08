@@ -16,28 +16,28 @@
   limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
     <version>0.9.0-incubating-SNAPSHOT</version>
-    <relativePath>../../parent</relativePath>
+    <relativePath>../../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.launchers.basebundlelist</artifactId>
-  <packaging>jar</packaging>
+  <artifactId>org.apache.stanbol.launchers.bundlelists.stanbolcommons</artifactId>
+  <packaging>partialbundlelist</packaging>
 
-  <name>Apache Stanbol Launcher - Base Bundle List</name>
-  <description>This is a Maven project which contains common bundles that are used other launchers of Apache Stanbol</description>
+  <name>Apache Stanbol OSGi Framework Bundle List </name>
+  <description>This is a Maven project which produces the partial list containing the common bundles that are used throughout the Stanbol.</description>
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/launchers/basebundlelist/
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/launchers/bundlelists/stanbolcommons
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/launchers/basebundlelist/
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/launchers/bundlelists/stanbolcommons
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>

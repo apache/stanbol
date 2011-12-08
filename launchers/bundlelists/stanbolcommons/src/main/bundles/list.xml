@@ -15,64 +15,23 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-  <!--
-		List of initial bundles for the Stanbol Sling-based standalone launcher.
-	-->
 <bundles>
-
-  <!-- *********************************************************************
-          start level < 10 reserved for OSGI and Sling Infrastructure
-       ********************************************************************* -->
-  <!-- OSGi infrastructure -->
   <startLevel level="5">
+    <!-- JDK Package Exporter -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.frameworkfragment</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
-    <bundle>
-      <groupId>org.apache.sling</groupId>
-      <artifactId>org.apache.sling.commons.log</artifactId>
-      <version>2.1.2</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.osgi.core</artifactId>
-      <version>1.4.0</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr</artifactId>
-      <version>1.6.0</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.configadmin</artifactId>
-      <version>1.2.8</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.metatype</artifactId>
-      <version>1.0.4</version>
-    </bundle>
   </startLevel>
 
-  <!-- HTTP service and Http related Utilities-->
+  <!-- HTTP service and Http related Utilities -->
   <startLevel level="5">
-    <bundle>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.http.whiteboard</artifactId>
-      <version>2.2.0</version>
-    </bundle>
-    <bundle>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
-      <version>1.4.0</version>
-    </bundle>
     <!-- Allows to parse Http Headers as QueryParameter -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.httpqueryheaders</artifactId>
+      <artifactId>org.apache.stanbol.commons.httpqueryheaders
+      </artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
@@ -86,12 +45,14 @@
     </bundle>
     <bundle>
       <groupId>org.apache.sling</groupId>
-      <artifactId>org.apache.sling.installer.factory.configuration</artifactId>
+      <artifactId>org.apache.sling.installer.factory.configuration
+      </artifactId>
       <version>1.0.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.installer.bundleprovider</artifactId>
+      <artifactId>org.apache.stanbol.commons.installer.bundleprovider
+      </artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
@@ -110,7 +71,8 @@
     </bundle>
     <bundle>
       <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.webconsole.plugins.memoryusage</artifactId>
+      <artifactId>org.apache.felix.webconsole.plugins.memoryusage
+      </artifactId>
       <version>1.0.2</version>
     </bundle>
   </startLevel>
@@ -129,10 +91,9 @@
     </bundle>
   </startLevel>
 
-  <!-- *********************************************************************
-          start level 10 TO 19 reserved for required libraries
-          (internal and external)
-       ********************************************************************* -->
+  <!-- ********************************************************************* 
+    start level 10 TO 19 reserved for required libraries (internal and external) 
+    ********************************************************************* -->
   <!-- General-purpose libraries -->
   <startLevel level="10">
     <bundle>
@@ -184,10 +145,9 @@
 
   <!-- Jersey -->
   <startLevel level="14">
-    <!--
-      NOTE: jersey-core bug, must start before jersey-server to avoid jersey
-      spi class not found errors. Restart jersey-server manually if getting those.
-    -->
+    <!-- NOTE: jersey-core bug, must start before jersey-server to avoid 
+      jersey spi class not found errors. Restart jersey-server manually if getting 
+      those. -->
     <bundle>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
@@ -221,7 +181,7 @@
       <artifactId>jersey-multipart</artifactId>
       <version>1.7</version>
     </bundle>
-    <!--  dependency of jersey-multipart -->
+    <!-- dependency of jersey-multipart -->
     <bundle>
       <groupId>org.jvnet</groupId>
       <artifactId>mimepull</artifactId>
@@ -328,18 +288,21 @@
     <!-- Allows to run Stanbol in offline mode -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
+      <artifactId>org.apache.stanbol.commons.stanboltools.offline
+      </artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <!-- DataFileProvider and implementations -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
+      <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider
+      </artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider.bundle</artifactId>
+      <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider.bundle
+      </artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
     <!-- OpenNLP as bundle + utilities -->
@@ -398,5 +361,4 @@
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
   </startLevel>
-
 </bundles>
