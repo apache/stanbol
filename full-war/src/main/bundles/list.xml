@@ -67,15 +67,6 @@
           (Enhancer, Entityhub, Contenthub, Factstore ... incl. Web Fragments)
        ********************************************************************* -->
 
-  <!-- FactStore -->
-  <startLevel level="20">
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.factstore</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-    </bundle>
-  </startLevel>
-
   <!-- KReS -->
   <startLevel level="22">
 		<bundle>
