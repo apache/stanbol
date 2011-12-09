@@ -17,6 +17,7 @@
 package org.apache.stanbol.commons.testing.http;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -70,7 +71,41 @@ public class Request {
     public Request withContent(String content) throws UnsupportedEncodingException {
         return withEntity(new StringEntity(content, "UTF-8"));
     }
-
+    /**
+     * Encodes the parsed form content. Strings at even indexes are interpreted
+     * as names. Values are {@link URLEncoder#encode(String, String) url encoded}.
+     * @param values the [{key-1},{value-1},...,{key-n},{key-n}] values for the form
+     * @return the Request with the form content added as {@link StringEntity}.
+     * @throws UnsupportedEncodingException if UTF-8 is not supported
+     * @throws IllegalArgumentException if an uneven number of elements are in the
+     * parsed values or if any parsed key is <code>null</code> or empty.
+     */
+    public Request withFormContent(String...values) throws UnsupportedEncodingException{
+        if(values == null || values.length == 0){
+            return withContent("");
+        }
+        if((values.length%2) != 0){
+            throw new IllegalArgumentException("The number of values MUST BE an even number");
+        }
+        StringBuilder content = new StringBuilder();
+        for(int i = 0;i<values.length;i+=2){
+            if(values[i] == null || values[i].isEmpty()){
+               throw new IllegalArgumentException("The name of the '"+(i/2)+
+                   "' parameter MUST NOT be NULL nor empty (value='"+
+                   values[i+1]+"')!");
+            }
+            if(i > 0){
+                content.append('&');
+            }
+            content.append(values[i]);
+            if(values[i+1] != null && !values[i+1].isEmpty()){
+                content.append('=')
+                    .append(URLEncoder.encode(values[i+1], "UTF-8"));
+            }
+            
+        }
+        return withContent(content.toString());
+    }
     public Request withEntity(HttpEntity e) {
         getHttpEntityEnclosingRequestBase().setEntity(e);
         return this;
