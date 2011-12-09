@@ -300,7 +300,51 @@ public class FactStoreTest extends StanbolTestBase {
         .withHeader("Content-Type", "application/json")
         .withHeader("Accept", "application/json");
                 
-        String expected = "{\"@subject\":\"1\",\"person\":\"http://upb.de/persons/bnagel\"}";
+        String expected = "{\"@subject\":\"R1\",\"person\":\"http://upb.de/persons/bnagel\"}";
+        String actual = executor.execute(q).assertStatus(200).getContent();
+        Assert.assertEquals(expected, actual);
+    }
+    
+    @Test
+    public void querySingleFactMultiResults() throws Exception {
+        Request r1 = builder
+        .buildOtherRequest(
+            new HttpPut(builder.buildUrl("/factstore/facts/"
+                                         + encodeURI("http://iks-project.eu/ont/emplOf"))))
+        .withContent(
+            "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"@types\":{\"person\":\"iks:person\",\"organization\":\"iks:organization\"}}}")
+        .withHeader("Content-Type", "application/json");
+        executor.execute(r1).assertStatus(201);
+
+        Request r2 = builder
+        .buildOtherRequest(new HttpPost(builder.buildUrl("/factstore/facts/")))
+        .withContent(
+            "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:emplOf\",\"person\":{\"@iri\":\"upb:jim\"},\"organization\":{\"@iri\":\"http://upb.de\"}}")
+        .withHeader("Content-Type", "application/json");
+        executor.execute(r2).assertStatus(200);
+        
+        Request r3 = builder
+        .buildOtherRequest(new HttpPost(builder.buildUrl("/factstore/facts/")))
+        .withContent(
+            "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:emplOf\",\"person\":{\"@iri\":\"upb:john\"},\"organization\":{\"@iri\":\"http://upb.de\"}}")
+        .withHeader("Content-Type", "application/json");
+        executor.execute(r3).assertStatus(200);
+        
+        Request r4 = builder
+        .buildOtherRequest(new HttpPost(builder.buildUrl("/factstore/facts/")))
+        .withContent(
+            "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\",\"upb\":\"http://upb.de/persons/\"},\"@profile\":\"iks:emplOf\",\"person\":{\"@iri\":\"upb:james\"},\"organization\":{\"@iri\":\"http://upb.de\"}}")
+        .withHeader("Content-Type", "application/json");
+        executor.execute(r4).assertStatus(200);
+        
+        String queryString = "{\"@context\":{\"iks\":\"http://iks-project.eu/ont/\"},\"select\":[\"person\"],\"from\":\"iks:emplOf\",\"where\":[{\"=\":{\"organization\":{\"@iri\":\"http://upb.de\"}}}]}";
+        Request q = builder
+        .buildOtherRequest(new HttpPost(builder.buildUrl("/factstore/query/")))
+        .withContent(queryString)
+        .withHeader("Content-Type", "application/json")
+        .withHeader("Accept", "application/json");
+                
+        String expected = "{\"@subject\":[{\"@subject\":\"R1\",\"person\":\"http://upb.de/persons/jim\"},{\"@subject\":\"R2\",\"person\":\"http://upb.de/persons/john\"},{\"@subject\":\"R3\",\"person\":\"http://upb.de/persons/james\"}]}";
         String actual = executor.execute(q).assertStatus(200).getContent();
         Assert.assertEquals(expected, actual);
     }

@@ -56,7 +56,7 @@ public class FactResultSet {
 			for (FactResult result : rows) {
 			    rowCount++;
 			    JsonLdResource subject = new JsonLdResource();
-			    subject.setSubject(String.valueOf(rowCount));
+			    subject.setSubject("R" + rowCount);
 				for (int i = 0; i < header.size(); i++) {
 					subject.putProperty(header.get(i), result.getValues().get(i));
 				}
