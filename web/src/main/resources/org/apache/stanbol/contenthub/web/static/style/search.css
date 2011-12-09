@@ -28,7 +28,7 @@
   height: 17px;
   border: none;
   display: inline;
-  background-image: url("/static/contenthub/images/configure_16.png");
+  background-image: url("../images/configure_16.png");
   background-repeat: no-repeat;
   background-position: right;	
 }
