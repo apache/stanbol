@@ -69,7 +69,7 @@ labels = rdfs:label :: xsd:string;
 comment = rdfs:comment[@en] :: xsd:string;
 categories = dct:subject :: xsd:anyURI;
 homepage = foaf:homepage :: xsd:anyURI;
-location = fn:concat("[",geo:lat,",",geo:lon,"]") :: xsd:string;</textarea>
+location = fn:concat("[",geo:lat,",",geo:long,"]") :: xsd:string;</textarea>
     <input type="submit" value="Execute" onclick="executeLDPath(); return false;" /></p>
 </form>
 </p>
