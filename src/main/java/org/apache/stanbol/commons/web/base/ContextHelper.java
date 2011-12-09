@@ -37,7 +37,7 @@ public class ContextHelper {
      */
     @SuppressWarnings("unchecked")
     public static <T> T getServiceFromContext(Class<T> clazz, ServletContext context) {
-        BundleContext bundleContext = (BundleContext) context.getAttribute(BundleContext.class.getName());
+        BundleContext bundleContext = getBundleContext(context);
         ServiceReference reference = bundleContext.getServiceReference(clazz.getName());
         //TODO: returning the service will cause the service reference not to be
         //  released bundleContext.ungetService(reference) will not be called!
