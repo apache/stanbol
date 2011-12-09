@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<h4>Subresource /mapping/entity</h4>
+<h3>Subresource /mapping/entity</h3>
 
 <table>
 <tbody>
@@ -40,11 +40,11 @@
 </tbody>
 </table>
 
-<h5>Example</h5>
+<h3>Example</h3>
 
 <pre>curl ${it.publicBaseUri}entityhub/mapping/entity?id=http://dbpedia.org/resource/Paris</pre>
 
-<h5>Test</h5>
+<h4>Test</h4>
 
 <form id="getMappingForEntityForm">
 <p>Get mapping for entity

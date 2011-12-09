@@ -16,11 +16,11 @@
 -->
 <#import "/imports/common.ftl" as common>
 <#escape x as x?html>
-<@common.page title="Entityhub Entity" hasrestapi=true> 
+<@common.page title="ReferencedSite LDPath" hasrestapi=true> 
 
-<h3>Service Endpoint <a href="${it.publicBaseUri}entityhub/entity">/entityhub/entity</a></h3>
-
-<#include "inc_entity.ftl">
+<#include "inc_ldpath.ftl">
+<hr>
+<#include "/imports/ldpathdocumentation.ftl">
 
 </@common.page>
 </#escape>

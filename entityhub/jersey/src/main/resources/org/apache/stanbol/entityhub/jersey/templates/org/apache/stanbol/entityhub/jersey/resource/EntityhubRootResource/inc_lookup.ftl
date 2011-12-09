@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<h4>Subresource /lookup?id={uri}&create={create}</h4>
+<h3>Subresource /lookup?id={uri}&create={create}</h3>
 
 <table>
 <tbody>
@@ -58,11 +58,11 @@
 </tbody>
 </table>
 
-<h5>Example</h5>
+<h4>Example</h4>
 
 <pre>curl "${it.publicBaseUri}entityhub/lookup/?id=http://dbpedia.org/resource/Paris&create=false"</pre>
 
-<h5>Test</h5>
+<h4>Test</h4>
 
 <ul>
 	<li><a href="#" onclick="lookupEntity('http://dbpedia.org/resource/Paris',false); return false;">Lookup symbol for

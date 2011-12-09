@@ -18,6 +18,7 @@ package org.apache.stanbol.entityhub.jersey.resource;
 
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.OPTIONS;
+import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
@@ -33,6 +34,7 @@ import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.ENTITY_SUPPO
 import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.REPRESENTATION_SUPPORTED_MEDIA_TYPES;
 import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.createFieldQueryForFindRequest;
 import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.getAcceptableMediaType;
+import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.handleLDPathRequest;
 
 import java.io.File;
 import java.util.Arrays;
@@ -46,7 +48,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.HttpMethod;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -68,6 +69,7 @@ import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.entityhub.jersey.parsers.FieldQueryReader;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
+import org.apache.stanbol.entityhub.ldpath.backend.SiteBackend;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
@@ -129,12 +131,12 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     
     private ReferencedSite site;
     
-    public ReferencedSiteRootResource(@Context ServletContext context,
-                                      @PathParam(value = "site") String siteId) {
+    public ReferencedSiteRootResource(@PathParam(value = "site") String siteId,
+                                      @Context ServletContext servletContext) {
         super();
         log.info("<init> with site {}", siteId);
         ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
-            ReferencedSiteManager.class, context);
+            ReferencedSiteManager.class, servletContext);
         if (siteId == null || siteId.isEmpty()) {
             log.error("Missing path parameter site={}", siteId);
             throw new WebApplicationException(Response.Status.NOT_FOUND);
@@ -400,6 +402,37 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         }
         
     }
+    /*
+     * LDPath support
+     */
+    @OPTIONS
+    @Path("/ldpath")
+    public Response handleCorsPreflightLDPath(@Context HttpHeaders headers){
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers,OPTIONS,GET,POST);
+        return res.build();
+    }
+    @GET
+    @Path("/ldpath")
+    public Response handleLDPathGet(
+            @QueryParam(value = "context")Set<String> contexts,
+            @QueryParam(value = "ldpath")String ldpath,
+            @Context HttpHeaders headers){
+        return handleLDPathPost(contexts, ldpath, headers);
+    }
+    @POST
+    @Path("/ldpath")
+    public Response handleLDPathPost(
+             @FormParam(value = "context")Set<String> contexts,
+             @FormParam(value = "ldpath")String ldpath,
+             @Context HttpHeaders headers){
+        return handleLDPathRequest(this,new SiteBackend(site), 
+            ldpath, contexts, headers, servletContext);
+    }
+    
+    /*
+     * Referenced Site Metadata
+     */
     /**
      * Transforms a site to a Representation that can be serialised 
      * @param context

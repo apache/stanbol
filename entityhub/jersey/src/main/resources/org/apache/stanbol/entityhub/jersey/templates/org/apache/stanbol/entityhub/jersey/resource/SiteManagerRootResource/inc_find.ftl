@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<h4>Subresource /find?name={name}</h4>
+<h3>Subresource /find?name={name}</h3>
 
 <table>
 <tbody>
@@ -50,11 +50,11 @@
 </tbody>
 </table>
 
-<h5>Example</h5>
+<h4>Example</h4>
 
 <pre>curl -X POST -d "name=Bishofsh*&limit=10&offset=0" ${it.publicBaseUri}entityhub/sites/find</pre>
 
-<h5>Test</h5>
+<h4>Test</h4>
 
 <form>
 <p>Start test search for

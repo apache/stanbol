@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<h4>Subresource /entity/find?name={name}</h4>
+<h3>Subresource /entity/find?name={name}</h3>
 
 <table>
 <tbody>
@@ -50,13 +50,13 @@
 </tbody>
 </table>
 
-<h5>Example</h5>
+<h4>Example</h4>
 <p>The following query would search for Entities with a 'rdfs:label' that starts
 with 'Pari'.</p>
 
 <pre>curl -X POST -d "name=Pari*&field=http://www.w3.org/2000/01/rdf-schema#label" ${it.publicBaseUri}entityhub/sites/find</pre>
 
-<h5>Test</h5>
+<h4>Test</h4>
 
 <p>Find symbol by searching for 'Paris' for the language 'de'.<br>
 <a href="#" onclick="findSymbol(); return false;">Go and find symbol</a>
