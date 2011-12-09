@@ -20,7 +20,7 @@
 <@common.page title="Referenced Site" hasrestapi=true> 
 
 <div class="panel" id="restapi">
-<h3>Service Endpoint <a href="${it.publicBaseUri}entityhub/sites">/entityhub/sites</a></h3>
+<h3>Service Endpoint <a href="${it.publicBaseUri}entityhub/sites">/entityhub/site/{siteId}</a></h3>
 
 <#nested>
 

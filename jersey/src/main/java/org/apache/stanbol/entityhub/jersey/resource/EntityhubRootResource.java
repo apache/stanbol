@@ -36,6 +36,7 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.handleLDPathRequest;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -72,6 +73,8 @@ import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
+import org.apache.stanbol.entityhub.ldpath.backend.SiteBackend;
+import org.apache.stanbol.entityhub.ldpath.backend.YardBackend;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
@@ -114,11 +117,9 @@ public class EntityhubRootResource extends BaseStanbolResource {
     private static final Collection<? extends String> DEFAULT_FIND_SELECTED_FIELDS = Arrays.asList(
         RdfResourceEnum.label.getUri(), RdfResourceEnum.description.getUri());
 
-    private ServletContext context;
     // bind the job manager by looking it up from the servlet request context
-    public EntityhubRootResource(@Context ServletContext context) {
+    public EntityhubRootResource() {
         super();
-        this.context = context;
     }
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers){
@@ -156,7 +157,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
             // TODO: how to parse an error message
             throw new WebApplicationException(BAD_REQUEST);
         }
-        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
+        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
         Entity entity;
         try {
             entity = entityhub.getEntity(symbolId);
@@ -197,7 +198,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
                 // TODO: how to parse an error message
                 throw new WebApplicationException(BAD_REQUEST);
             }
-            Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
+            Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
             Entity entity;
             try {
                 entity = entityhub.lookupLocalEntity(reference, create);
@@ -261,12 +262,12 @@ public class EntityhubRootResource extends BaseStanbolResource {
         MediaType accepted = JerseyUtils.getAcceptableMediaType(headers,
             JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES, 
             MediaType.APPLICATION_JSON_TYPE);
-        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
         if(id == null || id.isEmpty()){
             return Response.status(Status.BAD_REQUEST).entity("The Request does" +
                     "not provide the id of the Entity to delete (parameter 'id').")
                     .header(HttpHeaders.ACCEPT, accepted).build();
         }
+        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
         Entity entity;
         try {
             entity = entityhub.delete(id);
@@ -303,10 +304,10 @@ public class EntityhubRootResource extends BaseStanbolResource {
                                           boolean create, 
                                           boolean update,
                                           HttpHeaders headers){
+        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
         MediaType accepted = JerseyUtils.getAcceptableMediaType(headers,
             JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES, 
             MediaType.APPLICATION_JSON_TYPE);
-        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
         if(entityhub == null){
             return Response.status(Status.INTERNAL_SERVER_ERROR).
                 entity("The Entityhub is currently unavailable.")
@@ -540,7 +541,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
      * @return the response (results of error)
      */
     private Response executeQuery(FieldQuery query, HttpHeaders headers, MediaType acceptedMediaType) throws WebApplicationException {
-        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
+        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
         try {
             ResponseBuilder rb = Response.ok(entityhub.find(query));
             rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
@@ -588,7 +589,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
                     HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
         }
-        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
+        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
         Entity mapping;
         try {
             mapping = entityhub.getMappingById(reference);
@@ -640,7 +641,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
             }
         }
         
-        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
+        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
         Entity mapping;
         try {
             mapping = entityhub.getMappingBySource(entity);
@@ -691,7 +692,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
         }
-        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, context);
+        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
         Collection<Entity> mappings;
         try {
             mappings = entityhub.getMappingsByTarget(symbol);
@@ -712,4 +713,33 @@ public class EntityhubRootResource extends BaseStanbolResource {
             return rb.build();
         }
     }
+    /*
+     * LDPath support
+     */
+    @OPTIONS
+    @Path("/ldpath")
+    public Response handleCorsPreflightLDPath(@Context HttpHeaders headers){
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers,OPTIONS,GET,POST);
+        return res.build();
+    }
+    @GET
+    @Path("/ldpath")
+    public Response handleLDPathGet(
+            @QueryParam(value = "context")Set<String> contexts,
+            @QueryParam(value = "ldpath")String ldpath,
+            @Context HttpHeaders headers){
+        return handleLDPathPost(contexts, ldpath, headers);
+    }
+    @POST
+    @Path("/ldpath")
+    public Response handleLDPathPost(
+             @FormParam(value = "context")Set<String> contexts,
+             @FormParam(value = "ldpath")String ldpath,
+             @Context HttpHeaders headers){
+        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
+        return handleLDPathRequest(this,new YardBackend(entityhub.getYard()), 
+            ldpath, contexts, headers, servletContext);
+    }
+
 }

@@ -496,12 +496,14 @@ public class SolrYard extends AbstractYard implements Yard {
             //TODO: remove and replace with a setting where the SolrYard does not
             //      not activate until the SolrServer is available.
             if(server == null){
-                try {
-                    log.info(" ... waiting 1sec for SolrServer");
-                    server = (SolrServer)_registeredServerTracker.waitForService(1000);
-                } catch (InterruptedException e) {}
+                for(int i = 0;i<5;i++){//waiting for a maximum of 5sec 
+                    try {
+                        log.info(" ... waiting 1sec for SolrServer");
+                        
+                        server = (SolrServer)_registeredServerTracker.waitForService(1000);
+                    } catch (InterruptedException e) {}
+                }
             }
-        
         }
         //the server is not available -> throw an exception!
         if(server != null){

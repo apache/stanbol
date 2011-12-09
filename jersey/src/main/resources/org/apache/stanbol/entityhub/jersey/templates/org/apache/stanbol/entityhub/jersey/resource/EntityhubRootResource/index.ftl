@@ -18,12 +18,12 @@
 <#escape x as x?html>
 <@common.page title="Entityhub" hasrestapi=true> 
 
-<div class="panel" id="webview">
+<!-- <div class="panel" id="webview">
 <p>This is the start page of the entity hub.</p>
 
-</div>
+</div> -->
 
-<div class="panel" id="restapi" style="display: none;">
+<!-- div class="panel" id="restapi" style="display: none;" -->
   <h3>Service Endpoints</h3>
 
   <p>The Entityhub provide two main service. First it allows to manage a network
@@ -76,6 +76,9 @@
        <a href="${it.publicBaseUri}entityhub/sites">Referenced Sites</a> and
        the import of found Entities to the Entityhub.
     </li>
+    <li>LDPath @<a href="${it.publicBaseUri}entityhub/ldpath">/entityhub/ldpath</a>:
+       Allows to execute LDPath programs on locally managed Entities.
+    </li>
   </ul>
   <hr>
   <#include "inc_entity.ftl">
@@ -85,7 +88,9 @@
   <#include "inc_find.ftl">
   <hr>
   <#include "inc_query.ftl">
-</div>
+  <hr>
+  <#include "inc_ldpath.ftl">
+<!-- /div -->
 
 </@common.page>
 </#escape>

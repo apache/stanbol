@@ -18,6 +18,7 @@ package org.apache.stanbol.entityhub.jersey.resource;
 
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.OPTIONS;
+import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N3;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N_TRIPLE;
@@ -27,6 +28,7 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.handleLDPathRequest;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -56,6 +58,7 @@ import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
+import org.apache.stanbol.entityhub.ldpath.backend.SiteManagerBackend;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
@@ -89,11 +92,9 @@ public class SiteManagerRootResource extends BaseStanbolResource {
      */
     private static final int DEFAULT_FIND_RESULT_LIMIT = 5;
 
-    private ServletContext context;
-        
-    public SiteManagerRootResource(@Context ServletContext context) {
+    
+    public SiteManagerRootResource() {
         super();
-        this.context = context;
     }
 
     @OPTIONS
@@ -156,9 +157,9 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         } else {
-            JSONArray referencedSites = new JSONArray();
             ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
-                ReferencedSiteManager.class, context);
+                ReferencedSiteManager.class, servletContext);
+            JSONArray referencedSites = new JSONArray();
             for (String site : referencedSiteManager.getReferencedSiteIds()) {
                 referencedSites.put(String.format("%sentityhub/site/%s/", uriInfo.getBaseUri(), site));
             }
@@ -208,14 +209,8 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             }
         }
         ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
-            ReferencedSiteManager.class, context);
-        Entity sign;
-        // try {
-        sign = referencedSiteManager.getEntity(id);
-        // } catch (IOException e) {
-        // log.error("IOException while accessing ReferencedSiteManager",e);
-        // throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-        // }
+            ReferencedSiteManager.class, servletContext);
+        Entity sign = referencedSiteManager.getEntity(id);
         if (sign != null) {
             ResponseBuilder rb = Response.ok(sign);
             rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
@@ -286,7 +281,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             }
         }
         ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
-            ReferencedSiteManager.class, context);
+            ReferencedSiteManager.class, servletContext);
         FieldQuery query = JerseyUtils.createFieldQueryForFindRequest(name, field, language,
             limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, offset);
         ResponseBuilder rb = Response.ok(referencedSiteManager.find(query));
@@ -320,8 +315,6 @@ public class SiteManagerRootResource extends BaseStanbolResource {
     @Consumes( {MediaType.APPLICATION_JSON})
     public Response queryEntities(FieldQuery query,
                                   @Context HttpHeaders headers) {
-        ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
-            ReferencedSiteManager.class, context);
         Collection<String> supported = new HashSet<String>(JerseyUtils.QUERY_RESULT_SUPPORTED_MEDIA_TYPES);
         supported.add(TEXT_HTML);
         final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(
@@ -337,11 +330,42 @@ public class SiteManagerRootResource extends BaseStanbolResource {
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
         } else {
-            ResponseBuilder rb = Response.ok(referencedSiteManager.find(query));
+            ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
+                ReferencedSiteManager.class, servletContext);
+           ResponseBuilder rb = Response.ok(referencedSiteManager.find(query));
             rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
             addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         }
     }
-
+    /*
+     * LDPath support
+     */
+    @OPTIONS
+    @Path("/ldpath")
+    public Response handleCorsPreflightLDPath(@Context HttpHeaders headers){
+        ResponseBuilder res = Response.ok();
+        enableCORS(servletContext, res, headers,OPTIONS,GET,POST);
+        return res.build();
+    }
+    @GET
+    @Path("/ldpath")
+    public Response handleLDPathGet(
+            @QueryParam(value = "context")Set<String> contexts,
+            @QueryParam(value = "ldpath")String ldpath,
+            @Context HttpHeaders headers){
+        return handleLDPathPost(contexts, ldpath, headers);
+    }
+    @POST
+    @Path("/ldpath")
+    public Response handleLDPathPost(
+             @FormParam(value = "context")Set<String> contexts,
+             @FormParam(value = "ldpath")String ldpath,
+             @Context HttpHeaders headers){
+        ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
+            ReferencedSiteManager.class, servletContext);
+        return handleLDPathRequest(this,new SiteManagerBackend(referencedSiteManager), 
+            ldpath, contexts, headers, servletContext);
+    }
+    
 }

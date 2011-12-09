@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<h4>Subresource /query</h4>
+<h3>Subresource /query</h3>
 
 <table>
 <tbody>
@@ -39,7 +39,7 @@
 </tbody>
 </table>
 
-<h5>Example</h5>
+<h4>Example</h4>
 
 <pre>curl -X POST -H "Content-Type:application/json" --data "@fieldQuery.json" ${it.publicBaseUri}entityhub/site/dbpedia/query</pre>
 

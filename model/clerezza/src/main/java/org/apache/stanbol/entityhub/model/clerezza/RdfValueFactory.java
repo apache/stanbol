@@ -20,6 +20,7 @@ import java.util.Iterator;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
@@ -47,9 +48,24 @@ public final class RdfValueFactory implements ValueFactory {
         }
         return instance;
     }
-
+    /**
+     * If not <code>null</code> all {@link RdfRepresentation} created by this
+     * instance will use this graph.
+     */
+    private MGraph graph;
     private RdfValueFactory(){
+        this(null);
+    }
+    /**
+     * This allows to create an instance that uses the same graph for all
+     * created {@link Representation}s. This allows to automatically add all
+     * data added to {@link Representation} created by this Factory to this
+     * graph. 
+     * @param graph
+     */
+    public RdfValueFactory(MGraph graph){
         super();
+        this.graph = graph;
     }
 
     @Override
@@ -86,7 +102,8 @@ public final class RdfValueFactory implements ValueFactory {
         } else if(id.isEmpty()){
             throw new IllegalArgumentException("The parsed id MUST NOT be empty!");
         } else {
-            return createRdfRepresentation(new UriRef(id), new SimpleMGraph());
+            return createRdfRepresentation(new UriRef(id), 
+                graph == null ? new SimpleMGraph() : graph);
         }
     }
 

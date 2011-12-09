@@ -24,6 +24,7 @@
 	<li><a href="${it.publicBaseUri}entityhub/sites/entity">/entityhub/sites/entity</a></li>
 	<li><a href="${it.publicBaseUri}entityhub/sites/find">/entityhub/sites/find</a></li>
 	<li><a href="${it.publicBaseUri}entityhub/sites/query">/entityhub/sites/query</a></li>
+    <li><a href="${it.publicBaseUri}entityhub/sites/ldpath">/entityhub/sites/ldpath</a></li>
 </ul>
 
 <hr>
@@ -34,6 +35,8 @@
 <#include "inc_find.ftl">
 <hr>
 <#include "inc_query.ftl">
+<hr>
+<#include "inc_ldpath.ftl">
 
 </@common.page>
 </#escape>

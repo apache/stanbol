@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<h4>Subresource /entity?id={URI}</h4>
+<h3>Subresource /entity?id={URI}</h3>
 
 <table>
 <tbody>
@@ -41,21 +41,25 @@
 </tbody>
 </table>
 
-<h5>Example</h5>
+<h4>Example</h4>
 
 <pre>curl "${it.publicBaseUri}entityhub/site/dbpedia/entity?id=http://dbpedia.org/resource/Paris"</pre>
 
-<!-- TODO: Adapt this to work with referenced sites 
-<h5>Test</h5>
+<h4>Test</h4>
 
 <a href="#" onclick="searchEntityParis(); return false;">Search for entity 'Paris' in DBPedia</a>.
 
 <script language="javascript">
 function searchEntityParis() {
+ var relpath = "/entity";
+ var base = window.location.href.replace(/\/$/, "");
+ if(base.lastIndexOf(relpath) != (base.length-relpath.length)){
+   base = base+relpath;
+ }
  $("#searchEntityParisResult").show();	  
  $.ajax({
    type: "GET",
-   url: "${it.publicBaseUri}entityhub/sites/entity",
+   url: base,
    data: "id=http://dbpedia.org/resource/Paris",
    dataType: "text",
    cache: false,
@@ -72,4 +76,4 @@ function searchEntityParis() {
 <div id="searchEntityParisResult" style="display: none">
 <p><a href="#" onclick="$('#searchEntityParisResult').hide(); return false;">Hide results</a>
 <pre id="searchEntityParisResultText">... waiting for results ...</pre>
-</div> -->
+</div>

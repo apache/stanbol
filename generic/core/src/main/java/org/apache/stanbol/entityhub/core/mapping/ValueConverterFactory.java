@@ -176,7 +176,7 @@ public class ValueConverterFactory {
      *
      * @param <T> the type of created objects
      */
-    public interface ValueConverter<T> {
+    public static interface ValueConverter<T> {
 
         /**
          * The URI of the dataType created by this converter
@@ -196,7 +196,7 @@ public class ValueConverterFactory {
          */
         T convert(Object value,ValueFactory valueFactory);
     }
-    public class BooleanConverter implements ValueConverter<Boolean>{
+    public static class BooleanConverter implements ValueConverter<Boolean>{
 
         @Override
         public Boolean convert(Object value, ValueFactory valueFactory) {
@@ -218,7 +218,7 @@ public class ValueConverterFactory {
         public String getDataType() {return DataTypeEnum.Boolean.getUri();}
 
     }
-    public class ByteConverter implements ValueConverter<Byte>{
+    public static class ByteConverter implements ValueConverter<Byte>{
         @Override
         public Byte convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
@@ -247,7 +247,7 @@ public class ValueConverterFactory {
         public String getDataType() {return DataTypeEnum.Byte.getUri();}
 
     }
-    public class ShortConverter implements ValueConverter<Short>{
+    public static class ShortConverter implements ValueConverter<Short>{
         @Override
         public Short convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
@@ -277,7 +277,7 @@ public class ValueConverterFactory {
         public String getDataType() {return DataTypeEnum.Short.getUri();}
 
     }
-    public class IntConverter implements ValueConverter<Integer>{
+    public static class IntConverter implements ValueConverter<Integer>{
         @Override
         public Integer convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
@@ -307,7 +307,7 @@ public class ValueConverterFactory {
         public String getDataType() {return DataTypeEnum.Int.getUri();}
 
     }
-    public class LongConverter implements ValueConverter<Long>{
+    public static class LongConverter implements ValueConverter<Long>{
         @Override
         public Long convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
@@ -331,7 +331,7 @@ public class ValueConverterFactory {
         @Override
         public String getDataType() {return DataTypeEnum.Long.getUri();}
     }
-    public class FloatConverter implements ValueConverter<Float>{
+    public static class FloatConverter implements ValueConverter<Float>{
         @Override
         public Float convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
@@ -348,7 +348,7 @@ public class ValueConverterFactory {
         @Override
         public String getDataType() {return DataTypeEnum.Float.getUri();}
     }
-    public class DoubleConverter implements ValueConverter<Double>{
+    public static class DoubleConverter implements ValueConverter<Double>{
         @Override
         public Double convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
@@ -365,7 +365,7 @@ public class ValueConverterFactory {
         @Override
         public String getDataType() {return DataTypeEnum.Double.getUri();}
     }
-    public class IntegerConverter implements ValueConverter<BigInteger>{
+    public static class IntegerConverter implements ValueConverter<BigInteger>{
         @Override
         public BigInteger convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
@@ -383,7 +383,7 @@ public class ValueConverterFactory {
         @Override
         public String getDataType() {return DataTypeEnum.Integer.getUri();}
     }
-    public class DecimalConverter implements ValueConverter<BigDecimal>{
+    public static class DecimalConverter implements ValueConverter<BigDecimal>{
         @Override
         public BigDecimal convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
@@ -400,7 +400,7 @@ public class ValueConverterFactory {
         @Override
         public String getDataType() {return DataTypeEnum.Decimal.getUri();}
     }
-    public class AnyUriConverter implements ValueConverter<Reference>{
+    public static class AnyUriConverter implements ValueConverter<Reference>{
         @Override
         public Reference convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
@@ -420,12 +420,12 @@ public class ValueConverterFactory {
         @Override
         public String getDataType() {return DataTypeEnum.AnyUri.getUri();}
     }
-    public class ReferenceConverter extends AnyUriConverter {
+    public static class ReferenceConverter extends AnyUriConverter {
         //same as AnyUri just parse Reference as DataType
         @Override
         public String getDataType() {return DataTypeEnum.Reference.getUri();}
     }
-    public class DateTimeConverter implements ValueConverter<Date>{
+    public static class DateTimeConverter implements ValueConverter<Date>{
         private final DataTypeEnum dataType;
         public DateTimeConverter(){
             this.dataType = DataTypeEnum.DateTime;
@@ -456,17 +456,17 @@ public class ValueConverterFactory {
         @Override
         public String getDataType() {return dataType.getUri();}
     }
-    public class DateConverter extends DateTimeConverter {
+    public static class DateConverter extends DateTimeConverter {
         public DateConverter(){
             super(DataTypeEnum.Date);
         }
     }
-    public class TimeConverter extends DateTimeConverter {
+    public static class TimeConverter extends DateTimeConverter {
         public TimeConverter(){
             super(DataTypeEnum.Time);
         }
     }
-    public class TextConverter implements ValueConverter<Text> {
+    public static class TextConverter implements ValueConverter<Text> {
         @Override
         public Text convert(Object value, ValueFactory valueFactory) {
             if (value == null) {
@@ -481,13 +481,13 @@ public class ValueConverterFactory {
         @Override
         public String getDataType() { return DataTypeEnum.Text.getUri(); }
     }
-    public class StringConverter implements ValueConverter<String> {
+    public static class StringConverter implements ValueConverter<String> {
         @Override
         public String convert(Object value, ValueFactory valueFactory) { return value.toString(); }
         @Override
         public String getDataType() { return DataTypeEnum.String.getUri(); }
     }
-    public class DurationConverter implements ValueConverter<Duration> {
+    public static class DurationConverter implements ValueConverter<Duration> {
         private boolean nullAsZeroLengthDuration;
         /**
          * Creates a converter for durations

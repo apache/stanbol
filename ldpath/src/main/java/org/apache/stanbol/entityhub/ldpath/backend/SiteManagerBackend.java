@@ -5,6 +5,7 @@ import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
 import org.apache.stanbol.entityhub.ldpath.backend.AbstractBackend;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
+import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
@@ -34,7 +35,8 @@ public class SiteManagerBackend extends AbstractBackend {
     }
     @Override
     protected Representation getRepresentation(String id) throws EntityhubException {
-        return siteManager.getEntity(id).getRepresentation();
+        Entity entity = siteManager.getEntity(id);
+        return entity != null ? entity.getRepresentation() : null;
     }
     @Override
     protected ValueFactory getValueFactory() {

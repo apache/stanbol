@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<h4>Subresource /mapping/symbol</h4>
+<h3>Subresource /mapping/symbol</h3>
 
 <table>
 <tbody>
@@ -43,11 +43,11 @@
 </tbody>
 </table>
 
-<h5>Example</h5>
+<h4>Example</h4>
 
 <pre>curl ${it.publicBaseUri}entityhub/mapping/symbol?id=urn:org.apache.stanbol:entityhub:symbol.1265dfa5-f39a-a033-4d0a-0dc0bfb53fb7</pre>
 
-<h5>Test</h5>
+<h4>Test</h4>
 
 <form id="getMappingForSymbolForm">
 <p>Get mapping for symbol

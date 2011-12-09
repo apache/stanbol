@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<h4>Subresource /referenced</h4>
+<h3>Subresource /referenced</h3>
 
 <table>
 <tbody>
@@ -39,14 +39,14 @@
 </tbody>
 </table>
 
-<h5>Example</h5>
+<h4>Example</h4>
 <pre>curl "${it.publicBaseUri}entityhub/sites/referenced"</pre>
 
-<h5>Example response</h5>
+<h4>Example response</h4>
 <pre>["http:\/\/localhost:8080\/entityhub\/site\/dbpedia\/",
 "http:\/\/localhost:8080\/entityhub\/site\/musicbrainz\/"]</pre>
 
-<h5>Test</h5>
+<h4>Test</h4>
 
 <p>You can check the referenced sites in this installation by
 <a href="#" onclick="listReferencedSites(); return false;">clicking here</a>.</p>

@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<h4>Referenced Site Metadata </h4>
+<h3>Referenced Site Metadata </h3>
 
 <table>
 <tbody>
@@ -49,10 +49,10 @@
 </tbody>
 </table>
 
-<h5>Example</h5>
+<h4>Example</h4>
 <pre>curl -H "Accept: application/rdf+xml" "${it.publicBaseUri}entityhub/site/dbpedia"</pre>
 
-<h5>Test</h5>
+<h4>Test</h4>
 
 <p>You can the metadata of this referenced site by
 <a href="#" onclick="getSiteMetadata(); return false;">clicking here</a>.</p>
@@ -65,7 +65,7 @@ function getSiteMetadata() {
         req.setRequestHeader("Accept", "application/rdf+xml");
    },
    type: "GET",
-   url: window.location.href,
+   url: window.location.href.replace(/\/$/, ""),
    cache: false,
    data: "",
    dataType: "text",

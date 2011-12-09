@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<h4>Subresource /mapping?id={URI}</h4>
+<h3>Subresource /mapping?id={URI}</h3>
 
 <table>
 <tbody>
@@ -38,10 +38,10 @@
 </tbody>
 </table>
 
-<h5>Example</h5>
+<h4>Example</h4>
 
 <pre>curl "${it.publicBaseUri}entityhub/mapping?id=</pre>
-<h5>Test</h5>
+<h4>Test</h4>
 
 <form id="getMappingForUriForm">
 <p>Get mapping for URI

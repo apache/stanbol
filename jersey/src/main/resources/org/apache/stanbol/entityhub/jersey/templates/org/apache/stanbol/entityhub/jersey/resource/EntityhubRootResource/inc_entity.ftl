@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<h4>Subresource entityhub/entity</h4>
+<h3>Subresource entityhub/entity</h3>
 <p>Service to get/create/update and delete Entities managed by the Entityhub.
 <h4> GET entityhub/entity</h4>
 <table>
@@ -38,10 +38,10 @@
 </tbody>
 </table>
 
-<h5>Example</h5>
+<h4>Example</h4>
 
 <pre>curl "${it.publicBaseUri}entityhub/entity?id=</pre>
-<h5>Test</h5>
+<h4>Test</h4>
 
 <form id="getEntityForUriForm">
 <p>Get entity for URI
@@ -98,7 +98,7 @@ function getEntityForUri() {
     </tr>
 </tbody>
 </table>
-<h5>Examples:</h5>
+<h4>Examples:</h4>
 <p> The following request would create all Entities defines within {file.rdf} in
 the entityhub. If any of such Entities already exists within the Entityhub the
 request would fail with BAD REQUEST</p>
@@ -138,7 +138,7 @@ all triples with a subject other that {id} contained within {file.rdf}</p>
     </tr>
 </tbody>
 </table>
-<h5>Examples:</h5>
+<h4>Examples:</h4>
 <p> The following request would update/create all Entities defines within {file.rdf} in
 the entityhub. Non existent Entities will be created and already existing one will be
 updated (replaced with the submitted version).</p>

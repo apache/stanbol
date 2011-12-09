@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<h4>Subresource /find?name={name}</h4>
+<h3>Subresource /find?name={name}</h3>
 
 <table>
 <tbody>
@@ -51,11 +51,11 @@
 </tbody>
 </table>
 
-<h5>Example</h5>
+<h4>Example</h4>
 
 <pre>curl -X POST -d "name=Bishofsh*&limit=10&offset=0" ${it.publicBaseUri}entityhub/site/dbpedia/find</pre>
 
-<h5>Test</h5>
+<h4>Test</h4>
 
 <form>
 <p>Start test search for
@@ -65,12 +65,17 @@
 
 <script language="javascript">
 function startTestSearch() {
+ var relpath = "/find";
+ var base = window.location.href.replace(/\/$/, "");
+ if(base.lastIndexOf(relpath) != (base.length-relpath.length)){
+   base = base+relpath;
+ }
  $("#testSearchResultText").text("... waiting for results ...");
  $("#testSearchResult").show();
  var data = "name=" + $("#testSearchValue").val() + "&limit=10&offset=0";
  $.ajax({
    type: "POST",
-   url: window.location.href.replace(/\/$/, "") + "/find", //normalise trailing '/'
+   url: base,
    data: data,
    dataType: "text",
    cache: false,
