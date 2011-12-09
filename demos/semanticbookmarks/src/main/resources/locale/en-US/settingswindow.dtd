@@ -1,0 +1,22 @@
+<!ENTITY title "Semantic Bookmarks Settings">
+<!ENTITY cancel "Cancel">
+<!ENTITY service "Service">
+
+<!ENTITY setup "Setup">
+<!ENTITY init "Initialize Stanbol">
+
+<!ENTITY user_settings "Personal Information">
+<!ENTITY name "Name">
+<!ENTITY uri "URI">
+<!ENTITY create_user "Create User">
+
+
+<!ENTITY server "Apache Stanbol Server Base URI">
+<!ENTITY automatic "Automatic">
+<!ENTITY service_automatic "Automatically keep any visited webpage in mind">
+<!ENTITY organization "Organization">
+<!ENTITY money "Money">
+<!ENTITY revenue "Statements on revenue">
+<!ENTITY time "Time">
+<!ENTITY highlight "Highlight">
+<!ENTITY market "Market">

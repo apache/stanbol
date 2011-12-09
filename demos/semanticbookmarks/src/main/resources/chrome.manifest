@@ -1,0 +1,4 @@
+content	semanticbookmarks	content/
+locale	semanticbookmarks	en-US	locale/en-US/
+skin    semanticbookmarks	classic/1.0	skin/
+overlay	chrome://browser/content/browser.xul    chrome://semanticbookmarks/content/overlay.xul
