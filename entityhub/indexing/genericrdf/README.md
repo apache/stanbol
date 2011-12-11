@@ -63,8 +63,8 @@ directory.
 
 The indexer supports two indexing modes
 
-1. Iterate over the data and lookup the scores for entities (default). For this mode the "entityDataIterable" and a "entityScoreProvider" MUST BE configured. If no entity scores are available, a default entityScoreProvider provides no entity scores. This mode is typically used to index all entities of a dataset.
-2. Iterate over the entity IDs and Scores and lookup the data. For this Mode a "entityIdIterator" and a "entityDataProvider" Provider MUST BE configured. This mode is typically used to index a predefined list of entities (that might only be a very small subset of the an large dataset). 
+1. Iterate over the data and lookup the scores for entities (default). For this mode the "entityDataIterable" and an "entityScoreProvider" MUST BE configured. If no entity scores are available, a default entityScoreProvider provides no entity scores. This mode is typically used to index all entities of a dataset.
+2. Iterate over the entity IDs and Scores and lookup the data. For this Mode an "entityIdIterator" and an "entityDataProvider" MUST BE configured. This mode is typically used to index a predefined list of entities (that might only be a very small subset of the an large dataset). 
 
 The configuration of the mentioned components is contained in the main indexing configuration file explained below.
 
