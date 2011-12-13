@@ -420,7 +420,11 @@ public class SolrStoreImpl implements SolrStore {
             }
         }
 
-        return new SolrContentItemImpl(id, title, content.getBytes(), mimeType, metadata, constraints);
+        byte[] contentByte = null;
+        if(content != null){
+        	contentByte = content.getBytes();
+        }
+        return new SolrContentItemImpl(id, title, contentByte, mimeType, metadata, constraints);
     }
 
     @Override

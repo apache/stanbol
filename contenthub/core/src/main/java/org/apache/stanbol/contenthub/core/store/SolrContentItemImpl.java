@@ -148,6 +148,10 @@ public class SolrContentItemImpl implements SolrContentItem {
         } else {
             List<Object> titleList = constraints.get(SolrFieldName.TITLE.toString());
             if (titleList != null) {
+                String titleCons = titleList.toString();
+                titleCons = titleCons.substring(1,titleCons.length()-1);
+                titleList.clear();
+                titleList.add(titleCons);
                 title = titleList.get(0).toString();
             } else {
                 title = id;

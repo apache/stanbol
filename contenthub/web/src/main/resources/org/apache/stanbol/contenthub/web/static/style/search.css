@@ -73,9 +73,6 @@ div .resources{
 }
 
 div .searchbox {
-  position: absolute;
-  top: 15%;
-  left: 65%;
   margin-left: 0.5em;
   border: 1px solid transparent;
   padding: 0.5em 0.5em 0.5em 0.5em;

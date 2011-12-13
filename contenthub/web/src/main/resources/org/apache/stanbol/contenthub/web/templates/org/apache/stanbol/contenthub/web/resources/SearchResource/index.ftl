@@ -95,8 +95,6 @@
 
 		function getResults(jsonCons,facetName,facetValue,operation){
 			//clears the content of div because it'll be filled by explorer posts
-			//$("#tempEntityHubSuggestions").empty();
-			$("#allSuggestions").remove();
 						
 			var keywordToSearch = $("#keywordIn").val();
 			
@@ -231,6 +229,11 @@
 			}
 			//means if there is need to recalculate the suggestions from mexternal resource such as entityhub
 			if(operation == "first" || operation == "explore" || operation == "previousSuggestion") {
+				//if there ia lready suggestion on the page, first cleans them
+				if(document.getElementById("allSuggestions")) {
+					$("#entityHubSuggestionSubDiv").html('');
+				}
+				$("#tempEntityHubSuggestions").html('');
 				$.ajax({
 					url : "${it.publicBaseUri}contenthub/search/suggestion",
 					type : "POST",

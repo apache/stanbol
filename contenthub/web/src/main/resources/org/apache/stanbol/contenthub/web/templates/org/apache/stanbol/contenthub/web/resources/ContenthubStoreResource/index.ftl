@@ -20,11 +20,11 @@
 
 <div class="panel" id="webview">
 
-<div class="searchbox">
-<table><tr><td>
-<input type="text" id="searchKeywords" name="searchKeywords" onkeydown="if (event.keyCode == 13) document.getElementById('searchButton').click()" /><input id="searchButton" type="button" value="Search" onclick="performSearch()" />
-</td></tr><tr align="right"><td>
-<div><a href="contenthub/search" />Search Page</a></div></td></tr></table>
+<div class="searchbox" align="right">
+  <table><td>
+    <tr><input type="text" id="searchKeywords" name="searchKeywords" onkeydown="if (event.keyCode == 13) document.getElementById('searchButton').click()" /><input id="searchButton" type="button" value="Search" onclick="performSearch()" /></tr>
+    <tr><div><a href="contenthub/search" />Search Page</a></div></tr>
+  </td></table>
 </div>
 
 <#--
