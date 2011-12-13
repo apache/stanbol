@@ -24,7 +24,7 @@
 <div id="text">
 </div>
 <div id="result" class="result">
-<a href="">Back to Search</a></br>
+<a href="${it.publicBaseUri}contenthub/search">Back to Search</a></br>
 	<#assign con=it.templateData.context>
 	<!--General Divs for layout  -->
 	<div class="keywords">
