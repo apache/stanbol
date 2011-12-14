@@ -21,7 +21,7 @@
      xmlns:interaction="http://stanbol.apache.org/ontologies/models/interaction#">
     <owl:Ontology rdf:about="http://stanbol.apache.org/ontologies/interaction/patterns/cms.owl">
         <rdfs:comment xml:lang="en">Interaction Pattern models for Content Management.</rdfs:comment>
-        <owl:imports rdf:resource="http://stanbol.apache.org/ontologies/models/interaction/patterns/interpretation.owl"/>
+        <owl:imports rdf:resource="http://stanbol.apache.org/ontologies/models/interaction/interpretation.owl"/>
     </owl:Ontology>
     
 

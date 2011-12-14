@@ -17,6 +17,7 @@
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
     <owl:Ontology rdf:about="http://stanbol.apache.org/ontologies/test/interaction/patterns/cms.owl">
         <rdfs:comment xml:lang="en">Instances used for testing CMS-related interaction patterns.</rdfs:comment>
+        <owl:imports rdf:resource="http://stanbol.apache.org/ontologies/interaction/patterns/cms.owl"/>
     </owl:Ontology>
     
 
