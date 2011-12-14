@@ -61,7 +61,7 @@ public class JenaModelWriter implements MessageBodyWriter<Model> {
                         MediaType mediaType) {
         log.debug("Called size of item");
         stream = toStream(t, mediaType.toString());
-        log.error("Returning {} bytes", stream.size());
+        log.debug("Returning {} bytes", stream.size());
         return Integer.valueOf(stream.toByteArray().length).longValue();
     }
 

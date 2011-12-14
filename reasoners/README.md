@@ -85,7 +85,7 @@ Supported return formats are all classic RDF types (n3,turtle,rdf+xml) and HTML.
 Recently added
 =============
 
-* Support for long-term operations. This is crucial for reasoning tasks, since it can take some time with large graphs. This is needed in general for Stanbol, something like "Stanbol Jobs".
+* Support for long-term operations. 
 
 Todo
 =============

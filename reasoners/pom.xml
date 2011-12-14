@@ -33,20 +33,15 @@
   <inceptionYear>2011</inceptionYear>
 
   <modules>
-    <!--module>../jersey</module>   
-    <module>../ontologymanager/ontonet</module>
-    <module>../owl</module>  
-    <module>../rules/base</module>  
-    <module>../rules/manager</module-->
     <module>servicesapi</module>
     <module>manager</module>
     <module>owlapi</module>
     <module>jena</module>
     <module>test</module>
-    <module>hermit</module>
-    <!--module>base</module-->
+    <!-- module>hermit</module -->
     <module>owllink</module>
     <module>web</module>
+    <module>bundlelist</module>
   </modules>
   <profiles>
   <profile>

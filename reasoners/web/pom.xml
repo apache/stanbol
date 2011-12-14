@@ -26,26 +26,11 @@
     <relativePath>../../parent</relativePath>
   </parent>
 
-  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.reasoners.web</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Reasoner Web</name>
+  <name>Apache Stanbol Reasoners: Web</name>
   <description>Set of rest services to deal with reasoners</description>
-  
- <properties>
-   <!-- Set this to run the server on a specific port -->
-   <http.port></http.port>
- 
-   <!-- Set this to run tests against an existing server instance -->
-   <test.server.url></test.server.url>
-
-   <!-- Options for the VM that executes our runnable jar -->
-   <jar.executor.vm.options>-Xmx512m -Dorg.apache.stanbol.offline.mode=true</jar.executor.vm.options>
-
-   <!-- Set this to true to keep the runnable jar running - useful to debug tests -->
-   <keepJarRunning>false</keepJarRunning>
- </properties>
  
  <build>
    <!-- make it an OSGi bundle -->
@@ -60,80 +45,34 @@
        <extensions>true</extensions>
        <configuration>
          <instructions>
-           <Export-Package>
-              org.apache.stanbol.reasoners.web.*
-           </Export-Package>
-           <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl
-           </Embed-Dependency>
-           <Embed-Transitive>true</Embed-Transitive>
            <Import-Package>
-           !org.apache.felix.http.jetty, 
-           !org.mortbay.jetty.*,
-           org.apache.stanbol.reasoners.servicesapi.*,
-           org.apache.stanbol.reasoners.jena.*,
-           org.apache.stanbol.reasoners.owlapi.*,
-           org.apache.stanbol.reasoners.jobs.api.*,
-           *
-           </Import-Package>
+            javax.servlet.*, 
+			javax.ws.rs.*, 
+			org.slf4j.*,
+			org.osgi.framework.*,
+			org.osgi.service.*,
+			freemarker.cache.*,
+			com.sun.jersey.api.*,
+			com.sun.jersey.multipart.*,
+			org.apache.clerezza.rdf.core.*,
+			com.hp.hpl.jena.*,
+			org.semanticweb.owlapi.*,
+			org.coode.owlapi.*,
+			uk.ac.manchester.cs.owl.owlapi.*,
+			org.apache.commons.io.*,
+			org.apache.stanbol.commons.web.base.*,
+			org.apache.stanbol.commons.jobs.api.*,
+			org.apache.stanbol.commons.jobs.impl.*,
+			org.apache.stanbol.owl.*,
+			org.apache.stanbol.rules.base.api.*,
+			org.apache.stanbol.ontologymanager.ontonet.api.*,
+   			org.apache.stanbol.reasoners.servicesapi.*,
+            org.apache.stanbol.reasoners.jena.*,
+            org.apache.stanbol.reasoners.owlapi.*
+            </Import-Package>
          </instructions>
        </configuration>
      </plugin>
-<!-- <plugin>
-       <groupId>org.apache.maven.plugins</groupId>
-       <artifactId>maven-dependency-plugin</artifactId>
-       <executions>
-         <execution>
-           <id>copy-runnable-jar</id>
-           <goals>
-             <goal>copy-dependencies</goal>
-           </goals>
-           <phase>process-resources</phase>
-           <configuration>
-             <includeArtifactIds>org.apache.stanbol.launchers.full</includeArtifactIds>
-             <excludeTransitive>true</excludeTransitive>
-             <overWriteReleases>false</overWriteReleases>
-             <overWriteSnapshots>false</overWriteSnapshots>
-           </configuration>
-         </execution>
-       </executions>
-     </plugin>
-     <plugin>
-       <groupId>org.codehaus.mojo</groupId>
-       <artifactId>build-helper-maven-plugin</artifactId>
-       <executions>
-         <execution>
-           <id>reserve-server-port</id>
-           <goals>
-             <goal>reserve-network-port</goal>
-           </goals>
-           <phase>process-resources</phase>
-           <configuration>
-             <portNames>
-               <portName>http.port</portName>
-             </portNames>
-           </configuration>
-         </execution>
-       </executions>
-     </plugin>
-     <plugin>
-       <groupId>org.apache.maven.plugins</groupId>
-       <artifactId>maven-surefire-plugin</artifactId>
-       <configuration>
-         <systemPropertyVariables>
-           <test.server.url>${test.server.url}</test.server.url>
-           <jar.executor.server.port>${http.port}</jar.executor.server.port>
-           <jar.executor.vm.options>${jar.executor.vm.options}</jar.executor.vm.options>
-           <jar.executor.jar.folder>${project.basedir}/target/dependency</jar.executor.jar.folder>
-           <jar.executor.jar.name.regexp>org.apache.stanbol.*full.*jar$</jar.executor.jar.name.regexp>
-           <jar.executor.workingdirectory>${project.build.directory}/launchdir</jar.executor.workingdirectory>
-           <keepJarRunning>${keepJarRunning}</keepJarRunning>
-           <server.ready.timeout.seconds>180</server.ready.timeout.seconds>
-           <server.ready.path.1>/:stanbol.css</server.ready.path.1>
-           <server.ready.path.2>/engines:There are currently</server.ready.path.2>
-           <server.ready.path.3>/contenthub:Recently uploaded Content Items</server.ready.path.3>
-         </systemPropertyVariables>
-       </configuration>
-     </plugin> -->
       <plugin>
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
@@ -153,14 +92,6 @@
  </build>
 
   <dependencies>
-  <!--
-	<dependency>
-		<groupId>org.apache.stanbol</groupId>
-		<artifactId>org.apache.stanbol.launchers.full</artifactId>
-		<version>0.9.0-incubating-SNAPSHOT</version>
-    	<scope>provided</scope>
-   	</dependency>
-  -->
     <!-- dependencies on other IKS modules -->
     <dependency>
       <groupId>org.apache.clerezza</groupId>
@@ -217,9 +148,9 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>freemarker</groupId>
+      <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
-      <version>2.3.9</version>
+      <!-- version>2.3.9</version -->
     </dependency>
     <!-- indirect dependency for freemarker -->
     <dependency>
@@ -265,33 +196,6 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- for tests -->
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-client</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-container-default</artifactId>
-      <scope>test</scope>
-    </dependency>
-
     <!-- Stanbol deps -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -301,12 +205,6 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
     </dependency>
-    <!-- dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.reasoners.base</artifactId>
-      <version>0.9.0-incubating-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency-->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.base</artifactId>
@@ -327,42 +225,34 @@
     <dependency>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.reasoners.servicesapi</artifactId>
-    <version>0.9.0-incubating-SNAPSHOT</version>
+    <!-- version>0.9.0-incubating-SNAPSHOT</version -->
     </dependency>    
     <dependency>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.reasoners.jena</artifactId>
-    <version>0.9.0-incubating-SNAPSHOT</version>
+    <!-- version>0.9.0-incubating-SNAPSHOT</version -->
     </dependency>
     <dependency>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.reasoners.owlapi</artifactId>
-    <version>0.9.0-incubating-SNAPSHOT</version>
+    <!-- version>0.9.0-incubating-SNAPSHOT</version -->
     </dependency>    
     <dependency>
       <groupId>com.hp.hpl.jena</groupId>
       <artifactId>jena</artifactId>
       <scope>provided</scope>
     </dependency>
+	<dependency>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>org.apache.stanbol.commons.jobs.api</artifactId>
+		<!-- version>0.9.0-incubating-SNAPSHOT</version -->
+	</dependency>
 
 		<!-- Testing deps -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
-		</dependency>
-		<!-- dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.testing.jarexec</artifactId>
-		</dependency>
-	  <dependency>
-		  <groupId>org.apache.stanbol</groupId>
-		  <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
-	  </dependency-->
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.commons.jobs.api</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
 		</dependency>
   </dependencies>
 
@@ -385,10 +275,6 @@
       <id>apache repository - snapshot repo</id>
       <name>apache repository</name>
       <url>https://repository.apache.org/content/repositories/snapshots</url>
-    </repository>
-    <repository>
-    	<id>stlab-cnr-repo</id>
-        <url>http://stlab.istc.cnr.it/software/maven/repo</url>
     </repository>
   </repositories>
 
