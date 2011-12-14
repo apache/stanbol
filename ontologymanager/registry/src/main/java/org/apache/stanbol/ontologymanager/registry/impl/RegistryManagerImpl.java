@@ -84,7 +84,7 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
 
     private static final CachingPolicy _CACHING_POLICY_DEFAULT = CachingPolicy.CENTRALISED;
 
-    private static final boolean _LAZY_LOADING_DEFAULT = false;
+    private static final boolean _LAZY_LOADING_DEFAULT = true;
 
     private static final OWLClass cRegistryLibrary, cOntology;
 
@@ -118,7 +118,7 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
     /* Maps registries to libraries */
     private Map<IRI,Set<IRI>> libraryIndex = new HashMap<IRI,Set<IRI>>();
 
-    @Property(name = RegistryManager.REGISTRY_LOCATIONS, cardinality = 1000, value = {"http://www.ontologydesignpatterns.org/registry/iksnetwork.owl"})
+    @Property(name = RegistryManager.REGISTRY_LOCATIONS, cardinality = 1000, value = {"http://www.ontologydesignpatterns.org/registry/iksnetwork-standalone.owl"})
     private String[] locations;
 
     private Logger log = LoggerFactory.getLogger(getClass());
@@ -180,7 +180,7 @@ public class RegistryManagerImpl implements RegistryManager, RegistryContentList
         Object obj = configuration.get(RegistryManager.REGISTRY_LOCATIONS);
         if (obj instanceof String[]) locations = (String[]) obj;
         else if (obj instanceof String) locations = new String[] {(String) obj};
-        if (locations == null) locations = new String[] {"http://www.ontologydesignpatterns.org/registry/iksnetwork.owl"};
+        if (locations == null) locations = new String[] {"http://www.ontologydesignpatterns.org/registry/iksnetwork-standalone.owl"};
         Object cachingPolicy = configuration.get(RegistryManager.CACHING_POLICY);
         if (cachingPolicy == null) {
             this.cachingPolicyString = _CACHING_POLICY_DEFAULT.name();
