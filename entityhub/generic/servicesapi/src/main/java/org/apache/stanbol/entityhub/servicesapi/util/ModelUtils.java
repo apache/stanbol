@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -73,6 +74,23 @@ public final class ModelUtils {
         rng.setSeed(seed);
     }
 
+    /**
+     * Comparator based on the {@link RdfResourceEnum#resultScore} property that
+     * assumes that values of this property implement {@link Comparable}. The
+     * Representation with the highest score will be first
+     */
+    public static final Comparator<Representation> RESULT_SCORE_COMPARATOR = new Comparator<Representation>() {
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public int compare(Representation r1, Representation r2) {
+            Object score1 = r1.getFirst(RdfResourceEnum.resultScore.getUri());
+            Object score2 = r2.getFirst(RdfResourceEnum.resultScore.getUri());
+            return score1 == null && score2 == null ? 0 :
+                score2 == null ? -1 :
+                    score1 == null ? 1 :
+                        ((Comparable)score2).compareTo((Comparable)score1);
+        }};
     /**
      * Processes a value parsed as object to the representation.
      * This processing includes:

@@ -10,6 +10,7 @@ import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
 
+
 public class SiteBackend extends AbstractBackend {
 
     protected final ReferencedSite site;

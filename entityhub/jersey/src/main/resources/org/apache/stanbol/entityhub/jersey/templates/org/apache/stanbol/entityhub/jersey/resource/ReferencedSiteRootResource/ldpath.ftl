@@ -19,7 +19,6 @@
 <@common.page title="ReferencedSite LDPath" hasrestapi=true> 
 
 <#include "inc_ldpath.ftl">
-<hr>
 <#include "/imports/ldpathdocumentation.ftl">
 
 </@common.page>

@@ -99,7 +99,9 @@ public class EntityhubWebFragment implements WebFragment {
     
     @Override
     public List<LinkResource> getLinkResources() {
-        return Collections.emptyList();
+        List<LinkResource> resources = new ArrayList<LinkResource>();
+        resources.add(new LinkResource("stylesheet", "style/entityhub.css", this, 0));
+        return resources;
     }
     
     @Override

@@ -16,10 +16,14 @@
  */
 package org.apache.stanbol.entityhub.query.clerezza;
 
+import static org.apache.stanbol.entityhub.servicesapi.util.ModelUtils.RESULT_SCORE_COMPARATOR;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.MGraph;
@@ -33,7 +37,7 @@ import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 public class RdfQueryResultList implements QueryResultList<Representation> {
 
     private final FieldQuery query;
-    private final Collection<RdfRepresentation> results;
+    private final List<RdfRepresentation> results;
     private final MGraph resultGraph;
 
     public RdfQueryResultList(FieldQuery query,MGraph resultGraph) {
@@ -45,10 +49,13 @@ public class RdfQueryResultList implements QueryResultList<Representation> {
         }
         this.query = query;
         this.resultGraph = resultGraph;
-        this.results = Collections.unmodifiableSet(
-                ModelUtils.addToSet(
-                    SparqlQueryUtils.parseQueryResultsFromMGraph(resultGraph),
-                    new LinkedHashSet<RdfRepresentation>()));
+        List<RdfRepresentation> results = (List<RdfRepresentation>)ModelUtils.addToCollection(
+            SparqlQueryUtils.parseQueryResultsFromMGraph(resultGraph),
+            new ArrayList<RdfRepresentation>());
+        //sort the list based on the score
+        Collections.sort(results,RESULT_SCORE_COMPARATOR);
+        this.results = Collections.unmodifiableList(results);
+                
     }
     @Override
     public final FieldQuery getQuery() {

@@ -51,13 +51,13 @@ public class QueryResultListImpl<T> implements Iterable<T>, QueryResultList<T>{
         }
         this.type = type;
         if(resultIterator == null || !resultIterator.hasNext()){
-            this.results = Collections.emptySet();
+            this.results = Collections.emptyList();
         } else {
-            LinkedHashSet<T> resultList = new LinkedHashSet<T>();
+            List<T> resultList = new ArrayList<T>();
             while(resultIterator.hasNext()){
                 resultList.add(resultIterator.next());
             }
-            this.results = Collections.unmodifiableSet(resultList);
+            this.results = Collections.unmodifiableList(resultList);
         }
     }
     @Override

@@ -14,7 +14,16 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<h3>LD Path Language:</h3>
+<div class="docu"> 
+    <div class="collapsed">
+        <h3 id="ldpathDocTitle" class="docuTitle">
+            LD Path Language Documentation:</h3>
+        <script>
+            $("#ldpathDocTitle").click(function () {
+              $("#ldpathDocTitle").parent().toggleClass("collapsed");
+            }); 
+        </script>
+        <div class="docuCollapsable">
 
 <p><strong>NOTE:</strong> This only provides a short overview. A much more
 complete <a href="http://code.google.com/p/ldpath/wiki/PathLanguage">
@@ -39,15 +48,29 @@ documentation</a> is also available on the
 
 <p>Define fields in the search index to map to path definitions.</p>
 
-<pre><code>FIELDNAME = PATH :: FIELDTYPE FIELDCONF
+<pre><code>[FIELDNAME =] PATH [:: FIELDTYPE] [FIELDCONF]
 </code></pre>
 
-<p>where PATH is an RDF path and FIELDTYPE is one of the available field types. 
-FIELDCONF is an optional field configuration.</p>
+<p>where</p> <ul>
+<li> <strong>FIELDNAME</strong>: The name of the field used to store the values.
+If not provided the first element of the PATH is used as field name. If the PATH
+does not provide an unique field name (e.g. if unions or intersections are used)
+than FIELDNAME is required. This field supports '&lt;{uri}&gt;', 
+'{prefix}:{localname}' as well as '{name}'.
+<li> <strong>PATH</strong>: the RDF path (see following sections)
+<li> <strong>FIELDTYPE</strong>: The data type for the selected values. Type
+conversions are supported (e.g. parsing numbers, dates ... from strings). If not
+present the selected values are not converted.
+<li> <strong>FIELDCONF</strong>: Allows to provide additional configurations for
+the field. Currently not used - and ignored - by the Entityhub.
+</ul>
 
-<p><em>Example:</em></p>
+<p><em>Examples:</em></p>
 
 <pre><code>title = foaf:name :: xsd:string ;
+schema:name = rdfs:label[@en];
+geo:lat; geo:long;
+&lt;urn:my.company:label.private&gt; = skos:hiddenLabel;
 </code></pre>
 
 <h3>Path Selectors</h3>
@@ -123,3 +146,7 @@ title = fn:xpath("//head/title/text()", ex:hasHtmlContent) :: xsd:string ;
 content = fn:content(foaf:homepage) :: xsd:string ;</p></li></ul></li>
 </code></pre></li>
 </ul>
+
+        </div>
+    </div>
+</div>  

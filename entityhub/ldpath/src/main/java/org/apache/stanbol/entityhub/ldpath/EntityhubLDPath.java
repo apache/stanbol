@@ -1,7 +1,5 @@
 package org.apache.stanbol.entityhub.ldpath;
 
-import java.io.Reader;
-
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory.AnyUriConverter;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory.ReferenceConverter;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory.TextConverter;

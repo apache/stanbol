@@ -51,10 +51,22 @@
             <Export-Package>
               org.apache.stanbol.entityhub.ldpath;version=${project.version},
               org.apache.stanbol.entityhub.ldpath.backend;version=${project.version},
+              org.apache.stanbol.entityhub.ldpath.query;version=${project.version},
               org.apache.stanbol.entityhub.ldpath.transformer;version=${project.version},
               at.newmedialab.ldpath;version=${ldpath.version},
-              at.newmedialab.ldpath.api.*;version=${ldpath.version},
-              at.newmedialab.ldpath.model.*;version=${ldpath.version},
+              at.newmedialab.ldpath.api;version=${ldpath.version},
+              at.newmedialab.ldpath.api.backend;version=${ldpath.version},
+              at.newmedialab.ldpath.api.functions;version=${ldpath.version},
+              at.newmedialab.ldpath.api.selectors;version=${ldpath.version},
+              at.newmedialab.ldpath.api.transformers;version=${ldpath.version},
+              at.newmedialab.ldpath.model;version=${ldpath.version},
+              at.newmedialab.ldpath.model.backend;version=${ldpath.version},
+              at.newmedialab.ldpath.model.fields;version=${ldpath.version},
+              at.newmedialab.ldpath.model.functions;version=${ldpath.version},
+              at.newmedialab.ldpath.model.programs;version=${ldpath.version},
+              at.newmedialab.ldpath.model.selectors;version=${ldpath.version},
+              at.newmedialab.ldpath.model.transformers;version=${ldpath.version},
+              at.newmedialab.ldpath.util;version=${ldpath.version},
               at.newmedialab.ldpath.exception;version=${ldpath.version}
             </Export-Package>
             <Private-Package>

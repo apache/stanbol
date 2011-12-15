@@ -19,6 +19,7 @@
 <@common.page> 
 
 <#include "inc_find.ftl">
+<#include "/imports/ldpathdocumentation.ftl">
 
 </@common.page>
 </#escape>

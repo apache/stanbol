@@ -173,5 +173,199 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
             "\"@literal\": \"Paris\","
             );
     }
+    /*
+     * "/find" tests
+     */
+    @Test
+    public void testFindInvalidLDPath() throws IOException {
+        //parse some illegal LDPath
+        executor.execute(
+            builder.buildPostRequest("/entityhub/site/dbpedia/ldpath")
+            .withHeader("Accept", "text/turtle")
+            .withFormContent(
+                "name","Vienna",
+                "lang","en",
+                //NOTE the missing semicolon
+                "ldpath","label_de = rdfs:label[@de] :: xsd:string",
+                "limit","1")
+         )
+         .assertStatus(Status.BAD_REQUEST.getStatusCode());
+    }
+    @Test
+    public void testFindLDPathSelectLabel() throws IOException {
+        //select the German label on a query for the english one
+        executor.execute(
+            builder.buildPostRequest("/entityhub/site/dbpedia/find")
+            .withHeader("Accept", "text/turtle")
+            .withFormContent(
+                "name","Vienna",
+                "lang","en",
+                "ldpath","name_de = rdfs:label[@de] :: xsd:string;",
+                "limit","1")
+         )
+         .assertStatus(200)
+         .assertContentType("text/turtle")
+         .assertContentContains(
+             "<http://www.iks-project.eu/ontology/rick/query/score>",
+             "<http://dbpedia.org/resource/Vienna>",
+             "<name_de> \"Wien\"@de .");
+    }
+    @Test
+    public void testFindLDPathOnMultipleResults() throws IOException {
+        //select multiple end check that LD-Path is executed on all results
+        executor.execute(
+            builder.buildPostRequest("/entityhub/site/dbpedia/find")
+            .withHeader("Accept", "text/turtle")
+            .withFormContent(
+                "name","York",
+                "lang","en",
+                "ldpath","@prefix geo : <http://www.w3.org/2003/01/geo/wgs84_pos#> ;"+
+                    "lat = geo:lat :: xsd:double;",
+                "limit","3")
+         )
+         .assertStatus(200)
+         .assertContentType("text/turtle")
+         .assertContentContains(
+             "<http://www.iks-project.eu/ontology/rick/query/score>",
+             "<http://dbpedia.org/resource/York>",
+             "<lat>   \"53.958332\"^^<http://www.w3.org/2001/XMLSchema#double> .",
+             "<http://dbpedia.org/resource/New_York_City>",
+             "<lat>   \"40.716667\"^^<http://www.w3.org/2001/XMLSchema#double> .",
+             "<http://dbpedia.org/resource/New_York>",
+             "<lat>   \"43.0\"^^<http://www.w3.org/2001/XMLSchema#double> .");
+    }
+    @Test
+    public void testFindLDPathSelectPaths() throws IOException {
+        //select the German name and the categories ond other members of the
+        //same category
+        executor.execute(
+            builder.buildPostRequest("/entityhub/site/dbpedia/find")
+            .withHeader("Accept", "text/turtle")
+            .withFormContent(
+                "name","Spinne",
+                "lang","de",
+                "ldpath","@prefix dct : <http://purl.org/dc/terms/> ;"+
+                    "name = rdfs:label[@en] :: xsd:string;"+
+                    "category = dct:subject :: xsd:anyURI;"+
+                    "others = dct:subject/^dct:subject :: xsd:anyURI;",
+                "limit","1")
+         )
+         .assertStatus(200)
+         .assertContentType("text/turtle")
+         .assertContentContains(
+             "<http://www.iks-project.eu/ontology/rick/query/score>",
+             "<name>  \"Spider\"@en ;",
+             "<category> <http://dbpedia.org/resource/Category:Arachnids> , " +
+                 "<http://dbpedia.org/resource/Category:Spiders> ;",
+             "<others> <http://dbpedia.org/resource/Acari> , " +
+                 "<http://dbpedia.org/resource/Spider> , " +
+                 "<http://dbpedia.org/resource/Scorpion> , " +
+                 "<http://dbpedia.org/resource/Arachnid> .");
+    }
+    @Test
+    public void testQueryIllegalLDPath() throws IOException {
+        //The field query as java string
+        String query = "{"+
+            "\"ldpath\": \"@prefix dct : <http:\\/\\/purl.org\\/dc\\/terms\\/subject\\/> ; " +
+                "@prefix geo : <http:\\/\\/www.w3.org\\/2003\\/01\\/geo\\/wgs84_pos#> ; " +
+                "@prefix dbp-ont : <http:\\/\\/dbpedia.org\\/ontology\\/> ; " +
+                //note the missing semicolon
+                "lat = geo:lat :: xsd:decimal ; long = geo:long :: xsd:decimal " +
+                "type = rdf:type :: xsd:anyURI;\","+
+            "\"constraints\": [{ "+
+                    "\"type\": \"reference\","+ 
+                    "\"field\": \"http:\\/\\/www.w3.org\\/1999\\/02\\/22-rdf-syntax-ns#type\","+ 
+                    "\"value\": \"http:\\/\\/dbpedia.org\\/ontology\\/Place\","+ 
+                "},"+
+                "{"+
+                    "\"type\": \"range\","+
+                    "\"field\": \"http:\\/\\/www.w3.org\\/2003\\/01\\/geo\\/wgs84_pos#lat\","+
+                    "\"lowerBound\": 50,"+
+                    "\"upperBound\": 51,"+
+                    "\"inclusive\": true,"+
+                    "\"datatype\": \"xsd:double\""+
+                "},"+
+                "{"+
+                    "\"type\": \"range\","+
+                    "\"field\": \"http:\\/\\/www.w3.org\\/2003\\/01\\/geo\\/wgs84_pos#long\","+
+                    "\"lowerBound\": 6,"+
+                    "\"upperBound\": 8,"+
+                    "\"inclusive\": true,"+
+                    "\"datatype\": \"xsd:double\""+
+                "}"+
+            "],"+
+            "\"offset\": 0,"+
+            "\"limit\": 10,"+
+        "}";
+        executor.execute(
+            builder.buildPostRequest("/entityhub/site/dbpedia/query")
+            .withHeader("Content-Type", "application/json")
+            .withHeader("Accept", "text/turtle")
+            .withContent(query)
+        )
+        .assertStatus(Status.BAD_REQUEST.getStatusCode());
+    }
+    @Test
+    public void testQueryLDPathSelection() throws IOException {
+        //The field query as java string
+        String query = "{"+
+            "\"ldpath\": \"@prefix dct : <http:\\/\\/purl.org\\/dc\\/terms\\/subject\\/> ; " +
+                "@prefix geo : <http:\\/\\/www.w3.org\\/2003\\/01\\/geo\\/wgs84_pos#> ; " +
+                "@prefix dbp-ont : <http:\\/\\/dbpedia.org\\/ontology\\/> ; " +
+                "lat = geo:lat :: xsd:decimal ; long = geo:long :: xsd:decimal ; " +
+                "population = dbp-ont:populationTotal :: xsd:integer ; " +
+                "elevation = dbp-ont:elevation :: xsd:integer ; " +
+                "name = rdfs:label[@en] :: xsd:string; " +
+                "categories = dct:subject :: xsd:anyURI; " +
+                "type = rdf:type :: xsd:anyURI;\","+
+            "\"constraints\": [{ "+
+                    "\"type\": \"reference\","+ 
+                    "\"field\": \"http:\\/\\/www.w3.org\\/1999\\/02\\/22-rdf-syntax-ns#type\","+ 
+                    "\"value\": \"http:\\/\\/dbpedia.org\\/ontology\\/Place\","+ 
+                "},"+
+                "{"+
+                    "\"type\": \"range\","+
+                    "\"field\": \"http:\\/\\/www.w3.org\\/2003\\/01\\/geo\\/wgs84_pos#lat\","+
+                    "\"lowerBound\": 50,"+
+                    "\"upperBound\": 51,"+
+                    "\"inclusive\": true,"+
+                    "\"datatype\": \"xsd:double\""+
+                "},"+
+                "{"+
+                    "\"type\": \"range\","+
+                    "\"field\": \"http:\\/\\/www.w3.org\\/2003\\/01\\/geo\\/wgs84_pos#long\","+
+                    "\"lowerBound\": 6,"+
+                    "\"upperBound\": 8,"+
+                    "\"inclusive\": true,"+
+                    "\"datatype\": \"xsd:double\""+
+                "}"+
+            "],"+
+            "\"offset\": 0,"+
+            "\"limit\": 10,"+
+        "}";
+        executor.execute(
+            builder.buildPostRequest("/entityhub/site/dbpedia/query")
+            .withHeader("Content-Type", "application/json")
+            .withHeader("Accept", "text/turtle")
+            .withContent(query)
+        )
+        .assertStatus(200)
+        .assertContentType("text/turtle")
+        .assertContentContains(
+            //first expected entities
+            "<http://dbpedia.org/resource/Bonn>",
+            "<http://dbpedia.org/resource/Aachen>",
+            "<http://dbpedia.org/resource/Koblenz>",
+            "<http://dbpedia.org/resource/Cologne>",
+            //now some values based on the LDPath
+            "<name>  \"Koblenz\"@en",
+            "<lat>   \"50.359722\"",
+            "<long>  \"7.597778\"",
+            "<type>  <http://www.w3.org/2002/07/owl#Thing> , " +
+                "<http://www.opengis.net/gml/_Feature> , " +
+                "<http://dbpedia.org/ontology/Town>",
+            "<population> 314926");
+    }
+    
     
 }
