@@ -1019,7 +1019,7 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
                         indexUpdateDaemon.update(
                             currentArchive == null ? ManagedIndexState.UNINITIALISED :
                                     ManagedIndexState.ACTIVE,
-                            indexName, ais);
+                                    metadata, ais);
                     } // else an unused archive is no longer available -> nothing to do
                 } //else are not available -> nothing to do
             } //end for all Indexes using the archive that is no longer available
@@ -1046,7 +1046,7 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
                             archives.indexOf(resourceName) < archives.indexOf(currentArchive)){
                         metadata.setArchive(resourceName);
                         managedCores.store(metadata);
-                        indexUpdateDaemon.update(ManagedIndexState.ACTIVE,indexName, ais);
+                        indexUpdateDaemon.update(ManagedIndexState.ACTIVE,metadata, ais);
                         //if synchronised do not remove this listener
                         keepTracking = keepTracking || metadata.isSynchronized();
                     } else { //currently used Archive is of higher priority as
@@ -1073,8 +1073,19 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
      *
      */
     private class IndexUpdateDaemon extends Thread {
-    
-        private Map<String, ArchiveInputStream> toUpdate = new HashMap<String,ArchiveInputStream>();
+
+        private class IndexActionInfo {
+            public final ArchiveInputStream ais;
+            public final IndexMetadata metadata;
+            public final ManagedIndexState action;
+            private IndexActionInfo(ManagedIndexState action,ArchiveInputStream ais, IndexMetadata metadata){
+                this.ais = ais;
+                this.metadata = metadata;
+                this.action = action;
+            }
+        }
+        private Map<String, IndexActionInfo> toUpdate = new HashMap<String,IndexActionInfo>();
+
         private boolean active = true;
         
         public void close(){
@@ -1083,14 +1094,18 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
                 toUpdate.notifyAll();
             }
         }
-        public void update(ManagedIndexState state, String name,ArchiveInputStream ais){
-            if(name == null || name.isEmpty()){
-                throw new IllegalArgumentException("The parsed index name MUST NOT be NULL");
+        public void update(ManagedIndexState desiredState, IndexMetadata metadata,ArchiveInputStream ais){
+            if(metadata == null){
+                throw new IllegalArgumentException("The parsed IndexMetadata MUST NOT be NULL");
             }
-            if(state == null){
+            String name = metadata.getIndexName();
+            if(name == null || name.isEmpty()){
+                throw new IllegalArgumentException("The parsed IndexMetadata MUST contain a valid name (NOT NULL and NOT empty)!");
+            }
+            if(desiredState == null){
                 throw new IllegalArgumentException("The parsed desired ManagedIndexState MUST NOT be NULL");
             }
-            switch (state) {
+            switch (desiredState) {
                 case ACTIVE:
                     if(ais == null){
                         throw new IllegalArgumentException("If the parsed ManagedIndexState is ACTIVE, " +
@@ -1109,17 +1124,17 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
                     throw new IllegalArgumentException("The IndexUpdateDeamon only supports the ManagedIndexStates ACTIVE and UNINITIALISED!");
             }
             synchronized (toUpdate) {
-                toUpdate.put(name, ais);
+                toUpdate.put(name, new IndexActionInfo(desiredState,ais, metadata));
                 toUpdate.notifyAll();
             }
         }
         @Override
         public void run() {
             while(active){
-                Entry<String,ArchiveInputStream> entry;
+                Entry<String,IndexActionInfo> entry;
                 while(!toUpdate.isEmpty()) {
                     synchronized (toUpdate) {
-                        Iterator<Entry<String,ArchiveInputStream>> it = toUpdate.entrySet().iterator();
+                        Iterator<Entry<String,IndexActionInfo>> it = toUpdate.entrySet().iterator();
                         if(it.hasNext()){ //get the next element
                             entry = it.next();
                             it.remove(); //and remove it
@@ -1128,47 +1143,52 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
                         }
                     }
                     if(entry != null){
-                        IndexMetadata metadata = managedCores.getIndexMetadata(entry.getKey());
-                        if(metadata != null){
-                            if(entry.getValue() != null) { //desired state ACTIVE
-                                log.info(" ... start to ACTIVATE Index {} on ManagedSolrServer",entry.getKey(),metadata.getServerName());
+                        //IndexMetadata metadata = managedCores.getIndexMetadata(entry.getKey());
+                        IndexActionInfo info = entry.getValue();
+                        if(isManagedIndex(entry.getKey())){
+                            if(info.action == ManagedIndexState.ACTIVE){
+                                log.info(" ... start to ACTIVATE Index {} on ManagedSolrServer",entry.getKey(),info.metadata.getServerName());
                                 try {
-                                    updateCore(metadata, entry.getValue());
-                                    log.info(" ... Index {} on ManagedSolrServer {} is now ACTIVE",entry.getKey(),metadata.getServerName());
+                                    updateCore(info.metadata, info.ais);
+                                    log.info(" ... Index {} on ManagedSolrServer {} is now ACTIVE",entry.getKey(),info.metadata.getServerName());
                                 } catch (IOException e) {
                                         log.error("IOException while activating Index '"+
-                                            metadata.getServerName()+':'+
-                                            metadata.getIndexName()+"'!",e);
-                                        metadata.setError(e);
+                                            info.metadata.getServerName()+':'+
+                                            info.metadata.getIndexName()+"'!",e);
+                                        info.metadata.setError(e);
                                 } catch (SAXException e) {
                                         log.error("SAXException while activating Index '"+
-                                            metadata.getServerName()+':'+
-                                            metadata.getIndexName()+"'!",e);
-                                        metadata.setError(e);
+                                            info.metadata.getServerName()+':'+
+                                            info.metadata.getIndexName()+"'!",e);
+                                        info.metadata.setError(e);
                                 } catch (RuntimeException e) {
                                         log.error("Exception while activating Index '"+
-                                            metadata.getServerName()+':'+
-                                            metadata.getIndexName()+"'!",e);
-                                        metadata.setError(e);
+                                            info.metadata.getServerName()+':'+
+                                            info.metadata.getIndexName()+"'!",e);
+                                        info.metadata.setError(e);
                                 } finally {
-                                    managedCores.store(metadata);
+                                    managedCores.store(info.metadata);
                                 }
                             } else { //desired state UNINITIALISED
-                                log.info(" ... start to UNINITIALISE Index {} on ManagedSolrServer",entry.getKey(),metadata.getServerName());
+                                log.info(" ... start to UNINITIALISE Index {} on ManagedSolrServer",entry.getKey(),info.metadata.getServerName());
                                 try {
-                                    uninitialiseCore(metadata,true);
-                                    log.info(" ... Index {} on ManagedSolrServer {} is now UNINITIALISED",entry.getKey(),metadata.getServerName());
+                                    uninitialiseCore(info.metadata,true);
+                                    log.info(" ... Index {} on ManagedSolrServer {} is now UNINITIALISED",entry.getKey(),info.metadata.getServerName());
                                 } catch (RuntimeException e) {
                                     log.error("Exception while uninitialising Index '"+
-                                        metadata.getServerName()+':'+
-                                        metadata.getIndexName()+"'!",e);
-                                    metadata.setError(e);
+                                        info.metadata.getServerName()+':'+
+                                        info.metadata.getIndexName()+"'!",e);
+                                    info.metadata.setError(e);
                                 } finally {
                                     // store the updated metadata
-                                    managedCores.store(metadata);
+                                    managedCores.store(info.metadata);
                                 }
                             }
-                        } //else removed in the meantime -> nothing to do
+                        } else { //else removed in the meantime -> nothing to do
+                            log.info("ingonre Update request for Index {} with desired state {} " +
+                            		"because this index seams to be no longer managed!",
+                            		entry.getKey(),info.action);
+                        }
                     }
                 }
                 synchronized (toUpdate) {
