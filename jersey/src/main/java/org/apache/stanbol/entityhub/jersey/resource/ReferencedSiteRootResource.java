@@ -34,12 +34,16 @@ import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.ENTITY_SUPPO
 import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.REPRESENTATION_SUPPORTED_MEDIA_TYPES;
 import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.createFieldQueryForFindRequest;
 import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.getAcceptableMediaType;
+import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.getLDPathParseExceptionMessage;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.handleLDPathRequest;
+import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.prepairQueryLDPathProgram;
+import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.transformQueryResults;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -63,19 +67,26 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
+import org.apache.stanbol.entityhub.core.utils.AdaptingIterator;
 import org.apache.stanbol.entityhub.jersey.parsers.FieldQueryReader;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
+import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
 import org.apache.stanbol.entityhub.ldpath.backend.SiteBackend;
+import org.apache.stanbol.entityhub.ldpath.query.LDPathSelect;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
+import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
+import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.site.License;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteException;
@@ -83,6 +94,9 @@ import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import at.newmedialab.ldpath.exception.LDPathParseException;
+import at.newmedialab.ldpath.model.programs.Program;
 
 import com.sun.jersey.api.view.Viewable;
 
@@ -298,8 +312,9 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                                     // @QueryParam(value="select") String select,
                                     @QueryParam(value = "limit") @DefaultValue(value = "-1") int limit,
                                     @QueryParam(value = "offset") @DefaultValue(value = "0") int offset,
+                                    @QueryParam(value = "ldpath") String ldpath,
                                     @Context HttpHeaders headers) {
-        return findEntity(name, field, language, limit, offset, headers);
+        return findEntity(name, field, language, limit, offset, ldpath, headers);
     }
     
     @POST
@@ -310,6 +325,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                                // @FormParam(value="select") String select,
                                @FormParam(value = "limit") Integer limit,
                                @FormParam(value = "offset") Integer offset,
+                               @FormParam(value = "ldpath") String ldpath,
                                @Context HttpHeaders headers) {
         log.debug("site/{}/find Request",site.getId());
         Collection<String> supported = new HashSet<String>(JerseyUtils.QUERY_RESULT_SUPPORTED_MEDIA_TYPES);
@@ -328,7 +344,6 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
         }
-        // process the optional search field parameter
         if (field == null) {
             field = DEFAULT_FIND_FIELD;
         } else {
@@ -337,8 +352,10 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                 field = DEFAULT_FIND_FIELD;
             }
         }
-        return executeQuery(createFieldQueryForFindRequest(name, field, language,
-            limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, offset),
+        return executeQuery(createFieldQueryForFindRequest(
+                name, field, language,
+                limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, 
+                offset,ldpath),
             headers);
     }
     
@@ -389,19 +406,91 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     private Response executeQuery(FieldQuery query, HttpHeaders headers) throws WebApplicationException {
         MediaType mediaType = getAcceptableMediaType(headers, ENTITY_SUPPORTED_MEDIA_TYPES, 
             APPLICATION_JSON_TYPE);
-        try {
-            ResponseBuilder rb = Response.ok(site.find(query));
+        if(query instanceof LDPathSelect && ((LDPathSelect)query).getLDPathSelect() != null){
+            //use the LDPath variant to process this query
+            return executeLDPathQuery(query, ((LDPathSelect)query).getLDPathSelect(),
+                mediaType, headers);
+        } else { //use the default query execution
+            QueryResultList<Representation> result;
+            try {
+                result = site.find(query);
+            } catch (ReferencedSiteException e) {
+                String message = String.format("Unable to Query Site '%s' (message: %s)",
+                    site.getId(),e.getMessage());
+                log.error(message, e);
+                return Response.status(Status.INTERNAL_SERVER_ERROR)
+                .entity(message)
+                .header(HttpHeaders.ACCEPT, mediaType).build();
+            }
+            ResponseBuilder rb = Response.ok(result);
             rb.header(HttpHeaders.CONTENT_TYPE, mediaType+"; charset=utf-8");
             addCORSOrigin(servletContext, rb, headers);
             return rb.build();
-        } catch (ReferencedSiteException e) {
-            log.error("ReferencedSiteException while accessing Site " +
-                site.getConfiguration().getName() + " (id="
-                      + site.getId() + ")", e);
-            throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
         }
-        
     }
+
+    /**
+     * Execute a Query that uses LDPath to process results.
+     * @param query the query
+     * @param mediaType the mediaType for the response
+     * @param headers the http headers of the request
+     * @return the response
+     */
+    private Response executeLDPathQuery(FieldQuery query, String ldpathProgramString, MediaType mediaType, HttpHeaders headers) {
+        QueryResultList<Representation> result;
+        ValueFactory vf = new RdfValueFactory(new SimpleMGraph());
+        SiteBackend backend = new SiteBackend(site,vf);
+        EntityhubLDPath ldPath = new EntityhubLDPath(backend,vf);
+        //copy the selected fields, because we might need to delete some during
+        //the preparation phase
+        Set<String> selectedFields = new HashSet<String>(query.getSelectedFields());
+        //first prepare (only execute the query if the parameters are valid)
+        Program<Object> program;
+        try {
+            program = prepairQueryLDPathProgram(ldpathProgramString, selectedFields, backend, ldPath);
+        } catch (LDPathParseException e) {
+            log.warn("Unable to parse LDPath program used as select for Query:");
+            log.warn("FieldQuery: \n {}",query);
+            log.warn("LDPath: \n {}",((LDPathSelect)query).getLDPathSelect());
+            log.warn("Exception:",e);
+            return Response.status(Status.BAD_REQUEST)
+            .entity(("Unable to parse LDPath program (Messages: "+
+                    getLDPathParseExceptionMessage(e)+")!\n"))
+            .header(HttpHeaders.ACCEPT, mediaType).build();
+        } catch (IllegalStateException e) {
+            log.warn("parsed LDPath program is not compatible with parsed Query!",e);
+            return Response.status(Status.BAD_REQUEST)
+            .entity(e.getMessage())
+            .header(HttpHeaders.ACCEPT, mediaType).build();
+        }
+        //2. execute the query
+        Iterator<Representation> resultIt;
+        try { // we need to adapt from Entity to Representation
+            resultIt = new AdaptingIterator<Entity,Representation>(site.findEntities(query).iterator(),
+                    new AdaptingIterator.Adapter<Entity,Representation>() {
+                        @Override
+                        public Representation adapt(Entity value, Class<Representation> type) {
+                            return value.getRepresentation();
+                        }},Representation.class);
+        } catch (ReferencedSiteException e) {
+            String message = String.format("Unable to Query Site '%s' (message: %s)",
+                site.getId(),e.getMessage());
+            log.error(message, e);
+            return Response.status(Status.INTERNAL_SERVER_ERROR)
+            .entity(message)
+            .header(HttpHeaders.ACCEPT, mediaType).build();
+        }
+        //process the results
+        Collection<Representation> transformedResults = transformQueryResults(resultIt, program,
+            selectedFields, ldPath, backend, vf);
+        result = new QueryResultListImpl<Representation>(query, transformedResults, Representation.class);
+        ResponseBuilder rb = Response.ok(result);
+        rb.header(HttpHeaders.CONTENT_TYPE, mediaType+"; charset=utf-8");
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
+
+
     /*
      * LDPath support
      */

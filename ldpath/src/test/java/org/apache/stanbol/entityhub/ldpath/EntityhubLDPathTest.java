@@ -40,6 +40,7 @@ public class EntityhubLDPathTest extends LDPathTestBase {
         StringBuilder builder = new StringBuilder();
         builder.append("@prefix eh : <http://www.iks-project.eu/ontology/rick/model/>;");
         builder.append("@prefix dct : <http://purl.org/dc/terms/>;");
+        builder.append("@prefix geo : <http://www.w3.org/2003/01/geo/wgs84_pos#> ;");
         //this test that even when selecting strings the language is preserved
         builder.append("name = rdfs:label :: xsd:string;");
         //this tests support for natural language texts as used by the entityhub
@@ -48,6 +49,7 @@ public class EntityhubLDPathTest extends LDPathTestBase {
         builder.append("categories = dct:subject :: xsd:anyURI;");
         //this tests support for Reference as used by the entityhub
         builder.append("type = rdf:type :: eh:ref;");
+        builder.append("lat = geo:lat :: xsd:double;");
         DATA_TYPE_TEST_PROGRAM = builder.toString();
         
     }
@@ -93,6 +95,7 @@ public class EntityhubLDPathTest extends LDPathTestBase {
             vf.createReference("http://dbpedia.org/ontology/PopulatedPlace"),
             vf.createReference("http://dbpedia.org/ontology/Place")
             )));
+        expected.put("lat", Collections.emptySet());
         EXPECTED_RESULTS_LONDON = Collections.unmodifiableMap(expected);
     }
     

@@ -19,6 +19,7 @@ package org.apache.stanbol.entityhub.jersey.resource;
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.OPTIONS;
 import static javax.ws.rs.HttpMethod.POST;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N3;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N_TRIPLE;
@@ -28,11 +29,19 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES;
+import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.QUERY_RESULT_SUPPORTED_MEDIA_TYPES;
+import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.getAcceptableMediaType;
+import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.getLDPathParseExceptionMessage;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.handleLDPathRequest;
+import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.prepairQueryLDPathProgram;
+import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.transformQueryResults;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -46,6 +55,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -54,17 +64,31 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
+import org.apache.stanbol.entityhub.core.utils.AdaptingIterator;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
+import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
+import org.apache.stanbol.entityhub.ldpath.backend.SiteBackend;
 import org.apache.stanbol.entityhub.ldpath.backend.SiteManagerBackend;
+import org.apache.stanbol.entityhub.ldpath.query.LDPathSelect;
+import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
+import org.apache.stanbol.entityhub.servicesapi.model.Representation;
+import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
+import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
+import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteException;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
 import org.codehaus.jettison.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import at.newmedialab.ldpath.exception.LDPathParseException;
+import at.newmedialab.ldpath.model.programs.Program;
 
 import com.sun.jersey.api.view.Viewable;
 
@@ -242,8 +266,9 @@ public class SiteManagerRootResource extends BaseStanbolResource {
                                       // @QueryParam(value="select") String select,
                                       @QueryParam(value = "limit") @DefaultValue(value = "-1") int limit,
                                       @QueryParam(value = "offset") @DefaultValue(value = "0") int offset,
+                                      @QueryParam(value = "ldpath") String ldpath,
                                       @Context HttpHeaders headers) {
-        return findEntity(name, field, language, limit, offset, headers);
+        return findEntity(name, field, language, limit, offset, ldpath, headers);
     }
 
     @POST
@@ -254,6 +279,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
                                // @FormParam(value="select") String select,
                                @FormParam(value = "limit") Integer limit,
                                @FormParam(value = "offset") Integer offset,
+                               @FormParam(value = "ldpath") String ldpath,
                                @Context HttpHeaders headers) {
         log.debug("findEntity() Request");
         Collection<String> supported = new HashSet<String>(JerseyUtils.QUERY_RESULT_SUPPORTED_MEDIA_TYPES);
@@ -280,14 +306,11 @@ public class SiteManagerRootResource extends BaseStanbolResource {
                 field = DEFAULT_FIND_FIELD;
             }
         }
-        ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
-            ReferencedSiteManager.class, servletContext);
+        
         FieldQuery query = JerseyUtils.createFieldQueryForFindRequest(name, field, language,
-            limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, offset);
-        ResponseBuilder rb = Response.ok(referencedSiteManager.find(query));
-        rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
-        return rb.build();
+            limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, offset,ldpath);
+        return executeQuery(ContextHelper.getServiceFromContext(
+            ReferencedSiteManager.class, servletContext), query, acceptedMediaType, headers);
     }
     @GET
     @Path("/query")
@@ -330,12 +353,8 @@ public class SiteManagerRootResource extends BaseStanbolResource {
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
         } else {
-            ReferencedSiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
-                ReferencedSiteManager.class, servletContext);
-           ResponseBuilder rb = Response.ok(referencedSiteManager.find(query));
-            rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
-            return rb.build();
+            return executeQuery(ContextHelper.getServiceFromContext(
+                ReferencedSiteManager.class, servletContext), query, acceptedMediaType, headers);
         }
     }
     /*
@@ -367,5 +386,83 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         return handleLDPathRequest(this,new SiteManagerBackend(referencedSiteManager), 
             ldpath, contexts, headers, servletContext);
     }
-    
+    /**
+     * Executes the query parsed by {@link #queryEntities(String, File, HttpHeaders)} or created based
+     * {@link #findEntity(String, String, String, int, int, HttpHeaders)}
+     * 
+     * @param manager The {@link ReferencedSiteManager}
+     * @param query
+     *            The query to execute
+     * @param headers the request headers
+     * @return the response (results of error)
+     */
+    private Response executeQuery(ReferencedSiteManager manager,
+                                  FieldQuery query, MediaType mediaType, 
+                                  HttpHeaders headers) throws WebApplicationException {
+        if(query instanceof LDPathSelect && ((LDPathSelect)query).getLDPathSelect() != null){
+            //use the LDPath variant to process this query
+            return executeLDPathQuery(manager, query, ((LDPathSelect)query).getLDPathSelect(),
+                mediaType, headers);
+        } else { //use the default query execution
+            QueryResultList<Representation> result = manager.find(query);
+            ResponseBuilder rb = Response.ok(result);
+            rb.header(HttpHeaders.CONTENT_TYPE, mediaType+"; charset=utf-8");
+            addCORSOrigin(servletContext, rb, headers);
+            return rb.build();
+        }
+    }
+
+    /**
+     * Execute a Query that uses LDPath to process results.
+     * @param query the query
+     * @param mediaType the mediaType for the response
+     * @param headers the http headers of the request
+     * @return the response
+     */
+    private Response executeLDPathQuery(ReferencedSiteManager manager,FieldQuery query, String ldpathProgramString, MediaType mediaType, HttpHeaders headers) {
+        QueryResultList<Representation> result;
+        ValueFactory vf = new RdfValueFactory(new SimpleMGraph());
+        SiteManagerBackend backend = new SiteManagerBackend(manager);
+        EntityhubLDPath ldPath = new EntityhubLDPath(backend,vf);
+        //copy the selected fields, because we might need to delete some during
+        //the preparation phase
+        Set<String> selectedFields = new HashSet<String>(query.getSelectedFields());
+        //first prepare (only execute the query if the parameters are valid)
+        Program<Object> program;
+        try {
+            program = prepairQueryLDPathProgram(ldpathProgramString, selectedFields, backend, ldPath);
+        } catch (LDPathParseException e) {
+            log.warn("Unable to parse LDPath program used as select for a Query to the '/sites' endpoint:");
+            log.warn("FieldQuery: \n {}",query);
+            log.warn("LDPath: \n {}",((LDPathSelect)query).getLDPathSelect());
+            log.warn("Exception:",e);
+            return Response.status(Status.BAD_REQUEST)
+            .entity(("Unable to parse LDPath program (Messages: "+
+                    getLDPathParseExceptionMessage(e)+")!\n"))
+            .header(HttpHeaders.ACCEPT, mediaType).build();
+        } catch (IllegalStateException e) {
+            log.warn("parsed LDPath program is not compatible with the Query " +
+            		"parsed to the '/sites' endpoint!",e);
+            return Response.status(Status.BAD_REQUEST)
+            .entity(e.getMessage())
+            .header(HttpHeaders.ACCEPT, mediaType).build();
+        }
+        //2. execute the query
+        // we need to adapt from Entity to Representation
+        //TODO: should we add the metadata to the result?
+        Iterator<Representation> resultIt = new AdaptingIterator<Entity,Representation>(manager.findEntities(query).iterator(),
+            new AdaptingIterator.Adapter<Entity,Representation>() {
+                @Override
+                public Representation adapt(Entity value, Class<Representation> type) {
+                    return value.getRepresentation();
+                }},Representation.class);
+        //process the results
+        Collection<Representation> transformedResults = transformQueryResults(resultIt, program,
+            selectedFields, ldPath, backend, vf);
+        result = new QueryResultListImpl<Representation>(query, transformedResults, Representation.class);
+        ResponseBuilder rb = Response.ok(result);
+        rb.header(HttpHeaders.CONTENT_TYPE, mediaType+"; charset=utf-8");
+        addCORSOrigin(servletContext, rb, headers);
+        return rb.build();
+    }
 }

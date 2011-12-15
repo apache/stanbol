@@ -49,6 +49,7 @@ import javax.ws.rs.ext.MessageBodyReader;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
+import org.apache.stanbol.entityhub.ldpath.query.LDPathFieldQueryImpl;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
@@ -205,7 +206,9 @@ public final class JerseyUtils {
      * @throws IllegalArgumentException in case the parsed field is invalid. Callers
      * of this method need to ensure that this parameter is set to an valid value.
      */
-    public static FieldQuery createFieldQueryForFindRequest(String name, String field, String language, Integer limit, Integer offset) throws WebApplicationException, IllegalArgumentException{
+    public static FieldQuery createFieldQueryForFindRequest(String name, String field, 
+                                                            String language, Integer limit, 
+                                                            Integer offset, String ldpath) throws WebApplicationException, IllegalArgumentException{
         if(name == null || name.trim().isEmpty()){
             // This throws an WebApplicationException, because the search name is
             // provided by the caller. So an empty or missing name is interpreted
@@ -232,15 +235,22 @@ public final class JerseyUtils {
         log.debug("  > lang  : " + language);
         log.debug("  > limit : " + limit);
         log.debug("  > offset: " + offset);
-        FieldQuery query = queryFactory.createFieldQuery();
-        if (language == null) {
+        log.debug("  > ldpath: " + ldpath);
+        FieldQuery query;
+        if(ldpath != null && !ldpath.isEmpty()){ //STANBOL-417 
+            query = new LDPathFieldQueryImpl();
+            ((LDPathFieldQueryImpl)query).setLDPathSelect(ldpath);
+        } else { //if no LDPath is parsed select the default field
+            query = queryFactory.createFieldQuery();
+            Collection<String> selectedFields = new ArrayList<String>();
+            selectedFields.add(field); //select also the field used to find entities
+            query.addSelectedFields(selectedFields);
+        }
+        if (language == null || language.trim().isEmpty()) {
             query.setConstraint(field, new TextConstraint(name, PatternType.wildcard, false));
         } else {
             query.setConstraint(field, new TextConstraint(name, PatternType.wildcard, false, language));
         }
-        Collection<String> selectedFields = new ArrayList<String>();
-        selectedFields.add(field); //select also the field used to find entities
-        query.addSelectedFields(selectedFields);
         if (limit != null && limit > 0) {
             query.setLimit(limit);
         }

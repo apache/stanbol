@@ -54,11 +54,55 @@
 
 <pre>curl -X POST -d "name=Bishofsh*&limit=10&offset=0" ${it.publicBaseUri}entityhub/sites/find</pre>
 
+   
 <h4>Test</h4>
 
-<form>
-<p>Start test search for
-<input type="text" id="testSearchValue" value="Paderb*" />
+<form name="findForm" id="findForm">
+<p>Find entities with <br>
+<table><tr>
+    <td><strong>Name:</strong></td>
+    <td><input type="text" name="name" size="40" value="Paderb*"/> (required)<br>
+    This supports Wildcards such as 'Exam?le*'</td>
+  </tr><tr>
+    <td><strong>Language:</strong></td>
+    <td><input type="text" name="lang" size="10" value="en" />
+      (optional, default: any)</td>
+  </tr><tr>
+    <td><strong>Field:</strong> </td>
+    <td><input type="text" name="field" size="60" />
+      (optional, reasonable default - usually rdfs:label)</td>
+  </tr><tr>
+    <td><strong>Limit:</string></td>
+    <td> <input type="text" name="limit" size="6" maxlength="6" value="10" />
+      (optional, number, default: 10) The maximum number of results</td>
+  </tr><tr>
+    <td><strong>Offset:</strong> </td>
+    <td><input type="text" name="offset" size="6" maxlength="6" value="0" />
+      (optional, number, default: 0) The offset of the first returned result</td>
+  </tr><tr>
+    <td><strong>LDPath:</strong>
+    </td><td><textarea class="input" name="ldpath" rows="10">@prefix dct : <http://purl.org/dc/terms/> ;
+@prefix geo : <http://www.w3.org/2003/01/geo/wgs84_pos#> ;
+name = rdfs:label[@en] :: xsd:string;
+comment = rdfs:comment[@en] :: xsd:string;
+categories = dct:subject :: xsd:anyURI;
+homepage = foaf:homepage :: xsd:anyURI;
+location = fn:concat("[",geo:lat,",",geo:long,"]") :: xsd:string;</textarea><br>
+      (optional). LDPath programs can be used to specify what information to return for
+      Entities selected by the /find request. This example selects the english
+      labels, comments, categories, homepage and builds a string representing the
+      location '[{latitude},{longitude}]'.</td>
+  </tr><tr>
+    <td><strong>Output Format:</strong></td>
+    <td><select name="format" id="findOutputFormat">
+        <option value="application/json">JSON</option>
+        <option value="application/rdf+xml">RDF/XML</option>
+        <option value="application/rdf+json">RDF/JSON</option>
+        <option value="text/turtle">Turtle</option>
+        <option value="text/rdf+nt">N-TRIPLES</option>
+      </select> (Accept header set to the request)</td>
+  </tr>
+</table>
 <input type="submit" value="Search" onclick="startTestSearch(); return false;" /></p>
 </form>
 
@@ -69,17 +113,20 @@ function startTestSearch() {
  var data = "name=" + $("#testSearchValue").val() + "&limit=10&offset=0";
  $.ajax({
    type: "POST",
+   beforeSend: function(req) {
+        req.setRequestHeader("Accept", $("#findOutputFormat").val());
+   },
    url: "${it.publicBaseUri}entityhub/sites/find",
-   data: data,
+   data: $("#findForm").serialize(),
    dataType: "text",
    cache: false,
    success: function(result) {
      $("#testSearchResultText").text(result);
    },
-   error: function(result) {
-     $("#testSearchResultText").text(result);
+   error: function(jqXHR, textStatus, errorThrown) {
+     $("#testSearchResultText").text(jqXHR.statusText + " - " + jqXHR.responseText);
    }
- });		  
+ });          
 }
 </script>
 

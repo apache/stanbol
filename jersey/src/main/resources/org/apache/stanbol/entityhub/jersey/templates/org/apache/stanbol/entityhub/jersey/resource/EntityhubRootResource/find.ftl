@@ -19,6 +19,8 @@
 <@common.page title="Entityhub Find" hasrestapi=false> 
 
 <#include "inc_find.ftl">
+<hr>
+<#include "/imports/ldpathdocumentation.ftl">
 
 </@common.page>
 </#escape>

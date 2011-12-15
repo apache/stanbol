@@ -19,8 +19,8 @@
 <@common.page> 
 
 <#include "inc_query.ftl">
-<hr>
 <#include "/imports/fieldquerydocumentation.ftl">
+<#include "/imports/ldpathdocumentation.ftl">
 
 </@common.page>
 </#escape>

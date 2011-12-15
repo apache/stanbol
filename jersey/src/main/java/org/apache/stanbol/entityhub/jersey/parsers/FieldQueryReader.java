@@ -40,6 +40,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
+import org.apache.stanbol.entityhub.core.query.FieldQueryImpl;
+import org.apache.stanbol.entityhub.ldpath.query.LDPathFieldQueryImpl;
 import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
@@ -85,8 +87,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             acceptedType = MediaType.TEXT_PLAIN_TYPE;
         }
         try {
-            return fromJSON(
-                DefaultQueryFactory.getInstance(), 
+            return fromJSON( 
                 queryString,acceptedType);
         } catch (JSONException e) {
             log.error("Unable to parse Request ",e);
@@ -117,12 +118,19 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
      * @throws JSONException
      * @throws WebApplicationException
      */
-    public static FieldQuery fromJSON(FieldQueryFactory queryFactory, String jsonQueryString,MediaType acceptedMediaType) throws JSONException,WebApplicationException{
+    public static FieldQuery fromJSON(String jsonQueryString,MediaType acceptedMediaType) throws JSONException,WebApplicationException{
         if(jsonQueryString == null){
             throw new IllegalArgumentException("The parsed JSON object MUST NOT be NULL!");
         }
         JSONObject jQuery = new JSONObject(jsonQueryString);
-        FieldQuery query = queryFactory.createFieldQuery();
+        FieldQuery query;
+        if(jQuery.has("ldpath")){ //STANBOL-417: support for using LDPath as select
+            LDPathFieldQueryImpl ldPathQuery = new LDPathFieldQueryImpl();
+            ldPathQuery.setLDPathSelect(jQuery.getString("ldpath"));
+            query = ldPathQuery;
+        } else {
+            query = new FieldQueryImpl();
+        }
         if(!jQuery.has("constraints")){
             StringBuilder message = new StringBuilder();
             message.append("The parsed Field Query MUST contain at least a single 'constraints'\n");

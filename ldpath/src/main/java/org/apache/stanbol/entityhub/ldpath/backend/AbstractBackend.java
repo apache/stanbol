@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
@@ -48,21 +49,25 @@ import at.newmedialab.ldpath.api.backend.RDFBackend;
  * @author Rupert Westenthaler
  *
  */
-abstract class AbstractBackend implements RDFBackend<Object> {
+public abstract class AbstractBackend implements RDFBackend<Object> {
     
     public static final int DEFAULT_MAX_SELECT = 1000; //select a maximum of 1000 values per query
     public static final int DEFAULT_MAX_RESULTS = 100000; //select a maximum of 100k entities
 
-    private static final int LRU_CACHE_SIZE = 100;
+    private static final int LRU_CACHE_SIZE = 1000;
     
     @SuppressWarnings("serial")
-    private final java.util.LinkedHashMap<String,Representation> lru = 
+    private final LinkedHashMap<String,Representation> lru = 
         new LinkedHashMap<String,Representation>(LRU_CACHE_SIZE+1, 0.75f, true){
         @Override
         protected boolean removeEldestEntry(java.util.Map.Entry<String,Representation> eldest) {
             return size() > LRU_CACHE_SIZE;
         }
     };
+    /**
+     * Locally add Representations.
+     */
+    private final Map<String,Representation> local = new TreeMap<String,Representation>(); 
     /**
      * EnumMap to avoid instantiations of URIs for the limited set of
      * DataTypes
@@ -193,7 +198,7 @@ abstract class AbstractBackend implements RDFBackend<Object> {
             //Here the assumption is the the LD Path program will request
             //a lot of properties for a very low numbers of Entities
             // .. there fore we keep here representations within an LRU cache 
-            Representation r = lru.get(subject.toString());
+            Representation r = getCached(subject.toString());
             if(r == null){
                 try {
                     r = getRepresentation(subject.toString());
@@ -201,7 +206,7 @@ abstract class AbstractBackend implements RDFBackend<Object> {
                     throw new IllegalStateException(e.getMessage(),e);
                 }
                 if(r != null){
-                    lru.put(subject.toString(), r);
+                    toLRU(r);
                 }
             }
             if(r != null){
@@ -358,5 +363,48 @@ abstract class AbstractBackend implements RDFBackend<Object> {
                 type.getJavaType()+")!");
         }
         return converted;
+    }
+    /*
+     * Utility methods for managing the local cache
+     */
+    /**
+     * Adds an retrieved Representation to the LRU cache
+     * @param r
+     */
+    private void toLRU(Representation r){
+        lru.put(r.getId(), r);
+    }
+    /**
+     * Adds a Representation already available in-memory to this RDFBackend.
+     * This allows to prevent re-loading of Representations while executing
+     * LDPath programs.<p>
+     * Usually this is used if using Representations selected by a Query as
+     * context for LDPath program executions.
+     * @param r
+     */
+    public void addLocal(Representation r){
+        if(r != null){
+            local.put(r.getId(), r);
+            lru.remove(r.getId());
+        } //else ignore
+    }
+    /**
+     * Removes a Representation form the local cache
+     * @param id the ID of the represetnation to remove
+     */
+    public void removeLocal(String id){
+        if(id != null){
+            local.remove(id);
+            lru.remove(id);
+        }
+    }
+    /**
+     * Tries to get an {@link Representation} form {@link #local} or {@link #lru}
+     * @param id the ID
+     * @return the {@link Representation} or <code>null</code> if not cached
+     */
+    private Representation getCached(String id){
+        Representation r = local.get(id);
+        return r == null ? lru.get(id) : r;
     }
 }

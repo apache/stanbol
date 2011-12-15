@@ -22,6 +22,7 @@ import java.util.EnumSet;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import org.apache.stanbol.entityhub.ldpath.query.LDPathSelect;
 import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
@@ -65,6 +66,11 @@ final class FieldQueryToJSON {
         //if(query.getOffset() != 0){
             jQuery.put("offset", query.getOffset());
         //}
+        if(query instanceof LDPathSelect && 
+                ((LDPathSelect)query).getLDPathSelect() != null &&
+                !((LDPathSelect)query).getLDPathSelect().isEmpty()){
+            jQuery.put("ldpath", ((LDPathSelect)query).getLDPathSelect());
+        }
         return jQuery;
     }
 

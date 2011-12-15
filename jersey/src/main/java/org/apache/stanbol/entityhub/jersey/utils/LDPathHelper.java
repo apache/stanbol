@@ -2,11 +2,14 @@ package org.apache.stanbol.entityhub.jersey.utils;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.RESULT_SCORE_MAPPING;
 import static org.apache.stanbol.entityhub.ldpath.LDPathUtils.getReader;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,22 +23,46 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.jersey.resource.EntityhubRootResource;
 import org.apache.stanbol.entityhub.jersey.resource.ReferencedSiteRootResource;
 import org.apache.stanbol.entityhub.jersey.resource.SiteManagerRootResource;
 import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
+import org.apache.stanbol.entityhub.ldpath.backend.AbstractBackend;
+import org.apache.stanbol.entityhub.ldpath.backend.SiteBackend;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
+import org.apache.stanbol.entityhub.servicesapi.model.Reference;
+import org.apache.stanbol.entityhub.servicesapi.model.Representation;
+import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
+import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.Viewable;
 
+import at.newmedialab.ldpath.LDPath;
 import at.newmedialab.ldpath.api.backend.RDFBackend;
 import at.newmedialab.ldpath.exception.LDPathParseException;
+import at.newmedialab.ldpath.model.fields.FieldMapping;
 import at.newmedialab.ldpath.model.programs.Program;
+import at.newmedialab.ldpath.model.selectors.PropertySelector;
+import at.newmedialab.ldpath.model.transformers.DoubleTransformer;
 
 public class LDPathHelper {
     private static final Logger log = LoggerFactory.getLogger(LDPathHelper.class);
+    
+    /**
+     * LDPath {@link FieldMapping} for the {@link RdfResourceEnum#resultScore}
+     * property used for the score of query results
+     */
+    public static final FieldMapping<Double,Object> RESULT_SCORE_MAPPING = 
+        new FieldMapping<Double,Object>(RdfResourceEnum.resultScore.getUri(), 
+            NamespaceEnum.xsd+"double", new PropertySelector<Object>(
+                    InMemoryValueFactory.getInstance().createReference(
+                        RdfResourceEnum.resultScore.getUri())), 
+                    new DoubleTransformer<Object>(), null);
+    
     /**
      * Executes the LDPath program on the contexts stored in the backend and
      * returns the result as an RDF graph 
@@ -77,7 +104,7 @@ public class LDPathHelper {
      * @param e the exception
      * @return the info useful to replay in BAD_REQUEST responses
      */
-    private static Map<String,String> getLDPathParseExceptionMessage(LDPathParseException e) {
+    public static Map<String,String> getLDPathParseExceptionMessage(LDPathParseException e) {
         Map<String,String> messages = new LinkedHashMap<String,String>();
         Throwable t = e;
         do { // the real parsing error is in some cause ... 
@@ -151,5 +178,96 @@ public class LDPathHelper {
         rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
+    }
+    
+    
+    /**
+     * Transform the results of a query
+     * @param resultIt The Iterator over the results
+     * @param program the LDPath {@link Program} to execute on the results
+     * @param selectedFields additional selected fields of the query
+     * @param ldPath the Entityhub LDPath
+     * @param backend the {@link AbstractBackend} mainly used to 
+     * {@link AbstractBackend#addLocal(Representation) add representations} of
+     * the query to the local cache
+     * @param vf the {@link ValueFactory} used create {@link Reference}s for the
+     * String {@link Representation#getId() id}s of the {@link Representation} in
+     * the query results
+     * @return A collection with the transformed Representations in the processed
+     * order.
+     */
+    public static Collection<Representation> transformQueryResults(Iterator<Representation> resultIt,
+                                                             Program<Object> program,
+                                                             Set<String> selectedFields,
+                                                             EntityhubLDPath ldPath,
+                                                             AbstractBackend backend,
+                                                             ValueFactory vf) {
+        Collection<Representation> transformedResults = new LinkedHashSet<Representation>();
+        while(resultIt.hasNext()){
+            Representation rep = resultIt.next();
+            backend.addLocal(rep); //add results to local cache
+            Representation transformed = ldPath.execute(vf.createReference(rep.getId()), program);
+            //also add additional selected fields
+            for(String selected : selectedFields){
+                Iterator<Object> values = rep.get(selected);
+                if(values != null){
+                    while(values.hasNext()){
+                        transformed.add(selected, values.next());
+                    }
+                }
+            }
+            transformedResults.add(transformed);
+        }
+        return transformedResults;
+    }
+
+
+    /**
+     * 
+     * @param ldpathProgram the LDPath program as string
+     * @param selectedFields the selected fields of the query
+     * @param backend the RDFBackend  (only needed for logging)
+     * @param ldPath the {@link LDPath} used to parse the program.
+     * @return the pre-processed and validated program
+     * @throws LDPathParseException if the parsed LDPath program string is not
+     * valid
+     * @throws IllegalStateException if the fields selected by the LDPath
+     * program conflict with the fields selected by the query.
+     */
+    public static Program<Object> prepairQueryLDPathProgram(String ldpathProgram,
+                                                Set<String> selectedFields,
+                                                AbstractBackend backend,
+                                                EntityhubLDPath ldPath) throws LDPathParseException {
+        Program<Object> program = ldPath.parseProgram(getReader(ldpathProgram));
+        
+        //We need to do two things:
+        // 1) ensure that no fields define by LDPath are also selected
+        StringBuilder conflicting = null;
+        // 2) add the field of the result score if not defined by LDPath
+        String resultScoreProperty = RdfResourceEnum.resultScore.getUri();
+        boolean foundRsultRankingField = false;
+        for(FieldMapping<?,Object> ldPathField : program.getFields()){
+            String field = ldPathField.getFieldName();
+            if(!foundRsultRankingField && resultScoreProperty.equals(field)){
+                foundRsultRankingField = true;
+            }
+            //remove from selected fields -> if we decide later that
+            //this should not be an BAD_REQUEST
+            if(selectedFields.remove(ldPathField.getFieldName())){
+                if(conflicting == null){
+                    conflicting = new StringBuilder();
+                }
+                conflicting.append('\n').append("  > ")
+                .append(ldPathField.getPathExpression(backend));
+            }
+        }
+        if(conflicting != null){ //there are conflicts
+            throw new IllegalStateException("Selected Fields conflict with Fields defined by" +
+                "the LDPath program! Conflicts: "+conflicting.toString());
+        }
+        if(!foundRsultRankingField){ //if no mapping for the result score
+            program.addMapping(RESULT_SCORE_MAPPING); //add the default mapping
+        }
+        return program;
     }
 }

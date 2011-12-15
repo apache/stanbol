@@ -2,22 +2,12 @@ package org.apache.stanbol.entityhub.ldpath.backend;
 
 import static org.apache.stanbol.entityhub.ldpath.LDPathUtils.getReader;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
-
-import org.apache.bcel.generic.GETSTATIC;
-import org.apache.stanbol.entityhub.ldpath.LDPathUtils;
 import org.apache.stanbol.entityhub.ldpath.impl.LDPathTestBase;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -36,10 +26,12 @@ public class BackendTest extends LDPathTestBase {
     static {
         StringBuilder builder = new StringBuilder();
         //TODO:write LDPath test statement (or load it from test resources
+        builder.append("@prefix geo : <http://www.w3.org/2003/01/geo/wgs84_pos#> ;");
         builder.append("title = rdfs:label :: xsd:string;");
         builder.append("title_en = rdfs:label[@en] :: xsd:string;");
         builder.append("type = rdf:type :: xsd:anyURI;");
         builder.append("all = * :: xsd:string;");
+        builder.append("lat = geo:lat :: xsd:double;");
         DBPEDIA_TEST_PROGRAM = builder.toString();
     }
 
@@ -68,6 +60,7 @@ public class BackendTest extends LDPathTestBase {
             "http://dbpedia.org/resource/Category:Host_cities_of_the_Summer_Olympic_Games",
             "2.350833","0.81884754","2193031"));
         expected.put("all", allValues);
+        expected.put("lat", Collections.emptySet());
         EXPECTED_RESULTS_PARIS = Collections.unmodifiableMap(expected);
     }
     

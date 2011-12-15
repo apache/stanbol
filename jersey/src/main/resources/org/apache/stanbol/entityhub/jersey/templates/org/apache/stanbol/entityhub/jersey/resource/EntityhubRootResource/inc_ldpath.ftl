@@ -61,18 +61,25 @@
 
 <p>Execute the LDPath on the Context:<br>
 <form name="ldpathExample" id="ldpathExample">
-    <input type="text" size="150" name="context">
-    <textarea class="input" name="ldpath" rows="10">@prefix dct : <http://purl.org/dc/terms/subject/> ;
+    <strong>Context:</strong> <input type="text" size="120" name="context" value="http://dbpedia.org/resource/Paris">
+    <strong>LD-Path:</strong><br>
+    <textarea class="input" name="ldpath" rows="10">@prefix dct : <http://purl.org/dc/terms/> ;
 @prefix geo : <http://www.w3.org/2003/01/geo/wgs84_pos#> ;
 name = rdfs:label[@en] :: xsd:string;
 labels = rdfs:label :: xsd:string;
 comment = rdfs:comment[@en] :: xsd:string;
 categories = dct:subject :: xsd:anyURI;
 homepage = foaf:homepage :: xsd:anyURI;
-location = fn:concat("[",geo:lat,",",geo:long,"]") :: xsd:string;</textarea>
+location = fn:concat("[",geo:lat,",",geo:long,"]") :: xsd:string;</textarea><br>
+<strong>Format:</strong> <select name="format" id="findOutputFormat">
+        <option value="application/json">JSON-LD</option>
+        <option value="application/rdf+xml">RDF/XML</option>
+        <option value="application/rdf+json">RDF/JSON</option>
+        <option value="text/turtle">Turtle</option>
+        <option value="text/rdf+nt">N-TRIPLES</option>
+      </select> (Accept header set to the request)<p>
     <input type="submit" value="Execute" onclick="executeLDPath(); return false;" /></p>
 </form>
-</p>
 
 <script language="javascript">
 function executeLDPath() {
@@ -82,6 +89,9 @@ function executeLDPath() {
  $.ajax({
    type: 'POST',
    url: "${it.publicBaseUri}entityhub/ldpath" ,
+   beforeSend: function(req) {
+        req.setRequestHeader("Accept", $("#findOutputFormat").val());
+   },
    data: $("#ldpathExample").serialize(),
    dataType: "text",
    cache: false,
@@ -96,6 +106,6 @@ function executeLDPath() {
 </script>
 
 <div id="ldpathExampleResult" style="display: none">
-<p><a href="#" onclick="$('#findSymbolResult').hide(); return false;">Hide results</a>
+<p><a href="#" onclick="$('#ldpathExampleResult').hide(); return false;">Hide results</a>
 <pre id="ldpathExampleResultText">... waiting for results ...</pre>
 </div>

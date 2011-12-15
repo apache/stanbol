@@ -14,7 +14,16 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<h3>FieldQuery JSON format:</h3>
+<div class="docu"> 
+    <div class="collapsed">
+        <h3 id="fqDocTitle" class="docuTitle">
+            FieldQuery Documentation:</h3>
+        <script>
+            $("#fqDocTitle").click(function () {
+              $("#fqDocTitle").parent().toggleClass("collapsed");
+            }); 
+        </script>
+        <div class= "docuCollapsable">
 
 <p> The <a href="http://svn.apache.org/repos/asf/incubator/stanbol/trunk/entityhub/generic/servicesapi/src/main/java/org/apache/stanbol/entityhub/servicesapi/query/FieldQuery.java">
 FieldQuery</a> is part of the java API defined in the  
@@ -268,3 +277,6 @@ because otherwise the parsed value would be converted the "xsd:integer".</p>
 
 <p>Expected Results on DBPedia.org include Bill Clinton, George W. Bush and
 Donald Trump.</p>
+        </div>
+    </div>
+</div>  

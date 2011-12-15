@@ -45,3 +45,61 @@
 
 <p><em>Note</em>: "@fieldQuery.json" links to a local file that contains the parsed
     Fieldquery (see ection "FieldQuery JSON format" for examples).</p>
+    
+<!-- TODO: Add Example for queries 
+<h4>Test</h4>
+<p>Execute the FieldQuery:<br>
+<form name="ldpathExample" id="ldpathExample">
+<table><tr>
+<td><strong>Selected:</strong> :</td>
+<td><textarea class="input" name="selected" rows="4"></textarea></td>
+</tr><tr>
+<td><strong>LDPath:</strong> :</td>
+<td><textarea class="input" name="ldpath" rows="6">@prefix dct : <http://purl.org/dc/terms/subject/> ;
+@prefix geo : <http://www.w3.org/2003/01/geo/wgs84_pos#> ;
+name = rdfs:label[@en] :: xsd:string;
+labels = rdfs:label :: xsd:string;
+comment = rdfs:comment[@en] :: xsd:string;
+categories = dct:subject :: xsd:anyURI;
+homepage = foaf:homepage :: xsd:anyURI;
+latidude = geo:lat :: xsd:decimal;
+longitude = geo:long :: xsd:decimal;</textarea></td>
+</tr><tr>
+<td><strong>Constraints:</strong> :</td>
+<td><textarea class="input" name="constraints" rows="4">TODO: add Example</textarea></td>
+</tr><tr>
+<td><strong>Limit:</strong> :</td>
+<td><input type="text" size="5" name="limit" value="10"></td>
+</tr><tr>
+<td><strong>Offset:</strong> :</td>
+<td><input type="text" size="5" name="offset" value="0"></td>
+</tr></table>
+<input type="submit" value="Query" onclick="executeQuery(); return false;" /></p>
+</form>
+</p>
+
+<script language="javascript">
+function executeQuery() {
+ var relpath = "/ldpath";
+ var base = window.location.href.replace(/\/$/, "");
+ if(base.lastIndexOf(relpath) != (base.length-relpath.length)){
+   base = base+relpath;
+ }
+ $("#ldpathExampleResult").hide();
+ $("#ldpathExampleResultText").text("... waiting for results ...");
+ $("#ldpathExampleResult").show();
+ $.ajax({
+   type: 'POST',
+   url: base ,
+   data: $("#ldpathExample").serialize(),
+   dataType: "text",
+   cache: false,
+   success: function(data) {
+     $("#ldpathExampleResultText").text(data);
+   },
+   error: function(jqXHR, textStatus, errorThrown) {
+     $("#ldpathExampleResultText").text(jqXHR.statusText + " - " + jqXHR.responseText);
+   }
+ });          
+}
+</script> -->
