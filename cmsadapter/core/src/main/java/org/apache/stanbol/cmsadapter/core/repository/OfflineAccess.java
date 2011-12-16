@@ -332,4 +332,9 @@ public class OfflineAccess implements RepositoryAccess {
             return pathExpr.contentEquals(realPath);
         }
     }
+
+    @Override
+    public boolean isSessionValid(Object session) {
+        throw new UnsupportedOperationException("Offline Repository Access does not handle connections");
+    }
 }

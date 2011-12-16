@@ -28,7 +28,7 @@ public class ContentItemIDOrganizer {
     public static final String CONTENT_ITEM_URI_PREFIX = "urn:content-item-";
 
     public static String attachBaseURI(String id) {
-        if (!id.startsWith(CONTENT_ITEM_URI_PREFIX)) {
+        if (!id.startsWith("urn:")) {
             id = CONTENT_ITEM_URI_PREFIX + id;
         }
         return id;

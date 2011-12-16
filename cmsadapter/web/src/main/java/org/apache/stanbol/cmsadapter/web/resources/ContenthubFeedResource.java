@@ -38,13 +38,10 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.stanbol.cmsadapter.core.mapping.ContenthubFeederManager;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeeder;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeederException;
-import org.apache.stanbol.cmsadapter.servicesapi.repository.ConnectionInfo;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
 import org.apache.stanbol.cmsadapter.web.utils.RestUtil;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.view.Viewable;
 
@@ -60,8 +57,6 @@ import com.sun.jersey.api.view.Viewable;
  */
 @Path("/cmsadapter/contenthubfeed")
 public class ContenthubFeedResource extends BaseStanbolResource {
-    private static final Logger logger = LoggerFactory.getLogger(ContenthubFeedResource.class);
-
     ContenthubFeederManager feederManager;
 
     public ContenthubFeedResource(@Context ServletContext context) {
@@ -76,9 +71,10 @@ public class ContenthubFeedResource extends BaseStanbolResource {
 
     /**
      * This service enables submission of content repository objects to Contenthub. Connection to the content
-     * repository is established by the provided connection information. This service makes possible to submit
-     * content items through either their IDs or paths in the content repository. Enhancements of content
-     * items are obtained through <b>Stanbol Enhancer</b> before submitting them to Contenthub.
+     * repository is established by the previously created session object. This object is specified by the
+     * <code>sessionKey</code>. This service makes possible to submit content items through either their IDs
+     * or paths in the content repository. Enhancements of content items are obtained through <b>Stanbol
+     * Enhancer</b> before submitting them to Contenthub.
      * 
      * <p>
      * If <code>id</code> parameter is set, the target object is obtained from the content repository
@@ -93,11 +89,9 @@ public class ContenthubFeedResource extends BaseStanbolResource {
      * properties are specified within the <code>contentProperties</code> parameter.
      * 
      * 
-     * @param repositoryURL
-     * @param workspaceName
-     * @param username
-     * @param password
-     * @param connectionType
+     * @param sessionKey
+     *            session key to obtain a previously created session to be used to connect a content
+     *            repository
      * @param id
      *            content repository ID of the content item to be submitted
      * @param path
@@ -117,40 +111,25 @@ public class ContenthubFeedResource extends BaseStanbolResource {
      */
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response submitObjectsToContenthub(@FormParam("repositoryURL") String repositoryURL,
-                                              @FormParam("workspaceName") String workspaceName,
-                                              @FormParam("username") String username,
-                                              @FormParam("password") String password,
-                                              @FormParam("connectionType") String connectionType,
+    public Response submitObjectsToContenthub(@FormParam("sessionKey") String sessionKey,
                                               @FormParam("id") String id,
                                               @FormParam("path") String path,
                                               @FormParam("recursive") @DefaultValue("false") boolean recursive,
                                               @FormParam("contentProperties") @DefaultValue("skos:definition,content") String contentProperties) throws RepositoryAccessException,
                                                                                                                                                 ContenthubFeederException {
 
-        repositoryURL = RestUtil.nullify(repositoryURL);
-        workspaceName = RestUtil.nullify(workspaceName);
-        username = RestUtil.nullify(username);
-        password = RestUtil.nullify(password);
-        connectionType = RestUtil.nullify(connectionType);
+        sessionKey = RestUtil.nullify(sessionKey);
         id = RestUtil.nullify(id);
         path = RestUtil.nullify(path);
         contentProperties = RestUtil.nullify(contentProperties);
 
-        if (repositoryURL == null || username == null || password == null || connectionType == null) {
-            logger.warn("Repository URL, username, password and connection type parameters should not be null");
-            return Response
-                    .status(Status.BAD_REQUEST)
-                    .entity(
-                        "Repository URL, username, password and connection type parameters should not be null")
-                    .build();
+        if (sessionKey == null) {
+            return Response.status(Status.BAD_REQUEST).entity("Session key should not be null").build();
         }
 
         List<String> contentFieldList = parseContentProperties(contentProperties);
 
-        ContenthubFeeder feeder = feederManager.getContenthubFeeder(
-            formConnectionInfo(repositoryURL, workspaceName, username, password, connectionType),
-            contentFieldList);
+        ContenthubFeeder feeder = feederManager.getContenthubFeeder(sessionKey, contentFieldList);
 
         if (id != null) {
             feeder.submitContentItemByID(id);
@@ -170,8 +149,9 @@ public class ContenthubFeedResource extends BaseStanbolResource {
 
     /**
      * This service enables deletion of content items from Contenthub. Connection to the content repository is
-     * established by the provided connection information. This service makes possible to delete content items
-     * through either their IDs or paths in the content repository.
+     * established by the previously created session object. This object is specified by the
+     * <code>sessionKey</code>. This service makes possible to delete content items through either their IDs
+     * or paths in the content repository.
      * 
      * <p>
      * If <code>id</code> parameter is set, the content item is directly tried to be deleted from Contenthub.
@@ -179,11 +159,9 @@ public class ContenthubFeedResource extends BaseStanbolResource {
      * repository according to its path. Then retrieved ID is used to delete related content item from
      * Contenthub.
      * 
-     * @param repositoryURL
-     * @param workspaceName
-     * @param username
-     * @param password
-     * @param connectionType
+     * @param sessionKey
+     *            session key to obtain a previously created session to be used to connect a content
+     *            repository
      * @param id
      *            content repository ID of the content item to be submitted
      * @param path
@@ -198,35 +176,21 @@ public class ContenthubFeedResource extends BaseStanbolResource {
      */
     @DELETE
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response deleteObjectsFromContenthub(@FormParam("repositoryURL") String repositoryURL,
-                                                @FormParam("workspaceName") String workspaceName,
-                                                @FormParam("username") String username,
-                                                @FormParam("password") String password,
-                                                @FormParam("connectionType") String connectionType,
+    public Response deleteObjectsFromContenthub(@FormParam("sessionKey") String sessionKey,
                                                 @FormParam("id") String id,
                                                 @FormParam("path") String path,
                                                 @FormParam("recursive") @DefaultValue("false") boolean recursive) throws RepositoryAccessException,
                                                                                                                  ContenthubFeederException {
 
-        repositoryURL = RestUtil.nullify(repositoryURL);
-        workspaceName = RestUtil.nullify(workspaceName);
-        username = RestUtil.nullify(username);
-        password = RestUtil.nullify(password);
-        connectionType = RestUtil.nullify(connectionType);
+        sessionKey = RestUtil.nullify(sessionKey);
         id = RestUtil.nullify(id);
         path = RestUtil.nullify(path);
 
-        if (repositoryURL == null || username == null || password == null || connectionType == null) {
-            logger.warn("Repository URL, username, password and connection type parameters should not be null");
-            return Response
-                    .status(Status.BAD_REQUEST)
-                    .entity(
-                        "Repository URL, username, password and connection type parameters should not be null")
-                    .build();
+        if (sessionKey == null) {
+            return Response.status(Status.BAD_REQUEST).entity("Session key should not be null").build();
         }
 
-        ContenthubFeeder feeder = feederManager.getContenthubFeeder(formConnectionInfo(repositoryURL,
-            workspaceName, username, password, connectionType));
+        ContenthubFeeder feeder = feederManager.getContenthubFeeder(sessionKey, null);
 
         if (id != null) {
             feeder.deleteContentItemByID(id);
@@ -242,16 +206,6 @@ public class ContenthubFeedResource extends BaseStanbolResource {
         }
 
         return Response.ok().build();
-    }
-
-    private ConnectionInfo formConnectionInfo(String repositoryURL,
-                                              String workspaceName,
-                                              String username,
-                                              String password,
-                                              String connectionType) {
-        ConnectionInfo cInfo = new org.apache.stanbol.cmsadapter.servicesapi.repository.ConnectionInfo(
-                repositoryURL, workspaceName, username, password, connectionType);
-        return cInfo;
     }
 
     private List<String> parseContentProperties(String contentProperties) {

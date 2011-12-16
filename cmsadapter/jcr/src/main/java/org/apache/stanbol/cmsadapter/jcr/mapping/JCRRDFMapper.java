@@ -72,6 +72,7 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
     static {
         excludedProperties = new ArrayList<UriRef>();
         excludedProperties.add(CMSAdapterVocabulary.CMS_OBJECT_HAS_URI);
+        excludedProperties.add(new UriRef(NamespaceEnum.jcr.getNamespace() + "data"));
     }
 
     @Override
@@ -202,7 +203,7 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
 
         while (it.hasNext()) {
             Triple t = it.next();
-            String propURI = RDFBridgeHelper.removeEndCharacters(t.getPredicate().toString());
+            String propURI = t.getPredicate().getUnicodeString();
             Resource resource = t.getObject();
 
             String propValue = "";
@@ -229,8 +230,14 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
             List<String> singlePropValList = pInfo.getPropertyValues();
             String[] singlePropVals = new String[singlePropValList.size()];
             singlePropValList.toArray(singlePropVals);
-            String propName = NamespaceEnum.getShortName(RDFBridgeHelper.removeEndCharacters(propURI
-                    .toString()));
+            String propName = NamespaceEnum.getShortName(propURI);
+
+            if (propName.equals(propURI)) {
+                // we couldn't obtain the short name from the property URI and skipping this property
+                log.warn("Failed to obtain short name for the propertyURI: {}. Skipping it...", propURI);
+                continue;
+            }
+
             // check whether the namespace prefix is registered in the JCR
             // repository
             try {
@@ -268,8 +275,8 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
     }
 
     private void createDefaultPropertiesForCMS(Node n, NonLiteral subject) {
-        String uriPropShortURI = NamespaceEnum.getShortName(RDFBridgeHelper
-                .removeEndCharacters(CMSAdapterVocabulary.CMS_OBJECT_HAS_URI.toString()));
+        String uriPropShortURI = NamespaceEnum.getShortName(CMSAdapterVocabulary.CMS_OBJECT_HAS_URI
+                .getUnicodeString());
         try {
             n.setProperty(uriPropShortURI, RDFBridgeHelper.removeEndCharacters(subject.toString()));
         } catch (RepositoryException e) {
@@ -322,27 +329,20 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
         MGraph cmsGraph = new SimpleMGraph();
         Session jcrSession = (Session) session;
 
-        List<Node> targetNodes = new ArrayList<Node>();
+        Node rootNode = null;
         try {
-            Node rootNode = jcrSession.getNode(rootPath);
-            NodeIterator it = rootNode.getNodes();
-            while (it.hasNext()) {
-                targetNodes.add(it.nextNode());
-            }
+            rootNode = jcrSession.getNode(rootPath);
         } catch (RepositoryException e) {
             log.warn("Failed to retrieve node having path: {} or its children", rootPath);
             throw new RDFBridgeException("Failed to node having path: " + rootPath + " or its children", e);
         }
 
-        for (Node n : targetNodes) {
-            // get name to show in debug info
-            String name = "";
-            try {
-                name = n.getName();
-                cmsGraph.addAll(getGraphForNode(baseURI, n));
-            } catch (RepositoryException e) {
-                log.warn("Repository exception while processing node having name: {}", name, e);
-            }
+        String name = "";
+        try {
+            name = rootNode.getName();
+            cmsGraph.addAll(getGraphForNode(baseURI, rootNode));
+        } catch (RepositoryException e) {
+            log.warn("Repository exception while processing node having name: {}", name, e);
         }
         return cmsGraph;
     }
@@ -405,7 +405,7 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
         while (pit.hasNext()) {
             try {
                 Property p = pit.nextProperty();
-                UriRef pURI = getPropertyURI(p);
+                UriRef pURI = getPropertyURI(p.getName());
                 if (pURI == null || excludedProperties.contains(pURI)) {
                     continue;
                 }
@@ -459,8 +459,8 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
     }
 
     private UriRef getNodeURI(String baseURI, Node n) {
-        String uriPropShortURI = NamespaceEnum.getShortName(RDFBridgeHelper
-                .removeEndCharacters(CMSAdapterVocabulary.CMS_OBJECT_HAS_URI.toString()));
+        String uriPropShortURI = NamespaceEnum.getShortName(CMSAdapterVocabulary.CMS_OBJECT_HAS_URI
+                .getUnicodeString());
         String nodeName = "";
         String nodeURI = null;
         try {
@@ -481,16 +481,25 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
         return null;
     }
 
-    private static UriRef getPropertyURI(Property p) throws RepositoryException {
-        String name = p.getName();
-        if (!name.contains(":")) {
-            name = NamespaceEnum.cms.getPrefix() + ":" + name;
-        }
-        if (RDFBridgeHelper.isShortNameResolvable(name)) {
-            return new UriRef(NamespaceEnum.getFullName(name));
+    private static UriRef getPropertyURI(String shortName) throws RepositoryException {
+        String prefix = "";
+        String resourceName = "";
+        int index = shortName.indexOf(':');
+        if (index == -1) {
+            prefix = NamespaceEnum.cms.getPrefix();
+            resourceName = shortName;
+            shortName = prefix + ":" + shortName;
         } else {
-            log.warn("Failed to resolve property: {}", name);
-            return null;
+            resourceName = shortName.substring(index + 1);
+            prefix = shortName.substring(0, shortName.indexOf(':'));
+        }
+        if (RDFBridgeHelper.isShortNameResolvable(shortName)) {
+            return new UriRef(NamespaceEnum.getFullName(shortName));
+        } else {
+            // TODO it's a better solution to makes possible to add new prefix-uri tuples to NamespaceEnum
+            log.debug("Auto generated URI is being assigned for namespace prefix: {}", prefix);
+            return new UriRef(CMSAdapterVocabulary.CMS_ADAPTER_VOCABULARY_URI + "/ext_" + prefix + "/"
+                              + resourceName);
         }
     }
 
@@ -506,8 +515,8 @@ public class JCRRDFMapper extends BaseRDFMapper implements RDFMapper {
     }
 
     @Override
-    public boolean canMap(String connectionType) {
-        return connectionType.contentEquals("JCR");
+    public boolean canMapWith(Object session) {
+        return session instanceof Session;
     }
 
     private class PropertyInfo {

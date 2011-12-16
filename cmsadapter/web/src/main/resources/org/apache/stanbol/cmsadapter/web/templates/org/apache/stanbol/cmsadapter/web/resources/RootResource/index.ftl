@@ -29,6 +29,7 @@
 <ul>
 	<li>RDF Map @ <a href="${it.publicBaseUri}cmsadapter/map">/cmsadapter/map</a></li>
 	<li>Contenthub Feed @ <a href="${it.publicBaseUri}cmsadapter/contenthubfeed">/cmsadapter/contenthubfeed</a></li>
+	<li>Session @ <a href="${it.publicBaseUri}cmsadapter/session">/cmsadapter/session<a/></li>
 </ul>
 </div>
 

@@ -438,4 +438,9 @@ public class JCRRepositoryAccess implements RepositoryAccess {
             throw new RepositoryAccessException("Error at accessing parent", e);
         }
     }
+
+    @Override
+    public boolean isSessionValid(Object session) {
+        return ((Session) session).isLive();
+    }
 }

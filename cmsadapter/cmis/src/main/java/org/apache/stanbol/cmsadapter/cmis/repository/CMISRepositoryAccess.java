@@ -453,4 +453,15 @@ public class CMISRepositoryAccess implements RepositoryAccess {
             throw new RepositoryAccessException("Error at accessing repository", e);
         }
     }
+
+    @Override
+    public boolean isSessionValid(Object session) {
+        Session cmisSession = (Session) session;
+        try {
+            cmisSession.clear();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

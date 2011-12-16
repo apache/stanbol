@@ -30,6 +30,7 @@ import org.apache.stanbol.cmsadapter.web.resources.NotifyResource;
 import org.apache.stanbol.cmsadapter.web.resources.ObjectTypesResource;
 import org.apache.stanbol.cmsadapter.web.resources.RDFMapperResource;
 import org.apache.stanbol.cmsadapter.web.resources.RootResource;
+import org.apache.stanbol.cmsadapter.web.resources.SessionResource;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
@@ -79,6 +80,7 @@ public class CMSAdapterWebFragment implements WebFragment {
         classes.add(RootResource.class);
         classes.add(RDFMapperResource.class);
         classes.add(ContenthubFeedResource.class);
+        classes.add(SessionResource.class);
         return classes;
     }
 

@@ -31,37 +31,15 @@
 			<li><a href="#Map_RDF_to_repository">Map RDF to repository</a></li>
 			<li><a href="#Map_repository_to_RDF">Map repository to RDF</a></li>
 		</ul>
-		Interaction with the content repository is provided through the following properties. They are required all services provided by this endpoint.
-		Please note that while connecting JCR repositories <b>RMI protocol</b> is used, on the other hand for CMIS repositories <b>AtomPub Binding</b> 
-		is used. So, it is necessary to set <b>repositoryURL</b> parameter based on these connection methods. 
+		Interaction with the content repository will be obtained through the <b>Session Key</b> property. To be able to use the services below a session key
+		should be through the <b><a href="${it.publicBaseUri}cmsadapter/session">/cmsadapter/session</a></b> resource.  
 		<fieldset>
 			<legend>Connection parameters</legend>
 			<table>
 				<tbody>
 					<tr>
-						<th>Repository URL</th>
-						<td><input type="text" id="repositoryURL" value=""></td>
-					</tr>
-					<tr>
-						<th>Workspace Name</th>
-						<td><input type="text" id="workspaceName" value=""></td>
-					</tr>
-					<tr>
-						<th>Username</th>
-						<td><input type="text" id="username" value=""></td>
-					</tr>
-					<tr>
-						<th>Password</th>
-						<td><input type="password" id="password" value=""></td>
-					</tr>
-					<tr>
-						<th>Connection type</th>
-						<td>
-							<select id="connectionType">
-							  <option value="JCR">JCR</option>
-							  <option value="CMIS">CMIS</option>
-							</select>
-						</td>
+						<th>Session key</th>
+						<td><input type="text" id="sessionKey" value=""></td>
 					</tr>
 				</tbody>
 			</table>
@@ -116,7 +94,8 @@
 	<a onclick="javascript:postMapRepositoryToRDF()" href="javascript:void(0);">Map content repository to RDF</a>
 	<p>Base URI:
 		<input id="baseURIText" type="text" value="http://www.apache.org/stanbol/cms" class="url"/><br>
-		Store generated RDF persistently: <input id="storeCheck" type="checkbox"/>
+		Store generated RDF persistently: <input id="storeCheck" type="checkbox"/><br>
+		Update existing RDF with the generated one: <input id="updateCheck" type="checkbox" checked="yes"/>
 	</p>
 	<div id="postMapRepositoryToRDFResult" style="display: none; ">
 		<p><a href="#" onclick="$('#postMapRepositoryToRDFResult').hide(); return false;">Hide results</a>
@@ -128,11 +107,11 @@
 	<h3>Service Endpoint <a href="${it.publicBaseUri}cmsadapter/map">/cmsadapter/map</a></h3>
 	<p>Following services are available for this endpoint:<br>
 	<ul>
-		<li><a href="#Map_RDF_to_repository">Map RDF to repository</a></li>
-		<li><a href="#Map_repository_to_RDF">Map repository to RDF</a></li>
+		<li><a href="#Map_RDF_to_repository_rest">Map RDF to repository</a></li>
+		<li><a href="#Map_repository_to_RDF_rest">Map repository to RDF</a></li>
 	</ul>
 		
-	<a name="Map_RDF_to_repository" id="Map_RDF_to_repository"></a>
+	<a name="Map_RDF_to_repository_rest" id="Map_RDF_to_repository_rest"></a>
 	<h4>Map RDF to repository</h4>
 	<table>
 		<tbody>
@@ -153,15 +132,8 @@
 				<th valign="top">Parameters</th>
 				<td>
 					<ul>
-						<li>@FormParam repositoryURL: URL of the content repository. For JCR repositories <b>RMI protocol</b>, for CMIS repositories
-							<b>AtomPub Binding</b> is used. This parameter should be set according to these connection methods.</li>
-			            <li>@FormParam workspaceName: For JCR repositories this parameter determines the workspace to be connected. On the other hand
-			            	for CMIS repositories <b>repository ID</b> should be set to this parameter. In case of not setting this parameter,
-			            	for JCR <b>default workspace</b> is selected, for CMIS the <b>first repository</b> obtained through the session object 
-			            	is selected.</li>
-			    		<li>@FormParam username: Username to connect to content repository</li>
-			    		<li>@FormParam password: Password to connect to content repository</li>
-			    		<li>@FormParam connectionType: Connection type; either <b>JCR</b> or <b>CMIS</b></li>
+						<li>@FormParam sessionKey: Interaction with the content repository is provided through the <b>Session Key</b> property. To be able to use the services below a session key
+						should be through the <b><a href="${it.publicBaseUri}cmsadapter/session">/cmsadapter/session</a></b> resource.</li>
 			    		<li>@FormParam serializedGraph: External RDF in <b>application/rdf+xml</b> format</li>
 			    		<li>@FormParam url: URL of the external RDF data.</li>
 			    	</ul>
@@ -169,11 +141,13 @@
 			</tr>
 			<tr>
 				<th valign="top">Produces</th>
-				<td>HTTP 200 in case of successful execution.</td>
+				<td>HTTP 200 in case of successful execution.<br>
+					HTTP 400 in case of <code>sessionKey</code> parameter or none of the <code>serializedGraph</code> and <code>url</code> parameters is not set<br>
+					HTTP 500 in case of an expected exception occurs</td>
 			</tr>
 			<tr>
 				<th valign="top">Example</th>
-				<td><pre>curl -i -X POST -d "repositoryURL=rmi://localhost:1099/crx&workspaceName=test&username=admin&password=admin&connectionType=JCR&url=http://www.externalrdf.data" http://localhost:8080/cmsadapter/map/rdf</pre></td>
+				<td><pre>curl -i -X POST -d "sessionKey=eec8ff46-aaf9-485f-a7b5-452c1d7197d0&url=http://www.externalrdf.data" http://localhost:8080/cmsadapter/map/rdf</pre></td>
 			</tr>
 		</tbody>
 	</table>
@@ -194,14 +168,8 @@
 				<th valign="top">Parameters</th>
 				<td>
 					<ul>
-						<li>@QueryParam repositoryURL: URL of the content repository</li>
-			            <li>@QueryParam workspaceName: For JCR repositories this parameter determines the workspace to be connected. On the other hand
-			            	for CMIS repositories <b>repository ID</b> should be set to this parameter. In case of not setting this parameter,
-			            	for JCR <b>default workspace</b> is selected, for CMIS the <b>first repository</b> obtained through the session object 
-			            	is selected.</li>
-			    		<li>@QueryParam username: Username to connect to content repository</li>
-			    		<li>@QueryParam password: Password to connect to content repository</li>
-			    		<li>@QueryParam connectionType: Connection type; either <b>JCR</b> or <b>CMIS</b></li>
+						<li>@FormParam sessionKey: Interaction with the content repository is provided through the <b>Session Key</b> property. To be able to use the services below a session key
+						should be through the <b><a href="${it.publicBaseUri}cmsadapter/session">/cmsadapter/session</a></b> resource.</li>
 			    		<li>@FormDataParam rdfFile: Local RDF file to be submitted</li>
 			    		<li>@FormDataParam rdfFileInfo: Information about submitted RDF file</li>
 			    	</ul>
@@ -209,16 +177,18 @@
 			</tr>
 			<tr>
 				<th valign="top">Produces</th>
-				<td>HTTP 200 together with entry page of <b>/cmsadapter/map</b> endpoint, in case of successful execution.</td>
+				<td>HTTP 200 in case of successful execution.<br>
+					HTTP 400 when <code>sessionKey</code> parameter or an RDF file is not set<br>
+					HTTP 500 in case of an expected exception occurs</td>
 			</tr>
 			<tr>
 				<th valign="top">Example</th>
-				<td><pre>curl -i -X POST -F "rdfFile=@localRDFFile" "http://localhost:8080/cmsadapter/map/rdf?repositoryURL=http://localhost:8083/nuxeo/atom/cmis&workspaceName=test&username=admin&password=admin&connectionType=CMIS"</pre></td>
+				<td><pre>curl -i -X POST -F "rdfFile=@localRDFFile" "http://localhost:8080/cmsadapter/map/rdf?sessionKey=eec8ff46-aaf9-485f-a7b5-452c1d7197d0"</pre></td>
 			</tr>
 		</tbody>
 	</table>
 	
-	<a name="Map_repository_to_RDF" id="Map_repository_to_RDF"></a>
+	<a name="Map_repository_to_RDF_rest" id="Map_repository_to_RDF_rest"></a>
 	<h4>Map repository to RDF</h4>
 	<table>
 		<tbody>
@@ -241,26 +211,26 @@
 				<th valign="top">Parameters</th>
 				<td>
 					<ul>
-						<li>@FormParam repositoryURL: URL of the content repository</li>
-			            <li>@FormParam workspaceName: For JCR repositories this parameter determines the workspace to be connected. On the other hand
-			            	for CMIS repositories <b>repository ID</b> should be set to this parameter. In case of not setting this parameter,
-			            	for JCR <b>default workspace</b> is selected, for CMIS the <b>first repository</b> obtained through the session object 
-			            	is selected.</li>
-			    		<li>@FormParam username: Username to connect to content repository</li>
-			    		<li>@FormParam password: Password to connect to content repository</li>
-			    		<li>@FormParam connectionType: Connection type; either <b>JCR</b> or <b>CMIS</b></li>
-			    		<li>@FormParam store: A boolean value indicating whether the generated will be stored persistently or not.</li>
+						<li>@FormParam sessionKey: Interaction with the content repository is provided through the <b>Session Key</b> property. To be able to use the services below a session key
+						should be through the <b><a href="${it.publicBaseUri}cmsadapter/session">/cmsadapter/session</a></b> resource.</li>
 			    		<li>@FormParam baseURI: Base URI for the RDF to be generated.</li>
+			    		<li>@FormParam store: A boolean value indicating whether the generated will be stored persistently or not.</li>
+			    		<li>@FormParam update: A boolean value indicating whether the generated will be added into an existing RDF having the
+			    		specified <code>baseURI</code>. If there is no existing RDF a new one is created. Note that, this parameter is 
+			    		considered only if <code>store</code> is set as <code>true</code>. If it is not set explicitly, its default value is
+			    		<code>true</code>.</li>
 			    	</ul>
 			    </td>
 			</tr>
 			<tr>
 				<th valign="top">Produces</th>
-				<td>Mapped RDF from content repository in <b>application/rdf+xml</b> format</td>.
+				<td>HTTP 200 together with the mapped RDF from content repository in <b>application/rdf+xml</b> format in case of successful execution<br>
+					HTTP 400 when session key parameter is not set<br>
+					HTTP 500 in case of an expected exception occurs</td>.
 			</tr>
 			<tr>
 				<th valign="top">Example</th>
-				<td><pre>curl -i -X POST -d "repositoryURL=rmi://localhost:1099/crx&workspaceName=test&username=admin&password=admin&connectionType=JCR&baseURI=http://www.apache.org/stanbol/cms&store=true" http://localhost:8080/cmsadapter/map/cms</pre></td>
+				<td><pre>curl -i -X POST -d "sessionKey=eec8ff46-aaf9-485f-a7b5-452c1d7197d0&baseURI=http://www.apache.org/stanbol/cms&store=true" http://localhost:8080/cmsadapter/map/cms</pre></td>
 			</tr>
 		</tbody>
 	</table>
@@ -272,12 +242,10 @@
 <script language="javascript">
 function postRawRDF() {
 	var data = new Object();
-	data.repositoryURL = $("#repositoryURL").val();
-	data.workspaceName = $("#workspaceName").val();
-	data.username = $("#username").val();
-	data.password = $("#password").val();
-	data.connectionType = $("#connectionType").val();
+	data.sessionKey = $("#sessionKey").val();
 	data.serializedGraph = $("#rawRDF").val();
+	$("#rawRDFpostResultText").text("RDF is being mapped to the content repository...");
+    $("#rawRDFpostResult").show();
 	$.ajax({
 	  	type: 'POST',
 	  	url: '${it.publicBaseUri}cmsadapter/map/rdf',
@@ -287,7 +255,7 @@ function postRawRDF() {
      		$("#rawRDFpostResult").show();
    		},
    		error: function(jqXHR, textStatus, errorThrown) {
-     		$("#rawRDFpostResultText").text(jqXHR.statusText + " - " + jqXHR.responseText);
+     		$("#rawRDFpostResultText").text(jqXHR.statusText + " - " + errorThrown + " - " + jqXHR.responseText);
      		$("#rawRDFpostResult").show();
    		}
 	});
@@ -295,12 +263,10 @@ function postRawRDF() {
 
 function postRDFFromURL() {
 	var data = new Object();
-	data.repositoryURL = $("#repositoryURL").val();
-	data.workspaceName = $("#workspaceName").val();
-	data.username = $("#username").val();
-	data.password = $("#password").val();
-	data.connectionType = $("#connectionType").val();
+	data.sessionKey = $("#sessionKey").val();
 	data.url = $("#urlInput").val();
+	$("#postRDFFromURLResultText").text("RDF from external URL is being mapped to the content repository...");
+    $("#postRDFFromURLResult").show();
 	$.ajax({
 	  	type: 'POST',
 	  	url: '${it.publicBaseUri}cmsadapter/map/rdf',
@@ -310,18 +276,14 @@ function postRDFFromURL() {
      		$("#postRDFFromURLResult").show();
    		},
    		error: function(jqXHR, textStatus, errorThrown) {
-     		$("#postRDFFromURLResultText").text(jqXHR.statusText + " - " + jqXHR.responseText);
+     		$("#postRDFFromURLResultText").text(jqXHR.statusText + " - " + errorThrown + " - " + jqXHR.responseText);
      		$("#postRDFFromURLResult").show();
    		}
 	});
 }
 
 function postLocalRDFFileMapping() {
-	var url = "?repositoryURL=" + $("#repositoryURL").val() + 
-				"&workspaceName=" + $("#workspaceName").val() + 
-				"&username=" + $("#username").val() +
-				"&password=" + $("#password").val() +
-				"&connectionType=" + $("#connectionType").val();
+	var url = "?sessionKey=" + $("#sessionKey").val();
 	url = "${it.publicBaseUri}cmsadapter/map/rdf" + url;
 	$('#localRDFFileForm').attr('action', url);
 	$('#localRDFFileForm').submit();
@@ -329,12 +291,9 @@ function postLocalRDFFileMapping() {
 
 function postMapRepositoryToRDF(){
 	var data = new Object();
-	data.repositoryURL = $("#repositoryURL").val();
-	data.workspaceName = $("#workspaceName").val();
-	data.username = $("#username").val();
-	data.password = $("#password").val();
-	data.connectionType = $("#connectionType").val();
+	data.sessionKey = $("#sessionKey").val();
 	data.store = $("#storeCheck").is(':checked') ? "true" : "false";
+	data.update = $("#updateCheck").is(':checked') ? "true" : "false";
 	data.baseURI = $("#baseURIText").val();
 	$("#postMapRepositoryToRDFResultText").text("Mapping CMS to RDF...");
 	$("#postMapRepositoryToRDFResult").show();
@@ -347,7 +306,7 @@ function postMapRepositoryToRDF(){
      		$("#postMapRepositoryToRDFResult").show();
    		},
    		error: function(jqXHR, textStatus, errorThrown) {
-     		$("#postMapRepositoryToRDFResultText").text(jqXHR.statusText + " - " + jqXHR.responseText);
+     		$("#postMapRepositoryToRDFResultText").text(jqXHR.statusText + " - " + errorThrown + " - " + jqXHR.responseText);
      		$("#postMapRepositoryToRDFResult").show();
    		}
 	});	

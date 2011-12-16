@@ -208,4 +208,10 @@ public class MockOnlineAccess implements RepositoryAccess {
         }
     }
 
+    @Override
+    public boolean isSessionValid(Object session) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }

@@ -245,7 +245,10 @@ public class RDFBridgeHelper {
             shortURI = getResourceStringValue(r);
         } else if (r instanceof UriRef) {
             UriRef uri = getResourceURIValue(r);
-            shortURI = NamespaceEnum.getShortName(removeEndCharacters(uri.toString()));
+            shortURI = NamespaceEnum.getShortName(uri.getUnicodeString());
+            if(uri.getUnicodeString().equals(shortURI)) {
+                return "";
+            }
         } else {
             log.warn("Unexpected resource type:{} of mixin type resource", r);
         }

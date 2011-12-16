@@ -28,6 +28,7 @@ import java.net.URLConnection;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -41,18 +42,16 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.commons.io.FileUtils;
-import org.apache.stanbol.cmsadapter.core.helper.TcManagerClient;
+import org.apache.stanbol.cmsadapter.core.mapping.DefaultRDFBridgeImpl;
 import org.apache.stanbol.cmsadapter.core.mapping.RDFBridgeManager;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFBridge;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFBridgeException;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFMapper;
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.ConnectionInfo;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
+import org.apache.stanbol.cmsadapter.web.utils.RestUtil;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.slf4j.Logger;
@@ -63,22 +62,20 @@ import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
 
 /**
- * This resource is currently used to pass RDF data to CMS Adapter so that RDF data will be annotated with
- * "CMS vocabulary" annotations according to {@link RDFBridge}s. Afterwards, this annotated RDF is transformed
- * into nodes/object in the content repository.
+ * This resource provides functionalities for bidirectional mapping between external RDF data and JCR/CMIS
+ * content repositories. In other words, it is possible to populate content repository based on an external
+ * RDF. On the other direction, it enables generation of RDF using the structure of content repository. The
+ * mapping operation is done by {@link RDFBridge}s.
  */
-
 @Path("/cmsadapter/map")
 public class RDFMapperResource extends BaseStanbolResource {
     private static final Logger logger = LoggerFactory.getLogger(RDFMapperResource.class);
     private Parser clerezzaParser;
     private RDFBridgeManager bridgeManager;
-    private TcManager tcManager;
 
     public RDFMapperResource(@Context ServletContext context) {
         clerezzaParser = ContextHelper.getServiceFromContext(Parser.class, context);
         bridgeManager = ContextHelper.getServiceFromContext(RDFBridgeManager.class, context);
-        tcManager = ContextHelper.getServiceFromContext(TcManager.class, context);
     }
 
     @GET
@@ -91,26 +88,17 @@ public class RDFMapperResource extends BaseStanbolResource {
      * Allows clients to map specified RDF to the content repository. In the first step the RDF data is
      * annotated according to RDF Bridges loaded in the OSGI environment. Additional annotations provide
      * selection of certain resources from RDF data and creation/update of related content repository object.
-     * Either a raw RDF can be given in <code>serializedGraph</code> parameter or URL of an external RDF data
-     * can given in <code>url</code> parameter. However, <code>serializedGraph</code> has a higher priority.
+     * See Javadoc of {@link DefaultRDFBridgeImpl} for possible configuration options of default
+     * {@link RDFBridge} implementation. Either a raw RDF can be given in <code>serializedGraph</code>
+     * parameter or URL of an external RDF data can given in <code>url</code> parameter. However,
+     * <code>serializedGraph</code> has a higher priority.
      * 
-     * @param repositoryURL
-     *            URL of the content repository. For JCR repositories <b>RMI protocol</b>, for CMIS
-     *            repositories <b>AtomPub Binding</b> is used. This parameter should be set according to these
-     *            connection methods.
-     * @param workspaceName
-     *            For JCR repositories this parameter determines the workspace to be connected. On the other
-     *            hand for CMIS repositories <b>repository ID</b> should be set to this parameter. In case of
-     *            not setting this parameter, for JCR <b>default workspace</b> is selected, for CMIS the
-     *            <b>first repository</b> obtained through the session object is selected.
-     * @param username
-     *            Username to connect to content repository
-     * @param password
-     *            Password to connect to content repository
-     * @param connectionType
-     *            Connection type; either <b>JCR</b> or <b>CMIS</b>
+     * @param sessionKey
+     *            session key to obtain a previously created session to be used to connect a content
+     *            repository
      * @param serializedGraph
-     *            is the serialized RDF graph that is desired to be transformed into repository objects
+     *            is the serialized RDF graph in <b>application/rdf+xml" format that is desired to be
+     *            transformed into repository objects
      * @param url
      *            URL of the external RDF data.
      * @return
@@ -120,24 +108,16 @@ public class RDFMapperResource extends BaseStanbolResource {
     @Path("/rdf")
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response mapRawRDF(@FormParam("repositoryURL") String repositoryURL,
-                              @FormParam("workspaceName") String workspaceName,
-                              @FormParam("username") String username,
-                              @FormParam("password") String password,
-                              @FormParam("connectionType") String connectionType,
-                              @FormParam("serializedGraph") String serializedGraph,
-                              @FormParam("url") String url) throws MalformedURLException, IOException {
+    public Response mapRawRDFToRepository(@FormParam("sessionKey") String sessionKey,
+                                          @FormParam("serializedGraph") String serializedGraph,
+                                          @FormParam("url") String url) throws MalformedURLException,
+                                                                       IOException {
 
-        if (repositoryURL == null || username == null || password == null || connectionType == null) {
-            logger.warn("Repository URL, username, password and connection type parameters should not be null");
-            return Response
-                    .status(Status.BAD_REQUEST)
-                    .entity(
-                        "Repository URL, username, password and connection type parameters should not be null")
-                    .build();
+        sessionKey = RestUtil.nullify(sessionKey);
+        if (sessionKey == null) {
+            logger.warn("Sessin key should not be null");
+            return Response.status(Status.BAD_REQUEST).entity("Session key should not be null").build();
         }
-        ConnectionInfo connectionInfo = formConnectionInfo(repositoryURL, workspaceName, username, password,
-            connectionType);
 
         long start = System.currentTimeMillis();
         Graph g;
@@ -153,31 +133,18 @@ public class RDFMapperResource extends BaseStanbolResource {
                     .build();
         }
 
-        Response r = mapRDF(g, connectionInfo);
+        Response r = mapRDF(g, sessionKey);
         logger.info("RDF mapping finished in: {} seconds", ((System.currentTimeMillis() - start) / 1000));
         return r;
     }
 
     /**
-     * Same with {@link #mapRawRDF(String, String, String, String, String, String, String)}. But this service
-     * allows clients to submit external RDF data through a {@link File} specified in <code>rdfFile</code>
-     * parameter.
+     * Same with {@link #mapRawRDFToRepository(String, String, String)}. But this service allows clients to
+     * submit external RDF data through a {@link File} specified in <code>rdfFile</code> parameter.
      * 
-     * @param repositoryURL
-     *            URL of the content repository. For JCR repositories <b>RMI protocol</b>, for CMIS
-     *            repositories <b>AtomPub Binding</b> is used. This parameter should be set according to these
-     *            connection methods.
-     * @param workspaceName
-     *            For JCR repositories this parameter determines the workspace to be connected. On the other
-     *            hand for CMIS repositories <b>repository ID</b> should be set to this parameter. In case of
-     *            not setting this parameter, for JCR <b>default workspace</b> is selected, for CMIS the
-     *            <b>first repository</b> obtained through the session object is selected.
-     * @param username
-     *            Username to connect to content repository
-     * @param password
-     *            Password to connect to content repository
-     * @param connectionType
-     *            Connection type; either <b>JCR</b> or <b>CMIS</b>
+     * @param sessionKey
+     *            session key to obtain a previously created session to be used to connect a content
+     *            repository
      * @param rdfFile
      *            {@link File} containing the RDF to be mapped to the content repository
      * @param rdfFileInfo
@@ -188,24 +155,16 @@ public class RDFMapperResource extends BaseStanbolResource {
     @Path("/rdf")
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response mapRDFFromFile(@QueryParam("repositoryURL") String repositoryURL,
-                                   @QueryParam("workspaceName") String workspaceName,
-                                   @QueryParam("username") String username,
-                                   @QueryParam("password") String password,
-                                   @QueryParam("connectionType") String connectionType,
+    public Response mapRDFToRepositoryFromFile(@QueryParam("sessionKey") String sessionKey,
                                    @FormDataParam("rdfFile") File rdfFile,
                                    @FormDataParam("rdfFile") FormDataContentDisposition rdfFileInfo) throws IOException {
 
-        if (repositoryURL == null || username == null || password == null || connectionType == null) {
-            logger.warn("Repository URL, username, password and connection type parameters should not be null");
-            return Response
-                    .status(Status.BAD_REQUEST)
-                    .entity(
-                        "Repository URL, username, password and connection type parameters should not be null")
-                    .build();
+        sessionKey = RestUtil.nullify(sessionKey);
+        if (sessionKey == null) {
+            logger.warn("Sessin key should not be null");
+            return Response.status(Status.BAD_REQUEST).entity("Session key should not be null").build();
         }
-        ConnectionInfo connectionInfo = formConnectionInfo(repositoryURL, workspaceName, username, password,
-            connectionType);
+
         long start = System.currentTimeMillis();
         Graph g;
         if (rdfFile != null) {
@@ -216,18 +175,14 @@ public class RDFMapperResource extends BaseStanbolResource {
             return Response.status(Status.BAD_REQUEST).entity("There is no RDF file specified").build();
         }
 
-        Response r = mapRDF(g, connectionInfo);
-        logger.info("RDF mapping finished in: {} miliseconds", ((System.currentTimeMillis() - start) / 1000));
-        if (r.getStatus() == Response.Status.OK.getStatusCode()) {
-            return get();
-        } else {
-            return r;
-        }
+        Response r = mapRDF(g, sessionKey);
+        logger.info("RDF mapping finished in: {} seconds", ((System.currentTimeMillis() - start) / 1000));
+        return r;
     }
 
-    private Response mapRDF(Graph g, ConnectionInfo connectionInfo) {
+    private Response mapRDF(Graph g, String sessionKey) {
         try {
-            bridgeManager.storeRDFToRepository(connectionInfo, g);
+            bridgeManager.storeRDFToRepository(sessionKey, g);
         } catch (RepositoryAccessException e) {
             logger.warn("Failed to obtain a session from repository", e);
             return Response.status(Status.INTERNAL_SERVER_ERROR)
@@ -242,13 +197,27 @@ public class RDFMapperResource extends BaseStanbolResource {
 
     /**
      * This service provides obtaining an RDF from the content repository based on the {@link RDFBridge}
-     * instances in the environment. Target content content repository objects are determined according to
-     * path configurations of RDF Bridges. In the first step, content repository objects are converted into an
-     * RDF. This process is realized by {@link RDFMapper}. For JCR and CMIS repositories there are two
+     * instances in the environment. Target content repository objects are determined according to path
+     * configurations of RDF Bridges. In the first step, content repository objects are converted into an RDF.
+     * This process is realized by {@link RDFMapper}. For JCR and CMIS repositories there are two
      * implementations of this interface namely, <code>JCRRDFMapper</code> and <code>CMISRDFMapper</code>. At
      * the end of first step, generated RDF contains only <b>CMS Vocabulary</b> annotations. Afterwards,
      * additional assertions are added based on RDF Bridges.
      * 
+     * @param sessionKey
+     *            session key to obtain a previously created session to be used to connect a content
+     *            repository
+     * @param baseURI
+     *            base URI for the RDF to be generated
+     * @param store
+     *            if this boolean parameter is set as <code>true</code>, generated RDF is stored persistently
+     *            in Stanbol environment
+     * @param update
+     *            precondition to consider this parameter is setting <code>true</code> for <code>store</code>
+     *            parameter. If so; if this parameter is set as <code>true</code> previously store RDF having
+     *            the identified by the URI passed in <code>baseURI</code> parameter is updated. However, if
+     *            there is no stored RDF a new one is created. If it is not set explicitly, its default value
+     *            is <code>true</code>
      * 
      * @return generated {@link MGraph} wrapped in a {@link Response} in "application/rdf+xml" format
      */
@@ -256,64 +225,31 @@ public class RDFMapperResource extends BaseStanbolResource {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(SupportedFormat.RDF_XML)
-    public Response mapCMS(@FormParam("repositoryURL") String repositoryURL,
-                           @FormParam("workspaceName") String workspaceName,
-                           @FormParam("username") String username,
-                           @FormParam("password") String password,
-                           @FormParam("connectionType") String connectionType,
+    public Response mapRepositoryToRDF(@FormParam("sessionKey") String sessionKey,
                            @FormParam("baseURI") String baseURI,
-                           @FormParam("store") boolean store) {
+                           @FormParam("store") boolean store,
+                           @FormParam("update") @DefaultValue("true") boolean update) {
 
-        if (repositoryURL == null || username == null || password == null || connectionType == null) {
-            logger.warn("Repository URL, username, password and connection type parameters should not be null");
-            return Response
-                    .status(Status.BAD_REQUEST)
-                    .entity(
-                        "Repository URL, username, password and connection type parameters should not be null")
-                    .build();
+        sessionKey = RestUtil.nullify(sessionKey);
+        if (sessionKey == null) {
+            logger.warn("Sessin key should not be null");
+            return Response.status(Status.BAD_REQUEST).entity("Session key should not be null").build();
         }
-        ConnectionInfo connectionInfo = formConnectionInfo(repositoryURL, workspaceName, username, password,
-            connectionType);
 
         try {
             long start = System.currentTimeMillis();
-            MGraph generatedGraph = bridgeManager.generateRDFFromRepository(baseURI, connectionInfo);
+            MGraph generatedGraph = bridgeManager.generateRDFFromRepository(baseURI, sessionKey, store,
+                update);
             logger.info("CMS mapping finished in: {} seconds", ((System.currentTimeMillis() - start) / 1000));
-
-            TcManagerClient tcManagerClient = new TcManagerClient(tcManager);
-            if (store) {
-                if (tcManagerClient.modelExists(baseURI)) {
-                    logger.info("Deleting the triple collection having base URI: {}", baseURI);
-                    tcManager.deleteTripleCollection(new UriRef(baseURI));
-                }
-                logger.info("Saving the triple collection having base URI: {}", baseURI);
-                MGraph persistentGraph = tcManager.createMGraph(new UriRef(baseURI));
-                persistentGraph.addAll(generatedGraph);
-            }
-
             return Response.ok(generatedGraph, SupportedFormat.RDF_XML).build();
         } catch (RepositoryAccessException e) {
-            logger.warn("Failed to obtain a session from repository", e);
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
-                    .entity("Failed to obtain a session from repository").build();
+            String message = e.getMessage();
+            logger.warn(message, e);
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(message).build();
         } catch (RDFBridgeException e) {
             logger.warn("Error while generating RDF from repository", e);
             return Response.status(Status.INTERNAL_SERVER_ERROR)
                     .entity("Error while generating RDF from repository").build();
         }
-    }
-
-    private ConnectionInfo formConnectionInfo(String repositoryURL,
-                                              String workspaceName,
-                                              String username,
-                                              String password,
-                                              String connectionType) {
-        ConnectionInfo cInfo = new ConnectionInfo();
-        cInfo.setConnectionType(connectionType);
-        cInfo.setPassword(password);
-        cInfo.setRepositoryURL(repositoryURL);
-        cInfo.setUsername(username);
-        cInfo.setWorkspaceName(workspaceName);
-        return cInfo;
     }
 }

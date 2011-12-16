@@ -84,12 +84,13 @@ public interface RDFMapper {
     MGraph generateRDFFromRepository(String baseURI, Object session, String rootPath) throws RDFBridgeException;
 
     /**
-     * This method determines certain implementation of this interface is able to generate RDF from repository
-     * or update the repository based on the given RDF.
+     * This method is used for identification of RDFMappers based on the specified <code>session</code>
+     * object. If the specified instance can be used in certain implementation it returns <code>true</code>,
+     * otherwise <code>false</code>.
      * 
-     * @param connectionType
-     *            connection type for which an {@link RDFMapper} is requested
-     * @return whether this implementation can handle specified connection type
+     * @param session
+     *            Session object to be checked
+     * @return whether this implementation can handle specified session object
      */
-    boolean canMap(String connectionType);
+    boolean canMapWith(Object session);
 }

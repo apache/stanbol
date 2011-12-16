@@ -16,6 +16,8 @@
  */
 package org.apache.stanbol.cmsadapter.servicesapi.mapping;
 
+import java.util.Dictionary;
+
 /**
  * This interface provides methods to submit and delete content items to/from Contenthub.
  * 
@@ -34,16 +36,6 @@ package org.apache.stanbol.cmsadapter.servicesapi.mapping;
  */
 public interface ContenthubFeeder {
     /**
-     * Name of the factory for JCR Contenthub Feeder
-     */
-    public static final String JCR_CONTENTHUB_FEEDER_FACTORY = "org.apache.stanbol.cmsadapter.jcr.mapping.JCRContenthubFeederFactory";
-
-    /**
-     * Name of the factory for CMIS Contenthub Feeder
-     */
-    public static final String CMIS_CONTENTUB_FEEDER_FACTORY = "org.apache.stanbol.cmsadapter.cmis.mapping.CMISContenthubFeederFactory";
-
-    /**
      * Session property for default JCR and CMIS Contenthub Feeder implementations
      */
     public static final String PROP_SESSION = "org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeeder.session";
@@ -52,7 +44,21 @@ public interface ContenthubFeeder {
      * Content properties property. It indicates the fields that holds the actual content in the content
      * repository item.
      */
-    public static final String PROP_CONTENT_PROPERTIES = "org.apache.stanbol.cmsadapter.servicesapi.mappingçContenthubFeeder.contentFields";
+    public static final String PROP_CONTENT_PROPERTIES = "org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeeder.contentFields";
+
+    /**
+     * Creates a content item in Contenthub by leveraging the content repository object itself e.g <b>Node</b>
+     * in JCR, <b>Document</b> in CMIS. If there is an already existing content item in the Contenthub with
+     * the same id, the existing content item should be deleted first.
+     * 
+     * @param o
+     *            Content repository object to be transformed into a content item in Contenthub
+     * @param id
+     *            Optional ID for the content item in Contenthub. If this parameter is specified, it will be
+     *            used as the ID of the content item in Contenthub. Otherwise, the object's own ID in the
+     *            content repository will be used.
+     */
+    void submitContentItemByCMSObject(Object o, String id);
 
     /**
      * Submits content item by its ID to the Contenthub. If there is an already existing content item in the
@@ -94,10 +100,11 @@ public interface ContenthubFeeder {
     void submitContentItemsByCustomFilter(ContentItemFilter customContentItemFilter);
 
     /**
-     * Deletes content item by its ID from the Contenthub
+     * Deletes content item by its ID from the Contenthub. Please note that specified identifier should be the
+     * one that identifying the content item in Contenthub.
      * 
      * @param contentItemID
-     *            ID of the content item in the repository
+     *            ID of the content item in the <b>Contenthub</b>
      */
     void deleteContentItemByID(String contentItemID);
 
@@ -127,12 +134,23 @@ public interface ContenthubFeeder {
     void deleteContentItemsByCustomFilter(ContentItemFilter customContentItemFilter);
 
     /**
-     * Determines the specific implementation of {@link ContenthubFeeder} supports for the specified
-     * <connectionType>.
+     * This method is used for identification of {@link ContenthubFeeder}s based on the specified
+     * <code>session</code> object. If the specified instance can be used in certain implementation, it
+     * returns <code>true</code>, otherwise <code>false</code>.
      * 
-     * @param connectionType
-     *            connection type for which an {@link RDFMapper} is requested
+     * @param session
+     *            Session object to be checked
      * @return whether certain implementation can handle specified connection type
      */
-    boolean canFeed(String connectionType);
+    boolean canFeedWith(Object session);
+
+    /**
+     * Provides injecting of implementation dependent configurations at runtime for different
+     * {@link ContenthubFeeder}s.
+     * 
+     * @param configs
+     *            Configurations passed in a {@link Dictionary} instance
+     * @throws ContenthubFeederException
+     */
+    void setConfigs(Dictionary<String,Object> configs) throws ContenthubFeederException;
 }

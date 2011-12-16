@@ -37,17 +37,18 @@ import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.cmsadapter.core.repository.SessionManager;
 import org.apache.stanbol.cmsadapter.jcr.utils.JCRUtils;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.ContentItemFilter;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeeder;
-import org.apache.stanbol.cmsadapter.servicesapi.repository.ConnectionInfo;
+import org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeederException;
+import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
 import org.apache.stanbol.contenthub.servicesapi.store.SolrContentItem;
 import org.apache.stanbol.contenthub.servicesapi.store.SolrStore;
 import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +75,8 @@ import org.slf4j.LoggerFactory;
  * @author suat
  * 
  */
-@Component(factory = ContenthubFeeder.JCR_CONTENTHUB_FEEDER_FACTORY)
+@Component(metatype = true)
+@Service(value = ContenthubFeeder.class)
 public class JCRContenthubFeeder implements ContenthubFeeder {
     private static final String JCR_NT_FILE = "nt:file";
 
@@ -103,16 +105,24 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
     @Reference
     private SolrStore solrStore;
 
+    @Reference
+    private SessionManager sessionManager;
+
     private Session session = null;
 
     private List<String> contentProperties;
 
-    @SuppressWarnings("unchecked")
-    @Activate
-    protected void activate(ComponentContext context) throws ConfigurationException {
-        Dictionary<String,Object> properties = (Dictionary<String,Object>) context.getProperties();
-        checkSession(properties);
-        checkContentProp(properties);
+    @Override
+    public void submitContentItemByCMSObject(Object o, String id) {
+        Node n = (Node) o;
+        String actualNodeId = "";
+        try {
+            actualNodeId = n.getIdentifier();
+            ContentContext contentContext = getContentContextWithBasicInfo(n, id);
+            processContextAndSubmitToContenthub(contentContext);
+        } catch (RepositoryException e) {
+            log.warn("Failed to get basic information of node having id: {}", actualNodeId);
+        }
     }
 
     @Override
@@ -220,8 +230,8 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
     }
 
     @Override
-    public boolean canFeed(String connectionType) {
-        return connectionType.contentEquals(ConnectionInfo.JCR_CONNECTION_STRING);
+    public boolean canFeedWith(Object session) {
+        return session instanceof Session;
     }
 
     private void processContextAndSubmitToContenthub(ContentContext contentContext) {
@@ -348,8 +358,12 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
     }
 
     private ContentContext getContentContextWithBasicInfo(Node n) throws RepositoryException {
+        return getContentContextWithBasicInfo(n, null);
+    }
+
+    private ContentContext getContentContextWithBasicInfo(Node n, String id) throws RepositoryException {
         ContentContext contentContext = new ContentContext();
-        contentContext.setIdentifier(n.getIdentifier());
+        contentContext.setIdentifier((id == null || id.equals("")) ? n.getIdentifier() : id);
         contentContext.setNode(n);
         contentContext.setNodeType(n.getPrimaryNodeType().getName());
         contentContext.setNodeName(n.getName());
@@ -378,6 +392,7 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
         path += "%";
 
         QueryManager qm = session.getWorkspace().getQueryManager();
+        @SuppressWarnings("deprecation")
         Query query = qm.createQuery(String.format(JCR_ITEM_BY_PATH, path), Query.SQL);
         QueryResult queryResult = query.execute();
         NodeIterator nodes = queryResult.getNodes();
@@ -393,23 +408,43 @@ public class JCRContenthubFeeder implements ContenthubFeeder {
         return results;
     }
 
-    private void checkSession(Dictionary<String,Object> properties) throws ConfigurationException {
+    @Override
+    public void setConfigs(Dictionary<String,Object> configs) throws ContenthubFeederException {
+        try {
+            checkSession(configs);
+        } catch (ConfigurationException e) {
+            throw new ContenthubFeederException("Failed to set a session for JCRContenthubFeeder", e);
+        } catch (RepositoryAccessException e) {
+            throw new ContenthubFeederException("Failed to set a session for JCRContenthubFeeder", e);
+        }
+        checkContentProp(configs);
+    }
+
+    private void checkSession(Dictionary<String,Object> properties) throws ConfigurationException,
+                                                                   RepositoryAccessException {
         Object value = properties.get(PROP_SESSION);
         if (value == null) {
             throw new ConfigurationException(PROP_SESSION,
-                    "A JCR Session should be provided to activate this component.");
+                    "A valid JCR Session should be provided to activate this component.");
         }
-        this.session = (Session) value;
+        if (value instanceof String) {
+            this.session = (Session) sessionManager.getSession((String) value);
+        } else if (value instanceof Session) {
+            this.session = (Session) value;
+        } else {
+            throw new ConfigurationException(PROP_SESSION,
+                    "A valid JCR Session should be provided to activate this component.");
+        }
     }
 
     @SuppressWarnings("unchecked")
-    private void checkContentProp(Dictionary<String,Object> properties) throws ConfigurationException {
+    private void checkContentProp(Dictionary<String,Object> properties) {
         Object cProps = properties.get(PROP_CONTENT_PROPERTIES);
         if (cProps == null) {
-            throw new ConfigurationException(PROP_CONTENT_PROPERTIES,
-                    "A JCR Session should be provided to activate this component.");
+            log.debug("No content properties specified for JCRContenthubFeeder");
+        } else {
+            this.contentProperties = (List<String>) cProps;
         }
-        this.contentProperties = (List<String>) cProps;
     }
 
     /**

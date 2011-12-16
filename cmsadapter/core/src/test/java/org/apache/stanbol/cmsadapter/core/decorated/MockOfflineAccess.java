@@ -154,4 +154,9 @@ public class MockOfflineAccess implements RepositoryAccess {
         throw new RepositoryAccessException("Im just a mocker", null);
     }
 
+    @Override
+    public boolean isSessionValid(Object session) {
+        return false;
+    }
+
 }

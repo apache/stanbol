@@ -41,20 +41,21 @@ import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.cmsadapter.cmis.repository.CMISObjectId;
 import org.apache.stanbol.cmsadapter.cmis.utils.CMISUtils;
 import org.apache.stanbol.cmsadapter.core.mapping.RDFBridgeHelper;
+import org.apache.stanbol.cmsadapter.core.repository.SessionManager;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.NamespaceEnum;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.ContentItemFilter;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeeder;
-import org.apache.stanbol.cmsadapter.servicesapi.repository.ConnectionInfo;
+import org.apache.stanbol.cmsadapter.servicesapi.mapping.ContenthubFeederException;
+import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
 import org.apache.stanbol.contenthub.servicesapi.store.SolrContentItem;
 import org.apache.stanbol.contenthub.servicesapi.store.SolrStore;
 import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +71,8 @@ import org.slf4j.LoggerFactory;
  * @author suat
  * 
  */
-@Component(factory = ContenthubFeeder.CMIS_CONTENTUB_FEEDER_FACTORY)
+@Component
+@Service(value = ContenthubFeeder.class)
 public class CMISContenthubFeeder implements ContenthubFeeder {
 
     private static final Logger log = LoggerFactory.getLogger(CMISContenthubFeeder.class);
@@ -80,6 +82,9 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
 
     @Reference
     Parser parser;
+
+    @Reference
+    SessionManager sessionManager;
 
     private Session session = null;
 
@@ -103,11 +108,12 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
         excludedProperties.add("cmis:contentStreamFileName");
     }
 
-    @SuppressWarnings("unchecked")
-    @Activate
-    protected void activate(ComponentContext context) throws ConfigurationException {
-        Dictionary<String,Object> properties = (Dictionary<String,Object>) context.getProperties();
-        checkSession(properties);
+    @Override
+    public void submitContentItemByCMSObject(Object o, String id) {
+        CmisObject cmisObject = (CmisObject) o;
+        if (hasType(cmisObject, BaseTypeId.CMIS_DOCUMENT)) {
+            processDocumentAndSubmitToContenthub((Document) cmisObject, id);
+        }
     }
 
     @Override
@@ -211,20 +217,43 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
     }
 
     @Override
-    public boolean canFeed(String connectionType) {
-        return connectionType.contentEquals(ConnectionInfo.CMIS_CONNECTION_STRING);
+    public boolean canFeedWith(Object session) {
+        return session instanceof Session;
     }
 
-    private void checkSession(Dictionary<String,Object> properties) throws ConfigurationException {
+    @Override
+    public void setConfigs(Dictionary<String,Object> configs) throws ContenthubFeederException {
+        try {
+            checkSession(configs);
+        } catch (ConfigurationException e) {
+            throw new ContenthubFeederException("Failed to set a session for CMISContenthubFeeder", e);
+        } catch (RepositoryAccessException e) {
+            throw new ContenthubFeederException("Failed to set a session for CMISContenthubFeeder", e);
+        }
+    }
+
+    private void checkSession(Dictionary<String,Object> properties) throws ConfigurationException,
+                                                                   RepositoryAccessException {
         Object value = properties.get(ContenthubFeeder.PROP_SESSION);
         if (value == null) {
             throw new ConfigurationException(PROP_SESSION,
-                    "A CMIS Session should be provided to activate this component.");
+                    "A valid CMIS Session or session key should be provided to activate this component.");
         }
-        this.session = (Session) value;
+        if (value instanceof String) {
+            this.session = ((Session) sessionManager.getSession((String) value));
+        } else if (value instanceof Session) {
+            this.session = (Session) value;
+        } else {
+            throw new ConfigurationException(PROP_SESSION,
+                    "A valid CMIS Session or session key should be provided to activate this component.");
+        }
     }
 
     private void processDocumentAndSubmitToContenthub(Document d) {
+        processDocumentAndSubmitToContenthub(d, null);
+    }
+
+    private void processDocumentAndSubmitToContenthub(Document d, String id) {
         byte[] content;
         try {
             content = IOUtils.toByteArray(d.getContentStream().getStream());
@@ -238,6 +267,7 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
         }
         String mimeType = d.getContentStreamMimeType();
         Map<String,List<Object>> constraints = getConstraintsFromDocument(d);
+        id = (id == null || id.equals("")) ? d.getId() : id;
         SolrContentItem sci = solrStore.create(d.getId(), d.getName(), content, mimeType, constraints);
         solrStore.enhanceAndPut(sci);
         log.info("Document submitted to Contenthub.");
@@ -283,6 +313,10 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
                         Triple t = triples.next();
                         String predicate = t.getPredicate().getUnicodeString();
                         String shortPredicate = NamespaceEnum.getShortName(predicate);
+                        if (shortPredicate.equals(predicate)) {
+                            log.warn("Failed to obtain short name for URI: {}", predicate);
+                            continue;
+                        }
                         Resource resource = t.getObject();
 
                         String propValue = "";

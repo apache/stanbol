@@ -21,6 +21,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -28,21 +30,25 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.cmsadapter.core.helper.TcManagerClient;
+import org.apache.stanbol.cmsadapter.core.repository.SessionManager;
+import org.apache.stanbol.cmsadapter.servicesapi.helper.CMSAdapterVocabulary;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFBridge;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFBridgeException;
 import org.apache.stanbol.cmsadapter.servicesapi.mapping.RDFMapper;
-import org.apache.stanbol.cmsadapter.servicesapi.model.web.ConnectionInfo;
-import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccess;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
-import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This component keeps track of {@link RDFBridge}s and {@link RDFMapper}s in the environment and it provides
- * a method to submit RDF data to be annotated according to <code>RDFBridge</code>s. Then
- * <code>RDFMapper</code>s update repository based on the annotated RDF. It also allows generating RDF from
- * the content repository.
+ * This manager class keeps track of {@link RDFBridge}s and {@link RDFMapper}s in the OSGi environment. It
+ * provides methods to map populate content repository using external RDF data and mapping structure of
+ * content repository into RDF. In both direction, {@link RDFBridge}s and {@link RDFMapper}s are used.
+ * <p>
+ * While populating the content repository, {@link RDFBridge} instances add additional information to external
+ * RDF so that it can be mapped to content repository by {@link RDFMapper}s. In other direction, first
+ * {@link RDFMapper} produces an RDF containing only information regarding the content repository, after that
+ * {@link RDFBridge}s add other resource to generated RDF based on their implementation.
  * 
  * @author suat
  * 
@@ -60,22 +66,54 @@ public class RDFBridgeManager {
     List<RDFMapper> rdfMappers = new CopyOnWriteArrayList<RDFMapper>();
 
     @Reference
-    RepositoryAccessManager accessManager;
+    SessionManager sessionManager;
+
+    @Reference
+    TcManager tcManager;
 
     /**
-     * This method runs the collected {@link RDFBridge}s on the RDF data passed in a {@link Graph} instance.
-     * Afterwards, according to connection info, it tries to fetch related {@link RDFMapper} instance and
-     * delegates process to the related mapper.
+     * In the first step, this method runs the {@link RDFBridge}s on the RDF data passed in a {@link Graph}
+     * instance. After this execution new assertions are added to initial graph to map the graph to content
+     * repository. For example, an assertion stating <b>rdf:type</b> as
+     * {@link CMSAdapterVocabulary#CMS_OBJECT} is added to each resource to be mapped to the content
+     * repository.
+     * <p>
+     * In the second step, annotated RDF is mapped to the repository by an {@link RDFMapper} instance. This
+     * instance is also determined according to session object which will be obtained with the
+     * <code>sessionKey</code> parameter.
      * 
-     * @param connectionInfo
-     *            credentials to access repository
+     * @param sessionKey
+     *            Session key to retrieve previously cached session to access the repository
      * @param rawRDFData
      *            RDF to be annotated
      * @throws RepositoryAccessException
      * @throws RDFBridgeException
      */
-    public void storeRDFToRepository(ConnectionInfo connectionInfo, Graph rawRDFData) throws RepositoryAccessException,
-                                                                                     RDFBridgeException {
+    public void storeRDFToRepository(String sessionKey, Graph rawRDFData) throws RepositoryAccessException,
+                                                                         RDFBridgeException {
+        Object session = sessionManager.getSession(sessionKey);
+        storeRDFToRepository(session, rawRDFData);
+    }
+
+    /**
+     * In the first step, this method runs the {@link RDFBridge}s on the RDF data passed in a {@link Graph}
+     * instance. After this execution new assertions are added to initial graph to map the graph to content
+     * repository. For example, an assertion stating <b>rdf:type</b> as
+     * {@link CMSAdapterVocabulary#CMS_OBJECT} is added to each resource to be mapped to the content
+     * repository.
+     * <p>
+     * In the second step, annotated RDF is mapped to the repository by an {@link RDFMapper} instance. This
+     * instance is also determined according to <code>session</code> object.
+     * 
+     * @param session
+     *            Session to access repository
+     * @param rawRDFData
+     *            RDF to be annotated
+     * @throws RepositoryAccessException
+     * @throws RDFBridgeException
+     */
+    public void storeRDFToRepository(Object session, Graph rawRDFData) throws RepositoryAccessException,
+                                                                      RDFBridgeException {
         if (rdfBridges.size() == 0) {
             log.info("There is no RDF Bridge to execute");
             return;
@@ -83,13 +121,7 @@ public class RDFBridgeManager {
 
         // According to connection type get RDF mapper, repository accessor,
         // session
-        RDFMapper mapper = getRDFMapper(connectionInfo);
-        RepositoryAccess repositoryAccess = accessManager.getRepositoryAccessor(connectionInfo);
-        if (repositoryAccess == null) {
-            log.warn("Failed to retrieve a repository access with the specified connection info");
-            return;
-        }
-        Object session = repositoryAccess.getSession(connectionInfo);
+        RDFMapper mapper = getRDFMapper(session);
 
         // Annotate raw RDF with CMS vocabulary annotations according to bridges
         log.info("Graph annotation starting...");
@@ -111,52 +143,100 @@ public class RDFBridgeManager {
     /**
      * This method gets the RDF from the content repository based on the path configurations of
      * {@link RDFBridge}s and annotate them using {@link RDFBridge#annotateCMSGraph(MGraph)}.
+     * <p>
+     * This method maps structure of content repository into an RDF
      * 
      * @param baseURI
      *            Base URI for the RDF to be generated
-     * @param connectionInfo
-     *            is the object that holds all necessary information to connect repository.
+     * @param sessionKey
+     *            Session key to retrieve previously cached session to access the repository
+     * @param store
+     *            If this parameter is set as <code>true</code>, the generated RDF is stored persistently
+     * @param update
+     *            This parameter is considered only if the <code>store</code> parameter is set
+     *            <code>true</code>. If so and if this parameter is also set to true <code>true</code>, newly
+     *            generated graph will be merged with the existing one having the same base URI, otherwise a
+     *            new will be created.
      * @return {@link MGraph} formed by the aggregation of generated RDF for each RDF bridge
      * @throws RepositoryAccessException
      * @throws RDFBridgeException
      */
-    public MGraph generateRDFFromRepository(String baseURI, ConnectionInfo connectionInfo) throws RepositoryAccessException,
-                                                                                          RDFBridgeException {
+    public MGraph generateRDFFromRepository(String baseURI, String sessionKey, boolean store, boolean update) throws RepositoryAccessException,
+                                                                                                             RDFBridgeException {
+        Object session = sessionManager.getSession(sessionKey);
+        return generateRDFFromRepository(baseURI, session, store, update);
+    }
+
+    /**
+     * This method gets the RDF from the content repository based on the path configurations of
+     * {@link RDFBridge}s and annotate them using {@link RDFBridge#annotateCMSGraph(MGraph)}.
+     * 
+     * @param baseURI
+     *            Base URI for the RDF to be generated
+     * @param session
+     *            Session to access repository
+     * @param store
+     *            If this parameter is set as <code>true</code>, the generated RDF is stored persistently
+     * @param update
+     *            This parameter is considered only if the <code>store</code> parameter is set
+     *            <code>true</code>. If so and if this parameter is also set to true <code>true</code>, newly
+     *            generated graph will be merged with the existing one having the same base URI, otherwise a
+     *            new will be created.
+     * @return {@link MGraph} formed by the aggregation of generated RDF for each RDF bridge
+     * @throws RepositoryAccessException
+     * @throws RDFBridgeException
+     */
+    public MGraph generateRDFFromRepository(String baseURI, Object session, boolean store, boolean update) throws RepositoryAccessException,
+                                                                                                          RDFBridgeException {
         if (rdfBridges.size() == 0) {
             log.info("There is no RDF Bridge to execute");
             return new SimpleMGraph();
         }
 
-        // According to connection type get RDF mapper, repository accessor,
-        // session
-        RDFMapper mapper = getRDFMapper(connectionInfo);
-        RepositoryAccess repositoryAccess = accessManager.getRepositoryAccessor(connectionInfo);
-        if (repositoryAccess == null) {
-            throw new RepositoryAccessException(
-                    "Failed to obtain a RepositoryAccess for the provided connection information");
-        }
-        Object session = repositoryAccess.getSession(connectionInfo);
-
+        RDFMapper mapper = getRDFMapper(session);
         MGraph cmsGraph = new SimpleMGraph();
         for (RDFBridge bridge : rdfBridges) {
             MGraph generatedGraph = mapper.generateRDFFromRepository(baseURI, session, bridge.getCMSPath());
             bridge.annotateCMSGraph(generatedGraph);
             cmsGraph.addAll(generatedGraph);
         }
-        return cmsGraph;
+
+        MGraph persistentGraph = null;
+        if (store) {
+            TcManagerClient tcManagerClient = new TcManagerClient(tcManager);
+            boolean graphExists = tcManagerClient.modelExists(baseURI);
+            if (update) {
+                if (graphExists) {
+                    log.info("Getting the existing triple collection having base URI: {}", baseURI);
+                    persistentGraph = tcManager.getMGraph(new UriRef(baseURI));
+                } else {
+                    persistentGraph = tcManager.createMGraph(new UriRef(baseURI));
+                }
+            } else {
+                if (graphExists) {
+                    log.info("Deleting the triple collection having base URI: {}", baseURI);
+                    tcManager.deleteTripleCollection(new UriRef(baseURI));
+                }
+                persistentGraph = tcManager.createMGraph(new UriRef(baseURI));
+            }
+            log.info("Saving the triple collection having base URI: {}", baseURI);
+            persistentGraph.addAll(cmsGraph);
+        } else {
+            persistentGraph = cmsGraph;
+        }
+        return persistentGraph;
     }
 
-    private RDFMapper getRDFMapper(ConnectionInfo connectionInfo) {
+    private RDFMapper getRDFMapper(Object session) throws RepositoryAccessException {
         RDFMapper mapper = null;
-        String type = connectionInfo.getConnectionType();
         for (RDFMapper rdfMapper : rdfMappers) {
-            if (rdfMapper.canMap(type)) {
+            if (rdfMapper.canMapWith(session)) {
                 mapper = (RDFMapper) rdfMapper;
             }
         }
         if (mapper == null) {
-            log.warn("Failed to retrieve RDFMapper for connection type: {}", type);
-            throw new IllegalStateException("Failed to retrieve RDFMapper for connection type: " + type);
+            log.warn("Failed to retrieve RDFMapper for session: {}", session);
+            throw new IllegalStateException("Failed to retrieve RDFMapper for session: " + session);
         }
         return mapper;
     }

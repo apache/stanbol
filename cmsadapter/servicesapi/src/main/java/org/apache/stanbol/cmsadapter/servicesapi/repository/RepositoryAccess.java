@@ -274,6 +274,16 @@ public interface RepositoryAccess {
     CMSObject getParentByNode(CMSObject instance, Object session) throws RepositoryAccessException;
 
     /**
+     * Checks the specified session object still can be used to connect content repository
+     * 
+     * @param session
+     *            Session object to be validated
+     * @return <code>true</code> if the specified <code>session</code> is still valid, otherwise
+     *         <code>false</code>.
+     */
+    boolean isSessionValid(Object session);
+
+    /**
      * 
      * @param connectionInfo
      * @return true if the {@link RepositoryAccess} instance can connect to repository with the given
@@ -288,5 +298,4 @@ public interface RepositoryAccess {
      *         <b>session</b>
      */
     boolean canRetrieve(Object session);
-
 }

@@ -523,7 +523,7 @@ public class CMISRDFMapper extends BaseRDFMapper implements RDFMapper {
     }
 
     @Override
-    public boolean canMap(String connectionType) {
-        return connectionType.contentEquals("CMIS");
+    public boolean canMapWith(Object session) {
+        return session instanceof Session;
     }
 }

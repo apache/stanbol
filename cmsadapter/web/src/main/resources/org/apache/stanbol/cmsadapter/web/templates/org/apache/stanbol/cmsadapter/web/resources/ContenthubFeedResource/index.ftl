@@ -32,37 +32,15 @@
 			<li><a href="#Submit_content_items">Submit content items</a></li>
 			<li><a href="#Delete_content_items">Delete content items</a></li>
 		</ul>
-		Interaction with the content repository is provided through the following properties. They are required all services provided by this endpoint.
-		Please note that while connecting JCR repositories <b>RMI protocol</b> is used, on the other hand for CMIS repositories <b>AtomPub Binding</b> 
-		is used. So, it is necessary to set <b>repositoryURL</b> parameter based on these connection methods. 
+		Interaction with the content repository will be obtained through the <b>Session Key</b> property. To be able to use the services below a session key
+		should be through the <b><a href="${it.publicBaseUri}cmsadapter/session">/cmsadapter/session</a></b> resource.  
 		<fieldset>
 			<legend>Connection parameters</legend>
 			<table>
 				<tbody>
 					<tr>
-						<th>Repository URL</th>
-						<td><input type="text" id="repositoryURL" value=""></td>
-					</tr>
-					<tr>
-						<th>Workspace Name</th>
-						<td><input type="text" id="workspaceName" value=""></td>
-					</tr>
-					<tr>
-						<th>Username</th>
-						<td><input type="text" id="username" value=""></td>
-					</tr>
-					<tr>
-						<th>Password</th>
-						<td><input type="password" id="password" value=""></td>
-					</tr>
-					<tr>
-						<th>Connection type</th>
-						<td>
-							<select id="connectionType">
-							  <option value="JCR">JCR</option>
-							  <option value="CMIS">CMIS</option>
-							</select>
-						</td>
+						<th>Session key</th>
+						<td><input type="text" id="sessionKey" value=""></td>
 					</tr>
 				</tbody>
 			</table>
@@ -157,7 +135,7 @@
 				<td><p>This service enables submission of content repository objects to Contenthub. Connection to the content repository is 
 				established by the provided connection information. This service makes possible to submit content items through either their IDs or 
 				paths in the content repository. Enhancements of content items are obtained through <b>Stanbol Enhancer</b> before submitting them to 
-				Contenthub.</p><br><br> 
+				Contenthub.<br><br> 
 				
 				If <code>id</code> parameter is set, the target object is obtained from the content repository according to its ID. If 
 				<code>path</code> parameter is set, first the ID of target object is obtained from the content repository and then the retrieved 
@@ -177,15 +155,8 @@
 				<th valign="top">Parameters</th>
 				<td>
 					<ul>
-						<li>@FormParam repositoryURL: URL of the content repository. For JCR repositories <b>RMI protocol</b>, for CMIS repositories
-							<b>AtomPub Binding</b> is used. This parameter should be set according to these connection methods.</li>
-			            <li>@FormParam workspaceName: For JCR repositories this parameter determines the workspace to be connected. On the other hand
-			            	for CMIS repositories <b>repository ID</b> should be set to this parameter. In case of not setting this parameter,
-			            	for JCR <b>default workspace</b> is selected, for CMIS the <b>first repository</b> obtained through the session object 
-			            	is selected.</li>
-			    		<li>@FormParam username: Username to connect to content repository</li>
-			    		<li>@FormParam password: Password to connect to content repository</li>
-			    		<li>@FormParam connectionType: Connection type; either <b>JCR</b> or <b>CMIS</b></li>
+						<li>@FormParam sessionKey: Interaction with the content repository is provided through the <b>Session Key</b> property. To be able to use the services below a session key
+						should be through the <b><a href="${it.publicBaseUri}cmsadapter/session">/cmsadapter/session</a></b> resource.</li>
 			    		<li>@FormParam id: Content repository ID of the content item to be submitted</li>
 			    		<li>@FormParam path: Content repository path of the content item to be submitted</li>
 			    		<li>@FormParam recursive: This parameter is used together with <code>path</code> parameter. Its default value is 
@@ -198,13 +169,11 @@
 			<tr>
 				<th valign="top">Produces</th>
 				<td>HTTP 200 in case of successful execution.<br>
-					HTTP 400 when both <code>id</code> and <code>path</code> parameters are not set or one of the <code>username</code>, 
-					<code>password</code>, <code>connectionType</code>, <code>repositoryURL</code> parameters are not set</td>
-				
+					HTTP 400 when both <code>id</code> and <code>path</code> parameters or <code>sessionKey</code> parameter is not set</td>
 			</tr>
 			<tr>
 				<th valign="top">Example</th>
-				<td><pre>curl -i -X POST --data "repositoryURL=http://127.0.0.1:8084/alfresco/service/cmis&username=admin&password=admin&connectionType=CMIS&path=/contenthubfeedtest&recursive=true" http://localhost:8080/cmsadapter/contenthubfeed</pre></td>
+				<td><pre>curl -i -X POST --data "sessionKey=eec8ff46-aaf9-485f-a7b5-452c1d7197d0&path=/contenthubfeedtest&recursive=true" http://localhost:8080/cmsadapter/contenthubfeed</pre></td>
 			</tr>
 		</tbody>
 	</table></p>
@@ -232,14 +201,8 @@
 				<th valign="top">Parameters</th>
 				<td>
 					<ul>
-						<li>@FormParam repositoryURL: URL of the content repository</li>
-			            <li>@FormParam workspaceName: For JCR repositories this parameter determines the workspace to be connected. On the other hand
-			            	for CMIS repositories <b>repository ID</b> should be set to this parameter. In case of not setting this parameter,
-			            	for JCR <b>default workspace</b> is selected, for CMIS the <b>first repository</b> obtained through the session object 
-			            	is selected.</li>
-			    		<li>@FormParam username: Username to connect to content repository</li>
-			    		<li>@FormParam password: Password to connect to content repository</li>
-			    		<li>@FormParam connectionType: Connection type; either <b>JCR</b> or <b>CMIS</b></li>
+						<li>@FormParam sessionKey: Interaction with the content repository is provided through the <b>Session Key</b> property. To be able to use the services below a session key
+						should be through the <b><a href="${it.publicBaseUri}cmsadapter/session">/cmsadapter/session</a></b> resource.</li>
 			    		<li>@FormParam id: Content repository ID of the content item to be submitted</li>
 			    		<li>@FormParam path: Content repository path of the content item to be submitted</li>
 			    		<li>@FormParam recursive: This parameter is used together with <code>path</code> parameter. Its default value is 
@@ -250,12 +213,11 @@
 			<tr>
 				<th valign="top">Produces</th>
 				<td>HTTP 200 in case of successful execution.<br>
-					HTTP 400 when both <code>id</code> and <code>path</code> parameters are not set or one of the <code>username</code>, 
-					<code>password</code>, <code>connectionType</code>, <code>repositoryURL</code> parameters are not set</td>
+					HTTP 400 when both <code>id</code> and <code>path</code> parameters or <code>sessionKey</code> parameter is not set</td>
 			</tr>
 			<tr>
 				<th valign="top">Example</th>
-				<td><pre>curl -i -X DELETE --data "repositoryURL=http://127.0.0.1:8084/alfresco/service/cmis&username=admin&password=admin&connectionType=CMIS&path=/contenthubfeedtest&recursive=true" http://localhost:8080/cmsadapter/contenthubfeed</pre></td>
+				<td><pre>curl -i -X DELETE --data "sessionKey=eec8ff46-aaf9-485f-a7b5-452c1d7197d0&path=/contenthubfeedtest&recursive=true" http://localhost:8080/cmsadapter/contenthubfeed</pre></td>
 			</tr>
 		</tbody>
 	</table>
@@ -283,11 +245,7 @@ $(function() {
 
 function submitContentItemsToContenthub() {
 	var data = new Object();
-	data.repositoryURL = $("#repositoryURL").val();
-	data.workspaceName = $("#workspaceName").val();
-	data.username = $("#username").val();
-	data.password = $("#password").val();
-	data.connectionType = $("#connectionType").val();
+	data.sessionKey = $("#sessionKey").val();
 	data.id = $("#contentID").val();
 	data.path = $("#contentPath").val();
 	data.recursive = $("#recursiveCheck").is(':checked') ? "true" : "false";
@@ -311,11 +269,7 @@ function submitContentItemsToContenthub() {
 
 function deleteContentItemsFromContenthub(){
 	var data = new Object();
-	data.repositoryURL = $("#repositoryURL").val();
-	data.workspaceName = $("#workspaceName").val();
-	data.username = $("#username").val();
-	data.password = $("#password").val();
-	data.connectionType = $("#connectionType").val();
+	data.sessionKey = $("#sessionKey").val();
 	data.id = $("#contentID").val();
 	data.path = $("#contentPath").val();
 	data.recursive = $("#recursiveCheck").is(':checked') ? "true" : "false";
