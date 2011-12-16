@@ -81,9 +81,7 @@
       (optional, number, default: 0) The offset of the first returned result</td>
   </tr><tr>
     <td><strong>LDPath:</strong>
-    </td><td><textarea class="input" name="ldpath" rows="10">@prefix dct : <http://purl.org/dc/terms/> ;
-@prefix geo : <http://www.w3.org/2003/01/geo/wgs84_pos#> ;
-name = rdfs:label[@en] :: xsd:string;
+    </td><td><textarea class="input" name="ldpath" rows="10">name = rdfs:label[@en] :: xsd:string;
 comment = rdfs:comment[@en] :: xsd:string;
 categories = dct:subject :: xsd:anyURI;
 homepage = foaf:homepage :: xsd:anyURI;

@@ -46,7 +46,7 @@ final class QueryResultsToRDF {
     /**
      * The property used for the JSON serialised FieldQuery (STANBOL-298)
      */
-    static final UriRef FIELD_QUERY = new UriRef(RdfResourceEnum.queryResult.getUri());
+    static final UriRef FIELD_QUERY = new UriRef(RdfResourceEnum.query.getUri());
     
     /**
      * The LiteralFactory retrieved from {@link EntityToRDF#literalFactory}
@@ -60,7 +60,7 @@ final class QueryResultsToRDF {
             resultGraph = new SimpleMGraph(); //create a new Graph
             for (Object result : resultList) {
                 //add a triple to each reference in the result set
-                resultGraph.add(new TripleImpl(QUERY_RESULT_LIST, FIELD_QUERY, new UriRef(result.toString())));
+                resultGraph.add(new TripleImpl(QUERY_RESULT_LIST, QUERY_RESULT, new UriRef(result.toString())));
             }
         } else {
             //first determine the type of the resultList
@@ -78,7 +78,7 @@ final class QueryResultsToRDF {
                 resultGraph = ((RdfQueryResultList) resultList).getResultGraph();
                 if (isSignType) { //if we build a ResultList for Signs, that we need to do more things
                     //first remove all triples representing results
-                    Iterator<Triple> resultTripleIt = resultGraph.filter(QUERY_RESULT_LIST, FIELD_QUERY, null);
+                    Iterator<Triple> resultTripleIt = resultGraph.filter(QUERY_RESULT_LIST, QUERY_RESULT, null);
                     while (resultTripleIt.hasNext()) {
                         resultTripleIt.next();
                         resultTripleIt.remove();
@@ -88,7 +88,7 @@ final class QueryResultsToRDF {
                     for (Object result : resultList) {
                         UriRef signId = new UriRef(((Entity) result).getId());
                         EntityToRDF.addEntityTriplesToGraph(resultGraph, (Entity) result);
-                        resultGraph.add(new TripleImpl(QUERY_RESULT_LIST, FIELD_QUERY, signId));
+                        resultGraph.add(new TripleImpl(QUERY_RESULT_LIST, QUERY_RESULT, signId));
                     }
                 }
             } else { //any other implementation of the QueryResultList interface
@@ -106,7 +106,7 @@ final class QueryResultsToRDF {
                         //Note: In case of Representation this Triple points to
                         //      the representation. In case of Signs it points to
                         //      the sign.
-                        resultGraph.add(new TripleImpl(QUERY_RESULT_LIST, FIELD_QUERY, resultId));
+                        resultGraph.add(new TripleImpl(QUERY_RESULT_LIST, QUERY_RESULT, resultId));
                     }
                 }
             }

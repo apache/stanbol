@@ -154,6 +154,11 @@ public enum RdfResourceEnum {
      */
     queryResult(NamespaceEnum.entityhubQuery),
     /**
+     * Property used to link the Literal with the executed Query to the
+     * {@link #QueryResultSet}
+     */
+    query(NamespaceEnum.entityhubQuery),
+    /**
      * The score of the result in respect to the parsed query.
      */
     resultScore(NamespaceEnum.entityhubQuery,"score"),

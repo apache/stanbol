@@ -7,6 +7,7 @@ import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory.ValueConv
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.ldpath.transformer.ValueConverterTransformerAdapter;
 import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
@@ -17,6 +18,8 @@ import at.newmedialab.ldpath.api.backend.RDFBackend;
 import at.newmedialab.ldpath.api.transformers.NodeTransformer;
 import at.newmedialab.ldpath.model.fields.FieldMapping;
 import at.newmedialab.ldpath.model.programs.Program;
+import at.newmedialab.ldpath.parser.Configuration;
+import at.newmedialab.ldpath.parser.DefaultConfiguration;
 
 /**
  * {@link LDPath} with Entityhub specific configurations.
@@ -43,31 +46,34 @@ public class EntityhubLDPath extends LDPath<Object> {
 
     private final ValueFactory vf;
     private final RDFBackend<Object> backend;
+    /**
+     * Creates a {@link LDPath} instance configured as used with the Entityhub.
+     * This means support for<ul>
+     * <li> namespaces defined by the {@link NamespaceEnum}
+     * <li> {@link NodeTransformer} for {@link DataTypeEnum#Text} and 
+     * {@link DataTypeEnum#Reference}
+     * <li> and the usage of {@link Text} for <code>xsd:string</code> and
+     * {@link Reference} for <code>xsd:anyURI</code>
+     * @param backend the {@link RDFBackend}
+     */
     public EntityhubLDPath(RDFBackend<Object> backend) {
         this(backend,null);
     }
+    /**
+     * Creates a {@link LDPath} instance configured as used with the Entityhub.
+     * This means support for<ul>
+     * <li> namespaces defined by the {@link NamespaceEnum}
+     * <li> {@link NodeTransformer} for {@link DataTypeEnum#Text} and 
+     * {@link DataTypeEnum#Reference}
+     * <li> and the usage of {@link Text} for <code>xsd:string</code> and
+     * {@link Reference} for <code>xsd:anyURI</code>
+     * @param backend the {@link RDFBackend}
+     * @param vf the {@link ValueFactory} or <code>null</code> to use the default.
+     */
     public EntityhubLDPath(RDFBackend<Object> backend,ValueFactory vf) {
-        super(backend);
+        super(backend, new EntityhubConfiguration(vf));
         this.vf = vf == null ? InMemoryValueFactory.getInstance() : vf;
         this.backend = backend;
-        //register special Entutyhub Transformer for
-        // * entityhub:reference
-        ValueConverter<Reference> referenceConverter = new ReferenceConverter();
-        registerTransformer(referenceConverter.getDataType(), 
-            new ValueConverterTransformerAdapter<Reference>(referenceConverter,vf));
-        // * xsd:anyURI
-        ValueConverter<Reference> uriConverter = new AnyUriConverter();
-        registerTransformer(uriConverter.getDataType(), 
-            new ValueConverterTransformerAdapter<Reference>(uriConverter,vf));
-        // * entityhub:text
-        ValueConverter<Text> literalConverter = new TextConverter();
-        registerTransformer(literalConverter.getDataType(), 
-            new ValueConverterTransformerAdapter<Text>(literalConverter,vf));
-        // xsd:string (use also the literal converter for xsd:string
-        registerTransformer(DataTypeEnum.String.getUri(), 
-            new ValueConverterTransformerAdapter<Text>(literalConverter,vf));
-        //TODO: Currently it is NOT possible to register the default
-        //      Namespace mappings defined for the Entityhub!
     }
     
     /**
@@ -94,5 +100,36 @@ public class EntityhubLDPath extends LDPath<Object> {
         }
         return result;
         
+    }
+    /**
+     * The default configuration for the Entityhub
+     * @author Rupert Westenthaler
+     *
+     */
+    private static class EntityhubConfiguration extends DefaultConfiguration<Object>{
+        public EntityhubConfiguration(ValueFactory vf){
+            super();
+            vf = vf == null ? InMemoryValueFactory.getInstance() : vf;
+            //register special Entutyhub Transformer for
+            // * entityhub:reference
+            ValueConverter<Reference> referenceConverter = new ReferenceConverter();
+            addTransformer(referenceConverter.getDataType(), 
+                new ValueConverterTransformerAdapter<Reference>(referenceConverter,vf));
+            // * xsd:anyURI
+            ValueConverter<Reference> uriConverter = new AnyUriConverter();
+            addTransformer(uriConverter.getDataType(), 
+                new ValueConverterTransformerAdapter<Reference>(uriConverter,vf));
+            // * entityhub:text
+            ValueConverter<Text> literalConverter = new TextConverter();
+            addTransformer(literalConverter.getDataType(), 
+                new ValueConverterTransformerAdapter<Text>(literalConverter,vf));
+            // xsd:string (use also the literal converter for xsd:string
+            addTransformer(DataTypeEnum.String.getUri(), 
+                new ValueConverterTransformerAdapter<Text>(literalConverter,vf));
+            //Register the default namespaces
+            for(NamespaceEnum ns : NamespaceEnum.values()){
+                addNamespace(ns.getPrefix(), ns.getNamespace());
+            }
+        }
     }
 }
