@@ -44,6 +44,46 @@ documentation</a> is also available on the
 <pre><code>@prefix foaf : &lt;http://xmlns.com/foaf/0.1/&gt;;
 </code></pre>
 
+<p><em>Predefined Namespaces:</em></p>
+<ul>
+<li><strong>entityhub</strong>: http://www.iks-project.eu/ontology/rick/model/</li>
+<li><strong>entityhub-query</strong>: http://www.iks-project.eu/ontology/rick/query/</li>
+<li><strong>xsd</strong>: http://www.w3.org/2001/XMLSchema#</li>
+<li><strong>xsi</strong>: http://www.w3.org/2001/XMLSchema-instance#</li>
+<li><strong>xml</strong>: http://www.w3.org/XML/1998/namespace#</li>
+<li><strong>rdf</strong>: http://www.w3.org/1999/02/22-rdf-syntax-ns#</li>
+<li><strong>rdfs</strong>: http://www.w3.org/2000/01/rdf-schema#</li>
+<li><strong>owl</strong>: http://www.w3.org/2002/07/owl#</li>
+<li><strong>atom</strong>: http://www.w3.org/2005/Atom</li>
+<li><strong>cmis</strong>: http://docs.oasis-open.org/ns/cmis/core/200908/</li>
+<li><strong>cmis-ra</strong>: http://docs.oasis-open.org/ns/cmis/restatom/200908/</li>
+<li><strong>jcr</strong>: http://www.jcp.org/jcr/1.0/</li>
+<li><strong>jcr-sv</strong>: http://www.jcp.org/jcr/sv/1.0/</li>
+<li><strong>jcr-nt</strong>: http://www.jcp.org/jcr/nt/1.0/</li>
+<li><strong>jcr-mix</strong>: http://www.jcp.org/jcr/mix/1.0/</li>
+<li><strong>geo</strong>: http://www.w3.org/2003/01/geo/wgs84_pos#</li>
+<li><strong>georss</strong>: http://www.georss.org/georss/</li>
+<li><strong>gml</strong>: http://www.opengis.net/gml/</li>
+<li><strong>dc-elements</strong>: http://purl.org/dc/elements/1.1/</li>
+<li><strong>dc</strong>: http://purl.org/dc/terms/</li>
+<li><strong>foaf</strong>: http://xmlns.com/foaf/0.1/</li>
+<li><strong>vCal</strong>: http://www.w3.org/2002/12/cal#</li>
+<li><strong>vCard</strong>: http://www.w3.org/2001/vcard-rdf/3.0#</li>
+<li><strong>skos</strong>: http://www.w3.org/2004/02/skos/core#</li>
+<li><strong>sioc</strong>: http://rdfs.org/sioc/ns#</li>
+<li><strong>sioc-types</strong>: http://rdfs.org/sioc/types#</li>
+<li><strong>dc-bio</strong>: http://purl.org/vocab/bio/0.1/</li>
+<li><strong>rss</strong>: http://purl.org/rss/1.0/</li>
+<li><strong>gr</strong>: http://purl.org/goodrelations/v1#</li>
+<li><strong>swrc</strong>: http://swrc.ontoware.org/ontology#</li>
+<li><strong>dbp-ont</strong>: http://dbpedia.org/ontology/</li>
+<li><strong>dbp-prop</strong>: http://dbpedia.org/property/</li>
+<li><strong>geonames</strong>: http://www.geonames.org/ontology#</li>
+<li><strong>cc</strong>: http://creativecommons.org/ns#</li>
+<li><strong>schema</strong>: http://schema.org/</li>
+</ul>
+
+
 <h3>Field Definitions</h3>
 
 <p>Define fields in the search index to map to path definitions.</p>
@@ -108,6 +148,9 @@ title = &lt;http://xmlns.com/foaf/0.1/name&gt; :: xsd:string;
 <pre><code>topic_interests = foaf:interest &amp; foaf:topic</em>interest :: xsd:anyURI;
 </code></pre></li>
 <li><p>Recursive Selections ((PATH)+)</p>
+<pre><code>skos:broaderTransitive = (skos:broader | ^skos:narrower)+;
+</code></pre></li>
+
 <li><p>Tests ([...]): filter the collection based on test criteria</p>
 
 <ul><li>Path Existence Test (PATH): only resources where a subpath yields some value</li>
@@ -131,6 +174,7 @@ fluidfood = foaf:interest[rdf:type is ex:Food &amp; rdf:type is ex:Drink] :: xsd
 <li><p>Combinations of Tests</p>
 
 <pre><code>foodstuff = foaf:interest[rdf:type is ex:Food]/rdfs:label[@es] :: xsd:string ;
+relatedPersons = (* | dc:subject/^dc:subject)[rdf:type is dbp-ont:Person]/rdfs:label[@en] :: xsd:string;
 </code></pre></li>
 </ul>
 <li><p>Functions (f(...)): apply a function on the values of the selections passed as argument</p>

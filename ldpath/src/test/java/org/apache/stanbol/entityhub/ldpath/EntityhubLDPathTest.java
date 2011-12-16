@@ -38,17 +38,19 @@ public class EntityhubLDPathTest extends LDPathTestBase {
     private static final String DATA_TYPE_TEST_PROGRAM;
     static {
         StringBuilder builder = new StringBuilder();
-        builder.append("@prefix eh : <http://www.iks-project.eu/ontology/rick/model/>;");
-        builder.append("@prefix dct : <http://purl.org/dc/terms/>;");
-        builder.append("@prefix geo : <http://www.w3.org/2003/01/geo/wgs84_pos#> ;");
+        //NOTE: prefixes removed to test registration of the default namespaces
+        //      as registered in the NamespaceEnum
+        //builder.append("@prefix eh : <http://www.iks-project.eu/ontology/rick/model/>;");
+        //builder.append("@prefix dct : <http://purl.org/dc/terms/>;");
+        //builder.append("@prefix geo : <http://www.w3.org/2003/01/geo/wgs84_pos#> ;");
         //this test that even when selecting strings the language is preserved
         builder.append("name = rdfs:label :: xsd:string;");
         //this tests support for natural language texts as used by the entityhub
-        builder.append("comment = rdfs:comment :: eh:text;");
+        builder.append("comment = rdfs:comment :: entityhub:text;");
         //this tests that Reference is used for URIs
-        builder.append("categories = dct:subject :: xsd:anyURI;");
+        builder.append("categories = dc:subject :: xsd:anyURI;");
         //this tests support for Reference as used by the entityhub
-        builder.append("type = rdf:type :: eh:ref;");
+        builder.append("type = rdf:type :: entityhub:ref;");
         builder.append("lat = geo:lat :: xsd:double;");
         DATA_TYPE_TEST_PROGRAM = builder.toString();
         

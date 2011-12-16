@@ -1,6 +1,6 @@
 package org.apache.stanbol.entityhub.jersey.utils;
 
-import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static javax.ws.rs.core.MediaType.*;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.RESULT_SCORE_MAPPING;
 import static org.apache.stanbol.entityhub.ldpath.LDPathUtils.getReader;
@@ -163,6 +163,11 @@ public class LDPathHelper {
             rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
             addCORSOrigin(servletContext, rb, headers);
             return rb.build();
+        } else if(acceptedMediaType.equals(TEXT_HTML_TYPE)){
+            //HTML is only supported for documentation
+            return Response.status(Status.NOT_ACCEPTABLE)
+            .entity("The requested content type "+TEXT_HTML+" is not supported.\n")
+            .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
         }
         MGraph data;
         try {

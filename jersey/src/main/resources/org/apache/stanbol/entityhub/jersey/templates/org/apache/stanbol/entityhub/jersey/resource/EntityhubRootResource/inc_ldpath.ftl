@@ -61,7 +61,7 @@
 
 <p>Execute the LDPath on the Context:<br>
 <form name="ldpathExample" id="ldpathExample">
-    <strong>Context:</strong> <input type="text" size="120" name="context" value="http://dbpedia.org/resource/Paris">
+    <strong>Context:</strong> <input type="text" size="120" name="context" value="http://dbpedia.org/resource/Paris"><br>
     <strong>LD-Path:</strong><br>
     <textarea class="input" name="ldpath" rows="10">@prefix dct : <http://purl.org/dc/terms/> ;
 @prefix geo : <http://www.w3.org/2003/01/geo/wgs84_pos#> ;

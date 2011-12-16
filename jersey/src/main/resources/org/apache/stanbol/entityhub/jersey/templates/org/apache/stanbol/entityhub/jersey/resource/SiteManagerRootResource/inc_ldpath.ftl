@@ -61,7 +61,7 @@
 
 <p>Execute the LDPath on the Context:<br>
 <form name="ldpathExample" id="ldpathExample">
-    <strong>Context:</strong> <input type="text" size="120" name="context" value="http://dbpedia.org/resource/Paris">
+    <strong>Context:</strong> <input type="text" size="120" name="context" value="http://dbpedia.org/resource/Paris"><br>
     <strong>LD-Path:</strong><br>
     <textarea class="input" name="ldpath" rows="10">@prefix dct : <http://purl.org/dc/terms/> ;
 @prefix geo : <http://www.w3.org/2003/01/geo/wgs84_pos#> ;
@@ -129,5 +129,32 @@ schema:image = foaf:depiction;
 schema:url = foaf:homepage;
 schema:birthDate = dbp-ont:birthDate;
 schema:deathDate = dbp-ont:deathDate;</textarea>
-</ul>
+<li> Simple reasoning: The following shows an example how LD Path can be used to
+for deduce additional knowledge for a given context.<br>
+In this case sub-property, inverse- and transitive relations as defined by the
+SKOS ontology are expressed in LD Path.<br>
+NOTE: the rule for 'skos:narrowerTransitive' will not scale in big Thesaurus (e.g. 
+for the root node it will return every concept in the Thesaurus).
+In contrast the 'skos:broaderTransitive' rule is ok even for big Thesaurus as 
+long as they are not cyclic (such as the DBPedia Categories).<br>
+<textarea rows="10" readonly>skos:prefLabel;
+skos:altLabel;
+skos:hiddenLabel;
+rdfs:label = (skos:prefLabel | skos:altLabel | skos:hiddenLabel);
+skos:notation
+
+skos:inScheme;
+
+skos:broader = (skos:broader | ^skos:narrower);
+skos:broaderTransitive = (skos:broader | ^skos:narrower)+;
+
+skos:narrower = (^skos:broader | skos:narrower);
+skos:narrowerTransitive = (^skos:broader | skos:narrower)+;
+
+skos:related = (skos:related | skos:relatedMatch);
+skos:relatedMatch;
+skos:exactMatch = (skos:exactMatch)+;
+skos:closeMatch = (skos:closeMatch | (skos:exactMatch)+);
+skos:broaderMatch = (^skos:narrowMatch | skos:broaderMatch);
+skos:narrowMatch = (skos:narrowMatch | ^skos:broaderMatch);</textarea></ul>
 </p>

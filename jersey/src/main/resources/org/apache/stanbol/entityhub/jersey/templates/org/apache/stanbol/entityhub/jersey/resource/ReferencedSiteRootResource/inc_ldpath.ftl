@@ -33,7 +33,8 @@
 	</tr>
 	<tr>
 		<th>Parameter</th>
-		<td><ul><li>ldpath: The LDPath program to execute.</li>
+		<td><ul><li>ldpath: The LDPath program to execute. For a detailed description 
+		          of the language see the end of this page.</li>
     			<li>context: The id of the entity used as context for the execution
     			of the LDPath program. This parameter can occur multiple times</li>
     		</ul>
@@ -62,15 +63,13 @@
 
 <p>Execute the LDPath on the Context:<br>
 <form name="ldpathExample" id="ldpathExample">
-	<strong>Context:</strong> <input type="text" size="120" name="context" value="http://dbpedia.org/resource/Paris">
+	<strong>Context:</strong> <input type="text" size="120" name="context" value="http://dbpedia.org/resource/Paris"><br>
 	<strong>LD-Path:</strong><br>
-	<textarea class="input" name="ldpath" rows="10">@prefix dct : <http://purl.org/dc/terms/> ;
-@prefix geo : <http://www.w3.org/2003/01/geo/wgs84_pos#> ;
-name = rdfs:label[@en] :: xsd:string;
-labels = rdfs:label :: xsd:string;
-comment = rdfs:comment[@en] :: xsd:string;
-categories = dct:subject :: xsd:anyURI;
-homepage = foaf:homepage :: xsd:anyURI;
+	<textarea class="input" name="ldpath" rows="10">schema:name = rdfs:label[@en];
+rdfs:label;
+schema:description = rdfs:comment[@en];
+categories = dc:subject :: xsd:anyURI;
+schema:url = foaf:homepage :: xsd:anyURI;
 location = fn:concat("[",geo:lat,",",geo:long,"]") :: xsd:string;</textarea><br>
 <strong>Format:</strong> <select name="format" id="findOutputFormat">
         <option value="application/json">JSON-LD</option>
@@ -119,22 +118,42 @@ function executeLDPath() {
 <p><strong>Other LDPath Examples:</strong><ul>
 <li> This select all persons a) directly connected b) member of the same category c)
 member of a (direct) sub-category:
-      <textarea rows="5" readonly>@prefix dct : <http://purl.org/dc/terms/> ;
-@prefix dbp-ont : <http://dbpedia.org/ontology/> ;
-@prefix skos : <http://www.w3.org/2004/02/skos/core#> ;
-name = rdfs:label[@en] :: xsd:string ;
-people = (* | dct:subject/^dct:subject | dct:subject/^skos:broader/^dct:subject)[rdf:type is dbp-ont:Person] :: xsd:anyURI;</textarea>
+      <textarea rows="2" readonly>schema:name = rdfs:label[@en] :: xsd:string ;
+people = (* | dc:subject/^dc:subject | dc:subject/^skos:broader/^dc:subject)[rdf:type is dbp-ont:Person] :: xsd:anyURI;</textarea>
 <li> Schema translation: The following example converts dbpedia data for to schema.org
-      <textarea rows="5" readonly>@prefix dct : <http://purl.org/dc/terms/> ;
-@prefix dbp-ont : <http://dbpedia.org/ontology/> ;
-@prefix skos : <http://www.w3.org/2004/02/skos/core#> ;
-@prefix schema : <http://schema.org/> ;
-@prefix foaf : <http://xmlns.com/foaf/0.1/> ;
-schema:name = rdfs:label[@en];
+      <textarea rows="6" readonly>schema:name = rdfs:label[@en];
 schema:description = rdfs:comment[@en];
 schema:image = foaf:depiction;
 schema:url = foaf:homepage;
 schema:birthDate = dbp-ont:birthDate;
 schema:deathDate = dbp-ont:deathDate;</textarea>
+<li> Simple reasoning: The following shows an example how LD Path can be used to
+for deduce additional knowledge for a given context.<br>
+In this case sub-property, inverse- and transitive relations as defined by the
+SKOS ontology are expressed in LD Path.<br>
+NOTE: the rule for 'skos:narrowerTransitive' will not scale in big Thesaurus (e.g. 
+for the root node it will return every concept in the Thesaurus).
+In contrast the 'skos:broaderTransitive' rule is ok even for big Thesaurus as 
+long as they are not cyclic (such as the DBPedia Categories).<br>
+<textarea rows="10" readonly>skos:prefLabel;
+skos:altLabel;
+skos:hiddenLabel;
+rdfs:label = (skos:prefLabel | skos:altLabel | skos:hiddenLabel);
+skos:notation
+
+skos:inScheme;
+
+skos:broader = (skos:broader | ^skos:narrower);
+skos:broaderTransitive = (skos:broader | ^skos:narrower)+;
+
+skos:narrower = (^skos:broader | skos:narrower);
+skos:narrowerTransitive = (^skos:broader | skos:narrower)+;
+
+skos:related = (skos:related | skos:relatedMatch);
+skos:relatedMatch;
+skos:exactMatch = (skos:exactMatch)+;
+skos:closeMatch = (skos:closeMatch | (skos:exactMatch)+);
+skos:broaderMatch = (^skos:narrowMatch | skos:broaderMatch);
+skos:narrowMatch = (skos:narrowMatch | ^skos:broaderMatch);</textarea>
 </ul>
 </p>
