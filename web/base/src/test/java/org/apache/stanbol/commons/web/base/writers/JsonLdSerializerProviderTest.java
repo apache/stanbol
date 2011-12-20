@@ -16,10 +16,8 @@
 */
 package org.apache.stanbol.commons.web.base.writers;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -33,6 +31,7 @@ import org.apache.clerezza.rdf.core.impl.util.W3CDateFormat;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.TextAnnotation;
+import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
 import org.apache.stanbol.enhancer.servicesapi.helper.RdfEntityFactory;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.junit.Assert;
@@ -234,26 +233,7 @@ public class JsonLdSerializerProviderTest {
     }
 
     private ContentItem getContentItem(final String id, final String text) {
-        return new ContentItem() {
-
-            SimpleMGraph metadata = new SimpleMGraph();
-
-            public InputStream getStream() {
-                return new ByteArrayInputStream(text.getBytes());
-            }
-
-            public String getMimeType() {
-                return "text/plain";
-            }
-
-            public MGraph getMetadata() {
-                return metadata;
-            }
-
-            public String getId() {
-                return id;
-            }
-        };
+        return new InMemoryContentItem(id, text, "text/plain");
     }
 
     private void getTextAnnotation(ContentItem ci, String annotationURNExtension, String namedEntity, String context, UriRef type) {
