@@ -78,10 +78,10 @@ public class EntityMentionEnhancementEngine implements EnhancementEngine,
         if (autotagger == null) {
             log.warn(getClass().getSimpleName()
                     + " is deactivated: cannot process content item: "
-                    + ci.getId());
+                    + ci.getUri().getUnicodeString());
             return;
         }
-        UriRef contentItemId = new UriRef(ci.getId());
+        UriRef contentItemId = new UriRef(ci.getUri().getUnicodeString());
 
         MGraph graph = ci.getMetadata();
         LiteralFactory literalFactory = LiteralFactory.getInstance();

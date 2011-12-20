@@ -112,7 +112,7 @@ public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProper
         }
 
         // TODO: check whether there is the graph contains the text
-        UriRef subj = new UriRef(ci.getId());
+        UriRef subj = ci.getUri();
         Iterator<Triple> it = ci.getMetadata().filter(subj, NIE_PLAINTEXTCONTENT, null);
         if (it.hasNext()) {
             return ENHANCE_SYNCHRONOUS;
@@ -129,7 +129,7 @@ public class LangIdEnhancementEngine implements EnhancementEngine, ServiceProper
                 throw new InvalidContentException(this, ci, e);
             }
         } else {
-            Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getId()), NIE_PLAINTEXTCONTENT, null);
+            Iterator<Triple> it = ci.getMetadata().filter(ci.getUri(), NIE_PLAINTEXTCONTENT, null);
             while (it.hasNext()) {
                 text += it.next().getObject();
             }

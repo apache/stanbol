@@ -297,7 +297,7 @@ public class LocationEnhancementEngine implements EnhancementEngine, ServiceProp
 
     @Override
     public void computeEnhancements(ContentItem ci) throws EngineException {
-        UriRef contentItemId = new UriRef(ci.getId());
+        UriRef contentItemId = ci.getUri();
         MGraph graph = ci.getMetadata();
         LiteralFactory literalFactory = LiteralFactory.getInstance();
         //get all the textAnnotations

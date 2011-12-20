@@ -20,9 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,19 +29,18 @@ import java.util.Map;
 
 import opennlp.tools.tokenize.SimpleTokenizer;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.TextAnalyzerConfig;
 import org.apache.stanbol.enhancer.engines.keywordextraction.impl.ClasspathDataFileProvider;
 import org.apache.stanbol.enhancer.engines.keywordextraction.impl.TestSearcherImpl;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntityLinker;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntityLinkerConfig;
+import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntityLinkerConfig.RedirectProcessingMode;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.LinkedEntity;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.Suggestion;
-import org.apache.stanbol.enhancer.engines.keywordextraction.linking.EntityLinkerConfig.RedirectProcessingMode;
 import org.apache.stanbol.enhancer.engines.keywordextraction.linking.impl.OpenNlpAnalysedContentFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
@@ -128,26 +125,7 @@ public class TestTaxonomyLinker {
     }
 
     public static ContentItem getContentItem(final String id, final String text) {
-        return new ContentItem() {
-
-            SimpleMGraph metadata = new SimpleMGraph();
-
-            public InputStream getStream() {
-                return new ByteArrayInputStream(text.getBytes());
-            }
-
-            public String getMimeType() {
-                return "text/plain";
-            }
-
-            public MGraph getMetadata() {
-                return metadata;
-            }
-
-            public String getId() {
-                return id;
-            }
-        };
+        return new InMemoryContentItem(id, text, "text/plain");
     }
 
     @Test

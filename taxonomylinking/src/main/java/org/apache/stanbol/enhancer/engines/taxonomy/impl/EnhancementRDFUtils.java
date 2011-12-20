@@ -72,7 +72,7 @@ public class EnhancementRDFUtils {
                                                String nameField,
                                                String language) {
         MGraph graph = ci.getMetadata();
-        UriRef contentItemId = new UriRef(ci.getId());
+        UriRef contentItemId = ci.getUri();
         // 1. check if the returned Entity does has a label -> if not return null
         // add labels (set only a single label. Use "en" if available!
         Text label = null;

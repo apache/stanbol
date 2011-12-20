@@ -154,7 +154,7 @@ public class MetaxaEngine implements EnhancementEngine, ServiceProperties {
 
         try {
             // get model from the extraction
-            Model m = this.extractor.extract(ci.getStream(), ci.getId(), ci.getMimeType());
+            Model m = this.extractor.extract(ci.getStream(), ci.getUri().getUnicodeString(), ci.getMimeType());
             // add the statements from this model to the Metadata model
             if (null != m) {
                 /*

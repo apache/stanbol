@@ -18,16 +18,20 @@ package org.apache.stanbol.enhancer.engines.zemanta.impl;
 
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.stanbol.enhancer.engines.zemanta.impl.ZemantaEnhancementEngine.API_KEY_PROPERTY;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.*;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_REQUIRES;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_END;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_LABEL;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_CATEGORY;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_ENTITYANNOTATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -40,14 +44,12 @@ import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
-import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -98,28 +100,9 @@ public class ZemantaEnhancementEngineTest {
     }
 
     public static ContentItem wrapAsContentItem(final String text) {
-        return new ContentItem() {
-
-            SimpleMGraph metadata = new SimpleMGraph();
-            String id = "urn:org.apache.stanbol.enhancer:test:engines.zemanta:content-item-"
-                    + EnhancementEngineHelper.randomUUID().toString();
-
-            public InputStream getStream() {
-                return new ByteArrayInputStream(text.getBytes());
-            }
-
-            public String getMimeType() {
-                return "text/plain";
-            }
-
-            public MGraph getMetadata() {
-                return metadata;
-            }
-
-            public String getId() {
-                return id;
-            }
-        };
+    	String id = "urn:org.apache.stanbol.enhancer:test:engines.zemanta:content-item-"
+            + EnhancementEngineHelper.randomUUID().toString();
+    	return new InMemoryContentItem(id, text, "text/plain");
     }
 
     @Test

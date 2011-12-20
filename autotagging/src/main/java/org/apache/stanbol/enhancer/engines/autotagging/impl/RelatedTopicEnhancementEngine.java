@@ -75,7 +75,7 @@ public class RelatedTopicEnhancementEngine implements EnhancementEngine {
         if (autotagger == null) {
             log.warn(getClass().getSimpleName()
                     + " is deactivated: cannot process content item: "
-                    + ci.getId());
+                    + ci.getUri().getUnicodeString());
             return;
         }
         String mimeType = ci.getMimeType().split(";", 2)[0];
@@ -87,7 +87,7 @@ public class RelatedTopicEnhancementEngine implements EnhancementEngine {
                 throw new InvalidContentException(this, ci, e);
             }
         } else {
-            Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getId()), NIE_PLAINTEXTCONTENT, null);
+            Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getUri().getUnicodeString()), NIE_PLAINTEXTCONTENT, null);
             while (it.hasNext()) {
                 text += it.next().getObject();
             }
@@ -102,7 +102,7 @@ public class RelatedTopicEnhancementEngine implements EnhancementEngine {
 
         MGraph graph = ci.getMetadata();
         LiteralFactory literalFactory = LiteralFactory.getInstance();
-        UriRef contentItemId = new UriRef(ci.getId());
+        UriRef contentItemId = new UriRef(ci.getUri().getUnicodeString());
         try {
             List<TagInfo> suggestions = autotagger.suggestForType(text, type);
             Collection<NonLiteral> noRelatedEnhancements = Collections.emptyList();
@@ -122,7 +122,7 @@ public class RelatedTopicEnhancementEngine implements EnhancementEngine {
             return ENHANCE_SYNCHRONOUS;
         }
         // check for existence of textual content in metadata
-        UriRef subj = new UriRef(ci.getId());
+        UriRef subj = new UriRef(ci.getUri().getUnicodeString());
         Iterator<Triple> it = ci.getMetadata().filter(subj, NIE_PLAINTEXTCONTENT, null);
         if (it.hasNext()) {
             return ENHANCE_SYNCHRONOUS;

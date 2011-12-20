@@ -293,7 +293,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
             return ENHANCE_SYNCHRONOUS;
         }
         // check for existence of textual content in metadata
-        UriRef subj = new UriRef(ci.getId());
+        UriRef subj = ci.getUri();
         Iterator<Triple> it = ci.getMetadata().filter(subj, NIE_PLAINTEXTCONTENT, null);
         if (it.hasNext()) {
             return ENHANCE_SYNCHRONOUS;
@@ -319,7 +319,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
         String language = extractLanguage(ci);
         if(isProcessableLanguages(language)){
             log.debug("computeEnhancements for ContentItem {} language {} text={}", 
-                new Object []{ci.getId(), language, StringUtils.abbreviate(text, 100)});
+                new Object []{ci.getUri().getUnicodeString(), language, StringUtils.abbreviate(text, 100)});
             
             EntityLinker taxonomyLinker = new EntityLinker(
                 analysedContentFactory.create(text, language),
@@ -330,7 +330,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
             writeEnhancements(ci, taxonomyLinker.getLinkedEntities().values(), language);
         } else {
             log.debug("ignore ContentItem {} because language '{}' is not configured to" +
-            		"be processed by this engine.",ci.getId(),language);
+            		"be processed by this engine.",ci.getUri().getUnicodeString(),language);
         }
         
     }
@@ -423,13 +423,13 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
                 return lang;
             } else {
                 log.warn("Unable to extract language for ContentItem %s! The Enhancement of the %s is missing the %s property",
-                    new Object[]{ci.getId(),LANG_ID_ENGINE_NAME.getLexicalForm(),Properties.DC_LANGUAGE});
+                    new Object[]{ci.getUri().getUnicodeString(),LANG_ID_ENGINE_NAME.getLexicalForm(),Properties.DC_LANGUAGE});
                 log.warn(" ... return 'en' as default");
                 return "en";
             }
         } else {
             log.warn("Unable to extract language for ContentItem %s! Is the %s active?",
-                ci.getId(),LANG_ID_ENGINE_NAME.getLexicalForm());
+                ci.getUri().getUnicodeString(),LANG_ID_ENGINE_NAME.getLexicalForm());
             log.warn(" ... return 'en' as default");
             return "en";
         }
@@ -460,7 +460,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
             //TODO: change that as soon the Adapter Pattern is used for multiple
             // mimetype support.
             StringBuilder textBuilder = new StringBuilder();
-            Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getId()), NIE_PLAINTEXTCONTENT, null);
+            Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getUri().getUnicodeString()), NIE_PLAINTEXTCONTENT, null);
             while (it.hasNext()) {
                 textBuilder.append(it.next().getObject());
             }

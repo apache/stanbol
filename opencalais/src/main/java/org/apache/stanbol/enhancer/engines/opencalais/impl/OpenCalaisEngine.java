@@ -247,7 +247,7 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
 //            log.warn("No license key defined. The engine will not work!");
 //            return CANNOT_ENHANCE;
 //        }
-        UriRef subj = new UriRef(ci.getId());
+        UriRef subj = ci.getUri();
         String mimeType = ci.getMimeType().split(";", 2)[0];
         if (SUPPORTED_MIMETYPES.contains(mimeType.toLowerCase())) {
             // check language
@@ -278,7 +278,7 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
             }
         } else {
             mimeType = "text/plain";
-            text = getMetadataText(ci.getMetadata(), new UriRef(ci.getId()));
+            text = getMetadataText(ci.getMetadata(), ci.getUri());
         }
         if (text == null) {
             log.warn("no text found");

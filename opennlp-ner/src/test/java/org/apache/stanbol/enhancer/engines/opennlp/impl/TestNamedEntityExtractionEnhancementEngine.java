@@ -23,9 +23,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ST
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -38,9 +36,9 @@ import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
+import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -71,26 +69,7 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
 
     public static ContentItem wrapAsContentItem(final String id,
             final String text) {
-        return new ContentItem() {
-
-            SimpleMGraph metadata = new SimpleMGraph();
-
-            public InputStream getStream() {
-                return new ByteArrayInputStream(text.getBytes());
-            }
-
-            public String getMimeType() {
-                return "text/plain";
-            }
-
-            public MGraph getMetadata() {
-                return metadata;
-            }
-
-            public String getId() {
-                return id;
-            }
-        };
+    	return new InMemoryContentItem(id, text, "text/plain");
     }
 
     @Test
