@@ -356,7 +356,7 @@ public class TaxonomyLinkingEngine implements EnhancementEngine, ServiceProperti
             return ENHANCE_SYNCHRONOUS;
         }
         // check for existence of textual content in metadata
-        UriRef subj = new UriRef(ci.getId());
+        UriRef subj = ci.getUri();
         Iterator<Triple> it = ci.getMetadata().filter(subj, NIE_PLAINTEXTCONTENT, null);
         if (it.hasNext()) {
             return ENHANCE_SYNCHRONOUS;
@@ -372,7 +372,7 @@ public class TaxonomyLinkingEngine implements EnhancementEngine, ServiceProperti
             //ensure that it is present
             if (site == null) {
                 String msg = String.format(
-                    "Unable to enhance %s because Referenced Site %s is currently not active!", ci.getId(),
+                    "Unable to enhance %s because Referenced Site %s is currently not active!", ci.getUri().getUnicodeString(),
                     referencedSiteID);
                 log.warn(msg);
                 // TODO: throwing Exceptions is currently deactivated. We need a more clear
@@ -383,7 +383,7 @@ public class TaxonomyLinkingEngine implements EnhancementEngine, ServiceProperti
             //and that it supports offline mode if required
             if (isOfflineMode() && !site.supportsLocalMode()) {
                 log.warn("Unable to enhance ci {} because OfflineMode is not supported by ReferencedSite {}.",
-                    ci.getId(), site.getId());
+                    ci.getUri().getUnicodeString(), site.getId());
                 return;
             }
         } else { // null indicates to use the Entityhub to lookup Entities
@@ -401,7 +401,7 @@ public class TaxonomyLinkingEngine implements EnhancementEngine, ServiceProperti
             //TODO: change that as soon the Adapter Pattern is used for multiple
             // mimetype support.
             StringBuilder textBuilder = new StringBuilder();
-            Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getId()), NIE_PLAINTEXTCONTENT, null);
+            Iterator<Triple> it = ci.getMetadata().filter(ci.getUri(), NIE_PLAINTEXTCONTENT, null);
             while (it.hasNext()) {
                 textBuilder.append(it.next().getObject());
             }
@@ -417,7 +417,7 @@ public class TaxonomyLinkingEngine implements EnhancementEngine, ServiceProperti
         //TODO: determin the language
         String language = "en";
         log.debug("computeEnhancements for ContentItem {} language {} text={}", 
-            new Object []{ci.getId(), language, StringUtils.abbreviate(text, 100)});
+            new Object []{ci.getUri().getUnicodeString(), language, StringUtils.abbreviate(text, 100)});
         
         //first get the models
         Tokenizer tokenizer = initTokenizer(language);
@@ -825,7 +825,7 @@ public class TaxonomyLinkingEngine implements EnhancementEngine, ServiceProperti
                                         int endTokenIndex,
                                         Set<UriRef> dcTypes) {
         MGraph metadata = ci.getMetadata();
-        UriRef contentItemId = new UriRef(ci.getId());
+        UriRef contentItemId = ci.getUri();
         UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(metadata, this, contentItemId);
         int startChar =  tokenSpans[startTokenIndex].getStart();
         int endChar = tokenSpans[endTokenIndex].getEnd();

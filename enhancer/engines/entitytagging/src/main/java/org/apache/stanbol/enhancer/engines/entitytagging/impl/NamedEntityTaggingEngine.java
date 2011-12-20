@@ -290,8 +290,8 @@ public class NamedEntityTaggingEngine implements EnhancementEngine, ServicePrope
             //ensure that it is present
             if (site == null) {
                 String msg = String.format(
-                    "Unable to enhance %s because Referenced Site %s is currently not active!", ci.getId(),
-                    referencedSiteID);
+                    "Unable to enhance %s because Referenced Site %s is currently not active!", 
+                    ci.getUri().getUnicodeString(), referencedSiteID);
                 log.warn(msg);
                 // TODO: throwing Exceptions is currently deactivated. We need a more clear
                 // policy what do to in such situations
@@ -301,13 +301,13 @@ public class NamedEntityTaggingEngine implements EnhancementEngine, ServicePrope
             //and that it supports offline mode if required
             if (isOfflineMode() && !site.supportsLocalMode()) {
                 log.warn("Unable to enhance ci {} because OfflineMode is not supported by ReferencedSite {}.",
-                    ci.getId(), site.getId());
+                    ci.getUri().getUnicodeString(), site.getId());
                 return;
             }
         } else { // null indicates to use the Entityhub to lookup Entities
             site = null;
         }
-        UriRef contentItemId = new UriRef(ci.getId());
+        UriRef contentItemId = ci.getUri();
 
         MGraph graph = ci.getMetadata();
         LiteralFactory literalFactory = LiteralFactory.getInstance();

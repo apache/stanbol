@@ -271,7 +271,7 @@ public class CMISContenthubFeeder implements ContenthubFeeder {
         SolrContentItem sci = solrStore.create(d.getId(), d.getName(), content, mimeType, constraints);
         solrStore.enhanceAndPut(sci);
         log.info("Document submitted to Contenthub.");
-        log.info("Id: {}", sci.getId());
+        log.info("Id: {}", sci.getUri().getUnicodeString());
         log.info("Mime type: {}", sci.getMimeType());
         log.info("Constraints: {}", sci.getConstraints().toString());
     }

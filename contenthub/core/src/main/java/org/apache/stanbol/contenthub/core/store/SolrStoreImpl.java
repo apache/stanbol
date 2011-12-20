@@ -208,7 +208,7 @@ public class SolrStoreImpl implements SolrStore {
         try {
             jobManager.enhanceContent(sci);
         } catch (EngineException e) {
-            logger.error("Cannot enhance content with id: {}", sci.getId(), e);
+            logger.error("Cannot enhance content with id: {}", sci.getUri().getUnicodeString(), e);
         }
 
         updateEnhancementGraph(sci);
@@ -219,7 +219,7 @@ public class SolrStoreImpl implements SolrStore {
     private void updateEnhancementGraph(SolrContentItem sci) {
         MGraph enhancementGraph = getEnhancementGraph();
         // Delete old enhancements which belong to this content item from the global enhancements graph.
-        removeEnhancements(sci.getId());
+        removeEnhancements(sci.getUri().getUnicodeString());
         // Add new enhancements of this content item to the global enhancements graph.
         Iterator<Triple> it = sci.getMetadata().iterator();
         while (it.hasNext()) {
@@ -246,7 +246,7 @@ public class SolrStoreImpl implements SolrStore {
 
     @Override
     public String put(ContentItem ci) {
-        if (ci.getId() == null || ci.getId().isEmpty()) {
+        if (ci.getUri().getUnicodeString() == null || ci.getUri().getUnicodeString().isEmpty()) {
             logger.debug("ID of the content item cannot be null while inserting to the SolrStore.");
             throw new IllegalArgumentException(
                     "ID of the content item cannot be null while inserting to the SolrStore.");
@@ -265,7 +265,7 @@ public class SolrStoreImpl implements SolrStore {
         String creationDate = sdf.format(cal.getTime()).replace(" ", "T") + "Z";
 
         SolrInputDocument doc = new SolrInputDocument();
-        doc.addField(SolrFieldName.ID.toString(), ci.getId());
+        doc.addField(SolrFieldName.ID.toString(), ci.getUri().getUnicodeString());
         doc.addField(SolrFieldName.CONTENT.toString(), content);
         doc.addField(SolrFieldName.MIMETYPE.toString(), ci.getMimeType());
         doc.addField(SolrFieldName.CREATIONDATE.toString(), creationDate);
@@ -273,7 +273,7 @@ public class SolrStoreImpl implements SolrStore {
         // add the number of enhancemets to the content item
         long enhancementCount = 0;
         Iterator<Triple> it = ci.getMetadata().filter(null, Properties.ENHANCER_EXTRACTED_FROM,
-            new UriRef(ci.getId()));
+            new UriRef(ci.getUri().getUnicodeString()));
         while (it.hasNext()) {
             it.next();
             enhancementCount++;
@@ -300,7 +300,7 @@ public class SolrStoreImpl implements SolrStore {
                 addSemanticFields(sci, doc);
                 addFacetFields(sci, doc);
             } else {
-                logger.debug("There are no enhancements for the content item {}", sci.getId());
+                logger.debug("There are no enhancements for the content item {}", sci.getUri().getUnicodeString());
             }
         }
 
@@ -314,7 +314,7 @@ public class SolrStoreImpl implements SolrStore {
             logger.error("IOException", e);
         }
 
-        return ci.getId();
+        return ci.getUri().getUnicodeString();
     }
 
     private void addSemanticFields(SolrContentItem sci, SolrInputDocument doc) {

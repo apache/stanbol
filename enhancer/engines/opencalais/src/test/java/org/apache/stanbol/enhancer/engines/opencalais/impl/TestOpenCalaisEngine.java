@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.enhancer.engines.opencalais.impl;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,11 +24,10 @@ import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
-import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.junit.Assert;
 import org.junit.Assume;
@@ -68,27 +66,9 @@ public class TestOpenCalaisEngine {
   }
 
   public static ContentItem wrapAsContentItem(final String text) {
-    return new ContentItem() {
-      
-      SimpleMGraph metadata = new SimpleMGraph();
-      String id = "urn:org.apache.stanbol.enhancer:test:engines.opencalais:content-item-"+EnhancementEngineHelper.randomUUID().toString();
-      public InputStream getStream() {
-        return new ByteArrayInputStream(text.getBytes());
-      }
-      
-      public String getMimeType() {
-        return "text/plain";
-      }
-      
-      public MGraph getMetadata() {
-        return metadata;
-      }
-      
-      public String getId() {
-        return id;
-      }
-    };
+	  return new InMemoryContentItem((UriRef)null, text, "text/plain");
   }
+  
   @Test
   public void testEntityExtraction() {
     String testFile = "calaisresult.owl";
@@ -110,7 +90,7 @@ public class TestOpenCalaisEngine {
   	Assume.assumeNotNull(calaisExtractor.getLicenseKey());
   	try {
   	  ContentItem ci = wrapAsContentItem(TEST_TEXT);
-  	  ci.getMetadata().add(new TripleImpl(new UriRef(ci.getId()), Properties.DC_LANGUAGE, LiteralFactory.getInstance().createTypedLiteral("en")));
+  	  ci.getMetadata().add(new TripleImpl(ci.getUri(), Properties.DC_LANGUAGE, LiteralFactory.getInstance().createTypedLiteral("en")));
   		MGraph model = calaisExtractor.getCalaisAnalysis(TEST_TEXT,"text/plain");
   		Assert.assertNotNull("No model", model);
   		Collection<CalaisEntityOccurrence> entities = calaisExtractor.queryModel(model);

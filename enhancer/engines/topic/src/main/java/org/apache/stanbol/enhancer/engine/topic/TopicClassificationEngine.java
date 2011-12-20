@@ -286,7 +286,7 @@ public class TopicClassificationEngine implements EnhancementEngine, ServiceProp
                 throw new InvalidContentException(this, ci, e);
             }
         } else {
-            Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getId()), NIE_PLAINTEXTCONTENT, null);
+            Iterator<Triple> it = ci.getMetadata().filter(ci.getUri(), NIE_PLAINTEXTCONTENT, null);
             while (it.hasNext()) {
                 text += it.next().getObject();
             }

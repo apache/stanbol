@@ -16,25 +16,26 @@
  */
 package org.apache.stanbol.enhancer.engines.entitytagging.impl;
 
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.*;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_LABEL;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_ENTITYANNOTATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
 import java.util.Iterator;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.TextAnnotation;
+import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
 import org.apache.stanbol.enhancer.servicesapi.helper.RdfEntityFactory;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -83,26 +84,7 @@ public class TestEntityLinkingEnhancementEngine {
     }
 
     public static ContentItem getContentItem(final String id, final String text) {
-        return new ContentItem() {
-
-            SimpleMGraph metadata = new SimpleMGraph();
-
-            public InputStream getStream() {
-                return new ByteArrayInputStream(text.getBytes());
-            }
-
-            public String getMimeType() {
-                return "text/plain";
-            }
-
-            public MGraph getMetadata() {
-                return metadata;
-            }
-
-            public String getId() {
-                return id;
-            }
-        };
+        return new InMemoryContentItem(id, text, "text/plain");
     }
 
     public static void getTextAnnotation(ContentItem ci, String name,String context,UriRef type){

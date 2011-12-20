@@ -73,10 +73,10 @@ public class ClerezzaStore implements Store {
     }
 
     public String put(ContentItem ci) {
-        MGraph metadataGraph = tcManager.getMGraph(new UriRef(ci.getId()));
+        MGraph metadataGraph = tcManager.getMGraph(new UriRef(ci.getUri().getUnicodeString()));
         metadataGraph.clear();
         metadataGraph.addAll(ci.getMetadata());
-        return ci.getId();
+        return ci.getUri().getUnicodeString();
     }
 
     public ContentItem get(String id) {

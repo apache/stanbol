@@ -124,7 +124,7 @@ public class NEREngineCore implements EnhancementEngine {
             //TODO: change that as soon the Adapter Pattern is used for multiple
             // mimetype support.
             StringBuilder textBuilder = new StringBuilder();
-            Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getId()), NIE_PLAINTEXTCONTENT, null);
+            Iterator<Triple> it = ci.getMetadata().filter(ci.getUri(), NIE_PLAINTEXTCONTENT, null);
             while (it.hasNext()) {
                 textBuilder.append(it.next().getObject());
             }
@@ -137,7 +137,7 @@ public class NEREngineCore implements EnhancementEngine {
             log.warn("nothing to extract knowledge from in ContentItem {}", ci);
             return;
         }
-        log.debug("computeEnhancements {} text={}", ci.getId(), StringUtils.abbreviate(text, 100));
+        log.debug("computeEnhancements {} text={}", ci.getUri().getUnicodeString(), StringUtils.abbreviate(text, 100));
 
         try {
             for (Map.Entry<String,UriRef> type : entityTypes.entrySet()) {
@@ -161,7 +161,7 @@ public class NEREngineCore implements EnhancementEngine {
             throw new IllegalArgumentException("Parsed ContentItem MUST NOT be NULL");
         }
         if (text == null) {
-            log.warn("NULL was parsed as text for content item " + ci.getId() + "! -> call ignored");
+            log.warn("NULL was parsed as text for content item " + ci.getUri().getUnicodeString() + "! -> call ignored");
             return;
         }
         log.debug("findNamedEntities typeUri={}, type={}, text=", 
@@ -385,7 +385,7 @@ public class NEREngineCore implements EnhancementEngine {
             return ENHANCE_SYNCHRONOUS;
         }
         // check for existence of textual content in metadata
-        UriRef subj = new UriRef(ci.getId());
+        UriRef subj = ci.getUri();
         Iterator<Triple> it = ci.getMetadata().filter(subj, NIE_PLAINTEXTCONTENT, null);
         if (it.hasNext()) {
             return ENHANCE_SYNCHRONOUS;

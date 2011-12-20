@@ -16,94 +16,62 @@
 */
 package org.apache.stanbol.enhancer.servicesapi.helper;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.Blob;
 
 
 /**
- * Base content item implementation that holds a complete copy of the data in
- * memory.
+ * ContentItem implementation that holds a complete copy of the data in
+ * memory. Internally it uses {@link InMemoryBlob} to store the content and
+ * an {@link SimpleMGraph} for the metadata.
  * <p>
  * This implementation can be used independently of any store implementation and
  * is suitable for stateless processing.
  */
-public class InMemoryContentItem implements ContentItem {
-    // private final Logger log = LoggerFactory.getLogger(getClass());
+public class InMemoryContentItem extends ContentItemImpl {
 
-    private final MGraph metadata;
+//Do not allow to create a ContentItem without a content
+//    public InMemoryContentItem(String id) {
+//        this(id, null, null, null);
+//    }
 
-    private final String id;
+    public InMemoryContentItem(byte[] content, String mimeType) {
+        this((UriRef)null,new InMemoryBlob(content, mimeType),null);
+    }
+    
+    public InMemoryContentItem(String id, String content, String mimeType) {
+		this(id, new InMemoryBlob(content, mimeType),null);
+	}
 
-    private final String mimeType;
-
-    private final byte[] data;
-
-    public InMemoryContentItem(String id) {
-        this(id, null, null, null);
+    public InMemoryContentItem(String id, byte[] content, String mimetype) {
+        this(id,new InMemoryBlob(content, mimetype),null);
     }
 
-    public InMemoryContentItem(byte[] content, String mimetype) {
-        this(null, content, mimetype, null);
-    }
-
-    public InMemoryContentItem(String id, byte[] content, String mimeType) {
-        this(id, content, mimeType, null);
-    }
-
-    public InMemoryContentItem(String id, byte[] content, String mimeType,
+    public InMemoryContentItem(String uriString, byte[] content, String mimeType,
             MGraph metadata) {
-        if (id == null) {
-            id = ContentItemHelper.makeDefaultUrn(content).getUnicodeString();
-        }
-
-        if (metadata == null) {
-            metadata = new SimpleMGraph();
-        }
-        if (mimeType == null) {
-            mimeType = "application/octet-stream";
-        } else {
-            // Keep only first part of content-types like text/plain ; charset=UTF-8
-            mimeType = mimeType.split(";")[0].trim();
-        }
-        if (content == null) {
-            content = new byte[0];
-        }
-
-        this.id = id;
-        this.data = content;
-        this.mimeType = mimeType;
-        this.metadata = metadata;
+    	this(uriString != null? new UriRef(uriString) : null ,
+    	        new InMemoryBlob(content, mimeType),
+    	        metadata);
+    }
+    public InMemoryContentItem(UriRef uriRef, String content, String mimeType) {
+		this(uriRef, new InMemoryBlob(content, mimeType), null);
+	}
+    public InMemoryContentItem(UriRef uri, byte[] content, String mimeType, MGraph metadata) {
+        this(uri, new InMemoryBlob(content, mimeType),metadata);
+    }
+    protected InMemoryContentItem(String uriString, Blob blob, MGraph metadata) {
+        this(uriString != null ? new UriRef(uriString) : null, blob, metadata);
+    }
+    protected InMemoryContentItem(UriRef uri, Blob blob, MGraph metadata) {
+        super(uri == null ? ContentItemHelper.makeDefaultUrn(blob): uri,blob,
+                metadata == null ? new SimpleMGraph() : metadata);
     }
 
-    protected static final InMemoryContentItem fromString(String content) {
+	protected static final InMemoryContentItem fromString(String content) {
         return new InMemoryContentItem(content.getBytes(), "text/plain");
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + " id=[" + id + "], mimeType[="
-                + mimeType + "], data=[" + data.length + "] bytes"
-                + ", metadata=" + metadata;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public MGraph getMetadata() {
-        return metadata;
-    }
-
-    public String getMimeType() {
-        return mimeType;
-    }
-
-    public InputStream getStream() {
-        return new ByteArrayInputStream(data);
     }
 
 }

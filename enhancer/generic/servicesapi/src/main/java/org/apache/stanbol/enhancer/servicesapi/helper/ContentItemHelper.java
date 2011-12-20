@@ -24,8 +24,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.commons.io.IOUtils;
+import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 
 
@@ -53,7 +58,7 @@ public class ContentItemHelper {
      * it.
      */
     public static UriRef ensureUri(ContentItem ci) {
-        String uri = ci.getId();
+        String uri = ci.getUri().getUnicodeString();
         if (!uri.startsWith("http://") && !uri.startsWith("urn:")) {
             uri = "urn:" + urlEncode(uri);
         }
@@ -125,23 +130,88 @@ public class ContentItemHelper {
         return buf.toString();
     }
 
-    public static UriRef makeDefaultUrn(byte[] content) {
-        return makeDefaultUri("urn:content-item-", content);
+    public static UriRef makeDefaultUrn(Blob blob) {
+        return makeDefaultUri("urn:content-item-", blob.getStream());
     }
-
-    public static UriRef makeDefaultUri(String baseUri, byte[] content) {
+    public static UriRef makeDefaultUrn(InputStream in) {
+        return makeDefaultUri("urn:content-item-", in);
+    }
+    public static UriRef makeDefaultUrn(byte[] data){
+        return makeDefaultUri("urn:content-item-", new ByteArrayInputStream(data));
+    }
+    public static UriRef makeDefaultUri(String baseUri, Blob blob) {
+        return makeDefaultUri(baseUri, blob.getStream());
+    }
+    public static UriRef makeDefaultUri(String baseUri, byte[] data) {
+        return makeDefaultUri(baseUri, new ByteArrayInputStream(data));
+    }
+    public static UriRef makeDefaultUri(String baseUri, InputStream in) {
         // calculate an ID based on the digest of the content
         if (!baseUri.startsWith("urn:") && !baseUri.endsWith("/")) {
             baseUri += "/";
         }
-        String hexDigest = "";
+        String hexDigest;
         try {
-            hexDigest = streamDigest(new ByteArrayInputStream(content), null, SHA1);
+            hexDigest = streamDigest(in, null, SHA1);
         } catch (IOException e) {
-            // this is not going to happen since output stream is null and the
-            // input data is already loaded in memory
+            throw new IllegalStateException("Unable to read content for calculating" +
+            		"the hexDigest of the parsed content as used for the default URI" +
+            		"of an ContentItem!",e);
         }
+        IOUtils.closeQuietly(in);
         return new UriRef(baseUri + SHA1.toLowerCase() + "-" + hexDigest);
     }
-
+    /**
+     * This parses and validates the mime-type and parameters from the
+     * parsed mimetype string based on the definition as defined in
+     * <a href="http://www.ietf.org/rfc/rfc2046.txt">rfc2046</a>. 
+     * <p>
+     * The mime-type is stored as value for the <code>null</code>
+     * key. Parameter keys are converted to lower case. Values are stored as
+     * defined in the parsed media type. Parameters with empty key, empty or no
+     * values are ignored.
+     * @param mimeTypeString the media type formatted as defined by 
+     * <a href="http://www.ietf.org/rfc/rfc2046.txt">rfc2046</a>
+     * @return A map containing the mime-type under the <code>null</code> key and 
+     * all parameters with lower case keys and values.
+     * @throws IllegalArgumentException if the parsed mimeTypeString is
+     * <code>null</code>, empty or the parsed mime-type is empty, does not define
+     * non empty '{type}/{sub-type}' or uses a wildcard for the type or sub-type.
+     */
+    public static Map<String,String> parseMimeType(String mimeTypeString){
+        String mimeType;
+        if(mimeTypeString == null || mimeTypeString.isEmpty()){
+            throw new IllegalArgumentException("The parsed mime-type MUST NOT be NULL nor empty!");
+        }
+        Map<String,String> parsed = new HashMap<String,String>();
+        StringTokenizer tokens = new StringTokenizer(mimeTypeString, ";");
+        mimeType = tokens.nextToken(); //the first token is the mimeType
+        if(mimeType.isEmpty()){
+            throw new IllegalArgumentException("Parsed mime-type MUST NOT be empty" +
+                    "(mimeType='"+mimeType+"')!");
+        }
+        if(mimeType.indexOf('*')>=0){
+            throw new IllegalArgumentException("Parsed mime-type MUST NOT use" +
+                    "Wildcards (mimeType='"+mimeType+"')!");
+        }
+        String[] typeSubType = mimeType.split("/");
+        if(typeSubType.length != 2 || typeSubType[0].isEmpty() || typeSubType[1].isEmpty()) {
+            throw new IllegalArgumentException("Parsed mime-type MUST define '{type}/{sub-type}'" +
+            		"and both MUST NOT be empty(mimeType='"+mimeType+"')!");
+        }
+        parsed.put(null, mimeType);
+        while(tokens.hasMoreTokens()){ //parse the parameters (if any)
+            String parameter = tokens.nextToken();
+            //check if the parameter is valid formated and has a non empty value
+            int nameValueSeparator = parameter.indexOf('=');
+            if(nameValueSeparator>0 && parameter.length() > nameValueSeparator+2){
+                //keys are case insensitive (we use lower case)
+                String key = parameter.substring(0,nameValueSeparator).toLowerCase();
+                if(!parsed.containsKey(key)){ //do not override existing keys
+                    parsed.put(key,parameter.substring(nameValueSeparator+1));
+                }
+            }
+        }
+        return parsed;
+    }
 }

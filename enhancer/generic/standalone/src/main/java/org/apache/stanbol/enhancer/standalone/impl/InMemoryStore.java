@@ -79,11 +79,11 @@ public class InMemoryStore implements Store {
     public String put(ContentItem ci) {
         synchronized (data) {
 
-            data.put(ci.getId(), ci);
+            data.put(ci.getUri().getUnicodeString(), ci);
 
             // remove any previously stored data about ci
             MGraph g = getEnhancementGraph();
-            UriRef uri = new UriRef(ci.getId());
+            UriRef uri = ci.getUri();
             Iterator<Triple> toRemove = g.filter(uri, null, null);
             while (toRemove.hasNext()) {
                 toRemove.next();
@@ -99,7 +99,7 @@ public class InMemoryStore implements Store {
             // accumulate all triples recently collected
             getEnhancementGraph().addAll(ci.getMetadata());
         }
-        return ci.getId();
+        return ci.getUri().getUnicodeString();
     }
 
     @Override
