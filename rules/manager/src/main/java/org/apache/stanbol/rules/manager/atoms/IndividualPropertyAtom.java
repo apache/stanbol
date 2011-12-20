@@ -226,45 +226,57 @@ public class IndividualPropertyAtom extends CoreAtom {
 
     @Override
     public JenaClauseEntry toJenaClauseEntry(JenaVariableMap jenaVariableMap) {
-
-        String subject = argument1.toString();
-
-        Node subjectNode = null;
-        if (subject.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")) {
-            subject = "?" + subject.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
-
-            // subjectNode = Node_RuleVariable.createVariable(subject);
-            subjectNode = new Node_RuleVariable(subject, jenaVariableMap.getVariableIndex(subject));
-        } else {
-            subjectNode = Node_RuleVariable.createURI(subject);
-        }
-
-        String object = argument2.toString();
-        Node objectNode = null;
-        if (object.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")) {
-            object = subject.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
-            if (object.startsWith("?")) {
-                object = object.substring(1);
-            }
-
-            object = "?" + object;
-            objectNode = new Node_RuleVariable(object, jenaVariableMap.getVariableIndex(object));
-        } else {
-            objectNode = Node_RuleVariable.createURI(object);
-        }
-
-        String predicate = objectProperty.toString();
-        Node predicateNode = null;
-        if (predicate.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")) {
-            predicate = predicate.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
-            // predicateNode = Node_RuleVariable.createVariable(predicate);
-            predicateNode = new Node_RuleVariable(predicate, 2);
-        } else {
-            predicateNode = Node_RuleVariable.createURI(predicate);
-        }
-
-        ClauseEntry clauseEntry = new TriplePattern(subjectNode, predicateNode, objectNode);
-        return new JenaClauseEntryImpl(clauseEntry, jenaVariableMap);
-    }
+		
+		String subject = argument1.toString();
+		
+		Node subjectNode = null;
+		if(subject.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
+			subject = "?" + subject.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			
+			//subjectNode = Node_RuleVariable.createVariable(subject);
+			subjectNode = new Node_RuleVariable(subject, jenaVariableMap.getVariableIndex(subject));
+		}
+		else{
+			if(subject.startsWith("<") && subject.endsWith(">")){
+				subject = subject.substring(1, subject.length()-1);
+			}
+			subjectNode = Node_RuleVariable.createURI(subject);	
+		}
+		
+		String object = argument2.toString();
+		Node objectNode = null;
+		if(object.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
+			object = subject.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			if(object.startsWith("?")){
+				object = object.substring(1);
+			}
+			
+			object = "?" + object;
+			objectNode = new Node_RuleVariable(object, jenaVariableMap.getVariableIndex(object));
+		}
+		else{
+			if(object.startsWith("<") && object.endsWith(">")){
+				object = object.substring(1, object.length()-1);
+			}
+			objectNode = Node_RuleVariable.createURI(object);
+		}
+		
+		String predicate = objectProperty.toString();
+		Node predicateNode = null;
+		if(predicate.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
+			predicate = predicate.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
+			//predicateNode = Node_RuleVariable.createVariable(predicate);
+			predicateNode = new Node_RuleVariable(predicate, 2);
+		}
+		else{
+			if(predicate.startsWith("<") && predicate.endsWith(">")){
+				predicate = predicate.substring(1, predicate.length()-1);
+			}
+			predicateNode = Node_RuleVariable.createURI(predicate);
+		}
+		
+		ClauseEntry clauseEntry = new TriplePattern(subjectNode, predicateNode, objectNode);
+		return new JenaClauseEntryImpl(clauseEntry, jenaVariableMap);
+	}
 
 }

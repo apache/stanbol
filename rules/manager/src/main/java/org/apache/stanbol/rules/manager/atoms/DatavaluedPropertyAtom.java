@@ -321,6 +321,9 @@ public class DatavaluedPropertyAtom extends CoreAtom {
 			subjectNode = new Node_RuleVariable(subject, jenaVariableMap.getVariableIndex(subject));
 		}
 		else{
+			if(subject.startsWith("<") && subject.endsWith(">")){
+				subject = subject.substring(1, subject.length()-1);
+			}
 			subjectNode = Node_RuleVariable.createURI(subject);	
 		}
 		
@@ -334,6 +337,9 @@ public class DatavaluedPropertyAtom extends CoreAtom {
 			objectNode = new Node_RuleVariable(object, jenaVariableMap.getVariableIndex(object));
 		}
 		else{
+			if(object.startsWith("<") && object.endsWith(">")){
+				object = object.substring(1, object.length()-1);
+			}
 			objectNode = Node_RuleVariable.createLiteral(object);
 		}
 		
@@ -344,6 +350,9 @@ public class DatavaluedPropertyAtom extends CoreAtom {
 			predicateNode = Node_RuleVariable.createVariable(predicate);
 		}
 		else{
+			if(predicate.startsWith("<") && predicate.endsWith(">")){
+				predicate = predicate.substring(1, predicate.length()-1);
+			}
 			predicateNode = Node_RuleVariable.createURI(predicate);
 		}
 		

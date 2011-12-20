@@ -34,6 +34,7 @@ import org.semanticweb.owlapi.model.SWRLAtom;
 import org.semanticweb.owlapi.model.SWRLIArgument;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Node_URI;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.reasoner.TriplePattern;
@@ -223,8 +224,12 @@ public class ClassAtom extends CoreAtom {
 			classNode = Node_RuleVariable.createVariable(object);
 		}
 		else{
+			if(object.startsWith("<") && object.endsWith(">")){
+				object = object.substring(1, object.length()-1);
+			}
 			classNode = Node_RuleVariable.createURI(object);
 		}
+		
 		ClauseEntry clauseEntry = new TriplePattern(argumnetNode, Node_RuleVariable.createURI(RDF.type.getURI()), classNode);
 		return new JenaClauseEntryImpl(clauseEntry, jenaVariableMap);
 	}
