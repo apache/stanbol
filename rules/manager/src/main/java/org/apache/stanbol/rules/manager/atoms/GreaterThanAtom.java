@@ -34,18 +34,12 @@ import org.semanticweb.owlapi.model.SWRLBuiltInAtom;
 import org.semanticweb.owlapi.model.SWRLDArgument;
 import org.semanticweb.owlapi.vocab.SWRLBuiltInsVocabulary;
 
-import com.hp.hpl.jena.datatypes.RDFDatatype;
-import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.reasoner.rulesys.Builtin;
 import com.hp.hpl.jena.reasoner.rulesys.BuiltinRegistry;
-import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
 import com.hp.hpl.jena.reasoner.rulesys.Functor;
 import com.hp.hpl.jena.reasoner.rulesys.Node_RuleVariable;
-import com.hp.hpl.jena.reasoner.rulesys.builtins.GreaterThan;
 import com.hp.hpl.jena.vocabulary.XSD;
 
 
@@ -254,7 +248,6 @@ public class GreaterThanAtom extends ComparisonAtom {
 		String arg1 = argument1.toString();
 		if(arg1.startsWith("http://kres.iks-project.eu/ontology/meta/variables#")){
 			arg1 = "?" + arg1.replace("http://kres.iks-project.eu/ontology/meta/variables#", "");
-			//arg1Node = Node_RuleVariable.createVariable(arg1);
 			arg1Node = new Node_RuleVariable(arg1, jenaVariableMap.getVariableIndex(arg1));
 		}
 		else{
@@ -274,8 +267,6 @@ public class GreaterThanAtom extends ComparisonAtom {
 		
 		nodes.add(arg1Node);
 		nodes.add(arg2Node);
-		
-		
 		
 		return new JenaClauseEntryImpl(new Functor("greaterThan", nodes, new BuiltinRegistry()), jenaVariableMap);
 		

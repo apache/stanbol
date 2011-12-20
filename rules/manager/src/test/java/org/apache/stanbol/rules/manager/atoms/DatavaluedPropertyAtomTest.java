@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.stanbol.rules.base.api.RuleAtom;
+import org.apache.stanbol.rules.base.api.URIResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -28,42 +29,41 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import com.hp.hpl.jena.vocabulary.XSD;
 
-public class LessThanAtomTest extends AtomTest {
+public class DatavaluedPropertyAtomTest extends AtomTest {
 
-    private Object variable1;
-    private Object variable2;
+    private URIResource datatypeProperty;
+    private URIResource argument1;
 
-    private Object literal1;
-    private Object literal2;
-
-    private Object typedLiteral1;
-    private Object typedLiteral2;
+    // argument2
+    private Object variable;
+    private Object literal;
+    private Object typedLiteral;
 
     @Before
     public void setup() {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         this.factory = manager.getOWLDataFactory();
 
-        variable1 = new VariableAtom(URI.create("http://kres.iks-project.eu/ontology/meta/variables#x"),
-                false);
-        variable2 = new VariableAtom(URI.create("http://kres.iks-project.eu/ontology/meta/variables#y"),
-                false);
+        datatypeProperty = new ResourceAtom(
+                URI.create("http://kres.iks-project.eu/ontology/meta/resource#hasTest"));
+        argument1 = new VariableAtom(URI.create("http://kres.iks-project.eu/ontology/meta/variables#x"), true);
 
-        literal1 = "some text";
-        literal2 = "some other text";
+        variable = new VariableAtom(URI.create("http://kres.iks-project.eu/ontology/meta/variables#x"), false);
+
+        literal = "some text";
 
         try {
-            typedLiteral1 = new TypedLiteralAtom(3.0, new ResourceAtom(new URI(XSD.xdouble.getURI())));
-            typedLiteral2 = new TypedLiteralAtom(5.0, new ResourceAtom(new URI(XSD.xdouble.getURI())));
+            typedLiteral = new TypedLiteralAtom(3.0, new ResourceAtom(new URI(XSD.xdouble.getURI())));
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
+
     }
 
     @Test
     public void testValidAtomWithVariableArguments() {
 
-        RuleAtom ruleAtom = new LessThanAtom(variable1, variable2);
+        RuleAtom ruleAtom = new DatavaluedPropertyAtom(datatypeProperty, argument1, variable);
 
         execTest(ruleAtom);
 
@@ -72,7 +72,7 @@ public class LessThanAtomTest extends AtomTest {
     @Test
     public void testValidAtomWithLiteralArguments() {
 
-        RuleAtom ruleAtom = new LessThanAtom(literal1, literal2);
+        RuleAtom ruleAtom = new DatavaluedPropertyAtom(datatypeProperty, argument1, literal);
 
         execTest(ruleAtom);
     }
@@ -80,7 +80,7 @@ public class LessThanAtomTest extends AtomTest {
     @Test
     public void testValidAtomWithTypedLiteralArguments() {
 
-        RuleAtom ruleAtom = new LessThanAtom(typedLiteral1, typedLiteral2);
+        RuleAtom ruleAtom = new DatavaluedPropertyAtom(datatypeProperty, argument1, typedLiteral);
 
         execTest(ruleAtom);
     }

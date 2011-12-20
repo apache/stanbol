@@ -102,9 +102,9 @@ public class DatavaluedPropertyAtom extends CoreAtom {
 				Object value = kReSTypeLiteral.getValue();
 				String xsdType = kReSTypeLiteral.getXsdType().toString();
 				
-				System.out.println("TYPED LITERAL : ");
-				System.out.println("        value : "+value);
-				System.out.println("        xsd type : "+xsdType);
+//				System.out.println("TYPED LITERAL : ");
+//				System.out.println("        value : "+value);
+//				System.out.println("        xsd type : "+xsdType);
 				
 				if(value instanceof String){
 					arg2 = value + "^^" + xsdType;
@@ -113,7 +113,7 @@ public class DatavaluedPropertyAtom extends CoreAtom {
 					arg2 = ((Integer) value).toString()+"^^" + xsdType;
 				}
 				
-				System.out.println("ARG 2 : "+arg2);
+//				System.out.println("ARG 2 : "+arg2);
 			}
 			else if(argument2 instanceof StringFunctionAtom){
 				arg2 = ((StringFunctionAtom) argument2).toSPARQL().getObject();

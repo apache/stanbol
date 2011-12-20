@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package org.apache.stanbol.rules.manager.atoms;
 
@@ -28,65 +28,62 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import com.hp.hpl.jena.vocabulary.XSD;
 
-
 public class GreaterThanAtomTest extends AtomTest {
 
-	private Object variable1;
-	private Object variable2;
-	
-	private Object literal1;
-	private Object literal2;
-	
-	
-	private Object typedLiteral1;
-	private Object typedLiteral2;
-	
-	@Before
-	public void setup() {
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		this.factory = manager.getOWLDataFactory();
-		
-		variable1 = new VariableAtom(URI.create("http://kres.iks-project.eu/ontology/meta/variables#x"), false);
-		variable2 = new VariableAtom(URI.create("http://kres.iks-project.eu/ontology/meta/variables#y"), false);
-		
-		
-		literal1 = "some text";
-		literal2 = "some other text";
-		
-		try {
-			typedLiteral1 = new TypedLiteralAtom(3.0, new ResourceAtom(new URI(XSD.xdouble.getURI())));
-			typedLiteral2 = new TypedLiteralAtom(5.0, new ResourceAtom(new URI(XSD.xdouble.getURI())));
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	@Test
-	public void testValidAtomWithVariableArguments() {
-		
-		RuleAtom ruleAtom = new GreaterThanAtom(variable1, variable2);
-		
-		execTest(ruleAtom);
-		
-	}
-	
-	
-	@Test
-	public void testValidAtomWithLiteralArguments() {
-		
-		RuleAtom ruleAtom = new GreaterThanAtom(literal1, literal2);
-		
-		execTest(ruleAtom);
-	}
-	
-	
-	@Test
-	public void testValidAtomWithTypedLiteralArguments() {
-		
-		RuleAtom ruleAtom = new GreaterThanAtom(typedLiteral1, typedLiteral2);
-		
-		execTest(ruleAtom);
-	}
-	
-	
+    private Object variable1;
+    private Object variable2;
+
+    private Object literal1;
+    private Object literal2;
+
+    private Object typedLiteral1;
+    private Object typedLiteral2;
+
+    @Before
+    public void setup() {
+        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+        this.factory = manager.getOWLDataFactory();
+
+        variable1 = new VariableAtom(URI.create("http://kres.iks-project.eu/ontology/meta/variables#x"),
+                false);
+        variable2 = new VariableAtom(URI.create("http://kres.iks-project.eu/ontology/meta/variables#y"),
+                false);
+
+        literal1 = "some text";
+        literal2 = "some other text";
+
+        try {
+            typedLiteral1 = new TypedLiteralAtom(3.0, new ResourceAtom(new URI(XSD.xdouble.getURI())));
+            typedLiteral2 = new TypedLiteralAtom(5.0, new ResourceAtom(new URI(XSD.xdouble.getURI())));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Test
+    public void testValidAtomWithVariableArguments() {
+
+        RuleAtom ruleAtom = new GreaterThanAtom(variable1, variable2);
+
+        execTest(ruleAtom);
+
+    }
+
+    @Test
+    public void testValidAtomWithLiteralArguments() {
+
+        RuleAtom ruleAtom = new GreaterThanAtom(literal1, literal2);
+
+        execTest(ruleAtom);
+    }
+
+    @Test
+    public void testValidAtomWithTypedLiteralArguments() {
+
+        RuleAtom ruleAtom = new GreaterThanAtom(typedLiteral1, typedLiteral2);
+
+        execTest(ruleAtom);
+    }
+
 }
