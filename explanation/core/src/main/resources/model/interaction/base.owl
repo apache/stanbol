@@ -13,6 +13,7 @@
     <!ENTITY description "http://www.ontologydesignpatterns.org/cp/owl/description.owl#" >
     <!ENTITY participation "http://www.ontologydesignpatterns.org/cp/owl/participation.owl#" >
     <!ENTITY codkernel "http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#" >
+    <!ENTITY cpannotationschema "http://www.ontologydesignpatterns.org/schemas/cpannotationschema.owl#" >
 ]>
 
 
@@ -24,15 +25,19 @@
      xmlns:interaction="http://stanbol.apache.org/ontologies/models/interaction#"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      xmlns:codkernel="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#"
+     xmlns:cpannotationschema="http://www.ontologydesignpatterns.org/schemas/cpannotationschema.owl#"
      xmlns:description="http://www.ontologydesignpatterns.org/cp/owl/description.owl#"
      xmlns:participation="http://www.ontologydesignpatterns.org/cp/owl/participation.owl#"
-     xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
     <owl:Ontology rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl">
         <owl:versionInfo xml:lang="en">0.1 : created by Alessandro Adamou
-0.1.1 : added OWL restrictions</owl:versionInfo>
+0.1.1 : added OWL restrictions
+0.2 : simplified codolight alignments, replaced AgentCategory with dul:Role, added class unit tests</owl:versionInfo>
         <rdfs:comment xml:lang="en">An ontology on user interaction that can be used to model interaction patterns and log discourse traces. Its usage can be configured in environments where interacting agents are known or simple placeholders for User and System can be used instead.</rdfs:comment>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl"/>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/schemas/cpannotationschema.owl"/>
     </owl:Ontology>
     
 
@@ -218,7 +223,7 @@
     <!-- http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#involvesElement -->
 
     <owl:ObjectProperty rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#involvesElement">
-        <rdfs:label xml:lang="en">affectsWidget</rdfs:label>
+        <rdfs:label xml:lang="en">involves element</rdfs:label>
         <rdfs:range rdf:resource="&interaction;UIElement"/>
         <rdfs:subPropertyOf rdf:resource="&owl;topObjectProperty"/>
     </owl:ObjectProperty>
@@ -341,20 +346,10 @@ This property specializes hasEventDate from DOLCE+DnS UltraLite because, unlike 
     
 
 
-    <!-- http://stanbol.apache.org/ontologies/models/interaction#AgentCategory -->
-
-    <owl:Class rdf:about="&interaction;AgentCategory">
-        <rdfs:label xml:lang="en">Agent category</rdfs:label>
-        <rdfs:subClassOf rdf:resource="&DUL;Abstract"/>
-        <rdfs:comment xml:lang="en">Classifies agents in interactive systems</rdfs:comment>
-    </owl:Class>
-    
-
-
     <!-- http://stanbol.apache.org/ontologies/models/interaction#AncillaryInteractionPattern -->
 
     <owl:Class rdf:about="&interaction;AncillaryInteractionPattern">
-        <rdfs:label xml:lang="en">AncillaryInteractionPattern</rdfs:label>
+        <rdfs:label xml:lang="en">Ancillary interaction pattern</rdfs:label>
         <rdfs:subClassOf rdf:resource="&interaction;InteractionPattern"/>
         <rdfs:subClassOf>
             <owl:Restriction>
@@ -362,6 +357,13 @@ This property specializes hasEventDate from DOLCE+DnS UltraLite because, unlike 
                 <owl:someValuesFrom rdf:resource="&interaction;InteractionPattern"/>
             </owl:Restriction>
         </rdfs:subClassOf>
+        <cpannotationschema:hasUnitTest xml:lang="en">PREFIX interaction: &lt;http://stanbol.apache.org/ontologies/models/interaction#&gt;
+SELECT ?d
+WHERE {
+  ?p1 a interaction:InteractionPattern .
+  ?p1 interaction:boundTo ?p2 .
+  ?p2 a interaction:InteractionPattern
+}</cpannotationschema:hasUnitTest>
     </owl:Class>
     
 
@@ -392,17 +394,25 @@ This property specializes hasEventDate from DOLCE+DnS UltraLite because, unlike 
         <rdfs:subClassOf rdf:resource="&DUL;Event"/>
         <rdfs:subClassOf>
             <owl:Restriction>
+                <owl:onProperty rdf:resource="&DUL;isPartOf"/>
+                <owl:someValuesFrom rdf:resource="&interaction;Discourse"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
                 <owl:onProperty rdf:resource="&interaction;occursAt"/>
                 <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
                 <owl:onDataRange rdf:resource="&xsd;dateTime"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&DUL;isPartOf"/>
-                <owl:someValuesFrom rdf:resource="&interaction;Discourse"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
+        <cpannotationschema:hasUnitTest rdf:datatype="&xsd;string">PREFIX dul: &lt;http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#&gt;
+PREFIX interaction: &lt;http://stanbol.apache.org/ontologies/models/interaction#&gt;
+SELECT ?d
+WHERE {
+  ?e a interaction:DiscourseEvent .
+  ?e1 interaction:issuedBy ?p .
+  { ?p a dul:Role } UNION  { ?p a interaction:Agent }
+}</cpannotationschema:hasUnitTest>
     </owl:Class>
     
 
@@ -436,7 +446,8 @@ This property specializes hasEventDate from DOLCE+DnS UltraLite because, unlike 
     <!-- http://stanbol.apache.org/ontologies/models/interaction#InteractionComponent -->
 
     <owl:Class rdf:about="&interaction;InteractionComponent">
-        <rdfs:label xml:lang="en">InteractionComponent</rdfs:label>
+        <rdfs:label xml:lang="en">interaction component</rdfs:label>
+        <rdfs:comment xml:lang="en">Anything that participates in some discourse event.</rdfs:comment>
     </owl:Class>
     
 
@@ -444,10 +455,11 @@ This property specializes hasEventDate from DOLCE+DnS UltraLite because, unlike 
     <!-- http://stanbol.apache.org/ontologies/models/interaction#InteractionPattern -->
 
     <owl:Class rdf:about="&interaction;InteractionPattern">
+        <owl:equivalentClass rdf:resource="&codkernel;InteractionPattern"/>
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&DUL;hasComponent"/>
-                <owl:someValuesFrom rdf:resource="&interaction;InteractionComponent"/>
+                <owl:someValuesFrom rdf:resource="&interaction;DiscourseEvent"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -459,10 +471,17 @@ This property specializes hasEventDate from DOLCE+DnS UltraLite because, unlike 
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&DUL;hasComponent"/>
-                <owl:someValuesFrom rdf:resource="&interaction;DiscourseEvent"/>
+                <owl:someValuesFrom rdf:resource="&interaction;InteractionComponent"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:comment xml:lang="en">Depending on the needed usage, types of interaction pattern can either subsume or instantiate this class, or both.</rdfs:comment>
+        <cpannotationschema:hasUnitTest xml:lang="en">PREFIX interaction: &lt;http://stanbol.apache.org/ontologies/models/interaction#&gt;
+SELECT ?d
+WHERE {
+  ?x a interaction:InteractionPattern .
+  ?x interaction:implements ?d .
+  ?d a interaction:Discourse
+}</cpannotationschema:hasUnitTest>
         <owl:disjointUnionOf rdf:parseType="Collection">
             <rdf:Description rdf:about="&interaction;AncillaryInteractionPattern"/>
             <rdf:Description rdf:about="&interaction;StandaloneInteractionPattern"/>
@@ -505,13 +524,13 @@ This property specializes hasEventDate from DOLCE+DnS UltraLite because, unlike 
         <rdfs:subClassOf rdf:resource="&DUL;Region"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&DUL;directlyFollows"/>
+                <owl:onProperty rdf:resource="&DUL;directlyPrecedes"/>
                 <owl:allValuesFrom rdf:resource="&interaction;PositionInDiscourse"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&DUL;directlyPrecedes"/>
+                <owl:onProperty rdf:resource="&DUL;directlyFollows"/>
                 <owl:allValuesFrom rdf:resource="&interaction;PositionInDiscourse"/>
             </owl:Restriction>
         </rdfs:subClassOf>
@@ -524,6 +543,14 @@ This property specializes hasEventDate from DOLCE+DnS UltraLite because, unlike 
     <owl:Class rdf:about="&interaction;StandaloneInteractionPattern">
         <rdfs:label xml:lang="en">StandaloneInteractionPattern</rdfs:label>
         <rdfs:subClassOf rdf:resource="&interaction;InteractionPattern"/>
+        <cpannotationschema:hasUnitTest xml:lang="en">PREFIX interaction: &lt;http://stanbol.apache.org/ontologies/models/interaction#&gt;
+SELECT ?d
+WHERE {
+  ?p1 a interaction:InteractionPattern .
+  ?p1 interaction:boundTo ?p2 .
+  ?p2 a interaction:InteractionPattern
+}</cpannotationschema:hasUnitTest>
+        <rdfs:comment xml:lang="en">Unit test must yield no results</rdfs:comment>
     </owl:Class>
     
 
@@ -606,23 +633,6 @@ This property specializes hasEventDate from DOLCE+DnS UltraLite because, unlike 
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&interaction;issuedBy"/>
-                <owl:allValuesFrom>
-                    <owl:Class>
-                        <owl:unionOf rdf:parseType="Collection">
-                            <rdf:Description rdf:about="&interaction;User"/>
-                            <owl:Class>
-                                <owl:oneOf rdf:parseType="Collection">
-                                    <rdf:Description rdf:about="&interaction;User"/>
-                                </owl:oneOf>
-                            </owl:Class>
-                        </owl:unionOf>
-                    </owl:Class>
-                </owl:allValuesFrom>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&interaction;issuedBy"/>
                 <owl:someValuesFrom>
                     <owl:Class>
                         <owl:unionOf rdf:parseType="Collection">
@@ -635,6 +645,23 @@ This property specializes hasEventDate from DOLCE+DnS UltraLite because, unlike 
                         </owl:unionOf>
                     </owl:Class>
                 </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&interaction;issuedBy"/>
+                <owl:allValuesFrom>
+                    <owl:Class>
+                        <owl:unionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="&interaction;User"/>
+                            <owl:Class>
+                                <owl:oneOf rdf:parseType="Collection">
+                                    <rdf:Description rdf:about="&interaction;User"/>
+                                </owl:oneOf>
+                            </owl:Class>
+                        </owl:unionOf>
+                    </owl:Class>
+                </owl:allValuesFrom>
             </owl:Restriction>
         </rdfs:subClassOf>
     </owl:Class>
@@ -653,7 +680,7 @@ This property specializes hasEventDate from DOLCE+DnS UltraLite because, unlike 
                     <owl:Class>
                         <owl:unionOf rdf:parseType="Collection">
                             <rdf:Description rdf:about="&interaction;Agent"/>
-                            <rdf:Description rdf:about="&interaction;AgentCategory"/>
+                            <rdf:Description rdf:about="&DUL;Role"/>
                         </owl:unionOf>
                     </owl:Class>
                 </owl:onClass>
@@ -691,9 +718,7 @@ This property specializes hasEventDate from DOLCE+DnS UltraLite because, unlike 
 
     <!-- http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#InteractionPattern -->
 
-    <owl:Class rdf:about="&codkernel;InteractionPattern">
-        <rdfs:subClassOf rdf:resource="&interaction;InteractionPattern"/>
-    </owl:Class>
+    <owl:Class rdf:about="&codkernel;InteractionPattern"/>
     
 
 
@@ -788,7 +813,7 @@ This property specializes hasEventDate from DOLCE+DnS UltraLite because, unlike 
     <!-- http://stanbol.apache.org/ontologies/models/interaction#System -->
 
     <owl:NamedIndividual rdf:about="&interaction;System">
-        <rdf:type rdf:resource="&interaction;AgentCategory"/>
+        <rdf:type rdf:resource="&DUL;Role"/>
         <rdfs:label xml:lang="en">System</rdfs:label>
     </owl:NamedIndividual>
     
@@ -797,7 +822,7 @@ This property specializes hasEventDate from DOLCE+DnS UltraLite because, unlike 
     <!-- http://stanbol.apache.org/ontologies/models/interaction#User -->
 
     <owl:NamedIndividual rdf:about="&interaction;User">
-        <rdf:type rdf:resource="&interaction;AgentCategory"/>
+        <rdf:type rdf:resource="&DUL;Role"/>
         <rdfs:label xml:lang="en">User</rdfs:label>
     </owl:NamedIndividual>
     
@@ -841,16 +866,16 @@ This property specializes hasEventDate from DOLCE+DnS UltraLite because, unlike 
     <rdf:Description>
         <rdf:type rdf:resource="&owl;AllDifferent"/>
         <owl:distinctMembers rdf:parseType="Collection">
-            <rdf:Description rdf:about="&interaction;Strategy.PULL"/>
-            <rdf:Description rdf:about="&interaction;Strategy.PUSH"/>
+            <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status.COMPLETE"/>
+            <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status.HOLD_USER"/>
+            <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status.PROMPTING"/>
         </owl:distinctMembers>
     </rdf:Description>
     <rdf:Description>
         <rdf:type rdf:resource="&owl;AllDifferent"/>
         <owl:distinctMembers rdf:parseType="Collection">
-            <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status.COMPLETE"/>
-            <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status.HOLD_USER"/>
-            <rdf:Description rdf:about="http://stanbol.apache.org/ontologies/models/interaction/patterns/base.owl#Status.PROMPTING"/>
+            <rdf:Description rdf:about="&interaction;Strategy.PULL"/>
+            <rdf:Description rdf:about="&interaction;Strategy.PUSH"/>
         </owl:distinctMembers>
     </rdf:Description>
 </rdf:RDF>

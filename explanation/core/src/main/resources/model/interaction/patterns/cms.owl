@@ -121,18 +121,18 @@
     <!-- http://stanbol.apache.org/ontologies/interaction/patterns/cms.owl#InformationAugmentation -->
 
     <owl:Class rdf:about="http://stanbol.apache.org/ontologies/interaction/patterns/cms.owl#InformationAugmentation">
-        <rdfs:label xml:lang="en">InformationAugmentation</rdfs:label>
+        <rdfs:label xml:lang="en">Information augmentation</rdfs:label>
         <rdfs:subClassOf rdf:resource="&interaction;Discourse"/>
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&DUL;hasComponent"/>
-                <owl:someValuesFrom rdf:resource="http://stanbol.apache.org/ontologies/interaction/patterns/cms.owl#Query"/>
+                <owl:someValuesFrom rdf:resource="http://stanbol.apache.org/ontologies/interaction/patterns/cms.owl#ProvisionOfResults"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&DUL;hasComponent"/>
-                <owl:someValuesFrom rdf:resource="http://stanbol.apache.org/ontologies/interaction/patterns/cms.owl#ProvisionOfResults"/>
+                <owl:someValuesFrom rdf:resource="http://stanbol.apache.org/ontologies/interaction/patterns/cms.owl#Query"/>
             </owl:Restriction>
         </rdfs:subClassOf>
     </owl:Class>
