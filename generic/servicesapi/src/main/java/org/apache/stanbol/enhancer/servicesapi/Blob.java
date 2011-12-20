@@ -16,29 +16,33 @@
 */
 package org.apache.stanbol.enhancer.servicesapi;
 
+import java.io.InputStream;
+import java.util.Map;
+
 /**
- * Enhancement Engine should throw this exception when the provided Content Item
- * does not match there declared expectation (i.e. a malformed JPEG file).
- *
- * @author ogrisel
+ * represents a finite sequence of bytes associated to a mime-type
  */
-public class InvalidContentException extends EngineException {
+public interface Blob {
 
-    private static final long serialVersionUID = 1L;
-
-    public InvalidContentException(String message) {
-        super(message);
-    }
-
-    public InvalidContentException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvalidContentException(EnhancementEngine ee, ContentItem ci,
-            Throwable cause) {
-        super(String.format("'%s' failed to process invalid content item '%s'"
-                + " with type '%s': %s", ee.getClass().getSimpleName(),
-                ci.getUri().getUnicodeString(), ci.getMimeType(), cause.getMessage()), cause);
-    }
-
+	/**
+	 * Getter for the mime-type of the content. The returned string MUST only
+	 * contain the "{type}/{sub-type}". No wildcards MUST BE used.
+	 * @return the mime-type of his blog
+	 */
+	String getMimeType();
+	
+	/**
+	 * @return a stream of the data of this blog
+	 */
+	InputStream getStream();
+	/**
+	 * Additional parameters parsed with the mime-type. Typically the 'charset'
+	 * used to encode text is parsed as a parameter.
+	 * @return read only map with additional parameter for the used mime-type.
+	 */
+    Map<String,String> getParameter();
+	/**
+	 * The size of the Content in bytes or a negative value if not known
+	 */
+    long getContentLength();
 }

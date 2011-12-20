@@ -74,15 +74,15 @@ public class WeightedJobManager implements EnhancementJobManager {
             long startEngine = System.currentTimeMillis();
             if (engine.canEnhance(ci) == EnhancementEngine.CANNOT_ENHANCE) {
                 log.debug("[{}] cannot be enhanced by engine [{}], skipping",
-                        ci.getId(), engine);
+                        ci.getUri().getUnicodeString(), engine);
             } else {
                 // TODO should handle sync/async enhancing. All sync for now.
                 engine.computeEnhancements(ci);
                 log.debug("ContentItem [{}] enhanced by engine [{}] in {}ms",
-                        new Object[]{ci.getId(), engine,System.currentTimeMillis()-startEngine});
+                        new Object[]{ci.getUri().getUnicodeString(), engine,System.currentTimeMillis()-startEngine});
             }
         }
-        log.debug("ContentItem [{}] enhanced in {}ms",ci.getId(),(System.currentTimeMillis()-start));
+        log.debug("ContentItem [{}] enhanced in {}ms",ci.getUri().getUnicodeString(),(System.currentTimeMillis()-start));
     }
     
     @Override

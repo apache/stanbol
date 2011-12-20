@@ -38,6 +38,7 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EntityAnnotation;
 import org.apache.stanbol.enhancer.servicesapi.TextAnnotation;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryContentItem;
 import org.apache.stanbol.enhancer.servicesapi.helper.RdfEntityFactory;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.junit.Test;
@@ -55,20 +56,14 @@ public class TestEnhancementInterfaces {
     public static final UriRef TEST_ENHANCEMENT_ENGINE_URI = new UriRef("urn:test:dummyEnhancementEngine");
 
     public static ContentItem wrapAsContentItem(final String id, final String text) {
-        return new ContentItem() {
-            SimpleMGraph metadata = new SimpleMGraph();
-            public InputStream getStream() { return new ByteArrayInputStream(text.getBytes());}
-            public String getMimeType() { return "text/plain"; }
-            public MGraph getMetadata() { return metadata; }
-            public String getId() { return id; }
-        };
+    	return new InMemoryContentItem(id, text, "text/plain");
     }
 
     @Test
     public void testEnhancementInterfaces() throws Exception {
         ContentItem ci = wrapAsContentItem("urn:contentItem-"
                 + EnhancementEngineHelper.randomUUID(),SINGLE_SENTENCE);
-        UriRef ciUri = new UriRef(ci.getId());
+        UriRef ciUri = new UriRef(ci.getUri().getUnicodeString());
         RdfEntityFactory factory = RdfEntityFactory.createInstance(ci.getMetadata());
         long start = System.currentTimeMillis();
         //create an Text Annotation representing an extracted Person

@@ -16,88 +16,114 @@
 */
 package org.apache.stanbol.enhancer.servicesapi.helper;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Map;
 
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.commons.io.IOUtils;
-import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.Blob;
 
 /**
- * A ContentItem retrieving its content and MediaType by dereferencing a given URI.
+ * A ContentItem retrieving its content and MediaType by dereferencing a given 
+ * URI. After the content is loaded from the remote server it is cached 
+ * {@link InMemoryBlob in-memory}.
  * 
  * After construction the <code>metadata</code> graph is empty.
  *
  */
 /*
- * The current implementation keeps the content in memory after the firts connection 
+ * The current implementation keeps the content in memory after the first connection 
  * to the remote server. 
  */
-public class WebContentItem implements ContentItem {
-	
-	private final MGraph metadata = new SimpleMGraph();
-	private final URL url;
-	private boolean dereferenced = false;
-	private byte[] data;
-	private String mimeType;
+public class WebContentItem extends ContentItemImpl {
 	
 	/**
-	 * Creates an instance for a given URL
+	 * Creates an instance for a given URL and uses a {@link SimpleMGraph} to
+	 * store metadata in memory.
 	 * 
 	 * @param url the dereferenceable URI
 	 */
-	public WebContentItem(URL url) {
-		this.url = url;
-	}
-
-	@Override
-	public String getId() {
-		return url.toString();
-	}
-
-	@Override
-	public InputStream getStream() {
-		if (!dereferenced) {
-			dereference();
-		}
-		return new ByteArrayInputStream(data);
-	}
-
-	@Override
-	public String getMimeType() {
-		if (!dereferenced) {
-			dereference();
-		}
-		return mimeType;
-	}
-
-	@Override
-	public MGraph getMetadata() {
-		return metadata;
+    public WebContentItem(URL url) {
+        this(url,null);
+    }
+    /**
+     * Creates an instance for a given URL and an existing {@link MGraph} to
+     * store the metadata.
+     * @param url the dereferenceable URI
+     * @param metadata the {@link MGraph} to store the metadata
+     */
+	public WebContentItem(URL url, MGraph metadata) {
+		super(new UriRef(url.toString()), new UrlBlob(url),
+		    metadata == null ? new SimpleMGraph() : metadata);
 	}
 	
-	private synchronized void dereference() {
-		//checking again in the synchronized section
-		if (!dereferenced) {
-			URLConnection uc;
-			try {
-				uc = url.openConnection();
-				data = IOUtils.toByteArray(uc.getInputStream());
-	            mimeType = uc.getContentType();
-	            if (mimeType == null) {
-	                mimeType = "application/octet-stream";
-	            } else {
-	                // Keep only first part of content-types like text/plain ; charset=UTF-8
-	                mimeType = mimeType.split(";")[0].trim();
-	            }
-	            dereferenced = true;
-			} catch (IOException e) {
-				throw new RuntimeException("Exception derefereing URI "+url, e);
-			}
-		}
+	/**
+	 * Blob implementation that dereferences the parsed URL on the first
+	 * access to the Blob. The downloaded content is stored within an
+	 * {@link InMemoryBlob}
+	 *
+	 */
+	private static class UrlBlob implements Blob {
+
+	    private Blob dereferenced;
+        private final URL url;
+        protected UrlBlob(URL url){
+            this.url = url;
+        }
+	    
+        @Override
+        public String getMimeType() {
+            if(dereferenced == null){
+                dereference();
+            }
+            return dereferenced.getMimeType();
+        }
+
+        @Override
+        public InputStream getStream() {
+            if(dereferenced == null){
+                dereference();
+            }
+            return dereferenced.getStream();
+        }
+
+        @Override
+        public Map<String,String> getParameter() {
+            if(dereferenced == null){
+                dereference();
+            }
+            return dereferenced.getParameter();
+        }
+
+        @Override
+        public long getContentLength() {
+            if(dereferenced == null){
+                dereference();
+            }
+            return dereferenced.getContentLength();
+        }
+        
+        private synchronized void dereference() {
+            //checking again in the synchronized section
+            if (dereferenced == null) {
+                URLConnection uc;
+                try {
+                    uc = url.openConnection();
+                    InputStream in = uc.getInputStream();
+                    String mimeType = uc.getContentType();
+                    if (mimeType == null) {
+                        mimeType = "application/octet-stream";
+                    }
+                    dereferenced = new InMemoryBlob(in, mimeType);
+                } catch (IOException e) {
+                    throw new RuntimeException("Exception derefereing URI "+url, e);
+                }
+            }	 
+        }
 	}
 }

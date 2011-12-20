@@ -61,7 +61,7 @@ public class EnhancementEngineHelper {
      */
     public static UriRef createTextEnhancement(ContentItem ci,
             EnhancementEngine engine){
-        return createTextEnhancement(ci.getMetadata(), engine, new UriRef(ci.getId()));
+        return createTextEnhancement(ci.getMetadata(), engine, new UriRef(ci.getUri().getUnicodeString()));
     }
     /**
      * Create a new instance with the types enhancer:Enhancement and
@@ -95,7 +95,7 @@ public class EnhancementEngineHelper {
      */
     public static UriRef createEntityEnhancement(ContentItem ci,
             EnhancementEngine engine){
-        return createEntityEnhancement(ci.getMetadata(), engine, new UriRef(ci.getId()));
+        return createEntityEnhancement(ci.getMetadata(), engine, new UriRef(ci.getUri().getUnicodeString()));
     }
     /**
      * Create a new instance with the types enhancer:Enhancement and
@@ -183,7 +183,7 @@ public class EnhancementEngineHelper {
 
         // relate the extraction to the content item
         metadata.add(new TripleImpl(extraction,
-                Properties.ENHANCER_RELATED_CONTENT_ITEM, new UriRef(ci.getId())));
+                Properties.ENHANCER_RELATED_CONTENT_ITEM, new UriRef(ci.getUri().getUnicodeString())));
 
         // creation date
         metadata.add(new TripleImpl(extraction, Properties.DC_CREATED,

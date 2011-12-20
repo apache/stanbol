@@ -99,7 +99,7 @@ public class MainServlet extends HttpServlet {
         log.info("Created {}, registered with EnhancementJobManager", ci);
         resp.setContentType("text/plain");
         resp.setCharacterEncoding("UTF-8");
-        resp.getWriter().write(ci.getId());
+        resp.getWriter().write(ci.getUri().getUnicodeString());
         resp.getWriter().write('\n');
     }
 
@@ -127,7 +127,7 @@ public class MainServlet extends HttpServlet {
 
     private static void dumpContentItem(ContentItem ci, PrintWriter w) {
         w.print("**ContentItem:");
-        w.println(ci.getId());
+        w.println(ci.getUri().getUnicodeString());
         w.println("**Metadata:");
         for (Triple o : ci.getMetadata().getGraph()) {
             w.println(o);

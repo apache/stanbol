@@ -148,7 +148,7 @@ public class ContentItemResource extends BaseStanbolResource {
                 this.imageSrc = rawURI;
             }
             else {
-              Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getId()), NIE_PLAINTEXTCONTENT, null);
+              Iterator<Triple> it = ci.getMetadata().filter(ci.getUri(), NIE_PLAINTEXTCONTENT, null);
               if (it.hasNext()) {
                 this.textContent = ((Literal)it.next().getObject()).getLexicalForm();
               }

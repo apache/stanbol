@@ -153,7 +153,7 @@ public class ZemantaEnhancementEngine implements EnhancementEngine, ServicePrope
             return ENHANCE_SYNCHRONOUS;
         } else {
             // check for existence of textual content in metadata
-            UriRef subj = new UriRef(ci.getId());
+            UriRef subj = ci.getUri();
             Iterator<Triple> it = ci.getMetadata().filter(subj, NIE_PLAINTEXTCONTENT, null);
             if (it.hasNext()) {
                 return ENHANCE_SYNCHRONOUS;
@@ -188,7 +188,7 @@ public class ZemantaEnhancementEngine implements EnhancementEngine, ServicePrope
             //TODO: change that as soon the Adapter Pattern is used for multiple
             // mimetype support.
             StringBuilder textBuilder = new StringBuilder();
-            Iterator<Triple> it = ci.getMetadata().filter(new UriRef(ci.getId()), NIE_PLAINTEXTCONTENT, null);
+            Iterator<Triple> it = ci.getMetadata().filter(ci.getUri(), NIE_PLAINTEXTCONTENT, null);
             while (it.hasNext()) {
                 textBuilder.append(it.next().getObject());
             }
@@ -199,7 +199,7 @@ public class ZemantaEnhancementEngine implements EnhancementEngine, ServicePrope
             return;
         }
         MGraph graph = ci.getMetadata();
-        UriRef ciId = new UriRef(ci.getId());
+        UriRef ciId = ci.getUri();
         //we need to store the results of Zemanta in an temp graph
         MGraph results = new SimpleMGraph();
         ZemantaAPIWrapper zemanta = new ZemantaAPIWrapper(key);
