@@ -121,7 +121,7 @@ public class JSONUtils {
         try {
             jObj.put("content", content);
             jObj.put("mimeType", sci.getMimeType());
-            jObj.put("id", ContentItemIDOrganizer.detachBaseURI(sci.getId()));
+            jObj.put("id", ContentItemIDOrganizer.detachBaseURI(sci.getUri().getUnicodeString()));
         } catch (JSONException e) {
             logger.error("Cannot create the JSON Object.", e);
         }

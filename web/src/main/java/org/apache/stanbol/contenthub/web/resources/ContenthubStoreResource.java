@@ -156,7 +156,7 @@ public class ContenthubStoreResource extends BaseStanbolResource {
 		public RecentlyEnhanced(SolrContentItem contentItem, String baseURI,
 				long enhancements) {
 			this.localId = ContentItemIDOrganizer.detachBaseURI(contentItem
-					.getId());
+					.getUri().getUnicodeString());
 			this.uri = baseURI + "contenthub/content/" + this.localId;
 			this.mimetype = contentItem.getMimeType();
 			this.enhancements = enhancements;
@@ -576,11 +576,11 @@ public class ContenthubStoreResource extends BaseStanbolResource {
 		store.enhanceAndPut(sci);
 		if (useExplicitRedirect) {
 			// use an redirect to point browsers to newly created content
-			return Response.seeOther(makeRedirectionURI(sci.getId())).build();
+			return Response.seeOther(makeRedirectionURI(sci.getUri().getUnicodeString())).build();
 		} else {
 			// use the correct way of notifying the RESTful client that the
 			// resource has been successfully created
-			return Response.created(makeRedirectionURI(sci.getId())).build();
+			return Response.created(makeRedirectionURI(sci.getUri().getUnicodeString())).build();
 		}
 	}
 
