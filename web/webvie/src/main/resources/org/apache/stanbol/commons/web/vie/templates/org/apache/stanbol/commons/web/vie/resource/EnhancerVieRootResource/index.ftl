@@ -32,7 +32,9 @@ article {
         });
         var z = new VIE();
         z.use(new z.StanbolService({
-            url : "${it.publicBaseUri}",
+            // remove "/enhancervie" or "/enhancervie/" from the end of the uri.
+            // it.publicBaseUri gives back http://localhost:8080 or so if redirected so it's not useful.
+            url : window.location.href.replace(/\/[a-z]*\/?$/, ""), //"${it.publicBaseUri}",
             proxyDisabled: true
         }));
 
