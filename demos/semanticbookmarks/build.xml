@@ -13,7 +13,7 @@
 
   <target name="package">
     <mkdir dir="target"/>
-    <zip destfile="target/stanbol-semantic-bookmarks-0.9.xpi">
+    <zip destfile="target/stanbol-semantic-bookmarks-0.1.xpi">
       <fileset dir="src/main/resources" />
     </zip>
   </target>

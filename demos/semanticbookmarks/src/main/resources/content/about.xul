@@ -7,7 +7,7 @@
       <image src='chrome://semanticbookmarks/skin/logo.png' width='180' height='71' />
       <vbox>
         <label>Semantic Bookmarks</label>
-        <label>Demo Plugin</label>
+        <label>Demo Plugin v0.1</label>
       </vbox>
     </hbox>
     <hbox>
