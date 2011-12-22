@@ -15,10 +15,10 @@
 	    </Description>
     </em:targetApplication>
 	
-	  <em:name>Semantic Bookmarks</em:name>
+	  <em:name>Apache Stanbol Semantic Bookmarks</em:name>
 	  <em:description>Apache Stanbol Semantic Bookmarks Demo Plugin</em:description>
-	  <em:creator>Apache Stanbol</em:creator>
-	  <em:contributor>Apache Stanbol - Fabian Christ</em:contributor>
+	  <em:creator>Apache Stanbol Incubating Project</em:creator>
+	  <em:contributor>Fabian Christ</em:contributor>
 	  <em:homepageURL>http://incubator.apache.org/stanbol/</em:homepageURL>
 	  <em:updateURL>https://incubator.apache.org/stanbol/semanticbookmarks/semanticbookmarks-update.rdf</em:updateURL>
 	  <em:aboutURL>chrome://semanticbookmarks/content/about.xul</em:aboutURL>

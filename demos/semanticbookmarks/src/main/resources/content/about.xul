@@ -15,7 +15,7 @@
     </hbox>
     <hbox>
       <image src="chrome://semanticbookmarks/skin/information.png" />
-      <label>Copyright by Apache Stanbol</label>
+      <label>Copyright by Apache Stanbol Incubating Project</label>
     </hbox>
   </vbox>
 </window>
