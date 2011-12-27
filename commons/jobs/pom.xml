@@ -27,10 +27,10 @@
   <name>Apache Stanbol Commons Jobs Reactor</name>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/jobs
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/solr
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/jobs
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/solr
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>

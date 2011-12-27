@@ -43,46 +43,4 @@ under the License.
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/release/apache-stanbol-framework-source-release-assembly-descriptor</developerConnection>
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
-
-    <!-- workaround find from : https://issues.apache.org/jira/browse/SLING-2164b-->
-    <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-    <build>
-      <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>2.5</version>
-      </plugin>
-    </plugins>
-
-      <pluginManagement>
-    	<plugins>
-          <plugin>
-            <groupId>org.eclipse.m2e</groupId>
-            <artifactId>lifecycle-mapping</artifactId>
-            <version>1.0.0</version>
-            <configuration>
-              <lifecycleMappingMetadata>
-                <pluginExecutions>
-    		  <pluginExecution>
-                    <pluginExecutionFilter>
-                      <groupId>org.apache.maven.plugins</groupId>
-                      <artifactId>maven-remote-resources-plugin</artifactId>
-                      <versionRange>[1.0,)</versionRange>
-                      <goals>
-   						<goal>bundle</goal>
-                      </goals>
-                    </pluginExecutionFilter>
-                    <action>
-                      <execute />
-                    </action>
-                  </pluginExecution>
-                </pluginExecutions>
-              </lifecycleMappingMetadata>
-            </configuration>
-          </plugin>
-    	</plugins>
-      </pluginManagement>
-    </build>
-    
 </project>
