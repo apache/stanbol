@@ -35,7 +35,7 @@ import org.apache.clerezza.rdf.core.sparql.query.DescribeQuery;
 import org.apache.clerezza.rdf.core.sparql.query.Query;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.enhancer.servicesapi.Store;
+import org.apache.stanbol.contenthub.servicesapi.store.Store;
 import org.apache.stanbol.enhancer.servicesapi.SparqlQueryEngine.SparqlQueryEngineException;
 
 import com.sun.jersey.api.view.Viewable;

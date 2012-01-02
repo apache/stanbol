@@ -50,11 +50,7 @@
     <!-- dependencies on other IKS modules -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.enhancer.standalone</artifactId>
+      <artifactId>org.apache.stanbol.contenthub.servicesapi</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
