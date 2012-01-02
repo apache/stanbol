@@ -20,7 +20,7 @@
 <@common.page title="Content Item: ${it.localId} (${it.contentItem.mimeType})" hasrestapi=false> 
 
 <h3>Public URI of this resource</h3>
-<pre>${it.contentItem.id}</pre>
+<pre>${it.contentItem.uri.unicodeString}</pre>
 
 <h3>Content preview</h3>
 <div class="contentItemPreview">
