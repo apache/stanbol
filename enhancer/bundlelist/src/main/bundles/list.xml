@@ -26,20 +26,7 @@
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.standalone</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.weightedjobmanager</artifactId>
-			<version>0.9.0-incubating-SNAPSHOT</version>
-		</bundle>
-	</startLevel>
-	<!-- Clerezza based SPARQL query engine -->
-	<startLevel level="20">
-		<bundle>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.clerezza.sparql</artifactId>
 			<version>0.9.0-incubating-SNAPSHOT</version>
 		</bundle>
 	</startLevel>

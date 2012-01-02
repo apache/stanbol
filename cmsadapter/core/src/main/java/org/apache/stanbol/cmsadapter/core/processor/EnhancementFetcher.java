@@ -44,7 +44,7 @@ import org.apache.stanbol.cmsadapter.servicesapi.processor.Processor;
 import org.apache.stanbol.cmsadapter.servicesapi.processor.ProcessorProperties;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccess;
 import org.apache.stanbol.cmsadapter.servicesapi.repository.RepositoryAccessException;
-import org.apache.stanbol.enhancer.servicesapi.Store;
+import org.apache.stanbol.contenthub.servicesapi.store.Store;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

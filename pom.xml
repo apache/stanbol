@@ -60,7 +60,6 @@
     <module>enhancer/parent</module>
     <module>enhancer/generic/servicesapi</module>
     <module>enhancer/jobmanager</module>
-    <module>enhancer/generic/standalone</module>
     <module>enhancer/jersey</module>
     <module>enhancer/benchmark</module>
     <module>enhancer/bundlelist</module>

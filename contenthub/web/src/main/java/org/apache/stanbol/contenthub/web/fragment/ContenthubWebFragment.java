@@ -33,11 +33,11 @@ import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
+import org.apache.stanbol.contenthub.servicesapi.store.Store;
 import org.apache.stanbol.contenthub.web.resources.CNNImporterResource;
 import org.apache.stanbol.contenthub.web.resources.ContenthubStoreResource;
 import org.apache.stanbol.contenthub.web.resources.SearchResource;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
-import org.apache.stanbol.enhancer.servicesapi.Store;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 

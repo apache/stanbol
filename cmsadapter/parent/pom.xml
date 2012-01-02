@@ -1,161 +1,143 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor 
-	license agreements. See the NOTICE file distributed with this work for additional 
-	information regarding copyright ownership. The ASF licenses this file to 
-	You under the Apache License, Version 2.0 (the "License"); you may not use 
-	this file except in compliance with the License. You may obtain a copy of 
-	the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required 
-	by applicable law or agreed to in writing, software distributed under the 
-	License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
-	OF ANY KIND, either express or implied. See the License for the specific 
-	language governing permissions and limitations under the License. -->
+  license agreements. See the NOTICE file distributed with this work for additional 
+  information regarding copyright ownership. The ASF licenses this file to 
+  You under the Apache License, Version 2.0 (the "License"); you may not use 
+  this file except in compliance with the License. You may obtain a copy of 
+  the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required 
+  by applicable law or agreed to in writing, software distributed under the 
+  License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
+  OF ANY KIND, either express or implied. See the License for the specific 
+  language governing permissions and limitations under the License. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<artifactId>stanbol-parent</artifactId>
-		<groupId>org.apache.stanbol</groupId>
-		<version>0.9.0-incubating-SNAPSHOT</version>
-		<relativePath>../../parent</relativePath>
-	</parent>
-	<groupId>org.apache.stanbol</groupId>
-	<artifactId>org.apache.stanbol.cmsadapter.parent</artifactId>
-	<packaging>pom</packaging>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>stanbol-parent</artifactId>
+    <groupId>org.apache.stanbol</groupId>
+    <version>0.9.0-incubating-SNAPSHOT</version>
+    <relativePath>../../parent</relativePath>
+  </parent>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.cmsadapter.parent</artifactId>
+  <packaging>pom</packaging>
 
-	<name>Apache Stanbol CMS Adapter parent POM</name>
-	<description>
+  <name>Apache Stanbol CMS Adapter parent POM</name>
+  <description>
     Parent POM for the Apache Stanbol CMS Adapter
   </description>
 
-	<inceptionYear>2010</inceptionYear>
+  <inceptionYear>2010</inceptionYear>
 
-	<developers>
-		<!-- TBD -->
-	</developers>
+  <developers>
+    <!-- TBD -->
+  </developers>
 
-	<dependencyManagement>
-		<dependencies>
-			<!-- CMS Adapter -->
-			<dependency>
-				<groupId>org.apache.stanbol</groupId>
-				<artifactId>org.apache.stanbol.cmsadapter.servicesapi</artifactId>
-				<version>0.9.0-incubating-SNAPSHOT</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.stanbol</groupId>
-				<artifactId>org.apache.stanbol.cmsadapter.core</artifactId>
-				<version>0.9.0-incubating-SNAPSHOT</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.stanbol</groupId>
-				<artifactId>org.apache.stanbol.cmsadapter.rest.client</artifactId>
-				<version>0.9.0-incubating-SNAPSHOT</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.stanbol</groupId>
-				<artifactId>org.apache.stanbol.cmsadapter.jcr</artifactId>
-				<version>0.9.0-incubating-SNAPSHOT</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.stanbol</groupId>
-				<artifactId>org.apache.stanbol.cmsadapter.cmis</artifactId>
-				<version>0.9.0-incubating-SNAPSHOT</version>
-				<scope>provided</scope>
-			</dependency>
+  <dependencyManagement>
+    <dependencies>
+      <!-- CMS Adapter -->
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.cmsadapter.core</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.cmsadapter.rest.client</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.cmsadapter.jcr</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.cmsadapter.cmis</artifactId>
+        <version>0.9.0-incubating-SNAPSHOT</version>
+      </dependency>
 
-			<!-- CMIS -->
-			<dependency>
-				<groupId>org.apache.chemistry.opencmis</groupId>
-				<artifactId>chemistry-opencmis-client-api</artifactId>
-				<version>0.4.0</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.chemistry.opencmis</groupId>
-				<artifactId>chemistry-opencmis-client-impl</artifactId>
-				<version>0.4.0</version>
-				<scope>provided</scope>
-			</dependency>
+      <!-- CMIS -->
+      <dependency>
+        <groupId>org.apache.chemistry.opencmis</groupId>
+        <artifactId>chemistry-opencmis-client-api</artifactId>
+        <version>0.4.0</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.chemistry.opencmis</groupId>
+        <artifactId>chemistry-opencmis-client-impl</artifactId>
+        <version>0.4.0</version>
+        <scope>provided</scope>
+      </dependency>
 
-			<!-- JCR -->
-			<dependency>
-				<groupId>javax.jcr</groupId>
-				<artifactId>jcr</artifactId>
-				<version>2.0</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.jackrabbit</groupId>
-				<artifactId>jackrabbit-jcr-rmi</artifactId>
-				<version>2.2.5</version>
-				<scope>provided</scope>
-				<exclusions>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-api</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.jackrabbit</groupId>
-				<artifactId>jackrabbit-jcr-commons</artifactId>
-				<version>2.2.5</version>
-				<scope>provided</scope>
-			</dependency>
+      <!-- JCR -->
+      <dependency>
+        <groupId>javax.jcr</groupId>
+        <artifactId>jcr</artifactId>
+        <version>2.0</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.jackrabbit</groupId>
+        <artifactId>jackrabbit-jcr-rmi</artifactId>
+        <version>2.2.5</version>
+        <scope>provided</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.jackrabbit</groupId>
+        <artifactId>jackrabbit-jcr-commons</artifactId>
+        <version>2.2.5</version>
+        <scope>provided</scope>
+      </dependency>
 
-			<!-- Contenthub -->
-			<dependency>
-				<groupId>org.apache.stanbol</groupId>
-				<artifactId>org.apache.stanbol.contenthub.servicesapi</artifactId>
-				<version>0.9.0-incubating-SNAPSHOT</version>
-				<scope>provided</scope>
-			</dependency>
+      <!-- Jersey -->
+      <dependency>
+        <groupId>com.sun.jersey</groupId>
+        <artifactId>jersey-client</artifactId>
+        <version>1.7</version>
+        <scope>provided</scope>
+      </dependency>
 
-			<!-- Jersey -->
-			<dependency>
-				<groupId>com.sun.jersey</groupId>
-				<artifactId>jersey-client</artifactId>
-				<version>1.7</version>
-				<scope>provided</scope>
-			</dependency>
+      <!-- Clerezza -->
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.jena.facade</artifactId>
+        <version>0.12-incubating-SNAPSHOT</version>
+        <scope>provided</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
-			<!-- Clerezza -->
-			<dependency>
-				<groupId>org.apache.clerezza</groupId>
-				<artifactId>rdf.jena.facade</artifactId>
-				<version>0.12-incubating-SNAPSHOT</version>
-				<scope>provided</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+  <profiles>
+    <profile>
+      <id>sonar</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <!-- EXAMPLE FOR MYSQL -->
+        <sonar.jdbc.url>
+          jdbc:mysql://195.142.27.163:3306/sonar?useUnicode=true&amp;characterEncoding=utf8
+        </sonar.jdbc.url>
+        <sonar.jdbc.driver>com.mysql.jdbc.Driver</sonar.jdbc.driver>
+        <sonar.jdbc.username>sonar</sonar.jdbc.username>
+        <sonar.jdbc.password>sonar</sonar.jdbc.password>
 
-	<profiles>
-		<profile>
-			<id>sonar</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<properties>
-				<!-- EXAMPLE FOR MYSQL -->
-				<sonar.jdbc.url>
-					jdbc:mysql://195.142.27.163:3306/sonar?useUnicode=true&amp;characterEncoding=utf8
-                </sonar.jdbc.url>
-				<sonar.jdbc.driver>com.mysql.jdbc.Driver</sonar.jdbc.driver>
-				<sonar.jdbc.username>sonar</sonar.jdbc.username>
-				<sonar.jdbc.password>sonar</sonar.jdbc.password>
+        <!-- SERVER ON A REMOTE HOST -->
+        <sonar.host.url>http://195.142.27.163:9000</sonar.host.url>
+      </properties>
+    </profile>
+  </profiles>
 
-				<!-- SERVER ON A REMOTE HOST -->
-				<sonar.host.url>http://195.142.27.163:9000</sonar.host.url>
-			</properties>
-		</profile>
-	</profiles>
-
-	<properties>
-		<chemistryVersion>0.4.0</chemistryVersion>
-	</properties>
+  <properties>
+    <chemistryVersion>0.4.0</chemistryVersion>
+  </properties>
 </project>
