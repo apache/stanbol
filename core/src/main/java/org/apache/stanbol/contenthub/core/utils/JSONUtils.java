@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.stanbol.contenthub.servicesapi.store.SolrContentItem;
+import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.stanbol.contenthub.servicesapi.store;
+package org.apache.stanbol.contenthub.servicesapi.store.solr;
 
 import java.util.List;
 import java.util.Map;

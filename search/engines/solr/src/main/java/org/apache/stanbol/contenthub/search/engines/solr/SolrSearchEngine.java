@@ -37,7 +37,6 @@ import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.core.search.execution.SearchContextImpl;
-import org.apache.stanbol.contenthub.core.store.SolrStoreImpl;
 import org.apache.stanbol.contenthub.servicesapi.search.engine.EngineProperties;
 import org.apache.stanbol.contenthub.servicesapi.search.engine.SearchEngine;
 import org.apache.stanbol.contenthub.servicesapi.search.engine.SearchEngineException;
@@ -50,6 +49,7 @@ import org.apache.stanbol.contenthub.servicesapi.search.execution.SearchContextF
 import org.apache.stanbol.contenthub.servicesapi.search.vocabulary.SearchVocabulary;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
+import org.apache.stanbol.contenthub.store.solr.SolrStoreImpl;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

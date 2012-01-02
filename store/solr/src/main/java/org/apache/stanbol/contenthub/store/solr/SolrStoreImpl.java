@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.stanbol.contenthub.core.store;
+package org.apache.stanbol.contenthub.store.solr;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -61,8 +61,8 @@ import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
 import org.apache.stanbol.contenthub.core.utils.ContentItemIDOrganizer;
 import org.apache.stanbol.contenthub.core.utils.sparql.QueryGenerator;
 import org.apache.stanbol.contenthub.servicesapi.enhancements.vocabulary.EnhancementGraphVocabulary;
-import org.apache.stanbol.contenthub.servicesapi.store.SolrContentItem;
-import org.apache.stanbol.contenthub.servicesapi.store.SolrStore;
+import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
+import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrStore;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;

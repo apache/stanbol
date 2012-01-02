@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-package org.apache.stanbol.contenthub.servicesapi.store;
+package org.apache.stanbol.contenthub.servicesapi.store.solr;
 
 import java.util.List;
 import java.util.Map;
 
+import org.apache.stanbol.contenthub.servicesapi.store.Store;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
-import org.apache.stanbol.enhancer.servicesapi.Store;
 
 /**
  * {@link Store} interface for Solr.

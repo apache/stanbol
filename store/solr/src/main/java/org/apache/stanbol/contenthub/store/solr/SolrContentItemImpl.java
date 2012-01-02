@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.stanbol.contenthub.core.store;
+package org.apache.stanbol.contenthub.store.solr;
 
 import static org.apache.stanbol.contenthub.core.utils.ContentItemIDOrganizer.CONTENT_ITEM_URI_PREFIX;
 
@@ -28,17 +28,18 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.stanbol.contenthub.core.utils.ContentItemIDOrganizer;
-import org.apache.stanbol.contenthub.servicesapi.store.SolrContentItem;
+import org.apache.stanbol.contenthub.servicesapi.store.solr.SolrContentItem;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
-import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryBlob;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemImpl;
+import org.apache.stanbol.enhancer.servicesapi.helper.InMemoryBlob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * 
  * @author meric
+ * @author anil.sinaci
  * 
  */
 public class SolrContentItemImpl extends ContentItemImpl implements SolrContentItem {
