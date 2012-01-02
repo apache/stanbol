@@ -57,8 +57,6 @@
     <module>opencalais</module>
     <module>zemanta</module>
 
-    <module>../clerezza/org.apache.stanbol.enhancer.clerezza</module>
-    <module>../clerezza/clerezza-sparql</module>
     <module>../SemiAutomaticContentEnhancer</module>
   </modules>
 </project>
