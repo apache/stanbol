@@ -45,6 +45,20 @@ public class TechnicalClasses {
      */
     public static final UriRef ENHANCER_ENTITYANNOTATION = new UriRef(
             NamespaceEnum.enhancer+"EntityAnnotation");
+    
+    /**
+     * Type used for annotations documents. This type is intended
+     * to be used in combination with ENHANCER_ENHANCEMENT and
+     * ENHANCER_ENTITYANNOTATION as a complimentary marker to suggest
+     * that the referenced is the one of the primary topic of the
+     * whole document or of a specific section specified by a linked
+     * TextAnnotation. 
+     * 
+     * The entity or concept is not necessarily explicitly mentioned
+     * in the document (like a traditional entity occurrence would).
+     */
+    public static final UriRef ENHANCER_TOPICANNOTATION = new UriRef(
+            NamespaceEnum.enhancer+"TopicAnnotation");
 
     /**
      * To be used as a type pour any semantic knowledge extraction
