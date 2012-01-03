@@ -91,6 +91,6 @@ public interface TrainingSet {
     /**
      * Number of examples to fetch at once.
      */
-    public void setBatchSize();
+    void setBatchSize(int batchSize);
 
 }
