@@ -42,6 +42,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.core.CoreContainer;
 import org.apache.stanbol.commons.solr.utils.StreamQueryRequest;
+import org.apache.stanbol.enhancer.topic.TopicSuggestion;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -128,6 +129,7 @@ public class TopicEngineTest {
         config.put(TopicClassificationEngine.SOLR_CORE, solrServer);
         config.put(TopicClassificationEngine.TOPIC_URI_FIELD, "topic");
         config.put(TopicClassificationEngine.SIMILARTITY_FIELD, "text");
+        config.put(TopicClassificationEngine.BROADER_FIELD, "broader");
         return config;
     }
 
@@ -162,10 +164,50 @@ public class TopicEngineTest {
         // check accept language optional param
         Hashtable<String,Object> configWithAcceptLangage = new Hashtable<String,Object>();
         configWithAcceptLangage.putAll(config);
-        configWithAcceptLangage.put(TopicClassificationEngine.LANGUAGE, "en, fr");
+        configWithAcceptLangage.put(TopicClassificationEngine.LANGUAGES, "en, fr");
         engine = TopicClassificationEngine.fromParameters(configWithAcceptLangage);
         assertNotNull(engine);
         assertEquals(engine.acceptedLanguages, Arrays.asList("en", "fr"));
+    }
+
+    @Test
+    public void testProgrammaticThesaurusConstruction() throws Exception {
+        TopicClassificationEngine engine = TopicClassificationEngine.fromParameters(getDefaultConfigParams());
+
+        // Register the roots of the taxonomy
+        engine.addTopic("http://example.com/topics/root1", null);
+        engine.addTopic("http://example.com/topics/root2", null);
+        engine.addTopic("http://example.com/topics/root3", new ArrayList<String>());
+        assertEquals(0, engine.getBroaderTopics("http://example.com/topics/root1").size());
+        assertEquals(0, engine.getBroaderTopics("http://example.com/topics/root2").size());
+        assertEquals(0, engine.getBroaderTopics("http://example.com/topics/root3").size());
+        assertEquals(3, engine.getTopicRoots().size());
+
+        // Register some non root nodes
+        engine.addTopic("http://example.com/topics/node1",
+            Arrays.asList("http://example.com/topics/root1", "http://example.com/topics/root2"));
+        engine.addTopic("http://example.com/topics/node2", Arrays.asList("http://example.com/topics/root3"));
+        engine.addTopic("http://example.com/topics/node3",
+            Arrays.asList("http://example.com/topics/node1", "http://example.com/topics/node2"));
+        
+        // the root where not impacted
+        assertEquals(0, engine.getBroaderTopics("http://example.com/topics/root1").size());
+        assertEquals(0, engine.getBroaderTopics("http://example.com/topics/root2").size());
+        assertEquals(0, engine.getBroaderTopics("http://example.com/topics/root3").size());
+        assertEquals(3, engine.getTopicRoots().size());
+
+        // the other nodes have the same broader topics as at creation time
+        assertEquals(2, engine.getBroaderTopics("http://example.com/topics/node1").size());
+        assertEquals(1, engine.getBroaderTopics("http://example.com/topics/node2").size());
+        assertEquals(2, engine.getBroaderTopics("http://example.com/topics/node3").size());
+
+        // check the induced narrower relationships
+        assertEquals(1, engine.getNarrowerTopics("http://example.com/topics/root1").size());
+        assertEquals(1, engine.getNarrowerTopics("http://example.com/topics/root2").size());
+        assertEquals(1, engine.getNarrowerTopics("http://example.com/topics/root3").size());
+        assertEquals(1, engine.getNarrowerTopics("http://example.com/topics/node1").size());
+        assertEquals(1, engine.getNarrowerTopics("http://example.com/topics/node2").size());
+        assertEquals(0, engine.getNarrowerTopics("http://example.com/topics/node3").size());
     }
 
     @Test

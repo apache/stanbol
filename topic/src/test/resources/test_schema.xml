@@ -59,7 +59,8 @@
  <fields>
    <field name="topic" type="string" indexed="true" stored="true" required="true" /> 
    <field name="type" type="string" indexed="true" stored="true" multiValued="true" />
-   <field name="paths" type="string" indexed="true" stored="true" multiValued="true" /> 
+   <field name="paths" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="broader" type="string" indexed="true" stored="true" multiValued="true" />
    <field name="text" type="text" indexed="true" stored="false"
      termVectors="true" termPositions="false" termOffsets="false" />
    <field name="popularity" type="int" indexed="true" stored="true" />

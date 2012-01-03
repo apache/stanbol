@@ -14,32 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.enhancer.engine.topic;
+package org.apache.stanbol.enhancer.topic;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 
 /**
- * Data transfer object for the individual topic classification results.
+ * Unexpected Error while performing read or write access to a topic classifier training set.
  */
-public class TopicSuggestion {
+public class TrainingSetException extends IOException {
 
-    public final String uri;
+    private static final long serialVersionUID = 1L;
 
-    public final List<String> paths = new ArrayList<String>();
-
-    public final double score;
-
-    public TopicSuggestion(String uri, List<String> paths, double score) {
-        this.uri = uri;
-        if (paths != null) {
-            this.paths.addAll(paths);
-        }
-        this.score = score;
-    }
-
-    public TopicSuggestion(String uri, double score) {
-        this(uri, null, score);
+    public TrainingSetException(String message) {
+        super(message);
     }
 
 }

@@ -21,14 +21,19 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTE
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -43,6 +48,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MoreLikeThisParams;
 import org.apache.stanbol.commons.solr.IndexReference;
@@ -53,6 +59,13 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
+import org.apache.stanbol.enhancer.topic.ClassifierException;
+import org.apache.stanbol.enhancer.topic.TopicClassifier;
+import org.apache.stanbol.enhancer.topic.TopicSuggestion;
+import org.apache.stanbol.enhancer.topic.TrainingSet;
+import org.apache.stanbol.enhancer.topic.TrainingSetException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -72,17 +85,19 @@ import org.slf4j.LoggerFactory;
 @Properties(value = {@Property(name = TopicClassificationEngine.ENGINE_ID),
                      @Property(name = TopicClassificationEngine.ORDER, intValue = 100),
                      @Property(name = TopicClassificationEngine.SOLR_CORE),
-                     @Property(name = TopicClassificationEngine.LANGUAGE),
+                     @Property(name = TopicClassificationEngine.LANGUAGES),
                      @Property(name = TopicClassificationEngine.SIMILARTITY_FIELD),
                      @Property(name = TopicClassificationEngine.TOPIC_URI_FIELD),
-                     @Property(name = TopicClassificationEngine.MATERIALIZED_PATH_FIELD)})
-public class TopicClassificationEngine implements EnhancementEngine, ServiceProperties {
+                     @Property(name = TopicClassificationEngine.BROADER_FIELD),
+                     @Property(name = TopicClassificationEngine.MATERIALIZED_PATH_FIELD),
+                     @Property(name = TopicClassificationEngine.MODEL_UPDATE_DATE_FIELD)})
+public class TopicClassificationEngine implements EnhancementEngine, ServiceProperties, TopicClassifier {
 
     public static final String ENGINE_ID = "org.apache.stanbol.enhancer.engine.id";
 
     public static final String SOLR_CORE = "org.apache.stanbol.enhancer.engine.topic.solrCore";
 
-    public static final String LANGUAGE = "org.apache.stanbol.enhancer.engine.topic.language";
+    public static final String LANGUAGES = "org.apache.stanbol.enhancer.engine.topic.languages";
 
     public static final String ORDER = "org.apache.stanbol.enhancer.engine.topic.order";
 
@@ -90,7 +105,11 @@ public class TopicClassificationEngine implements EnhancementEngine, ServiceProp
 
     public static final String TOPIC_URI_FIELD = "org.apache.stanbol.enhancer.engine.topic.uriField";
 
+    public static final String BROADER_FIELD = "org.apache.stanbol.enhancer.engine.topic.broaderField";
+
     public static final String MATERIALIZED_PATH_FIELD = "org.apache.stanbol.enhancer.engine.topic.materializedPathField";
+
+    public static final String MODEL_UPDATE_DATE_FIELD = "org.apache.stanbol.enhancer.engine.topic.modelUpdateField";
 
     private static final Logger log = LoggerFactory.getLogger(TopicClassificationEngine.class);
 
@@ -111,11 +130,17 @@ public class TopicClassificationEngine implements EnhancementEngine, ServiceProp
 
     protected String topicUriField;
 
+    protected String modelUpdateDateField;
+
+    protected String broaderField;
+
     protected String materializedPathField;
 
     protected ComponentContext context;
 
     protected int numTopics = 10;
+
+    protected TrainingSet trainingSet;
 
     @Activate
     protected void activate(ComponentContext context) throws ConfigurationException, InvalidSyntaxException {
@@ -136,7 +161,7 @@ public class TopicClassificationEngine implements EnhancementEngine, ServiceProp
         engineId = getRequiredStringParam(config, ENGINE_ID);
         similarityField = getRequiredStringParam(config, SIMILARTITY_FIELD);
         topicUriField = getRequiredStringParam(config, TOPIC_URI_FIELD);
-        acceptedLanguages = getStringListParan(config, LANGUAGE);
+        acceptedLanguages = getStringListParan(config, LANGUAGES);
         if (config.get(SOLR_CORE) instanceof SolrServer) {
             // Bind a fixed Solr server client instead of doing dynamic OSGi lookup using the service tracker.
             // This can be useful both for unit-testing .
@@ -159,8 +184,10 @@ public class TopicClassificationEngine implements EnhancementEngine, ServiceProp
                 throw new ConfigurationException(SOLR_CORE, e.getMessage(), e);
             }
         }
-        // optional field, can be null
+        // optional fields, can be null
+        broaderField = (String) config.get(BROADER_FIELD);
         materializedPathField = (String) config.get(TOPIC_URI_FIELD);
+        modelUpdateDateField = (String) config.get(MODEL_UPDATE_DATE_FIELD);
         Object orderParamValue = config.get(ORDER);
         if (orderParamValue != null) {
             order = (Integer) orderParamValue;
@@ -218,48 +245,26 @@ public class TopicClassificationEngine implements EnhancementEngine, ServiceProp
     @Override
     public void computeEnhancements(ContentItem ci) throws EngineException {
         String text = getTextFromContentItem(ci);
-        suggestTopics(text);
-
-        // TODO: express the results as RDF.
-    }
-
-    public List<TopicSuggestion> suggestTopics(String text) throws EngineException {
-        List<TopicSuggestion> suggestedTopics = new ArrayList<TopicSuggestion>(numTopics);
-        SolrServer solrServer = getActiveSolrServer();
-        SolrQuery query = new SolrQuery();
-        query.setQueryType("/" + MoreLikeThisParams.MLT);
-        query.set(MoreLikeThisParams.MATCH_INCLUDE, false);
-        query.set(MoreLikeThisParams.MIN_DOC_FREQ, 1);
-        query.set(MoreLikeThisParams.MIN_TERM_FREQ, 1);
-        // TODO: find a way to parse the interesting terms and report them
-        // for debugging / explanation in dedicated RDF datastucture.
-        // query.set(MoreLikeThisParams.INTERESTING_TERMS, "details");
-        query.set(MoreLikeThisParams.SIMILARITY_FIELDS, similarityField);
-        query.set(CommonParams.STREAM_BODY, text);
-        query.setRows(numTopics);
+        MGraph metadata = ci.getMetadata();
+        List<TopicSuggestion> topics;
         try {
-            StreamQueryRequest request = new StreamQueryRequest(query);
-            QueryResponse response = request.process(solrServer);
-            SolrDocumentList results = response.getResults();
-            for (SolrDocument result : results.toArray(new SolrDocument[0])) {
-                String uri = (String) result.getFirstValue(topicUriField);
-                if (uri == null) {
-                    throw new EngineException(String.format("Solr Core '%s' is missing required field '%s'.",
-                        solrCoreId, topicUriField));
-                }
-                suggestedTopics.add(new TopicSuggestion(uri, 0.0));
-            }
-        } catch (SolrServerException e) {
-            if ("unknown handler: /mlt".equals(e.getCause().getMessage())) {
-                String message = String.format("SolrServer with id '%s' for topic engine '%s' lacks"
-                                               + " configuration for the MoreLikeThisHandler", solrCoreId,
-                    engineId);
-                throw new EngineException(message, e);
-            } else {
-                throw new EngineException(e);
-            }
+            topics = suggestTopics(text);
+        } catch (ClassifierException e) {
+            throw new EngineException(e);
         }
-        return suggestedTopics;
+        for (TopicSuggestion topic : topics) {
+            UriRef enhancement = EnhancementEngineHelper.createEntityEnhancement(ci, this);
+            metadata.add(new TripleImpl(enhancement,
+                    org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE,
+                    TechnicalClasses.ENHANCER_TOPICANNOTATION));
+
+            // add link to entity
+            metadata.add(new TripleImpl(enhancement,
+                    org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE,
+                    new UriRef(topic.uri)));
+            // TODO: make it possible to dereference and the path to the root the entities according to a
+            // configuration parameter
+        }
     }
 
     /**
@@ -300,4 +305,187 @@ public class TopicClassificationEngine implements EnhancementEngine, ServiceProp
         return engine;
     }
 
+    // classifier API
+
+    @Override
+    public String getSchemeId() {
+        return engineId;
+    }
+
+    @Override
+    public List<String> getAcceptedLanguages() {
+        return acceptedLanguages;
+    }
+
+    public List<TopicSuggestion> suggestTopics(String text) throws ClassifierException {
+        List<TopicSuggestion> suggestedTopics = new ArrayList<TopicSuggestion>(numTopics);
+        SolrServer solrServer = getActiveSolrServer();
+        SolrQuery query = new SolrQuery();
+        query.setQueryType("/" + MoreLikeThisParams.MLT);
+        query.set(MoreLikeThisParams.MATCH_INCLUDE, false);
+        query.set(MoreLikeThisParams.MIN_DOC_FREQ, 1);
+        query.set(MoreLikeThisParams.MIN_TERM_FREQ, 1);
+        // TODO: find a way to parse the interesting terms and report them
+        // for debugging / explanation in dedicated RDF data structure.
+        // query.set(MoreLikeThisParams.INTERESTING_TERMS, "details");
+        query.set(MoreLikeThisParams.SIMILARITY_FIELDS, similarityField);
+        query.set(CommonParams.STREAM_BODY, text);
+        query.setRows(numTopics);
+        try {
+            StreamQueryRequest request = new StreamQueryRequest(query);
+            QueryResponse response = request.process(solrServer);
+            SolrDocumentList results = response.getResults();
+            for (SolrDocument result : results.toArray(new SolrDocument[0])) {
+                String uri = (String) result.getFirstValue(topicUriField);
+                if (uri == null) {
+                    throw new ClassifierException(String.format(
+                        "Solr Core '%s' is missing required field '%s'.", solrCoreId, topicUriField));
+                }
+                suggestedTopics.add(new TopicSuggestion(uri, 0.0));
+            }
+        } catch (SolrServerException e) {
+            if ("unknown handler: /mlt".equals(e.getCause().getMessage())) {
+                String message = String.format("SolrServer with id '%s' for topic engine '%s' lacks"
+                                               + " configuration for the MoreLikeThisHandler", solrCoreId,
+                    engineId);
+                throw new ClassifierException(message, e);
+            } else {
+                throw new ClassifierException(e);
+            }
+        }
+        return suggestedTopics;
+    }
+
+    @Override
+    public Set<String> getNarrowerTopics(String broadTopicId) throws ClassifierException {
+        LinkedHashSet<String> narrowerTopics = new LinkedHashSet<String>();
+        if (broaderField == null) {
+            return narrowerTopics;
+        }
+        SolrServer solrServer = getActiveSolrServer();
+        SolrQuery query = new SolrQuery("*:*");
+        // use a filter query to avoid string escaping issues with special solr chars
+        query.addFilterQuery("{!field f=" + broaderField + "}" + broadTopicId);
+        query.addField(topicUriField);
+        query.addSortField(topicUriField, SolrQuery.ORDER.asc);
+        try {
+            for (SolrDocument result : solrServer.query(query).getResults()) {
+                narrowerTopics.add(result.getFirstValue(topicUriField).toString());
+            }
+        } catch (SolrServerException e) {
+            String msg = String.format("Error while fetching narrower topics of '%s' on Solr Core '%s'.",
+                broadTopicId, solrCoreId);
+            throw new ClassifierException(msg, e);
+        }
+        return narrowerTopics;
+    }
+
+    @Override
+    public Set<String> getBroaderTopics(String id) throws ClassifierException {
+        LinkedHashSet<String> broaderTopics = new LinkedHashSet<String>();
+        if (broaderField == null) {
+            return broaderTopics;
+        }
+        SolrServer solrServer = getActiveSolrServer();
+        SolrQuery query = new SolrQuery("*:*");
+        // use a filter query to avoid string escaping issues with special solr chars
+        query.addFilterQuery("{!field f=" + topicUriField + "}" + id);
+        query.addField(broaderField);
+        try {
+            for (SolrDocument result : solrServer.query(query).getResults()) {
+                // there should be only one results
+                Collection<Object> broaderFieldValues = result.getFieldValues(broaderField);
+                if (broaderFieldValues == null) {
+                    continue;
+                }
+                for (Object value : broaderFieldValues) {
+                    broaderTopics.add(value.toString());
+                }
+            }
+        } catch (SolrServerException e) {
+            String msg = String.format("Error while fetching broader topics of '%s' on Solr Core '%s'.", id,
+                solrCoreId);
+            throw new ClassifierException(msg, e);
+        }
+        return broaderTopics;
+    }
+
+    @Override
+    public Set<String> getTopicRoots() throws ClassifierException {
+        // TODO: this can be very big on flat thesauri: should we enable a paging API instead?
+        LinkedHashSet<String> rootTopics = new LinkedHashSet<String>();
+        SolrServer solrServer = getActiveSolrServer();
+        SolrQuery query = new SolrQuery();
+        if (broaderField != null) {
+            // find any topic with an empty broaderField
+            query.setParam("q", "-" + broaderField + ":[\"\" TO *]");
+        } else {
+            // find any topic
+            query.setQuery("*:*");
+        }
+        try {
+            for (SolrDocument result : solrServer.query(query).getResults()) {
+                rootTopics.add(result.getFirstValue(topicUriField).toString());
+            }
+        } catch (SolrServerException e) {
+            String msg = String.format("Error while fetching root topics on Solr Core '%s'.", solrCoreId);
+            throw new ClassifierException(msg, e);
+        }
+        return rootTopics;
+    }
+
+    @Override
+    public void addTopic(String id, Collection<String> broaderTopics) throws ClassifierException {
+        SolrInputDocument doc = new SolrInputDocument();
+        doc.addField(topicUriField, id);
+        if (broaderTopics != null && broaderField != null) {
+            doc.addField(broaderField, broaderTopics);
+        }
+        SolrServer solrServer = getActiveSolrServer();
+        try {
+            solrServer.add(doc);
+            solrServer.commit();
+        } catch (Exception e) {
+            String msg = String.format("Error adding topic with id '%s' on Solr Core '%s'", id, solrCoreId);
+            throw new ClassifierException(msg, e);
+        }
+    }
+
+    @Override
+    public void removeTopic(String id) throws ClassifierException {
+        SolrServer solrServer = getActiveSolrServer();
+        try {
+            solrServer.deleteByQuery(topicUriField + ":" + id);
+            solrServer.commit();
+        } catch (Exception e) {
+            String msg = String.format("Error adding topic with id '%s' on Solr Core '%s'", id, solrCoreId);
+            throw new ClassifierException(msg, e);
+        }
+    }
+
+    @Override
+    public boolean isUpdatable() {
+        return trainingSet != null;
+    }
+
+    @Override
+    public void setTrainingSet(TrainingSet trainingSet) {
+        this.trainingSet = trainingSet;
+    }
+
+    @Override
+    public void updateModel() throws TrainingSetException {
+        checkTrainingSet();
+        // TODO:
+        // perform a first query to iterate over all the registered topics sorted by id (to allow for paging)
+        // for each topic find the last update date of the union of the topic and it's narrower topic
+    }
+
+    protected void checkTrainingSet() throws TrainingSetException {
+        if (trainingSet != null) {
+            throw new TrainingSetException(
+                    String.format("TopicClassificationEngine %s has no registered"
+                                  + " training set hence cannot be updated.", engineId));
+        }
+    }
 }
