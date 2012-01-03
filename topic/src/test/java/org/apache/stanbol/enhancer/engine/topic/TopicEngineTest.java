@@ -139,7 +139,7 @@ public class TopicEngineTest {
         TopicClassificationEngine engine = TopicClassificationEngine.fromParameters(config);
         assertNotNull(engine);
         assertEquals(engine.engineId, "test-engine");
-        assertEquals(engine.solrServer, solrServer);
+        assertEquals(engine.getActiveSolrServer(), solrServer);
         assertEquals(engine.topicUriField, "topic");
         assertEquals(engine.similarityField, "text");
         assertEquals(engine.acceptedLanguages, new ArrayList<String>());
@@ -189,7 +189,7 @@ public class TopicEngineTest {
         engine.addTopic("http://example.com/topics/node2", Arrays.asList("http://example.com/topics/root3"));
         engine.addTopic("http://example.com/topics/node3",
             Arrays.asList("http://example.com/topics/node1", "http://example.com/topics/node2"));
-        
+
         // the root where not impacted
         assertEquals(0, engine.getBroaderTopics("http://example.com/topics/root1").size());
         assertEquals(0, engine.getBroaderTopics("http://example.com/topics/root2").size());

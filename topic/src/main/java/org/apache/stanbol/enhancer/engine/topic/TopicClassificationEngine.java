@@ -20,7 +20,6 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTE
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -51,8 +50,6 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MoreLikeThisParams;
-import org.apache.stanbol.commons.solr.IndexReference;
-import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
 import org.apache.stanbol.commons.solr.utils.StreamQueryRequest;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -62,6 +59,7 @@ import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.apache.stanbol.enhancer.topic.ClassifierException;
+import org.apache.stanbol.enhancer.topic.ConfiguredSolrCoreTracker;
 import org.apache.stanbol.enhancer.topic.TopicClassifier;
 import org.apache.stanbol.enhancer.topic.TopicSuggestion;
 import org.apache.stanbol.enhancer.topic.TrainingSet;
@@ -91,7 +89,7 @@ import org.slf4j.LoggerFactory;
                      @Property(name = TopicClassificationEngine.BROADER_FIELD),
                      @Property(name = TopicClassificationEngine.MATERIALIZED_PATH_FIELD),
                      @Property(name = TopicClassificationEngine.MODEL_UPDATE_DATE_FIELD)})
-public class TopicClassificationEngine implements EnhancementEngine, ServiceProperties, TopicClassifier {
+public class TopicClassificationEngine extends ConfiguredSolrCoreTracker implements EnhancementEngine, ServiceProperties, TopicClassifier {
 
     public static final String ENGINE_ID = "org.apache.stanbol.enhancer.engine.id";
 
@@ -115,16 +113,9 @@ public class TopicClassificationEngine implements EnhancementEngine, ServiceProp
 
     protected String engineId;
 
-    protected String solrCoreId;
-
     protected List<String> acceptedLanguages;
 
     protected Integer order = ORDERING_EXTRACTION_ENHANCEMENT;
-
-    protected RegisteredSolrServerTracker indexTracker;
-
-    // instance of solrServer to use if not using the OSGi service tracker (e.g. for tests)
-    protected SolrServer solrServer;
 
     protected String similarityField;
 
@@ -135,8 +126,6 @@ public class TopicClassificationEngine implements EnhancementEngine, ServiceProp
     protected String broaderField;
 
     protected String materializedPathField;
-
-    protected ComponentContext context;
 
     protected int numTopics = 10;
 
@@ -162,28 +151,8 @@ public class TopicClassificationEngine implements EnhancementEngine, ServiceProp
         similarityField = getRequiredStringParam(config, SIMILARTITY_FIELD);
         topicUriField = getRequiredStringParam(config, TOPIC_URI_FIELD);
         acceptedLanguages = getStringListParan(config, LANGUAGES);
-        if (config.get(SOLR_CORE) instanceof SolrServer) {
-            // Bind a fixed Solr server client instead of doing dynamic OSGi lookup using the service tracker.
-            // This can be useful both for unit-testing .
-            // The Solr server is expected to be configured with the MoreLikeThisQueryHandler and the matching
-            // fields from the configuration.
-            solrServer = (SolrServer) config.get(SOLR_CORE);
-        } else {
-            String solrCoreId = getRequiredStringParam(config, SOLR_CORE);
-            if (context == null) {
-                throw new ConfigurationException(SOLR_CORE, SOLR_CORE
-                                                            + " should be a SolrServer instance for using"
-                                                            + " the engine without any OSGi context. Got: "
-                                                            + solrCoreId);
-            }
-            try {
-                indexTracker = new RegisteredSolrServerTracker(context.getBundleContext(),
-                        IndexReference.parse(solrCoreId));
-                indexTracker.open();
-            } catch (InvalidSyntaxException e) {
-                throw new ConfigurationException(SOLR_CORE, e.getMessage(), e);
-            }
-        }
+        configureSolrCore(config, SOLR_CORE);
+
         // optional fields, can be null
         broaderField = (String) config.get(BROADER_FIELD);
         materializedPathField = (String) config.get(TOPIC_URI_FIELD);
@@ -191,41 +160,6 @@ public class TopicClassificationEngine implements EnhancementEngine, ServiceProp
         Object orderParamValue = config.get(ORDER);
         if (orderParamValue != null) {
             order = (Integer) orderParamValue;
-        }
-    }
-
-    protected String getRequiredStringParam(Dictionary<String,Object> parameters, String paramName) throws ConfigurationException {
-        return getRequiredStringParam(parameters, paramName, null);
-    }
-
-    protected String getRequiredStringParam(Dictionary<String,Object> config,
-                                            String paramName,
-                                            String defaultValue) throws ConfigurationException {
-        Object paramValue = config.get(paramName);
-        if (paramValue == null) {
-            if (defaultValue == null) {
-                throw new ConfigurationException(paramName, paramName + " is a required parameter.");
-            } else {
-                return defaultValue;
-            }
-        }
-        return paramValue.toString();
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<String> getStringListParan(Dictionary<String,Object> config, String paramName) throws ConfigurationException {
-        Object paramValue = config.get(paramName);
-        if (paramValue == null) {
-            return new ArrayList<String>();
-        } else if (paramValue instanceof String) {
-            return Arrays.asList(paramValue.toString().split(",\\s*"));
-        } else if (paramValue instanceof String[]) {
-            return Arrays.asList((String[]) paramValue);
-        } else if (paramValue instanceof List) {
-            return (List<String>) paramValue;
-        } else {
-            throw new ConfigurationException(paramName, String.format(
-                "Unexpected parameter type for '%s': %s", paramName, paramValue));
         }
     }
 
@@ -265,13 +199,6 @@ public class TopicClassificationEngine implements EnhancementEngine, ServiceProp
             // TODO: make it possible to dereference and the path to the root the entities according to a
             // configuration parameter
         }
-    }
-
-    /**
-     * @return the manually bound solrServer instance or the one tracked by the OSGi service tracker.
-     */
-    protected SolrServer getActiveSolrServer() {
-        return solrServer != null ? solrServer : indexTracker.getService();
     }
 
     @Override
