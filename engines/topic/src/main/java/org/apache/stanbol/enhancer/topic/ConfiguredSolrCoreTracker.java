@@ -37,7 +37,7 @@ public abstract class ConfiguredSolrCoreTracker {
 
     protected RegisteredSolrServerTracker indexTracker;
 
-    // instance of solrServer to use if not using the OSGi service tracker (e.g. for tests)
+    // instance of classifierSolrServer to use if not using the OSGi service tracker (e.g. for tests)
     protected SolrServer solrServer;
 
     protected ComponentContext context;
@@ -80,7 +80,7 @@ public abstract class ConfiguredSolrCoreTracker {
     }
 
     /**
-     * @return the manually bound solrServer instance or the one tracked by the OSGi service tracker.
+     * @return the manually bound classifierSolrServer instance or the one tracked by the OSGi service tracker.
      */
     public SolrServer getActiveSolrServer() {
         return solrServer != null ? solrServer : indexTracker.getService();

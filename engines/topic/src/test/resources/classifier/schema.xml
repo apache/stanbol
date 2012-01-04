@@ -23,6 +23,9 @@
     <fieldType name="int" class="solr.TrieIntField" precisionStep="0"
       omitNorms="true" positionIncrementGap="0"/>
 
+    <fieldType name="tdate" class="solr.TrieDateField" omitNorms="true"
+      precisionStep="6" positionIncrementGap="0"/>
+
     <fieldType name="random" class="solr.RandomSortField" indexed="true" />
 
     <fieldType name="text" class="solr.TextField">
@@ -64,6 +67,8 @@
    <field name="text" type="text" indexed="true" stored="false"
      termVectors="true" termPositions="false" termOffsets="false" />
    <field name="popularity" type="int" indexed="true" stored="true" />
+   <field name="modification_dt" type="tdate" indexed="true" stored="true" />
+   <field name="random" type="random" indexed="true" stored="false" />
  </fields>
 
  <uniqueKey>topic</uniqueKey>

@@ -21,7 +21,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -31,8 +30,6 @@ import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import junit.framework.TestCase;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -40,7 +37,6 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.params.CommonParams;
-import org.apache.solr.core.CoreContainer;
 import org.apache.stanbol.commons.solr.utils.StreamQueryRequest;
 import org.apache.stanbol.enhancer.topic.TopicSuggestion;
 import org.junit.After;
@@ -51,59 +47,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-public class TopicEngineTest {
+public class TopicEngineTest extends BaseTestWithSolrCore {
 
     private static final Logger log = LoggerFactory.getLogger(TopicEngineTest.class);
 
-    public static final String TEST_SOLR_CORE_ID = "test";
-
-    EmbeddedSolrServer solrServer;
+    EmbeddedSolrServer classifierSolrServer;
 
     File solrHome;
 
     @Before
-    public void makeEmptyEmbeddedSolrServer() throws IOException, ParserConfigurationException, SAXException {
-        solrHome = File.createTempFile("topicEngineTest_", "_solr_folder");
+    public void setup() throws IOException, ParserConfigurationException, SAXException {
+        solrHome = File.createTempFile("topicEngineTest_", "_solr_cores");
         solrHome.delete();
         solrHome.mkdir();
-
-        // solr conf file
-        File solrFile = new File(solrHome, "solr.xml");
-        InputStream is = getClass().getResourceAsStream("/test_solr.xml");
-        TestCase.assertNotNull("missing test solr.xml file", is);
-        IOUtils.copy(is, new FileOutputStream(solrFile));
-
-        // solr conf folder with schema
-        File solrCoreFolder = new File(solrHome, TEST_SOLR_CORE_ID);
-        solrCoreFolder.mkdir();
-        File solrConfFolder = new File(solrCoreFolder, "conf");
-        solrConfFolder.mkdir();
-        File schemaFile = new File(solrConfFolder, "schema.xml");
-        is = getClass().getResourceAsStream("/test_schema.xml");
-        TestCase.assertNotNull("missing test solr schema.xml file", is);
-        IOUtils.copy(is, new FileOutputStream(schemaFile));
-
-        File solrConfigFile = new File(solrConfFolder, "solrconfig.xml");
-        is = getClass().getResourceAsStream("/test_solrconfig.xml");
-        TestCase.assertNotNull("missing test solrconfig.xml file", is);
-        IOUtils.copy(is, new FileOutputStream(solrConfigFile));
-
-        // create the embedded server
-        CoreContainer coreContainer = new CoreContainer(solrHome.getAbsolutePath(), solrFile);
-        solrServer = new EmbeddedSolrServer(coreContainer, TEST_SOLR_CORE_ID);
+        classifierSolrServer = makeEmptyEmbeddedSolrServer(solrHome, "classifierserver", "classifier");
     }
 
     @After
     public void cleanupEmbeddedSolrServer() {
         FileUtils.deleteQuietly(solrHome);
         solrHome = null;
-        solrServer = null;
+        classifierSolrServer = null;
     }
 
     protected void loadSampleTopicsFromTSV() throws IOException, SolrServerException {
-        assertNotNull(solrHome);
-        assertNotNull(solrServer);
-        String topicSnippetsPath = "/topics_abstracts_snippet.tsv";
+        assertNotNull(classifierSolrServer);
+        String topicSnippetsPath = "/classifier/topics_abstracts_snippet.tsv";
         InputStream is = getClass().getResourceAsStream(topicSnippetsPath);
         assertNotNull("Could not find test resource: " + topicSnippetsPath, is);
 
@@ -118,7 +87,7 @@ public class TopicEngineTest {
         query.set(CommonParams.STREAM_BODY, IOUtils.toString(is, "utf-8"));
 
         // Upload an index
-        QueryResponse response = new StreamQueryRequest(query).process(solrServer);
+        QueryResponse response = new StreamQueryRequest(query).process(classifierSolrServer);
         assertNotNull(response);
         log.info(String.format("Indexed test topics in %dms", response.getElapsedTime()));
     }
@@ -126,7 +95,7 @@ public class TopicEngineTest {
     protected Hashtable<String,Object> getDefaultConfigParams() {
         Hashtable<String,Object> config = new Hashtable<String,Object>();
         config.put(TopicClassificationEngine.ENGINE_ID, "test-engine");
-        config.put(TopicClassificationEngine.SOLR_CORE, solrServer);
+        config.put(TopicClassificationEngine.SOLR_CORE, classifierSolrServer);
         config.put(TopicClassificationEngine.TOPIC_URI_FIELD, "topic");
         config.put(TopicClassificationEngine.SIMILARTITY_FIELD, "text");
         config.put(TopicClassificationEngine.BROADER_FIELD, "broader");
@@ -139,7 +108,7 @@ public class TopicEngineTest {
         TopicClassificationEngine engine = TopicClassificationEngine.fromParameters(config);
         assertNotNull(engine);
         assertEquals(engine.engineId, "test-engine");
-        assertEquals(engine.getActiveSolrServer(), solrServer);
+        assertEquals(engine.getActiveSolrServer(), classifierSolrServer);
         assertEquals(engine.topicUriField, "topic");
         assertEquals(engine.similarityField, "text");
         assertEquals(engine.acceptedLanguages, new ArrayList<String>());
