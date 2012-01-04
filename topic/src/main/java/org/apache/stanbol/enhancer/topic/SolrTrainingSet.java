@@ -54,7 +54,7 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
 
     public static final String SOLR_CORE = "org.apache.stanbol.enhancer.engine.topic.solrCore";
 
-    public static final String TOPICS_URI_FIELD = "org.apache.stanbol.enhancer.engine.topic.topicUriField";
+    public static final String TOPICS_URI_FIELD = "org.apache.stanbol.enhancer.engine.topic.topicsUriField";
 
     public static final String EXAMPLE_ID_FIELD = "org.apache.stanbol.enhancer.engine.topic.exampleIdField";
 
