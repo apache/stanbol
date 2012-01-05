@@ -122,6 +122,18 @@ public class TrainingSetTest extends BaseTestWithSolrCore {
         assertEquals(2, examples.items.size());
         assertEquals(examples.items, Arrays.asList("Text of example1.", "Text of example2."));
         assertFalse(examples.hasMore);
+        
+        // Test example removal
+        trainingSet.registerExample("example1", null, Arrays.asList(TOPIC_1, TOPIC_3));
+        examples = trainingSet.getPositiveExamples(Arrays.asList(TOPIC_1, TOPIC_3), null);
+        assertEquals(1, examples.items.size());
+        assertEquals(examples.items, Arrays.asList("Text of example2."));
+        assertFalse(examples.hasMore);
+
+        trainingSet.registerExample("example2", null, Arrays.asList(TOPIC_1, TOPIC_3));
+        examples = trainingSet.getPositiveExamples(Arrays.asList(TOPIC_1, TOPIC_3), null);
+        assertEquals(0, examples.items.size());
+        assertFalse(examples.hasMore);
     }
 
     @Test

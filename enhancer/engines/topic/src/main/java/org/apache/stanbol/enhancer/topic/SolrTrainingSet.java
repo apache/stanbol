@@ -144,6 +144,23 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
 
     @Override
     public String registerExample(String exampleId, String text, List<String> topics) throws TrainingSetException {
+        if (text == null) {
+            // special case: example removal
+            if (exampleId == null) {
+                throw new IllegalArgumentException("exampleId and text should not be null simultaneously");
+            }
+            SolrServer solrServer = getActiveSolrServer();
+            try {
+                solrServer.deleteByQuery(exampleIdField + ":" + exampleId);
+                solrServer.commit();
+                return exampleId;
+            } catch (Exception e) {
+                String msg = String.format("Error deleting example with id '%s' on Solr Core '%s'",
+                    exampleId, solrCoreId);
+                throw new TrainingSetException(msg, e);
+            }
+        }
+
         if (exampleId == null || exampleId.isEmpty()) {
             exampleId = UUID.randomUUID().toString();
         }
