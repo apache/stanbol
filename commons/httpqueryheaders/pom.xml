@@ -30,7 +30,7 @@
   <artifactId>org.apache.stanbol.commons.httpqueryheaders</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Http Query Headers</name>
+  <name>Apache Stanbol Http Query Headers</name>
   <description>Allows to parse HTTP headers as QueryParameters by prefixing it with "header_{http-header}". This feature allows to bypass the inability of Internet Explorer to set headers for multi domain (CORS) requests. This is a general utility and has no dependencies to Apache Stanbol.</description>
 <!--  <scm>
     <connection>
