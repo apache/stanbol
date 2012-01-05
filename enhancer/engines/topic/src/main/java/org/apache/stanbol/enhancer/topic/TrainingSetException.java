@@ -29,4 +29,8 @@ public class TrainingSetException extends IOException {
         super(message);
     }
 
+    public TrainingSetException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }
