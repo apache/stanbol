@@ -76,6 +76,9 @@ public class TrainingSetTest extends BaseTestWithSolrCore {
         Batch<String> examples = trainingSet.getPositiveExamples(new ArrayList<String>(), null);
         assertEquals(examples.items.size(), 0);
         assertFalse(examples.hasMore);
+        examples = trainingSet.getNegativeExamples(new ArrayList<String>(), null);
+        assertEquals(examples.items.size(), 0);
+        assertFalse(examples.hasMore);
         examples = trainingSet.getPositiveExamples(Arrays.asList(TOPIC_1), null);
         assertEquals(examples.items.size(), 0);
         assertFalse(examples.hasMore);
@@ -87,20 +90,20 @@ public class TrainingSetTest extends BaseTestWithSolrCore {
         assertFalse(examples.hasMore);
     }
 
-    //@Test
+    @Test
     public void testStoringExamples() throws ConfigurationException, TrainingSetException {
         trainingSet.registerExample("example1", "Text of example1.", Arrays.asList(TOPIC_1));
         trainingSet.registerExample("example2", "Text of example2.", Arrays.asList(TOPIC_1, TOPIC_2));
         trainingSet.registerExample("example3", "Text of example3.", new ArrayList<String>());
 
-        Batch<String> examples = trainingSet.getPositiveExamples(Arrays.asList(TOPIC_1, TOPIC_3), null);
-        assertEquals(2, examples.items.size());
-        assertEquals(examples.items, Arrays.asList("Text of example1.", "Text of example2."));
-        assertFalse(examples.hasMore);
-
-        examples = trainingSet.getPositiveExamples(Arrays.asList(TOPIC_2), null);
+        Batch<String> examples = trainingSet.getPositiveExamples(Arrays.asList(TOPIC_2), null);
         assertEquals(1, examples.items.size());
         assertEquals(examples.items, Arrays.asList("Text of example2."));
+        assertFalse(examples.hasMore);
+
+        examples = trainingSet.getPositiveExamples(Arrays.asList(TOPIC_1, TOPIC_3), null);
+        assertEquals(2, examples.items.size());
+        assertEquals(examples.items, Arrays.asList("Text of example1.", "Text of example2."));
         assertFalse(examples.hasMore);
 
         examples = trainingSet.getNegativeExamples(Arrays.asList(TOPIC_1), null);
@@ -109,7 +112,7 @@ public class TrainingSetTest extends BaseTestWithSolrCore {
         assertFalse(examples.hasMore);
     }
 
-    //@Test
+    // @Test
     public void testBatchingExamples() throws ConfigurationException, TrainingSetException {
         for (int i = 0; i < 28; i++) {
             trainingSet.registerExample("example" + i, "Text of example" + i + ".", Arrays.asList(TOPIC_1));
