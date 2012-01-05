@@ -37,6 +37,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.osgi.framework.InvalidSyntaxException;
@@ -168,29 +169,50 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
         SolrServer solrServer = getActiveSolrServer();
         SolrQuery query = new SolrQuery();
         List<String> parts = new ArrayList<String>();
+        String q = "";
         if (topics.isEmpty()) {
-            query.setQuery("*:*");
+            q += "*:*";
         } else if (positive) {
             for (String topic : topics) {
                 // use a nested query to avoid string escaping issues with special solr chars
                 parts.add("_query_:\"{!field f=" + topicUrisField + "}" + topic + "\"");
             }
-            query.setQuery(StringUtils.join(parts, " OR "));
+            if (offset != null) {
+                q += "(";
+            }
+            q += StringUtils.join(parts, " OR ");
+            if (offset != null) {
+                q += ")";
+            }
         } else {
             for (String topic : topics) {
                 // use a nested query to avoid string escaping issues with special solr chars
                 parts.add("-_query_:\"{!field f=" + topicUrisField + "}" + topic + "\"");
             }
-            query.setQuery(StringUtils.join(parts, " AND "));
+            q += StringUtils.join(parts, " AND ");
         }
+        if (offset != null) {
+            q += " AND " + exampleIdField + ":[" + offset.toString() + " TO *]";
+        }
+        query.setQuery(q);
+        query.addSortField(exampleIdField, SolrQuery.ORDER.asc);
+        query.set("rows", batchSize + 1);
+        String nextExampleId = null;
         try {
-            for (SolrDocument result : solrServer.query(query).getResults()) {
-                Collection<Object> textValues = result.getFieldValues(exampleTextField);
-                if (textValues == null) {
-                    continue;
-                }
-                for (Object value : textValues) {
-                    items.add(value.toString());
+            int count = 0;
+            QueryResponse response = solrServer.query(query);
+            for (SolrDocument result : response.getResults()) {
+                if (count == batchSize) {
+                    nextExampleId = result.getFirstValue(exampleIdField).toString();
+                } else {
+                    count++;
+                    Collection<Object> textValues = result.getFieldValues(exampleTextField);
+                    if (textValues == null) {
+                        continue;
+                    }
+                    for (Object value : textValues) {
+                        items.add(value.toString());
+                    }
                 }
             }
         } catch (SolrServerException e) {
@@ -199,7 +221,7 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
                 StringUtils.join(topics, "', '"), solrCoreId);
             throw new TrainingSetException(msg, e);
         }
-        return new Batch<String>(items, false, null);
+        return new Batch<String>(items, nextExampleId != null, nextExampleId);
     }
 
     @Override
