@@ -134,12 +134,12 @@
         <configuration>
           <excludes>
             <!-- License provided in src/main/resources/README -->
-            <exclude>src/main/resources/org/apache/data/site/dbpedia/default/config/dbpedia_43k.solrindex.ref</exclude>
-            <exclude>src/main/resources/org/apache/data/site/dbpedia/default/config/org.apache.stanbol.enhancer.engines.entitytagging.impl.NamedEntityTaggingEngine-dbpedia.config</exclude>
-            <exclude>src/main/resources/org/apache/data/site/dbpedia/default/config/org.apache.stanbol.entityhub.core.site.CacheImpl-dbpedia.config</exclude>
-            <exclude>src/main/resources/org/apache/data/site/dbpedia/default/config/org.apache.stanbol.entityhub.site.referencedSite-dbpedia.config</exclude>
-            <exclude>src/main/resources/org/apache/data/site/dbpedia/default/config/org.apache.stanbol.entityhub.yard.solr.impl.SolrYard-dbpedia.config</exclude>
-            <exclude>src/main/resources/org/apache/data/site/dbpedia/default/index/dbpedia_43k.solrindex.zip</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/data/site/dbpedia/default/config/dbpedia.solrindex.ref</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/data/site/dbpedia/default/config/org.apache.stanbol.enhancer.engines.entitytagging.impl.NamedEntityTaggingEngine-dbpedia.config</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/data/site/dbpedia/default/config/org.apache.stanbol.entityhub.core.site.CacheImpl-dbpedia.config</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/data/site/dbpedia/default/config/org.apache.stanbol.entityhub.site.referencedSite-dbpedia.config</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/data/site/dbpedia/default/config/org.apache.stanbol.entityhub.yard.solr.impl.SolrYard-dbpedia.config</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/data/site/dbpedia/default/index/dbpedia_43k.solrindex.zip</exclude>
           </excludes>
         </configuration>
       </plugin>
