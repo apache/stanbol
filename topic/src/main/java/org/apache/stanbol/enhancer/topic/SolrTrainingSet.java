@@ -18,11 +18,15 @@ package org.apache.stanbol.enhancer.topic;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -30,6 +34,11 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrInputDocument;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -67,7 +76,11 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
 
     protected String trainingSetId;
 
-    protected String topicUriField;
+    protected String exampleIdField;
+
+    protected String exampleTextField;
+
+    protected String topicUrisField;
 
     protected String modificationDateField;
 
@@ -92,7 +105,9 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
     @Override
     public void configure(Dictionary<String,Object> config) throws ConfigurationException {
         trainingSetId = getRequiredStringParam(config, TRAINING_SET_ID);
-        topicUriField = getRequiredStringParam(config, TOPICS_URI_FIELD);
+        exampleIdField = getRequiredStringParam(config, EXAMPLE_ID_FIELD);
+        exampleTextField = getRequiredStringParam(config, EXAMPLE_TEXT_FIELD);
+        topicUrisField = getRequiredStringParam(config, TOPICS_URI_FIELD);
         modificationDateField = getRequiredStringParam(config, MODIFICATION_DATE_FIELD);
         configureSolrCore(config, SOLR_CORE);
     }
@@ -110,7 +125,25 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
 
     @Override
     public String registerExample(String exampleId, String text, List<String> topics) throws TrainingSetException {
-        // TODO
+        if (exampleId == null || exampleId.isEmpty()) {
+            exampleId = UUID.randomUUID().toString();
+        }
+        SolrInputDocument doc = new SolrInputDocument();
+        doc.addField(exampleIdField, exampleId);
+        doc.addField(exampleTextField, text);
+        if (topics != null) {
+            doc.addField(topicUrisField, topics);
+        }
+        doc.addField(modificationDateField, new Date());
+        SolrServer server = getActiveSolrServer();
+        try {
+            server.add(doc);
+            server.commit();
+        } catch (Exception e) {
+            String msg = String.format("Could not register example '%s' with topics: ['%s']", exampleId,
+                StringUtils.join(topics, "', '"));
+            throw new TrainingSetException(msg, e);
+        }
         return exampleId;
     }
 
@@ -122,14 +155,51 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
 
     @Override
     public Batch<String> getPositiveExamples(List<String> topics, Object offset) throws TrainingSetException {
-        // TODO
-        return new Batch<String>(new ArrayList<String>(), false, null);
+        return getExamples(topics, offset, true);
     }
 
     @Override
     public Batch<String> getNegativeExamples(List<String> topics, Object offset) throws TrainingSetException {
-        // TODO
-        return new Batch<String>(new ArrayList<String>(), false, null);
+        return getExamples(topics, offset, false);
+    }
+
+    protected Batch<String> getExamples(List<String> topics, Object offset, boolean positive) throws TrainingSetException {
+        List<String> items = new ArrayList<String>();
+        SolrServer solrServer = getActiveSolrServer();
+        SolrQuery query = new SolrQuery();
+        List<String> parts = new ArrayList<String>();
+        if (topics.isEmpty()) {
+            query.setQuery("*:*");
+        } else if (positive) {
+            for (String topic : topics) {
+                // use a nested query to avoid string escaping issues with special solr chars
+                parts.add("_query_:\"{!field f=" + topicUrisField + "}" + topic + "\"");
+            }
+            query.setQuery(StringUtils.join(parts, " OR "));
+        } else {
+            for (String topic : topics) {
+                // use a nested query to avoid string escaping issues with special solr chars
+                parts.add("-_query_:\"{!field f=" + topicUrisField + "}" + topic + "\"");
+            }
+            query.setQuery(StringUtils.join(parts, " AND "));
+        }
+        try {
+            for (SolrDocument result : solrServer.query(query).getResults()) {
+                Collection<Object> textValues = result.getFieldValues(exampleTextField);
+                if (textValues == null) {
+                    continue;
+                }
+                for (Object value : textValues) {
+                    items.add(value.toString());
+                }
+            }
+        } catch (SolrServerException e) {
+            String msg = String.format(
+                "Error while fetching positive examples for topics ['%s'] on Solr Core '%s'.",
+                StringUtils.join(topics, "', '"), solrCoreId);
+            throw new TrainingSetException(msg, e);
+        }
+        return new Batch<String>(items, false, null);
     }
 
     @Override
