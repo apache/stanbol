@@ -107,7 +107,7 @@ public class Fact {
                         }
                     }
                     else {
-                        // TODO Implement Me!
+                        // TODO Implement multi-valued properties when converting JSON-LD to fact
                         throw new RuntimeException("Sorry, this is not implemented yet!");
                     }
                 }

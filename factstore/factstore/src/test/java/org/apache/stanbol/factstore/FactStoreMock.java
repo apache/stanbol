@@ -40,13 +40,13 @@ public class FactStoreMock implements FactStore {
 
     @Override
     public void createFactSchema(FactSchema factSchema) throws Exception {
-        // TODO Auto-generated method stub
+
         
     }
 
     @Override
     public FactSchema getFactSchema(String factSchemaURN) {
-        // TODO Auto-generated method stub
+
         return null;
     }
 
@@ -57,19 +57,18 @@ public class FactStoreMock implements FactStore {
 
     @Override
     public void addFacts(Set<Fact> factSet) throws Exception {
-        // TODO Auto-generated method stub
+
         
     }
 
     @Override
     public FactResultSet query(Query query) {
-        // TODO Auto-generated method stub
+
         return null;
     }
 
     @Override
     public Fact getFact(int factId, String factSchemaURN) throws Exception {
-        // TODO Auto-generated method stub
         return null;
     }
 
