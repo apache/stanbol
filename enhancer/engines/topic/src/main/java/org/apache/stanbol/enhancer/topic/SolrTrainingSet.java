@@ -16,14 +16,18 @@
  */
 package org.apache.stanbol.enhancer.topic;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Dictionary;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
@@ -59,6 +63,8 @@ import org.slf4j.LoggerFactory;
                      @Property(name = SolrTrainingSet.TOPICS_URI_FIELD),
                      @Property(name = SolrTrainingSet.MODIFICATION_DATE_FIELD)})
 public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements TrainingSet {
+
+    protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
     public static final String TRAINING_SET_ID = "org.apache.stanbol.enhancer.topic.trainingset.id";
 
@@ -124,6 +130,18 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
         return true;
     }
 
+    protected String utcIsoString(Date date) {
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        return df.format(date);
+    }
+
+    protected String utcIsoString(Calendar calendar) {
+        if (!calendar.getTimeZone().equals(UTC)) {
+            calendar.setTimeZone(UTC);
+        }
+        return utcIsoString(calendar.getTime());
+    }
+
     @Override
     public String registerExample(String exampleId, String text, List<String> topics) throws TrainingSetException {
         if (exampleId == null || exampleId.isEmpty()) {
@@ -135,7 +153,8 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
         if (topics != null) {
             doc.addField(topicUrisField, topics);
         }
-        doc.addField(modificationDateField, new Date());
+        String utcIsoDate = utcIsoString(new GregorianCalendar(UTC));
+        doc.addField(modificationDateField, utcIsoDate + "Z");
         SolrServer server = getActiveSolrServer();
         try {
             server.add(doc);
@@ -150,8 +169,48 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
 
     @Override
     public Set<String> getUpdatedTopics(Calendar lastModificationDate) throws TrainingSetException {
-        // TODO
-        return Collections.emptySet();
+        TreeSet<String> collectedTopics = new TreeSet<String>();
+        SolrQuery query = new SolrQuery();
+        String utcIsoDate = utcIsoString(lastModificationDate);
+        String q = modificationDateField + ":[" + utcIsoDate + "Z TO *]";
+        String offset = null;
+        boolean done = false;
+        query.addSortField(exampleIdField, SolrQuery.ORDER.asc);
+        query.set("rows", batchSize + 1);
+        query.set("fl", exampleIdField + "," + topicUrisField);
+        while (!done) {
+            try {
+                if (offset != null) {
+                    q += " AND " + exampleIdField + ":[" + offset.toString() + " TO *]";
+                }
+                query.setQuery(q);
+                QueryResponse response = solrServer.query(query);
+                int count = 0;
+                for (SolrDocument result : response.getResults()) {
+                    if (count == batchSize) {
+                        offset = result.getFirstValue(exampleIdField).toString();
+                    } else {
+                        count++;
+                        Collection<Object> values = result.getFieldValues(topicUrisField);
+                        if (values == null) {
+                            continue;
+                        }
+                        for (Object value : values) {
+                            collectedTopics.add(value.toString());
+                        }
+                    }
+                }
+                if (count < batchSize) {
+                    done = true;
+                }
+            } catch (SolrServerException e) {
+                String msg = String.format(
+                    "Error while fetching topics for examples modified after '%s' on Solr Core '%s'.",
+                    utcIsoDate, solrCoreId);
+                throw new TrainingSetException(msg, e);
+            }
+        }
+        return collectedTopics;
     }
 
     @Override
