@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
@@ -171,6 +173,28 @@ public class TrainingSetTest extends BaseTestWithSolrCore {
         assertFalse(examples.hasMore);
 
         assertEquals(expectedCollectedText, collectedText);
+    }
+
+    @Test
+    public void testIncrementalQueries() throws Exception {
+        Calendar date0 = new GregorianCalendar();
+        Set<String> updatedTopics = trainingSet.getUpdatedTopics(date0);
+        assertEquals(0, updatedTopics.size());
+
+        trainingSet.registerExample("example1", "Text of example1.", Arrays.asList(TOPIC_1));
+        trainingSet.registerExample("example2", "Text of example2.", Arrays.asList(TOPIC_1, TOPIC_2));
+
+        updatedTopics = trainingSet.getUpdatedTopics(date0);
+        assertEquals(2, updatedTopics.size());
+        assertTrue(updatedTopics.contains(TOPIC_1));
+        assertTrue(updatedTopics.contains(TOPIC_2));
+
+        // check that the new registration look as compared to a new date:
+        Thread.sleep(1000);
+
+        Calendar date1 = new GregorianCalendar();
+        updatedTopics = trainingSet.getUpdatedTopics(date1);
+        assertEquals(0, updatedTopics.size());
     }
 
     protected Hashtable<String,Object> getDefaultConfigParams() {
