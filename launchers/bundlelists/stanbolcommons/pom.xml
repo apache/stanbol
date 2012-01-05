@@ -29,7 +29,7 @@
   <artifactId>org.apache.stanbol.launchers.bundlelists.stanbolcommons</artifactId>
   <packaging>partialbundlelist</packaging>
 
-  <name>Apache Stanbol OSGi Framework Bundle List </name>
+  <name>Apache Stanbol Commons Bundle List </name>
   <description>This is a Maven project which produces the partial list containing the common bundles that are used throughout the Stanbol.</description>
 
   <scm>
