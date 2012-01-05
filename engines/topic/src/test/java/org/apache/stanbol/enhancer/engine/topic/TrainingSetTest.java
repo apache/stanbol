@@ -195,6 +195,19 @@ public class TrainingSetTest extends BaseTestWithSolrCore {
         Calendar date1 = new GregorianCalendar();
         updatedTopics = trainingSet.getUpdatedTopics(date1);
         assertEquals(0, updatedTopics.size());
+
+        // check that incremental query works with batching
+        trainingSet.setBatchSize(3);
+
+        Set<String> expectedTopics = new HashSet<String>();
+        for (int i = 0; i < 11; i++) {
+            String topic = "http://example.org/new-topics/" + i;
+            String text = "Text of example" + i + ".";
+            trainingSet.registerExample(null, text, Arrays.asList(topic));
+            expectedTopics.add(topic);
+        }
+        Set<String> newlyUpdatedTopics = trainingSet.getUpdatedTopics(date1);
+        assertEquals(expectedTopics, newlyUpdatedTopics);
     }
 
     protected Hashtable<String,Object> getDefaultConfigParams() {
