@@ -29,7 +29,7 @@
   <artifactId>org.apache.stanbol.commons.installer.bundleprovider</artifactId>
   <packaging>bundle</packaging>
 
-  <name>BundleProvider</name>
+  <name>Apache Stanbol Bundle Provider</name>
   <description>Provides support for installing Configurations contained
   within Bundles by using the Sling Installer infrastructure </description>
   <scm>
