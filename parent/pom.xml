@@ -40,11 +40,6 @@
     <url>http://incubator.apache.org/stanbol</url>
   </scm>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <stanbol-version>0.9.0-incubating-SNAPSHOT</stanbol-version>
-  </properties>
-
   <build>
     <pluginManagement>
       <plugins>
@@ -67,22 +62,22 @@
       <dependency>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.contenthub.core</artifactId>
-        <version>${stanbol-version}</version>
+        <version>0.9.0-incubating-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.contenthub.store.solr</artifactId>
-        <version>${stanbol-version}</version>
+        <version>0.9.0-incubating-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.contenthub.web</artifactId>
-        <version>${stanbol-version}</version>
+        <version>0.9.0-incubating-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.contenthub.search.engines.wordnet</artifactId>
-        <version>${stanbol-version}</version>
+        <version>0.9.0-incubating-SNAPSHOT</version>
       </dependency>
 
       <!-- Search External -->
@@ -95,7 +90,7 @@
       <dependency>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>org.apache.stanbol.contenthub.helper.cnn</artifactId>
-        <version>${stanbol-version}</version>
+        <version>0.9.0-incubating-SNAPSHOT</version>
       </dependency>
 
       <!-- Clerezza -->
@@ -103,7 +98,6 @@
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.facade</artifactId>
         <version>0.12-incubating-SNAPSHOT</version>
-        <scope>provided</scope>
       </dependency>
 
       <!-- Wordnet -->
@@ -130,15 +124,6 @@
         <groupId>com.sun.xml.bind</groupId>
         <artifactId>jaxb-impl</artifactId>
         <version>2.2.2</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <!-- Jersey -->
-      <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-client</artifactId>
-        <version>${jersey-version}</version>
-        <scope>provided</scope>
       </dependency>
 
     </dependencies>
