@@ -101,9 +101,11 @@ public interface TopicClassifier {
     void setTrainingSet(TrainingSet trainingSet);
 
     /**
-     * Incrementally update the statistical model of the classifier. Note: depending on the size of the
-     * dataset and the number of topics to update, this process can take a long time and should probably be
-     * wrapped in a dedicated thread if called by a the user interface layer.
+     * Update (incrementally or from scratch) the statistical model of the classifier. Note: depending on the
+     * size of the dataset and the number of topics to update, this process can take a long time and should
+     * probably be wrapped in a dedicated thread if called by a the user interface layer.
+     * 
+     * @return the number of updated topics
      */
-    void updateModel() throws TrainingSetException;
+    int updateModel(boolean incremental) throws TrainingSetException;
 }
