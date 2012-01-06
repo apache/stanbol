@@ -25,6 +25,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHAN
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -62,9 +63,11 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
     
     public static final String FAKE_BUNDLE_SYMBOLIC_NAME = "FAKE_BUNDLE_SYMBOLIC_NAME";
 
+    @SuppressWarnings("unchecked")
     @BeforeClass
     public static void setUpServices() throws IOException {
-        nerEngine = new NEREngineCore(new ClasspathDataFileProvider(FAKE_BUNDLE_SYMBOLIC_NAME));
+        nerEngine = new NEREngineCore(new ClasspathDataFileProvider(FAKE_BUNDLE_SYMBOLIC_NAME),
+            "en",Collections.EMPTY_SET);
     }
 
     public static ContentItem wrapAsContentItem(final String id,
