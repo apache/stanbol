@@ -28,8 +28,6 @@ import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -46,7 +44,6 @@ import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
 public class TopicEngineTest extends BaseTestWithSolrCore {
 
