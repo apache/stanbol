@@ -51,11 +51,9 @@
   <!-- These modules form the Stanbol Framework -->
   <modules>
     <module>parent</module>
-    <module>frameworkfragment</module>
     <module>commons</module>
-    <module>owl</module>
-    <module>entityhub</module>
-    <module>factstore</module>
+    <module>data</module>
+    <module>frameworkfragment</module>
 
     <module>enhancer/parent</module>
     <module>enhancer/generic/servicesapi</module>
@@ -64,14 +62,17 @@
     <module>enhancer/benchmark</module>
     <module>enhancer/bundlelist</module>
 
+    <module>cmsadapter</module>
     <module>contenthub</module>
+    <module>entityhub</module>
+    <module>factstore</module>
+
     <module>ontologymanager/ontonet</module>
     <module>ontologymanager/registry</module>
     <module>ontologymanager/web</module>
     <module>ontologymanager/bundlelist</module>
+    <module>owl</module>
     <module>rules</module>
-
-    <module>cmsadapter</module>
   </modules>
 
   <profiles>
@@ -80,13 +81,16 @@
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
+      <properties>
+        <sourceReleaseAssemblyDescriptor>
+          stack-source-release-zip-tar
+        </sourceReleaseAssemblyDescriptor>
+      </properties>
       <build>
         <finalName>stanbol-stack-${project.version}</finalName>
       </build>
       <modules>
-        <module>commons/opennlp</module>
         <module>commons/web/webvie</module>
-        <module>data</module>
 
         <module>enhancer/engines</module>
 
@@ -111,8 +115,6 @@
         </file>
       </activation>
       <properties>
-        <!-- Define the framework source release packaging descriptor for
-             framework releases when using the apache-release profile -->
         <sourceReleaseAssemblyDescriptor>
           framework-source-release-zip-tar
         </sourceReleaseAssemblyDescriptor>
@@ -133,6 +135,68 @@
         <module>releasing/framework/stanbol-framework-source-release-assembly-descriptor</module>
       </modules>
     </profile>
+    <profile>
+      <id>rat</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.rat</groupId>
+            <artifactId>apache-rat-plugin</artifactId>
+            <executions>
+              <execution>
+                <configuration>
+                  <!-- If you want reports per module, set this to 'true' -->
+                  <excludeSubProjects>false</excludeSubProjects>
+                  <excludes>
+                    <!-- hidden files -->
+                    <exclude>**/.*</exclude>
+                    <exclude>**/.*/*</exclude>
+                    <exclude>**/.*/**/*</exclude>
+
+                    <!-- by file type -->
+                    <exclude>**/*.config</exclude>
+                    <exclude>**/*.cfg</exclude>
+                    <exclude>**/*.ref</exclude>
+                    <exclude>**/*.txt</exclude>
+                    <exclude>**/*.tsv</exclude>
+                    <exclude>**/*.sem</exclude>
+
+                    <exclude>**/test/**/*.eml</exclude>
+                    <exclude>**/test/**/*.nt</exclude>
+
+                    <!-- generated files -->
+                    <exclude>*/**/target/**</exclude>
+
+                    <!-- approved licenses -->
+                    <exclude>contenthub/web/src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jit.js</exclude>
+                    <exclude>enhancer/jersey/src/main/resources/org/apache/stanbol/enhancer/jersey/static/openlayers-2.9/**</exclude>
+                    <exclude>owl/**</exclude>
+
+                    <!-- unstable and not release relevant stuff -->
+                    <exclude>PLAYGROUND.txt</exclude>
+                    <exclude>conventions/**</exclude>
+                    <exclude>enhancer/data/text-examples/**</exclude>
+                    <exclude>enhancer/query-rendering/**</exclude>
+                    <exclude>enhancer/stores/**</exclude>
+                    <exclude>explanation/**</exclude>
+                    <exclude>demos/**</exclude>
+                    <exclude>launchers/kres/**</exclude>
+                    <exclude>reasoners/**</exclude>
+                    <exclude>reengineer/**</exclude>
+
+                  </excludes>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    
+    <!-- One day the KReS profile will disappear -->    
     <profile>
       <id>kres</id>
       <activation>
