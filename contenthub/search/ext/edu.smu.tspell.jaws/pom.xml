@@ -11,59 +11,70 @@
     permissions and limitations under the License.
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<parent>
-		<artifactId>org.apache.stanbol.contenthub.parent</artifactId>
-		<groupId>org.apache.stanbol</groupId>
-		<version>0.9.0-incubating-SNAPSHOT</version>
-		<relativePath>../../../parent</relativePath>
-	</parent>
+  <parent>
+    <artifactId>org.apache.stanbol.contenthub.parent</artifactId>
+    <groupId>org.apache.stanbol</groupId>
+    <version>0.9.0-incubating-SNAPSHOT</version>
+    <relativePath>../../../parent</relativePath>
+  </parent>
 
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>edu.smu.tspell.jaws</artifactId>
-	<packaging>bundle</packaging>
-	<version>1.2</version>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>edu.smu.tspell.jaws</artifactId>
+  <packaging>bundle</packaging>
+  <version>1.2</version>
 
-	<name>Apache Stanbol Search  Ext - Jaws OSGI Bundle  </name>
-	<description>Jaws OSGI Bundle</description>
+  <name>Apache Stanbol Search  Ext - Jaws OSGI Bundle  </name>
+  <description>Jaws OSGI Bundle</description>
 
-	<repositories>
-		<repository>
-			<releases>
-				<updatePolicy>always</updatePolicy>
-			</releases>
-			<snapshots>
-				<updatePolicy>always</updatePolicy>
-			</snapshots>
-			<id>local-owlapi-repo</id>
-			<url>file://localhost/${project.basedir}/src/main/resources/local-maven-repository</url>
-		</repository>
-	</repositories>
+  <repositories>
+    <repository>
+      <releases>
+        <updatePolicy>always</updatePolicy>
+      </releases>
+      <snapshots>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+      <id>local-owlapi-repo</id>
+      <url>file://localhost/${project.basedir}/src/main/resources/local-maven-repository</url>
+    </repository>
+  </repositories>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-						<Embed-Dependency>*;artifactId=jaws</Embed-Dependency>
-						<Embed-Transitive>true</Embed-Transitive>
-						<Export-Package>edu.smu.tspell.*</Export-Package>
-					</instructions>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Embed-Dependency>*;artifactId=jaws</Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>
+            <Export-Package>edu.smu.tspell.*</Export-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- See STANBOL-445 -->
+            <exclude>src/main/resources/local-maven-repository/edu/smu/tspell/jaws/1.2/jaws-1.2.pom</exclude>
+            <exclude>src/main/resources/local-maven-repository/edu/smu/tspell/jaws/maven-metadata-local.xml</exclude>
+          </excludes>
+        </configuration>
+      </plugin>     
+    </plugins>
+  </build>
 
-	<dependencies>
-		<dependency>
-			<groupId>edu.smu.tspell</groupId>
-			<artifactId>jaws</artifactId>
-		</dependency>
-	</dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>edu.smu.tspell</groupId>
+      <artifactId>jaws</artifactId>
+    </dependency>
+  </dependencies>
 
 </project>

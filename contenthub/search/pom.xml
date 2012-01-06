@@ -16,45 +16,46 @@
    limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.apache.stanbol</groupId>
-		<artifactId>org.apache.stanbol.contenthub.parent</artifactId>
-		<version>0.9.0-incubating-SNAPSHOT</version>
-		<relativePath>../parent</relativePath>
-	</parent>
+  <!-- parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.contenthub.parent</artifactId>
+    <version>0.9.0-incubating-SNAPSHOT</version>
+    <relativePath>../parent</relativePath>
+  </parent -->
 
-	<artifactId>org.apache.stanbol.contenthub.search.reactor</artifactId>
-	<packaging>pom</packaging>
-	<version>${search-version}</version>
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.contenthub.search.reactor</artifactId>
+  <version>0.9.0-incubating-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
-	<name>Apache Stanbol Search Reactor</name>
-	<description>
+  <name>Apache Stanbol Search Reactor</name>
+  <description>
     Pseudo project to build the complete semantic search project
   </description>
 
-	<inceptionYear>2011</inceptionYear>
+  <inceptionYear>2011</inceptionYear>
 
-	<scm>
-		<connection>
-				  scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/contenthub/search
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/contenthub/search
     </connection>
-		<developerConnection>
-				  scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/contenthub/search
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/contenthub/search
     </developerConnection>
-	</scm>
+  </scm>
 
-	<modules>
-		<module>engines/solr</module>
-		<module>ext/edu.smu.tspell.jaws</module>
-		<module>engines/wordnet</module>
-		<module>engines/ontologyresource</module>
-		<!--
-		<module>engines/enhancement</module>
-		<module>engines/location</module>-->
-		
-	</modules>
+  <modules>
+    <module>engines/solr</module>
+    <module>ext/edu.smu.tspell.jaws</module>
+    <module>engines/wordnet</module>
+    <module>engines/ontologyresource</module>
+    <!--
+    <module>engines/enhancement</module>
+    <module>engines/location</module>-->
+    
+  </modules>
 </project>
