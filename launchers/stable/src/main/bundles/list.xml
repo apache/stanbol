@@ -19,6 +19,14 @@
 		List of initial bundles for the Stanbol Sling-based standalone launcher.
 	-->
 <bundles>
+  <!-- General-purpose libraries -->
+  <startLevel level="10">
+        <bundle> <!-- used by langid -->
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>0.9</version>
+        </bundle>
+  </startLevel>
 
   <!-- *********************************************************************
           start level 20 TO 24 reserved for Stanbol Framework
@@ -72,12 +80,12 @@
 
   <!-- Stanbol Enhancer plug-ins (the Enhancement Engines) -->
   <startLevel level="25">
-    <!-- unstable
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.langid</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
+    <!-- unstable
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.metaxa</artifactId>
@@ -119,6 +127,12 @@
       <artifactId>org.apache.stanbol.enhancer.engine.entitytagging</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
     </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engine.keywordextraction</artifactId>
+      <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>
+    
   </startLevel>
 
   <!-- *********************************************************************

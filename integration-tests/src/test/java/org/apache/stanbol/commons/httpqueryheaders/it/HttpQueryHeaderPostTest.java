@@ -63,7 +63,8 @@ public class HttpQueryHeaderPostTest extends EnhancerTestBase {
                 builder.buildUrl("/engines", 
                 "header_Accept",""))) //override the parse Accept Header
             .withHeader("Accept","text/turtle") //set Accept to turtle (overridden) 
-            .withContent("John Smith was born in London.")
+            .withContent("John Smith was born in London. But since ten years he " +
+            		"lives now in Paris.")
         )
         .assertStatus(200)
         //check for JSON-LD (the default content type
