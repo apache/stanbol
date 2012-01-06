@@ -89,7 +89,8 @@ import org.slf4j.LoggerFactory;
                      @Property(name = TopicClassificationEngine.BROADER_FIELD),
                      @Property(name = TopicClassificationEngine.MATERIALIZED_PATH_FIELD),
                      @Property(name = TopicClassificationEngine.MODEL_UPDATE_DATE_FIELD)})
-public class TopicClassificationEngine extends ConfiguredSolrCoreTracker implements EnhancementEngine, ServiceProperties, TopicClassifier {
+public class TopicClassificationEngine extends ConfiguredSolrCoreTracker implements EnhancementEngine,
+        ServiceProperties, TopicClassifier {
 
     public static final String ENGINE_ID = "org.apache.stanbol.enhancer.engine.id";
 
@@ -401,11 +402,12 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     }
 
     @Override
-    public void updateModel() throws TrainingSetException {
+    public int updateModel(boolean incremental) throws TrainingSetException {
         checkTrainingSet();
         // TODO:
         // perform a first query to iterate over all the registered topics sorted by id (to allow for paging)
         // for each topic find the last update date of the union of the topic and it's narrower topic
+        return 0;
     }
 
     protected void checkTrainingSet() throws TrainingSetException {
