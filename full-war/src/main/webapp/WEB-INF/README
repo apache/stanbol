@@ -21,3 +21,5 @@ resources/config/org.apache.stanbol.entityhub.core.impl.EntityhubConfigurationIm
 resources/config/org.apache.stanbol.enhancer.engines.entitytagging.impl.NamedEntityTaggingEngine-local.config
 resources/config/org.apache.stanbol.entityhub.yard.solr.impl.SolrYard-entityhub.config
 resources/config/org.apache.stanbol.commons.solr.web.impl.SolrDispatchFilterComponent-default.config
+resources/config/org.apache.stanbol.enhancer.engines.opennlp.impl.NamedEntityExtractionEnhancementEngine-default.config
+
