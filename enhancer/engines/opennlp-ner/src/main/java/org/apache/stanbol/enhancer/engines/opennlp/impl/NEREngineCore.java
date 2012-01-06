@@ -354,31 +354,21 @@ public class NEREngineCore implements EnhancementEngine {
 
             // extract the names in the current sentence and
             // keep them store them with the current context
-            String[] tokens = tokenizer.tokenize(sentence);
+            Span[] tokenSpans = tokenizer.tokenizePos(sentence);
+            String[] tokens = Span.spansToStrings(tokenSpans, sentence);
             Span[] nameSpans = finder.find(tokens);
             double[] probs = finder.probs();
             String[] names = Span.spansToStrings(nameSpans, tokens);
-            int lastStartPosition = 0;
+            //int lastStartPosition = 0;
             for (int j = 0; j < names.length; j++) {
                 String name = names[j];
                 Double confidence = 1.0;
                 for (int k = nameSpans[j].getStart(); k < nameSpans[j].getEnd(); k++) {
                     confidence *= probs[k];
                 }
-                int start = sentence.substring(lastStartPosition).indexOf(name);
-                Integer absoluteStart = null;
-                Integer absoluteEnd = null;
-                if (start != -1) {
-                    /*
-                     * NOTE (rw, issue 19, 20100615) Here we need to set the new start position, by adding the
-                     * current start to the lastStartPosion. we need also to use the lastStartPosition to
-                     * calculate the start of the element. The old code had not worked if names contains more
-                     * than a single element!
-                     */
-                    lastStartPosition += start;
-                    absoluteStart = sentenceSpans[i].getStart() + lastStartPosition;
-                    absoluteEnd = absoluteStart + name.length();
-                }
+                int start = tokenSpans[nameSpans[j].getStart()].getStart();
+                int absoluteStart = sentenceSpans[i].getStart() + start;
+                int absoluteEnd = absoluteStart + name.length();
                 NameOccurrence occurrence = new NameOccurrence(name, absoluteStart, absoluteEnd, context,
                         confidence);
 
