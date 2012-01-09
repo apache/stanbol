@@ -418,6 +418,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     @Override
     public int updateModel(boolean incremental) throws TrainingSetException, ClassifierException {
         checkTrainingSet();
+        long start = System.currentTimeMillis();
         if (incremental && modelUpdateDateField == null) {
             log.warn(MODEL_UPDATE_DATE_FIELD + " field is not configured: switching to batch update mode.");
             incremental = false;
@@ -427,7 +428,11 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         SolrServer solrServer = getActiveSolrServer();
         SolrQuery query = new SolrQuery();
         String q = "*:*";
-        query.setFields(topicUriField, broaderField);
+        if (modelUpdateDateField != null) {
+            query.setFields(topicUriField, broaderField);
+        } else {
+            query.setFields(topicUriField, broaderField, modelUpdateDateField);
+        }
         String offset = null;
         boolean done = false;
         int batchSize = 1000;
@@ -448,31 +453,46 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                         offset = topicId;
                     } else {
                         count++;
-                        updateTopic(topicId, result.getFieldValues(broaderField));
+                        List<String> impactedTopics = new ArrayList<String>();
+                        impactedTopics.add(topicId);
+                        impactedTopics.addAll(getNarrowerTopics(topicId));
+                        if (incremental) {
+                            Date lastModelUpdate = (Date) result.getFirstValue(modelUpdateDateField);
+                            if (lastModelUpdate != null
+                                && !trainingSet.hasChangedSince(impactedTopics, lastModelUpdate)) {
+                                continue;
+                            }
+                        }
+                        updateTopic(topicId, impactedTopics, result.getFieldValues(broaderField));
                         updatedTopics++;
                     }
                 }
                 if (count < batchSize) {
                     done = true;
                 }
-            } catch (SolrServerException e) {
+                solrServer.optimize();
+            } catch (Exception e) {
                 String msg = String.format("Error while updating topics on Solr Core '%s'.", solrCoreId);
                 throw new TrainingSetException(msg, e);
             }
         }
+        long stop = System.currentTimeMillis();
+        log.info("Sucessfully updated {} topics in {}s", updatedTopics, (double) (stop - start) / 1000.);
         return updatedTopics;
     }
 
     /**
      * @param topicId
-     * @throws TrainingSetException
-     * @throws ClassifierException
+     *            the topic model to update
+     * @param impactedTopics
+     *            the list of impacted topics (e.g. the topic node and direct children)
+     * @param broaderTopics
+     *            the collection of broader to re-add in the broader field
      */
-    public void updateTopic(String topicId, Collection<Object> broaderTopicIds) throws TrainingSetException,
-                                                                               ClassifierException {
-        ArrayList<String> impactedTopics = new ArrayList<String>();
-        impactedTopics.add(topicId);
-        impactedTopics.addAll(getNarrowerTopics(topicId));
+    public void updateTopic(String topicId, List<String> impactedTopics, Collection<Object> broaderTopics) throws TrainingSetException,
+                                                                                                          ClassifierException {
+        long start = System.currentTimeMillis();
+
         Batch<String> examples = Batch.emtpyBatch(String.class);
         StringBuffer sb = new StringBuffer();
         do {
@@ -486,8 +506,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         // reindex the topic with the new text data collected from the examples
         SolrInputDocument doc = new SolrInputDocument();
         doc.addField(topicUriField, topicId);
-        if (broaderTopicIds != null && broaderField != null) {
-            doc.addField(broaderField, broaderTopicIds);
+        if (broaderTopics != null && broaderField != null) {
+            doc.addField(broaderField, broaderTopics);
         }
         if (sb.length() > 0) {
             doc.addField(similarityField, sb);
@@ -505,6 +525,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 solrCoreId);
             throw new ClassifierException(msg, e);
         }
+        long stop = System.currentTimeMillis();
+        log.debug("Sucessfully updated topic {} in {}s", topicId, (double) (stop - start) / 1000.);
     }
 
     protected void checkTrainingSet() throws TrainingSetException {
