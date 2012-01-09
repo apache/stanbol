@@ -18,6 +18,7 @@ package org.apache.stanbol.enhancer.engine.topic;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -202,8 +203,8 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
         assertEquals(bestSuggestion.uri, "Category:American_films");
     }
 
-    //@Test
-    public void testTrainClassifierFromExamples() throws Exception {
+    @Test
+    public void testBatchTrainClassifierFromExamples() throws Exception {
 
         // mini taxonomy for news articles
         String business = "urn:topics/business";
@@ -212,25 +213,28 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
         String sport = "urn:topics/sport";
         String football = "urn:topics/football";
         String wordcup = "urn:topics/wordcup";
+        String music = "urn:topics/music";
 
         classifier.addTopic(business, null);
         classifier.addTopic(technology, null);
         classifier.addTopic(sport, null);
+        classifier.addTopic(music, null);
         classifier.addTopic(apple, Arrays.asList(business, technology));
         classifier.addTopic(football, Arrays.asList(sport));
         classifier.addTopic(wordcup, Arrays.asList(football));
 
         // train the classifier on an empty dataset
         classifier.setTrainingSet(trainingSet);
-        assertEquals(6, classifier.updateModel(true));
+        assertEquals(7, classifier.updateModel(false));
 
         // the model is updated but does not predict anything
         List<TopicSuggestion> suggestions = classifier
                 .suggestTopics("I like the sound of vuvuzula in the morning!");
         assertEquals(0, suggestions.size());
 
-        // further update of the model leave do not change any topic
-        assertEquals(0, classifier.updateModel(true));
+        // further update of the model leave do not change any topic but they are re-indexed anyway because
+        // incremental update is disabled.
+        assertEquals(7, classifier.updateModel(false));
 
         // lets register some examples
         trainingSet.registerExample(null, "Money, money, money is the root of all evil.",
@@ -243,15 +247,16 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
             Arrays.asList(football));
         trainingSet.registerExample(null, "Vuvuzela made the soundtrack of the"
                                           + " football wordcup of 2010 in South Africa.",
-            Arrays.asList(football, wordcup));
+            Arrays.asList(football, wordcup, music));
 
-        // retrain the model: all 6 topics are impacted by the new examples
-        assertEquals(6, classifier.updateModel(true));
+        // retrain the model: all topics are recomputed
+        assertEquals(7, classifier.updateModel(false));
         suggestions = classifier.suggestTopics("I like the sound of vuvuzula in the morning!");
-        assertEquals(3, suggestions.size());
-        assertEquals(wordcup, suggestions.get(0).uri);
-        assertEquals(football, suggestions.get(1).uri);
-        assertEquals(sport, suggestions.get(2).uri);
+        assertTrue(suggestions.size() >= 4);
+        assertEquals(music, suggestions.get(0).uri);
+        assertEquals(wordcup, suggestions.get(1).uri);
+        assertEquals(football, suggestions.get(2).uri);
+        assertEquals(sport, suggestions.get(3).uri);
     }
 
     protected Hashtable<String,Object> getDefaultClassifierConfigParams() {

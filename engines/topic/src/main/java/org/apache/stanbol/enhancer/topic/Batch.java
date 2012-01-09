@@ -17,6 +17,7 @@
 package org.apache.stanbol.enhancer.topic;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -52,5 +53,12 @@ public class Batch<T> implements Serializable {
         this.items = items;
         this.hasMore = hasMore;
         this.nextOffset = nextOffset;
+    }
+
+    /**
+     * Helper method to return a first empty batch to bootstrap an iteration loop.
+     */
+    public static <T2> Batch<T2> emtpyBatch(Class<T2> clazz) {
+        return new Batch<T2>(new ArrayList<T2>(), true, null);
     }
 }
