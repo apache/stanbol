@@ -56,6 +56,7 @@ import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyScopeFact
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologySpace;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ScopeRegistry;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.UnmodifiableOntologyCollectorException;
+import org.apache.stanbol.ontologymanager.ontonet.api.session.Session;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionLimitException;
 import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
 import org.apache.stanbol.owl.transformation.OWLAPIToClerezzaConverter;
@@ -169,189 +170,202 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
         /*
          * Now we prepare the OntoNet environment. First we create the OntoNet session in which run the whole
          */
-        final String sessionID;
-        try {
-            sessionID = // createAndAddSessionSpaceToScope();
-            sessionManager.createSession().getID();
-        } catch (SessionLimitException e1) {
-            throw new EngineException(e1);
-        }
+        //String sessionID = null;
+        
+        Session tmpSession = null;
+		try {
+			tmpSession = sessionManager.createSession();
+		} catch (SessionLimitException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+        
+        
 
-        /*
-         * We retrieve the session space
-         */
-        OntologySpace sessionSpace = scope.getSessionSpace(sessionID);
-
-        while (tripleIt.hasNext()) {
-            Triple triple = tripleIt.next();
-            Resource entityReference = triple.getObject();
-            /*
-             * the entity uri
-             */
-            final String entityReferenceString = entityReference.toString().replace("<", "").replace(">", "");
-            log.debug("Trying to resolve entity " + entityReferenceString);
-            /**
-             * We fetch the entity in the OntologyInputSource object
-             */
-            try {
-
-                final IRI fetchedIri = IRI.create(entityReferenceString);
-
-                /*
-                 * The RDF graph of an entity is fetched via the EntityHub. The getEntityOntology is a method
-                 * the do the job of asking the entity to the EntityHub and wrap the RDF graph into an
-                 * OWLOntology.
-                 */
-                OWLOntology fetched = null;
-
-                if (useEntityHub) {
-                    fetched = getEntityOntology(entityReferenceString);
-                } else {
-                    Dereferencer dereferencer = new Dereferencer();
-                    try {
-                        fetched = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(
-                            dereferencer.resolve(entityReferenceString));
-                    } catch (OWLOntologyCreationException e) {
-                        log.error("An error occurred while trying to create the ontology related to the entity "
-                                  + entityReferenceString);
-                    } catch (FileNotFoundException e) {
-                        log.error("The entity " + entityReferenceString + " does not exist or is unreachable");
-                    }
-                }
-
-                if (fetched != null) {
-                    final OWLOntology fetchedFinal = fetched;
-                    OntologyInputSource ontologySource = new OntologyInputSource() {
-
-                        @Override
-                        public boolean hasRootOntology() {
-                            return (fetchedFinal != null);
-                        }
-
-                        @Override
-                        public boolean hasPhysicalIRI() {
-                            return true;
-                        }
-
-                        @Override
-                        public OWLOntology getRootOntology() {
-                            return fetchedFinal;
-                        }
-
-                        @Override
-                        public IRI getPhysicalIRI() {
-                            return fetchedIri;
-                        }
-
-                        @Override
-                        public Set<OWLOntology> getImports(boolean direct) {
-                            // TODO Auto-generated method stub
-                            return null;
-                        }
-
-                    };
-                    sessionSpace.addOntology(ontologySource);
-                }
-
-                log.debug("Added " + entityReferenceString + " to the session space of scope "
-                          + scope.getID().toString(), this);
-
-            } catch (UnmodifiableOntologyCollectorException e) {
-                log.error("Cannot load the entity", e);
-            }
-
-        }
-
-        /*
-         * Now we merge the RDF from the T-box - the ontologies - and the A-box - the RDF data fetched
-         */
-
-        final OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-
-        OWLOntologySetProvider provider = new OWLOntologySetProvider() {
-
-            @Override
-            public Set<OWLOntology> getOntologies() {
-
-                Set<OWLOntology> ontologies = new HashSet<OWLOntology>();
-                OntologySpace sessionSpace = scope.getSessionSpace(sessionID);
-                ontologies.addAll(sessionSpace.getOntologies(true));
-
-                /*
-                 * We add to the set the graph containing the metadata generated by previous enhancement
-                 * engines. It is important becaus we want to menage during the refactoring also some
-                 * information fron that graph. As the graph is provided as a Clerezza MGraph, we first need
-                 * to convert it to an OWLAPI OWLOntology. There is no chance that the mGraph could be null as
-                 * it was previously controlled by the JobManager through the canEnhance method and the
-                 * computeEnhancement is always called iff the former returns true.
-                 */
-                OWLOntology fiseMetadataOntology = OWLAPIToClerezzaConverter
-                        .clerezzaGraphToOWLOntology(mGraph);
-                ontologies.add(fiseMetadataOntology);
-                return ontologies;
-            }
-        };
-
-        /*
-         * We merge all the ontologies from the session space of the scope into a single ontology that will be
-         * used for the refactoring.
-         */
-        OWLOntologyMerger merger = new OWLOntologyMerger(provider);
-
-        OWLOntology ontology;
-        try {
-            ontology = merger.createMergedOntology(man,
-                IRI.create("http://fise.iks-project.eu/dulcifier/integrity-check"));
-
-            /*
-             * To perform the refactoring of the ontology to a given vocabulary we use the Stanbol Refactor.
-             */
-
-            log.debug("Refactoring recipe IRI is : " + recipeIRI);
-
-            /*
-             * We pass the ontology and the recipe IRI to the Refactor that returns the refactored graph
-             * expressed by using the given vocabulary.
-             */
-            try {
-
-                Recipe recipe = ruleStore.getRecipe(recipeIRI);
-
-                log.debug("Rules in the recipe are : " + recipe.getkReSRuleList().size(), this);
-
-                log.debug("The ontology to be refactor is : " + ontology, this);
-
-                ontology = refactorer.ontologyRefactoring(ontology, recipeIRI);
-
-            } catch (RefactoringException e) {
-                log.error("The refactoring engine failed the execution.", e);
-            } catch (NoSuchRecipeException e) {
-                log.error("The recipe with ID " + recipeIRI + " does not exists", e);
-            }
-
-            log.debug("Merged ontologies in " + ontology);
-
-            /*
-             * The new generated ontology is converted to Clarezza format and than added os substitued to the
-             * old mGraph.
-             */
-            if (graph_append) {
-                mGraph.addAll(OWLAPIToClerezzaConverter.owlOntologyToClerezzaTriples(ontology));
-                log.debug("Metadata of the content passd have been substituted", this);
-            } else {
-                mGraph.removeAll(mGraph);
-                mGraph.addAll(OWLAPIToClerezzaConverter.owlOntologyToClerezzaTriples(ontology));
-                log.debug("Metadata of the content is appended to the existent one", this);
-            }
-
-            /*
-             * The session needs to be destroyed, as it is no more useful.
-             */
-            sessionManager.destroySession(sessionID.toString());
-
-        } catch (OWLOntologyCreationException e) {
-            log.error("Cannot create the ontology for the refactoring", e);
-        }
+		if(tmpSession != null){
+			
+			final Session session = tmpSession;
+        
+			//final String sessionIdentifier = sessionID;
+			
+			/*
+	         * We retrieve the session space
+	         */
+	        //OntologySpace sessionSpace = scope.getSessionSpace(sessionIdentifier);
+	
+	        
+	        log.info("The session space is " + session);
+	        while (tripleIt.hasNext()) {
+	            Triple triple = tripleIt.next();
+	            Resource entityReference = triple.getObject();
+	            /*
+	             * the entity uri
+	             */
+	            final String entityReferenceString = entityReference.toString().replace("<", "").replace(">", "");
+	            log.debug("Trying to resolve entity " + entityReferenceString);
+	            /**
+	             * We fetch the entity in the OntologyInputSource object
+	             */
+	            try {
+	
+	                final IRI fetchedIri = IRI.create(entityReferenceString);
+	
+	                /*
+	                 * The RDF graph of an entity is fetched via the EntityHub. The getEntityOntology is a method
+	                 * the do the job of asking the entity to the EntityHub and wrap the RDF graph into an
+	                 * OWLOntology.
+	                 */
+	                OWLOntology fetched = null;
+	
+	                if (useEntityHub) {
+	                    fetched = getEntityOntology(entityReferenceString);
+	                } else {
+	                    Dereferencer dereferencer = new Dereferencer();
+	                    try {
+	                        fetched = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(
+	                            dereferencer.resolve(entityReferenceString));
+	                    } catch (OWLOntologyCreationException e) {
+	                        log.error("An error occurred while trying to create the ontology related to the entity "
+	                                  + entityReferenceString);
+	                    } catch (FileNotFoundException e) {
+	                        log.error("The entity " + entityReferenceString + " does not exist or is unreachable");
+	                    }
+	                }
+	
+	                if (fetched != null) {
+	                    final OWLOntology fetchedFinal = fetched;
+	                    OntologyInputSource ontologySource = new OntologyInputSource() {
+	
+	                        @Override
+	                        public boolean hasRootOntology() {
+	                            return (fetchedFinal != null);
+	                        }
+	
+	                        @Override
+	                        public boolean hasPhysicalIRI() {
+	                            return true;
+	                        }
+	
+	                        @Override
+	                        public OWLOntology getRootOntology() {
+	                            return fetchedFinal;
+	                        }
+	
+	                        @Override
+	                        public IRI getPhysicalIRI() {
+	                            return fetchedIri;
+	                        }
+	
+	                        @Override
+	                        public Set<OWLOntology> getImports(boolean direct) {
+	                            // TODO Auto-generated method stub
+	                            return null;
+	                        }
+	
+	                    };
+	                    session.addOntology(ontologySource);
+	                }
+	
+	                log.debug("Added " + entityReferenceString + " to the session space of scope "
+	                          + scope.getID().toString(), this);
+	
+	            } catch (UnmodifiableOntologyCollectorException e) {
+	                log.error("Cannot load the entity", e);
+	            }
+	
+	        }
+	
+	        /*
+	         * Now we merge the RDF from the T-box - the ontologies - and the A-box - the RDF data fetched
+	         */
+	
+	        final OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+	
+	        OWLOntologySetProvider provider = new OWLOntologySetProvider() {
+	
+	            @Override
+	            public Set<OWLOntology> getOntologies() {
+	
+	                Set<OWLOntology> ontologies = new HashSet<OWLOntology>();
+	                ontologies.addAll(session.getOntologies(true));
+	
+	                /*
+	                 * We add to the set the graph containing the metadata generated by previous enhancement
+	                 * engines. It is important becaus we want to menage during the refactoring also some
+	                 * information fron that graph. As the graph is provided as a Clerezza MGraph, we first need
+	                 * to convert it to an OWLAPI OWLOntology. There is no chance that the mGraph could be null as
+	                 * it was previously controlled by the JobManager through the canEnhance method and the
+	                 * computeEnhancement is always called iff the former returns true.
+	                 */
+	                OWLOntology fiseMetadataOntology = OWLAPIToClerezzaConverter
+	                        .clerezzaGraphToOWLOntology(mGraph);
+	                ontologies.add(fiseMetadataOntology);
+	                return ontologies;
+	            }
+	        };
+	
+	        /*
+	         * We merge all the ontologies from the session space of the scope into a single ontology that will be
+	         * used for the refactoring.
+	         */
+	        OWLOntologyMerger merger = new OWLOntologyMerger(provider);
+	
+	        OWLOntology ontology;
+	        try {
+	            ontology = merger.createMergedOntology(man,
+	                IRI.create("http://fise.iks-project.eu/dulcifier/integrity-check"));
+	
+	            /*
+	             * To perform the refactoring of the ontology to a given vocabulary we use the Stanbol Refactor.
+	             */
+	
+	            log.debug("Refactoring recipe IRI is : " + recipeIRI);
+	
+	            /*
+	             * We pass the ontology and the recipe IRI to the Refactor that returns the refactored graph
+	             * expressed by using the given vocabulary.
+	             */
+	            try {
+	
+	                Recipe recipe = ruleStore.getRecipe(recipeIRI);
+	
+	                log.debug("Rules in the recipe are : " + recipe.getkReSRuleList().size(), this);
+	
+	                log.debug("The ontology to be refactor is : " + ontology, this);
+	
+	                ontology = refactorer.ontologyRefactoring(ontology, recipeIRI);
+	
+	            } catch (RefactoringException e) {
+	                log.error("The refactoring engine failed the execution.", e);
+	            } catch (NoSuchRecipeException e) {
+	                log.error("The recipe with ID " + recipeIRI + " does not exists", e);
+	            }
+	
+	            log.debug("Merged ontologies in " + ontology);
+	
+	            /*
+	             * The new generated ontology is converted to Clarezza format and than added os substitued to the
+	             * old mGraph.
+	             */
+	            if (graph_append) {
+	                mGraph.addAll(OWLAPIToClerezzaConverter.owlOntologyToClerezzaTriples(ontology));
+	                log.debug("Metadata of the content passd have been substituted", this);
+	            } else {
+	                mGraph.removeAll(mGraph);
+	                mGraph.addAll(OWLAPIToClerezzaConverter.owlOntologyToClerezzaTriples(ontology));
+	                log.debug("Metadata of the content is appended to the existent one", this);
+	            }
+	
+	            /*
+	             * The session needs to be destroyed, as it is no more useful.
+	             */
+	            sessionManager.destroySession(session.getID());
+	            
+	            
+	        } catch (OWLOntologyCreationException e) {
+	            log.error("Cannot create the ontology for the refactoring", e);
+	        }
+		}
     }
 
     // /**
