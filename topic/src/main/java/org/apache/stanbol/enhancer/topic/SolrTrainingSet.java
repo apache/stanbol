@@ -193,8 +193,8 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
         String offset = null;
         boolean done = false;
         query.addSortField(exampleIdField, SolrQuery.ORDER.asc);
-        query.set("rows", batchSize + 1);
-        query.set("fl", exampleIdField + "," + topicUrisField);
+        query.setRows(batchSize + 1);
+        query.setFields(exampleIdField, topicUrisField);
         while (!done) {
             try {
                 if (offset != null) {
