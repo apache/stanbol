@@ -21,6 +21,10 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
@@ -29,44 +33,98 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An ontology input source that returns a Clerezza {@link Graph} after parsing its serialized content from an
- * input stream. <br>
- * <br>
- * Note that this implementation does not tamper with the triple store. The resulting graph is created
- * in-memory, and its triples will have to be manually added to a stored graph if necessary.
+ * An ontology input source that returns a Clerezza {@link TripleCollection} ({@link Graph} or {@link MGraph})
+ * after parsing its serialized content from an input stream.
  * 
  * @author alexdma
  * 
  */
 public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
 
+    private UriRef id = null;
+
     private Logger log = LoggerFactory.getLogger(getClass());
 
+    /**
+     * Creates a new graph input source by parsing <code>content</code>. Every supported format will be tried
+     * until one is parsed successfully. The resulting graph is created in-memory, and its triples will have
+     * to be manually added to a stored graph if necessary.
+     * 
+     * @param content
+     *            the serialized graph content.
+     */
     public GraphContentInputSource(InputStream content) {
-        this(content, null);
+        this(content, (String) null);
     }
 
+    /**
+     * Creates a new graph input source by parsing <code>content</code> assuming it has the given format. The
+     * resulting graph is created in-memory, and its triples will have to be manually added to a stored graph
+     * if necessary.
+     * 
+     * @param content
+     *            the serialized graph content.
+     * @param formatIdentifier
+     *            the format to parse the content as.
+     */
     public GraphContentInputSource(InputStream content, String formatIdentifier) {
-        this(content, formatIdentifier, Parser.getInstance());
+        this(content, formatIdentifier, null);
     }
 
-    public GraphContentInputSource(InputStream content, String formatIdentifier, Parser parser) {
+    /**
+     * Creates a new graph input source by parsing <code>content</code> into a graph created using the
+     * supplied {@link TcProvider}, assuming it has the given format.
+     * 
+     * @param content
+     *            the serialized graph content.
+     * @param formatIdentifier
+     *            the format to parse the content as.
+     * @param tcProvider
+     *            the provider that will create the graph where the triples will be stored.
+     */
+    public GraphContentInputSource(InputStream content, String formatIdentifier, TcProvider tcProvider) {
+        this(content, formatIdentifier, tcProvider, Parser.getInstance());
+    }
+
+    /**
+     * Creates a new graph input source by parsing <code>content</code> (using the supplied {@link Parser})
+     * into a graph created using the supplied {@link TcProvider}, assuming it has the given format.
+     * 
+     * @param content
+     *            the serialized graph content.
+     * @param formatIdentifier
+     *            the format to parse the content as.
+     * @param tcProvider
+     *            the provider that will create the graph where the triples will be stored.
+     * @param parser
+     *            the parser to use for creating the graph. If null, the default one will be used.
+     */
+    public GraphContentInputSource(InputStream content,
+                                   String formatIdentifier,
+                                   TcProvider tcProvider,
+                                   Parser parser) {
         long before = System.currentTimeMillis();
 
         if (content == null) throw new IllegalArgumentException("No content supplied");
-
+        if (parser == null) parser = Parser.getInstance();
         // No physical IRI
         bindPhysicalIri(null);
+        bindTriplesProvider(tcProvider);
         boolean loaded = false;
 
         Collection<String> formats;
         if (formatIdentifier == null || "".equals(formatIdentifier.trim())) formats = OntologyUtils
                 .getPreferredSupportedFormats(parser.getSupportedFormats());
         else formats = Collections.singleton(formatIdentifier);
-        Graph graph = null;
+        TripleCollection graph = null;
+        if (tcProvider != null) {
+            UriRef name = new UriRef(getClass().getCanonicalName() + "-" + System.currentTimeMillis());
+            graph = tcProvider.createMGraph(name);
+        }
         for (String format : formats) {
             try {
-                graph = parser.parse(content, format);
+                if (graph != null && graph instanceof MGraph) parser.parse((MGraph) graph, content, format);
+                else graph = parser.parse(content, format);
                 loaded = true;
                 break;
             } catch (UnsupportedFormatException e) {
@@ -77,13 +135,30 @@ public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
                 continue;
             }
         }
-        if (loaded) bindRootOntology(graph);
+        if (loaded) {
+            bindRootOntology(graph);
+            id = OWLUtils.guessOntologyIdentifier(getRootOntology());
+            log.debug("Root ontology is a {}.", getRootOntology().getClass().getCanonicalName());
+        }
         log.debug("Input source initialization completed in {} ms.", (System.currentTimeMillis() - before));
+    }
+
+    /**
+     * Creates a new graph input source by parsing <code>content</code> into a graph created using the
+     * supplied {@link TcProvider}. Every supported format will be tried until one is parsed successfully.
+     * 
+     * @param content
+     *            the serialized graph content.
+     * @param tcProvider
+     *            the provider that will create the graph where the triples will be stored.
+     */
+    public GraphContentInputSource(InputStream content, TcProvider tcProvider) {
+        this(content, null, tcProvider);
     }
 
     @Override
     public String toString() {
-        return "<TRIPLE_COLLECTION_CONTENT>" + OWLUtils.guessOntologyIdentifier(getRootOntology());
+        return "<GRAPH_CONTENT>" + id;
     }
 
 }

@@ -30,6 +30,7 @@ public class RootOntologySource extends AbstractOWLOntologyInputSource {
         bindRootOntology(rootOntology);
         try {
             bindPhysicalIri(rootOntology.getOntologyID().getDefaultDocumentIRI());
+            bindTriplesProvider(rootOntology.getOWLOntologyManager());
         } catch (Exception e) {
             // Ontology might be anonymous, no physical IRI then...
             bindPhysicalIri(null);

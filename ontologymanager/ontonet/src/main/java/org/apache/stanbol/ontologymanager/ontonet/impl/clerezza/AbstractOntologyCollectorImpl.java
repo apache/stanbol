@@ -25,6 +25,9 @@ import java.util.Set;
 
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.Lockable;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OWLExportable;
@@ -102,7 +105,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     }
 
     @Override
-    public synchronized void addOntology(OntologyInputSource<?> ontologySource) throws UnmodifiableOntologyCollectorException {
+    public synchronized String addOntology(OntologyInputSource<?,?> ontologySource) throws UnmodifiableOntologyCollectorException {
 
         long before = System.currentTimeMillis();
 
@@ -138,15 +141,44 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         if (key != null && !key.isEmpty()) {
             // add to index
             managedOntologies.add(IRI.create(uri.getUnicodeString()));
+            // Note that imported ontologies are not considered as managed! TODO should we change this?
             log.debug("Add ontology completed in {} ms.", (System.currentTimeMillis() - before));
             // fire the event
             fireOntologyAdded(uri);
         }
+        return key;
+    }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public <O> O export(Class<O> returnType, boolean merge) {
+        if (OWLOntology.class.isAssignableFrom(returnType)) return (O) exportToOWLOntology(merge);
+        if (TripleCollection.class.isAssignableFrom(returnType)) {
+            if (merge) throw new UnsupportedOperationException(
+                    "Merge not implemented yet for Clerezza triple collections.");
+            // No need to store, give it a name, or anything.
+            TripleCollection root = new SimpleMGraph();
+            UriRef iri = new UriRef(namespace + _id);
+            // Add the import declarations for directly managed ontologies.
+            if (root != null) {
+                String base = URIUtils.upOne(IRI.create(namespace + getID())) + "/";
+                // The key set of managedOntologies contains the ontology IRIs, not their storage keys.
+                for (IRI ontologyIri : managedOntologies) {
+                    UriRef physIRI = new UriRef(base + ontologyIri);
+                    root.add(new TripleImpl(iri, OWL.imports, physIRI));
+                }
+            }
+            return (O) root;
+        }
+        throw new UnsupportedOperationException("Cannot export to " + returnType);
     }
 
     @Override
     public OWLOntology asOWLOntology(boolean merge) {
+        return export(OWLOntology.class, merge);
+    }
+
+    private OWLOntology exportToOWLOntology(boolean merge) {
 
         long before = System.currentTimeMillis();
 

@@ -56,19 +56,19 @@ public class OntologyUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(OntologyUtils.class);
 
-    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology> parentSrc,
-                                             OntologyInputSource<OWLOntology> childSrc,
+    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology,OWLOntologyManager> parentSrc,
+                                             OntologyInputSource<OWLOntology,OWLOntologyManager> childSrc,
                                              OWLOntologyManager ontologyManager) {
         return appendOntology(parentSrc, childSrc, ontologyManager, null);
     }
 
-    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology> parentSrc,
-                                             OntologyInputSource<OWLOntology> childSrc) {
+    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology,OWLOntologyManager> parentSrc,
+                                             OntologyInputSource<OWLOntology,OWLOntologyManager> childSrc) {
         return appendOntology(parentSrc, childSrc, null, null);
     }
 
-    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology> parentSrc,
-                                             OntologyInputSource<OWLOntology> childSrc,
+    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology,OWLOntologyManager> parentSrc,
+                                             OntologyInputSource<OWLOntology,OWLOntologyManager> childSrc,
                                              IRI rewritePrefix) {
         return appendOntology(parentSrc, childSrc, null, rewritePrefix);
     }
@@ -92,8 +92,8 @@ public class OntologyUtils {
      *            ontology document file elsewhere.
      * @return the parent with the appended child
      */
-    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology> parentSrc,
-                                             OntologyInputSource<OWLOntology> childSrc,
+    public static OWLOntology appendOntology(OntologyInputSource<OWLOntology,OWLOntologyManager> parentSrc,
+                                             OntologyInputSource<OWLOntology,OWLOntologyManager> childSrc,
                                              OWLOntologyManager ontologyManager,
                                              IRI rewritePrefix) {
 
@@ -127,7 +127,7 @@ public class OntologyUtils {
         return oParent;
     }
 
-    public static OWLOntology buildImportTree(OntologyInputSource<OWLOntology> rootSrc,
+    public static OWLOntology buildImportTree(OntologyInputSource<OWLOntology,OWLOntologyManager> rootSrc,
                                               Set<OWLOntology> subtrees) {
 
         return buildImportTree(rootSrc.getRootOntology(), subtrees, OWLManager.createOWLOntologyManager());
@@ -141,7 +141,7 @@ public class OntologyUtils {
      * @param mgr
      * @return
      */
-    public static OWLOntology buildImportTree(OntologyInputSource<OWLOntology> rootSrc,
+    public static OWLOntology buildImportTree(OntologyInputSource<OWLOntology,OWLOntologyManager> rootSrc,
                                               Set<OWLOntology> subtrees,
                                               OWLOntologyManager mgr) {
 
@@ -293,16 +293,14 @@ public class OntologyUtils {
     private static String[] preferredFormats = {"application/rdf+xml", "application/rdf+json", "text/turtle",
                                                 "text/rdf+n3", "text/rdf+nt", "text/owl-manchester",
                                                 "application/owl+xml"};
-    
+
     public static List<String> getPreferredSupportedFormats(Collection<String> supported) {
         List<String> result = new ArrayList<String>();
         for (String f : preferredFormats)
-            if (supported.contains(f))
-                result.add(f);
+            if (supported.contains(f)) result.add(f);
         // The non-preferred supported formats on the tail in any order
         for (String f : supported)
-            if (!result.contains(f))
-                result.add(f);
+            if (!result.contains(f)) result.add(f);
         return result;
     }
 

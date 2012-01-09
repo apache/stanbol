@@ -57,6 +57,7 @@ public class GraphSource extends AbstractClerezzaGraphInputSource {
      */
     public GraphSource(UriRef graphId, TcManager tcManager) {
         this(tcManager.getTriples(graphId));
+        bindTriplesProvider(tcManager);
     }
 
     @Override

@@ -16,32 +16,33 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.ontology;
 
-import org.semanticweb.owlapi.model.IRI;
-
 /**
- * Implementations of this interface are able to react to modifications on the ontology network
- * infrastructure.
+ * The policies that determine how OntoNet should handle OWL import statements and/or the imported ontologies
+ * (i.e. import targets) when performing operations such as load/export of ontologies, and rewriting of import
+ * statements.
  * 
  * @author alexdma
  * 
  */
-public interface ScopeOntologyListener {
+public enum ImportManagementPolicy {
 
     /**
-     * Called whenever an ontology is set to be managed by a scope, space or session.
-     * 
-     * @param scopeId
-     * @param addedOntology
+     * The root ontology contains all the import statements that point to (recursively) imported ontologies,
+     * which instead are cleared of all import statements. Can be used to minimize the number of statements
+     * and remove cycles.
      */
-    void onOntologyAdded(String scopeId, IRI addedOntology);
+    FLATTEN,
 
     /**
-     * Called whenever an ontology is set to no longer be managed by a scope, space or session. This method is
-     * not called if that ontology was not being managed earlier.
-     * 
-     * @param scopeId
-     * @param addedOntology
+     * Remove all import statements from the root ontology's import closure, and recursively copy all the
+     * axioms from imported ontologies into the root one.
      */
-    void onOntologyRemoved(String scopeId, IRI removedOntology);
+    MERGE,
+
+    /**
+     * Keep the import structure as it is. Note that the import targets can still be rewritten even by
+     * following this policy.
+     */
+    PRESERVE;
 
 }

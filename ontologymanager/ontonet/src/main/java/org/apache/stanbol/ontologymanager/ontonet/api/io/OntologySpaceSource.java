@@ -34,10 +34,10 @@ public class OntologySpaceSource extends AbstractOWLOntologyInputSource {
         this(space, null);
     }
 
-    public OntologySpaceSource(OntologySpace space, Set<OntologyInputSource> subtrees) {
+    public OntologySpaceSource(OntologySpace space, Set<OntologyInputSource<?,?>> subtrees) {
         this.space = space;
         if (subtrees != null) try {
-            for (OntologyInputSource st : subtrees)
+            for (OntologyInputSource<?,?> st : subtrees)
                 appendSubtree(st);
         } catch (UnmodifiableOntologyCollectorException e) {
             log.error(
@@ -47,7 +47,7 @@ public class OntologySpaceSource extends AbstractOWLOntologyInputSource {
         bindRootOntology(space.asOWLOntology(false));
     }
 
-    protected void appendSubtree(OntologyInputSource subtree) throws UnmodifiableOntologyCollectorException {
+    protected void appendSubtree(OntologyInputSource<?,?> subtree) throws UnmodifiableOntologyCollectorException {
         space.addOntology(subtree);
     }
 

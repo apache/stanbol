@@ -21,12 +21,12 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.stanbol.owl.util.OWLUtils;
 
@@ -40,30 +40,33 @@ import org.apache.stanbol.owl.util.OWLUtils;
  * @author alexdma
  * 
  */
-public abstract class AbstractClerezzaGraphInputSource extends AbstractGenericInputSource<Graph> {
+public abstract class AbstractClerezzaGraphInputSource extends
+        AbstractGenericInputSource<TripleCollection,TcProvider> {
 
     protected UriRef ontologyId = null;
 
     @Override
-    protected void bindRootOntology(Graph ontology) {
+    protected void bindRootOntology(TripleCollection ontology) {
         super.bindRootOntology(ontology);
         this.ontologyId = OWLUtils.guessOntologyIdentifier(ontology);
     }
 
     @Override
-    public Set<Graph> getImports(boolean recursive) {
+    public Set<TripleCollection> getImports(boolean recursive) {
         return getImportedGraphs(rootOntology, recursive);
     }
 
-    protected Set<Graph> getImportedGraphs(TripleCollection g, boolean recursive) {
-        Set<Graph> result = new HashSet<Graph>();
+    protected Set<TripleCollection> getImportedGraphs(TripleCollection g, boolean recursive) {
+        Set<TripleCollection> result = new HashSet<TripleCollection>();
         Iterator<Triple> it = g.filter(OWLUtils.guessOntologyIdentifier((Graph) g), OWL.imports, null);
         while (it.hasNext()) {
             Resource r = it.next().getObject();
             if (r instanceof UriRef) {
                 TripleCollection gr = TcManager.getInstance().getTriples((UriRef) r);
-                if (gr instanceof Graph) result.add((Graph) gr);
-                else if (gr instanceof MGraph) result.add(((MGraph) gr).getGraph());
+                // Avoid calls to getGraph() to save memory
+                // if (gr instanceof Graph)
+                result.add(/* (Graph) */gr);
+                // else if (gr instanceof MGraph) result.add(((MGraph) gr).getGraph());
                 if (recursive) result.addAll(getImportedGraphs(gr, true));
             }
         }

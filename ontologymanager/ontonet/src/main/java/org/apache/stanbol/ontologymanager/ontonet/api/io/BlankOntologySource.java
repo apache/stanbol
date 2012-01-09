@@ -35,6 +35,7 @@ public class BlankOntologySource extends AbstractOWLOntologyInputSource {
      */
     public BlankOntologySource() {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+        bindTriplesProvider(manager);
         try {
             bindRootOntology(manager.createOntology());
         } catch (OWLOntologyCreationException e) {

@@ -78,6 +78,7 @@ public class ParentPathInputSource extends AbstractOWLOntologyInputSource {
         bindRootOntology(mgr.loadOntologyFromOntologyDocument(rootFile));
         // TODO : do we really want this to happen?
         bindPhysicalIri(IRI.create(rootFile));
+        bindTriplesProvider(mgr);
     }
 
     @Override

@@ -32,8 +32,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Hashtable;
 
-import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.stanbol.ontologymanager.ontonet.Constants;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
@@ -79,17 +79,17 @@ public class TestClerezzaSpaces {
 
     private static OntologySpaceFactory factory;
 
-    private static OntologyInputSource<?> inMemorySrc, minorSrc, dropSrc, nonexSrc;
+    private static OntologyInputSource<?,?> inMemorySrc, minorSrc, dropSrc, nonexSrc;
 
     private static OfflineConfiguration offline;
 
-    private static OntologyInputSource<Graph> getLocalSource(String resourcePath) {
+    private static OntologyInputSource<TripleCollection,?> getLocalSource(String resourcePath) {
         InputStream is = TestOntologySpaces.class.getResourceAsStream(resourcePath);
         return new GraphSource(parser.parse(is, SupportedFormat.RDF_XML));
     }
 
-    private static OntologyInputSource<?> getLocalSource(String resourcePath, OWLOntologyManager mgr) throws OWLOntologyCreationException,
-                                                                                                     URISyntaxException {
+    private static OntologyInputSource<?,?> getLocalSource(String resourcePath, OWLOntologyManager mgr) throws OWLOntologyCreationException,
+                                                                                                       URISyntaxException {
         URL url = TestOntologySpaces.class.getResource(resourcePath);
         File f = new File(url.toURI());
         return new ParentPathInputSource(f, mgr != null ? mgr

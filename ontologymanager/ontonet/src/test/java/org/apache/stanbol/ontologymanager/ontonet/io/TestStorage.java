@@ -82,7 +82,7 @@ public class TestStorage {
     @Test
     public void storedOntologyOutlivesScope() throws Exception {
         String ephemeralScopeId = "CaducousScope";
-        OntologyInputSource<OWLOntology> ois = new RootOntologyIRISource(IRI.create(getClass().getResource(
+        OntologyInputSource<OWLOntology,?> ois = new RootOntologyIRISource(IRI.create(getClass().getResource(
             "/ontologies/nonexistentcharacters.owl")));
         IRI ontologyId = ois.getRootOntology().getOntologyID().getOntologyIRI();
         OntologyScope scope = onManager.getOntologyScopeFactory().createOntologyScope(ephemeralScopeId);

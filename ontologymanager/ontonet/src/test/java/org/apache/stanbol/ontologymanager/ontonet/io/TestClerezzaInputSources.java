@@ -16,13 +16,16 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.io;
 
-import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.*;
-import static org.junit.Assert.*;
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.parser;
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.reset;
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.tcManager;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.InputStream;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.ontologymanager.ontonet.Locations;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.GraphSource;
@@ -50,7 +53,7 @@ public class TestClerezzaInputSources {
 
     }
 
-    private OntologyInputSource<Graph> gis;
+    private OntologyInputSource<TripleCollection,?> gis;
 
     @Before
     public void bind() throws Exception {
@@ -67,10 +70,10 @@ public class TestClerezzaInputSources {
         gis = new GraphSource(new UriRef(Locations.CHAR_ACTIVE.toString()));
         assertNotNull(gis);
         assertNotNull(gis.getRootOntology());
-        Set<Graph> imported = gis.getImports(false);
+        Set<TripleCollection> imported = gis.getImports(false);
         // Number of stored graphs minus the importing one = imported graphs
         assertEquals(tcManager.listTripleCollections().size() - 1, imported.size());
-        for (Graph g : imported)
+        for (TripleCollection g : imported)
             assertNotNull(g);
     }
 

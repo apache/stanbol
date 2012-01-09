@@ -16,7 +16,8 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.impl.clerezza;
 
-import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.*;
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.ontologyProvider;
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.reset;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -31,7 +32,6 @@ import org.junit.After;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyLoaderListener;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -86,7 +86,7 @@ public class TestOntologyCollectors {
         mgr.addIRIMapper(new PhonyIRIMapper(null));
 
         File f = new File(url.toURI());
-        OntologyInputSource<OWLOntology> src = new ParentPathInputSource(f, mgr);
+        OntologyInputSource<OWLOntology,?> src = new ParentPathInputSource(f, mgr);
         // OntologyInputSource<OWLOntology> src = new RootOntologyIRISource(IRI.create(f), mgr);
 
         // OntologyInputSource<OWLOntology> src = new OntologyContentInputSource(content,mgr);

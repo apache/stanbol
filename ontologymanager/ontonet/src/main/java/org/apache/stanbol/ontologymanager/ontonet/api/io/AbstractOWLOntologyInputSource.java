@@ -29,7 +29,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * {@link #bindRootOntology(OWLOntology)} in their constructors, or override them.
  * 
  */
-public abstract class AbstractOWLOntologyInputSource extends AbstractGenericInputSource<OWLOntology> {
+public abstract class AbstractOWLOntologyInputSource extends AbstractGenericInputSource<OWLOntology,OWLOntologyManager> {
 
     @Override
     public Set<OWLOntology> getImports(boolean recursive) {

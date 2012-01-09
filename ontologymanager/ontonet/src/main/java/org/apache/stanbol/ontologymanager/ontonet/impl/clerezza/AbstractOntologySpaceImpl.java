@@ -72,6 +72,7 @@ public abstract class AbstractOntologySpaceImpl extends AbstractOntologyCollecto
         /*
          * TODO manage import rewrites better once the container ID is fully configurable (i.e. instead of
          * going upOne() add "session" or "ontology" if needed).
+         * But only do this if we keep considering imported ontologies as *not* managed.
          */
         if (!merge) {
             for (OWLImportsDeclaration oldImp : o.getImportsDeclarations()) {

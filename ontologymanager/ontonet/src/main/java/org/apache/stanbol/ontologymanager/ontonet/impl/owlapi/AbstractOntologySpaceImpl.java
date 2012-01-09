@@ -25,6 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.stanbol.ontologymanager.ontonet.api.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorListener;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyCollectorModificationException;
@@ -126,9 +131,16 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
     public void addListener(OntologyCollectorListener listener) {
         listeners.add(listener);
     }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public <O> O export(Class<O> returnType, boolean merge) {
+        if (OWLOntology.class.isAssignableFrom(returnType)) return (O) asOWLOntology(merge);
+        throw new UnsupportedOperationException("Cannot export to " + returnType);
+    }
 
     @Override
-    public synchronized void addOntology(OntologyInputSource<?> ontologySource) throws UnmodifiableOntologyCollectorException {
+    public synchronized String addOntology(OntologyInputSource<?,?> ontologySource) throws UnmodifiableOntologyCollectorException {
         if (locked) throw new UnmodifiableOntologyCollectorException(this);
         log.debug("Trying to add ontology {} to space {}",
             ontologySource != null ? ontologySource.getRootOntology() : "<NULL>", getNamespace() + getID());
@@ -145,7 +157,9 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
             } else throw new UnsupportedOperationException(
                     "This ontology space implementation can only handle " + OWLOntology.class
                             + " input sources.");
-        } else return; // No ontology to add
+        } 
+        if (o!=null) return o.getOntologyID().toString();
+        else return null; // No ontology to add
     }
 
     @Override
@@ -297,7 +311,7 @@ public abstract class AbstractOntologySpaceImpl implements OntologySpace {
         return locked;
     }
 
-    private void performAdd(OntologyInputSource<?> ontSrc) {
+    private void performAdd(OntologyInputSource<?,?> ontSrc) {
 
         Object obj = ontSrc.getRootOntology();
         OWLOntology ontology = (OWLOntology) obj;

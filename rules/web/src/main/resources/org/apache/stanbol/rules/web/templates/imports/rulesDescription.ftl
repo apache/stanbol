@@ -14,5 +14,5 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-This is a the implementation of Stanbol Rules which can be used both for <strong>reasoning</strong>
+This is the implementation of Stanbol Rules which can be used both for <strong>reasoning</strong>
 and <strong>refactoring</strong>

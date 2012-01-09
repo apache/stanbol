@@ -37,6 +37,7 @@ public class OntologyContentInputSource extends AbstractOWLOntologyInputSource {
         long before = System.currentTimeMillis();
         bindPhysicalIri(null);
         bindRootOntology(manager.loadOntologyFromOntologyDocument(content));
+        bindTriplesProvider(manager);
         log.debug("Input source initialization completed in {} ms.",
             (System.currentTimeMillis() - before));
     }

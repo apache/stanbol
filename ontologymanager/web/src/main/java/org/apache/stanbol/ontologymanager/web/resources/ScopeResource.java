@@ -144,14 +144,15 @@ public class ScopeResource extends BaseStanbolResource {
      *         other reason, {@link Status#INTERNAL_SERVER_ERROR} if some other error occurs.
      */
     @POST
-    @Consumes(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.TURTLE, KRFormat.FUNCTIONAL_OWL,
-                       KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
+    @Consumes(value = {KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.N_TRIPLE, KRFormat.TURTLE,
+                       KRFormat.FUNCTIONAL_OWL, KRFormat.MANCHESTER_OWL, KRFormat.RDF_JSON})
     @Produces(MediaType.TEXT_PLAIN)
-    public Response manageOntology(InputStream content) {
+    public Response manageOntology(InputStream content, @Context HttpHeaders headers) {
         long before = System.currentTimeMillis();
         if (scope == null) return Response.status(NOT_FOUND).build();
         try {
-            scope.getCustomSpace().addOntology(new GraphContentInputSource(content)
+            scope.getCustomSpace().addOntology(
+                new GraphContentInputSource(content, headers.getMediaType().toString())
             // new OntologyContentInputSource(content)
                     );
         } catch (UnmodifiableOntologyCollectorException e) {
@@ -212,7 +213,7 @@ public class ScopeResource extends BaseStanbolResource {
         if (reg.containsScope(scopeid)) {
             OntologyScope scope = reg.getScope(scopeid);
             try {
-                OntologyInputSource<?> src = new RootOntologyIRISource(ontoiri);
+                OntologyInputSource<?,?> src = new RootOntologyIRISource(ontoiri);
                 OntologySpace space = scope.getCustomSpace();
                 if (space == null) {
                     space = onm.getOntologySpaceFactory().createCustomOntologySpace(scopeid, src);
@@ -263,7 +264,7 @@ public class ScopeResource extends BaseStanbolResource {
         log.debug("Request URI {}", uriInfo.getRequestUri());
 
         OntologyScope scope;
-        OntologyInputSource<?> coreSrc = null, custSrc = null;
+        OntologyInputSource<?,?> coreSrc = null, custSrc = null;
 
         // First thing, check the core source.
         if (coreRegistry != null && !coreRegistry.isEmpty()) try {
@@ -298,7 +299,7 @@ public class ScopeResource extends BaseStanbolResource {
         // Now the creation.
         try {
             // Expand core sources
-            List<OntologyInputSource<?>> expanded = new ArrayList<OntologyInputSource<?>>();
+            List<OntologyInputSource<?,?>> expanded = new ArrayList<OntologyInputSource<?,?>>();
             if (coreSrc != null) {
                 if (coreSrc instanceof OntologySetInputSource) {
                     for (OWLOntology o : ((OntologySetInputSource) coreSrc).getOntologies()) {

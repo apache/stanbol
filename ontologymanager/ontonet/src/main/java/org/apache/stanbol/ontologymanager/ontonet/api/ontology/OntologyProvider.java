@@ -26,11 +26,9 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
- * A system responsible for maintaining registry ontologies. Depending on the implementation, it can be
- * volatile or persistent, centralised or distributed.<br>
+ * A system responsible for maintaining stored ontologies.<br>
  * <br>
- * TODO see if full CRUD operation support is necessary. TODO deprecate methods that expose keys. These should
- * all be handled internally.
+ * TODO see if full CRUD operation support is necessary.
  * 
  * @author alexdma
  * 
@@ -45,12 +43,39 @@ public interface OntologyProvider<S> {
     public String GRAPH_PREFIX = "org.apache.stanbol.ontologymanager.ontonet.graphPrefix";
 
     /**
+     * The key used to configure the import management policy.
+     */
+    public String IMPORT_POLICY = "org.apache.stanbol.ontologymanager.ontonet.importPolicy";
+
+    /**
      * The key used to configure the default import resolution policy for this provider.
      */
     public String RESOLVE_IMPORTS = "org.apache.stanbol.ontologymanager.ontonet.resolveImports";
 
+    /**
+     * Gets the policy adopted by this provider whenever an import statement is found in an ontology <i>that
+     * has already been loaded</i> (e.g. when exporting it). It does <b>not</b> influence how the system
+     * should <i>resolve</i> imports of newly found ontologies.
+     * 
+     * @return the import management policy.
+     */
+    ImportManagementPolicy getImportManagementPolicy();
+
+    /**
+     * Gets a string that can be used to directly access the ontology whose logical identifier is
+     * <tt>ontologyIRI</tt>.
+     * 
+     * @param ontologyIRI
+     *            the logical identifier of the ontology.
+     * @return the key to access the ontology from the store.
+     */
     String getKey(IRI ontologyIRI);
 
+    /**
+     * Gets the set of all the strings that can be used to access the ontologies stored by this provider.
+     * 
+     * @return the ontology key set.
+     */
     Set<String> getKeys();
 
     /**
@@ -72,15 +97,38 @@ public interface OntologyProvider<S> {
      * </ol>
      * 
      * @param reference
+     *            the IRI that references the ontology.
      * @param returnType
-     * @return
+     *            the desired type that the method should return, if supported, otherwise an
+     *            {@link UnsupportedOperationException} is thrown. Can be null, in which case a default return
+     *            type is chosen.
+     * @return the stored ontology in the desired format, or null if no such ontology is managed by the
+     *         provider.
      */
     <O> O getStoredOntology(IRI reference, Class<O> returnType);
 
+    /**
+     * Same as {@link OntologyProvider#getStoredOntology(String, Class, boolean)}, but instead of the internal
+     * key it uses an IRI that <i>publicly</i> identifies or references an ontology. This can be, ordered by
+     * preference most relevant first:
+     * 
+     * @param reference
+     *            the IRI that references the ontology.
+     * @param returnType
+     *            The expected type for the returned ontology object. If null, the provider will arbitrarily
+     *            select a supported return type. If the supplied type is not supported (i.e. not assignable
+     *            to any type contained in the result of {@link #getSupportedReturnTypes()}) an
+     *            {@link UnsupportedOperationException} should be thrown.
+     * @param forceMerge
+     *            if true, the ontology will be merged with all its imports, thus overriding the import
+     *            management policy set for this provider.
+     * @return the stored ontology in the desired format, or null if no such ontology is managed by the
+     *         provider.
+     */
     <O> O getStoredOntology(IRI reference, Class<O> returnType, boolean merge);
 
     /**
-     * 
+     * Returns a stored ontology that is internally identified by the provided key.
      * 
      * @param key
      *            the key used to identify the ontology in this provider. They can or cannot coincide with the
@@ -90,11 +138,29 @@ public interface OntologyProvider<S> {
      *            select a supported return type. If the supplied type is not supported (i.e. not assignable
      *            to any type contained in the result of {@link #getSupportedReturnTypes()}) an
      *            {@link UnsupportedOperationException} should be thrown.
-     * @return
+     * @return the stored ontology in the desired format, or null if no such ontology is managed by the
+     *         provider.
      */
     <O> O getStoredOntology(String key, Class<O> returnType);
 
-    <O> O getStoredOntology(String key, Class<O> returnType, boolean merge);
+    /**
+     * Returns a stored ontology that is internally identified by the provided key.
+     * 
+     * @param key
+     *            the key used to identify the ontology in this provider. They can or cannot coincide with the
+     *            logical and/or physical IRI of the ontology.
+     * @param returnType
+     *            The expected type for the returned ontology object. If null, the provider will arbitrarily
+     *            select a supported return type. If the supplied type is not supported (i.e. not assignable
+     *            to any type contained in the result of {@link #getSupportedReturnTypes()}) an
+     *            {@link UnsupportedOperationException} should be thrown.
+     * @param forceMerge
+     *            if true, the ontology will be merged with all its imports, thus overriding the import
+     *            management policy set for this provider.
+     * @return the stored ontology in the desired format, or null if no such ontology is managed by the
+     *         provider.
+     */
+    <O> O getStoredOntology(String key, Class<O> returnType, boolean forceMerge);
 
     /**
      * Returns an array containing the most specific types for ontology objects that this provider can manage
@@ -114,13 +180,18 @@ public interface OntologyProvider<S> {
      * @param formatIdentifier
      *            the MIME type of the expected serialization format of this ontology. If null, all supported
      *            formats will be tried until all parsers fail or one succeeds.
+     * @param preferredKey
+     *            a string that should preferrably identify the ontology internally within the provider. It
+     *            will be ignored if null or empty. It is not guaranteed that the supplied key can be used,
+     *            e.g. if there is already a duplicate of the key and the policy does not allow duplicates. In
+     *            this case, a different key will be set and returned by this method.
      * @param force
      *            if true, all mappings provided by the offline configuration will be ignored (both for the
      *            root ontology and its recursive imports) and the provider will forcibly try to resolve the
      *            location IRI. If some remote import is found, the import policy is aggressive and Stanbol is
      *            set on offline mode, this method will fail.
      * @return a key that can be used to retrieve the stored ontology afterwards, or null if loading/storage
-     *         failed.
+     *         failed. If it was possible to set it as such, it will be the same as <tt>preferredKey</tt>.
      * @throws IOException
      *             if all attempts to load the ontology failed.
      * @throws UnsupportedFormatException
@@ -139,6 +210,11 @@ public interface OntologyProvider<S> {
      * @param formatIdentifier
      *            the MIME type of the expected serialization format of this ontology. If null, all supported
      *            formats will be tried until all parsers fail or one succeeds.
+     * @param preferredKey
+     *            a string that should preferrably identify the ontology internally within the provider. It
+     *            will be ignored if null or empty. It is not guaranteed that the supplied key can be used,
+     *            e.g. if there is already a duplicate of the key and the policy does not allow duplicates. In
+     *            this case, a different key will be set and returned by this method.
      * @param force
      *            if true, all mappings provided by the offline configuration will be ignored (both for the
      *            root ontology and its recursive imports) and the provider will forcibly try to resolve the
@@ -154,6 +230,34 @@ public interface OntologyProvider<S> {
     String loadInStore(IRI location, String formatIdentifier, String preferredKey, boolean force) throws IOException,
                                                                                                  UnsupportedFormatException;
 
+    /**
+     * Stores an ontology that has already been loaded into an object. If the object is of a non-native yet
+     * supported type, the ontology provider will try to perform a conversion prior to storing it.
+     * 
+     * @param ontology
+     *            the ontology to be stored.
+     * @param preferredKey
+     *            a string that should preferrably identify the ontology internally within the provider. It
+     *            will be ignored if null or empty. It is not guaranteed that the supplied key can be used,
+     *            e.g. if there is already a duplicate of the key and the policy does not allow duplicates. In
+     *            this case, a different key will be set and returned by this method.
+     * @param force
+     *            if true, all mappings provided by the offline configuration will be ignored (both for the
+     *            root ontology and its recursive imports) and the provider will forcibly try to resolve the
+     *            location IRI. If some remote import is found, the import policy is aggressive and Stanbol is
+     *            set on offline mode, this method will fail.
+     * @return
+     */
     String loadInStore(Object ontology, String preferredKey, boolean force);
+
+    /**
+     * Sets the policy adopted by this provider whenever an import statement is found in an ontology <i>that
+     * has already been loaded</i> (e.g. when exporting it). It does <b>not</b> influence how the system
+     * should <i>resolve</i> imports of newly found ontologies.
+     * 
+     * @param policy
+     *            the import management policy.
+     */
+    void setImportManagementPolicy(ImportManagementPolicy policy);
 
 }

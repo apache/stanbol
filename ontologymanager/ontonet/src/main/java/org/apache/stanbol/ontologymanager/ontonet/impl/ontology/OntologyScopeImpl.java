@@ -91,7 +91,7 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
     public OntologyScopeImpl(String id,
                              IRI namespace,
                              OntologySpaceFactory factory,
-                             OntologyInputSource<?>... coreOntologies) {
+                             OntologyInputSource<?,?>... coreOntologies) {
         setID(id);
         setNamespace(namespace);
 
@@ -132,6 +132,13 @@ public class OntologyScopeImpl implements OntologyScope, OntologyCollectorListen
             else ((SessionOntologySpace) sessionSpace).attachSpace(this.getCoreSpace(), true);
 
         }
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public <O> O export(Class<O> returnType, boolean merge) {
+        if (OWLOntology.class.isAssignableFrom(returnType)) return (O) asOWLOntology(merge);
+        throw new UnsupportedOperationException("Cannot export to " + returnType);
     }
 
     /**

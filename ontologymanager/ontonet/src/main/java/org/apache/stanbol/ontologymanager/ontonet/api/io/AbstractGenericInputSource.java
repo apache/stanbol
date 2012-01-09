@@ -25,9 +25,13 @@ import org.semanticweb.owlapi.model.IRI;
  * @param <O>
  *            the ontologuy returned by this input source.
  */
-public abstract class AbstractGenericInputSource<O> implements OntologyInputSource<O> {
+public abstract class AbstractGenericInputSource<O,P> implements OntologyInputSource<O,P> {
+
+    protected String key;
 
     protected IRI physicalIri = null;
+
+    private P provider;
 
     protected O rootOntology = null;
 
@@ -57,10 +61,18 @@ public abstract class AbstractGenericInputSource<O> implements OntologyInputSour
         this.rootOntology = ontology;
     }
 
+    protected void bindStorageKey(String key) {
+        this.key = key;
+    }
+
+    protected void bindTriplesProvider(P provider) {
+        this.provider = provider;
+    }
+
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof OntologyInputSource<?>)) return false;
-        OntologyInputSource<?> src = (OntologyInputSource<?>) obj;
+        if (!(obj instanceof OntologyInputSource<?,?>)) return false;
+        OntologyInputSource<?,?> src = (OntologyInputSource<?,?>) obj;
         return this.physicalIri.equals(src.getPhysicalIRI())
                && this.rootOntology.equals(src.getRootOntology());
     }
@@ -73,6 +85,16 @@ public abstract class AbstractGenericInputSource<O> implements OntologyInputSour
     @Override
     public O getRootOntology() {
         return rootOntology;
+    }
+
+    @Override
+    public String getStorageKey() {
+        return key;
+    }
+
+    @Override
+    public P getTriplesProvider() {
+        return provider;
     }
 
     @Override

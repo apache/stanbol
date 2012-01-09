@@ -63,7 +63,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
      * @param scopeID
      * @param rootSource
      */
-    private void configureSpace(OntologySpace s, String scopeID, OntologyInputSource<?>... ontologySources) {
+    private void configureSpace(OntologySpace s, String scopeID, OntologyInputSource<?,?>... ontologySources) {
         // FIXME: ensure that this is not null AND convert to using Strings for scope IDs
         OntologyScope parentScope = registry.getScope(scopeID);
 
@@ -71,7 +71,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
                 .addListener((OntologyCollectorListener) parentScope);
         // Set the supplied ontology's parent as the root for this space.
         if (ontologySources != null) try {
-            for (OntologyInputSource<?> src : ontologySources)
+            for (OntologyInputSource<?,?> src : ontologySources)
                 s.addOntology(src);
         } catch (UnmodifiableOntologyCollectorException e) {
             log.error("Ontology space " + s.getID() + " was found locked at creation time!", e);
@@ -80,7 +80,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
     }
 
     @Override
-    public CoreOntologySpace createCoreOntologySpace(String scopeId, OntologyInputSource<?>... coreSources) {
+    public CoreOntologySpace createCoreOntologySpace(String scopeId, OntologyInputSource<?,?>... coreSources) {
         CoreOntologySpace s = new CoreOntologySpaceImpl(scopeId, namespace, /* storage, */
         OWLOntologyManagerFactory.createOWLOntologyManager(offline.getOntologySourceLocations().toArray(
             new IRI[0])));
@@ -90,7 +90,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 
     @Override
     public CustomOntologySpace createCustomOntologySpace(String scopeId,
-                                                         OntologyInputSource<?>... customSources) {
+                                                         OntologyInputSource<?,?>... customSources) {
         CustomOntologySpace s = new CustomOntologySpaceImpl(scopeId, namespace, /* storage, */
         OWLOntologyManagerFactory.createOWLOntologyManager(offline.getOntologySourceLocations().toArray(
             new IRI[0])));
@@ -101,7 +101,7 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
     @Override
     public OntologySpace createOntologySpace(String scopeId,
                                              SpaceType type,
-                                             OntologyInputSource<?>... ontologySources) {
+                                             OntologyInputSource<?,?>... ontologySources) {
         switch (type) {
             case CORE:
                 return createCoreOntologySpace(scopeId, ontologySources);
@@ -116,11 +116,11 @@ public class OntologySpaceFactoryImpl implements OntologySpaceFactory {
 
     @Override
     public SessionOntologySpace createSessionOntologySpace(String scopeId,
-                                                           OntologyInputSource<?>... sessionSources) {
+                                                           OntologyInputSource<?,?>... sessionSources) {
         SessionOntologySpace s = new SessionOntologySpaceImpl(scopeId, namespace, /* storage, */
         OWLOntologyManagerFactory.createOWLOntologyManager(offline.getOntologySourceLocations().toArray(
             new IRI[0])));
-        for (OntologyInputSource<?> src : sessionSources)
+        for (OntologyInputSource<?,?> src : sessionSources)
             try {
                 s.addOntology(src);
             } catch (UnmodifiableOntologyCollectorException e) {

@@ -95,7 +95,7 @@ public class LibrarySource extends AbstractOWLOntologyInputSource implements Ont
      */
     public LibrarySource(IRI libraryID,
                          RegistryManager registryManager,
-                         OntologyInputSource<OWLOntology> parentSrc) throws RegistryContentException {
+                         OntologyInputSource<OWLOntology,OWLOntologyManager> parentSrc) throws RegistryContentException {
         this(libraryID, registryManager, checkOntologyManager(registryManager), parentSrc);
     }
 
@@ -139,7 +139,7 @@ public class LibrarySource extends AbstractOWLOntologyInputSource implements Ont
     public LibrarySource(IRI libraryID,
                          RegistryManager registryManager,
                          OWLOntologyManager ontologyManager,
-                         OntologyInputSource<OWLOntology> parentSrc) throws RegistryContentException {
+                         OntologyInputSource<OWLOntology,OWLOntologyManager> parentSrc) throws RegistryContentException {
         if (registryManager == null) throw new IllegalArgumentException(
                 "A null registry manager is not allowed");
 

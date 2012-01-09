@@ -37,7 +37,7 @@ import org.semanticweb.owlapi.model.IRI;
  * @author alexdma
  * 
  */
-public interface OntologyInputSource<O> {
+public interface OntologyInputSource<O,P> {
 
     /**
      * Gets the ontology network resulting from the transitive closure of import statements on the root
@@ -62,6 +62,10 @@ public interface OntologyInputSource<O> {
      * @return the ontology network root.
      */
     O getRootOntology();
+
+    String getStorageKey();
+
+    P getTriplesProvider();
 
     /**
      * Determines if a physical IRI is known for this ontology source. Note that an anonymous ontology may

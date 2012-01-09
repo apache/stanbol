@@ -48,10 +48,11 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
      * 
      * @param ontology
      *            the ontology to be added
+     * @return the key that can be used for accessing the stored ontology directly
      * @throws UnmodifiableOntologyCollectorException
      *             if the ontology space is read-only
      */
-    void addOntology(OntologyInputSource<?> ontologySource) throws UnmodifiableOntologyCollectorException;
+    String addOntology(OntologyInputSource<?,?> ontologySource) throws UnmodifiableOntologyCollectorException;
 
     /**
      * Removes all ontology space listeners registered with this space.
@@ -89,7 +90,7 @@ public interface OntologyCollector extends NamedResource, OntologyInputSourceHan
      * @return the requested ontology, or null if no ontology with this ID has been loaded.
      */
     OWLOntology getOntology(IRI ontologyIri, boolean merge);
-    
+
     /**
      * Equivalent to calling <code>getOntology(IRI, false)</code>;
      * 

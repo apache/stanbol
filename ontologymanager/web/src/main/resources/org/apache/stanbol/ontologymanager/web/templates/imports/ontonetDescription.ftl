@@ -14,4 +14,4 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<#macro view>A controlled environment for managing ontologies and ontology networks and user sessions managing them.</#macro>
+A <strong>controlled environment</strong> for managing Web ontologies, <strong>ontology networks</strong> and user sessions that put them to use.

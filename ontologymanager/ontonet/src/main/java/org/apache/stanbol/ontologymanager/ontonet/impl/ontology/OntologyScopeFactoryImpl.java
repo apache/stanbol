@@ -69,7 +69,7 @@ public class OntologyScopeFactoryImpl implements OntologyScopeFactory {
     }
 
     @Override
-    public OntologyScope createOntologyScope(String scopeID, OntologyInputSource<?>... coreSources) throws DuplicateIDException {
+    public OntologyScope createOntologyScope(String scopeID, OntologyInputSource<?,?>... coreSources) throws DuplicateIDException {
 
         if (registry.containsScope(scopeID)) throw new DuplicateIDException(scopeID,
                 "Scope registry already contains ontology scope with ID " + scopeID);

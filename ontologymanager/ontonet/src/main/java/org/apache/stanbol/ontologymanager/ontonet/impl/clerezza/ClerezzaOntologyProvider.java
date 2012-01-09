@@ -50,6 +50,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
@@ -57,6 +58,7 @@ import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.ontologymanager.ontonet.api.OfflineConfiguration;
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ImportManagementPolicy;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.ontonet.impl.util.OntologyUtils;
 import org.apache.stanbol.owl.OWLOntologyManagerFactory;
@@ -78,19 +80,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Clerezza-based ontology cache implementation. Whether it is persistent or in-memory depends on the
+ * Clerezza-based ontology provider implementation. Whether it is persistent or in-memory depends on the
  * {@link TcProvider} used.
  * 
  * @author alexdma
  * 
  */
-@Component(immediate = true, metatype = false)
+@Component(immediate = true, metatype = true)
 @Service(OntologyProvider.class)
 public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
     private static final String _GRAPH_PREFIX_DEFAULT = "ontonet";
 
+    private static final ImportManagementPolicy _IMPORT_POLICY_DEFAULT = ImportManagementPolicy.PRESERVE;
+
     private static final boolean _RESOLVE_IMPORTS_DEFAULT = true;
+
+    @Property(name = OntologyProvider.IMPORT_POLICY, options = {
+                                                                @PropertyOption(value = '%'
+                                                                                        + OntologyProvider.IMPORT_POLICY
+                                                                                        + ".option.merge", name = "MERGE"),
+                                                                @PropertyOption(value = '%'
+                                                                                        + OntologyProvider.IMPORT_POLICY
+                                                                                        + ".option.flatten", name = "FLATTEN"),
+                                                                @PropertyOption(value = '%'
+                                                                                        + OntologyProvider.IMPORT_POLICY
+                                                                                        + ".option.preserve", name = "PRESERVE")}, value = "PRESERVE")
+    private String importPolicyString;
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -157,6 +173,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         if (store == null) store = TcManager.getInstance();
         this.store = store;
         if (this.tcManager == null) this.tcManager = TcManager.getInstance();
+        // Same for the parser
         if (parser == null) this.parser = Parser.getInstance();
         else this.parser = parser;
 
@@ -188,6 +205,14 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             resolveImports = _RESOLVE_IMPORTS_DEFAULT; // Should be already assigned though
         }
 
+        Object importPolicy = configuration.get(OntologyProvider.IMPORT_POLICY);
+        if (importPolicy == null) {
+            this.importPolicyString = _IMPORT_POLICY_DEFAULT.name();
+        } else {
+            this.importPolicyString = importPolicy.toString();
+        }
+
+        // TODO replace with DataFileProvider ?
         final IRI[] offlineResources;
         if (this.offlineConfig != null) {
             List<IRI> paths = offlineConfig.getOntologySourceLocations();
@@ -197,7 +222,6 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         }
         // There's no offline configuration at all.
         else offlineResources = new IRI[0];
-
         this.mappers = OWLOntologyManagerFactory.getMappers(offlineResources);
 
     }
@@ -225,20 +249,53 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         this.offlineMode = mode;
     }
 
-    private void fillImportsReverse(UriRef importing, List<UriRef> reverseImports) {
+    /**
+     * Fills a reverse stack of import targets for the graph identified by key <tt>importing</tt>. The import
+     * tree is visited in <i>pre-order</i> and the stack is filled accordingly. Optionally, a second stack can
+     * be supplied to store only the level 1 imports. This can be used for preserving the original import tree
+     * structure.<br>
+     * <br>
+     * TODO there should be a more space-efficient implementation.
+     * 
+     * @param importing
+     *            the key of the root graph, which will be at the bottom of every list.
+     * @param reverseImports
+     *            the list that will store all import target keys in pre-order.
+     * @param level1Imports
+     *            a second list that will store the level 1 import target keys, and is not passed to recursive
+     *            calls. Will be ignored if null.
+     */
+    private void fillImportsReverse(UriRef importing, List<UriRef> reverseImports, List<UriRef> level1Imports) {
         log.debug("Filling reverse imports for {}", importing);
         reverseImports.add(importing);
+        if (level1Imports != null) level1Imports.add(importing);
+
+        // Get the graph and explore its imports
         TripleCollection graph = store.getTriples(importing);
         Iterator<Triple> it = graph.filter(null, RDF.type, OWL.Ontology);
         if (it.hasNext()) {
             Iterator<Triple> it2 = graph.filter(it.next().getSubject(), OWL.imports, null);
             while (it2.hasNext()) {
                 Resource obj = it2.next().getObject();
-                if (obj instanceof UriRef) fillImportsReverse(
-                    new UriRef(getKey(IRI.create(((UriRef) obj).getUnicodeString()))
-                    // prefix + "::" + ((UriRef) obj).getUnicodeString()
-                    ), reverseImports);
+                if (obj instanceof UriRef) {
+                    UriRef key = new UriRef(getKey(IRI.create(((UriRef) obj).getUnicodeString())));
+                    if (level1Imports != null) level1Imports.add(key);
+                    fillImportsReverse(key, reverseImports, null);
+                }
             }
+        }
+    }
+
+    @Override
+    public ImportManagementPolicy getImportManagementPolicy() {
+        try {
+            return ImportManagementPolicy.valueOf(importPolicyString);
+        } catch (IllegalArgumentException e) {
+            log.warn("The value \""
+                     + importPolicyString
+                     + "\" configured as default ImportManagementPolicy does not match any value of the Enumeration! "
+                     + "Return the default policy as defined by the " + ImportManagementPolicy.class + ".");
+            return _IMPORT_POLICY_DEFAULT;
         }
     }
 
@@ -265,13 +322,12 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
     }
 
     @Override
-    public <O> O getStoredOntology(IRI reference, Class<O> returnType, boolean merge) {
-        return getStoredOntology(getKey(reference), returnType, merge);
+    public <O> O getStoredOntology(IRI reference, Class<O> returnType, boolean forceMerge) {
+        return getStoredOntology(getKey(reference), returnType, forceMerge);
     }
 
     @Override
     public <O> O getStoredOntology(String key, Class<O> returnType) {
-        // TODO default to false? Or by set policy?
         return getStoredOntology(key, returnType, false);
     }
 
@@ -280,9 +336,10 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <O> O getStoredOntology(String identifier, Class<O> returnType, boolean merge) {
+    public <O> O getStoredOntology(String identifier, Class<O> returnType, boolean forceMerge) {
         if (identifier == null) throw new IllegalArgumentException("Identifier cannot be null");
         if (returnType == null) {
+            // Defaults to OWLOntology
             returnType = (Class<O>) OWLOntology.class;
             log.warn("No return type given for ontologies. Will return a {}", returnType);
         }
@@ -303,7 +360,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             return returnType.cast(tc);
         } else if (OWLOntology.class.isAssignableFrom(returnType)) {
             try {
-                return (O) toOWLOntology(new UriRef(identifier), merge);
+                return (O) toOWLOntology(new UriRef(identifier), forceMerge);
             } catch (OWLOntologyCreationException e) {
                 log.error("Failed to return stored ontology " + identifier + " as type " + returnType, e);
             }
@@ -419,7 +476,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
 
         long before = System.currentTimeMillis();
 
-        MGraph graph;
+        TripleCollection graph;
         TripleCollection rdfData;
 
         if (ontology instanceof OWLOntology) {
@@ -454,9 +511,14 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         /*
          * rdfData should be a SimpleGraph, so we shouldn't have a problem creating one with the TcProvider
          * and adding triples there, so that the SimpleGraph is garbage-collected.
+         * 
+         * TODO this occupies twice as much space, which should not be necessary if the provider is the same
+         * as the one used by the input source.
          */
-        {
-            UriRef uriref = new UriRef(s);
+        UriRef uriref = new UriRef(s);
+        // The policy here is to avoid copying the triples from a graph already in the store.
+        // TODO not a good policy for graphs that change
+        if (!getStore().listTripleCollections().contains(uriref) || force) {
             try {
                 graph = store.createMGraph(uriref);
             } catch (EntityAlreadyExistsException e) {
@@ -464,10 +526,13 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
                 else graph = store.createMGraph(uriref);
             }
             graph.addAll(rdfData);
-        }
+        } else graph = store.getTriples(uriref);
+
         if (resolveImports) {
+            // Scan resources of type owl:Ontology, but only get the first.
             Iterator<Triple> it = graph.filter(null, RDF.type, OWL.Ontology);
             if (it.hasNext()) {
+                // Scan import statements for the one owl:Ontology considered.
                 Iterator<Triple> it2 = graph.filter(it.next().getSubject(), OWL.imports, null);
                 while (it2.hasNext()) {
                     Resource obj = it2.next().getObject();
@@ -480,7 +545,6 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
                     }
                 }
             }
-
         }
 
         loaded = true;
@@ -498,7 +562,21 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
         } else return null;
     }
 
-    protected OWLOntology toOWLOntology(UriRef graphName, boolean merge) throws OWLOntologyCreationException {
+    @Override
+    public void setImportManagementPolicy(ImportManagementPolicy policy) {
+        if (policy == null) throw new IllegalArgumentException("Import management policy cannot be null.");
+        importPolicyString = policy.toString();
+    }
+
+    /**
+     * 
+     * @param graphName
+     * @param forceMerge
+     *            if set to false, the selected import management policy will be applied.
+     * @return
+     * @throws OWLOntologyCreationException
+     */
+    protected OWLOntology toOWLOntology(UriRef graphName, boolean forceMerge) throws OWLOntologyCreationException {
 
         OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
         // Never try to import
@@ -517,16 +595,31 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             if (nl instanceof UriRef) ontologyId = (UriRef) nl;
         }
         List<UriRef> revImps = new Stack<UriRef>();
+        List<UriRef> lvl1 = new Stack<UriRef>();
+        fillImportsReverse(graphName, revImps, lvl1);
 
-        fillImportsReverse(graphName, revImps);
-
-        if (!merge) {
+        // If not set to merge (either by policy of by force), adopt the set import policy.
+        if (!forceMerge && !ImportManagementPolicy.MERGE.equals(getImportManagementPolicy())) {
             OWLOntology o = OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(graph, mgr);
             // TODO make it not flat.
             // Examining the reverse imports stack will flatten all imports.
             List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
             OWLDataFactory df = OWLManager.getOWLDataFactory();
-            for (UriRef ref : revImps)
+
+            List<UriRef> listToUse;
+            switch (getImportManagementPolicy()) {
+                case FLATTEN:
+                    listToUse = revImps;
+                    break;
+                case PRESERVE:
+                    listToUse = lvl1;
+                    break;
+                default:
+                    listToUse = lvl1;
+                    break;
+            }
+
+            for (UriRef ref : listToUse)
                 if (!loaded.contains(ref) && !ref.equals(graphName)) {
                     changes.add(new AddImport(o, df.getOWLImportsDeclaration(IRI.create(ref
                             .getUnicodeString()))));
@@ -535,7 +628,7 @@ public class ClerezzaOntologyProvider implements OntologyProvider<TcProvider> {
             o.getOWLOntologyManager().applyChanges(changes);
             return o;
         } else {
-            // More efficient / brutal implementation.
+            // Merge
 
             // If there is just the root ontology, convert it straight away.
             if (revImps.size() == 1 && revImps.contains(graphName)) {

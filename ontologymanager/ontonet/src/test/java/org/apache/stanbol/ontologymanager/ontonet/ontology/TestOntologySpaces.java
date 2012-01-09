@@ -16,8 +16,14 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.ontology;
 
-import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.*;
-import static org.junit.Assert.*;
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.onManager;
+import static org.apache.stanbol.ontologymanager.ontonet.MockOsgiContext.reset;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -55,13 +61,14 @@ public class TestOntologySpaces {
             .create(Constants.PEANUTS_MINOR_BASE);
 
     private static OntologySpaceFactory factory;
-    private static OntologyInputSource<OWLOntology> inMemorySrc, minorSrc, dropSrc, nonexSrc;
+    private static OntologyInputSource<OWLOntology,?> inMemorySrc, minorSrc, dropSrc, nonexSrc;
     private static OWLAxiom linusIsHuman = null;
 
     private static OWLOntology ont = null, ont2 = null;
 
-    private static OntologyInputSource<OWLOntology> getLocalSource(String resourcePath, OWLOntologyManager mgr) throws OWLOntologyCreationException,
-                                                                                                               URISyntaxException {
+    private static OntologyInputSource<OWLOntology,?> getLocalSource(String resourcePath,
+                                                                     OWLOntologyManager mgr) throws OWLOntologyCreationException,
+                                                                                            URISyntaxException {
         URL url = TestOntologySpaces.class.getResource(resourcePath);
         File f = new File(url.toURI());
         return new ParentPathInputSource(f, mgr != null ? mgr

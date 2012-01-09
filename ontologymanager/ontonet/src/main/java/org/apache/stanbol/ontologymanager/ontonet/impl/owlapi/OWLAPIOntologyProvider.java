@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.stanbol.ontologymanager.ontonet.api.ontology.ImportManagementPolicy;
 import org.apache.stanbol.ontologymanager.ontonet.api.ontology.OntologyProvider;
 import org.apache.stanbol.owl.util.OWLUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -58,6 +59,11 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
     public OWLAPIOntologyProvider(OWLOntologyManager store) {
         if (store == null) throw new IllegalArgumentException("Cache requires a non-null OWLOntologyManager.");
         this.store = store;
+    }
+
+    @Override
+    public ImportManagementPolicy getImportManagementPolicy() {
+        return ImportManagementPolicy.PRESERVE;
     }
 
     @Override
@@ -148,6 +154,12 @@ public class OWLAPIOntologyProvider implements OntologyProvider<OWLOntologyManag
     @Override
     public String loadInStore(Object ontology, String preferredKey, boolean force) {
         throw new UnsupportedOperationException("Not implemented for OWL API version.");
+    }
+
+    @Override
+    public void setImportManagementPolicy(ImportManagementPolicy policy) {
+        if (!ImportManagementPolicy.PRESERVE.equals(policy)) throw new IllegalArgumentException(
+                "The OWL API implementation does not support import policies other than PRESERVE.");
     }
 
 }

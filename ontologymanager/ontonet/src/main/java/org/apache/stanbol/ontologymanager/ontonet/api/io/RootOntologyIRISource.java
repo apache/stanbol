@@ -44,6 +44,7 @@ public class RootOntologyIRISource extends AbstractOWLOntologyInputSource {
         bindPhysicalIri(rootPhysicalIri);
         bindRootOntology(ignoreIriMappers ? manager.loadOntologyFromOntologyDocument(rootPhysicalIri)
                 : manager.loadOntology(rootPhysicalIri));
+        bindTriplesProvider(manager);
     }
 
     @Override
