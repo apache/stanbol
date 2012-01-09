@@ -144,53 +144,47 @@
         <plugins>
           <plugin>
             <groupId>org.apache.rat</groupId>
-            <artifactId>apache-rat-plugin</artifactId>
-            <executions>
-              <execution>
-                <configuration>
-                  <!-- If you want reports per module, set this to 'true' -->
-                  <excludeSubProjects>false</excludeSubProjects>
-                  <excludes>
-                    <!-- hidden files -->
-                    <exclude>**/.*</exclude>
-                    <exclude>**/.*/*</exclude>
-                    <exclude>**/.*/**/*</exclude>
+            <artifactId>apache-rat-plugin</artifactId>          
+            <configuration>
+              <excludeSubProjects>false</excludeSubProjects>
+              <excludes>
+                <!-- AL20 files without header by file type -->
+                <exclude>**/*.config</exclude>
+                <exclude>**/*.cfg</exclude>
+                <exclude>**/*.ref</exclude>
+                <exclude>**/*.txt</exclude>
+                <exclude>**/*.tsv</exclude>
+                <exclude>**/*.sem</exclude>
+                <exclude>**/test/**/*.eml</exclude>
+                <exclude>**/test/**/*.nt</exclude>
 
-                    <!-- by file type -->
-                    <exclude>**/*.config</exclude>
-                    <exclude>**/*.cfg</exclude>
-                    <exclude>**/*.ref</exclude>
-                    <exclude>**/*.txt</exclude>
-                    <exclude>**/*.tsv</exclude>
-                    <exclude>**/*.sem</exclude>
+                <!-- approved licenses, see modules' POMs for details -->
+                <exclude>contenthub/web/src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jit.js</exclude>
+                <exclude>enhancer/jersey/src/main/resources/org/apache/stanbol/enhancer/jersey/static/openlayers-2.9/**</exclude>
+                <exclude>owl/**</exclude>
 
-                    <exclude>**/test/**/*.eml</exclude>
-                    <exclude>**/test/**/*.nt</exclude>
+                <!-- unstable and not release relevant stuff -->
+                <exclude>PLAYGROUND.txt</exclude>
+                <exclude>conventions/**</exclude>
+                <exclude>enhancer/data/text-examples/**</exclude>
+                <exclude>enhancer/query-rendering/**</exclude>
+                <exclude>enhancer/stores/**</exclude>
+                <exclude>explanation/**</exclude>
+                <exclude>demos/**</exclude>
+                <exclude>launchers/kres/**</exclude>
+                <exclude>reasoners/**</exclude>
+                <exclude>reengineer/**</exclude>
 
-                    <!-- generated files -->
-                    <exclude>*/**/target/**</exclude>
+                <!-- exclude hidden files -->
+                <exclude>**/.*</exclude>
+                <exclude>**/.*/*</exclude>
+                <exclude>**/.*/**/*</exclude>
 
-                    <!-- approved licenses -->
-                    <exclude>contenthub/web/src/main/resources/org/apache/stanbol/contenthub/web/static/scripts/jit.js</exclude>
-                    <exclude>enhancer/jersey/src/main/resources/org/apache/stanbol/enhancer/jersey/static/openlayers-2.9/**</exclude>
-                    <exclude>owl/**</exclude>
+                <!-- exclude generated files -->
+                <exclude>*/**/target/**</exclude>
 
-                    <!-- unstable and not release relevant stuff -->
-                    <exclude>PLAYGROUND.txt</exclude>
-                    <exclude>conventions/**</exclude>
-                    <exclude>enhancer/data/text-examples/**</exclude>
-                    <exclude>enhancer/query-rendering/**</exclude>
-                    <exclude>enhancer/stores/**</exclude>
-                    <exclude>explanation/**</exclude>
-                    <exclude>demos/**</exclude>
-                    <exclude>launchers/kres/**</exclude>
-                    <exclude>reasoners/**</exclude>
-                    <exclude>reengineer/**</exclude>
-
-                  </excludes>
-                </configuration>
-              </execution>
-            </executions>
+              </excludes>
+            </configuration>
           </plugin>
         </plugins>
       </build>
