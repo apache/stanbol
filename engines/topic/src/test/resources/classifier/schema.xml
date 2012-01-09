@@ -67,7 +67,7 @@
    <field name="text" type="text" indexed="true" stored="false"
      termVectors="true" termPositions="false" termOffsets="false" />
    <field name="popularity" type="int" indexed="true" stored="true" />
-   <field name="modification_dt" type="tdate" indexed="true" stored="true" />
+   <field name="last_update_dt" type="tdate" indexed="true" stored="true" />
    <field name="random" type="random" indexed="true" stored="false" />
  </fields>
 
