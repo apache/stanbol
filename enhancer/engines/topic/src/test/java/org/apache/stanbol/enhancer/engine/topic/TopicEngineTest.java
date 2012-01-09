@@ -266,6 +266,7 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
         config.put(TopicClassificationEngine.TOPIC_URI_FIELD, "topic");
         config.put(TopicClassificationEngine.SIMILARTITY_FIELD, "text");
         config.put(TopicClassificationEngine.BROADER_FIELD, "broader");
+        config.put(TopicClassificationEngine.MODEL_UPDATE_DATE_FIELD, "last_update_dt");
         return config;
     }
 
