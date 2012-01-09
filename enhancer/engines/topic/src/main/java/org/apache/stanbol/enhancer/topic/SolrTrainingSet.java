@@ -184,7 +184,14 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
         return exampleId;
     }
 
+
     @Override
+    public boolean hasChangedSince(List<String> topics, Date referenceDate) {
+        // TODO
+        return true;
+    }
+    
+    @Deprecated
     public Set<String> getUpdatedTopics(Calendar lastModificationDate) throws TrainingSetException {
         TreeSet<String> collectedTopics = new TreeSet<String>();
         SolrQuery query = new SolrQuery();
@@ -304,4 +311,5 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
     public void setBatchSize(int batchSize) {
         this.batchSize = batchSize;
     }
+
 }

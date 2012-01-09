@@ -16,9 +16,8 @@
  */
 package org.apache.stanbol.enhancer.topic;
 
-import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Source of categorized text documents that can be used to build a the statistical model of a
@@ -48,15 +47,6 @@ public interface TrainingSet {
      * @return the id of the registered example (can be automatically generated)
      */
     String registerExample(String exampleId, String text, List<String> topics) throws TrainingSetException;
-
-    /**
-     * @param lastModificationDate
-     *            typically the date of the last classifier model update or null to find the list of all
-     *            topics registered in the dataset.
-     * @return the set of topic ids that received some modifications (e.g. new or updated examples) since
-     *         {@code lastModificationDate}.
-     */
-    Set<String> getUpdatedTopics(Calendar lastModificationDate) throws TrainingSetException;
 
     /**
      * Fetch examples representative of the set of topics passed as argument so as to be able to build a
@@ -92,5 +82,17 @@ public interface TrainingSet {
      * Number of examples to fetch at once.
      */
     void setBatchSize(int batchSize);
+
+    /**
+     * Method to tell the classifier if topic model should be updated if there exists examples classified in
+     * one of those topics that has changed.
+     * 
+     * @param topics
+     *            topics to check
+     * @param referenceDate
+     *            look for changes after that date
+     * @return true if one of the passed topics has changed since the last date
+     */
+    boolean hasChangedSince(List<String> topics, Date referenceDate);
 
 }
