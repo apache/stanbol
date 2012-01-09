@@ -25,6 +25,6 @@
     <format>tar.gz</format>
   </formats>
   <componentDescriptors>
-    <componentDescriptor>assemblies/source-shared.xml</componentDescriptor>
+    <componentDescriptor>assemblies/stack.xml</componentDescriptor>
   </componentDescriptors>
 </assembly>
