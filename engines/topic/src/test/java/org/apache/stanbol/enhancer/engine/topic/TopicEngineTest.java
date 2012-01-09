@@ -212,7 +212,7 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
         String apple = "urn:topics/apple";
         String sport = "urn:topics/sport";
         String football = "urn:topics/football";
-        String wordcup = "urn:topics/wordcup";
+        String worldcup = "urn:topics/worldcup";
         String music = "urn:topics/music";
 
         classifier.addTopic(business, null);
@@ -221,7 +221,7 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
         classifier.addTopic(music, null);
         classifier.addTopic(apple, Arrays.asList(business, technology));
         classifier.addTopic(football, Arrays.asList(sport));
-        classifier.addTopic(wordcup, Arrays.asList(football));
+        classifier.addTopic(worldcup, Arrays.asList(football));
 
         // train the classifier on an empty dataset
         classifier.setTrainingSet(trainingSet);
@@ -232,31 +232,49 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
                 .suggestTopics("I like the sound of vuvuzula in the morning!");
         assertEquals(0, suggestions.size());
 
-        // further update of the model leave do not change any topic but they are re-indexed anyway because
-        // incremental update is disabled.
-        assertEquals(7, classifier.updateModel(false));
-
         // lets register some examples
         trainingSet.registerExample(null, "Money, money, money is the root of all evil.",
             Arrays.asList(business));
         trainingSet.registerExample(null, "VC invested more money in tech startups in 2011.",
             Arrays.asList(business, technology));
+
+        trainingSet.registerExample(null, "Apple's iPad is a small handheld computer with a touch screen UI",
+            Arrays.asList(apple, technology));
         trainingSet.registerExample(null, "Apple sold many iPads at a very high price"
                                           + " and made record profits.", Arrays.asList(apple, business));
+
         trainingSet.registerExample(null, "Manchester United won 3-2 against FC Barcelona.",
             Arrays.asList(football));
+        trainingSet.registerExample(null, "The 2012 Football Worldcup takes place in Brazil.",
+            Arrays.asList(football, worldcup));
         trainingSet.registerExample(null, "Vuvuzela made the soundtrack of the"
-                                          + " football wordcup of 2010 in South Africa.",
-            Arrays.asList(football, wordcup, music));
+                                          + " football worldcup of 2010 in South Africa.",
+            Arrays.asList(football, worldcup, music));
+
+        trainingSet.registerExample(null, "Amon Tobin will be live in Paris soon.", Arrays.asList(music));
 
         // retrain the model: all topics are recomputed
         assertEquals(7, classifier.updateModel(false));
+
+        // test the trained classifier
         suggestions = classifier.suggestTopics("I like the sound of vuvuzula in the morning!");
         assertTrue(suggestions.size() >= 4);
-        assertEquals(music, suggestions.get(0).uri);
-        assertEquals(wordcup, suggestions.get(1).uri);
+        assertEquals(worldcup, suggestions.get(0).uri);
+        assertEquals(music, suggestions.get(1).uri);
         assertEquals(football, suggestions.get(2).uri);
         assertEquals(sport, suggestions.get(3).uri);
+
+        suggestions = classifier.suggestTopics("Apple is no longer a startup.");
+        assertTrue(suggestions.size() >= 3);
+        assertEquals(apple, suggestions.get(0).uri);
+        assertEquals(technology, suggestions.get(1).uri);
+        assertEquals(business, suggestions.get(2).uri);
+
+        suggestions = classifier.suggestTopics("You can watch the worldcup on your iPad.");
+        assertTrue(suggestions.size() >= 3);
+        assertEquals(worldcup, suggestions.get(0).uri);
+        assertEquals(football, suggestions.get(1).uri);
+        assertEquals(sport, suggestions.get(2).uri);
     }
 
     protected Hashtable<String,Object> getDefaultClassifierConfigParams() {
