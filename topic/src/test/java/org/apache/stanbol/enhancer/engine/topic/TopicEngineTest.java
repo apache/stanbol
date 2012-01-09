@@ -240,7 +240,7 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
 
         trainingSet.registerExample(null, "Apple's iPad is a small handheld computer with a touch screen UI",
             Arrays.asList(apple, technology));
-        trainingSet.registerExample(null, "Apple sold many iPads at a very high price"
+        trainingSet.registerExample(null, "Apple sold the iPad at a very high price"
                                           + " and made record profits.", Arrays.asList(apple, business));
 
         trainingSet.registerExample(null, "Manchester United won 3-2 against FC Barcelona.",
@@ -271,10 +271,11 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
         assertEquals(business, suggestions.get(2).uri);
 
         suggestions = classifier.suggestTopics("You can watch the worldcup on your iPad.");
-        assertTrue(suggestions.size() >= 3);
-        assertEquals(worldcup, suggestions.get(0).uri);
-        assertEquals(football, suggestions.get(1).uri);
-        assertEquals(sport, suggestions.get(2).uri);
+        assertTrue(suggestions.size() >= 4);
+        assertEquals(apple, suggestions.get(0).uri);
+        assertEquals(worldcup, suggestions.get(1).uri);
+        assertEquals(technology, suggestions.get(2).uri);
+        assertEquals(football, suggestions.get(3).uri);
     }
 
     protected Hashtable<String,Object> getDefaultClassifierConfigParams() {
