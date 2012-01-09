@@ -261,6 +261,18 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
 	                            // TODO Auto-generated method stub
 	                            return null;
 	                        }
+
+                            @Override
+                            public String getStorageKey() {
+                                // TODO Auto-generated method stub
+                                return null;
+                            }
+
+                            @Override
+                            public Object getTriplesProvider() {
+                                // TODO Auto-generated method stub
+                                return null;
+                            }
 	
 	                    };
 	                    session.addOntology(ontologySource);
@@ -453,6 +465,18 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
                 return null;
             }
 
+            @Override
+            public String getStorageKey() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public Object getTriplesProvider() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
         };
 
         return ois;
@@ -533,6 +557,18 @@ public class RefactorEnhancementEngine implements EnhancementEngine, ServiceProp
 
             @Override
             public Set<OWLOntology> getImports(boolean direct) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public String getStorageKey() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public Object getTriplesProvider() {
                 // TODO Auto-generated method stub
                 return null;
             }
