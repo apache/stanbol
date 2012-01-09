@@ -114,10 +114,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.rules.base</artifactId>
 		</dependency>
 		<dependency>

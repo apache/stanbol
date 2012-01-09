@@ -27,17 +27,10 @@ import java.util.Set;
 
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
-import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.sparql.QueryEngine;
 import org.apache.clerezza.rdf.jena.sparql.JenaSparqlEngine;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
-import org.apache.stanbol.ontologymanager.ontonet.impl.ONManagerImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.OfflineConfigurationImpl;
-import org.apache.stanbol.ontologymanager.ontonet.impl.clerezza.ClerezzaOntologyProvider;
-import org.apache.stanbol.ontologymanager.ontonet.impl.session.SessionManagerImpl;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.Rule;
@@ -273,11 +266,8 @@ public class RefactoringTest {
         WeightedTcProvider wtcp = new SimpleTcProvider();
         TcManager tcm = new SpecialTcManager(qe, wtcp);
 
-        ONManager onm = new ONManagerImpl(tcm, wtcp, emptyConfig);
-        SessionManager sesMgr = new SessionManagerImpl(new ClerezzaOntologyProvider(wtcp,
-                new OfflineConfigurationImpl(emptyConfig), new Parser()), emptyConfig);
 
-        Refactorer refactorer = new RefactorerImpl(null, new Serializer(), tcm, onm, sesMgr, ruleStore,
+        Refactorer refactorer = new RefactorerImpl(null, new Serializer(), tcm, ruleStore,
                 emptyConfig);
         try {
             refactorer.ontologyRefactoring(ontology, recipeIRI);
@@ -310,10 +300,7 @@ public class RefactoringTest {
         RuleList ruleList = kb.getkReSRuleList();
         Recipe actualRecipe = new RecipeImpl(null, null, ruleList);
 
-        ONManager onm = new ONManagerImpl(tcm, wtcp, emptyConfig);
-        SessionManager sesMgr = new SessionManagerImpl(new ClerezzaOntologyProvider(wtcp,
-                new OfflineConfigurationImpl(emptyConfig), new Parser()), emptyConfig);
-        Refactorer refactorer = new RefactorerImpl(null, new Serializer(), tcm, onm, sesMgr, ruleStore,
+        Refactorer refactorer = new RefactorerImpl(null, new Serializer(), tcm, ruleStore,
                 emptyConfig);
         try {
             refactorer.ontologyRefactoring(ontology, actualRecipe);
