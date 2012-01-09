@@ -107,5 +107,5 @@ public interface TopicClassifier {
      * 
      * @return the number of updated topics
      */
-    int updateModel(boolean incremental) throws TrainingSetException;
+    int updateModel(boolean incremental) throws TrainingSetException, ClassifierException;
 }
