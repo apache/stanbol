@@ -16,18 +16,11 @@
  */
 package org.apache.stanbol.enhancer.topic;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Dictionary;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.TreeSet;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
@@ -63,8 +56,6 @@ import org.slf4j.LoggerFactory;
                      @Property(name = SolrTrainingSet.TOPICS_URI_FIELD),
                      @Property(name = SolrTrainingSet.MODIFICATION_DATE_FIELD)})
 public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements TrainingSet {
-
-    protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
     public static final String TRAINING_SET_ID = "org.apache.stanbol.enhancer.topic.trainingset.id";
 
@@ -130,18 +121,6 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
         return true;
     }
 
-    protected String utcIsoString(Date date) {
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        return df.format(date);
-    }
-
-    protected String utcIsoString(Calendar calendar) {
-        if (!calendar.getTimeZone().equals(UTC)) {
-            calendar.setTimeZone(UTC);
-        }
-        return utcIsoString(calendar.getTime());
-    }
-
     @Override
     public String registerExample(String exampleId, String text, List<String> topics) throws TrainingSetException {
         if (text == null) {
@@ -170,8 +149,7 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
         if (topics != null) {
             doc.addField(topicUrisField, topics);
         }
-        String utcIsoDate = utcIsoString(new GregorianCalendar(UTC));
-        doc.addField(modificationDateField, utcIsoDate + "Z");
+        doc.addField(modificationDateField, UTCTimeStamper.nowUtcDate());
         SolrServer server = getActiveSolrServer();
         try {
             server.add(doc);
@@ -184,57 +162,35 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
         return exampleId;
     }
 
-
     @Override
-    public boolean hasChangedSince(List<String> topics, Date referenceDate) {
-        // TODO
-        return true;
-    }
-    
-    @Deprecated
-    public Set<String> getUpdatedTopics(Calendar lastModificationDate) throws TrainingSetException {
-        TreeSet<String> collectedTopics = new TreeSet<String>();
-        SolrQuery query = new SolrQuery();
-        String utcIsoDate = utcIsoString(lastModificationDate);
-        String q = modificationDateField + ":[" + utcIsoDate + "Z TO *]";
-        String offset = null;
-        boolean done = false;
-        query.addSortField(exampleIdField, SolrQuery.ORDER.asc);
-        query.setRows(batchSize + 1);
-        query.setFields(exampleIdField, topicUrisField);
-        while (!done) {
-            try {
-                if (offset != null) {
-                    q += " AND " + exampleIdField + ":[" + offset.toString() + " TO *]";
-                }
-                query.setQuery(q);
-                QueryResponse response = solrServer.query(query);
-                int count = 0;
-                for (SolrDocument result : response.getResults()) {
-                    if (count == batchSize) {
-                        offset = result.getFirstValue(exampleIdField).toString();
-                    } else {
-                        count++;
-                        Collection<Object> values = result.getFieldValues(topicUrisField);
-                        if (values == null) {
-                            continue;
-                        }
-                        for (Object value : values) {
-                            collectedTopics.add(value.toString());
-                        }
-                    }
-                }
-                if (count < batchSize) {
-                    done = true;
-                }
-            } catch (SolrServerException e) {
-                String msg = String.format(
-                    "Error while fetching topics for examples modified after '%s' on Solr Core '%s'.",
-                    utcIsoDate, solrCoreId);
-                throw new TrainingSetException(msg, e);
+    public boolean hasChangedSince(List<String> topics, Date referenceDate) throws TrainingSetException {
+        String utcIsoDate = UTCTimeStamper.utcIsoString(referenceDate);
+        StringBuffer sb = new StringBuffer();
+        sb.append(modificationDateField);
+        sb.append(":[");
+        sb.append(utcIsoDate);
+        sb.append(" TO *]");
+        if (topics != null && topics.size() > 0) {
+            sb.append(" AND (");
+            List<String> parts = new ArrayList<String>();
+            for (String topic : topics) {
+                // use a nested query to avoid string escaping issues with special solr chars
+                parts.add("_query_:\"{!field f=" + topicUrisField + "}" + topic + "\"");
             }
+            sb.append(StringUtils.join(parts, " OR "));
+            sb.append(")");
         }
-        return collectedTopics;
+        SolrQuery query = new SolrQuery(sb.toString());
+        query.setRows(1);
+        query.setFields(exampleIdField);
+        try {
+            return solrServer.query(query).getResults().size() > 0;
+        } catch (SolrServerException e) {
+            String msg = String.format(
+                "Error while fetching topics for examples modified after '%s' on Solr Core '%s'.",
+                utcIsoDate, solrCoreId);
+            throw new TrainingSetException(msg, e);
+        }
     }
 
     @Override

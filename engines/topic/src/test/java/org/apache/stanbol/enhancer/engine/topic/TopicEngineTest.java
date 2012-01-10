@@ -204,7 +204,7 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
     }
 
     @Test
-    public void testBatchTrainClassifierFromExamples() throws Exception {
+    public void testTrainClassifierFromExamples() throws Exception {
 
         // mini taxonomy for news articles
         String business = "urn:topics/business";
@@ -214,6 +214,7 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
         String football = "urn:topics/football";
         String worldcup = "urn:topics/worldcup";
         String music = "urn:topics/music";
+        String law = "urn:topics/law";
 
         classifier.addTopic(business, null);
         classifier.addTopic(technology, null);
@@ -225,12 +226,15 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
 
         // train the classifier on an empty dataset
         classifier.setTrainingSet(trainingSet);
-        assertEquals(7, classifier.updateModel(false));
+        assertEquals(7, classifier.updateModel(true));
 
         // the model is updated but does not predict anything
         List<TopicSuggestion> suggestions = classifier
                 .suggestTopics("I like the sound of vuvuzula in the morning!");
         assertEquals(0, suggestions.size());
+
+        // check that updating the model incrementally without changing the dataset won't change anything.
+        assertEquals(0, classifier.updateModel(true));
 
         // lets register some examples
         trainingSet.registerExample(null, "Money, money, money is the root of all evil.",
@@ -254,7 +258,7 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
         trainingSet.registerExample(null, "Amon Tobin will be live in Paris soon.", Arrays.asList(music));
 
         // retrain the model: all topics are recomputed
-        assertEquals(7, classifier.updateModel(false));
+        assertEquals(7, classifier.updateModel(true));
 
         // test the trained classifier
         suggestions = classifier.suggestTopics("I like the sound of vuvuzula in the morning!");
@@ -276,6 +280,39 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
         assertEquals(worldcup, suggestions.get(1).uri);
         assertEquals(technology, suggestions.get(2).uri);
         assertEquals(football, suggestions.get(3).uri);
+
+        // test incremental update of a single root node
+        Thread.sleep(10);
+        trainingSet.registerExample(null, "Dubstep is broken beat as are Hip-Hop, Dancehall"
+                                          + " or Drum & Bass", Arrays.asList(music));
+        assertEquals(1, classifier.updateModel(true));
+        suggestions = classifier.suggestTopics("Glory box is best mixed as dubstep.");
+        assertTrue(suggestions.size() >= 1);
+        assertEquals(music, suggestions.get(0).uri);
+        assertEquals(0, classifier.updateModel(true));
+
+        // test incremental update of a leaf node (the parent topic needs re-indexing too)
+        Thread.sleep(10);
+        trainingSet.registerExample(null, "The Brazil team has won the cup so many times.",
+            Arrays.asList(worldcup));
+        assertEquals(2, classifier.updateModel(true));
+        assertEquals(0, classifier.updateModel(true));
+
+        // it's always possible to rebuild all models from scratch
+        assertEquals(7, classifier.updateModel(false));
+
+        // it's also possible to define new topics on an existing model and leverage incremental indexing for
+        // them as long as there are effectively registered on the classifier
+        trainingSet.registerExample(null,
+            "Under Belgian law, judges and prosecutors are judicial officers with equal rank and pay.",
+            Arrays.asList(law));
+        trainingSet.registerExample(null, "Prosecutors are typically lawyers who possess a law degree,"
+                                          + " and are recognized as legal professionals by the court"
+                                          + " in which they intend to represent the state.",
+            Arrays.asList(law));
+        assertEquals(0, classifier.updateModel(true));
+        classifier.addTopic(law, null);
+        assertEquals(1, classifier.updateModel(true));
     }
 
     protected Hashtable<String,Object> getDefaultClassifierConfigParams() {
