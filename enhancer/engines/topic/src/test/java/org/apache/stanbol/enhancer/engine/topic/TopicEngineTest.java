@@ -283,8 +283,8 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
 
         // test incremental update of a single root node
         Thread.sleep(10);
-        trainingSet.registerExample(null, "Dubstep is broken beat as are Hip-Hop, Dancehall"
-                                          + " or Drum & Bass", Arrays.asList(music));
+        trainingSet.registerExample(null, "Dubstep is a broken beat musical style as are Hip-Hop,"
+                                          + " Dancehall or Drum & Bass", Arrays.asList(music));
         assertEquals(1, classifier.updateModel(true));
         suggestions = classifier.suggestTopics("Glory box is best mixed as dubstep.");
         assertTrue(suggestions.size() >= 1);
