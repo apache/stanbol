@@ -16,17 +16,21 @@
  */
 package org.apache.stanbol.enhancer.engine.topic;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
+import java.util.TimeZone;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -35,6 +39,7 @@ import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.stanbol.enhancer.topic.Batch;
 import org.apache.stanbol.enhancer.topic.SolrTrainingSet;
 import org.apache.stanbol.enhancer.topic.TrainingSetException;
+import org.apache.stanbol.enhancer.topic.UTCTimeStamper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,6 +78,19 @@ public class TrainingSetTest extends BaseTestWithSolrCore {
         FileUtils.deleteQuietly(solrHome);
         solrHome = null;
         trainingsetSolrServer = null;
+    }
+
+    @Test
+    public void testDateSerialization() throws Exception {
+        GregorianCalendar timeUtc = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        timeUtc.set(2012, 23, 12, 06, 43, 00);
+        timeUtc.set(Calendar.MILLISECOND, 0);
+        assertEquals("2013-12-12T06:43:00.000Z", UTCTimeStamper.utcIsoString(timeUtc.getTime()));
+
+        GregorianCalendar timeCet = new GregorianCalendar(TimeZone.getTimeZone("CET"));
+        timeCet.set(2012, 23, 12, 06, 43, 00);
+        timeCet.set(Calendar.MILLISECOND, 0);
+        assertEquals("2013-12-12T05:43:00.000Z", UTCTimeStamper.utcIsoString(timeCet.getTime()));
     }
 
     @Test
@@ -122,7 +140,7 @@ public class TrainingSetTest extends BaseTestWithSolrCore {
         assertEquals(2, examples.items.size());
         assertEquals(examples.items, Arrays.asList("Text of example1.", "Text of example2."));
         assertFalse(examples.hasMore);
-        
+
         // Test example removal
         trainingSet.registerExample("example1", null, Arrays.asList(TOPIC_1, TOPIC_3));
         examples = trainingSet.getPositiveExamples(Arrays.asList(TOPIC_1, TOPIC_3), null);
@@ -188,38 +206,33 @@ public class TrainingSetTest extends BaseTestWithSolrCore {
     }
 
     @Test
-    public void testIncrementalQueries() throws Exception {
-        Calendar date0 = new GregorianCalendar();
-        Set<String> updatedTopics = trainingSet.getUpdatedTopics(date0);
-        assertEquals(0, updatedTopics.size());
+    public void testHasChangedSince() throws Exception {
+        Date date0 = new Date();
+        assertFalse(trainingSet.hasChangedSince(Arrays.asList(TOPIC_1), date0));
+        assertFalse(trainingSet.hasChangedSince(Arrays.asList(TOPIC_2), date0));
+        assertFalse(trainingSet.hasChangedSince(Arrays.asList(TOPIC_3), date0));
+        assertFalse(trainingSet.hasChangedSince(Arrays.asList(TOPIC_1, TOPIC_2), date0));
+        assertFalse(trainingSet.hasChangedSince(Arrays.asList(TOPIC_1, TOPIC_3), date0));
 
         trainingSet.registerExample("example1", "Text of example1.", Arrays.asList(TOPIC_1));
         trainingSet.registerExample("example2", "Text of example2.", Arrays.asList(TOPIC_1, TOPIC_2));
 
-        updatedTopics = trainingSet.getUpdatedTopics(date0);
-        assertEquals(2, updatedTopics.size());
-        assertTrue(updatedTopics.contains(TOPIC_1));
-        assertTrue(updatedTopics.contains(TOPIC_2));
+        assertTrue(trainingSet.hasChangedSince(Arrays.asList(TOPIC_1), date0));
+        assertTrue(trainingSet.hasChangedSince(Arrays.asList(TOPIC_2), date0));
+        assertFalse(trainingSet.hasChangedSince(Arrays.asList(TOPIC_3), date0));
+        assertTrue(trainingSet.hasChangedSince(Arrays.asList(TOPIC_1, TOPIC_2), date0));
+        assertTrue(trainingSet.hasChangedSince(Arrays.asList(TOPIC_1, TOPIC_3), date0));
 
-        // check that the new registration look as compared to a new date:
-        Thread.sleep(1000);
+        // check that the new registration look as compared to a new date (who are stored up to the
+        // millisecond precision):
+        Thread.sleep(10);
 
-        Calendar date1 = new GregorianCalendar();
-        updatedTopics = trainingSet.getUpdatedTopics(date1);
-        assertEquals(0, updatedTopics.size());
-
-        // check that incremental query works with batching
-        trainingSet.setBatchSize(3);
-
-        Set<String> expectedTopics = new HashSet<String>();
-        for (int i = 0; i < 11; i++) {
-            String topic = "http://example.org/new-topics/" + i;
-            String text = "Text of example" + i + ".";
-            trainingSet.registerExample(null, text, Arrays.asList(topic));
-            expectedTopics.add(topic);
-        }
-        Set<String> newlyUpdatedTopics = trainingSet.getUpdatedTopics(date1);
-        assertEquals(expectedTopics, newlyUpdatedTopics);
+        Date date1 = new Date();
+        assertFalse(trainingSet.hasChangedSince(Arrays.asList(TOPIC_1), date1));
+        assertFalse(trainingSet.hasChangedSince(Arrays.asList(TOPIC_2), date1));
+        assertFalse(trainingSet.hasChangedSince(Arrays.asList(TOPIC_3), date1));
+        assertFalse(trainingSet.hasChangedSince(Arrays.asList(TOPIC_1, TOPIC_2), date1));
+        assertFalse(trainingSet.hasChangedSince(Arrays.asList(TOPIC_1, TOPIC_3), date1));
     }
 
     protected Hashtable<String,Object> getDefaultConfigParams() {
