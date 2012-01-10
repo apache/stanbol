@@ -66,6 +66,7 @@ import org.apache.stanbol.enhancer.topic.TopicClassifier;
 import org.apache.stanbol.enhancer.topic.TopicSuggestion;
 import org.apache.stanbol.enhancer.topic.TrainingSet;
 import org.apache.stanbol.enhancer.topic.TrainingSetException;
+import org.apache.stanbol.enhancer.topic.UTCTimeStamper;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -429,9 +430,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         SolrQuery query = new SolrQuery();
         String q = "*:*";
         if (modelUpdateDateField != null) {
-            query.setFields(topicUriField, broaderField);
-        } else {
             query.setFields(topicUriField, broaderField, modelUpdateDateField);
+        } else {
+            query.setFields(topicUriField, broaderField);
         }
         String offset = null;
         boolean done = false;
@@ -492,7 +493,6 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     public void updateTopic(String topicId, List<String> impactedTopics, Collection<Object> broaderTopics) throws TrainingSetException,
                                                                                                           ClassifierException {
         long start = System.currentTimeMillis();
-
         Batch<String> examples = Batch.emtpyBatch(String.class);
         StringBuffer sb = new StringBuffer();
         do {
@@ -513,8 +513,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             doc.addField(similarityField, sb);
         }
         if (modelUpdateDateField != null) {
-            // TODO: force UTC timezone here
-            doc.addField(modelUpdateDateField, new Date());
+            doc.addField(modelUpdateDateField, UTCTimeStamper.nowUtcDate());
         }
         SolrServer solrServer = getActiveSolrServer();
         try {

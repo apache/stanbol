@@ -93,6 +93,6 @@ public interface TrainingSet {
      *            look for changes after that date
      * @return true if one of the passed topics has changed since the last date
      */
-    boolean hasChangedSince(List<String> topics, Date referenceDate);
+    boolean hasChangedSince(List<String> topics, Date referenceDate) throws TrainingSetException;
 
 }
