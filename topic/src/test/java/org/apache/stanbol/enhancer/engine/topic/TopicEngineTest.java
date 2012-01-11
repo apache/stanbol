@@ -286,10 +286,10 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
         trainingSet.registerExample(null, "Dubstep is a broken beat musical style as are Hip-Hop,"
                                           + " Dancehall or Drum & Bass", Arrays.asList(music));
         assertEquals(1, classifier.updateModel(true));
+        assertEquals(0, classifier.updateModel(true));
         suggestions = classifier.suggestTopics("Glory box is best mixed as dubstep.");
         assertTrue(suggestions.size() >= 1);
         assertEquals(music, suggestions.get(0).uri);
-        assertEquals(0, classifier.updateModel(true));
 
         // test incremental update of a leaf node (the parent topic needs re-indexing too)
         Thread.sleep(10);
@@ -300,6 +300,7 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
 
         // it's always possible to rebuild all models from scratch
         assertEquals(7, classifier.updateModel(false));
+        assertEquals(0, classifier.updateModel(true));
 
         // it's also possible to define new topics on an existing model and leverage incremental indexing for
         // them as long as there are effectively registered on the classifier
@@ -313,6 +314,7 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
         assertEquals(0, classifier.updateModel(true));
         classifier.addTopic(law, null);
         assertEquals(1, classifier.updateModel(true));
+        assertEquals(0, classifier.updateModel(true));
     }
 
     protected Hashtable<String,Object> getDefaultClassifierConfigParams() {
