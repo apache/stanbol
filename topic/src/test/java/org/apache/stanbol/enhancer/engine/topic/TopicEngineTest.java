@@ -269,6 +269,10 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
         assertEquals(music, suggestions.get(1).uri);
         assertEquals(football, suggestions.get(2).uri);
         assertEquals(sport, suggestions.get(3).uri);
+        // check that the scores are decreasing:
+        assertTrue(suggestions.get(0).score > suggestions.get(1).score);
+        assertTrue(suggestions.get(1).score > suggestions.get(2).score);
+        assertTrue(suggestions.get(2).score > suggestions.get(3).score);
 
         suggestions = classifier.suggestTopics("Apple is no longer a startup.");
         assertTrue(suggestions.size() >= 3);
