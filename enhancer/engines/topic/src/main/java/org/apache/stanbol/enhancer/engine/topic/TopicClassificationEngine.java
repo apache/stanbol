@@ -65,6 +65,7 @@ import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.apache.stanbol.enhancer.topic.Batch;
+import org.apache.stanbol.enhancer.topic.ClassificationPerformance;
 import org.apache.stanbol.enhancer.topic.ClassifierException;
 import org.apache.stanbol.enhancer.topic.ConfiguredSolrCoreTracker;
 import org.apache.stanbol.enhancer.topic.TopicClassifier;
@@ -183,6 +184,11 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     protected String entryTypeField;
 
     protected String modelEntryIdField;
+
+    // customize the behavior of the classifier instance for model evaluation
+    protected int cvFoldIndex = 0;
+
+    protected int cvFoldCount = 0;
 
     @Activate
     protected void activate(ComponentContext context) throws ConfigurationException, InvalidSyntaxException {
@@ -667,5 +673,33 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                     String.format("TopicClassificationEngine %s has no registered"
                                   + " training set hence cannot be updated.", engineId));
         }
+    }
+
+    @Override
+    public void setCrossValidationInfo(int foldIndex, int foldCount) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public TopicClassifier cloneWithEmdeddedModel() throws ClassifierException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void destroyModel() throws ClassifierException {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void updatePerformanceEstimates(boolean incremental) throws ClassifierException, TrainingSetException {
+        
+    }
+
+    @Override
+    public ClassificationPerformance getPerformanceEstimates(String topic) throws ClassifierException {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

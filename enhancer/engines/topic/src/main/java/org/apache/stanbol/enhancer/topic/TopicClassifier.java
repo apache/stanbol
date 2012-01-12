@@ -108,4 +108,39 @@ public interface TopicClassifier {
      * @return the number of updated topics
      */
     int updateModel(boolean incremental) throws TrainingSetException, ClassifierException;
+
+    /**
+     * Perform k-fold cross validation of the model to compute estimates of the precision, recall and f1
+     * score.
+     */
+    public void updatePerformanceEstimates(boolean incremental) throws ClassifierException,
+                                                               TrainingSetException;
+
+    /**
+     * Tell the classifier which slice of data to keep aside while training for model evaluation using k-folds
+     * cross validation.
+     * 
+     * http://en.wikipedia.org/wiki/Cross-validation_%28statistics%29#K-fold_cross-validation
+     * 
+     * @param foldIndex
+     *            the fold id used as a training set for this classifier instance.
+     * @param foldCount
+     *            the number of folds used in the cross validation process (typically 3 or 5). Set to 0 to
+     *            disable cross validation for this classifier.
+     */
+    void setCrossValidationInfo(int foldIndex, int foldCount);
+
+    /**
+     * Clone the classifier to get a new independent instance with an empty embedded model to be trained on a
+     * subsample of the dataset in a cross validation setting for model evaluation.
+     */
+    TopicClassifier cloneWithEmdeddedModel() throws ClassifierException;
+
+    /**
+     * Free the backing resources of the model (e.g. indices persisted on the harddrive or a DB) once the
+     * cross validation process is completed.
+     */
+    void destroyModel() throws ClassifierException;
+
+    ClassificationPerformance getPerformanceEstimates(String topic) throws ClassifierException;
 }
