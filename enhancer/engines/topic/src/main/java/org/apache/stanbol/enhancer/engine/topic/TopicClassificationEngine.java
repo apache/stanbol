@@ -20,6 +20,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTE
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -36,6 +37,7 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -44,7 +46,6 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.UpdateRequest;
@@ -376,9 +377,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             return broaderTopics;
         }
         SolrServer solrServer = getActiveSolrServer();
-        SolrQuery query = new SolrQuery();
-        // use a filter query to avoid string escaping issues with special solr chars
-        query.setQuery("{!field f=" + topicUriField + "}" + id);
+        SolrQuery query = new SolrQuery(topicUriField + ":" + ClientUtils.escapeQueryChars(id));
         query.addField(broaderField);
         try {
             for (SolrDocument result : solrServer.query(query).getResults()) {
@@ -451,6 +450,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         modelEntry.addField(entryIdField, modelEntryId);
         modelEntry.addField(topicUriField, topicId);
         modelEntry.addField(entryTypeField, MODEL_ENTRY);
+        if (broaderTopics != null) {
+            invalidateModelFields(broaderTopics, modelUpdateDateField, modelEvaluationDateField);
+        }
         SolrServer solrServer = getActiveSolrServer();
         try {
             UpdateRequest request = new UpdateRequest();
@@ -463,9 +465,39 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 solrCoreId);
             throw new ClassifierException(msg, e);
         }
+    }
 
-        // TODO: invalidate the last_model_update_dt field of the metadata of the broader topics to schedule
-        // them for the next coming model updates
+    /*
+     * The commit is the responsibility of the caller.
+     */
+    protected void invalidateModelFields(Collection<String> topicIds, String... fieldNames) throws ClassifierException {
+        if (topicIds.isEmpty() || fieldNames.length == 0) {
+            return;
+        }
+        SolrServer solrServer = getActiveSolrServer();
+        List<String> invalidatedFields = Arrays.asList(fieldNames);
+        try {
+            UpdateRequest request = new UpdateRequest();
+            for (String topicId : topicIds) {
+                SolrQuery query = new SolrQuery(entryTypeField + ":" + METADATA_ENTRY + " AND "
+                                                + topicUriField + ":" + ClientUtils.escapeQueryChars(topicId));
+                for (SolrDocument result : solrServer.query(query).getResults()) {
+                    // there should be only one (or none: tolerated)
+                    SolrInputDocument newEntry = new SolrInputDocument();
+                    for (String fieldName : result.getFieldNames()) {
+                        if (!invalidatedFields.contains(fieldName)) {
+                            newEntry.setField(fieldName, result.getFieldValues(fieldName));
+                        }
+                    }
+                    request.add(newEntry);
+                }
+            }
+            solrServer.request(request);
+        } catch (Exception e) {
+            String msg = String.format("Error invalidating topics [%s] on Solr Core '%s'",
+                StringUtils.join(topicIds, ", "), solrCoreId);
+            throw new ClassifierException(msg, e);
+        }
     }
 
     @Override

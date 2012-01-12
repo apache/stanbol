@@ -321,6 +321,12 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
         classifier.addTopic(law, null);
         assertEquals(1, classifier.updateModel(true));
         assertEquals(0, classifier.updateModel(true));
+        
+        // registering new subtopics invalidate the models of the parent as well
+        classifier.addTopic("urn:topics/sportsmafia", Arrays.asList(football, business));
+        assertEquals(3, classifier.updateModel(true));
+        assertEquals(0, classifier.updateModel(true));
+        
     }
 
     protected Hashtable<String,Object> getDefaultClassifierConfigParams() {
