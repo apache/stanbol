@@ -35,6 +35,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.osgi.framework.InvalidSyntaxException;
@@ -175,7 +176,7 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
             List<String> parts = new ArrayList<String>();
             for (String topic : topics) {
                 // use a nested query to avoid string escaping issues with special solr chars
-                parts.add("_query_:\"{!field f=" + topicUrisField + "}" + topic + "\"");
+                parts.add(topicUrisField + ":" + ClientUtils.escapeQueryChars(topic));
             }
             sb.append(StringUtils.join(parts, " OR "));
             sb.append(")");
@@ -213,8 +214,7 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
             q += "*:*";
         } else if (positive) {
             for (String topic : topics) {
-                // use a nested query to avoid string escaping issues with special solr chars
-                parts.add("_query_:\"{!field f=" + topicUrisField + "}" + topic + "\"");
+                parts.add(topicUrisField + ":" + ClientUtils.escapeQueryChars(topic));
             }
             if (offset != null) {
                 q += "(";
@@ -225,8 +225,7 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
             }
         } else {
             for (String topic : topics) {
-                // use a nested query to avoid string escaping issues with special solr chars
-                parts.add("-_query_:\"{!field f=" + topicUrisField + "}" + topic + "\"");
+                parts.add("-" + topicUrisField + ":" + ClientUtils.escapeQueryChars(topic));
             }
             q += StringUtils.join(parts, " AND ");
         }
