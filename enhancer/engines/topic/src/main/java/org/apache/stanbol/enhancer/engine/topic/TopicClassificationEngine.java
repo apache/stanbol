@@ -65,7 +65,7 @@ import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.apache.stanbol.enhancer.topic.Batch;
-import org.apache.stanbol.enhancer.topic.ClassificationPerformance;
+import org.apache.stanbol.enhancer.topic.ClassificationReport;
 import org.apache.stanbol.enhancer.topic.ClassifierException;
 import org.apache.stanbol.enhancer.topic.ConfiguredSolrCoreTracker;
 import org.apache.stanbol.enhancer.topic.TopicClassifier;
@@ -698,7 +698,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     }
 
     @Override
-    public ClassificationPerformance getPerformanceEstimates(String topic) throws ClassifierException {
+    public ClassificationReport getPerformanceEstimates(String topic) throws ClassifierException {
         // TODO Auto-generated method stub
         return null;
     }
