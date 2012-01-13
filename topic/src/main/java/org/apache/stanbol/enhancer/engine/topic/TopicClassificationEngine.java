@@ -677,8 +677,12 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     @Override
     public void setCrossValidationInfo(int foldIndex, int foldCount) {
-        // TODO Auto-generated method stub
-
+        if (foldIndex > foldCount - 1) {
+            throw new IllegalArgumentException(String.format(
+                "foldIndex=%d should be smaller than foldCount=%d - 1", foldIndex, foldCount));
+        }
+        cvFoldIndex = foldIndex;
+        cvFoldCount = foldCount;
     }
 
     @Override
@@ -693,13 +697,36 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     }
 
-    public void updatePerformanceEstimates(boolean incremental) throws ClassifierException, TrainingSetException {
-        
+    public int updatePerformanceEstimates(boolean incremental) throws ClassifierException,
+                                                              TrainingSetException {
+        int updatedTopics = 0;
+        // TODO
+        return updatedTopics;
     }
 
     @Override
     public ClassificationReport getPerformanceEstimates(String topic) throws ClassifierException {
-        // TODO Auto-generated method stub
-        return null;
+
+        SolrServer solrServer = getActiveSolrServer();
+        SolrQuery query = new SolrQuery(entryIdField + ":" + METADATA_ENTRY + " AND " + topicUriField + ":"
+                                        + ClientUtils.escapeQueryChars(topic));
+        try {
+            SolrDocumentList results = solrServer.query(query).getResults();
+            if (results.isEmpty()) {
+                throw new ClassifierException(String.format("%s is not a registered topic", topic));
+            }
+            SolrDocument metadata = results.get(0);
+            float precision = (Float) metadata.getFirstValue(precisionField);
+            float recall = (Float) metadata.getFirstValue(recallField);
+            float f1 = (Float) metadata.getFirstValue(f1Field);
+            // int positiveSupport = (Integer) metadata.getFirstValue(po);
+            // int negativeSupport = 0;
+            Date evaluationDate = (Date) metadata.getFirstValue(modelEvaluationDateField);
+            boolean uptodate = evaluationDate != null;
+            return new ClassificationReport(precision, recall, f1, 0, 0, uptodate, evaluationDate);
+        } catch (SolrServerException e) {
+            throw new ClassifierException(String.format("Error fetching the performance report for topic "
+                                                        + topic));
+        }
     }
 }

@@ -17,6 +17,7 @@
 package org.apache.stanbol.enhancer.topic;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -65,6 +66,10 @@ public class ClassificationReport {
      */
     public final int negativeSupport;
 
+    public final boolean uptodate;
+
+    public final Date evaluationDate;
+
     public final List<String> falsePositiveExampleIds = new ArrayList<String>();
 
     public final List<String> falseNegativeExampleIds = new ArrayList<String>();
@@ -73,12 +78,16 @@ public class ClassificationReport {
                                 float recall,
                                 float f1,
                                 int positiveSupport,
-                                int negativeSupport) {
+                                int negativeSupport,
+                                boolean uptodate,
+                                Date evaluationDate) {
         this.precision = precision;
         this.recall = recall;
         this.f1 = f1;
         this.positiveSupport = positiveSupport;
         this.negativeSupport = negativeSupport;
+        this.uptodate = uptodate;
+        this.evaluationDate = evaluationDate;
     }
 
 }
