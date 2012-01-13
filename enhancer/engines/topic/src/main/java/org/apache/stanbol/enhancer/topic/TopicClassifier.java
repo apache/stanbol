@@ -112,9 +112,11 @@ public interface TopicClassifier {
     /**
      * Perform k-fold cross validation of the model to compute estimates of the precision, recall and f1
      * score.
+     * 
+     * @return number of updated topics
      */
-    public void updatePerformanceEstimates(boolean incremental) throws ClassifierException,
-                                                               TrainingSetException;
+    public int updatePerformanceEstimates(boolean incremental) throws ClassifierException,
+                                                              TrainingSetException;
 
     /**
      * Tell the classifier which slice of data to keep aside while training for model evaluation using k-folds
