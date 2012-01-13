@@ -37,6 +37,12 @@
         	</xsl:call-template>
         </xsl:variable>
         <xsl:choose>
+        	<xsl:when test="starts-with($ref,'//')">
+        	<!--  prefix is just the protocol part -->
+        	<!--	<xsl:value-of select="concat(substring-before($baseUri,':'),':',$ref)"/> -->
+        	<!--  hard code the prefix for Stanbol because there we will not see the real URLs anyway -->
+        		<xsl:value-of select="concat('http:',$ref)"/>
+        	</xsl:when>
         	<xsl:when test="starts-with($ref,'/')">
         		<xsl:value-of select="concat($baseUri,$ref)"/>
        		</xsl:when>
