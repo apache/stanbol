@@ -70,7 +70,14 @@
 
 	<!-- rel-license pattern -->
 	<xsl:template match="*[@rel='license']">
-		<dc:license rdf:resource="{@href}" />
+		<xsl:variable name="href" select="@href" />
+		<xsl:variable name="hrefForm">
+			<xsl:call-template name="resolveUri">
+				<xsl:with-param name="base" select="$uri" />
+				<xsl:with-param name="ref" select="$href" />
+			</xsl:call-template>
+		</xsl:variable>		
+		<dc:license rdf:resource="{$hrefForm}" />
 	</xsl:template>
 
 	<!--  TODO: rel-bookmark, rel-me, rel-contact, ... ? -->
