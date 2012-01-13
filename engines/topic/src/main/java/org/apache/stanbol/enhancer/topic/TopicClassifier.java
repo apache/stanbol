@@ -142,5 +142,5 @@ public interface TopicClassifier {
      */
     void destroyModel() throws ClassifierException;
 
-    ClassificationPerformance getPerformanceEstimates(String topic) throws ClassifierException;
+    ClassificationReport getPerformanceEstimates(String topic) throws ClassifierException;
 }
