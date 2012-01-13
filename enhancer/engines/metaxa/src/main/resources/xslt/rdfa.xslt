@@ -367,6 +367,9 @@
      <when test="not(contains($curie_or_uri,'://')) and not(starts-with($curie_or_uri,'/'))"> <!-- relative URL -->
       <value-of select="concat($this_location,$curie_or_uri)" />
      </when>
+     <when test="not(contains($curie_or_uri,'://')) and starts-with($curie_or_uri,'//')"> <!-- protocol only -->
+      <value-of select="concat(substring-before($this_root,':'),':',$curie_or_uri)" />
+     </when>
      <when test="not(contains($curie_or_uri,'://')) and (starts-with($curie_or_uri,'/'))"> <!-- URL from root domain -->
       <value-of select="concat($this_root,substring-after($curie_or_uri,'/'))" />
      </when>
