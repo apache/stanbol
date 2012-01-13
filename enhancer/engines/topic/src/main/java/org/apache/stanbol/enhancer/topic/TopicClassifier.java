@@ -142,5 +142,9 @@ public interface TopicClassifier {
      */
     void destroyModel() throws ClassifierException;
 
+    /**
+     * Get a classification report with various accuracy metrics (precision, recall and f1-score) along with
+     * the example ids of some mistakes (false positives or false negatives).
+     */
     ClassificationReport getPerformanceEstimates(String topic) throws ClassifierException;
 }

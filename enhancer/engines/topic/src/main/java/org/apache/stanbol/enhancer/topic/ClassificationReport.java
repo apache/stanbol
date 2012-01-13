@@ -21,15 +21,21 @@ import java.util.List;
 
 /**
  * Data transfer object to report estimated classification performance of a classifier.
- *
+ * 
+ * <p>
  * Report scores to evaluate the quality of a model on a labeled evaluation dataset (that should not have been
- * used when training the model). See:
- *
- * http://en.wikipedia.org/wiki/Precision_and_recall
- *
+ * used when training the model).
+ * </p>
+ * 
+ * <p>
+ * See: http://en.wikipedia.org/wiki/Precision_and_recall
+ * </p>
+ * 
+ * <p>
  * Precision, Recall are F1-score and preferred over a simple rate of good classification so as to account for
  * potentially imbalanced evaluation set (e.g. when the number of negative examples is much larger than the
  * number of positive examples).
+ * </p>
  */
 public class ClassificationReport {
 
@@ -49,14 +55,30 @@ public class ClassificationReport {
      */
     public final float f1;
 
+    /**
+     * Total number of positive examples used by the evaluation procedure.
+     */
+    public final int positiveSupport;
+
+    /**
+     * Total number of negative examples used by the evaluation procedure.
+     */
+    public final int negativeSupport;
+
     public final List<String> falsePositiveExampleIds = new ArrayList<String>();
 
     public final List<String> falseNegativeExampleIds = new ArrayList<String>();
 
-    public ClassificationReport(float precision, float recall, float f1) {
+    public ClassificationReport(float precision,
+                                float recall,
+                                float f1,
+                                int positiveSupport,
+                                int negativeSupport) {
         this.precision = precision;
         this.recall = recall;
         this.f1 = f1;
+        this.positiveSupport = positiveSupport;
+        this.negativeSupport = negativeSupport;
     }
 
 }
