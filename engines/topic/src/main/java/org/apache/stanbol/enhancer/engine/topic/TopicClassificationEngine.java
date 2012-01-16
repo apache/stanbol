@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -613,10 +614,18 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         }
         final boolean incr = incremental;
         int updatedTopics = batchOverTopics(new BatchProcessor<SolrDocument>() {
+            int offset = 0;
+
             @Override
             public int process(List<SolrDocument> batch) throws ClassifierException, TrainingSetException {
                 int processed = 0;
                 for (SolrDocument result : batch) {
+                    offset++;
+                    if (cvFoldCount != 0 && offset % cvFoldCount == cvFoldIndex) {
+                        // we are performing a cross validation session and this example belong to the test
+                        // fold hence should be skipped
+                        continue;
+                    }
                     String topicId = result.getFirstValue(topicUriField).toString();
                     List<String> impactedTopics = new ArrayList<String>();
                     impactedTopics.add(topicId);
@@ -727,12 +736,28 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     }
 
     protected Dictionary<String,Object> getCanonicalConfiguration(EmbeddedSolrServer server) {
-        // TODO
-        return null;
+        Hashtable<String,Object> config = new Hashtable<String,Object>();
+        config.put(TopicClassificationEngine.ENGINE_ID, engineId + "-evaluation");
+        config.put(TopicClassificationEngine.ENTRY_ID_FIELD, "entry_id");
+        config.put(TopicClassificationEngine.ENTRY_TYPE_FIELD, "entry_type");
+        config.put(TopicClassificationEngine.MODEL_ENTRY_ID_FIELD, "model_entry_id");
+        config.put(TopicClassificationEngine.SOLR_CORE, server);
+        config.put(TopicClassificationEngine.TOPIC_URI_FIELD, "topic");
+        config.put(TopicClassificationEngine.SIMILARTITY_FIELD, "classifier_features");
+        config.put(TopicClassificationEngine.BROADER_FIELD, "broader");
+        config.put(TopicClassificationEngine.MODEL_UPDATE_DATE_FIELD, "last_update_dt");
+        config.put(TopicClassificationEngine.MODEL_EVALUATION_DATE_FIELD, "last_evaluation_dt");
+        config.put(TopicClassificationEngine.PRECISION_FIELD, "precision");
+        config.put(TopicClassificationEngine.RECALL_FIELD, "recall");
+        config.put(TopicClassificationEngine.F1_FIELD, "f1");
+        config.put(TopicClassificationEngine.POSITIVE_SUPPORT_FIELD, "positive_support");
+        config.put(TopicClassificationEngine.NEGATIVE_SUPPORT_FIELD, "negative_support");
+        config.put(TopicClassificationEngine.FALSE_POSITIVES_FIELD, "false_positives");
+        config.put(TopicClassificationEngine.FALSE_NEGATIVES_FIELD, "false_negatives");
+        return config;
     }
 
     protected EmbeddedSolrServer makeTopicClassifierSolrServer(File folder) {
-
         // TODO
         return null;
     }
@@ -768,9 +793,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         return updatedTopics;
     }
 
-    protected void performCVFold(TopicClassificationEngine classifier, int cvFoldIndex, int cvFoldCount) throws ConfigurationException,
-                                                                                                        TrainingSetException,
-                                                                                                        ClassifierException {
+    protected void performCVFold(final TopicClassificationEngine classifier, int cvFoldIndex, int cvFoldCount) throws ConfigurationException,
+                                                                                                              TrainingSetException,
+                                                                                                              ClassifierException {
 
         log.info(String.format("Performing evaluation CV iteration %d/%d on classifier %s", cvFoldIndex + 1,
             cvFoldCount, engineId));
@@ -783,8 +808,21 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         // iterate over all the topics to register them in the evaluation classifier
         batchOverTopics(new BatchProcessor<SolrDocument>() {
             @Override
-            public int process(List<SolrDocument> batch) {
-                return 0;
+            public int process(List<SolrDocument> batch) throws ClassifierException {
+                for (SolrDocument topicEntry : batch) {
+                    String topicId = topicEntry.getFirstValue(topicUriField).toString();
+                    Collection<Object> broader = topicEntry.getFieldValues(broaderField);
+                    if (broader == null) {
+                        classifier.addTopic(topicId, null);
+                    } else {
+                        List<String> broaderTopics = new ArrayList<String>();
+                        for (Object broaderTopic : broader) {
+                            broaderTopics.add(broaderTopic.toString());
+                        }
+                        classifier.addTopic(topicId, broaderTopics);
+                    }
+                }
+                return batch.size();
             }
         });
 
