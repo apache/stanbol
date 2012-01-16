@@ -18,20 +18,28 @@ package org.apache.stanbol.reasoners.web.resources;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningService;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServicesManager;
+import org.apache.stanbol.reasoners.servicesapi.UnboundReasoningServiceException;
+import org.apache.stanbol.reasoners.servicesapi.annotations.Documentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +73,21 @@ public class ReasoningServicesResource extends BaseStanbolResource {
         return Response.ok(new Viewable("index", this), TEXT_HTML).build();
     }
 
+    private ReasoningService<?,?,?> service = null;
+    
+    @GET
+    @Produces(TEXT_HTML)
+    @Path("{service}")
+    public Response getServiceDocumentation(@PathParam(value = "service") String serviceID) {
+    	try {
+			this.service = this.getServicesManager().get(serviceID);
+		} catch (UnboundReasoningServiceException e) {
+			log.info("Service {} is not bound", serviceID);
+			return Response.status(Status.NOT_FOUND).build();
+		}
+        return Response.ok(new Viewable("service", this), TEXT_HTML).build();
+    }
+    
     private ReasoningServicesManager getServicesManager() {
         log.debug("(getServicesManager()) ");
         return (ReasoningServicesManager) ContextHelper.getServiceFromContext(ReasoningServicesManager.class,
@@ -76,4 +99,43 @@ public class ReasoningServicesResource extends BaseStanbolResource {
         return getServicesManager().asUnmodifiableSet();
     }
 
+    public ReasoningService<?, ?, ?> getService(){
+    	return this.service;
+    }
+
+    public Map<String,String> getServiceDescription(){
+    	return getServiceDescription(service);
+    }
+    
+    public Map<String,String> getServiceDescription(ReasoningService<?,?,?> service){
+    	Class<?> serviceC = service.getClass();
+	 	String name;
+		try {
+			name = serviceC.getAnnotation(Documentation.class).name();
+		} catch (NullPointerException e) {
+    		log.warn("The service {} is not documented: missing name", serviceC);
+			name="";
+		}
+	 	String description;
+		try {
+			description = serviceC.getAnnotation(Documentation.class).description();
+		} catch (NullPointerException e) {
+    		log.warn("The service {} is not documented: missing description", serviceC);
+    		description="";
+		}
+	 	// String file = serviceC.getAnnotation(Documentation.class).file();
+		Map<String,String> serviceProperties = new HashMap<String,String>();
+		serviceProperties.put("name", name);
+		serviceProperties.put("description", description);
+		// serviceProperties.put("file", file);
+		serviceProperties.put("path", service.getPath());
+		return serviceProperties;
+    }
+    public List<Map<String,String>> getServicesDescription(){
+    	List<Map<String,String>> descriptions = new ArrayList<Map<String,String>>();
+    	for(ReasoningService<?, ?, ?> service : getActiveServices()){
+    		descriptions.add(getServiceDescription(service));
+    	}
+    	return descriptions;
+    }
 }

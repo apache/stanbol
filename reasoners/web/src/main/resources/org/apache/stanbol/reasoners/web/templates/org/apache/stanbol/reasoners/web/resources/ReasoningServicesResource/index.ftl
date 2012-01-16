@@ -16,52 +16,53 @@
 -->
 <#import "/imports/common.ftl" as common>
 <#import "/imports/reasonersDescription.ftl" as reasonersDescription>
+<#import "/imports/serviceDescription.ftl" as serviceDescription>
 <#escape x as x?html>
-<@common.page title="Reasoners" hasrestapi=false> 
+<@common.page title="Reasoners" hasrestapi=true> 
 		
  <div class="panel" id="webview">
+ <p>The Stanbol Reasoners provides a set of services that take advantage of automatic inference engines.</p>
+ <h3>Active services</h3>
+ <p>There are currently <strong>${it.activeServices?size}</strong> active services.</p>
+ <p>Each reasoning service can be accessed to perform one of three tasks: classification, consistency check, get all inferences</p>          
+  <ul>
+  <#list it.servicesDescription as service>
+    <@serviceDescription.li name="${service.name}" fullpath="${it.currentPath}/${service.path}" path="${service.path}" description="${service.description}"/>
+    <ul>
+    <#-- TODO: generate the task list dinamically -->
+      <li><a href="${it.publicBaseUri}${it.currentPath}/${service.path}/classify" title="${service.name} Task: classify">classify</a></li>
+      <li><a href="${it.publicBaseUri}${it.currentPath}/${service.path}/check" title="${service.name} Task: check">check</a></li>
+      <li><a href="${it.publicBaseUri}${it.currentPath}/${service.path}/enrich" title="${service.name} Task: classify">enrich</a></li>
+    </ul>	
+  </#list>
+ </ul>
  <#if it.activeServices?size == 0>
-   <p><em>There is no reasoning services. Administrators can install and
+   <p><em>There is no reasoning service. Administrators can install and
    configure new reasoning services using the
     <a href="/system/console/components" target="_blank">OSGi console</a>.</em></p>
  <#else>
- <!-- FIXME class names should be generic, and not bound to a specific functionality (here engines->reasoning services)-->
- <div class="enginelisting">
-  <div class="collapsed">
-  <p class="collapseheader">There are currently
-   <strong>${it.activeServices?size}</strong> active services.</p>
-   <div class="collapsable">
-    <ul>
-
-     <#list it.activeServices as service>
-      <li><b>${service.path}</b>:
-        <#list service.supportedTasks as task> 
-        	<a href="${it.publicBaseUri}${it.currentPath}/${service.path}/${task}" title="${service.class.name} Task: ${task}">${task}</a> |
-        </#list>
-        <a href="${it.publicBaseUri}${it.currentPath}/${service.path}/check" title="${service.class.name} Task: check">check</a>
-      </li>
-     </#list>
-    </ul>
-    
+<#--
+  This is not much informative for the moment   
   <p class="note">Administrators can enable, disable and deploy reasoning services using the
     <a href="/system/console/components" target="_blank">OSGi console</a>.</p>
-   </div>
-   
-  </div> 
- </div>
-
-<script>
-$(".enginelisting p").click(function () {
-  $(this).parents("div").toggleClass("collapsed");
-});    
-</script>
+-->
  </#if>
-	</div>
-
-    <!-- We disable this at the moment -->
-    <!--div class="panel" id="restapi" style="display: none;">
-          
-    </div -->
-
+ </div>
+ <!-- We disable this at the moment -->
+ <div class="panel" id="restapi" style="display: none;">
+    <p>This section lists how to use the REST api of all active services:</p>
+    <h3>Service Endpoints</h3>
+    <ul>
+    <#list it.servicesDescription as service>
+      <li><a href="#${service.path}">${service.name}</a></li>
+	</#list>
+    </ul>
+    <#list it.servicesDescription as service>
+    <hr/>
+      <a name="${service.path}"></a>
+      <h4 style="font-size:1em">Service Endpoint <a href="${it.currentPath}/${service.path}">/reasoners/${service.path}</a>: ${service.name}</h4>
+	  <@serviceDescription.view name="${service.name}" fullpath="${it.currentPath}/${service.path}" path="${service.path}" description="${service.description}"/>
+	</#list>
+ </div>
 </@common.page>
 </#escape>

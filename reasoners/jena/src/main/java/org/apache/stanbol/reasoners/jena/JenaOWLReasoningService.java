@@ -21,6 +21,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningService;
+import org.apache.stanbol.reasoners.servicesapi.annotations.Documentation;
 import org.osgi.service.component.ComponentContext;
 
 import com.hp.hpl.jena.reasoner.ReasonerRegistry;
@@ -30,6 +31,7 @@ import com.hp.hpl.jena.reasoner.ReasonerRegistry;
  */
 @Component(immediate = true, metatype = true)
 @Service
+@Documentation(name = "Jena OWL", description = "This service use the Jena OWL reasoner.")
 public class JenaOWLReasoningService extends AbstractJenaReasoningService {
     public static final String _DEFAULT_PATH = "owl";
 

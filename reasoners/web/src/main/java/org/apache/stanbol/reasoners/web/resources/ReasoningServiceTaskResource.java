@@ -61,6 +61,7 @@ import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputManager;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServicesManager;
 import org.apache.stanbol.reasoners.servicesapi.UnboundReasoningServiceException;
 import org.apache.stanbol.reasoners.servicesapi.UnsupportedTaskException;
+import org.apache.stanbol.reasoners.servicesapi.annotations.Documentation;
 import org.apache.stanbol.reasoners.web.input.impl.SimpleInputManager;
 import org.apache.stanbol.reasoners.web.input.provider.impl.FileInputProvider;
 import org.apache.stanbol.reasoners.web.input.provider.impl.OntonetInputProvider;
@@ -566,4 +567,35 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         log.debug("(getJobManager()) ");
         return (JobManager) ContextHelper.getServiceFromContext(JobManager.class, this.context);
     }
+    
+    
+    public Map<String,String> getServiceDescription(){
+    	return getServiceDescription(service);
+    }
+    
+    public Map<String,String> getServiceDescription(ReasoningService<?,?,?> service){
+    	Class<?> serviceC = service.getClass();
+	 	String name;
+		try {
+			name = serviceC.getAnnotation(Documentation.class).name();
+		} catch (NullPointerException e) {
+    		log.warn("The service {} is not documented: missing name", serviceC);
+			name="";
+		}
+	 	String description;
+		try {
+			description = serviceC.getAnnotation(Documentation.class).description();
+		} catch (NullPointerException e) {
+    		log.warn("The service {} is not documented: missing description", serviceC);
+    		description="";
+		}
+	 	// String file = serviceC.getAnnotation(Documentation.class).file();
+		Map<String,String> serviceProperties = new HashMap<String,String>();
+		serviceProperties.put("name", name);
+		serviceProperties.put("description", description);
+		// serviceProperties.put("file", file);
+		serviceProperties.put("path", service.getPath());
+		return serviceProperties;
+    }
+
 }

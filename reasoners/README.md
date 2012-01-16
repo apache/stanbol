@@ -43,10 +43,10 @@ Description
 * HermiT reasoning service
 
 * A common REST endpoint at /reasoners with the following preloaded services:
-**    /rdfs
-**    /owl
-**    /owlmini
-**    /owl2
+ *    /rdfs
+ *    /owl
+ *    /owlmini
+ *    /owl2
 
 each can be accessed with one of three tasks: check,enrich,classify, for example:
 
@@ -55,7 +55,7 @@ or
 /reasoners/owl2/classify (the hermit service with task classify)
 
 Tasks description:
-* check    : is the input consistent? 200 =true, 204 =false
+* check    : is the input consistent? 200 =true, 409 =false
 * classify : return only rdf:type inferences
 * enrich   : return all inferences
 
@@ -80,7 +80,8 @@ These additional parameters can be sent:
 * recipe  // The ID of a recipe from the Rules module (only with OWLApi based services)s
 
 Supported output formats:
-Supported return formats are all classic RDF types (n3,turtle,rdf+xml) and HTML. For HTML the returned statements are provided in Turtle (Jena) or OWL Manchester syntax (OWLApi), wrapped in the stanbol layout. It would be nice to have all in the latter, which is very much readable (todo).
+Supported return formats are all classic RDF types (n3,turtle,rdf+xml) and HTML. 
+For HTML the returned statements are provided in Turtle (Jena) or OWL Manchester syntax (OWLApi), wrapped in the stanbol layout. It would be nice to have all in the latter, which is very much readable (todo).
 
 Recently added
 =============
