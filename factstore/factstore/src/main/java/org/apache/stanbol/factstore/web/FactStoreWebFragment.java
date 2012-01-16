@@ -98,7 +98,7 @@ public class FactStoreWebFragment implements WebFragment {
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> navList = new ArrayList<NavigationLink>();
-        navList.add(new NavigationLink("factstore", "/factstore", null, 30));
+        navList.add(new NavigationLink("factstore", "/factstore", "/imports/abstract.ftl", 30));
         return navList;
     }
     

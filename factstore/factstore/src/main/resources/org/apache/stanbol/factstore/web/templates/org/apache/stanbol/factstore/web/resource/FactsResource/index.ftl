@@ -19,13 +19,13 @@
 <@common.page>
 
 <ul>
-	<li><a href="#Publish_a_New_Fact_Schema">Publish a New Fact Schema</a></li>
+	<li><a href="#Create_a_New_Fact_Schema">Create a New Fact Schema</a></li>
 	<li><a href="#Get_Fact_Schema">Get Fact Schema</a></li>
-	<li><a href="#Publish_New_Facts">Publish New Facts</a></li>
+	<li><a href="#Store_Facts">Store Facts</a></li>
 	<li><a href="#Query_for_Facts_of_a_Certain_Type">Query for Facts of a Certain Type</a></li>
 </ul>
 
-<a name="Publish_a_New_Fact_Schema" id="Publish_a_New_Fact_Schema"></a><h4>Publish a New Fact Schema</h4>
+<a name="Create_a_New_Fact_Schema" id="Create_a_New_Fact_Schema"></a><h4>Create a New Fact Schema</h4>
 <table>
 	<tr>
 		<th valign="top">Description: </th>
@@ -227,11 +227,11 @@ function getFactSchema() {
 </table>
 </form>
 
-<a name="Publish_New_Facts" id="Publish_New_Facts"></a><h4>Publish New Facts</h4>
+<a name="Store_Facts" id="Store_Facts"></a><h4>Store Facts</h4>
 <table>
 	<tr>
 		<th valign="top">Description: </th>
-		<td>Allows clients to publish a new facts according to a defined fact schema that was previously
+		<td>Allows clients to store a new facts according to a defined fact schema that was previously
 		published to the FactStore. Each new fact is an n-tuple according to its schema where each tuple
 		element identifies an entity using its unique IRI.</td>
 	</tr>

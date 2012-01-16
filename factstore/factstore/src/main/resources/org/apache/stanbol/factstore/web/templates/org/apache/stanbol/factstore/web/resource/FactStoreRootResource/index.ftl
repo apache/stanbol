@@ -49,17 +49,16 @@ services in combination through their RESTful API.</p>
 
 <h3>Specification</h3>
 
-<p>The FactStore specification proposal can be found online at the
-<a href="http://wiki.iks-project.eu/index.php/FactStore_Specification" target="_blank">IKS Wiki page</a>.</p>
-</div>
+<p>The FactStore specification proposal can be found online at the Apache Stanbol
+<a href="http://incubator.apache.org/stanbol/docs/trunk/factstore/specification.html" target="_blank">web site</a>.</p>
 
 <h3>Implementation Status</h3>
 
 <p>The current implementation of the FactStore provides these features:</p>
 
 <ul>
-	<li><a href="${it.publicBaseUri}factstore/facts#Publish_a_New_Fact_Schema">Creation of Fact Schemas</a></li>
-	<li><a href="${it.publicBaseUri}factstore/facts#Publish_New_Facts">Storing of Facts</a></li>
+	<li><a href="${it.publicBaseUri}factstore/facts#Create_a_New_Fact_Schema">Creation of Fact Schemas</a></li>
+	<li><a href="${it.publicBaseUri}factstore/facts#Store_Facts">Storing of Facts</a></li>
 	<li><a href="${it.publicBaseUri}factstore/facts#Query_for_Facts_of_a_Certain_Type">Querying for Single Facts</a></li>
 </ul>
 
@@ -133,6 +132,8 @@ syntax. The `@profile` defines the fact schema where this fact belongs to.</p>
 <p>On success this will return a 201 (Created) and the URI of the newly created
 fact in the location header of the response. To retrieve a fact you can GET it
 from the returned URI.</p>
+
+</div>
 
 <div class="panel" id="restapi" style="display: none;">
 <h3>Service Endpoints</h3>
