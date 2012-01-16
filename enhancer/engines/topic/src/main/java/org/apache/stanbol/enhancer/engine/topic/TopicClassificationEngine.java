@@ -830,11 +830,41 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         classifier.setCrossValidationInfo(cvFoldIndex, cvFoldCount);
         classifier.updateModel(false);
 
+        final int foldCount = cvFoldCount;
+        final int foldIndex = cvFoldIndex;
+
         // iterate over the topics again to compute scores on the test fold
         batchOverTopics(new BatchProcessor<SolrDocument>() {
+
             @Override
-            public int process(List<SolrDocument> batch) {
-                return 0;
+            public int process(List<SolrDocument> batch) throws TrainingSetException, ClassifierException {
+                for (SolrDocument topicMetadata : batch) {
+                    String topic = topicMetadata.getFirstValue(topicUriField).toString();
+                    List<String> impactedTopics = new ArrayList<String>();
+                    int offset = 0;
+                    Batch<String> examples = Batch.emtpyBatch(String.class);
+                    do {
+                        examples = trainingSet.getPositiveExamples(impactedTopics, examples.nextOffset);
+                        for (String example : examples.items) {
+                            if (!(offset % foldCount == foldIndex)) {
+                                // this example is not part of the test fold, skip it
+                                offset++;
+                                continue;
+                            }
+                            offset++;
+                            if (classifier.suggestTopics(example).contains(topic)) {
+                                // count positive success
+                            } else {
+                                // collect false negatives
+                            }
+                        }
+                    } while (examples.hasMore); // TODO: put a bound on the number of examples
+
+                    // TODO: handle false positives with negative examples here
+
+                    // TODO: store performance statistics for current model in the original classifier
+                }
+                return batch.size();
             }
         });
 
