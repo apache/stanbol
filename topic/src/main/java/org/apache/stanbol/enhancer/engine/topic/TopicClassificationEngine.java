@@ -18,6 +18,7 @@ package org.apache.stanbol.enhancer.engine.topic;
 
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.NIE_PLAINTEXTCONTENT;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,6 +37,7 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -48,6 +50,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -209,6 +212,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     protected int cvFoldIndex = 0;
 
     protected int cvFoldCount = 0;
+
+    protected File evaluationFolder;
 
     @Activate
     protected void activate(ComponentContext context) throws ConfigurationException, InvalidSyntaxException {
@@ -553,25 +558,12 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         this.trainingSet = trainingSet;
     }
 
-    @Override
-    public int updateModel(boolean incremental) throws TrainingSetException, ClassifierException {
-        checkTrainingSet();
-        long start = System.currentTimeMillis();
-        if (incremental && modelUpdateDateField == null) {
-            log.warn(MODEL_UPDATE_DATE_FIELD + " field is not configured: switching to batch update mode.");
-            incremental = false;
-        }
+    protected int batchOverTopics(BatchProcessor<SolrDocument> processor) throws TrainingSetException {
         // TODO: implement incremental update by using the date informations
-        int updatedTopics = 0;
+        int processedCount = 0;
         SolrServer solrServer = getActiveSolrServer();
         SolrQuery query = new SolrQuery();
         String q = entryTypeField + ":" + METADATA_ENTRY;
-        if (modelUpdateDateField != null) {
-            query.setFields(topicUriField, entryIdField, modelEntryIdField, broaderField,
-                modelUpdateDateField);
-        } else {
-            query.setFields(topicUriField, entryIdField, modelEntryIdField, broaderField);
-        }
         String offset = null;
         boolean done = false;
         int batchSize = 1000;
@@ -587,29 +579,17 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 query.setQuery(q);
                 QueryResponse response = solrServer.query(query);
                 int count = 0;
+                List<SolrDocument> batchDocuments = new ArrayList<SolrDocument>();
                 for (SolrDocument result : response.getResults()) {
                     String topicId = result.getFirstValue(topicUriField).toString();
                     if (count == batchSize) {
                         offset = topicId;
                     } else {
                         count++;
-                        List<String> impactedTopics = new ArrayList<String>();
-                        impactedTopics.add(topicId);
-                        impactedTopics.addAll(getNarrowerTopics(topicId));
-                        if (incremental) {
-                            Date lastModelUpdate = (Date) result.getFirstValue(modelUpdateDateField);
-                            if (lastModelUpdate != null
-                                && !trainingSet.hasChangedSince(impactedTopics, lastModelUpdate)) {
-                                continue;
-                            }
-                        }
-                        String metadataEntryId = result.getFirstValue(entryIdField).toString();
-                        String modelEntryId = result.getFirstValue(modelEntryIdField).toString();
-                        updateTopic(topicId, metadataEntryId, modelEntryId, impactedTopics,
-                            result.getFieldValues(broaderField));
-                        updatedTopics++;
+                        batchDocuments.add(result);
                     }
                 }
+                processedCount += processor.process(batchDocuments);
                 solrServer.commit();
                 if (count < batchSize) {
                     done = true;
@@ -620,6 +600,43 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             String msg = String.format("Error while updating topics on Solr Core '%s'.", solrCoreId);
             throw new TrainingSetException(msg, e);
         }
+        return processedCount;
+    }
+
+    @Override
+    public int updateModel(boolean incremental) throws TrainingSetException, ClassifierException {
+        checkTrainingSet();
+        long start = System.currentTimeMillis();
+        if (incremental && modelUpdateDateField == null) {
+            log.warn(MODEL_UPDATE_DATE_FIELD + " field is not configured: switching to batch update mode.");
+            incremental = false;
+        }
+        final boolean incr = incremental;
+        int updatedTopics = batchOverTopics(new BatchProcessor<SolrDocument>() {
+            @Override
+            public int process(List<SolrDocument> batch) throws ClassifierException, TrainingSetException {
+                int processed = 0;
+                for (SolrDocument result : batch) {
+                    String topicId = result.getFirstValue(topicUriField).toString();
+                    List<String> impactedTopics = new ArrayList<String>();
+                    impactedTopics.add(topicId);
+                    impactedTopics.addAll(getNarrowerTopics(topicId));
+                    if (incr) {
+                        Date lastModelUpdate = (Date) result.getFirstValue(modelUpdateDateField);
+                        if (lastModelUpdate != null
+                            && !trainingSet.hasChangedSince(impactedTopics, lastModelUpdate)) {
+                            continue;
+                        }
+                    }
+                    String metadataEntryId = result.getFirstValue(entryIdField).toString();
+                    String modelEntryId = result.getFirstValue(modelEntryIdField).toString();
+                    updateTopic(topicId, metadataEntryId, modelEntryId, impactedTopics,
+                        result.getFieldValues(broaderField));
+                    processed++;
+                }
+                return processed;
+            }
+        });
         long stop = System.currentTimeMillis();
         log.info("Sucessfully updated {} topics in {}s", updatedTopics, (double) (stop - start) / 1000.);
         return updatedTopics;
@@ -709,23 +726,84 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         cvFoldCount = foldCount;
     }
 
-    @Override
-    public TopicClassifier cloneWithEmdeddedModel() throws ClassifierException {
-        // TODO Auto-generated method stub
+    protected Dictionary<String,Object> getCanonicalConfiguration(EmbeddedSolrServer server) {
+        // TODO
         return null;
     }
 
-    @Override
-    public void destroyModel() throws ClassifierException {
-        // TODO Auto-generated method stub
+    protected EmbeddedSolrServer makeTopicClassifierSolrServer(File folder) {
 
+        // TODO
+        return null;
+    }
+
+    public boolean isEvaluationRunning() {
+        return evaluationFolder != null;
     }
 
     public int updatePerformanceEstimates(boolean incremental) throws ClassifierException,
                                                               TrainingSetException {
+        if (evaluationFolder != null) {
+            throw new ClassifierException("Another evaluation is already running");
+        }
         int updatedTopics = 0;
-        // TODO
+        int cvFoldCount = 3; // 3-folds CV is hardcoded for now
+
+        TopicClassificationEngine classifier = new TopicClassificationEngine();
+        classifier.setTrainingSet(trainingSet);
+        try {
+            // TODO: make the temporary folder path configurable with a property
+            evaluationFolder = File.createTempFile("stanbol-classifier-evaluation-", "-solr");
+            for (int cvFoldIndex = 0; cvFoldIndex < cvFoldCount; cvFoldIndex++) {
+                performCVFold(classifier, cvFoldIndex, cvFoldCount);
+            }
+        } catch (ConfigurationException e) {
+            throw new ClassifierException(e);
+        } catch (IOException e) {
+            throw new ClassifierException(e);
+        } finally {
+            FileUtils.deleteQuietly(evaluationFolder);
+            evaluationFolder = null;
+        }
         return updatedTopics;
+    }
+
+    protected void performCVFold(TopicClassificationEngine classifier, int cvFoldIndex, int cvFoldCount) throws ConfigurationException,
+                                                                                                        TrainingSetException,
+                                                                                                        ClassifierException {
+
+        log.info(String.format("Performing evaluation CV iteration %d/%d on classifier %s", cvFoldIndex + 1,
+            cvFoldCount, engineId));
+        long start = System.currentTimeMillis();
+        FileUtils.deleteQuietly(evaluationFolder);
+        evaluationFolder.mkdir();
+        EmbeddedSolrServer evaluationServer = makeTopicClassifierSolrServer(evaluationFolder);
+        classifier.configure(getCanonicalConfiguration(evaluationServer));
+
+        // iterate over all the topics to register them in the evaluation classifier
+        batchOverTopics(new BatchProcessor<SolrDocument>() {
+            @Override
+            public int process(List<SolrDocument> batch) {
+                return 0;
+            }
+        });
+
+        // build the model on the for the current train CV folds
+        classifier.setCrossValidationInfo(cvFoldIndex, cvFoldCount);
+        classifier.updateModel(false);
+
+        // iterate over the topics again to compute scores on the test fold
+        batchOverTopics(new BatchProcessor<SolrDocument>() {
+            @Override
+            public int process(List<SolrDocument> batch) {
+                return 0;
+            }
+        });
+
+        float averageF1 = 0.0f;
+        long stop = System.currentTimeMillis();
+        log.info(String.format("Finished CV iteration %d/%d on classifier %s in %fs. F1-score = %f",
+            cvFoldIndex + 1, cvFoldCount, engineId, (stop - start) / 1000.0, averageF1));
     }
 
     @Override

@@ -133,18 +133,6 @@ public interface TopicClassifier {
     void setCrossValidationInfo(int foldIndex, int foldCount);
 
     /**
-     * Clone the classifier to get a new independent instance with an empty embedded model to be trained on a
-     * subsample of the dataset in a cross validation setting for model evaluation.
-     */
-    TopicClassifier cloneWithEmdeddedModel() throws ClassifierException;
-
-    /**
-     * Free the backing resources of the model (e.g. indices persisted on the harddrive or a DB) once the
-     * cross validation process is completed.
-     */
-    void destroyModel() throws ClassifierException;
-
-    /**
      * Get a classification report with various accuracy metrics (precision, recall and f1-score) along with
      * the example ids of some mistakes (false positives or false negatives).
      */

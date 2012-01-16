@@ -66,8 +66,8 @@
       required="true" />
 
     <!-- If entry_type can be model 'model' or 'metadata' -->
-  <field name="entry_type" type="string" indexed="true" stored="true"
-    required="true" />
+    <field name="entry_type" type="string" indexed="true" stored="true"
+      required="true" />
 
     <!-- Mandatory classifier model attribute when entry_type == 'model' -->
     <field name="classifier_features" type="text" indexed="true"
@@ -81,15 +81,21 @@
       multiValued="true" />
     <field name="last_update_dt" type="tdate" indexed="true"
       stored="true" />
-    <!-- Accuracy evaluation of the model -->
-    <field name="precision" type="tfloat" indexed="true" stored="true" />
-    <field name="recall" type="tfloat" indexed="true" stored="true" />
-    <field name="f1" type="tfloat" indexed="true" stored="true" />
+    <!-- Accuracy evaluation of the model (accross CV folds) -->
+    <field name="precision" type="tfloat" indexed="true" stored="true"
+      multiValued="true" />
+    <field name="recall" type="tfloat" indexed="true" stored="true"
+      multiValued="true" />
+    <field name="f1" type="tfloat" indexed="true" stored="true"
+      multiValued="true" />
     <field name="last_evaluation_dt" type="tdate" indexed="true"
       stored="true" />
-    <field name="positive_support" type="tint" indexed="false" stored="true" />
-    <field name="negative_support" type="tint" indexed="false" stored="true" />
-    <!-- Store ids of some false positive and negative examples -->
+    <field name="positive_support" type="tint" indexed="false"
+      stored="true" multiValued="true" />
+    <field name="negative_support" type="tint" indexed="false"
+      stored="true" multiValued="true" />
+    <!-- Store ids of some false positive and negative examples (accumulated 
+      over several CV folds) -->
     <field name="false_positives" type="string" indexed="false"
       multiValued="true" stored="true" />
     <field name="negative_positives" type="string" indexed="false"
