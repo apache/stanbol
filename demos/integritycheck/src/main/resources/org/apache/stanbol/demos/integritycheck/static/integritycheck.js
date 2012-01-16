@@ -7,7 +7,8 @@
  * @author enridaga, anuzzolese
  */
 $(document).ready(function(){
-	
+	// We must add this datatype to jqueryrdf
+	jQuery.typedValue.types["http://www.w3.org/2001/XMLSchema#long"] = jQuery.typedValue.types["http://www.w3.org/2001/XMLSchema#float"];
 	// Base application URL, (we want to know this several times in the process)
 	var baseA = document.createElement("a");
 	baseA.href="/";
