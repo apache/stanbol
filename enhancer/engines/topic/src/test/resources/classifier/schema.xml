@@ -16,7 +16,7 @@
     <fieldType name="string" class="solr.StrField"
       sortMissingLast="true" omitNorms="true" />
 
-    <fieldType name="int" class="solr.TrieIntField"
+    <fieldType name="tint" class="solr.TrieIntField"
       precisionStep="0" omitNorms="true" positionIncrementGap="0" />
 
     <fieldType name="tfloat" class="solr.TrieFloatField"
@@ -87,6 +87,13 @@
     <field name="f1" type="tfloat" indexed="true" stored="true" />
     <field name="last_evaluation_dt" type="tdate" indexed="true"
       stored="true" />
+    <field name="positive_support" type="tint" indexed="false" stored="true" />
+    <field name="negative_support" type="tint" indexed="false" stored="true" />
+    <!-- Store ids of some false positive and negative examples -->
+    <field name="false_positives" type="string" indexed="false"
+      multiValued="true" stored="true" />
+    <field name="negative_positives" type="string" indexed="false"
+      multiValued="true" stored="true" />
 
   </fields>
 

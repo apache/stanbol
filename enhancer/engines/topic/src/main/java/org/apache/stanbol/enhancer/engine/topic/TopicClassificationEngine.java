@@ -102,7 +102,11 @@ import org.slf4j.LoggerFactory;
                      @Property(name = TopicClassificationEngine.RECALL_FIELD, value = "recall"),
                      @Property(name = TopicClassificationEngine.F1_FIELD, value = "f1"),
                      @Property(name = TopicClassificationEngine.MODEL_ENTRY_ID_FIELD, value = "model_entry_id"),
-                     @Property(name = TopicClassificationEngine.MODEL_EVALUATION_DATE_FIELD, value = "last_evaluation_dt")})
+                     @Property(name = TopicClassificationEngine.MODEL_EVALUATION_DATE_FIELD, value = "last_evaluation_dt"),
+                     @Property(name = TopicClassificationEngine.FALSE_NEGATIVES_FIELD, value = "false_negatives"),
+                     @Property(name = TopicClassificationEngine.FALSE_POSITIVES_FIELD, value = "false_positives"),
+                     @Property(name = TopicClassificationEngine.POSITIVE_SUPPORT_FIELD, value = "positive_support"),
+                     @Property(name = TopicClassificationEngine.NEGATIVE_SUPPORT_FIELD, value = "negative_support")})
 public class TopicClassificationEngine extends ConfiguredSolrCoreTracker implements EnhancementEngine,
         ServiceProperties, TopicClassifier {
 
@@ -139,6 +143,14 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     public static final String RECALL_FIELD = "org.apache.stanbol.enhancer.engine.topic.recallField";
 
     public static final String F1_FIELD = "org.apache.stanbol.enhancer.engine.topic.f1Field";
+
+    public static final String FALSE_POSITIVES_FIELD = "org.apache.stanbol.enhancer.engine.topic.falsePositivesField";
+
+    public static final String FALSE_NEGATIVES_FIELD = "org.apache.stanbol.enhancer.engine.topic.falseNegativesField";
+
+    public static final String POSITIVE_SUPPORT_FIELD = "org.apache.stanbol.enhancer.engine.topic.positiveSupportField";
+
+    public static final String NEGATIVE_SUPPORT_FIELD = "org.apache.stanbol.enhancer.engine.topic.negativeSupportField";
 
     private static final Logger log = LoggerFactory.getLogger(TopicClassificationEngine.class);
 
@@ -185,6 +197,14 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     protected String modelEntryIdField;
 
+    protected String positiveSupportField;
+
+    protected String negativeSupportField;
+
+    protected String falsePositivesField;
+
+    protected String falseNegativesField;
+
     // customize the behavior of the classifier instance for model evaluation
     protected int cvFoldIndex = 0;
 
@@ -218,6 +238,10 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         f1Field = getRequiredStringParam(config, F1_FIELD);
         modelUpdateDateField = getRequiredStringParam(config, MODEL_UPDATE_DATE_FIELD);
         modelEvaluationDateField = getRequiredStringParam(config, MODEL_EVALUATION_DATE_FIELD);
+        falsePositivesField = getRequiredStringParam(config, FALSE_POSITIVES_FIELD);
+        falseNegativesField = getRequiredStringParam(config, FALSE_NEGATIVES_FIELD);
+        positiveSupportField = getRequiredStringParam(config, POSITIVE_SUPPORT_FIELD);
+        negativeSupportField = getRequiredStringParam(config, NEGATIVE_SUPPORT_FIELD);
         configureSolrCore(config, SOLR_CORE);
 
         // optional fields, can be null
@@ -719,11 +743,19 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             float precision = (Float) metadata.getFirstValue(precisionField);
             float recall = (Float) metadata.getFirstValue(recallField);
             float f1 = (Float) metadata.getFirstValue(f1Field);
-            // int positiveSupport = (Integer) metadata.getFirstValue(po);
-            // int negativeSupport = 0;
+            int positiveSupport = (Integer) metadata.getFirstValue(positiveSupportField);
+            int negativeSupport = (Integer) metadata.getFirstValue(negativeSupportField);
             Date evaluationDate = (Date) metadata.getFirstValue(modelEvaluationDateField);
             boolean uptodate = evaluationDate != null;
-            return new ClassificationReport(precision, recall, f1, 0, 0, uptodate, evaluationDate);
+            ClassificationReport report = new ClassificationReport(precision, recall, f1, positiveSupport,
+                    negativeSupport, uptodate, evaluationDate);
+            for (Object falsePositiveId : metadata.getFieldValues(FALSE_POSITIVES_FIELD)) {
+                report.falsePositiveExampleIds.add(falsePositiveId.toString());
+            }
+            for (Object falseNegativeId : metadata.getFieldValues(FALSE_NEGATIVES_FIELD)) {
+                report.falseNegativeExampleIds.add(falseNegativeId.toString());
+            }
+            return report;
         } catch (SolrServerException e) {
             throw new ClassifierException(String.format("Error fetching the performance report for topic "
                                                         + topic));

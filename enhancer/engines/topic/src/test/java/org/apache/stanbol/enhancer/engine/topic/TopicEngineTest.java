@@ -485,6 +485,10 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
         config.put(TopicClassificationEngine.PRECISION_FIELD, "precision");
         config.put(TopicClassificationEngine.RECALL_FIELD, "recall");
         config.put(TopicClassificationEngine.F1_FIELD, "f1");
+        config.put(TopicClassificationEngine.POSITIVE_SUPPORT_FIELD, "positive_support");
+        config.put(TopicClassificationEngine.NEGATIVE_SUPPORT_FIELD, "negative_support");
+        config.put(TopicClassificationEngine.FALSE_POSITIVES_FIELD, "false_positives");
+        config.put(TopicClassificationEngine.FALSE_NEGATIVES_FIELD, "false_negatives");
         return config;
     }
 
