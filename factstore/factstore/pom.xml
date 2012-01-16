@@ -29,12 +29,10 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.factstore</artifactId>
-  <version>0.9.0-incubating-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol FactStore</name>
-  <description>The FactStore stores n-ary relations (facts) about entities and provides a query language for
-  those relations.</description>
+  <description>The FactStore stores n-ary relations (facts) about entities and provides a query language for those relations.</description>
 
   <scm>
     <connection>
