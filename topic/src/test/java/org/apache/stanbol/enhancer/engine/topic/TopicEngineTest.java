@@ -337,7 +337,46 @@ public class TopicEngineTest extends BaseTestWithSolrCore {
 
     }
 
-    //@Test
+    @Test
+    public void testUpdatePerformanceEstimates() throws Exception {
+        ClassificationReport performanceEstimates;
+        // no registered topic
+        try {
+            classifier.getPerformanceEstimates("urn:t/001");
+            fail("Should have raised ClassifierException");
+        } catch (ClassifierException e) {
+            // expected
+        }
+
+        // register some topics
+        classifier.addTopic("urn:t/001", null);
+        classifier.addTopic("urn:t/002", Arrays.asList("urn:t/001"));
+        performanceEstimates = classifier.getPerformanceEstimates("urn:t/002");
+        assertFalse(performanceEstimates.uptodate);
+
+        // update the performance metadata manually
+        classifier.updatePerformanceMetadata("urn:t/002", 0.76f, 0.60f, 0.67f, Arrays.asList("ex14", "ex78"),
+            Arrays.asList("ex34", "ex23", "ex89"));
+        classifier.getActiveSolrServer().commit();
+        performanceEstimates = classifier.getPerformanceEstimates("urn:t/002");
+        assertTrue(performanceEstimates.uptodate);
+        assertEquals(Float.valueOf(0.76f), Float.valueOf(performanceEstimates.precision));
+        assertEquals(Float.valueOf(0.60f), Float.valueOf(performanceEstimates.recall));
+        assertEquals(Float.valueOf(0.67f), Float.valueOf(performanceEstimates.f1));
+        assertTrue(classifier.getBroaderTopics("urn:t/002").contains("urn:t/001"));
+
+        // accumulate other folds statistics and compute means of statistics
+        classifier.updatePerformanceMetadata("urn:t/002", 0.79f, 0.63f, 0.72f, Arrays.asList("ex1", "ex5"),
+            Arrays.asList("ex3", "ex10", "ex11"));
+        classifier.getActiveSolrServer().commit();
+        performanceEstimates = classifier.getPerformanceEstimates("urn:t/002");
+        assertTrue(performanceEstimates.uptodate);
+        assertEquals(Float.valueOf(0.775f), Float.valueOf(performanceEstimates.precision));
+        assertEquals(Float.valueOf(0.615f), Float.valueOf(performanceEstimates.recall));
+        assertEquals(Float.valueOf(0.69500005f), Float.valueOf(performanceEstimates.f1));
+    }
+
+    // @Test
     public void testCrossValidation() throws Exception {
         // seed a pseudo random number generator for reproducible tests
         Random rng = new Random(0);
