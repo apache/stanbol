@@ -21,7 +21,7 @@
   adminPath: RequestHandler path to manage cores.  
     If 'null' (or absent), cores will not be manageable via request handler
   -->
-  <cores adminPath="/admin/cores" defaultCoreName="test">
-    <core name="test" instanceDir="test" />
+  <cores adminPath="/admin/cores" defaultCoreName="classifier">
+    <core name="classifier" instanceDir="classifier" />
   </cores>
 </solr>

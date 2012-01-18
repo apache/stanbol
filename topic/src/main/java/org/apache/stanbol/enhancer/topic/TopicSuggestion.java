@@ -19,6 +19,8 @@ package org.apache.stanbol.enhancer.topic;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Data transfer object for the individual topic classification results.
  */
@@ -42,4 +44,9 @@ public class TopicSuggestion {
         this(uri, null, score);
     }
 
+    @Override
+    public String toString() {
+        return String.format("TopicSuggestion(\"%s\", [%s], %f)", uri, StringUtils.join(paths, "\", \""),
+            score);
+    }
 }
