@@ -37,6 +37,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.stanbol.enhancer.topic.Batch;
+import org.apache.stanbol.enhancer.topic.EmbeddedSolrHelper;
 import org.apache.stanbol.enhancer.topic.SolrTrainingSet;
 import org.apache.stanbol.enhancer.topic.TrainingSetException;
 import org.apache.stanbol.enhancer.topic.UTCTimeStamper;
@@ -46,7 +47,7 @@ import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
 import org.xml.sax.SAXException;
 
-public class TrainingSetTest extends BaseTestWithSolrCore {
+public class TrainingSetTest extends EmbeddedSolrHelper {
 
     public static final String TOPIC_1 = "http://example.com/topics/topic1";
 
@@ -68,7 +69,8 @@ public class TrainingSetTest extends BaseTestWithSolrCore {
         solrHome = File.createTempFile("topicTrainingSetTest_", "_solr_cores");
         solrHome.delete();
         solrHome.mkdir();
-        trainingsetSolrServer = makeEmptyEmbeddedSolrServer(solrHome, "trainingsetserver", "trainingset");
+        trainingsetSolrServer = makeEmbeddedSolrServer(solrHome, "trainingsetserver", "trainingset",
+            "trainingset");
         trainingSet = new SolrTrainingSet();
         trainingSet.configure(getDefaultConfigParams());
     }
