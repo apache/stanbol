@@ -36,6 +36,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
+import org.osgi.framework.FrameworkEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,8 +136,9 @@ public class BundleInstaller implements BundleListener {
             case BundleEvent.STARTED:
                 register(event.getBundle());
                 break;
-
-            case BundleEvent.STOPPED:
+            //use uninstalled instead of stopped so that unregister is not called
+            //when the OSGI environment closes
+            case BundleEvent.UNINSTALLED://STOPPED:
                 unregister(event.getBundle());
                 break;
 
