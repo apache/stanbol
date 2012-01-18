@@ -331,8 +331,8 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
                     metadata.setError(e);
                     log.error("Unable to activate previously active SolrIndex '"+
                         metadata.getIndexReference()+"'!",e);
-                } finally {
-                    managedCores.store(metadata);
+                //} finally { The metadata are not modified anyway!
+                //    managedCores.store(metadata);
                 }
             }
         }
@@ -936,7 +936,7 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
          */
         public void addTracking(IndexMetadata metadata) {
             if(metadata != null){ //may be removed in the meantime
-                if(!metadata.isActive() || metadata.isSynchronized()){
+                if(!(metadata.isActive() || metadata.isInactive()) || metadata.isSynchronized()){
                     String archive = metadata.getArchive();
                     boolean found = false; //only track higher priority files as the current
                     for(String indexArchive : metadata.getIndexArchives()){
@@ -948,7 +948,7 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
                                 IndexMetadata.toStringMap(metadata));
                         } // else higher priority archive present -> no tracking
                     }
-                } //else active and not syncronized -> no tracking
+                } //else (active || inactive) and not syncronized -> no tracking
             }
         };
         /**
