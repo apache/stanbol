@@ -73,6 +73,7 @@ import org.apache.stanbol.enhancer.topic.Batch;
 import org.apache.stanbol.enhancer.topic.ClassificationReport;
 import org.apache.stanbol.enhancer.topic.ClassifierException;
 import org.apache.stanbol.enhancer.topic.ConfiguredSolrCoreTracker;
+import org.apache.stanbol.enhancer.topic.EmbeddedSolrHelper;
 import org.apache.stanbol.enhancer.topic.TopicClassifier;
 import org.apache.stanbol.enhancer.topic.TopicSuggestion;
 import org.apache.stanbol.enhancer.topic.TrainingSet;
@@ -621,12 +622,13 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             public int process(List<SolrDocument> batch) throws ClassifierException, TrainingSetException {
                 int processed = 0;
                 for (SolrDocument result : batch) {
-                    offset++;
-                    if (cvFoldCount != 0 && offset % cvFoldCount == cvFoldIndex) {
+                    if ((cvFoldCount != 0) && (offset % cvFoldCount == cvFoldIndex)) {
                         // we are performing a cross validation session and this example belong to the test
                         // fold hence should be skipped
+                        offset++;
                         continue;
                     }
+                    offset++;
                     String topicId = result.getFirstValue(topicUriField).toString();
                     List<String> impactedTopics = new ArrayList<String>();
                     impactedTopics.add(topicId);
@@ -758,11 +760,6 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         return config;
     }
 
-    protected EmbeddedSolrServer makeTopicClassifierSolrServer(File folder) {
-        // TODO
-        return null;
-    }
-
     public boolean isEvaluationRunning() {
         return evaluationFolder != null;
     }
@@ -781,7 +778,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             // TODO: make the temporary folder path configurable with a property
             evaluationFolder = File.createTempFile("stanbol-classifier-evaluation-", "-solr");
             for (int cvFoldIndex = 0; cvFoldIndex < cvFoldCount; cvFoldIndex++) {
-                performCVFold(classifier, cvFoldIndex, cvFoldCount);
+                updatedTopics = performCVFold(classifier, cvFoldIndex, cvFoldCount, incremental);
             }
         } catch (ConfigurationException e) {
             throw new ClassifierException(e);
@@ -794,17 +791,25 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         return updatedTopics;
     }
 
-    protected void performCVFold(final TopicClassificationEngine classifier, int cvFoldIndex, int cvFoldCount) throws ConfigurationException,
-                                                                                                              TrainingSetException,
-                                                                                                              ClassifierException {
+    protected int performCVFold(final TopicClassificationEngine classifier,
+                                int cvFoldIndex,
+                                int cvFoldCount,
+                                boolean incremental) throws ConfigurationException,
+                                                    TrainingSetException,
+                                                    ClassifierException {
 
         log.info(String.format("Performing evaluation CV iteration %d/%d on classifier %s", cvFoldIndex + 1,
             cvFoldCount, engineId));
         long start = System.currentTimeMillis();
         FileUtils.deleteQuietly(evaluationFolder);
         evaluationFolder.mkdir();
-        EmbeddedSolrServer evaluationServer = makeTopicClassifierSolrServer(evaluationFolder);
-        classifier.configure(getCanonicalConfiguration(evaluationServer));
+        try {
+            EmbeddedSolrServer evaluationServer = EmbeddedSolrHelper.makeEmbeddedSolrServer(evaluationFolder,
+                "evaluationclassifierserver", "classifier", "classifier");
+            classifier.configure(getCanonicalConfiguration(evaluationServer));
+        } catch (Exception e) {
+            throw new ClassifierException(e);
+        }
 
         // iterate over all the topics to register them in the evaluation classifier
         batchOverTopics(new BatchProcessor<SolrDocument>() {
@@ -835,23 +840,21 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         final int foldIndex = cvFoldIndex;
 
         // iterate over the topics again to compute scores on the test fold
-        batchOverTopics(new BatchProcessor<SolrDocument>() {
+        int updatedTopics = batchOverTopics(new BatchProcessor<SolrDocument>() {
 
             @Override
             public int process(List<SolrDocument> batch) throws TrainingSetException, ClassifierException {
                 int offset;
                 for (SolrDocument topicMetadata : batch) {
                     String topic = topicMetadata.getFirstValue(topicUriField).toString();
-                    List<String> impactedTopics = new ArrayList<String>();
-
-                    Batch<String> examples = Batch.emtpyBatch(String.class);
-
+                    List<String> topics = Arrays.asList(topic);
                     List<String> falseNegativeExamples = new ArrayList<String>();
                     int truePositives = 0;
                     int falseNegatives = 0;
                     offset = 0;
+                    Batch<String> examples = Batch.emtpyBatch(String.class);
                     do {
-                        examples = trainingSet.getPositiveExamples(impactedTopics, examples.nextOffset);
+                        examples = trainingSet.getPositiveExamples(topics, examples.nextOffset);
                         for (String example : examples.items) {
                             if (!(offset % foldCount == foldIndex)) {
                                 // this example is not part of the test fold, skip it
@@ -859,11 +862,18 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                                 continue;
                             }
                             offset++;
-                            if (classifier.suggestTopics(example).contains(topic)) {
-                                truePositives++;
-                            } else {
-                                falseNegatives++;
-                                // falseNegativeExamples.add(exampleId);
+                            List<TopicSuggestion> suggestedTopics = classifier.suggestTopics(example);
+                            for (TopicSuggestion suggestedTopic : suggestedTopics) {
+                                boolean match = false;
+                                if (topic.equals(suggestedTopic.uri)) {
+                                    match = true;
+                                    truePositives++;
+                                    break;
+                                }
+                                if (!match) {
+                                    falseNegatives++;
+                                    // falseNegativeExamples.add(exampleId);
+                                }
                             }
                         }
                     } while (examples.hasMore); // TODO: put a bound on the number of examples
@@ -872,8 +882,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                     int trueNegatives = 0;
                     int falsePositives = 0;
                     offset = 0;
+                    examples = Batch.emtpyBatch(String.class);
                     do {
-                        examples = trainingSet.getNegativeExamples(impactedTopics, examples.nextOffset);
+                        examples = trainingSet.getNegativeExamples(topics, examples.nextOffset);
                         for (String example : examples.items) {
                             if (!(offset % foldCount == foldIndex)) {
                                 // TODO: change the dataset API to include exampleId
@@ -882,12 +893,18 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                                 continue;
                             }
                             offset++;
-                            if (classifier.suggestTopics(example).contains(topic)) {
-                                falsePositives++;
-                                // TODO: change the dataset API to include exampleId
-                                // falsePositiveExamples.add(exampleId);
-                            } else {
-                                trueNegatives++;
+                            List<TopicSuggestion> suggestedTopics = classifier.suggestTopics(example);
+                            for (TopicSuggestion suggestedTopic : suggestedTopics) {
+                                boolean match = false;
+                                if (topic.equals(suggestedTopic.uri)) {
+                                    match = true;
+                                    falsePositives++;
+                                    // falsePositiveExamples.add(exampleId);
+                                    break;
+                                }
+                                if (!match) {
+                                    trueNegatives++;
+                                }
                             }
                         }
                     } while (examples.hasMore); // TODO: put a bound on the number of examples
@@ -921,6 +938,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         long stop = System.currentTimeMillis();
         log.info(String.format("Finished CV iteration %d/%d on classifier %s in %fs. F1-score = %f",
             cvFoldIndex + 1, cvFoldCount, engineId, (stop - start) / 1000.0, averageF1));
+        return updatedTopics;
     }
 
     /**
