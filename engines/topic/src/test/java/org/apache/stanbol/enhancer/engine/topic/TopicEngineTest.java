@@ -249,26 +249,30 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         // check that updating the model incrementally without changing the dataset won't change anything.
         assertEquals(0, classifier.updateModel(true));
 
-        // lets register some examples
-        trainingSet.registerExample(null, "Money, money, money is the root of all evil.",
+        // lets register some examples including stop words as well to limit statistical artifacts cause by
+        // the small size of the training set.
+        String STOP_WORDS = " the a is are be in at ";
+        trainingSet.registerExample(null, "Money, money, money is the root of all evil." + STOP_WORDS,
             Arrays.asList(business));
-        trainingSet.registerExample(null, "VC invested more money in tech startups in 2011.",
+        trainingSet.registerExample(null, "VC invested more money in tech startups in 2011." + STOP_WORDS,
             Arrays.asList(business, technology));
 
-        trainingSet.registerExample(null, "Apple's iPad is a small handheld computer with a touch screen UI",
-            Arrays.asList(apple, technology));
+        trainingSet.registerExample(null, "Apple's iPad is a small handheld computer with a touch screen UI"
+                                          + STOP_WORDS, Arrays.asList(apple, technology));
         trainingSet.registerExample(null, "Apple sold the iPad at a very high price"
-                                          + " and made record profits.", Arrays.asList(apple, business));
+                                          + " and made record profits." + STOP_WORDS,
+            Arrays.asList(apple, business));
 
-        trainingSet.registerExample(null, "Manchester United won 3-2 against FC Barcelona.",
+        trainingSet.registerExample(null, "Manchester United won 3-2 against FC Barcelona." + STOP_WORDS,
             Arrays.asList(football));
-        trainingSet.registerExample(null, "The 2012 Football Worldcup takes place in Brazil.",
+        trainingSet.registerExample(null, "The 2012 Football Worldcup takes place in Brazil." + STOP_WORDS,
             Arrays.asList(football, worldcup));
         trainingSet.registerExample(null, "Vuvuzela made the soundtrack of the"
-                                          + " football worldcup of 2010 in South Africa.",
+                                          + " football worldcup of 2010 in South Africa." + STOP_WORDS,
             Arrays.asList(football, worldcup, music));
 
-        trainingSet.registerExample(null, "Amon Tobin will be live in Paris soon.", Arrays.asList(music));
+        trainingSet.registerExample(null, "Amon Tobin will be live in Paris soon." + STOP_WORDS,
+            Arrays.asList(music));
 
         // retrain the model: all topics are recomputed
         assertEquals(7, classifier.updateModel(true));
@@ -281,9 +285,9 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         assertEquals(football, suggestions.get(2).uri);
         assertEquals(sport, suggestions.get(3).uri);
         // check that the scores are decreasing:
-        assertTrue(suggestions.get(0).score > suggestions.get(1).score);
-        assertTrue(suggestions.get(1).score > suggestions.get(2).score);
-        assertTrue(suggestions.get(2).score > suggestions.get(3).score);
+        assertTrue(suggestions.get(0).score >= suggestions.get(1).score);
+        assertTrue(suggestions.get(1).score >= suggestions.get(2).score);
+        assertTrue(suggestions.get(2).score >= suggestions.get(3).score);
 
         suggestions = classifier.suggestTopics("Apple is no longer a startup.");
         assertTrue(suggestions.size() >= 3);
@@ -292,11 +296,9 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         assertEquals(business, suggestions.get(2).uri);
 
         suggestions = classifier.suggestTopics("You can watch the worldcup on your iPad.");
-        assertTrue(suggestions.size() >= 4);
-        assertEquals(worldcup, suggestions.get(0).uri);
-        assertEquals(apple, suggestions.get(1).uri);
-        assertEquals(football, suggestions.get(2).uri);
-        assertEquals(sport, suggestions.get(3).uri);
+        assertTrue(suggestions.size() >= 2);
+        assertEquals(apple, suggestions.get(0).uri);
+        assertEquals(worldcup, suggestions.get(1).uri);
 
         // test incremental update of a single root node
         Thread.sleep(10);
@@ -358,25 +360,25 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         assertFalse(performanceEstimates.uptodate);
 
         // update the performance metadata manually
-        classifier.updatePerformanceMetadata("urn:t/002", 0.76f, 0.60f, 0.67f, Arrays.asList("ex14", "ex78"),
+        classifier.updatePerformanceMetadata("urn:t/002", 0.76f, 0.60f, Arrays.asList("ex14", "ex78"),
             Arrays.asList("ex34", "ex23", "ex89"));
         classifier.getActiveSolrServer().commit();
         performanceEstimates = classifier.getPerformanceEstimates("urn:t/002");
         assertTrue(performanceEstimates.uptodate);
-        assertEquals(Float.valueOf(0.76f), Float.valueOf(performanceEstimates.precision));
-        assertEquals(Float.valueOf(0.60f), Float.valueOf(performanceEstimates.recall));
-        assertEquals(Float.valueOf(0.67f), Float.valueOf(performanceEstimates.f1));
+        assertEquals(0.76f, performanceEstimates.precision, 0.01);
+        assertEquals(0.60f, performanceEstimates.recall, 0.01);
+        assertEquals(0.67f, performanceEstimates.f1, 0.01);
         assertTrue(classifier.getBroaderTopics("urn:t/002").contains("urn:t/001"));
 
         // accumulate other folds statistics and compute means of statistics
-        classifier.updatePerformanceMetadata("urn:t/002", 0.79f, 0.63f, 0.72f, Arrays.asList("ex1", "ex5"),
+        classifier.updatePerformanceMetadata("urn:t/002", 0.79f, 0.63f, Arrays.asList("ex1", "ex5"),
             Arrays.asList("ex3", "ex10", "ex11"));
         classifier.getActiveSolrServer().commit();
         performanceEstimates = classifier.getPerformanceEstimates("urn:t/002");
         assertTrue(performanceEstimates.uptodate);
-        assertEquals(Float.valueOf(0.775f), Float.valueOf(performanceEstimates.precision));
-        assertEquals(Float.valueOf(0.615f), Float.valueOf(performanceEstimates.recall));
-        assertEquals(Float.valueOf(0.69500005f), Float.valueOf(performanceEstimates.f1));
+        assertEquals(0.775f, performanceEstimates.precision, 0.01);
+        assertEquals(0.615f, performanceEstimates.recall, 0.01);
+        assertEquals(0.695f, performanceEstimates.f1, 0.01);
     }
 
     @Test
@@ -388,8 +390,8 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         // build an artificial data set used for training models and evaluation
         int numberOfTopics = 10;
         int numberOfDocuments = 100;
-        int vocabSizeMin = 10;
-        int vocabSizeMax = 25; // we are using the alphabet as base terms
+        int vocabSizeMin = 20;
+        int vocabSizeMax = 30;
         initArtificialTrainingSet(numberOfTopics, numberOfDocuments, vocabSizeMin, vocabSizeMax, rng);
 
         // by default the reports are not computed
@@ -409,32 +411,17 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
 
         // launch an evaluation of the classifier according to the current state of the training set
         assertEquals(numberOfTopics, classifier.updatePerformanceEstimates(true));
-        performanceEstimates = classifier.getPerformanceEstimates("urn:t/001");
-        assertTrue(performanceEstimates.uptodate);
-        // assertGreater(performanceEstimates.precision, 0.8f);
-        // assertGreater(performanceEstimates.recall, 0.8f);
-        // assertGreater(performanceEstimates.f1, 0.8f);
-        // assertGreater(performanceEstimates.positiveSupport, 10);
-        // assertGreater(performanceEstimates.negativeSupport, 90);
-        assertNotNull(performanceEstimates.evaluationDate);
-
-        performanceEstimates = classifier.getPerformanceEstimates("urn:t/002");
-        assertTrue(performanceEstimates.uptodate);
-        // assertGreater(performanceEstimates.precision, 0.8f);
-        // assertGreater(performanceEstimates.recall, 0.8f);
-        // assertGreater(performanceEstimates.f1, 0.8f);
-        // assertGreater(performanceEstimates.positiveSupport, 10);
-        // assertGreater(performanceEstimates.negativeSupport, 90);
-        assertNotNull(performanceEstimates.evaluationDate);
-
-        performanceEstimates = classifier.getPerformanceEstimates("urn:t/003");
-        assertTrue(performanceEstimates.uptodate);
-        // assertGreater(performanceEstimates.precision, 0.8f);
-        // assertGreater(performanceEstimates.recall, 0.8f);
-        // assertGreater(performanceEstimates.f1, 0.8f);
-        // assertGreater(performanceEstimates.positiveSupport, 10);
-        // assertGreater(performanceEstimates.negativeSupport, 90);
-        assertNotNull(performanceEstimates.evaluationDate);
+        for (int i = 1; i <= numberOfTopics; i++) {
+            String topic = String.format("urn:t/%03d", i);
+            performanceEstimates = classifier.getPerformanceEstimates(topic);
+            assertTrue(performanceEstimates.uptodate);
+            assertGreater(performanceEstimates.precision, 0.5f);
+            assertGreater(performanceEstimates.recall, 0.5f);
+            assertGreater(performanceEstimates.f1, 0.65f);
+            // assertGreater(performanceEstimates.positiveSupport, 10);
+            // assertGreater(performanceEstimates.negativeSupport, 90);
+            assertNotNull(performanceEstimates.evaluationDate);
+        }
 
         // TODO: test model invalidation by registering a sub topic manually
     }
@@ -451,22 +438,14 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
                                              int vocabSizeMax,
                                              Random rng) throws ClassifierException, TrainingSetException {
         // define some artificial topics and register them to the classifier
-        char[] alphabet = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+        String[] stopWords = randomVocabulary(0, 50, 50, rng);
         String[] topics = new String[numberOfTopics];
         Map<String,String[]> vocabularies = new TreeMap<String,String[]>();
         for (int i = 0; i < numberOfTopics; i++) {
             String topic = String.format("urn:t/%03d", i + 1);
             topics[i] = topic;
             classifier.addTopic(topic, null);
-            int vocSize = rng.nextInt(vocabSizeMax + 1 - vocabSizeMin) + vocabSizeMin;
-            String[] terms = new String[vocSize];
-
-            for (int j = 0; j < vocSize; j++) {
-                // define some artificial vocabulary for each topic to automatically generate random examples
-                // with some topic structure
-                // if i = 1, will generate: ["a1", "b1", "c1", ...]
-                terms[j] = "term_" + alphabet[j] + String.valueOf(i + 1);
-            }
+            String[] terms = randomVocabulary(i, vocabSizeMin, vocabSizeMax, rng);
             vocabularies.put(topic, terms);
         }
         classifier.setTrainingSet(trainingSet);
@@ -476,24 +455,36 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
             List<String> documentTerms = new ArrayList<String>();
 
             // add terms from some non-dominant topics that are used as classification target
-            int numberOfDominantTopics = 1;// rng.nextInt(4) + 1; // between 1 and 3 topics
+            int numberOfDominantTopics = rng.nextInt(3) + 1; // between 1 and 3 topics
             List<String> documentTopics = new ArrayList<String>();
             for (int j = 0; j < numberOfDominantTopics; j++) {
-                String topic = randomTopicAndTerms(topics, vocabularies, documentTerms, 50, 100, rng);
+                String topic = randomTopicAndTerms(topics, vocabularies, documentTerms, 100, 150, rng);
                 documentTopics.add(topic);
             }
             // add terms from some non-dominant topics
-            for (int j = 0; j < 0; j++) {
-                randomTopicAndTerms(topics, vocabularies, documentTerms, 1, 10, rng);
+            for (int j = 0; j < 5; j++) {
+                randomTopicAndTerms(topics, vocabularies, documentTerms, 5, 10, rng);
             }
             // add some non discriminative terms not linked to any topic
-            for (int k = 0; k < 0; k++) {
-                documentTerms.add(String.valueOf(alphabet[rng.nextInt(alphabet.length)]));
+            for (int k = 0; k < 100; k++) {
+                documentTerms.add(String.valueOf(stopWords[rng.nextInt(stopWords.length)]));
             }
             // register the generated example in the training set
             String text = StringUtils.join(documentTerms, " ");
             trainingSet.registerExample(String.format("example_%03d", i), text, documentTopics);
         }
+    }
+
+    protected String[] randomVocabulary(int topicIndex, int vocabSizeMin, int vocabSizeMax, Random rng) {
+        int vocSize = rng.nextInt(vocabSizeMax + 1 - vocabSizeMin) + vocabSizeMin;
+        String[] terms = new String[vocSize];
+
+        for (int j = 0; j < vocSize; j++) {
+            // define some artificial vocabulary for each topic to automatically generate random examples
+            // with some topic structure
+            terms[j] = String.format("term_%03d_t%03d", j, topicIndex + 1);
+        }
+        return terms;
     }
 
     protected String randomTopicAndTerms(String[] topics,
@@ -525,7 +516,6 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         config.put(TopicClassificationEngine.MODEL_EVALUATION_DATE_FIELD, "last_evaluation_dt");
         config.put(TopicClassificationEngine.PRECISION_FIELD, "precision");
         config.put(TopicClassificationEngine.RECALL_FIELD, "recall");
-        config.put(TopicClassificationEngine.F1_FIELD, "f1");
         config.put(TopicClassificationEngine.POSITIVE_SUPPORT_FIELD, "positive_support");
         config.put(TopicClassificationEngine.NEGATIVE_SUPPORT_FIELD, "negative_support");
         config.put(TopicClassificationEngine.FALSE_POSITIVES_FIELD, "false_positives");
