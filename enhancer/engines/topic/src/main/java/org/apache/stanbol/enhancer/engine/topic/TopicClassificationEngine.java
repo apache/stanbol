@@ -106,7 +106,6 @@ import org.slf4j.LoggerFactory;
                      @Property(name = TopicClassificationEngine.MODEL_UPDATE_DATE_FIELD, value = "last_update_dt"),
                      @Property(name = TopicClassificationEngine.PRECISION_FIELD, value = "precision"),
                      @Property(name = TopicClassificationEngine.RECALL_FIELD, value = "recall"),
-                     @Property(name = TopicClassificationEngine.F1_FIELD, value = "f1"),
                      @Property(name = TopicClassificationEngine.MODEL_ENTRY_ID_FIELD, value = "model_entry_id"),
                      @Property(name = TopicClassificationEngine.MODEL_EVALUATION_DATE_FIELD, value = "last_evaluation_dt"),
                      @Property(name = TopicClassificationEngine.FALSE_NEGATIVES_FIELD, value = "false_negatives"),
@@ -148,8 +147,6 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     public static final String RECALL_FIELD = "org.apache.stanbol.enhancer.engine.topic.recallField";
 
-    public static final String F1_FIELD = "org.apache.stanbol.enhancer.engine.topic.f1Field";
-
     public static final String FALSE_POSITIVES_FIELD = "org.apache.stanbol.enhancer.engine.topic.falsePositivesField";
 
     public static final String FALSE_NEGATIVES_FIELD = "org.apache.stanbol.enhancer.engine.topic.falseNegativesField";
@@ -160,11 +157,16 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     private static final Logger log = LoggerFactory.getLogger(TopicClassificationEngine.class);
 
+    public static final String SOLR_NON_EMPTY_FIELD = "[\"\" TO *]";
+
     // TODO: make the following bounds configurable
 
     public int MAX_CHARS_PER_TOPIC = 100000;
 
     public Integer MAX_ROOTS = 1000;
+
+    public int MAX_SUGGESTIONS = 5; // never suggest more than this: this is expected to be a reasonable
+                                    // estimate of the number of topics occuring in each documents
 
     protected String engineId;
 
@@ -185,10 +187,6 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     protected String precisionField;
 
     protected String recallField;
-
-    protected String f1Field;
-
-    protected int numTopics = 10;
 
     protected TrainingSet trainingSet;
 
@@ -243,7 +241,6 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         acceptedLanguages = getStringListParan(config, LANGUAGES);
         precisionField = getRequiredStringParam(config, PRECISION_FIELD);
         recallField = getRequiredStringParam(config, RECALL_FIELD);
-        f1Field = getRequiredStringParam(config, F1_FIELD);
         modelUpdateDateField = getRequiredStringParam(config, MODEL_UPDATE_DATE_FIELD);
         modelEvaluationDateField = getRequiredStringParam(config, MODEL_EVALUATION_DATE_FIELD);
         falsePositivesField = getRequiredStringParam(config, FALSE_POSITIVES_FIELD);
@@ -342,7 +339,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     }
 
     public List<TopicSuggestion> suggestTopics(String text) throws ClassifierException {
-        List<TopicSuggestion> suggestedTopics = new ArrayList<TopicSuggestion>(numTopics);
+        List<TopicSuggestion> suggestedTopics = new ArrayList<TopicSuggestion>(MAX_SUGGESTIONS * 3);
         SolrServer solrServer = getActiveSolrServer();
         SolrQuery query = new SolrQuery();
         query.setQueryType("/" + MoreLikeThisParams.MLT);
@@ -350,12 +347,16 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         query.set(MoreLikeThisParams.MATCH_INCLUDE, false);
         query.set(MoreLikeThisParams.MIN_DOC_FREQ, 1);
         query.set(MoreLikeThisParams.MIN_TERM_FREQ, 1);
+        query.set(MoreLikeThisParams.MAX_QUERY_TERMS, 30);
+        query.set(MoreLikeThisParams.MAX_NUM_TOKENS_PARSED, 10000);
         // TODO: find a way to parse the interesting terms and report them
         // for debugging / explanation in dedicated RDF data structure.
         // query.set(MoreLikeThisParams.INTERESTING_TERMS, "details");
         query.set(MoreLikeThisParams.SIMILARITY_FIELDS, similarityField);
         query.set(CommonParams.STREAM_BODY, text);
-        query.setRows(numTopics);
+        // over query the number of suggestions to find a statistical cut based on the curve of the scores of
+        // the top suggestion
+        query.setRows(MAX_SUGGESTIONS * 3);
         query.setFields(topicUriField);
         query.setIncludeScore(true);
         try {
@@ -381,7 +382,28 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 throw new ClassifierException(e);
             }
         }
-        return suggestedTopics;
+        if (suggestedTopics.size() <= 1) {
+            // no need to apply the cutting heuristic
+            return suggestedTopics;
+        }
+        // filter out suggestion that are less than some threshold based on the mean of the top scores
+        float mean = 0.0f;
+        for (TopicSuggestion suggestion : suggestedTopics) {
+            mean += suggestion.score / suggestedTopics.size();
+        }
+        float threshold = 0.25f * suggestedTopics.get(0).score + 0.75f * mean;
+        List<TopicSuggestion> filteredSuggestions = new ArrayList<TopicSuggestion>();
+        for (TopicSuggestion suggestion : suggestedTopics) {
+            if (filteredSuggestions.size() >= MAX_SUGGESTIONS) {
+                return filteredSuggestions;
+            }
+            if (filteredSuggestions.isEmpty() || suggestion.score > threshold) {
+                filteredSuggestions.add(suggestion);
+            } else {
+                break;
+            }
+        }
+        return filteredSuggestions;
     }
 
     @Override
@@ -447,8 +469,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         query.setSortField(topicUriField, SolrQuery.ORDER.asc);
         if (broaderField != null) {
             // find any topic with an empty broaderField
-            query.setParam("q", entryTypeField + ":" + METADATA_ENTRY + " AND -" + broaderField
-                                + ":[\"\" TO *]");
+            query.setParam("q", entryTypeField + ":" + METADATA_ENTRY + " AND -" + broaderField + ":"
+                                + SOLR_NON_EMPTY_FIELD);
         } else {
             // find any topic
             query.setQuery(entryTypeField + ":" + METADATA_ENTRY);
@@ -616,19 +638,11 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         }
         final boolean incr = incremental;
         int updatedTopics = batchOverTopics(new BatchProcessor<SolrDocument>() {
-            int offset = 0;
 
             @Override
             public int process(List<SolrDocument> batch) throws ClassifierException, TrainingSetException {
                 int processed = 0;
                 for (SolrDocument result : batch) {
-                    if ((cvFoldCount != 0) && (offset % cvFoldCount == cvFoldIndex)) {
-                        // we are performing a cross validation session and this example belong to the test
-                        // fold hence should be skipped
-                        offset++;
-                        continue;
-                    }
-                    offset++;
                     String topicId = result.getFirstValue(topicUriField).toString();
                     List<String> impactedTopics = new ArrayList<String>();
                     impactedTopics.add(topicId);
@@ -675,9 +689,17 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         long start = System.currentTimeMillis();
         Batch<String> examples = Batch.emtpyBatch(String.class);
         StringBuffer sb = new StringBuffer();
+        int offset = 0;
         do {
             examples = trainingSet.getPositiveExamples(impactedTopics, examples.nextOffset);
             for (String example : examples.items) {
+                if ((cvFoldCount != 0) && (offset % cvFoldCount == cvFoldIndex)) {
+                    // we are performing a cross validation session and this example belong to the test
+                    // fold hence should be skipped
+                    offset++;
+                    continue;
+                }
+                offset++;
                 sb.append(example);
                 sb.append("\n\n");
             }
@@ -752,7 +774,6 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         config.put(TopicClassificationEngine.MODEL_EVALUATION_DATE_FIELD, "last_evaluation_dt");
         config.put(TopicClassificationEngine.PRECISION_FIELD, "precision");
         config.put(TopicClassificationEngine.RECALL_FIELD, "recall");
-        config.put(TopicClassificationEngine.F1_FIELD, "f1");
         config.put(TopicClassificationEngine.POSITIVE_SUPPORT_FIELD, "positive_support");
         config.put(TopicClassificationEngine.NEGATIVE_SUPPORT_FIELD, "negative_support");
         config.put(TopicClassificationEngine.FALSE_POSITIVES_FIELD, "false_positives");
@@ -863,23 +884,22 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                             }
                             offset++;
                             List<TopicSuggestion> suggestedTopics = classifier.suggestTopics(example);
+                            boolean match = false;
                             for (TopicSuggestion suggestedTopic : suggestedTopics) {
-                                boolean match = false;
                                 if (topic.equals(suggestedTopic.uri)) {
                                     match = true;
                                     truePositives++;
                                     break;
                                 }
-                                if (!match) {
-                                    falseNegatives++;
-                                    // falseNegativeExamples.add(exampleId);
-                                }
+                            }
+                            if (!match) {
+                                falseNegatives++;
+                                // falseNegativeExamples.add(exampleId);
                             }
                         }
                     } while (examples.hasMore); // TODO: put a bound on the number of examples
 
                     List<String> falsePositiveExamples = new ArrayList<String>();
-                    int trueNegatives = 0;
                     int falsePositives = 0;
                     offset = 0;
                     examples = Batch.emtpyBatch(String.class);
@@ -895,17 +915,13 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                             offset++;
                             List<TopicSuggestion> suggestedTopics = classifier.suggestTopics(example);
                             for (TopicSuggestion suggestedTopic : suggestedTopics) {
-                                boolean match = false;
                                 if (topic.equals(suggestedTopic.uri)) {
-                                    match = true;
                                     falsePositives++;
                                     // falsePositiveExamples.add(exampleId);
                                     break;
                                 }
-                                if (!match) {
-                                    trueNegatives++;
-                                }
                             }
+                            // we don't need to collect true negatives
                         }
                     } while (examples.hasMore); // TODO: put a bound on the number of examples
 
@@ -915,14 +931,10 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                         precision = truePositives / (float) (truePositives + falsePositives);
                     }
                     float recall = 0;
-                    if (trueNegatives != 0 || falseNegatives != 0) {
-                        recall = trueNegatives / (float) (trueNegatives + falseNegatives);
+                    if (truePositives != 0 || falseNegatives != 0) {
+                        recall = truePositives / (float) (truePositives + falseNegatives);
                     }
-                    float f1 = 0;
-                    if (precision != 0 || recall != 0) {
-                        f1 = 2 * precision * recall / (precision + recall);
-                    }
-                    updatePerformanceMetadata(topic, precision, recall, f1, falsePositiveExamples,
+                    updatePerformanceMetadata(topic, precision, recall, falsePositiveExamples,
                         falseNegativeExamples);
                 }
                 try {
@@ -942,13 +954,12 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     }
 
     /**
-     * Update the performance statistics in a metadata entry of a topic. It ist the responsibility of the
+     * Update the performance statistics in a metadata entry of a topic. It is the responsibility of the
      * caller to commit.
      */
     protected void updatePerformanceMetadata(String topicId,
                                              float precision,
                                              float recall,
-                                             float f1,
                                              List<String> falsePositiveExamples,
                                              List<String> falseNegativeExamples) throws ClassifierException {
         SolrServer solrServer = getActiveSolrServer();
@@ -964,7 +975,6 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 }
                 addToList(fieldValues, precisionField, precision);
                 addToList(fieldValues, recallField, recall);
-                addToList(fieldValues, f1Field, f1);
                 // TODO: handle supports too...
                 // addToList(fieldValues, falsePositivesField, falsePositiveExamples);
                 // addToList(fieldValues, falseNegativesField, falseNegativeExamples);
@@ -1010,12 +1020,11 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
             SolrDocument metadata = results.get(0);
             Float precision = computeMeanValue(metadata, precisionField);
             Float recall = computeMeanValue(metadata, recallField);
-            Float f1 = computeMeanValue(metadata, f1Field);
             int positiveSupport = computeSumValue(metadata, positiveSupportField);
             int negativeSupport = computeSumValue(metadata, negativeSupportField);
             Date evaluationDate = (Date) metadata.getFirstValue(modelEvaluationDateField);
             boolean uptodate = evaluationDate != null;
-            ClassificationReport report = new ClassificationReport(precision, recall, f1, positiveSupport,
+            ClassificationReport report = new ClassificationReport(precision, recall, positiveSupport,
                     negativeSupport, uptodate, evaluationDate);
             if (metadata.getFieldValues(falsePositivesField) == null) {
                 metadata.setField(falsePositivesField, new ArrayList<Object>());
