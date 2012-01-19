@@ -76,18 +76,26 @@ public class ClassificationReport {
 
     public ClassificationReport(float precision,
                                 float recall,
-                                float f1,
                                 int positiveSupport,
                                 int negativeSupport,
                                 boolean uptodate,
                                 Date evaluationDate) {
         this.precision = precision;
         this.recall = recall;
-        this.f1 = f1;
+        if (precision != 0 || recall != 0) {
+            this.f1 = 2 * precision * recall / (precision + recall);
+        } else {
+            this.f1 = 0;
+        }
         this.positiveSupport = positiveSupport;
         this.negativeSupport = negativeSupport;
         this.uptodate = uptodate;
         this.evaluationDate = evaluationDate;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("ClassificationReport: precision=%f, recall=%f, f1=%f", precision, recall, f1);
     }
 
 }

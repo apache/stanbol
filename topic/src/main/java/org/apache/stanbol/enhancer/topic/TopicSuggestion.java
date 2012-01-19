@@ -30,9 +30,9 @@ public class TopicSuggestion {
 
     public final List<String> paths = new ArrayList<String>();
 
-    public final double score;
+    public final float score;
 
-    public TopicSuggestion(String uri, List<String> paths, double score) {
+    public TopicSuggestion(String uri, List<String> paths, float score) {
         this.uri = uri;
         if (paths != null) {
             this.paths.addAll(paths);
@@ -40,7 +40,7 @@ public class TopicSuggestion {
         this.score = score;
     }
 
-    public TopicSuggestion(String uri, double score) {
+    public TopicSuggestion(String uri, float score) {
         this(uri, null, score);
     }
 
