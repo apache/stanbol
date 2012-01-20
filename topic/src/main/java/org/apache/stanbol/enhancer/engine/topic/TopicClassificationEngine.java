@@ -161,7 +161,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     public static final String SOLR_NON_EMPTY_FIELD = "[\"\" TO *]";
 
-    // TODO: make the following bounds configurable
+    // TODO: make the following fields configurable
+
+    public int MAX_EVALUATION_SAMPLES = 1000;
 
     public int MAX_CHARS_PER_TOPIC = 100000;
 
@@ -906,7 +908,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                                 falseNegativeExamples.add(example.id);
                             }
                         }
-                    } while (examples.hasMore); // TODO: put a bound on the number of examples
+                    } while (examples.hasMore && offset < MAX_EVALUATION_SAMPLES);
 
                     List<String> falsePositiveExamples = new ArrayList<String>();
                     int falsePositives = 0;
@@ -917,7 +919,6 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                         examples = trainingSet.getNegativeExamples(topics, examples.nextOffset);
                         for (Example example : examples.items) {
                             if (!(offset % foldCount == foldIndex)) {
-                                // TODO: change the dataset API to include exampleId
                                 // this example is not part of the test fold, skip it
                                 offset++;
                                 continue;
@@ -935,7 +936,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                             }
                             // we don't need to collect true negatives
                         }
-                    } while (examples.hasMore); // TODO: put a bound on the number of examples
+                    } while (examples.hasMore && offset < MAX_EVALUATION_SAMPLES);
 
                     // compute precision, recall and f1 score for the current test fold and topic
                     float precision = 0;
@@ -991,9 +992,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 addToList(fieldValues, recallField, recall);
                 increment(fieldValues, positiveSupportField, positiveSupport);
                 increment(fieldValues, negativeSupportField, negativeSupport);
-                // TODO: handle supports too...
-                // addToList(fieldValues, falsePositivesField, falsePositiveExamples);
-                // addToList(fieldValues, falseNegativesField, falseNegativeExamples);
+                addToList(fieldValues, falsePositivesField, falsePositiveExamples);
+                addToList(fieldValues, falseNegativesField, falseNegativeExamples);
                 SolrInputDocument newEntry = new SolrInputDocument();
                 for (Map.Entry<String,Collection<Object>> entry : fieldValues.entrySet()) {
                     newEntry.addField(entry.getKey(), entry.getValue());
