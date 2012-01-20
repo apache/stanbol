@@ -420,6 +420,14 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
             performanceEstimates = classifier.getPerformanceEstimates(topic);
             assertTrue(performanceEstimates.uptodate);
             assertGreater(performanceEstimates.precision, 0.5f);
+            assertNotNull(performanceEstimates.falsePositiveExampleIds);
+            assertNotNull(performanceEstimates.falseNegativeExampleIds);
+            if (performanceEstimates.precision < 1) {
+                assertFalse(performanceEstimates.falsePositiveExampleIds.isEmpty());
+            }
+            if (performanceEstimates.recall < 1) {
+                assertFalse(performanceEstimates.falseNegativeExampleIds.isEmpty());
+            }
             assertGreater(performanceEstimates.recall, 0.5f);
             assertGreater(performanceEstimates.f1, 0.65f);
             assertGreater(performanceEstimates.positiveSupport, 10);

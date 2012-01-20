@@ -96,7 +96,7 @@
       over several CV folds) -->
     <field name="false_positives" type="string" indexed="false"
       multiValued="true" stored="true" />
-    <field name="negative_positives" type="string" indexed="false"
+    <field name="false_negatives" type="string" indexed="false"
       multiValued="true" stored="true" />
 
   </fields>
