@@ -360,18 +360,20 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         assertFalse(performanceEstimates.uptodate);
 
         // update the performance metadata manually
-        classifier.updatePerformanceMetadata("urn:t/002", 0.76f, 0.60f, Arrays.asList("ex14", "ex78"),
-            Arrays.asList("ex34", "ex23", "ex89"));
+        classifier.updatePerformanceMetadata("urn:t/002", 0.76f, 0.60f, 34, 32,
+            Arrays.asList("ex14", "ex78"), Arrays.asList("ex34", "ex23", "ex89"));
         classifier.getActiveSolrServer().commit();
         performanceEstimates = classifier.getPerformanceEstimates("urn:t/002");
         assertTrue(performanceEstimates.uptodate);
         assertEquals(0.76f, performanceEstimates.precision, 0.01);
         assertEquals(0.60f, performanceEstimates.recall, 0.01);
         assertEquals(0.67f, performanceEstimates.f1, 0.01);
+        assertEquals(34, performanceEstimates.positiveSupport);
+        assertEquals(32, performanceEstimates.negativeSupport);
         assertTrue(classifier.getBroaderTopics("urn:t/002").contains("urn:t/001"));
 
         // accumulate other folds statistics and compute means of statistics
-        classifier.updatePerformanceMetadata("urn:t/002", 0.79f, 0.63f, Arrays.asList("ex1", "ex5"),
+        classifier.updatePerformanceMetadata("urn:t/002", 0.79f, 0.63f, 10, 10, Arrays.asList("ex1", "ex5"),
             Arrays.asList("ex3", "ex10", "ex11"));
         classifier.getActiveSolrServer().commit();
         performanceEstimates = classifier.getPerformanceEstimates("urn:t/002");
@@ -379,6 +381,8 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         assertEquals(0.775f, performanceEstimates.precision, 0.01);
         assertEquals(0.615f, performanceEstimates.recall, 0.01);
         assertEquals(0.695f, performanceEstimates.f1, 0.01);
+        assertEquals(44, performanceEstimates.positiveSupport);
+        assertEquals(42, performanceEstimates.negativeSupport);
     }
 
     @Test
@@ -418,8 +422,8 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
             assertGreater(performanceEstimates.precision, 0.5f);
             assertGreater(performanceEstimates.recall, 0.5f);
             assertGreater(performanceEstimates.f1, 0.65f);
-            // assertGreater(performanceEstimates.positiveSupport, 10);
-            // assertGreater(performanceEstimates.negativeSupport, 90);
+            assertGreater(performanceEstimates.positiveSupport, 10);
+            assertGreater(performanceEstimates.negativeSupport, 10);
             assertNotNull(performanceEstimates.evaluationDate);
         }
 
