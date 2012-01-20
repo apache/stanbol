@@ -19,6 +19,8 @@ package org.apache.stanbol.enhancer.topic;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.stanbol.enhancer.topic.training.Example;
+
 /**
  * Source of categorized text documents that can be used to build a the statistical model of a
  * TopicClassifier.
@@ -60,7 +62,7 @@ public interface TrainingSet {
      *            marker value to fetch the next batch. Pass null to fetch the first batch.
      * @return a batch of example suitable for training a classifier model for the requested topics.
      */
-    Batch<String> getPositiveExamples(List<String> topics, Object offset) throws TrainingSetException;
+    Batch<Example> getPositiveExamples(List<String> topics, Object offset) throws TrainingSetException;
 
     /**
      * Fetch examples representative of any document not specifically classified in one of the passed topics.
@@ -76,7 +78,7 @@ public interface TrainingSet {
      * @return a batch of examples suitable for training (negative-refinement) a classifier model for the
      *         requested topics.
      */
-    Batch<String> getNegativeExamples(List<String> topics, Object offset) throws TrainingSetException;
+    Batch<Example> getNegativeExamples(List<String> topics, Object offset) throws TrainingSetException;
 
     /**
      * Number of examples to fetch at once.
