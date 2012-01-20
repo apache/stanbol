@@ -41,6 +41,7 @@ import org.apache.stanbol.enhancer.topic.EmbeddedSolrHelper;
 import org.apache.stanbol.enhancer.topic.SolrTrainingSet;
 import org.apache.stanbol.enhancer.topic.TrainingSetException;
 import org.apache.stanbol.enhancer.topic.UTCTimeStamper;
+import org.apache.stanbol.enhancer.topic.training.Example;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -97,7 +98,7 @@ public class TrainingSetTest extends EmbeddedSolrHelper {
 
     @Test
     public void testEmptyTrainingSet() throws TrainingSetException {
-        Batch<String> examples = trainingSet.getPositiveExamples(new ArrayList<String>(), null);
+        Batch<Example> examples = trainingSet.getPositiveExamples(new ArrayList<String>(), null);
         assertEquals(examples.items.size(), 0);
         assertFalse(examples.hasMore);
         examples = trainingSet.getNegativeExamples(new ArrayList<String>(), null);
@@ -120,19 +121,20 @@ public class TrainingSetTest extends EmbeddedSolrHelper {
         trainingSet.registerExample("example2", "Text of example2.", Arrays.asList(TOPIC_1, TOPIC_2));
         trainingSet.registerExample("example3", "Text of example3.", new ArrayList<String>());
 
-        Batch<String> examples = trainingSet.getPositiveExamples(Arrays.asList(TOPIC_2), null);
+        Batch<Example> examples = trainingSet.getPositiveExamples(Arrays.asList(TOPIC_2), null);
         assertEquals(1, examples.items.size());
-        assertEquals(examples.items, Arrays.asList("Text of example2."));
+        assertEquals(examples.items.get(0).getContentString(), "Text of example2.");
         assertFalse(examples.hasMore);
 
         examples = trainingSet.getPositiveExamples(Arrays.asList(TOPIC_1, TOPIC_3), null);
         assertEquals(2, examples.items.size());
-        assertEquals(examples.items, Arrays.asList("Text of example1.", "Text of example2."));
+        assertEquals(examples.items.get(0).getContentString(), "Text of example1.");
+        assertEquals(examples.items.get(1).getContentString(), "Text of example2.");
         assertFalse(examples.hasMore);
 
         examples = trainingSet.getNegativeExamples(Arrays.asList(TOPIC_1), null);
         assertEquals(1, examples.items.size());
-        assertEquals(examples.items, Arrays.asList("Text of example3."));
+        assertEquals(examples.items.get(0).getContentString(), "Text of example3.");
         assertFalse(examples.hasMore);
 
         // Test example update by adding topic3 to example1. The results of the previous query should remain
@@ -140,14 +142,15 @@ public class TrainingSetTest extends EmbeddedSolrHelper {
         trainingSet.registerExample("example1", "Text of example1.", Arrays.asList(TOPIC_1, TOPIC_3));
         examples = trainingSet.getPositiveExamples(Arrays.asList(TOPIC_1, TOPIC_3), null);
         assertEquals(2, examples.items.size());
-        assertEquals(examples.items, Arrays.asList("Text of example1.", "Text of example2."));
+        assertEquals(examples.items.get(0).getContentString(), "Text of example1.");
+        assertEquals(examples.items.get(1).getContentString(), "Text of example2.");
         assertFalse(examples.hasMore);
 
         // Test example removal
         trainingSet.registerExample("example1", null, Arrays.asList(TOPIC_1, TOPIC_3));
         examples = trainingSet.getPositiveExamples(Arrays.asList(TOPIC_1, TOPIC_3), null);
         assertEquals(1, examples.items.size());
-        assertEquals(examples.items, Arrays.asList("Text of example2."));
+        assertEquals(examples.items.get(0).getContentString(), "Text of example2.");
         assertFalse(examples.hasMore);
 
         trainingSet.registerExample("example2", null, Arrays.asList(TOPIC_1, TOPIC_3));
@@ -158,52 +161,76 @@ public class TrainingSetTest extends EmbeddedSolrHelper {
 
     @Test
     public void testBatchingPositiveExamples() throws ConfigurationException, TrainingSetException {
+        Set<String> expectedCollectedIds = new HashSet<String>();
         Set<String> expectedCollectedText = new HashSet<String>();
+        Set<String> collectedIds = new HashSet<String>();
         Set<String> collectedText = new HashSet<String>();
         for (int i = 0; i < 28; i++) {
+            String id = "example-" + i;
             String text = "Text of example" + i + ".";
-            trainingSet.registerExample("example-" + i, text, Arrays.asList(TOPIC_1));
+            trainingSet.registerExample(id, text, Arrays.asList(TOPIC_1));
+            expectedCollectedIds.add(id);
             expectedCollectedText.add(text);
         }
         trainingSet.setBatchSize(10);
-        Batch<String> examples = trainingSet.getPositiveExamples(Arrays.asList(TOPIC_1, TOPIC_2), null);
+        Batch<Example> examples = trainingSet.getPositiveExamples(Arrays.asList(TOPIC_1, TOPIC_2), null);
         assertEquals(10, examples.items.size());
-        collectedText.addAll(examples.items);
+        for (Example example : examples.items) {
+            collectedIds.add(example.id);
+            collectedText.add(example.getContentString());
+        }
         assertTrue(examples.hasMore);
 
         examples = trainingSet.getPositiveExamples(Arrays.asList(TOPIC_1, TOPIC_2), examples.nextOffset);
         assertEquals(10, examples.items.size());
-        collectedText.addAll(examples.items);
+        for (Example example : examples.items) {
+            collectedIds.add(example.id);
+            collectedText.add(example.getContentString());
+        }
         assertTrue(examples.hasMore);
 
         examples = trainingSet.getPositiveExamples(Arrays.asList(TOPIC_1, TOPIC_2), examples.nextOffset);
         assertEquals(8, examples.items.size());
-        collectedText.addAll(examples.items);
+        for (Example example : examples.items) {
+            collectedIds.add(example.id);
+            collectedText.add(example.getContentString());
+        }
         assertFalse(examples.hasMore);
 
+        assertEquals(expectedCollectedIds, collectedIds);
         assertEquals(expectedCollectedText, collectedText);
     }
 
     @Test
     public void testBatchingNegativeExamplesAndAutoId() throws ConfigurationException, TrainingSetException {
+        Set<String> expectedCollectedIds = new HashSet<String>();
         Set<String> expectedCollectedText = new HashSet<String>();
+        Set<String> collectedIds = new HashSet<String>();
         Set<String> collectedText = new HashSet<String>();
         for (int i = 0; i < 17; i++) {
             String text = "Text of example" + i + ".";
-            trainingSet.registerExample(null, text, Arrays.asList(TOPIC_1));
+            String id = trainingSet.registerExample(null, text, Arrays.asList(TOPIC_1));
+            expectedCollectedIds.add(id);
             expectedCollectedText.add(text);
         }
         trainingSet.setBatchSize(10);
-        Batch<String> examples = trainingSet.getNegativeExamples(Arrays.asList(TOPIC_2), null);
+        Batch<Example> examples = trainingSet.getNegativeExamples(Arrays.asList(TOPIC_2), null);
         assertEquals(10, examples.items.size());
-        collectedText.addAll(examples.items);
+        for (Example example : examples.items) {
+            collectedIds.add(example.id);
+            collectedText.add(example.getContentString());
+        }
         assertTrue(examples.hasMore);
 
         examples = trainingSet.getNegativeExamples(Arrays.asList(TOPIC_2), examples.nextOffset);
         assertEquals(7, examples.items.size());
-        collectedText.addAll(examples.items);
+        for (Example example : examples.items) {
+            collectedIds.add(example.id);
+            collectedText.add(example.getContentString());
+        }
         assertFalse(examples.hasMore);
 
+        assertEquals(expectedCollectedIds, collectedIds);
         assertEquals(expectedCollectedText, collectedText);
     }
 
