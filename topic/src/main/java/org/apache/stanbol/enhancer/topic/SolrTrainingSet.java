@@ -38,6 +38,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.stanbol.enhancer.topic.training.Example;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -195,17 +196,17 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
     }
 
     @Override
-    public Batch<String> getPositiveExamples(List<String> topics, Object offset) throws TrainingSetException {
+    public Batch<Example> getPositiveExamples(List<String> topics, Object offset) throws TrainingSetException {
         return getExamples(topics, offset, true);
     }
 
     @Override
-    public Batch<String> getNegativeExamples(List<String> topics, Object offset) throws TrainingSetException {
+    public Batch<Example> getNegativeExamples(List<String> topics, Object offset) throws TrainingSetException {
         return getExamples(topics, offset, false);
     }
 
-    protected Batch<String> getExamples(List<String> topics, Object offset, boolean positive) throws TrainingSetException {
-        List<String> items = new ArrayList<String>();
+    protected Batch<Example> getExamples(List<String> topics, Object offset, boolean positive) throws TrainingSetException {
+        List<Example> items = new ArrayList<Example>();
         SolrServer solrServer = getActiveSolrServer();
         SolrQuery query = new SolrQuery();
         List<String> parts = new ArrayList<String>();
@@ -244,13 +245,13 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
                     nextExampleId = result.getFirstValue(exampleIdField).toString();
                 } else {
                     count++;
+                    String exampleId = result.getFirstValue(exampleIdField).toString();
+                    Collection<Object> labelValues = result.getFieldValues(topicUrisField);
                     Collection<Object> textValues = result.getFieldValues(exampleTextField);
                     if (textValues == null) {
                         continue;
                     }
-                    for (Object value : textValues) {
-                        items.add(value.toString());
-                    }
+                    items.add(new Example(exampleId, labelValues, textValues));
                 }
             }
         } catch (SolrServerException e) {
@@ -259,7 +260,7 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
                 StringUtils.join(topics, "', '"), solrCoreId);
             throw new TrainingSetException(msg, e);
         }
-        return new Batch<String>(items, nextExampleId != null, nextExampleId);
+        return new Batch<Example>(items, nextExampleId != null, nextExampleId);
     }
 
     @Override

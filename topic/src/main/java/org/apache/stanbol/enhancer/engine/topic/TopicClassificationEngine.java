@@ -79,6 +79,7 @@ import org.apache.stanbol.enhancer.topic.TopicSuggestion;
 import org.apache.stanbol.enhancer.topic.TrainingSet;
 import org.apache.stanbol.enhancer.topic.TrainingSetException;
 import org.apache.stanbol.enhancer.topic.UTCTimeStamper;
+import org.apache.stanbol.enhancer.topic.training.Example;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -336,6 +337,10 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     @Override
     public List<String> getAcceptedLanguages() {
         return acceptedLanguages;
+    }
+
+    public List<TopicSuggestion> suggestTopics(Collection<Object> contents) throws ClassifierException {
+        return suggestTopics(StringUtils.join(contents, "\n\n"));
     }
 
     public List<TopicSuggestion> suggestTopics(String text) throws ClassifierException {
@@ -687,12 +692,12 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                                Collection<Object> broaderTopics) throws TrainingSetException,
                                                                 ClassifierException {
         long start = System.currentTimeMillis();
-        Batch<String> examples = Batch.emtpyBatch(String.class);
+        Batch<Example> examples = Batch.emtpyBatch(Example.class);
         StringBuffer sb = new StringBuffer();
         int offset = 0;
         do {
             examples = trainingSet.getPositiveExamples(impactedTopics, examples.nextOffset);
-            for (String example : examples.items) {
+            for (Example example : examples.items) {
                 if ((cvFoldCount != 0) && (offset % cvFoldCount == cvFoldIndex)) {
                     // we are performing a cross validation session and this example belong to the test
                     // fold hence should be skipped
@@ -700,7 +705,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                     continue;
                 }
                 offset++;
-                sb.append(example);
+                sb.append(StringUtils.join(example.contents, "\n\n"));
                 sb.append("\n\n");
             }
         } while (sb.length() < MAX_CHARS_PER_TOPIC && examples.hasMore);
@@ -874,10 +879,10 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                     int falseNegatives = 0;
                     int positiveSupport = 0;
                     offset = 0;
-                    Batch<String> examples = Batch.emtpyBatch(String.class);
+                    Batch<Example> examples = Batch.emtpyBatch(Example.class);
                     do {
                         examples = trainingSet.getPositiveExamples(topics, examples.nextOffset);
-                        for (String example : examples.items) {
+                        for (Example example : examples.items) {
                             if (!(offset % foldCount == foldIndex)) {
                                 // this example is not part of the test fold, skip it
                                 offset++;
@@ -885,7 +890,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                             }
                             positiveSupport++;
                             offset++;
-                            List<TopicSuggestion> suggestedTopics = classifier.suggestTopics(example);
+                            List<TopicSuggestion> suggestedTopics = classifier
+                                    .suggestTopics(example.contents);
                             boolean match = false;
                             for (TopicSuggestion suggestedTopic : suggestedTopics) {
                                 if (topic.equals(suggestedTopic.uri)) {
@@ -896,7 +902,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                             }
                             if (!match) {
                                 falseNegatives++;
-                                // falseNegativeExamples.add(exampleId);
+                                falseNegativeExamples.add(example.id);
                             }
                         }
                     } while (examples.hasMore); // TODO: put a bound on the number of examples
@@ -905,10 +911,10 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                     int falsePositives = 0;
                     int negativeSupport = 0;
                     offset = 0;
-                    examples = Batch.emtpyBatch(String.class);
+                    examples = Batch.emtpyBatch(Example.class);
                     do {
                         examples = trainingSet.getNegativeExamples(topics, examples.nextOffset);
-                        for (String example : examples.items) {
+                        for (Example example : examples.items) {
                             if (!(offset % foldCount == foldIndex)) {
                                 // TODO: change the dataset API to include exampleId
                                 // this example is not part of the test fold, skip it
@@ -917,11 +923,12 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                             }
                             negativeSupport++;
                             offset++;
-                            List<TopicSuggestion> suggestedTopics = classifier.suggestTopics(example);
+                            List<TopicSuggestion> suggestedTopics = classifier
+                                    .suggestTopics(example.contents);
                             for (TopicSuggestion suggestedTopic : suggestedTopics) {
                                 if (topic.equals(suggestedTopic.uri)) {
                                     falsePositives++;
-                                    // falsePositiveExamples.add(exampleId);
+                                    falsePositiveExamples.add(example.id);
                                     break;
                                 }
                             }
