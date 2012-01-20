@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.enhancer.topic;
+package org.apache.stanbol.enhancer.topic.training;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,7 +38,9 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
-import org.apache.stanbol.enhancer.topic.training.Example;
+import org.apache.stanbol.enhancer.topic.Batch;
+import org.apache.stanbol.enhancer.topic.ConfiguredSolrCoreTracker;
+import org.apache.stanbol.enhancer.topic.UTCTimeStamper;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;

@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
+import org.apache.stanbol.enhancer.topic.training.TrainingSet;
+import org.apache.stanbol.enhancer.topic.training.TrainingSetException;
 
 /**
  * Service interface for suggesting hierarchical topics from a specific scheme (a.k.a. taxonomy, thesaurus or
