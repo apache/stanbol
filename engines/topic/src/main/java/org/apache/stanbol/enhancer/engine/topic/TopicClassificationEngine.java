@@ -163,6 +163,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     // TODO: make the following fields configurable
 
+    private int MAX_COLLECTED_EXAMPLES = 100;
+
     public int MAX_EVALUATION_SAMPLES = 1000;
 
     public int MAX_CHARS_PER_TOPIC = 100000;
@@ -905,7 +907,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                             }
                             if (!match) {
                                 falseNegatives++;
-                                falseNegativeExamples.add(example.id);
+                                if (falseNegativeExamples.size() < MAX_COLLECTED_EXAMPLES / foldCount) {
+                                    falseNegativeExamples.add(example.id);
+                                }
                             }
                         }
                     } while (examples.hasMore && offset < MAX_EVALUATION_SAMPLES);
@@ -930,7 +934,9 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                             for (TopicSuggestion suggestedTopic : suggestedTopics) {
                                 if (topic.equals(suggestedTopic.uri)) {
                                     falsePositives++;
-                                    falsePositiveExamples.add(example.id);
+                                    if (falsePositiveExamples.size() < MAX_COLLECTED_EXAMPLES / foldCount) {
+                                        falsePositiveExamples.add(example.id);
+                                    }
                                     break;
                                 }
                             }
