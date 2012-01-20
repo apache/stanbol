@@ -872,6 +872,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                     List<String> falseNegativeExamples = new ArrayList<String>();
                     int truePositives = 0;
                     int falseNegatives = 0;
+                    int positiveSupport = 0;
                     offset = 0;
                     Batch<String> examples = Batch.emtpyBatch(String.class);
                     do {
@@ -882,6 +883,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                                 offset++;
                                 continue;
                             }
+                            positiveSupport++;
                             offset++;
                             List<TopicSuggestion> suggestedTopics = classifier.suggestTopics(example);
                             boolean match = false;
@@ -901,6 +903,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
                     List<String> falsePositiveExamples = new ArrayList<String>();
                     int falsePositives = 0;
+                    int negativeSupport = 0;
                     offset = 0;
                     examples = Batch.emtpyBatch(String.class);
                     do {
@@ -912,6 +915,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                                 offset++;
                                 continue;
                             }
+                            negativeSupport++;
                             offset++;
                             List<TopicSuggestion> suggestedTopics = classifier.suggestTopics(example);
                             for (TopicSuggestion suggestedTopic : suggestedTopics) {
@@ -934,8 +938,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                     if (truePositives != 0 || falseNegatives != 0) {
                         recall = truePositives / (float) (truePositives + falseNegatives);
                     }
-                    updatePerformanceMetadata(topic, precision, recall, falsePositiveExamples,
-                        falseNegativeExamples);
+                    updatePerformanceMetadata(topic, precision, recall, positiveSupport, negativeSupport,
+                        falsePositiveExamples, falseNegativeExamples);
                 }
                 try {
                     getActiveSolrServer().commit();
@@ -960,6 +964,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     protected void updatePerformanceMetadata(String topicId,
                                              float precision,
                                              float recall,
+                                             int positiveSupport,
+                                             int negativeSupport,
                                              List<String> falsePositiveExamples,
                                              List<String> falseNegativeExamples) throws ClassifierException {
         SolrServer solrServer = getActiveSolrServer();
@@ -975,6 +981,8 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 }
                 addToList(fieldValues, precisionField, precision);
                 addToList(fieldValues, recallField, recall);
+                increment(fieldValues, positiveSupportField, positiveSupport);
+                increment(fieldValues, negativeSupportField, negativeSupport);
                 // TODO: handle supports too...
                 // addToList(fieldValues, falsePositivesField, falsePositiveExamples);
                 // addToList(fieldValues, falseNegativesField, falseNegativeExamples);
@@ -990,6 +998,17 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 "Error updating performance metadata for topic '%s' on Solr Core '%s'", topicId, solrCoreId);
             throw new ClassifierException(msg, e);
         }
+    }
+
+    protected void increment(Map<String,Collection<Object>> fieldValues, String fieldName, int count) {
+        // this collection is expected to be a singleton for this particular field
+        Collection<Object> oldValues = fieldValues.get(fieldName);
+        if (oldValues != null && !oldValues.isEmpty()) {
+            count += (Integer) oldValues.iterator().next();
+        }
+        Collection<Object> values = new ArrayList<Object>();
+        values.add(count);
+        fieldValues.put(fieldName, values);
     }
 
     @SuppressWarnings("unchecked")
