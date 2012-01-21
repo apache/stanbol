@@ -68,7 +68,7 @@
 name = rdfs:label[@en] :: xsd:string;
 labels = rdfs:label :: xsd:string;
 comment = rdfs:comment[@en] :: xsd:string;
-categories = dct:subject :: xsd:anyURI;
+categories = dc:subject :: xsd:anyURI;
 homepage = foaf:homepage :: xsd:anyURI;
 location = fn:concat("[",geo:lat,",",geo:long,"]") :: xsd:string;</textarea><br>
 <strong>Format:</strong> <select name="format" id="findOutputFormat">
