@@ -68,7 +68,7 @@
 name = rdfs:label[@en] :: xsd:string;
 labels = rdfs:label :: xsd:string;
 comment = rdfs:comment[@en] :: xsd:string;
-categories = dct:subject :: xsd:anyURI;
+categories = dc:subject :: xsd:anyURI;
 homepage = foaf:homepage :: xsd:anyURI;
 location = fn:concat("[",geo:lat,",",geo:long,"]") :: xsd:string;</textarea><br>
 <strong>Format:</strong> <select name="format" id="findOutputFormat">
@@ -112,11 +112,10 @@ function executeLDPath() {
 <p><strong>Other LDPath Examples:</strong><ul>
 <li> This select all persons a) directly connected b) member of the same category c)
 member of a (direct) sub-category:
-      <textarea rows="5" readonly>@prefix dct : <http://purl.org/dc/terms/> ;
-@prefix dbp-ont : <http://dbpedia.org/ontology/> ;
+      <textarea rows="5" readonly>@prefix dbp-ont : <http://dbpedia.org/ontology/> ;
 @prefix skos : <http://www.w3.org/2004/02/skos/core#> ;
 name = rdfs:label[@en] :: xsd:string ;
-people = (* | dct:subject/^dct:subject | dct:subject/^skos:broader/^dct:subject)[rdf:type is dbp-ont:Person] :: xsd:anyURI;</textarea>
+people = (* | dc:subject/^dc:subject | dc:subject/^skos:broader/^dc:subject)[rdf:type is dbp-ont:Person] :: xsd:anyURI;</textarea>
 <li> Schema translation: The following example converts dbpedia data for to schema.org
       <textarea rows="5" readonly>@prefix dct : <http://purl.org/dc/terms/> ;
 @prefix dbp-ont : <http://dbpedia.org/ontology/> ;
