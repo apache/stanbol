@@ -19,37 +19,39 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  
+
   <parent>
-    <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
     <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.enhancer.jobmanager.reactor</artifactId>
     <version>0.9.0-incubating-SNAPSHOT</version>
-    <relativePath>../parent</relativePath>
+    <relativePath>../</relativePath>
   </parent>
   
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.enhancer.jobmanager.reactor</artifactId>
+  <artifactId>org.apache.stanbol.enhancer.jobmanager.cameljobmanager.reactor</artifactId>
   <version>0.9.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Enhancer JobManager Reactor</name>
   <description>
-    Pseudo project to build JoManager Implementations
+    Pseudo project to build Camel JobManager Implementation
   </description>
   <inceptionYear>2010</inceptionYear>
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/jobmanager
+      scm:svn:http://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/jobmanager/cameljobmanager
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/jobmanager
+      scm:svn:https://svn.apache.org/repos/asf/incubator/stanbol/trunk/enhancer/jobmanager/cameljobmanager
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>
-  
+
   <modules>
-    <module>weightedjobmanager</module>
-    <module>cameljobmanager</module>
+    <module>chainjobmanager</module>
+    <module>weightedchain</module>
+    <module>filepoolchain</module>
+    <module>bundlelist</module>
   </modules>
 </project>
