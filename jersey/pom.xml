@@ -94,7 +94,16 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.ldpath</artifactId>
     </dependency>
-    
+    <!-- LD Path -->
+    <dependency>
+      <groupId>at.newmedialab.ldpath</groupId>
+      <artifactId>ldpath-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>at.newmedialab.ldpath</groupId>
+      <artifactId>ldpath-core-bundle</artifactId>
+    </dependency>
+        
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>

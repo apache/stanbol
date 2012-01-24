@@ -48,7 +48,6 @@ import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedParsingFormatException;
-import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.jersey.utils.MessageBodyReaderUtils;

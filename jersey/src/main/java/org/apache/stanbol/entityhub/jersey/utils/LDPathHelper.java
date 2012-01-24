@@ -16,9 +16,10 @@
 */
 package org.apache.stanbol.entityhub.jersey.utils;
 
-import static javax.ws.rs.core.MediaType.*;
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static javax.ws.rs.core.MediaType.TEXT_HTML_TYPE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.RESULT_SCORE_MAPPING;
+import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.getAcceptableMediaType;
 import static org.apache.stanbol.entityhub.ldpath.LDPathUtils.getReader;
 
 import java.util.Collection;
@@ -39,13 +40,13 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.jersey.resource.EntityhubRootResource;
 import org.apache.stanbol.entityhub.jersey.resource.ReferencedSiteRootResource;
 import org.apache.stanbol.entityhub.jersey.resource.SiteManagerRootResource;
 import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
 import org.apache.stanbol.entityhub.ldpath.backend.AbstractBackend;
-import org.apache.stanbol.entityhub.ldpath.backend.SiteBackend;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
@@ -55,8 +56,6 @@ import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.view.Viewable;
-
 import at.newmedialab.ldpath.LDPath;
 import at.newmedialab.ldpath.api.backend.RDFBackend;
 import at.newmedialab.ldpath.exception.LDPathParseException;
@@ -64,6 +63,8 @@ import at.newmedialab.ldpath.model.fields.FieldMapping;
 import at.newmedialab.ldpath.model.programs.Program;
 import at.newmedialab.ldpath.model.selectors.PropertySelector;
 import at.newmedialab.ldpath.model.transformers.DoubleTransformer;
+
+import com.sun.jersey.api.view.Viewable;
 
 public class LDPathHelper {
     private static final Logger log = LoggerFactory.getLogger(LDPathHelper.class);
@@ -150,7 +151,7 @@ public class LDPathHelper {
                                          ServletContext servletContext) {
         Collection<String> supported = new HashSet<String>(JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES);
         supported.add(TEXT_HTML);
-        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers,
+        final MediaType acceptedMediaType = getAcceptableMediaType(headers,
             supported, MediaType.APPLICATION_JSON_TYPE);
         boolean printDocu = false;
         //remove null and "" element

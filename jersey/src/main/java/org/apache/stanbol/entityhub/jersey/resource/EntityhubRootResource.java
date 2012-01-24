@@ -36,6 +36,7 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.getAcceptableMediaType;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.getLDPathParseExceptionMessage;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.handleLDPathRequest;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.prepairQueryLDPathProgram;
@@ -74,6 +75,7 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
@@ -153,7 +155,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
         log.info("GET /entity Request");
         log.info("  > id: " + symbolId);
         log.info("  > accept: " + headers.getAcceptableMediaTypes());
-        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, 
+        MediaType acceptedMediaType = getAcceptableMediaType(headers, 
             ENTITY_SUPPORTED_MEDIA_TYPE_INCL_HTML,
             APPLICATION_JSON_TYPE);
         if(acceptedMediaType.isCompatible(TEXT_HTML_TYPE) && symbolId == null){
@@ -194,7 +196,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
         log.info("  > id: " + reference);
         log.info("  > create   : " + create);
         log.info("  > accept: " + headers.getAcceptableMediaTypes());
-        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers, 
+        MediaType acceptedMediaType = getAcceptableMediaType(headers, 
             ENTITY_SUPPORTED_MEDIA_TYPE_INCL_HTML,
             APPLICATION_JSON_TYPE);
         if(acceptedMediaType.isCompatible(TEXT_HTML_TYPE) && reference == null){
@@ -269,7 +271,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
     @Path("entity")
     public Response deleteEntity(@QueryParam(value="id") String id,
                                  @Context HttpHeaders headers){
-        MediaType accepted = JerseyUtils.getAcceptableMediaType(headers,
+        MediaType accepted = getAcceptableMediaType(headers,
             JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES, 
             MediaType.APPLICATION_JSON_TYPE);
         if(id == null || id.isEmpty()){
@@ -315,7 +317,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
                                           boolean update,
                                           HttpHeaders headers){
         Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
-        MediaType accepted = JerseyUtils.getAcceptableMediaType(headers,
+        MediaType accepted = getAcceptableMediaType(headers,
             JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES, 
             MediaType.APPLICATION_JSON_TYPE);
         if(entityhub == null){
@@ -460,7 +462,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
                                @FormParam(value = "ldpath") String ldpath,
                                @Context HttpHeaders headers) {
         log.debug("/find Request");
-        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers,
+        final MediaType acceptedMediaType = getAcceptableMediaType(headers,
             ENTITY_SUPPORTED_MEDIA_TYPE_INCL_HTML,
             MediaType.APPLICATION_JSON_TYPE);
         if(name == null || name.isEmpty()){
@@ -534,7 +536,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
     @Consumes( {MediaType.APPLICATION_JSON})
     public Response queryEntities(/*@FormParam("query")*/ FieldQuery query,
                                   @Context HttpHeaders headers) {
-        final MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(headers,
+        final MediaType acceptedMediaType = getAcceptableMediaType(headers,
             JerseyUtils.QUERY_RESULT_SUPPORTED_MEDIA_TYPES,
             MediaType.APPLICATION_JSON_TYPE);
         if(query == null && MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
@@ -650,7 +652,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
             reference, headers.getAcceptableMediaTypes());
         Set<String> supported = new HashSet<String>(JerseyUtils.REPRESENTATION_SUPPORTED_MEDIA_TYPES);
         supported.add(TEXT_HTML);
-        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(
+        MediaType acceptedMediaType = getAcceptableMediaType(
             headers,supported, APPLICATION_JSON_TYPE);
         
         if (reference == null || reference.isEmpty()) {
@@ -701,7 +703,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
         
         Set<String> supported = new HashSet<String>(JerseyUtils.REPRESENTATION_SUPPORTED_MEDIA_TYPES);
         supported.add(TEXT_HTML);
-        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(
+        MediaType acceptedMediaType = getAcceptableMediaType(
             headers,supported, APPLICATION_JSON_TYPE);
 
         if (entity == null || entity.isEmpty()) {
@@ -752,7 +754,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
         
         Set<String> supported = new HashSet<String>(JerseyUtils.REPRESENTATION_SUPPORTED_MEDIA_TYPES);
         supported.add(TEXT_HTML);
-        MediaType acceptedMediaType = JerseyUtils.getAcceptableMediaType(
+        MediaType acceptedMediaType = getAcceptableMediaType(
             headers,supported, APPLICATION_JSON_TYPE);
 
         if (symbol == null || symbol.isEmpty()) {

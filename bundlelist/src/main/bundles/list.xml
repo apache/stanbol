@@ -58,6 +58,16 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.ldpath</artifactId>
       <version>0.9.0-incubating-SNAPSHOT</version>
+    </bundle>   
+    <bundle> <!-- LD Path -->
+      <groupId>at.newmedialab.ldpath</groupId>
+      <artifactId>ldpath-api</artifactId>
+      <version>0.9.4-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>at.newmedialab.ldpath</groupId>
+      <artifactId>ldpath-core-bundle</artifactId>
+      <version>0.9.4-SNAPSHOT</version>
     </bundle>
     <bundle> <!-- LDPath requires jdom for xPath -->
       <groupId>org.jdom</groupId>

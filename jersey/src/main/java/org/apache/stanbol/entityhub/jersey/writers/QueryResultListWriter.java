@@ -34,7 +34,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
-import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
