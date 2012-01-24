@@ -68,6 +68,7 @@ import org.apache.clerezza.rdf.core.sparql.SolutionMapping;
 import org.apache.clerezza.rdf.core.sparql.query.SelectQuery;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -77,6 +78,7 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationException;
@@ -95,7 +97,12 @@ import org.slf4j.LoggerFactory;
 
 @Component(immediate = true, metatype = true)
 @Service
-public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
+@Properties(value={
+    @Property(name=EnhancementEngine.PROPERTY_NAME,value="opencalais")
+})
+public class OpenCalaisEngine 
+        extends AbstractEnhancementEngine<RuntimeException,RuntimeException>
+        implements EnhancementEngine, ServiceProperties {
 
     private static Logger log = LoggerFactory.getLogger(OpenCalaisEngine.class);
 
@@ -616,6 +623,7 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
      * @param ce the {@link ComponentContext}
      */
     protected void activate(ComponentContext ce) throws ConfigurationException {
+        super.activate(ce);
         if (ce != null) {
             this.bundleContext = ce.getBundleContext();
             //TODO initialize Extractor
@@ -638,8 +646,8 @@ public class OpenCalaisEngine implements EnhancementEngine, ServiceProperties {
      *
      * @param ce the {@link ComponentContext}
      */
-    protected void deactivate(@SuppressWarnings("unused") ComponentContext ce) {
-
+    protected void deactivate(ComponentContext ce) {
+        super.deactivate(ce);
     }
 
 }

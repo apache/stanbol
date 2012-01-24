@@ -71,6 +71,7 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
@@ -79,6 +80,7 @@ import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSite;
+import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -89,15 +91,15 @@ import org.slf4j.LoggerFactory;
     policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
     specVersion = "1.1", 
     metatype = true, 
-    immediate = true)
+    immediate = true,
+    inherit = true)
 @Service
 @org.apache.felix.scr.annotations.Properties(value={
+    @Property(name=EnhancementEngine.PROPERTY_NAME),
     @Property(name=KeywordLinkingEngine.REFERENCED_SITE_ID),
     @Property(name=KeywordLinkingEngine.NAME_FIELD,value=EntityLinkerConfig.DEFAULT_NAME_FIELD),
     @Property(name=KeywordLinkingEngine.TYPE_FIELD,value=EntityLinkerConfig.DEFAULT_TYPE_FIELD),
     @Property(name=KeywordLinkingEngine.REDIRECT_FIELD,value=EntityLinkerConfig.DEFAULT_REDIRECT_FIELD),
-    //@Property(name=TaxonomyLinkingEngine2.SIMPLE_TOKENIZER,boolValue=true),
-    //@Property(name=TaxonomyLinkingEngine2.ENABLE_CHUNKER,boolValue=false),
     @Property(name=KeywordLinkingEngine.REDIRECT_PROCESSING_MODE,options={
         @PropertyOption(
             value='%'+KeywordLinkingEngine.REDIRECT_PROCESSING_MODE+".option.ignore",
@@ -108,7 +110,7 @@ import org.slf4j.LoggerFactory;
         @PropertyOption(
                 value='%'+KeywordLinkingEngine.REDIRECT_PROCESSING_MODE+".option.follow",
                 name="FOLLOW")
-        },value="FOLLOW"),
+        },value="IGNORE"),
     @Property(name=KeywordLinkingEngine.MIN_SEARCH_TOKEN_LENGTH,
         intValue=EntityLinkerConfig.DEFAULT_MIN_SEARCH_TOKEN_LENGTH),
     @Property(name=KeywordLinkingEngine.MAX_SUGGESTIONS,
@@ -116,9 +118,12 @@ import org.slf4j.LoggerFactory;
     @Property(name=KeywordLinkingEngine.PROCESSED_LANGUAGES,value=""),
     @Property(name=KeywordLinkingEngine.DEFAULT_MATCHING_LANGUAGE,value=""),
     @Property(name=KeywordLinkingEngine.DEREFERENCE_ENTITIES,
-        boolValue=KeywordLinkingEngine.DEFAULT_DEREFERENCE_ENTITIES_STATE)
+        boolValue=KeywordLinkingEngine.DEFAULT_DEREFERENCE_ENTITIES_STATE),
+    @Property(name=Constants.SERVICE_RANKING,intValue=0)
 })
-public class KeywordLinkingEngine implements EnhancementEngine, ServiceProperties{
+public class KeywordLinkingEngine 
+        extends AbstractEnhancementEngine<RuntimeException,RuntimeException> 
+        implements EnhancementEngine, ServiceProperties {
 
     private final Logger log = LoggerFactory.getLogger(KeywordLinkingEngine.class);
     /**
@@ -514,6 +519,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
     @Activate
     @SuppressWarnings("unchecked")
     protected void activate(ComponentContext context) throws ConfigurationException {
+        super.activate(context);
         Dictionary<String,Object> properties = context.getProperties();
         activateTextAnalyzerConfig(properties);
         activateEntitySearcher(context, properties);
@@ -763,6 +769,7 @@ public class KeywordLinkingEngine implements EnhancementEngine, ServicePropertie
      */
     @Deactivate
     protected void deactivate(ComponentContext context) {
+        super.deactivate(context);
         deactivateEntitySearcher();
         deactivateTextAnalyzerConfig();
         deactivateEntityLinkerConfig();

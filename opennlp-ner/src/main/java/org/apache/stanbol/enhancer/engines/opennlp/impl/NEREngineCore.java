@@ -110,6 +110,10 @@ public class NEREngineCore implements EnhancementEngine {
 ////        entityTypes.put(name, new Object[] {typeUri, model});
 //        return model;
 //    }
+    @Override
+    public String getName() {
+        return getClass().getName();
+    }
 
     public void computeEnhancements(ContentItem ci) throws EngineException {
         //first check the langauge before processing the content (text)

@@ -73,6 +73,7 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
@@ -89,6 +90,7 @@ import org.apache.stanbol.entityhub.servicesapi.site.ReferencedSiteManager;
 //@Component(configurationFactory = true, policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
 //    specVersion = "1.1", metatype = true, immediate = true)
 //@Service
+import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -106,10 +108,13 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Component(configurationFactory = true, policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
-    specVersion = "1.1", metatype = true, immediate = true)
+    specVersion = "1.1", metatype = true, immediate = true, inherit = true)
 @Service
+@Property(name=EnhancementEngine.PROPERTY_NAME)
 @Deprecated
-public class TaxonomyLinkingEngine implements EnhancementEngine, ServiceProperties {
+public class TaxonomyLinkingEngine 
+        extends AbstractEnhancementEngine<RuntimeException,RuntimeException> 
+        implements EnhancementEngine, ServiceProperties {
 
     private static Logger log = LoggerFactory.getLogger(TaxonomyLinkingEngine.class);
 
@@ -140,6 +145,8 @@ public class TaxonomyLinkingEngine implements EnhancementEngine, ServiceProperti
     public static final String MAX_SUGGESTIONS = "org.apache.stanbol.enhancer.engines.taxonomy.maxSuggestions";
     @Property(intValue=DEFAULT_MIN_FOUND_TOKENS)
     public static final String MIN_FOUND_TOKENS= "org.apache.stanbol.enhancer.engines.taxonomy.minFoundTokens";
+    @Property(intValue=0)
+    public static final String SERVICE_RANKING = Constants.SERVICE_RANKING;
     
     protected static final String TEXT_PLAIN_MIMETYPE = "text/plain";
     /**
@@ -245,6 +252,7 @@ public class TaxonomyLinkingEngine implements EnhancementEngine, ServiceProperti
     @SuppressWarnings("unchecked")
     @Activate
     protected void activate(ComponentContext context) throws ConfigurationException {
+        super.activate(context);
         Dictionary<String,Object> config = context.getProperties();
         //lookup the referenced site used as dictionary
         Object referencedSiteID = config.get(REFERENCED_SITE_ID);
@@ -294,6 +302,7 @@ public class TaxonomyLinkingEngine implements EnhancementEngine, ServiceProperti
     }
     @Deactivate
     protected void deactivate(ComponentContext context) {
+        super.deactivate(context);
         referencedSiteID = null;
         //reset optional properties to the default
         nameField = DEFAULT_NAME_FIELD;

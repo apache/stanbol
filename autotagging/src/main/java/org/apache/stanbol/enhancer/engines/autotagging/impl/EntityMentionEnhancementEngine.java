@@ -31,6 +31,8 @@ import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.autotagging.Autotagger;
@@ -41,11 +43,13 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+import static org.apache.stanbol.enhancer.servicesapi.EnhancementEngine.PROPERTY_NAME;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.*;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
 
@@ -56,14 +60,20 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHAN
  * @author ogrisel, rwesten
  * @deprecated use NamedEntityTaggingEngine and the EntityHub instead
  */
-@Component(immediate = true, metatype = true)
+@Component(immediate = true, metatype = true, inherit=true)
 @Service
+@Properties(value={
+    @Property(name=PROPERTY_NAME,value=EntityMentionEnhancementEngine.DEFAULT_NAME)
+})
 @Deprecated
-public class EntityMentionEnhancementEngine implements EnhancementEngine,
-        ServiceProperties {
+public class EntityMentionEnhancementEngine 
+        extends AbstractEnhancementEngine<RuntimeException,RuntimeException> 
+        implements EnhancementEngine, ServiceProperties {
 
     private static final Logger log = LoggerFactory.getLogger(EntityMentionEnhancementEngine.class);
 
+    public static final String DEFAULT_NAME = "autotaggingEntityMention";
+    
     @Reference
     AutotaggerProvider autotaggerProvider;
 
