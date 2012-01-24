@@ -80,18 +80,6 @@
   </build>
 
   <dependencies>
-    <!--  added temporary for the AutotaggingServlet -->
-<!--    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
-	<dependency>
-	  <groupId>org.json</groupId>
-	  <artifactId>json</artifactId>
-	  <scope>provided</scope>
-	</dependency>    -->
-    <!--  end -->
     
     <!-- Enhancer Sevice API -->
     <dependency>
