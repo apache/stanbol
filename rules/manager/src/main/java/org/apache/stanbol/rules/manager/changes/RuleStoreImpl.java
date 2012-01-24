@@ -83,9 +83,9 @@ import org.slf4j.LoggerFactory;
 @Service(RuleStore.class)
 public class RuleStoreImpl implements RuleStore {
 
-    public static final String _RULE_NAMESPACE_DEFAULT = "http://kres.iks-project.eu/ontology/meta/rmi.owl#";
+    public static final String _RULE_NAMESPACE_DEFAULT = "http://incubator.apache.org/stanbol/ontology/rmi.owl#";
 
-    public static final String _RULE_ONTOLOGY_DEFAULT = "http://ontologydesignpatterns.org/ont/iks/kres/rmi_config.owl";
+    public static final String _RULE_ONTOLOGY_DEFAULT = "";
 
     /**
      * Rewrites the rule ontology location and overwrites the given configuration.
@@ -104,7 +104,7 @@ public class RuleStoreImpl implements RuleStore {
             Properties configProps = System.getProperties();
             String userdir = configProps.getProperty("user.dir");
 
-            String respath = "KReSConf" + System.getProperty("file.separator"); // "src/main/resources/";
+            String respath = "RuleConf" + System.getProperty("file.separator"); // "src/main/resources/";
             String filepath2 = "rmi_config.owl"; // "RuleOntology/rmi_config.owl";
             // userdir = userdir.substring(0, userdir.lastIndexOf("kres.") + 5) + "rules/";
 
@@ -215,6 +215,8 @@ public class RuleStoreImpl implements RuleStore {
      * @throws IOException
      */
     protected void activate(Dictionary<String,Object> configuration) throws IOException {
+    	
+    	
         if (this.owlmodel != null) {
             ruleOntologyLocation = owlmodel.getOWLOntologyManager().getOntologyDocumentIRI(owlmodel)
                     .toString();
@@ -246,9 +248,9 @@ public class RuleStoreImpl implements RuleStore {
             // Rule ontology location not set
             if (ruleOntologyLocation == null || ruleOntologyLocation.equals("")) {
                 String sep = System.getProperty("file.separator");
-                String filedir = System.getProperty("user.dir") + sep + "KReSConf" + sep + "rmi_config.owl";
+                String filedir = System.getProperty("user.dir") + sep + "RuleConf" + sep + "rmi_config.owl";
 
-                // default KReSConf dir exists
+                // default RuleConf dir exists
                 if ((new File(filedir)).exists()) {
                     this.ruleOntologyLocation = filedir;
                     try {
@@ -260,7 +262,7 @@ public class RuleStoreImpl implements RuleStore {
                         log.error("1 Rule Store: no rule ontology available.", e);
                     }
                 }
-                // default KReSConf dir does not exist
+                // default RuleConf dir does not exist
                 else {
                     IRI inputontology = IRI
                             .create("http://ontologydesignpatterns.org/ont/iks/kres/rmi_config.owl");
@@ -277,9 +279,9 @@ public class RuleStoreImpl implements RuleStore {
                 // Can we skip this step of saving the ontology?
                 if (owlmodel != null) {
 
-                    File dirs = new File("." + sep + "KReSConf");
+                    File dirs = new File("." + sep + "RuleConf");
                     if (!dirs.exists()) dirs.mkdir();
-                    ruleOntologyLocation = "." + sep + "KReSConf" + sep + "rmi_config.owl";
+                    ruleOntologyLocation = "." + sep + "RuleConf" + sep + "rmi_config.owl";
 
                     FileOutputStream fos;
                     try {
@@ -309,6 +311,8 @@ public class RuleStoreImpl implements RuleStore {
                 }
             }
         }
+        
+        log.info("Rule Ontology Location set to be " + ruleOntologyLocation, this);
     }
 
     /*
@@ -321,7 +325,7 @@ public class RuleStoreImpl implements RuleStore {
         OWLOntologyManager owlmanager = OWLManager.createOWLOntologyManager();
         OWLDataFactory factory = OWLManager.getOWLDataFactory();
 
-        String owlIDrmi = "http://kres.iks-project.eu/ontology/meta/rmi.owl#";
+        String owlIDrmi = "http://incubator.apache.org/stanbol/ontology/rmi.owl#";
 
         OWLClass ontocls = factory.getOWLClass(IRI.create(owlIDrmi + "Recipe"));
         OWLNamedIndividual ontoind = factory.getOWLNamedIndividual(recipeIRI);
@@ -365,13 +369,13 @@ public class RuleStoreImpl implements RuleStore {
      * 
      * @param recipe
      *            the recipe
-     * @param kReSRule
+     * @param RuleRule
      *            the rule in Rule syntax
      * 
      * @return the recipe we the new rule.
      */
     @Override
-    public Recipe addRuleToRecipe(Recipe recipe, String kReSRuleInKReSSyntax) {
+    public Recipe addRuleToRecipe(Recipe recipe, String stanbolSyntaxRule) {
         log.debug("Adding rule to recipe " + recipe);
 
         /**
@@ -384,7 +388,7 @@ public class RuleStoreImpl implements RuleStore {
          * object property hasRule and then we add the literal that contains the rule in Rule Syntax to the
          * recipe individual.
          */
-        String ruleNS = "http://kres.iks-project.eu/ontology/meta/rmi.owl#";
+        String ruleNS = "http://incubator.apache.org/stanbol/ontology/rmi.owl#";
         OWLObjectProperty hasRule = factory.getOWLObjectProperty(IRI.create(ruleNS + "hasRule"));
         OWLDataProperty hasBodyAndHead = factory.getOWLDataProperty(IRI.create(ruleNS + "hasBodyAndHead"));
 
@@ -400,13 +404,13 @@ public class RuleStoreImpl implements RuleStore {
         /**
          * Finally also the in-memory representation of the Recipe passed as input is modified.
          */
-        KB kReSKB = RuleParserImpl.parse(kReSRuleInKReSSyntax);
-        RuleList ruleList = kReSKB.getkReSRuleList();
+        KB kb = RuleParserImpl.parse(stanbolSyntaxRule);
+        RuleList ruleList = kb.getkReSRuleList();
         for (Rule rule : ruleList) {
 
             /**
-             * The rule must be added to the ontology, so 1. an IRI is created from its name 2. the KReS
-             * syntax is added to the rule as a literal through the hasBobyAndHe data property. 3. the rule is
+             * The rule must be added to the ontology, so 1. an IRI is created from its name 2. the rule
+             * in Stanbol syntax is added to the rule as a literal through the hasBobyAndHe data property. 3. the rule is
              * associated to the recipe by means of the hasRule object property, so that the triple <a_recipe
              * hasRule a_rule> is added to the rule ontology.
              * 
@@ -455,7 +459,7 @@ public class RuleStoreImpl implements RuleStore {
          * object property hasRule and then we add the literal that contains the rule in Rule Syntax to the
          * recipe individual.
          */
-        String ruleNS = "http://kres.iks-project.eu/ontology/meta/rmi.owl#";
+        String ruleNS = "http://incubator.apache.org/stanbol/ontology/rmi.owl#";
         OWLObjectProperty hasRule = factory.getOWLObjectProperty(IRI.create(ruleNS + "hasRule"));
         OWLDataProperty hasBodyAndHead = factory.getOWLDataProperty(IRI.create(ruleNS + "hasBodyAndHead"));
 
@@ -471,13 +475,13 @@ public class RuleStoreImpl implements RuleStore {
         /**
          * Finally also the in-memory representation of the Recipe passed as input is modified.
          */
-        KB kReSKB = RuleParserImpl.parse(rulesStream);
-        RuleList ruleList = kReSKB.getkReSRuleList();
+        KB kb = RuleParserImpl.parse(rulesStream);
+        RuleList ruleList = kb.getkReSRuleList();
         for (Rule rule : ruleList) {
 
             /**
-             * The rule must be added to the ontology, so 1. an IRI is created from its name 2. the KReS
-             * syntax is added to the rule as a literal through the hasBobyAndHe data property. 3. the rule is
+             * The rule must be added to the ontology, so 1. an IRI is created from its name 2. the rule
+             * in Stanbol syntax is added to the rule as a literal through the hasBobyAndHe data property. 3. the rule is
              * associated to the recipe by means of the hasRule object property, so that the triple <a_recipe
              * hasRule a_rule> is added to the rule ontology.
              * 
@@ -506,14 +510,14 @@ public class RuleStoreImpl implements RuleStore {
      * 
      * @param recipeIRI
      *            the IRI of the recipe
-     * @param kReSRule
+     * @param stanbolRule
      *            the rule in Rule syntax
      */
     @Override
-    public Recipe addRuleToRecipe(String recipeID, String kReSRuleInKReSSyntax) throws NoSuchRecipeException {
+    public Recipe addRuleToRecipe(String recipeID, String stanbolRule) throws NoSuchRecipeException {
 
         Recipe recipe = getRecipe(IRI.create(recipeID));
-        return addRuleToRecipe(recipe, kReSRuleInKReSSyntax);
+        return addRuleToRecipe(recipe, stanbolRule);
 
     }
     
@@ -534,9 +538,9 @@ public class RuleStoreImpl implements RuleStore {
     }
 
     @Override
-    public void createRecipe(String recipeID, String rulesInKReSSyntax) {
-        log.debug("Create recipe " + recipeID + " with rules in kres sytnax " + rulesInKReSSyntax, this);
-        KB kb = RuleParserImpl.parse(rulesInKReSSyntax);
+    public void createRecipe(String recipeID, String stanbolRule) {
+        log.debug("Create recipe " + recipeID + " with rules in Stanbol sytnax " + stanbolRule, this);
+        KB kb = RuleParserImpl.parse(stanbolRule);
         RuleList rules = kb.getkReSRuleList();
 
         AddRule addRule = new AddRule(this);
@@ -545,10 +549,10 @@ public class RuleStoreImpl implements RuleStore {
         log.debug("Rules are " + rules.size());
         for (Rule rule : rules) {
             log.debug("Creating rule " + rule.getRuleName());
-            String kReSSyntax = rule.toKReSSyntax();
+            String stanbolSyntax = rule.toKReSSyntax();
 
-            log.debug("Rule in KReS Syntax : " + kReSSyntax);
-            addRule.addRule(IRI.create(rule.getRuleName()), kReSSyntax, null);
+            log.debug("Rule in Stanbol Syntax : " + stanbolSyntax);
+            addRule.addRule(IRI.create(rule.getRuleName()), stanbolSyntax, null);
             ruleVectorIRIs.add(IRI.create(rule.getRuleName()));
         }
 
@@ -565,8 +569,8 @@ public class RuleStoreImpl implements RuleStore {
         log.info("in " + RuleStoreImpl.class + " deactivate with context " + context);
     }
 
-    private RuleList generateKnowledgeBase(String kReSRulesInKReSSyntax) {
-        KB kb = RuleParserImpl.parse(kReSRulesInKReSSyntax);
+    private RuleList generateKnowledgeBase(String stanbolRule) {
+        KB kb = RuleParserImpl.parse(stanbolRule);
         return kb.getkReSRuleList();
     }
 
@@ -605,7 +609,7 @@ public class RuleStoreImpl implements RuleStore {
                 // OWLObjectProperty objectProperty =
                 // factory.getOWLObjectProperty(IRI.create(ruleNS + "hasRule"));
 
-                String ruleNS = "http://kres.iks-project.eu/ontology/meta/rmi.owl#";
+                String ruleNS = "http://incubator.apache.org/stanbol/ontology/rmi.owl#";
 
                 /**
                  * First get the recipe description in the rule/recipe ontology.
@@ -628,7 +632,7 @@ public class RuleStoreImpl implements RuleStore {
                         .create(ruleNS + "hasRule"));
                 Set<OWLIndividual> rules = recipeIndividual.getObjectPropertyValues(objectProperty, owlmodel);
 
-                String kReSRulesInKReSSyntax = "";
+                String stanbolRule = "";
 
                 log.debug("The recipe " + recipeIRI.toString() + " has " + rules.size() + " rules.");
 
@@ -642,31 +646,31 @@ public class RuleStoreImpl implements RuleStore {
                 for (OWLIndividual rule : rules) {
                     log.debug("Getting rule : " + rule.toStringID(), this);
 
-                    Set<OWLLiteral> kReSRuleLiterals = rule.getDataPropertyValues(hasBodyAndHead, owlmodel);
+                    Set<OWLLiteral> stanbolRuleLiterals = rule.getDataPropertyValues(hasBodyAndHead, owlmodel);
 
                     if (!firstLoop) {
-                        kReSRulesInKReSSyntax += " . ";
+                        stanbolRule += " . ";
                     } else {
                         firstLoop = false;
                     }
 
-                    for (OWLLiteral kReSRuleLiteral : kReSRuleLiterals) {
-                        String ruleTmp = kReSRuleLiteral.getLiteral().replace("&lt;", "<");
+                    for (OWLLiteral stanbolRuleLiteral : stanbolRuleLiterals) {
+                        String ruleTmp = stanbolRuleLiteral.getLiteral().replace("&lt;", "<");
                         ruleTmp = ruleTmp.replace("&gt;", ">");
                         log.debug("Rule is: " + ruleTmp);
-                        kReSRulesInKReSSyntax += ruleTmp;
+                        stanbolRule += ruleTmp;
                     }
                 }
 
                 /**
                  * Create the Recipe object.
                  */
-                log.debug("Recipe in KReS Syntax : " + kReSRulesInKReSSyntax);
+                log.debug("Recipe in Stanbol Syntax : " + stanbolRule);
 
                 RuleList ruleList = null;
 
-                if (!kReSRulesInKReSSyntax.isEmpty()) {
-                    ruleList = generateKnowledgeBase(kReSRulesInKReSSyntax);
+                if (!stanbolRule.isEmpty()) {
+                    ruleList = generateKnowledgeBase(stanbolRule);
                 }
 
                 recipe = (Recipe) new RecipeImpl(recipeIRI, recipeDescription, ruleList);
@@ -766,7 +770,7 @@ public class RuleStoreImpl implements RuleStore {
 
         OWLOntologyManager mng = owlmodel.getOWLOntologyManager();
         OWLDataFactory factory = mng.getOWLDataFactory();
-        String ruleNS = "http://kres.iks-project.eu/ontology/meta/rmi.owl#";
+        String ruleNS = "http://incubator.apache.org/stanbol/ontology/rmi.owl#";
 
         // Create the remover to be used to delete the rule from the ontology.
         OWLEntityRemover remover = new OWLEntityRemover(mng, Collections.singleton(owlmodel));
@@ -788,7 +792,7 @@ public class RuleStoreImpl implements RuleStore {
     /**
      * To save some change to the ontology loaded in the store.
      * 
-     * FIXME: save using the Clerezza TcManager, or the KReS wrapper for it
+     * FIXME: save using the Clerezza TcManager, or the Stanbol wrapper for it
      */
     @Override
     public void saveOntology() {
@@ -796,7 +800,7 @@ public class RuleStoreImpl implements RuleStore {
             FileOutputStream fos;
             if (this.ruleOntologyLocation.isEmpty()) {
                 String sep = System.getProperty("file.separator");
-                this.ruleOntologyLocation = System.getProperty("user.dir") + sep + "KReSConf" + sep
+                this.ruleOntologyLocation = System.getProperty("user.dir") + sep + "RuleConf" + sep
                                             + "rmi_config.owl";
                 try {
                     fos = new FileOutputStream(ruleOntologyLocation);
@@ -808,6 +812,7 @@ public class RuleStoreImpl implements RuleStore {
                     log.error("Cannot store the ontology ", e);
                 }
             } else {
+            	log.info("Rule Ontology Location: " + this.ruleOntologyLocation, this);
                 fos = new FileOutputStream(ruleOntologyLocation);
                 this.owlmodel.getOWLOntologyManager().saveOntology(owlmodel, fos);
             }
