@@ -31,7 +31,7 @@
   <artifactId>org.apache.stanbol.commons.solr.install</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Solr Installer Bundle</name>
+  <name>Apache Stanbol Commons Solr Installer</name>
   <description>Provides support to Install Solr indexes by using the
   Apache Sling Installer framework 
   </description>
